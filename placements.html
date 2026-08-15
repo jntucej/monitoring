@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Placements | JNTUH University College of Engineering, Nachupally</title>
+  <meta name="description" content="Placements at JNTUHCEJ — 150+ students placed annually in top companies like TCS, IBM, Cognizant, Wipro, and more.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%237C3AED'/><text x='50' y='68' font-size='52' font-family='Inter,sans-serif' font-weight='700' fill='white' text-anchor='middle'>J</text></svg>">
+</head>
+<body>
+
+  <!-- ═══ Announcement Bar ═══ -->
+  <div class="announcement" id="announcement">
+    <div class="marquee">
+      <div class="marquee-track">
+        <span>🎓 Admissions Open 2026-27 — B.Tech & M.Tech Applications Now Accepted</span>
+        <span>🏆 HACK INNOVA 2K26 — National Level Hackathon, Register Now</span>
+        <span>📢 NAAC A+ Grade Re-Accreditation Achieved</span>
+        <span>🎉 Egnis'26 — Annual Techno-Cultural Fest Coming Soon</span>
+        <span>📅 Academic Calendar 2026-27 Released</span>
+      </div>
+    </div>
+    <button class="close" aria-label="Close announcement" onclick="document.getElementById('announcement').style.display='none'">✕</button>
+  </div>
+
+  <!-- ═══ Navbar ═══ -->
+  <nav class="navbar" id="navbar">
+    <div class="container">
+      <a href="index.html" class="nav-logo">
+        <img src="https://jntuhcej.ac.in/images/logo.png" alt="JNTUHCEJ Logo" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%237C3AED%22/><text x=%2250%22 y=%2268%22 font-size=%2252%22 font-family=%22Inter,sans-serif%22 font-weight=%22700%22 fill=%22white%22 text-anchor=%22middle%22>J</text></svg>'">
+        <div class="logo-text">
+          <strong>JNTUHCEJ</strong>
+          <span>Nachupally (Kondagattu)</span>
+        </div>
+      </a>
+
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="academics.html">Academics</a>
+        <a href="departments.html">Departments</a>
+        <a href="admissions.html">Admissions</a>
+        <a href="placements.html" class="active">Placements</a>
+        <a href="campus-life.html">Campus Life</a>
+        <a href="contact.html">Contact</a>
+      </div>
+
+      <div class="nav-actions">
+        <button class="icon-btn" aria-label="Search">🔍</button>
+        <a href="login.html" class="btn btn-primary">Login</a>
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Drawer -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <div class="mobile-drawer" id="mobileDrawer">
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="academics.html">Academics</a>
+    <a href="departments.html">Departments</a>
+    <a href="admissions.html">Admissions</a>
+    <a href="placements.html">Placements</a>
+    <a href="campus-life.html">Campus Life</a>
+    <a href="contact.html">Contact</a>
+    <a href="login.html" class="btn btn-primary" style="margin-top: 8px;">Login</a>
+  </div>
+
+  <!-- ═══ Page Hero ═══ -->
+  <header class="page-hero">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="index.html">Home</a>
+        <span class="sep">/</span>
+        <span>Placements</span>
+      </div>
+      <h1>Campus Placements</h1>
+      <p>150+ students placed annually in prestigious national and multinational corporations.</p>
+    </div>
+  </header>
+
+  <!-- ═══ Stats ═══ -->
+  <section class="stats-bar">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-item reveal">
+          <div class="stat-icon">💼</div>
+          <strong>150+</strong>
+          <span>Students Placed Annually</span>
+        </div>
+        <div class="stat-item reveal reveal-delay-1">
+          <div class="stat-icon">🏢</div>
+          <strong>50+</strong>
+          <span>Recruiting Companies</span>
+        </div>
+        <div class="stat-item reveal reveal-delay-2">
+          <div class="stat-icon">📈</div>
+          <strong>90%</strong>
+          <span>Placement Assistance</span>
+        </div>
+        <div class="stat-item reveal reveal-delay-3">
+          <div class="stat-icon">🌍</div>
+          <strong>MNCs</strong>
+          <span>Global Recruiters</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Placement Officer ═══ -->
+  <section class="section">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-content reveal">
+          <div class="section-head" style="margin-bottom: 0;">
+            <span class="eyebrow">Placement Cell</span>
+            <h2>Training & Placement Office</h2>
+          </div>
+          <p class="lead">The Campus Recruitment Cell is the vital bridge between academic preparation and professional actualization.</p>
+          <p style="color: var(--text-secondary); margin-bottom: var(--sp-4);">Our dedicated placement team works tirelessly to connect students with leading employers, organize training programs, and facilitate successful career outcomes.</p>
+          <div class="card" style="display: inline-block; padding: var(--sp-4) var(--sp-6); margin-top: var(--sp-4);">
+            <strong style="font-size: 0.9375rem;">Dr. B. Sudheer Prem Kumar</strong>
+            <div class="small" style="color: var(--text-secondary);">Placement Officer</div>
+            <div class="small" style="color: var(--accent); margin-top: var(--sp-1);">bsudheerpk@yahoo.co.in</div>
+          </div>
+        </div>
+        <div class="about-visual reveal reveal-delay-1">
+          <div class="main-img">
+            <img src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=800&q=80" alt="Placement Cell">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Historical Recruitment Data ═══ -->
+  <section class="section" style="background: var(--white); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+    <div class="container">
+      <div class="section-head center reveal">
+        <span class="eyebrow">Recruitment History</span>
+        <h2>Corporate Engagement Over the Years</h2>
+        <p>Our long-standing relationships with leading corporations demonstrate sustained placement excellence.</p>
+      </div>
+      <div class="table-wrap reveal">
+        <table>
+          <thead>
+            <tr>
+              <th>Recruiting Organization</th>
+              <th>2002-03</th>
+              <th>2003-04</th>
+              <th>2004-05</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Tata Consultancy Services (TCS)</strong></td><td>57</td><td>42</td><td>71</td></tr>
+            <tr><td>HCL Technologies Ltd.</td><td>1</td><td>1</td><td>7</td></tr>
+            <tr><td>Cognizant Technology Solutions</td><td>20</td><td>5</td><td>18</td></tr>
+            <tr><td>IBM Global Services India Pvt. Ltd.</td><td>—</td><td>7</td><td>29</td></tr>
+            <tr><td>Satyam GE</td><td>—</td><td>—</td><td>19</td></tr>
+            <tr><td>Patni Computer Systems Ltd.</td><td>—</td><td>35</td><td>—</td></tr>
+            <tr><td>Wipro Technologies</td><td>—</td><td>6</td><td>—</td></tr>
+            <tr><td>Birla Soft</td><td>—</td><td>5</td><td>3</td></tr>
+            <tr><td>Penny Wise Solutions</td><td>—</td><td>6</td><td>—</td></tr>
+            <tr><td>Virtusa</td><td>—</td><td>4</td><td>3</td></tr>
+            <tr><td>Philips</td><td>—</td><td>3</td><td>—</td></tr>
+            <tr><td>TVS Motors</td><td>—</td><td>2</td><td>—</td></tr>
+            <tr><td>WIL Consulting Limited</td><td>—</td><td>2</td><td>—</td></tr>
+            <tr><td>Schindler India Pvt. Ltd.</td><td>—</td><td>2</td><td>—</td></tr>
+            <tr><td>Agile</td><td>—</td><td>2</td><td>—</td></tr>
+            <tr><td>CSC</td><td>—</td><td>—</td><td>1</td></tr>
+            <tr><td>Coco Cola</td><td>3</td><td>—</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Top Recruiters ═══ -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head center reveal">
+        <span class="eyebrow">Top Recruiters</span>
+        <h2>Trusted by Industry Leaders</h2>
+      </div>
+      <div class="grid-4">
+        <div class="card reveal" style="text-align: center; padding: var(--sp-8) var(--sp-6);">
+          <div class="dept-icon" style="margin: 0 auto var(--sp-4);">💼</div>
+          <h3>TCS</h3>
+          <p class="small" style="color: var(--text-secondary);">Tata Consultancy Services</p>
+        </div>
+        <div class="card reveal reveal-delay-1" style="text-align: center; padding: var(--sp-8) var(--sp-6);">
+          <div class="dept-icon" style="margin: 0 auto var(--sp-4);">🌐</div>
+          <h3>IBM</h3>
+          <p class="small" style="color: var(--text-secondary);">Global Services</p>
+        </div>
+        <div class="card reveal reveal-delay-2" style="text-align: center; padding: var(--sp-8) var(--sp-6);">
+          <div class="dept-icon" style="margin: 0 auto var(--sp-4);">🧠</div>
+          <h3>Cognizant</h3>
+          <p class="small" style="color: var(--text-secondary);">Technology Solutions</p>
+        </div>
+        <div class="card reveal reveal-delay-3" style="text-align: center; padding: var(--sp-8) var(--sp-6);">
+          <div class="dept-icon" style="margin: 0 auto var(--sp-4);">🚀</div>
+          <h3>Wipro</h3>
+          <p class="small" style="color: var(--text-secondary);">Technologies</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CTA Banner ═══ -->
+  <section class="section-sm">
+    <div class="container">
+      <div class="cta-banner reveal">
+        <div>
+          <h2>Build Your Career With Us</h2>
+          <p>Join a community with a proven track record of placement success.</p>
+        </div>
+        <a href="admissions.html" class="btn btn-white btn-lg">Apply Now</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Footer ═══ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="nav-logo">
+            <img src="https://jntuhcej.ac.in/images/logo.png" alt="JNTUHCEJ Logo" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%237C3AED%22/><text x=%2250%22 y=%2268%22 font-size=%2252%22 font-family=%22Inter,sans-serif%22 font-weight=%22700%22 fill=%22white%22 text-anchor=%22middle%22>J</text></svg>'">
+            <div class="logo-text">
+              <strong>JNTUHCEJ</strong>
+              <span>Nachupally (Kondagattu)</span>
+            </div>
+          </a>
+          <p>JNTUH University College of Engineering, Nachupally (Kondagattu), Kodimyal Mandal, Jagtial Dist, Telangana — 505 501, India.</p>
+          <ul class="footer-contact">
+            <li><span class="fc-icon">📧</span> cej@jntuh.ac.in</li>
+            <li><span class="fc-icon">📞</span> 63025 03548</li>
+            <li><span class="fc-icon">📍</span> Kodimyal Mandal, Jagtial, Telangana</li>
+          </ul>
+        </div>
+
+        <div>
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="academics.html">Academics</a></li>
+            <li><a href="admissions.html">Admissions</a></li>
+            <li><a href="placements.html">Placements</a></li>
+            <li><a href="campus-life.html">Campus Life</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4>Departments</h4>
+          <ul class="footer-links">
+            <li><a href="departments.html#cse">Computer Science & Engg</a></li>
+            <li><a href="departments.html#it">Information Technology</a></li>
+            <li><a href="departments.html#ece">Electronics & Communication</a></li>
+            <li><a href="departments.html#eee">Electrical & Electronics</a></li>
+            <li><a href="departments.html#me">Mechanical Engineering</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-newsletter">
+          <h4>Stay Updated</h4>
+          <p>Subscribe to receive the latest news, events, and admission updates.</p>
+          <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Subscribed! Thank you.');">
+            <input type="email" class="input" placeholder="Your email" required>
+            <button type="submit" class="btn btn-primary">→</button>
+          </form>
+          <div class="social-links">
+            <a href="#" aria-label="Facebook">f</a>
+            <a href="#" aria-label="Twitter">𝕏</a>
+            <a href="#" aria-label="Instagram">◎</a>
+            <a href="#" aria-label="LinkedIn">in</a>
+            <a href="#" aria-label="YouTube">▶</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 JNTUH University College of Engineering, Nachupally (Kondagattu). All rights reserved.</span>
+        <div class="legal">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Use</a>
+          <a href="#">Sitemap</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

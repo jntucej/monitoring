@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us | JNTUH University College of Engineering, Nachupally</title>
+  <meta name="description" content="Contact JNTUHCEJ — address, phone, email, and contact form. Reach our admissions, placement, and administrative offices.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%237C3AED'/><text x='50' y='68' font-size='52' font-family='Inter,sans-serif' font-weight='700' fill='white' text-anchor='middle'>J</text></svg>">
+</head>
+<body>
+
+  <!-- ═══ Announcement Bar ═══ -->
+  <div class="announcement" id="announcement">
+    <div class="marquee">
+      <div class="marquee-track">
+        <span>🎓 Admissions Open 2026-27 — B.Tech & M.Tech Applications Now Accepted</span>
+        <span>🏆 HACK INNOVA 2K26 — National Level Hackathon, Register Now</span>
+        <span>📢 NAAC A+ Grade Re-Accreditation Achieved</span>
+        <span>🎉 Egnis'26 — Annual Techno-Cultural Fest Coming Soon</span>
+        <span>📅 Academic Calendar 2026-27 Released</span>
+      </div>
+    </div>
+    <button class="close" aria-label="Close announcement" onclick="document.getElementById('announcement').style.display='none'">✕</button>
+  </div>
+
+  <!-- ═══ Navbar ═══ -->
+  <nav class="navbar" id="navbar">
+    <div class="container">
+      <a href="index.html" class="nav-logo">
+        <img src="https://jntuhcej.ac.in/images/logo.png" alt="JNTUHCEJ Logo" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%237C3AED%22/><text x=%2250%22 y=%2268%22 font-size=%2252%22 font-family=%22Inter,sans-serif%22 font-weight=%22700%22 fill=%22white%22 text-anchor=%22middle%22>J</text></svg>'">
+        <div class="logo-text">
+          <strong>JNTUHCEJ</strong>
+          <span>Nachupally (Kondagattu)</span>
+        </div>
+      </a>
+
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="academics.html">Academics</a>
+        <a href="departments.html">Departments</a>
+        <a href="admissions.html">Admissions</a>
+        <a href="placements.html">Placements</a>
+        <a href="campus-life.html">Campus Life</a>
+        <a href="contact.html" class="active">Contact</a>
+      </div>
+
+      <div class="nav-actions">
+        <button class="icon-btn" aria-label="Search">🔍</button>
+        <a href="login.html" class="btn btn-primary">Login</a>
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Drawer -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <div class="mobile-drawer" id="mobileDrawer">
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="academics.html">Academics</a>
+    <a href="departments.html">Departments</a>
+    <a href="admissions.html">Admissions</a>
+    <a href="placements.html">Placements</a>
+    <a href="campus-life.html">Campus Life</a>
+    <a href="contact.html">Contact</a>
+    <a href="login.html" class="btn btn-primary" style="margin-top: 8px;">Login</a>
+  </div>
+
+  <!-- ═══ Page Hero ═══ -->
+  <header class="page-hero">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="index.html">Home</a>
+        <span class="sep">/</span>
+        <span>Contact</span>
+      </div>
+      <h1>Contact Us</h1>
+      <p>We're here to help. Reach out to our offices for admissions, placements, or general inquiries.</p>
+    </div>
+  </header>
+
+  <!-- ═══ Contact Info Cards ═══ -->
+  <section class="section">
+    <div class="container">
+      <div class="grid-4">
+        <div class="card reveal" style="text-align: center;">
+          <div class="dept-icon" style="margin: 0 auto var(--sp-4);">📍</div>
+          <h3>Address</h3>
+          <p class="small" style="color: var(--text-secondary); margin-top: var(--sp-2);">JNTUHCEJ, Nachupally (Kondagattu), Kodimyal Mandal, Jagtial Dist, Telangana — 505 501</p>
+        </div>
+        <div class="card reveal reveal-delay-1" style="text-align: center;">
+          <div class="dept-icon" style="margin: 0 auto var(--sp-4);">📧</div>
+          <h3>Email</h3>
+          <p class="small" style="color: var(--text-secondary); margin-top: var(--sp-2);">cej@jntuh.ac.in<br>bsudheerpk@yahoo.co.in</p>
+        </div>
+        <div class="card reveal reveal-delay-2" style="text-align: center;">
+          <div class="dept-icon" style="margin: 0 auto var(--sp-4);">📞</div>
+          <h3>Phone</h3>
+          <p class="small" style="color: var(--text-secondary); margin-top: var(--sp-2);">63025 03548<br>Office Hours: Mon-Fri, 9 AM - 5 PM</p>
+        </div>
+        <div class="card reveal reveal-delay-3" style="text-align: center;">
+          <div class="dept-icon" style="margin: 0 auto var(--sp-4);">🕐</div>
+          <h3>Office Hours</h3>
+          <p class="small" style="color: var(--text-secondary); margin-top: var(--sp-2);">Monday - Friday<br>9:00 AM - 5:00 PM IST</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Contact Form + Map ═══ -->
+  <section class="section" style="background: var(--white); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+    <div class="container">
+      <div class="grid-2-1">
+        <div class="reveal">
+          <div class="section-head" style="margin-bottom: var(--sp-6);">
+            <span class="eyebrow">Send a Message</span>
+            <h2>Get in Touch</h2>
+          </div>
+          <form class="card" style="display: grid; gap: var(--sp-4);" onsubmit="event.preventDefault(); alert('Thank you! Your message has been sent.');">
+            <div class="grid-2" style="gap: var(--sp-4);">
+              <input type="text" class="input" placeholder="Your Name" required>
+              <input type="email" class="input" placeholder="Your Email" required>
+            </div>
+            <input type="text" class="input" placeholder="Subject" required>
+            <select class="select" required>
+              <option value="" disabled selected>Select Department</option>
+              <option>Admissions</option>
+              <option>Placements</option>
+              <option>Academics</option>
+              <option>Administration</option>
+              <option>General Inquiry</option>
+            </select>
+            <textarea class="textarea" placeholder="Your Message" required></textarea>
+            <button type="submit" class="btn btn-primary btn-lg">Send Message</button>
+          </form>
+        </div>
+
+        <div class="reveal reveal-delay-1">
+          <div class="section-head" style="margin-bottom: var(--sp-6);">
+            <span class="eyebrow">Find Us</span>
+            <h2>Our Location</h2>
+          </div>
+          <div class="card" style="padding: 0; overflow: hidden;">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3789.5!2d78.9!3d18.8!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTjCsDQ4JzAwLjAiTiA3OMKwNTQnMDAuMCJF!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
+              width="100%" height="400" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Directory ═══ -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head center reveal">
+        <span class="eyebrow">Directory</span>
+        <h2>Key Contacts</h2>
+      </div>
+      <div class="table-wrap reveal">
+        <table>
+          <thead>
+            <tr>
+              <th>Office</th>
+              <th>Contact Person</th>
+              <th>Email</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Principal's Office</td><td>Dr. G. Narsimha</td><td>cej@jntuh.ac.in</td></tr>
+            <tr><td>Vice Principal</td><td>Dr. K. Srinivas</td><td>cej@jntuh.ac.in</td></tr>
+            <tr><td>Placement Cell</td><td>Dr. B. Sudheer Prem Kumar</td><td>bsudheerpk@yahoo.co.in</td></tr>
+            <tr><td>Admissions Office</td><td>Admissions Cell</td><td>cej@jntuh.ac.in</td></tr>
+            <tr><td>Administration</td><td>Office Superintendent</td><td>cej@jntuh.ac.in</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CTA Banner ═══ -->
+  <section class="section-sm">
+    <div class="container">
+      <div class="cta-banner reveal">
+        <div>
+          <h2>Ready to Join JNTUHCEJ?</h2>
+          <p>Take the first step toward a bright engineering career.</p>
+        </div>
+        <a href="admissions.html" class="btn btn-white btn-lg">Apply Now</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Footer ═══ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="nav-logo">
+            <img src="https://jntuhcej.ac.in/images/logo.png" alt="JNTUHCEJ Logo" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%237C3AED%22/><text x=%2250%22 y=%2268%22 font-size=%2252%22 font-family=%22Inter,sans-serif%22 font-weight=%22700%22 fill=%22white%22 text-anchor=%22middle%22>J</text></svg>'">
+            <div class="logo-text">
+              <strong>JNTUHCEJ</strong>
+              <span>Nachupally (Kondagattu)</span>
+            </div>
+          </a>
+          <p>JNTUH University College of Engineering, Nachupally (Kondagattu), Kodimyal Mandal, Jagtial Dist, Telangana — 505 501, India.</p>
+          <ul class="footer-contact">
+            <li><span class="fc-icon">📧</span> cej@jntuh.ac.in</li>
+            <li><span class="fc-icon">📞</span> 63025 03548</li>
+            <li><span class="fc-icon">📍</span> Kodimyal Mandal, Jagtial, Telangana</li>
+          </ul>
+        </div>
+
+        <div>
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="academics.html">Academics</a></li>
+            <li><a href="admissions.html">Admissions</a></li>
+            <li><a href="placements.html">Placements</a></li>
+            <li><a href="campus-life.html">Campus Life</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4>Departments</h4>
+          <ul class="footer-links">
+            <li><a href="departments.html#cse">Computer Science & Engg</a></li>
+            <li><a href="departments.html#it">Information Technology</a></li>
+            <li><a href="departments.html#ece">Electronics & Communication</a></li>
+            <li><a href="departments.html#eee">Electrical & Electronics</a></li>
+            <li><a href="departments.html#me">Mechanical Engineering</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-newsletter">
+          <h4>Stay Updated</h4>
+          <p>Subscribe to receive the latest news, events, and admission updates.</p>
+          <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Subscribed! Thank you.');">
+            <input type="email" class="input" placeholder="Your email" required>
+            <button type="submit" class="btn btn-primary">→</button>
+          </form>
+          <div class="social-links">
+            <a href="#" aria-label="Facebook">f</a>
+            <a href="#" aria-label="Twitter">𝕏</a>
+            <a href="#" aria-label="Instagram">◎</a>
+            <a href="#" aria-label="LinkedIn">in</a>
+            <a href="#" aria-label="YouTube">▶</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 JNTUH University College of Engineering, Nachupally (Kondagattu). All rights reserved.</span>
+        <div class="legal">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Use</a>
+          <a href="#">Sitemap</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

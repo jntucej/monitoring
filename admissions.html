@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admissions | JNTUH University College of Engineering, Nachupally</title>
+  <meta name="description" content="Admissions at JNTUHCEJ — admission process, eligibility criteria, fee structure, and important dates for B.Tech and M.Tech programs.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%237C3AED'/><text x='50' y='68' font-size='52' font-family='Inter,sans-serif' font-weight='700' fill='white' text-anchor='middle'>J</text></svg>">
+</head>
+<body>
+
+  <!-- ═══ Announcement Bar ═══ -->
+  <div class="announcement" id="announcement">
+    <div class="marquee">
+      <div class="marquee-track">
+        <span>🎓 Admissions Open 2026-27 — B.Tech & M.Tech Applications Now Accepted</span>
+        <span>🏆 HACK INNOVA 2K26 — National Level Hackathon, Register Now</span>
+        <span>📢 NAAC A+ Grade Re-Accreditation Achieved</span>
+        <span>🎉 Egnis'26 — Annual Techno-Cultural Fest Coming Soon</span>
+        <span>📅 Academic Calendar 2026-27 Released</span>
+      </div>
+    </div>
+    <button class="close" aria-label="Close announcement" onclick="document.getElementById('announcement').style.display='none'">✕</button>
+  </div>
+
+  <!-- ═══ Navbar ═══ -->
+  <nav class="navbar" id="navbar">
+    <div class="container">
+      <a href="index.html" class="nav-logo">
+        <img src="https://jntuhcej.ac.in/images/logo.png" alt="JNTUHCEJ Logo" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%237C3AED%22/><text x=%2250%22 y=%2268%22 font-size=%2252%22 font-family=%22Inter,sans-serif%22 font-weight=%22700%22 fill=%22white%22 text-anchor=%22middle%22>J</text></svg>'">
+        <div class="logo-text">
+          <strong>JNTUHCEJ</strong>
+          <span>Nachupally (Kondagattu)</span>
+        </div>
+      </a>
+
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="academics.html">Academics</a>
+        <a href="departments.html">Departments</a>
+        <a href="admissions.html" class="active">Admissions</a>
+        <a href="placements.html">Placements</a>
+        <a href="campus-life.html">Campus Life</a>
+        <a href="contact.html">Contact</a>
+      </div>
+
+      <div class="nav-actions">
+        <button class="icon-btn" aria-label="Search">🔍</button>
+        <a href="login.html" class="btn btn-primary">Login</a>
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Drawer -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <div class="mobile-drawer" id="mobileDrawer">
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="academics.html">Academics</a>
+    <a href="departments.html">Departments</a>
+    <a href="admissions.html">Admissions</a>
+    <a href="placements.html">Placements</a>
+    <a href="campus-life.html">Campus Life</a>
+    <a href="contact.html">Contact</a>
+    <a href="login.html" class="btn btn-primary" style="margin-top: 8px;">Login</a>
+  </div>
+
+  <!-- ═══ Page Hero ═══ -->
+  <header class="page-hero">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="index.html">Home</a>
+        <span class="sep">/</span>
+        <span>Admissions</span>
+      </div>
+      <h1>Admissions 2026-27</h1>
+      <p>Your gateway to a premier engineering education. Explore the admission process, eligibility, and important dates.</p>
+    </div>
+  </header>
+
+  <!-- ═══ Admission Process ═══ -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head center reveal">
+        <span class="eyebrow">Admission Process</span>
+        <h2>How to Apply</h2>
+        <p>A simple, transparent process to secure your seat at JNTUHCEJ.</p>
+      </div>
+      <div class="grid-4">
+        <div class="card reveal" style="text-align: center;">
+          <div class="dept-icon" style="margin: 0 auto var(--sp-4);">📝</div>
+          <h3>1. Apply</h3>
+          <p style="color: var(--text-secondary); margin-top: var(--sp-2);">Submit your application through the TS EAMCET / TS PGECET counseling process.</p>
+        </div>
+        <div class="card reveal reveal-delay-1" style="text-align: center;">
+          <div class="dept-icon" style="margin: 0 auto var(--sp-4);">📋</div>
+          <h3>2. Document Verification</h3>
+          <p style="color: var(--text-secondary); margin-top: var(--sp-2);">Verify your academic records, certificates, and eligibility documents.</p>
+        </div>
+        <div class="card reveal reveal-delay-2" style="text-align: center;">
+          <div class="dept-icon" style="margin: 0 auto var(--sp-4);">✅</div>
+          <h3>3. Seat Allotment</h3>
+          <p style="color: var(--text-secondary); margin-top: var(--sp-2);">Receive your seat allotment based on rank and preference.</p>
+        </div>
+        <div class="card reveal reveal-delay-3" style="text-align: center;">
+          <div class="dept-icon" style="margin: 0 auto var(--sp-4);">🎓</div>
+          <h3>4. Enroll</h3>
+          <p style="color: var(--text-secondary); margin-top: var(--sp-2);">Complete fee payment and join the JNTUHCEJ family.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Eligibility ═══ -->
+  <section class="section" style="background: var(--white); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+    <div class="container">
+      <div class="section-head center reveal">
+        <span class="eyebrow">Eligibility</span>
+        <h2>Eligibility Criteria</h2>
+      </div>
+      <div class="grid-2">
+        <div class="card reveal">
+          <h3>B.Tech (UG Programs)</h3>
+          <ul style="margin-top: var(--sp-4); display: grid; gap: var(--sp-3);">
+            <li style="display: flex; gap: var(--sp-2);"><span style="color: var(--accent);">✓</span> Passed Intermediate (10+2) with Mathematics, Physics, and Chemistry.</li>
+            <li style="display: flex; gap: var(--sp-2);"><span style="color: var(--accent);">✓</span> Qualified in TS EAMCET examination.</li>
+            <li style="display: flex; gap: var(--sp-2);"><span style="color: var(--accent);">✓</span> Lateral entry via TS ECET for direct 2nd year admission (6 seats per branch).</li>
+            <li style="display: flex; gap: var(--sp-2);"><span style="color: var(--accent);">✓</span> Minimum qualifying marks as per TS EAMCET norms.</li>
+          </ul>
+        </div>
+        <div class="card reveal reveal-delay-1">
+          <h3>M.Tech (PG Programs)</h3>
+          <ul style="margin-top: var(--sp-4); display: grid; gap: var(--sp-3);">
+            <li style="display: flex; gap: var(--sp-2);"><span style="color: var(--accent);">✓</span> B.Tech / BE degree in the relevant branch of engineering.</li>
+            <li style="display: flex; gap: var(--sp-2);"><span style="color: var(--accent);">✓</span> Qualified in TS PGECET / GATE examination.</li>
+            <li style="display: flex; gap: var(--sp-2);"><span style="color: var(--accent);">✓</span> Minimum 50% aggregate marks (45% for reserved categories).</li>
+            <li style="display: flex; gap: var(--sp-2);"><span style="color: var(--accent);">✓</span> Specializations: CSE, IT, DSCE, EPS, Engineering Design.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Fee Structure ═══ -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head center reveal">
+        <span class="eyebrow">Fee Structure</span>
+        <h2>Tuition & Fees</h2>
+        <p>Transparent and affordable fee structure for all programs.</p>
+      </div>
+      <div class="table-wrap reveal">
+        <table>
+          <thead>
+            <tr>
+              <th>Program</th>
+              <th>Category</th>
+              <th>Annual Tuition Fee</th>
+              <th>Other Fees</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>B.Tech (All Branches)</td><td>Convener Quota</td><td>As per TS EAMCET norms</td><td>As applicable</td></tr>
+            <tr><td>B.Tech (All Branches)</td><td>Management Quota</td><td>As per college norms</td><td>As applicable</td></tr>
+            <tr><td>M.Tech (All Specializations)</td><td>Convener Quota</td><td>As per TS PGECET norms</td><td>As applicable</td></tr>
+            <tr><td>M.Tech (All Specializations)</td><td>Management Quota</td><td>As per college norms</td><td>As applicable</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="small" style="color: var(--text-secondary); text-align: center; margin-top: var(--sp-4);">* Fee structure is subject to revision as per university and government regulations. Contact the admissions office for the latest fee details.</p>
+    </div>
+  </section>
+
+  <!-- ═══ Important Dates ═══ -->
+  <section class="section" style="background: var(--white); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+    <div class="container">
+      <div class="section-head center reveal">
+        <span class="eyebrow">Important Dates</span>
+        <h2>Admission Timeline 2026-27</h2>
+      </div>
+      <div class="table-wrap reveal">
+        <table>
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>TS EAMCET 2026 Notification</td><td>February 2026</td><td><span class="badge badge-green">Completed</span></td></tr>
+            <tr><td>TS EAMCET 2026 Examination</td><td>May 2026</td><td><span class="badge badge-green">Completed</span></td></tr>
+            <tr><td>TS EAMCET 2026 Results</td><td>June 2026</td><td><span class="badge badge-amber">Upcoming</span></td></tr>
+            <tr><td>Counseling & Seat Allotment</td><td>July 2026</td><td><span class="badge badge-amber">Upcoming</span></td></tr>
+            <tr><td>Classes Commence</td><td>July 2026</td><td><span class="badge badge-amber">Upcoming</span></td></tr>
+            <tr><td>TS PGECET 2026 Examination</td><td>June 2026</td><td><span class="badge badge-amber">Upcoming</span></td></tr>
+            <tr><td>M.Tech Counseling</td><td>July 2026</td><td><span class="badge badge-amber">Upcoming</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CTA Banner ═══ -->
+  <section class="section-sm">
+    <div class="container">
+      <div class="cta-banner reveal">
+        <div>
+          <h2>Have Questions About Admissions?</h2>
+          <p>Our admissions team is here to help you every step of the way.</p>
+        </div>
+        <a href="contact.html" class="btn btn-white btn-lg">Contact Us</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Footer ═══ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="nav-logo">
+            <img src="https://jntuhcej.ac.in/images/logo.png" alt="JNTUHCEJ Logo" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%237C3AED%22/><text x=%2250%22 y=%2268%22 font-size=%2252%22 font-family=%22Inter,sans-serif%22 font-weight=%22700%22 fill=%22white%22 text-anchor=%22middle%22>J</text></svg>'">
+            <div class="logo-text">
+              <strong>JNTUHCEJ</strong>
+              <span>Nachupally (Kondagattu)</span>
+            </div>
+          </a>
+          <p>JNTUH University College of Engineering, Nachupally (Kondagattu), Kodimyal Mandal, Jagtial Dist, Telangana — 505 501, India.</p>
+          <ul class="footer-contact">
+            <li><span class="fc-icon">📧</span> cej@jntuh.ac.in</li>
+            <li><span class="fc-icon">📞</span> 63025 03548</li>
+            <li><span class="fc-icon">📍</span> Kodimyal Mandal, Jagtial, Telangana</li>
+          </ul>
+        </div>
+
+        <div>
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="academics.html">Academics</a></li>
+            <li><a href="admissions.html">Admissions</a></li>
+            <li><a href="placements.html">Placements</a></li>
+            <li><a href="campus-life.html">Campus Life</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4>Departments</h4>
+          <ul class="footer-links">
+            <li><a href="departments.html#cse">Computer Science & Engg</a></li>
+            <li><a href="departments.html#it">Information Technology</a></li>
+            <li><a href="departments.html#ece">Electronics & Communication</a></li>
+            <li><a href="departments.html#eee">Electrical & Electronics</a></li>
+            <li><a href="departments.html#me">Mechanical Engineering</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-newsletter">
+          <h4>Stay Updated</h4>
+          <p>Subscribe to receive the latest news, events, and admission updates.</p>
+          <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Subscribed! Thank you.');">
+            <input type="email" class="input" placeholder="Your email" required>
+            <button type="submit" class="btn btn-primary">→</button>
+          </form>
+          <div class="social-links">
+            <a href="#" aria-label="Facebook">f</a>
+            <a href="#" aria-label="Twitter">𝕏</a>
+            <a href="#" aria-label="Instagram">◎</a>
+            <a href="#" aria-label="LinkedIn">in</a>
+            <a href="#" aria-label="YouTube">▶</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 JNTUH University College of Engineering, Nachupally (Kondagattu). All rights reserved.</span>
+        <div class="legal">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Use</a>
+          <a href="#">Sitemap</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
