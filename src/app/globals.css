@@ -1,0 +1,127 @@
+@import "tailwindcss";
+
+/* ============================================================
+   DESIGN TOKENS — Student Gate Monitoring System
+   Source of truth: gate-monitor/Plan/UI_Plan_Gate_Monitoring_System.md
+   ============================================================ */
+
+/* Inter font (loaded via next/font in layout). Fallback to system sans. */
+@font-face {
+  font-family: "Inter";
+  font-style: 100 900;
+  font-display: swap;
+  src: url("/fonts/inter-var.woff2") format("woff2")
+        fallback;
+  font-weight: 100 900;
+}
+
+:root {
+  /* Typography */
+  --font-family: "Inter", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  /* Spacing scale (strict) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-24: 96px;
+  --space-32: 128px;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  /* Motion */
+  --duration-fast: 120ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-success: 1000ms;
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== DARK THEME (Operator / Supervisor / Admin default) ===== */
+:root[data-theme="dark"] {
+  --bg-base: #0F172A;      /* slate-900 */
+  --bg-surface: #1E293B;   /* slate-800 */
+  --bg-elevated: #334155;  /* slate-700 */
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
+  --border: #334155;
+  --border-strong: #475569;
+
+  --action-primary: #10B981;   /* emerald-500 — Entry / success */
+  --action-danger: #EF4444;     /* red-500 — Exit / errors */
+  --action-warning: #F59E0B;    /* amber-500 — Day Out / offline */
+  --action-info: #3B82F6;       /* blue-500 — Leave / info */
+  --focus-ring: #38BDF8;        /* sky-400 */
+  --stat-up: #10B981;
+  --stat-down: #EF4444;
+}
+
+/* ===== LIGHT THEME (Parent / Student) ===== */
+:root[data-theme="light"] {
+  --bg-base: #F8FAFC;
+  --bg-surface: #FFFFFF;
+  --bg-elevated: #FFFFFF;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  --border: #E2E8F0;
+  --border-strong: #CBD5E1;
+
+  --action-primary: #059669;    /* emerald-600 */
+  --action-danger: #DC2626;      /* red-600 */
+  --action-warning: #D97706;     /* amber-600 */
+  --action-info: #2563EB;        /* blue-600 */
+  --focus-ring: #0EA5E9;
+  --stat-up: #059669;
+  --stat-down: #DC2626;
+}
+
+/* ===== SEMANTIC STATUS COLORS (consistent everywhere) ===== */
+.status-entry    { color: var(--action-primary); }
+.status-exit-home{ color: var(--action-danger); }
+.status-exit-day { color: var(--action-warning); }
+.status-exit-leave{ color: var(--action-info); }
+.status-exiting  { color: var(--action-danger); }
+
+.bg-entry    { background-color: var(--action-primary); }
+.bg-exit     { background-color: var(--action-danger); }
+.bg-dayout   { background-color: var(--action-warning); }
+.bg-leave    { background-color: var(--action-info); }
+
+/* ===== REDUCED MOTION ===== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ===== BASE ===== */
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Utility: tabular nums for data */
+.tabular-nums { font-variant-numeric: tabular-nums; }
