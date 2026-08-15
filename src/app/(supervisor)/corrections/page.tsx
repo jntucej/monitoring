@@ -1,7 +1,9 @@
+import { CorrectionsList } from "@/components/supervisor/CorrectionsList";
+
 export default function CorrectionsPage() {
   return (
     <div>
-      <h1 className="text-2xl font-bold">Corrections</h1>
+      <CorrectionsList />
     </div>
   );
 }
