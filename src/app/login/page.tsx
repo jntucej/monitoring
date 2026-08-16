@@ -11,11 +11,9 @@ import {
   AlertCircle,
   GraduationCap,
   Users,
-  KeyRound,
   ShieldAlert,
   Sliders,
   Sparkles,
-  CheckCircle2,
   HelpCircle,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
@@ -107,7 +105,7 @@ const DEMO_CREDENTIALS: Record<string, DemoCredential> = {
   },
 };
 
-type LoginTab = "operator" | "supervisor" | "admin" | "sysadmin" | "student" | "parent";
+type LoginTab = "student" | "supervisor" | "operator" | "admin" | "sysadmin" | "parent";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -115,8 +113,8 @@ export default function LoginPage() {
   const { addToast } = useUIStore();
 
   const [activeTab, setActiveTab] = useState<LoginTab>("student");
-  const [loginIdentifier, setLoginIdentifier] = useState(DEMO_CREDENTIALS.student.id);
-  const [passwordOrPin, setPasswordOrPin] = useState(DEMO_CREDENTIALS.student.pin);
+  const [loginIdentifier, setLoginIdentifier] = useState("");
+  const [passwordOrPin, setPasswordOrPin] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [isShaking, setIsShaking] = useState(false);
@@ -133,9 +131,8 @@ export default function LoginPage() {
   const handleTabChange = (tab: LoginTab) => {
     setActiveTab(tab);
     setErrorMsg("");
-    const cred = DEMO_CREDENTIALS[tab];
-    setLoginIdentifier(cred.id);
-    setPasswordOrPin(cred.pin);
+    setLoginIdentifier("");
+    setPasswordOrPin("");
   };
 
   const fillQuickCreds = (cred: DemoCredential) => {
@@ -144,7 +141,7 @@ export default function LoginPage() {
     setErrorMsg("");
     addToast({
       title: `${cred.roleTitle} Credentials Loaded`,
-      message: `Prefilled ${cred.id} for quick authentication.`,
+      message: `Loaded ${cred.id} into login fields.`,
       variant: "info",
     });
   };
@@ -167,7 +164,7 @@ export default function LoginPage() {
       const upperRoll = identifier.toUpperCase();
       const parsed = parseRollNumber(upperRoll);
       if (!parsed && upperRoll.length > 0) {
-        triggerShake("Invalid JNTUH Roll Number format (e.g. 21001A0501 or 24JJ1A0501).");
+        triggerShake("Invalid Roll Number format (e.g. 21001A0501 or 24JJ1A0501).");
         return;
       }
     }
@@ -194,7 +191,7 @@ export default function LoginPage() {
       const userRole = useAuthStore.getState().role || currentDemo.role;
       addToast({
         title: "Access Granted",
-        message: `Authenticated via Security PIN.`,
+        message: `Authenticated via Security PIN. Redirecting...`,
         variant: "success",
       });
       router.push(ROLE_REDIRECTS[userRole as Role] || "/student");
@@ -219,21 +216,21 @@ export default function LoginPage() {
             JNTUH UCoEJ Gate Monitor
           </h1>
           <p className="text-xs text-[var(--text-muted)] font-medium max-w-xs mx-auto">
-            Authorized Role-Based Security Gateway — Select your role to sign in
+            Authorized Role-Based Security Portal — Select your role to sign in
           </p>
         </div>
 
         {/* Role Selection Tabs Grid */}
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs text-[var(--text-muted)] px-1 font-semibold">
-            <span>Select Access Portal</span>
+            <span>Portal Select</span>
             <button
               type="button"
               onClick={() => setShowCredDetails(!showCredDetails)}
               className="text-[var(--action-primary)] hover:underline flex items-center gap-1"
             >
               <HelpCircle className="w-3.5 h-3.5" />
-              <span>{showCredDetails ? "Hide Demo Logins" : "View Credentials"}</span>
+              <span>{showCredDetails ? "Hide Demo Credentials" : "Show Credentials"}</span>
             </button>
           </div>
 
@@ -318,14 +315,13 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Selected Role Info Card & One-Click Demo Filler */}
+        {/* Role Portal Details */}
         <div className="p-3.5 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold border uppercase ${currentDemo.badgeColor}`}>
                 {currentDemo.roleTitle}
               </span>
-              <span className="text-xs font-semibold text-[var(--text-primary)]">{currentDemo.name}</span>
             </div>
             <button
               type="button"
@@ -333,7 +329,7 @@ export default function LoginPage() {
               className="text-[11px] font-bold text-[var(--action-primary)] hover:underline flex items-center gap-1 bg-[var(--action-primary)]/10 px-2.5 py-1 rounded-lg border border-[var(--action-primary)]/20 transition-all active:scale-95"
             >
               <Sparkles className="w-3 h-3" />
-              <span>Auto-Fill</span>
+              <span>Fill Demo Credentials</span>
             </button>
           </div>
           <p className="text-xs text-[var(--text-muted)] leading-relaxed">{currentDemo.description}</p>
@@ -371,20 +367,20 @@ export default function LoginPage() {
               {activeTab === "student"
                 ? "JNTUH Student Roll Number"
                 : activeTab === "parent"
-                ? "Parent Email / Registered Mobile"
-                : `${currentDemo.roleTitle} Employee ID / Email`}
+                ? "Parent ID / Mobile / Email"
+                : `${currentDemo.roleTitle} ID / Email`}
             </label>
             <div className="relative">
               <input
                 type="text"
                 value={loginIdentifier}
-                onChange={(e) => setLoginIdentifier(e.target.value.toUpperCase())}
+                onChange={(e) => setLoginIdentifier(e.target.value)}
                 placeholder={
                   activeTab === "student"
-                    ? "e.g. 21001A0501"
+                    ? "Enter Roll No (e.g. 21001A0501)"
                     : activeTab === "parent"
-                    ? "e.g. parent@gatekeeper.edu"
-                    : `e.g. ${currentDemo.id}`
+                    ? "Enter Parent ID (e.g. PAR001)"
+                    : `Enter ID (e.g. ${currentDemo.id})`
                 }
                 className="w-full pl-10 pr-4 py-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-sm font-semibold text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none transition-all"
               />
@@ -394,14 +390,14 @@ export default function LoginPage() {
 
           <div className="space-y-1.5">
             <label className="block text-xs font-semibold text-[var(--text-secondary)]">
-              Password or Security PIN (Default: 1234)
+              Password or Security PIN
             </label>
             <div className="relative">
               <input
                 type="password"
                 value={passwordOrPin}
                 onChange={(e) => setPasswordOrPin(e.target.value)}
-                placeholder="••••••••"
+                placeholder="Enter password or 4-digit PIN"
                 className="w-full pl-10 pr-4 py-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none transition-all"
               />
               <Lock className="w-4 h-4 absolute left-3.5 top-3.5 text-[var(--text-muted)]" />
@@ -414,7 +410,7 @@ export default function LoginPage() {
             className="w-full touch-target-primary rounded-xl bg-[var(--action-primary)] text-white font-bold text-sm hover:opacity-95 transition-all disabled:opacity-40 shadow-md flex items-center justify-center gap-2 py-3 mt-2 active:scale-[0.99]"
           >
             {loading ? (
-              <span>Authenticating {currentDemo.roleTitle}...</span>
+              <span>Authenticating...</span>
             ) : (
               <>
                 <span>Sign In to {currentDemo.roleTitle} Portal</span>
@@ -433,11 +429,11 @@ export default function LoginPage() {
               onChange={(e) => setRememberMe(e.target.checked)}
               className="w-4 h-4 rounded text-[var(--action-primary)] focus:ring-[var(--focus-ring)] accent-[var(--action-primary)]"
             />
-            <span>Keep session active</span>
+            <span>Remember login</span>
           </label>
           <span className="inline-flex items-center gap-1 text-[10px] font-mono text-[var(--action-primary)] font-bold">
             <ShieldAlert className="w-3 h-3" />
-            <span>Supabase Auth Protected</span>
+            <span>Encrypted Authorization</span>
           </span>
         </div>
       </div>
