@@ -56,29 +56,34 @@ CREATE INDEX IF NOT EXISTS idx_users_login_identifier ON users(login_identifier)
 -- 11. Update RLS policies to work with the new identity model
 
 -- Update users policies to include sysadmin where appropriate
-CREATE OR REPLACE POLICY "Users can view their own data"
+DROP POLICY IF EXISTS "Users can view their own data" ON users;
+CREATE POLICY "Users can view their own data"
 ON users
 FOR SELECT
 USING (id = auth.uid());
 
-CREATE OR REPLACE POLICY "Users can update their own data"
+DROP POLICY IF EXISTS "Users can update their own data" ON users;
+CREATE POLICY "Users can update their own data"
 ON users
 FOR UPDATE
 USING (id = auth.uid())
 WITH CHECK (id = auth.uid());
 
-CREATE OR REPLACE POLICY "Admins can view all users"
+DROP POLICY IF EXISTS "Admins can view all users" ON users;
+CREATE POLICY "Admins can view all users"
 ON users
 FOR SELECT
 USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND (role = 'admin' OR role = 'sysadmin')));
 
-CREATE OR REPLACE POLICY "Admins can update user data"
+DROP POLICY IF EXISTS "Admins can update user data" ON users;
+CREATE POLICY "Admins can update user data"
 ON users
 FOR UPDATE
 USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND (role = 'admin' OR role = 'sysadmin')))
-WITH CHECK (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND (role = 'admin' OR role = 'sysadmin'))));
+WITH CHECK (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND (role = 'admin' OR role = 'sysadmin')));
 
-CREATE OR REPLACE POLICY "Sysadmins can update user roles"
+DROP POLICY IF EXISTS "Sysadmins can update user roles" ON users;
+CREATE POLICY "Sysadmins can update user roles"
 ON users
 FOR UPDATE
 USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'sysadmin'))

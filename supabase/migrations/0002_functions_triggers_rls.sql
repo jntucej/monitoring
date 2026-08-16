@@ -245,12 +245,30 @@ FOR UPDATE
 USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'sysadmin'))
 WITH CHECK (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'sysadmin'));
 
+-- Create a function to map users to students for RLS
+CREATE OR REPLACE FUNCTION user_student_mapping(user_id UUID)
+RETURNS UUID AS $$
+DECLARE
+  student_id UUID;
+BEGIN
+  -- Check if the user is a student
+  SELECT id INTO student_id FROM students WHERE id = user_id;
+
+  -- If not a student, check if they are a parent
+  IF NOT FOUND THEN
+    SELECT id INTO student_id FROM students WHERE parent_id = user_id LIMIT 1;
+  END IF;
+
+  RETURN student_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 -- Students table policies
 -- Students can view their own data
 CREATE POLICY "Students can view their own data"
 ON students
 FOR SELECT
-USING (id = (SELECT student_id FROM user_student_mapping WHERE user_id = auth.uid()));
+USING (id = user_student_mapping(auth.uid()));
 
 -- Parents can view their children's data
 CREATE POLICY "Parents can view their children's data"
@@ -286,7 +304,7 @@ ON gates
 FOR SELECT
 USING (
   EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'operator') AND
-  (id = ANY((SELECT gate_id FROM users WHERE id = auth.uid())::UUID[]))
+  (id = (SELECT gate_id FROM users WHERE id = auth.uid()))
 );
 
 -- Gate logs table policies
@@ -296,7 +314,7 @@ ON gate_logs
 FOR SELECT
 USING (
   EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'operator') AND
-  (gate_id = ANY((SELECT gate_id FROM users WHERE id = auth.uid())::UUID[]))
+  (gate_id = (SELECT gate_id FROM users WHERE id = auth.uid()))
 );
 
 -- Admins can view all gate logs
@@ -310,7 +328,7 @@ USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'admin'));
 CREATE POLICY "Students can view their own gate passes"
 ON gate_passes
 FOR SELECT
-USING (student_id = (SELECT student_id FROM user_student_mapping WHERE user_id = auth.uid()));
+USING (student_id = user_student_mapping(auth.uid()));
 
 -- Parents can view gate passes for their children
 CREATE POLICY "Parents can view gate passes for their children"
@@ -337,7 +355,7 @@ ON alerts
 FOR SELECT
 USING (
   EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'supervisor') AND
-  (gate_id = ANY((SELECT supervised_gates FROM users WHERE id = auth.uid())::UUID[]))
+  (gate_id::TEXT = ANY(COALESCE((SELECT supervised_gates FROM users WHERE id = auth.uid()), ARRAY[]::TEXT[])))
 );
 
 -- Audit logs table policies
@@ -381,21 +399,3 @@ CREATE POLICY "Admins can view all campus occupancy data"
 ON campus_occupancy
 FOR SELECT
 USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'admin'));
-
--- Create a function to map users to students for RLS
-CREATE OR REPLACE FUNCTION user_student_mapping(user_id UUID)
-RETURNS UUID AS $$
-DECLARE
-  student_id UUID;
-BEGIN
-  -- Check if the user is a student
-  SELECT id INTO student_id FROM students WHERE id = user_id;
-
-  -- If not a student, check if they are a parent
-  IF NOT FOUND THEN
-    SELECT id INTO student_id FROM students WHERE parent_id = user_id LIMIT 1;
-  END IF;
-
-  RETURN student_id;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;

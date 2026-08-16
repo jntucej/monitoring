@@ -231,7 +231,7 @@ $$ LANGUAGE plpgsql;
 
 -- 12. Create trigger to update user_student_mapping when user parent_id changes
 CREATE TRIGGER trigger_update_user_student_mapping_on_user_parent_change
-AFTER INSERT OR UPDATE ON users
+AFTER UPDATE ON users
 FOR EACH ROW
 WHEN (OLD.parent_id IS DISTINCT FROM NEW.parent_id)
 EXECUTE FUNCTION update_user_student_mapping_on_user_parent_change();
@@ -342,7 +342,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 25. Add a function to get gates supervised by a user
 CREATE OR REPLACE FUNCTION get_supervised_gates(user_id UUID)
-RETURNS SETOF UUID AS $$
+RETURNS SETOF TEXT AS $$
 BEGIN
   RETURN QUERY
   SELECT unnest(supervised_gates) FROM users WHERE id = user_id;
@@ -364,7 +364,7 @@ ON gates
 FOR SELECT
 USING (
   is_operator(auth.uid()) AND
-  (id = ANY((SELECT gate_id FROM users WHERE id = auth.uid())::UUID[]))
+  (id = (SELECT gate_id FROM users WHERE id = auth.uid()))
 );
 
 -- Update alerts RLS policy for supervisors
@@ -373,7 +373,7 @@ ON alerts
 FOR SELECT
 USING (
   is_supervisor(auth.uid()) AND
-  (gate_id = ANY((SELECT get_supervised_gates(auth.uid()))))
+  (gate_id::TEXT = ANY((SELECT get_supervised_gates(auth.uid()))))
 );
 
 -- Update students RLS policy for wardens
