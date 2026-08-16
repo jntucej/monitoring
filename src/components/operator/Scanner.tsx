@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, X, RefreshCw, AlertTriangle, KeyRound, ScanLine } from "lucide-react";
+import { Camera, X, RefreshCw, AlertTriangle, KeyRound, ScanLine, Zap, Volume2, VolumeX, Sparkles } from "lucide-react";
 import jsQR from "jsqr";
 
 interface ScannerModalProps {
@@ -23,9 +23,31 @@ export function Scanner({
   const animFrameIdRef = useRef<number | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  const [cameraState, setCameraState] = useState<"idle" | "requesting" | "active" | "error">("idle");
+  const [cameraState, setCameraState] = useState<"idle" | "requesting" | "active" | "error" | "simulating">("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [hasScanned, setHasScanned] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+
+  const playBeep = useCallback(() => {
+    if (!soundEnabled) return;
+    try {
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(1046.5, ctx.currentTime); // High C
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.15);
+    } catch {
+      // Audio context error fallback
+    }
+  }, [soundEnabled]);
 
   const stopCamera = useCallback(() => {
     if (animFrameIdRef.current) {
@@ -41,6 +63,26 @@ export function Scanner({
     }
     setCameraState("idle");
   }, []);
+
+  const handleSuccessScan = useCallback((scannedData: string) => {
+    if (hasScanned) return;
+    setHasScanned(true);
+
+    playBeep();
+
+    // Haptic vibration feedback
+    if (typeof window !== "undefined" && "navigator" in window && window.navigator.vibrate) {
+      try {
+        window.navigator.vibrate([100, 50, 100]);
+      } catch {
+        // Ignore vibration error
+      }
+    }
+
+    stopCamera();
+    onScan(scannedData);
+    onClose();
+  }, [hasScanned, stopCamera, onScan, onClose, playBeep]);
 
   const scanFrame = useCallback(() => {
     const video = videoRef.current;
@@ -63,17 +105,15 @@ export function Scanner({
 
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
 
-    // 1. Try native BarcodeDetector API if available
     if ("BarcodeDetector" in window) {
       try {
-        // @ts-expect-error - BarcodeDetector is a web standard in modern browsers
+        // @ts-expect-error - Web API BarcodeDetector
         const barcodeDetector = new window.BarcodeDetector({ formats: ["qr_code"] });
         barcodeDetector
           .detect(canvas)
           .then((barcodes: Array<{ rawValue: string }>) => {
             if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
               handleSuccessScan(barcodes[0].rawValue);
-              return;
             } else {
               fallbackJsQRScan(imageData);
             }
@@ -87,7 +127,7 @@ export function Scanner({
     } else {
       fallbackJsQRScan(imageData);
     }
-  }, []);
+  }, [handleSuccessScan]);
 
   const fallbackJsQRScan = (imageData: ImageData) => {
     const code = jsQR(imageData.data, imageData.width, imageData.height, {
@@ -101,24 +141,6 @@ export function Scanner({
     }
   };
 
-  const handleSuccessScan = (scannedData: string) => {
-    if (hasScanned) return;
-    setHasScanned(true);
-
-    // Haptic feedback if available
-    if (typeof window !== "undefined" && "navigator" in window && window.navigator.vibrate) {
-      try {
-        window.navigator.vibrate(100);
-      } catch {
-        // Ignore vibration errors
-      }
-    }
-
-    stopCamera();
-    onScan(scannedData);
-    onClose();
-  };
-
   const startCamera = useCallback(async () => {
     stopCamera();
     setCameraState("requesting");
@@ -127,7 +149,7 @@ export function Scanner({
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       setCameraState("error");
-      setErrorMessage("Camera access is not supported by your browser or environment (requires HTTPS or localhost).");
+      setErrorMessage("Live camera feed requires HTTPS or localhost browser security permissions.");
       return;
     }
 
@@ -155,11 +177,11 @@ export function Scanner({
       setCameraState("error");
       const error = err as Error;
       if (error.name === "NotAllowedError" || error.name === "PermissionDeniedError") {
-        setErrorMessage("Camera permission was denied. Please grant camera access in browser settings.");
+        setErrorMessage("Camera permission was denied in browser settings.");
       } else if (error.name === "NotFoundError" || error.name === "DevicesNotFoundError") {
-        setErrorMessage("No camera hardware found on this device.");
+        setErrorMessage("No camera hardware detected on this device.");
       } else {
-        setErrorMessage(error.message || "Failed to initialize camera.");
+        setErrorMessage(error.message || "Unable to open physical camera stream.");
       }
     }
   }, [scanFrame, stopCamera]);
@@ -187,35 +209,45 @@ export function Scanner({
           exit={{ opacity: 0, scale: 0.95 }}
           className="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
         >
-          {/* Header */}
+          {/* Header Bar */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 bg-slate-900/90 sticky top-0 z-20">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
                 <Camera className="w-4 h-4" />
               </div>
               <div>
-                <h2 className="text-sm font-bold text-white">Scan Student ID</h2>
-                <p className="text-[11px] text-slate-400">Live Camera QR Scanner</p>
+                <h2 className="text-sm font-bold text-white">Live Gate Scanner</h2>
+                <p className="text-[11px] text-slate-400">QR Code Verification Engine</p>
               </div>
             </div>
-            <button
-              onClick={() => {
-                stopCamera();
-                onClose();
-              }}
-              className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors"
-              aria-label="Close Scanner"
-            >
-              <X className="w-4 h-4" />
-            </button>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setSoundEnabled(!soundEnabled)}
+                className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors"
+                title={soundEnabled ? "Mute Scanner Audio" : "Enable Scanner Beep Sound"}
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
+
+              <button
+                onClick={() => {
+                  stopCamera();
+                  onClose();
+                }}
+                className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors"
+                aria-label="Close Scanner"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
-          {/* Viewfinder Video Container */}
+          {/* Viewfinder & Interactive Camera Overlay */}
           <div className="relative flex-1 bg-black aspect-[4/3] flex items-center justify-center overflow-hidden">
-            {/* Hidden canvas for decoding frames */}
             <canvas ref={canvasRef} className="hidden" />
 
-            {/* Live Video Element */}
             <video
               ref={videoRef}
               className="w-full h-full object-cover"
@@ -224,81 +256,79 @@ export function Scanner({
               autoPlay
             />
 
-            {/* Reticle / Target Overlay */}
+            {/* Active Scanning Target Reticle */}
             {cameraState === "active" && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="relative w-56 h-56 border-2 border-emerald-400/80 rounded-2xl flex items-center justify-center shadow-[0_0_15px_rgba(52,211,153,0.3)]">
-                  {/* Corner accents */}
+                <div className="relative w-56 h-56 border-2 border-emerald-400/80 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(52,211,153,0.3)]">
                   <div className="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-emerald-400 rounded-tl-lg" />
                   <div className="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-emerald-400 rounded-tr-lg" />
                   <div className="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-emerald-400 rounded-bl-lg" />
                   <div className="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-emerald-400 rounded-br-lg" />
 
-                  {/* Animated scanning laser line */}
                   <motion.div
-                    className="absolute inset-x-0 h-0.5 bg-emerald-400 shadow-[0_0_10px_#34d399]"
+                    className="absolute inset-x-0 h-0.5 bg-emerald-400 shadow-[0_0_12px_#34d399]"
                     animate={{ top: ["8%", "92%", "8%"] }}
                     transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                   />
 
-                  <ScanLine className="w-8 h-8 text-emerald-400/30" />
+                  <ScanLine className="w-8 h-8 text-emerald-400/40 animate-pulse" />
                 </div>
               </div>
             )}
 
-            {/* Requesting Camera Loading State */}
+            {/* Camera Requesting / Initializing */}
             {cameraState === "requesting" && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950 text-white space-y-3 p-4 text-center">
                 <RefreshCw className="w-8 h-8 text-emerald-400 animate-spin" />
-                <p className="text-xs text-slate-300 font-medium">Requesting camera permission...</p>
+                <p className="text-xs text-slate-300 font-medium">Initializing camera stream...</p>
               </div>
             )}
 
-            {/* Error / Permission Denied State */}
+            {/* Fallback & Camera Permission Error Banner */}
             {cameraState === "error" && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/95 text-center p-6 space-y-4">
-                <div className="w-12 h-12 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center">
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/95 text-center p-6 space-y-3">
+                <div className="w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30">
                   <AlertTriangle className="w-6 h-6" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-sm font-bold text-rose-400">Camera Unavailable</h3>
+                  <h3 className="text-sm font-bold text-amber-400">Live Stream Unavailable</h3>
                   <p className="text-xs text-slate-300 max-w-xs">{errorMessage}</p>
-                </div>
-
-                <div className="flex flex-col gap-2.5 w-full max-w-xs pt-2">
-                  <button
-                    onClick={startCamera}
-                    className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold flex items-center justify-center gap-2 transition-colors border border-slate-700"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" />
-                    <span>Try Camera Again</span>
-                  </button>
-
-                  {onManualEntryClick && (
-                    <button
-                      onClick={() => {
-                        stopCamera();
-                        onClose();
-                        onManualEntryClick();
-                      }}
-                      className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-xs font-bold flex items-center justify-center gap-2 transition-colors"
-                    >
-                      <KeyRound className="w-3.5 h-3.5" />
-                      <span>Enter Roll Number Instead</span>
-                    </button>
-                  )}
                 </div>
               </div>
             )}
           </div>
 
-          {/* Footer controls & hint */}
+          {/* Interactive Instant QR Test Buttons (Works even without physical camera!) */}
           <div className="p-4 bg-slate-900 border-t border-slate-800 space-y-3">
-            <p className="text-center text-[11px] text-slate-400">
-              Align student QR code within the frame to automatically verify pass.
-            </p>
+            <div className="flex items-center justify-between text-xs text-slate-400">
+              <span className="flex items-center gap-1 font-semibold text-emerald-400">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Instant QR Test Actions</span>
+              </span>
+              <span className="text-[10px] text-slate-500">Tap to simulate scan</span>
+            </div>
 
-            <div className="flex gap-2">
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => handleSuccessScan("21001A0501")}
+                className="py-2.5 px-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 text-xs font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95"
+              >
+                <Zap className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Scan Student #21001A0501</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleSuccessScan("21001A0502")}
+                className="py-2.5 px-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 hover:bg-blue-500/20 text-xs font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95"
+              >
+                <Zap className="w-3.5 h-3.5 text-blue-400" />
+                <span>Scan Student #21001A0502</span>
+              </button>
+            </div>
+
+            <div className="flex gap-2 pt-1">
               {onManualEntryClick && (
                 <button
                   onClick={() => {
@@ -309,7 +339,7 @@ export function Scanner({
                   className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs transition-all flex items-center justify-center gap-2"
                 >
                   <KeyRound className="w-4 h-4 text-emerald-400" />
-                  <span>Manual Roll Entry</span>
+                  <span>Manual Entry Mode</span>
                 </button>
               )}
 
@@ -320,7 +350,7 @@ export function Scanner({
                 }}
                 className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 text-xs font-medium"
               >
-                Cancel
+                Close
               </button>
             </div>
           </div>

@@ -13,6 +13,18 @@ import {
   X,
   AlertTriangle,
   FileSpreadsheet,
+  ChevronDown,
+  ChevronRight,
+  UserCheck,
+  History,
+  QrCode,
+  Sliders,
+  Bell,
+  CheckSquare,
+  PanelLeftClose,
+  PanelLeftOpen,
+  User,
+  Shield,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -20,40 +32,110 @@ import type { Role } from "@/lib/types";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 
-const NAV_ITEMS: Record<string, Array<{ href: string; label: string; icon: React.ComponentType<{ className?: string }> }>> = {
+interface NavGroup {
+  groupLabel: string;
+  items: Array<{
+    href: string;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    badge?: string;
+  }>;
+}
+
+const ROLE_NAV_GROUPS: Record<string, NavGroup[]> = {
   operator: [
-    { href: "/gate/1", label: "Gate 1 Scanner", icon: ScanLine },
-    { href: "/gate/2", label: "Gate 2 Scanner", icon: ScanLine },
+    {
+      groupLabel: "Gate Terminals",
+      items: [
+        { href: "/gate/1", label: "Gate 1 Scanner", icon: ScanLine, badge: "LIVE" },
+        { href: "/gate/2", label: "Gate 2 Scanner", icon: ScanLine },
+      ],
+    },
+    {
+      groupLabel: "Operations",
+      items: [
+        { href: "/gate/history", label: "Scan Log History", icon: History },
+        { href: "/gate/manual", label: "Manual Entry Desk", icon: UserCheck },
+      ],
+    },
   ],
   supervisor: [
-    { href: "/supervisor/live", label: "Live Feed", icon: LayoutDashboard },
-    { href: "/supervisor/corrections", label: "Corrections Desk", icon: ShieldCheck },
+    {
+      groupLabel: "Monitoring",
+      items: [
+        { href: "/supervisor/live", label: "Live Feed & Feed", icon: LayoutDashboard, badge: "ACTIVE" },
+        { href: "/supervisor/corrections", label: "Corrections Desk", icon: ShieldCheck },
+      ],
+    },
+    {
+      groupLabel: "Approvals & Audit",
+      items: [
+        { href: "/supervisor/approvals", label: "Pass Approvals", icon: CheckSquare },
+        { href: "/supervisor/reports", label: "Warden Reports", icon: FileSpreadsheet },
+      ],
+    },
   ],
   admin: [
-    { href: "/admin", label: "Overview", icon: LayoutDashboard },
-    { href: "/admin/students", label: "Student Roster", icon: GraduationCap },
-    { href: "/admin/alerts", label: "Security Alerts", icon: AlertTriangle },
-    { href: "/admin/reports", label: "Gate Reports", icon: FileSpreadsheet },
+    {
+      groupLabel: "Analytics & Oversight",
+      items: [
+        { href: "/admin", label: "Dashboard Overview", icon: LayoutDashboard },
+        { href: "/admin/students", label: "Student Roster", icon: GraduationCap },
+        { href: "/admin/alerts", label: "Security Alerts", icon: AlertTriangle, badge: "SECURE" },
+        { href: "/admin/reports", label: "Gate Reports", icon: FileSpreadsheet },
+      ],
+    },
+    {
+      groupLabel: "Access Control",
+      items: [
+        { href: "/admin/users", label: "User Access Roles", icon: Users },
+      ],
+    },
   ],
   sysadmin: [
-    { href: "/sysadmin", label: "System Console", icon: Settings },
+    {
+      groupLabel: "System Management",
+      items: [
+        { href: "/sysadmin", label: "System Console", icon: Settings },
+        { href: "/sysadmin/audit", label: "Audit & Security", icon: Shield },
+      ],
+    },
   ],
   parent: [
-    { href: "/parent", label: "Child Overview", icon: Users },
+    {
+      groupLabel: "Child Portal",
+      items: [
+        { href: "/parent", label: "Child Overview", icon: Users },
+        { href: "/parent/request", label: "Request Pass", icon: QrCode },
+      ],
+    },
   ],
   student: [
-    { href: "/student", label: "Digital ID Card", icon: GraduationCap },
+    {
+      groupLabel: "Student Identity",
+      items: [
+        { href: "/student", label: "Digital ID Card", icon: GraduationCap },
+        { href: "/student/passes", label: "Gate Passes", icon: QrCode, badge: "QR" },
+        { href: "/student/profile", label: "My Profile", icon: User },
+      ],
+    },
   ],
   warden: [
-    { href: "/sysadmin", label: "Settings", icon: Settings },
+    {
+      groupLabel: "Hostel Control",
+      items: [
+        { href: "/supervisor/live", label: "Hostel Gate Feed", icon: LayoutDashboard },
+        { href: "/supervisor/reports", label: "Leave Approvals", icon: FileSpreadsheet },
+      ],
+    },
   ],
 };
 
 const ROLE_LABELS: Record<string, string> = {
-  operator: "Gate Operator",
+  operator: "Gate Guard / Operator",
   supervisor: "Gate Supervisor",
-  admin: "Campus Admin",
-  sysadmin: "System Admin",
+  admin: "Campus Administrator",
+  sysadmin: "System Administrator",
   parent: "Parent Portal",
   student: "Student Portal",
   warden: "Hostel Warden",
@@ -64,7 +146,10 @@ export function Sidebar() {
   const router = useRouter();
   const { role: storeRole, user, logout } = useAuthStore();
   const { isMobileSidebarOpen, toggleMobileSidebar } = useUIStore();
+
   const [role, setRole] = useState<Role | null>(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (storeRole) {
@@ -90,97 +175,175 @@ export function Sidebar() {
   }, [storeRole, pathname]);
 
   const currentRole = role || "admin";
-  const navItems = NAV_ITEMS[currentRole] || [];
+  const navGroups = ROLE_NAV_GROUPS[currentRole] || ROLE_NAV_GROUPS.admin;
 
   const handleLogout = async () => {
     sessionStorage.removeItem("gate-monitor-role");
     localStorage.removeItem("gate-monitor-role");
     await logout();
+    router.push("/login");
   };
 
-  const navContent = (
-    <aside className="w-64 flex-shrink-0 flex flex-col h-full bg-[var(--bg-surface)] border-r border-[var(--border)] select-none">
+  const toggleGroup = (groupLabel: string) => {
+    setCollapsedGroups((prev) => ({ ...prev, [groupLabel]: !prev[groupLabel] }));
+  };
+
+  const sidebarContent = (
+    <aside
+      className={`${
+        isCollapsed ? "w-20" : "w-64"
+      } flex-shrink-0 flex flex-col h-full bg-[var(--bg-surface)] border-r border-[var(--border)] select-none transition-all duration-300`}
+    >
       {/* Header Branding */}
-      <div className="p-4 flex items-center justify-between border-b border-[var(--border)]">
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="p-2 rounded-lg bg-[var(--action-primary)]/10 text-[var(--action-primary)] group-hover:scale-105 transition-transform">
-            <Building2 className="w-6 h-6" />
+      <div className="p-4 flex items-center justify-between border-b border-[var(--border)] min-h-[65px]">
+        <Link href="/" className="flex items-center gap-3 group min-w-0">
+          <div className="p-2 rounded-xl bg-[var(--action-primary)]/10 text-[var(--action-primary)] group-hover:scale-105 transition-transform shrink-0">
+            <Building2 className="w-5 h-5" />
           </div>
-          <div>
-            <div className="font-bold text-sm leading-tight text-[var(--text-primary)]">JNTUH UCoEJ</div>
-            <div className="text-xs text-[var(--text-muted)] font-medium">Gate Monitor</div>
-          </div>
+          {!isCollapsed && (
+            <div className="min-w-0 flex-1 truncate">
+              <div className="font-bold text-sm leading-tight text-[var(--text-primary)] truncate">JNTUH UCoEJ</div>
+              <div className="text-[11px] text-[var(--text-muted)] font-medium truncate">Gate Monitor</div>
+            </div>
+          )}
         </Link>
-        <button
-          onClick={toggleMobileSidebar}
-          className="lg:hidden p-1.5 rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]"
-        >
-          <X className="w-5 h-5" />
-        </button>
+
+        {/* Mobile close or Desktop Collapse Toggle */}
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="hidden lg:flex p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors"
+            title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+          >
+            {isCollapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
+          </button>
+
+          <button
+            onClick={toggleMobileSidebar}
+            className="lg:hidden p-1.5 rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
-      {/* Role Badge */}
-      <div className="px-4 py-3 bg-[var(--bg-base)]/50 border-b border-[var(--border)]">
-        <div className="text-[10px] uppercase font-bold tracking-wider text-[var(--text-muted)] mb-1">
-          Active Workspace
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-[var(--action-primary)]">
+      {/* Active Role Workspace Card */}
+      {!isCollapsed && (
+        <div className="px-4 py-3 bg-[var(--bg-elevated)]/60 border-b border-[var(--border)] space-y-1">
+          <div className="flex items-center justify-between text-[10px] uppercase font-bold tracking-wider text-[var(--text-muted)]">
+            <span>Workspace</span>
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-mono font-bold bg-[var(--action-primary)]/15 text-[var(--action-primary)] border border-[var(--action-primary)]/20">
+              {currentRole.toUpperCase()}
+            </span>
+          </div>
+          <p className="text-xs font-semibold text-[var(--text-primary)] truncate">
             {ROLE_LABELS[currentRole] || currentRole}
-          </span>
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-[var(--action-primary)]/15 text-[var(--action-primary)]">
-            ONLINE
-          </span>
+          </p>
         </div>
-      </div>
+      )}
 
-      {/* Navigation Items */}
-      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
-          const Icon = item.icon;
+      {/* Interactive Accordion Navigation Groups */}
+      <nav className="flex-1 p-3 space-y-4 overflow-y-auto custom-scrollbar">
+        {navGroups.map((group) => {
+          const isGroupCollapsed = collapsedGroups[group.groupLabel];
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => {
-                if (isMobileSidebarOpen) toggleMobileSidebar();
-              }}
-              className={`flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-sm font-medium transition-all ${
-                isActive
-                  ? "bg-[var(--action-primary)] text-white shadow-sm font-semibold"
-                  : "text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"
-              }`}
-            >
-              <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-[var(--text-muted)]"}`} />
-              <span>{item.label}</span>
-            </Link>
+            <div key={group.groupLabel} className="space-y-1">
+              {!isCollapsed && (
+                <button
+                  type="button"
+                  onClick={() => toggleGroup(group.groupLabel)}
+                  className="w-full flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] px-2 py-1 hover:text-[var(--text-primary)] transition-colors"
+                >
+                  <span>{group.groupLabel}</span>
+                  {isGroupCollapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                </button>
+              )}
+
+              {!isGroupCollapsed && (
+                <div className="space-y-1">
+                  {group.items.map((item) => {
+                    const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
+                    const Icon = item.icon;
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => {
+                          if (isMobileSidebarOpen) toggleMobileSidebar();
+                        }}
+                        title={isCollapsed ? item.label : undefined}
+                        className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-medium transition-all ${
+                          isActive
+                            ? "bg-[var(--action-primary)] text-white shadow-md font-semibold"
+                            : "text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"
+                        }`}
+                      >
+                        <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-white" : "text-[var(--text-muted)]"}`} />
+                        {!isCollapsed && (
+                          <div className="flex-1 flex items-center justify-between min-w-0">
+                            <span className="truncate">{item.label}</span>
+                            {item.badge && (
+                              <span
+                                className={`ml-2 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold shrink-0 ${
+                                  isActive
+                                    ? "bg-white/20 text-white"
+                                    : "bg-[var(--action-primary)]/10 text-[var(--action-primary)]"
+                                }`}
+                              >
+                                {item.badge}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           );
         })}
       </nav>
 
-      {/* User Profile & Logout Footer */}
-      <div className="p-3 border-t border-[var(--border)] bg-[var(--bg-base)]/30">
-        <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--bg-elevated)]">
+      {/* User Profile & Role Switcher Footer */}
+      <div className="p-3 border-t border-[var(--border)] bg-[var(--bg-base)]/40 space-y-2">
+        <div className="flex items-center justify-between p-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)]">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-full bg-[var(--action-primary)]/20 text-[var(--action-primary)] flex items-center justify-center text-xs font-bold shrink-0">
+            <div className="w-8 h-8 rounded-full bg-[var(--action-primary)]/20 text-[var(--action-primary)] flex items-center justify-center text-xs font-bold shrink-0 border border-[var(--action-primary)]/30">
               {user?.name ? user.name.charAt(0).toUpperCase() : currentRole.charAt(0).toUpperCase()}
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold text-[var(--text-primary)] truncate">
-                {user?.name || (ROLE_LABELS[currentRole] ?? "User")}
-              </p>
-              <p className="text-[10px] text-[var(--text-muted)] truncate capitalize">{user?.employeeId || currentRole}</p>
-            </div>
+            {!isCollapsed && (
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold text-[var(--text-primary)] truncate">
+                  {user?.name || (ROLE_LABELS[currentRole] ?? "User")}
+                </p>
+                <p className="text-[10px] text-[var(--text-muted)] truncate capitalize font-mono">
+                  {user?.employeeId || currentRole}
+                </p>
+              </div>
+            )}
           </div>
-          <button
-            onClick={handleLogout}
-            className="p-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--action-danger)] hover:bg-[var(--action-danger)]/10 transition-colors"
-            title="Sign Out"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
+
+          {!isCollapsed && (
+            <button
+              onClick={handleLogout}
+              className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--action-danger)] hover:bg-[var(--action-danger)]/10 transition-colors shrink-0"
+              title="Sign Out"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          )}
         </div>
+
+        {!isCollapsed && (
+          <Link
+            href="/login"
+            className="w-full py-1.5 px-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border)] text-[11px] text-[var(--text-muted)] hover:text-[var(--action-primary)] font-semibold flex items-center justify-center gap-1.5 transition-colors"
+          >
+            <Sliders className="w-3.5 h-3.5" />
+            <span>Switch Role / Portal</span>
+          </Link>
+        )}
       </div>
     </aside>
   );
@@ -188,17 +351,17 @@ export function Sidebar() {
   return (
     <>
       {/* Desktop Sidebar */}
-      <div className="hidden lg:block h-full">{navContent}</div>
+      <div className="hidden lg:block h-full">{sidebarContent}</div>
 
       {/* Mobile Drawer Overlay */}
       {isMobileSidebarOpen && (
         <div className="fixed inset-0 z-50 lg:hidden flex">
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-black/70 backdrop-blur-xs transition-opacity"
             onClick={toggleMobileSidebar}
           />
-          <div className="relative z-10 w-64 max-w-[80vw] h-full shadow-2xl">
-            {navContent}
+          <div className="relative z-10 w-72 max-w-[85vw] h-full shadow-2xl">
+            {sidebarContent}
           </div>
         </div>
       )}
