@@ -1,32 +1,54 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { User } from "lucide-react";
+import { User, CheckCircle2, LogIn, LogOut, X } from "lucide-react";
 
 interface ScanConfirmationProps {
   student: {
     name: string;
     roll: string;
     department: string;
-    year: number;
+    year?: number;
     photo?: string;
   };
   onConfirm: (direction: "IN" | "OUT", reason?: string) => void;
   onCancel: () => void;
-  suggestedDirection: "IN" | "OUT";
+  suggestedDirection?: "IN" | "OUT";
 }
 
-export function ScanConfirmation({ student, onConfirm, onCancel, suggestedDirection }: ScanConfirmationProps) {
+export function ScanConfirmation({
+  student,
+  onConfirm,
+  onCancel,
+  suggestedDirection = "IN",
+}: ScanConfirmationProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
+      initial={{ opacity: 0, scale: 0.96 }}
       animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0 }}
-      className="absolute inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur"
+      exit={{ opacity: 0, scale: 0.96 }}
+      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md pb-safe"
     >
-      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-8 max-w-sm w-full mx-4">
-        <div className="text-center">
-          <div className="relative mx-auto w-28 h-28 rounded-full overflow-hidden border-4 border-[var(--border)] mb-4">
+      <div className="bg-[var(--bg-surface)] border border-[var(--border-strong)] rounded-2xl p-6 sm:p-8 max-w-sm w-full shadow-2xl relative space-y-5">
+        {/* Cancel Close Icon */}
+        <button
+          onClick={onCancel}
+          aria-label="Cancel scan verification"
+          className="absolute top-4 right-4 w-9 h-9 rounded-full bg-[var(--bg-base)] text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        {/* Verification Status Banner */}
+        <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 py-1.5 px-3 rounded-full w-fit mx-auto">
+          <CheckCircle2 className="w-4 h-4" />
+          <span>Verified Student</span>
+        </div>
+
+        {/* Student Avatar & Basic Info */}
+        <div className="text-center space-y-2">
+          <div className="relative mx-auto w-24 h-24 rounded-2xl overflow-hidden border-2 border-[var(--border-strong)] shadow-inner">
             {student.photo ? (
               <img src={student.photo} alt={student.name} className="w-full h-full object-cover" />
             ) : (
@@ -36,39 +58,58 @@ export function ScanConfirmation({ student, onConfirm, onCancel, suggestedDirect
             )}
           </div>
 
-          <h2 className="text-xl font-bold mb-1">{student.name}</h2>
-          <p className="text-[var(--text-secondary)] font-mono text-sm">{student.roll}</p>
-          <p className="text-sm text-[var(--text-muted)] mb-4">
-            {student.department} • Year {student.year}
-          </p>
-
-          <p className="text-sm text-[var(--text-muted)] mb-4">ENTRY or EXIT?</p>
-          <div className="grid grid-cols-2 gap-3">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => onConfirm("IN")}
-              className="h-12 px-4 rounded-lg bg-[var(--action-primary)] text-white font-semibold text-lg hover:brightness-110 transition-all"
-            >
-              🟢 ENTRY
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => onConfirm("OUT")}
-              className="h-12 px-4 rounded-lg bg-[var(--action-danger)] text-white font-semibold text-lg hover:brightness-110 transition-all"
-            >
-              🔴 EXIT
-            </motion.button>
+          <div>
+            <h2 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">
+              {student.name}
+            </h2>
+            <p className="text-sm font-mono font-semibold text-[var(--text-secondary)] mt-0.5">
+              {student.roll}
+            </p>
+            <p className="text-xs text-[var(--text-muted)] mt-1">
+              {student.department}
+            </p>
           </div>
-
-          <button
-            onClick={onCancel}
-            className="mt-4 w-full h-10 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-          >
-            Cancel
-          </button>
         </div>
+
+        {/* Operational Action CTA Buttons (64px Touch Targets) */}
+        <div className="grid grid-cols-2 gap-3 pt-2">
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={() => onConfirm("IN")}
+            className={`h-16 rounded-xl font-bold text-base flex flex-col items-center justify-center gap-1 shadow-md transition-all ${
+              suggestedDirection === "IN"
+                ? "bg-[var(--action-primary)] text-white ring-2 ring-emerald-400/40"
+                : "bg-[var(--bg-base)] border border-[var(--border)] text-[var(--text-primary)] hover:border-[var(--action-primary)]"
+            }`}
+          >
+            <div className="flex items-center gap-1.5">
+              <LogIn className="w-5 h-5" />
+              <span>ENTER</span>
+            </div>
+          </motion.button>
+
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={() => onConfirm("OUT")}
+            className={`h-16 rounded-xl font-bold text-base flex flex-col items-center justify-center gap-1 shadow-md transition-all ${
+              suggestedDirection === "OUT"
+                ? "bg-[var(--action-danger)] text-white ring-2 ring-rose-400/40"
+                : "bg-[var(--bg-base)] border border-[var(--border)] text-[var(--text-primary)] hover:border-[var(--action-danger)]"
+            }`}
+          >
+            <div className="flex items-center gap-1.5">
+              <LogOut className="w-5 h-5" />
+              <span>EXIT</span>
+            </div>
+          </motion.button>
+        </div>
+
+        <button
+          onClick={onCancel}
+          className="w-full text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] py-1"
+        >
+          Dismiss & Resume Scanning
+        </button>
       </div>
     </motion.div>
   );

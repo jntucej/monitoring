@@ -1,18 +1,99 @@
 "use client";
-import { Menu, Bell } from "lucide-react";
+
+import { Menu, Bell, Sun, Moon, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { useUIStore } from "@/stores/uiStore";
+import { useAuthStore } from "@/stores/authStore";
+
+const PAGE_TITLES: Record<string, string> = {
+  "/gate/1": "Gate 1 Scanner — High Speed Scanner Desk",
+  "/gate/2": "Gate 2 Scanner — High Speed Scanner Desk",
+  "/supervisor/live": "Real-Time Campus Feed",
+  "/supervisor/corrections": "Supervisor Corrections Desk",
+  "/admin": "Campus Overview Dashboard",
+  "/admin/students": "Student Master Roster",
+  "/admin/alerts": "Security & Anomaly Alerts",
+  "/admin/reports": "Gate Entry/Exit Analytics",
+  "/sysadmin": "System Administration & Settings",
+  "/parent": "Parent Dashboard — Student Tracking",
+  "/student": "Digital ID & Gate Pass Management",
+};
 
 export function Header() {
+  const pathname = usePathname();
+  const { theme, setTheme, toggleMobileSidebar, addToast } = useUIStore();
+  const { role, user } = useAuthStore();
+
+  const title = PAGE_TITLES[pathname] || "JNTUH UCoEJ Gate Monitor";
+
+  const handleToggleTheme = () => {
+    const nextTheme = theme === "dark" ? "light" : "dark";
+    setTheme(nextTheme);
+    addToast({
+      title: "Theme Changed",
+      message: `Switched to ${nextTheme.toUpperCase()} mode`,
+      variant: "info",
+      duration: 2000,
+    });
+  };
+
   return (
-    <header className="h-16 flex items-center justify-between px-6 bg-[var(--bg-surface)] border-b border-[var(--border)]">
-      <div className="flex items-center gap-4">
-        <button className="lg:hidden p-2 -ml-2 text-[var(--text-muted)] hover:bg-white/5 rounded-md">
-          <Menu className="w-6 h-6" />
+    <header className="h-16 flex items-center justify-between px-4 sm:px-6 bg-[var(--bg-surface)] border-b border-[var(--border)] sticky top-0 z-30 select-none">
+      <div className="flex items-center gap-3">
+        <button
+          onClick={toggleMobileSidebar}
+          className="lg:hidden p-2 -ml-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] rounded-lg transition-colors"
+          title="Open Menu"
+          aria-label="Toggle navigation menu"
+        >
+          <Menu className="w-5 h-5" />
         </button>
-        <h1 className="text-lg font-semibold">Dashboard</h1>
+        <div>
+          <h1 className="text-base sm:text-lg font-semibold text-[var(--text-primary)] leading-tight">
+            {title}
+          </h1>
+          <p className="text-[11px] text-[var(--text-muted)] hidden sm:block">
+            JNTUH College of Engineering, Jagtial (Nachupally)
+          </p>
+        </div>
       </div>
-      <div className="flex items-center gap-4">
-        <button className="p-2 text-[var(--text-muted)] hover:bg-white/5 rounded-full">
+
+      <div className="flex items-center gap-2 sm:gap-3">
+        {/* Security / Connection Indicator */}
+        <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--action-primary)]/10 text-[var(--action-primary)] border border-[var(--action-primary)]/20 text-xs font-medium">
+          <CheckCircle2 className="w-3.5 h-3.5" />
+          <span>Encrypted Gateway</span>
+        </div>
+
+        {/* Theme Toggle Button */}
+        <button
+          onClick={handleToggleTheme}
+          className="p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] rounded-lg transition-colors"
+          title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+          aria-label="Toggle dark/light theme"
+        >
+          {theme === "dark" ? (
+            <Sun className="w-5 h-5 text-amber-400" />
+          ) : (
+            <Moon className="w-5 h-5 text-indigo-600" />
+          )}
+        </button>
+
+        {/* Notifications Icon */}
+        <button
+          onClick={() =>
+            addToast({
+              title: "System Alerts",
+              message: "All campus gate sensors operating normally",
+              variant: "success",
+            })
+          }
+          className="relative p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] rounded-lg transition-colors"
+          title="Notifications"
+          aria-label="View notifications"
+        >
           <Bell className="w-5 h-5" />
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[var(--action-primary)] rounded-full ring-2 ring-[var(--bg-surface)]" />
         </button>
       </div>
     </header>
