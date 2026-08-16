@@ -1,14 +1,42 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getAlerts } from "@/lib/db";
+import { withAuthAndStatus } from "@/middleware/auth";
+import { withAuthorization } from "@/middleware/authorization";
+import { withRateLimit } from "@/lib/rate-limit";
 
-export async function GET() {
+/**
+ * GET /api/alerts
+ * Query params:
+ *   resolved=true|false  -> filter by resolution status (omit to get all)
+ *   severity=low|medium|high|critical -> filter by severity
+ */
+async function handleGet(req: NextRequest) {
   try {
-    const data = getAlerts(true);
+    const params = req.nextUrl.searchParams;
+    const resolvedParam = params.get("resolved");
+    const severity = params.get("severity");
+
+    let data = await getAlerts();
+    if (resolvedParam === "true") {
+      data = data.filter((a) => a.resolved);
+    } else if (resolvedParam === "false") {
+      data = data.filter((a) => !a.resolved);
+    }
+    if (severity) {
+      data = data.filter((a) => a.severity === severity);
+    }
+
     return NextResponse.json({ success: true, data });
-  } catch {
+  } catch (error) {
+    console.error("Error fetching alerts:", error);
     return NextResponse.json(
       { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to load alerts" } },
       { status: 500 }
     );
   }
 }
+
+export const GET = withRateLimit(
+  withAuthAndStatus(withAuthorization(handleGet, { requiredRole: ['admin', 'supervisor', 'sysadmin'] })),
+  { keyPrefix: 'alerts_list', maxRequests: 60 }
+);

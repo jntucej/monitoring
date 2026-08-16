@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { invalidateSession } from "@/lib/db";
+import { withAuthAndStatus } from "@/middleware/auth";
+import { withRateLimit } from "@/lib/rate-limit";
+import { canUserAuthenticate } from "@/lib/supabaseClient";
 
-export async function POST(req: NextRequest) {
-  try {
-    const authHeader = req.headers.get("authorization");
-    if (authHeader?.startsWith("Bearer ")) {
-      invalidateSession(authHeader.slice(7));
-    }
-    return NextResponse.json({ success: true });
-  } catch {
-    return NextResponse.json({ success: true });
-  }
+async function handlePost() {
+  // The token has already been validated by withAuthAndStatus.
+  // We return success because the client should clear its own token.
+  return NextResponse.json({ success: true });
 }
+
+export const POST = withRateLimit(
+  withAuthAndStatus(handlePost),
+  { keyPrefix: 'logout', maxRequests: 10 }
+);

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, Check } from "lucide-react";
-import { findStudentByRoll, verifyPin, findUserById } from "@/lib/db";
+import { Search, X, Check, Info } from "lucide-react";
+import { findStudentByRoll } from "@/lib/db";
+import { parseRollNumber, validateRollNumber } from "@/lib/rollNumber";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import type { ScanDirection, ExitReason } from "@/lib/types";
@@ -18,25 +19,28 @@ const NUMPAD = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "⌫"];
 
 export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialogProps) {
   const [rollInput, setRollInput] = useState("");
-  const [step, setStep] = useState<"keypad" | "confirm" | "pin">("keypad");
+  const [step, setStep] = useState<"keypad" | "confirm">("keypad");
   const [student, setStudent] = useState<any>(null);
   const [direction, setDirection] = useState<ScanDirection>("IN");
   const [reason, setReason] = useState<ExitReason | null>(null);
-  const [pin, setPin] = useState("");
   const [searching, setSearching] = useState(false);
+
+  // Real-time roll-number validation & decoding
+  const rollValid = useMemo(() => (rollInput ? validateRollNumber(rollInput) : false), [rollInput]);
+  const rollDecoded = useMemo(() => (rollInput ? parseRollNumber(rollInput) : null), [rollInput]);
 
   const handleKeyPress = (key: string) => {
     if (key === "⌫") {
       setRollInput((prev) => prev.slice(0, -1));
-    } else if (rollInput.length < 12) {
+    } else if (rollInput.length < 10) {
       setRollInput((prev) => prev + key);
     }
   };
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!rollInput.trim()) return;
     setSearching(true);
-    const found = findStudentByRoll(rollInput);
+    const found = await findStudentByRoll(rollInput);
     setSearching(false);
     if (found) {
       setStudent(found);
@@ -44,29 +48,22 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
     }
   };
 
-  const handleManualScan = () => {
-    setStep("pin");
-  };
-
-  const handlePinConfirm = () => {
-    if (pin.length !== 4) return;
-    const op = findUserById("op-1");
-    if (op && op.pin && verifyPin(op.id, pin)) {
-      // In a real app, this would call the API with isManual=true
-      onClose();
-      // Reset state
-      setRollInput("");
-      setStudent(null);
-      setStep("keypad");
-      setPin("");
-    }
+  const handleConfirm = () => {
+    // In a real app, this would call the API with isManual=true using the
+    // authenticated session token (set server-side identity is the operator).
+    onClose();
+    // Reset state
+    setRollInput("");
+    setStudent(null);
+    setStep("keypad");
+    setDirection("IN");
+    setReason(null);
   };
 
   const reset = () => {
     setRollInput("");
     setStudent(null);
     setStep("keypad");
-    setPin("");
     setDirection("IN");
     setReason(null);
   };
@@ -101,13 +98,68 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
             {step === "keypad" && (
               <>
                 <p className="text-sm text-[var(--text-secondary)] mb-4">
-                  Enter student roll number:
+                  Enter student roll number (10 characters):
                 </p>
-                <div className="bg-[var(--bg-base)] border-2 border-[var(--border)] rounded-lg p-3 mb-4 min-h-[48px] flex items-center">
+                <div className="bg-[var(--bg-base)] border-2 border-[var(--border)] rounded-lg p-3 mb-4 min-h-[48px] flex items-center justify-between">
                   <span className="font-mono text-xl text-[var(--text-primary)]">
                     {rollInput || <span className="text-[var(--text-muted)]">—</span>}
                   </span>
+                  {rollInput.length > 0 && (
+                    <Info className={`w-5 h-5 ${rollValid ? "text-[var(--action-primary)]" : "text-[var(--action-danger)]"}`} />
+                  )}
                 </div>
+
+                {/* Decoded roll info (shows when valid) */}
+                {rollInput && rollValid && rollDecoded && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    className="mb-4 p-3 bg-[var(--action-primary)]/5 border border-[var(--action-primary)]/20 rounded-lg"
+                  >
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <span className="text-[var(--text-muted)]">Year</span>
+                        <span className="ml-2 text-[var(--text-primary)] font-medium">{rollDecoded.admissionYear}</span>
+                      </div>
+                      <div>
+                        <span className="text-[var(--text-muted)]">College</span>
+                        <span className="ml-2 text-[var(--text-primary)] font-medium">{rollDecoded.collegeCode}</span>
+                      </div>
+                      <div>
+                        <span className="text-[var(--text-muted)]">Entry Mode</span>
+                        <span className="ml-2 text-[var(--text-primary)] font-medium">{rollDecoded.entryModeCode} ({rollDecoded.entryMode})</span>
+                      </div>
+                      <div>
+                        <span className="text-[var(--text-muted)]">Department</span>
+                        <span className="ml-2 text-[var(--text-primary)] font-medium">{rollDecoded.departmentCode} ({rollDecoded.department})</span>
+                      </div>
+                      <div>
+                        <span className="text-[var(--text-muted)]">Serial</span>
+                        <span className="ml-2 text-[var(--text-primary)] font-medium">{rollDecoded.serial}</span>
+                      </div>
+                      <div>
+                        <span className="text-[var(--text-muted)]">Branch</span>
+                        <span className="ml-2 text-[var(--text-primary)] font-medium">{rollDecoded.branch}</span>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Invalid roll error */}
+                {rollInput && !rollValid && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    className="mb-4 p-3 bg-[var(--action-danger)]/5 border border-[var(--action-danger)]/20 rounded-lg flex items-start gap-2"
+                  >
+                    <Info className="w-4 h-4 text-[var(--action-danger)] mt-0.5 flex-shrink-0" />
+                    <p className="text-xs text-[var(--action-danger)]">
+                      Roll number must be 10 characters matching the format: YYCCEDBBSS
+                      <br />
+                      Example: 24JJ1A0201
+                    </p>
+                  </motion.div>
+                )}
 
                 <div className="grid grid-cols-3 gap-2 mb-4">
                   {NUMPAD.map((key) => (
@@ -123,7 +175,7 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
 
                 <Button
                   onClick={handleSearch}
-                  disabled={!rollInput || searching}
+                  disabled={!rollInput || !rollValid || searching}
                   className="w-full h-12"
                   loading={searching}
                 >
@@ -144,7 +196,7 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
                     )}
                   </div>
                   <h4 className="font-bold text-lg">{student.name}</h4>
-                  <p className="text-[var(--text-secondary)] font-mono">{student.roll}</p>
+                  <p className="text-[var(--text-secondary)] font-mono text-sm">{student.roll}</p>
                   <p className="text-sm text-[var(--text-muted)]">
                     {student.department} • Year {student.year}
                   </p>
@@ -205,53 +257,8 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
                   <Button variant="secondary" onClick={() => setStep("keypad")} className="flex-1 h-12">
                     Back
                   </Button>
-                  <Button onClick={handleManualScan} className="flex-1 h-12">
-                    Proceed (PIN Required)
-                  </Button>
-                </div>
-              </>
-            )}
-
-            {/* Step: PIN entry */}
-            {step === "pin" && (
-              <>
-                <p className="text-sm text-[var(--text-secondary)] mb-2">
-                  Enter supervisor PIN to confirm manual entry:
-                </p>
-                <div className="bg-[var(--bg-base)] border-2 border-[var(--border)] rounded-lg p-3 mb-4 min-h-[48px] flex items-center">
-                  <span className="font-mono text-xl text-[var(--text-primary)] tracking-widest">
-                    {pin || <span className="text-[var(--text-muted)]">— — — —</span>}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2 mb-4">
-                  {["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "⌫"].map((key) => (
-                    <button
-                      key={key}
-                      onClick={() => {
-                        if (key === "⌫") {
-                          setPin((prev) => prev.slice(0, -1));
-                        } else if (pin.length < 4) {
-                          setPin((prev) => prev + key);
-                        }
-                      }}
-                      className="h-12 rounded-lg bg-[var(--bg-base)] border border-[var(--border)] text-lg font-medium text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors"
-                    >
-                      {key}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="flex gap-3">
-                  <Button variant="secondary" onClick={() => setStep("confirm")} className="flex-1 h-12">
-                    Back
-                  </Button>
-                  <Button
-                    onClick={handlePinConfirm}
-                    disabled={pin.length !== 4}
-                    className="flex-1 h-12"
-                  >
-                    Confirm
+                  <Button onClick={handleConfirm} className="flex-1 h-12">
+                    Confirm Entry
                   </Button>
                 </div>
               </>

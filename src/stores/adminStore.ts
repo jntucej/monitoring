@@ -31,18 +31,18 @@ export const useAdminStore = create<AdminState & AdminActions>()((set, get) => (
   activeGate: null,
   loading: false,
 
-  loadDashboard: () => {
-    const data = dashboard();
+  loadDashboard: async () => {
+    const data = await dashboard();
     set({ dashboardData: data, liveActivity: data.activityFeed });
   },
 
-  loadAlerts: () => {
-    const alerts = getAlerts(true);
+  loadAlerts: async () => {
+    const alerts = await getAlerts(true);
     set({ alerts });
   },
 
-  resolveAlert: (alertId, userId, userName) => {
-    resolveAlert(alertId, userId, userName);
+  resolveAlert: async (alertId, userId, userName) => {
+    await resolveAlert(alertId, userId);
     get().loadAlerts();
     get().loadDashboard();
   },

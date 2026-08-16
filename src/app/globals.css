@@ -5,15 +5,7 @@
    Source of truth: gate-monitor/Plan/UI_Plan_Gate_Monitoring_System.md
    ============================================================ */
 
-/* Inter font (loaded via next/font in layout). Fallback to system sans. */
-@font-face {
-  font-family: "Inter";
-  font-style: 100 900;
-  font-display: swap;
-  src: url("/fonts/inter-var.woff2") format("woff2")
-        fallback;
-  font-weight: 100 900;
-}
+/* Inter font is loaded via next/font in layout.tsx. */
 
 :root {
   /* Typography */
@@ -125,3 +117,10 @@ body {
 
 /* Utility: tabular nums for data */
 .tabular-nums { font-variant-numeric: tabular-nums; }
+
+/* ===== GLOBAL FOCUS VISIBLE ===== */
+*:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}

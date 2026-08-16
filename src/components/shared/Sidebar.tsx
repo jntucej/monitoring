@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   ShieldCheck,
   LayoutDashboard,
@@ -18,8 +19,8 @@ import type { Role } from "@/lib/types";
 
 const NAV_ITEMS = {
   operator: [
-    { href: "/operator/gate-1", label: "Gate 1", icon: ScanLine },
-    { href: "/operator/gate-2", label: "Gate 2", icon: ScanLine },
+    { href: "/gate/1", label: "Gate 1", icon: ScanLine },
+    { href: "/gate/2", label: "Gate 2", icon: ScanLine },
   ],
   supervisor: [
     { href: "/supervisor/live", label: "Live Feed", icon: LayoutDashboard },
@@ -29,6 +30,7 @@ const NAV_ITEMS = {
   sysadmin: [{ href: "/sysadmin", label: "Settings", icon: Settings }],
   parent: [{ href: "/parent", label: "Dashboard", icon: Users }],
   student: [{ href: "/student", label: "My ID", icon: GraduationCap }],
+  warden: [{ href: "/sysadmin", label: "Settings", icon: Settings }],
 };
 
 export function Sidebar() {
@@ -64,7 +66,7 @@ export function Sidebar() {
       </div>
       <nav className="flex-1 p-2 space-y-1">
         {navItems.map((item) => (
-          <a
+          <Link
             key={item.href}
             href={item.href}
             className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
@@ -75,7 +77,7 @@ export function Sidebar() {
           >
             <item.icon className="w-5 h-5" />
             <span>{item.label}</span>
-          </a>
+          </Link>
         ))}
       </nav>
       <div className="p-4 border-t border-[var(--border)]">

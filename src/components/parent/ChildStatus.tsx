@@ -1,28 +1,111 @@
 "use client";
-import { User, CheckCircle, XCircle } from "lucide-react";
+import { useEffect, useState } from "react";
+import { CheckCircle, XCircle, Loader2 } from "lucide-react";
+import type { Student } from "@/lib/types";
 
 export function ChildStatus() {
-    const child = {
-        name: "Akarsh Jadi",
-        status: "inside", // 'inside' or 'outside'
-        lastSeen: "Gate 1, Today at 10:30 AM"
-    };
+  const [children, setChildren] = useState<Student[]>([]);
+  const [statuses, setStatuses] = useState<Record<string, { status: "IN" | "OUT"; last: { timestamp: string; gateName: string } | null }>>({});
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      try {
+        // Get parent ID from auth (demo)
+        const authRaw = localStorage.getItem("gate-monitor-auth");
+        const auth = authRaw ? JSON.parse(authRaw) : null;
+        const parentId = auth?.user?.parentId ?? auth?.user?.id ?? "pa-1";
+
+        const res = await fetch(`/api/students?parentId=${parentId}`, { cache: "no-store" });
+        const json = await res.json();
+        if (cancelled) return;
+        const kids: Student[] = Array.isArray(json.data) ? json.data : [];
+        setChildren(kids);
+
+        // Get current status for each child
+        const stat: Record<string, any> = {};
+        await Promise.all(
+          kids.map(async (k) => {
+            try {
+              const r = await fetch(`/api/students/${encodeURIComponent(k.roll)}/status`, { cache: "no-store" });
+              const j = await r.json();
+              stat[k.roll] = j.data ?? { status: "OUT", last: null };
+            } catch {
+              stat[k.roll] = { status: "OUT", last: null };
+            }
+          })
+        );
+        if (!cancelled) {
+          setStatuses(stat);
+          setLoading(false);
+        }
+      } catch {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    load();
+    const t = setInterval(load, 30_000);
+    return () => {
+      cancelled = true;
+      clearInterval(t);
+    };
+  }, []);
+
+  if (loading) {
     return (
-        <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-6 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-                <div className="relative w-16 h-16 rounded-full border-2 border-gray-400">
-                    <img src="/avatar-placeholder.png" alt={child.name} className="rounded-full w-full h-full object-cover" />
-                </div>
-                <div>
-                    <h3 className="text-xl font-bold">{child.name}</h3>
-                    <p className="text-sm text-[var(--text-muted)]">{child.lastSeen}</p>
-                </div>
-            </div>
-            <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-white ${child.status === 'inside' ? 'bg-emerald-500' : 'bg-rose-500'}`}>
-                {child.status === 'inside' ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
-                <span className="font-semibold capitalize">{child.status === 'inside' ? 'Inside Campus' : 'Outside Campus'}</span>
-            </div>
-        </div>
+      <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-6 flex items-center gap-3 text-[var(--text-muted)] text-sm">
+        <Loader2 className="w-4 h-4 animate-spin" /> Loading children…
+      </div>
     );
+  }
+
+  if (children.length === 0) {
+    return (
+      <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-6 text-sm text-[var(--text-muted)]">
+        No linked students found.
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {children.map((child) => {
+        const st = statuses[child.roll];
+        const isIn = st?.status === "IN";
+        const lastSeen = st?.last
+          ? `${st.last.gateName} • ${new Date(st.last.timestamp).toLocaleString("en-IN", {
+              day: "2-digit",
+              month: "short",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}`
+          : "No recent activity";
+        return (
+          <div key={child.id} className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-6 flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-4">
+              <div className="relative w-16 h-16 rounded-full border-2 border-gray-400 overflow-hidden">
+                {child.photo ? (
+                  <img src={child.photo} alt={child.name} className="rounded-full w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xl font-semibold">
+                    {child.name?.[0] ?? "?"}
+                  </div>
+                )}
+              </div>
+              <div>
+                <h3 className="text-xl font-bold">{child.name}</h3>
+                <p className="text-sm font-mono text-[var(--text-muted)]">{child.roll}</p>
+                <p className="text-sm text-[var(--text-muted)] mt-0.5">Last seen: {lastSeen}</p>
+              </div>
+            </div>
+            <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-white ${isIn ? "bg-emerald-500" : "bg-rose-500"}`}>
+              {isIn ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
+              <span className="font-semibold">{isIn ? "Inside Campus" : "Outside Campus"}</span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
 }

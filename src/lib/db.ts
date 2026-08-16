@@ -1,29 +1,12 @@
-/**
- * SQLite database layer for the Gate Monitoring System.
- * Uses better-sqlite3 for synchronous, reliable persistence.
- * Fully deployable — data persists across server restarts.
- */
-
-import Database from "better-sqlite3";
-import path from "path";
-import fs from "fs";
-import { createHash, randomUUID } from "crypto";
+import { supabase } from './supabaseClient';
+import { randomUUID } from "crypto";
+import bcrypt from 'bcryptjs';
 
 import type {
   Department, DepartmentCode, Gate, Student, Scan, ScanDirection, ExitReason,
   GatePass, GatePassStatus, Alert, AlertSeverity, AuditEntry,
-  User, DashboardData,
+  User, DashboardData, Role, AccountStatus,
 } from "./types";
-
-/* ------------------------------------------------------------------ *
- *  DATABASE INITIALIZATION
- * ------------------------------------------------------------------ */
-const DATA_DIR = process.env.DATA_DIR || path.join(process.cwd(), "data");
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-
-const db = new Database(path.join(DATA_DIR, "gate-monitor.db"));
-db.pragma("journal_mode = WAL");
-db.pragma("foreign_keys = ON");
 
 /* ------------------------------------------------------------------ *
  *  COLLEGE DATA
@@ -37,6 +20,33 @@ export const COLLEGE = {
   website: "https://jntuhcej.ac.in/",
   principal: "Dr. G. Narsimha",
 };
+
+export async function resolveAlert(alertId: string, userId: string): Promise<boolean> {
+  const { data: user } = await supabase.from('users').select('name').eq('id', userId).single();
+  const { error } = await supabase
+    .from('alerts')
+    .update({
+      resolved: true,
+      resolved_at: new Date().toISOString(),
+      resolved_by: userId,
+    })
+    .eq('id', alertId);
+
+  if (error) {
+    console.error('Error resolving alert:', error);
+    return false;
+  }
+
+  await addAudit({
+    action: 'ALERT_RESOLVED',
+    userId,
+    userName: user?.name ?? 'Unknown',
+    role: 'admin',
+    details: `Resolved alert ${alertId}`,
+  });
+
+  return true;
+}
 
 export const DEPARTMENTS: Department[] = [
   { code: "CSE", name: "Computer Science & Engineering", hod: "Dr. K. Sridhar" },
@@ -52,358 +62,1303 @@ export const GATES: Gate[] = [
   { id: "gate-3", name: "Gate 3 (Back Gate)", location: "Back Side",        type: "back",   isActive: false },
 ];
 
-/* ------------------------------------------------------------------ *
- *  SCHEMA
- * ------------------------------------------------------------------ */
-db.exec(`
-CREATE TABLE IF NOT EXISTS departments (id TEXT PRIMARY KEY, code TEXT UNIQUE NOT NULL, name TEXT NOT NULL, hod TEXT);
-CREATE TABLE IF NOT EXISTS gates (id TEXT PRIMARY KEY, name TEXT NOT NULL, location TEXT, type TEXT, is_active INTEGER DEFAULT 1);
-CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, employee_id TEXT UNIQUE, name TEXT NOT NULL, email TEXT, phone TEXT, password_hash TEXT, role TEXT NOT NULL, gate_id TEXT, parent_id TEXT, pin TEXT, created_at TEXT DEFAULT (datetime('now')));
-CREATE TABLE IF NOT EXISTS students (id TEXT PRIMARY KEY, roll TEXT UNIQUE NOT NULL, name TEXT NOT NULL, department TEXT NOT NULL, year INTEGER NOT NULL, section TEXT, batch TEXT, photo TEXT, email TEXT, phone TEXT, parent_name TEXT, parent_phone TEXT, parent_id TEXT, qr_code TEXT UNIQUE NOT NULL, id_valid_until TEXT, status TEXT DEFAULT 'active', created_at TEXT DEFAULT (datetime('now')));
-CREATE TABLE IF NOT EXISTS gate_logs (id TEXT PRIMARY KEY, student_id TEXT NOT NULL, roll TEXT NOT NULL, name TEXT NOT NULL, department TEXT NOT NULL, year INTEGER NOT NULL, direction TEXT NOT NULL, reason TEXT, gate_id TEXT NOT NULL, gate_name TEXT NOT NULL, operator_id TEXT NOT NULL, operator_name TEXT NOT NULL, scan_method TEXT DEFAULT 'qr', timestamp TEXT NOT NULL, is_manual INTEGER DEFAULT 0, is_correction INTEGER DEFAULT 0, original_scan_id TEXT, parent_notified INTEGER DEFAULT 0);
-CREATE TABLE IF NOT EXISTS gate_passes (id TEXT PRIMARY KEY, roll TEXT NOT NULL, student_name TEXT NOT NULL, department TEXT NOT NULL, reason TEXT NOT NULL, from_datetime TEXT NOT NULL, to_datetime TEXT NOT NULL, description TEXT, requested_by_id TEXT NOT NULL, requested_by_name TEXT NOT NULL, requested_at TEXT NOT NULL, parent_status TEXT DEFAULT 'PENDING', admin_status TEXT DEFAULT 'PENDING', final_status TEXT DEFAULT 'PENDING', parent_comment TEXT, admin_comment TEXT, parent_approver_id TEXT, admin_approver_id TEXT, qr_code TEXT, used_at TEXT, created_at TEXT DEFAULT (datetime('now')));
-CREATE TABLE IF NOT EXISTS campus_occupancy (id TEXT PRIMARY KEY, student_id TEXT UNIQUE NOT NULL, current_status TEXT NOT NULL, last_gate_id TEXT, last_log_id TEXT, last_updated TEXT NOT NULL);
-CREATE TABLE IF NOT EXISTS alerts (id TEXT PRIMARY KEY, severity TEXT NOT NULL, title TEXT NOT NULL, message TEXT NOT NULL, gate_id TEXT, student_roll TEXT, timestamp TEXT NOT NULL, resolved INTEGER DEFAULT 0, resolved_by TEXT, resolved_at TEXT);
-CREATE TABLE IF NOT EXISTS audit_logs (id TEXT PRIMARY KEY, action TEXT NOT NULL, user_id TEXT NOT NULL, user_name TEXT NOT NULL, role TEXT NOT NULL, timestamp TEXT NOT NULL, details TEXT, gate_id TEXT);
-CREATE TABLE IF NOT EXISTS notifications (id TEXT PRIMARY KEY, recipient_type TEXT NOT NULL, recipient_id TEXT NOT NULL, type TEXT NOT NULL, title TEXT NOT NULL, message TEXT NOT NULL, status TEXT DEFAULT 'pending', sent_at TEXT, read_at TEXT, created_at TEXT DEFAULT (datetime('now')));
-CREATE TABLE IF NOT EXISTS sessions (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, token TEXT UNIQUE NOT NULL, refresh_token TEXT UNIQUE, expires_at TEXT NOT NULL, last_active TEXT DEFAULT (datetime('now')), is_valid INTEGER DEFAULT 1, created_at TEXT DEFAULT (datetime('now')));
-CREATE TABLE IF NOT EXISTS device_registry (id TEXT PRIMARY KEY, device_id TEXT UNIQUE NOT NULL, device_name TEXT, device_type TEXT, assigned_gate_id TEXT, assigned_to TEXT, last_seen TEXT, status TEXT DEFAULT 'active', created_at TEXT DEFAULT (datetime('now')));
-CREATE INDEX IF NOT EXISTS idx_logs_student ON gate_logs(student_id);
-CREATE INDEX IF NOT EXISTS idx_logs_timestamp ON gate_logs(timestamp);
-CREATE INDEX IF NOT EXISTS idx_logs_direction ON gate_logs(direction);
-CREATE INDEX IF NOT EXISTS idx_logs_gate ON gate_logs(gate_id);
-`);
-
-/* ------------------------------------------------------------------ *
- *  SEED
- * ------------------------------------------------------------------ */
-function hashPwd(p: string): string { return createHash("sha256").update(p).digest("hex"); }
-
-function seed() {
-  const cnt = (db.prepare("SELECT COUNT(*) as c FROM users").get() as any)?.c ?? 0;
-  if (cnt > 0) return;
-
-  for (const g of GATES) db.prepare(`INSERT INTO gates (id, name, location, type, is_active) VALUES (?,?,?,?,?)`).run(g.id, g.name, g.location, g.type, g.isActive ? 1 : 0);
-  for (const d of DEPARTMENTS) db.prepare(`INSERT INTO departments (id, code, name, hod) VALUES (?,?,?,?)`).run(d.code, d.code, d.name, d.hod);
-
-  const ph = hashPwd("1234");
-  const users: any[] = [
-    { id: "op-1", e: "OP001", n: "M. Ramu", m: "ramu@jntuhcej.ac.in", p: "9876543210", r: "operator", g: "gate-1", pin: "1234" },
-    { id: "op-2", e: "OP002", n: "S. Lakshmi", m: "lak@gmail.com", p: "9876543211", r: "operator", g: "gate-2", pin: "5678" },
-    { id: "op-3", e: "OP003", n: "V. Raju", m: "raju@gmail.com", p: "9876543212", r: "operator", g: "gate-3", pin: "9012" },
-    { id: "sv-1", e: "SV001", n: "K. Suresh", m: "suresh@gate.edu", p: "9876543213", r: "supervisor", g: "gate-1", pin: "3456" },
-    { id: "sv-2", e: "SV002", n: "P. Anjali", m: "anjali@gate.edu", p: "9876543214", r: "supervisor", g: "gate-2", pin: "7890" },
-    { id: "ad-1", e: "AD001", n: "Dr. G. Narsimha", m: "principal@jntg.edu", p: "9876543215", r: "admin", g: null, pin: null },
-    { id: "sa-1", e: "SA001", n: "IT Admin", m: "itadmin@jntg.edu", p: "9876543216", r: "sysadmin", g: null, pin: null },
-    { id: "pa-1", e: "PA001", n: "Mrs. K. Lakshmi", m: "lakshmi.parent@gmail.com", p: "9012345678", r: "parent", g: null, pin: null },
-    { id: "pa-2", e: "PA002", n: "Mr. R. Kumar", m: "kumar.parent@gmail.com", p: "9012345679", r: "parent", g: null, pin: null },
-  ];
-  const insU = db.prepare(`INSERT INTO users (id, employee_id, name, email, phone, password_hash, role, gate_id, pin) VALUES (?,?,?,?,?,?,?,?,?)`);
-  for (const u of users) insU.run(u.id, u.e, u.n, u.m, u.p, ph, u.r, u.g, u.pin);
-
-  // Students
-  const FM = ["Arjun", "Kiran", "Manoj", "Suresh", "Dinesh", "Ganesh", "Ramesh", "Phani", "Naresh", "Raj"];
-  const FF = ["Sneha", "Priya", "Rohan", "Anjali", "Kumar", "Sita", "Vijay", "Meena", "Lakshmi", "Devi"];
-  const LN = ["Kumar", "Reddy", "Rao", "Naidu", "Sarma", "Chowdary", "Prasad", "Devi", "Lakshmi", "Naik"];
-  const DC: DepartmentCode[] = ["CSE", "IT", "ECE", "EEE", "ME"];
-  const insS = db.prepare(`INSERT INTO students (id, roll, name, department, year, section, batch, photo, email, phone, parent_id, qr_code, id_valid_until, status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
-  for (let i = 0; i < 50; i++) {
-    const dept = DC[i % 5], yr = (i % 4) + 1, fn = (i % 2 === 0 ? FM : FF)[Math.floor(i / 2) % 10], ln = LN[i % 10];
-    const roll = `21${dept}${String(101 + i)}`;
-    const pid = i % 5 === 0 ? "pa-1" : i % 5 === 1 ? "pa-2" : null;
-    insS.run(`stu-${i + 1}`, roll, `${fn} ${ln}`, dept, yr, String.fromCharCode(65 + (i % 4)), "2021-2025", `https://i.pravatar.cc/150?u=${roll}`, `stu${i + 1}@jntuh.edu`, `98765${String(43000 + i)}`, pid, roll, "2027-06-30", "active");
-  }
-
-  // Seed scans
-  const students = db.prepare(`SELECT * FROM students`).all() as any[];
-  const ops = db.prepare(`SELECT * FROM users WHERE role='operator'`).all() as any[];
-  const reasons: ExitReason[] = ["Home Out", "Day Out", "Leave", "Regular"];
-  const now = Date.now();
-  const insL = db.prepare(`INSERT INTO gate_logs (id, student_id, roll, name, department, year, direction, reason, gate_id, gate_name, operator_id, operator_name, timestamp) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`);
-  for (let i = 0; i < 80; i++) {
-    const s = students[i % students.length]; const g = GATES[i % 2]; const op = ops[i % ops.length];
-    const dir: ScanDirection = i < 50 ? "IN" : "OUT";
-    const rsn = dir === "OUT" ? reasons[i % 4] : null;
-    const ts = new Date(now - (120 - i) * 60000).toISOString();
-    insL.run(`scan-seed-${i}`, s.id, s.roll, s.name, s.department, s.year, dir, rsn, g.id, g.name, op.id, op.name, ts);
-    const occ = db.prepare(`SELECT id FROM campus_occupancy WHERE student_id=?`).get(s.id);
-    if (occ) db.prepare(`UPDATE campus_occupancy SET current_status=?, last_gate_id=?, last_log_id=?, last_updated=? WHERE student_id=?`).run(dir, g.id, `scan-seed-${i}`, ts, s.id);
-    else db.prepare(`INSERT INTO campus_occupancy (id, student_id, current_status, last_gate_id, last_log_id, last_updated) VALUES (?,?,?,?,?,?)`).run(randomUUID(), s.id, dir, g.id, `scan-seed-${i}`, ts);
-  }
-
-  // Alert + pass
-  const od = students[4];
-  db.prepare(`INSERT INTO alerts (id, severity, title, message, gate_id, student_roll, timestamp, resolved) VALUES (?, 'critical', 'Overdue Student', ?, 'gate-1', ?, ?, 0)`)
-    .run(randomUUID(), `${od.name} (${od.roll}) left on Leave earlier and has NOT returned.`, od.roll, new Date(now - 30 * 60000).toISOString());
-  db.prepare(`INSERT INTO gate_passes (id, roll, student_name, department, reason, from_datetime, to_datetime, description, requested_by_id, requested_by_name, requested_at, parent_status, admin_status, final_status, qr_code) VALUES (?, ?, ?, ?, 'Leave', ?, ?, 'Doctor appointment', 'pa-1', 'R. Kumar', ?, 'APPROVED', 'APPROVED', 'EXPIRED', ?)`)
-    .run(`pass-seed-1`, od.roll, od.name, od.department, new Date(now - 6 * 3600000).toISOString(), new Date(now - 2 * 3600000).toISOString(), new Date(now - 8 * 3600000).toISOString(), randomUUID());
-}
 type Reason = ExitReason;
-seed();
 
 /* ------------------------------------------------------------------ *
  *  MAPPERS
  * ------------------------------------------------------------------ */
 function mStu(r: any): Student { return { id: r.id, roll: r.roll, name: r.name, department: r.department, year: r.year, section: r.section, batch: r.batch, photo: r.photo, email: r.email, phone: r.phone, parentName: r.parent_name, parentPhone: r.parent_phone, parentId: r.parent_id, qrCode: r.qr_code, idValidUntil: r.id_valid_until, status: r.status }; }
-function mUser(r: any): User { return { id: r.id, employeeId: r.employee_id, name: r.name, email: r.email, phone: r.phone, role: r.role, gateId: r.gate_id || undefined, pin: r.pin, parentId: r.parent_id || undefined }; }
+function mUser(r: any): User {
+  return {
+    id: r.id,
+    employeeId: r.employee_id,
+    name: r.name,
+    email: r.email,
+    phone: r.phone,
+    role: r.role,
+    gateId: r.gate_id || undefined,
+    pin: r.pin,
+    parentId: r.parent_id || undefined,
+    supervisedGates: r.supervised_gates || undefined,
+    assignedHostel: r.assigned_hostel || undefined,
+    isHod: r.is_hod || undefined,
+    departmentId: r.department_id || undefined,
+    canViewGender: r.can_view_gender || undefined,
+    status: r.status || "ACTIVE"
+  };
+}
 function mScan(r: any): Scan { return { id: r.id, roll: r.roll, name: r.name, department: r.department, year: r.year, direction: r.direction, reason: r.reason, gateId: r.gate_id, gateName: r.gate_name, operatorId: r.operator_id, operatorName: r.operator_name, timestamp: r.timestamp, isManual: !!r.is_manual, isCorrection: !!r.is_correction, originalScanId: r.original_scan_id || undefined }; }
 function mPass(r: any): GatePass { return { id: r.id, roll: r.roll, studentName: r.student_name, department: r.department, reason: r.reason, from: r.from_datetime, to: r.to_datetime, description: r.description, requestedById: r.requested_by_id, requestedByName: r.requested_by_name, requestedAt: r.requested_at, parentStatus: r.parent_status, adminStatus: r.admin_status, finalStatus: r.final_status, parentComment: r.parent_comment, adminComment: r.admin_comment, parentApproverId: r.parent_approver_id, adminApproverId: r.admin_approver_id, qrCode: r.qr_code }; }
 function mAlert(r: any): Alert { return { id: r.id, severity: r.severity, title: r.title, message: r.message, gateId: r.gate_id, studentRoll: r.student_roll, timestamp: r.timestamp, resolved: !!r.resolved }; }
 
-type StudentRow = ReturnType<typeof toStuAny>;
+export async function findPass(passId: string): Promise<GatePass | null> {
+  const { data, error } = await supabase
+    .from('gate_passes')
+    .select('*')
+    .eq('id', passId)
+    .single();
+
+  if (error || !data) {
+    console.error('Error finding pass:', error);
+    return null;
+  }
+
+  return mPass(data);
+}
+
+export async function approvePass(passId: string, role: string, comment: string = "", approverId: string): Promise<boolean> {
+  // Determine which status field to update based on role
+  const updateField = role === 'parent' ? 'parent_status' : 'admin_status';
+  const commentField = role === 'parent' ? 'parent_comment' : 'admin_comment';
+  const approverField = role === 'parent' ? 'parent_approver_id' : 'admin_approver_id';
+
+  const statusValue = 'APPROVED';
+
+  // First read the pass to compute new final_status
+  const { data: pass, error: readErr } = await supabase
+    .from('gate_passes')
+    .select('*')
+    .eq('id', passId)
+    .single();
+
+  if (readErr || !pass) {
+    console.error('Error reading pass for approval:', readErr);
+    return false;
+  }
+
+  const newParentStatus = role === 'parent' ? statusValue : pass.parent_status;
+  const newAdminStatus = role === 'admin' ? statusValue : pass.admin_status;
+  const finalStatus =
+    newParentStatus === 'APPROVED' && newAdminStatus === 'APPROVED'
+      ? 'APPROVED'
+      : newParentStatus === 'REJECTED' || newAdminStatus === 'REJECTED'
+      ? 'REJECTED'
+      : newParentStatus === 'APPROVED' || newAdminStatus === 'APPROVED'
+      ? (newParentStatus === 'APPROVED' ? 'APPROVED_PARENT' : 'APPROVED_ADMIN')
+      : 'PENDING';
+
+  const { error } = await supabase
+    .from('gate_passes')
+    .update({
+      [updateField]: statusValue,
+      [commentField]: comment,
+      [approverField]: approverId,
+      final_status: finalStatus,
+    })
+    .eq('id', passId);
+
+  if (error) {
+    console.error('Error approving pass:', error);
+    return false;
+  }
+
+  const { data: user } = await supabase.from('users').select('name').eq('id', approverId).single();
+  await addAudit({
+    action: `GATE_PASS_APPROVED_${role.toUpperCase()}`,
+    userId: approverId,
+    userName: user?.name ?? 'Unknown',
+    role,
+    details: `Approved gate pass ${passId}${comment ? ` — ${comment}` : ''}`,
+  });
+
+  // Notify student
+  const { data: stu } = await supabase.from('students').select('id, parent_id, name').eq('roll', pass.roll).single();
+  if (stu) {
+    await addNotification(
+      'student',
+      stu.id,
+      'gate_pass',
+      'Gate Pass Update',
+      `Your gate pass has been ${role === 'parent' ? 'approved by parent' : 'approved by admin'} (${finalStatus}).`
+    );
+    if (stu.parent_id) {
+      await addNotification(
+        'parent',
+        stu.parent_id,
+        'gate_pass',
+        'Gate Pass Update',
+        `Gate pass for ${stu.name} was ${role === 'parent' ? 'approved by parent' : 'approved by admin'}.`
+      );
+    }
+  }
+
+  return true;
+}
+
+export async function rejectPass(passId: string, role: string, comment: string = "", approverId?: string): Promise<boolean> {
+  const updateField = role === 'parent' ? 'parent_status' : 'admin_status';
+  const commentField = role === 'parent' ? 'parent_comment' : 'admin_comment';
+  const approverField = role === 'parent' ? 'parent_approver_id' : 'admin_approver_id';
+
+  const { error } = await supabase
+    .from('gate_passes')
+    .update({
+      [updateField]: 'REJECTED',
+      [commentField]: comment,
+      [approverField]: approverId,
+      final_status: 'REJECTED',
+    })
+    .eq('id', passId);
+
+  if (error) {
+    console.error('Error rejecting pass:', error);
+    return false;
+  }
+
+  if (approverId) {
+    const { data: user } = await supabase.from('users').select('name').eq('id', approverId).single();
+    await addAudit({
+      action: `GATE_PASS_REJECTED_${role.toUpperCase()}`,
+      userId: approverId,
+      userName: user?.name ?? 'Unknown',
+      role,
+      details: `Rejected gate pass ${passId} — ${comment}`,
+    });
+  }
+
+  return true;
+}
+
+export async function createGatePass(passData: {
+  roll: string;
+  reason: string;
+  from: string;
+  to: string;
+  description?: string;
+  requestedById?: string;
+  requestedByName?: string;
+}): Promise<GatePass | null> {
+  // Look up student for derived fields
+  const { data: stu, error: stuErr } = await supabase
+    .from('students')
+    .select('id, name, department, parent_id')
+    .eq('roll', passData.roll.trim().toUpperCase())
+    .single();
+
+  if (stuErr || !stu) {
+    console.error('Student not found for pass creation:', stuErr);
+    return null;
+  }
+
+  const id = `pass-${randomUUID()}`;
+  const qrPayload = JSON.stringify({ id, roll: passData.roll });
+
+  const { data, error } = await supabase
+    .from('gate_passes')
+    .insert([
+      {
+        id,
+        student_id: stu.id,
+        roll: passData.roll.toUpperCase(),
+        student_name: stu.name,
+        department: stu.department,
+        reason: passData.reason,
+        from_datetime: passData.from,
+        to_datetime: passData.to,
+        description: passData.description ?? null,
+        requested_by_id: passData.requestedById ?? null,
+        requested_by_name: passData.requestedByName ?? null,
+        parent_status: 'PENDING',
+        admin_status: 'PENDING',
+        final_status: 'PENDING',
+        qr_code: qrPayload,
+      },
+    ])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating gate pass:', error);
+    return null;
+  }
+
+  // Notify parent & admin
+  if (stu.parent_id) {
+    await addNotification(
+      'parent',
+      stu.parent_id,
+      'gate_pass',
+      'New Gate Pass Request',
+      `${stu.name} requested a gate pass (${passData.reason}) from ${passData.from} to ${passData.to}. Please review.`
+    );
+  }
+  await addNotification(
+    'admin',
+    'all',
+    'gate_pass',
+    'New Gate Pass Request',
+    `${stu.name} (${passData.roll}) requested a gate pass (${passData.reason}).`
+  );
+
+  return mPass(data);
+}
+
+export async function findGatePasses(filters: {
+  status?: string;
+  roll?: string;
+  parentId?: string;
+  studentId?: string;
+} = {}): Promise<GatePass[]> {
+  let query = supabase.from('gate_passes').select('*').order('requested_at', { ascending: false });
+
+  if (filters.status) {
+    query = query.eq('final_status', filters.status);
+  }
+  if (filters.roll) {
+    query = query.eq('roll', filters.roll.toUpperCase());
+  }
+  if (filters.parentId) {
+    // Filter by parent of the student
+    const { data: stu } = await supabase.from('students').select('id').eq('parent_id', filters.parentId);
+    const ids = (stu ?? []).map((s: any) => s.id);
+    if (ids.length === 0) return [];
+    query = query.in('student_id', ids);
+  }
+  if (filters.studentId) {
+    query = query.eq('student_id', filters.studentId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('Error finding gate passes:', error);
+    return [];
+  }
+
+  return (data ?? []).map(mPass);
+}
+
+export async function correctionCandidates(): Promise<Scan[]> {
+  // Eligible for correction: scans within the last hour, not already corrected
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+
+  const { data, error } = await supabase
+    .from('gate_logs')
+    .select('*')
+    .gte('timestamp', oneHourAgo)
+    .eq('is_correction', false)
+    .order('timestamp', { ascending: false })
+    .limit(100);
+
+  if (error) {
+    console.error('Error loading correction candidates:', error);
+    return [];
+  }
+
+  return (data ?? []).map(mScan);
+}
+
+export async function correctScan(originalScanId: string, newDirection: ScanDirection, newReason: ExitReason | undefined, reason: string, userId: string, userName: string, role: string): Promise<Scan | null> {
+  // 1. Read the original scan
+  const { data: original, error: readErr } = await supabase
+    .from('gate_logs')
+    .select('*')
+    .eq('id', originalScanId)
+    .single();
+
+  if (readErr || !original) {
+    console.error('Original scan not found:', readErr);
+    return null;
+  }
+
+  // 2. Reject corrections outside 1-hour window
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  if (original.timestamp < oneHourAgo) {
+    console.warn('Scan outside correction window');
+    return null;
+  }
+
+  // 3. Insert a NEW scan row that supersedes the original
+  const newId = `scan-${randomUUID()}`;
+  const ts = new Date().toISOString();
+  const { data: newScan, error: insErr } = await supabase
+    .from('gate_logs')
+    .insert([
+      {
+        id: newId,
+        student_id: original.student_id,
+        roll: original.roll,
+        name: original.name,
+        department: original.department,
+        year: original.year,
+        direction: newDirection,
+        reason: newReason ?? null,
+        gate_id: original.gate_id,
+        gate_name: original.gate_name,
+        operator_id: userId,
+        operator_name: userName,
+        timestamp: ts,
+        is_manual: 1,
+        is_correction: true,
+        original_scan_id: originalScanId,
+        correction_reason: reason,
+      },
+    ])
+    .select()
+    .single();
+
+  if (insErr || !newScan) {
+    console.error('Error inserting corrected scan:', insErr);
+    return null;
+  }
+
+  // 4. Update campus_occupancy to reflect the new direction
+  if (original.student_id) {
+    await supabase.from('campus_occupancy').upsert(
+      {
+        student_id: original.student_id,
+        current_status: newDirection,
+        last_gate_id: original.gate_id,
+        last_log_id: newId,
+        last_updated: ts,
+      },
+      { onConflict: 'student_id' }
+    );
+  }
+
+  // 5. Audit
+  await addAudit({
+    action: 'SCAN_CORRECTED',
+    userId,
+    userName,
+    role,
+    details: `Corrected scan ${originalScanId} (${original.direction} → ${newDirection}). Reason: ${reason}`,
+    gateId: original.gate_id,
+  });
+
+  return mScan(newScan);
+}
+
+export async function getAllGatesLive(): Promise<Gate[]> {
+  // Combine persisted gates + activity counts from today's scans
+  const gates = await findAllGates();
+  const today = await scansToday();
+
+  return gates.map((g) => ({
+    ...g,
+    // The Gate type from `findAllGates` doesn't include these, but the route extends it
+    currentScanCount: today.filter((s) => s.gateId === g.id).length,
+    lastScan: today.find((s) => s.gateId === g.id) ?? null,
+  })) as any;
+}
+
+export async function getAlerts(resolved?: boolean): Promise<Alert[]> {
+  let query = supabase.from('alerts').select('*').order('timestamp', { ascending: false });
+  if (resolved !== undefined) {
+    query = query.eq('resolved', resolved);
+  }
+  const { data, error } = await query;
+  if (error) {
+    console.error('Error loading alerts:', error);
+    return [];
+  }
+  return (data ?? []).map(mAlert);
+}
+
+export async function getNotifications(recipientType: string, recipientId: string): Promise<Alert[]> {
+  // 'all' is a wildcard (e.g. for admin broadcast)
+  let query = supabase
+    .from('notifications')
+    .select('*')
+    .eq('recipient_type', recipientType)
+    .order('created_at', { ascending: false })
+    .limit(50);
+
+  if (recipientId !== 'all') {
+    query = query.eq('recipient_id', recipientId);
+  }
+
+  const { data, error } = await query;
+  if (error) {
+    console.error('Error loading notifications:', error);
+    return [];
+  }
+  // Re-map to Alert shape (notifications table has no severity/gate/student_roll — use defaults)
+  return (data ?? []).map((n: any) => ({
+    id: n.id,
+    severity: 'info' as AlertSeverity,
+    title: n.title,
+    message: n.message,
+    gateId: undefined,
+    studentRoll: undefined,
+    timestamp: n.created_at,
+    resolved: !!n.read,
+  }));
+}
+
+export async function getUserForSession(sessionId: string): Promise<User | null> {
+  const { data, error } = await supabase
+    .from('sessions')
+    .select('users(*)')
+    .eq('id', sessionId)
+    .eq('active', true)
+    .single();
+
+  if (error || !data) {
+    console.error('Error loading session user:', error);
+    return null;
+  }
+  return data.users ? mUser(data.users) : null;
+}
+
+export async function createSession(userId: string, token: string, refreshToken: string): Promise<string | null> {
+  const id = `sess-${randomUUID()}`;
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
+  const { error } = await supabase.from('sessions').insert([
+    {
+      id,
+      user_id: userId,
+      token,
+      refresh_token: refreshToken,
+      active: true,
+      expires_at: expiresAt,
+      created_at: new Date().toISOString(),
+    },
+  ]);
+
+  if (error) {
+    console.error('Error creating session:', error);
+    return null;
+  }
+  return id;
+}
+
+export async function invalidateSession(sessionId: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('sessions')
+    .update({ active: false, invalidated_at: new Date().toISOString() })
+    .eq('id', sessionId);
+
+  if (error) {
+    console.error('Error invalidating session:', error);
+    return false;
+  }
+  return true;
+}
+
 function toStuAny(r: any) { return r; }
 
 /* ------------------------------------------------------------------ *
  *  PUBLIC API — STUDENTS
  * ------------------------------------------------------------------ */
-function toStu(r: any): Student { return { id: String(r.id), roll: r.roll, name: r.name, department: r.department as DepartmentCode, year: r.year, section: r.section, batch: r.batch, photo: r.photo, email: r.email, phone: r.phone, parentName: r.parent_name, parentPhone: r.parent_phone, parentId: r.parent_id, qrCode: r.qr_code, idValidUntil: r.id_valid_until, status: r.status }; }
+export async function findStudentByRoll(rollNum: string): Promise<Student | null> {
+  const { data, error } = await supabase
+    .from('students')
+    .select('*')
+    .eq('roll', rollNum.trim().toUpperCase())
+    .single();
 
-export function findStudentByRoll(rollNum: string): Student | null {
-  const row = db.prepare(`SELECT * FROM students WHERE roll = ?`).get(rollNum.trim().toUpperCase());
-  return row ? toStu(row) : null;
+  if (error) {
+    console.error('Error finding student by roll:', error);
+    return null;
+  }
+
+  return data ? mStu(data) : null;
 }
 
-export function findAllStudents(): Student[] { return (db.prepare(`SELECT * FROM students ORDER BY roll`).all() as any[]).map(toStu); }
-export function searchStudents(q: string): Student[] {
+export async function findAllStudents(): Promise<Student[]> {
+  const { data, error } = await supabase
+    .from('students')
+    .select('*')
+    .order('roll');
+
+  if (error) {
+    console.error('Error finding all students:', error);
+    return [];
+  }
+
+  return data.map(mStu);
+}
+
+export async function searchStudents(q: string): Promise<Student[]> {
   const s = `%${q.toLowerCase()}%`;
-  return (db.prepare(`SELECT * FROM students WHERE LOWER(roll) LIKE ? OR LOWER(name) LIKE ? OR LOWER(department) LIKE ? LIMIT 20`).all(s, s, s) as any[]).map(toStu);
+  const { data, error } = await supabase
+    .from('students')
+    .select('*')
+    .or(`roll.ilike.${s},name.ilike.${s},department.ilike.${s}`)
+    .limit(20);
+
+  if (error) {
+    console.error('Error searching students:', error);
+    return [];
+  }
+
+  return data.map(mStu);
 }
-export function findByQr(payload: string): Student | null { return findStudentByRoll(payload.trim().toUpperCase().replace(/\s+/g, "")); }
-export function getStudentByRoll(rollNum: string): Student | null { return findStudentByRoll(rollNum); }
+export async function findByQr(payload: string): Promise<Student | null> { return findStudentByRoll(payload.trim().toUpperCase().replace(/\s+/g, "")); }
+export async function getStudentByRoll(rollNum: string): Promise<Student | null> { return findStudentByRoll(rollNum); }
 
 /* ------------------------------------------------------------------ *
  *  PUBLIC API — GATES
  * ------------------------------------------------------------------ */
-export function findGateById(id: string): Gate | null { const r = db.prepare(`SELECT * FROM gates WHERE id = ?`).get(id) as any; return r ? { id: r.id, name: r.name, location: r.location, type: r.type, isActive: !!r.is_active } : null; }
-export function findAllGates(): Gate[] { return (db.prepare(`SELECT * FROM gates`).all() as any[]).map((r) => ({ id: r.id, name: r.name, location: r.location, type: r.type, isActive: !!r.is_active })); }
+export async function findGateById(id: string): Promise<Gate | null> {
+  const { data, error } = await supabase
+    .from('gates')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.error('Error finding gate by id:', error);
+    return null;
+  }
+
+  return data ? { id: data.id, name: data.name, location: data.location, type: data.type, isActive: !!data.is_active } : null;
+}
+
+export async function findAllGates(): Promise<Gate[]> {
+  const { data, error } = await supabase
+    .from('gates')
+    .select('*');
+
+  if (error) {
+    console.error('Error finding all gates:', error);
+    return [];
+  }
+
+  return data.map((r) => ({ id: r.id, name: r.name, location: r.location, type: r.type, isActive: !!r.is_active }));
+}
 
 /* ------------------------------------------------------------------ *
  *  PUBLIC API — USERS & AUTH
  * ------------------------------------------------------------------ */
-export function findUserById(id: string): User | null { const r = db.prepare(`SELECT * FROM users WHERE id = ?`).get(id); return r ? mUser(r) : null; }
-export function findUserByLogin(login: string): User | null { const r = db.prepare(`SELECT * FROM users WHERE employee_id = ? OR email = ? OR name = ?`).get(login.trim(), login.trim(), login.trim()); return r ? mUser(r) : null; }
-export function verifyLogin(login: string, password: string): User | null { const u = findUserByLogin(login); if (!u) return null; const r = db.prepare(`SELECT password_hash FROM users WHERE id = ?`).get(u.id) as any; if (!r) return null; if (r.password_hash !== hashPwd(password)) return null; return u; }
-export function verifyPin(userId: string, pin: string): boolean { const r = db.prepare(`SELECT pin FROM users WHERE id = ?`).get(userId) as any; return !!r && r.pin === pin; }
+/**
+ * Find all users in the system
+ * @returns Array of User objects
+ */
+export async function findAllUsers(): Promise<User[]> {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .order('name');
+
+  if (error) {
+    console.error('Error finding all users:', error);
+    return [];
+  }
+
+  return data.map(mUser);
+}
+
+/**
+ * Create a new user
+ * @param userData - User data to create
+ * @returns Created User object or null if failed
+ */
+export async function createUser(userData: {
+  name: string;
+  email: string;
+  role: Role;
+  status?: AccountStatus;
+}): Promise<User | null> {
+  const id = `user-${randomUUID()}`;
+  const { name, email, role, status = 'ACTIVE' } = userData;
+
+  // Hash a default password (should be changed by admin)
+  const defaultPassword = randomUUID().replace(/-/g, "").substring(0, 12);
+  const passwordHash = await bcrypt.hash(defaultPassword, 10);
+
+  const { data, error } = await supabase
+    .from('users')
+    .insert([
+      {
+        id,
+        name,
+        email,
+        role,
+        status,
+        password_hash: passwordHash,
+        created_at: new Date().toISOString(),
+      },
+    ])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating user:', error);
+    return null;
+  }
+
+  // Audit the user creation
+  await addAudit({
+    action: 'USER_CREATED',
+    userId: 'system', // This is a system action
+    userName: 'System',
+    role: 'system',
+    details: `Created new user ${id} with role ${role}`,
+  });
+
+  return data ? mUser(data) : null;
+}
+
+export async function findUserById(id: string): Promise<User | null> {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.error('Error finding user by id:', error);
+    return null;
+  }
+
+  return data ? mUser(data) : null;
+}
+
+export async function findUserByLogin(login: string): Promise<User | null> {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .or(`employee_id.eq.${login.trim()},email.eq.${login.trim()},name.eq.${login.trim()}`)
+    .eq('status', 'ACTIVE') // Only return ACTIVE users by default
+    .single();
+
+  if (error) {
+    console.error('Error finding user by login:', error);
+    return null;
+  }
+
+  return data ? mUser(data) : null;
+}
+
+export async function verifyLogin(login: string, password: string): Promise<User | null> {
+  const user = await findUserByLogin(login);
+  if (!user) return null;
+
+  // Check account status - only ACTIVE users can authenticate
+  if (user.status !== "ACTIVE") {
+    console.warn(`Login attempt for non-ACTIVE account: ${login}, status: ${user.status}`);
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from('users')
+    .select('password_hash')
+    .eq('id', user.id)
+    .single();
+
+  if (error || !data) {
+    console.error('Error verifying login:', error);
+    return null;
+  }
+
+  const isMatch = await bcrypt.compare(password, data.password_hash);
+  return isMatch ? user : null;
+}
+
+export async function verifyPin(userId: string, pin: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('users')
+    .select('pin_hash') // Store hashed PINs instead of plain text
+    .eq('id', userId)
+    .single();
+
+  if (error || !data) {
+    console.error('Error verifying pin:', error);
+    return false;
+  }
+
+  // If there's no pin_hash but there's a pin (migration case), compare directly
+  if (!data.pin_hash && (data as any).pin) {
+    return (data as any).pin === pin;
+  }
+
+  // If no pin is set, return false
+  if (!data.pin_hash) {
+    return false;
+  }
+
+  return await bcrypt.compare(pin, data.pin_hash);
+}
+
+// Helper function to hash PINs
+export async function hashPin(pin: string): Promise<string> {
+  return await bcrypt.hash(pin, 10);
+}
+
+/**
+ * Update user account status and revoke all active sessions
+ * @param userId - The user ID to update
+ * @param newStatus - The new account status
+ * @returns true if successful, false otherwise
+ */
+export async function updateAccountStatus(userId: string, newStatus: AccountStatus): Promise<boolean> {
+  // First, get the user's current status and name for audit logging
+  const { data: userData, error: userError } = await supabase
+    .from('users')
+    .select('status, name')
+    .eq('id', userId)
+    .single();
+
+  if (userError || !userData) {
+    console.error('Error fetching user for status update:', userError);
+    return false;
+  }
+
+  // Update the user's status
+  const { error: updateError } = await supabase
+    .from('users')
+    .update({ status: newStatus })
+    .eq('id', userId);
+
+  if (updateError) {
+    console.error('Error updating user status:', updateError);
+    return false;
+  }
+
+  // If the status is not ACTIVE, revoke all active sessions
+  if (newStatus !== "ACTIVE") {
+    const { error: sessionError } = await supabase
+      .from('sessions')
+      .update({ active: false, invalidated_at: new Date().toISOString() })
+      .eq('user_id', userId)
+      .eq('active', true);
+
+    if (sessionError) {
+      console.error('Error revoking sessions for user:', sessionError);
+      // Don't return false here - the status was updated, just sessions failed
+    }
+  }
+
+  // Audit the status change
+  await addAudit({
+    action: 'ACCOUNT_STATUS_CHANGED',
+    userId: 'system', // This is a system action
+    userName: 'System',
+    role: 'system',
+    details: `Changed account status for ${userId} from ${userData.status} to ${newStatus}`,
+  });
+
+  return true;
+}
+
+/**
+ * Update user role and revoke all active sessions
+ * @param userId - The user ID to update
+ * @param newRole - The new role to assign
+ * @param actorId - The ID of the user making the change (for audit logging)
+ * @returns true if successful, false otherwise
+ */
+export async function updateUserRole(userId: string, newRole: Role, actorId: string): Promise<boolean> {
+  // First, get the user's current role and name for audit logging
+  const { data: userData, error: userError } = await supabase
+    .from('users')
+    .select('role, name')
+    .eq('id', userId)
+    .single();
+
+  if (userError || !userData) {
+    console.error('Error fetching user for role update:', userError);
+    return false;
+  }
+
+  // Update the user's role
+  const { error: updateError } = await supabase
+    .from('users')
+    .update({ role: newRole })
+    .eq('id', userId);
+
+  if (updateError) {
+    console.error('Error updating user role:', updateError);
+    return false;
+  }
+
+  // Revoke all active sessions for the user
+  const { error: sessionError } = await supabase
+    .from('sessions')
+    .update({ active: false, invalidated_at: new Date().toISOString() })
+    .eq('user_id', userId)
+    .eq('active', true);
+
+  if (sessionError) {
+    console.error('Error revoking sessions for user:', sessionError);
+    // Don't return false here - the role was updated, just sessions failed
+  }
+
+  // Get the actor's name for audit logging
+  const { data: actorData } = await supabase
+    .from('users')
+    .select('name')
+    .eq('id', actorId)
+    .single();
+
+  // Audit the role change
+  await addAudit({
+    action: 'ROLE_CHANGED',
+    userId: actorId,
+    userName: actorData?.name ?? 'Unknown',
+    role: 'admin', // This should be the actor's role, but we'll use admin for now
+    details: `Changed role for ${userId} from ${userData.role} to ${newRole}`,
+  });
+
+  return true;
+}
+
+/**
+ * Revoke all active sessions for a user
+ * @param userId - The user ID to revoke sessions for
+ * @returns true if successful, false otherwise
+ */
+export async function revokeAllSessions(userId: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('sessions')
+    .update({ active: false, invalidated_at: new Date().toISOString() })
+    .eq('user_id', userId)
+    .eq('active', true);
+
+  if (error) {
+    console.error('Error revoking all sessions for user:', error);
+    return false;
+  }
+
+  // Audit the session revocation
+  await addAudit({
+    action: 'ALL_SESSIONS_REVOKED',
+    userId: 'system', // This is a system action
+    userName: 'System',
+    role: 'system',
+    details: `Revoked all active sessions for user ${userId}`,
+  });
+
+  return true;
+}
 
 /* ------------------------------------------------------------------ *
  *  PUBLIC API — SCANS
  * ------------------------------------------------------------------ */
-export function lastScanFor(roll: string): Scan | null { const r = db.prepare(`SELECT * FROM gate_logs WHERE roll = ? ORDER BY timestamp DESC LIMIT 1`).get(roll); return r ? mScan(r) : null; }
-export function scansToday(): Scan[] { const t = new Date().toISOString().slice(0, 10); return (db.prepare(`SELECT * FROM gate_logs ORDER BY timestamp DESC`).all() as any[]).filter((r) => r.timestamp.slice(0, 10) === t).map(mScan); }
-export function studentsInside(): Student[] { return (db.prepare(`SELECT s.* FROM campus_occupancy co JOIN students s ON s.id = co.student_id WHERE co.current_status = 'IN'`).all() as any[]).map(toStu); }
-export function campusCount(): number { return (db.prepare(`SELECT COUNT(*) as c FROM campus_occupancy WHERE current_status='IN'`).get() as any).c; }
-export function isDuplicate(roll: string, direction: ScanDirection, min = 5): boolean { const cutoff = new Date(Date.now() - min * 60000).toISOString(); return !!db.prepare(`SELECT id FROM gate_logs WHERE roll=? AND direction=? AND timestamp>? LIMIT 1`).get(roll, direction, cutoff); }
-export function inferDirection(roll: string): ScanDirection { const l = lastScanFor(roll); return l ? (l.direction === "IN" ? "OUT" : "IN") : "IN"; }
+export async function lastScanFor(roll: string): Promise<Scan | null> {
+  const { data, error } = await supabase
+    .from('gate_logs')
+    .select('*')
+    .eq('roll', roll)
+    .order('timestamp', { ascending: false })
+    .limit(1)
+    .single();
 
-export function addScan(input: { roll: string; direction: ScanDirection; reason?: ExitReason; gateId: string; operatorId: string; isManual?: boolean; timestamp?: string; }): { scan: Scan; duplicate: boolean } {
-  const stu = findStudentByRoll(input.roll);
+  if (error) {
+    console.error('Error getting last scan for roll:', error);
+    return null;
+  }
+
+  return data ? mScan(data) : null;
+}
+
+export async function scansToday(): Promise<Scan[]> {
+  const t = new Date().toISOString().slice(0, 10);
+  const { data, error } = await supabase
+    .from('gate_logs')
+    .select('*')
+    .gte('timestamp', `${t}T00:00:00.000Z`)
+    .lte('timestamp', `${t}T23:59:59.999Z`)
+    .order('timestamp', { ascending: false });
+
+  if (error) {
+    console.error('Error getting scans for today:', error);
+    return [];
+  }
+
+  return data.map(mScan);
+}
+export async function studentsInside(): Promise<Student[]> {
+  const { data, error } = await supabase
+    .from('campus_occupancy')
+    .select('students(*)')
+    .eq('current_status', 'IN');
+
+  if (error) {
+    console.error('Error getting students inside:', error);
+    return [];
+  }
+
+  return data.map((d: any) => mStu(d.students));
+}
+
+export async function campusCount(): Promise<number> {
+  const { count, error } = await supabase
+    .from('campus_occupancy')
+    .select('*', { count: 'exact', head: true })
+    .eq('current_status', 'IN');
+
+  if (error) {
+    console.error('Error getting campus count:', error);
+    return 0;
+  }
+
+  return count || 0;
+}
+
+export async function isDuplicate(roll: string, direction: ScanDirection, min = 5): Promise<boolean> {
+  const cutoff = new Date(Date.now() - min * 60000).toISOString();
+  const { data, error } = await supabase
+    .from('gate_logs')
+    .select('id')
+    .eq('roll', roll)
+    .eq('direction', direction)
+    .gte('timestamp', cutoff)
+    .limit(1)
+    .single();
+
+  if (error) {
+    // Ignore error if it's because no rows were found
+    if (error.code === 'PGRST116') {
+      return false;
+    }
+    console.error('Error checking for duplicate scan:', error);
+  }
+
+  return !!data;
+}
+
+export async function inferDirection(roll: string): Promise<ScanDirection> {
+  const l = await lastScanFor(roll);
+  return l ? (l.direction === "IN" ? "OUT" : "IN") : "IN";
+}
+
+export async function addScan(input: {
+  roll: string;
+  direction: ScanDirection;
+  reason?: ExitReason;
+  gateId: string;
+  operatorId: string;
+  isManual?: boolean;
+  timestamp?: string;
+}): Promise<{ scan: Scan | null; duplicate: boolean }> {
+  const stu = await findStudentByRoll(input.roll);
   if (!stu) throw new Error("STUDENT_NOT_FOUND");
-  if (isDuplicate(input.roll, input.direction)) return { scan: null as any, duplicate: true };
-  const gate = findGateById(input.gateId) ?? GATES[0];
-  const op = findUserById(input.operatorId) ?? { id: "op-1", name: "M. Ramu", role: "operator" as const };
+
+  if (await isDuplicate(input.roll, input.direction)) {
+    return { scan: null, duplicate: true };
+  }
+
+  const gate = (await findGateById(input.gateId)) ?? GATES[0];
+  const op = (await findUserById(input.operatorId)) ?? { id: "op-1", name: "M. Ramu", role: "operator" as const };
   const ts = input.timestamp ?? new Date().toISOString();
   const id = `scan-${randomUUID()}`;
-  db.prepare(`INSERT INTO gate_logs (id, student_id, roll, name, department, year, direction, reason, gate_id, gate_name, operator_id, operator_name, timestamp, is_manual) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(id, stu.id, stu.roll, stu.name, stu.department, stu.year, input.direction, input.reason ?? null, gate.id, gate.name, op.id, op.name, ts, input.isManual ? 1 : 0);
-  const occ = db.prepare(`SELECT id FROM campus_occupancy WHERE student_id=?`).get(stu.id);
-  if (occ) db.prepare(`UPDATE campus_occupancy SET current_status=?, last_gate_id=?, last_log_id=?, last_updated=? WHERE student_id=?`).run(input.direction, gate.id, id, ts, stu.id);
-  else db.prepare(`INSERT INTO campus_occupancy (id, student_id, current_status, last_gate_id, last_log_id, last_updated) VALUES (?,?,?,?,?,?)`).run(randomUUID(), stu.id, input.direction, gate.id, id, ts);
-  addAudit({ action: "SCAN_CREATED", userId: op.id, userName: op.name, role: op.role, details: `${input.direction} ${stu.name} (${stu.roll}) at ${gate.name}`, gateId: gate.id });
-  addNotification("parent", stu.parentId ?? "pa-1", "gate_entry", "Gate Entry", `${stu.name} (${stu.roll}) ${input.direction === "IN" ? "entered" : "exited"} campus at ${new Date(ts).toLocaleTimeString()} via ${gate.name}`);
-  return { scan: mScan({ id, roll: stu.roll, name: stu.name, department: stu.department, year: stu.year, direction: input.direction, reason: input.reason, gate_id: gate.id, gate_name: gate.name, operator_id: op.id, operator_name: op.name, timestamp: ts, is_manual: input.isManual ? 1 : 0 }), duplicate: false };
+
+  const { data, error } = await supabase
+    .from('gate_logs')
+    .insert([
+      {
+        id,
+        student_id: stu.id,
+        roll: stu.roll,
+        name: stu.name,
+        department: stu.department,
+        year: stu.year,
+        direction: input.direction,
+        reason: input.reason ?? null,
+        gate_id: gate.id,
+        gate_name: gate.name,
+        operator_id: op.id,
+        operator_name: op.name,
+        timestamp: ts,
+        is_manual: input.isManual ? 1 : 0,
+      },
+    ])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error adding scan:', error);
+    return { scan: null, duplicate: false };
+  }
+
+  // Upsert into campus_occupancy
+  const { error: occError } = await supabase.from('campus_occupancy').upsert(
+    {
+      student_id: stu.id,
+      current_status: input.direction,
+      last_gate_id: gate.id,
+      last_log_id: id,
+      last_updated: ts,
+    },
+    { onConflict: 'student_id' }
+  );
+
+  if (occError) {
+    console.error('Error updating campus occupancy:', occError);
+    // Don't fail the whole operation, just log the error
+  }
+
+  await addAudit({
+    action: "SCAN_CREATED",
+    userId: op.id,
+    userName: op.name,
+    role: op.role as Role,
+    details: `${input.direction} ${stu.name} (${stu.roll}) at ${gate.name}`,
+    gateId: gate.id,
+  });
+
+  await addNotification(
+    "parent",
+    stu.parentId ?? "pa-1",
+    "gate_entry",
+    "Gate Entry",
+    `${stu.name} (${stu.roll}) ${
+      input.direction === "IN" ? "entered" : "exited"
+    } campus at ${new Date(ts).toLocaleTimeString()} via ${gate.name}`
+  );
+
+  return { scan: mScan(data), duplicate: false };
 }
 
-export function getAllLogs(f?: { gateId?: string; date?: string; direction?: string; reason?: string; search?: string; page?: number; limit?: number }) {
-  let w: string[] = []; let p: any[] = [];
-  if (f?.gateId) { w.push("gate_id = ?"); p.push(f.gateId); }
-  if (f?.date) { w.push("date(timestamp) = ?"); p.push(f.date); }
-  if (f?.direction) { w.push("direction = ?"); p.push(f.direction); }
-  if (f?.reason) { w.push("reason = ?"); p.push(f.reason); }
-  if (f?.search) { w.push("(LOWER(roll) LIKE ? OR LOWER(name) LIKE ?)"); const s = `%${f.search.toLowerCase()}%`; p.push(s, s); }
-  const wc = w.length ? `WHERE ${w.join(" AND ")}` : "";
-  const total = (db.prepare(`SELECT COUNT(*) as c FROM gate_logs ${wc}`).get(...p) as any).c;
-  const page = f?.page || 1; const limit = f?.limit || 50;
-  const rows = db.prepare(`SELECT * FROM gate_logs ${wc} ORDER BY timestamp DESC LIMIT ? OFFSET ?`).all(...p, limit, (page - 1) * limit) as any[];
-  return { items: rows.map(mScan), total, page, limit, totalPages: Math.ceil(total / limit) };
+export async function getAllLogs(f?: {
+  gateId?: string;
+  date?: string;
+  from?: string;
+  to?: string;
+  direction?: string;
+  reason?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+}) {
+  let query = supabase.from('gate_logs').select('*', { count: 'exact' });
+
+  if (f?.gateId) {
+    query = query.eq('gate_id', f.gateId);
+  }
+  if (f?.date) {
+    query = query.gte('timestamp', `${f.date}T00:00:00.000Z`);
+    query = query.lte('timestamp', `${f.date}T23:59:59.999Z`);
+  } else {
+    if (f?.from) {
+      query = query.gte('timestamp', `${f.from}T00:00:00.000Z`);
+    }
+    if (f?.to) {
+      query = query.lte('timestamp', `${f.to}T23:59:59.999Z`);
+    }
+  }
+  if (f?.direction) {
+    query = query.eq('direction', f.direction);
+  }
+  if (f?.reason) {
+    query = query.eq('reason', f.reason);
+  }
+  if (f?.search) {
+    const s = `%${f.search.toLowerCase()}%`;
+    query = query.or(`roll.ilike.${s},name.ilike.${s}`);
+  }
+
+  const page = f?.page || 1;
+  const limit = f?.limit || 50;
+  const offset = (page - 1) * limit;
+
+  query = query.range(offset, offset + limit - 1).order('timestamp', { ascending: false });
+
+  const { data, error, count } = await query;
+
+  if (error) {
+    console.error('Error getting all logs:', error);
+    return { items: [], total: 0, page, limit, totalPages: 0 };
+  }
+
+  const total = count || 0;
+  return {
+    items: data.map(mScan),
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
 }
 
-export function correctionCandidates(): Scan[] { const cutoff = new Date(Date.now() - 3600000).toISOString(); return (db.prepare(`SELECT * FROM gate_logs WHERE timestamp > ? ORDER BY timestamp DESC LIMIT 30`).all(cutoff) as any[]).map(mScan); }
 
-export function correctScan(logId: string, newDirection: ScanDirection, newReason: ExitReason | undefined, reason: string, userId: string, userName: string, role: string): Scan | null {
-  const ex = db.prepare(`SELECT * FROM gate_logs WHERE id=?`).get(logId) as any; if (!ex) return null;
-  if (Date.now() - new Date(ex.timestamp).getTime() > 3600000) throw new Error("CORRECTION_WINDOW_EXPIRED");
-  db.prepare(`UPDATE gate_logs SET direction=?, reason=?, is_correction=1 WHERE id=?`).run(newDirection, newReason ?? null, logId);
-  db.prepare(`UPDATE campus_occupancy SET current_status=?, last_updated=? WHERE student_id=?`).run(newDirection, new Date().toISOString(), ex.student_id);
-  addAudit({ action: "CORRECTION", userId, userName, role, details: `Corrected scan ${logId}: ${ex.direction}->${newDirection}. ${reason}`, gateId: ex.gate_id });
-  const row = db.prepare(`SELECT * FROM gate_logs WHERE id=?`).get(logId); return row ? mScan(row) : null;
-}
+async function addAudit(input: {
+  action: string;
+  userId: string;
+  userName: string;
+  role: string;
+  details: string;
+  gateId?: string;
+}) {
+  const { error } = await supabase.from('audit_logs').insert([
+    {
+      action: input.action,
+      user_id: input.userId,
+      user_name: input.userName,
+      role: input.role,
+      details: input.details,
+      gate_id: input.gateId,
+    },
+  ]);
 
-function addAudit(input: { action: string; userId: string; userName: string; role: string; details: string; gateId?: string }) {
-  db.prepare(`INSERT INTO audit_logs (id, action, user_id, user_name, role, timestamp, details, gate_id) VALUES (?,?,?,?,?,?,?,?)`).run(randomUUID(), input.action, input.userId, input.userName, input.role, new Date().toISOString(), input.details, input.gateId ?? null);
+  if (error) {
+    console.error('Error adding audit log:', error);
+  }
 }
-export function auditLogs(params?: { userId?: string; action?: string; page?: number; limit?: number }) {
-  let w: string[] = []; let p: any[] = [];
-  if (params?.userId) { w.push("user_id = ?"); p.push(params.userId); }
-  if (params?.action) { w.push("action = ?"); p.push(params.action); }
-  const wc = w.length ? `WHERE ${w.join(" AND ")}` : "";
-  const limit = params?.limit || 50; const page = params?.page || 1;
-  const total = (db.prepare(`SELECT COUNT(*) as c FROM audit_logs ${wc}`).get(...p) as any).c;
-  const rows = db.prepare(`SELECT * FROM audit_logs ${wc} ORDER BY timestamp DESC LIMIT ? OFFSET ?`).all(...p, limit, (page - 1) * limit) as any[];
-  return { items: rows.map((r) => ({ id: r.id, action: r.action, userId: r.user_id, userName: r.user_name, role: r.role, timestamp: r.timestamp, details: r.details, gateId: r.gate_id })), total, page, limit, totalPages: Math.ceil(total / limit) };
-}
-
-/* ------------------------------------------------------------------ *
- *  GATE PASSES
- * ------------------------------------------------------------------ */
-export function createGatePass(input: { roll: string; reason: ExitReason; from: string; to: string; description?: string; requestedById: string; requestedByName: string }): GatePass | null {
-  const s = findStudentByRoll(input.roll); if (!s) return null;
-  const id = `pass-${randomUUID()}`;
-  const pid = s.parentId ? "PENDING" : "APPROVED";
-  const fid = s.parentId ? "PENDING" : "APPROVED_PARENT";
-  db.prepare(`INSERT INTO gate_passes (id, roll, student_name, department, reason, from_datetime, to_datetime, description, requested_by_id, requested_by_name, requested_at, parent_status, admin_status, final_status, qr_code) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(id, s.roll, s.name, s.department, input.reason, input.from, input.to, input.description ?? null, input.requestedById, input.requestedByName, new Date().toISOString(), pid, "PENDING", fid, randomUUID());
-  return findPass(id);
-}
-
-export function findGatePasses(filters?: { status?: string; roll?: string; parentId?: string }): GatePass[] {
-  let w: string[] = []; let p: any[] = [];
-  if (filters?.status) { w.push("final_status = ?"); p.push(filters.status); }
-  if (filters?.roll) { w.push("roll = ?"); p.push(filters.roll); }
-  if (filters?.parentId) { w.push("roll IN (SELECT roll FROM students WHERE parent_id = ?)"); p.push(filters.parentId); }
-  const wc = w.length ? `WHERE ${w.join(" AND ")}` : "";
-  return (db.prepare(`SELECT * FROM gate_passes ${wc} ORDER BY requested_at DESC`).all(...p) as any[]).map(mPass);
-}
-export function findPass(id: string): GatePass | null { const r = db.prepare(`SELECT * FROM gate_passes WHERE id=?`).get(id); return r ? mPass(r) : null; }
-
-export function approvePass(passId: string, by: "parent" | "admin", comment?: string, approverId?: string): GatePass | null {
-  const p = findPass(passId); if (!p) return null;
-  const now = new Date().toISOString();
-  if (by === "parent") db.prepare(`UPDATE gate_passes SET parent_status='APPROVED', parent_comment=?, parent_approver_id=?, updated_at=? WHERE id=?`).run(comment ?? "", approverId ?? "pa-1", now, passId);
-  else db.prepare(`UPDATE gate_passes SET admin_status='APPROVED', admin_comment=?, admin_approver_id=?, updated_at=? WHERE id=?`).run(comment ?? "", approverId ?? "ad-1", now, passId);
-  const up = findPass(passId)!;
-  const ns = up.parentStatus === "APPROVED" && up.adminStatus === "APPROVED" ? "APPROVED_ADMIN" : up.parentStatus === "APPROVED" && up.adminStatus === "PENDING" ? "APPROVED_PARENT" : up.parentStatus === "REJECTED" || up.adminStatus === "REJECTED" ? "REJECTED" : "PENDING";
-  db.prepare(`UPDATE gate_passes SET final_status=? WHERE id=?`).run(ns, passId);
-  addAudit({ action: "PASS_APPROVED", userId: approverId ?? (by === "parent" ? "pa-1" : "ad-1"), userName: by === "parent" ? "Parent" : "Admin", role: by === "parent" ? "parent" : "admin", details: `Gate pass ${passId} approved by ${by}` });
-  return findPass(passId);
-}
-
-export function rejectPass(passId: string, by: "parent" | "admin", comment: string): GatePass | null {
-  const p = findPass(passId); if (!p) return null;
-  const now = new Date().toISOString();
-  if (by === "parent") db.prepare(`UPDATE gate_passes SET parent_status='REJECTED', parent_comment=?, updated_at=? WHERE id=?`).run(comment, now, passId);
-  else db.prepare(`UPDATE gate_passes SET admin_status='REJECTED', admin_comment=?, updated_at=? WHERE id=?`).run(comment, now, passId);
-  db.prepare(`UPDATE gate_passes SET final_status='REJECTED' WHERE id=?`).run(passId);
-  addAudit({ action: "PASS_REJECTED", userId: "approver", userName: by, role: by === "parent" ? "parent" : "admin", details: `Gate pass ${passId} rejected by ${by}: ${comment}` });
-  return findPass(passId);
-}
-
-/* ------------------------------------------------------------------ *
- *  ALERTS
- * ------------------------------------------------------------------ */
-export function getAlerts(onlyUnresolved = true): Alert[] { const w = onlyUnresolved ? "WHERE resolved = 0" : ""; return (db.prepare(`SELECT * FROM alerts ${w} ORDER BY timestamp DESC LIMIT 50`).all() as any[]).map(mAlert); }
-export function resolveAlert(alertId: string, userId: string, userName: string): Alert | null { db.prepare(`UPDATE alerts SET resolved=1, resolved_by=?, resolved_at=? WHERE id=?`).run(userId, new Date().toISOString(), alertId); const r = getAlerts(false).find((a) => a.id === alertId); return r ?? null; }
-export function createAlert(input: { severity: AlertSeverity; title: string; message: string; gateId?: string; studentRoll?: string }): Alert { const id = randomUUID(); db.prepare(`INSERT INTO alerts (id, severity, title, message, gate_id, student_roll, timestamp, resolved) VALUES (?,?,?,?,?,?,?,0)`).run(id, input.severity, input.title, input.message, input.gateId ?? null, input.studentRoll ?? null, new Date().toISOString()); return mAlert(db.prepare(`SELECT * FROM alerts WHERE id=?`).get(id)); }
 
 /* ------------------------------------------------------------------ *
  *  NOTIFICATIONS
  * ------------------------------------------------------------------ */
-export function addNotification(recipientType: string, recipientId: string, type: string, title: string, message: string) { db.prepare(`INSERT INTO notifications (id, recipient_type, recipient_id, type, title, message) VALUES (?,?,?,?,?,?)`).run(randomUUID(), recipientType, recipientId, type, title, message); }
-export function getNotifications(recipientType: string, recipientId: string): any[] { return (db.prepare(`SELECT * FROM notifications WHERE recipient_type=? AND recipient_id=? ORDER BY created_at DESC LIMIT 50`).all(recipientType, recipientId) as any[]).map((r) => ({ id: r.id, type: r.type, title: r.title, message: r.message, status: r.status, createdAt: r.created_at })); }
+export async function addNotification(
+  recipientType: string,
+  recipientId: string,
+  type: string,
+  title: string,
+  message: string
+) {
+  const { error } = await supabase.from('notifications').insert([
+    {
+      recipient_type: recipientType,
+      recipient_id: recipientId,
+      type,
+      title,
+      message,
+    },
+  ]);
 
-/* ------------------------------------------------------------------ *
- *  SESSIONS
- * ------------------------------------------------------------------ */
-export function createSession(userId: string, token: string, refreshToken: string) { db.prepare(`INSERT INTO sessions (id, user_id, token, refresh_token, expires_at) VALUES (?,?,?,?,?)`).run(randomUUID(), userId, token, refreshToken, new Date(Date.now() + 7 * 86400000).toISOString()); }
-export function invalidateSession(token: string) { db.prepare(`UPDATE sessions SET is_valid=0 WHERE token=?`).run(token); }
-export function getUserForSession(token: string): User | null { const s = db.prepare(`SELECT * FROM sessions WHERE token=? AND is_valid=1`).get(token) as any; if (!s) return null; if (new Date(s.expires_at).getTime() < Date.now()) return null; return findUserById(s.user_id); }
+  if (error) {
+    console.error('Error adding notification:', error);
+  }
+}
 
 /* ------------------------------------------------------------------ *
  *  DASHBOARD
  * ------------------------------------------------------------------ */
-export function dashboard(): DashboardData {
-  const tsc = scansToday(); const ins = tsc.filter((s) => s.direction === "IN").length; const outs = tsc.filter((s) => s.direction === "OUT").length;
-  const inside = studentsInside(); const alerts = getAlerts(true); const passes = findGatePasses().slice(0, 5);
-  const locs = [
-    { id: "gate-1", name: "Gate 1 (Main)", count: tsc.filter((s) => s.gateId === "gate-1").length, status: "active" as const, type: "gate" as const },
-    { id: "gate-2", name: "Gate 2 (Hostel)", count: tsc.filter((s) => s.gateId === "gate-2").length, status: "active" as const, type: "gate" as const },
-    { id: "lib", name: "Library", count: 456, status: "active" as const, type: "location" as const },
-    { id: "canteen", name: "Canteen", count: 234, status: "active" as const, type: "location" as const },
-  ];
+export async function dashboard(): Promise<DashboardData> {
+  const tsc = await scansToday();
+  const ins = tsc.filter((s) => s.direction === "IN").length;
+  const outs = tsc.filter((s) => s.direction === "OUT").length;
+  const inside = await studentsInside();
+
+  // Fetch real alerts (unresolved) and pending passes in parallel
+  const [alerts, passes, gates] = await Promise.all([
+    getAlerts(false),
+    findGatePasses({ status: 'PENDING' }),
+    findAllGates(),
+  ]);
+
+  // Real per-gate activity
+  const locs: Array<Gate & { currentScanCount: number; lastScan: Scan | null }> = gates.map((g) => {
+    const gateScans = tsc.filter((s) => s.gateId === g.id);
+    return {
+      ...g,
+      currentScanCount: gateScans.length,
+      lastScan: gateScans[0] ?? null,
+    } as any;
+  });
+
+  // Department breakdown from today's scans
+  const deptStats: Record<string, { in: number; out: number }> = {};
+  for (const s of tsc) {
+    const d = s.department || 'Unknown';
+    if (!deptStats[d]) deptStats[d] = { in: 0, out: 0 };
+    if (s.direction === 'IN') deptStats[d].in++;
+    else deptStats[d].out++;
+  }
+  const total = tsc.length || 1;
+  const deptBreakdown = Object.entries(deptStats).map(([dept, { in: inC, out: outC }]) => ({
+    dept,
+    deptCode: dept,
+    in: inC,
+    out: outC,
+    pct: Math.round(((inC + outC) / total) * 100),
+  }));
+
+  // Trend comparison vs yesterday
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yDate = yesterday.toISOString().slice(0, 10);
+  const { data: yScans } = await supabase
+    .from('gate_logs')
+    .select('direction')
+    .gte('timestamp', `${yDate}T00:00:00.000Z`)
+    .lte('timestamp', `${yDate}T23:59:59.999Z`);
+  const yIn = (yScans ?? []).filter((s: any) => s.direction === 'IN').length;
+  const yOut = (yScans ?? []).filter((s: any) => s.direction === 'OUT').length;
+
+  const fmtTrend = (today: number, yest: number) => {
+    if (yest === 0) return today > 0 ? `+${today} vs yesterday` : '0 vs yesterday';
+    const diff = today - yest;
+    if (diff === 0) return 'Same as yesterday';
+    return `${diff > 0 ? '+' : ''}${diff} vs yesterday`;
+  };
+
   return {
-    onCampus: inside.length, todayIn: ins, todayOut: outs, totalScans: tsc.length, activeAlerts: alerts.filter((a) => !a.resolved).length,
-    trendOnCampus: inside.length > 0 ? "+12 vs yesterday" : "0 vs yesterday", trendOut: outs > 0 ? "+45 vs yesterday" : "0 vs yesterday", trendScans: tsc.length > 0 ? "Normal" : "No scans yet",
-    locations: locs, activityFeed: tsc.slice(0, 20), deptBreakdown: deptBreakdownToday(), alerts, gatePasses: passes,
+    onCampus: inside.length,
+    todayIn: ins,
+    todayOut: outs,
+    totalScans: tsc.length,
+    activeAlerts: alerts.length,
+    trendOnCampus: inside.length > 0 ? `+${inside.length} currently inside` : 'Empty campus',
+    trendOut: fmtTrend(outs, yOut),
+    trendScans: fmtTrend(tsc.length, (yIn + yOut)),
+    locations: locs,
+    activityFeed: tsc.slice(0, 20),
+    deptBreakdown,
+    alerts,
+    gatePasses: passes,
   };
 }
 
-export function deptBreakdownToday(): DashboardData["deptBreakdown"] {
-  const names: Record<string, string> = { CSE: "Computer Science & Engineering", IT: "Information Technology", ECE: "Electronics & Communication Engineering", EEE: "Electrical & Electronics Engineering", ME: "Mechanical Engineering" };
-  return (["CSE", "IT", "ECE", "EEE", "ME"] as DepartmentCode[]).map((code) => {
-    const r = db.prepare(`SELECT SUM(CASE WHEN direction='IN' THEN 1 ELSE 0 END) as i, SUM(CASE WHEN direction='OUT' THEN 1 ELSE 0 END) as o FROM gate_logs WHERE department=?`).get(code) as any;
-    const i = r?.i || 0; const o = r?.o || 0; const t = i + o;
-    return { dept: names[code], deptCode: code, in: i, out: o, pct: t ? Math.round((i / t) * 100) : 0 };
-  });
-}
-
-/* ------------------------------------------------------------------ *
- *  DEVICES
- * ------------------------------------------------------------------ */
-export function registerDevice(input: { deviceId: string; deviceName?: string; deviceType?: string; assignedGateId?: string }): void {
-  db.prepare(`INSERT OR REPLACE INTO device_registry (id, device_id, device_name, device_type, assigned_gate_id, assigned_to) VALUES (?,?,?,?,?,?)`).run(randomUUID(), input.deviceId, input.deviceName ?? null, input.deviceType ?? "tablet", input.assignedGateId ?? null, null);
-}
-export function getDevices(): any[] { return (db.prepare(`SELECT * FROM device_registry ORDER BY created_at DESC`).all() as any[]).map((r) => ({ id: r.id, deviceId: r.device_id, deviceName: r.device_name, deviceType: r.device_type, assignedGateId: r.assigned_gate_id, assignedTo: r.assigned_to, lastSeen: r.last_seen, status: r.status })); }
-
 /* ------------------------------------------------------------------ */
-export function statsToday(): { entries: number; exits: number; onCampus: number; lastScan: Scan | null; recentScans: Scan[] } {
-  const t = scansToday();
-  return { entries: t.filter((s) => s.direction === "IN").length, exits: t.filter((s) => s.direction === "OUT").length, onCampus: campusCount(), lastScan: t[0] ?? null, recentScans: t.slice(0, 5) };
+export async function statsToday(): Promise<{ entries: number; exits: number; onCampus: number; lastScan: Scan | null; recentScans: Scan[] }> {
+  const t = await scansToday();
+  return { entries: t.filter((s) => s.direction === "IN").length, exits: t.filter((s) => s.direction === "OUT").length, onCampus: await campusCount(), lastScan: t[0] ?? null, recentScans: t.slice(0, 5) };
 }
 
 /* ------------------------------------------------------------------ *
  *  STUDENT STATUS & HISTORY (for parent/student views)
  * ------------------------------------------------------------------ */
-export function getStudentStatus(roll: string): { status: "IN" | "OUT"; lastScan: Scan | null; name?: string } {
-  const occ = db.prepare(`SELECT current_status, last_log_id FROM campus_occupancy co JOIN students s ON s.id = co.student_id WHERE s.roll = ?`).get(roll) as any;
-  if (!occ) return { status: "OUT", lastScan: null };
-  const lastScan = lastScanFor(roll);
-  return { status: occ.current_status as "IN" | "OUT", lastScan, name: lastScan?.name };
-}
+export async function getStudentStatus(roll: string): Promise<{ status: "IN" | "OUT"; lastScan: Scan | null; name?: string }> {
+  // First get the student ID using parameterized query
+  const { data: student, error: studentError } = await supabase
+    .from('students')
+    .select('id')
+    .eq('roll', roll.trim().toUpperCase())
+    .single();
 
-export function getStudentHistory(roll: string, limit: number = 20): Scan[] {
-  const rows = db.prepare(`SELECT * FROM gate_logs WHERE roll = ? ORDER BY timestamp DESC LIMIT ?`).all(roll, limit) as any[];
-  return rows.map(mScan);
-}
-
-export function getParentChildren(parentId: string): Student[] {
-  const rows = db.prepare(`SELECT * FROM students WHERE parent_id = ? OR parent_name != '' ORDER BY roll`).all(parentId) as any[];
-  return rows.map(toStu);
-}
-
-/* ------------------------------------------------------------------ *
- *  GATE PASS SCANNING
- * ------------------------------------------------------------------ */
-export function scanGatePass(passId: string, gateId: string, operatorId: string): { success: boolean; message: string } {
-  const pass = findPass(passId);
-  if (!pass) return { success: false, message: "Gate pass not found" };
-  if (pass.finalStatus !== "APPROVED_ADMIN" && pass.finalStatus !== "ACTIVE") {
-    return { success: false, message: "Gate pass is not approved" };
+  if (studentError || !student) {
+    return { status: "OUT", lastScan: null };
   }
-  const now = new Date().toISOString();
-  if (new Date(pass.to) < new Date()) {
-    return { success: false, message: "Gate pass has expired" };
+
+  // Then get the occupancy status using the student ID
+  const { data, error } = await supabase
+    .from('campus_occupancy')
+    .select('current_status, last_log_id')
+    .eq('student_id', student.id)
+    .single();
+
+  if (error || !data) {
+    return { status: "OUT", lastScan: null };
   }
-  db.prepare(`UPDATE gate_passes SET used_at = ?, final_status = 'COMPLETED' WHERE id = ?`).run(now, passId);
-  addAudit({ action: "PASS_SCANNED", userId: operatorId, userName: "Operator", role: "operator", details: `Gate pass ${passId} scanned at ${gateId}` });
-  return { success: true, message: "Gate pass scanned successfully" };
+
+  const lastScan = await lastScanFor(roll);
+  return { status: data.current_status as "IN" | "OUT", lastScan, name: lastScan?.name };
 }
 
-/* ------------------------------------------------------------------ *
- *  REAL-TIME GATE MONITORING (for supervisor live view)
- * ------------------------------------------------------------------ */
-export function getAllGatesLive(): Array<Gate & { currentScanCount: number; lastScan: Scan | null }> {
-  return GATES.map((g) => {
-    const scans = scansToday().filter((s) => s.gateId === g.id);
-    const lastScan = scans[0] ?? null;
-    return { ...g, currentScanCount: scans.length, lastScan };
-  });
+export async function getStudentHistory(roll: string, limit: number = 20): Promise<Scan[]> {
+  const { data, error } = await supabase
+    .from('gate_logs')
+    .select('*')
+    .eq('roll', roll)
+    .order('timestamp', { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error('Error getting student history:', error);
+    return [];
+  }
+
+  return data.map(mScan);
 }
 
-export default db;
+export async function getParentChildren(parentId: string): Promise<Student[]> {
+  const { data, error } = await supabase
+    .from('students')
+    .select('*')
+    .eq('parent_id', parentId)
+    .order('roll');
+
+  if (error) {
+    console.error('Error getting parent children:', error);
+    return [];
+  }
+
+  return data.map(mStu);
+}
+
+export default {};

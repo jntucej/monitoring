@@ -1,19 +1,54 @@
 import { NextRequest, NextResponse } from "next/server";
 import { findStudentByRoll, getStudentHistory, getStudentStatus } from "@/lib/db";
+import { withAuthAndStatus } from "@/middleware/auth";
+import { withAuthorization } from "@/middleware/authorization";
+import { withRateLimit } from "@/lib/rate-limit";
+import { supabase } from "@/lib/supabaseClient";
 
-export async function GET(req: NextRequest) {
+/**
+ * Extract the [roll] dynamic segment from the request URL.
+ * This avoids needing Next.js route context which doesn't propagate
+ * through our middleware wrappers.
+ */
+function getRoll(req: NextRequest): string {
+  const segments = new URL(req.url).pathname.split("/").filter(Boolean);
+  // URL pattern: /api/students/:roll
+  return decodeURIComponent(segments[segments.length - 1]);
+}
+
+async function handleGet(req: NextRequest) {
   try {
-    const params = req.nextUrl.searchParams;
-    const roll = params.get("roll");
+    const roll = getRoll(req);
+    const authUserId = req.headers.get("x-user-id");
+    const authRole = req.headers.get("x-user-role");
 
-    if (!roll) {
-      return NextResponse.json(
-        { success: false, error: { code: "MISSING_ROLL", message: "Student roll number is required" } },
-        { status: 400 }
-      );
+    // Authorization Check
+    const isAllowedRole = ["supervisor", "admin", "sysadmin"].includes(authRole || "");
+
+    if (!isAllowedRole) {
+      if (authRole === "student") {
+        // Student must be accessing their own record.
+        const { data: profile, error } = await supabase
+          .from("users")
+          .select("login_identifier")
+          .eq("id", authUserId)
+          .single();
+        if (error || !profile || profile.login_identifier !== roll) {
+          return NextResponse.json(
+            { success: false, error: { code: "FORBIDDEN", message: "You can only view your own student record." } },
+            { status: 403 }
+          );
+        }
+      } else {
+        // Other roles like operator, parent are forbidden.
+        return NextResponse.json(
+          { success: false, error: { code: "FORBIDDEN", message: "Insufficient permissions to view student details." } },
+          { status: 403 }
+        );
+      }
     }
 
-    const student = findStudentByRoll(roll);
+    const student = await findStudentByRoll(roll);
     if (!student) {
       return NextResponse.json(
         { success: false, error: { code: "NOT_FOUND", message: `Student with roll ${roll} not found` } },
@@ -21,8 +56,8 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const status = getStudentStatus(roll);
-    const history = getStudentHistory(roll, 20);
+    const status = await getStudentStatus(roll);
+    const history = await getStudentHistory(roll, 20);
 
     return NextResponse.json({
       success: true,
@@ -33,10 +68,16 @@ export async function GET(req: NextRequest) {
         history,
       },
     });
-  } catch {
+  } catch (error) {
+    console.error("Error fetching student details:", error);
     return NextResponse.json(
       { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to load student data" } },
       { status: 500 }
     );
   }
 }
+
+export const GET = withRateLimit(
+  withAuthAndStatus(withAuthorization(handleGet, { requiredRole: ["supervisor", "admin", "sysadmin", "student"] })),
+  { keyPrefix: "student_details", maxRequests: 100 }
+);

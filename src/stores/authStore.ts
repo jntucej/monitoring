@@ -4,8 +4,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { User, Role } from "@/lib/types";
-import { signToken } from "@/lib/auth";
-import { findUserByLogin, verifyLogin, verifyPin, createSession, invalidateSession } from "@/lib/db";
+import { invalidateSession } from "@/lib/db";
 
 interface AuthState {
   user: User | null;
@@ -34,37 +33,57 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
       login: async (login, password) => {
         set({ loading: true });
-        const user = verifyLogin(login, password);
-        if (!user) {
+        try {
+          const response = await fetch("/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ login, password }),
+          });
+
+          const result = await response.json();
+
+          if (!response.ok || !result.success) {
+            set({ loading: false });
+            return { success: false, error: result.error?.message || "Login failed" };
+          }
+
+          const { token, user } = result.data;
+          set({ user, token, role: user.role as Role, authenticated: true, loading: false });
+          return { success: true };
+        } catch (error) {
           set({ loading: false });
-          return { success: false, error: "Invalid credentials" };
+          return { success: false, error: "Network error" };
         }
-        const token = await signToken(user);
-        createSession(user.id, token, token + "-refresh");
-        set({ user, token, role: user.role as Role, authenticated: true, loading: false });
-        return { success: true };
       },
 
       pinLogin: async (employeeId, pin) => {
         set({ loading: true });
-        const user = findUserByLogin(employeeId);
-        if (!user || user.role !== "operator") {
+        try {
+          const response = await fetch("/api/auth/pin-login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ employeeId, pin }),
+          });
+
+          const result = await response.json();
+
+          if (!response.ok || !result.success) {
+            set({ loading: false });
+            return { success: false, error: result.error?.message || "PIN login failed" };
+          }
+
+          const { token, user } = result.data;
+          set({ user, token, role: user.role as Role, authenticated: true, loading: false });
+          return { success: true };
+        } catch (error) {
           set({ loading: false });
-          return { success: false, error: "User not found" };
+          return { success: false, error: "Network error" };
         }
-        if (!user.pin || !verifyPin(user.id, pin)) {
-          set({ loading: false });
-          return { success: false, error: "Invalid PIN" };
-        }
-        const token = await signToken(user);
-        createSession(user.id, token, token + "-refresh");
-        set({ user, token, role: "operator", authenticated: true, loading: false });
-        return { success: true };
       },
 
-      logout: () => {
+      logout: async () => {
         const token = get().token;
-        if (token) invalidateSession(token);
+        if (token) await invalidateSession(token);
         localStorage.removeItem("gate-monitor-token");
         localStorage.removeItem("gate-monitor-auth");
         set({ user: null, token: null, role: null, authenticated: false });

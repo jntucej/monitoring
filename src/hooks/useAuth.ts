@@ -16,6 +16,7 @@ const DEMO_CREDENTIALS: Record<Role, { login: string; password: string }> = {
   sysadmin: { login: "SA001", password: "1234" },
   parent: { login: "PA001", password: "1234" },
   student: { login: "stu-1", password: "password" },
+  warden: { login: "WD001", password: "1234" },
 };
 
 export function useAuth() {

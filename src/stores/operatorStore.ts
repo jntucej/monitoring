@@ -59,8 +59,8 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
   offlineQueue: [],
   isOnline: true,
 
-  startScan: (roll) => {
-    const student = findStudentByRoll(roll);
+  startScan: async (roll) => {
+    const student = await findStudentByRoll(roll);
     if (!student) {
       set({
         state: "error",
@@ -80,7 +80,7 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
       return;
     }
 
-    const direction = inferDirection(roll);
+    const direction = await inferDirection(roll);
     set({
       state: "confirming",
       currentStudent: student,
@@ -101,11 +101,11 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
     set({ selectedReason: reason, state: "confirming" });
   },
 
-  confirmScan: () => {
+  confirmScan: async () => {
     const { currentStudent, selectedDirection, selectedReason } = get();
     if (!currentStudent) return;
 
-    const isDuplicateScan = isDuplicate(currentStudent.roll, selectedDirection);
+    const isDuplicateScan = await isDuplicate(currentStudent.roll, selectedDirection);
     if (isDuplicateScan) {
       set({
         state: "error",
@@ -118,7 +118,7 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
       return;
     }
 
-    const result = addScan({
+    const result = await addScan({
       roll: currentStudent.roll,
       direction: selectedDirection,
       reason: selectedDirection === "OUT" ? (selectedReason ?? "Regular") : undefined,
@@ -137,7 +137,7 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
     }
 
     // Update stats
-    const stats = statsToday();
+    const stats = await statsToday();
     set({
       state: "success",
       lastScan: result.scan,
@@ -162,8 +162,8 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
     });
   },
 
-  reset: () => {
-    const stats = statsToday();
+  reset: async () => {
+    const stats = await statsToday();
     set({
       state: "idle",
       currentStudent: null,
@@ -176,13 +176,13 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
     });
   },
 
-  loadStats: () => {
-    const stats = statsToday();
+  loadStats: async () => {
+    const stats = await statsToday();
     set({ todaysStats: stats, recentScans: stats.recentScans });
   },
 
-  setGate: (gateId) => {
-    const gate = findGateById(gateId);
+  setGate: async (gateId) => {
+    const gate = await findGateById(gateId);
     set({ gate: gate ?? null });
   },
 

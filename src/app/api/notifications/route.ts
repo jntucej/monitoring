@@ -1,18 +1,48 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getNotifications } from "@/lib/db";
+import { withAuthAndStatus } from "@/middleware/auth";
+import { withAuthorization } from "@/middleware/authorization";
+import { withRateLimit } from "@/lib/rate-limit";
 
-export async function GET(req: NextRequest) {
+async function handleGet(req: NextRequest) {
   try {
-    const params = req.nextUrl.searchParams;
-    const recipientType = params.get("type") || "parent";
-    const recipientId = params.get("id") || "pa-1";
+    const authUserId = req.headers.get('x-user-id');
+    const authRole = req.headers.get('x-user-role');
 
-    const data = getNotifications(recipientType, recipientId);
+    const params = req.nextUrl.searchParams;
+    const recipientType = params.get("type");
+    const recipientId = params.get("id");
+
+    if (!recipientType || !recipientId) {
+        return NextResponse.json(
+            { success: false, error: { code: "BAD_REQUEST", message: "Recipient type and ID are required." } },
+            { status: 400 }
+        );
+    }
+
+    // Authorization: Prevent user enumeration
+    const isAdmin = ['admin', 'supervisor', 'sysadmin'].includes(authRole || '');
+    if (!isAdmin) {
+        if (recipientId !== authUserId || recipientType !== authRole) {
+            return NextResponse.json(
+                { success: false, error: { code: "FORBIDDEN", message: "You can only access your own notifications." } },
+                { status: 403 }
+            );
+        }
+    }
+
+    const data = await getNotifications(recipientType, recipientId);
     return NextResponse.json({ success: true, data });
-  } catch {
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
     return NextResponse.json(
       { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to load notifications" } },
       { status: 500 }
     );
   }
 }
+
+export const GET = withRateLimit(
+    withAuthAndStatus(withAuthorization(handleGet, { requiredRole: ['admin', 'supervisor', 'sysadmin', 'parent', 'student'] })),
+    { keyPrefix: 'notifications_list', maxRequests: 60 }
+);

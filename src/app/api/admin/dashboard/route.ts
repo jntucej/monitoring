@@ -1,14 +1,23 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { dashboard } from "@/lib/db";
+import { withAuthAndStatus } from "@/middleware/auth";
+import { withAuthorization } from "@/middleware/authorization";
+import { withRateLimit } from "@/lib/rate-limit";
 
-export async function GET() {
+async function handleGet(req: NextRequest) {
   try {
-    const data = dashboard();
+    const data = await dashboard();
     return NextResponse.json({ success: true, data });
-  } catch {
+  } catch (error) {
+    console.error("Error fetching dashboard data:", error);
     return NextResponse.json(
       { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to load dashboard" } },
       { status: 500 }
     );
   }
 }
+
+export const GET = withRateLimit(
+  withAuthAndStatus(withAuthorization(handleGet, { requiredRole: ['admin', 'sysadmin'] })),
+  { keyPrefix: 'admin_dashboard', maxRequests: 60 }
+);

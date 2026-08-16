@@ -1,20 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAllLogs, correctionCandidates } from "@/lib/db";
+import { getAllLogs } from "@/lib/db";
+import { withAuthAndStatus } from "@/middleware/auth";
+import { withAuthorization } from "@/middleware/authorization";
+import { withRateLimit } from "@/lib/rate-limit";
 
-export async function GET(req: NextRequest) {
+async function handleGet(req: NextRequest) {
   try {
     const params = req.nextUrl.searchParams;
     const gateId = params.get("gateId") || undefined;
     const date = params.get("date") || undefined;
+    const from = params.get("from") || undefined;
+    const to = params.get("to") || undefined;
     const direction = params.get("direction") || undefined;
     const reason = params.get("reason") || undefined;
     const search = params.get("search") || undefined;
     const page = parseInt(params.get("page") || "1");
     const limit = parseInt(params.get("limit") || "50");
 
-    const data = getAllLogs({ gateId, date, direction, reason, search, page, limit });
+    const data = await getAllLogs({ gateId, date, from, to, direction, reason, search, page, limit });
     return NextResponse.json({ success: true, data });
-  } catch {
+  } catch (error) {
+    console.error("Error fetching gate logs:", error);
     return NextResponse.json(
       { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to load logs" } },
       { status: 500 }
@@ -22,8 +28,16 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function POST(req: NextRequest) {
+async function handlePost(req: NextRequest) {
   try {
+    const operatorId = req.headers.get('x-user-id');
+    if (!operatorId) {
+      return NextResponse.json(
+        { success: false, error: { code: "UNAUTHORIZED", message: "Could not identify the user." } },
+        { status: 401 }
+      );
+    }
+
     const body = await req.json();
     const { scans } = body;
 
@@ -38,12 +52,12 @@ export async function POST(req: NextRequest) {
     const results = [];
     for (const scan of scans) {
       try {
-        const result = addScan({
+        const result = await addScan({
           roll: scan.roll,
           direction: scan.direction,
           reason: scan.reason,
           gateId: scan.gateId,
-          operatorId: scan.operatorId,
+          operatorId: operatorId, // Use the authenticated user's ID
           isManual: scan.isManual,
         });
         results.push({ local_id: scan.id, status: "success", data: result.scan });
@@ -53,10 +67,22 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true, data: { results } });
-  } catch {
+  } catch (error) {
+    console.error("Error in bulk scan sync:", error);
     return NextResponse.json(
       { success: false, error: { code: "INTERNAL_ERROR", message: "Bulk sync failed" } },
       { status: 500 }
     );
   }
 }
+
+export const GET = withRateLimit(
+  withAuthAndStatus(withAuthorization(handleGet, { requiredRole: ['admin', 'supervisor', 'sysadmin', 'operator'] })),
+  { keyPrefix: 'gate_logs_list', maxRequests: 100 }
+);
+
+export const POST = withRateLimit(
+  withAuthAndStatus(withAuthorization(handlePost, { requiredRole: ['operator', 'supervisor'] })),
+  { keyPrefix: 'gate_logs_create', maxRequests: 30 }
+);
+
