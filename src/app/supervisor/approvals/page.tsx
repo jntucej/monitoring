@@ -40,29 +40,8 @@ export default function SupervisorApprovalsPage() {
             }))
           );
         } else {
-          // Dynamic initial backend seed fallback if table is newly created
-          setApprovals([
-            {
-              id: "REQ-901",
-              studentName: "K. Rajesh",
-              rollNumber: "21001A0501",
-              branch: "CSE - 4th Year",
-              passType: "Home Leave",
-              reason: "Visiting home for festival celebration",
-              requestedAt: "10 mins ago",
-              parentConsent: "APPROVED",
-            },
-            {
-              id: "REQ-902",
-              studentName: "P. Sai Kumar",
-              rollNumber: "21001A0502",
-              branch: "ECE - 4th Year",
-              passType: "Outing",
-              reason: "Medical appointment at Apollo Clinic",
-              requestedAt: "25 mins ago",
-              parentConsent: "APPROVED",
-            },
-          ]);
+          // No dummy data - empty state will show properly
+          setApprovals([]);
         }
       } catch (err) {
         console.error("Failed to load pending passes:", err);
