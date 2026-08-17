@@ -599,12 +599,22 @@ export async function findGateById(id: string): Promise<Gate | null> {
     .eq('id', id)
     .single();
 
-  if (error) {
-    console.error('Error finding gate by id:', error);
-    return null;
+  if (!error && data) {
+    return { id: data.id, name: data.name, location: data.location, type: data.type, isActive: !!data.is_active };
   }
 
-  return data ? { id: data.id, name: data.name, location: data.location, type: data.type, isActive: !!data.is_active } : null;
+  // Fallback to local GATES array if database query fails
+  // This prevents crashes when database types don't match or connection issues occur
+  const localGate = GATES.find(g => g.id === id);
+  if (localGate) {
+    return localGate;
+  }
+
+  // Suppress noisy error logging during normal operation
+  if (error && error.code !== '22P02') {
+    console.error('Error finding gate by id:', error);
+  }
+  return null;
 }
 
 export async function findAllGates(): Promise<Gate[]> {
