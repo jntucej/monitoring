@@ -191,7 +191,16 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
 
   setGate: async (gateId) => {
     // Convert numeric gate IDs to proper format (1 -> gate-1, 2 -> gate-2, etc.)
+    // Skip lookup for invalid gate IDs (e.g., "manual", "scan", etc.)
     const normalizedGateId = /^\d+$/.test(gateId) ? `gate-${gateId}` : gateId;
+    
+    // Only query database if gateId looks like a valid gate ID
+    if (!normalizedGateId.startsWith('gate-') && !/^\d+$/.test(gateId)) {
+      // Invalid gate ID format, use fallback
+      set({ gate: null });
+      return;
+    }
+    
     const gate = await findGateById(normalizedGateId);
     set({ gate: gate ?? null });
   },
