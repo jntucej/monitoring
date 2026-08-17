@@ -190,7 +190,9 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
   },
 
   setGate: async (gateId) => {
-    const gate = await findGateById(gateId);
+    // Convert numeric gate IDs to proper format (1 -> gate-1, 2 -> gate-2, etc.)
+    const normalizedGateId = /^\d+$/.test(gateId) ? `gate-${gateId}` : gateId;
+    const gate = await findGateById(normalizedGateId);
     set({ gate: gate ?? null });
   },
 
