@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>ANNEXURE_B_ROLE_BASED_ACCESS_CONTROL_MATRIX.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="annexure-b-role-based-access-control-rbac-matrix">ANNEXURE B: ROLE-BASED ACCESS CONTROL (RBAC) MATRIX</h1>
+<p><strong>System Name:</strong> Educational Institution Gate Monitoring &amp; Access Control System<br>
+<strong>Document Version:</strong> 1.0.0<br>
+<strong>Date:</strong> August 17, 2026<br>
+<strong>Classification:</strong> Confidential - Security Policy Reference</p>
+<hr>
+<h2 id="1-system-roles--hierarchical-definitions">1. System Roles &amp; Hierarchical Definitions</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Role</th>
+<th style="text-align:left">Role Level</th>
+<th style="text-align:left">Scope of Authority</th>
+<th style="text-align:left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>sysadmin</code></td>
+<td style="text-align:left">Level 0 (Highest)</td>
+<td style="text-align:left">System-Wide</td>
+<td style="text-align:left">Platform system administrator with unmitigated administrative access, system maintenance capabilities, schema trigger configuration, and user provision/deprovision controls.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>admin</code></td>
+<td style="text-align:left">Level 1</td>
+<td style="text-align:left">Institutional</td>
+<td style="text-align:left">Administrative staff managing student records, issuing global announcements, generating analytical reports, and executing secondary gate pass approvals.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>supervisor</code></td>
+<td style="text-align:left">Level 2</td>
+<td style="text-align:left">Gate Cluster / Hostel</td>
+<td style="text-align:left">Gate supervisors overseeing multiple assigned gates, reviewing scan logs, resolving alerts, and authorizing manual scan corrections.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>operator</code></td>
+<td style="text-align:left">Level 3</td>
+<td style="text-align:left">Assigned Gate</td>
+<td style="text-align:left">Physical gate security operators conducting barcode/QR scans, verifying digital IDs, and recording entry/exit events.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>warden</code></td>
+<td style="text-align:left">Level 3</td>
+<td style="text-align:left">Hostel Block</td>
+<td style="text-align:left">Hostel wardens managing student room allocations, monitoring hostel curfews, and processing hostel-specific exit permissions.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>student</code></td>
+<td style="text-align:left">Level 4</td>
+<td style="text-align:left">Self Only</td>
+<td style="text-align:left">Enrolled students viewing personal profile, generating dynamic identity QR codes, and submitting gate pass applications.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>parent</code></td>
+<td style="text-align:left">Level 4</td>
+<td style="text-align:left">Dependent Children</td>
+<td style="text-align:left">Linked parents/guardians reviewing ward activity, tracking gate crossings, and providing primary pass authorization.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="2-account-status-state-machine">2. Account Status State Machine</h2>
+<p>Every user record contains a mandatory <code>status</code> flag evaluated dynamically on every authenticated request by the Edge Middleware (<code>auth.ts</code>).</p>
+<pre class="hljs"><code><div> +-------------------------------------------------------------------------------+
+ |                            ACCOUNT STATUS STATES                              |
+ |                                                                               |
+ |  [ ACTIVE ] -------&gt; Token Valid &amp; Requests Allowed                           |
+ |      |                                                                        |
+ |      +------&gt; [ LOCKED ] ------&gt; Invalidated by 5 Failed Pin/Password Tries   |
+ |      |                                                                        |
+ |      +------&gt; [ SUSPENDED ] ---&gt; Administrative Lockout (Session Revoked)     |
+ |      |                                                                        |
+ |      +------&gt; [ DISABLED ] -----&gt; Inactive Employee / Graduated Student       |
+ |      |                                                                        |
+ |      +------&gt; [ DEPROVISIONED ] &gt; Soft Deleted Record (All Access Denied)     |
+ +-------------------------------------------------------------------------------+
+</div></code></pre>
+<hr>
+<h2 id="3-end-to-end-api-authorization-matrix">3. End-to-End API Authorization Matrix</h2>
+<h3 id="31-authentication--session-endpoints">3.1 Authentication &amp; Session Endpoints</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Endpoint</th>
+<th style="text-align:left">Method</th>
+<th style="text-align:left">Required Auth</th>
+<th style="text-align:left">Allowed Roles</th>
+<th style="text-align:left">Permission Required</th>
+<th style="text-align:left">Resource Scope</th>
+<th style="text-align:left">ID Derivation Source</th>
+<th style="text-align:left">Audit Event Logged</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>/api/auth/login</code></td>
+<td style="text-align:left">POST</td>
+<td style="text-align:left">Optional</td>
+<td style="text-align:left">All</td>
+<td style="text-align:left"><code>auth:login</code></td>
+<td style="text-align:left">Authentication</td>
+<td style="text-align:left">Request Body Credentials</td>
+<td style="text-align:left"><code>LOGIN_SUCCESS</code>, <code>LOGIN_FAILURE</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>/api/auth/pin-login</code></td>
+<td style="text-align:left">POST</td>
+<td style="text-align:left">Optional</td>
+<td style="text-align:left"><code>operator</code>, <code>supervisor</code></td>
+<td style="text-align:left"><code>auth:pin</code></td>
+<td style="text-align:left">Quick Terminal Login</td>
+<td style="text-align:left">PIN Hash Verification</td>
+<td style="text-align:left"><code>PIN_LOGIN_SUCCESS</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>/api/auth/logout</code></td>
+<td style="text-align:left">POST</td>
+<td style="text-align:left">Required</td>
+<td style="text-align:left">All</td>
+<td style="text-align:left"><code>auth:logout</code></td>
+<td style="text-align:left">Active Session</td>
+<td style="text-align:left">JWT Header Session ID</td>
+<td style="text-align:left"><code>LOGOUT</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>/api/auth/session</code></td>
+<td style="text-align:left">GET</td>
+<td style="text-align:left">Required</td>
+<td style="text-align:left">All</td>
+<td style="text-align:left"><code>auth:session</code></td>
+<td style="text-align:left">Current Profile</td>
+<td style="text-align:left">JWT Validated User</td>
+<td style="text-align:left">None</td>
+</tr>
+</tbody>
+</table>
+<h3 id="32-user-management-endpoints">3.2 User Management Endpoints</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Endpoint</th>
+<th style="text-align:left">Method</th>
+<th style="text-align:left">Required Auth</th>
+<th style="text-align:left">Allowed Roles</th>
+<th style="text-align:left">Permission Required</th>
+<th style="text-align:left">Resource Scope</th>
+<th style="text-align:left">ID Derivation Source</th>
+<th style="text-align:left">Audit Event Logged</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>/api/users</code></td>
+<td style="text-align:left">GET</td>
+<td style="text-align:left">Required</td>
+<td style="text-align:left"><code>admin</code>, <code>sysadmin</code></td>
+<td style="text-align:left"><code>users:read</code></td>
+<td style="text-align:left">All User Profiles</td>
+<td style="text-align:left">Direct DB Query</td>
+<td style="text-align:left">None</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>/api/users</code></td>
+<td style="text-align:left">POST</td>
+<td style="text-align:left">Required</td>
+<td style="text-align:left"><code>sysadmin</code></td>
+<td style="text-align:left"><code>users:create</code></td>
+<td style="text-align:left">New User Creation</td>
+<td style="text-align:left">Server <code>gen_random_uuid()</code></td>
+<td style="text-align:left"><code>USER_CREATION</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>/api/users/[id]</code></td>
+<td style="text-align:left">GET</td>
+<td style="text-align:left">Required</td>
+<td style="text-align:left"><code>admin</code>, <code>sysadmin</code>, Self</td>
+<td style="text-align:left"><code>users:read</code></td>
+<td style="text-align:left">Specific User Profile</td>
+<td style="text-align:left">Verified against JWT User</td>
+<td style="text-align:left">None</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>/api/users/[id]</code></td>
+<td style="text-align:left">PUT</td>
+<td style="text-align:left">Required</td>
+<td style="text-align:left"><code>admin</code>, <code>sysadmin</code>, Self</td>
+<td style="text-align:left"><code>users:update</code></td>
+<td style="text-align:left">Profile Modifications</td>
+<td style="text-align:left">Verified against JWT User</td>
+<td style="text-align:left"><code>USER_UPDATE</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>/api/users/[id]/status</code></td>
+<td style="text-align:left">PUT</td>
+<td style="text-align:left">Required</td>
+<td style="text-align:left"><code>admin</code>, <code>sysadmin</code></td>
+<td style="text-align:left"><code>users:status:update</code></td>
+<td style="text-align:left">Lock/Suspend Account</td>
+<td style="text-align:left">Server Invalidation</td>
+<td style="text-align:left"><code>ACCOUNT_STATUS_CHANGE</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>/api/users/[id]/role</code></td>
+<td style="text-align:left">PUT</td>
+<td style="text-align:left">Required</td>
+<td style="text-align:left"><code>sysadmin</code></td>
+<td style="text-align:left"><code>users:role:update</code></td>
+<td style="text-align:left">Change User Privilege</td>
+<td style="text-align:left">Server Invalidation</td>
+<td style="text-align:left"><code>ROLE_CHANGE</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="33-gate-scanning--operations-endpoints">3.3 Gate Scanning &amp; Operations Endpoints</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Endpoint</th>
+<th style="text-align:left">Method</th>
+<th style="text-align:left">Required Auth</th>
+<th style="text-align:left">Allowed Roles</th>
+<th style="text-align:left">Permission Required</th>
+<th style="text-align:left">Resource Scope</th>
+<th style="text-align:left">ID Derivation Source</th>
+<th style="text-align:left">Audit Event Logged</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>/api/gate/scan</code></td>
+<td style="text-align:left">POST</td>
+<td style="text-align:left">Required</td>
+<td style="text-align:left"><code>operator</code>, <code>supervisor</code></td>
+<td style="text-align:left"><code>gate:scan:create</code></td>
+<td style="text-align:left">Gate Entry/Exit Event</td>
+<td style="text-align:left"><strong>Derived from JWT Session</strong></td>
+<td style="text-align:left"><code>GATE_SCAN</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>/api/gate/logs</code></td>
+<td style="text-align:left">GET</td>
+<td style="text-align:left">Required</td>
+<td style="text-align:left"><code>operator</code>, <code>supervisor</code>, <code>admin</code>, <code>sysadmin</code></td>
+<td style="text-align:left"><code>gate:logs:read</code></td>
+<td style="text-align:left">Scan Event History</td>
+<td style="text-align:left">Assigned Gate Filter</td>
+<td style="text-align:left">None</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>/api/gate/logs/[id]/correction</code></td>
+<td style="text-align:left">PUT</td>
+<td style="text-align:left">Required</td>
+<td style="text-align:left"><code>supervisor</code>, <code>admin</code>, <code>sysadmin</code></td>
+<td style="text-align:left"><code>gate:logs:correct</code></td>
+<td style="text-align:left">Scan Error Override</td>
+<td style="text-align:left">Supervisor Session ID</td>
+<td style="text-align:left"><code>SCAN_CORRECTION</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="34-student-records--gate-pass-endpoints">3.4 Student Records &amp; Gate Pass Endpoints</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Endpoint</th>
+<th style="text-align:left">Method</th>
+<th style="text-align:left">Required Auth</th>
+<th style="text-align:left">Allowed Roles</th>
+<th style="text-align:left">Permission Required</th>
+<th style="text-align:left">Resource Scope</th>
+<th style="text-align:left">ID Derivation Source</th>
+<th style="text-align:left">Audit Event Logged</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>/api/students</code></td>
+<td style="text-align:left">GET</td>
+<td style="text-align:left">Required</td>
+<td style="text-align:left"><code>admin</code>, <code>sysadmin</code>, <code>supervisor</code>, <code>warden</code></td>
+<td style="text-align:left"><code>students:read</code></td>
+<td style="text-align:left">Student Directory</td>
+<td style="text-align:left">DB Authorization Filter</td>
+<td style="text-align:left">None</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>/api/students/[roll]</code></td>
+<td style="text-align:left">GET</td>
+<td style="text-align:left">Required</td>
+<td style="text-align:left">All Roles (Scoped)</td>
+<td style="text-align:left"><code>students:read</code></td>
+<td style="text-align:left">Student Profile</td>
+<td style="text-align:left">Verification Check</td>
+<td style="text-align:left">None</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>/api/passes</code></td>
+<td style="text-align:left">GET</td>
+<td style="text-align:left">Required</td>
+<td style="text-align:left"><code>admin</code>, <code>sysadmin</code>, <code>supervisor</code>, <code>student</code>, <code>parent</code></td>
+<td style="text-align:left"><code>passes:read</code></td>
+<td style="text-align:left">Pass Requests</td>
+<td style="text-align:left">Student/Parent Relation</td>
+<td style="text-align:left">None</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>/api/passes</code></td>
+<td style="text-align:left">POST</td>
+<td style="text-align:left">Required</td>
+<td style="text-align:left"><code>student</code>, <code>parent</code></td>
+<td style="text-align:left"><code>passes:create</code></td>
+<td style="text-align:left">Request Pass</td>
+<td style="text-align:left"><strong>Derived Student ID</strong></td>
+<td style="text-align:left"><code>PASS_CREATED</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>/api/passes/[id]/approve</code></td>
+<td style="text-align:left">PUT</td>
+<td style="text-align:left">Required</td>
+<td style="text-align:left"><code>admin</code>, <code>sysadmin</code>, <code>parent</code></td>
+<td style="text-align:left"><code>passes:approve</code></td>
+<td style="text-align:left">Grant Exit Pass</td>
+<td style="text-align:left">Approver Session ID</td>
+<td style="text-align:left"><code>PASS_APPROVED</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>/api/passes/[id]/reject</code></td>
+<td style="text-align:left">PUT</td>
+<td style="text-align:left">Required</td>
+<td style="text-align:left"><code>admin</code>, <code>sysadmin</code>, <code>parent</code></td>
+<td style="text-align:left"><code>passes:reject</code></td>
+<td style="text-align:left">Deny Exit Pass</td>
+<td style="text-align:left">Approver Session ID</td>
+<td style="text-align:left"><code>PASS_REJECTED</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="4-client-controlled-vs-server-derived-id-enforcement-rules">4. Client-Controlled vs. Server-Derived ID Enforcement Rules</h2>
+<p>To prevent <strong>Insecure Direct Object Reference (IDOR)</strong> and <strong>Identity Forgery</strong> vulnerabilities, the system enforces the following explicit parameter derivation rules:</p>
+<ol>
+<li><strong>Operator Identity</strong>: Under NO circumstances is <code>operator_id</code> accepted from the client POST body in <code>/api/gate/scan</code>. The server strictly extracts <code>operator_id</code> from the verified JWT payload (<code>req.user.id</code>).</li>
+<li><strong>Student Gate Pass Ownership</strong>: When a student requests a pass, <code>student_id</code> is extracted from the authenticated user record bound to that student account.</li>
+<li><strong>Parent Authorization</strong>: Parents can only view or approve passes where <code>students.parent_id</code> matches the parent's authenticated <code>user.id</code>.</li>
+<li><strong>Supervisor Gate Scope</strong>: Supervisors are strictly restricted to reading logs and alerts for gate IDs included in their <code>users.supervised_gates</code> array.</li>
+</ol>
+<hr>
+<h2 id="5-automatic-session-revocation-policies">5. Automatic Session Revocation Policies</h2>
+<p>The platform enforces dynamic session invalidation via database triggers and background workers:</p>
+<ul>
+<li><strong>Role Modification</strong>: Updating a user's role in <code>users</code> instantly fires <code>trigger_notify_session_invalidation</code>, sending a <code>pg_notify</code> payload to invalidate all active JWT session records in <code>sessions</code>.</li>
+<li><strong>Status Change</strong>: Transitioning an account from <code>ACTIVE</code> to <code>LOCKED</code>, <code>SUSPENDED</code>, or <code>DISABLED</code> automatically sets <code>sessions.active = FALSE</code> and populates <code>invalidated_at = NOW()</code>.</li>
+<li><strong>Password / PIN Reset</strong>: Changing credentials immediately revokes all prior active sessions.</li>
+</ul>
+
+</body>
+</html>

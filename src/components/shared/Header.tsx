@@ -24,7 +24,7 @@ export function Header() {
   const { theme, setTheme, toggleMobileSidebar, addToast } = useUIStore();
   const { role, user } = useAuthStore();
 
-  const title = PAGE_TITLES[pathname] || "JNTUH UCoEJ Gate Monitor";
+  const title = PAGE_TITLES[pathname] || "JNTUH CEJ Gate Monitor";
 
   const handleToggleTheme = () => {
     const nextTheme = theme === "dark" ? "light" : "dark";

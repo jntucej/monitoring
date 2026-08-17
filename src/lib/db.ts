@@ -12,9 +12,9 @@ import type {
  *  COLLEGE DATA
  * ------------------------------------------------------------------ */
 export const COLLEGE = {
-  name: "JNTUH University College of Engineering, Nachupally (Kondagattu)",
-  shortName: "JNTUH-UCoEJ",
-  address: "JNTUH University College of Engineering, Nachupally (Kondagattu), Jagtial Dist, Telangana — 505 501",
+  name: "JNTUH College of Engineering Jagtial (JNTUH CEJ)",
+  shortName: "JNTUH CEJ",
+  address: "JNTUH College of Engineering Jagtial, Nachupally (Kondagattu), Jagtial Dist, Telangana — 505 501",
   logo: "🏛️",
   accreditation: "NAAC A+ Grade",
   website: "https://jntuhcej.ac.in/",

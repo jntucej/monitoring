@@ -43,6 +43,7 @@ export default function OperatorPage() {
     setOnline,
   } = useOperatorStore();
 
+  const [activeTab, setActiveTab] = useState<"scan" | "manual">("scan");
   const [showManualEntry, setShowManualEntry] = useState(false);
   const [showCameraScanner, setShowCameraScanner] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -89,23 +90,14 @@ export default function OperatorPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] pb-safe">
-      {/* Header Bar */}
-      <header className="flex items-center justify-between h-16 px-4 sm:px-6 border-b border-[var(--border)] bg-[var(--bg-surface)] flex-shrink-0 sticky top-0 z-30">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[var(--action-primary)]/10 text-[var(--action-primary)] flex items-center justify-center font-bold text-xs border border-[var(--action-primary)]/20">
-            J
+      {/* Main Operational Mobile Container */}
+      <main className="flex-1 max-w-lg w-full mx-auto p-4 sm:p-6 space-y-5">
+        {/* Gate Operational Status Bar */}
+        <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] shadow-sm">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-xs font-semibold text-[var(--text-primary)]">{gateName}</span>
           </div>
-          <div>
-            <h1 className="font-bold text-xs sm:text-sm text-[var(--text-primary)] leading-none">
-              {COLLEGE.shortName}
-            </h1>
-            <p className="text-[11px] text-[var(--action-primary)] font-medium mt-0.5">
-              {gateName}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--bg-base)] border border-[var(--border)] text-xs text-[var(--text-secondary)]">
             {isOnline ? (
               <>
@@ -119,29 +111,33 @@ export default function OperatorPage() {
               </>
             )}
           </div>
-
-          <button
-            onClick={() => setShowLogoutConfirm(true)}
-            aria-label="Operator sign out"
-            className="w-9 h-9 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--action-danger)] flex items-center justify-center transition-colors"
-          >
-            <Power className="w-4 h-4" />
-          </button>
         </div>
-      </header>
-
-      {/* Main Operational Mobile Container */}
-      <main className="flex-1 max-w-lg w-full mx-auto p-4 sm:p-6 space-y-5">
-        {/* Dominant Primary Action CTA: SCAN ID */}
+        {/* Active Operational Mode Tabs: SCAN vs MANUAL */}
         {state !== "confirming" && state !== "success" && (
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setShowCameraScanner(true)}
-            className="w-full h-14 rounded-2xl bg-[var(--action-primary)] hover:bg-emerald-400 text-slate-950 font-extrabold text-lg flex items-center justify-center gap-3 shadow-xl transition-all"
-          >
-            <Scan className="w-6 h-6 stroke-[2.5]" />
-            <span>SCAN STUDENT ID</span>
-          </motion.button>
+          <div className="flex bg-[var(--bg-surface)] p-1.5 rounded-2xl border border-[var(--border)] gap-1">
+            <button
+              onClick={() => setActiveTab("scan")}
+              className={`flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
+                activeTab === "scan"
+                  ? "bg-[var(--action-primary)] text-slate-950 shadow-md"
+                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+              }`}
+            >
+              <Scan className="w-4 h-4" />
+              <span>QR Scan</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("manual")}
+              className={`flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
+                activeTab === "manual"
+                  ? "bg-[var(--action-primary)] text-slate-950 shadow-md"
+                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+              }`}
+            >
+              <KeyRound className="w-4 h-4" />
+              <span>Manual Entry</span>
+            </button>
+          </div>
         )}
 
         {/* Today's Operational Summary Strip */}
@@ -207,26 +203,51 @@ export default function OperatorPage() {
           />
         )}
 
-        {/* Primary Viewfinder & Scanner Desk */}
+        {/* Tabbed Viewport: SCAN vs MANUAL tabs */}
         {state !== "success" && state !== "error" && state !== "confirming" && (
           <div className="space-y-4">
-            <ScanViewfinder
-              onStartScanner={() => setShowCameraScanner(true)}
-              onManualEntry={() => setShowManualEntry(true)}
-              scanning={state === "detecting"}
-              lastScanRoll={lastScan?.roll}
-              sampleRolls={SAMPLE_ROLL_NUMBERS.slice(0, 3)}
-              onSampleScan={(roll) => startScan(roll)}
-            />
+            {activeTab === "scan" ? (
+              <ScanViewfinder
+                onStartScanner={() => setShowCameraScanner(true)}
+                onManualEntry={() => setActiveTab("manual")}
+                scanning={state === "detecting"}
+                lastScanRoll={lastScan?.roll}
+                sampleRolls={SAMPLE_ROLL_NUMBERS.slice(0, 3)}
+                onSampleScan={(roll) => startScan(roll)}
+              />
+            ) : (
+              <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 space-y-4">
+                <div className="space-y-1">
+                  <h3 className="text-sm font-bold text-[var(--text-primary)]">Manual Student Verification</h3>
+                  <p className="text-xs text-[var(--text-muted)]">Enter roll number to pull student record and open verification pop-up</p>
+                </div>
 
-            {/* Manual Roll Number Trigger */}
-            <button
-              onClick={() => setShowManualEntry(true)}
-              className="w-full py-3.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-primary)] font-semibold text-sm hover:border-[var(--border-strong)] transition-all flex items-center justify-center gap-2"
-            >
-              <KeyRound className="w-4 h-4 text-[var(--text-muted)]" />
-              <span>Manual Roll Number Entry</span>
-            </button>
+                <div className="space-y-3">
+                  <button
+                    onClick={() => setShowManualEntry(true)}
+                    className="w-full py-4 px-4 rounded-xl bg-[var(--action-primary)] hover:bg-emerald-400 text-slate-950 font-bold text-sm flex items-center justify-center gap-2 shadow-md transition-all"
+                  >
+                    <KeyRound className="w-5 h-5" />
+                    <span>OPEN MANUAL ROLL ENTRY DIALOG</span>
+                  </button>
+
+                  <div className="pt-2 border-t border-[var(--border)]">
+                    <span className="text-[11px] font-mono text-[var(--text-muted)] block mb-2">Quick Test Roll Numbers:</span>
+                    <div className="flex flex-wrap gap-2">
+                      {SAMPLE_ROLL_NUMBERS.slice(0, 4).map((roll) => (
+                        <button
+                          key={roll}
+                          onClick={() => startScan(roll)}
+                          className="px-3 py-1.5 rounded-lg bg-[var(--bg-base)] border border-[var(--border)] font-mono text-xs text-[var(--text-primary)] hover:border-[var(--action-primary)] hover:text-[var(--action-primary)] transition-all"
+                        >
+                          {roll}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

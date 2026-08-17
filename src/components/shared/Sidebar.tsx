@@ -202,7 +202,7 @@ export function Sidebar() {
           </div>
           {!isCollapsed && (
             <div className="min-w-0 flex-1 truncate">
-              <div className="font-bold text-sm leading-tight text-[var(--text-primary)] truncate">JNTUH UCoEJ</div>
+              <div className="font-bold text-sm leading-tight text-[var(--text-primary)] truncate">JNTUH CEJ</div>
               <div className="text-[11px] text-[var(--text-muted)] font-medium truncate">Gate Monitor</div>
             </div>
           )}

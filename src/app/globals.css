@@ -33,42 +33,60 @@
   --duration-normal: 220ms;
   --duration-slow: 350ms;
   --ease-apple: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Fallback Base Tokens (Default Dark High Contrast) */
+  --bg-base: #060911;
+  --bg-surface: #0f172a;
+  --bg-elevated: #1e293b;
+  --text-primary: #ffffff;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --border: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.24);
+
+  --action-primary: #10b981;
+  --action-danger: #f43f5e;
+  --action-warning: #f59e0b;
+  --action-info: #3b82f6;
+  --focus-ring: #10b981;
 }
 
-/* ===== DARK THEME — GitHub, Vercel & Supabase Developer Aesthetic ===== */
-:root[data-theme="dark"] {
-  --bg-base: #090D16;        /* Deep Obsidian / GitHub Dark */
-  --bg-surface: #121824;     /* Supabase Dark Card Surface */
-  --bg-elevated: #1B2232;    /* Elevated Vercel Dialog */
-  --text-primary: #F3F4F6;   /* Pure crisp high-contrast white */
-  --text-secondary: #9CA3AF; /* Cool Gray-400 */
-  --text-muted: #6B7280;     /* Cool Gray-500 */
-  --border: rgba(255, 255, 255, 0.08); /* Crisp subtle border */
-  --border-strong: rgba(255, 255, 255, 0.16);
+/* ===== DARK THEME — Deep High Contrast Developer & Security Aesthetic ===== */
+:root[data-theme="dark"],
+html.dark {
+  --bg-base: #060911;        /* Deep Obsidian Black */
+  --bg-surface: #0f172a;     /* Slate-900 High Contrast Card Surface */
+  --bg-elevated: #1e293b;    /* Slate-800 High-Visibility Container */
+  --text-primary: #ffffff;   /* Pure 100% Crisp White Text */
+  --text-secondary: #cbd5e1; /* Slate-300 Readable Subtitle */
+  --text-muted: #94a3b8;     /* Slate-400 Soft Contrast */
+  --border: rgba(255, 255, 255, 0.14); /* Vivid border */
+  --border-strong: rgba(255, 255, 255, 0.28);
 
-  --action-primary: #3ECF8E; /* Supabase Neon Green / Emerald */
-  --action-danger: #F43F5E;  /* Vercel Rose / Red */
-  --action-warning: #F59E0B; /* Amber-500 */
-  --action-info: #3B82F6;    /* Vercel Blue / GitHub Accent */
-  --focus-ring: #3ECF8E;     /* Supabase Neon Emerald */
+  --action-primary: #10b981; /* High-contrast Emerald Green */
+  --action-danger: #f43f5e;  /* Vivid Crimson Red */
+  --action-warning: #f59e0b; /* Bright Amber */
+  --action-info: #3b82f6;    /* Vibrant Royal Blue */
+  --focus-ring: #10b981;
 }
 
-/* ===== LIGHT THEME — Vercel / GitHub Clean Light ===== */
-:root[data-theme="light"] {
-  --bg-base: #FAFAFA;        /* Vercel Off-white base */
-  --bg-surface: #FFFFFF;     /* Pure white card surface */
-  --bg-elevated: #F4F4F5;    /* Elevated background */
-  --text-primary: #09090B;   /* Zinc-950 high contrast text */
-  --text-secondary: #52525B; /* Zinc-600 */
-  --text-muted: #71717A;     /* Zinc-500 */
-  --border: #E4E4E7;        /* Zinc-200 subtle border */
-  --border-strong: #D4D4D8; /* Zinc-300 */
+/* ===== LIGHT THEME — Crisp Pure White High-Contrast ===== */
+:root[data-theme="light"],
+html.light {
+  --bg-base: #f8fafc;        /* Slate-50 Crisp Light Background */
+  --bg-surface: #ffffff;     /* Pure White Card Surface */
+  --bg-elevated: #f1f5f9;    /* Slate-100 High Contrast Sub-panel */
+  --text-primary: #020617;   /* Slate-950 Deepest Black Text for sharp contrast */
+  --text-secondary: #334155; /* Slate-700 Text */
+  --text-muted: #64748b;     /* Slate-500 Text */
+  --border: #cbd5e1;        /* Slate-300 Crisp Border */
+  --border-strong: #94a3b8; /* Slate-400 Strong Border */
 
-  --action-primary: #10B981; /* Emerald-600 */
-  --action-danger: #EF4444;  /* Red-500 */
-  --action-warning: #F59E0B; /* Amber-500 */
-  --action-info: #2563EB;    /* Blue-600 */
-  --focus-ring: #10B981;     /* Emerald ring */
+  --action-primary: #059669; /* Emerald-600 */
+  --action-danger: #dc2626;  /* Red-600 */
+  --action-warning: #d97706; /* Amber-600 */
+  --action-info: #2563eb;    /* Blue-600 */
+  --focus-ring: #059669;
 }
 
 /* ===== SEMANTIC HIG STATUS SURFACES ===== */

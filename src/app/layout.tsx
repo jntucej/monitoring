@@ -10,8 +10,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "JNTUH-UCoEJ Gate Monitor",
-  description: "Student Gate Monitoring System — JNTUH University College of Engineering, Nachupally (Kondagattu)",
+  title: "JNTUH CEJ Gate Monitor",
+  description: "Student Gate Monitoring System — JNTUH College of Engineering Jagtial",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 

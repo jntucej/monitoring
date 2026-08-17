@@ -213,7 +213,7 @@ export default function LoginPage() {
             <Building2 className="w-7 h-7" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">
-            JNTUH UCoEJ Gate Monitor
+            JNTUH CEJ Gate Monitor
           </h1>
           <p className="text-xs text-[var(--text-muted)] font-medium max-w-xs mx-auto">
             Authorized Role-Based Security Portal — Select your role to sign in

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   ScanLine,
   BarChart3,
@@ -69,16 +69,36 @@ const ROLE_TABS: Record<string, NavTab[]> = {
 
 export function MobileBottomNav() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { role } = useAuthStore();
 
   const currentRole = (role as Role) || "operator";
   const tabs = ROLE_TABS[currentRole] || ROLE_TABS.operator;
 
+  const currentTabParam = searchParams?.get("tab") || null;
+
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[var(--bg-surface)]/90 backdrop-blur-xl border-t border-[var(--border)] pb-safe shadow-2xl select-none">
       <div className="h-16 grid grid-cols-4 items-center px-1">
         {tabs.map((tab) => {
-          const isActive = pathname === tab.href || (tab.href !== "/" && pathname.startsWith(tab.href.split("?")[0]));
+          const [basePath, searchStr] = tab.href.split("?");
+          const targetTabParam = searchStr ? new URLSearchParams(searchStr).get("tab") : null;
+
+          let isActive = false;
+          if (pathname === basePath) {
+            if (targetTabParam) {
+              isActive = currentTabParam === targetTabParam;
+            } else {
+              isActive = !currentTabParam;
+            }
+          } else if (basePath !== "/" && pathname.startsWith(basePath) && basePath.length > 1) {
+            if (targetTabParam) {
+              isActive = currentTabParam === targetTabParam;
+            } else {
+              isActive = !currentTabParam;
+            }
+          }
+
           const Icon = tab.icon;
 
           return (

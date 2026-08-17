@@ -27,7 +27,7 @@ export function DynamicHeader() {
   const [tapCount, setTapCount] = useState(0);
   const tapTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const title = PAGE_TITLES[pathname] || "JNTUH UCoEJ Gate Monitor";
+  const title = PAGE_TITLES[pathname] || "JNTUH CEJ Gate Monitor";
 
   // Secret Triple-tap gesture on top-right area to instantly logout
   const handleSecretTripleTap = () => {
