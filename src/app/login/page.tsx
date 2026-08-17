@@ -47,7 +47,7 @@ const DEMO_CREDENTIALS: Record<string, DemoCredential> = {
     role: "student",
     roleTitle: "Student",
     name: "K. Rajesh (CSE 4th Year)",
-    id: "21001A0501",
+    id: "24JJ1A0501",
     email: "student@gatekeeper.edu",
     pin: "1234",
     badgeColor: "bg-blue-500/10 text-blue-500 border-blue-500/20",
@@ -162,9 +162,8 @@ export default function LoginPage() {
 
     if (activeTab === "student") {
       const upperRoll = identifier.toUpperCase();
-      const parsed = parseRollNumber(upperRoll);
-      if (!parsed && upperRoll.length > 0) {
-        triggerShake("Invalid Roll Number format (e.g. 21001A0501 or 24JJ1A0501).");
+      if (upperRoll.length < 3) {
+        triggerShake("Please enter a valid Student Roll Number or ID.");
         return;
       }
     }

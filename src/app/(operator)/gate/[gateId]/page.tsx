@@ -27,6 +27,7 @@ export default function OperatorPage() {
   const params = useParams<{ gateId: string }>();
   const gateId = params?.gateId || "gate-1";
   const { user, authenticated, loginAsRole, logout } = useAuth();
+  const operatorStore = useOperatorStore();
   const {
     state,
     currentStudent,
@@ -36,12 +37,12 @@ export default function OperatorPage() {
     error,
     isOnline,
     startScan,
-    confirmScan,
     cancelScan,
     reset,
     setGate,
     setOnline,
-  } = useOperatorStore();
+  } = operatorStore;
+  const confirmScan = operatorStore.confirmScan;
 
   const [activeTab, setActiveTab] = useState<"scan" | "manual">("scan");
   const [showManualEntry, setShowManualEntry] = useState(false);
@@ -198,7 +199,7 @@ export default function OperatorPage() {
         {state === "confirming" && currentStudent && (
           <ScanConfirmation
             student={currentStudent}
-            onConfirm={(dir) => confirmScan()}
+            onConfirm={(dir, reason) => confirmScan(dir, reason)}
             onCancel={cancelScan}
           />
         )}

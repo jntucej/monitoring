@@ -311,20 +311,20 @@ export function Scanner({
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={() => handleSuccessScan("21001A0501")}
+                onClick={() => handleSuccessScan("24JJ1A0501")}
                 className="py-2.5 px-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 text-xs font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95"
               >
                 <Zap className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Scan Student #21001A0501</span>
+                <span>Scan Roll #24JJ1A0501</span>
               </button>
 
               <button
                 type="button"
-                onClick={() => handleSuccessScan("21001A0502")}
+                onClick={() => handleSuccessScan("24JJ1A0502")}
                 className="py-2.5 px-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 hover:bg-blue-500/20 text-xs font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95"
               >
                 <Zap className="w-3.5 h-3.5 text-blue-400" />
-                <span>Scan Student #21001A0502</span>
+                <span>Scan Roll #24JJ1A0502</span>
               </button>
             </div>
 

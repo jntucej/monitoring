@@ -33,7 +33,7 @@ interface OperatorState {
   startScan: (roll: string) => void;
   setDirection: (direction: ScanDirection) => void;
   setReason: (reason: ExitReason) => void;
-  confirmScan: () => void;
+  confirmScan: (overrideDirection?: ScanDirection, overrideReason?: ExitReason | string) => void;
   cancelScan: () => void;
   reset: () => void;
   loadStats: () => void;
@@ -101,17 +101,20 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
     set({ selectedReason: reason, state: "confirming" });
   },
 
-  confirmScan: async () => {
-    const { currentStudent, selectedDirection, selectedReason } = get();
+  confirmScan: async (overrideDirection?: ScanDirection, overrideReason?: ExitReason | string) => {
+    const { currentStudent } = get();
     if (!currentStudent) return;
 
-    const isDuplicateScan = await isDuplicate(currentStudent.roll, selectedDirection);
+    const directionToUse = overrideDirection || get().selectedDirection;
+    const reasonToUse = (overrideReason as ExitReason) || get().selectedReason;
+
+    const isDuplicateScan = await isDuplicate(currentStudent.roll, directionToUse);
     if (isDuplicateScan) {
       set({
         state: "error",
         error: {
           code: "DUPLICATE_SCAN",
-          message: `This student was already scanned ${selectedDirection === "OUT" ? "out" : "in"} recently. Please wait 5 minutes.`,
+          message: `This student was already scanned ${directionToUse === "OUT" ? "out" : "in"} recently. Please wait 5 minutes.`,
         },
       });
       setTimeout(() => get().reset(), 3000);
@@ -120,8 +123,8 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
 
     const result = await addScan({
       roll: currentStudent.roll,
-      direction: selectedDirection,
-      reason: selectedDirection === "OUT" ? (selectedReason ?? "Regular") : undefined,
+      direction: directionToUse,
+      reason: reasonToUse ? (reasonToUse as ExitReason) : (directionToUse === "OUT" ? "Regular" : undefined),
       gateId: get().gate?.id || "gate-1",
       operatorId: "op-1",
       isManual: false,

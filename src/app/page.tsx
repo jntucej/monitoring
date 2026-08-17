@@ -208,7 +208,7 @@ export default function Home() {
             <span>NAAC A+ Accredited Campus • Roll Number Blueprint Compliant</span>
           </div>
           <p className="font-mono text-[11px]">
-            © 2026 JNTUH-UCoEJ • Security Infrastructure Engine
+            © 2026 JNTUH CEJ • Security Infrastructure Engine
           </p>
         </div>
       </div>
