@@ -53,7 +53,23 @@ WHERE
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_login_identifier ON users(login_identifier);
 
--- 11. Update RLS policies to work with the new identity model
+-- 11. Helper functions (SECURITY DEFINER to avoid RLS infinite recursion)
+
+CREATE OR REPLACE FUNCTION is_admin(user_id UUID)
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (SELECT 1 FROM users WHERE id = user_id AND (role = 'admin' OR role = 'sysadmin'));
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION is_sysadmin(user_id UUID)
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (SELECT 1 FROM users WHERE id = user_id AND role = 'sysadmin');
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 12. Update RLS policies to work with the new identity model
 
 -- Update users policies to include sysadmin where appropriate
 DROP POLICY IF EXISTS "Users can view their own data" ON users;
@@ -73,30 +89,21 @@ DROP POLICY IF EXISTS "Admins can view all users" ON users;
 CREATE POLICY "Admins can view all users"
 ON users
 FOR SELECT
-USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND (role = 'admin' OR role = 'sysadmin')));
+USING (is_admin(auth.uid()));
 
 DROP POLICY IF EXISTS "Admins can update user data" ON users;
 CREATE POLICY "Admins can update user data"
 ON users
 FOR UPDATE
-USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND (role = 'admin' OR role = 'sysadmin')))
-WITH CHECK (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND (role = 'admin' OR role = 'sysadmin')));
+USING (is_admin(auth.uid()))
+WITH CHECK (is_admin(auth.uid()));
 
 DROP POLICY IF EXISTS "Sysadmins can update user roles" ON users;
 CREATE POLICY "Sysadmins can update user roles"
 ON users
 FOR UPDATE
-USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'sysadmin'))
-WITH CHECK (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'sysadmin'));
-
--- 12. Update helper functions to work with the new role hierarchy
-
-CREATE OR REPLACE FUNCTION is_admin(user_id UUID)
-RETURNS BOOLEAN AS $$
-BEGIN
-  RETURN EXISTS (SELECT 1 FROM users WHERE id = user_id AND (role = 'admin' OR role = 'sysadmin'));
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+USING (is_sysadmin(auth.uid()))
+WITH CHECK (is_sysadmin(auth.uid()));
 
 CREATE OR REPLACE FUNCTION is_sysadmin(user_id UUID)
 RETURNS BOOLEAN AS $$
