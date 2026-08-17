@@ -550,7 +550,10 @@ export async function findStudentByRoll(rollNum: string): Promise<Student | null
     .single();
 
   if (error) {
-    console.error('Error finding student by roll:', error);
+    // Only log errors that aren't "no rows found" (PGRST116)
+    if (error.code !== 'PGRST116') {
+      console.error('Error finding student by roll:', error);
+    }
     return null;
   }
 
@@ -948,7 +951,10 @@ export async function lastScanFor(roll: string): Promise<Scan | null> {
     .single();
 
   if (error) {
-    console.error('Error getting last scan for roll:', error);
+    // Only log errors that aren't "no rows found" (PGRST116)
+    if (error.code !== 'PGRST116') {
+      console.error('Error getting last scan for roll:', error);
+    }
     return null;
   }
 
