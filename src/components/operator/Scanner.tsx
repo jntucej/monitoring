@@ -20,10 +20,11 @@ export function Scanner({
 }: ScannerModalProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const animFrameIdRef = useRef<number | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const isScanningRef = useRef<boolean>(false);
 
-  const [cameraState, setCameraState] = useState<"idle" | "requesting" | "active" | "error" | "simulating">("idle");
+  const [cameraState, setCameraState] = useState<"idle" | "requesting" | "active" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [hasScanned, setHasScanned] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -37,7 +38,7 @@ export function Scanner({
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = "sine";
-      osc.frequency.setValueAtTime(1046.5, ctx.currentTime); // High C
+      osc.frequency.setValueAtTime(1046.5, ctx.currentTime);
       gain.gain.setValueAtTime(0.3, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
       osc.connect(gain);
@@ -50,9 +51,10 @@ export function Scanner({
   }, [soundEnabled]);
 
   const stopCamera = useCallback(() => {
-    if (animFrameIdRef.current) {
-      cancelAnimationFrame(animFrameIdRef.current);
-      animFrameIdRef.current = null;
+    isScanningRef.current = false;
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
     }
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
@@ -65,12 +67,12 @@ export function Scanner({
   }, []);
 
   const handleSuccessScan = useCallback((scannedData: string) => {
-    if (hasScanned) return;
+    if (hasScanned || !scannedData) return;
     setHasScanned(true);
+    isScanningRef.current = false;
 
     playBeep();
 
-    // Haptic vibration feedback
     if (typeof window !== "undefined" && "navigator" in window && window.navigator.vibrate) {
       try {
         window.navigator.vibrate([100, 50, 100]);
@@ -84,27 +86,39 @@ export function Scanner({
     onClose();
   }, [hasScanned, stopCamera, onScan, onClose, playBeep]);
 
-  const scanFrame = useCallback(() => {
+  const processFrame = useCallback(() => {
+    if (!isScanningRef.current || hasScanned) return;
     const video = videoRef.current;
     const canvas = canvasRef.current;
 
     if (!video || !canvas || video.readyState !== video.HAVE_ENOUGH_DATA) {
-      animFrameIdRef.current = requestAnimationFrame(scanFrame);
       return;
     }
+
+    // Downscale scan resolution to 360x270 for smooth, non-fluctuating performance
+    const targetWidth = 360;
+    const targetHeight = 270;
+
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
 
     const context = canvas.getContext("2d", { willReadFrequently: true });
-    if (!context) {
-      animFrameIdRef.current = requestAnimationFrame(scanFrame);
+    if (!context) return;
+
+    context.drawImage(video, 0, 0, targetWidth, targetHeight);
+    const imageData = context.getImageData(0, 0, targetWidth, targetHeight);
+
+    // Try jsQR first for lightweight fast execution
+    const code = jsQR(imageData.data, imageData.width, imageData.height, {
+      inversionAttempts: "dontInvert",
+    });
+
+    if (code && code.data && code.data.trim().length > 0) {
+      handleSuccessScan(code.data.trim());
       return;
     }
 
-    canvas.height = video.videoHeight;
-    canvas.width = video.videoWidth;
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-
+    // Secondary fallback using BarcodeDetector if available
     if ("BarcodeDetector" in window) {
       try {
         // @ts-expect-error - Web API BarcodeDetector
@@ -114,32 +128,14 @@ export function Scanner({
           .then((barcodes: Array<{ rawValue: string }>) => {
             if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
               handleSuccessScan(barcodes[0].rawValue);
-            } else {
-              fallbackJsQRScan(imageData);
             }
           })
-          .catch(() => {
-            fallbackJsQRScan(imageData);
-          });
+          .catch(() => {});
       } catch {
-        fallbackJsQRScan(imageData);
+        // Fallback catch
       }
-    } else {
-      fallbackJsQRScan(imageData);
     }
-  }, [handleSuccessScan]);
-
-  const fallbackJsQRScan = (imageData: ImageData) => {
-    const code = jsQR(imageData.data, imageData.width, imageData.height, {
-      inversionAttempts: "dontInvert",
-    });
-
-    if (code && code.data && code.data.trim().length > 0) {
-      handleSuccessScan(code.data.trim());
-    } else {
-      animFrameIdRef.current = requestAnimationFrame(scanFrame);
-    }
-  };
+  }, [handleSuccessScan, hasScanned]);
 
   const startCamera = useCallback(async () => {
     stopCamera();
@@ -157,8 +153,8 @@ export function Scanner({
       const constraints: MediaStreamConstraints = {
         video: {
           facingMode: { ideal: "environment" },
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
+          width: { ideal: 640 },
+          height: { ideal: 480 },
         },
         audio: false,
       };
@@ -171,7 +167,12 @@ export function Scanner({
         videoRef.current.setAttribute("playsinline", "true");
         await videoRef.current.play();
         setCameraState("active");
-        animFrameIdRef.current = requestAnimationFrame(scanFrame);
+        isScanningRef.current = true;
+
+        // Run scanner at 5 frames per second (every 200ms) to eliminate flickering/lag!
+        timerRef.current = setInterval(() => {
+          processFrame();
+        }, 200);
       }
     } catch (err: unknown) {
       setCameraState("error");
@@ -184,7 +185,7 @@ export function Scanner({
         setErrorMessage(error.message || "Unable to open physical camera stream.");
       }
     }
-  }, [scanFrame, stopCamera]);
+  }, [processFrame, stopCamera]);
 
   useEffect(() => {
     if (isOpen) {
@@ -217,7 +218,7 @@ export function Scanner({
               </div>
               <div>
                 <h2 className="text-sm font-bold text-white">Live Gate Scanner</h2>
-                <p className="text-[11px] text-slate-400">QR Code Verification Engine</p>
+                <p className="text-[11px] text-slate-400">JNTUH CEJ Security Verification</p>
               </div>
             </div>
 
@@ -244,7 +245,7 @@ export function Scanner({
             </div>
           </div>
 
-          {/* Viewfinder & Interactive Camera Overlay */}
+          {/* Viewfinder & Smooth Video Canvas Feed */}
           <div className="relative flex-1 bg-black aspect-[4/3] flex items-center justify-center overflow-hidden">
             <canvas ref={canvasRef} className="hidden" />
 
@@ -256,7 +257,7 @@ export function Scanner({
               autoPlay
             />
 
-            {/* Active Scanning Target Reticle */}
+            {/* Scanning Reticle Frame */}
             {cameraState === "active" && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="relative w-56 h-56 border-2 border-emerald-400/80 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(52,211,153,0.3)]">
@@ -276,7 +277,7 @@ export function Scanner({
               </div>
             )}
 
-            {/* Camera Requesting / Initializing */}
+            {/* Initializing State */}
             {cameraState === "requesting" && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950 text-white space-y-3 p-4 text-center">
                 <RefreshCw className="w-8 h-8 text-emerald-400 animate-spin" />
@@ -284,7 +285,7 @@ export function Scanner({
               </div>
             )}
 
-            {/* Fallback & Camera Permission Error Banner */}
+            {/* Error State */}
             {cameraState === "error" && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/95 text-center p-6 space-y-3">
                 <div className="w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30">
@@ -298,14 +299,14 @@ export function Scanner({
             )}
           </div>
 
-          {/* Interactive Instant QR Test Buttons (Works even without physical camera!) */}
+          {/* Quick Actions & Instant Scan Simulation */}
           <div className="p-4 bg-slate-900 border-t border-slate-800 space-y-3">
             <div className="flex items-center justify-between text-xs text-slate-400">
               <span className="flex items-center gap-1 font-semibold text-emerald-400">
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Instant QR Test Actions</span>
+                <span>Instant Scan Simulation</span>
               </span>
-              <span className="text-[10px] text-slate-500">Tap to simulate scan</span>
+              <span className="text-[10px] text-slate-500">Tap to load profile instantly</span>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
@@ -315,7 +316,7 @@ export function Scanner({
                 className="py-2.5 px-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 text-xs font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95"
               >
                 <Zap className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Scan Roll #24JJ1A0501</span>
+                <span>Scan #24JJ1A0501</span>
               </button>
 
               <button
@@ -324,7 +325,7 @@ export function Scanner({
                 className="py-2.5 px-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 hover:bg-blue-500/20 text-xs font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95"
               >
                 <Zap className="w-3.5 h-3.5 text-blue-400" />
-                <span>Scan Roll #24JJ1A0502</span>
+                <span>Scan #24JJ1A0502</span>
               </button>
             </div>
 
@@ -339,7 +340,7 @@ export function Scanner({
                   className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs transition-all flex items-center justify-center gap-2"
                 >
                   <KeyRound className="w-4 h-4 text-emerald-400" />
-                  <span>Manual Entry Mode</span>
+                  <span>Manual Roll Entry</span>
                 </button>
               )}
 
