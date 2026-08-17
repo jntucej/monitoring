@@ -197,7 +197,8 @@ export function Scanner({
     return () => {
       stopCamera();
     };
-  }, [isOpen, startCamera, stopCamera]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]); // Only re-run when isOpen changes, not on every render
 
   if (!isOpen) return null;
 
