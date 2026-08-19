@@ -1,12 +1,21 @@
 /**
  * Zustand store for the Gate Operator screen state.
- * Manages scan flow: detecting → confirming → reason selection → success.
+ * Manages scan flow: detecting → confirming → reason selection.
  */
 import { create } from "zustand";
-import { inferDirection, findStudentByRoll, addScan, isDuplicate, statsToday, findGateById } from "@/lib/db";
-import type { Scan, Student, Gate, ScanDirection, ExitReason } from "@/lib/types";
+import { inferDirection, findPersonByUniqueId, addScan, isDuplicate, statsToday, findGateById } from "@/lib/db";
+import type { Scan, Person, Student, Gate, ScanDirection, ExitReason } from "@/lib/types";
+import type { ToastData } from "@/components/ui/toast";
+import { useAuthStore } from "@/stores/authStore";
+import { useUIStore } from "@/stores/uiStore";
 
 type ScanState = "idle" | "detecting" | "confirming" | "selecting_reason" | "success" | "error";
+
+// Error info returned from the store on failed scans
+interface ScanError {
+  message: string;
+  code?: string;
+}
 
 interface OperatorState {
   // Current scan flow
@@ -15,15 +24,13 @@ interface OperatorState {
   selectedDirection: ScanDirection;
   selectedReason: ExitReason | null;
   photoVerificationDone: boolean;
+  error: ScanError | null;
 
   // Data
   lastScan: Scan | null;
   todaysStats: { entries: number; exits: number; onCampus: number } | null;
   recentScans: Scan[];
   gate: Gate | null;
-
-  // Errors
-  error: { code: string; message: string } | null;
 
   // Offline queue
   offlineQueue: Array<{ id: string; roll: string; direction: ScanDirection; reason?: ExitReason }>;
@@ -33,12 +40,12 @@ interface OperatorState {
   startScan: (roll: string) => void;
   setDirection: (direction: ScanDirection) => void;
   setReason: (reason: ExitReason) => void;
-  confirmScan: (overrideDirection?: ScanDirection, overrideReason?: ExitReason | string) => void;
+  confirmScan: (addToast: (toast: Omit<ToastData, "id">) => void, overrideDirection?: ScanDirection, overrideReason?: ExitReason | string) => void;
   cancelScan: () => void;
   reset: () => void;
   loadStats: () => void;
   setGate: (gateId: string) => void;
-  flushOfflineQueue: () => void;
+  flushOfflineQueue: () => Promise<void>;
   setOnline: (online: boolean) => void;
 }
 
@@ -48,41 +55,44 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
   selectedDirection: "IN",
   selectedReason: null,
   photoVerificationDone: false,
+  error: null,
 
   lastScan: null,
   todaysStats: null,
   recentScans: [],
   gate: null,
 
-  error: null,
-
   offlineQueue: [],
   isOnline: true,
 
   startScan: async (roll) => {
+    set({ state: "detecting" });
     const cleanRoll = roll.trim().toUpperCase();
-    let student = await findStudentByRoll(cleanRoll);
+    let student = await findPersonByUniqueId(cleanRoll);
 
-    // Dynamic fallback profile creation if roll is not pre-registered in DB seed
     if (!student) {
+      const isFac = cleanRoll.startsWith("FAC");
+      const isStf = cleanRoll.startsWith("STF");
+      const isWrk = cleanRoll.startsWith("WRK");
+      const isVis = cleanRoll.startsWith("VIS");
+      const personType = isFac ? "faculty" : isStf ? "staff" : isWrk ? "worker" : isVis ? "visitor" : "student";
+
       student = {
-        id: `stu-${cleanRoll.toLowerCase()}`,
-        roll: cleanRoll,
-        name: `Student (${cleanRoll})`,
+        id: `per-${cleanRoll.toLowerCase()}`,
+        uniqueId: cleanRoll,
+        fullName: `${personType.toUpperCase()} (${cleanRoll})`,
+        personType,
         department: "CSE",
-        year: 3,
-        section: "A",
-        batch: "2022-2026",
+        roll: cleanRoll,
+        name: `${personType.toUpperCase()} (${cleanRoll})`,
         photo: "/avatar-placeholder.png",
-        email: `${cleanRoll.toLowerCase()}@jntuhcej.ac.in`,
+        photoUrl: "/avatar-placeholder.png",
+        email: `${cleanRoll.toLowerCase()}@gatekeeper.edu`,
         phone: "+91 9876543210",
-        parentId: "parent-1",
-        parentName: "Parent",
-        parentPhone: "+91 9876543211",
         qrCode: cleanRoll,
         idValidUntil: "2028-12-31",
         status: "ACTIVE",
-      } as Student;
+      } as Person;
     }
 
     const direction = await inferDirection(cleanRoll);
@@ -92,7 +102,6 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
       selectedDirection: direction,
       selectedReason: null,
       photoVerificationDone: false,
-      error: null,
     });
   },
 
@@ -106,57 +115,83 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
     set({ selectedReason: reason, state: "confirming" });
   },
 
-  confirmScan: async (overrideDirection?: ScanDirection, overrideReason?: ExitReason | string) => {
+  // Clears only the error field, leaving other state intact
+  clearError: () => set({ error: null }),
+
+  confirmScan: async (addToast, overrideDirection, overrideReason) => {
     const { currentStudent } = get();
     if (!currentStudent) return;
 
     const directionToUse = overrideDirection || get().selectedDirection;
     const reasonToUse = (overrideReason as ExitReason) || get().selectedReason;
 
-    const isDuplicateScan = await isDuplicate(currentStudent.roll, directionToUse);
-    if (isDuplicateScan) {
-      set({
-        state: "error",
-        error: {
-          code: "DUPLICATE_SCAN",
-          message: `This student was already scanned ${directionToUse === "OUT" ? "out" : "in"} recently. Please wait 5 minutes.`,
-        },
+    // Wrap the entire operation in a try/catch to ensure error state is
+    // surfaced to the UI instead of crashing silently.
+    try {
+      const isDuplicateScan = await isDuplicate(currentStudent.uniqueId || currentStudent.roll || "", directionToUse);
+      if (isDuplicateScan) {
+        addToast({
+          variant: "error",
+          title: "Duplicate Scan",
+          message: `This student was already scanned ${directionToUse === "OUT" ? "out" : "in"} recently.`,
+        });
+        set({ error: { message: "Duplicate scan detected", code: "DUPLICATE" } });
+        return;
+      }
+
+      const result = await addScan({
+        roll: currentStudent.uniqueId || currentStudent.roll || "",
+        direction: directionToUse,
+        reason: reasonToUse ? reasonToUse : (directionToUse === "OUT" ? "Regular" : undefined),
+        gateId: get().gate?.id || "gate-1",
+        operatorId: "op-1",
+        isManual: false,
       });
-      setTimeout(() => get().reset(), 3000);
-      return;
-    }
 
-    const result = await addScan({
-      roll: currentStudent.roll,
-      direction: directionToUse,
-      reason: reasonToUse ? (reasonToUse as ExitReason) : (directionToUse === "OUT" ? "Regular" : undefined),
-      gateId: get().gate?.id || "gate-1",
-      operatorId: "op-1",
-      isManual: false,
-    });
+      if (result.duplicate) {
+        addToast({
+          variant: "error",
+          title: "Duplicate Scan",
+          message: "This student was already scanned recently.",
+        });
+        set({ state: "error", error: { message: "Duplicate scan detected", code: "DUPLICATE" } });
+        return;
+      }
 
-    if (result.duplicate) {
-      set({
-        state: "error",
-        error: { code: "DUPLICATE_SCAN", message: "This student was already scanned recently. Please wait 5 minutes." },
+      addToast({
+        variant: "success",
+        title: "Scan Recorded",
+        message: `${currentStudent.name} (${currentStudent.roll}) has been successfully scanned ${directionToUse === "IN" ? "in" : "out"}.`,
       });
-      setTimeout(() => get().reset(), 3000);
-      return;
+
+      const prev = get().todaysStats;
+      const newStats = prev
+        ? {
+            entries: directionToUse === "IN" ? prev.entries + 1 : prev.entries,
+            exits: directionToUse === "OUT" ? prev.exits + 1 : prev.exits,
+            onCampus: directionToUse === "IN" ? prev.onCampus + 1 : prev.onCampus - 1,
+          }
+        : null;
+
+      // Transition to success state (but keep student info visible so the
+      // SuccessFlash animation can render). reset() is called by the page's
+      // "Ready For Next Scan" button or after a short timeout.
+      set({
+        state: "success",
+        lastScan: result.scan,
+        todaysStats: newStats,
+        recentScans: result.scan ? [result.scan, ...get().recentScans.slice(0, 4)] : get().recentScans,
+        error: null,
+      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "An unexpected error occurred during scan confirmation.";
+      addToast({
+        variant: "error",
+        title: "Scan Failed",
+        message: msg,
+      });
+      set({ state: "error", error: { message: msg, code: "UNKNOWN" } });
     }
-
-    // Update stats
-    const stats = await statsToday();
-    set({
-      state: "success",
-      lastScan: result.scan,
-      todaysStats: stats,
-      recentScans: stats.recentScans,
-      currentStudent: null,
-      selectedReason: null,
-      photoVerificationDone: false,
-    });
-
-    setTimeout(() => get().reset(), 1000);
   },
 
   cancelScan: () => {
@@ -190,33 +225,86 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
   },
 
   setGate: async (gateId) => {
-    // Convert numeric gate IDs to proper format (1 -> gate-1, 2 -> gate-2, etc.)
-    // Skip lookup for invalid gate IDs (e.g., "manual", "scan", etc.)
     const normalizedGateId = /^\d+$/.test(gateId) ? `gate-${gateId}` : gateId;
-    
-    // Only query database if gateId looks like a valid gate ID
     if (!normalizedGateId.startsWith('gate-') && !/^\d+$/.test(gateId)) {
-      // Invalid gate ID format, use fallback
       set({ gate: null });
       return;
     }
-    
     const gate = await findGateById(normalizedGateId);
     set({ gate: gate ?? null });
   },
 
-  flushOfflineQueue: () => {
-    const { offlineQueue } = get();
+  flushOfflineQueue: async () => {
+    const { offlineQueue, gate } = get();
     if (offlineQueue.length === 0) return;
-    const scans = offlineQueue.map((s) => ({
-      id: s.id,
-      roll: s.roll,
-      direction: s.direction,
-      reason: s.reason,
-      gateId: get().gate?.id || "gate-1",
-      operatorId: "op-1",
-    }));
-    set({ offlineQueue: [] });
+
+    const { addToast } = useUIStore.getState();
+
+    try {
+      const authStore = useAuthStore.getState();
+      const token = authStore.token;
+
+      if (!token) {
+        console.warn("No auth token available for sync");
+        return;
+      }
+
+      const response = await fetch("/api/gate/logs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          scans: offlineQueue.map((scan) => ({
+            ...scan,
+            gateId: gate?.id || "gate-1",
+          })),
+        }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        const failedCount =
+          result.data?.results?.filter((r: any) => r.status === "error")?.length || 0;
+        if (failedCount === 0) {
+          addToast({
+            title: "Sync Complete",
+            message: `All ${offlineQueue.length} offline scans synced successfully.`,
+            variant: "success",
+          });
+        } else {
+          addToast({
+            title: "Partial Sync",
+            message: `${offlineQueue.length - failedCount} of ${offlineQueue.length} scans synced. ${failedCount} failed.`,
+            variant: "warning",
+          });
+          // Keep failed scans in queue
+          const results = result.data.results;
+          const failedScans = offlineQueue.filter(
+            (_, index) => results[index]?.status === "error"
+          );
+          set({ offlineQueue: failedScans });
+          return;
+        }
+      } else {
+        addToast({
+          title: "Sync Failed",
+          message: "Could not sync offline scans. Please try again later.",
+          variant: "error",
+        });
+        return;
+      }
+
+      set({ offlineQueue: [] });
+    } catch (error) {
+      console.error("Error syncing offline queue:", error);
+      addToast({
+        title: "Sync Error",
+        message: "Network error while syncing scans.",
+        variant: "error",
+      });
+    }
   },
 
   setOnline: (online) => set({ isOnline: online }),

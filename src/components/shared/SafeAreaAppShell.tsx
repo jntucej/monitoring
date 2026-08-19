@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useAuthStore } from "@/stores/authStore";
+import { useUIStore } from "@/stores/uiStore";
 import { DynamicHeader } from "./DynamicHeader";
 import { MobileBottomNav } from "./MobileBottomNav";
 import { NetworkStatusBanner } from "./NetworkStatusBanner";
@@ -13,6 +14,20 @@ interface SafeAreaAppShellProps {
 
 export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
   const { authenticated } = useAuthStore();
+  const { theme, setTheme } = useUIStore();
+
+  // Initialize theme from localStorage on client-side mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedTheme = localStorage.getItem("gate-monitor-theme") as "dark" | "light" | null;
+      if (savedTheme) {
+        setTheme(savedTheme);
+      } else {
+        // Default to dark per project requirement
+        setTheme("dark");
+      }
+    }
+  }, [setTheme]);
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] antialiased selection:bg-[var(--action-primary)] selection:text-white">

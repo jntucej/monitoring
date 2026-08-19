@@ -49,27 +49,11 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             }
           }
         } catch (error) {
-          console.warn("API login request warning, proceeding with offline fallback:", error);
+          console.error("Login error:", error);
         }
 
-        const upper = login.trim().toUpperCase();
-        let role: Role = "student";
-        if (upper.includes("SYS")) role = "sysadmin";
-        else if (upper.includes("ADM")) role = "admin";
-        else if (upper.includes("SUP")) role = "supervisor";
-        else if (upper.includes("OP") || upper.includes("GUARD")) role = "operator";
-        else if (upper.includes("PAR")) role = "parent";
-
-        const mockUser: User = {
-          id: `usr-${login.toLowerCase().replace(/[^a-z0-9]/g, "")}`,
-          name: `${role.toUpperCase()} User (${login.trim()})`,
-          email: `${role}@gatekeeper.edu`,
-          role,
-          status: "ACTIVE",
-        };
-        const mockToken = `token-offline-${Date.now()}`;
-        set({ user: mockUser, token: mockToken, role, authenticated: true, loading: false });
-        return { success: true };
+        set({ loading: false });
+        return { success: false, error: "Invalid credentials" };
       },
 
       pinLogin: async (employeeId, pin) => {
@@ -90,28 +74,11 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             }
           }
         } catch (error) {
-          console.warn("PIN API request warning, proceeding with offline fallback:", error);
+          console.error("PIN login error:", error);
         }
 
-        const upper = employeeId.trim().toUpperCase();
-        let role: Role = "operator";
-        if (upper.includes("SYS")) role = "sysadmin";
-        else if (upper.includes("ADM")) role = "admin";
-        else if (upper.includes("SUP")) role = "supervisor";
-        else if (upper.includes("OP")) role = "operator";
-        else if (upper.includes("PAR")) role = "parent";
-        else role = "student";
-
-        const mockUser: User = {
-          id: `usr-${employeeId.toLowerCase().replace(/[^a-z0-9]/g, "")}`,
-          name: `${role.toUpperCase()} User (${employeeId.trim()})`,
-          email: `${role}@gatekeeper.edu`,
-          role,
-          status: "ACTIVE",
-        };
-        const mockToken = `pin-token-offline-${Date.now()}`;
-        set({ user: mockUser, token: mockToken, role, authenticated: true, loading: false });
-        return { success: true };
+        set({ loading: false });
+        return { success: false, error: "Invalid PIN" };
       },
 
       logout: async () => {

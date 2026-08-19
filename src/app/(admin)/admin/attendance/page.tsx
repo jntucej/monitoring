@@ -45,10 +45,12 @@ export default function AdminAttendancePage() {
         // For each student: find first IN and last OUT of the day
         const byRoll: Record<string, Row> = {};
         for (const s of students) {
-          byRoll[s.roll] = {
-            roll: s.roll,
-            name: s.name,
-            department: s.department,
+          const key = s.uniqueId || s.roll || "";
+          if (!key) continue;
+          byRoll[key] = {
+            roll: key,
+            name: s.fullName || s.name || "",
+            department: s.department || "",
             timeIn: null,
             timeOut: null,
             status: "absent",
@@ -59,7 +61,7 @@ export default function AdminAttendancePage() {
           const row = (byRoll[log.roll] ??= {
             roll: log.roll,
             name: log.name,
-            department: log.department,
+            department: log.department || "",
             timeIn: null,
             timeOut: null,
             status: "absent",

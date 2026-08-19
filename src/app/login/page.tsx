@@ -27,8 +27,12 @@ const ROLE_REDIRECTS: Record<Role, string> = {
   admin: "/admin",
   sysadmin: "/sysadmin",
   parent: "/parent",
-  student: "/student",
+  student: "/person",
   warden: "/sysadmin",
+  faculty: "/person",
+  staff: "/person",
+  worker: "/person",
+  visitor: "/person",
 };
 
 interface DemoCredential {

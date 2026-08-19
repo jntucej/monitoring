@@ -70,7 +70,13 @@ export function LiveFeed() {
         setIsLoading(false);
       }
     }
+
     fetchEvents();
+
+    // Poll every 5 seconds for near-real-time updates
+    const interval = setInterval(fetchEvents, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -90,7 +96,7 @@ export function LiveFeed() {
       )}
 
       {!isLoading && !error && (
-        <div className="p-4 space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto">
+        <div className="p-4 space-y-4 max-h-[calc(100vh-2000px)] overflow-y-auto">
           {events.map((event) => {
             const rollInfo = rollSummary(event.student.rollNumber);
             return (

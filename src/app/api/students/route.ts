@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { findAllStudents, searchStudents, findStudentByRoll } from "@/lib/db";
+import { findAllStudents, searchStudents, findStudentByRoll, getParentChildren } from "@/lib/db";
 import { withAuthAndStatus } from "@/middleware/auth";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { getGateStudentInfo } from "@/lib/authContext";
+import type { Student } from "@/lib/types";
 
 /**
  * Helper: extract bearer token from request for authContext lookups.
@@ -13,20 +14,6 @@ function extractToken(req: NextRequest): string | null {
   if (!authHeader?.startsWith("Bearer ")) return null;
   return authHeader.slice(7);
 }
-
-/**
- * Minimal student fields (no PII) for gate verification.
- */
-type MinimalStudent = {
-  id: string;
-  roll: string;
-  name: string;
-  department: string;
-  year: number;
-  section: string;
-  photo: string;
-  status: string;
-};
 
 async function handleGet(req: NextRequest) {
   try {
@@ -39,9 +26,38 @@ async function handleGet(req: NextRequest) {
     }
 
     const authRole = req.headers.get("x-user-role");
+    const authUserId = req.headers.get("x-user-id");
     const params = req.nextUrl.searchParams;
     const roll = params.get("roll");
     const q = params.get("q");
+    const parentId = params.get("parentId");
+
+    // If parentId is provided, return students for that parent
+    if (parentId) {
+      // Only the parent themselves or an admin can access this
+      if (authRole !== "admin" && authRole !== "sysadmin" && authUserId !== parentId) {
+        return NextResponse.json(
+          { success: false, error: { code: "FORBIDDEN", message: "You can only access your own children." } },
+          { status: 403 }
+        );
+      }
+
+      const children = await getParentChildren(parentId);
+      // Sanitize: remove sensitive fields for parents
+      const sanitized = children.map((s: Student) => ({
+        id: s.id,
+        roll: s.roll,
+        name: s.name,
+        department: s.department,
+        year: s.year,
+        section: s.section,
+        photo: s.photo,
+        status: s.status,
+        hostelBlock: s.hostelBlock,
+        roomNumber: s.roomNumber,
+      }));
+      return NextResponse.json({ success: true, data: sanitized });
+    }
 
     if (roll) {
       // Operator: only receive minimal PII-free fields for gate verification
@@ -79,7 +95,7 @@ async function handleGet(req: NextRequest) {
       }
       const data = await searchStudents(q);
       // For search results, strip PII fields that should not be exposed
-      const sanitized = data.map((s) => ({
+      const sanitized = data.map((s: Student) => ({
         id: s.id,
         roll: s.roll,
         name: s.name,
@@ -102,7 +118,7 @@ async function handleGet(req: NextRequest) {
 
     const data = await findAllStudents();
     // Strip PII from the full listing as well
-    const sanitized = data.map((s) => ({
+    const sanitized = data.map((s: Student) => ({
       id: s.id,
       roll: s.roll,
       name: s.name,
@@ -114,8 +130,8 @@ async function handleGet(req: NextRequest) {
       status: s.status,
     }));
     return NextResponse.json({ success: true, data: sanitized });
-  } catch (error: any) {
-    if (error.message?.includes("NOT_FOUND") || error.message?.includes("FORBIDDEN") || error.message?.includes("INACTIVE")) {
+  } catch (error: unknown) {
+    if (error instanceof Error && (error.message.includes("NOT_FOUND") || error.message.includes("FORBIDDEN") || error.message.includes("INACTIVE"))) {
       return NextResponse.json(
         { success: false, error: { code: "FORBIDDEN", message: error.message } },
         { status: 403 }
@@ -129,7 +145,9 @@ async function handleGet(req: NextRequest) {
   }
 }
 
+// Apply authentication, authorization, and rate limiting to ALL operations
+// Parent role added so parents can fetch their own children's basic info
 export const GET = withRateLimit(
-  withAuthAndStatus(withAuthorization(handleGet, { requiredRole: ["operator", "supervisor", "admin", "sysadmin"] })),
+  withAuthAndStatus(withAuthorization(handleGet, { requiredRole: ["operator", "supervisor", "admin", "sysadmin", "parent"] })),
   { keyPrefix: "students_get", maxRequests: 100 }
 );

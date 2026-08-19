@@ -71,10 +71,13 @@ export function StudentList() {
           </div>
         ) : (
           students.slice(0, 30).map((student) => {
-            const decoded = parseRollNumber(student.roll);
-            const branch = decoded?.departmentFullName ?? student.department ?? "—";
+            const roll = student.uniqueId || student.roll || "";
+            const name = student.fullName || student.name || "";
+            const dept = student.department || "";
+            const decoded = parseRollNumber(roll);
+            const branch = decoded?.departmentFullName ?? dept ?? "—";
             const colorClass =
-              DEPT_COLORS[student.department] ?? "bg-slate-500/20 text-slate-400";
+              (dept && DEPT_COLORS[dept]) ?? "bg-slate-500/20 text-slate-400";
             return (
               <div
                 key={student.id}
@@ -85,8 +88,8 @@ export function StudentList() {
                     <User className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="font-medium">{student.name}</p>
-                    <p className="text-sm text-[var(--text-muted)] font-mono">{student.roll}</p>
+                    <p className="font-medium">{name}</p>
+                    <p className="text-sm text-[var(--text-muted)] font-mono">{roll}</p>
                   </div>
                 </div>
                 <p className="text-sm text-[var(--text-secondary)]">{branch}</p>

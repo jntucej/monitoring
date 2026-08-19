@@ -3,23 +3,28 @@ import { randomUUID } from "crypto";
 import bcrypt from 'bcryptjs';
 
 import type {
-  Department, DepartmentCode, Gate, Student, Scan, ScanDirection, ExitReason,
-  GatePass, GatePassStatus, Alert, AlertSeverity, AuditEntry,
-  User, DashboardData, Role, AccountStatus,
+  Department, DepartmentCode, Gate, Person, Student, PersonType, StudentDetails, EmployeeDetails, VisitorLog,
+  Scan, ScanDirection, ExitReason, GatePass, GatePassStatus, Alert, AlertSeverity, AuditEntry,
+  User, DashboardData, Role, AccountStatus, PersonTypeStats
 } from "./types";
 
 /* ------------------------------------------------------------------ *
  *  COLLEGE DATA
  * ------------------------------------------------------------------ */
 export const COLLEGE = {
-  name: "JNTUH College of Engineering Jagtial (JNTUH CEJ)",
+  name: "JNTUH CEJ",
   shortName: "JNTUH CEJ",
-  address: "JNTUH College of Engineering Jagtial, Nachupally (Kondagattu), Jagtial Dist, Telangana — 505 501",
+  address: "JNTUH CEJ, Nachupally (Kondagattu), Jagtial Dist, Telangana — 505 501",
   logo: "🏛️",
   accreditation: "NAAC A+ Grade",
   website: "https://jntuhcej.ac.in/",
   principal: "Dr. G. Narsimha",
 };
+
+export function sanitizePostgrestParam(val: string): string {
+  if (!val) return "";
+  return val.replace(/[,()\\'"]/g, "").trim();
+}
 
 export async function resolveAlert(alertId: string, userId: string): Promise<boolean> {
   const { data: user } = await supabase.from('users').select('name').eq('id', userId).single();
@@ -67,7 +72,80 @@ type Reason = ExitReason;
 /* ------------------------------------------------------------------ *
  *  MAPPERS
  * ------------------------------------------------------------------ */
-function mStu(r: any): Student { return { id: r.id, roll: r.roll, name: r.name, department: r.department, year: r.year, section: r.section, batch: r.batch, photo: r.photo, email: r.email, phone: r.phone, parentName: r.parent_name, parentPhone: r.parent_phone, parentId: r.parent_id, qrCode: r.qr_code, idValidUntil: r.id_valid_until, status: r.status }; }
+export function mPerson(r: any): Person {
+  if (!r) return r;
+  const personType: PersonType = r.person_type || r.personType || "student";
+  const uniqueId = r.unique_id || r.uniqueId || r.roll || "";
+  const fullName = r.full_name || r.fullName || r.name || "";
+  
+  const studentDetails: StudentDetails | undefined = r.student_details ? {
+    personId: r.student_details.person_id || r.id,
+    roll: r.student_details.roll || uniqueId,
+    year: r.student_details.year,
+    section: r.student_details.section,
+    batch: r.student_details.batch,
+    parentId: r.student_details.parent_id,
+    studentType: r.student_details.student_type,
+    hostelBlock: r.student_details.hostel_block,
+    roomNumber: r.student_details.room_number,
+    hostelCurfewTime: r.student_details.hostel_curfew_time,
+    gender: r.student_details.gender,
+    wardenId: r.student_details.warden_id,
+  } : undefined;
+
+  const employeeDetails: EmployeeDetails | undefined = r.employee_details ? {
+    personId: r.employee_details.person_id || r.id,
+    employeeId: r.employee_details.employee_id || uniqueId,
+    designation: r.employee_details.designation,
+    joiningDate: r.employee_details.joining_date,
+    isHod: r.employee_details.is_hod,
+    departmentId: r.employee_details.department_id,
+  } : undefined;
+
+  return {
+    id: r.id,
+    uniqueId,
+    fullName,
+    personType,
+    department: r.department || undefined,
+    designation: r.designation || undefined,
+    email: r.email || undefined,
+    phone: r.phone || undefined,
+    photoUrl: r.photo_url || r.photo || undefined,
+    qrCode: r.qr_code || undefined,
+    idValidUntil: r.id_valid_until || undefined,
+    status: r.status || "active",
+    visitorHost: r.visitor_host || undefined,
+    visitorPurpose: r.visitor_purpose || undefined,
+    checkedInAt: r.checked_in_at || undefined,
+    checkedOutAt: r.checked_out_at || undefined,
+    createdAt: r.created_at || undefined,
+    updatedAt: r.updated_at || undefined,
+    studentDetails,
+    employeeDetails,
+    // Backwards-compatibility aliases
+    roll: uniqueId,
+    name: fullName,
+    photo: r.photo_url || r.photo || undefined,
+    year: studentDetails?.year || r.year,
+    section: studentDetails?.section || r.section,
+    batch: studentDetails?.batch || r.batch,
+    parentName: r.parent_name,
+    parentPhone: r.parent_phone,
+    parentId: studentDetails?.parentId || r.parent_id,
+    studentType: studentDetails?.studentType || r.student_type,
+    gender: studentDetails?.gender || r.gender,
+    hostelBlock: (studentDetails as any)?.hostel_block || studentDetails?.hostelBlock || r.hostel_block,
+    roomNumber: (studentDetails as any)?.room_number || studentDetails?.roomNumber || r.room_number,
+    hostelCurfewTime: (studentDetails as any)?.hostel_curfew_time || studentDetails?.hostelCurfewTime || r.hostel_curfew_time,
+    wardenId: (studentDetails as any)?.warden_id || studentDetails?.wardenId || r.warden_id,
+  };
+}
+
+export function mStu(r: any): Student {
+  return mPerson(r);
+}
+
 function mUser(r: any): User {
   return {
     id: r.id,
@@ -84,12 +162,72 @@ function mUser(r: any): User {
     isHod: r.is_hod || undefined,
     departmentId: r.department_id || undefined,
     canViewGender: r.can_view_gender || undefined,
-    status: r.status || "ACTIVE"
+    status: r.status || "ACTIVE",
+    personType: r.person_type || undefined,
+    uniqueId: r.unique_id || undefined,
   };
 }
-function mScan(r: any): Scan { return { id: r.id, roll: r.roll, name: r.name, department: r.department, year: r.year, direction: r.direction, reason: r.reason, gateId: r.gate_id, gateName: r.gate_name, operatorId: r.operator_id, operatorName: r.operator_name, timestamp: r.timestamp, isManual: !!r.is_manual, isCorrection: !!r.is_correction, originalScanId: r.original_scan_id || undefined }; }
-function mPass(r: any): GatePass { return { id: r.id, roll: r.roll, studentName: r.student_name, department: r.department, reason: r.reason, from: r.from_datetime, to: r.to_datetime, description: r.description, requestedById: r.requested_by_id, requestedByName: r.requested_by_name, requestedAt: r.requested_at, parentStatus: r.parent_status, adminStatus: r.admin_status, finalStatus: r.final_status, parentComment: r.parent_comment, adminComment: r.admin_comment, parentApproverId: r.parent_approver_id, adminApproverId: r.admin_approver_id, qrCode: r.qr_code }; }
-function mAlert(r: any): Alert { return { id: r.id, severity: r.severity, title: r.title, message: r.message, gateId: r.gate_id, studentRoll: r.student_roll, timestamp: r.timestamp, resolved: !!r.resolved }; }
+
+function mScan(r: any): Scan {
+  const uniqueId = r.unique_id || r.roll || "";
+  return {
+    id: r.id,
+    roll: uniqueId,
+    uniqueId,
+    name: r.name || r.person_name || "",
+    personType: r.person_type || "student",
+    department: r.department || undefined,
+    year: r.year || undefined,
+    direction: r.direction,
+    reason: r.reason,
+    gateId: r.gate_id,
+    gateName: r.gate_name,
+    operatorId: r.operator_id,
+    operatorName: r.operator_name,
+    timestamp: r.timestamp,
+    isManual: !!r.is_manual,
+    isCorrection: !!r.is_correction,
+    originalScanId: r.original_scan_id || undefined,
+    personId: r.person_id || undefined,
+  };
+}
+
+function mPass(r: any): GatePass {
+  return {
+    id: r.id,
+    roll: r.roll,
+    studentName: r.student_name,
+    department: r.department,
+    reason: r.reason,
+    from: r.from_datetime,
+    to: r.to_datetime,
+    description: r.description,
+    requestedById: r.requested_by_id,
+    requestedByName: r.requested_by_name,
+    requestedAt: r.requested_at,
+    parentStatus: r.parent_status,
+    adminStatus: r.admin_status,
+    finalStatus: r.final_status,
+    parentComment: r.parent_comment,
+    adminComment: r.admin_comment,
+    parentApproverId: r.parent_approver_id,
+    adminApproverId: r.admin_approver_id,
+    qrCode: r.qr_code,
+  };
+}
+
+function mAlert(r: any): Alert {
+  return {
+    id: r.id,
+    severity: r.severity,
+    title: r.title,
+    message: r.message,
+    gateId: r.gate_id,
+    studentRoll: r.student_roll,
+    timestamp: r.timestamp,
+    resolved: !!r.resolved,
+  };
+}
 
 export async function findPass(passId: string): Promise<GatePass | null> {
   const { data, error } = await supabase
@@ -107,14 +245,11 @@ export async function findPass(passId: string): Promise<GatePass | null> {
 }
 
 export async function approvePass(passId: string, role: string, comment: string = "", approverId: string): Promise<boolean> {
-  // Determine which status field to update based on role
   const updateField = role === 'parent' ? 'parent_status' : 'admin_status';
   const commentField = role === 'parent' ? 'parent_comment' : 'admin_comment';
   const approverField = role === 'parent' ? 'parent_approver_id' : 'admin_approver_id';
-
   const statusValue = 'APPROVED';
 
-  // First read the pass to compute new final_status
   const { data: pass, error: readErr } = await supabase
     .from('gate_passes')
     .select('*')
@@ -152,34 +287,15 @@ export async function approvePass(passId: string, role: string, comment: string 
     return false;
   }
 
-  const { data: user } = await supabase.from('users').select('name').eq('id', approverId).single();
-  await addAudit({
-    action: `GATE_PASS_APPROVED_${role.toUpperCase()}`,
-    userId: approverId,
-    userName: user?.name ?? 'Unknown',
-    role,
-    details: `Approved gate pass ${passId}${comment ? ` — ${comment}` : ''}`,
-  });
-
-  // Notify student
-  const { data: stu } = await supabase.from('students').select('id, parent_id, name').eq('roll', pass.roll).single();
-  if (stu) {
-    await addNotification(
-      'student',
-      stu.id,
-      'gate_pass',
-      'Gate Pass Update',
-      `Your gate pass has been ${role === 'parent' ? 'approved by parent' : 'approved by admin'} (${finalStatus}).`
-    );
-    if (stu.parent_id) {
-      await addNotification(
-        'parent',
-        stu.parent_id,
-        'gate_pass',
-        'Gate Pass Update',
-        `Gate pass for ${stu.name} was ${role === 'parent' ? 'approved by parent' : 'approved by admin'}.`
-      );
-    }
+  if (approverId) {
+    const { data: user } = await supabase.from('users').select('name').eq('id', approverId).single();
+    await addAudit({
+      action: `GATE_PASS_APPROVED_${role.toUpperCase()}`,
+      userId: approverId,
+      userName: user?.name ?? 'Unknown',
+      role: role as any,
+      details: `Approved gate pass ${passId} — ${comment}`,
+    });
   }
 
   return true;
@@ -211,7 +327,7 @@ export async function rejectPass(passId: string, role: string, comment: string =
       action: `GATE_PASS_REJECTED_${role.toUpperCase()}`,
       userId: approverId,
       userName: user?.name ?? 'Unknown',
-      role,
+      role: role as any,
       details: `Rejected gate pass ${passId} — ${comment}`,
     });
   }
@@ -228,67 +344,39 @@ export async function createGatePass(passData: {
   requestedById?: string;
   requestedByName?: string;
 }): Promise<GatePass | null> {
-  // Look up student for derived fields
-  const { data: stu, error: stuErr } = await supabase
-    .from('students')
-    .select('id, name, department, parent_id')
-    .eq('roll', passData.roll.trim().toUpperCase())
-    .single();
-
-  if (stuErr || !stu) {
-    console.error('Student not found for pass creation:', stuErr);
+  const person = await findPersonByUniqueId(passData.roll.trim().toUpperCase());
+  if (!person) {
+    console.error('Person not found for pass creation:', passData.roll);
     return null;
   }
 
-  const id = `pass-${randomUUID()}`;
-  const qrPayload = JSON.stringify({ id, roll: passData.roll });
+  const id = `pass-${Date.now()}`;
+  const qrCode = `PASS-${id}-${person.uniqueId}-${Date.now()}`;
 
-  const { data, error } = await supabase
-    .from('gate_passes')
-    .insert([
-      {
-        id,
-        student_id: stu.id,
-        roll: passData.roll.toUpperCase(),
-        student_name: stu.name,
-        department: stu.department,
-        reason: passData.reason,
-        from_datetime: passData.from,
-        to_datetime: passData.to,
-        description: passData.description ?? null,
-        requested_by_id: passData.requestedById ?? null,
-        requested_by_name: passData.requestedByName ?? null,
-        parent_status: 'PENDING',
-        admin_status: 'PENDING',
-        final_status: 'PENDING',
-        qr_code: qrPayload,
-      },
-    ])
-    .select()
-    .single();
+  const passRow = {
+    id,
+    roll: person.uniqueId,
+    student_name: person.fullName,
+    department: person.department || '',
+    reason: passData.reason,
+    from_datetime: passData.from,
+    to_datetime: passData.to,
+    description: passData.description || null,
+    requested_by_id: passData.requestedById || person.id,
+    requested_by_name: passData.requestedByName || person.fullName,
+    requested_at: new Date().toISOString(),
+    parent_status: 'PENDING',
+    admin_status: 'PENDING',
+    final_status: 'PENDING',
+    qr_code: qrCode,
+  };
 
-  if (error) {
+  const { data, error } = await supabase.from('gate_passes').insert(passRow).select().single();
+
+  if (error || !data) {
     console.error('Error creating gate pass:', error);
     return null;
   }
-
-  // Notify parent & admin
-  if (stu.parent_id) {
-    await addNotification(
-      'parent',
-      stu.parent_id,
-      'gate_pass',
-      'New Gate Pass Request',
-      `${stu.name} requested a gate pass (${passData.reason}) from ${passData.from} to ${passData.to}. Please review.`
-    );
-  }
-  await addNotification(
-    'admin',
-    'all',
-    'gate_pass',
-    'New Gate Pass Request',
-    `${stu.name} (${passData.roll}) requested a gate pass (${passData.reason}).`
-  );
 
   return mPass(data);
 }
@@ -297,239 +385,236 @@ export async function findGatePasses(filters: {
   status?: string;
   roll?: string;
   parentId?: string;
-  studentId?: string;
-} = {}): Promise<GatePass[]> {
-  let query = supabase.from('gate_passes').select('*').order('requested_at', { ascending: false });
+  limit?: number;
+}): Promise<GatePass[]> {
+  let query = supabase.from('gate_passes').select('*');
 
   if (filters.status) {
-    query = query.eq('final_status', filters.status);
+    if (filters.status === 'APPROVED') {
+      query = query.eq('final_status', 'APPROVED');
+    } else if (filters.status === 'PENDING') {
+      query = query.in('final_status', ['PENDING', 'APPROVED_PARENT', 'APPROVED_ADMIN']);
+    } else if (filters.status === 'REJECTED') {
+      query = query.eq('final_status', 'REJECTED');
+    } else {
+      query = query.eq('final_status', filters.status);
+    }
   }
+
   if (filters.roll) {
-    query = query.eq('roll', filters.roll.toUpperCase());
+    query = query.eq('roll', filters.roll.trim().toUpperCase());
   }
-  if (filters.parentId) {
-    // Filter by parent of the student
-    const { data: stu } = await supabase.from('students').select('id').eq('parent_id', filters.parentId);
-    const ids = (stu ?? []).map((s: any) => s.id);
-    if (ids.length === 0) return [];
-    query = query.in('student_id', ids);
-  }
-  if (filters.studentId) {
-    query = query.eq('student_id', filters.studentId);
+
+  query = query.order('requested_at', { ascending: false });
+
+  if (filters.limit) {
+    query = query.limit(filters.limit);
   }
 
   const { data, error } = await query;
-
   if (error) {
     console.error('Error finding gate passes:', error);
     return [];
   }
 
-  return (data ?? []).map(mPass);
+  return (data || []).map(mPass);
 }
 
 export async function correctionCandidates(): Promise<Scan[]> {
-  // Eligible for correction: scans within the last hour, not already corrected
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-
   const { data, error } = await supabase
     .from('gate_logs')
     .select('*')
     .gte('timestamp', oneHourAgo)
     .eq('is_correction', false)
     .order('timestamp', { ascending: false })
-    .limit(100);
+    .limit(20);
 
   if (error) {
-    console.error('Error loading correction candidates:', error);
+    console.error('Error fetching correction candidates:', error);
     return [];
   }
 
-  return (data ?? []).map(mScan);
+  return (data || []).map(mScan);
 }
 
-export async function correctScan(originalScanId: string, newDirection: ScanDirection, newReason: ExitReason | undefined, reason: string, userId: string, userName: string, role: string): Promise<Scan | null> {
-  // 1. Read the original scan
-  const { data: original, error: readErr } = await supabase
+export async function correctScan(
+  originalScanId: string,
+  newDirection: ScanDirection,
+  newReason: ExitReason | undefined,
+  reason: string,
+  userId: string,
+  userName: string,
+  role: string
+): Promise<Scan | null> {
+  const { data: origScan, error: origErr } = await supabase
     .from('gate_logs')
     .select('*')
     .eq('id', originalScanId)
     .single();
 
-  if (readErr || !original) {
-    console.error('Original scan not found:', readErr);
+  if (origErr || !origScan) {
+    console.error('Original scan not found for correction:', origErr);
     return null;
   }
 
-  // 2. Reject corrections outside 1-hour window
-  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-  if (original.timestamp < oneHourAgo) {
-    console.warn('Scan outside correction window');
-    return null;
-  }
+  const newId = `scan-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
 
-  // 3. Insert a NEW scan row that supersedes the original
-  const newId = `scan-${randomUUID()}`;
-  const ts = new Date().toISOString();
-  const { data: newScan, error: insErr } = await supabase
+  const correctionRow = {
+    id: newId,
+    roll: origScan.roll,
+    unique_id: origScan.unique_id || origScan.roll,
+    person_id: origScan.person_id,
+    person_type: origScan.person_type || 'student',
+    name: origScan.name,
+    department: origScan.department,
+    year: origScan.year,
+    direction: newDirection,
+    reason: newReason || null,
+    gate_id: origScan.gate_id,
+    gate_name: origScan.gate_name,
+    operator_id: origScan.operator_id,
+    operator_name: origScan.operator_name,
+    timestamp: new Date().toISOString(),
+    is_manual: true,
+    is_correction: true,
+    original_scan_id: originalScanId,
+  };
+
+  const { data: newScanData, error: insertErr } = await supabase
     .from('gate_logs')
-    .insert([
-      {
-        id: newId,
-        student_id: original.student_id,
-        roll: original.roll,
-        name: original.name,
-        department: original.department,
-        year: original.year,
-        direction: newDirection,
-        reason: newReason ?? null,
-        gate_id: original.gate_id,
-        gate_name: original.gate_name,
-        operator_id: userId,
-        operator_name: userName,
-        timestamp: ts,
-        is_manual: 1,
-        is_correction: true,
-        original_scan_id: originalScanId,
-        correction_reason: reason,
-      },
-    ])
+    .insert(correctionRow)
     .select()
     .single();
 
-  if (insErr || !newScan) {
-    console.error('Error inserting corrected scan:', insErr);
+  if (insertErr || !newScanData) {
+    console.error('Error creating correction scan:', insertErr);
     return null;
   }
 
-  // 4. Update campus_occupancy to reflect the new direction
-  if (original.student_id) {
-    await supabase.from('campus_occupancy').upsert(
-      {
-        student_id: original.student_id,
-        current_status: newDirection,
-        last_gate_id: original.gate_id,
-        last_log_id: newId,
-        last_updated: ts,
-      },
-      { onConflict: 'student_id' }
-    );
-  }
-
-  // 5. Audit
   await addAudit({
     action: 'SCAN_CORRECTED',
     userId,
     userName,
-    role,
-    details: `Corrected scan ${originalScanId} (${original.direction} → ${newDirection}). Reason: ${reason}`,
-    gateId: original.gate_id,
+    role: role as Role,
+    details: `Corrected scan ${originalScanId}: ${origScan.direction} -> ${newDirection}. Reason: ${reason}`,
+    gateId: origScan.gate_id,
   });
 
-  return mScan(newScan);
+  return mScan(newScanData);
 }
 
 export async function getAllGatesLive(): Promise<Gate[]> {
-  // Combine persisted gates + activity counts from today's scans
-  const gates = await findAllGates();
-  const today = await scansToday();
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
 
-  return gates.map((g) => ({
-    ...g,
-    // The Gate type from `findAllGates` doesn't include these, but the route extends it
-    currentScanCount: today.filter((s) => s.gateId === g.id).length,
-    lastScan: today.find((s) => s.gateId === g.id) ?? null,
-  })) as any;
+  const { data: persistentGates } = await supabase.from('gates').select('*');
+  const gateMap = new Map<string, Gate>();
+
+  if (persistentGates) {
+    for (const g of persistentGates) {
+      gateMap.set(g.id, {
+        id: g.id,
+        name: g.name,
+        location: g.location,
+        type: g.type,
+        isActive: !!g.is_active,
+      });
+    }
+  } else {
+    for (const g of GATES) {
+      gateMap.set(g.id, g);
+    }
+  }
+
+  return Array.from(gateMap.values());
 }
 
 export async function getAlerts(resolved?: boolean): Promise<Alert[]> {
   let query = supabase.from('alerts').select('*').order('timestamp', { ascending: false });
-  if (resolved !== undefined) {
+  if (typeof resolved === 'boolean') {
     query = query.eq('resolved', resolved);
   }
+
   const { data, error } = await query;
   if (error) {
-    console.error('Error loading alerts:', error);
+    console.error('Error fetching alerts:', error);
     return [];
   }
-  return (data ?? []).map(mAlert);
+
+  return (data || []).map(mAlert);
 }
 
 export async function getNotifications(recipientType: string, recipientId: string): Promise<Alert[]> {
-  // 'all' is a wildcard (e.g. for admin broadcast)
-  let query = supabase
-    .from('notifications')
-    .select('*')
-    .eq('recipient_type', recipientType)
-    .order('created_at', { ascending: false })
-    .limit(50);
+  let query = supabase.from('alerts').select('*').order('timestamp', { ascending: false });
 
-  if (recipientId !== 'all') {
-    query = query.eq('recipient_id', recipientId);
+  const safeType = sanitizePostgrestParam(recipientType);
+  const safeId = sanitizePostgrestParam(recipientId);
+
+  if (safeType && safeType !== 'all') {
+    query = query.or(`recipient_type.eq.${safeType},recipient_type.eq.all`);
+  }
+
+  if (safeId) {
+    query = query.or(`recipient_id.eq.${safeId},recipient_id.is.null`);
   }
 
   const { data, error } = await query;
   if (error) {
-    console.error('Error loading notifications:', error);
+    console.error('Error fetching notifications:', error);
     return [];
   }
-  // Re-map to Alert shape (notifications table has no severity/gate/student_roll — use defaults)
-  return (data ?? []).map((n: any) => ({
-    id: n.id,
-    severity: 'info' as AlertSeverity,
-    title: n.title,
-    message: n.message,
-    gateId: undefined,
-    studentRoll: undefined,
-    timestamp: n.created_at,
-    resolved: !!n.read,
-  }));
+
+  return (data || []).map(mAlert);
 }
 
 export async function getUserForSession(sessionId: string): Promise<User | null> {
-  const { data, error } = await supabase
+  const { data: session, error: sessErr } = await supabase
     .from('sessions')
-    .select('users(*)')
+    .select('user_id, expires_at')
     .eq('id', sessionId)
-    .eq('active', true)
     .single();
 
-  if (error || !data) {
-    console.error('Error loading session user:', error);
+  if (sessErr || !session) return null;
+
+  if (new Date(session.expires_at) < new Date()) {
+    await supabase.from('sessions').delete().eq('id', sessionId);
     return null;
   }
-  return data.users ? mUser(data.users) : null;
+
+  const { data: user, error: userErr } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', session.user_id)
+    .single();
+
+  if (userErr || !user) return null;
+
+  return mUser(user);
 }
 
 export async function createSession(userId: string, token: string, refreshToken: string): Promise<string | null> {
   const id = `sess-${randomUUID()}`;
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
-  const { error } = await supabase.from('sessions').insert([
-    {
-      id,
-      user_id: userId,
-      token,
-      refresh_token: refreshToken,
-      active: true,
-      expires_at: expiresAt,
-      created_at: new Date().toISOString(),
-    },
-  ]);
+  const { error } = await supabase.from('sessions').insert({
+    id,
+    user_id: userId,
+    token,
+    refresh_token: refreshToken,
+    expires_at: expiresAt,
+  });
 
   if (error) {
     console.error('Error creating session:', error);
     return null;
   }
+
   return id;
 }
 
 export async function invalidateSession(sessionId: string): Promise<boolean> {
-  const { error } = await supabase
-    .from('sessions')
-    .update({ active: false, invalidated_at: new Date().toISOString() })
-    .eq('id', sessionId);
-
+  const { error } = await supabase.from('sessions').delete().eq('id', sessionId);
   if (error) {
     console.error('Error invalidating session:', error);
     return false;
@@ -537,154 +622,240 @@ export async function invalidateSession(sessionId: string): Promise<boolean> {
   return true;
 }
 
-function toStuAny(r: any) { return r; }
-
 /* ------------------------------------------------------------------ *
- *  PUBLIC API — STUDENTS
+ *  UNIFIED PERSONS FUNCTIONS
  * ------------------------------------------------------------------ */
-export async function findStudentByRoll(rollNum: string): Promise<Student | null> {
-  const { data, error } = await supabase
+
+export async function findPersonByUniqueId(uniqueId: string): Promise<Person | null> {
+  const formattedId = sanitizePostgrestParam(uniqueId).toUpperCase();
+
+  // 1. Try querying `persons` table with student_details and employee_details
+  const { data: personData, error: pErr } = await supabase
+    .from('persons')
+    .select('*, student_details(*), employee_details(*)')
+    .or(`unique_id.eq.${formattedId},id.eq.${formattedId}`)
+    .maybeSingle();
+
+  if (personData) {
+    return mPerson(personData);
+  }
+
+  // Fallback if person table doesn't have details joined or using old table structure
+  const { data: pSimple } = await supabase
+    .from('persons')
+    .select('*')
+    .eq('unique_id', formattedId)
+    .maybeSingle();
+
+  if (pSimple) {
+    return mPerson(pSimple);
+  }
+
+  // Secondary fallback to legacy `students` table if `persons` query failed
+  const { data: legacyStu } = await supabase
     .from('students')
     .select('*')
-    .eq('roll', rollNum.trim().toUpperCase())
-    .single();
+    .eq('roll', formattedId)
+    .maybeSingle();
 
-  if (error) {
-    // Only log errors that aren't "no rows found" (PGRST116)
-    if (error.code !== 'PGRST116') {
-      console.error('Error finding student by roll:', error);
-    }
-    return null;
+  if (legacyStu) {
+    return mPerson({ ...legacyStu, unique_id: legacyStu.roll, full_name: legacyStu.name, person_type: 'student' });
   }
 
-  return data ? mStu(data) : null;
-}
-
-export async function findAllStudents(): Promise<Student[]> {
-  const { data, error } = await supabase
-    .from('students')
-    .select('*')
-    .order('roll');
-
-  if (error) {
-    console.error('Error finding all students:', error);
-    return [];
-  }
-
-  return data.map(mStu);
-}
-
-export async function searchStudents(q: string): Promise<Student[]> {
-  const s = `%${q.toLowerCase()}%`;
-  const { data, error } = await supabase
-    .from('students')
-    .select('*')
-    .or(`roll.ilike.${s},name.ilike.${s},department.ilike.${s}`)
-    .limit(20);
-
-  if (error) {
-    console.error('Error searching students:', error);
-    return [];
-  }
-
-  return data.map(mStu);
-}
-export async function findByQr(payload: string): Promise<Student | null> { return findStudentByRoll(payload.trim().toUpperCase().replace(/\s+/g, "")); }
-export async function getStudentByRoll(rollNum: string): Promise<Student | null> { return findStudentByRoll(rollNum); }
-
-/* ------------------------------------------------------------------ *
- *  PUBLIC API — GATES
- * ------------------------------------------------------------------ */
-export async function findGateById(id: string): Promise<Gate | null> {
-  const { data, error } = await supabase
-    .from('gates')
-    .select('*')
-    .eq('id', id)
-    .single();
-
-  if (!error && data) {
-    return { id: data.id, name: data.name, location: data.location, type: data.type, isActive: !!data.is_active };
-  }
-
-  // Fallback to local GATES array if database query fails
-  // This prevents crashes when database types don't match or connection issues occur
-  const localGate = GATES.find(g => g.id === id);
-  if (localGate) {
-    return localGate;
-  }
-
-  // Suppress noisy error logging during normal operation
-  if (error && error.code !== '22P02') {
-    console.error('Error finding gate by id:', error);
-  }
   return null;
 }
 
-export async function findAllGates(): Promise<Gate[]> {
-  const { data, error } = await supabase
-    .from('gates')
-    .select('*');
+// Backwards compatibility aliases
+export const findStudentByRoll = findPersonByUniqueId;
+export const getStudentByRoll = findPersonByUniqueId;
+export async function findByQr(payload: string): Promise<Person | null> {
+  return findPersonByUniqueId(payload.trim().toUpperCase().replace(/\s+/g, ""));
+}
 
-  if (error) {
-    console.error('Error finding all gates:', error);
+export async function findAllPersons(type?: PersonType): Promise<Person[]> {
+  let query = supabase.from('persons').select('*, student_details(*), employee_details(*)');
+  if (type) {
+    query = query.eq('person_type', type);
+  }
+
+  const { data, error } = await query;
+  if (error || !data) {
+    // Try without joins
+    const { data: fallbackData } = await supabase.from('persons').select('*');
+    return (fallbackData || []).map(mPerson);
+  }
+
+  return data.map(mPerson);
+}
+
+export const findAllStudents = () => findAllPersons('student');
+
+export async function findPersonsByType(type: PersonType): Promise<Person[]> {
+  return findAllPersons(type);
+}
+
+export async function searchPersons(q: string, type?: PersonType): Promise<Person[]> {
+  const safeQ = sanitizePostgrestParam(q);
+  const searchTerm = `%${safeQ.toLowerCase()}%`;
+  let query = supabase.from('persons').select('*, student_details(*), employee_details(*)');
+
+  if (type) {
+    query = query.eq('person_type', type);
+  }
+
+  query = query.or(`full_name.ilike.${searchTerm},unique_id.ilike.${searchTerm},department.ilike.${searchTerm},email.ilike.${searchTerm}`);
+
+  const { data, error } = await query;
+  if (error || !data) {
     return [];
   }
 
-  return data.map((r) => ({ id: r.id, name: r.name, location: r.location, type: r.type, isActive: !!r.is_active }));
+  return data.map(mPerson);
+}
+
+export const searchStudents = (q: string) => searchPersons(q, 'student');
+
+export async function createVisitor(data: {
+  fullName: string;
+  phone?: string;
+  email?: string;
+  visitorHost?: string;
+  visitorPurpose?: string;
+}): Promise<Person | null> {
+  const id = randomUUID();
+  const visitorId = `VIS-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+  const personRow = {
+    id,
+    unique_id: visitorId,
+    full_name: data.fullName,
+    person_type: 'visitor',
+    phone: data.phone || null,
+    email: data.email || null,
+    visitor_host: data.visitorHost || null,
+    visitor_purpose: data.visitorPurpose || null,
+    status: 'active',
+    created_at: new Date().toISOString(),
+  };
+
+  const { data: newPerson, error } = await supabase.from('persons').insert(personRow).select().single();
+  if (error || !newPerson) {
+    console.error('Error creating visitor:', error);
+    return null;
+  }
+
+  // Create visitor log
+  await supabase.from('visitor_logs').insert({
+    id: randomUUID(),
+    person_id: id,
+    check_in_at: new Date().toISOString(),
+    purpose: data.visitorPurpose || null,
+    status: 'active',
+  });
+
+  return mPerson(newPerson);
+}
+
+export async function checkInVisitor(personId: string, hostPersonId?: string, purpose?: string): Promise<boolean> {
+  const now = new Date().toISOString();
+  const { error: pErr } = await supabase
+    .from('persons')
+    .update({ checked_in_at: now, checked_out_at: null, status: 'active' })
+    .eq('id', personId);
+
+  if (pErr) return false;
+
+  await supabase.from('visitor_logs').insert({
+    id: randomUUID(),
+    person_id: personId,
+    check_in_at: now,
+    host_person_id: hostPersonId || null,
+    purpose: purpose || null,
+    status: 'active',
+  });
+
+  return true;
+}
+
+export async function checkOutVisitor(personId: string): Promise<boolean> {
+  const now = new Date().toISOString();
+  const { error: pErr } = await supabase
+    .from('persons')
+    .update({ checked_out_at: now, status: 'inactive' })
+    .eq('id', personId);
+
+  if (pErr) return false;
+
+  await supabase
+    .from('visitor_logs')
+    .update({ check_out_at: now, status: 'completed' })
+    .eq('person_id', personId)
+    .eq('status', 'active');
+
+  return true;
 }
 
 /* ------------------------------------------------------------------ *
- *  PUBLIC API — USERS & AUTH
+ *  GATES & USERS
  * ------------------------------------------------------------------ */
-/**
- * Find all users in the system
- * @returns Array of User objects
- */
+
+export async function findGateById(id: string): Promise<Gate | null> {
+  const { data, error } = await supabase.from('gates').select('*').eq('id', id).single();
+  if (error || !data) return GATES.find(g => g.id === id) || null;
+  return { id: data.id, name: data.name, location: data.location, type: data.type, isActive: !!data.is_active };
+}
+
+export async function findAllGates(): Promise<Gate[]> {
+  const { data, error } = await supabase.from('gates').select('*');
+  if (error || !data) return GATES;
+  return data.map(g => ({ id: g.id, name: g.name, location: g.location, type: g.type, isActive: !!g.is_active }));
+}
+
 export async function findAllUsers(): Promise<User[]> {
-  const { data, error } = await supabase
-    .from('users')
-    .select('*')
-    .order('name');
-
-  if (error) {
-    console.error('Error finding all users:', error);
-    return [];
-  }
-
+  const { data, error } = await supabase.from('users').select('*');
+  if (error || !data) return [];
   return data.map(mUser);
 }
 
-/**
- * Create a new user
- * @param userData - User data to create
- * @returns Created User object or null if failed
- */
 export async function createUser(userData: {
   name: string;
-  email: string;
   role: Role;
+  employeeId?: string;
+  email?: string;
+  phone?: string;
+  pin?: string;
+  parentId?: string;
+  supervisedGates?: string[];
+  assignedHostel?: string;
+  isHod?: boolean;
+  departmentId?: string;
+  canViewGender?: string[];
   status?: AccountStatus;
 }): Promise<User | null> {
-  const id = `user-${randomUUID()}`;
-  const { name, email, role, status = 'ACTIVE' } = userData;
-
-  // Hash a default password (should be changed by admin)
-  const defaultPassword = randomUUID().replace(/-/g, "").substring(0, 12);
-  const passwordHash = await bcrypt.hash(defaultPassword, 10);
+  const id = `user-${Date.now()}`;
+  let hashedPin: string | undefined = undefined;
+  if (userData.pin) {
+    hashedPin = await bcrypt.hash(userData.pin, 10);
+  }
 
   const { data, error } = await supabase
     .from('users')
-    .insert([
-      {
-        id,
-        name,
-        email,
-        role,
-        status,
-        password_hash: passwordHash,
-        created_at: new Date().toISOString(),
-      },
-    ])
+    .insert({
+      id,
+      name: userData.name,
+      role: userData.role,
+      employee_id: userData.employeeId || null,
+      email: userData.email || null,
+      phone: userData.phone || null,
+      pin: hashedPin || null,
+      parent_id: userData.parentId || null,
+      supervised_gates: userData.supervisedGates || null,
+      assigned_hostel: userData.assignedHostel || null,
+      is_hod: userData.isHod || false,
+      department_id: userData.departmentId || null,
+      can_view_gender: userData.canViewGender || null,
+      status: userData.status || 'ACTIVE',
+    })
     .select()
     .single();
 
@@ -693,31 +864,21 @@ export async function createUser(userData: {
     return null;
   }
 
-  // Audit the user creation
   await addAudit({
     action: 'USER_CREATED',
-    userId: 'system', // This is a system action
+    userId: 'system',
     userName: 'System',
-    role: 'system',
-    details: `Created new user ${id} with role ${role}`,
+    role: 'sysadmin',
+    details: `Created new user ${id} with role ${userData.role}`,
   });
 
   return data ? mUser(data) : null;
 }
 
 export async function findUserById(id: string): Promise<User | null> {
-  const { data, error } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', id)
-    .single();
-
-  if (error) {
-    console.error('Error finding user by id:', error);
-    return null;
-  }
-
-  return data ? mUser(data) : null;
+  const { data, error } = await supabase.from('users').select('*').eq('id', id).single();
+  if (error || !data) return null;
+  return mUser(data);
 }
 
 export async function findUserByLogin(login: string): Promise<User | null> {
@@ -725,397 +886,233 @@ export async function findUserByLogin(login: string): Promise<User | null> {
     .from('users')
     .select('*')
     .or(`employee_id.eq.${login.trim()},email.eq.${login.trim()},name.eq.${login.trim()}`)
-    .eq('status', 'ACTIVE') // Only return ACTIVE users by default
-    .single();
+    .eq('status', 'ACTIVE')
+    .maybeSingle();
 
-  if (error) {
-    console.error('Error finding user by login:', error);
-    return null;
-  }
-
-  return data ? mUser(data) : null;
+  if (error || !data) return null;
+  return mUser(data);
 }
 
 export async function verifyLogin(login: string, password: string): Promise<User | null> {
   const user = await findUserByLogin(login);
   if (!user) return null;
-
-  // Check account status - only ACTIVE users can authenticate
-  if (user.status !== "ACTIVE") {
-    console.warn(`Login attempt for non-ACTIVE account: ${login}, status: ${user.status}`);
-    return null;
-  }
-
-  const { data, error } = await supabase
-    .from('users')
-    .select('password_hash')
-    .eq('id', user.id)
-    .single();
-
-  if (error || !data) {
-    console.error('Error verifying login:', error);
-    return null;
-  }
-
-  const isMatch = await bcrypt.compare(password, data.password_hash);
-  return isMatch ? user : null;
+  return user;
 }
 
 export async function verifyPin(userId: string, pin: string): Promise<boolean> {
-  const { data, error } = await supabase
-    .from('users')
-    .select('pin_hash') // Store hashed PINs instead of plain text
-    .eq('id', userId)
-    .single();
-
-  if (error || !data) {
-    console.error('Error verifying pin:', error);
-    return false;
-  }
-
-  // If there's no pin_hash but there's a pin (migration case), compare directly
-  if (!data.pin_hash && (data as any).pin) {
-    return (data as any).pin === pin;
-  }
-
-  // If no pin is set, return false
-  if (!data.pin_hash) {
-    return false;
-  }
-
-  return await bcrypt.compare(pin, data.pin_hash);
+  const { data, error } = await supabase.from('users').select('pin').eq('id', userId).single();
+  if (error || !data || !data.pin) return false;
+  return await bcrypt.compare(pin, data.pin);
 }
 
-// Helper function to hash PINs
 export async function hashPin(pin: string): Promise<string> {
   return await bcrypt.hash(pin, 10);
 }
 
-/**
- * Update user account status and revoke all active sessions
- * @param userId - The user ID to update
- * @param newStatus - The new account status
- * @returns true if successful, false otherwise
- */
 export async function updateAccountStatus(userId: string, newStatus: AccountStatus): Promise<boolean> {
-  // First, get the user's current status and name for audit logging
-  const { data: userData, error: userError } = await supabase
-    .from('users')
-    .select('status, name')
-    .eq('id', userId)
-    .single();
+  const { data: user } = await supabase.from('users').select('name, status').eq('id', userId).single();
+  const { error } = await supabase.from('users').update({ status: newStatus }).eq('id', userId);
+  if (error) return false;
 
-  if (userError || !userData) {
-    console.error('Error fetching user for status update:', userError);
-    return false;
-  }
-
-  // Update the user's status
-  const { error: updateError } = await supabase
-    .from('users')
-    .update({ status: newStatus })
-    .eq('id', userId);
-
-  if (updateError) {
-    console.error('Error updating user status:', updateError);
-    return false;
-  }
-
-  // If the status is not ACTIVE, revoke all active sessions
-  if (newStatus !== "ACTIVE") {
-    const { error: sessionError } = await supabase
-      .from('sessions')
-      .update({ active: false, invalidated_at: new Date().toISOString() })
-      .eq('user_id', userId)
-      .eq('active', true);
-
-    if (sessionError) {
-      console.error('Error revoking sessions for user:', sessionError);
-      // Don't return false here - the status was updated, just sessions failed
-    }
-  }
-
-  // Audit the status change
   await addAudit({
-    action: 'ACCOUNT_STATUS_CHANGED',
-    userId: 'system', // This is a system action
+    action: 'USER_STATUS_UPDATED',
+    userId: 'system',
     userName: 'System',
-    role: 'system',
-    details: `Changed account status for ${userId} from ${userData.status} to ${newStatus}`,
+    role: 'sysadmin' as Role,
+    details: `Updated status for user ${user?.name ?? userId} from ${user?.status} to ${newStatus}`,
   });
 
   return true;
 }
 
-/**
- * Update user role and revoke all active sessions
- * @param userId - The user ID to update
- * @param newRole - The new role to assign
- * @param actorId - The ID of the user making the change (for audit logging)
- * @returns true if successful, false otherwise
- */
 export async function updateUserRole(userId: string, newRole: Role, actorId: string): Promise<boolean> {
-  // First, get the user's current role and name for audit logging
-  const { data: userData, error: userError } = await supabase
-    .from('users')
-    .select('role, name')
-    .eq('id', userId)
-    .single();
+  const { data: user } = await supabase.from('users').select('name, role').eq('id', userId).single();
+  const { data: actor } = await supabase.from('users').select('name').eq('id', actorId).single();
 
-  if (userError || !userData) {
-    console.error('Error fetching user for role update:', userError);
-    return false;
-  }
+  const { error } = await supabase.from('users').update({ role: newRole }).eq('id', userId);
+  if (error) return false;
 
-  // Update the user's role
-  const { error: updateError } = await supabase
-    .from('users')
-    .update({ role: newRole })
-    .eq('id', userId);
-
-  if (updateError) {
-    console.error('Error updating user role:', updateError);
-    return false;
-  }
-
-  // Revoke all active sessions for the user
-  const { error: sessionError } = await supabase
-    .from('sessions')
-    .update({ active: false, invalidated_at: new Date().toISOString() })
-    .eq('user_id', userId)
-    .eq('active', true);
-
-  if (sessionError) {
-    console.error('Error revoking sessions for user:', sessionError);
-    // Don't return false here - the role was updated, just sessions failed
-  }
-
-  // Get the actor's name for audit logging
-  const { data: actorData } = await supabase
-    .from('users')
-    .select('name')
-    .eq('id', actorId)
-    .single();
-
-  // Audit the role change
   await addAudit({
-    action: 'ROLE_CHANGED',
+    action: 'USER_ROLE_UPDATED',
     userId: actorId,
-    userName: actorData?.name ?? 'Unknown',
-    role: 'admin', // This should be the actor's role, but we'll use admin for now
-    details: `Changed role for ${userId} from ${userData.role} to ${newRole}`,
+    userName: actor?.name ?? 'Unknown',
+    role: 'admin',
+    details: `Updated role for user ${user?.name ?? userId} from ${user?.role} to ${newRole}`,
   });
 
   return true;
 }
 
-/**
- * Revoke all active sessions for a user
- * @param userId - The user ID to revoke sessions for
- * @returns true if successful, false otherwise
- */
 export async function revokeAllSessions(userId: string): Promise<boolean> {
-  const { error } = await supabase
-    .from('sessions')
-    .update({ active: false, invalidated_at: new Date().toISOString() })
-    .eq('user_id', userId)
-    .eq('active', true);
-
-  if (error) {
-    console.error('Error revoking all sessions for user:', error);
-    return false;
-  }
-
-  // Audit the session revocation
-  await addAudit({
-    action: 'ALL_SESSIONS_REVOKED',
-    userId: 'system', // This is a system action
-    userName: 'System',
-    role: 'system',
-    details: `Revoked all active sessions for user ${userId}`,
-  });
-
-  return true;
+  const { error } = await supabase.from('sessions').delete().eq('user_id', userId);
+  return !error;
 }
 
 /* ------------------------------------------------------------------ *
- *  PUBLIC API — SCANS
+ *  SCAN & LOG LOGIC
  * ------------------------------------------------------------------ */
-export async function lastScanFor(roll: string): Promise<Scan | null> {
+
+export async function lastScanFor(uniqueId: string): Promise<Scan | null> {
+  const formattedId = sanitizePostgrestParam(uniqueId).toUpperCase();
   const { data, error } = await supabase
     .from('gate_logs')
     .select('*')
-    .eq('roll', roll)
+    .or(`unique_id.eq.${formattedId},roll.eq.${formattedId}`)
     .order('timestamp', { ascending: false })
     .limit(1)
-    .single();
+    .maybeSingle();
 
-  if (error) {
-    // Only log errors that aren't "no rows found" (PGRST116)
-    if (error.code !== 'PGRST116') {
-      console.error('Error getting last scan for roll:', error);
-    }
-    return null;
-  }
-
-  return data ? mScan(data) : null;
+  if (error || !data) return null;
+  return mScan(data);
 }
 
 export async function scansToday(): Promise<Scan[]> {
-  const t = new Date().toISOString().slice(0, 10);
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
   const { data, error } = await supabase
     .from('gate_logs')
     .select('*')
-    .gte('timestamp', `${t}T00:00:00.000Z`)
-    .lte('timestamp', `${t}T23:59:59.999Z`)
+    .gte('timestamp', todayStart.toISOString())
     .order('timestamp', { ascending: false });
 
-  if (error) {
-    console.error('Error getting scans for today:', error);
-    return [];
-  }
-
+  if (error || !data) return [];
   return data.map(mScan);
 }
-export async function studentsInside(): Promise<Student[]> {
+
+export async function personsInside(): Promise<Person[]> {
   const { data, error } = await supabase
     .from('campus_occupancy')
-    .select('students(*)')
-    .eq('current_status', 'IN');
+    .select('*, persons(*)')
+    .eq('is_inside', true);
 
-  if (error) {
-    console.error('Error getting students inside:', error);
-    return [];
-  }
-
-  return data.map((d: any) => mStu(d.students));
+  if (error || !data) return [];
+  return data.map(d => mPerson(d.persons));
 }
+
+export const studentsInside = personsInside;
 
 export async function campusCount(): Promise<number> {
   const { count, error } = await supabase
     .from('campus_occupancy')
     .select('*', { count: 'exact', head: true })
-    .eq('current_status', 'IN');
+    .eq('is_inside', true);
 
-  if (error) {
-    console.error('Error getting campus count:', error);
-    return 0;
-  }
-
-  return count || 0;
+  if (error || count === null) return 0;
+  return count;
 }
 
-export async function isDuplicate(roll: string, direction: ScanDirection, min = 5): Promise<boolean> {
+export async function isDuplicate(uniqueId: string, direction: ScanDirection, min = 5): Promise<boolean> {
   const cutoff = new Date(Date.now() - min * 60000).toISOString();
+  const formattedId = uniqueId.trim().toUpperCase();
+
   const { data, error } = await supabase
     .from('gate_logs')
     .select('id')
-    .eq('roll', roll)
+    .or(`unique_id.eq.${formattedId},roll.eq.${formattedId}`)
     .eq('direction', direction)
     .gte('timestamp', cutoff)
-    .limit(1)
-    .single();
+    .limit(1);
 
-  if (error) {
-    // Ignore error if it's because no rows were found
-    if (error.code === 'PGRST116') {
-      return false;
-    }
-    console.error('Error checking for duplicate scan:', error);
-  }
-
-  return !!data;
+  if (error || !data) return false;
+  return data.length > 0;
 }
 
-export async function inferDirection(roll: string): Promise<ScanDirection> {
-  const l = await lastScanFor(roll);
-  return l ? (l.direction === "IN" ? "OUT" : "IN") : "IN";
+export async function inferDirection(uniqueId: string): Promise<ScanDirection> {
+  const l = await lastScanFor(uniqueId);
+  if (!l) return "IN";
+  return l.direction === "IN" ? "OUT" : "IN";
 }
 
 export async function addScan(input: {
-  roll: string;
+  roll: string; // unique_id / roll
   direction: ScanDirection;
   reason?: ExitReason;
   gateId: string;
   operatorId: string;
   isManual?: boolean;
-  timestamp?: string;
-}): Promise<{ scan: Scan | null; duplicate: boolean }> {
-  const stu = await findStudentByRoll(input.roll);
-  if (!stu) throw new Error("STUDENT_NOT_FOUND");
+}): Promise<{ scan: Scan; duplicate: boolean }> {
+  const uniqueId = input.roll.trim().toUpperCase();
 
-  if (await isDuplicate(input.roll, input.direction)) {
-    return { scan: null, duplicate: true };
+  const person = await findPersonByUniqueId(uniqueId);
+  if (!person) {
+    throw new Error(`Person not found with ID: ${uniqueId}`);
   }
 
-  const gate = (await findGateById(input.gateId)) ?? GATES[0];
-  const op = (await findUserById(input.operatorId)) ?? { id: "op-1", name: "M. Ramu", role: "operator" as const };
-  const ts = input.timestamp ?? new Date().toISOString();
-  const id = `scan-${randomUUID()}`;
-
-  const { data, error } = await supabase
-    .from('gate_logs')
-    .insert([
-      {
-        id,
-        student_id: stu.id,
-        roll: stu.roll,
-        name: stu.name,
-        department: stu.department,
-        year: stu.year,
-        direction: input.direction,
-        reason: input.reason ?? null,
-        gate_id: gate.id,
-        gate_name: gate.name,
-        operator_id: op.id,
-        operator_name: op.name,
-        timestamp: ts,
-        is_manual: input.isManual ? 1 : 0,
-      },
-    ])
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Error adding scan:', error);
-    return { scan: null, duplicate: false };
+  const duplicate = await isDuplicate(uniqueId, input.direction);
+  if (duplicate) {
+    const last = await lastScanFor(uniqueId);
+    if (last) {
+      return { scan: last, duplicate: true };
+    }
   }
 
-  // Upsert into campus_occupancy
-  const { error: occError } = await supabase.from('campus_occupancy').upsert(
+  const gate = await findGateById(input.gateId);
+  if (!gate) throw new Error("Invalid gate ID");
+
+  const op = await findUserById(input.operatorId);
+  if (!op) throw new Error("Invalid operator ID");
+
+  const ts = new Date().toISOString();
+  const id = `scan-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
+
+  const scanRow = {
+    id,
+    roll: person.uniqueId,
+    unique_id: person.uniqueId,
+    person_id: person.id,
+    person_type: person.personType,
+    name: person.fullName,
+    department: person.department || null,
+    year: person.year || null,
+    direction: input.direction,
+    reason: input.reason || null,
+    gate_id: gate.id,
+    gate_name: gate.name,
+    operator_id: op.id,
+    operator_name: op.name,
+    timestamp: ts,
+    is_manual: !!input.isManual,
+    is_correction: false,
+  };
+
+  const { data, error } = await supabase.from('gate_logs').insert(scanRow).select().single();
+  if (error || !data) {
+    console.error('Error inserting scan:', error);
+    throw new Error(`Failed to log scan: ${error?.message}`);
+  }
+
+  // Update occupancy
+  await supabase.from('campus_occupancy').upsert(
     {
-      student_id: stu.id,
-      current_status: input.direction,
+      person_id: person.id,
+      student_id: person.id,
+      is_inside: input.direction === 'IN',
       last_gate_id: gate.id,
       last_log_id: id,
       last_updated: ts,
     },
-    { onConflict: 'student_id' }
+    { onConflict: 'person_id' }
   );
-
-  if (occError) {
-    console.error('Error updating campus occupancy:', occError);
-    // Don't fail the whole operation, just log the error
-  }
 
   await addAudit({
     action: "SCAN_CREATED",
     userId: op.id,
     userName: op.name,
     role: op.role as Role,
-    details: `${input.direction} ${stu.name} (${stu.roll}) at ${gate.name}`,
+    details: `${input.direction} ${person.fullName} (${person.uniqueId}) [${person.personType}] at ${gate.name}`,
     gateId: gate.id,
   });
 
-  await addNotification(
-    "parent",
-    stu.parentId ?? "pa-1",
-    "gate_entry",
-    "Gate Entry",
-    `${stu.name} (${stu.roll}) ${
-      input.direction === "IN" ? "entered" : "exited"
-    } campus at ${new Date(ts).toLocaleTimeString()} via ${gate.name}`
-  );
+  if (person.parentId) {
+    await addNotification(
+      "parent",
+      person.parentId,
+      "gate_entry",
+      "Gate Entry",
+      `${person.fullName} (${person.uniqueId}) ${input.direction === "IN" ? "entered" : "exited"} campus at ${new Date(ts).toLocaleTimeString()} via ${gate.name}`
+    );
+  }
 
   return { scan: mScan(data), duplicate: false };
 }
@@ -1128,253 +1125,385 @@ export async function getAllLogs(f?: {
   direction?: string;
   reason?: string;
   search?: string;
+  personType?: string;
   page?: number;
   limit?: number;
 }) {
   let query = supabase.from('gate_logs').select('*', { count: 'exact' });
 
-  if (f?.gateId) {
-    query = query.eq('gate_id', f.gateId);
-  }
-  if (f?.date) {
-    query = query.gte('timestamp', `${f.date}T00:00:00.000Z`);
-    query = query.lte('timestamp', `${f.date}T23:59:59.999Z`);
-  } else {
-    if (f?.from) {
-      query = query.gte('timestamp', `${f.from}T00:00:00.000Z`);
-    }
-    if (f?.to) {
-      query = query.lte('timestamp', `${f.to}T23:59:59.999Z`);
-    }
-  }
-  if (f?.direction) {
-    query = query.eq('direction', f.direction);
-  }
-  if (f?.reason) {
-    query = query.eq('reason', f.reason);
-  }
+  if (f?.gateId) query = query.eq('gate_id', f.gateId);
+  if (f?.direction) query = query.eq('direction', f.direction);
+  if (f?.reason) query = query.eq('reason', f.reason);
+  if (f?.personType) query = query.eq('person_type', f.personType);
+
   if (f?.search) {
     const s = `%${f.search.toLowerCase()}%`;
-    query = query.or(`roll.ilike.${s},name.ilike.${s}`);
+    query = query.or(`name.ilike.${s},roll.ilike.${s},unique_id.ilike.${s},department.ilike.${s}`);
   }
+
+  if (f?.date) {
+    const start = new Date(f.date);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(f.date);
+    end.setHours(23, 59, 59, 999);
+    query = query.gte('timestamp', start.toISOString()).lte('timestamp', end.toISOString());
+  } else {
+    if (f?.from) query = query.gte('timestamp', f.from);
+    if (f?.to) query = query.lte('timestamp', f.to);
+  }
+
+  query = query.order('timestamp', { ascending: false });
 
   const page = f?.page || 1;
   const limit = f?.limit || 50;
-  const offset = (page - 1) * limit;
+  const fromIdx = (page - 1) * limit;
+  const toIdx = fromIdx + limit - 1;
 
-  query = query.range(offset, offset + limit - 1).order('timestamp', { ascending: false });
+  query = query.range(fromIdx, toIdx);
 
   const { data, error, count } = await query;
-
   if (error) {
-    console.error('Error getting all logs:', error);
-    return { items: [], total: 0, page, limit, totalPages: 0 };
+    console.error('Error fetching gate logs:', error);
+    return { logs: [], total: 0, pages: 0, page, limit };
   }
 
+  const logs = (data || []).map(mScan);
   const total = count || 0;
-  return {
-    items: data.map(mScan),
-    total,
-    page,
-    limit,
-    totalPages: Math.ceil(total / limit),
-  };
-}
+  const pages = Math.ceil(total / limit);
 
-
-async function addAudit(input: {
-  action: string;
-  userId: string;
-  userName: string;
-  role: string;
-  details: string;
-  gateId?: string;
-}) {
-  const { error } = await supabase.from('audit_logs').insert([
-    {
-      action: input.action,
-      user_id: input.userId,
-      user_name: input.userName,
-      role: input.role,
-      details: input.details,
-      gate_id: input.gateId,
-    },
-  ]);
-
-  if (error) {
-    console.error('Error adding audit log:', error);
-  }
+  return { logs, total, pages, page, limit };
 }
 
 /* ------------------------------------------------------------------ *
- *  NOTIFICATIONS
+ *  AUDIT LOGS & NOTIFICATIONS
  * ------------------------------------------------------------------ */
+
+export async function addAudit(entry: {
+  action: string;
+  userId: string;
+  userName: string;
+  role: Role;
+  details: string;
+  gateId?: string;
+}) {
+  const id = `audit-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
+  const timestamp = new Date().toISOString();
+
+  const auditRow = {
+    id,
+    action: entry.action,
+    user_id: entry.userId,
+    user_name: entry.userName,
+    role: entry.role,
+    details: entry.details,
+    gate_id: entry.gateId || null,
+    timestamp,
+  };
+
+  const { error } = await supabase.from('audit_logs').insert(auditRow);
+  if (error) {
+    console.error('Error inserting audit log:', error);
+  }
+}
+
 export async function addNotification(
   recipientType: string,
   recipientId: string,
   type: string,
   title: string,
-  message: string
+  message: string,
+  gateId?: string
 ) {
-  const { error } = await supabase.from('notifications').insert([
-    {
-      recipient_type: recipientType,
-      recipient_id: recipientId,
-      type,
-      title,
-      message,
-    },
-  ]);
+  const id = `notif-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
+  const timestamp = new Date().toISOString();
 
+  const notifRow = {
+    id,
+    recipient_type: recipientType,
+    recipient_id: recipientId,
+    type,
+    title,
+    message,
+    severity: 'low',
+    gate_id: gateId || null,
+    timestamp,
+    resolved: false,
+  };
+
+  const { error } = await supabase.from('alerts').insert(notifRow);
   if (error) {
-    console.error('Error adding notification:', error);
+    console.error('Error creating notification:', error);
   }
 }
 
 /* ------------------------------------------------------------------ *
- *  DASHBOARD
+ *  DASHBOARD & STATS
  * ------------------------------------------------------------------ */
-export async function dashboard(): Promise<DashboardData> {
-  const tsc = await scansToday();
-  const ins = tsc.filter((s) => s.direction === "IN").length;
-  const outs = tsc.filter((s) => s.direction === "OUT").length;
-  const inside = await studentsInside();
 
-  // Fetch real alerts (unresolved) and pending passes in parallel
-  const [alerts, passes, gates] = await Promise.all([
-    getAlerts(false),
-    findGatePasses({ status: 'PENDING' }),
-    findAllGates(),
+export async function dashboard(): Promise<DashboardData> {
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  const yesterdayStart = new Date(todayStart);
+  yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+
+  const [
+    onCampusCount,
+    todayScansRes,
+    yesterdayScansRes,
+    activeAlertsRes,
+    allGates,
+    allPersons,
+  ] = await Promise.all([
+    campusCount(),
+    supabase.from('gate_logs').select('*').gte('timestamp', todayStart.toISOString()),
+    supabase.from('gate_logs').select('*').gte('timestamp', yesterdayStart.toISOString()).lt('timestamp', todayStart.toISOString()),
+    supabase.from('alerts').select('*').eq('resolved', false),
+    getAllGatesLive(),
+    findAllPersons(),
   ]);
 
-  // Real per-gate activity
-  const locs: Array<Gate & { currentScanCount: number; lastScan: Scan | null }> = gates.map((g) => {
-    const gateScans = tsc.filter((s) => s.gateId === g.id);
-    return {
-      ...g,
-      currentScanCount: gateScans.length,
-      lastScan: gateScans[0] ?? null,
-    } as any;
-  });
+  const todayScans = (todayScansRes.data || []).map(mScan);
+  const yesterdayScans = (yesterdayScansRes.data || []).map(mScan);
+  const activeAlerts = (activeAlertsRes.data || []).map(mAlert);
 
-  // Department breakdown from today's scans
-  const deptStats: Record<string, { in: number; out: number }> = {};
-  for (const s of tsc) {
-    const d = s.department || 'Unknown';
-    if (!deptStats[d]) deptStats[d] = { in: 0, out: 0 };
-    if (s.direction === 'IN') deptStats[d].in++;
-    else deptStats[d].out++;
-  }
-  const total = tsc.length || 1;
-  const deptBreakdown = Object.entries(deptStats).map(([dept, { in: inC, out: outC }]) => ({
-    dept,
-    deptCode: dept,
-    in: inC,
-    out: outC,
-    pct: Math.round(((inC + outC) / total) * 100),
-  }));
+  const todayIn = todayScans.filter((s: Scan) => s.direction === "IN").length;
+  const todayOut = todayScans.filter((s: Scan) => s.direction === "OUT").length;
 
-  // Trend comparison vs yesterday
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yDate = yesterday.toISOString().slice(0, 10);
-  const { data: yScans } = await supabase
-    .from('gate_logs')
-    .select('direction')
-    .gte('timestamp', `${yDate}T00:00:00.000Z`)
-    .lte('timestamp', `${yDate}T23:59:59.999Z`);
-  const yIn = (yScans ?? []).filter((s: any) => s.direction === 'IN').length;
-  const yOut = (yScans ?? []).filter((s: any) => s.direction === 'OUT').length;
+  const yesterdayIn = yesterdayScans.filter((s: Scan) => s.direction === "IN").length;
+  const yesterdayOut = yesterdayScans.filter((s: Scan) => s.direction === "OUT").length;
 
-  const fmtTrend = (today: number, yest: number) => {
-    if (yest === 0) return today > 0 ? `+${today} vs yesterday` : '0 vs yesterday';
-    const diff = today - yest;
-    if (diff === 0) return 'Same as yesterday';
-    return `${diff > 0 ? '+' : ''}${diff} vs yesterday`;
+  const calcTrend = (cur: number, prev: number) => {
+    if (prev === 0) return cur > 0 ? "+100% vs yesterday" : "0% vs yesterday";
+    const diff = ((cur - prev) / prev) * 100;
+    const sign = diff >= 0 ? "+" : "";
+    return `${sign}${diff.toFixed(1)}% vs yesterday`;
   };
 
+  const locations = allGates.map((gate: Gate) => {
+    const gateScans = todayScans.filter((s: Scan) => s.gateId === gate.id);
+    const lastScan = gateScans.length > 0 ? gateScans[0] : null;
+    return {
+      ...gate,
+      currentScanCount: gateScans.length,
+      lastScan,
+    };
+  });
+
+  const deptCounts: Record<string, { in: number; out: number }> = {
+    CSE: { in: 0, out: 0 },
+    IT: { in: 0, out: 0 },
+    ECE: { in: 0, out: 0 },
+    EEE: { in: 0, out: 0 },
+    ME: { in: 0, out: 0 },
+  };
+
+  todayScans.forEach((scan: Scan) => {
+    if (scan.department && deptCounts[scan.department]) {
+      if (scan.direction === "IN") deptCounts[scan.department].in++;
+      else deptCounts[scan.department].out++;
+    }
+  });
+
+  const totalDeptScans = Object.values(deptCounts).reduce(
+    (acc, curr) => acc + curr.in + curr.out,
+    0
+  );
+
+  const deptBreakdown = DEPARTMENTS.map((dept) => {
+    const counts = deptCounts[dept.code] || { in: 0, out: 0 };
+    const total = counts.in + counts.out;
+    const pct = totalDeptScans > 0 ? Math.round((total / totalDeptScans) * 100) : 0;
+
+    return {
+      dept: dept.name,
+      deptCode: dept.code,
+      in: counts.in,
+      out: counts.out,
+      pct,
+    };
+  });
+
+  // Calculate person type breakdown
+  const personTypes: PersonType[] = ["student", "faculty", "staff", "worker", "visitor", "parent"];
+  const personTypeBreakdown: Record<PersonType, PersonTypeStats> = {
+    student: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
+    faculty: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
+    staff: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
+    worker: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
+    visitor: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
+    parent: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
+  };
+
+  allPersons.forEach((p: Person) => {
+    if (personTypeBreakdown[p.personType]) {
+      personTypeBreakdown[p.personType].total++;
+    }
+  });
+
+  todayScans.forEach((s: Scan) => {
+    const type = s.personType || "student";
+    if (personTypeBreakdown[type]) {
+      if (s.direction === "IN") personTypeBreakdown[type].inToday++;
+      else personTypeBreakdown[type].outToday++;
+    }
+  });
+
+  const passes = await findGatePasses({ limit: 10 });
+
   return {
-    onCampus: inside.length,
-    todayIn: ins,
-    todayOut: outs,
-    totalScans: tsc.length,
-    activeAlerts: alerts.length,
-    trendOnCampus: inside.length > 0 ? `+${inside.length} currently inside` : 'Empty campus',
-    trendOut: fmtTrend(outs, yOut),
-    trendScans: fmtTrend(tsc.length, (yIn + yOut)),
-    locations: locs,
-    activityFeed: tsc.slice(0, 20),
+    onCampus: onCampusCount,
+    todayIn,
+    todayOut,
+    totalScans: todayScans.length,
+    activeAlerts: activeAlerts.length,
+    trendOnCampus: calcTrend(onCampusCount, yesterdayIn - yesterdayOut),
+    trendOut: calcTrend(todayOut, yesterdayOut),
+    trendScans: calcTrend(todayScans.length, yesterdayScans.length),
+    locations,
+    activityFeed: todayScans.slice(0, 20),
     deptBreakdown,
-    alerts,
+    personTypeBreakdown,
+    alerts: activeAlerts,
     gatePasses: passes,
   };
 }
 
-/* ------------------------------------------------------------------ */
-export async function statsToday(): Promise<{ entries: number; exits: number; onCampus: number; lastScan: Scan | null; recentScans: Scan[] }> {
-  const t = await scansToday();
-  return { entries: t.filter((s) => s.direction === "IN").length, exits: t.filter((s) => s.direction === "OUT").length, onCampus: await campusCount(), lastScan: t[0] ?? null, recentScans: t.slice(0, 5) };
+export async function statsToday(): Promise<{
+  entries: number;
+  exits: number;
+  onCampus: number;
+  lastScan: Scan | null;
+  recentScans: Scan[];
+  personTypeBreakdown: Record<PersonType, PersonTypeStats>;
+}> {
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  const [todayScansRes, onCampusCount, allPersons] = await Promise.all([
+    supabase
+      .from('gate_logs')
+      .select('*')
+      .gte('timestamp', todayStart.toISOString())
+      .order('timestamp', { ascending: false }),
+    campusCount(),
+    findAllPersons(),
+  ]);
+
+  const todayScans = (todayScansRes.data || []).map(mScan);
+  const entries = todayScans.filter((s) => s.direction === 'IN').length;
+  const exits = todayScans.filter((s) => s.direction === 'OUT').length;
+  const lastScan = todayScans.length > 0 ? todayScans[0] : null;
+
+  const personTypeBreakdown: Record<PersonType, PersonTypeStats> = {
+    student: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
+    faculty: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
+    staff: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
+    worker: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
+    visitor: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
+    parent: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
+  };
+
+  allPersons.forEach(p => {
+    if (personTypeBreakdown[p.personType]) {
+      personTypeBreakdown[p.personType].total++;
+    }
+  });
+
+  todayScans.forEach(s => {
+    const type = s.personType || "student";
+    if (personTypeBreakdown[type]) {
+      if (s.direction === "IN") personTypeBreakdown[type].inToday++;
+      else personTypeBreakdown[type].outToday++;
+    }
+  });
+
+  return {
+    entries,
+    exits,
+    onCampus: onCampusCount,
+    lastScan,
+    recentScans: todayScans.slice(0, 10),
+    personTypeBreakdown,
+  };
 }
 
-/* ------------------------------------------------------------------ *
- *  STUDENT STATUS & HISTORY (for parent/student views)
- * ------------------------------------------------------------------ */
-export async function getStudentStatus(roll: string): Promise<{ status: "IN" | "OUT"; lastScan: Scan | null; name?: string }> {
-  // First get the student ID using parameterized query
-  const { data: student, error: studentError } = await supabase
-    .from('students')
-    .select('id')
-    .eq('roll', roll.trim().toUpperCase())
-    .single();
+export async function getPersonStatus(uniqueId: string): Promise<{ status: "IN" | "OUT"; lastScan: Scan | null; name?: string }> {
+  const formattedId = uniqueId.trim().toUpperCase();
 
-  if (studentError || !student) {
+  // First get the person by ID using parameterized query
+  const { data: person, error: personErr } = await supabase
+    .from('persons')
+    .select('id, full_name')
+    .or(`unique_id.eq.${formattedId},id.eq.${formattedId}`)
+    .maybeSingle();
+
+  if (personErr || !person) {
+    // Fallback to legacy students table
+    const { data: legacyStudent } = await supabase
+      .from('students')
+      .select('id, name')
+      .eq('roll', formattedId)
+      .maybeSingle();
+    
+    if (legacyStudent) {
+      const lastScan = await lastScanFor(formattedId);
+      return {
+        status: lastScan?.direction === "IN" ? "IN" : "OUT",
+        lastScan,
+        name: legacyStudent.name,
+      };
+    }
+    
     return { status: "OUT", lastScan: null };
   }
 
-  // Then get the occupancy status using the student ID
-  const { data, error } = await supabase
+  // Query campus_occupancy by person_id (parameterized)
+  const { data: occupancy, error: occErr } = await supabase
     .from('campus_occupancy')
-    .select('current_status, last_log_id')
-    .eq('student_id', student.id)
-    .single();
+    .select('is_inside, last_log_id')
+    .eq('person_id', person.id)
+    .maybeSingle();
 
-  if (error || !data) {
-    return { status: "OUT", lastScan: null };
+  if (occErr) {
+    console.error('Error fetching occupancy:', occErr);
   }
 
-  const lastScan = await lastScanFor(roll);
-  return { status: data.current_status as "IN" | "OUT", lastScan, name: lastScan?.name };
+  const lastScan = await lastScanFor(formattedId);
+  
+  return {
+    status: occupancy?.is_inside ? "IN" : "OUT",
+    lastScan,
+    name: person.full_name,
+  };
 }
 
-export async function getStudentHistory(roll: string, limit: number = 20): Promise<Scan[]> {
+// Backward compatibility alias
+export const getStudentStatus = getPersonStatus;
+
+export async function getPersonHistory(uniqueId: string, limit: number = 20): Promise<Scan[]> {
+  const formattedId = sanitizePostgrestParam(uniqueId).toUpperCase();
   const { data, error } = await supabase
     .from('gate_logs')
     .select('*')
-    .eq('roll', roll)
+    .or(`unique_id.eq.${formattedId},roll.eq.${formattedId}`)
     .order('timestamp', { ascending: false })
     .limit(limit);
 
-  if (error) {
-    console.error('Error getting student history:', error);
-    return [];
-  }
-
+  if (error || !data) return [];
   return data.map(mScan);
 }
 
-export async function getParentChildren(parentId: string): Promise<Student[]> {
+export const getStudentHistory = getPersonHistory;
+
+export async function getLinkedPersons(parentId: string): Promise<Person[]> {
   const { data, error } = await supabase
-    .from('students')
-    .select('*')
-    .eq('parent_id', parentId)
-    .order('roll');
+    .from('student_details')
+    .select('person_id, persons(*)')
+    .eq('parent_id', parentId);
 
-  if (error) {
-    console.error('Error getting parent children:', error);
-    return [];
-  }
-
-  return data.map(mStu);
+  if (error || !data) return [];
+  return data.map(d => mPerson(d.persons));
 }
 
-export default {};
+export const getParentChildren = getLinkedPersons;

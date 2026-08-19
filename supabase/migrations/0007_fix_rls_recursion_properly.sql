@@ -18,22 +18,34 @@ DROP FUNCTION IF EXISTS public.is_sysadmin(UUID);
 CREATE OR REPLACE FUNCTION public.is_admin(user_id UUID)
 RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
 AS $$
-DECLARE user_role TEXT;
+DECLARE
+  user_role TEXT;
 BEGIN
-  SELECT role INTO user_role FROM users W  SELECT role INTO user_role FROM users W  SELECT role INTO's  SELECT role INTO user_role FROM users W  SELECT role INTO user_ATE OR REPLACE FUNCTION public.is_sysadmin(user_id UUID)
+  SELECT role INTO user_role FROM users WHERE id = user_id;
+  RETURN user_role IN ('admin', 'sysadmin');
+EXCEPTION WHEN OTHERS THEN
+  RETURN FALSE;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.is_sysadmin(user_id UUID)
 RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
 AS $$
-DECLARE user_role TEXT;
+DECLARE
+  user_role TEXT;
 BEGIN
-  SELECT role INTO use  SELECT role INTO use  SELECT role INTO use  SELECT role INrole = 'sysadmin';
-EXCEPTION WHEN OTHERS THEN RETURN FALSE;
+  SELECT role INTO user_role FROM users WHERE id = user_id;
+  RETURN user_role = 'sysadmin';
+EXCEPTION WHEN OTHERS THEN
+  RETURN FALSE;
 END;
 $$;
 
 CREATE POLICY "users_select_own" ON users FOR SELECT USING (auth.uid() = id);
 CREATE POLICY "users_select_admin" ON users FOR SELECT USING (is_admin(auth.uid()));
-CREATE POLICY "users_update_own" ON users FOR UPDATE UCREATE POLICY "users_upWITH CHECK (auth.uid() = id);
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCR CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCd())) WITH CHECK (is_admin(auth.uid()));
+CREATE POLICY "users_update_own" ON users FOR UPDATE USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
+CREATE POLICY "users_update_admin" ON users FOR UPDATE USING (is_admin(auth.uid())) WITH CHECK (is_admin(auth.uid()));
 
-GRANT EXECUTE ON FUNCTION public.is_GRANT EXECUTE ON FUNCTION public.is_GRANT EXECUTE ON FUNCTION public.is_sysGRANn(GRANT EXECUTE ON FUNCTicated;
+GRANT EXECUTE ON FUNCTION public.is_admin(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.is_sysadmin(UUID) TO authenticated;
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;

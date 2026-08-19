@@ -78,8 +78,8 @@ export interface RollNumberDecoded {
 export const COLLEGE_CODES: Record<string, CollegeInfo> = {
   JJ: {
     code: "JJ",
-    name: "JNTUH University College of Engineering Jagtial (UCEJ)",
-    shortName: "JNTUH-UCEJ",
+    name: "JNTUH CEJ",
+    shortName: "JNTUH CEJ",
   },
 };
 
@@ -307,12 +307,12 @@ export function describeRollNumber(roll: string | null | undefined): string {
 
 /** Default roll numbers for demo / testing purposes. */
 export const SAMPLE_ROLL_NUMBERS: string[] = [
-  "24JJ1A0201", // 2024, UCEJ, Regular, EEE, #01
-  "24JJ1A0501", // 2024, UCEJ, Regular, CSE, #01
-  "24JJ1A1201", // 2024, UCEJ, Regular, IT, #01
-  "24JJ1A0401", // 2024, UCEJ, Regular, ECE, #01
-  "24JJ1A0301", // 2024, UCEJ, Regular, ME, #01
-  "25JJ5A1203", // 2025, UCEJ, Lateral Entry, IT, #03
-  "25JJ1A0512", // 2025, UCEJ, Regular, CSE, #12
-  "24JJ5A0307", // 2024, UCEJ, Lateral Entry, ME, #07
+  "24JJ1A0201", // 2024, JNTUH CEJ, Regular, EEE, #01
+  "24JJ1A0501", // 2024, JNTUH CEJ, Regular, CSE, #01
+  "24JJ1A1201", // 2024, JNTUH CEJ, Regular, IT, #01
+  "24JJ1A0401", // 2024, JNTUH CEJ, Regular, ECE, #01
+  "24JJ1A0301", // 2024, JNTUH CEJ, Regular, ME, #01
+  "25JJ5A1203", // 2025, JNTUH CEJ, Lateral Entry, IT, #03
+  "25JJ1A0512", // 2025, JNTUH CEJ, Regular, CSE, #12
+  "24JJ5A0307", // 2024, JNTUH CEJ, Lateral Entry, ME, #07
 ];

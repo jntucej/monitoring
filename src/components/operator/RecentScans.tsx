@@ -1,48 +1,57 @@
 "use client";
-import { User, ArrowRight, ArrowLeft } from "lucide-react";
-import { parseRollNumber } from "@/lib/rollNumber";
+import React from "react";
+import { User, ArrowDownLeft, ArrowUpRight } from "lucide-react";
+import type { Scan } from "@/lib/types";
 
-const DUMMY_SCANS = [
-  { id: 1, name: "Akarsh Jadi",   roll: "24JJ1A0501",  status: "entry", time: "10:30 AM" },
-  { id: 2, name: "Bhavana",        roll: "24JJ1A0508",  status: "exit",  time: "10:32 AM" },
-  { id: 3, name: "Chandu",         roll: "24JJ1A1215",  status: "entry", time: "10:35 AM" },
-  { id: 4, name: "Dhana",          roll: "24JJ1A0322",  status: "entry", time: "10:38 AM" },
-  { id: 5, name: "Eshwar",         roll: "24JJ1A0429",  status: "exit",  time: "10:40 AM" },
-];
+interface RecentScansProps {
+  scans: Scan[];
+}
 
-const SCANS_WITH_DEPT = DUMMY_SCANS.map((s) => {
-  const decoded = parseRollNumber(s.roll);
-  return { ...s, department: decoded?.department ?? "??" };
-});
-
-export function RecentScans() {
+export function RecentScans({ scans }: RecentScansProps) {
   return (
-    <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-6">
-      <h3 className="font-semibold mb-4">Recent Scans</h3>
-      <div className="space-y-4">
-        {SCANS_WITH_DEPT.map((scan) => (
-          <div key={scan.id} className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${scan.status === 'entry' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
-                <User className="w-5 h-5" />
+    <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border)] p-5 space-y-4 shadow-sm">
+      <h3 className="font-semibold text-sm text-[var(--text-primary)]">Recent Access Activity</h3>
+      <div className="space-y-3.5">
+        {scans && scans.length > 0 ? (
+          scans.map((scan) => (
+            <div key={scan.id} className="flex items-center justify-between text-xs py-2 border-b border-[var(--border)]/30 last:border-b-0">
+              <div className="flex items-center gap-3">
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${scan.direction === 'IN' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-[var(--action-danger)]/10 text-[var(--action-danger)]'}`}>
+                  <User className="w-4.5 h-4.5" />
+                </div>
+                <div>
+                  <p className="font-bold text-[var(--text-primary)]">{scan.name}</p>
+                  <p className="text-[11px] text-[var(--text-muted)] font-mono">
+                    {scan.roll}
+                    <span className="ml-1.5 text-[10px] font-bold text-[var(--text-secondary)] uppercase">[{scan.department}]</span>
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="font-medium">{scan.name}</p>
-                <p className="text-sm text-[var(--text-muted)] font-mono">
-                  {scan.roll}
-                  <span className="ml-1.5 text-xs font-medium text-[var(--text-secondary)]">[{scan.department}]</span>
+              <div className="text-right">
+                <div className={`flex items-center gap-1 text-[11px] font-bold ${scan.direction === 'IN' ? 'text-emerald-400' : 'text-[var(--action-danger)]'}`}>
+                  {scan.direction === 'IN' ? (
+                    <>
+                      <ArrowDownLeft className="w-3.5 h-3.5" />
+                      <span>ENTRY</span>
+                    </>
+                  ) : (
+                    <>
+                      <ArrowUpRight className="w-3.5 h-3.5" />
+                      <span>EXIT</span>
+                    </>
+                  )}
+                </div>
+                <p className="text-[10px] text-[var(--text-muted)]">
+                  {new Date(scan.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
                 </p>
               </div>
             </div>
-            <div className="text-right">
-              <div className={`flex items-center gap-1.5 text-sm font-medium ${scan.status === 'entry' ? 'text-emerald-400' : 'text-rose-400'}`}>
-                {scan.status === 'entry' ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
-                <span>{scan.status === 'entry' ? 'Entry' : 'Exit'}</span>
-              </div>
-              <p className="text-xs text-[var(--text-muted)]">{scan.time}</p>
-            </div>
+          ))
+        ) : (
+          <div className="text-center py-6 text-[var(--text-muted)] text-xs">
+            No gate scans registered details on this workspace yet.
           </div>
-        ))}
+        )}
       </div>
     </div>
   );

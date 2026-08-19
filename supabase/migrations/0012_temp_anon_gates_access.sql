@@ -2,7 +2,8 @@
 -- This unblocks the 406 error while we fix frontend auth
 
 -- Allow anonymous users to read gates table
-CREATE POLICY IF NOT EXISTS "gates_select_anon_testing"
+DROP POLICY IF EXISTS "gates_select_anon_testing" ON public.gates;
+CREATE POLICY "gates_select_anon_testing"
 ON public.gates
 FOR SELECT
 TO anon

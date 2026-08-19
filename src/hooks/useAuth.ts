@@ -4,7 +4,7 @@
  */
 "use client";
 
-import { useEffect } from "react";
+import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import type { Role } from "@/lib/types";
@@ -17,6 +17,10 @@ const DEMO_CREDENTIALS: Record<Role, { login: string; password: string }> = {
   parent: { login: "PA001", password: "1234" },
   student: { login: "stu-1", password: "password" },
   warden: { login: "WD001", password: "1234" },
+  faculty: { login: "FAC-001", password: "1234" },
+  staff: { login: "STF-001", password: "1234" },
+  worker: { login: "WRK-001", password: "1234" },
+  visitor: { login: "VIS-001", password: "1234" },
 };
 
 export function useAuth() {
@@ -27,7 +31,7 @@ export function useAuth() {
    * Auto-login for demo mode — logs in as the given role using seeded credentials.
    * In production this would be replaced by a proper login form / SSO.
    */
-  const loginAsRole = async (targetRole: Role) => {
+  const loginAsRole = useCallback(async (targetRole: Role) => {
     const creds = DEMO_CREDENTIALS[targetRole];
     if (!creds) {
       // For student role, we need to handle it differently since students aren't in the users table
@@ -38,7 +42,7 @@ export function useAuth() {
         role: targetRole as Role,
         gateId: undefined,
         employeeId: undefined,
-      } as any;
+      };
       setRole(targetRole);
       // For student/parent roles that aren't in users table, we create a minimal session
       // The API routes will still work with the SQLite DB
@@ -53,9 +57,9 @@ export function useAuth() {
       return true;
     }
     return false;
-  };
+  }, [login, setRole]);
 
-  const requireAuth = (allowedRoles?: Role[]) => {
+  const requireAuth = useCallback((allowedRoles?: Role[]) => {
     if (!authenticated) {
       router.push("/login");
       return false;
@@ -65,7 +69,7 @@ export function useAuth() {
       return false;
     }
     return true;
-  };
+  }, [authenticated, role, router]);
 
   return {
     user,

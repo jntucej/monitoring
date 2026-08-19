@@ -5,9 +5,92 @@ export type Role =
   | "sysadmin"
   | "parent"
   | "student"
-  | "warden";
+  | "warden"
+  | "faculty"
+  | "staff"
+  | "worker"
+  | "visitor";
 
 export type AccountStatus = "ACTIVE" | "LOCKED" | "SUSPENDED" | "DISABLED" | "DEPROVISIONED";
+
+export type PersonType = "student" | "faculty" | "staff" | "worker" | "visitor" | "parent";
+
+export interface StudentDetails {
+  personId: string;
+  roll: string;
+  year?: number;
+  section?: string;
+  batch?: string;
+  parentId?: string;
+  studentType?: StudentType;
+  hostelBlock?: string;
+  roomNumber?: string;
+  hostelCurfewTime?: string;
+  gender?: "male" | "female";
+  wardenId?: string;
+}
+
+export interface EmployeeDetails {
+  personId: string;
+  employeeId: string;
+  designation?: string;
+  joiningDate?: string;
+  isHod?: boolean;
+  departmentId?: string;
+}
+
+export interface VisitorLog {
+  id: string;
+  personId: string;
+  checkInAt: string;
+  checkOutAt?: string;
+  hostPersonId?: string;
+  purpose?: string;
+  status: "active" | "completed";
+}
+
+export interface Person {
+  id: string;
+  uniqueId: string;
+  fullName: string;
+  personType: PersonType;
+  department?: string;
+  designation?: string;
+  email?: string;
+  phone?: string;
+  photoUrl?: string;
+  qrCode?: string;
+  idValidUntil?: string;
+  status: string;
+  visitorHost?: string;
+  visitorPurpose?: string;
+  checkedInAt?: string;
+  checkedOutAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  // Related details if loaded
+  studentDetails?: StudentDetails;
+  employeeDetails?: EmployeeDetails;
+  // Backwards compatibility aliases/flattened fields
+  roll?: string;
+  name?: string;
+  photo?: string;
+  year?: number;
+  section?: string;
+  batch?: string;
+  parentName?: string;
+  parentPhone?: string;
+  parentId?: string;
+  studentType?: StudentType;
+  gender?: "male" | "female";
+  hostelBlock?: string;
+  roomNumber?: string;
+  hostelCurfewTime?: string;
+  wardenId?: string;
+}
+
+// Keep Student interface for backwards compatibility (extends/aliases Person)
+export type Student = Person;
 
 export interface User {
   id: string;
@@ -25,6 +108,8 @@ export interface User {
   departmentId?: string;
   canViewGender?: string[];
   status: AccountStatus;
+  personType?: PersonType;
+  uniqueId?: string;
 }
 
 export type ExitReason = "Home Out" | "Day Out" | "Leave" | "Regular";
@@ -33,53 +118,14 @@ export type StudentType = "HM" | "HF" | "DM" | "DF";
 
 export type ScanDirection = "IN" | "OUT";
 
-export interface Student {
-  id: string;
-  roll: string;
-  name: string;
-  department: string;
-  year: number;
-  section: string;
-  batch: string;
-  photo: string;
-  email: string;
-  phone: string;
-  parentName: string;
-  parentPhone: string;
-  parentId: string;
-  qrCode: string;
-  idValidUntil: string;
-  status: string;
-  studentType?: StudentType;
-  gender?: "male" | "female";
-  hostelBlock?: string;
-  roomNumber?: string;
-  hostelCurfewTime?: string;
-  wardenId?: string;
-}
-
-export interface Department {
-  code: string;
-  name: string;
-  hod: string;
-}
-
-export type DepartmentCode = string;
-
-export interface Gate {
-  id: string;
-  name: string;
-  location: string;
-  type: string;
-  isActive: boolean;
-}
-
 export interface Scan {
   id: string;
-  roll: string;
+  roll: string; // unique_id / roll
+  uniqueId: string;
   name: string;
-  department: string;
-  year: number;
+  personType: PersonType;
+  department?: string;
+  year?: number;
   direction: ScanDirection;
   reason?: ExitReason;
   gateId: string;
@@ -90,6 +136,7 @@ export interface Scan {
   isManual: boolean;
   isCorrection: boolean;
   originalScanId?: string;
+  personId?: string;
 }
 
 export interface GatePass {
@@ -140,6 +187,29 @@ export interface AuditEntry {
   gateId?: string;
 }
 
+export interface Department {
+  code: string;
+  name: string;
+  hod: string;
+}
+
+export type DepartmentCode = string;
+
+export interface Gate {
+  id: string;
+  name: string;
+  location: string;
+  type: string;
+  isActive: boolean;
+}
+
+export interface PersonTypeStats {
+  total: number;
+  onCampus: number;
+  inToday: number;
+  outToday: number;
+}
+
 export interface DashboardData {
   onCampus: number;
   todayIn: number;
@@ -158,6 +228,7 @@ export interface DashboardData {
     out: number;
     pct: number;
   }>;
+  personTypeBreakdown: Record<PersonType, PersonTypeStats>;
   alerts: Alert[];
   gatePasses: GatePass[];
 }

@@ -11,7 +11,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "JNTUH CEJ Gate Monitor",
-  description: "Student Gate Monitoring System — JNTUH College of Engineering Jagtial",
+  description: "Student Gate Monitoring System — JNTUH CEJ",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 

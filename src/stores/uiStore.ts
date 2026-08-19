@@ -41,7 +41,15 @@ export const useUIStore = create<UIState & UIActions>()((set) => ({
   clearAllToasts: () => set({ toasts: [] }),
 
   setTheme: (theme) => {
-    document.documentElement.setAttribute("data-theme", theme);
+    if (typeof window !== "undefined") {
+      document.documentElement.setAttribute("data-theme", theme);
+      if (theme === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+      localStorage.setItem("gate-monitor-theme", theme);
+    }
     set({ theme });
   },
 

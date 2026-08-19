@@ -127,7 +127,7 @@ export default function Home() {
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--bg-elevated)] border border-[var(--border)] shadow-xs">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-xs font-semibold text-[var(--text-secondary)]">
-              JNTUH UCoEJ Security Grid • Operational Online
+              JNTUH CEJ Security Grid • Operational Online
             </span>
           </div>
 
@@ -137,7 +137,7 @@ export default function Home() {
             </div>
             <div className="text-left">
               <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--text-primary)]">
-                JNTUH University College of Engineering
+                JNTUH CEJ
               </h1>
               <p className="text-xs sm:text-sm font-medium text-[var(--text-muted)]">
                 Jagtial (Nachupally / Kondagattu) • Digital Gate & Student Pass Subsystem

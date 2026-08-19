@@ -24,23 +24,23 @@ export default function SupervisorApprovalsPage() {
   useEffect(() => {
     async function loadPendingPasses() {
       try {
-        const { findGatePasses } = await import("@/lib/db");
-        const passes = await findGatePasses({ status: "PENDING" });
-        if (passes && passes.length > 0) {
+        setLoading(true);
+        const res = await fetch("/api/passes?status=PENDING", { cache: "no-store" });
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
           setApprovals(
-            passes.map((p) => ({
+            json.data.map((p: any) => ({
               id: p.id,
-              studentName: p.studentName || "Student",
-              rollNumber: p.roll,
-              branch: p.department || "Department",
+              studentName: p.studentName || p.student_name || "Student",
+              rollNumber: p.roll || p.roll_number || p.student_roll,
+              branch: p.department || p.branch || p.dept || "Department",
               passType: p.reason || "Outing Pass",
               reason: p.description || p.reason || "Student Outing Request",
-              requestedAt: new Date(p.requestedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-              parentConsent: p.parentStatus === "APPROVED" ? "APPROVED" : "PENDING",
+              requestedAt: new Date(p.requestedAt || p.requested_at || Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+              parentConsent: p.parentStatus === "APPROVED" || p.parent_status === "APPROVED" ? "APPROVED" : "PENDING",
             }))
           );
         } else {
-          // No dummy data - empty state will show properly
           setApprovals([]);
         }
       } catch (err) {
@@ -54,32 +54,58 @@ export default function SupervisorApprovalsPage() {
 
   const handleApprove = async (id: string, name: string) => {
     try {
-      const { approvePass } = await import("@/lib/db");
-      await approvePass(id, "admin", "Approved by supervisor", "sup-1");
-    } catch {
-      // Graceful local update fallback
+      const res = await fetch(`/api/passes/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ action: "approve", comment: "Approved by supervisor" }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.error?.message || "Failed to approve pass");
+      }
+      setApprovals((prev) => prev.filter((a) => a.id !== id));
+      addToast({
+        title: "Gate Pass Approved",
+        message: `Pass for ${name} has been authorized and issued.`,
+        variant: "success",
+      });
+    } catch (err: any) {
+      addToast({
+        title: "Approval Failed",
+        message: err.message || "Failed to approve pass request.",
+        variant: "error",
+      });
     }
-    setApprovals((prev) => prev.filter((a) => a.id !== id));
-    addToast({
-      title: "Gate Pass Approved",
-      message: `Pass for ${name} has been authorized and issued.`,
-      variant: "success",
-    });
   };
 
   const handleReject = async (id: string, name: string) => {
     try {
-      const { rejectPass } = await import("@/lib/db");
-      await rejectPass(id, "admin", "Rejected by supervisor", "sup-1");
-    } catch {
-      // Graceful local update fallback
+      const res = await fetch(`/api/passes/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ action: "reject", comment: "Rejected by supervisor" }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.error?.message || "Failed to reject pass");
+      }
+      setApprovals((prev) => prev.filter((a) => a.id !== id));
+      addToast({
+        title: "Gate Pass Rejected",
+        message: `Pass request for ${name} was denied.`,
+        variant: "error",
+      });
+    } catch (err: any) {
+      addToast({
+        title: "Rejection Failed",
+        message: err.message || "Failed to reject pass request.",
+        variant: "error",
+      });
     }
-    setApprovals((prev) => prev.filter((a) => a.id !== id));
-    addToast({
-      title: "Gate Pass Rejected",
-      message: `Pass request for ${name} was denied.`,
-      variant: "error",
-    });
   };
 
   return (

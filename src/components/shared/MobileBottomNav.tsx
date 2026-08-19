@@ -81,7 +81,18 @@ export function MobileBottomNav() {
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[var(--bg-surface)]/90 backdrop-blur-xl border-t border-[var(--border)] pb-safe shadow-2xl select-none">
       <div className="h-16 grid grid-cols-4 items-center px-1">
         {tabs.map((tab) => {
-          const [basePath, searchStr] = tab.href.split("?");
+          // Dynamically adjust gate ID in the tab href if we are current on a gate route
+          let tabHref = tab.href;
+          const isGateRoute = pathname.startsWith("/gate/");
+          if (isGateRoute && tab.href.startsWith("/gate/1")) {
+            const parts = pathname.split("/");
+            if (parts.length >= 3) {
+              const currentGateId = parts[2];
+              tabHref = tab.href.replace("/gate/1", `/gate/${currentGateId}`);
+            }
+          }
+
+          const [basePath, searchStr] = tabHref.split("?");
           const targetTabParam = searchStr ? new URLSearchParams(searchStr).get("tab") : null;
 
           let isActive = false;
@@ -104,7 +115,7 @@ export function MobileBottomNav() {
           return (
             <Link
               key={tab.label}
-              href={tab.href}
+              href={tabHref}
               className={`relative flex flex-col items-center justify-center py-1 transition-all active:scale-95 ${
                 isActive
                   ? "text-[var(--action-primary)] font-bold"

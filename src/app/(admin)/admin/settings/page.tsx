@@ -76,7 +76,7 @@ export default function AdminSettingsPage() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm mb-1">College Name</label>
-              <input type="text" defaultValue="JNTUH University College of Engineering" className="w-full px-3 py-2 bg-[var(--bg-base)] border border-[var(--border)] rounded-lg text-sm" />
+              <input type="text" defaultValue="JNTUH CEJ" className="w-full px-3 py-2 bg-[var(--bg-base)] border border-[var(--border)] rounded-lg text-sm" />
             </div>
             <div>
               <label className="block text-sm mb-1">Default Gate</label>

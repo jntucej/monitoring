@@ -39,37 +39,20 @@ export async function POST(request: Request) {
         }
       }
     } catch (dbErr) {
-      console.warn("DB PIN login verification error, using fallback:", dbErr);
+      console.warn("DB PIN login verification error:", dbErr);
     }
 
-    // 2. Demo Fallback
-    let role: Role = "operator";
-    const upper = cleanId.toUpperCase();
-
-    if (upper.includes("SYS")) role = "sysadmin";
-    else if (upper.includes("ADM")) role = "admin";
-    else if (upper.includes("SUP")) role = "supervisor";
-    else if (upper.includes("OP")) role = "operator";
-    else if (upper.includes("PAR")) role = "parent";
-    else role = "student";
-
-    return NextResponse.json({
-      success: true,
-      data: {
-        token: `pin-mock-token-${Date.now()}`,
-        user: {
-          id: `usr-${cleanId.toLowerCase().replace(/[^a-z0-9]/g, "")}`,
-          name: `${role.toUpperCase()} User (${cleanId})`,
-          email: `${role}@gatekeeper.edu`,
-          role,
-          status: "ACTIVE",
-        },
-      },
-    });
+    // 2. If the database lookup failed or PIN invalid, return an error.
+    // Do NOT fall back to role inference — that was a critical security hole
+    // that allowed arbitrary PIN-based login with no valid credentials.
+    return NextResponse.json(
+      { success: false, error: { code: "INVALID_PIN", message: "Invalid PIN or user not found." } },
+      { status: 401 }
+    );
   } catch (error: any) {
     console.error("PIN Login API route error:", error);
     return NextResponse.json(
-      { success: false, error: { message: error?.message || "Internal PIN authentication error" } },
+      { success: false, error: { code: "INTERNAL_ERROR", message: error?.message || "Internal PIN authentication error" } },
       { status: 500 }
     );
   }

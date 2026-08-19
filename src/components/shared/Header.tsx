@@ -1,7 +1,8 @@
 "use client";
 
-import { Menu, Bell, Sun, Moon, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { Menu, Sun, Moon, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { NotificationBell } from "./NotificationBell";
 import { useUIStore } from "@/stores/uiStore";
 import { useAuthStore } from "@/stores/authStore";
 
@@ -53,7 +54,7 @@ export function Header() {
             {title}
           </h1>
           <p className="text-[11px] text-[var(--text-muted)] hidden sm:block">
-            JNTUH College of Engineering, Jagtial (Nachupally)
+            JNTUH CEJ
           </p>
         </div>
       </div>
@@ -79,22 +80,8 @@ export function Header() {
           )}
         </button>
 
-        {/* Notifications Icon */}
-        <button
-          onClick={() =>
-            addToast({
-              title: "System Alerts",
-              message: "All campus gate sensors operating normally",
-              variant: "success",
-            })
-          }
-          className="relative p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] rounded-lg transition-colors"
-          title="Notifications"
-          aria-label="View notifications"
-        >
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[var(--action-primary)] rounded-full ring-2 ring-[var(--bg-surface)]" />
-        </button>
+        {/* Real Notification Bell */}
+        <NotificationBell />
       </div>
     </header>
   );

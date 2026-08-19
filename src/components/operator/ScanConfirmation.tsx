@@ -1,26 +1,234 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { User, CheckCircle2, LogIn, LogOut, Home, Sun, Clock, X } from "lucide-react";
+import Image from "next/image";
+import { User, CheckCircle2, LogIn, Home, Sun, Clock, X, Briefcase } from "lucide-react";
+import { EXIT_REASON_CONFIGS, ExitReason, StudentType, Student, ScanDirection } from "@/lib/types";
+import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
+import { PersonBadge } from "@/components/shared/PersonBadge";
 
 interface ScanConfirmationProps {
-  student: {
-    name: string;
-    roll: string;
-    department: string;
-    year?: number;
-    photo?: string;
-  };
-  onConfirm: (direction: "IN" | "OUT", reason?: string) => void;
+  student: Student;
+  onConfirm: (direction: ScanDirection, reason?: ExitReason) => void;
   onCancel: () => void;
-  suggestedDirection?: "IN" | "OUT";
+  suggestedDirection?: ScanDirection;
+  isInline?: boolean;
 }
+
+type ActionEntry = {
+  code: ExitReason;
+  name: string;
+  direction: ScanDirection;
+  icon: React.ElementType;
+  applicableTo: StudentType[];
+  requiresApproval: boolean;
+  parentNotification: boolean | string;
+};
+
+const reasonIcons: Record<ExitReason, React.ElementType> = {
+  "Regular": Briefcase,
+  "Home Out": Home,
+  "Day Out": Sun,
+  "Leave": Clock,
+};
 
 export function ScanConfirmation({
   student,
   onConfirm,
   onCancel,
+  suggestedDirection = "IN",
+  isInline = false,
 }: ScanConfirmationProps) {
+  // Photo verification state
+  const [photoVerified, setPhotoVerified] = useState(false);
+  const [countdown, setCountdown] = useState(2);
+  const [selectedDirection, setSelectedDirection] = useState<ScanDirection | null>(null);
+  const [selectedReason, setSelectedReason] = useState<ExitReason | null>(null);
+
+  // Start photo verification countdown when component mounts
+  useEffect(() => {
+    setPhotoVerified(false);
+    setCountdown(2);
+    setSelectedDirection(null);
+    setSelectedReason(null);
+
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setPhotoVerified(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [student.id]);
+
+  const applicableReasons = EXIT_REASON_CONFIGS.filter(
+    (config) => !student.studentType || config.applicableTo.includes(student.studentType)
+  );
+
+  const outActions: ActionEntry[] = applicableReasons.map((config) => ({
+    ...config,
+    direction: "OUT" as ScanDirection,
+    icon: reasonIcons[config.code] || Briefcase,
+  }));
+
+  const inActions: ActionEntry[] = [
+    {
+      code: "Regular",
+      name: "Entry",
+      direction: "IN",
+      icon: LogIn,
+      applicableTo: ["HM", "HF", "DM", "DF"],
+      requiresApproval: false,
+      parentNotification: false,
+    },
+  ];
+
+  const handleConfirmClick = (direction: ScanDirection, reason?: ExitReason) => {
+    if (!photoVerified) {
+      return;
+    }
+    setSelectedDirection(direction);
+    setSelectedReason(reason || null);
+    onConfirm(direction, reason);
+  };
+
+  const renderActionButtons = (actions: ActionEntry[]) => (
+    <div className={cn("grid gap-2", actions.length > 2 ? "grid-cols-3" : "grid-cols-2")}>
+      {actions.map(({ code, name, icon: Icon, direction }) => {
+        const isSelected = selectedDirection === direction && selectedReason === code;
+        return (
+          <button
+            key={`${direction}-${code}`}
+            type="button"
+            onClick={() => handleConfirmClick(direction, code)}
+            disabled={!photoVerified}
+            className={cn(
+              "py-2.5 px-2 rounded-xl border font-bold text-[11px] flex flex-col items-center justify-center gap-1 transition-all active:scale-95",
+              isSelected
+                ? "bg-[var(--action-primary)] border-[var(--action-primary)] text-white"
+                : photoVerified
+                  ? "bg-[var(--bg-base)] border-[var(--border)] text-[var(--text-primary)] hover:border-emerald-500/50 hover:bg-[var(--bg-elevated)]"
+                  : "bg-[var(--bg-base)] border-[var(--border)] text-[var(--text-muted)] opacity-50 cursor-not-allowed"
+            )}
+          >
+            <Icon
+              className={cn(
+                "w-4 h-4",
+                isSelected ? "text-white" : direction === "IN" ? "text-emerald-400" : "text-amber-400"
+              )}
+            />
+            <span>{name}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+
+  const content = (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.98 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+      className="bg-[var(--bg-surface)] border border-[var(--border-strong)] rounded-3xl p-5 sm:p-7 max-w-md w-full shadow-lg relative space-y-5"
+    >
+      {/* Cancel Close Icon */}
+      <button
+        onClick={onCancel}
+        aria-label="Cancel scan verification"
+        className="absolute top-4 right-4 w-9 h-9 rounded-full bg-[var(--bg-base)] text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors border border-[var(--border)]"
+      >
+        <X className="w-5 h-5" />
+      </button>
+
+      {/* Verification Status Banner */}
+      <div className="flex items-center justify-center gap-1.5 text-xs font-bold py-1.5 px-3 rounded-full w-fit mx-auto">
+        {photoVerified ? (
+          <span className="text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full flex items-center gap-1.5">
+            <CheckCircle2 className="w-4 h-4" />
+            <span>Identity Verified</span>
+          </span>
+        ) : (
+          <span className="text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full flex items-center gap-1.5 animate-pulse">
+            <Clock className="w-4 h-4" />
+            <span>Verifying Identity... {countdown}s</span>
+          </span>
+        )}
+      </div>
+
+      {/* Student Avatar & Basic Info */}
+      <div className="text-center space-y-2">
+        <div className="relative mx-auto w-20 h-20 rounded-2xl overflow-hidden border-2 border-[var(--border-strong)] shadow-md">
+          {student.photo || student.photoUrl ? (
+            <img src={student.photo || student.photoUrl} alt={student.fullName || student.name || "Person"} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-[var(--bg-base)]">
+              <User className="w-9 h-9 text-[var(--text-muted)]" />
+            </div>
+          )}
+          {/* Photo verification overlay ring */}
+          {!photoVerified && (
+            <div className="absolute inset-0 rounded-2xl border-4 border-amber-400/60 animate-pulse" />
+          )}
+        </div>
+
+        <div>
+          <div className="flex items-center justify-center gap-2">
+            <h2 className="text-lg font-bold text-[var(--text-primary)] tracking-tight">{student.fullName || student.name}</h2>
+            <PersonBadge type={student.personType || 'student'} />
+          </div>
+          <p className="text-xs font-mono font-semibold text-emerald-400 mt-0.5">{student.uniqueId || student.roll}</p>
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">
+            {student.department || student.designation} {student.year && `- Year ${student.year}`}
+          </p>
+        </div>
+      </div>
+
+      {/* Action Movement Category Selection */}
+      <div className="space-y-4 pt-1">
+        <div>
+          <label className="text-[11px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] block text-center mb-2">
+            Confirm Entry
+          </label>
+          {renderActionButtons(inActions)}
+        </div>
+
+        <div>
+          <label className="text-[11px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] block text-center mb-2">
+            Confirm Exit
+          </label>
+          {renderActionButtons(outActions)}
+        </div>
+      </div>
+
+      <button
+        onClick={onCancel}
+        className="w-full text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] py-1 text-center"
+      >
+        Cancel & Resume Scanning
+      </button>
+    </motion.div>
+  );
+
+  if (isInline) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 10 }}
+        className="w-full flex justify-center"
+      >
+        {content}
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.96 }}
@@ -29,112 +237,7 @@ export function ScanConfirmation({
       transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md pb-safe select-none"
     >
-      <div className="bg-[var(--bg-surface)] border border-[var(--border-strong)] rounded-3xl p-5 sm:p-7 max-w-md w-full shadow-2xl relative space-y-5">
-        {/* Cancel Close Icon */}
-        <button
-          onClick={onCancel}
-          aria-label="Cancel scan verification"
-          className="absolute top-4 right-4 w-9 h-9 rounded-full bg-[var(--bg-base)] text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors border border-[var(--border)]"
-        >
-          <X className="w-5 h-5" />
-        </button>
-
-        {/* Verification Status Banner */}
-        <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 py-1.5 px-3 rounded-full w-fit mx-auto">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-          <span>Student Record Identified</span>
-        </div>
-
-        {/* Student Avatar & Basic Info */}
-        <div className="text-center space-y-2">
-          <div className="relative mx-auto w-20 h-20 rounded-2xl overflow-hidden border-2 border-[var(--border-strong)] shadow-md">
-            {student.photo ? (
-              <img src={student.photo} alt={student.name} className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-[var(--bg-base)]">
-                <User className="w-9 h-9 text-[var(--text-muted)]" />
-              </div>
-            )}
-          </div>
-
-          <div>
-            <h2 className="text-lg font-bold text-[var(--text-primary)] tracking-tight">
-              {student.name}
-            </h2>
-            <p className="text-xs font-mono font-semibold text-emerald-400 mt-0.5">
-              {student.roll}
-            </p>
-            <p className="text-xs text-[var(--text-muted)] mt-0.5">
-              {student.department}
-            </p>
-          </div>
-        </div>
-
-        {/* Action Movement Category Selection */}
-        <div className="space-y-3 pt-1">
-          <label className="text-[11px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] block text-center">
-            Select Movement Action & Pass Type
-          </label>
-
-          {/* Quick Direct In / Out Actions */}
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => onConfirm("IN", "Day Scholar Entry")}
-              className="py-3 px-3 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-400 font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm"
-            >
-              <LogIn className="w-4 h-4" />
-              <span>Day Scholar In</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => onConfirm("OUT", "Day Scholar Exit")}
-              className="py-3 px-3 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-400 font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm"
-            >
-              <LogOut className="w-4 h-4" />
-              <span>Day Scholar Out</span>
-            </button>
-          </div>
-
-          {/* Hostel Pass Actions */}
-          <div className="grid grid-cols-3 gap-2 pt-1">
-            <button
-              type="button"
-              onClick={() => onConfirm("OUT", "Hostel Home Out")}
-              className="py-2.5 px-2 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] hover:border-amber-500/50 text-[var(--text-primary)] font-bold text-[11px] flex flex-col items-center justify-center gap-1 transition-all active:scale-95"
-            >
-              <Home className="w-4 h-4 text-amber-400" />
-              <span>Home Out</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => onConfirm("IN", "Hostel Home In")}
-              className="py-2.5 px-2 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] hover:border-sky-500/50 text-[var(--text-primary)] font-bold text-[11px] flex flex-col items-center justify-center gap-1 transition-all active:scale-95"
-            >
-              <Home className="w-4 h-4 text-sky-400" />
-              <span>Home In</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => onConfirm("OUT", "Hostel Day Out")}
-              className="py-2.5 px-2 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] hover:border-purple-500/50 text-[var(--text-primary)] font-bold text-[11px] flex flex-col items-center justify-center gap-1 transition-all active:scale-95"
-            >
-              <Sun className="w-4 h-4 text-purple-400" />
-              <span>Day Out</span>
-            </button>
-          </div>
-        </div>
-
-        <button
-          onClick={onCancel}
-          className="w-full text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] py-1 text-center"
-        >
-          Cancel & Resume Scanning
-        </button>
-      </div>
+      {content}
     </motion.div>
   );
 }

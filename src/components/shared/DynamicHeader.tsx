@@ -56,8 +56,10 @@ export function DynamicHeader() {
     setTheme(next);
   };
 
+  const isMobileRole = role === "student" || role === "operator" || role === "parent";
+
   return (
-    <header className="h-14 sm:h-16 sticky top-0 z-40 px-3 sm:px-6 flex items-center justify-between backdrop-blur-xl bg-[var(--bg-surface)]/80 border-b border-[var(--border)] select-none">
+    <header className={`h-14 sm:h-16 sticky top-0 z-40 px-3 sm:px-6 flex items-center justify-between backdrop-blur-xl bg-[var(--bg-surface)]/80 border-b border-[var(--border)] select-none ${isMobileRole ? "hidden md:flex" : "flex"}`}>
       <div className="flex items-center gap-2.5">
         <button
           onClick={toggleMobileSidebar}
@@ -71,7 +73,7 @@ export function DynamicHeader() {
             {title}
           </h1>
           <p className="text-[10px] text-[var(--text-muted)] hidden sm:block">
-            JNTUH College of Engineering, Jagtial
+            JNTUH CEJ, Jagtial
           </p>
         </div>
       </div>

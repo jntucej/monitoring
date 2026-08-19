@@ -462,27 +462,59 @@ async function validateLogOperation(
 export async function getGateStudentInfo(token: string, roll: string) {
   const context = await requireRole(token, ['operator', 'supervisor']);
 
-  // Get the student information
+  const formattedId = roll.trim().toUpperCase();
+
+  // 1. Try persons table
+  const { data: person } = await supabase
+    .from('persons')
+    .select('*, student_details(*)')
+    .or(`unique_id.eq.${formattedId},id.eq.${formattedId}`)
+    .maybeSingle();
+
+  if (person) {
+    if (person.status && person.status.toLowerCase() !== 'active') {
+      throw new Error('INACTIVE_STUDENT: Person account is not active');
+    }
+    const sDetails = person.student_details || {};
+    return {
+      id: person.id,
+      roll: person.unique_id,
+      uniqueId: person.unique_id,
+      name: person.full_name,
+      fullName: person.full_name,
+      personType: person.person_type || 'student',
+      department: person.department,
+      designation: person.designation,
+      year: sDetails.year,
+      section: sDetails.section,
+      photo: person.photo_url,
+      hostelBlock: sDetails.hostel_block,
+      roomNumber: sDetails.room_number,
+    };
+  }
+
+  // 2. Fallback legacy students table
   const { data: student, error: studentError } = await supabase
     .from('students')
     .select('id, roll, name, department, year, section, photo, status, hostel_block, room_number')
-    .eq('roll', roll)
-    .single();
+    .eq('roll', formattedId)
+    .maybeSingle();
 
   if (studentError || !student) {
-    throw new Error('NOT_FOUND: Student not found');
+    throw new Error('NOT_FOUND: Student/Person not found');
   }
 
-  // Check if the student is active
-  if (student.status !== 'ACTIVE') {
+  if (student.status && student.status.toUpperCase() !== 'ACTIVE') {
     throw new Error('INACTIVE_STUDENT: Student account is not active');
   }
 
-  // Return minimal information for gate verification
   return {
     id: student.id,
     roll: student.roll,
+    uniqueId: student.roll,
     name: student.name,
+    fullName: student.name,
+    personType: 'student',
     department: student.department,
     year: student.year,
     section: student.section,

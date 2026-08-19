@@ -82,9 +82,26 @@ async function handlePost(req: NextRequest, { auth }: { auth: any }) {
       );
     }
 
-    // Get minimal student information for gate verification
-    // This validates that the operator can access this student
+    // Get minimal person information for gate verification
     const studentInfo = await getGateStudent(req, roll);
+
+    // Validate time-based access control (e.g. worker shift hours)
+    if (studentInfo.personType === "worker") {
+      const { checkTimeBasedAccess } = await import("@/lib/access-control");
+      const accessCheck = checkTimeBasedAccess("worker");
+      if (!accessCheck.allowed) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: "WORKER_ACCESS_RESTRICTED",
+              message: accessCheck.reason || "Worker entry/exit denied due to shift time restrictions",
+            },
+          },
+          { status: 403 }
+        );
+      }
+    }
 
     // Validate gate access if gateId is provided
     if (gateId) {
@@ -127,6 +144,24 @@ async function handlePost(req: NextRequest, { auth }: { auth: any }) {
         { success: false, error: { code: "DUPLICATE_SCAN", message: "This student was already scanned recently. Please wait 5 minutes." } },
         { status: 429 }
       );
+    }
+
+    // Trigger notification
+    try {
+      const { sendNotification } = await import("@/lib/notification-service");
+      const notifType = direction === "IN" ? "entry_recorded" : "exit_recorded";
+      await sendNotification(
+        notifType,
+        studentInfo.id || roll,
+        "person",
+        {
+          personName: studentInfo.name || roll,
+          time: new Date().toLocaleTimeString(),
+          gateName: gate.name,
+        }
+      );
+    } catch (notifErr) {
+      console.error("Failed to send scan notification:", notifErr);
     }
 
     // Get client IP address for audit logging

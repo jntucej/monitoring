@@ -25,6 +25,7 @@ import {
   PanelLeftOpen,
   User,
   Shield,
+  HardHat,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -80,15 +81,17 @@ const ROLE_NAV_GROUPS: Record<string, NavGroup[]> = {
       groupLabel: "Analytics & Oversight",
       items: [
         { href: "/admin", label: "Dashboard Overview", icon: LayoutDashboard },
-        { href: "/admin/students", label: "Student Roster", icon: GraduationCap },
+        { href: "/admin/analytics", label: "Campus Analytics", icon: FileSpreadsheet, badge: "NEW" },
+        { href: "/admin/students", label: "Person Roster", icon: GraduationCap },
         { href: "/admin/alerts", label: "Security Alerts", icon: AlertTriangle, badge: "SECURE" },
         { href: "/admin/reports", label: "Gate Reports", icon: FileSpreadsheet },
       ],
     },
     {
-      groupLabel: "Access Control",
+      groupLabel: "Access Control & Roster",
       items: [
         { href: "/admin/users", label: "User Access Roles", icon: Users },
+        { href: "/admin/workers", label: "Worker Management", icon: HardHat, badge: "RESTRICT" },
       ],
     },
   ],
@@ -120,6 +123,33 @@ const ROLE_NAV_GROUPS: Record<string, NavGroup[]> = {
       ],
     },
   ],
+  faculty: [
+    {
+      groupLabel: "Faculty Console",
+      items: [
+        { href: "/faculty", label: "Faculty Dashboard", icon: Building2 },
+        { href: "/hod", label: "HOD Department Console", icon: ShieldCheck },
+        { href: "/visitor", label: "Visitor Management", icon: Users },
+      ],
+    },
+  ],
+  staff: [
+    {
+      groupLabel: "Staff Console",
+      items: [
+        { href: "/staff", label: "Staff Dashboard", icon: UserCheck },
+        { href: "/visitor", label: "Visitor Desk", icon: Users },
+      ],
+    },
+  ],
+  worker: [
+    {
+      groupLabel: "Worker Console",
+      items: [
+        { href: "/worker", label: "Worker Dashboard", icon: HardHat, badge: "SHIFT" },
+      ],
+    },
+  ],
   warden: [
     {
       groupLabel: "Hostel Control",
@@ -138,6 +168,9 @@ const ROLE_LABELS: Record<string, string> = {
   sysadmin: "System Administrator",
   parent: "Parent Portal",
   student: "Student Portal",
+  faculty: "Faculty Portal",
+  staff: "Staff Portal",
+  worker: "Worker Portal",
   warden: "Hostel Warden",
 };
 

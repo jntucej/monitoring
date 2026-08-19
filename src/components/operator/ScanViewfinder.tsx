@@ -11,8 +11,6 @@ interface ScanViewfinderProps {
   scanning?: boolean;
   lastScanRoll?: string;
   error?: { code: string; message: string } | null;
-  sampleRolls?: string[];
-  onSampleScan?: (roll: string) => void;
 }
 
 export function ScanViewfinder({
@@ -21,8 +19,6 @@ export function ScanViewfinder({
   scanning,
   lastScanRoll,
   error,
-  sampleRolls = ["21CSE101", "21ECE102", "21IT103"],
-  onSampleScan,
 }: ScanViewfinderProps) {
   return (
     <div className="relative flex-1 min-h-[280px] bg-slate-950 rounded-2xl overflow-hidden border border-[var(--border-strong)] flex flex-col justify-between">
@@ -85,25 +81,6 @@ export function ScanViewfinder({
           <Camera className="w-5 h-5" />
           <span>OPEN CAMERA SCANNER</span>
         </button>
-
-        {onSampleScan && sampleRolls.length > 0 && (
-          <div className="flex items-center justify-center gap-2 pt-1">
-            <span className="text-[11px] text-slate-400 font-mono">Test Scans:</span>
-            {sampleRolls.map((roll) => (
-              <button
-                key={roll}
-                type="button"
-                onClick={() => onSampleScan(roll)}
-                className={cn(
-                  "px-2.5 py-1 rounded-md bg-slate-900 border border-slate-800 text-[11px] font-mono text-slate-300 hover:text-emerald-400 hover:border-emerald-500/40 transition-colors",
-                  lastScanRoll === roll && "border-emerald-500 text-emerald-400"
-                )}
-              >
-                {roll}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );

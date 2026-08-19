@@ -2,10 +2,11 @@
 
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, Check, Info, User, ArrowRight } from "lucide-react";
+import { Search, X, Check, Info, User, ArrowRight, Lock } from "lucide-react";
 import { findStudentByRoll } from "@/lib/db";
 import { parseRollNumber, validateRollNumber } from "@/lib/rollNumber";
 import { Button } from "@/components/ui/button";
+import { useUIStore } from "@/stores/uiStore";
 import type { ScanDirection, ExitReason } from "@/lib/types";
 
 interface ManualEntryDialogProps {
@@ -21,6 +22,10 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
   const [direction, setDirection] = useState<ScanDirection>("IN");
   const [reason, setReason] = useState<ExitReason | null>(null);
   const [searching, setSearching] = useState(false);
+  const [pin, setPin] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const { addToast } = useUIStore();
 
   // Real-time roll-number validation & decoding
   const rollValid = useMemo(() => (rollInput ? validateRollNumber(rollInput) : false), [rollInput]);
@@ -38,9 +43,81 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
     }
   };
 
-  const handleConfirm = () => {
-    onClose();
-    reset();
+  const handlePinConfirm = async () => {
+    if (pin.length !== 4) {
+      addToast({
+        title: "Invalid PIN",
+        message: "Please enter a valid 4-digit supervisor PIN.",
+        variant: "error",
+      });
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      // First verify the supervisor PIN via API
+      const verifyRes = await fetch("/api/auth/pin-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ employeeId: "SV001", pin }),
+      });
+
+      const verifyData = await verifyRes.json();
+      if (!verifyData.success) {
+        addToast({
+          title: "PIN Verification Failed",
+          message: "Invalid supervisor PIN. Please try again.",
+          variant: "error",
+        });
+        setSubmitting(false);
+        return;
+      }
+
+      // Get the authenticated supervisor ID from the token
+      const token = verifyData.data.token;
+
+      // Now submit the manual scan
+      const scanRes = await fetch("/api/gate/scan", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          roll: student.roll,
+          direction: direction,
+          reason: direction === "OUT" ? reason : undefined,
+          gateId: gateId,
+          isManual: true,
+        }),
+      });
+
+      const scanData = await scanRes.json();
+      if (scanData.success) {
+        addToast({
+          title: "Manual Entry Recorded",
+          message: `${student.name} (${student.roll}) has been recorded ${direction === "IN" ? "entering" : "exiting"} campus.`,
+          variant: "success",
+        });
+        onClose();
+        reset();
+      } else {
+        addToast({
+          title: "Manual Entry Failed",
+          message: scanData.error?.message || "Could not record the scan.",
+          variant: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Manual entry error:", error);
+      addToast({
+        title: "Error",
+        message: "An unexpected error occurred. Please try again.",
+        variant: "error",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const reset = () => {
@@ -49,6 +126,7 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
     setStep("input");
     setDirection("IN");
     setReason(null);
+    setPin("");
   };
 
   return (
@@ -255,11 +333,35 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
                   </div>
                 )}
 
+                {/* Supervisor PIN entry */}
+                <div className="space-y-2">
+                  <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase flex items-center gap-2">
+                    <Lock className="w-3.5 h-3.5" />
+                    Supervisor PIN (required for manual entry)
+                  </label>
+                  <input
+                    type="password"
+                    maxLength={4}
+                    value={pin}
+                    onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                    placeholder="••••"
+                    className="w-full py-3 px-4 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-center font-mono font-bold text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
+                  />
+                  <p className="text-xs text-[var(--text-muted)]">
+                    Enter 4-digit supervisor PIN to authorize this manual entry.
+                  </p>
+                </div>
+
                 <div className="flex gap-3 pt-2">
                   <Button variant="secondary" onClick={() => setStep("input")} className="flex-1 rounded-xl">
                     Back
                   </Button>
-                  <Button onClick={handleConfirm} className="flex-1 rounded-xl font-bold">
+                  <Button
+                    onClick={handlePinConfirm}
+                    disabled={submitting || pin.length !== 4}
+                    loading={submitting}
+                    className="flex-1 rounded-xl font-bold"
+                  >
                     Authorize Entry
                   </Button>
                 </div>

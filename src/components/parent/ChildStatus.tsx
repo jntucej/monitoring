@@ -27,12 +27,14 @@ export function ChildStatus() {
         const stat: Record<string, any> = {};
         await Promise.all(
           kids.map(async (k) => {
+            const roll = k.uniqueId || k.roll || "";
+            if (!roll) return;
             try {
-              const r = await fetch(`/api/students/${encodeURIComponent(k.roll)}/status`, { cache: "no-store" });
+              const r = await fetch(`/api/persons/${encodeURIComponent(roll)}/status`, { cache: "no-store" });
               const j = await r.json();
-              stat[k.roll] = j.data ?? { status: "OUT", last: null };
+              stat[roll] = j.data ?? { status: "OUT", last: null };
             } catch {
-              stat[k.roll] = { status: "OUT", last: null };
+              stat[roll] = { status: "OUT", last: null };
             }
           })
         );
@@ -71,7 +73,9 @@ export function ChildStatus() {
   return (
     <div className="space-y-3">
       {children.map((child) => {
-        const st = statuses[child.roll];
+        const roll = child.uniqueId || child.roll || "";
+        const name = child.fullName || child.name || "";
+        const st = statuses[roll];
         const isIn = st?.status === "IN";
         const lastSeen = st?.last
           ? `${st.last.gateName} • ${new Date(st.last.timestamp).toLocaleString("en-IN", {
@@ -85,17 +89,17 @@ export function ChildStatus() {
           <div key={child.id} className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-6 flex items-center justify-between gap-3 flex-wrap">
             <div className="flex items-center gap-4">
               <div className="relative w-16 h-16 rounded-full border-2 border-gray-400 overflow-hidden">
-                {child.photo ? (
-                  <img src={child.photo} alt={child.name} className="rounded-full w-full h-full object-cover" />
+                {child.photoUrl || child.photo ? (
+                  <img src={child.photoUrl || child.photo} alt={name} className="rounded-full w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xl font-semibold">
-                    {child.name?.[0] ?? "?"}
+                    {name?.[0] ?? "?"}
                   </div>
                 )}
               </div>
               <div>
-                <h3 className="text-xl font-bold">{child.name}</h3>
-                <p className="text-sm font-mono text-[var(--text-muted)]">{child.roll}</p>
+                <h3 className="text-xl font-bold">{name}</h3>
+                <p className="text-sm font-mono text-[var(--text-muted)]">{roll}</p>
                 <p className="text-sm text-[var(--text-muted)] mt-0.5">Last seen: {lastSeen}</p>
               </div>
             </div>
