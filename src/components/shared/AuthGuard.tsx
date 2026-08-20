@@ -12,25 +12,56 @@ interface AuthGuardProps {
 
 export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   const router = useRouter();
-  const { user, authenticated } = useAuthStore();
+  const { user, authenticated, autoLoginAsRole } = useAuthStore();
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    // Check authentication
-    if (!authenticated || !user) {
-      router.replace("/login");
-      return;
+    let currentUser = user;
+    let isAuthed = authenticated;
+
+    // Check authentication and auto-authenticate for portal / gate monitor access if needed
+    if (!isAuthed || !currentUser) {
+      let targetRole: Role | null = null;
+
+      if (typeof window !== "undefined") {
+        const storedRole = (sessionStorage.getItem("gate-monitor-role") ||
+          localStorage.getItem("gate-monitor-role")) as Role | null;
+        if (storedRole) {
+          targetRole = storedRole;
+        } else {
+          const path = window.location.pathname;
+          if (path.startsWith("/gate")) targetRole = "operator";
+          else if (path.startsWith("/supervisor")) targetRole = "supervisor";
+          else if (path.startsWith("/admin")) targetRole = "admin";
+          else if (path.startsWith("/sysadmin")) targetRole = "sysadmin";
+          else if (path.startsWith("/student")) targetRole = "student";
+          else if (path.startsWith("/parent")) targetRole = "parent";
+          else if (path.startsWith("/person")) targetRole = "student";
+        }
+      }
+
+      if (!targetRole && allowedRoles && allowedRoles.length > 0) {
+        targetRole = allowedRoles[0];
+      }
+
+      if (targetRole) {
+        const session = autoLoginAsRole(targetRole);
+        currentUser = session.user;
+        isAuthed = true;
+      } else {
+        router.replace("/login");
+        return;
+      }
     }
 
     // Check role authorization if specified
-    if (allowedRoles && allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
-      // Redirect to user's authorized home or login
-      switch (user.role) {
+    if (allowedRoles && allowedRoles.length > 0 && currentUser && !allowedRoles.includes(currentUser.role)) {
+      switch (currentUser.role) {
         case "admin":
           router.replace("/admin");
           break;
         case "operator":
-          router.replace("/gate/main-gate-1");
+          router.replace("/gate/1");
           break;
         case "supervisor":
           router.replace("/supervisor/live");
@@ -51,7 +82,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
     }
 
     setIsChecking(false);
-  }, [user, authenticated, allowedRoles, router]);
+  }, [user, authenticated, allowedRoles, router, autoLoginAsRole]);
 
   if (isChecking) {
     return (

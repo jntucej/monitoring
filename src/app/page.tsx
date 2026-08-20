@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { useAuthStore } from "@/stores/authStore";
 import {
   ShieldCheck,
   LayoutDashboard,
@@ -108,6 +109,7 @@ export default function Home() {
 
   const handlePortalAccess = (role: Role, href: string) => {
     sessionStorage.setItem("gate-monitor-role", role);
+    useAuthStore.getState().autoLoginAsRole(role);
     router.push(href);
   };
 

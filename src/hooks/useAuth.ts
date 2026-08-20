@@ -32,32 +32,9 @@ export function useAuth() {
    * In production this would be replaced by a proper login form / SSO.
    */
   const loginAsRole = useCallback(async (targetRole: Role) => {
-    const creds = DEMO_CREDENTIALS[targetRole];
-    if (!creds) {
-      // For student role, we need to handle it differently since students aren't in the users table
-      // Fall back to a parent-like auto-auth
-      const fakeUser = {
-        id: "pa-1",
-        name: "Demo User",
-        role: targetRole as Role,
-        gateId: undefined,
-        employeeId: undefined,
-      };
-      setRole(targetRole);
-      // For student/parent roles that aren't in users table, we create a minimal session
-      // The API routes will still work with the SQLite DB
-      localStorage.setItem("gate-monitor-token", "demo-token");
-      localStorage.setItem("gate-monitor-role", targetRole);
-      localStorage.setItem("gate-monitor-user", JSON.stringify(fakeUser));
-      return true;
-    }
-
-    const result = await login(creds.login, creds.password);
-    if (result.success) {
-      return true;
-    }
-    return false;
-  }, [login, setRole]);
+    useAuthStore.getState().autoLoginAsRole(targetRole);
+    return true;
+  }, []);
 
   const requireAuth = useCallback((allowedRoles?: Role[]) => {
     if (!authenticated) {
