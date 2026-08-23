@@ -48,7 +48,7 @@ export default function FacultyDashboardPage() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-extrabold tracking-tight text-[var(--text-primary)]">
-              Faculty Portal
+              Department Portal
             </h1>
             <PersonBadge type="faculty" />
           </div>

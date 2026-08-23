@@ -135,9 +135,9 @@ const ROLE_NAV_GROUPS: Record<string, NavGroup[]> = {
   ],
   faculty: [
     {
-      groupLabel: "Faculty Console",
+      groupLabel: "Department Console",
       items: [
-        { href: "/faculty", label: "Faculty Dashboard", icon: Building2 },
+        { href: "/faculty", label: "Department Dashboard", icon: Building2 },
         { href: "/hod", label: "HOD Department Console", icon: ShieldCheck },
         { href: "/visitor", label: "Visitor Management", icon: Users },
       ],
@@ -179,7 +179,7 @@ const ROLE_LABELS: Record<string, string> = {
   guardian: "Guardian Portal",
   parent: "Guardian Portal", // legacy
   student: "My Portal",
-  faculty: "Faculty Portal",
+  faculty: "Department Portal",
   staff: "Staff Portal",
   worker: "Worker Portal",
   warden: "Hostel Warden",
