@@ -57,7 +57,7 @@ export const resolveLoginIdentifier = async (loginId: string): Promise<string | 
 export const canUserAuthenticate = async (userId: string): Promise<boolean> => {
   try {
     const { data, error } = await supabase
-      .rpc('can_user_authenticate', { user_id: userId })
+      .rpc('can_user_authenticate', { p_user_id: userId })
       .single()
 
     if (error) {

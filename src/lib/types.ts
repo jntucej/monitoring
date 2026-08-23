@@ -102,6 +102,8 @@ export interface User {
   uniqueId?: string;
   /** Friendly unique login handle */
   handle?: string;
+  /** Active session token for single-device verification */
+  currentSessionToken?: string;
   name: string;
   role: Role;
   gateId?: string;

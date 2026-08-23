@@ -8,7 +8,7 @@ import { useAuthStore } from "@/stores/authStore";
 import type { ApiResponse } from "@/lib/types";
 
 export function useApi() {
-  const { token } = useAuthStore();
+  const { token, logout } = useAuthStore();
 
   const request = async <T = any>(
     input: string | URL,
@@ -21,9 +21,22 @@ export function useApi() {
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
+    const sessionToken = useAuthStore.getState().user?.currentSessionToken;
+    if (sessionToken) {
+      headers["X-Session-Token"] = sessionToken;
+    }
 
     const res = await fetch(input, { ...init, headers });
     const data = await res.json();
+
+    // If session expired or unauthorized on device check, force logout and redirect to login page
+    if (res.status === 401 && data?.error?.code === "SESSION_EXPIRED") {
+      logout();
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
+      }
+    }
+
     return data as ApiResponse<T>;
   };
 

@@ -60,7 +60,7 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
       const verifyRes = await fetch("/api/auth/pin-login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ employeeId: "SV001", pin }),
+        body: JSON.stringify({ employeeId: "SV001", pin, verifyOnly: true }),
       });
 
       const verifyData = await verifyRes.json();

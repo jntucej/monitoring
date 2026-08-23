@@ -10,8 +10,8 @@ async function handleGet(req: NextRequest) {
     const date = params.get("date") || new Date().toISOString().slice(0, 10);
 
     const { data: scans, error } = await supabase
-      .from("gate_logs")
-      .select("*")
+      .from("movement_logs")
+      .select("*, users:users!movement_logs_user_id_fkey(role)")
       .gte("timestamp", `${date}T00:00:00.000Z`)
       .lte("timestamp", `${date}T23:59:59.999Z`);
 
@@ -38,7 +38,13 @@ async function handleGet(req: NextRequest) {
       const hour = new Date(scan.timestamp).getHours();
       hourCounts[hour] = (hourCounts[hour] || 0) + 1;
 
-      const pType = (scan.person_type as keyof typeof stats.byType) || "student";
+      const rawRole = scan.users?.role;
+      let role = rawRole || "student";
+      if (role === "guardian") role = "parent";
+      if (role === "operator" || role === "supervisor" || role === "admin" || role === "sysadmin") {
+        role = "staff";
+      }
+      const pType = (role as keyof typeof stats.byType) || "student";
       const typeEntry = stats.byType[pType] || { in: 0, out: 0 };
 
       if (scan.direction === "IN") {

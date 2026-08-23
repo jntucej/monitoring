@@ -8,7 +8,7 @@
  * - Prevents client-side identity spoofing
  */
 
-import { supabase } from './supabaseClient';
+import { supabase, getSupabaseServiceClient } from './supabaseClient';
 import { Role, AccountStatus } from './types';
 
 /**
@@ -49,6 +49,9 @@ export interface AuthContext {
 
   /** Whether the user has an active account */
   isActive: boolean;
+
+  /** The user's active session handle/token for single-session enforcement */
+  handle?: string;
 }
 
 /**
@@ -65,8 +68,9 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
     throw new Error('UNAUTHORIZED: Invalid or expired token');
   }
 
-  // Get the user profile from public.users
-  const { data: profile, error: profileError } = await supabase
+  // Get the user profile from public.users using the service client to bypass RLS on server-side lookups
+  const service = getSupabaseServiceClient();
+  const { data: profile, error: profileError } = await service
     .from('users')
     .select('*')
     .eq('id', user.id)
@@ -95,7 +99,8 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
     gateId: profile.gate_id,
     employeeId: profile.unique_id || profile.employee_id,
     isAuthenticated: true,
-    isActive: profile.status === 'ACTIVE'
+    isActive: profile.status === 'ACTIVE',
+    handle: profile.handle || undefined
   };
 }
 
@@ -408,7 +413,7 @@ async function validateLogOperation(
 
   // Get the log to validate access
   const { data: log, error: logError } = await supabase
-    .from('gate_logs')
+    .from('movement_logs')
     .select('gate_id, operator_id')
     .eq('id', logId)
     .single();

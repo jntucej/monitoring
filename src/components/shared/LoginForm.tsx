@@ -53,7 +53,7 @@ export function LoginForm({ role, title, subtitle }: LoginFormProps) {
     e.preventDefault();
     setErrorMsg("");
 
-    const identifier = loginIdentifier.trim();
+    const identifier = loginIdentifier.trim().toUpperCase(); // Convert to uppercase for consistency
     if (!identifier) {
       triggerShake("Please enter your ID.");
       return;
@@ -77,7 +77,10 @@ export function LoginForm({ role, title, subtitle }: LoginFormProps) {
         message: `Authenticated successfully.`,
         variant: "success",
       });
-      // Redirect based on role or let the app redirect
+      // Redirect based on role
+      const authStore = useAuthStore.getState();
+      const userRole = authStore.role;
+      redirectAfterLogin(userRole);
       return;
     }
 
@@ -88,9 +91,48 @@ export function LoginForm({ role, title, subtitle }: LoginFormProps) {
         message: `Authenticated via Security PIN.`,
         variant: "success",
       });
+      const authStore = useAuthStore.getState();
+      const userRole = authStore.role;
+      redirectAfterLogin(userRole);
       return;
     } else {
       triggerShake(result.error || pinResult.error || "Invalid credentials.");
+    }
+  };
+
+  // Helper function to redirect based on role after successful login
+  const redirectAfterLogin = (role: Role | null) => {
+    switch (role) {
+      case "operator":
+        router.push("/gate/1"); // Default to gate 1
+        break;
+      case "supervisor":
+        router.push("/supervisor/live");
+        break;
+      case "admin":
+      case "sysadmin":
+        router.push("/admin/dashboard");
+        break;
+      case "faculty":
+        router.push("/faculty");
+        break;
+      case "staff":
+        router.push("/staff");
+        break;
+      case "worker":
+        router.push("/worker");
+        break;
+      case "student":
+        router.push("/student");
+        break;
+      case "guardian":
+        router.push("/guardian");
+        break;
+      case "visitor":
+        router.push("/visitor");
+        break;
+      default:
+        router.push("/");
     }
   };
 

@@ -7,6 +7,7 @@ import { DynamicHeader } from "./DynamicHeader";
 import { MobileBottomNav } from "./MobileBottomNav";
 import { NetworkStatusBanner } from "./NetworkStatusBanner";
 import { Sidebar } from "./Sidebar";
+import { Sun, Moon, Sparkles, Smartphone } from "lucide-react";
 
 interface SafeAreaAppShellProps {
   children: React.ReactNode;
@@ -14,9 +15,9 @@ interface SafeAreaAppShellProps {
 
 export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
   const { authenticated } = useAuthStore();
-  const { theme, setTheme } = useUIStore();
+  const { theme, setTheme, deviceProfile, setDeviceProfile } = useUIStore();
 
-  // Initialize theme from localStorage on client-side mount
+  // Initialize theme and device profile from localStorage on client-side mount
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedTheme = localStorage.getItem("gate-monitor-theme") as "dark" | "light" | null;
@@ -26,8 +27,15 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
         // Default to dark per project requirement
         setTheme("dark");
       }
+
+      const savedProfile = localStorage.getItem("gate-monitor-device-profile") as "high-end" | "low-profile" | null;
+      if (savedProfile) {
+        setDeviceProfile(savedProfile);
+      } else {
+        setDeviceProfile("high-end");
+      }
     }
-  }, [setTheme]);
+  }, [setTheme, setDeviceProfile]);
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] antialiased selection:bg-[var(--action-primary)] selection:text-white">
@@ -50,6 +58,45 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
 
       {/* Mobile Touch Navigation (Authenticated only) */}
       {authenticated && <MobileBottomNav />}
+
+      {/* Floating Panel for changing Theme and Preview Profile */}
+      <div className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col gap-3 items-end">
+        {/* Theme Toggle Button */}
+        <button
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          className="w-10 h-10 rounded-full flex items-center justify-center bg-[var(--bg-surface)] hover:bg-[var(--bg-elevated)] border border-[var(--border-strong)] shadow-lg shadow-black/20 text-[var(--text-primary)] transition-all hover:scale-105 active:scale-95 group relative"
+          title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+          aria-label="Toggle Theme Mode"
+        >
+          {theme === "dark" ? (
+            <Sun className="w-5 h-5 text-amber-400 group-hover:rotate-12 transition-transform" />
+          ) : (
+            <Moon className="w-5 h-5 text-indigo-400 group-hover:-rotate-12 transition-transform" />
+          )}
+          <span className="absolute right-12 top-1.5 px-2 py-1 rounded bg-slate-900 border border-slate-850 text-[10px] text-slate-200 opacity-0 group-hover:opacity-100 whitespace-nowrap transition-opacity pointer-events-none md:block hidden">
+            Theme: {theme === "dark" ? "Dark Mode" : "Light Mode"}
+          </span>
+        </button>
+
+        {/* Profile Toggle Button (High-End / Low Profile preview switcher) */}
+        <button
+          onClick={() => setDeviceProfile(deviceProfile === "high-end" ? "low-profile" : "high-end")}
+          className={`w-10 h-10 rounded-full flex items-center justify-center bg-[var(--bg-surface)] hover:bg-[var(--bg-elevated)] border shadow-lg shadow-black/20 transition-all hover:scale-105 active:scale-95 group relative ${
+            deviceProfile === "high-end" ? "border-emerald-500/40 text-emerald-405" : "border-amber-500/40 text-amber-405"
+          }`}
+          title={`Switch to ${deviceProfile === "high-end" ? "Low-Profile (for Older/Low-spec Mobiles)" : "High-End (Video QR Scan)"} mode`}
+          aria-label="Toggle Device Profile"
+        >
+          {deviceProfile === "high-end" ? (
+            <Sparkles className="w-5 h-5 text-emerald-400 animate-pulse" />
+          ) : (
+            <Smartphone className="w-5 h-5 text-amber-400" />
+          )}
+          <span className="absolute right-12 top-1.5 px-2 py-1 rounded bg-slate-900 border border-slate-850 text-[10px] text-slate-200 opacity-0 group-hover:opacity-100 whitespace-nowrap transition-opacity pointer-events-none md:block hidden">
+            Device: {deviceProfile === "high-end" ? "High-End Spec (Camera On)" : "Low-Profile Mobile (Camera Off)"}
+          </span>
+        </button>
+      </div>
     </div>
   );
 }

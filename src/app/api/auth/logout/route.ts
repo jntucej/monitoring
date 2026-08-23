@@ -22,7 +22,13 @@ async function handlePost(req: NextRequest) {
       } = await supabase.auth.getUser(authHeader.slice(7));
 
       if (!getUserErr && user?.id) {
-        await getSupabaseServiceClient().auth.admin.signOut(user.id).catch((signOutErr) => {
+        const service = getSupabaseServiceClient();
+        try {
+          await service.from("users").update({ handle: null }).eq("id", user.id);
+        } catch (dbErr) {
+          console.error("Logout database session token clear error:", dbErr);
+        }
+        await service.auth.admin.signOut(user.id).catch((signOutErr) => {
           console.error("Logout session revocation error:", signOutErr);
         });
       }

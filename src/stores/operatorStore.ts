@@ -254,6 +254,7 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          "X-Session-Token": authStore.user?.currentSessionToken || "",
         },
         body: JSON.stringify({
           scans: offlineQueue.map((scan) => ({
@@ -264,6 +265,13 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
       });
 
       const result = await response.json();
+      if (response.status === 401 && result?.error?.code === "SESSION_EXPIRED") {
+        authStore.logout();
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+        return;
+      }
       if (result.success) {
         const failedCount =
           result.data?.results?.filter((r: any) => r.status === "error")?.length || 0;

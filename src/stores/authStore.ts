@@ -38,10 +38,12 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       login: async (login, password) => {
         set({ loading: true });
         try {
+          // Convert to uppercase for consistency
+          const cleanLogin = login.trim().toUpperCase();
           const response = await fetch("/api/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ login, password }),
+            body: JSON.stringify({ login: cleanLogin, password }),
           });
 
           if (response.ok) {
@@ -70,10 +72,12 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       pinLogin: async (employeeId, pin) => {
         set({ loading: true });
         try {
+          // Convert to uppercase for consistency
+          const cleanEmployeeId = employeeId.trim().toUpperCase();
           const response = await fetch("/api/auth/pin-login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ employeeId, pin }),
+            body: JSON.stringify({ employeeId: cleanEmployeeId, pin }),
           });
 
           if (response.ok) {

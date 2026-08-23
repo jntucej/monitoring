@@ -169,15 +169,24 @@ function mUser(r: any): User {
 }
 
 function mScan(r: any): Scan {
-  const uniqueId = r.unique_id || r.roll || "";
+  const user = r.users; // joined user object
+  const student = user?.student_details; // nested student details
+  
+  const uniqueId = user?.unique_id || r.unique_id || r.roll || "";
+  const name = user?.name || r.name || r.person_name || "";
+  const personType = user?.role || r.person_type || "student";
+  const department = user?.department_id || r.department || undefined;
+  const year = student?.year || r.year || undefined;
+  const personId = r.user_id || r.person_id || undefined;
+
   return {
     id: r.id,
     roll: uniqueId,
     uniqueId,
-    name: r.name || r.person_name || "",
-    personType: r.person_type || "student",
-    department: r.department || undefined,
-    year: r.year || undefined,
+    name,
+    personType,
+    department,
+    year,
     direction: r.direction,
     reason: r.reason,
     gateId: r.gate_id,
@@ -187,8 +196,8 @@ function mScan(r: any): Scan {
     timestamp: r.timestamp,
     isManual: !!r.is_manual,
     isCorrection: !!r.is_correction,
-    originalScanId: r.original_scan_id || undefined,
-    personId: r.person_id || undefined,
+    originalScanId: r.original_scan_id || r.original_log_id || undefined,
+    personId,
   };
 }
 
@@ -424,7 +433,7 @@ export async function correctionCandidates(): Promise<Scan[]> {
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
   const { data, error } = await supabase
     .from('movement_logs')
-    .select('*')
+    .select('*, users:users!movement_logs_user_id_fkey!inner(name, role, unique_id, department_id, student_details:student_details!student_details_user_id_fkey(year))')
     .gte('timestamp', oneHourAgo)
     .eq('is_correction', false)
     .order('timestamp', { ascending: false })
@@ -448,8 +457,8 @@ export async function correctScan(
   role: string
 ): Promise<Scan | null> {
   const { data: origScan, error: origErr } = await supabase
-    .from('gate_logs')
-    .select('*')
+    .from('movement_logs')
+    .select('*, users:users!movement_logs_user_id_fkey!inner(name, role, unique_id, department_id, student_details:student_details!student_details_user_id_fkey(year))')
     .eq('id', originalScanId)
     .single();
 
@@ -462,29 +471,24 @@ export async function correctScan(
 
   const correctionRow = {
     id: newId,
-    roll: origScan.roll,
-    unique_id: origScan.unique_id || origScan.roll,
-    person_id: origScan.person_id,
-    person_type: origScan.person_type || 'student',
-    name: origScan.name,
-    department: origScan.department,
-    year: origScan.year,
+    user_id: origScan.user_id,
     direction: newDirection,
     reason: newReason || null,
     gate_id: origScan.gate_id,
     gate_name: origScan.gate_name,
-    operator_id: origScan.operator_id,
-    operator_name: origScan.operator_name,
+    operator_id: userId,
+    operator_name: userName,
     timestamp: new Date().toISOString(),
     is_manual: true,
     is_correction: true,
-    original_scan_id: originalScanId,
+    original_log_id: originalScanId,
+    correction_reason: reason
   };
 
   const { data: newScanData, error: insertErr } = await supabase
-    .from('gate_logs')
+    .from('movement_logs')
     .insert(correctionRow)
-    .select()
+    .select('*, users:users!movement_logs_user_id_fkey!inner(name, role, unique_id, department_id, student_details:student_details!student_details_user_id_fkey(year))')
     .single();
 
   if (insertErr || !newScanData) {
@@ -1088,16 +1092,21 @@ export async function getAllLogs(f?: {
   page?: number;
   limit?: number;
 }) {
-  let query = supabase.from('gate_logs').select('*', { count: 'exact' });
+  let query = supabase
+    .from('movement_logs')
+    .select('*, users:users!movement_logs_user_id_fkey!inner(name, role, unique_id, department_id, student_details:student_details!student_details_user_id_fkey(year))', { count: 'exact' });
 
   if (f?.gateId) query = query.eq('gate_id', f.gateId);
   if (f?.direction) query = query.eq('direction', f.direction);
   if (f?.reason) query = query.eq('reason', f.reason);
-  if (f?.personType) query = query.eq('person_type', f.personType);
+  if (f?.personType) {
+    const roleValue = f.personType === 'parent' ? 'guardian' : f.personType;
+    query = query.eq('users.role', roleValue);
+  }
 
   if (f?.search) {
-    const s = `%${f.search.toLowerCase()}%`;
-    query = query.or(`name.ilike.${s},roll.ilike.${s},unique_id.ilike.${s},department.ilike.${s}`);
+    const s = f.search.trim();
+    query = query.or(`name.ilike.%${s}%,unique_id.ilike.%${s}%,department_id.ilike.%${s}%`, { foreignTable: 'users' });
   }
 
   if (f?.date) {

@@ -10,6 +10,7 @@
  * Rate limited: 5 attempts / 15 min / IP.
  */
 import { NextRequest, NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 import { withRateLimit } from "@/lib/rate-limit";
 import { supabase, getSupabaseServiceClient } from "@/lib/supabaseClient";
 
@@ -60,7 +61,8 @@ async function handleLogin(req: NextRequest) {
       );
     }
 
-    const cleanLogin = login.trim();
+    // Convert to uppercase for consistency (in case client didn't)
+    const cleanLogin = login.trim().toUpperCase();
 
     // 1. Resolve identifier -> Supabase Auth email (null when unknown).
     let email: string | null = null;
@@ -109,6 +111,17 @@ async function handleLogin(req: NextRequest) {
       );
     }
 
+    // Generate unique session token for single active session enforcement
+    const currentSessionToken = randomUUID();
+    const { error: sessionUpdateError } = await service
+      .from("users")
+      .update({ handle: currentSessionToken })
+      .eq("id", authData.user.id);
+
+    if (sessionUpdateError) {
+      console.error("Failed to update user session token:", sessionUpdateError);
+    }
+
     // 4. Return the genuine Supabase session to the client.
     return NextResponse.json({
       success: true,
@@ -125,6 +138,7 @@ async function handleLogin(req: NextRequest) {
           employeeId: profile.employee_id,
           email,
           status: profile.status,
+          currentSessionToken,
         },
       },
     });

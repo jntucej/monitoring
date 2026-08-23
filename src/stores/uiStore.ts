@@ -8,6 +8,7 @@ interface UIState {
   toasts: ToastData[];
   theme: "dark" | "light";
   isMobileSidebarOpen: boolean;
+  deviceProfile: "high-end" | "low-profile";
 }
 
 interface UIActions {
@@ -15,6 +16,7 @@ interface UIActions {
   removeToast: (id: string) => void;
   clearAllToasts: () => void;
   setTheme: (theme: "dark" | "light") => void;
+  setDeviceProfile: (profile: "high-end" | "low-profile") => void;
   toggleMobileSidebar: () => void;
   success: (message: string, title?: string) => void;
   error: (message: string, title?: string) => void;
@@ -26,6 +28,7 @@ export const useUIStore = create<UIState & UIActions>()((set) => ({
   toasts: [],
   theme: "dark",
   isMobileSidebarOpen: false,
+  deviceProfile: "high-end",
 
   addToast: (toast) => {
     const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -51,6 +54,13 @@ export const useUIStore = create<UIState & UIActions>()((set) => ({
       localStorage.setItem("gate-monitor-theme", theme);
     }
     set({ theme });
+  },
+
+  setDeviceProfile: (deviceProfile) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("gate-monitor-device-profile", deviceProfile);
+    }
+    set({ deviceProfile });
   },
 
   toggleMobileSidebar: () => set((state) => ({ isMobileSidebarOpen: !state.isMobileSidebarOpen })),

@@ -61,6 +61,23 @@ export function withAuthorization(
       // Validate basic authentication
       const authContext = await requireAuthUser(token);
 
+      // Strict check: if profile has handle stored, verify match with X-Session-Token header.
+      if (authContext.handle) {
+        const sessionToken = req.headers.get('x-session-token');
+        if (!sessionToken || sessionToken !== authContext.handle) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: {
+                code: 'SESSION_EXPIRED',
+                message: 'Your session has expired or you have logged in from another device.',
+              },
+            },
+            { status: 401 }
+          );
+        }
+      }
+
       // Check account status - must be ACTIVE unless explicitly allowed
       if (!options.allowInactive && !authContext.isActive) {
         return NextResponse.json(
@@ -119,13 +136,12 @@ export function withAuthorization(
 
       // Inject trusted identity headers for the handler. These ALWAYS
       // overwrite client-supplied values with server-validated data.
-      const authenticatedReq = new NextRequest(req);
-      authenticatedReq.headers.set('x-user-id', authContext.userId);
-      authenticatedReq.headers.set('x-user-role', authContext.role);
-      authenticatedReq.headers.set('x-user-email', authContext.email);
+      req.headers.set('x-user-id', authContext.userId);
+      req.headers.set('x-user-role', authContext.role);
+      req.headers.set('x-user-email', authContext.email);
 
       // If all checks pass, continue to the handler with auth context
-      return handler(authenticatedReq, { auth: authContext });
+      return handler(req, { auth: authContext });
     } catch (error) {
       // Handle different types of errors
       if (error instanceof Error) {

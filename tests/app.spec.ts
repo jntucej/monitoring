@@ -9,13 +9,13 @@ test.describe('Gate Monitor Application E2E Tests', () => {
 
   test('Portal buttons navigate to login pages', async ({ page }) => {
     await page.goto('/');
-    const portalButton = page.locator('text=Portal');
+    const portalButton = page.locator('text=Users Portal').first();
     await expect(portalButton).toBeVisible();
   });
 
   test('Login page loads and allows role selection', async ({ page }) => {
     await page.goto('/login');
-    await expect(page.locator('text=Gate Operator Desk').or(page.locator('text=Login'))).toBeVisible();
+    await expect(page.locator('text=Operator Portal').or(page.locator('text=Select Portal')).first()).toBeVisible();
   });
 
   test('Health check API returns OK', async ({ request }) => {

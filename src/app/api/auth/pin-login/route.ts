@@ -12,6 +12,7 @@
  *  5. Missing user and wrong PIN return identical responses (no oracle).
  */
 import { NextRequest, NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";
 import { withRateLimit } from "@/lib/rate-limit";
 import { getSupabaseServiceClient, createEphemeralSupabaseClient } from "@/lib/supabaseClient";
@@ -75,7 +76,7 @@ async function mintSupabaseSession(email: string) {
 async function handlePinLogin(req: NextRequest) {
   try {
     const body = await req.json().catch(() => null);
-    const { employeeId, pin } = body || {};
+    const { employeeId, pin, verifyOnly } = body || {};
 
     if (
       typeof employeeId !== "string" || !employeeId.trim() ||
@@ -87,7 +88,10 @@ async function handlePinLogin(req: NextRequest) {
       );
     }
 
-    const user = await findPinUser(employeeId.trim());
+    // Convert to uppercase for consistency (in case client didn't)
+    const cleanEmployeeId = employeeId.trim().toUpperCase();
+    
+    const user = await findPinUser(cleanEmployeeId);
 
     // No user OR no PIN provisioned -> same generic failure (no oracle).
     if (!user?.initial_pin_hash) {
@@ -108,6 +112,21 @@ async function handlePinLogin(req: NextRequest) {
       );
     }
 
+    // Generate unique session token for single active session enforcement (if not just verification)
+    let currentSessionToken: string | undefined;
+    if (verifyOnly !== true) {
+      currentSessionToken = randomUUID();
+      const service = getSupabaseServiceClient();
+      const { error: sessionUpdateError } = await service
+        .from("users")
+        .update({ handle: currentSessionToken })
+        .eq("id", user.id);
+
+      if (sessionUpdateError) {
+        console.error("Failed to update user session token during PIN login:", sessionUpdateError);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       data: {
@@ -123,6 +142,7 @@ async function handlePinLogin(req: NextRequest) {
           employeeId: user.unique_id,
           email: user.email,
           status: "ACTIVE",
+          currentSessionToken,
         },
       },
     });

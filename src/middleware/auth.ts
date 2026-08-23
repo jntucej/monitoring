@@ -3,7 +3,7 @@
  * Updated to use Supabase Auth as the sole authentication authority
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase, canUserAuthenticate } from '@/lib/supabaseClient';
+import { supabase, canUserAuthenticate, getSupabaseServiceClient } from '@/lib/supabaseClient';
 
 /**
  * Authentication middleware that validates:
@@ -48,8 +48,9 @@ export async function authMiddleware(req: NextRequest) {
     );
   }
 
-  // Get user profile from public.users
-  const { data: profile, error: profileError } = await supabase
+  // Get user profile from public.users using the service client to bypass RLS on server-side lookups
+  const service = getSupabaseServiceClient();
+  const { data: profile, error: profileError } = await service
     .from('users')
     .select('*')
     .eq('id', user.id)
@@ -68,6 +69,23 @@ export async function authMiddleware(req: NextRequest) {
       { success: false, error: { code: 'ACCOUNT_INACTIVE', message: 'Account is not active' } },
       { status: 403 }
     );
+  }
+
+  // Strict check: if profile has handle stored, verify match with X-Session-Token header.
+  if (profile.handle) {
+    const sessionToken = req.headers.get('x-session-token');
+    if (!sessionToken || sessionToken !== profile.handle) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'SESSION_EXPIRED',
+            message: 'Your session has expired or you have logged in from another device.',
+          },
+        },
+        { status: 401 }
+      );
+    }
   }
 
   // Attach user information to headers
@@ -121,8 +139,9 @@ export function withAuth(handler: (req: NextRequest) => Promise<Response>) {
       );
     }
 
-    // Get user profile from public.users
-    const { data: profile, error: profileError } = await supabase
+    // Get user profile from public.users using the service client to bypass RLS on server-side lookups
+    const service = getSupabaseServiceClient();
+    const { data: profile, error: profileError } = await service
       .from('users')
       .select('*')
       .eq('id', user.id)
@@ -140,7 +159,24 @@ export function withAuth(handler: (req: NextRequest) => Promise<Response>) {
       return NextResponse.json(
         { success: false, error: { code: 'ACCOUNT_INACTIVE', message: 'Account is not active' } },
         { status: 403 }
-    );
+      );
+    }
+
+    // Strict check: if profile has handle stored, verify match with X-Session-Token header.
+    if (profile.handle) {
+      const sessionToken = req.headers.get('x-session-token');
+      if (!sessionToken || sessionToken !== profile.handle) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: 'SESSION_EXPIRED',
+              message: 'Your session has expired or you have logged in from another device.',
+            },
+          },
+          { status: 401 }
+        );
+      }
     }
 
     // Create new request with user information
