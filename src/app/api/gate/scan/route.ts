@@ -26,16 +26,20 @@ async function handlePost(req: NextRequest) {
     }
 
     // Check duplicate first (uses service client in db.ts)
-    const duplicate = await    const duplicate = await    const duplicate = await    const duplicate = await    const duplicaes    const duplicate = await    const duplicate = awaitect    const duplicate = await    const duplicat
-
-                                                                re                                                on                                                           ual:                   
-             retu             retu                        retu uplic             ret:              retu    {             retu  );
-  }  }  }  }  }  }  }  }  }  }  }  }  }  }  }proc  }  g s  }  }  }  }  }  }  }  }  }  }  }  }  }  } st  }  }  }  }  }  }  }  }  }  }  }  }  }  }  }proc  }  g s  }  }  }  }  }  spo  }  }  }  }  }  }  }  }  }  }  }  }  }  }  }proc  }  gNAL_ERROR", message } },
+    const duplicate =    const duplicate =    const duplicate =    const duplicate =    const duplicate =    const duplicate es    const duplicate =    const duplicate =    const dupct    const duplicate =    const duplicate =    c      const duplicate =    const duplicate =    const duplicate result = await addScan({
+      roll,
+      direction      direction      direction      direction      directioual:      directioalse,
+             retu             retu           { success: true, duplic            scan:             },
+      {      {      {      ;
+  } catch (error) {
+    console.error("Error processing s    console.error("Error processing s    cnstanceof Error ? error.message : "Failed to process scan";
+    return NextResponse.json(
+      { success: false, error: { code: "INTERNAL_ERROR", message } },
       { status: 500 }
     );
   }
 }
 
 export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["operator", "supervisor",  withAuthorization(handlePost, { requiredRole: ["operatxRequests: 60 }
+  withAuthorization(handlePost, { requiredRole: ["operator  withAervisor",  withAuthorization(handlePost, { requiredRole: ["operatorequests: 60 }
 );
