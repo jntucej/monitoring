@@ -1,5 +1,9 @@
 /**
- * Seed Script: Generate Dummy Unified Users Data for Gate Monitor
+ * Full Campus Seed Script for Gate Monitor
+ * Generates:
+ *  - 4 Academic Years of Students (1st, 2nd, 3rd, 4th Year: 2025, 2024, 2023, 2022)
+ *  - 70 Students per Year (280 Total Students) across EEE(02), ME(03), ECE(04), CSE(05), IT(12)
+ *  - 35 Employees (5 HODs, 20 Faculty, 10 Staff/Workers) + 50 Guardians
  */
 const { createClient } = require('@supabase/supabase-js');
 const bcrypt = require('bcryptjs');
@@ -9,97 +13,181 @@ const key = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cC
 
 const supabase = createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } });
 
-const DEPARTMENTS = ['02', '03', '04', '05', '12'];
-const NAMES_M = ['Amit', 'Raj', 'Vijay', 'Suresh', 'Ramesh', 'Dinesh', 'Mahesh', 'Arun'];
-const NAMES_F = ['Priya', 'Sneha', 'Pooja', 'Divya', 'Anjali', 'Kavitha', 'Lakshmi'];
-const SURNAMES = ['Kumar', 'Reddy', 'Rao', 'Naidu', 'Singh', 'Sharma', 'Patel'];
+const DEPT = [
+  { c: '02', s: 'EEE' }, { c: '03', s: 'ME' }, { c: '04', s: 'ECE' },
+  { c: '05', s: 'CSE' }, { c: '12', s: 'IT' }
+];
+
+const NM = ['Amit', 'Raj', 'Vijay', 'Suresh', 'Ramesh', 'Dinesh', 'Mahesh', 'Arun', 'Kumar', 'Mani', 'Srinivas', 'Karthik', 'Nikhil', 'Rahul'];
+const NF = ['Priya', 'Sneha', 'Pooja', 'Divya', 'Anjali', 'Kavitha', 'Lakshmi', 'Sita', 'Maya', 'Nandini', 'Keerthi', 'Harini', 'Swathi', 'Geetha'];
+const SUR = ['Kumar', 'Reddy', 'Rao', 'Naidu', 'Singh', 'Devi', 'Yadav', 'Pillai', 'Sharma', 'Verma', 'Patel', 'Gupta'];
 
 const uuid = () => require('crypto').randomUUID();
 const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const phone = () => '9' + String(randInt(100000000, 99999999)).padStart(9, '0');
 
-async function seed() {
-  console.log('=== Seeding Gate Monitor Dummy Data ===');
+async function main() {
+  console.log('🚀 Generating Full Campus Dataset (280 Students across 4 Years + 35 Staff)');
   const defaultPinHash = await bcrypt.hash('12345678', 10);
-  
+
+  const users = [];
+  const studentDetails = [];
+  const employeeDetails = [];
   const gates = [
     { gate_code: 'MAIN', name: 'Main Gate', location: 'Main Entrance', type: 'main', is_active: true },
     { gate_code: 'HOSTEL', name: 'Hostel Gate', location: 'Hostel Side', type: 'hostel', is_active: true },
     { gate_code: 'BACK', name: 'Back Gate', location: 'Back Side', type: 'back', is_active: false },
   ];
 
-  const users = [
-    { id: uuid(), unique_id: 'ADM-001', name: 'Admin User', role: 'admin' },
-    { id: uuid(), unique_id: 'SUP-001', name: 'Supervisor User', role: 'supervisor' },
-    { id: uuid(), unique_id: 'OP-001', name: 'Gate Operator', role: 'operator' },
-  ].map(u => ({
-    ...u, status: 'active', email: `${u.role}@jntuhcej.ac.in`, phone: phone(),
-    photo_url: `https://api.dicebear.com/7.x/initials/svg?seed=${u.name}`,
-    qr_code: JSON.stringify({ uniqueId: u.unique_id, role: u.role }), initial_pin_hash: defaultPinHash
-  }));
+  // 1. System Accounts
+  const sysRoles = [
+    { unique_id: 'ADM-001', name: 'Dr. Principal (Admin)', role: 'admin', email: 'admin@jntuhcej.ac.in' },
+    { unique_id: 'SUP-001', name: 'Chief Security Officer', role: 'supervisor', email: 'supervisor@jntuhcej.ac.in' },
+    { unique_id: 'OP-001', name: 'Main Gate Operator Desk', role: 'operator', email: 'operator@jntuhcej.ac.in' },
+    { unique_id: 'WDN-001', name: 'Boys Hostel Warden', role: 'warden', email: 'warden.boys@jntuhcej.ac.in' },
+    { unique_id: 'WDN-002', name: 'Girls Hostel Warden', role: 'warden', email: 'warden.girls@jntuhcej.ac.in' },
+  ];
 
-  const studentDetails = [];
-  for (let i = 1; i <= 30; i++) {
-    const uId = uuid();
-    const isMale = i % 2 === 0;
-    const name = `${pick(isMale ? NAMES_M : NAMES_F)} ${pick(SURNAMES)}`;
-    const roll = `24JJ1A${pick(DEPARTMENTS)}${String(i).padStart(2, '0')}`;
-    
+  sysRoles.forEach(r => {
     users.push({
-      id: uId, unique_id: roll, name, role: 'student', status: 'active',
-      email: `${roll.toLowerCase()}@student.jntuhcej.ac.in`, phone: phone(),
-      photo_url: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`,
-      qr_code: JSON.stringify({ uniqueId: roll, role: 'student' }), initial_pin_hash: defaultPinHash
+      id: uuid(), unique_id: r.unique_id, name: r.name, role: r.role, status: 'active', email: r.email,
+      phone: phone(), photo_url: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(r.name)}`,
+      qr_code: JSON.stringify({ uniqueId: r.unique_id, role: r.role }), initial_pin_hash: defaultPinHash
     });
+  });
 
-    const isHostel = i % 3 !== 0;
-    studentDetails.push({
-      user_id: uId, roll, year: randInt(1, 4), section: pick(['A', 'B']), batch: '2024-2028',
-      student_type: isHostel ? (isMale ? 'HM' : 'HF') : (isMale ? 'DM' : 'DF'),
-      hostel_block: isHostel ? (isMale ? 'Boys-A' : 'Girls-A') : null,
-      room_number: isHostel ? String(randInt(101, 400)) : null,
-      hostel_curfew_time: isHostel ? (isMale ? '21:00' : '18:30') : null
-    });
-  }
-
-  const employeeDetails = [];
-  for (let i = 1; i <= 10; i++) {
-    const uId = uuid();
-    const name = `Dr. ${pick(NAMES_M)} ${pick(SURNAMES)}`;
-    const empId = `FAC-${String(i).padStart(3, '0')}`;
+  // 2. Guardians (50 Accounts)
+  const guardians = [];
+  for (let g = 1; g <= 50; g++) {
+    const gId = uuid();
+    const gName = `${pick(NM)} ${pick(SUR)} (Parent)`;
+    const gCode = `PAR-${String(g).padStart(3, '0')}`;
+    guardians.push({ id: gId });
 
     users.push({
-      id: uId, unique_id: empId, name, role: 'faculty', status: 'active',
-      email: `faculty.${empId.toLowerCase()}@jntuhcej.ac.in`, phone: phone(),
-      photo_url: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`,
-      qr_code: JSON.stringify({ uniqueId: empId, role: 'faculty' }), initial_pin_hash: defaultPinHash
+      id: gId, unique_id: gCode, name: gName, role: 'guardian', status: 'active', email: `parent${g}@example.com`,
+      phone: phone(), photo_url: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(gName)}`,
+      qr_code: JSON.stringify({ uniqueId: gCode, role: 'guardian' }), initial_pin_hash: defaultPinHash
+    });
+  // 3. Students across 4 Years (70 per year batch = 280 Students Total)
+  const batches = [
+    { yearCode: '25', yearNum: 1, batchLabel: '2025-2029' },
+    { yearCode: '24', yearNum: 2, batchLabel: '2024-2028' },
+    { yearCode: '23', yearNum: 3, batchLabel: '2023-2027' },
+    { yearCode: '22', yearNum: 4, batchLabel: '2022-2026' },
+  ];
+
+  batches.forEach(({ yearCode, yearNum, batchLabel }) => {
+    for (let i = 1; i <= 70; i++) {
+      const uId = uuid();
+      const isMale = i % 2 === 0;
+      const name = `${pick(isMale ? NM : NF)} ${pick(SUR)}`;
+      const dept = DEPT[i % DEPT.length];
+      const entryCode = (yearNum > 1 && i > 60) ? '5A' : '1A';
+      const seqStr = String(((i - 1) % 14) + 1).padStart(2, '0');
+      const roll = `${yearCode}JJ${entryCode}${dept.c}${seqStr}`;
+      const parent = pick(guardians);
+
+      users.push({
+        id: uId, unique_id: roll, name, role: 'student', status: 'active',
+        email: `${roll.toLowerCase()}@student.jntuhcej.ac.in`, phone: phone(),
+        photo_url: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`,
+        qr_code: JSON.stringify({ uniqueId: roll, role: 'student' }), initial_pin_hash: defaultPinHash
+      });
+
+      const isHostel = i % 3 !== 0;
+      studentDetails.push({
+        user_id: uId, roll, year: yearNum, section: i % 2 === 0 ? 'A' : 'B', batch: batchLabel,
+        student_type: isHostel ? (isMale ? 'HM' : 'HF') : (isMale ? 'DM' : 'DF'),
+        hostel_block: isHostel ? (isMale ? (i % 2 === 0 ? 'Boys-A' : 'Boys-B') : (i % 2 === 0 ? 'Girls-A' : 'Girls-B')) : null,
+        room_number: isHostel ? String(randInt(101, 420)) : null,
+        hostel_curfew_time: isHostel ? (isMale ? '21:00' : '18:30') : null,
+        guardian_id: parent.id
+      });
+    }
+  });
+
+  // 4. Employees (HODs, Faculty, Staff, Workers = 35 Total)
+  DEPT.forEach((d) => {
+    const hodId = uuid();
+    const hodName = `Dr. ${pick(NM)} ${pick(SUR)} (HOD ${d.s})`;
+    const hodEmpId = `HOD-${d.s}`;
+
+    users.push({
+      id: hodId, unique_id: hodEmpId, name: hodName, role: 'faculty', status: 'active',
+      email: `hod.${d.s.toLowerCase()}@jntuhcej.ac.in`, phone: phone(),
+      photo_url: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(hodName)}`,
+      qr_code: JSON.stringify({ uniqueId: hodEmpId, role: 'faculty' }), initial_pin_hash: defaultPinHash
     });
 
     employeeDetails.push({
-      user_id: uId, employee_id: empId, designation: i <= 2 ? 'Professor & HOD' : 'Assistant Professor',
-      joining_date: '2020-01-15', is_hod: i <= 2, department_id: pick(DEPARTMENTS)
+      user_id: hodId, employee_id: hodEmpId, designation: 'Professor & HOD',
+      joining_date: '2018-06-01', is_hod: true, department_id: d.c
+    });
+
+    for (let f = 1; f <= 4; f++) {
+      const facId = uuid();
+      const facName = `Dr. ${pick(NM)} ${pick(SUR)}`;
+      const facEmpId = `FAC-${d.s}-${f}`;
+
+      users.push({
+        id: facId, unique_id: facEmpId, name: facName, role: 'faculty', status: 'active',
+        email: `${facEmpId.toLowerCase()}@jntuhcej.ac.in`, phone: phone(),
+        photo_url: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(facName)}`,
+        qr_code: JSON.stringify({ uniqueId: facEmpId, role: 'faculty' }), initial_pin_hash: defaultPinHash
+      });
+
+      employeeDetails.push({
+        user_id: facId, employee_id: facEmpId, designation: f <= 2 ? 'Associate Professor' : 'Assistant Professor',
+        joining_date: '2020-08-15', is_hod: false, department_id: d.c
+      });
+    }
+  });
+
+  for (let s = 1; s <= 10; s++) {
+    const stfId = uuid();
+    const stfName = `${pick(NM)} ${pick(SUR)}`;
+    const stfCode = s <= 5 ? `STF-${String(s).padStart(3, '0')}` : `WRK-${String(s).padStart(3, '0')}`;
+    const stfRole = s <= 5 ? 'staff' : 'worker';
+
+    users.push({
+      id: stfId, unique_id: stfCode, name: stfName, role: stfRole, status: 'active',
+      email: `${stfCode.toLowerCase()}@jntuhcej.ac.in`, phone: phone(),
+      photo_url: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(stfName)}`,
+      qr_code: JSON.stringify({ uniqueId: stfCode, role: stfRole }), initial_pin_hash: defaultPinHash
+    });
+
+    employeeDetails.push({
+      user_id: stfId, employee_id: stfCode, designation: s <= 5 ? 'Office Staff' : 'Maintenance Specialist',
+      joining_date: '2021-01-10', is_hod: false, department_id: '00'
     });
   }
 
-  console.log(`Generated ${users.length} dummy users.`);
+  console.log(`Generated ${users.length} Total Users (${studentDetails.length} Students across 4 Years, ${employeeDetails.length} Employees).`);
 
   await supabase.from('gates').upsert(gates, { onConflict: 'gate_code' });
-  console.log('✅ Gates seeded');
+  console.log('✅ Gates seeded.');
 
-  const { error: uErr } = await supabase.from('users').upsert(users, { onConflict: 'unique_id' });
-  if (uErr) console.error('❌ Users error:', uErr.message);
-  else console.log('✅ Users seeded');
+  for (let i = 0; i < users.length; i += 100) {
+    const { error } = await supabase.from('users').upsert(users.slice(i, i + 100), { onConflict: 'unique_id' });
+    if (error) console.error(`❌ Users insert error:`, error.message);
+  }
+  console.log('✅ Users seeded.');
 
-  const { error: sErr } = await supabase.from('student_details').upsert(studentDetails, { onConflict: 'user_id' });
-  if (sErr) console.error('❌ Student details error:', sErr.message);
-  else console.log('✅ Student details seeded');
+  for (let i = 0; i < studentDetails.length; i += 100) {
+    const { error } = await supabase.from('student_details').upsert(studentDetails.slice(i, i + 100), { onConflict: 'user_id' });
+    if (error) console.error(`❌ Student details error:`, error.message);
+  }
+  console.log('✅ Student details seeded.');
 
   const { error: eErr } = await supabase.from('employee_details').upsert(employeeDetails, { onConflict: 'user_id' });
   if (eErr) console.error('❌ Employee details error:', eErr.message);
-  else console.log('✅ Employee details seeded');
+  else console.log('✅ Employee details seeded.');
 
-  console.log('=== Dummy Data Seeding Complete ===');
+  console.log('\n🎉 FULL CAMPUS DATASET SEEDED SUCCESSFULLY!');
 }
 
-seed().catch(err => { console.error(err); process.exit(1); });
+main().catch(err => { console.error(err); process.exit(1); });
+
+  }
