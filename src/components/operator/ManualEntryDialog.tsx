@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, Check, Info, User, ArrowRight, Lock } from "lucide-react";
+import { Search, X, Check, Info, User, ArrowRight, Lock, Eye, EyeOff } from "lucide-react";
 import { findStudentByRoll } from "@/lib/db";
 import { parseRollNumber, validateRollNumber } from "@/lib/rollNumber";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
   const [reason, setReason] = useState<ExitReason | null>(null);
   const [searching, setSearching] = useState(false);
   const [pin, setPin] = useState("");
+  const [showPin, setShowPin] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const { addToast } = useUIStore();
@@ -339,14 +340,28 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
                     <Lock className="w-3.5 h-3.5" />
                     Supervisor PIN (required for manual entry)
                   </label>
-                  <input
-                    type="password"
-                    maxLength={4}
-                    value={pin}
-                    onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
-                    placeholder="••••"
-                    className="w-full py-3 px-4 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-center font-mono font-bold text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPin ? "text" : "password"}
+                      maxLength={4}
+                      value={pin}
+                      onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                      placeholder="••••"
+                      className="w-full py-3 px-4 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-center font-mono font-bold text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPin(!showPin)}
+                      className="absolute right-3.5 top-3.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] focus:outline-none transition-colors p-1"
+                      aria-label={showPin ? "Hide PIN" : "Show PIN"}
+                    >
+                      {showPin ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
                   <p className="text-xs text-[var(--text-muted)]">
                     Enter 4-digit supervisor PIN to authorize this manual entry.
                   </p>
