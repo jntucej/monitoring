@@ -21,7 +21,7 @@ function LoginContent() {
     { name: 'Operator', path: '/login/operator', icon: User },
     { name: 'Guardian', path: '/login/guardian', icon: Users },
     { name: 'Faculty', path: '/login/faculty', icon: BookOpen },
-    { name: 'Member', path: '/login/student', icon: GraduationCap },
+    { name: 'Users', path: '/login/student', icon: GraduationCap },
     { name: 'Supervisor', path: '/login/supervisor', icon: RadioTower },
   ];
 

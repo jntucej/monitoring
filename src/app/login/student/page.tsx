@@ -5,8 +5,8 @@ export default function StudentLoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-[var(--bg-base)] p-4 sm:p-6 lg:p-8">
       <LoginForm
         role="student"
-        title="My Portal"
-        subtitle="Track your attendance and gate movements"
+        title="Users Portal"
+        subtitle="Campus Members"
       />
     </div>
   );

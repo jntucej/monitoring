@@ -30,7 +30,7 @@ export function LoginForm({ role, title, subtitle }: LoginFormProps) {
     { name: 'Admin', path: '/login/admin' },
     { name: 'Operator', path: '/login/operator' },
     { name: 'Guardian', path: '/login/guardian' },
-    { name: 'Student', path: '/login/student' },
+    { name: 'Users', path: '/login/student' },
     { name: 'Supervisor', path: '/login/supervisor' },
   ];
 

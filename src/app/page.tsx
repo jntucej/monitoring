@@ -79,7 +79,7 @@ const PORTALS: Array<{
   },
   {
     role: "student",
-    label: "Portal",
+    label: "Users Portal",
     subtitle: "Campus Members",
     description: "Dynamic QR or ID login, access history & gate entry/exit notifications",
     icon: <GraduationCap className="w-6 h-6" />,
@@ -117,40 +117,40 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] p-4">
+    <main className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] p-4 sm:p-6 lg:p-8">
       {/* Main Content Area */}
-      <div className="max-w-md mx-auto text-center">
+      <div className="max-w-3xl lg:max-w-4xl mx-auto text-center">
         <h2 className="text-3xl font-bold px-1 mb-6 cursor-pointer hover:text-indigo-400 transition-colors">
           <Link href="/about">JNTUH CEJ Monitoring</Link>
         </h2>
         
         <section className="space-y-4" id="main-content-flow">
           {/* Grid of Portal Access Points */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
             {PORTALS.map((portal) => (
               <motion.div
                 key={portal.role}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => handlePortalAccess(portal.role, portal.href)}
-                className="glass-card p-4 rounded-3xl text-left border-slate-800/50 hover:border-indigo-500/50 hover:cursor-pointer transition-all duration-300 ease-out flex flex-col gap-3 shadow-sm hover:shadow-lg hover:shadow-indigo-500/30 ring-1 ring-white/5 hover:ring-indigo-500/30"
+                className="glass-card p-4 sm:p-5 rounded-3xl text-left border-slate-800/50 hover:border-indigo-500/50 hover:cursor-pointer transition-all duration-300 ease-out flex flex-col gap-3 shadow-sm hover:shadow-lg hover:shadow-indigo-500/30 ring-1 ring-white/5 hover:ring-indigo-500/30"
               >
                 <div className={`p-3 rounded-2xl w-fit transition-colors duration-300 ${portal.bg} ${portal.color}`}>
                   {portal.icon}
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-[var(--text-primary)]">
-                    {portal.label.split(" ")[0]}
+                    {portal.label}
                   </h3>
-                  <p className="text-[10px] text-[var(--text-muted)] mt-0.5 line-clamp-2 leading-relaxed">
+                  <p className="text-[11px] text-[var(--text-muted)] mt-0.5 line-clamp-2 leading-relaxed">
                     {portal.subtitle}
                   </p>
                 </div>
                 <div className="mt-auto pt-2 flex items-center justify-between">
-                  <span className="text-[10px] font-medium text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="text-[10px] font-medium text-indigo-400">
                     Enter
                   </span>
-                  <ArrowRight className="w-3 h-3 text-[var(--text-muted)]" />
+                  <ArrowRight className="w-3.5 h-3.5 text-[var(--text-muted)]" />
                 </div>
               </motion.div>
             ))}
