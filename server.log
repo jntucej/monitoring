@@ -1,0 +1,13 @@
+
+> gate-monitor@0.1.0 start
+> next start
+
+▲ Next.js 16.3.1
+- Local:         http://localhost:3000
+- Network:       http://10.228.223.132:3000
+✓ Ready in 85ms
+⚠ Warning: Next.js ignored package-lock.json in /Users/akarsh/Desktop/CLG/GATE MONITOR because it is outside the current Git repository (/Users/akarsh/Desktop/CLG/GATE MONITOR/gate-monitor).
+ To use this directory, set `outputFileTracingRoot` in your Next.js config.
+
+✓ Running next.config.ts took 21ms
+PIN login: failed to mint Supabase session

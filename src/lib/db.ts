@@ -967,6 +967,7 @@ export async function personsInside(): Promise<Person[]> {
   const { data, error } = await supabase
     .from('campus_occupancy')
     .select('*, users(*)')
+.eq('current_status', 'IN');
     .eq('is_inside', true);
 
   if (error || !data) return [];
@@ -978,6 +979,7 @@ export const studentsInside = personsInside;
 export async function campusCount(): Promise<number> {
   const { count, error } = await supabase
     .from('campus_occupancy')
+.eq('current_status', 'IN');
     .select('*', { count: 'exact', head: true })
     .eq('is_inside', true);
 
@@ -1064,21 +1066,8 @@ export async function addScan(input: {
     throw new Error(`Failed to log scan: ${error?.message}`);
   }
 
-  // Update occupancy — use service client to bypass RLS
-  let occClient = supabase;
-  try {
-    const { getSupabaseServiceClient } = await import('./supabaseClient');
-    occClient = getSupabaseServiceClient();
-  } catch { /* fallback to anon client */ }
-  await occClient.from('campus_occupancy').upsert(
-    {
-      user_id: person.id,
-      is_inside: input.direction === 'IN',
-      last_log_id: id,
-      updated_at: ts,
-    },
-    { onConflict: 'user_id' }
-  );
+  // Note: campus_occupancy is automatically updated by the trigger update_campus_occupancy_on_movement()
+  // when a record is inserted into movement_logs. No manual upsert needed.
 
   await addAudit({
     action: "SCAN_CREATED",
@@ -1462,6 +1451,7 @@ export async function getPersonStatus(uniqueId: string): Promise<{ status: "IN" 
   }
 
   // Query campus_occupancy by user_id (parameterized) — use service client to bypass RLS
+.eq('current_status', 'IN');
   const { data: occupancy, error: occErr } = await client
     .from('campus_occupancy')
     .select('is_inside, last_log_id')
@@ -1475,7 +1465,7 @@ export async function getPersonStatus(uniqueId: string): Promise<{ status: "IN" 
   const lastScan = await lastScanFor(formattedId);
   
   return {
-    status: occupancy?.is_inside ? "IN" : "OUT",
+    status: occupancy?.current_status ? "IN" : "OUT",
     lastScan,
     name: person.name,
   };

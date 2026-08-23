@@ -1,0 +1,19 @@
+▲ Next.js 16.3.1 (Turbopack)
+- Local:         http://localhost:3001
+- Network:       http://10.228.223.132:3001
+- Environments: .env.local
+✓ Ready in 240ms
+⚠ Warning: Next.js ignored package-lock.json in /Users/akarsh/Desktop/CLG/GATE MONITOR because it is outside the current Git repository (/Users/akarsh/Desktop/CLG/GATE MONITOR/gate-monitor).
+ To use this directory, set `turbopack.root` in your Next.js config.
+
+✓ Running next.config.ts took 20ms
+⨯ Another next dev server is already running.
+
+- Local:        http://localhost:3000
+- PID:          57817
+- Dir:          /Users/akarsh/Desktop/CLG/GATE MONITOR/gate-monitor
+- Log:          .next/dev/logs/next-development.log
+
+You can access the existing server at http://localhost:3000,
+or run kill 57817 to stop it and start a new one.
+[?25h
