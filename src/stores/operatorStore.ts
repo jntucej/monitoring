@@ -155,42 +155,46 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
 
     const directionToUse = overrideDirection || get().selectedDirection;
     const reasonToUse = (overrideReason as ExitReason) || get().selectedReason;
+    const uniqueId = currentStudent.uniqueId || currentStudent.roll || "";
+    const operatorId = useAuthStore.getState().user?.id || "op-1";
 
-    // Fire-and-forget: wrap async operations in a promise chain so the UI
-    // doesn't block while we check duplicates, write the scan, and update stats.
+    // Fire-and-forget: call server-side API to bypass RLS
     Promise.resolve()
-      .then(() => isDuplicate(currentStudent.uniqueId || currentStudent.roll || "", directionToUse))
-      .then((isDuplicateScan) => {
-        if (isDuplicateScan) {
+      .then(() => {
+        const authStore = useAuthStore.getState();
+        const token = authStore.token;
+        const sessionToken = authStore.user?.currentSessionToken;
+        const headers: Record<string, string> = { "Content-Type": "application/json" };
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+        if (sessionToken) headers["X-Session-Token"] = sessionToken;
+
+        return fetch("/api/gate/scan", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            roll: uniqueId,
+            direction: directionToUse,
+            reason: reasonToUse || (directionToUse === "OUT" ? "Regular" : undefined),
+            gateId: get().gate?.id || "gate-1",
+            operatorId,
+            isManual: false,
+          }),
+        });
+      })
+      .then((res) => res.json())
+      .then((result) => {
+        if (result?.duplicate) {
           addToast({
             variant: "error",
             title: "Duplicate Scan",
             message: `This student was already scanned ${directionToUse === "OUT" ? "out" : "in"} recently.`,
           });
           set({ error: { message: "Duplicate scan detected", code: "DUPLICATE" } });
-          return null;
-        }
-        return null;
-      })
-      .then(() =>
-        addScan({
-          roll: currentStudent.uniqueId || currentStudent.roll || "",
-          direction: directionToUse,
-          reason: reasonToUse ? reasonToUse : directionToUse === "OUT" ? "Regular" : undefined,
-          gateId: get().gate?.id || "gate-1",
-          operatorId: useAuthStore.getState().user?.id || "op-1",
-          isManual: false,
-        })
-      )
-      .then((result) => {
-        if (result?.duplicate) {
-          addToast({
-            variant: "error",
-            title: "Duplicate Scan",
-            message: "This student was already scanned recently.",
-          });
-          set({ state: "error", error: { message: "Duplicate scan detected", code: "DUPLICATE" } });
           return;
+        }
+
+        if (!result?.success) {
+          throw new Error(result?.error?.message || "Scan failed");
         }
 
         addToast({
@@ -210,9 +214,9 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
 
         set({
           state: "success",
-          lastScan: result?.scan ?? null,
+          lastScan: result.scan ?? null,
           todaysStats: newStats,
-          recentScans: result?.scan ? [result.scan, ...get().recentScans.slice(0, 4)] : get().recentScans,
+          recentScans: result.scan ? [result.scan, ...get().recentScans.slice(0, 4)] : get().recentScans,
           error: null,
         });
       })
