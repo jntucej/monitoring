@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { 
@@ -12,7 +12,7 @@ import {
   RadioTower 
 } from 'lucide-react';
 
-export default function LoginLandingPage() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -75,6 +75,14 @@ export default function LoginLandingPage() {
         To force a portal, use: <code>/login?force=admin</code>. To clear: <code>/login?clear=true</code>.
       </p>
     </div>
+  );
+}
+
+export default function LoginLandingPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[var(--bg-base)] text-[var(--text-muted)]">Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }
 
