@@ -423,7 +423,7 @@ export async function findGatePasses(filters: {
 export async function correctionCandidates(): Promise<Scan[]> {
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
   const { data, error } = await supabase
-    .from('gate_logs')
+    .from('movement_logs')
     .select('*')
     .gte('timestamp', oneHourAgo)
     .eq('is_correction', false)
@@ -580,37 +580,26 @@ export async function getNotifications(recipientType: string, recipientId: strin
 export async function findPersonByUniqueId(uniqueId: string): Promise<Person | null> {
   const formattedId = sanitizePostgrestParam(uniqueId).toUpperCase();
 
-  // 1. Try querying `persons` table with student_details and employee_details
-  const { data: personData, error: pErr } = await supabase
-    .from('persons')
+  // 1. Query `users` table with student_details and employee_details
+  const { data: userData } = await supabase
+    .from('users')
     .select('*, student_details(*), employee_details(*)')
     .or(`unique_id.eq.${formattedId},id.eq.${formattedId}`)
     .maybeSingle();
 
-  if (personData) {
-    return mPerson(personData);
+  if (userData) {
+    return mPerson(userData);
   }
 
-  // Fallback if person table doesn't have details joined or using old table structure
-  const { data: pSimple } = await supabase
-    .from('persons')
-    .select('*')
-    .eq('unique_id', formattedId)
-    .maybeSingle();
-
-  if (pSimple) {
-    return mPerson(pSimple);
-  }
-
-  // Secondary fallback to legacy `students` table if `persons` query failed
-  const { data: legacyStu } = await supabase
-    .from('students')
-    .select('*')
+  // 2. Query student_details by roll number
+  const { data: sDetails } = await supabase
+    .from('student_details')
+    .select('*, users(*)')
     .eq('roll', formattedId)
     .maybeSingle();
 
-  if (legacyStu) {
-    return mPerson({ ...legacyStu, unique_id: legacyStu.roll, full_name: legacyStu.name, person_type: 'student' });
+  if (sDetails && sDetails.users) {
+    return mPerson({ ...sDetails.users, student_details: sDetails });
   }
 
   return null;

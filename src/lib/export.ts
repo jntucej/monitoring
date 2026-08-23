@@ -45,8 +45,8 @@ export async function generatePDF(content: string, filename: string) {
 
 export async function exportDailyReport(date: string, format: "pdf" | "csv" = "csv") {
   const { data: scans } = await supabase
-    .from("gate_logs")
-    .select("*, persons(full_name, person_type, department)")
+    .from("movement_logs")
+    .select("*, users(name, role)")
     .gte("timestamp", `${date}T00:00:00.000Z`)
     .lte("timestamp", `${date}T23:59:59.999Z`);
 
@@ -55,13 +55,12 @@ export async function exportDailyReport(date: string, format: "pdf" | "csv" = "c
   }
 
   const formattedData = scans.map(scan => ({
-    Name: (scan.persons as any)?.full_name || scan.name || "Unknown",
-    ID: scan.roll || scan.person_id || "",
-    Type: (scan.persons as any)?.person_type || scan.person_type || "student",
-    Department: (scan.persons as any)?.department || scan.department || "-",
+    Name: (scan.users as any)?.name || "Unknown",
+    ID: scan.user_id || "",
+    Type: (scan.users as any)?.role || "student",
+    Department: (scan.users as any)?.department || "-",
     Direction: scan.direction || "IN",
-    Gate: scan.gate_name || scan.gate_id || "Main Gate",
-    Operator: scan.operator_name || "System",
+    Gate: scan.gate_id || "Main Gate",
     Time: new Date(scan.timestamp).toLocaleString(),
   }));
 

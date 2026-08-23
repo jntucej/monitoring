@@ -464,30 +464,29 @@ export async function getGateStudentInfo(token: string, roll: string) {
 
   const formattedId = roll.trim().toUpperCase();
 
-  // 1. Try persons table
-  const { data: person } = await supabase
-    .from('persons')
+  // 1. Query users table with student_details
+  const { data: userRecord } = await supabase
+    .from('users')
     .select('*, student_details(*)')
     .or(`unique_id.eq.${formattedId},id.eq.${formattedId}`)
     .maybeSingle();
 
-  if (person) {
-    if (person.status && person.status.toLowerCase() !== 'active') {
-      throw new Error('INACTIVE_STUDENT: Person account is not active');
+  if (userRecord) {
+    if (userRecord.status && userRecord.status.toLowerCase() !== 'active') {
+      throw new Error('INACTIVE_STUDENT: User account is not active');
     }
-    const sDetails = person.student_details || {};
+    const sDetails = userRecord.student_details || {};
     return {
-      id: person.id,
-      roll: person.unique_id,
-      uniqueId: person.unique_id,
-      name: person.full_name,
-      fullName: person.full_name,
-      personType: person.person_type || 'student',
-      department: person.department,
-      designation: person.designation,
+      id: userRecord.id,
+      roll: userRecord.unique_id,
+      uniqueId: userRecord.unique_id,
+      name: userRecord.name,
+      fullName: userRecord.name,
+      personType: userRecord.role || 'student',
+      department: sDetails.department_id,
       year: sDetails.year,
       section: sDetails.section,
-      photo: person.photo_url,
+      photo: userRecord.photo_url,
       hostelBlock: sDetails.hostel_block,
       roomNumber: sDetails.room_number,
     };

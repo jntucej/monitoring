@@ -6,23 +6,23 @@ import { OccupancyStats } from "@/lib/analytics-types";
 
 async function handleGet(req: NextRequest) {
   try {
-    const { data: persons, error } = await supabase
-      .from("persons")
-      .select("id, person_type, department, status")
+    const { data: users, error } = await supabase
+      .from("users")
+      .select("id, role, status")
       .eq("status", "active");
 
     if (error) throw error;
 
     const { data: scans } = await supabase
-      .from("gate_logs")
-      .select("person_id, direction, timestamp")
+      .from("movement_logs")
+      .select("user_id, direction, timestamp")
       .order("timestamp", { ascending: false });
 
-    // Determine currently IN persons
+    // Determine currently IN users
     const latestStatus = new Map<string, string>();
     for (const scan of scans || []) {
-      if (!latestStatus.has(scan.person_id)) {
-        latestStatus.set(scan.person_id, scan.direction);
+      if (scan.user_id && !latestStatus.has(scan.user_id)) {
+        latestStatus.set(scan.user_id, scan.direction);
       }
     }
 
@@ -40,17 +40,13 @@ async function handleGet(req: NextRequest) {
       lastUpdated: new Date().toISOString(),
     };
 
-    for (const person of persons || []) {
-      // If student/person is currently IN (or if no scan record, default present/active for fallback stats)
-      const currentDir = latestStatus.get(person.id) || "IN";
+    for (const user of users || []) {
+      const currentDir = latestStatus.get(user.id) || "IN";
       if (currentDir === "IN") {
         stats.total++;
-        const type = (person.person_type as keyof typeof stats.byType) || "student";
+        const type = (user.role as keyof typeof stats.byType) || "student";
         if (stats.byType[type] !== undefined) {
           stats.byType[type]++;
-        }
-        if (person.department) {
-          stats.byDepartment[person.department] = (stats.byDepartment[person.department] || 0) + 1;
         }
       }
     }
