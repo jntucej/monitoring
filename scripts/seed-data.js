@@ -51,7 +51,7 @@ async function main() {
 
   sysRoles.forEach(r => {
     users.push({
-      id: uuid(), unique_id: r.unique_id, name: r.name, role: r.role, status: 'active', email: r.email,
+      id: uuid(), unique_id: r.unique_id, name: r.name, role: r.role, status: 'ACTIVE', email: r.email,
       phone: phone(), photo_url: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(r.name)}`,
       qr_code: JSON.stringify({ uniqueId: r.unique_id, role: r.role }), initial_pin_hash: defaultPinHash
     });
@@ -66,10 +66,11 @@ async function main() {
     guardians.push({ id: gId });
 
     users.push({
-      id: gId, unique_id: gCode, name: gName, role: 'guardian', status: 'active', email: `parent${g}@example.com`,
+      id: gId, unique_id: gCode, name: gName, role: 'guardian', status: 'ACTIVE', email: `parent${g}@example.com`,
       phone: phone(), photo_url: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(gName)}`,
       qr_code: JSON.stringify({ uniqueId: gCode, role: 'guardian' }), initial_pin_hash: defaultPinHash
     });
+  }
   // 3. Students across 4 Years (70 per year batch = 280 Students Total)
   const batches = [
     { yearCode: '25', yearNum: 1, batchLabel: '2025-2029' },
@@ -90,7 +91,7 @@ async function main() {
       const parent = pick(guardians);
 
       users.push({
-        id: uId, unique_id: roll, name, role: 'student', status: 'active',
+        id: uId, unique_id: roll, name, role: 'student', status: 'ACTIVE',
         email: `${roll.toLowerCase()}@student.jntuhcej.ac.in`, phone: phone(),
         photo_url: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`,
         qr_code: JSON.stringify({ uniqueId: roll, role: 'student' }), initial_pin_hash: defaultPinHash
@@ -115,7 +116,7 @@ async function main() {
     const hodEmpId = `HOD-${d.s}`;
 
     users.push({
-      id: hodId, unique_id: hodEmpId, name: hodName, role: 'faculty', status: 'active',
+      id: hodId, unique_id: hodEmpId, name: hodName, role: 'faculty', status: 'ACTIVE',
       email: `hod.${d.s.toLowerCase()}@jntuhcej.ac.in`, phone: phone(),
       photo_url: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(hodName)}`,
       qr_code: JSON.stringify({ uniqueId: hodEmpId, role: 'faculty' }), initial_pin_hash: defaultPinHash
@@ -132,7 +133,7 @@ async function main() {
       const facEmpId = `FAC-${d.s}-${f}`;
 
       users.push({
-        id: facId, unique_id: facEmpId, name: facName, role: 'faculty', status: 'active',
+        id: facId, unique_id: facEmpId, name: facName, role: 'faculty', status: 'ACTIVE',
         email: `${facEmpId.toLowerCase()}@jntuhcej.ac.in`, phone: phone(),
         photo_url: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(facName)}`,
         qr_code: JSON.stringify({ uniqueId: facEmpId, role: 'faculty' }), initial_pin_hash: defaultPinHash
@@ -152,7 +153,7 @@ async function main() {
     const stfRole = s <= 5 ? 'staff' : 'worker';
 
     users.push({
-      id: stfId, unique_id: stfCode, name: stfName, role: stfRole, status: 'active',
+      id: stfId, unique_id: stfCode, name: stfName, role: stfRole, status: 'ACTIVE',
       email: `${stfCode.toLowerCase()}@jntuhcej.ac.in`, phone: phone(),
       photo_url: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(stfName)}`,
       qr_code: JSON.stringify({ uniqueId: stfCode, role: stfRole }), initial_pin_hash: defaultPinHash
@@ -189,5 +190,3 @@ async function main() {
 }
 
 main().catch(err => { console.error(err); process.exit(1); });
-
-  }

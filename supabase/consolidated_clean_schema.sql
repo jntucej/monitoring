@@ -56,12 +56,7 @@ CREATE TABLE IF NOT EXISTS users (
   created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at           TIMESTAMPTZ
 );
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_users_auth') THEN
-    ALTER TABLE users ADD CONSTRAINT fk_users_auth
-      FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE;
-  END IF;
-END $$;
+ALTER TABLE users DROP CONSTRAINT IF EXISTS fk_users_auth;
 -- 1.3 STUDENT DETAILS (optional layer for anyone who is a student;
 --     keyed by user_id so it stays indexable, NOT a separate identity)
 CREATE TABLE IF NOT EXISTS student_details (
