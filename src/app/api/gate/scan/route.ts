@@ -27,12 +27,37 @@ async function handlePost(req: NextRequest) {
 
     const duplicate = await isDuplicate(roll, direction)
     if (duplicate) {
-      return NextRespon      return NextRespon      return NextRespon      return NextRespon      return NextRespon       s      return NextRespon      return NextRespon      redd      return NextRespon      return NextResponon      return NextRespon      return NextRespon      return N? f      return NextRespon      return NextRespon         return NextRespon      return NextRespon      return          return NextR         return er      return NextRespon  "E      return NextRan:"      return cons      return NextRens      return NextRror.me      return NextRespon      return NextRespNe      on      return NextRespon      return Next{ code: "INTERNAL_ERROR", message } },
+      return NextResponse.json(
+        { success: true, duplicate: true, message: "Duplicate scan detected" },
+        { status: 200 }
+      )
+    }
+
+    const result = await addScan({
+      roll,
+      direction,
+      reason,
+      gateId,
+      operatorId,
+      isManual: isManual ?? false,
+    })
+
+    return NextResponse.json(
+      { success: true, duplicate: false, scan: result.scan },
+      { status: 200 }
+    )
+  } catch (error) {
+    console.error("Error processing scan:", error)
+    const message = error instanceof Error ? error.message : "Failed to process scan"
+    return NextResponse.json(
+      { success: false, error: { code: "INTERNAL_ERROR", message } },
       { status: 500 }
     )
   }
 }
 
-exportexportexportexportexportexportexportexportexportexportePost, { requiredRole: ["operator", "supervisor", "admin", "sysadmin"] }),
+export const POST = withRateLimit(
+  withAuthorization(handlePost, { requiredRole: ["operator", "supervisor", "admin", "sysadmin"] }),
   { keyPrefix: "gate_scan", maxRequests: 60 }
 )
+
