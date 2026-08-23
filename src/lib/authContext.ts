@@ -91,9 +91,9 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
     role: profile.role as Role,
     status: profile.status as AccountStatus,
     email: profile.email,
-    loginIdentifier: profile.login_identifier,
+    loginIdentifier: profile.unique_id || profile.login_identifier,
     gateId: profile.gate_id,
-    employeeId: profile.employee_id,
+    employeeId: profile.unique_id || profile.employee_id,
     isAuthenticated: true,
     isActive: profile.status === 'ACTIVE'
   };

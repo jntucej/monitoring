@@ -28,21 +28,21 @@ async function resolveIdentifierToEmail(login: string): Promise<string | null> {
 
   const service = getSupabaseServiceClient();
 
+  const byUniqueId = await service
+    .from("users")
+    .select("email")
+    .eq("unique_id", login)
+    .eq("status", "ACTIVE")
+    .maybeSingle();
+  if (byUniqueId.data?.email) return byUniqueId.data.email as string;
+
   const byLoginIdentifier = await service
     .from("users")
     .select("email")
     .eq("login_identifier", login)
     .eq("status", "ACTIVE")
     .maybeSingle();
-  if (byLoginIdentifier.data?.email) return byLoginIdentifier.data.email as string;
-
-  const byEmployeeId = await service
-    .from("users")
-    .select("email")
-    .eq("employee_id", login)
-    .eq("status", "ACTIVE")
-    .maybeSingle();
-  return (byEmployeeId.data?.email as string) ?? null;
+  return (byLoginIdentifier.data?.email as string) ?? null;
 }
 
 async function handleLogin(req: NextRequest) {
