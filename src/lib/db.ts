@@ -74,7 +74,7 @@ type Reason = ExitReason;
  * ------------------------------------------------------------------ */
 export function mPerson(r: any): Person {
   if (!r) return r;
-  const personType: PersonType = r.person_type || r.personType || "student";
+  const personType: PersonType = r.role || r.person_type || r.personType || "student";
   const uniqueId = r.unique_id || r.uniqueId || r.roll || "";
   const fullName = r.full_name || r.fullName || r.name || "";
   
@@ -107,7 +107,7 @@ export function mPerson(r: any): Person {
     uniqueId,
     fullName,
     personType,
-    department: r.department || undefined,
+    department: r.department || r.department_id || undefined,
     designation: r.designation || undefined,
     email: r.email || undefined,
     phone: r.phone || undefined,
@@ -396,7 +396,10 @@ export async function findGatePasses(filters: {
   parentId?: string;
   limit?: number;
 }): Promise<GatePass[]> {
-  let query = supabase.from('gate_passes').select('*');
+  // Use service client to bypass RLS — access control is enforced at the API layer
+  const { getSupabaseServiceClient } = await import('./supabaseClient');
+  const serviceClient = getSupabaseServiceClient();
+  let query = serviceClient.from('gate_passes').select('*');
 
   if (filters.status) {
     if (filters.status === 'APPROVED') {
@@ -584,11 +587,24 @@ export async function getNotifications(recipientType: string, recipientId: strin
 export async function findPersonByUniqueId(uniqueId: string): Promise<Person | null> {
   const formattedId = sanitizePostgrestParam(uniqueId).toUpperCase();
 
+  // Use service client to bypass RLS — access control is enforced at the API layer
+  let client = supabase;
+  try {
+    const { getSupabaseServiceClient } = await import('./supabaseClient');
+    client = getSupabaseServiceClient();
+  } catch { /* fallback to anon client if service key unavailable (e.g. client-side) */ }
+
+  // Only include id (UUID) filter when the input looks like a valid UUID
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(formattedId);
+  const orFilter = isUuid
+    ? `unique_id.eq.${formattedId},id.eq.${formattedId}`
+    : `unique_id.eq.${formattedId}`;
+
   // 1. Query `users` table with student_details and employee_details
-  const { data: userData } = await supabase
+  const { data: userData } = await client
     .from('users')
-    .select('*, student_details(*), employee_details(*)')
-    .or(`unique_id.eq.${formattedId},id.eq.${formattedId}`)
+    .select('*, student_details!student_details_user_id_fkey(*), employee_details(*)')
+    .or(orFilter)
     .maybeSingle();
 
   if (userData) {
@@ -596,9 +612,9 @@ export async function findPersonByUniqueId(uniqueId: string): Promise<Person | n
   }
 
   // 2. Query student_details by roll number
-  const { data: sDetails } = await supabase
+  const { data: sDetails } = await client
     .from('student_details')
-    .select('*, users(*)')
+    .select('*, users!student_details_user_id_fkey(*)')
     .eq('roll', formattedId)
     .maybeSingle();
 
@@ -617,15 +633,15 @@ export async function findByQr(payload: string): Promise<Person | null> {
 }
 
 export async function findAllPersons(type?: PersonType): Promise<Person[]> {
-  let query = supabase.from('persons').select('*, student_details(*), employee_details(*)');
+  let query = supabase.from('users').select('*, student_details!student_details_user_id_fkey(*), employee_details(*)');
   if (type) {
-    query = query.eq('person_type', type);
+    query = query.eq('role', type);
   }
 
   const { data, error } = await query;
   if (error || !data) {
     // Try without joins
-    const { data: fallbackData } = await supabase.from('persons').select('*');
+    const { data: fallbackData } = await supabase.from('users').select('*');
     return (fallbackData || []).map(mPerson);
   }
 
@@ -641,13 +657,13 @@ export async function findPersonsByType(type: PersonType): Promise<Person[]> {
 export async function searchPersons(q: string, type?: PersonType): Promise<Person[]> {
   const safeQ = sanitizePostgrestParam(q);
   const searchTerm = `%${safeQ.toLowerCase()}%`;
-  let query = supabase.from('persons').select('*, student_details(*), employee_details(*)');
+  let query = supabase.from('users').select('*, student_details!student_details_user_id_fkey(*), employee_details(*)');
 
   if (type) {
-    query = query.eq('person_type', type);
+    query = query.eq('role', type);
   }
 
-  query = query.or(`full_name.ilike.${searchTerm},unique_id.ilike.${searchTerm},department.ilike.${searchTerm},email.ilike.${searchTerm}`);
+  query = query.or(`name.ilike.${searchTerm},unique_id.ilike.${searchTerm},email.ilike.${searchTerm}`);
 
   const { data, error } = await query;
   if (error || !data) {
@@ -669,20 +685,18 @@ export async function createVisitor(data: {
   const id = randomUUID();
   const visitorId = `VIS-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
-  const personRow = {
+  const userRow = {
     id,
     unique_id: visitorId,
-    full_name: data.fullName,
-    person_type: 'visitor',
+    name: data.fullName,
+    role: 'visitor',
     phone: data.phone || null,
-    email: data.email || null,
-    visitor_host: data.visitorHost || null,
-    visitor_purpose: data.visitorPurpose || null,
-    status: 'active',
+    email: data.email || `${visitorId.toLowerCase()}@visitor.gatekeeper.edu`,
+    status: 'ACTIVE',
     created_at: new Date().toISOString(),
   };
 
-  const { data: newPerson, error } = await supabase.from('persons').insert(personRow).select().single();
+  const { data: newPerson, error } = await supabase.from('users').insert(userRow).select().single();
   if (error || !newPerson) {
     console.error('Error creating visitor:', error);
     return null;
@@ -691,7 +705,7 @@ export async function createVisitor(data: {
   // Create visitor log
   await supabase.from('visitor_logs').insert({
     id: randomUUID(),
-    person_id: id,
+    user_id: id,
     check_in_at: new Date().toISOString(),
     purpose: data.visitorPurpose || null,
     status: 'active',
@@ -703,17 +717,17 @@ export async function createVisitor(data: {
 export async function checkInVisitor(personId: string, hostPersonId?: string, purpose?: string): Promise<boolean> {
   const now = new Date().toISOString();
   const { error: pErr } = await supabase
-    .from('persons')
-    .update({ checked_in_at: now, checked_out_at: null, status: 'active' })
+    .from('users')
+    .update({ status: 'ACTIVE' })
     .eq('id', personId);
 
   if (pErr) return false;
 
   await supabase.from('visitor_logs').insert({
     id: randomUUID(),
-    person_id: personId,
+    user_id: personId,
     check_in_at: now,
-    host_person_id: hostPersonId || null,
+    host_user_id: hostPersonId || null,
     purpose: purpose || null,
     status: 'active',
   });
@@ -724,8 +738,8 @@ export async function checkInVisitor(personId: string, hostPersonId?: string, pu
 export async function checkOutVisitor(personId: string): Promise<boolean> {
   const now = new Date().toISOString();
   const { error: pErr } = await supabase
-    .from('persons')
-    .update({ checked_out_at: now, status: 'inactive' })
+    .from('users')
+    .update({ status: 'DISABLED' })
     .eq('id', personId);
 
   if (pErr) return false;
@@ -733,7 +747,7 @@ export async function checkOutVisitor(personId: string): Promise<boolean> {
   await supabase
     .from('visitor_logs')
     .update({ check_out_at: now, status: 'completed' })
-    .eq('person_id', personId)
+    .eq('user_id', personId)
     .eq('status', 'active');
 
   return true;
@@ -917,10 +931,16 @@ export async function updateUserRole(userId: string, newRole: Role, actorId: str
 
 export async function lastScanFor(uniqueId: string): Promise<Scan | null> {
   const formattedId = sanitizePostgrestParam(uniqueId).toUpperCase();
-  const { data, error } = await supabase
-    .from('gate_logs')
-    .select('*')
-    .or(`unique_id.eq.${formattedId},roll.eq.${formattedId}`)
+  // Use service client to bypass RLS
+  let client = supabase;
+  try {
+    const { getSupabaseServiceClient } = await import('./supabaseClient');
+    client = getSupabaseServiceClient();
+  } catch { /* fallback to anon client */ }
+  const { data, error } = await client
+    .from('movement_logs')
+    .select('*, users!inner(*)')
+    .eq('users.unique_id', formattedId)
     .order('timestamp', { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -934,8 +954,8 @@ export async function scansToday(): Promise<Scan[]> {
   todayStart.setHours(0, 0, 0, 0);
 
   const { data, error } = await supabase
-    .from('gate_logs')
-    .select('*')
+    .from('movement_logs')
+    .select('*, users(*)')
     .gte('timestamp', todayStart.toISOString())
     .order('timestamp', { ascending: false });
 
@@ -946,11 +966,11 @@ export async function scansToday(): Promise<Scan[]> {
 export async function personsInside(): Promise<Person[]> {
   const { data, error } = await supabase
     .from('campus_occupancy')
-    .select('*, persons(*)')
+    .select('*, users(*)')
     .eq('is_inside', true);
 
   if (error || !data) return [];
-  return data.map(d => mPerson(d.persons));
+  return data.map(d => mPerson(d.users));
 }
 
 export const studentsInside = personsInside;
@@ -969,10 +989,17 @@ export async function isDuplicate(uniqueId: string, direction: ScanDirection, mi
   const cutoff = new Date(Date.now() - min * 60000).toISOString();
   const formattedId = uniqueId.trim().toUpperCase();
 
-  const { data, error } = await supabase
-    .from('gate_logs')
-    .select('id')
-    .or(`unique_id.eq.${formattedId},roll.eq.${formattedId}`)
+  // Use service client to bypass RLS
+  let client = supabase;
+  try {
+    const { getSupabaseServiceClient } = await import('./supabaseClient');
+    client = getSupabaseServiceClient();
+  } catch { /* fallback to anon client */ }
+
+  const { data, error } = await client
+    .from('movement_logs')
+    .select('id, users!inner(unique_id)')
+    .eq('users.unique_id', formattedId)
     .eq('direction', direction)
     .gte('timestamp', cutoff)
     .limit(1);
@@ -1017,45 +1044,40 @@ export async function addScan(input: {
   if (!op) throw new Error("Invalid operator ID");
 
   const ts = new Date().toISOString();
-  const id = `scan-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
+  const id = crypto.randomUUID();
 
   const scanRow = {
     id,
-    roll: person.uniqueId,
-    unique_id: person.uniqueId,
-    person_id: person.id,
-    person_type: person.personType,
-    name: person.fullName,
-    department: person.department || null,
-    year: person.year || null,
+    user_id: person.id,
     direction: input.direction,
     reason: input.reason || null,
     gate_id: gate.id,
-    gate_name: gate.name,
     operator_id: op.id,
-    operator_name: op.name,
     timestamp: ts,
     is_manual: !!input.isManual,
     is_correction: false,
   };
 
-  const { data, error } = await supabase.from('gate_logs').insert(scanRow).select().single();
+  const { data, error } = await supabase.from('movement_logs').insert(scanRow).select('*, users(*)').single();
   if (error || !data) {
     console.error('Error inserting scan:', error);
     throw new Error(`Failed to log scan: ${error?.message}`);
   }
 
-  // Update occupancy
-  await supabase.from('campus_occupancy').upsert(
+  // Update occupancy — use service client to bypass RLS
+  let occClient = supabase;
+  try {
+    const { getSupabaseServiceClient } = await import('./supabaseClient');
+    occClient = getSupabaseServiceClient();
+  } catch { /* fallback to anon client */ }
+  await occClient.from('campus_occupancy').upsert(
     {
-      person_id: person.id,
-      student_id: person.id,
+      user_id: person.id,
       is_inside: input.direction === 'IN',
-      last_gate_id: gate.id,
       last_log_id: id,
-      last_updated: ts,
+      updated_at: ts,
     },
-    { onConflict: 'person_id' }
+    { onConflict: 'user_id' }
   );
 
   await addAudit({
@@ -1399,11 +1421,24 @@ export async function statsToday(): Promise<{
 export async function getPersonStatus(uniqueId: string): Promise<{ status: "IN" | "OUT"; lastScan: Scan | null; name?: string }> {
   const formattedId = uniqueId.trim().toUpperCase();
 
+  // Use service client to bypass RLS — access control is enforced at the API layer
+  let client = supabase;
+  try {
+    const { getSupabaseServiceClient } = await import('./supabaseClient');
+    client = getSupabaseServiceClient();
+  } catch { /* fallback to anon client */ }
+
+  // Only include id (UUID) filter when the input looks like a valid UUID
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(formattedId);
+  const orFilter = isUuid
+    ? `unique_id.eq.${formattedId},id.eq.${formattedId}`
+    : `unique_id.eq.${formattedId}`;
+
   // First get the person by ID using parameterized query
-  const { data: person, error: personErr } = await supabase
-    .from('persons')
-    .select('id, full_name')
-    .or(`unique_id.eq.${formattedId},id.eq.${formattedId}`)
+  const { data: person, error: personErr } = await client
+    .from('users')
+    .select('id, name')
+    .or(orFilter)
     .maybeSingle();
 
   if (personErr || !person) {
@@ -1426,11 +1461,11 @@ export async function getPersonStatus(uniqueId: string): Promise<{ status: "IN" 
     return { status: "OUT", lastScan: null };
   }
 
-  // Query campus_occupancy by person_id (parameterized)
-  const { data: occupancy, error: occErr } = await supabase
+  // Query campus_occupancy by user_id (parameterized) — use service client to bypass RLS
+  const { data: occupancy, error: occErr } = await client
     .from('campus_occupancy')
     .select('is_inside, last_log_id')
-    .eq('person_id', person.id)
+    .eq('user_id', person.id)
     .maybeSingle();
 
   if (occErr) {
@@ -1442,7 +1477,7 @@ export async function getPersonStatus(uniqueId: string): Promise<{ status: "IN" 
   return {
     status: occupancy?.is_inside ? "IN" : "OUT",
     lastScan,
-    name: person.full_name,
+    name: person.name,
   };
 }
 
@@ -1451,10 +1486,16 @@ export const getStudentStatus = getPersonStatus;
 
 export async function getPersonHistory(uniqueId: string, limit: number = 20): Promise<Scan[]> {
   const formattedId = sanitizePostgrestParam(uniqueId).toUpperCase();
-  const { data, error } = await supabase
-    .from('gate_logs')
-    .select('*')
-    .or(`unique_id.eq.${formattedId},roll.eq.${formattedId}`)
+  // Use service client to bypass RLS
+  let client = supabase;
+  try {
+    const { getSupabaseServiceClient } = await import('./supabaseClient');
+    client = getSupabaseServiceClient();
+  } catch { /* fallback to anon client */ }
+  const { data, error } = await client
+    .from('movement_logs')
+    .select('*, users!inner(*)')
+    .eq('users.unique_id', formattedId)
     .order('timestamp', { ascending: false })
     .limit(limit);
 
@@ -1467,11 +1508,11 @@ export const getStudentHistory = getPersonHistory;
 export async function getLinkedPersons(parentId: string): Promise<Person[]> {
   const { data, error } = await supabase
     .from('student_details')
-    .select('person_id, persons(*)')
-    .eq('parent_id', parentId);
+    .select('user_id, users!student_details_user_id_fkey(*)')
+    .eq('guardian_id', parentId);
 
   if (error || !data) return [];
-  return data.map(d => mPerson(d.persons));
+  return data.map(d => mPerson(d.users));
 }
 
 export const getParentChildren = getLinkedPersons;

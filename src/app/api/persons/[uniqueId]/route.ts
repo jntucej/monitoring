@@ -18,15 +18,20 @@ async function handleGet(req: NextRequest) {
     const isAllowedRole = ["supervisor", "admin", "sysadmin", "faculty", "staff", "operator"].includes(authRole || "");
 
     if (!isAllowedRole) {
-      if (authRole === "student" || authRole === "parent") {
-        const { data: profile } = await supabase
+      if (authRole === "student" || authRole === "parent" || authRole === "guardian") {
+        // Query users and student_details to check owner or guardian link
+        const { data: studentCheck } = await supabase
           .from("users")
-          .select("login_identifier")
-          .eq("id", authUserId)
-          .single();
-        if (!profile || profile.login_identifier !== uniqueId) {
+          .select("id, unique_id, student_details(guardian_id)")
+          .eq("unique_id", uniqueId)
+          .maybeSingle();
+
+        const isSelf = studentCheck?.id === authUserId || studentCheck?.unique_id === uniqueId;
+        const isChildOfGuardian = studentCheck?.student_details && (studentCheck.student_details as any).guardian_id === authUserId;
+
+        if (!isSelf && !isChildOfGuardian) {
           return NextResponse.json(
-            { success: false, error: { code: "FORBIDDEN", message: "You can only view your own record." } },
+            { success: false, error: { code: "FORBIDDEN", message: "You can only view your own record or your child's record." } },
             { status: 403 }
           );
         }

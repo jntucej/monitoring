@@ -18,12 +18,12 @@ async function handleGet(req: NextRequest, context: { auth: any }) {
     }
     
     let query = supabase
-      .from('persons')
-      .select('*, employeeDetails(*)')
-      .eq('personType', 'faculty');
+      .from('users')
+      .select('*, employee_details(*)')
+      .eq('role', 'faculty');
 
     if (departmentId) {
-      query = query.eq('employeeDetails.departmentId', departmentId);
+      query = query.eq('department_id', departmentId);
     }
 
     const { data, error } = await query;

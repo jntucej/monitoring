@@ -35,16 +35,16 @@ async function main() {
   const studentDetails = [];
   const employeeDetails = [];
   const gates = [
-    { gate_code: 'MAIN', name: 'Main Gate', location: 'Main Entrance', type: 'main', is_active: true },
-    { gate_code: 'HOSTEL', name: 'Hostel Gate', location: 'Hostel Side', type: 'hostel', is_active: true },
-    { gate_code: 'BACK', name: 'Back Gate', location: 'Back Side', type: 'back', is_active: false },
+    { id: 'a52afdfb-dbd5-42b8-b616-da9d99295100', gate_code: 'MAIN', name: 'Main Gate', location: 'Main Entrance', type: 'main', is_active: true },
+    { id: '80efc275-d9b1-415d-b13a-caed784f3b22', gate_code: 'HOSTEL', name: 'Hostel Gate', location: 'Hostel Side', type: 'hostel', is_active: true },
+    { id: 'a5a5c683-86cd-4f00-9e3d-e0b61b563e1f', gate_code: 'BACK', name: 'Back Gate', location: 'Back Side', type: 'back', is_active: false },
   ];
 
   // 1. System Accounts
   const sysRoles = [
     { unique_id: 'ADM-001', name: 'Dr. Principal (Admin)', role: 'admin', email: 'admin@jntuhcej.ac.in' },
-    { unique_id: 'SUP-001', name: 'Chief Security Officer', role: 'supervisor', email: 'supervisor@jntuhcej.ac.in' },
-    { unique_id: 'OP-001', name: 'Main Gate Operator Desk', role: 'operator', email: 'operator@jntuhcej.ac.in' },
+    { unique_id: 'SUP-001', name: 'Chief Security Officer', role: 'supervisor', email: 'supervisor@jntuhcej.ac.in', supervised_gates: ['a52afdfb-dbd5-42b8-b616-da9d99295100', '80efc275-d9b1-415d-b13a-caed784f3b22', 'a5a5c683-86cd-4f00-9e3d-e0b61b563e1f'] },
+    { unique_id: 'OP-001', name: 'Main Gate Operator Desk', role: 'operator', email: 'operator@jntuhcej.ac.in', gate_id: 'a52afdfb-dbd5-42b8-b616-da9d99295100' },
     { unique_id: 'WDN-001', name: 'Boys Hostel Warden', role: 'warden', email: 'warden.boys@jntuhcej.ac.in' },
     { unique_id: 'WDN-002', name: 'Girls Hostel Warden', role: 'warden', email: 'warden.girls@jntuhcej.ac.in' },
   ];
@@ -53,7 +53,8 @@ async function main() {
     users.push({
       id: uuid(), unique_id: r.unique_id, name: r.name, role: r.role, status: 'ACTIVE', email: r.email,
       phone: phone(), photo_url: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(r.name)}`,
-      qr_code: JSON.stringify({ uniqueId: r.unique_id, role: r.role }), initial_pin_hash: defaultPinHash
+      qr_code: JSON.stringify({ uniqueId: r.unique_id, role: r.role }), initial_pin_hash: defaultPinHash,
+      gate_id: r.gate_id || null, supervised_gates: r.supervised_gates || null
     });
   });
 

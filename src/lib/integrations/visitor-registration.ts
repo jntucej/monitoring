@@ -198,23 +198,24 @@ export async function checkInPreRegisteredVisitor(id: string): Promise<boolean> 
 
     // Create person record if not exists
     const { data: existing } = await supabase
-      .from("persons")
+      .from("users")
       .select("id")
       .eq("unique_id", uniqueId)
-      .single();
+      .maybeSingle();
 
     let personId: string;
 
     if (!existing) {
       const { data: person, error: personError } = await supabase
-        .from("persons")
+        .from("users")
         .insert({
+          id: crypto.randomUUID(),
           unique_id: uniqueId,
-          full_name: reg.full_name,
-          person_type: "visitor",
-          email: reg.email,
+          name: reg.full_name,
+          role: "visitor",
+          email: reg.email || `${uniqueId.toLowerCase()}@visitor.gatekeeper.edu`,
           phone: reg.phone,
-          status: "active",
+          status: "ACTIVE",
           created_at: new Date().toISOString(),
         })
         .select()
@@ -233,8 +234,8 @@ export async function checkInPreRegisteredVisitor(id: string): Promise<boolean> 
     const { error: logError } = await supabase
       .from("visitor_logs")
       .insert({
-        person_id: personId,
-        host_person_id: reg.host_id,
+        user_id: personId,
+        host_user_id: reg.host_id,
         purpose: reg.purpose,
         check_in_at: new Date().toISOString(),
         status: "active",

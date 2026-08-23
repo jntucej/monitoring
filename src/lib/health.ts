@@ -67,7 +67,7 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
   try {
     const dbStart = Date.now();
     const { data, error } = await supabase
-      .from('persons')
+      .from('users')
       .select('id', { count: 'exact', head: true })
       .limit(1);
 

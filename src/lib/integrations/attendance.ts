@@ -7,29 +7,29 @@ export async function generateAttendanceReport(
 ): Promise<AttendanceRecord[]> {
   // Get all persons who are students, faculty, or staff
   const { data: persons } = await supabase
-    .from("persons")
-    .select("id, unique_id, full_name, person_type, department")
-    .in("person_type", ["student", "faculty", "staff"]);
+    .from("users")
+    .select("id, unique_id, name, role, department_id")
+    .in("role", ["student", "faculty", "staff"]);
 
   if (!persons || persons.length === 0) return [];
 
   // Get all scans for the date
   const { data: scans } = await supabase
-    .from("gate_logs")
-    .select("person_id, direction, timestamp")
+    .from("movement_logs")
+    .select("user_id, direction, timestamp")
     .gte("timestamp", `${date}T00:00:00.000Z`)
     .lte("timestamp", `${date}T23:59:59.999Z`);
 
   const scanMap: Record<string, { in: string | null; out: string | null }> = {};
 
   for (const scan of scans || []) {
-    if (!scanMap[scan.person_id]) {
-      scanMap[scan.person_id] = { in: null, out: null };
+    if (!scanMap[scan.user_id]) {
+      scanMap[scan.user_id] = { in: null, out: null };
     }
-    if (scan.direction === "IN" && !scanMap[scan.person_id].in) {
-      scanMap[scan.person_id].in = scan.timestamp;
+    if (scan.direction === "IN" && !scanMap[scan.user_id].in) {
+      scanMap[scan.user_id].in = scan.timestamp;
     } else if (scan.direction === "OUT") {
-      scanMap[scan.person_id].out = scan.timestamp;
+      scanMap[scan.user_id].out = scan.timestamp;
     }
   }
 
@@ -56,13 +56,13 @@ export async function generateAttendanceReport(
     records.push({
       personId: person.id,
       uniqueId: person.unique_id,
-      name: person.full_name,
+      name: person.name,
       date,
       timeIn,
       timeOut,
       status,
-      department: person.department,
-      personType: person.person_type,
+      department: person.department_id || "",
+      personType: person.role,
     });
   }
 

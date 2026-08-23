@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { findAllPersons, searchPersons, findPersonByUniqueId, findPersonsByType, getLinkedPersons } from "@/lib/db";
+import { findAllPersons, searchPersons, findPersonByUniqueId, findPersonsByType, getLinkedPersons, mPerson } from "@/lib/db";
 import { supabase } from "@/lib/supabaseClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -107,27 +107,41 @@ async function handlePost(req: NextRequest) {
     }
 
     const id = crypto.randomUUID();
-    const personRow = {
+    const userRow = {
       id,
       unique_id: uniqueId.trim().toUpperCase(),
-      full_name: fullName,
-      person_type: personType,
-      department: department || null,
-      designation: designation || null,
-      email: email || null,
+      name: fullName,
+      role: personType,
+      email: email || `${uniqueId.trim().toLowerCase()}@gatekeeper.edu`,
       phone: phone || null,
-      status: "active",
+      department_id: department || null,
+      status: "ACTIVE",
     };
 
-    const { data, error } = await supabase.from("persons").insert(personRow).select().single();
-    if (error) {
+    const { data: newUser, error } = await supabase.from("users").insert(userRow).select().single();
+    if (error || !newUser) {
       return NextResponse.json(
-        { success: false, error: { code: "DB_ERROR", message: error.message } },
+        { success: false, error: { code: "DB_ERROR", message: error?.message || "Database insert failed" } },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ success: true, data });
+    if (["faculty", "staff", "worker"].includes(personType)) {
+      await supabase.from("employee_details").insert({
+        user_id: id,
+        employee_id: uniqueId.trim().toUpperCase(),
+        designation: designation || null,
+        department_id: department || null,
+      });
+    } else if (personType === "student") {
+      await supabase.from("student_details").insert({
+        user_id: id,
+        roll: uniqueId.trim().toUpperCase(),
+        department_id: department || null,
+      });
+    }
+
+    return NextResponse.json({ success: true, data: mPerson(newUser) });
   } catch (error: unknown) {
     console.error("Error creating person:", error);
     return NextResponse.json(
@@ -156,19 +170,50 @@ async function handlePatch(req: NextRequest) {
       );
     }
 
-    let query = supabase.from("persons").update(updates);
+    const userUpdates: any = {};
+    if (updates.fullName !== undefined) userUpdates.name = updates.fullName;
+    if (updates.full_name !== undefined) userUpdates.name = updates.full_name;
+    if (updates.name !== undefined) userUpdates.name = updates.name;
+
+    if (updates.personType !== undefined) userUpdates.role = updates.personType;
+    if (updates.person_type !== undefined) userUpdates.role = updates.person_type;
+    if (updates.role !== undefined) userUpdates.role = updates.role;
+
+    if (updates.email !== undefined) userUpdates.email = updates.email;
+    if (updates.phone !== undefined) userUpdates.phone = updates.phone;
+
+    if (updates.department !== undefined) userUpdates.department_id = updates.department;
+    if (updates.department_id !== undefined) userUpdates.department_id = updates.department_id;
+
+    if (updates.status !== undefined) {
+      const upStatus = updates.status.toUpperCase();
+      if (["ACTIVE", "LOCKED", "SUSPENDED", "DISABLED", "DEPROVISIONED"].includes(upStatus)) {
+        userUpdates.status = upStatus;
+      } else if (upStatus === "INACTIVE" || upStatus === "IN-ACTIVE") {
+        userUpdates.status = "DISABLED";
+      }
+    }
+
+    let query = supabase.from("users").update(userUpdates);
     if (id) query = query.eq("id", id);
     else query = query.eq("unique_id", uniqueId);
 
-    const { data, error } = await query.select().single();
-    if (error) {
+    const { data: updatedUser, error } = await query.select().single();
+    if (error || !updatedUser) {
       return NextResponse.json(
-        { success: false, error: { code: "DB_ERROR", message: error.message } },
+        { success: false, error: { code: "DB_ERROR", message: error?.message || "Database update failed" } },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ success: true, data });
+    if (updates.designation !== undefined) {
+      await supabase
+        .from("employee_details")
+        .update({ designation: updates.designation })
+        .eq("user_id", updatedUser.id);
+    }
+
+    return NextResponse.json({ success: true, data: mPerson(updatedUser) });
   } catch (error: unknown) {
     console.error("Error updating person:", error);
     return NextResponse.json(
@@ -197,7 +242,7 @@ async function handleDelete(req: NextRequest) {
       );
     }
 
-    const { error } = await supabase.from("persons").update({ status: "inactive" }).eq("id", id);
+    const { error } = await supabase.from("users").update({ status: "DISABLED" }).eq("id", id);
     if (error) {
       return NextResponse.json(
         { success: false, error: { code: "DB_ERROR", message: error.message } },

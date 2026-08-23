@@ -29,10 +29,10 @@ async function handleGet(req: NextRequest) {
         // Student must be accessing their own record.
         const { data: profile, error } = await supabase
           .from("users")
-          .select("login_identifier")
+          .select("unique_id")
           .eq("id", authUserId)
           .single();
-        if (error || !profile || profile.login_identifier !== roll) {
+        if (error || !profile || profile.unique_id !== roll) {
           return NextResponse.json(
             { success: false, error: { code: "FORBIDDEN", message: "You can only view your own student record." } },
             { status: 403 }

@@ -7,6 +7,7 @@ import { EXIT_REASON_CONFIGS, ExitReason, StudentType, Student, ScanDirection } 
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { PersonBadge } from "@/components/shared/PersonBadge";
+import { useAuthStore } from "@/stores/authStore";
 
 interface ScanConfirmationProps {
   student: Student;
@@ -45,6 +46,8 @@ export function ScanConfirmation({
   const [countdown, setCountdown] = useState(2);
   const [selectedDirection, setSelectedDirection] = useState<ScanDirection | null>(null);
   const [selectedReason, setSelectedReason] = useState<ExitReason | null>(null);
+  const [approvedPasses, setApprovedPasses] = useState<any[]>([]);
+  const [loadingPasses, setLoadingPasses] = useState(false);
 
   // Start photo verification countdown when component mounts
   useEffect(() => {
@@ -52,6 +55,7 @@ export function ScanConfirmation({
     setCountdown(2);
     setSelectedDirection(null);
     setSelectedReason(null);
+    setApprovedPasses([]);
 
     const timer = setInterval(() => {
       setCountdown((prev) => {
@@ -66,6 +70,36 @@ export function ScanConfirmation({
 
     return () => clearInterval(timer);
   }, [student.id]);
+
+  useEffect(() => {
+    const fetchApprovedPasses = async () => {
+      const rollNum = student.uniqueId || student.roll || student.id;
+      if (!rollNum) return;
+      setLoadingPasses(true);
+      try {
+        const authStore = useAuthStore.getState();
+        const token = authStore.token;
+        const sessionToken = authStore.user?.currentSessionToken;
+        const headers: Record<string, string> = { "Content-Type": "application/json" };
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+        if (sessionToken) {
+          headers["X-Session-Token"] = sessionToken;
+        }
+        const res = await fetch(`/api/passes?roll=${encodeURIComponent(rollNum)}&status=APPROVED`, { headers });
+        const result = await res.json();
+        if (result.success && result.data) {
+          setApprovedPasses(result.data);
+        }
+      } catch (err) {
+        console.error("Error loading approved passes:", err);
+      } finally {
+        setLoadingPasses(false);
+      }
+    };
+    fetchApprovedPasses();
+  }, [student.id, student.uniqueId, student.roll]);
 
   const applicableReasons = EXIT_REASON_CONFIGS.filter(
     (config) => !student.studentType || config.applicableTo.includes(student.studentType)
@@ -100,19 +134,22 @@ export function ScanConfirmation({
 
   const renderActionButtons = (actions: ActionEntry[]) => (
     <div className={cn("grid gap-2", actions.length > 2 ? "grid-cols-3" : "grid-cols-2")}>
-      {actions.map(({ code, name, icon: Icon, direction }) => {
+      {actions.map(({ code, name, icon: Icon, direction, requiresApproval }) => {
         const isSelected = selectedDirection === direction && selectedReason === code;
+        const passRequired = direction === "OUT" && requiresApproval && (student.personType === "student" || !student.personType);
+        const hasApprovedPass = approvedPasses.some((p) => p.reason === code);
+        const isDisabled = !photoVerified || (passRequired && !hasApprovedPass);
         return (
           <button
             key={`${direction}-${code}`}
             type="button"
             onClick={() => handleConfirmClick(direction, code)}
-            disabled={!photoVerified}
+            disabled={isDisabled}
             className={cn(
               "py-2.5 px-2 rounded-xl border font-bold text-[11px] flex flex-col items-center justify-center gap-1 transition-all active:scale-95",
               isSelected
                 ? "bg-[var(--action-primary)] border-[var(--action-primary)] text-white"
-                : photoVerified
+                : photoVerified && !isDisabled
                   ? "bg-[var(--bg-base)] border-[var(--border)] text-[var(--text-primary)] hover:border-emerald-500/50 hover:bg-[var(--bg-elevated)]"
                   : "bg-[var(--bg-base)] border-[var(--border)] text-[var(--text-muted)] opacity-50 cursor-not-allowed"
             )}
@@ -124,6 +161,16 @@ export function ScanConfirmation({
               )}
             />
             <span>{name}</span>
+            {passRequired && (
+              <span className={cn(
+                "text-[8px] font-extrabold mt-1 px-1 rounded border scale-90",
+                hasApprovedPass 
+                  ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" 
+                  : "bg-rose-500/20 text-rose-400 border-rose-500/30"
+              )}>
+                {hasApprovedPass ? "Pass Active" : "No Pass"}
+              </span>
+            )}
           </button>
         );
       })}
@@ -189,6 +236,36 @@ export function ScanConfirmation({
           </p>
         </div>
       </div>
+
+      {/* Active Permissions / Passes Section */}
+      {(student.personType === "student" || !student.personType) && (
+        <div className="bg-[var(--bg-base)] border border-[var(--border)] rounded-2xl p-3.5 space-y-2 text-left">
+          <span className="text-[10px] font-extrabold uppercase tracking-wide text-[var(--text-muted)] block">
+            Approved Exit Passes ({approvedPasses.length})
+          </span>
+          {loadingPasses ? (
+            <p className="text-xs text-[var(--text-muted)] animate-pulse">Checking gate pass database...</p>
+          ) : approvedPasses.length > 0 ? (
+            <div className="space-y-1.5 max-h-[80px] overflow-y-auto pr-1">
+              {approvedPasses.map((pass) => (
+                <div key={pass.id} className="flex justify-between items-center bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-1.5 rounded-lg text-[11px]">
+                  <div>
+                    <span className="font-bold text-emerald-400">{pass.reason}</span>
+                    <span className="text-[9px] text-[var(--text-muted)] ml-2">
+                       until {new Date(pass.to_datetime).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <span className="font-extrabold text-[8px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                    Approved
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-[11px] text-[var(--text-muted)] italic">No active approved exit passes found in database.</p>
+          )}
+        </div>
+      )}
 
       {/* Action Movement Category Selection */}
       <div className="space-y-4 pt-1">

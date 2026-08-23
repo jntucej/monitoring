@@ -277,7 +277,7 @@ async function sendPushNotification(notification: Notification) {
 async function sendSMSNotification(notification: Notification) {
   console.log(`[SMS] ${notification.title}: ${notification.message}`);
   const { data: person } = await supabase
-    .from('persons')
+    .from('users')
     .select('phone')
     .eq('unique_id', notification.recipientId)
     .single();
@@ -297,7 +297,7 @@ async function sendSMSNotification(notification: Notification) {
 async function sendEmailNotification(notification: Notification) {
   console.log(`[EMAIL] ${notification.title}: ${notification.message}`);
   const { data: person } = await supabase
-    .from('persons')
+    .from('users')
     .select('email')
     .eq('unique_id', notification.recipientId)
     .single();

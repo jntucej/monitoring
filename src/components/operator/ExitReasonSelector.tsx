@@ -1,13 +1,15 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { ExitReason } from "@/lib/types";
+import { ExitReason, EXIT_REASON_CONFIGS } from "@/lib/types";
 
 interface ExitReasonSelectorProps {
   isOpen: boolean;
   selected?: ExitReason;
   onSelect: (reason: ExitReason) => void;
   onCancel: () => void;
+  approvedPasses?: any[];
+  personType?: string;
 }
 
 const REASONS: { val: ExitReason; label: string; icon: string; color: string }[] = [
@@ -17,7 +19,7 @@ const REASONS: { val: ExitReason; label: string; icon: string; color: string }[]
   { val: "Regular", label: "Regular", icon: "🚶", color: "bg-[var(--action-danger)]" },
 ];
 
-export function ExitReasonSelector({ isOpen, selected, onSelect, onCancel }: ExitReasonSelectorProps) {
+export function ExitReasonSelector({ isOpen, selected, onSelect, onCancel, approvedPasses = [], personType = "student" }: ExitReasonSelectorProps) {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -37,18 +39,42 @@ export function ExitReasonSelector({ isOpen, selected, onSelect, onCancel }: Exi
           >
             <h3 className="text-lg font-semibold mb-4 text-center">Select reason for exit</h3>
             <div className="grid grid-cols-2 gap-3">
-              {REASONS.map((r) => (
-                <motion.button
-                  key={r.val}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => onSelect(r.val)}
-                  className={`h-14 px-3 rounded-lg text-white font-medium text-sm flex items-center justify-center gap-2 ${r.color} hover:brightness-110 transition-all`}
-                >
-                  <span>{r.icon}</span>
-                  {r.label}
-                </motion.button>
-              ))}
+              {REASONS.map((r) => {
+                const config = EXIT_REASON_CONFIGS.find((c) => c.code === r.val);
+                const requiresApproval = config?.requiresApproval ?? false;
+                const passRequired = requiresApproval && (personType === "student" || !personType);
+                const hasApprovedPass = approvedPasses.some((p) => p.reason === r.val);
+                const isDisabled = passRequired && !hasApprovedPass;
+
+                return (
+                  <motion.button
+                    key={r.val}
+                    whileHover={isDisabled ? {} : { scale: 1.02 }}
+                    whileTap={isDisabled ? {} : { scale: 0.98 }}
+                    disabled={isDisabled}
+                    onClick={() => onSelect(r.val)}
+                    className={`h-14 px-3 rounded-lg text-white font-medium text-xs flex flex-col items-center justify-center gap-0.5 transition-all ${
+                      isDisabled 
+                        ? "bg-[var(--bg-base)] border border-[var(--border)] text-[var(--text-muted)] opacity-50 cursor-not-allowed"
+                        : r.color
+                    } hover:brightness-110`}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span>{r.icon}</span>
+                      <span>{r.label}</span>
+                    </div>
+                    {passRequired && (
+                      <span className={`text-[8px] font-extrabold px-1 rounded border scale-90 ${
+                        hasApprovedPass 
+                          ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" 
+                          : "bg-rose-500/20 text-rose-400 border-rose-500/30"
+                      }`}>
+                        {hasApprovedPass ? "Pass Active" : "No Pass"}
+                      </span>
+                    )}
+                  </motion.button>
+                );
+              })}
             </div>
             <button
               onClick={onCancel}

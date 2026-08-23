@@ -17,18 +17,18 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
     let parentId = params.get("parentId") || undefined;
 
     // Authorization: Non-admins can only query their own data.
-    const isAdmin = ['admin', 'supervisor', 'sysadmin'].includes(authRole);
+    const isAdmin = ['admin', 'supervisor', 'sysadmin', 'operator'].includes(authRole);
 
     if (!isAdmin) {
       if (authRole === 'student') {
         // Students must query by their own roll number, which we can get from their user profile.
         const { data: profile } = await supabase
           .from('users')
-          .select('login_identifier')
+          .select('unique_id')
           .eq('id', authUserId)
           .single();
 
-        const userRoll = profile?.login_identifier;
+        const userRoll = profile?.unique_id;
         if (!userRoll) {
           return NextResponse.json(
             { success: false, error: { code: "FORBIDDEN", message: "No roll number associated with this account." } },
@@ -90,11 +90,11 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
       // Student can only create passes for themselves
       const { data: profile } = await supabase
         .from('users')
-        .select('login_identifier')
+        .select('unique_id')
         .eq('id', authUserId)
         .single();
 
-      if (profile?.login_identifier !== roll) {
+      if (profile?.unique_id !== roll) {
         return NextResponse.json(
           { success: false, error: { code: "FORBIDDEN", message: "You can only create passes for yourself." } },
           { status: 403 }
@@ -144,11 +144,11 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ['admin', 'supervisor', 'sysadmin', 'parent', 'student'] }),
+  withAuthorization(handleGet, { requiredRole: ['admin', 'supervisor', 'sysadmin', 'operator', 'parent', 'student'] }),
   { keyPrefix: 'passes_list', maxRequests: 100 }
 );
 
 export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ['student', 'parent', 'admin', 'supervisor', 'sysadmin'] }),
+  withAuthorization(handlePost, { requiredRole: ['student', 'parent', 'admin', 'supervisor', 'sysadmin', 'operator'] }),
   { keyPrefix: 'passes_create', maxRequests: 10 }
 );

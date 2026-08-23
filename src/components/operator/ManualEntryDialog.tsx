@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, X, Check, Info, User, ArrowRight, Lock, Eye, EyeOff } from "lucide-react";
 import { findStudentByRoll } from "@/lib/db";
@@ -8,6 +8,8 @@ import { parseRollNumber, validateRollNumber } from "@/lib/rollNumber";
 import { Button } from "@/components/ui/button";
 import { useUIStore } from "@/stores/uiStore";
 import type { ScanDirection, ExitReason } from "@/lib/types";
+import { supabase } from "@/lib/supabaseClient";
+import { EXIT_REASON_CONFIGS } from "@/lib/types";
 
 interface ManualEntryDialogProps {
   isOpen: boolean;
@@ -25,8 +27,37 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
   const [pin, setPin] = useState("");
   const [showPin, setShowPin] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [approvedPasses, setApprovedPasses] = useState<any[]>([]);
+  const [loadingPasses, setLoadingPasses] = useState(false);
 
   const { addToast } = useUIStore();
+
+  useEffect(() => {
+    if (!student) {
+      setApprovedPasses([]);
+      return;
+    }
+    const fetchApprovedPasses = async () => {
+      const rollNum = student.uniqueId || student.roll || student.id;
+      if (!rollNum) return;
+      setLoadingPasses(true);
+      try {
+        const { data, error } = await supabase
+          .from("gate_passes")
+          .select("*")
+          .eq("roll", rollNum)
+          .in("final_status", ["APPROVED", "APPROVED_PARENT", "APPROVED_ADMIN"]);
+        if (!error && data) {
+          setApprovedPasses(data);
+        }
+      } catch (err) {
+        console.error("Error loading approved passes:", err);
+      } finally {
+        setLoadingPasses(false);
+      }
+    };
+    fetchApprovedPasses();
+  }, [student]);
 
   // Real-time roll-number validation & decoding
   const rollValid = useMemo(() => (rollInput ? validateRollNumber(rollInput) : false), [rollInput]);
@@ -311,25 +342,77 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
                 </div>
 
                 {direction === "OUT" && (
-                  <div className="space-y-2">
-                    <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase">
-                      Campus Exit Reason
-                    </label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {["Home Out", "Day Out", "Leave", "Regular"].map((r) => (
-                        <button
-                          key={r}
-                          type="button"
-                          onClick={() => setReason(r as ExitReason)}
-                          className={`py-2.5 px-3 rounded-xl text-xs font-semibold transition-all ${
-                            reason === r
-                              ? "bg-[var(--action-primary)] text-white shadow-xs"
-                              : "bg-[var(--bg-base)] border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
-                          }`}
-                        >
-                          {r}
-                        </button>
-                      ))}
+                  <div className="space-y-4">
+                    {/* Active Permissions / Passes Section */}
+                    {(student.personType === "student" || !student.personType) && (
+                      <div className="bg-[var(--bg-base)] border border-[var(--border)] rounded-2xl p-3.5 space-y-2 text-left">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wide text-[var(--text-muted)] block">
+                          Approved Exit Passes ({approvedPasses.length})
+                        </span>
+                        {loadingPasses ? (
+                          <p className="text-xs text-[var(--text-muted)] animate-pulse">Checking gate pass database...</p>
+                        ) : approvedPasses.length > 0 ? (
+                          <div className="space-y-1.5 max-h-[80px] overflow-y-auto pr-1">
+                            {approvedPasses.map((pass) => (
+                              <div key={pass.id} className="flex justify-between items-center bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-1.5 rounded-lg text-xs">
+                                <div>
+                                  <span className="font-bold text-emerald-400">{pass.reason}</span>
+                                  <span className="text-[10px] text-[var(--text-muted)] ml-2">
+                                     until {new Date(pass.to_datetime).toLocaleDateString()}
+                                  </span>
+                                </div>
+                                <span className="font-extrabold text-[9px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                  Approved
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-[11px] text-[var(--text-muted)] italic">No active approved exit passes found in database.</p>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
+                      <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase">
+                        Campus Exit Reason
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {["Home Out", "Day Out", "Leave", "Regular"].map((r) => {
+                          const config = EXIT_REASON_CONFIGS.find((c) => c.code === r);
+                          const requiresApproval = config?.requiresApproval ?? false;
+                          const passRequired = requiresApproval && (student.personType === "student" || !student.personType);
+                          const hasApprovedPass = approvedPasses.some((p) => p.reason === r);
+                          const isDisabled = passRequired && !hasApprovedPass;
+
+                          return (
+                            <button
+                              key={r}
+                              type="button"
+                              disabled={isDisabled}
+                              onClick={() => setReason(r as ExitReason)}
+                              className={`py-2.5 px-3 rounded-xl text-xs font-semibold transition-all flex flex-col items-center justify-center gap-1 ${
+                                reason === r
+                                  ? "bg-[var(--action-primary)] text-white shadow-xs"
+                                  : isDisabled
+                                    ? "bg-[var(--bg-base)] border border-[var(--border)] text-[var(--text-muted)] opacity-50 cursor-not-allowed"
+                                    : "bg-[var(--bg-base)] border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
+                              }`}
+                            >
+                              <span>{r}</span>
+                              {passRequired && (
+                                <span className={`text-[8px] font-extrabold px-1 rounded border scale-90 ${
+                                  hasApprovedPass
+                                    ? reason === r ? "bg-white/20 text-white border-white/30" : "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+                                    : "bg-rose-500/20 text-rose-400 border-rose-500/30"
+                                }`}>
+                                  {hasApprovedPass ? "Pass Active" : "No Pass"}
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
                 )}

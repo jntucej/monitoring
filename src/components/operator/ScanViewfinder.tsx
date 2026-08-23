@@ -41,29 +41,7 @@ export function ScanViewfinder({
         </div>
       </div>
 
-      {/* Target Reticle */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="relative w-48 h-48 border-2 border-emerald-500/50 rounded-2xl flex items-center justify-center">
-          <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-emerald-400 rounded-tl-lg" />
-          <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-emerald-400 rounded-tr-lg" />
-          <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-emerald-400 rounded-bl-lg" />
-          <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-emerald-400 rounded-br-lg" />
-
-          {isHighEnd && (
-            <motion.div
-              className="absolute left-0 right-0 h-0.5 bg-emerald-400/80 shadow-[0_0_8px_#34d399]"
-              animate={{ top: ["10%", "90%", "10%"] }}
-              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-            />
-          )}
-
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-2">
-            <p className="text-white font-medium text-xs">
-              {isHighEnd ? "Align Student QR" : "Low Profile Desk"}
-            </p>
-          </div>
-        </div>
-      </div>
+      {/* Target Reticle simplified/removed */}
 
       {/* Error overlay */}
       <AnimatePresence>

@@ -54,22 +54,21 @@ export async function syncEmployeesFromHR(): Promise<{
       try {
         // Check if person already exists
         const { data: existing } = await supabase
-          .from("persons")
-          .select("id, full_name, department, status")
+          .from("users")
+          .select("id, name, department_id, status")
           .eq("unique_id", emp.employeeId)
-          .single();
+          .maybeSingle();
 
         if (existing) {
           // Update existing person
           const { error } = await supabase
-            .from("persons")
+            .from("users")
             .update({
-              full_name: emp.fullName,
+              name: emp.fullName,
               email: emp.email,
               phone: emp.phone,
-              department: emp.department,
-              designation: emp.designation,
-              status: emp.status === "active" ? "active" : "inactive",
+              department_id: emp.department,
+              status: emp.status === "active" ? "ACTIVE" : "DISABLED",
               updated_at: new Date().toISOString(),
             })
             .eq("id", existing.id);
@@ -85,28 +84,28 @@ export async function syncEmployeesFromHR(): Promise<{
             .from("employee_details")
             .upsert(
               {
-                person_id: existing.id,
+                user_id: existing.id,
                 employee_id: emp.employeeId,
                 designation: emp.designation,
                 joining_date: emp.joiningDate,
                 is_hod: emp.isHod,
                 department_id: emp.department,
               },
-              { onConflict: "person_id" }
+              { onConflict: "user_id" }
             );
         } else {
           // Create new person
           const { data: person, error: personError } = await supabase
-            .from("persons")
+            .from("users")
             .insert({
+              id: crypto.randomUUID(),
               unique_id: emp.employeeId,
-              full_name: emp.fullName,
-              person_type: emp.employeeId.startsWith("FAC") ? "faculty" : "staff",
+              name: emp.fullName,
+              role: emp.employeeId.startsWith("FAC") ? "faculty" : "staff",
               email: emp.email,
               phone: emp.phone,
-              department: emp.department,
-              designation: emp.designation,
-              status: emp.status === "active" ? "active" : "inactive",
+              department_id: emp.department,
+              status: emp.status === "active" ? "ACTIVE" : "DISABLED",
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
             })
@@ -120,7 +119,7 @@ export async function syncEmployeesFromHR(): Promise<{
 
           // Create employee details
           await supabase.from("employee_details").insert({
-            person_id: person.id,
+            user_id: person.id,
             employee_id: emp.employeeId,
             designation: emp.designation,
             joining_date: emp.joiningDate,
