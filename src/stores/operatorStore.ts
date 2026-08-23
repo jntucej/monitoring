@@ -95,6 +95,20 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
           }
         })
         .catch((err) => {
+          // Check if the error is a session expiry (401 with SESSION_EXPIRED)
+          if (err && typeof err === "object" && "status" in err && err.status === 401) {
+            try {
+              err.json().then((json: any) => {
+                if (json?.error?.code === "SESSION_EXPIRED") {
+                  const authStore = useAuthStore.getState();
+                  authStore.logout();
+                  if (typeof window !== "undefined") {
+                    window.location.href = "/login";
+                  }
+                }
+              }).catch(() => {});
+            } catch {}
+          }
           console.error("Error fetching person:", err);
         })
         .finally(() => {
@@ -181,8 +195,21 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
           }),
         });
       })
-      .then((res) => res.json())
+      .then(async (res) => {
+        const result = await res.json();
+        // Handle session expiry — log out and redirect to login instead of showing "verification denied"
+        if (res.status === 401 && result?.error?.code === "SESSION_EXPIRED") {
+          const authStore = useAuthStore.getState();
+          authStore.logout();
+          if (typeof window !== "undefined") {
+            window.location.href = "/login";
+          }
+          return null;
+        }
+        return result;
+      })
       .then((result) => {
+        if (!result) return;
         if (result?.duplicate) {
           addToast({
             variant: "error",

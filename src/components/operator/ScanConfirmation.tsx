@@ -89,6 +89,15 @@ export function ScanConfirmation({
         }
         const res = await fetch(`/api/passes?roll=${encodeURIComponent(rollNum)}&status=APPROVED`, { headers });
         const result = await res.json();
+        // Handle session expiry in pass lookup
+        if (res.status === 401 && result?.error?.code === "SESSION_EXPIRED") {
+          const authStore = useAuthStore.getState();
+          authStore.logout();
+          if (typeof window !== "undefined") {
+            window.location.href = "/login";
+          }
+          return;
+        }
         if (result.success && result.data) {
           setApprovedPasses(result.data);
         }
