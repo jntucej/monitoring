@@ -85,10 +85,10 @@ export function rateLimit(keyOrReq: string | NextRequest, pointsOrConfig?: numbe
 
 // Rate limiting middleware for API routes
 export function withRateLimit(
-  handler: (req: NextRequest) => Promise<Response>,
+  handler: (req: NextRequest, ...args: any[]) => Promise<Response>,
   config: RateLimitConfig = {}
 ) {
-  return async (req: NextRequest) => {
+  return async (req: NextRequest, ...args: any[]) => {
     const limiter = (rateLimit as Function)(config);
     const result = limiter(req);
 
@@ -114,7 +114,7 @@ export function withRateLimit(
       );
     }
 
-    const response = await handler(req);
+        const response = await handler(req, ...args);
     
     const headers = new Headers(response.headers);
     headers.set('X-RateLimit-Limit', (config.maxRequests || DEFAULT_MAX_REQUESTS).toString());

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { findPersonByUniqueId, getPersonHistory, getPersonStatus } from "@/lib/db";
-import { withAuthAndStatus } from "@/middleware/auth";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { supabase } from "@/lib/supabaseClient";
@@ -69,6 +68,6 @@ async function handleGet(req: NextRequest) {
 }
 
 export const GET = withRateLimit(
-  withAuthAndStatus(withAuthorization(handleGet, { requiredRole: ["supervisor", "admin", "sysadmin", "student", "parent", "faculty", "staff", "operator"] })),
+  withAuthorization(handleGet, { requiredRole: ["supervisor", "admin", "sysadmin", "student", "parent", "faculty", "staff", "operator"] }),
   { keyPrefix: "person_details", maxRequests: 100 }
 );

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getNotifications } from "@/lib/db";
-import { withAuthAndStatus } from "@/middleware/auth";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 
@@ -43,6 +42,6 @@ async function handleGet(req: NextRequest) {
 }
 
 export const GET = withRateLimit(
-    withAuthAndStatus(withAuthorization(handleGet, { requiredRole: ['admin', 'supervisor', 'sysadmin', 'parent', 'student'] })),
+    withAuthorization(handleGet, { requiredRole: ['admin', 'supervisor', 'sysadmin', 'parent', 'student'] }),
     { keyPrefix: 'notifications_list', maxRequests: 60 }
 );

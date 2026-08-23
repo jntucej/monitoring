@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { findPass, approvePass, rejectPass } from "@/lib/db";
-import { withAuthAndStatus } from "@/middleware/auth";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 
@@ -105,11 +104,11 @@ async function handlePut(req: NextRequest) {
 }
 
 export const GET = withRateLimit(
-  withAuthAndStatus(withAuthorization(handleGet, { requiredRole: ["admin", "supervisor", "sysadmin", "parent", "student"] })),
+  withAuthorization(handleGet, { requiredRole: ["admin", "supervisor", "sysadmin", "parent", "student"] }),
   { keyPrefix: "passes_get", maxRequests: 100 }
 );
 
 export const PUT = withRateLimit(
-  withAuthAndStatus(withAuthorization(handlePut, { requiredRole: ["admin", "supervisor", "sysadmin"] })),
+  withAuthorization(handlePut, { requiredRole: ["admin", "supervisor", "sysadmin"] }),
   { keyPrefix: "passes_update", maxRequests: 20 }
 );

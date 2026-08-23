@@ -104,18 +104,28 @@ const ROLE_NAV_GROUPS: Record<string, NavGroup[]> = {
       ],
     },
   ],
+  guardian: [
+    {
+      groupLabel: "Ward Portal",
+      items: [
+        { href: "/parent", label: "Ward Overview", icon: Users },
+        { href: "/parent/request", label: "Request Pass", icon: QrCode },
+      ],
+    },
+  ],
+  // legacy alias: map 'parent' role into the same guardian portal nav
   parent: [
     {
-      groupLabel: "Child Portal",
+      groupLabel: "Ward Portal",
       items: [
-        { href: "/parent", label: "Child Overview", icon: Users },
+        { href: "/parent", label: "Ward Overview", icon: Users },
         { href: "/parent/request", label: "Request Pass", icon: QrCode },
       ],
     },
   ],
   student: [
     {
-      groupLabel: "Student Identity",
+      groupLabel: "My Identity",
       items: [
         { href: "/student", label: "Digital ID Card", icon: GraduationCap },
         { href: "/student/passes", label: "Gate Passes", icon: QrCode, badge: "QR" },
@@ -166,8 +176,9 @@ const ROLE_LABELS: Record<string, string> = {
   supervisor: "Gate Supervisor",
   admin: "Campus Administrator",
   sysadmin: "System Administrator",
-  parent: "Parent Portal",
-  student: "Student Portal",
+  guardian: "Guardian Portal",
+  parent: "Guardian Portal", // legacy
+  student: "My Portal",
   faculty: "Faculty Portal",
   staff: "Staff Portal",
   worker: "Worker Portal",

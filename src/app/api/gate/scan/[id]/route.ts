@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { correctScan } from "@/lib/db";
-import { withAuthAndStatus } from "@/middleware/auth";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { supabase } from "@/lib/supabaseClient";
@@ -96,6 +95,6 @@ async function handlePatch(req: NextRequest, { auth }: { auth: AuthContext }) {
 }
 
 export const PATCH = withRateLimit(
-  withAuthAndStatus(withAuthorization(handlePatch, { requiredRole: ["supervisor", "admin", "sysadmin"] })),
+  withAuthorization(handlePatch, { requiredRole: ["supervisor", "admin", "sysadmin"] }),
   { keyPrefix: "scan_correction", maxRequests: 30 }
 );

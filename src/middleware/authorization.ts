@@ -1,8 +1,16 @@
 /**
  * Centralized Authorization Middleware for Gate Monitoring System
  *
- * This middleware provides consistent authorization checks across all API routes.
- * It validates user roles, permissions, and account status on every request.
+ * `withAuthorization` is the SINGLE validation point per request:
+ * it authenticates the Supabase access token exactly once, enforces account
+ * status / role / permission / resource rules, and injects the trusted
+ * identity headers (`x-user-id`, `x-user-role`, `x-user-email`) consumed by
+ * route handlers. Handlers downstream MUST read identity only from these
+ * headers — they are always overwritten here from server-validated data,
+ * so client-supplied values can never spoof identity.
+ *
+ * NOTE: Routes no longer need to wrap this in `withAuthAndStatus`; doing so
+ * would duplicate the Supabase round-trips per request.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -10,7 +18,6 @@ import { supabase } from "@/lib/supabaseClient";
 import { Role, AccountStatus } from "@/lib/types";
 import {
   requireAuthenticatedUser as requireAuthUser,
-  requireRole as requireAuthRole,
   requirePermission as requireAuthPermission,
   validateResourceOperation as validateResourceOp,
   getGateStudentInfo
@@ -18,13 +25,14 @@ import {
 
 /**
  * Authorization middleware that validates:
- * - User account status (must be ACTIVE)
+ * - Token validity using Supabase Auth (single validation per request)
+ * - User existence in public.users
+ * - User account status (must be ACTIVE unless allowInactive)
  * - User role and permissions
  * - Resource access
  *
- * @param handler - The API route handler
+ * @param handler - The API route handler; receives (req, { auth: AuthContext })
  * @param options - Authorization options
- * @returns NextResponse with appropriate error or continues to handler
  */
 export function withAuthorization(
   handler: (req: NextRequest, context: { auth: any }) => Promise<Response>,
@@ -80,17 +88,17 @@ export function withAuthorization(
         await requireAuthPermission(token, options.requiredPermission);
       }
 
-      // Validate resource access if specified
+      // Validate resource access if specified.
+      // Body inspection is limited to body-bearing methods and uses a clone,
+      // so GET requests are untouched and handlers can still call req.json().
       if (options.resourceType && options.resourceIdParam) {
         let resourceId: string | undefined;
 
-        // Try to get resource ID from different sources
         if (req.nextUrl.searchParams.has(options.resourceIdParam)) {
           resourceId = req.nextUrl.searchParams.get(options.resourceIdParam) || undefined;
-        } else {
-          // For POST/PUT requests, try to parse the body
+        } else if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
           try {
-            const body = await req.json();
+            const body = await req.clone().json();
             if (body && typeof body === 'object' && options.resourceIdParam in body) {
               resourceId = body[options.resourceIdParam];
             }
@@ -109,8 +117,15 @@ export function withAuthorization(
         }
       }
 
+      // Inject trusted identity headers for the handler. These ALWAYS
+      // overwrite client-supplied values with server-validated data.
+      const authenticatedReq = new NextRequest(req);
+      authenticatedReq.headers.set('x-user-id', authContext.userId);
+      authenticatedReq.headers.set('x-user-role', authContext.role);
+      authenticatedReq.headers.set('x-user-email', authContext.email);
+
       // If all checks pass, continue to the handler with auth context
-      return handler(req, { auth: authContext });
+      return handler(authenticatedReq, { auth: authContext });
     } catch (error) {
       // Handle different types of errors
       if (error instanceof Error) {
@@ -138,6 +153,7 @@ export function withAuthorization(
       }
 
       // Default error response
+      console.error('Authorization middleware error:', error);
       return NextResponse.json(
         { success: false, error: { code: 'INTERNAL_ERROR', message: 'Authorization failed' } },
         { status: 500 }

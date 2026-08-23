@@ -12,51 +12,37 @@ interface AuthGuardProps {
 
 export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   const router = useRouter();
-  const { user, authenticated, autoLoginAsRole } = useAuthStore();
+  const { user, authenticated } = useAuthStore();
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    let currentUser = user;
-    let isAuthed = authenticated;
-
-    // Check authentication and auto-authenticate for portal / gate monitor access if needed
-    if (!isAuthed || !currentUser) {
+    // If not authenticated or no user set, redirect to login with role hint if available
+    if (!authenticated || !user) {
       let targetRole: Role | null = null;
 
       if (typeof window !== "undefined") {
-        const storedRole = (sessionStorage.getItem("gate-monitor-role") ||
-          localStorage.getItem("gate-monitor-role")) as Role | null;
-        if (storedRole) {
-          targetRole = storedRole;
-        } else {
-          const path = window.location.pathname;
-          if (path.startsWith("/gate")) targetRole = "operator";
-          else if (path.startsWith("/supervisor")) targetRole = "supervisor";
-          else if (path.startsWith("/admin")) targetRole = "admin";
-          else if (path.startsWith("/sysadmin")) targetRole = "sysadmin";
-          else if (path.startsWith("/student")) targetRole = "student";
-          else if (path.startsWith("/parent")) targetRole = "parent";
-          else if (path.startsWith("/person")) targetRole = "student";
-        }
+        const path = window.location.pathname;
+        if (path.startsWith("/gate")) targetRole = "operator";
+        else if (path.startsWith("/supervisor")) targetRole = "supervisor";
+        else if (path.startsWith("/admin")) targetRole = "admin";
+        else if (path.startsWith("/sysadmin")) targetRole = "sysadmin";
+        else if (path.startsWith("/student")) targetRole = "student";
+        else if (path.startsWith("/parent")) targetRole = "parent";
+        else if (path.startsWith("/person")) targetRole = "student";
       }
 
       if (!targetRole && allowedRoles && allowedRoles.length > 0) {
         targetRole = allowedRoles[0];
       }
 
-      if (targetRole) {
-        const session = autoLoginAsRole(targetRole);
-        currentUser = session.user;
-        isAuthed = true;
-      } else {
-        router.replace("/login");
-        return;
-      }
+      const loginUrl = targetRole ? `/login?role=${targetRole}` : "/login";
+      router.replace(loginUrl);
+      return;
     }
 
     // Check role authorization if specified
-    if (allowedRoles && allowedRoles.length > 0 && currentUser && !allowedRoles.includes(currentUser.role)) {
-      switch (currentUser.role) {
+    if (allowedRoles && allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+      switch (user.role) {
         case "admin":
           router.replace("/admin");
           break;
@@ -82,7 +68,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
     }
 
     setIsChecking(false);
-  }, [user, authenticated, allowedRoles, router, autoLoginAsRole]);
+  }, [user, authenticated, allowedRoles, router]);
 
   if (isChecking) {
     return (

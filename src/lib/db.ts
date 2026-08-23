@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient';
+import { supabase, invalidateAllUserSessions } from './supabaseClient';
 import { randomUUID } from "crypto";
 import bcrypt from 'bcryptjs';
 
@@ -568,59 +568,10 @@ export async function getNotifications(recipientType: string, recipientId: strin
   return (data || []).map(mAlert);
 }
 
-export async function getUserForSession(sessionId: string): Promise<User | null> {
-  const { data: session, error: sessErr } = await supabase
-    .from('sessions')
-    .select('user_id, expires_at')
-    .eq('id', sessionId)
-    .single();
-
-  if (sessErr || !session) return null;
-
-  if (new Date(session.expires_at) < new Date()) {
-    await supabase.from('sessions').delete().eq('id', sessionId);
-    return null;
-  }
-
-  const { data: user, error: userErr } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', session.user_id)
-    .single();
-
-  if (userErr || !user) return null;
-
-  return mUser(user);
-}
-
-export async function createSession(userId: string, token: string, refreshToken: string): Promise<string | null> {
-  const id = `sess-${randomUUID()}`;
-  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-
-  const { error } = await supabase.from('sessions').insert({
-    id,
-    user_id: userId,
-    token,
-    refresh_token: refreshToken,
-    expires_at: expiresAt,
-  });
-
-  if (error) {
-    console.error('Error creating session:', error);
-    return null;
-  }
-
-  return id;
-}
-
-export async function invalidateSession(sessionId: string): Promise<boolean> {
-  const { error } = await supabase.from('sessions').delete().eq('id', sessionId);
-  if (error) {
-    console.error('Error invalidating session:', error);
-    return false;
-  }
-  return true;
-}
+// NOTE: Session lifecycle is fully owned by Supabase Auth (GoTrue).
+// The legacy custom `sessions` table functions (`getUserForSession`,
+// `createSession`, `invalidateSession`) were removed. To revoke a user's
+// sessions, use `invalidateAllUserSessions` from '@/lib/supabaseClient'.
 
 /* ------------------------------------------------------------------ *
  *  UNIFIED PERSONS FUNCTIONS
@@ -817,13 +768,22 @@ export async function findAllUsers(): Promise<User[]> {
   return data.map(mUser);
 }
 
+/**
+ * Insert a user profile into public.users.
+ *
+ * IMPORTANT: `id` MUST be the UUID of an ALREADY-PROVISIONED Supabase Auth
+ * user — public.users.id is a foreign key to auth.users.id (see
+ * consolidated_clean_schema.sql). Passwords live only in Supabase Auth;
+ * secondary PINs are stored bcrypt-hashed in `initial_pin_hash`.
+ */
 export async function createUser(userData: {
+  id: string;
   name: string;
   role: Role;
   employeeId?: string;
   email?: string;
   phone?: string;
-  pin?: string;
+  gateId?: string;
   parentId?: string;
   supervisedGates?: string[];
   assignedHostel?: string;
@@ -831,23 +791,19 @@ export async function createUser(userData: {
   departmentId?: string;
   canViewGender?: string[];
   status?: AccountStatus;
+  loginIdentifier?: string;
+  initialPinHash?: string;
 }): Promise<User | null> {
-  const id = `user-${Date.now()}`;
-  let hashedPin: string | undefined = undefined;
-  if (userData.pin) {
-    hashedPin = await bcrypt.hash(userData.pin, 10);
-  }
-
   const { data, error } = await supabase
     .from('users')
     .insert({
-      id,
+      id: userData.id,
       name: userData.name,
       role: userData.role,
       employee_id: userData.employeeId || null,
       email: userData.email || null,
       phone: userData.phone || null,
-      pin: hashedPin || null,
+      gate_id: userData.gateId || null,
       parent_id: userData.parentId || null,
       supervised_gates: userData.supervisedGates || null,
       assigned_hostel: userData.assignedHostel || null,
@@ -855,6 +811,8 @@ export async function createUser(userData: {
       department_id: userData.departmentId || null,
       can_view_gender: userData.canViewGender || null,
       status: userData.status || 'ACTIVE',
+      login_identifier: userData.loginIdentifier || null,
+      initial_pin_hash: userData.initialPinHash || null,
     })
     .select()
     .single();
@@ -869,7 +827,7 @@ export async function createUser(userData: {
     userId: 'system',
     userName: 'System',
     role: 'sysadmin',
-    details: `Created new user ${id} with role ${userData.role}`,
+    details: `Created new user ${userData.id} with role ${userData.role}`,
   });
 
   return data ? mUser(data) : null;
@@ -893,16 +851,15 @@ export async function findUserByLogin(login: string): Promise<User | null> {
   return mUser(data);
 }
 
-export async function verifyLogin(login: string, password: string): Promise<User | null> {
-  const user = await findUserByLogin(login);
-  if (!user) return null;
-  return user;
-}
+// NOTE: `verifyLogin` was REMOVED. Password verification belongs exclusively
+// to Supabase Auth (`signInWithPassword`) — application code must never
+// authenticate users by merely looking up a row.
 
+/** Verify an operator PIN against the bcrypt-hashed `initial_pin_hash`. */
 export async function verifyPin(userId: string, pin: string): Promise<boolean> {
-  const { data, error } = await supabase.from('users').select('pin').eq('id', userId).single();
-  if (error || !data || !data.pin) return false;
-  return await bcrypt.compare(pin, data.pin);
+  const { data, error } = await supabase.from('users').select('initial_pin_hash').eq('id', userId).single();
+  if (error || !data || !data.initial_pin_hash) return false;
+  return await bcrypt.compare(pin, data.initial_pin_hash);
 }
 
 export async function hashPin(pin: string): Promise<string> {
@@ -922,6 +879,13 @@ export async function updateAccountStatus(userId: string, newStatus: AccountStat
     details: `Updated status for user ${user?.name ?? userId} from ${user?.status} to ${newStatus}`,
   });
 
+  // Revoke all Supabase Auth sessions so the status change takes effect
+  // immediately (e.g., locking an account kicks the user out).
+  const revoked = await invalidateAllUserSessions(userId);
+  if (!revoked) {
+    console.error(`Failed to revoke sessions for user ${userId} after status change`);
+  }
+
   return true;
 }
 
@@ -940,13 +904,19 @@ export async function updateUserRole(userId: string, newRole: Role, actorId: str
     details: `Updated role for user ${user?.name ?? userId} from ${user?.role} to ${newRole}`,
   });
 
+  // Revoke all Supabase Auth sessions so stale tokens cannot keep exercising
+  // the old role (role changes require re-authentication).
+  const revoked = await invalidateAllUserSessions(userId);
+  if (!revoked) {
+    console.error(`Failed to revoke sessions for user ${userId} after role change`);
+  }
+
   return true;
 }
 
-export async function revokeAllSessions(userId: string): Promise<boolean> {
-  const { error } = await supabase.from('sessions').delete().eq('user_id', userId);
-  return !error;
-}
+// NOTE: `revokeAllSessions` (legacy custom-sessions table) was REMOVED.
+// Session revocation is handled by `invalidateAllUserSessions` in
+// '@/lib/supabaseClient', which calls Supabase Auth's Admin signOut API.
 
 /* ------------------------------------------------------------------ *
  *  SCAN & LOG LOGIC

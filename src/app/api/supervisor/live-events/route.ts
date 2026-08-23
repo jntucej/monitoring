@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { scansToday } from "@/lib/db";
-import { withAuthAndStatus } from "@/middleware/auth";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 
@@ -30,6 +29,6 @@ async function handleGet(req: NextRequest) {
 }
 
 export const GET = withRateLimit(
-  withAuthAndStatus(withAuthorization(handleGet, { requiredRole: ['supervisor', 'admin', 'sysadmin'] })),
+  withAuthorization(handleGet, { requiredRole: ['supervisor', 'admin', 'sysadmin'] }),
   { keyPrefix: 'live_events', maxRequests: 120 }
 );

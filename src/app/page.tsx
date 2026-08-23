@@ -12,10 +12,9 @@ import {
   Building2,
   ScanLine,
   LogIn,
-  Activity,
-  Lock,
   ArrowRight,
 } from "lucide-react";
+import Link from "next/link";
 import type { Role } from "@/lib/types";
 
 const PORTALS: Array<{
@@ -34,7 +33,7 @@ const PORTALS: Array<{
     role: "operator",
     label: "Gate Operator Desk",
     subtitle: "Security Gate Officers",
-    description: "Scan QR codes, instant student profile preview, direction toggle, reason selection & offline buffering",
+    description: "Scan QR codes, instant profile preview, direction toggle, reason selection & offline buffering",
     icon: <ScanLine className="w-6 h-6" />,
     color: "text-emerald-400",
     bg: "bg-emerald-500/10",
@@ -58,7 +57,7 @@ const PORTALS: Array<{
     role: "admin",
     label: "College Administration",
     subtitle: "Principal & Academic Deans",
-    description: "Campus analytics, daily mobility trends, student exit reports & curfew violation logs",
+    description: "Campus analytics, daily mobility trends, exit reports & curfew violation logs",
     icon: <LayoutDashboard className="w-6 h-6" />,
     color: "text-violet-400",
     bg: "bg-violet-500/10",
@@ -80,26 +79,26 @@ const PORTALS: Array<{
   },
   {
     role: "student",
-    label: "Student Digital ID",
-    subtitle: "Enrolled Undergraduates",
-    description: "Dynamic QR hall ticket, active out-passes, scan history & gate entry/exit notifications",
+    label: "My Portal",
+    subtitle: "Campus Members & Day Scholars",
+    description: "Dynamic QR or ID login, access history & gate entry/exit notifications",
     icon: <GraduationCap className="w-6 h-6" />,
     color: "text-blue-400",
     bg: "bg-blue-500/10",
     border: "hover:border-blue-500/50 hover:shadow-blue-500/10",
-    href: "/student",
-    badge: "Pass Authority",
+    href: "/login/student",
+    badge: "Access",
   },
   {
-    role: "parent",
-    label: "Parent Portal",
-    subtitle: "Guardians & Parents",
-    description: "Real-time movement updates, out-pass request approvals & child location status",
+    role: "guardian",
+    label: "Guardian Portal",
+    subtitle: "Guardians & Wards",
+    description: "Real-time movement updates, out-pass request approvals & location status",
     icon: <Users className="w-6 h-6" />,
     color: "text-rose-400",
     bg: "bg-rose-500/10",
     border: "hover:border-rose-500/50 hover:shadow-rose-500/10",
-    href: "/parent",
+    href: "/login/guardian",
     badge: "Guardian",
   },
 ];
@@ -108,111 +107,62 @@ export default function Home() {
   const router = useRouter();
 
   const handlePortalAccess = (role: Role, href: string) => {
-    sessionStorage.setItem("gate-monitor-role", role);
-    useAuthStore.getState().autoLoginAsRole(role);
-    router.push(href);
+    const { authenticated, user } = useAuthStore.getState();
+    if (authenticated && user && (user.role === role || user.role === "admin" || user.role === "sysadmin")) {
+      sessionStorage.setItem("gate-monitor-role", user.role);
+      router.push(href);
+    } else {
+      router.push(href);
+    }
   };
 
   return (
-    <main className="flex-1 flex flex-col items-center justify-center min-h-screen bg-[var(--bg-base)] p-4 sm:p-6 lg:p-8 relative overflow-hidden select-none">
-      {/* Background Mesh Gradient Glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-[var(--action-primary)]/10 blur-[120px] rounded-full pointer-events-none" />
-
-      <div className="w-full max-w-6xl z-10 space-y-10">
-        {/* Header Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center space-y-4 max-w-3xl mx-auto"
-        >
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--bg-elevated)] border border-[var(--border)] shadow-xs">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs font-semibold text-[var(--text-secondary)]">
-              JNTUH CEJ Security Grid • Operational Online
-            </span>
-          </div>
-
-          <div className="flex items-center justify-center gap-3">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[var(--action-primary)]/10 text-[var(--action-primary)] border border-[var(--action-primary)]/20 flex items-center justify-center shadow-lg">
-              <Building2 className="w-7 h-7" />
-            </div>
-            <div className="text-left">
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--text-primary)]">
-                JNTUH CEJ
-              </h1>
-              <p className="text-xs sm:text-sm font-medium text-[var(--text-muted)]">
-                Jagtial (Nachupally / Kondagattu) • Digital Gate & Student Pass Subsystem
-              </p>
-            </div>
-          </div>
-
-          {/* Quick Actions Row */}
-          <div className="pt-2 flex items-center justify-center gap-3">
-            <button
-              onClick={() => router.push("/login")}
-              className="touch-target-primary px-5 rounded-xl bg-[var(--action-primary)] text-white font-bold text-xs sm:text-sm hover:opacity-95 transition-all shadow-md flex items-center gap-2"
-            >
-              <LogIn className="w-4 h-4" />
-              <span>Staff / Student PIN Login</span>
-            </button>
-          </div>
-        </motion.div>
-
-        {/* Portals Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {PORTALS.map((portal, i) => (
-            <motion.button
-              key={portal.role}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: i * 0.07 }}
-              onClick={() => handlePortalAccess(portal.role, portal.href)}
-              className={`group text-left p-5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)] ${portal.border} transition-all duration-200 hover:shadow-xl hover:-translate-y-1 relative overflow-hidden flex flex-col justify-between`}
-            >
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <div
-                    className={`w-12 h-12 rounded-xl ${portal.bg} ${portal.color} flex items-center justify-center border border-white/5 shadow-inner`}
-                  >
-                    {portal.icon}
-                  </div>
-                  {portal.badge && (
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors">
-                      {portal.badge}
-                    </span>
-                  )}
+    <main className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] p-4">
+      {/* Main Content Area */}
+      <div className="max-w-md mx-auto text-center">
+        <h2 className="text-3xl font-bold px-1 mb-6 cursor-pointer hover:text-indigo-400 transition-colors">
+          <Link href="/about">JNTUH CEJ Monitoring</Link>
+        </h2>
+        
+        <section className="space-y-4" id="main-content-flow">
+          {/* Grid of Portal Access Points */}
+          <div className="grid grid-cols-2 gap-3">
+            {PORTALS.map((portal) => (
+              <motion.div
+                key={portal.role}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => handlePortalAccess(portal.role, portal.href)}
+                className="glass-card p-4 rounded-3xl text-left border-slate-800/50 hover:border-indigo-500/50 hover:cursor-pointer transition-all duration-300 ease-out flex flex-col gap-3 shadow-sm hover:shadow-lg hover:shadow-indigo-500/30 ring-1 ring-white/5 hover:ring-indigo-500/30"
+              >
+                <div className={`p-3 rounded-2xl w-fit transition-colors duration-300 ${portal.bg} ${portal.color}`}>
+                  {portal.icon}
                 </div>
-
-                <h3 className="text-base font-bold text-[var(--text-primary)] group-hover:text-[var(--action-primary)] transition-colors">
-                  {portal.label}
-                </h3>
-                <p className="text-xs font-semibold text-[var(--text-secondary)] mb-2">
-                  {portal.subtitle}
-                </p>
-                <p className="text-xs text-[var(--text-muted)] leading-relaxed line-clamp-2">
-                  {portal.description}
-                </p>
-              </div>
-
-              <div className="mt-5 pt-3 border-t border-[var(--border)] flex items-center justify-between text-xs font-bold text-[var(--text-muted)] group-hover:text-[var(--action-primary)] transition-colors">
-                <span>Enter Workstation</span>
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </div>
-            </motion.button>
-          ))}
-        </div>
-
-        {/* System Footer Info */}
-        <div className="pt-6 border-t border-[var(--border)] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[var(--text-muted)]">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-            <span>NAAC A+ Accredited Campus • Roll Number Blueprint Compliant</span>
+                <div>
+                  <h3 className="text-sm font-semibold text-[var(--text-primary)]">
+                    {portal.label.split(" ")[0]}
+                  </h3>
+                  <p className="text-[10px] text-[var(--text-muted)] mt-0.5 line-clamp-2 leading-relaxed">
+                    {portal.subtitle}
+                  </p>
+                </div>
+                <div className="mt-auto pt-2 flex items-center justify-between">
+                  <span className="text-[10px] font-medium text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                    Enter
+                  </span>
+                  <ArrowRight className="w-3 h-3 text-[var(--text-muted)]" />
+                </div>
+              </motion.div>
+            ))}
           </div>
-          <p className="font-mono text-[11px]">
-            © 2026 JNTUH CEJ • Security Infrastructure Engine
-          </p>
-        </div>
+
+          <div className="glass-card mt-4 p-4 rounded-3xl border-slate-800/50">
+            <h3 className="text-sm font-semibold mb-2">Live Status Overview</h3>
+            <p className="text-xs text-[var(--text-muted)]">
+              All gates currently operational. System stability at 100%.
+            </p>
+          </div>
+        </section>
       </div>
     </main>
   );

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAllLogs } from "@/lib/db";
-import { withAuthAndStatus } from "@/middleware/auth";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 
@@ -77,12 +76,12 @@ async function handlePost(req: NextRequest) {
 }
 
 export const GET = withRateLimit(
-  withAuthAndStatus(withAuthorization(handleGet, { requiredRole: ['admin', 'supervisor', 'sysadmin', 'operator'] })),
+  withAuthorization(handleGet, { requiredRole: ['admin', 'supervisor', 'sysadmin', 'operator'] }),
   { keyPrefix: 'gate_logs_list', maxRequests: 100 }
 );
 
 export const POST = withRateLimit(
-  withAuthAndStatus(withAuthorization(handlePost, { requiredRole: ['operator', 'supervisor'] })),
+  withAuthorization(handlePost, { requiredRole: ['operator', 'supervisor'] }),
   { keyPrefix: 'gate_logs_create', maxRequests: 30 }
 );
 

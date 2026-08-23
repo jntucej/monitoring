@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { findAllStudents, searchStudents, findStudentByRoll, getParentChildren } from "@/lib/db";
-import { withAuthAndStatus } from "@/middleware/auth";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { getGateStudentInfo } from "@/lib/authContext";
@@ -148,6 +147,6 @@ async function handleGet(req: NextRequest) {
 // Apply authentication, authorization, and rate limiting to ALL operations
 // Parent role added so parents can fetch their own children's basic info
 export const GET = withRateLimit(
-  withAuthAndStatus(withAuthorization(handleGet, { requiredRole: ["operator", "supervisor", "admin", "sysadmin", "parent"] })),
+  withAuthorization(handleGet, { requiredRole: ["operator", "supervisor", "admin", "sysadmin", "parent"] }),
   { keyPrefix: "students_get", maxRequests: 100 }
 );

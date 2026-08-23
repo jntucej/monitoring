@@ -101,6 +101,31 @@ html.light {
 .bg-leave-subtle  { background-color: rgba(59, 130, 246, 0.12); color: var(--action-info); }
 
 /* Numeric Precision Utilities */
+.glass-card {
+  /* Solid fallback for mobile GPU protection */
+  background-color: rgba(15, 23, 42, 0.85);
+
+  /* Lightweight blur to prevent scroll jank on Android */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  /* GPU Layer Promotion */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.25);
+  
+  /* Element-specific Glow */
+  transition: box-shadow 0.3s ease-out;
+}
+
+.glass-card:hover {
+  box-shadow: 0 0 60px 0px rgba(99, 102, 241, 0.6); /* Intensified indigo glow */
+  border-color: rgba(99, 102, 241, 0.5);
+  transform: translateY(-2px);
+}
+
 .tabular-nums {
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.01em;

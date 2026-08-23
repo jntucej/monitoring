@@ -72,9 +72,17 @@ export function ActivePasses() {
                     {expiryLabel(pass.to, pass.finalStatus)}
                   </p>
                 </div>
-                <span className="text-[10px] font-semibold uppercase tracking-wider opacity-70">
-                  {pass.finalStatus}
-                </span>
+                <div className="flex flex-col items-end gap-1">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider bg-black/20 px-2 py-1 rounded">
+                    {pass.finalStatus}
+                  </span>
+                  {pass.parentStatus !== 'APPROVED' && (
+                    <span className="text-[9px] opacity-60">Parent: {pass.parentStatus}</span>
+                  )}
+                  {pass.adminStatus !== 'APPROVED' && (
+                    <span className="text-[9px] opacity-60">Admin: {pass.adminStatus}</span>
+                  )}
+                </div>
               </div>
             );
           })}

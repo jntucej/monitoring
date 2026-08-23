@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { correctionCandidates, correctScan, getAllGatesLive } from "@/lib/db";
-import { withAuthAndStatus } from "@/middleware/auth";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { supabase } from "@/lib/supabaseClient";
@@ -29,7 +28,7 @@ async function handleGet(req: NextRequest) {
 
 async function handlePost(req: NextRequest) {
   try {
-    // Identity comes from the validated auth headers (set by withAuthAndStatus).
+    // Identity comes from the validated auth headers (set by withAuthorization).
     // The role is already checked by the withAuthorization wrapper.
     const supervisorId = req.headers.get("x-user-id");
     if (!supervisorId) {
@@ -96,11 +95,11 @@ async function handlePost(req: NextRequest) {
 const requiredRoles: Role[] = ["supervisor", "admin", "sysadmin"];
 
 export const GET = withRateLimit(
-  withAuthAndStatus(withAuthorization(handleGet, { requiredRole: requiredRoles })),
+  withAuthorization(handleGet, { requiredRole: requiredRoles }),
   { keyPrefix: "supervisor_get", maxRequests: 60 }
 );
 
 export const POST = withRateLimit(
-  withAuthAndStatus(withAuthorization(handlePost, { requiredRole: requiredRoles })),
+  withAuthorization(handlePost, { requiredRole: requiredRoles }),
   { keyPrefix: "supervisor_post", maxRequests: 30 }
 );

@@ -1,3 +1,4 @@
+import { SignJWT, jwtVerify } from "jose";
 import { Person } from "@/lib/types";
 import { findPersonByUniqueId } from "@/lib/db";
 
@@ -7,32 +8,49 @@ export interface MobileSession {
   expiresAt: string;
 }
 
-// Generate JWT or Mobile token
-export function generateMobileToken(personId: string, uniqueId: string): string {
-  const payload = {
-    sub: personId,
-    uniqueId,
-    iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60, // 30 days
-  };
+const MOBILE_TOKEN_TTL_SECONDS = 30 * 24 * 60 * 60; // 30 days
 
-  // In production, sign with JWT secret
-  return `mbt_${Buffer.from(JSON.stringify(payload)).toString("base64url")}`;
+/**
+ * HMAC signing secret for mobile session tokens.
+ * FAILS CLOSED when MOBILE_TOKEN_SECRET is not configured: token generation
+ * and validation both throw, so no unsigned/forgeable token is ever accepted.
+ */
+function getSigningKey(): Uint8Array {
+  const secret = process.env.MOBILE_TOKEN_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error(
+      "MOBILE_TOKEN_SECRET is not configured (must be >= 32 chars) — refusing to issue or accept mobile tokens"
+    );
+  }
+  return new TextEncoder().encode(secret);
 }
 
-// Validate mobile token
+/** Issue a signed HS256 JWT bound to a person (30-day expiry). */
+export async function generateMobileToken(personId: string, uniqueId: string): Promise<string> {
+  const issuedAt = Math.floor(Date.now() / 1000);
+
+  return await new SignJWT({ uniqueId })
+    .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+    .setSubject(personId)
+    .setIssuedAt(issuedAt)
+    .setExpirationTime(issuedAt + MOBILE_TOKEN_TTL_SECONDS)
+    .sign(getSigningKey());
+}
+
+/** Verify signature + expiry, then resolve the person. Returns null if invalid. */
 export async function validateMobileToken(token: string): Promise<Person | null> {
   try {
-    if (!token.startsWith("mbt_")) return null;
+    const { payload } = await jwtVerify(token, getSigningKey(), {
+      algorithms: ["HS256"],
+    });
 
-    const payloadStr = Buffer.from(token.slice(4), "base64url").toString("utf-8");
-    const payload = JSON.parse(payloadStr);
+    const uniqueId = payload.uniqueId as string | undefined;
+    if (!uniqueId || typeof payload.sub !== "string") return null;
 
-    if (payload.exp < Math.floor(Date.now() / 1000)) {
-      return null; // Expired
-    }
+    const person = await findPersonByUniqueId(uniqueId);
+    // Bind the token to its subject: a valid JWT for another person is rejected.
+    if (!person || person.id !== payload.sub) return null;
 
-    const person = await findPersonByUniqueId(payload.uniqueId);
     return person;
   } catch (error) {
     console.error("Mobile token validation error:", error);

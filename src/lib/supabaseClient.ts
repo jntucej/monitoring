@@ -72,7 +72,20 @@ export const canUserAuthenticate = async (userId: string): Promise<boolean> => {
   }
 }
 
-// Function to invalidate all user sessions (requires service role)
+// Ephemeral client for one-off server-side token exchanges (e.g., OTP verify
+// during PIN login). No session persistence, so no state leaks across requests.
+export const createEphemeralSupabaseClient = (): SupabaseClient =>
+  createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+      detectSessionInUrl: false,
+    },
+  });
+
+// Function to invalidate all user sessions (requires service role).
+// Revokes Supabase Auth sessions (refresh tokens) via the Admin API and
+// records the invalidation through the `invalidate_all_user_sessions` RPC.
 export const invalidateAllUserSessions = async (userId: string): Promise<boolean> => {
   try {
     const serviceClient = getSupabaseServiceClient()

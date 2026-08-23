@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { findGatePasses, createGatePass, getParentChildren } from "@/lib/db";
 import { supabase } from "@/lib/supabaseClient";
-import { withAuthAndStatus } from "@/middleware/auth";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import type { AuthContext } from "@/lib/authContext";
@@ -145,11 +144,11 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
 }
 
 export const GET = withRateLimit(
-  withAuthAndStatus(withAuthorization(handleGet, { requiredRole: ['admin', 'supervisor', 'sysadmin', 'parent', 'student'] })),
+  withAuthorization(handleGet, { requiredRole: ['admin', 'supervisor', 'sysadmin', 'parent', 'student'] }),
   { keyPrefix: 'passes_list', maxRequests: 100 }
 );
 
 export const POST = withRateLimit(
-  withAuthAndStatus(withAuthorization(handlePost, { requiredRole: ['student', 'parent', 'admin', 'supervisor', 'sysadmin'] })),
+  withAuthorization(handlePost, { requiredRole: ['student', 'parent', 'admin', 'supervisor', 'sysadmin'] }),
   { keyPrefix: 'passes_create', maxRequests: 10 }
 );

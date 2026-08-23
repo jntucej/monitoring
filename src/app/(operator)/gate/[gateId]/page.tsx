@@ -31,7 +31,7 @@ export default function OperatorPage() {
   const gateId = params?.gateId || "1";
   const currentTab = searchParams?.get("tab") || "scandesk";
   
-  const { authenticated, loginAsRole } = useAuth();
+  const { authenticated } = useAuth();
   const { addToast } = useToast();
   const operatorStore = useOperatorStore();
   const {
@@ -60,7 +60,7 @@ export default function OperatorPage() {
   // "entry" tab so the user sees the confirmation/success/error UI.
   const effectiveSubMode =
     state === "confirming" || state === "success" || state === "error"
-      ? "entry" as const
+      ? ("entry" as const)
       : operatorSubMode;
 
   // When a scan is active, redirect away from query param tabs to keep
@@ -73,23 +73,17 @@ export default function OperatorPage() {
     }
   }, [state, searchParams]);
 
-  // Ref to prevent double initialization: loginAsRole is async and changes
-  // `authenticated` state, which would re-trigger this effect and duplicate
-  // all data-fetching calls (setGate + reset → statsToday → scansToday + campusCount).
+  // Ref to prevent double initialization
   const gateInitializedRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!authenticated) {
-      loginAsRole("operator");
-      return;
-    }
-    // Only fetch data once per gateId (prevents duplicate calls on re-render)
+    if (!authenticated) return;
     if (gateInitializedRef.current === gateId) return;
     gateInitializedRef.current = gateId;
 
     setGate(gateId);
     reset();
-  }, [authenticated, gateId, loginAsRole, setGate, reset]);
+  }, [authenticated, gateId, setGate, reset]);
 
   useEffect(() => {
     const goOnline = () => {

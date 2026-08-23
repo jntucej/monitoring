@@ -1,87 +1,144 @@
-import { NextResponse } from "next/server";
-import { verifyLogin } from "@/lib/db";
-import type { Role } from "@/lib/types";
+/**
+ * POST /api/auth/login — Password authentication backed by Supabase Auth.
+ *
+ * Supabase Auth is the SOLE authentication authority:
+ *  - Credentials are verified ONLY via `supabase.auth.signInWithPassword`.
+ *  - This endpoint issues genuine Supabase access/refresh tokens; it never
+ *    mints custom or opaque tokens of its own.
+ *  - A matching ACTIVE profile in `public.users` is additionally required.
+ *
+ * Rate limited: 5 attempts / 15 min / IP.
+ */
+import { NextRequest, NextResponse } from "next/server";
+import { withRateLimit } from "@/lib/rate-limit";
+import { supabase, getSupabaseServiceClient } from "@/lib/supabaseClient";
 
-export async function POST(request: Request) {
+const GENERIC_FAILURE = {
+  success: false,
+  error: { code: "INVALID_CREDENTIALS", message: "Invalid credentials or user not found." },
+} as const;
+
+/**
+ * Resolve a login identifier (email | login_identifier | employee_id) to the
+ * Supabase Auth email. Parameterized equality lookups only — no `.or()`
+ * string interpolation, so untrusted input cannot inject PostgREST filters.
+ */
+async function resolveIdentifierToEmail(login: string): Promise<string | null> {
+  if (login.includes("@")) return login.toLowerCase();
+
+  const service = getSupabaseServiceClient();
+
+  const byLoginIdentifier = await service
+    .from("users")
+    .select("email")
+    .eq("login_identifier", login)
+    .eq("status", "ACTIVE")
+    .maybeSingle();
+  if (byLoginIdentifier.data?.email) return byLoginIdentifier.data.email as string;
+
+  const byEmployeeId = await service
+    .from("users")
+    .select("email")
+    .eq("employee_id", login)
+    .eq("status", "ACTIVE")
+    .maybeSingle();
+  return (byEmployeeId.data?.email as string) ?? null;
+}
+
+async function handleLogin(req: NextRequest) {
   try {
-    const body = await request.json();
+    const body = await req.json().catch(() => null);
     const { login, password } = body || {};
 
-    if (!login || !password) {
+    if (
+      typeof login !== "string" || !login.trim() ||
+      typeof password !== "string" || !password
+    ) {
       return NextResponse.json(
-        { success: false, error: { message: "Login identifier and password/PIN are required." } },
+        { success: false, error: { code: "MISSING_FIELDS", message: "Login identifier and password are required." } },
         { status: 400 }
       );
     }
 
-    const cleanLogin = String(login).trim();
+    const cleanLogin = login.trim();
 
-    // 1. Check Supabase DB for user
+    // 1. Resolve identifier -> Supabase Auth email (null when unknown).
+    let email: string | null = null;
     try {
-      const user = await verifyLogin(cleanLogin, password);
-      if (user) {
-        return NextResponse.json({
-          success: true,
-          data: {
-            token: `token-${Date.now()}-${user.id}`,
-            user: {
-              id: user.id,
-              name: user.name,
-              email: user.email,
-              role: user.role,
-              employeeId: user.employeeId,
-              status: user.status,
-            },
-          },
-        });
-      }
-    } catch (dbErr) {
-      console.warn("DB login verification error:", dbErr);
+      email = await resolveIdentifierToEmail(cleanLogin);
+    } catch (resolveErr) {
+      console.error("Login identifier resolution error:", resolveErr);
     }
 
-    if (process.env.NODE_ENV === 'development') {
-      // In development, only allow specific test credentials
-      const validTestUsers: Record<string, { password: string; role: Role; name: string }> = {
-        'test-operator': { password: 'op123', role: 'operator', name: 'Test Operator' },
-        'test-admin': { password: 'admin123', role: 'admin', name: 'Test Admin' },
-        'test-student': { password: 'stu123', role: 'student', name: 'Test Student' },
-        'test-supervisor': { password: 'sup123', role: 'supervisor', name: 'Test Supervisor' },
-        'test-faculty': { password: 'fac123', role: 'faculty', name: 'Test Faculty' },
-        'test-staff': { password: 'stf123', role: 'staff', name: 'Test Staff' },
-        'test-worker': { password: 'wrk123', role: 'worker', name: 'Test Worker' },
-        'test-visitor': { password: 'vis123', role: 'visitor', name: 'Test Visitor' },
-        'test-parent': { password: 'par123', role: 'parent', name: 'Test Parent' },
-        'test-sysadmin': { password: 'sys123', role: 'sysadmin', name: 'Test SysAdmin' },
-      };
-
-      const testUser = validTestUsers[cleanLogin];
-      if (testUser && password === testUser.password) {
-        return NextResponse.json({
-          success: true,
-          data: {
-            token: `dev-token-${Date.now()}`,
-            user: {
-              id: `dev-${testUser.role}-${Date.now()}`,
-              name: testUser.name,
-              email: `${testUser.role}@test.dev`,
-              role: testUser.role,
-              status: 'ACTIVE',
-            },
-          },
-        });
-      }
+    // Unknown identifier and wrong password produce IDENTICAL responses
+    // to prevent account enumeration.
+    if (!email) {
+      return NextResponse.json(GENERIC_FAILURE, { status: 401 });
     }
 
-    // Return unauthorized if verification failed
-    return NextResponse.json(
-      { success: false, error: { code: "INVALID_CREDENTIALS", message: "Invalid credentials or user not found." } },
-      { status: 401 }
-    );
+    // 2. Authenticate with Supabase Auth — the only credential authority.
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (authError || !authData?.session || !authData?.user) {
+      return NextResponse.json(GENERIC_FAILURE, { status: 401 });
+    }
+
+    // 3. Defense in depth: profile must exist AND be ACTIVE.
+    const service = getSupabaseServiceClient();
+    const { data: profile } = await service
+      .from("users")
+      .select("id, name, role, employee_id, status")
+      .eq("id", authData.user.id)
+      .maybeSingle();
+
+    if (!profile) {
+      // Valid auth user without a provisioned profile — revoke immediately.
+      await service.auth.admin.signOut(authData.user.id).catch(() => {});
+      return NextResponse.json(GENERIC_FAILURE, { status: 401 });
+    }
+
+    if (profile.status !== "ACTIVE") {
+      // Kill the session that was just created for a non-active account.
+      await service.auth.admin.signOut(authData.user.id).catch(() => {});
+      return NextResponse.json(
+        { success: false, error: { code: "ACCOUNT_INACTIVE", message: "Account is not active." } },
+        { status: 403 }
+      );
+    }
+
+    // 4. Return the genuine Supabase session to the client.
+    return NextResponse.json({
+      success: true,
+      data: {
+        token: authData.session.access_token,
+        refreshToken: authData.session.refresh_token,
+        expiresAt: authData.session.expires_at
+          ? new Date(authData.session.expires_at * 1000).toISOString()
+          : null,
+        user: {
+          id: profile.id,
+          name: profile.name,
+          role: profile.role,
+          employeeId: profile.employee_id,
+          email,
+          status: profile.status,
+        },
+      },
+    });
   } catch (error: any) {
     console.error("Login API route error:", error);
     return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message: error?.message || "Internal authentication error" } },
+      { success: false, error: { code: "INTERNAL_ERROR", message: "Internal authentication error." } },
       { status: 500 }
     );
   }
 }
+
+export const POST = withRateLimit(handleLogin, {
+  keyPrefix: "auth_login",
+  maxRequests: 5,
+  windowMs: 15 * 60 * 1000,
+});

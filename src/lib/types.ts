@@ -3,7 +3,8 @@ export type Role =
   | "supervisor"
   | "admin"
   | "sysadmin"
-  | "parent"
+  | "guardian" // unified role for parents/guardians of wards
+  | "parent" // @deprecated legacy alias kept for schema/code coherence
   | "student"
   | "warden"
   | "faculty"
@@ -21,7 +22,10 @@ export interface StudentDetails {
   year?: number;
   section?: string;
   batch?: string;
+  /** @deprecated use guardianId */
   parentId?: string;
+  /** Guardian (parent/ward caretaker) user id */
+  guardianId?: string;
   studentType?: StudentType;
   hostelBlock?: string;
   roomNumber?: string;
@@ -94,6 +98,10 @@ export type Student = Person;
 
 export interface User {
   id: string;
+  /** Fixed identifying detail (roll / employee id / phone) for lookup */
+  uniqueId?: string;
+  /** Friendly unique login handle */
+  handle?: string;
   name: string;
   role: Role;
   gateId?: string;
@@ -101,7 +109,10 @@ export interface User {
   email?: string;
   phone?: string;
   pin?: string;
+  /** @deprecated use guardianId */
   parentId?: string;
+  /** Guardian (parent/ward caretaker) links to student_details.guardian_id */
+  guardianId?: string;
   supervisedGates?: string[];
   assignedHostel?: string;
   isHod?: boolean;
@@ -109,7 +120,6 @@ export interface User {
   canViewGender?: string[];
   status: AccountStatus;
   personType?: PersonType;
-  uniqueId?: string;
 }
 
 export type ExitReason = "Home Out" | "Day Out" | "Leave" | "Regular";

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createVisitor, checkInVisitor, checkOutVisitor } from "@/lib/db";
 import { supabase } from "@/lib/supabaseClient";
-import { withAuthAndStatus } from "@/middleware/auth";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 
@@ -114,16 +113,16 @@ async function handlePut(req: NextRequest) {
 }
 
 export const GET = withRateLimit(
-  withAuthAndStatus(withAuthorization(handleGet, { requiredRole: ["operator", "supervisor", "admin", "sysadmin"] })),
+  withAuthorization(handleGet, { requiredRole: ["operator", "supervisor", "admin", "sysadmin"] }),
   { keyPrefix: "visitors_get", maxRequests: 100 }
 );
 
 export const POST = withRateLimit(
-  withAuthAndStatus(withAuthorization(handlePost, { requiredRole: ["operator", "supervisor", "admin", "sysadmin"] })),
+  withAuthorization(handlePost, { requiredRole: ["operator", "supervisor", "admin", "sysadmin"] }),
   { keyPrefix: "visitors_post", maxRequests: 30 }
 );
 
 export const PUT = withRateLimit(
-  withAuthAndStatus(withAuthorization(handlePut, { requiredRole: ["operator", "supervisor", "admin", "sysadmin"] })),
+  withAuthorization(handlePut, { requiredRole: ["operator", "supervisor", "admin", "sysadmin"] }),
   { keyPrefix: "visitors_put", maxRequests: 30 }
 );

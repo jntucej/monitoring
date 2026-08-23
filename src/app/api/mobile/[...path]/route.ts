@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { findPersonByUniqueId, getPersonHistory } from "@/lib/db";
 import { generateMobileToken, validateMobileToken } from "@/lib/mobile-auth";
+import { withRateLimit } from "@/lib/rate-limit";
 
-export async function POST(
+async function handlePost(
   req: NextRequest,
   context: { params: Promise<{ path: string[] }> }
 ) {
@@ -24,7 +25,7 @@ export async function POST(
         return NextResponse.json({ error: "Person not found" }, { status: 404 });
       }
 
-      const token = generateMobileToken(person.id, person.uniqueId);
+      const token = await generateMobileToken(person.id, person.uniqueId);
 
       return NextResponse.json({
         token,
@@ -32,12 +33,19 @@ export async function POST(
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       });
     } catch (error: any) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error("Mobile login error:", error);
+      return NextResponse.json({ error: "Internal mobile authentication error" }, { status: 500 });
     }
   }
 
   return NextResponse.json({ error: "Endpoint not found" }, { status: 404 });
 }
+
+export const POST = withRateLimit(handlePost, {
+  keyPrefix: "mobile",
+  maxRequests: 10,
+  windowMs: 60 * 1000,
+});
 
 export async function GET(
   req: NextRequest,

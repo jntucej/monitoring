@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { findAllPersons, searchPersons, findPersonByUniqueId, findPersonsByType, getLinkedPersons } from "@/lib/db";
 import { supabase } from "@/lib/supabaseClient";
-import { withAuthAndStatus } from "@/middleware/auth";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import type { Person, PersonType } from "@/lib/types";
@@ -217,21 +216,21 @@ async function handleDelete(req: NextRequest) {
 }
 
 export const GET = withRateLimit(
-  withAuthAndStatus(withAuthorization(handleGet, { requiredRole: ["operator", "supervisor", "admin", "sysadmin", "parent", "faculty", "staff"] })),
+  withAuthorization(handleGet, { requiredRole: ["operator", "supervisor", "admin", "sysadmin", "parent", "faculty", "staff"] }),
   { keyPrefix: "persons_get", maxRequests: 100 }
 );
 
 export const POST = withRateLimit(
-  withAuthAndStatus(withAuthorization(handlePost, { requiredRole: ["admin", "sysadmin"] })),
+  withAuthorization(handlePost, { requiredRole: ["admin", "sysadmin"] }),
   { keyPrefix: "persons_post", maxRequests: 30 }
 );
 
 export const PATCH = withRateLimit(
-  withAuthAndStatus(withAuthorization(handlePatch, { requiredRole: ["admin", "sysadmin"] })),
+  withAuthorization(handlePatch, { requiredRole: ["admin", "sysadmin"] }),
   { keyPrefix: "persons_patch", maxRequests: 30 }
 );
 
 export const DELETE = withRateLimit(
-  withAuthAndStatus(withAuthorization(handleDelete, { requiredRole: ["admin", "sysadmin"] })),
+  withAuthorization(handleDelete, { requiredRole: ["admin", "sysadmin"] }),
   { keyPrefix: "persons_delete", maxRequests: 30 }
 );
