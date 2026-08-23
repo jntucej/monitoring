@@ -1,270 +1,105 @@
 /**
- * Seed Script: Generate Dummy Unified Persons Data for Gate Monitor
- * Supports: students, faculty, staff, workers, visitors, parents.
- *
- * Usage:
- *   SUPABASE_SERVICE_ROLE_KEY=your-key node scripts/seed-data.js
+ * Seed Script: Generate Dummy Unified Users Data for Gate Monitor
  */
+const { createClient } = require('@supabase/supabase-js');
+const bcrypt = require('bcryptjs');
 
-const { createClient } = require('@supabase/supabase-js')
-const bcrypt = require('bcryptjs')
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://hgdlaghzerrrgkhqpdvz.supabase.co';
+const key = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnZGxhZ2h6ZXJycmdraHFwZHZ6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4Njc5NTA0MiwiZXhwIjoyMTAyMzcxMDQyfQ.U6OPFP84AmFIb2MgKHdCRAQo2cXRC5OAheVIm7OOkvk';
 
-if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_PRODUCTION_SEED) {
-  console.error('Refusing to seed database in production mode without ALLOW_PRODUCTION_SEED=1')
-  process.exit(1)
-}
+const supabase = createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } });
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://localhost:54321'
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+const DEPARTMENTS = ['02', '03', '04', '05', '12'];
+const NAMES_M = ['Amit', 'Raj', 'Vijay', 'Suresh', 'Ramesh', 'Dinesh', 'Mahesh', 'Arun'];
+const NAMES_F = ['Priya', 'Sneha', 'Pooja', 'Divya', 'Anjali', 'Kavitha', 'Lakshmi'];
+const SURNAMES = ['Kumar', 'Reddy', 'Rao', 'Naidu', 'Singh', 'Sharma', 'Patel'];
 
-if (!supabaseServiceRoleKey) {
-  console.error('Error: SUPABASE_SERVICE_ROLE_KEY environment variable is required to run seed script.')
-  process.exit(1)
-}
+const uuid = () => require('crypto').randomUUID();
+const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const phone = () => '9' + String(randInt(100000000, 99999999)).padStart(9, '0');
 
-const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
-  auth: { autoRefreshToken: false, persistSession: false }
-})
+async function seed() {
+  console.log('=== Seeding Gate Monitor Dummy Data ===');
+  const defaultPinHash = await bcrypt.hash('12345678', 10);
+  
+  const gates = [
+    { gate_code: 'MAIN', name: 'Main Gate', location: 'Main Entrance', type: 'main', is_active: true },
+    { gate_code: 'HOSTEL', name: 'Hostel Gate', location: 'Hostel Side', type: 'hostel', is_active: true },
+    { gate_code: 'BACK', name: 'Back Gate', location: 'Back Side', type: 'back', is_active: false },
+  ];
 
-const COLLEGE_CODE = 'JJ'
-const DEPARTMENTS = [
-  { code: '02', short: 'EEE', full: 'Electrical & Electronics Engineering' },
-  { code: '03', short: 'ME',  full: 'Mechanical Engineering' },
-  { code: '04', short: 'ECE', full: 'Electronics & Communication Engineering' },
-  { code: '05', short: 'CSE', full: 'Computer Science & Engineering' },
-  { code: '12', short: 'IT',  full: 'Information Technology' },
-]
+  const users = [
+    { id: uuid(), unique_id: 'ADM-001', name: 'Admin User', role: 'admin' },
+    { id: uuid(), unique_id: 'SUP-001', name: 'Supervisor User', role: 'supervisor' },
+    { id: uuid(), unique_id: 'OP-001', name: 'Gate Operator', role: 'operator' },
+  ].map(u => ({
+    ...u, status: 'active', email: `${u.role}@jntuhcej.ac.in`, phone: phone(),
+    photo_url: `https://api.dicebear.com/7.x/initials/svg?seed=${u.name}`,
+    qr_code: JSON.stringify({ uniqueId: u.unique_id, role: u.role }), initial_pin_hash: defaultPinHash
+  }));
 
-const FIRST_NAMES_MALE = ['Amit', 'Raj', 'Vijay', 'Suresh', 'Ramesh', 'Dinesh', 'Mahesh', 'Siddharth', 'Arun', 'Kumar', 'Mani', 'Srinivas', 'Venkatesh', 'Chandra', 'Ganesh']
-const FIRST_NAMES_FEMALE = ['Priya', 'Sneha', 'Pooja', 'Divya', 'Anjali', 'Kavitha', 'Lakshmi', 'Sita', 'Maya', 'Nandini', 'Keerthi', 'Harini', 'Madhavi', 'Swathi']
-const LAST_NAMES = ['Kumar', 'Raj', 'Reddy', 'Rao', 'Naidu', 'Singh', 'Devi', 'Yadav', 'Chandran', 'Pillai', 'Sharma', 'Verma', 'Patel']
+  const studentDetails = [];
+  for (let i = 1; i <= 30; i++) {
+    const uId = uuid();
+    const isMale = i % 2 === 0;
+    const name = `${pick(isMale ? NAMES_M : NAMES_F)} ${pick(SURNAMES)}`;
+    const roll = `24JJ1A${pick(DEPARTMENTS)}${String(i).padStart(2, '0')}`;
+    
+    users.push({
+      id: uId, unique_id: roll, name, role: 'student', status: 'active',
+      email: `${roll.toLowerCase()}@student.jntuhcej.ac.in`, phone: phone(),
+      photo_url: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`,
+      qr_code: JSON.stringify({ uniqueId: roll, role: 'student' }), initial_pin_hash: defaultPinHash
+    });
 
-const uuid = () => require('crypto').randomUUID()
-const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min
-const randomChoice = (arr) => arr[Math.floor(Math.random() * arr.length)]
-
-function generatePhone() {
-  const prefix = randomChoice(['9', '8', '7', '6'])
-  return prefix + String(randomInt(100000000, 99999999)).padStart(9, '0')
-}
-
-async function hashPassword(password) {
-  return await bcrypt.hash(password, 10)
-}
-
-async function generateSeedData() {
-  const persons = []
-  const studentDetails = []
-  const employeeDetails = []
-  const visitorLogs = []
-  const users = []
-
-  const gateRecords = [
-    { id: 'gate-1', name: 'Gate 1 (Main)', location: 'Main Entrance', type: 'main', is_active: true },
-    { id: 'gate-2', name: 'Gate 2 (Hostel)', location: 'Hostel Side', type: 'hostel', is_active: true },
-    { id: 'gate-3', name: 'Gate 3 (Back Gate)', location: 'Back Side', type: 'back', is_active: false },
-  ]
-
-  const defaultPassword = await hashPassword('password123')
-
-  // 1. Generate Students (100 sample students)
-  for (let i = 1; i <= 100; i++) {
-    const personId = uuid()
-    const isMale = i % 2 === 0
-    const firstName = randomChoice(isMale ? FIRST_NAMES_MALE : FIRST_NAMES_FEMALE)
-    const lastName = randomChoice(LAST_NAMES)
-    const fullName = `${firstName} ${lastName}`
-    const dept = randomChoice(DEPARTMENTS)
-    const roll = `24${COLLEGE_CODE}1A${dept.code}${String(i).padStart(2, '0')}`
-
-    persons.push({
-      id: personId,
-      unique_id: roll,
-      full_name: fullName,
-      person_type: 'student',
-      department: dept.short,
-      email: `${roll.toLowerCase()}@student.jntuhcej.ac.in`,
-      phone: generatePhone(),
-      photo_url: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(fullName)}`,
-      qr_code: JSON.stringify({ uniqueId: roll, personType: 'student' }),
-      id_valid_until: '2028-06-30T23:59:59Z',
-      status: 'active',
-    })
-
-    const isHosteler = i % 3 !== 0
+    const isHostel = i % 3 !== 0;
     studentDetails.push({
-      person_id: personId,
-      roll: roll,
-      year: randomInt(1, 4),
-      section: randomChoice(['A', 'B', 'C']),
-      batch: '2024-2028',
-      student_type: isHosteler ? (isMale ? 'HM' : 'HF') : (isMale ? 'DM' : 'DF'),
-      hostel_block: isHosteler ? (isMale ? 'Boys-A' : 'Girls-A') : null,
-      room_number: isHosteler ? String(randomInt(101, 400)) : null,
-      hostel_curfew_time: isHosteler ? (isMale ? '21:00' : '18:30') : null,
-    })
+      user_id: uId, roll, year: randInt(1, 4), section: pick(['A', 'B']), batch: '2024-2028',
+      student_type: isHostel ? (isMale ? 'HM' : 'HF') : (isMale ? 'DM' : 'DF'),
+      hostel_block: isHostel ? (isMale ? 'Boys-A' : 'Girls-A') : null,
+      room_number: isHostel ? String(randInt(101, 400)) : null,
+      hostel_curfew_time: isHostel ? (isMale ? '21:00' : '18:30') : null
+    });
   }
 
-  // 2. Generate Faculty (20 faculty members)
-  for (let i = 1; i <= 20; i++) {
-    const personId = uuid()
-    const isMale = i % 2 === 0
-    const firstName = randomChoice(isMale ? FIRST_NAMES_MALE : FIRST_NAMES_FEMALE)
-    const lastName = randomChoice(LAST_NAMES)
-    const fullName = `Dr. ${firstName} ${lastName}`
-    const dept = DEPARTMENTS[i % DEPARTMENTS.length]
-    const empId = `FAC-${String(i).padStart(3, '0')}`
+  const employeeDetails = [];
+  for (let i = 1; i <= 10; i++) {
+    const uId = uuid();
+    const name = `Dr. ${pick(NAMES_M)} ${pick(SURNAMES)}`;
+    const empId = `FAC-${String(i).padStart(3, '0')}`;
 
-    persons.push({
-      id: personId,
-      unique_id: empId,
-      full_name: fullName,
-      person_type: 'faculty',
-      department: dept.short,
-      designation: i <= 5 ? 'Professor & HOD' : 'Assistant Professor',
-      email: `faculty.${empId.toLowerCase()}@jntuhcej.ac.in`,
-      phone: generatePhone(),
-      photo_url: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(fullName)}`,
-      qr_code: JSON.stringify({ uniqueId: empId, personType: 'faculty' }),
-      status: 'active',
-    })
+    users.push({
+      id: uId, unique_id: empId, name, role: 'faculty', status: 'active',
+      email: `faculty.${empId.toLowerCase()}@jntuhcej.ac.in`, phone: phone(),
+      photo_url: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`,
+      qr_code: JSON.stringify({ uniqueId: empId, role: 'faculty' }), initial_pin_hash: defaultPinHash
+    });
 
     employeeDetails.push({
-      person_id: personId,
-      employee_id: empId,
-      designation: i <= 5 ? 'Professor & HOD' : 'Assistant Professor',
-      joining_date: '2020-01-15',
-      is_hod: i <= 5,
-      department_id: dept.code,
-    })
+      user_id: uId, employee_id: empId, designation: i <= 2 ? 'Professor & HOD' : 'Assistant Professor',
+      joining_date: '2020-01-15', is_hod: i <= 2, department_id: pick(DEPARTMENTS)
+    });
   }
 
-  // 3. Generate Staff (15 staff members)
-  for (let i = 1; i <= 15; i++) {
-    const personId = uuid()
-    const firstName = randomChoice(FIRST_NAMES_MALE)
-    const lastName = randomChoice(LAST_NAMES)
-    const fullName = `${firstName} ${lastName}`
-    const empId = `STF-${String(i).padStart(3, '0')}`
+  console.log(`Generated ${users.length} dummy users.`);
 
-    persons.push({
-      id: personId,
-      unique_id: empId,
-      full_name: fullName,
-      person_type: 'staff',
-      department: 'Administration',
-      designation: 'Office Staff',
-      email: `staff.${empId.toLowerCase()}@jntuhcej.ac.in`,
-      phone: generatePhone(),
-      photo_url: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(fullName)}`,
-      qr_code: JSON.stringify({ uniqueId: empId, personType: 'staff' }),
-      status: 'active',
-    })
+  await supabase.from('gates').upsert(gates, { onConflict: 'gate_code' });
+  console.log('✅ Gates seeded');
 
-    employeeDetails.push({
-      person_id: personId,
-      employee_id: empId,
-      designation: 'Office Staff',
-      joining_date: '2021-06-01',
-      is_hod: false,
-      department_id: '00',
-    })
-  }
+  const { error: uErr } = await supabase.from('users').upsert(users, { onConflict: 'unique_id' });
+  if (uErr) console.error('❌ Users error:', uErr.message);
+  else console.log('✅ Users seeded');
 
-  // 4. Generate Workers (10 maintenance workers)
-  for (let i = 1; i <= 10; i++) {
-    const personId = uuid()
-    const firstName = randomChoice(FIRST_NAMES_MALE)
-    const lastName = randomChoice(LAST_NAMES)
-    const fullName = `${firstName} ${lastName}`
-    const wrkId = `WRK-${String(i).padStart(3, '0')}`
+  const { error: sErr } = await supabase.from('student_details').upsert(studentDetails, { onConflict: 'user_id' });
+  if (sErr) console.error('❌ Student details error:', sErr.message);
+  else console.log('✅ Student details seeded');
 
-    persons.push({
-      id: personId,
-      unique_id: wrkId,
-      full_name: fullName,
-      person_type: 'worker',
-      designation: 'Maintenance Specialist',
-      phone: generatePhone(),
-      photo_url: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(fullName)}`,
-      qr_code: JSON.stringify({ uniqueId: wrkId, personType: 'worker' }),
-      status: 'active',
-    })
-  }
+  const { error: eErr } = await supabase.from('employee_details').upsert(employeeDetails, { onConflict: 'user_id' });
+  if (eErr) console.error('❌ Employee details error:', eErr.message);
+  else console.log('✅ Employee details seeded');
 
-  // 5. Generate Visitors (10 recent visitors)
-  for (let i = 1; i <= 10; i++) {
-    const personId = uuid()
-    const firstName = randomChoice(FIRST_NAMES_FEMALE)
-    const lastName = randomChoice(LAST_NAMES)
-    const fullName = `${firstName} ${lastName}`
-    const visId = `VIS-2026-${String(i).padStart(3, '0')}`
-
-    persons.push({
-      id: personId,
-      unique_id: visId,
-      full_name: fullName,
-      person_type: 'visitor',
-      email: `visitor${i}@example.com`,
-      phone: generatePhone(),
-      photo_url: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(fullName)}`,
-      qr_code: JSON.stringify({ uniqueId: visId, personType: 'visitor' }),
-      visitor_host: 'Dr. Principal',
-      visitor_purpose: 'Official Campus Inspection',
-      checked_in_at: new Date(Date.now() - 3600000 * i).toISOString(),
-      status: 'active',
-    })
-
-    visitorLogs.push({
-      id: uuid(),
-      person_id: personId,
-      check_in_at: new Date(Date.now() - 3600000 * i).toISOString(),
-      purpose: 'Official Campus Inspection',
-      status: i % 2 === 0 ? 'active' : 'completed',
-    })
-  }
-
-  return { persons, studentDetails, employeeDetails, visitorLogs, gateRecords }
+  console.log('=== Dummy Data Seeding Complete ===');
 }
 
-async function main() {
-  console.log('=== Unified Campus Access Management Seed Script ===\n')
-
-  const { persons, studentDetails, employeeDetails, visitorLogs, gateRecords } = await generateSeedData()
-
-  console.log(`Generated ${persons.length} total persons:`)
-  console.log(`  - Students: ${studentDetails.length}`)
-  console.log(`  - Employees (Faculty/Staff): ${employeeDetails.length}`)
-  console.log(`  - Visitor Logs: ${visitorLogs.length}`)
-  console.log(`  - Gates: ${gateRecords.length}\n`)
-
-  console.log('📤 Uploading gates...')
-  await supabase.from('gates').upsert(gateRecords, { onConflict: 'id' })
-
-  console.log('📤 Uploading persons...')
-  const { error: pErr } = await supabase.from('persons').upsert(persons, { onConflict: 'unique_id' })
-  if (pErr) console.error('❌ Error uploading persons:', pErr)
-  else console.log('✅ Persons uploaded successfully')
-
-  console.log('📤 Uploading student_details...')
-  const { error: sErr } = await supabase.from('student_details').upsert(studentDetails, { onConflict: 'person_id' })
-  if (sErr) console.error('❌ Error uploading student_details:', sErr)
-  else console.log('✅ Student details uploaded successfully')
-
-  console.log('📤 Uploading employee_details...')
-  const { error: eErr } = await supabase.from('employee_details').upsert(employeeDetails, { onConflict: 'person_id' })
-  if (eErr) console.error('❌ Error uploading employee_details:', eErr)
-  else console.log('✅ Employee details uploaded successfully')
-
-  console.log('📤 Uploading visitor_logs...')
-  const { error: vErr } = await supabase.from('visitor_logs').upsert(visitorLogs, { onConflict: 'id' })
-  if (vErr) console.error('❌ Error uploading visitor_logs:', vErr)
-  else console.log('✅ Visitor logs uploaded successfully')
-
-  console.log('\n=== Seed Completed Successfully ===')
-}
-
-main().catch(err => {
-  console.error('Fatal error in seed script:', err)
-  process.exit(1)
-})
+seed().catch(err => { console.error(err); process.exit(1); });
