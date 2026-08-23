@@ -313,16 +313,16 @@ EXCEPTION WHEN OTHERS THEN RETURN FALSE; END; $$;
 
 -- 4.2 SCOPE HELPERS
 CREATE OR REPLACE FUNCTION get_guardian_wards(p_guardian_id UUID)
-RETURNS SETOF UUID LANGUAGE sql SECURITY DEFINER SET search_path = public
-AS $$ SELECT sd.user_id FROM student_details sd WHERE sd.guardian_id = p_guardian_id; $$;
+RETURNS UUID[] LANGUAGE sql SECURITY DEFINER SET search_path = public
+AS $$ SELECT COALESCE(array_agg(sd.user_id), ARRAY[]::UUID[]) FROM student_details sd WHERE sd.guardian_id = p_guardian_id; $$;
 
 CREATE OR REPLACE FUNCTION get_warden_hostel(p_user_id UUID)
 RETURNS TEXT LANGUAGE sql SECURITY DEFINER SET search_path = public
 AS $$ SELECT assigned_hostel FROM users WHERE id = p_user_id; $$;
 
 CREATE OR REPLACE FUNCTION get_supervised_gates(p_user_id UUID)
-RETURNS SETOF UUID LANGUAGE sql SECURITY DEFINER SET search_path = public
-AS $$ SELECT unnest(COALESCE(supervised_gates, ARRAY[]::UUID[])) FROM users WHERE id = p_user_id; $$;
+RETURNS UUID[] LANGUAGE sql SECURITY DEFINER SET search_path = public
+AS $$ SELECT COALESCE(supervised_gates, ARRAY[]::UUID[]) FROM users WHERE id = p_user_id; $$;
 
 CREATE OR REPLACE FUNCTION get_user_department(p_user_id UUID)
 RETURNS TEXT LANGUAGE sql SECURITY DEFINER SET search_path = public
@@ -566,11 +566,11 @@ CREATE POLICY vlogs_update_auth ON visitor_logs FOR UPDATE TO authenticated
 
 -- 6.8 GATE PASSES (owner + guardian of wards + staff approvers)
 CREATE POLICY passes_select_own ON gate_passes FOR SELECT TO authenticated
-  USING (user_id = auth.uid() OR user_id IN (SELECT get_guardian_wards(auth.uid())));
+  USING (user_id = auth.uid() OR user_id = ANY(get_guardian_wards(auth.uid())));
 CREATE POLICY passes_select_staff ON gate_passes FOR SELECT TO authenticated
   USING (is_admin(auth.uid()) OR is_supervisor(auth.uid()) OR is_warden(auth.uid()));
 CREATE POLICY passes_insert_own ON gate_passes FOR INSERT TO authenticated WITH CHECK (
-  user_id = auth.uid() OR user_id IN (SELECT get_guardian_wards(auth.uid())) OR is_admin(auth.uid()));
+  user_id = auth.uid() OR user_id = ANY(get_guardian_wards(auth.uid())) OR is_admin(auth.uid()));
 CREATE POLICY passes_update_approvers ON gate_passes FOR UPDATE TO authenticated USING (
   is_admin(auth.uid()) OR is_supervisor(auth.uid()) OR is_warden(auth.uid()))
   WITH CHECK (is_admin(auth.uid()) OR is_supervisor(auth.uid()) OR is_warden(auth.uid()));
@@ -578,7 +578,7 @@ CREATE POLICY passes_update_approvers ON gate_passes FOR UPDATE TO authenticated
 -- 6.9 ALERTS (admin; supervisors by gate; operators own gate)
 CREATE POLICY alerts_select_admin ON alerts FOR SELECT TO authenticated USING (is_admin(auth.uid()));
 CREATE POLICY alerts_select_sup  ON alerts FOR SELECT TO authenticated
-  USING (is_supervisor(auth.uid()) AND gate_id::TEXT = ANY(get_supervised_gates(auth.uid())::TEXT[]));
+  USING (is_supervisor(auth.uid()) AND gate_id = ANY(get_supervised_gates(auth.uid())));
 CREATE POLICY alerts_select_op   ON alerts FOR SELECT TO authenticated
   USING (is_operator(auth.uid()) AND (gate_id = (SELECT gate_id FROM users WHERE id = auth.uid()) OR gate_id IS NULL));
 CREATE POLICY alerts_resolve_admin ON alerts FOR UPDATE TO authenticated USING (is_admin(auth.uid())) WITH CHECK (is_admin(auth.uid()));
