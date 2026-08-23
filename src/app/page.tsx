@@ -79,8 +79,8 @@ const PORTALS: Array<{
   },
   {
     role: "student",
-    label: "My Portal",
-    subtitle: "Campus Members & Day Scholars",
+    label: "Portal",
+    subtitle: "Campus Members",
     description: "Dynamic QR or ID login, access history & gate entry/exit notifications",
     icon: <GraduationCap className="w-6 h-6" />,
     color: "text-blue-400",
