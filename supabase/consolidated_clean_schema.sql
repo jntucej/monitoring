@@ -679,5 +679,17 @@ COMMENT ON COLUMN gate_passes.reason IS 'Exit type: Home Out|Day Out|Leave|Regul
 COMMENT ON COLUMN student_details.student_type IS 'HM=Hostel Male|HF=Hostel Female|DM=Day Male|DF=Day Female';
 
 -- ============================================================================
+-- SECTION 10: PERMISSIONS
+-- ============================================================================
+GRANT USAGE ON SCHEMA public TO postgres, anon, authenticated, service_role;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO postgres, anon, authenticated, service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO postgres, anon, authenticated, service_role;
+GRANT ALL ON ALL FUNCTIONS IN SCHEMA public TO postgres, anon, authenticated, service_role;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO postgres, anon, authenticated, service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO postgres, anon, authenticated, service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO postgres, anon, authenticated, service_role;
+
+-- ============================================================================
 -- END OF CONSOLIDATED UNIFIED SCHEMA
 -- ============================================================================
