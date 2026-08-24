@@ -46,7 +46,7 @@ export async function generatePDF(content: string, filename: string) {
 export async function exportDailyReport(date: string, format: "pdf" | "csv" = "csv") {
   const { data: scans } = await supabase
     .from("movement_logs")
-    .select("*, users(name, role)")
+    .select("*, users:users!movement_logs_user_id_fkey(name, role)")
     .gte("timestamp", `${date}T00:00:00.000Z`)
     .lte("timestamp", `${date}T23:59:59.999Z`);
 

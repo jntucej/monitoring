@@ -22,7 +22,7 @@ async function handleGet(req: NextRequest) {
         // Query users and student_details to check owner or guardian link
         const { data: studentCheck } = await supabase
           .from("users")
-          .select("id, unique_id, student_details(guardian_id)")
+          .select("id, unique_id, student_details!student_details_user_id_fkey(guardian_id)")
           .eq("unique_id", uniqueId)
           .maybeSingle();
 
