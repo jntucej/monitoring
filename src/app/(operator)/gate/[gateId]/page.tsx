@@ -72,6 +72,32 @@ export default function OperatorPage() {
       window.history.pushState({}, "");
     }
   }, [state, searchParams]);
+  // Auto-reset & Tap Anywhere to ready next scan when state === "success"
+  useEffect(() => {
+    if (state !== "success") return;
+
+    // Auto-reset after 2.5 seconds if no manual tap occurs
+    const autoResetTimer = setTimeout(() => {
+      reset();
+    }, 2500);
+
+    const handleTapAnywhere = () => {
+      reset();
+    };
+
+    // Delay adding the event listener slightly so the click that confirmed the scan doesn't instantly dismiss success
+    const listenerTimer = setTimeout(() => {
+      window.addEventListener("click", handleTapAnywhere, { once: true });
+      window.addEventListener("touchstart", handleTapAnywhere, { once: true });
+    }, 200);
+
+    return () => {
+      clearTimeout(autoResetTimer);
+      clearTimeout(listenerTimer);
+      window.removeEventListener("click", handleTapAnywhere);
+      window.removeEventListener("touchstart", handleTapAnywhere);
+    };
+  }, [state, reset]);
 
   // Ref to prevent double initialization
   const gateInitializedRef = useRef<string | null>(null);
@@ -266,15 +292,18 @@ export default function OperatorPage() {
 
               {effectiveSubMode === "entry" && (
                 <div className="space-y-4">
-                  {/* Success Visual Flash */}
+                  {/* Success Visual Flash & Tap Anywhere to Reset */}
                   {state === "success" && (
-                    <div className="space-y-4">
-                      <SuccessFlash />
-                      <div className="p-4 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-center space-y-2">
-                        <p className="text-xs text-emerald-400 font-semibold">Movement Recorded Successfully</p>
+                    <div className="space-y-4 cursor-pointer select-none" onClick={reset}>
+                      <SuccessFlash onClick={reset} />
+                      <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-center space-y-2 hover:bg-emerald-500/20 transition-colors">
+                        <p className="text-xs text-emerald-400 font-bold">Movement Recorded Successfully</p>
+                        <p className="text-[11px] text-[var(--text-secondary)]">
+                          Tap anywhere or wait 2s to scan next student
+                        </p>
                         <button
                           onClick={reset}
-                          className="px-4 py-2 bg-[var(--action-primary)] hover:bg-emerald-400 text-slate-950 rounded-lg text-xs font-bold transition-all active:scale-[0.98]"
+                          className="px-4 py-2 bg-[var(--action-primary)] hover:bg-emerald-400 text-slate-950 rounded-lg text-xs font-bold transition-all active:scale-[0.98] shadow-sm"
                         >
                           Ready For Next Scan
                         </button>
