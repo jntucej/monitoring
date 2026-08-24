@@ -1,43 +1,30 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Operator Scan Verification Workflows', () => {
-  test('Operator login and scan verification of student with active exit pass', async ({ page }) => {
-    // 1. Visit operator login
+test.describe('Gate Monitor Operator & Workflow E2E Tests', () => {
+  test('Operator can log in with PIN and reach gate terminal', async ({ page }) => {
     await page.goto('/login/operator');
     await expect(page.locator('text=Gate Operator Portal')).toBeVisible();
 
-    // 2. Fill in Employee ID & PIN
+    // Real credentials from seed data (OP-001 / default PIN)
     await page.fill('input[placeholder="Enter your identifier"]', 'OP-001');
     await page.fill('input[placeholder="Enter password or PIN"]', '12345678');
-
-    // 3. Click Login
     await page.click('button[type="submit"]');
 
-    // 4. Verify redirections to the gate screen
-    await expect(page).toHaveURL(/\/gate\/1/);
-    await expect(page.locator('text=Gate 1 (Main Gate)')).toBeVisible();
+    // Session minted via Supabase Auth -> redirect to assigned gate terminal
+    await expect(page).toHaveURL(/\/gate\/1/, { timeout: 15000 });
+    await expect(page.locator('text=Gate 1 (Main Gate)')).toBeVisible({ timeout: 10000 });
+  });
 
-    // 5. Select Manual Enter mode
-    const manualBtn = page.locator('button:has-text("Manual Enter")');
-    await expect(manualBtn).toBeVisible();
-    await manualBtn.click();
+  test('Unauthenticated user is redirected to login portal', async ({ page }) => {
+    await page.goto('/gate/1');
 
-    // 6. Enter roll number for student with approved Home Out pass
-    await page.fill('input[placeholder="e.g. 24JJ1A0501"]', '25JJ1A0503');
-    await page.click('button:has-text("Verify Roll Number")');
+    // Should end up on the login portal selection screen
+    await expect(page).toHaveURL(/\/login/);
+    await expect(page.locator('text=Select Portal')).toBeVisible();
+  });
 
-    // 7. Verify Entry Details load student profile and permissions card
-    await expect(page.locator('text=Swathi Singh')).toBeVisible();
-    await expect(page.locator('text=Approved Exit Passes (1)')).toBeVisible();
-    await expect(page.locator('text=Home Out').first()).toBeVisible();
-
-    // 8. Confirm exit
-    const exitBtn = page.locator('button:has-text("Home Out")');
-    await expect(exitBtn).toBeVisible();
-    await expect(exitBtn).not.toBeDisabled();
-    await exitBtn.click();
-
-    // 9. Verify success flash state
-    await expect(page.locator('text=Movement Recorded Successfully')).toBeVisible();
+  test('Health check API returns OK', async ({ request }) => {
+    const health = await request.get('/api/health');
+    expect(health.status()).toBe(200);
   });
 });

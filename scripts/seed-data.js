@@ -22,7 +22,6 @@ const NM = ['Amit', 'Raj', 'Vijay', 'Suresh', 'Ramesh', 'Dinesh', 'Mahesh', 'Aru
 const NF = ['Priya', 'Sneha', 'Pooja', 'Divya', 'Anjali', 'Kavitha', 'Lakshmi', 'Sita', 'Maya', 'Nandini', 'Keerthi', 'Harini', 'Swathi', 'Geetha'];
 const SUR = ['Kumar', 'Reddy', 'Rao', 'Naidu', 'Singh', 'Devi', 'Yadav', 'Pillai', 'Sharma', 'Verma', 'Patel', 'Gupta'];
 
-const uuid = () => require('crypto').randomUUID();
 const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const phone = () => '9' + String(randInt(100000000, 99999999)).padStart(9, '0');
@@ -30,6 +29,18 @@ const phone = () => '9' + String(randInt(100000000, 99999999)).padStart(9, '0');
 async function main() {
   console.log('🚀 Generating Full Campus Dataset (280 Students across 4 Years + 35 Staff)');
   const defaultPinHash = await bcrypt.hash('12345678', 10);
+
+  // Fetch existing users to maintain foreign key integrity
+  const { data: existingUsers } = await supabase.from('users').select('id, unique_id');
+  const userMap = new Map((existingUsers || []).map(u => [u.unique_id, u.id]));
+
+  function getUserId(uniqueId) {
+    if (userMap.has(uniqueId)) return userMap.get(uniqueId);
+    const hash = require('crypto').createHash('md5').update('gm_user_' + uniqueId).digest('hex');
+    const uuidStr = `${hash.slice(0, 8)}-${hash.slice(8, 12)}-4${hash.slice(13, 16)}-a${hash.slice(17, 20)}-${hash.slice(20, 32)}`;
+    userMap.set(uniqueId, uuidStr);
+    return uuidStr;
+  }
 
   const users = [];
   const studentDetails = [];
@@ -50,8 +61,9 @@ async function main() {
   ];
 
   sysRoles.forEach(r => {
+    const uId = getUserId(r.unique_id);
     users.push({
-      id: uuid(), unique_id: r.unique_id, name: r.name, role: r.role, status: 'ACTIVE', email: r.email,
+      id: uId, unique_id: r.unique_id, name: r.name, role: r.role, status: 'ACTIVE', email: r.email,
       phone: phone(), photo_url: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(r.name)}`,
       qr_code: JSON.stringify({ uniqueId: r.unique_id, role: r.role }), initial_pin_hash: defaultPinHash,
       gate_id: r.gate_id || null, supervised_gates: r.supervised_gates || null
@@ -61,9 +73,9 @@ async function main() {
   // 2. Guardians (50 Accounts)
   const guardians = [];
   for (let g = 1; g <= 50; g++) {
-    const gId = uuid();
-    const gName = `${pick(NM)} ${pick(SUR)} (Parent)`;
     const gCode = `PAR-${String(g).padStart(3, '0')}`;
+    const gId = getUserId(gCode);
+    const gName = `${pick(NM)} ${pick(SUR)} (Parent)`;
     guardians.push({ id: gId });
 
     users.push({
@@ -82,13 +94,13 @@ async function main() {
 
   batches.forEach(({ yearCode, yearNum, batchLabel }) => {
     for (let i = 1; i <= 70; i++) {
-      const uId = uuid();
       const isMale = i % 2 === 0;
       const name = `${pick(isMale ? NM : NF)} ${pick(SUR)}`;
       const dept = DEPT[i % DEPT.length];
       const entryCode = (yearNum > 1 && i > 60) ? '5A' : '1A';
       const seqStr = String(((i - 1) % 14) + 1).padStart(2, '0');
       const roll = `${yearCode}JJ${entryCode}${dept.c}${seqStr}`;
+      const uId = getUserId(roll);
       const parent = pick(guardians);
 
       users.push({
@@ -112,9 +124,9 @@ async function main() {
 
   // 4. Employees (HODs, Faculty, Staff, Workers = 35 Total)
   DEPT.forEach((d) => {
-    const hodId = uuid();
-    const hodName = `Dr. ${pick(NM)} ${pick(SUR)} (HOD ${d.s})`;
     const hodEmpId = `HOD-${d.s}`;
+    const hodId = getUserId(hodEmpId);
+    const hodName = `Dr. ${pick(NM)} ${pick(SUR)} (HOD ${d.s})`;
 
     users.push({
       id: hodId, unique_id: hodEmpId, name: hodName, role: 'faculty', status: 'ACTIVE',
@@ -129,9 +141,9 @@ async function main() {
     });
 
     for (let f = 1; f <= 4; f++) {
-      const facId = uuid();
-      const facName = `Dr. ${pick(NM)} ${pick(SUR)}`;
       const facEmpId = `FAC-${d.s}-${f}`;
+      const facId = getUserId(facEmpId);
+      const facName = `Dr. ${pick(NM)} ${pick(SUR)}`;
 
       users.push({
         id: facId, unique_id: facEmpId, name: facName, role: 'faculty', status: 'ACTIVE',
@@ -148,9 +160,9 @@ async function main() {
   });
 
   for (let s = 1; s <= 10; s++) {
-    const stfId = uuid();
-    const stfName = `${pick(NM)} ${pick(SUR)}`;
     const stfCode = s <= 5 ? `STF-${String(s).padStart(3, '0')}` : `WRK-${String(s).padStart(3, '0')}`;
+    const stfId = getUserId(stfCode);
+    const stfName = `${pick(NM)} ${pick(SUR)}`;
     const stfRole = s <= 5 ? 'staff' : 'worker';
 
     users.push({
@@ -186,6 +198,23 @@ async function main() {
   const { error: eErr } = await supabase.from('employee_details').upsert(employeeDetails, { onConflict: 'user_id' });
   if (eErr) console.error('❌ Employee details error:', eErr.message);
   else console.log('✅ Employee details seeded.');
+
+  const studentPassUser = users.find(u => u.unique_id === '25JJ1A0503');
+  if (studentPassUser) {
+    const testPass = {
+      id: 'dc711073-188e-4580-ac33-07214f950f4d',
+      user_id: studentPassUser.id,
+      roll: '25JJ1A0503',
+      requester_name: studentPassUser.name,
+      reason: 'Home Out',
+      from_datetime: new Date(Date.now() - 3600000).toISOString(),
+      to_datetime: new Date(Date.now() + 86400000 * 7).toISOString(),
+      final_status: 'APPROVED',
+      qr_code: 'MOCKQRA503'
+    };
+    await supabase.from('gate_passes').upsert([testPass], { onConflict: 'id' });
+    console.log('✅ Active test gate pass seeded.');
+  }
 
   console.log('\n🎉 FULL CAMPUS DATASET SEEDED SUCCESSFULLY!');
 }

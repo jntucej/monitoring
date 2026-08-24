@@ -14,6 +14,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { withRateLimit } from "@/lib/rate-limit";
 import { getSupabaseServiceClient, createEphemeralSupabaseClient } from "@/lib/supabaseClient";
 
@@ -50,14 +51,59 @@ async function findPinUser(identifier: string) {
   return byEmail.data ?? null;
 }
 
+/**
+ * Ensure the email exists in Supabase Auth AND is confirmed.
+ * Seeded users live in public.users but may be missing from Auth, or exist
+ * as unconfirmed (e.g. created via invite). Magic-link OTP fails for both.
+ */
+async function ensureAuthUser(service: SupabaseClient, email: string): Promise<boolean> {
+  const probe = await service.auth.admin.generateLink({ type: "magiclink", email });
+
+  if (!probe.error && probe.data?.user) {
+    // User exists — confirm the email if it is not confirmed yet.
+    if (!probe.data.user.email_confirmed_at) {
+      const { error: confirmError } = await service.auth.admin.updateUserById(
+        probe.data.user.id,
+        { email_confirm: true }
+      );
+      if (confirmError) console.error("confirm user error:", confirmError.message);
+    }
+    return true;
+  }
+
+  const msg = (probe.error?.message ?? "").toLowerCase();
+  if (msg.includes("user not found") || msg.includes("unable to find user") || probe.error?.status === 404) {
+    // Missing from Auth entirely — provision a confirmed user.
+    const { error: createError } = await service.auth.admin.createUser({
+      email,
+      email_confirm: true,
+    });
+    if (createError) {
+      console.error("createUser error:", createError.message);
+      return false;
+    }
+    return true;
+  }
+
+  if (probe.error) console.error("generateLink probe error:", probe.error.message);
+  return false;
+}
+
 /** Exchange a service-generated magic-link token for a real Supabase session. */
 async function mintSupabaseSession(email: string) {
   const service = getSupabaseServiceClient();
+
+  if (!(await ensureAuthUser(service, email))) return null;
+
+  // Fresh token AFTER the user exists and is confirmed.
   const { data, error } = await service.auth.admin.generateLink({
     type: "magiclink",
     email,
   });
-  if (error || !data?.properties) return null;
+  if (error || !data?.properties) {
+    if (error) console.error("generateLink error:", error.message);
+    return null;
+  }
 
   const props = data.properties as GenerateLinkProperties;
   const tokenHash = props.token_hash || props.hashed_token;
@@ -68,7 +114,10 @@ async function mintSupabaseSession(email: string) {
     type: "magiclink",
     token_hash: tokenHash,
   });
-  if (otpError || !otpData?.session) return null;
+  if (otpError || !otpData?.session) {
+    if (otpError) console.error("verifyOtp error:", otpError.message);
+    return null;
+  }
 
   return otpData.session;
 }

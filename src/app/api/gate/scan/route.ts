@@ -16,7 +16,9 @@ interface ScanBody {
 async function handlePost(req: NextRequest) {
   try {
     const body: ScanBody = await req.json()
-    const { roll, direction, reason, gateId, operatorId, isManual } = body
+    const authOperatorId = req.headers.get("x-user-id")
+    const { roll, direction, reason, gateId, isManual } = body
+    const operatorId = authOperatorId || body.operatorId
 
     if (!roll || !direction || !gateId || !operatorId) {
       return NextResponse.json(
