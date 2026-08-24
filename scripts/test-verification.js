@@ -10,9 +10,19 @@ async function testVerification() {
   const token = loginJson.data.token;
   const sessionToken = loginJson.data.user.currentSessionToken;
   const operatorId = loginJson.data.user.id;
-  const gateId = loginJson.data.user.supervisedGates?.[0] || '11111111-1111-1111-1111-111111111111';
 
-  console.log('1. Lookup person 25JJ5A1201:');
+  const gatesRes = await fetch('https://samples-clg.vercel.app/api/gates', {
+    headers: {
+      'Authorization': 'Bearer ' + token,
+      'x-session-token': sessionToken
+    }
+  });
+  const gatesJson = await gatesRes.json();
+  console.log('Gates API response:', gatesJson);
+  const gatesList = gatesJson.gates || gatesJson.data || gatesJson;
+  const realGateId = Array.isArray(gatesList) ? gatesList[0]?.id : null;
+
+  console.log('\n1. Lookup person 25JJ5A1201:');
   const personRes = await fetch('https://samples-clg.vercel.app/api/persons/25JJ5A1201', {
     headers: {
       'Authorization': 'Bearer ' + token,
@@ -21,7 +31,7 @@ async function testVerification() {
   });
   console.log(await personRes.text());
 
-  console.log('\n2. Add Scan log for 25JJ5A1201:');
+  console.log('\n2. Add Scan log for 25JJ5A1201 at gate:', realGateId);
   const scanRes = await fetch('https://samples-clg.vercel.app/api/gate/scan', {
     method: 'POST',
     headers: {
@@ -32,7 +42,7 @@ async function testVerification() {
     body: JSON.stringify({
       roll: '25JJ5A1201',
       direction: 'OUT',
-      gateId: gateId,
+      gateId: realGateId,
       operatorId: operatorId,
       isManual: true
     })
@@ -41,3 +51,5 @@ async function testVerification() {
 }
 
 testVerification().catch(console.error);
+
+

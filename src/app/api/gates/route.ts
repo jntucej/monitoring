@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
+import { getSupabaseServiceClient } from "@/lib/supabaseClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 
 async function handleGet(req: NextRequest) {
-  const { data, error } = await supabase.from('gates').select('*');
+  const service = getSupabaseServiceClient();
+  const { data, error } = await service.from('gates').select('*');
   if (error) {
     return NextResponse.json({ success: false, error: 'Failed to fetch gates' }, { status: 500 });
   }
@@ -14,7 +15,8 @@ async function handleGet(req: NextRequest) {
 async function handlePost(req: NextRequest) {
   try {
     const body = await req.json();
-    const { data, error } = await supabase
+    const service = getSupabaseServiceClient();
+    const { data, error } = await service
       .from('gates')
       .insert({
         id: body.id || `gate-${Date.now()}`,
