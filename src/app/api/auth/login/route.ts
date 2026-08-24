@@ -92,7 +92,7 @@ async function handleLogin(req: NextRequest) {
     const service = getSupabaseServiceClient();
     const { data: profile } = await service
       .from("users")
-      .select("id, name, role, employee_id, status")
+      .select("id, name, role, employee_id, unique_id, gate_id, status")
       .eq("id", authData.user.id)
       .maybeSingle();
 
@@ -136,9 +136,11 @@ async function handleLogin(req: NextRequest) {
           name: profile.name,
           role: profile.role,
           employeeId: profile.employee_id,
+          uniqueId: profile.unique_id,
           email,
           status: profile.status,
           currentSessionToken,
+          gateId: profile.gate_id,
         },
       },
     });

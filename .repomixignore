@@ -1,0 +1,23 @@
+# Ignore markdown and documentation files
+*.md
+**/*.md
+docs/**
+
+# Ignore logs and temporary files
+*.log
+dev-server.log
+server.log
+tsconfig.tsbuildinfo
+fix_types.py
+
+# Ignore test reports and outputs
+playwright-report/**
+test-results/**
+repomix-output.*
+
+# Ignore lock and environment files
+package-lock.json
+.env*
+.DS_Store
+**/.DS_Store
+

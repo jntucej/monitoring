@@ -1,21 +1,22 @@
 const fs = require('fs');
 const { createClient } = require('@supabase/supabase-js');
 
-// Read .env.local manually
-const envText = fs.readFileSync('.env.local', 'utf8');
-const env = {};
-envText.split('\n').forEach(line => {
-  const match = line.match(/^([^=]+)=(.*)$/);
-  if (match) {
-    env[match[1].trim()] = match[2].trim().replace(/^["']|["']$/g, '');
-  }
-});
+let env = {};
+if (fs.existsSync('.env.local')) {
+  const envText = fs.readFileSync('.env.local', 'utf8');
+  envText.split('\n').forEach(line => {
+    const match = line.match(/^([^=]+)=(.*)$/);
+    if (match) {
+      env[match[1].trim()] = match[2].trim().replace(/^["']|["']$/g, '');
+    }
+  });
+}
 
-const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = env.SUPABASE_SERVICE_ROLE_KEY || env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
-  console.error("Missing Supabase credentials");
+  console.error("Missing SUPABASE_SERVICE_ROLE_KEY or NEXT_PUBLIC_SUPABASE_URL in environment or .env.local");
   process.exit(1);
 }
 

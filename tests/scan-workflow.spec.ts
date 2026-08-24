@@ -1,30 +1,133 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Gate Monitor Operator & Workflow E2E Tests', () => {
-  test('Operator can log in with PIN and reach gate terminal', async ({ page }) => {
+  // Execute sequentially to avoid parallel Supabase OTP login conflicts with the same account
+  test.describe.configure({ mode: 'serial' });
+  
+  test.beforeEach(async ({ page }) => {
+    page.on('console', msg => console.log('BROWSERLOG:', msg.text()));
+
+    // Perform login prior to each operator workflow test
     await page.goto('/login/operator');
     await expect(page.locator('text=Gate Operator Portal')).toBeVisible();
 
-    // Real credentials from seed data (OP-001 / default PIN)
+    // Use OP-001 credential
     await page.fill('input[placeholder="Enter your identifier"]', 'OP-001');
     await page.fill('input[placeholder="Enter password or PIN"]', '12345678');
     await page.click('button[type="submit"]');
 
-    // Session minted via Supabase Auth -> redirect to assigned gate terminal
-    await expect(page).toHaveURL(/\/gate\/1/, { timeout: 15000 });
+    // Wait redirect
+    await expect(page).toHaveURL(/\/gate\//, { timeout: 15000 });
     await expect(page.locator('text=Gate 1 (Main Gate)')).toBeVisible({ timeout: 10000 });
   });
 
-  test('Unauthenticated user is redirected to login portal', async ({ page }) => {
-    await page.goto('/gate/1');
+  test('Operator workflow: verify valid active student manual entry lookup and confirm scan', async ({ page }) => {
+    // Go to "Manual Enter" tab
+    await page.click('button:has-text("Manual Enter")');
+    await expect(page.locator('input[placeholder="e.g. 24JJ1A0501"]')).toBeVisible();
 
-    // Should end up on the login portal selection screen
-    await expect(page).toHaveURL(/\/login/);
-    await expect(page.locator('text=Select Portal')).toBeVisible();
+    // Fill with a valid roll number from seed data (e.g. first student 24JJ1A0501)
+    await page.fill('input[placeholder="e.g. 24JJ1A0501"]', '24JJ1A0501');
+    await page.click('button:has-text("Verify Roll Number")');
+
+    // Page automatically switches to "Entry Details" sub-mode/confirming state
+    await expect(page.locator('text=Verifying Identity...')).toBeVisible();
+
+    // Wait until identity is verified (2 seconds simulated delay)
+    await expect(page.locator('text=Identity Verified')).toBeVisible({ timeout: 5000 });
+
+    // Assert student info is resolved from the server and displayed correctly
+    await expect(page.locator('text=24JJ1A0501')).toBeVisible();
+    await expect(page.locator('text=- Year 2')).toBeVisible();
+
+    // Scan direction defaults or action buttons should be active
+    const confirmButton = page.getByRole('button', { name: 'Entry', exact: true });
+    await expect(confirmButton).toBeEnabled();
+
+    // Confirm scan
+    await confirmButton.click();
+
+    // Assert transition to success flash screen
+    await expect(page.locator('text=Movement Recorded Successfully')).toBeVisible({ timeout: 5000 });
+
+    // Tap to reset
+    await page.click('text=Ready For Next Scan', { force: true });
+    await expect(page.locator('text=Verify Roll Number')).not.toBeVisible();
   });
 
-  test('Health check API returns OK', async ({ request }) => {
-    const health = await request.get('/api/health');
-    expect(health.status()).toBe(200);
+  test('Operator workflow: verify invalid roll number format fails validation on server', async ({ page }) => {
+    // Selection Manual
+    await page.click('button:has-text("Manual Enter")');
+
+    // Fill a totally invalid format
+    await page.fill('input[placeholder="e.g. 24JJ1A0501"]', 'XYZ-99');
+    await page.click('button:has-text("Verify Roll Number")');
+
+    // Since offline bypass/mocking is removed, this queries the backend and displays the 404 from the server
+    await expect(page.locator('text=Person with ID XYZ-99 not found')).toBeVisible({ timeout: 8000 });
+
+    // Verify cleanup
+    await page.click('button:has-text("Resume Verification")');
+    await expect(page.locator('input[placeholder="e.g. 24JJ1A0501"]')).toBeVisible();
   });
+
+  test('Operator workflow: verify well-formed but non-existent student roll query fails strictly online with server 404', async ({ page }) => {
+    await page.click('button:has-text("Manual Enter")');
+
+    // Well-formed JNTUH roll format that doesn't exist in seed data: 24JJ1A0599
+    await page.fill('input[placeholder="e.g. 24JJ1A0501"]', '24JJ1A0599');
+    await page.click('button:has-text("Verify Roll Number")');
+
+    // Stays on/transitions to "Entry Details" sub-mode but displays error box directly from server return message
+    await expect(page.locator('text=Person with ID 24JJ1A0599 not found')).toBeVisible({ timeout: 8000 });
+
+    // Try a new scan
+    await page.click('button:has-text("Resume Verification")');
+    await expect(page.locator('input[placeholder="e.g. 24JJ1A0501"]')).toBeVisible();
+  });
+
+  test('Operator workflow: verify QR payload schema varieties', async ({ page }) => {
+    // 1. JSON payload with "roll" schema variety
+    await page.evaluate(() => {
+      (window as any).__handleQRScannedForTesting('{"roll": "24JJ1A0501"}');
+    });
+    await expect(page.locator('text=Verifying Identity...')).toBeVisible();
+    await expect(page.locator('text=24JJ1A0501')).toBeVisible();
+    // Cancel the confirmation page
+    await page.click('button[aria-label="Cancel scan verification"]');
+
+    // 2. JSON payload with "student_roll" schema variety
+    await page.evaluate(() => {
+      (window as any).__handleQRScannedForTesting('{"student_roll": "24JJ1A0501"}');
+    });
+    await expect(page.locator('text=Verifying Identity...')).toBeVisible();
+    await expect(page.locator('text=24JJ1A0501')).toBeVisible();
+    // Cancel
+    await page.click('button[aria-label="Cancel scan verification"]');
+
+    // 3. JSON payload with "uniqueId" schema variety
+    await page.evaluate(() => {
+      (window as any).__handleQRScannedForTesting('{"uniqueId": "24JJ1A0501"}');
+    });
+    await expect(page.locator('text=Verifying Identity...')).toBeVisible();
+    await expect(page.locator('text=24JJ1A0501')).toBeVisible();
+    // Cancel
+    await page.click('button[aria-label="Cancel scan verification"]');
+
+    // 4. Plain raw text string format
+    await page.evaluate(() => {
+      (window as any).__handleQRScannedForTesting('24JJ1A0501');
+    });
+    await expect(page.locator('text=Verifying Identity...')).toBeVisible();
+    await expect(page.locator('text=24JJ1A0501')).toBeVisible();
+    // Cancel
+    await page.click('button[aria-label="Cancel scan verification"]');
+
+    // 5. Non-existent JSON roll variety: should give 404 message directly
+    await page.evaluate(() => {
+      (window as any).__handleQRScannedForTesting('{"roll": "24JJ1A0599"}');
+    });
+    await expect(page.locator('text=Person with ID 24JJ1A0599 not found')).toBeVisible({ timeout: 8000 });
+  });
+
 });

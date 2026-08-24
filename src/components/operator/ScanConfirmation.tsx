@@ -88,6 +88,14 @@ export function ScanConfirmation({
           headers["X-Session-Token"] = sessionToken;
         }
         const res = await fetch(`/api/passes?roll=${encodeURIComponent(rollNum)}&status=APPROVED`, { headers });
+        
+        if (!res.ok) {
+          console.warn(`Pass API returned status ${res.status}`);
+          setApprovedPasses([]);
+          setLoadingPasses(false);
+          return;
+        }
+
         const result = await res.json();
         // Handle session expiry in pass lookup
         if (res.status === 401 && result?.error?.code === "SESSION_EXPIRED") {
@@ -100,6 +108,8 @@ export function ScanConfirmation({
         }
         if (result.success && result.data) {
           setApprovedPasses(result.data);
+        } else {
+          setApprovedPasses([]);
         }
       } catch (err) {
         console.error("Error loading approved passes:", err);

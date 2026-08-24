@@ -25,6 +25,7 @@ function timeAgo(iso: string): string {
 export default function AdminAlertsPage() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "active" | "resolved">("active");
   const [busyId, setBusyId] = useState<string | null>(null);
 
@@ -32,10 +33,17 @@ export default function AdminAlertsPage() {
     try {
       const url = filter === "all" ? "/api/alerts" : `/api/alerts?resolved=${filter === "resolved"}`;
       const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error("Failed to fetch alerts");
       const json = await res.json();
-      if (json.success) setAlerts(Array.isArray(json.data) ? json.data : []);
-    } catch {
-      // ignore
+      if (json.success) {
+        setAlerts(Array.isArray(json.data) ? json.data : []);
+        setError(null);
+      } else {
+        setError(json.error?.message ?? "Failed to load alerts");
+      }
+    } catch (err: any) {
+      console.error("Failed to load alerts:", err);
+      setError(err?.message ?? "Failed to load alerts");
     } finally {
       setLoading(false);
     }
@@ -44,17 +52,33 @@ export default function AdminAlertsPage() {
   useEffect(() => {
     setLoading(true);
     load();
-    const t = setInterval(load, 30_000);
+    const t = setInterval(() => {
+      if (typeof document !== "undefined" && document.hidden) return;
+      load();
+    }, 30_000);
     return () => clearInterval(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
   const resolve = async (id: string) => {
     setBusyId(id);
-    // We don't yet have a dedicated /api/alerts/[id] PATCH route; use the admin endpoint if available.
-    // For now, mark locally as resolved and re-fetch.
-    setAlerts((prev) => prev.map((a) => (a.id === id ? { ...a, resolved: true } : a)));
-    setBusyId(null);
+    try {
+      const res = await fetch(`/api/alerts/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+      });
+      const json = await res.json();
+      if (json.success) {
+        setAlerts((prev) => prev.map((a) => (a.id === id ? { ...a, resolved: true } : a)));
+      } else {
+        alert(json.error?.message || "Failed to resolve alert");
+      }
+    } catch (err) {
+      console.error("Failed to resolve alert:", err);
+      alert("Failed to resolve alert due to network error");
+    } finally {
+      setBusyId(null);
+    }
   };
 
   return (
@@ -94,6 +118,8 @@ export default function AdminAlertsPage() {
         <div className="divide-y divide-[var(--border)]">
           {loading ? (
             <div className="p-8 text-center text-[var(--text-muted)] text-sm">Loading…</div>
+          ) : error ? (
+            <div className="p-8 text-center text-rose-400 text-sm">{error}</div>
           ) : alerts.length === 0 ? (
             <div className="p-8 text-center text-[var(--text-muted)] text-sm">
               No {filter === "all" ? "" : filter} alerts.

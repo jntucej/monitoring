@@ -29,7 +29,7 @@ export function EntryExitChart() {
         const endStr = today.toISOString().slice(0, 10);
 
         const res = await fetch(
-          `/api/gate/logs?from=${startStr}&to=${endStr}&limit=5000`,
+          `/api/gate/logs?from=${startStr}&to=${endStr}&limit=1000`,
           { cache: "no-store" }
         );
         const json = await res.json();
@@ -65,7 +65,10 @@ export function EntryExitChart() {
       }
     };
     load();
-    const t = setInterval(load, 60_000);
+    const t = setInterval(() => {
+      if (typeof document !== "undefined" && document.hidden) return;
+      load();
+    }, 60_000);
     return () => {
       cancelled = true;
       clearInterval(t);

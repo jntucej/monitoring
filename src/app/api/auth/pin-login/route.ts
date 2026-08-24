@@ -32,7 +32,7 @@ const INVALID_PIN = {
 
 async function findPinUser(identifier: string) {
   const service = getSupabaseServiceClient();
-  const columns = "id, email, name, role, unique_id, initial_pin_hash";
+  const columns = "id, email, name, role, unique_id, initial_pin_hash, gate_id";
 
   const byUniqueId = await service
     .from("users")
@@ -189,9 +189,11 @@ async function handlePinLogin(req: NextRequest) {
           name: user.name,
           role: user.role,
           employeeId: user.unique_id,
+          uniqueId: user.unique_id,
           email: user.email,
           status: "ACTIVE",
           currentSessionToken,
+          gateId: user.gate_id,
         },
       },
     });

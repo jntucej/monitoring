@@ -118,18 +118,28 @@ export async function restoreDatabaseBackup(
 
   for (const [table, records] of Object.entries(backupData)) {
     try {
+      const sampleRecord = Array.isArray(records) && records.length > 0 ? records[0] : null;
+      const pkColumn = sampleRecord
+        ? (sampleRecord.id !== undefined ? 'id' : Object.keys(sampleRecord)[0] ?? 'id')
+        : 'id';
+
       if (options.truncate) {
-        // Warning: This deletes existing data!
-        await supabase.from(table).delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        // Safe table truncation without relying on hardcoded UUIDs
+        const { error: delErr } = await supabase.from(table).delete().not(pkColumn, 'is', null);
+        if (delErr) {
+          // Secondary fallback if primary key column varies
+          await supabase.from(table).delete().neq(pkColumn, '');
+        }
       }
 
       // Insert records in batches of 100
       const batchSize = 100;
       for (let i = 0; i < records.length; i += batchSize) {
         const batch = records.slice(i, i + batchSize);
+        const upsertOptions = pkColumn ? { onConflict: pkColumn } : undefined;
         const { error } = await supabase
           .from(table)
-          .upsert(batch, { onConflict: 'id' });
+          .upsert(batch, upsertOptions);
 
         if (error) {
           errors.push(`Error inserting into ${table}: ${error.message}`);

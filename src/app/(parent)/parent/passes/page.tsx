@@ -23,6 +23,7 @@ function statusIcon(status: string) {
 export default function ParentPassesPage() {
   const [passes, setPasses] = useState<GatePass[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const load = async () => {
     try {
@@ -30,10 +31,17 @@ export default function ParentPassesPage() {
       const auth = authRaw ? JSON.parse(authRaw) : null;
       const parentId = auth?.user?.parentId ?? auth?.user?.id ?? "pa-1";
       const res = await fetch(`/api/passes?parentId=${parentId}`, { cache: "no-store" });
+      if (!res.ok) throw new Error("Failed to fetch passes");
       const json = await res.json();
-      if (json.success) setPasses(Array.isArray(json.data) ? json.data : []);
-    } catch {
-      // ignore
+      if (json.success) {
+        setPasses(Array.isArray(json.data) ? json.data : []);
+        setError(null);
+      } else {
+        setError(json.error?.message ?? "Failed to load passes");
+      }
+    } catch (err: any) {
+      console.error("Failed to load pass requests:", err);
+      setError(err?.message ?? "Failed to load pass requests");
     } finally {
       setLoading(false);
     }
@@ -41,7 +49,10 @@ export default function ParentPassesPage() {
 
   useEffect(() => {
     load();
-    const t = setInterval(load, 30_000);
+    const t = setInterval(() => {
+      if (typeof document !== "undefined" && document.hidden) return;
+      load();
+    }, 30_000);
     return () => clearInterval(t);
   }, []);
 
@@ -64,6 +75,8 @@ export default function ParentPassesPage() {
             <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
               <Loader2 className="w-4 h-4 animate-spin" /> Loading…
             </div>
+          ) : error ? (
+            <p className="text-sm text-rose-400">{error}</p>
           ) : passes.length === 0 ? (
             <p className="text-sm text-[var(--text-muted)]">No pass requests yet.</p>
           ) : (

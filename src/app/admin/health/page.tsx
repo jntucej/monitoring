@@ -43,7 +43,10 @@ export default function SystemHealthPage() {
     
     let interval: NodeJS.Timeout;
     if (autoRefresh) {
-      interval = setInterval(loadHealth, 30000); // Refresh every 30 seconds
+      interval = setInterval(() => {
+        if (typeof document !== "undefined" && document.hidden) return;
+        loadHealth();
+      }, 30000); // Refresh every 30 seconds
     }
     
     return () => {

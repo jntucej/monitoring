@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { RefreshCw, Wifi, WifiOff, AlertCircle, Scan, KeyRound, UserCheck, LayoutDashboard, Clock, User as UserIcon } from "lucide-react";
+import { RefreshCw, AlertCircle, Scan, KeyRound, UserCheck, LayoutDashboard, Clock, User as UserIcon } from "lucide-react";
 import { useOperatorStore } from "@/stores/operatorStore";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/toast";
@@ -22,6 +22,9 @@ const GATE_NAMES: Record<string, string> = {
   "1": "Gate 1 (Main Gate)",
   "2": "Gate 2 (Hostel Gate)",
   "3": "Gate 3 (Back Gate)",
+  "a52afdfb-dbd5-42b8-b616-da9d99295100": "Gate 1 (Main Gate)",
+  "80efc275-d9b1-415d-b13a-caed784f3b22": "Gate 2 (Hostel Gate)",
+  "a5a5c683-86cd-4f00-9e3d-e0b61b563e1f": "Gate 3 (Back Gate)",
 };
 
 export default function OperatorPage() {
@@ -40,14 +43,11 @@ export default function OperatorPage() {
     lastScan,
     todaysStats,
     recentScans,
-    isOnline,
     error,
     startScan,
     cancelScan,
     reset,
     setGate,
-    setOnline,
-    flushOfflineQueue,
   } = operatorStore;
   const confirmScan = operatorStore.confirmScan;
 
@@ -111,23 +111,7 @@ export default function OperatorPage() {
     reset();
   }, [authenticated, gateId, setGate, reset]);
 
-  useEffect(() => {
-    const goOnline = () => {
-      setOnline(true);
-      // Flush any queued offline scans when we regain connectivity
-      flushOfflineQueue();
-    };
-    const goOffline = () => setOnline(false);
-    window.addEventListener("online", goOnline);
-    window.addEventListener("offline", goOffline);
-    setOnline(navigator.onLine);
-    return () => {
-      window.removeEventListener("online", goOnline);
-      window.removeEventListener("offline", goOffline);
-    };
-  }, [setOnline, flushOfflineQueue]);
-
-  const gateName = GATE_NAMES[gateId] || `Gate ${gateId}`;
+  const gateName = GATE_NAMES[gateId] || operatorStore.gate?.name || `Gate ${gateId}`;
 
   const handleQRScanned = (scannedPayload: string) => {
     let rollCandidate = scannedPayload.trim();
@@ -136,12 +120,19 @@ export default function OperatorPage() {
         const parsed = JSON.parse(rollCandidate);
         if (parsed.roll) rollCandidate = parsed.roll;
         else if (parsed.student_roll) rollCandidate = parsed.student_roll;
+        else if (parsed.uniqueId) rollCandidate = parsed.uniqueId;
       } catch {
         // use raw
       }
     }
     startScan(rollCandidate);
   };
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      (window as any).__handleQRScannedForTesting = handleQRScanned;
+    }
+  }, [handleQRScanned]);
 
   const renderActiveView = () => {
     switch (currentTab) {
@@ -420,17 +411,7 @@ export default function OperatorPage() {
             <span className="text-xs font-bold text-[var(--text-primary)]">{gateName}</span>
           </div>
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--bg-base)] border border-[var(--border)] text-[10px] text-[var(--text-secondary)]">
-            {isOnline ? (
-              <>
-                <Wifi className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="font-bold text-emerald-400">Online</span>
-              </>
-            ) : (
-              <>
-                <WifiOff className="w-3.5 h-3.5 text-amber-400" />
-                <span className="font-bold text-amber-400">Offline Queue</span>
-              </>
-            )}
+            <span className="font-bold text-emerald-400">Online</span>
           </div>
         </div>
 

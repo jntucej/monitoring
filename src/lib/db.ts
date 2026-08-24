@@ -23,7 +23,7 @@ export const COLLEGE = {
 
 export function sanitizePostgrestParam(val: string): string {
   if (!val) return "";
-  return val.replace(/[,()\\'"]/g, "").trim();
+  return val.replace(/[^a-zA-Z0-9_\-\.\@]/g, "").trim();
 }
 
 export async function resolveAlert(alertId: string, userId: string): Promise<boolean> {
@@ -107,7 +107,7 @@ export function mPerson(r: any): Person {
     uniqueId,
     fullName,
     personType,
-    department: r.department || r.department_id || undefined,
+    department: r.department || r.department_id || r.employee_details?.department_id || undefined,
     designation: r.designation || undefined,
     email: r.email || undefined,
     phone: r.phone || undefined,
@@ -147,9 +147,11 @@ export function mStu(r: any): Student {
 }
 
 function mUser(r: any): User {
+  const isHod = r.is_hod || r.employee_details?.is_hod || undefined;
+  const departmentId = r.department_id || r.employee_details?.department_id || undefined;
   return {
     id: r.id,
-    employeeId: r.employee_id,
+    employeeId: r.employee_id || r.employee_details?.employee_id || undefined,
     name: r.name,
     email: r.email,
     phone: r.phone,
@@ -159,8 +161,8 @@ function mUser(r: any): User {
     parentId: r.parent_id || undefined,
     supervisedGates: r.supervised_gates || undefined,
     assignedHostel: r.assigned_hostel || undefined,
-    isHod: r.is_hod || undefined,
-    departmentId: r.department_id || undefined,
+    isHod,
+    departmentId,
     canViewGender: r.can_view_gender || undefined,
     status: r.status || "ACTIVE",
     personType: r.person_type || undefined,
@@ -647,81 +649,52 @@ export async function findPersonByUniqueId(uniqueId: string): Promise<Person | n
     }
   } catch { /* fallback */ }
 
-  // Tier 4: Dynamic Auto-Provisioning (Ensure scanning/lookup never fails with "Person Not Found")
+  // Tier 4: Query employee_details by employee_id directly (faculty/staff tracking)
   try {
-    const newId = crypto.randomUUID();
-    const isStudentRoll = /^[0-9]{2}[A-Z0-9]+$/i.test(formattedId);
-    const displayName = isStudentRoll ? `Student ${formattedId}` : `User ${formattedId}`;
-    
-    let deptId = "CSE";
-    if (formattedId.includes("05")) deptId = "CSE";
-    else if (formattedId.includes("12")) deptId = "IT";
-    else if (formattedId.includes("04")) deptId = "ECE";
-    else if (formattedId.includes("03")) deptId = "MECH";
-    else if (formattedId.includes("02")) deptId = "EEE";
-    else if (formattedId.includes("01")) deptId = "CIVIL";
+    const { data: eDetails } = await client
+      .from('employee_details')
+      .select('*')
+      .eq('employee_id', formattedId)
+      .maybeSingle();
 
-    const newUser = {
-      id: newId,
-      unique_id: formattedId,
-      name: displayName,
-      role: "student",
-      status: "ACTIVE",
-      email: `${formattedId.toLowerCase()}@jntuhcej.ac.in`,
-      phone: "9876543210",
-      department_id: deptId,
-      photo_url: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(displayName)}`,
-      qr_code: JSON.stringify({ uniqueId: formattedId, role: "student" }),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-
-    const { data: insertedUser, error: insErr } = await client
-      .from('users')
-      .insert(newUser)
-      .select()
-      .single();
-
-    if (!insErr && insertedUser) {
-      const sDet = {
-        user_id: newId,
-        roll: formattedId,
-        hostel_curfew_time: "21:00",
-      };
-      try {
-        await client.from('student_details').insert(sDet);
-      } catch { /* ignore */ }
-      return mPerson({ ...insertedUser, student_details: sDet });
+    if (eDetails && eDetails.user_id) {
+      const { data: userRecord } = await client.from('users').select('*').eq('id', eDetails.user_id).maybeSingle();
+      if (userRecord) {
+        return mPerson({ ...userRecord, employee_details: eDetails });
+      }
     }
-  } catch (err) {
-    console.error("Auto-provisioning student failed, returning fallback person:", err);
-  }
+  } catch { /* fallback */ }
 
-  // Fallback in-memory Person structure (guarantees scan never throws "Person Not Found")
-  const fallbackId = crypto.randomUUID();
-  const fallbackName = `Student ${formattedId}`;
-  return {
-    id: fallbackId,
-    uniqueId: formattedId,
-    fullName: fallbackName,
-    personType: "student",
-    email: `${formattedId.toLowerCase()}@jntuhcej.ac.in`,
-    phone: "9876543210",
-    photoUrl: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(fallbackName)}`,
-    qrCode: JSON.stringify({ uniqueId: formattedId, role: "student" }),
-    status: "ACTIVE",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    studentDetails: {
-      personId: fallbackId,
-      roll: formattedId,
-      hostelCurfewTime: "21:00",
-    },
-    roll: formattedId,
-    name: fallbackName,
-    photo: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(fallbackName)}`,
-    hostelCurfewTime: "21:00",
-  };
+  // Tier 5: Try hyphenated/stripped variants (e.g. FAC001 <-> FAC-001, EMP001 <-> EMP-001)
+  try {
+    const hasHyphen = formattedId.includes("-");
+    const altId = hasHyphen ? formattedId.replace(/-/g, "") : formattedId.replace(/^([A-Z]+)(\d+)$/, "$1-$2");
+    if (altId && altId !== formattedId) {
+      const { data: altUser } = await client
+        .from('users')
+        .select('*, student_details!student_details_user_id_fkey(*), employee_details(*)')
+        .eq('unique_id', altId)
+        .maybeSingle();
+      if (altUser) {
+        return mPerson(altUser);
+      }
+
+      const { data: altEmp } = await client
+        .from('employee_details')
+        .select('*')
+        .eq('employee_id', altId)
+        .maybeSingle();
+      if (altEmp && altEmp.user_id) {
+        const { data: userRec } = await client.from('users').select('*').eq('id', altEmp.user_id).maybeSingle();
+        if (userRec) {
+          return mPerson({ ...userRec, employee_details: altEmp });
+        }
+      }
+    }
+  } catch { /* fallback */ }
+
+  // Person not found in database
+  return null;
 }
 
 // Backwards compatibility aliases
@@ -857,6 +830,40 @@ export async function checkOutVisitor(personId: string): Promise<boolean> {
  * ------------------------------------------------------------------ */
 
 export async function findGateById(id: string): Promise<Gate | null> {
+  if (typeof window !== "undefined") {
+    try {
+      const authStore = (await import("@/stores/authStore")).useAuthStore.getState();
+      const token = authStore.token;
+      const sessionToken = authStore.user?.currentSessionToken;
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+      if (sessionToken) headers["X-Session-Token"] = sessionToken;
+
+      const res = await fetch("/api/gates", { headers });
+      if (res.ok) {
+        const result = await res.json();
+        if (result.success && Array.isArray(result.data)) {
+          const match = result.data.find((g: any) =>
+            g.id === id ||
+            g.gate_code?.toLowerCase() === id.toLowerCase() ||
+            g.name?.toLowerCase().includes(id.toLowerCase())
+          );
+          if (match) {
+            return { id: match.id, name: match.name, location: match.location, type: match.type, isActive: !!match.is_active };
+          }
+          if (id === "1" || id === "gate-1") {
+            const first = result.data[0];
+            if (first) {
+              return { id: first.id, name: first.name, location: first.location, type: first.type, isActive: !!first.is_active };
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.warn("findGateById client fetch error:", err);
+    }
+  }
+
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
   if (isUuid) {
     const { data, error } = await supabase.from('gates').select('*').eq('id', id).single();
@@ -882,13 +889,40 @@ export async function findGateById(id: string): Promise<Gate | null> {
 }
 
 export async function findAllGates(): Promise<Gate[]> {
+  if (typeof window !== "undefined") {
+    try {
+      const authStore = (await import("@/stores/authStore")).useAuthStore.getState();
+      const token = authStore.token;
+      const sessionToken = authStore.user?.currentSessionToken;
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+      if (sessionToken) headers["X-Session-Token"] = sessionToken;
+
+      const res = await fetch("/api/gates", { headers });
+      if (res.ok) {
+        const result = await res.json();
+        if (result.success && Array.isArray(result.data)) {
+          return result.data.map((g: any) => ({
+            id: g.id,
+            name: g.name,
+            location: g.location,
+            type: g.type,
+            isActive: !!g.is_active
+          }));
+        }
+      }
+    } catch (err) {
+      console.warn("findAllGates client fetch error:", err);
+    }
+  }
+
   const { data, error } = await supabase.from('gates').select('*');
   if (error || !data) return GATES;
   return data.map(g => ({ id: g.id, name: g.name, location: g.location, type: g.type, isActive: !!g.is_active }));
 }
 
 export async function findAllUsers(): Promise<User[]> {
-  const { data, error } = await supabase.from('users').select('*');
+  const { data, error } = await supabase.from('users').select('*, employee_details(*)');
   if (error || !data) return [];
   return data.map(mUser);
 }
@@ -967,17 +1001,17 @@ export async function findUserById(id: string): Promise<User | null> {
   } catch { /* fallback */ }
 
   if (isUuid) {
-    const { data, error } = await client.from('users').select('*').eq('id', id).maybeSingle();
+    const { data, error } = await client.from('users').select('*, employee_details(*)').eq('id', id).maybeSingle();
     if (!error && data) return mUser(data);
   }
 
-  const { data: uData } = await client.from('users').select('*').eq('unique_id', id).maybeSingle();
+  const { data: uData } = await client.from('users').select('*, employee_details(*)').eq('unique_id', id).maybeSingle();
   if (uData) return mUser(uData);
 
-  const { data: ops } = await client.from('users').select('*').eq('role', 'operator').limit(1);
+  const { data: ops } = await client.from('users').select('*, employee_details(*)').eq('role', 'operator').limit(1);
   if (ops && ops.length > 0) return mUser(ops[0]);
 
-  const { data: anyUser } = await client.from('users').select('*').limit(1);
+  const { data: anyUser } = await client.from('users').select('*, employee_details(*)').limit(1);
   if (anyUser && anyUser.length > 0) return mUser(anyUser[0]);
 
   return null;
@@ -986,7 +1020,7 @@ export async function findUserById(id: string): Promise<User | null> {
 export async function findUserByLogin(login: string): Promise<User | null> {
   const { data, error } = await supabase
     .from('users')
-    .select('*')
+    .select('*, employee_details(*)')
     .or(`employee_id.eq.${login.trim()},email.eq.${login.trim()},name.eq.${login.trim()}`)
     .eq('status', 'ACTIVE')
     .maybeSingle();
@@ -1170,6 +1204,7 @@ export async function addScan(input: {
   gateId: string;
   operatorId: string;
   isManual?: boolean;
+  clientEventId?: string;
 }): Promise<{ scan: Scan; duplicate: boolean }> {
   const uniqueId = input.roll.trim().toUpperCase();
 
@@ -1180,6 +1215,27 @@ export async function addScan(input: {
 
   if (person.status && person.status.toUpperCase() !== "ACTIVE") {
     throw new Error(`Access Denied: Account status is ${person.status}. Gate access denied.`);
+  }
+
+  let client = supabase;
+  try {
+    const { getSupabaseServiceClient } = await import('./supabaseClient');
+    client = getSupabaseServiceClient();
+  } catch { /* fallback */ }
+
+  const isUuid = (str?: string) => !!str && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+
+  // DB Idempotency Check via clientEventId
+  if (input.clientEventId && isUuid(input.clientEventId)) {
+    const { data: existingLog } = await client
+      .from('movement_logs')
+      .select('*, users:users!movement_logs_user_id_fkey(*)')
+      .eq('id', input.clientEventId)
+      .maybeSingle();
+
+    if (existingLog) {
+      return { scan: mScan(existingLog), duplicate: true };
+    }
   }
 
   const duplicate = await isDuplicate(uniqueId, input.direction);
@@ -1197,7 +1253,7 @@ export async function addScan(input: {
   if (!op) throw new Error("Invalid operator ID");
 
   const ts = new Date().toISOString();
-  const id = crypto.randomUUID();
+  const id = (input.clientEventId && isUuid(input.clientEventId)) ? input.clientEventId : crypto.randomUUID();
 
   const scanRow = {
     id,
@@ -1213,14 +1269,18 @@ export async function addScan(input: {
     is_correction: false,
   };
 
-  let client = supabase;
-  try {
-    const { getSupabaseServiceClient } = await import('./supabaseClient');
-    client = getSupabaseServiceClient();
-  } catch { /* fallback */ }
-
   const { data, error } = await client.from('movement_logs').insert(scanRow).select('*, users:users!movement_logs_user_id_fkey(*)').single();
   if (error || !data) {
+    if (error?.code === '23505') {
+      const { data: existingLog } = await client
+        .from('movement_logs')
+        .select('*, users:users!movement_logs_user_id_fkey(*)')
+        .eq('id', id)
+        .maybeSingle();
+      if (existingLog) {
+        return { scan: mScan(existingLog), duplicate: true };
+      }
+    }
     console.error('Error inserting scan:', error);
     throw new Error(`Failed to log scan: ${error?.message}`);
   }

@@ -97,6 +97,26 @@ export function Scanner({
     const file = event.target.files?.[0];
     if (!file) return;
 
+    // Validate file type
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      alert("Invalid file type. Please upload a PNG, JPEG, or WEBP image.");
+      if (event.target) {
+        event.target.value = "";
+      }
+      return;
+    }
+
+    // Limit file size to 5MB
+    const maxSizeBytes = 5 * 1024 * 1024;
+    if (file.size > maxSizeBytes) {
+      alert("Image is too large. Please upload an image smaller than 5MB.");
+      if (event.target) {
+        event.target.value = "";
+      }
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = new Image();

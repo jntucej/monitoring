@@ -98,17 +98,23 @@ export default function AdminReportsPage() {
     }, 500);
   };
 
-  const exportAll = () => {
-    if (!data) return;
-    const rep: GeneratedReport = {
-      id: `rpt-${Date.now()}`,
-      title: "All-Data Export",
-      range: todayISO(),
-      type: "Daily",
-      generatedAt: new Date().toISOString(),
-      source: "manual",
-    };
-    downloadReportCSV(rep, data);
+  const exportAll = async () => {
+    try {
+      const res = await fetch(`/api/analytics/export?from=${todayISO()}&format=csv`);
+      if (!res.ok) throw new Error("Failed to export report");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `gate_activity_report_${todayISO()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Export error:", err);
+      alert("Failed to export report from server");
+    }
   };
 
   const attendanceRate = data

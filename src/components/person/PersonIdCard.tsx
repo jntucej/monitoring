@@ -27,7 +27,11 @@ export function PersonIdCard({ person: initialPerson, type }: PersonIdCardProps 
       try {
         const authRaw = localStorage.getItem("gate-monitor-auth");
         const auth = authRaw ? JSON.parse(authRaw) : null;
-        const uniqueId = auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll ?? "24JJ1A0501";
+        const uniqueId = auth?.state?.user?.uniqueId ?? auth?.state?.user?.roll ?? auth?.state?.user?.studentRoll ?? auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll;
+        if (!uniqueId) {
+          if (!cancelled) setLoading(false);
+          return;
+        }
         const res = await fetch(`/api/persons/${encodeURIComponent(uniqueId)}`, { cache: "no-store" });
         const json = await res.json();
         if (!cancelled) {

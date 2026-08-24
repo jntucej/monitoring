@@ -24,17 +24,24 @@ function fmtTime(iso: string | null) {
 export default function AdminAttendancePage() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
 
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
       setLoading(true);
+      setError(null);
       try {
         const [logsRes, stuRes] = await Promise.all([
-          fetch(`/api/gate/logs?date=${date}&limit=10000`, { cache: "no-store" }),
+          fetch(`/api/gate/logs?date=${date}&limit=1000`, { cache: "no-store" }),
           fetch(`/api/students`, { cache: "no-store" }),
         ]);
+
+        if (!logsRes.ok || !stuRes.ok) {
+          throw new Error("Failed to fetch attendance logs or student list");
+        }
+
         const logsJson = await logsRes.json();
         const stuJson = await stuRes.json();
         if (cancelled) return;
@@ -89,8 +96,9 @@ export default function AdminAttendancePage() {
         const present = Object.values(byRoll).filter((r) => r.timeIn || r.timeOut);
         const absent = Object.values(byRoll).filter((r) => !r.timeIn && !r.timeOut).slice(0, 50);
         setRows([...present, ...absent]);
-      } catch {
-        // ignore
+      } catch (err: any) {
+        console.error("Failed to load attendance data:", err);
+        if (!cancelled) setError(err?.message || "Failed to load attendance data");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -163,6 +171,8 @@ export default function AdminAttendancePage() {
             <tbody className="divide-y divide-[var(--border)]">
               {loading ? (
                 <tr><td colSpan={5} className="p-8 text-center text-[var(--text-muted)]">Loading…</td></tr>
+              ) : error ? (
+                <tr><td colSpan={5} className="p-8 text-center text-rose-400">{error}</td></tr>
               ) : rows.length === 0 ? (
                 <tr><td colSpan={5} className="p-8 text-center text-[var(--text-muted)]">No records</td></tr>
               ) : (

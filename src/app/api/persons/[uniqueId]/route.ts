@@ -18,16 +18,16 @@ async function handleGet(req: NextRequest) {
     const isAllowedRole = ["supervisor", "admin", "sysadmin", "faculty", "staff", "operator"].includes(authRole || "");
 
     if (!isAllowedRole) {
-      if (authRole === "student" || authRole === "parent" || authRole === "guardian") {
+      if (authRole === "student" || authRole === "parent" || authRole === "guardian" || authRole === "worker") {
         // Query users and student_details to check owner or guardian link
-        const { data: studentCheck } = await supabase
+        const { data: userCheck } = await supabase
           .from("users")
           .select("id, unique_id, student_details!student_details_user_id_fkey(guardian_id)")
           .eq("unique_id", uniqueId)
           .maybeSingle();
 
-        const isSelf = studentCheck?.id === authUserId || studentCheck?.unique_id === uniqueId;
-        const isChildOfGuardian = studentCheck?.student_details && (studentCheck.student_details as any).guardian_id === authUserId;
+        const isSelf = userCheck?.id === authUserId || userCheck?.unique_id === uniqueId;
+        const isChildOfGuardian = userCheck?.student_details && (userCheck.student_details as any).guardian_id === authUserId;
 
         if (!isSelf && !isChildOfGuardian) {
           return NextResponse.json(
@@ -51,8 +51,8 @@ async function handleGet(req: NextRequest) {
       );
     }
 
-    const status = await getPersonStatus(person.id);
-    const history = await getPersonHistory(person.id, 20);
+    const status = await getPersonStatus(uniqueId);
+    const history = await getPersonHistory(uniqueId, 20);
 
     return NextResponse.json({
       success: true,
@@ -73,6 +73,6 @@ async function handleGet(req: NextRequest) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["supervisor", "admin", "sysadmin", "student", "parent", "faculty", "staff", "operator"] }),
+  withAuthorization(handleGet, { requiredRole: ["supervisor", "admin", "sysadmin", "student", "parent", "faculty", "staff", "operator", "worker"] }),
   { keyPrefix: "person_details", maxRequests: 100 }
 );

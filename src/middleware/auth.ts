@@ -71,21 +71,19 @@ export async function authMiddleware(req: NextRequest) {
     );
   }
 
-  // Strict check: if profile has handle stored, verify match with X-Session-Token header.
-  if (profile.handle) {
-    const sessionToken = req.headers.get('x-session-token');
-    if (!sessionToken || sessionToken !== profile.handle) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'SESSION_EXPIRED',
-            message: 'Your session has expired or you have logged in from another device.',
-          },
+  // Strict check: verify match with X-Session-Token header.
+  const sessionToken = req.headers.get('x-session-token');
+  if (!profile.handle || !sessionToken || sessionToken !== profile.handle) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: 'SESSION_EXPIRED',
+          message: 'Your session has expired or you have logged in from another device.',
         },
-        { status: 401 }
-      );
-    }
+      },
+      { status: 401 }
+    );
   }
 
   // Attach user information to headers
@@ -162,21 +160,19 @@ export function withAuth(handler: (req: NextRequest) => Promise<Response>) {
       );
     }
 
-    // Strict check: if profile has handle stored, verify match with X-Session-Token header.
-    if (profile.handle) {
-      const sessionToken = req.headers.get('x-session-token');
-      if (!sessionToken || sessionToken !== profile.handle) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: {
-              code: 'SESSION_EXPIRED',
-              message: 'Your session has expired or you have logged in from another device.',
-            },
+    // Strict check: verify match with X-Session-Token header.
+    const sessionToken = req.headers.get('x-session-token');
+    if (!profile.handle || !sessionToken || sessionToken !== profile.handle) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'SESSION_EXPIRED',
+            message: 'Your session has expired or you have logged in from another device.',
           },
-          { status: 401 }
-        );
-      }
+        },
+        { status: 401 }
+      );
     }
 
     // Create new request with user information

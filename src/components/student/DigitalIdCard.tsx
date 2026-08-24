@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { QrCode, Loader2 } from "lucide-react";
+import { QrCode, Loader2, AlertCircle } from "lucide-react";
 import { QRCode } from "react-qrcode-logo";
 import { parseRollNumber } from "@/lib/rollNumber";
 import type { Student } from "@/lib/types";
@@ -8,6 +8,7 @@ import type { Student } from "@/lib/types";
 export function DigitalIdCard() {
   const [student, setStudent] = useState<Student | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -15,16 +16,29 @@ export function DigitalIdCard() {
       try {
         const authRaw = localStorage.getItem("gate-monitor-auth");
         const auth = authRaw ? JSON.parse(authRaw) : null;
-        // Demo: roll from auth or fallback to sample
-        const roll = auth?.user?.roll ?? auth?.user?.studentRoll ?? "24JJ1A0501";
+        const roll = auth?.state?.user?.uniqueId ?? auth?.state?.user?.roll ?? auth?.state?.user?.studentRoll ?? auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll;
+        if (!roll) {
+          if (!cancelled) {
+            setError("No student roll number found in session. Please log in again.");
+            setLoading(false);
+          }
+          return;
+        }
         const res = await fetch(`/api/students/${encodeURIComponent(roll)}`, { cache: "no-store" });
         const json = await res.json();
         if (!cancelled) {
-          setStudent(json.data ?? null);
+          if (res.ok && json.success) {
+            setStudent(json.data?.student ?? json.data ?? null);
+          } else {
+            setError(json.error?.message || "Failed to load student record.");
+          }
           setLoading(false);
         }
       } catch {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setError("Network error loading student data.");
+          setLoading(false);
+        }
       }
     };
     load();
@@ -41,10 +55,12 @@ export function DigitalIdCard() {
     );
   }
 
-  if (!student) {
+  if (error || !student) {
     return (
-      <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-8 text-sm text-[var(--text-muted)]">
-        Student record not found.
+      <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-8 text-center space-y-2">
+        <AlertCircle className="w-8 h-8 text-[var(--action-danger)] mx-auto opacity-60" />
+        <p className="text-sm font-semibold text-[var(--text-primary)]">Unable to Load ID Card</p>
+        <p className="text-xs text-[var(--text-muted)]">{error || "Student record not found."}</p>
       </div>
     );
   }

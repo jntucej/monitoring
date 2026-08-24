@@ -27,7 +27,12 @@ async function handleGet(req: NextRequest) {
     const uniqueId = params.get("uniqueId") || params.get("roll");
     const q = params.get("q");
     const type = params.get("type") as PersonType | null;
-    const parentId = params.get("parentId");
+    let parentId = params.get("parentId");
+
+    // Force parentId to be the user's own ID if client role is parent or guardian to prevent tampering
+    if (authRole === "parent" || authRole === "guardian") {
+      parentId = authUserId;
+    }
 
     if (parentId) {
       if (authRole !== "admin" && authRole !== "sysadmin" && authUserId !== parentId) {
@@ -41,12 +46,6 @@ async function handleGet(req: NextRequest) {
     }
 
     if (uniqueId) {
-      if (!["operator", "supervisor", "admin", "sysadmin", "faculty", "staff"].includes(authRole || "")) {
-        return NextResponse.json(
-          { success: false, error: { code: "FORBIDDEN", message: "Insufficient permissions to look up person." } },
-          { status: 403 }
-        );
-      }
       const person = await findPersonByUniqueId(uniqueId);
       if (!person) {
         return NextResponse.json(
@@ -54,7 +53,34 @@ async function handleGet(req: NextRequest) {
           { status: 404 }
         );
       }
-      return NextResponse.json({ success: true, data: person });
+
+      // Privileged roles can view any person details
+      if (["operator", "supervisor", "admin", "sysadmin"].includes(authRole || "")) {
+        return NextResponse.json({ success: true, data: person });
+      }
+
+      // For faculty/staff/parent/student: ensure self-lookup
+      const isSelf = authUserId && (
+        authUserId === person.id ||
+        authUserId === person.uniqueId ||
+        authUserId === person.employeeDetails?.employeeId
+      );
+      if (isSelf) {
+        return NextResponse.json({ success: true, data: person });
+      }
+
+      if (authRole === "faculty" && authUserId) {
+        const { findUserById } = await import("@/lib/db");
+        const callingUser = await findUserById(authUserId);
+        if (callingUser?.isHod && callingUser.departmentId && callingUser.departmentId === person.department) {
+          return NextResponse.json({ success: true, data: person });
+        }
+      }
+
+      return NextResponse.json(
+        { success: false, error: { code: "FORBIDDEN", message: "You do not have permission to view this profile." } },
+        { status: 403 }
+      );
     }
 
     if (q) {

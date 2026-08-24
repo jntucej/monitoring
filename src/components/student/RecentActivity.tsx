@@ -13,7 +13,11 @@ export function RecentActivity() {
       try {
         const authRaw = localStorage.getItem("gate-monitor-auth");
         const auth = authRaw ? JSON.parse(authRaw) : null;
-        const roll = auth?.user?.roll ?? auth?.user?.studentRoll ?? "24JJ1A0501";
+        const roll = auth?.state?.user?.uniqueId ?? auth?.state?.user?.roll ?? auth?.state?.user?.studentRoll ?? auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll;
+        if (!roll) {
+          if (!cancelled) setLoading(false);
+          return;
+        }
         const res = await fetch(`/api/students/${encodeURIComponent(roll)}/history?limit=5`, { cache: "no-store" });
         const json = await res.json();
         if (!cancelled) {

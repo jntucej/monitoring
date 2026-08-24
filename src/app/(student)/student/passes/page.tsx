@@ -15,15 +15,15 @@ export default function StudentPassesPage() {
   const [reasonText, setReasonText] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const getStudentRoll = () => {
-    if (typeof window === "undefined") return "24JJ1A0501";
+  const getStudentRoll = (): string | null => {
+    if (typeof window === "undefined") return null;
     const authRaw = localStorage.getItem("gate-monitor-auth");
-    if (!authRaw) return "24JJ1A0501";
+    if (!authRaw) return null;
     try {
       const auth = JSON.parse(authRaw);
-      return auth?.user?.roll ?? auth?.user?.studentRoll ?? auth?.user?.id ?? "24JJ1A0501";
+      return auth?.state?.user?.uniqueId ?? auth?.state?.user?.roll ?? auth?.state?.user?.studentRoll ?? auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll ?? null;
     } catch {
-      return "24JJ1A0501";
+      return null;
     }
   };
 
@@ -31,6 +31,10 @@ export default function StudentPassesPage() {
     try {
       setLoading(true);
       const roll = getStudentRoll();
+      if (!roll) {
+        setPasses([]);
+        return;
+      }
       const res = await fetch(`/api/passes?roll=${encodeURIComponent(roll)}`, { cache: "no-store" });
       const json = await res.json();
       if (json.success && Array.isArray(json.data)) {
@@ -57,6 +61,15 @@ export default function StudentPassesPage() {
     setSubmitting(true);
     try {
       const roll = getStudentRoll();
+      if (!roll) {
+        addToast({
+          title: "Session Error",
+          message: "No student roll number found. Please log in again.",
+          variant: "error",
+        });
+        setSubmitting(false);
+        return;
+      }
       const res = await fetch("/api/passes", {
         method: "POST",
         headers: {

@@ -3,9 +3,9 @@ import { VisitorPreRegistration } from "@/lib/integration-types";
 import { sendEmail } from "@/lib/integrations/email";
 import { sendSMS } from "@/lib/integrations/sms";
 
-// Generate QR code payload or data string
+// Generate QR code payload or data string using a secure UUID token
 export function generateQR(payload: string): string {
-  return `QR:${payload}`;
+  return `VSTR:${payload}`;
 }
 
 // Create a visitor pre-registration
@@ -13,8 +13,9 @@ export async function createVisitorPreRegistration(
   data: Omit<VisitorPreRegistration, "id" | "createdAt" | "updatedAt" | "status" | "qrCode">
 ): Promise<VisitorPreRegistration | null> {
   try {
-    const id = `visit_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
-    const qrCode = generateQR(`VIS-${id}`);
+    const token = crypto.randomUUID();
+    const id = `visit_${token}`;
+    const qrCode = generateQR(token);
 
     const { data: registration, error } = await supabase
       .from("visitor_pre_registrations")

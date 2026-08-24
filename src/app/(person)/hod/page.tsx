@@ -4,8 +4,19 @@ import React, { useState, useEffect } from "react";
 import { PersonBadge } from "@/components/shared/PersonBadge";
 import { Building, Users, CheckCircle2, XCircle, Search, RefreshCw, ShieldAlert } from "lucide-react";
 
+interface FacultyMember {
+  id: string;
+  uniqueId: string;
+  fullName: string;
+  email?: string;
+  phone?: string;
+  photoUrl?: string;
+  designation?: string;
+  department?: string;
+}
+
 export default function HodConsolePage() {
-  const [facultyList, setFacultyList] = useState<any[]>([]);
+  const [facultyList, setFacultyList] = useState<FacultyMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [department, setDepartment] = useState("Computer Science & Engineering");
@@ -37,8 +48,8 @@ export default function HodConsolePage() {
   );
 
   const totalCount = facultyList.length;
-  // Mock active status based on ID mod for realistic demonstration
-  const activeOnCampus = facultyList.filter((f, idx) => idx % 2 === 0).length;
+  // Campus status is fetched from the API alongside faculty list (/api/persons?type=faculty returns status)
+  const activeOnCampus = facultyList.filter((f: any) => f.campusStatus === "IN" || f.status === "IN").length;
   const offCampus = totalCount - activeOnCampus;
 
   return (
@@ -141,8 +152,13 @@ export default function HodConsolePage() {
                     </td>
                   </tr>
                 ) : (
-                  filteredFaculty.map((item, idx) => {
-                    const isOnCampus = idx % 2 === 0;
+                  filteredFaculty.map((item: any) => {
+                    const isOnCampus = item.campusStatus === "IN" || item.status === "IN";
+                    const lastScanTs = item.lastScan?.timestamp
+                      ? new Date(item.lastScan.timestamp).toLocaleString("en-IN", {
+                          month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit",
+                        })
+                      : "—";
                     return (
                       <tr key={item.id} className="hover:bg-[var(--bg-base)]/50 transition-colors">
                         <td className="p-3.5 font-semibold flex items-center gap-3">
@@ -171,7 +187,7 @@ export default function HodConsolePage() {
                           </span>
                         </td>
                         <td className="p-3.5 text-[var(--text-muted)] font-mono">
-                          {isOnCampus ? "Today, 08:35 AM" : "Yesterday, 05:15 PM"}
+                          {lastScanTs}
                         </td>
                       </tr>
                     );

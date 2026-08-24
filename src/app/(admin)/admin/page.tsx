@@ -31,8 +31,11 @@ export default function AdminDashboardPage() {
       }
     };
     load();
-    // Refresh every 30s for live feel
-    const t = setInterval(load, 30_000);
+    // Refresh every 30s for live feel (only when tab is active)
+    const t = setInterval(() => {
+      if (typeof document !== "undefined" && document.hidden) return;
+      load();
+    }, 30_000);
     return () => {
       cancelled = true;
       clearInterval(t);

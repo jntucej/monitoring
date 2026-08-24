@@ -61,21 +61,19 @@ export function withAuthorization(
       // Validate basic authentication
       const authContext = await requireAuthUser(token);
 
-      // Strict check: if profile has handle stored, verify match with X-Session-Token header.
-      if (authContext.handle) {
-        const sessionToken = req.headers.get('x-session-token');
-        if (!sessionToken || sessionToken !== authContext.handle) {
-          return NextResponse.json(
-            {
-              success: false,
-              error: {
-                code: 'SESSION_EXPIRED',
-                message: 'Your session has expired or you have logged in from another device.',
-              },
+      // Strict check: verify match with X-Session-Token header.
+      const sessionToken = req.headers.get('x-session-token');
+      if (!authContext.handle || !sessionToken || sessionToken !== authContext.handle) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: 'SESSION_EXPIRED',
+              message: 'Your session has expired or you have logged in from another device.',
             },
-            { status: 401 }
-          );
-        }
+          },
+          { status: 401 }
+        );
       }
 
       // Check account status - must be ACTIVE unless explicitly allowed

@@ -65,13 +65,31 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
 
   const handleSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!rollInput.trim() || !rollValid) return;
+    const cleanInput = rollInput.trim().toUpperCase();
+    if (!cleanInput) return;
+
+    const isKnownPrefix = ["FAC", "STF", "EMP", "HOD", "SUP", "ADM", "WDN", "WRK", "VIS", "F-", "E-", "H-", "S-", "FAC-", "STF-", "EMP-", "HOD-", "SUP-", "ADM-", "WDN-", "WRK-", "VIS-"].some((p) => cleanInput.startsWith(p));
+    if (!isKnownPrefix && !validateRollNumber(cleanInput)) {
+      addToast({
+        title: "Invalid Roll Format",
+        message: `"${cleanInput}" does not match the expected 10-character JNTUH roll number schema (e.g. 24JJ1A0501).`,
+        variant: "error",
+      });
+      return;
+    }
+
     setSearching(true);
-    const found = await findStudentByRoll(rollInput.trim().toUpperCase());
+    const found = await findStudentByRoll(cleanInput);
     setSearching(false);
     if (found) {
       setStudent(found);
       setStep("confirm");
+    } else {
+      addToast({
+        title: "Person Not Found",
+        message: `No registered student or user found matching ID "${cleanInput}".`,
+        variant: "error",
+      });
     }
   };
 
@@ -96,9 +114,17 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
         user?.employeeId,
         user?.uniqueId,
         user?.email,
-        "SUP-001",
-        "OP-001",
       ].filter((val): val is string => Boolean(val && val.trim()));
+
+      if (candidates.length === 0) {
+        addToast({
+          title: "Configuration Error",
+          message: "No user identifier found for PIN verification.",
+          variant: "error",
+        });
+        setSubmitting(false);
+        return;
+      }
 
       let verifyData: any = null;
 

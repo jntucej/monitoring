@@ -8,6 +8,7 @@ import type { Scan, Person, Student, Gate, ScanDirection, ExitReason } from "@/l
 import type { ToastData } from "@/components/ui/toast";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
+import { validateRollNumber } from "@/lib/rollNumber";
 
 type ScanState = "idle" | "detecting" | "confirming" | "selecting_reason" | "success" | "error";
 
@@ -32,10 +33,6 @@ interface OperatorState {
   recentScans: Scan[];
   gate: Gate | null;
 
-  // Offline queue
-  offlineQueue: Array<{ id: string; roll: string; direction: ScanDirection; reason?: ExitReason }>;
-  isOnline: boolean;
-
   // Actions
   startScan: (roll: string) => void;
   setDirection: (direction: ScanDirection) => void;
@@ -45,8 +42,6 @@ interface OperatorState {
   reset: () => void;
   loadStats: () => void;
   setGate: (gateId: string) => void;
-  flushOfflineQueue: () => Promise<void>;
-  setOnline: (online: boolean) => void;
 }
 
 export const useOperatorStore = create<OperatorState>()((set, get) => ({
@@ -61,9 +56,6 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
   todaysStats: null,
   recentScans: [],
   gate: null,
-
-  offlineQueue: [],
-  isOnline: true,
 
   startScan: async (roll) => {
     const cleanRoll = roll.trim().toUpperCase();
@@ -140,50 +132,14 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
       });
     } catch (err) {
       console.error("Network or fetch error during scan start:", err);
-
-      // Handle offline mode gracefully
-      if (typeof navigator !== "undefined" && !navigator.onLine) {
-        const isFac = cleanRoll.startsWith("FAC");
-        const isStf = cleanRoll.startsWith("STF");
-        const isWrk = cleanRoll.startsWith("WRK");
-        const isVis = cleanRoll.startsWith("VIS");
-        const personType = isFac ? "faculty" : isStf ? "staff" : isWrk ? "worker" : isVis ? "visitor" : "student";
-
-        const offlineStudent = {
-          id: `per-${cleanRoll.toLowerCase()}`,
-          uniqueId: cleanRoll,
-          fullName: `${personType.toUpperCase()} (${cleanRoll})`,
-          personType,
-          department: "CSE",
-          roll: cleanRoll,
-          name: `${personType.toUpperCase()} (${cleanRoll})`,
-          photo: "/avatar-placeholder.png",
-          photoUrl: "/avatar-placeholder.png",
-          email: `${cleanRoll.toLowerCase()}@gatekeeper.edu`,
-          phone: "+91 9876543210",
-          qrCode: cleanRoll,
-          idValidUntil: "2028-12-31",
-          status: "ACTIVE",
-        } as Person;
-
-        set({
-          state: "confirming",
-          currentStudent: offlineStudent,
-          selectedDirection: "IN",
-          selectedReason: null,
-          photoVerificationDone: false,
-          error: null,
-        });
-      } else {
-        set({
-          state: "error",
-          error: {
-            message: err instanceof Error ? err.message : "Unable to communicate with server.",
-            code: "NETWORK_ERROR",
-          },
-          currentStudent: null,
-        });
-      }
+      set({
+        state: "error",
+        error: {
+          message: err instanceof Error ? err.message : "Unable to communicate with server.",
+          code: "NETWORK_ERROR",
+        },
+        currentStudent: null,
+      });
     }
   },
 
@@ -285,41 +241,6 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
         });
       })
       .catch((err: unknown) => {
-        const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
-        if (isOffline || (err instanceof TypeError && err.message.toLowerCase().includes("fetch"))) {
-          // Offline mode — queue scan locally
-          const offlineScan = {
-            id: crypto.randomUUID(),
-            roll: uniqueId,
-            direction: directionToUse,
-            reason: reasonToUse || (directionToUse === "OUT" ? "Regular" : undefined),
-          };
-          const updatedQueue = [...get().offlineQueue, offlineScan];
-
-          addToast({
-            variant: "warning",
-            title: "Offline Mode",
-            message: `Scan for ${currentStudent.name} (${uniqueId}) saved offline. Will sync when connection is restored.`,
-          });
-
-          const prev = get().todaysStats;
-          const newStats = prev
-            ? {
-                entries: directionToUse === "IN" ? prev.entries + 1 : prev.entries,
-                exits: directionToUse === "OUT" ? prev.exits + 1 : prev.exits,
-                onCampus: directionToUse === "IN" ? prev.onCampus + 1 : prev.onCampus - 1,
-              }
-            : null;
-
-          set({
-            state: "success",
-            offlineQueue: updatedQueue,
-            todaysStats: newStats,
-            error: null,
-          });
-          return;
-        }
-
         const msg = err instanceof Error ? err.message : "An unexpected error occurred during scan confirmation.";
         addToast({
           variant: "error",
@@ -370,87 +291,4 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
     const gate = await findGateById(normalizedGateId);
     set({ gate: gate ?? null });
   },
-
-  flushOfflineQueue: async () => {
-    const { offlineQueue, gate } = get();
-    if (offlineQueue.length === 0) return;
-
-    const { addToast } = useUIStore.getState();
-
-    try {
-      const authStore = useAuthStore.getState();
-      const token = authStore.token;
-
-      if (!token) {
-        console.warn("No auth token available for sync");
-        return;
-      }
-
-      const response = await fetch("/api/gate/logs", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-          "X-Session-Token": authStore.user?.currentSessionToken || "",
-        },
-        body: JSON.stringify({
-          scans: offlineQueue.map((scan) => ({
-            ...scan,
-            gateId: gate?.id || "gate-1",
-          })),
-        }),
-      });
-
-      const result = await response.json();
-      if (response.status === 401 && result?.error?.code === "SESSION_EXPIRED") {
-        authStore.logout();
-        if (typeof window !== "undefined") {
-          window.location.href = "/login";
-        }
-        return;
-      }
-      if (result.success) {
-        const failedCount =
-          result.data?.results?.filter((r: any) => r.status === "error")?.length || 0;
-        if (failedCount === 0) {
-          addToast({
-            title: "Sync Complete",
-            message: `All ${offlineQueue.length} offline scans synced successfully.`,
-            variant: "success",
-          });
-        } else {
-          addToast({
-            title: "Partial Sync",
-            message: `${offlineQueue.length - failedCount} of ${offlineQueue.length} scans synced. ${failedCount} failed.`,
-            variant: "warning",
-          });
-          // Keep failed scans in queue
-          const results = result.data.results;
-          const failedScans = offlineQueue.filter(
-            (_, index) => results[index]?.status === "error"
-          );
-          set({ offlineQueue: failedScans });
-          return;
-        }
-      } else {
-        addToast({
-          title: "Sync Failed",
-          message: "Could not sync offline scans. Please try again later.",
-          variant: "error",
-        });
-        return;
-      }
-
-      set({ offlineQueue: [] });
-    } catch (error) {
-      console.error("Error syncing offline queue:", error);
-      addToast({
-        title: "Sync Error",
-        message: "Network error while syncing scans.",
-        variant: "error",
-      });
-    }
-  },
-
-  setOnline: (online) => set({ isOnline: online }),
 }));

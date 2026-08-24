@@ -7,9 +7,10 @@ import { RecentActivity } from "@/components/student/RecentActivity";
 import { PersonBadge } from "@/components/shared/PersonBadge";
 import { Briefcase, Building, Clock, FileText, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import type { Person } from "@/lib/types";
 
 export default function FacultyDashboardPage() {
-  const [person, setPerson] = useState<any>(null);
+  const [person, setPerson] = useState<Person | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,7 +19,13 @@ export default function FacultyDashboardPage() {
       try {
         const authRaw = localStorage.getItem("gate-monitor-auth");
         const auth = authRaw ? JSON.parse(authRaw) : null;
-        const uniqueId = auth?.user?.uniqueId ?? auth?.user?.roll ?? "FAC-001";
+        const uniqueId = auth?.state?.user?.uniqueId ?? auth?.state?.user?.roll ?? auth?.user?.uniqueId ?? auth?.user?.roll;
+        if (!uniqueId) {
+          if (!cancelled) {
+            setLoading(false);
+          }
+          return;
+        }
         
         const res = await fetch(`/api/persons/${encodeURIComponent(uniqueId)}`, { cache: "no-store" });
         const json = await res.json();
@@ -39,7 +46,8 @@ export default function FacultyDashboardPage() {
     };
   }, []);
 
-  const isHod = person?.employeeDetails?.is_hod || person?.designation?.toLowerCase().includes("head") || person?.designation?.toLowerCase().includes("hod");
+  // HOD elevated privileges are disabled for normal HOD/faculty during initial testing phase
+  const isHod = false;
 
   return (
     <div className="space-y-6 pb-12 max-w-6xl mx-auto px-4 sm:px-6">

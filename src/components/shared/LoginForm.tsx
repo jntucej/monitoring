@@ -142,11 +142,36 @@ export function LoginForm({ role, title, subtitle }: LoginFormProps) {
   };
 
   // Helper function to redirect based on role after successful login
-  const redirectAfterLogin = (role: Role | null) => {
+  const redirectAfterLogin = async (role: Role | null) => {
     switch (role) {
-      case "operator":
-        router.push("/gate/1"); // Default to gate 1
+      case "operator": {
+        const authStore = useAuthStore.getState();
+        const user = authStore.user;
+        console.log("LoginForm Redirecting Operator user:", JSON.stringify(user));
+        if (user?.gateId) {
+          router.push(`/gate/${user.gateId}`);
+        } else {
+          try {
+            const token = authStore.token;
+            const res = await fetch("/api/gates", {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+            const body = await res.json();
+            if (body.success && Array.isArray(body.data) && body.data.length > 0) {
+              const activeGate = body.data.find((g: any) => g.is_active || g.isActive) || body.data[0];
+              router.push(`/gate/${activeGate.id}`);
+            } else {
+              router.push("/");
+            }
+          } catch (err) {
+            console.error("Failed to fetch gates for operator redirection:", err);
+            router.push("/");
+          }
+        }
         break;
+      }
       case "supervisor":
         router.push("/supervisor/live");
         break;

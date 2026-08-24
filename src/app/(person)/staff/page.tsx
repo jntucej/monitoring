@@ -6,9 +6,10 @@ import { EmployeeStats } from "@/components/person/EmployeeStats";
 import { RecentActivity } from "@/components/student/RecentActivity";
 import { PersonBadge } from "@/components/shared/PersonBadge";
 import { UserCheck, Clock, Shield } from "lucide-react";
+import type { Person } from "@/lib/types";
 
 export default function StaffDashboardPage() {
-  const [person, setPerson] = useState<any>(null);
+  const [person, setPerson] = useState<Person | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -17,7 +18,13 @@ export default function StaffDashboardPage() {
       try {
         const authRaw = localStorage.getItem("gate-monitor-auth");
         const auth = authRaw ? JSON.parse(authRaw) : null;
-        const uniqueId = auth?.user?.uniqueId ?? auth?.user?.roll ?? "STF-001";
+        const uniqueId = auth?.state?.user?.uniqueId ?? auth?.state?.user?.roll ?? auth?.user?.uniqueId ?? auth?.user?.roll;
+        if (!uniqueId) {
+          if (!cancelled) {
+            setLoading(false);
+          }
+          return;
+        }
         
         const res = await fetch(`/api/persons/${encodeURIComponent(uniqueId)}`, { cache: "no-store" });
         const json = await res.json();

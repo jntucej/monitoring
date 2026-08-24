@@ -131,8 +131,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             todaysStats: null,
             recentScans: [],
             gate: null,
-            offlineQueue: [],
-            isOnline: true,
           });
         } catch (e) {
           console.error("Failed to reset operator store on logout:", e);

@@ -58,10 +58,11 @@ async function handlePost(req: NextRequest) {
           gateId: scan.gateId,
           operatorId: operatorId, // Use the authenticated user's ID
           isManual: scan.isManual,
+          clientEventId: scan.id || scan.clientEventId || scan.local_id,
         });
-        results.push({ local_id: scan.id, status: "success", data: result.scan });
+        results.push({ local_id: scan.id || scan.clientEventId || scan.local_id, status: "success", data: result.scan });
       } catch {
-        results.push({ local_id: scan.id, status: "error" });
+        results.push({ local_id: scan.id || scan.clientEventId || scan.local_id, status: "error" });
       }
     }
 
