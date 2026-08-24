@@ -1,9 +1,9 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
 // Supabase configuration
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key'
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key'
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://hgdlaghzerrrgkhqpdvz.supabase.co'
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnZGxhZ2h6ZXJycmdraHFwZHZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY3OTUwNDIsImV4cCI6MjEwMjM3MTA0Mn0.RVXUdKQJXF5KSHdBKfinx3FhLGCauCxc7uuYsjx5sew'
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnZGxhZ2h6ZXJycmdraHFwZHZ6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4Njc5NTA0MiwiZXhwIjoyMTAyMzcxMDQyfQ.U6OPFP84AmFIb2MgKHdCRAQo2cXRC5OAheVIm7OOkvk'
 
 // Client for browser-side usage (anonymous access)
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {

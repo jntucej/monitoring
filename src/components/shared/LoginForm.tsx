@@ -67,6 +67,44 @@ export function LoginForm({ role, title, subtitle }: LoginFormProps) {
     // it probably checks or relies on user.role after login.
     // For now, let's keep the logic as is.
 
+    // For operator login, attempt PIN authentication first to avoid unnecessary 401 logs from password auth
+    if (role === "operator") {
+      const pinResult = await pinLogin(identifier, passwordOrPin);
+      if (pinResult.success) {
+        if (rememberMe) {
+          localStorage.setItem("gate-monitor-remember", "true");
+        }
+        addToast({
+          title: "Access Granted",
+          message: `Authenticated via Security PIN.`,
+          variant: "success",
+        });
+        const authStore = useAuthStore.getState();
+        const userRole = authStore.role;
+        redirectAfterLogin(userRole);
+        return;
+      }
+
+      const result = await login(identifier, passwordOrPin);
+      if (result.success) {
+        if (rememberMe) {
+          localStorage.setItem("gate-monitor-remember", "true");
+        }
+        addToast({
+          title: "Access Granted",
+          message: `Authenticated successfully.`,
+          variant: "success",
+        });
+        const authStore = useAuthStore.getState();
+        const userRole = authStore.role;
+        redirectAfterLogin(userRole);
+        return;
+      }
+
+      triggerShake(pinResult.error || result.error || "Invalid credentials.");
+      return;
+    }
+
     const result = await login(identifier, passwordOrPin);
     if (result.success) {
       if (rememberMe) {
@@ -86,6 +124,9 @@ export function LoginForm({ role, title, subtitle }: LoginFormProps) {
 
     const pinResult = await pinLogin(identifier, passwordOrPin);
     if (pinResult.success) {
+      if (rememberMe) {
+        localStorage.setItem("gate-monitor-remember", "true");
+      }
       addToast({
         title: "Access Granted",
         message: `Authenticated via Security PIN.`,

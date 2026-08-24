@@ -112,7 +112,7 @@ export default function Home() {
       sessionStorage.setItem("gate-monitor-role", user.role);
       router.push(href);
     } else {
-      router.push(href);
+      router.push(`/login?role=${role}`);
     }
   };
 

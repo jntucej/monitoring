@@ -16,27 +16,8 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    // Fast path: check localStorage synchronously to prevent redirect flicker on page refresh/hydration lag
-    let activeAuth = authenticated;
-    let activeUser = user;
-
-    if (!activeAuth || !activeUser) {
-      try {
-        const raw = localStorage.getItem("gate-monitor-auth");
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed && parsed.state && parsed.state.authenticated && parsed.state.user) {
-            activeAuth = true;
-            activeUser = parsed.state.user;
-          }
-        }
-      } catch (err) {
-        console.error("AuthGuard storage check error:", err);
-      }
-    }
-
-    // If still not authenticated or no user set, redirect to login with role hint if available
-    if (!activeAuth || !activeUser) {
+    // If not authenticated or no user set, redirect to login with role hint if available
+    if (!authenticated || !user) {
       let targetRole: Role | null = null;
 
       if (typeof window !== "undefined") {
@@ -60,8 +41,8 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
     }
 
     // Check role authorization if specified
-    if (allowedRoles && allowedRoles.length > 0 && !allowedRoles.includes(activeUser.role)) {
-      switch (activeUser.role) {
+    if (allowedRoles && allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+      switch (user.role) {
         case "admin":
           router.replace("/admin");
           break;
@@ -89,7 +70,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
     setIsChecking(false);
   }, [user, authenticated, allowedRoles, router]);
 
-  if (isChecking) {
+  if (isChecking || !authenticated || !user) {
     return (
       <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[var(--bg-base)] text-[var(--text-primary)]">
         <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4" />

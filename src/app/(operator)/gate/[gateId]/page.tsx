@@ -289,11 +289,21 @@ export default function OperatorPage() {
                       animate={{ opacity: 1, scale: 1 }}
                       className="p-5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-center space-y-3"
                     >
-                      <div className="w-10 h-10 rounded-full bg-rose-500/20 text-rose-455 flex items-center justify-center mx-auto">
+                      <div className="w-10 h-10 rounded-full bg-rose-500/20 text-rose-500 flex items-center justify-center mx-auto">
                         <AlertCircle className="w-5 h-5" />
                       </div>
                       <div className="space-y-1">
-                        <h3 className="font-bold text-sm text-[var(--action-danger)]">Verification Denied</h3>
+                        <h3 className="font-bold text-sm text-[var(--action-danger)]">
+                          {error.code === "NOT_FOUND"
+                            ? "Person Not Found"
+                            : error.code === "ACCOUNT_INACTIVE"
+                            ? "Verification Denied (Account Inactive)"
+                            : error.code === "DUPLICATE"
+                            ? "Duplicate Scan Warning"
+                            : error.code === "NETWORK_ERROR"
+                            ? "Network Connection Error"
+                            : "Verification Denied"}
+                        </h3>
                         <p className="text-xs text-[var(--text-secondary)]">{error.message}</p>
                       </div>
                       <button

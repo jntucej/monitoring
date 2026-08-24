@@ -65,88 +65,125 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
   offlineQueue: [],
   isOnline: true,
 
-  startScan: (roll) => {
-    set({ state: "detecting" });
+  startScan: async (roll) => {
     const cleanRoll = roll.trim().toUpperCase();
+    if (!cleanRoll) return;
 
-    // Fetch person via API to leverage server-side service client (bypasses RLS)
-    let student: Person | null = null;
-    let direction: ScanDirection = "IN";
+    set({ state: "detecting", error: null });
+
+    const authStore = useAuthStore.getState();
+    const token = authStore.token;
+    const sessionToken = authStore.user?.currentSessionToken;
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    if (sessionToken) {
+      headers["X-Session-Token"] = sessionToken;
+    }
+
     try {
-      const authStore = useAuthStore.getState();
-      const token = authStore.token;
-      const sessionToken = authStore.user?.currentSessionToken;
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-      if (sessionToken) {
-        headers["X-Session-Token"] = sessionToken;
-      }
-      fetch(`/api/persons/${encodeURIComponent(cleanRoll)}`, { headers })
-        .then((res) => res.ok ? res.json() : Promise.reject(res))
-        .then((result) => {
-          if (result.success && result.data?.person) {
-            student = result.data.person;
-            // Infer direction from last scan returned by the API
-            if (result.data.lastScan?.direction) {
-              direction = result.data.lastScan.direction === "IN" ? "OUT" : "IN";
-            }
-          }
-        })
-        .catch((err) => {
-          // Check if the error is a session expiry (401 with SESSION_EXPIRED)
-          if (err && typeof err === "object" && "status" in err && err.status === 401) {
-            try {
-              err.json().then((json: any) => {
-                if (json?.error?.code === "SESSION_EXPIRED") {
-                  const authStore = useAuthStore.getState();
-                  authStore.logout();
-                  if (typeof window !== "undefined") {
-                    window.location.href = "/login";
-                  }
-                }
-              }).catch(() => {});
-            } catch {}
-          }
-          console.error("Error fetching person:", err);
-        })
-        .finally(() => {
-          if (!student) {
-            const isFac = cleanRoll.startsWith("FAC");
-            const isStf = cleanRoll.startsWith("STF");
-            const isWrk = cleanRoll.startsWith("WRK");
-            const isVis = cleanRoll.startsWith("VIS");
-            const personType = isFac ? "faculty" : isStf ? "staff" : isWrk ? "worker" : isVis ? "visitor" : "student";
+      const res = await fetch(`/api/persons/${encodeURIComponent(cleanRoll)}`, { headers });
+      const result = await res.json().catch(() => null);
 
-            student = {
-              id: `per-${cleanRoll.toLowerCase()}`,
-              uniqueId: cleanRoll,
-              fullName: `${personType.toUpperCase()} (${cleanRoll})`,
-              personType,
-              department: "CSE",
-              roll: cleanRoll,
-              name: `${personType.toUpperCase()} (${cleanRoll})`,
-              photo: "/avatar-placeholder.png",
-              photoUrl: "/avatar-placeholder.png",
-              email: `${cleanRoll.toLowerCase()}@gatekeeper.edu`,
-              phone: "+91 9876543210",
-              qrCode: cleanRoll,
-              idValidUntil: "2028-12-31",
-              status: "ACTIVE",
-            } as Person;
-          }
+      if (res.status === 401 && result?.error?.code === "SESSION_EXPIRED") {
+        authStore.logout();
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+        return;
+      }
 
-          set({
-            state: "confirming",
-            currentStudent: student,
-            selectedDirection: direction,
-            selectedReason: null,
-            photoVerificationDone: false,
-          });
+      if (!res.ok || !result?.success) {
+        const errorMsg =
+          result?.error?.message ||
+          (res.status === 404
+            ? `Person with ID "${cleanRoll}" not found in database.`
+            : "Failed to fetch person details.");
+        const errorCode = result?.error?.code || (res.status === 404 ? "NOT_FOUND" : "ERROR");
+        set({
+          state: "error",
+          error: { message: errorMsg, code: errorCode },
+          currentStudent: null,
         });
+        return;
+      }
+
+      const person: Person = result.data.person;
+
+      // Check account status — do not allow inactive/suspended accounts to proceed
+      if (person.status && person.status.toUpperCase() !== "ACTIVE") {
+        set({
+          state: "error",
+          error: {
+            message: `Verification Denied: Student account is ${person.status}. Gate access denied.`,
+            code: "ACCOUNT_INACTIVE",
+          },
+          currentStudent: person,
+        });
+        return;
+      }
+
+      // Infer direction from last scan returned by the API
+      let direction: ScanDirection = "IN";
+      if (result.data.lastScan?.direction) {
+        direction = result.data.lastScan.direction === "IN" ? "OUT" : "IN";
+      }
+
+      set({
+        state: "confirming",
+        currentStudent: person,
+        selectedDirection: direction,
+        selectedReason: null,
+        photoVerificationDone: false,
+        error: null,
+      });
     } catch (err) {
-      console.error("Error fetching person:", err);
+      console.error("Network or fetch error during scan start:", err);
+
+      // Handle offline mode gracefully
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        const isFac = cleanRoll.startsWith("FAC");
+        const isStf = cleanRoll.startsWith("STF");
+        const isWrk = cleanRoll.startsWith("WRK");
+        const isVis = cleanRoll.startsWith("VIS");
+        const personType = isFac ? "faculty" : isStf ? "staff" : isWrk ? "worker" : isVis ? "visitor" : "student";
+
+        const offlineStudent = {
+          id: `per-${cleanRoll.toLowerCase()}`,
+          uniqueId: cleanRoll,
+          fullName: `${personType.toUpperCase()} (${cleanRoll})`,
+          personType,
+          department: "CSE",
+          roll: cleanRoll,
+          name: `${personType.toUpperCase()} (${cleanRoll})`,
+          photo: "/avatar-placeholder.png",
+          photoUrl: "/avatar-placeholder.png",
+          email: `${cleanRoll.toLowerCase()}@gatekeeper.edu`,
+          phone: "+91 9876543210",
+          qrCode: cleanRoll,
+          idValidUntil: "2028-12-31",
+          status: "ACTIVE",
+        } as Person;
+
+        set({
+          state: "confirming",
+          currentStudent: offlineStudent,
+          selectedDirection: "IN",
+          selectedReason: null,
+          photoVerificationDone: false,
+          error: null,
+        });
+      } else {
+        set({
+          state: "error",
+          error: {
+            message: err instanceof Error ? err.message : "Unable to communicate with server.",
+            code: "NETWORK_ERROR",
+          },
+          currentStudent: null,
+        });
+      }
     }
   },
 
@@ -248,6 +285,41 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
         });
       })
       .catch((err: unknown) => {
+        const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+        if (isOffline || (err instanceof TypeError && err.message.toLowerCase().includes("fetch"))) {
+          // Offline mode — queue scan locally
+          const offlineScan = {
+            id: crypto.randomUUID(),
+            roll: uniqueId,
+            direction: directionToUse,
+            reason: reasonToUse || (directionToUse === "OUT" ? "Regular" : undefined),
+          };
+          const updatedQueue = [...get().offlineQueue, offlineScan];
+
+          addToast({
+            variant: "warning",
+            title: "Offline Mode",
+            message: `Scan for ${currentStudent.name} (${uniqueId}) saved offline. Will sync when connection is restored.`,
+          });
+
+          const prev = get().todaysStats;
+          const newStats = prev
+            ? {
+                entries: directionToUse === "IN" ? prev.entries + 1 : prev.entries,
+                exits: directionToUse === "OUT" ? prev.exits + 1 : prev.exits,
+                onCampus: directionToUse === "IN" ? prev.onCampus + 1 : prev.onCampus - 1,
+              }
+            : null;
+
+          set({
+            state: "success",
+            offlineQueue: updatedQueue,
+            todaysStats: newStats,
+            error: null,
+          });
+          return;
+        }
+
         const msg = err instanceof Error ? err.message : "An unexpected error occurred during scan confirmation.";
         addToast({
           variant: "error",
@@ -289,11 +361,12 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
   },
 
   setGate: async (gateId) => {
-    const normalizedGateId = /^\d+$/.test(gateId) ? `gate-${gateId}` : gateId;
-    if (!normalizedGateId.startsWith('gate-') && !/^\d+$/.test(gateId)) {
+    if (!gateId) {
       set({ gate: null });
       return;
     }
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(gateId);
+    const normalizedGateId = !isUuid && /^\d+$/.test(gateId) ? `gate-${gateId}` : gateId;
     const gate = await findGateById(normalizedGateId);
     set({ gate: gate ?? null });
   },

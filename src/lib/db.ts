@@ -1104,6 +1104,10 @@ export async function addScan(input: {
     throw new Error(`Person not found with ID: ${uniqueId}`);
   }
 
+  if (person.status && person.status.toUpperCase() !== "ACTIVE") {
+    throw new Error(`Access Denied: Account status is ${person.status}. Gate access denied.`);
+  }
+
   const duplicate = await isDuplicate(uniqueId, input.direction);
   if (duplicate) {
     const last = await lastScanFor(uniqueId);

@@ -116,16 +116,65 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         } catch (error) {
           console.error("Logout request error:", error);
         }
-        localStorage.removeItem("gate-monitor-token");
-        localStorage.removeItem("gate-monitor-auth");
+
+        // Reset operator store state
+        try {
+          const { useOperatorStore } = await import("@/stores/operatorStore");
+          useOperatorStore.setState({
+            state: "idle",
+            currentStudent: null,
+            selectedDirection: "IN",
+            selectedReason: null,
+            photoVerificationDone: false,
+            error: null,
+            lastScan: null,
+            todaysStats: null,
+            recentScans: [],
+            gate: null,
+            offlineQueue: [],
+            isOnline: true,
+          });
+        } catch (e) {
+          console.error("Failed to reset operator store on logout:", e);
+        }
+
+        // Reset admin store state
+        try {
+          const { useAdminStore } = await import("@/stores/adminStore");
+          useAdminStore.setState({
+            dashboardData: null,
+            alerts: [],
+            unreadNotifications: 0,
+            liveActivity: [],
+            activeGate: null,
+            loading: false,
+          });
+        } catch (e) {
+          console.error("Failed to reset admin store on logout:", e);
+        }
+
+        // Clear auth store state
         set({
           user: null,
           token: null,
           refreshToken: null,
           role: null,
           authenticated: false,
+          loading: false,
         });
-        window.location.href = "/";
+
+        // Clear storage and hard-redirect to login
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.removeItem("gate-monitor-token");
+            localStorage.removeItem("gate-monitor-auth");
+            localStorage.removeItem("gate-monitor-role");
+            sessionStorage.clear();
+          } catch (e) {
+            console.error("Error clearing storage on logout:", e);
+          }
+          window.location.href = "/login";
+        }
       },
 
       setRole: (role) => set({ role }),

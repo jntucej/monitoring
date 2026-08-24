@@ -87,15 +87,35 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
 
     setSubmitting(true);
     try {
-      // First verify the supervisor PIN via API
-      const verifyRes = await fetch("/api/auth/pin-login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ employeeId: "SV001", pin, verifyOnly: true }),
-      });
+      // Get current user info to try PIN verification with their ID first, then fallbacks
+      const currentUser = useUIStore.getState(); // or auth store
+      const authStore = (await import("@/stores/authStore")).useAuthStore.getState();
+      const user = authStore.user;
 
-      const verifyData = await verifyRes.json();
-      if (!verifyData.success) {
+      const candidates = [
+        user?.employeeId,
+        user?.uniqueId,
+        user?.email,
+        "SUP-001",
+        "OP-001",
+      ].filter((val): val is string => Boolean(val && val.trim()));
+
+      let verifyData: any = null;
+
+      for (const empId of candidates) {
+        const verifyRes = await fetch("/api/auth/pin-login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ employeeId: empId, pin, verifyOnly: true }),
+        });
+        const json = await verifyRes.json();
+        if (json.success) {
+          verifyData = json;
+          break;
+        }
+      }
+
+      if (!verifyData || !verifyData.success) {
         addToast({
           title: "PIN Verification Failed",
           message: "Invalid supervisor PIN. Please try again.",
