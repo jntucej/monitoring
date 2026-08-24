@@ -209,6 +209,7 @@ export type DepartmentCode = string;
 
 export interface Gate {
   id: string;
+  gateCode?: string;
   name: string;
   location: string;
   type: string;
