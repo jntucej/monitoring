@@ -599,7 +599,7 @@ export async function findPersonByUniqueId(uniqueId: string): Promise<Person | n
 
   // Tier 1: Query users table with auto-resolved relationships
   try {
-    let query = client.from('users').select('*, student_details(*), employee_details(*)');
+    let query = client.from('users').select('*, student_details!student_details_user_id_fkey(*), employee_details(*)');
     if (isUuid) {
       query = query.or(`unique_id.eq.${formattedId},id.eq.${formattedId}`);
     } else {
