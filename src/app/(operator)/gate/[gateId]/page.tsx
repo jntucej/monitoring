@@ -31,7 +31,7 @@ export default function OperatorPage() {
   const gateId = params?.gateId || "1";
   const currentTab = searchParams?.get("tab") || "scandesk";
   
-  const { authenticated } = useAuth();
+  const { authenticated, logout } = useAuth();
   const { addToast } = useToast();
   const operatorStore = useOperatorStore();
   const {
@@ -307,10 +307,18 @@ export default function OperatorPage() {
                         <p className="text-xs text-[var(--text-secondary)]">{error.message}</p>
                       </div>
                       <button
-                        onClick={reset}
+                        onClick={() => {
+                          if (error.code === "UNAUTHORIZED" || error.code === "SESSION_EXPIRED" || error.message?.toLowerCase().includes("token")) {
+                            logout();
+                          } else {
+                            reset();
+                          }
+                        }}
                         className="px-4 py-2 rounded-xl bg-rose-500 text-white font-semibold text-xs hover:bg-rose-600 transition-colors active:scale-[0.98]"
                       >
-                        Resume Verification
+                        {error.code === "UNAUTHORIZED" || error.code === "SESSION_EXPIRED" || error.message?.toLowerCase().includes("token")
+                          ? "Log In Again"
+                          : "Resume Verification"}
                       </button>
                     </motion.div>
                   )}

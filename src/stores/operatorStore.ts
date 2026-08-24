@@ -86,7 +86,7 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
       const res = await fetch(`/api/persons/${encodeURIComponent(cleanRoll)}`, { headers });
       const result = await res.json().catch(() => null);
 
-      if (res.status === 401 && result?.error?.code === "SESSION_EXPIRED") {
+      if (res.status === 401 || result?.error?.code === "SESSION_EXPIRED" || result?.error?.code === "UNAUTHORIZED") {
         authStore.logout();
         if (typeof window !== "undefined") {
           window.location.href = "/login";
