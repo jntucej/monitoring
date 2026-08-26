@@ -38,6 +38,11 @@ yarn-error.log*
 .vercel
 
 # typescript
+.next
+tsconfig*.tsbuildinfo
+
+# supabase local cache
+supabase/.temp/
 *.tsbuildinfo
 next-env.d.ts
 

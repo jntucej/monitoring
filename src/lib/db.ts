@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs';
 import type {
   Department, DepartmentCode, Gate, Person, Student, PersonType, StudentDetails, EmployeeDetails, VisitorLog,
   Scan, ScanDirection, ExitReason, GatePass, GatePassStatus, Alert, AlertSeverity, AuditEntry,
-  User, DashboardData, Role, AccountStatus, PersonTypeStats
+  User, DashboardData, Role, AccountStatus, PersonTypeStats, DailyGateStats
 } from "./types";
 
 /* ------------------------------------------------------------------ *
@@ -107,8 +107,21 @@ export function mPerson(r: any): Person {
     uniqueId,
     fullName,
     personType,
-    department: r.department || r.department_id || r.employee_details?.department_id || undefined,
-    designation: r.designation || undefined,
+    department: (() => {
+      const deptCodeMap: Record<string, string> = {
+        "02": "EEE",
+        "03": "ME",
+        "04": "ECE",
+        "05": "CSE",
+        "12": "IT"
+      };
+      const rawDept = r.department || r.department_id || r.employee_details?.department_id || undefined;
+      if (!rawDept) return undefined;
+      const deptCode = deptCodeMap[rawDept] || rawDept;
+      const deptObj = DEPARTMENTS.find(d => d.code === deptCode || d.name === deptCode);
+      return deptObj ? deptObj.name : deptCode;
+    })(),
+    designation: r.designation || r.employee_details?.designation || undefined,
     email: r.email || undefined,
     phone: r.phone || undefined,
     photoUrl: r.photo_url || r.photo || undefined,
@@ -121,6 +134,7 @@ export function mPerson(r: any): Person {
     checkedOutAt: r.checked_out_at || undefined,
     createdAt: r.created_at || undefined,
     updatedAt: r.updated_at || undefined,
+    hasThumbprint: !!r.thumbprint_hash,
     studentDetails,
     employeeDetails,
     // Backwards-compatibility aliases
@@ -167,6 +181,8 @@ function mUser(r: any): User {
     status: r.status || "ACTIVE",
     personType: r.person_type || undefined,
     uniqueId: r.unique_id || undefined,
+    thumbprintHash: r.thumbprint_hash || undefined,
+    thumbprintVerifiedAt: r.thumbprint_verified_at || undefined,
   };
 }
 
@@ -177,7 +193,20 @@ function mScan(r: any): Scan {
   const uniqueId = user?.unique_id || r.unique_id || r.roll || "";
   const name = user?.name || r.name || r.person_name || "";
   const personType = user?.role || r.person_type || "student";
-  const department = user?.department_id || r.department || undefined;
+  const department = (() => {
+    const deptCodeMap: Record<string, string> = {
+      "02": "EEE",
+      "03": "ME",
+      "04": "ECE",
+      "05": "CSE",
+      "12": "IT"
+    };
+    const rawDept = user?.department || user?.department_id || r.department || undefined;
+    if (!rawDept) return undefined;
+    const deptCode = deptCodeMap[rawDept] || rawDept;
+    const deptObj = DEPARTMENTS.find(d => d.code === deptCode || d.name === deptCode);
+    return deptObj ? deptObj.name : deptCode;
+  })();
   const year = student?.year || r.year || undefined;
   const personId = r.user_id || r.person_id || undefined;
 
@@ -843,11 +872,18 @@ export async function findGateById(id: string): Promise<Gate | null> {
       if (res.ok) {
         const result = await res.json();
         if (result.success && Array.isArray(result.data)) {
-          const match = result.data.find((g: any) =>
-            g.id === id ||
-            g.gate_code?.toLowerCase() === id.toLowerCase() ||
-            g.name?.toLowerCase().includes(id.toLowerCase())
-          );
+          const query = id.toLowerCase();
+          const match = result.data.find((g: any) => {
+            const gId = g.id?.toLowerCase();
+            const code = g.gate_code?.toLowerCase();
+            const name = g.name?.toLowerCase();
+            return gId === query ||
+                   code === query ||
+                   name === query ||
+                   (query === "1" || query === "gate-1" ? (code === "gate-01" || code === "main") : false) ||
+                   (query === "2" || query === "gate-2" ? (code === "gate-02" || code === "hostel") : false) ||
+                   (query === "3" || query === "gate-3" ? (code === "gate-03" || code === "back") : false);
+          });
           if (match) {
             return { id: match.id, name: match.name, location: match.location, type: match.type, isActive: !!match.is_active };
           }
@@ -874,18 +910,35 @@ export async function findGateById(id: string): Promise<Gate | null> {
 
   const { data: allData } = await supabase.from('gates').select('*');
   if (allData && allData.length > 0) {
-    const match = allData.find(g =>
-      g.id === id ||
-      g.gate_code?.toLowerCase() === id.toLowerCase() ||
-      g.name?.toLowerCase().includes(id.toLowerCase())
-    );
+    const query = id.toLowerCase();
+    const match = allData.find(g => {
+      const gId = g.id?.toLowerCase();
+      const code = g.gate_code?.toLowerCase();
+      const name = g.name?.toLowerCase();
+      return gId === query ||
+             code === query ||
+             name === query ||
+             (query === "1" || query === "gate-1" ? (code === "gate-01" || code === "main") : false) ||
+             (query === "2" || query === "gate-2" ? (code === "gate-02" || code === "hostel") : false) ||
+             (query === "3" || query === "gate-3" ? (code === "gate-03" || code === "back") : false);
+    });
     if (match) {
       return { id: match.id, name: match.name, location: match.location, type: match.type, isActive: !!match.is_active };
     }
     return { id: allData[0].id, name: allData[0].name, location: allData[0].location, type: allData[0].type, isActive: !!allData[0].is_active };
   }
 
-  return GATES.find(g => g.id === id || g.gateCode?.toLowerCase() === id.toLowerCase()) || GATES[0] || null;
+  const query = id.toLowerCase();
+  const fallbackMatch = GATES.find(g => {
+    const gId = g.id?.toLowerCase();
+    const code = g.gateCode?.toLowerCase();
+    return gId === query ||
+           code === query ||
+           (query === "1" || query === "gate-1" ? (code === "gate-01" || code === "main" || code === "gate-1") : false) ||
+           (query === "2" || query === "gate-2" ? (code === "gate-02" || code === "hostel" || code === "gate-2") : false) ||
+           (query === "3" || query === "gate-3" ? (code === "gate-03" || code === "back" || code === "gate-3") : false);
+  });
+  return fallbackMatch || GATES[0] || null;
 }
 
 export async function findAllGates(): Promise<Gate[]> {
@@ -1042,6 +1095,79 @@ export async function verifyPin(userId: string, pin: string): Promise<boolean> {
 
 export async function hashPin(pin: string): Promise<string> {
   return await bcrypt.hash(pin, 10);
+}
+
+/* ------------------------------------------------------------------ *
+ *  THUMBPRINT / BIOMETRIC VERIFICATION
+ * ------------------------------------------------------------------ */
+
+/** Registration-time helper: bcrypt-hash a thumbprint signature (cost 10). */
+export async function hashThumbprint(signature: string): Promise<string> {
+  return bcrypt.hash(signature, 10);
+}
+
+/**
+ * Store a new thumbprint hash for a user. Uses the service client so the
+ * write bypasses RLS (only server routes should call this). Never persist
+ * the raw biometric — hash it first with `hashThumbprint`.
+ */
+export async function registerThumbprint(userId: string, hash: string): Promise<boolean> {
+  let client = supabase;
+  try {
+    const { getSupabaseServiceClient } = await import('./supabaseClient');
+    client = getSupabaseServiceClient();
+  } catch { /* fallback to anon client */ }
+
+  const { error } = await client
+    .from('users')
+    .update({ thumbprint_hash: hash, thumbprint_verified_at: new Date().toISOString() })
+    .eq('id', userId);
+  return !error;
+}
+
+/** Remove a user's stored thumbprint. */
+export async function clearThumbprint(userId: string): Promise<boolean> {
+  let client = supabase;
+  try {
+    const { getSupabaseServiceClient } = await import('./supabaseClient');
+    client = getSupabaseServiceClient();
+  } catch { /* fallback to anon client */ }
+
+  const { error } = await client
+    .from('users')
+    .update({ thumbprint_hash: null, thumbprint_verified_at: null })
+    .eq('id', userId);
+  return !error;
+}
+
+/**
+ * Look up a user's stored thumbprint hash. Returns `null` when the user
+ * doesn't exist or has no thumbprint registered — that's the operator
+ * "thumbprint not in database" fallback case.
+ */
+export async function getThumbprint(userId: string): Promise<{
+  hash: string;
+  name: string;
+  uniqueId: string;
+} | null> {
+  let client = supabase;
+  try {
+    const { getSupabaseServiceClient } = await import('./supabaseClient');
+    client = getSupabaseServiceClient();
+  } catch { /* fallback to anon client */ }
+
+  const { data, error } = await client
+    .from('users')
+    .select('thumbprint_hash, name, unique_id')
+    .eq('id', userId)
+    .maybeSingle();
+
+  if (error || !data || !data.thumbprint_hash) return null;
+  return {
+    hash: data.thumbprint_hash,
+    name: data.name ?? 'Unknown',
+    uniqueId: data.unique_id ?? userId,
+  };
 }
 
 export async function updateAccountStatus(userId: string, newStatus: AccountStatus): Promise<boolean> {
@@ -1567,7 +1693,55 @@ export async function dashboard(): Promise<DashboardData> {
   };
 }
 
-export async function statsToday(): Promise<{
+// --------------------------------------------------------------------------- *
+// DAILY GATE STATS (per-day table that resets each new day at midnight)
+// --------------------------------------------------------------------------- *
+
+/**
+ * Read per-day gate stats from the `daily_stats` table.
+ *
+ * The table holds one row per (date, gate). Because rows are keyed by date, a
+ * scan after local midnight creates a fresh row — today's entries/exits start
+ * at zero while all historical days remain recorded.
+ *
+ * @param date YYYY-MM-DD; defaults to today (UTC day, matching the table rows)
+ * @param gateId optional gate UUID to scope; omitted = all gates summary
+ */
+export async function getDailyStats(date?: string, gateId?: string): Promise<DailyGateStats | DailyGateStats[] | null> {
+  let client = supabase;
+  try {
+    const { getSupabaseServiceClient } = await import('./supabaseClient');
+    client = getSupabaseServiceClient();
+  } catch { /* fallback to anon client */ }
+
+  const day = date || new Date().toISOString().slice(0, 10);
+
+  let query = client
+    .from('daily_stats')
+    .select('date, gate_id, gate_code, entries, exits, peak_hour, peak_count, on_campus_last, updated_at')
+    .eq('date', day);
+
+  if (gateId) query = query.eq('gate_id', gateId);
+
+  const { data, error } = await query;
+  if (error || !data) return null;
+
+  const rows: DailyGateStats[] = data.map((r: any) => ({
+    date: r.date,
+    gateId: r.gate_id,
+    gateCode: r.gate_code,
+    entries: Number(r.entries || 0),
+    exits: Number(r.exits || 0),
+    peakHour: r.peak_hour ?? undefined,
+    peakCount: r.peak_count ?? undefined,
+    onCampusLast: r.on_campus_last ?? undefined,
+    updatedAt: r.updated_at,
+  }));
+
+  return gateId ? (rows[0] ?? null) : rows;
+}
+
+export async function statsToday(gateId?: string): Promise<{
   entries: number;
   exits: number;
   onCampus: number;
@@ -1575,22 +1749,51 @@ export async function statsToday(): Promise<{
   recentScans: Scan[];
   personTypeBreakdown: Record<PersonType, PersonTypeStats>;
 }> {
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
+  // Use a single UTC day boundary for both the daily_stats lookup and the
+  // movement_logs fallback so the counters stay perfectly in sync with the
+  // analytics routes (which also use UTC day boundaries).
+  const day = new Date().toISOString().slice(0, 10);
+  const dayStartUTC = `${day}T00:00:00.000Z`;
+
+  // Read scan history from movement_logs (the active table writes go to).
+  // The legacy "gate_logs" table is not written to anymore, so reading from
+  // it always returned zero entries/exits.
+  let todayScansQuery = supabase
+    .from('movement_logs')
+    .select('*, users:users!movement_logs_user_id_fkey(name, role, unique_id, department_id)')
+    .gte('timestamp', dayStartUTC)
+    .order('timestamp', { ascending: false });
+
+  // Scope to the operator's gate when one is provided.
+  if (gateId) {
+    todayScansQuery = todayScansQuery.eq('gate_id', gateId);
+  }
 
   const [todayScansRes, onCampusCount, allPersons] = await Promise.all([
-    supabase
-      .from('gate_logs')
-      .select('*')
-      .gte('timestamp', todayStart.toISOString())
-      .order('timestamp', { ascending: false }),
+    todayScansQuery,
     campusCount(),
     findAllPersons(),
   ]);
 
   const todayScans = (todayScansRes.data || []).map(mScan);
-  const entries = todayScans.filter((s) => s.direction === 'IN').length;
-  const exits = todayScans.filter((s) => s.direction === 'OUT').length;
+
+  // Prefer the authoritative per-day `daily_stats` counter (auto-reset at
+  // midnight) when a row exists; otherwise fall back to a live computation
+  // from today's movement_logs so the page is never stuck on 0.
+  let entries: number;
+  let exits: number;
+  let dailyRow: DailyGateStats | DailyGateStats[] | null = null;
+  try {
+    dailyRow = await getDailyStats(day, gateId);
+  } catch { /* daily_stats may not be migrated on this DB yet; fall through */ }
+  const row = Array.isArray(dailyRow) ? dailyRow[0] : dailyRow;
+  if (row) {
+    entries = row.entries;
+    exits = row.exits;
+  } else {
+    entries = todayScans.filter((s) => s.direction === 'IN').length;
+    exits = todayScans.filter((s) => s.direction === 'OUT').length;
+  }
   const lastScan = todayScans.length > 0 ? todayScans[0] : null;
 
   const personTypeBreakdown: Record<PersonType, PersonTypeStats> = {
@@ -1616,12 +1819,33 @@ export async function statsToday(): Promise<{
     }
   });
 
+  const personMap = new Map<string, any>();
+  allPersons.forEach(p => {
+    if (p.uniqueId) personMap.set(p.uniqueId.toUpperCase(), p);
+  });
+
+  const filteredRecentScans = todayScans.filter((scan) => {
+    const person = personMap.get(scan.roll?.toUpperCase() || scan.uniqueId?.toUpperCase());
+    if (!person) return false;
+
+    if (person.personType === "student") {
+      const type = person.studentType || "";
+      if (type === "DM" || type === "DF") {
+        return true;
+      }
+      if (type === "HM" || type === "HF") {
+        return scan.direction === "OUT";
+      }
+    }
+    return false;
+  });
+
   return {
     entries,
     exits,
     onCampus: onCampusCount,
     lastScan,
-    recentScans: todayScans.slice(0, 10),
+    recentScans: filteredRecentScans.slice(0, 10),
     personTypeBreakdown,
   };
 }

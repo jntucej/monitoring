@@ -1,19 +1,24 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { RefreshCw, AlertCircle, Scan, KeyRound, UserCheck, LayoutDashboard, Clock, User as UserIcon } from "lucide-react";
 import { useOperatorStore } from "@/stores/operatorStore";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/toast";
 import { ScanConfirmation } from "@/components/operator/ScanConfirmation";
+import { ThumbprintScanner } from "@/components/operator/ThumbprintScanner";
 import { SuccessFlash } from "@/components/operator/SuccessFlash";
 import { Scanner } from "@/components/operator/Scanner";
 import { ScanViewfinder } from "@/components/operator/ScanViewfinder";
 import { UserProfileTab } from "@/components/shared/UserProfileTab";
 import { RecentScans } from "@/components/operator/RecentScans";
 import { OperatorStats } from "@/components/operator/OperatorStats";
+import { BreakdownPanel } from "@/components/operator/BreakdownPanel";
+import { OutingPanel } from "@/components/operator/OutingPanel";
+import { ScanDetailModal } from "@/components/operator/ScanDetailModal";
+import type { Scan as ScanRecord } from "@/lib/types";
 
 const GATE_NAMES: Record<string, string> = {
   "gate-1": "Gate 1 (Main Gate)",
@@ -30,11 +35,16 @@ const GATE_NAMES: Record<string, string> = {
 export default function OperatorPage() {
   const params = useParams<{ gateId: string }>();
   const searchParams = useSearchParams();
+  const router = useRouter();
   
-  const gateId = params?.gateId || "1";
-  const currentTab = searchParams?.get("tab") || "scandesk";
+  const gateIdParam = params?.gateId;
+  const isSpecialPath = gateIdParam === "history" || gateIdParam === "manual";
   
-  const { authenticated, logout } = useAuth();
+  const { authenticated, user, logout } = useAuth();
+  
+  const gateId = isSpecialPath ? (user?.gateId || "1") : (gateIdParam || "1");
+  const currentTab = isSpecialPath && gateIdParam === "history" ? "history" : (searchParams?.get("tab") || "scandesk");
+  
   const { addToast } = useToast();
   const operatorStore = useOperatorStore();
   const {
@@ -43,16 +53,58 @@ export default function OperatorPage() {
     lastScan,
     todaysStats,
     recentScans,
+    breakdown,
+    outing,
     error,
     startScan,
     cancelScan,
     reset,
     setGate,
+    loadStats,
   } = operatorStore;
   const confirmScan = operatorStore.confirmScan;
 
+  // Log detail modal selection
+  const [selectedScan, setSelectedScan] = useState<ScanRecord | null>(null);
+
   // Local active tab for the desk panel: scan, manual, entry
   const [operatorSubMode, setOperatorSubMode] = useState<"scan" | "manual" | "entry">("scan");
+  
+  // Redirect special routing path shortcuts (/gate/history & /gate/manual) to operators dynamic gate path
+  useEffect(() => {
+    if (isSpecialPath && user?.gateId) {
+      if (gateIdParam === "history") {
+        router.replace(`/gate/${user.gateId}?tab=history`);
+      } else {
+        router.replace(`/gate/${user.gateId}?tab=scandesk&mode=manual`);
+      }
+    }
+  }, [isSpecialPath, gateIdParam, user?.gateId, router]);
+
+  // Adjust operatorSubMode when URL parameters change
+  useEffect(() => {
+    const mode = searchParams?.get("mode");
+    if (mode === "manual") {
+      setOperatorSubMode("manual");
+    } else if (mode === "scan") {
+      setOperatorSubMode("scan");
+    } else if (isSpecialPath && gateIdParam === "manual") {
+      setOperatorSubMode("manual");
+    }
+  }, [searchParams, isSpecialPath, gateIdParam]);
+
+    // Periodic sync of stats and logs for real-time feel (every 5 seconds)
+  useEffect(() => {
+    if (!authenticated) return;
+    // Load immediately, then poll every 5s while the page is visible.
+    const tick = () => {
+      if (typeof document !== "undefined" && document.hidden) return;
+      loadStats();
+    };
+    tick();
+    const interval = setInterval(tick, 5000);
+    return () => clearInterval(interval);
+  }, [authenticated, loadStats]);
   const [showCameraScanner, setShowCameraScanner] = useState(false);
   const [manualRollInput, setManualRollInput] = useState("");
 
@@ -128,6 +180,29 @@ export default function OperatorPage() {
     startScan(rollCandidate);
   };
 
+  // Show the thumbprint (biometric) confirmation whenever the scan flow is
+  // "confirming" AND the person hasn't already passed a thumbprint step.
+  // Derived (not stored in state) so it can't get out of sync with the flow.
+  const showThumbprint =
+    state === "confirming" &&
+    !!currentStudent &&
+    !operatorStore.thumbprintVerified &&
+    !operatorStore.thumbprintFallback;
+
+  const handleThumbprintResult = (result: { verified: boolean; fallback?: boolean; code?: string }) => {
+    if (result.verified) {
+      operatorStore.setThumbprintStatus(true, false);
+      addToast({ variant: "success", title: "Biometric Verified", message: "Thumbprint matched successfully." });
+    } else if (result.fallback) {
+      operatorStore.setThumbprintStatus(true, true);
+      addToast({ variant: "info", title: "Thumbprint Not in Database", message: "Continuing with photo verification." });
+    } else {
+      operatorStore.setThumbprintStatus(false, false);
+      addToast({ variant: "error", title: "Access Denied", message: "Thumbprint verification failed. Please escalate to a supervisor." });
+      cancelScan();
+    }
+  };
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       (window as any).__handleQRScannedForTesting = handleQRScanned;
@@ -150,6 +225,8 @@ export default function OperatorPage() {
                 onCampus={todaysStats?.onCampus ?? 0}
               />
             </div>
+            <BreakdownPanel breakdown={breakdown} />
+            <OutingPanel entries={outing} />
             <div className="bg-[var(--bg-surface)] p-5 rounded-2xl border border-[var(--border)] space-y-3">
               <h3 className="font-bold text-sm">Desk Statistics Information</h3>
               <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
@@ -174,7 +251,7 @@ export default function OperatorPage() {
                 <RefreshCw className="w-3.5 h-3.5 animate-spin-hover" /> Refresh Logs
               </button>
             </div>
-            <RecentScans scans={recentScans} />
+                        <RecentScans scans={recentScans} onSelect={setSelectedScan} />
           </div>
         );
 
@@ -350,6 +427,7 @@ export default function OperatorPage() {
                       onConfirm={(dir, reason) => confirmScan(addToast, dir, reason)}
                       onCancel={cancelScan}
                       isInline={true}
+                      thumbprintVerified={operatorStore.thumbprintVerified || operatorStore.thumbprintFallback}
                     />
                   )}
 
@@ -419,6 +497,9 @@ export default function OperatorPage() {
         {renderActiveView()}
       </main>
 
+      {/* Person overview modal opened by tapping a log */}
+      <ScanDetailModal scan={selectedScan} onClose={() => setSelectedScan(null)} />
+
       {/* Live Camera Scanner Dialog/Component */}
       <Scanner
         isOpen={showCameraScanner}
@@ -429,6 +510,19 @@ export default function OperatorPage() {
           setOperatorSubMode("manual");
         }}
       />
+
+      {/* Thumbprint (biometric) confirmation step after the ID scan */}
+      {showThumbprint && (
+        <ThumbprintScanner
+          key={currentStudent?.id || "thumbprint"}
+          isOpen={true}
+          personId={currentStudent?.id || ""}
+          personName={currentStudent?.fullName || currentStudent?.name || "User"}
+          personUniqueId={currentStudent?.uniqueId || currentStudent?.roll}
+          onResult={handleThumbprintResult}
+          onCancel={() => cancelScan()}
+        />
+      )}
     </div>
   );
 }

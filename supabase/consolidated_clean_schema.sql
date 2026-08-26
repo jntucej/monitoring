@@ -43,6 +43,8 @@ CREATE TABLE IF NOT EXISTS users (
   department_id        TEXT,
   photo_url            TEXT,
   qr_code              TEXT,
+  thumbprint_hash      TEXT,
+  thumbprint_verified_at TIMESTAMPTZ,
   gate_id              UUID REFERENCES gates(id) ON DELETE SET NULL,
   supervised_gates     UUID[],
   assigned_hostel      TEXT,
@@ -111,6 +113,21 @@ CREATE TABLE IF NOT EXISTS campus_occupancy (
   last_gate_id   UUID REFERENCES gates(id) ON DELETE SET NULL,
   last_log_id    UUID REFERENCES movement_logs(id) ON DELETE SET NULL,
   last_updated   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 2.3 DAILY GATE STATS (one row per date + gate; rolls to a fresh row at midnight
+--     so counters naturally reset to 0 each new day, while historical days persist)
+CREATE TABLE IF NOT EXISTS daily_stats (
+  date           DATE NOT NULL,
+  gate_id        UUID NOT NULL REFERENCES gates(id) ON DELETE CASCADE,
+  gate_code      TEXT,
+  entries        BIGINT NOT NULL DEFAULT 0,
+  exits          BIGINT NOT NULL DEFAULT 0,
+  peak_hour      INTEGER,
+  peak_count     INTEGER,
+  on_campus_last INTEGER,
+  updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (date, gate_id)
 );
 
 -- 2.3 VISITOR LOGS (visitor users' check-in/out; keyed by user_id)
@@ -390,6 +407,31 @@ AS $$ DECLARE v_user UUID; BEGIN
   RETURN NEW;
 END; $$;
 
+-- 4.5b DAILY GATE STATS ENGINE (per-day rollup; a new date row = automatic midnight reset)
+CREATE OR REPLACE FUNCTION update_daily_stats_on_movement()
+RETURNS TRIGGER LANGUAGE plpgsql SET search_path = public
+AS $$ DECLARE v_date DATE; BEGIN
+  -- Day boundary follows the movement's recorded timestamp (UTC day), matching the
+  -- analytics routes. A movement after local midnight creates a brand-new (date, gate)
+  -- row, so today's counters start from zero automatically.
+  v_date := (NEW.timestamp AT TIME ZONE 'UTC')::date;
+  INSERT INTO daily_stats (date, gate_id, gate_code, entries, exits, updated_at)
+  VALUES (
+    v_date,
+    NEW.gate_id,
+    NEW.gate_name,
+    CASE WHEN NEW.direction = 'IN'  THEN 1 ELSE 0 END,
+    CASE WHEN NEW.direction = 'OUT' THEN 1 ELSE 0 END,
+    NOW()
+  )
+  ON CONFLICT (date, gate_id) DO UPDATE
+  SET entries    = daily_stats.entries + EXCLUDED.entries,
+      exits      = daily_stats.exits  + EXCLUDED.exits,
+      gate_code  = EXCLUDED.gate_code,
+      updated_at = NOW();
+  RETURN NEW;
+END; $$;
+
 -- 4.6 AUDIT TRIGGER FUNCTIONS
 CREATE OR REPLACE FUNCTION audit_log_entry(p_action TEXT, p_user_id UUID, p_user_name TEXT, p_role TEXT, p_details JSONB)
 RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
@@ -474,6 +516,8 @@ END; $$;
 -- ============================================================================
 CREATE TRIGGER trg_occupancy_on_movement
   AFTER INSERT ON movement_logs FOR EACH ROW EXECUTE FUNCTION update_campus_occupancy_on_movement();
+CREATE TRIGGER trg_daily_stats_on_movement
+  AFTER INSERT ON movement_logs FOR EACH ROW EXECUTE FUNCTION update_daily_stats_on_movement();
 CREATE TRIGGER trg_audit_on_movement
   AFTER INSERT ON movement_logs FOR EACH ROW EXECUTE FUNCTION create_audit_log_on_movement();
 CREATE TRIGGER trg_audit_on_pass_insert
@@ -497,6 +541,7 @@ ALTER TABLE gates                     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE student_details           ENABLE ROW LEVEL SECURITY;
 ALTER TABLE employee_details          ENABLE ROW LEVEL SECURITY;
 ALTER TABLE movement_logs             ENABLE ROW LEVEL SECURITY;
+ALTER TABLE daily_stats               ENABLE ROW LEVEL SECURITY;
 ALTER TABLE campus_occupancy          ENABLE ROW LEVEL SECURITY;
 ALTER TABLE visitor_logs              ENABLE ROW LEVEL SECURITY;
 ALTER TABLE gate_passes               ENABLE ROW LEVEL SECURITY;
@@ -544,6 +589,14 @@ CREATE POLICY mlog_select_staff  ON movement_logs FOR SELECT TO authenticated
 CREATE POLICY mlog_select_own    ON movement_logs FOR SELECT TO authenticated USING (user_id = auth.uid());
 CREATE POLICY mlog_insert_staff  ON movement_logs FOR INSERT TO authenticated
   WITH CHECK (is_operator(auth.uid()) OR is_admin(auth.uid()) OR is_warden(auth.uid()));
+
+-- 6.5b DAILY STATS (operator own gate; staff broad; admin read all; service writes/backfills)
+CREATE POLICY dstats_select_operator ON daily_stats FOR SELECT TO authenticated
+  USING (is_operator(auth.uid()) AND gate_id = (SELECT gate_id FROM users WHERE id = auth.uid()));
+CREATE POLICY dstats_select_staff ON daily_stats FOR SELECT TO authenticated
+  USING (is_supervisor(auth.uid()) OR is_admin(auth.uid()) OR is_warden(auth.uid()));
+CREATE POLICY dstats_select_own   ON daily_stats FOR SELECT TO authenticated USING (true);
+CREATE POLICY dstats_all_service ON daily_stats FOR ALL TO service_role USING (true) WITH CHECK (true);
 
 -- 6.6 CAMPUS OCCUPANCY (operator own gate; staff broad; self)
 CREATE POLICY occ_select_operator ON campus_occupancy FOR SELECT TO authenticated

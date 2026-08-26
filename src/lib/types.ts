@@ -72,6 +72,8 @@ export interface Person {
   checkedOutAt?: string;
   createdAt?: string;
   updatedAt?: string;
+  /** True when a thumbprint (biometric) is registered for this person */
+  hasThumbprint?: boolean;
   // Related details if loaded
   studentDetails?: StudentDetails;
   employeeDetails?: EmployeeDetails;
@@ -122,9 +124,47 @@ export interface User {
   canViewGender?: string[];
   status: AccountStatus;
   personType?: PersonType;
+  /** bcrypt hash of the user's thumbprint/biometric signature (never raw) */
+  thumbprintHash?: string;
+  /** When the thumbprint was last registered */
+  thumbprintVerifiedAt?: string;
 }
 
 export type ExitReason = "Home Out" | "Day Out" | "Leave" | "Regular";
+
+// ---- Operator dashboard: category breakdown & outing tracking -------------
+export type PersonCategoryKey =
+  | "hostellers"
+  | "dayscholars"
+  | "facultyStaff"
+  | "authorities"
+  | "visitors"
+  | "others";
+
+export interface CategoryStat {
+  /** People currently inside campus right now */
+  inside: number;
+  /** IN scans today */
+  inToday: number;
+  /** OUT scans today */
+  outToday: number;
+}
+
+export type CategoryBreakdown = Record<PersonCategoryKey, CategoryStat>;
+
+/** A person currently out on a no-permission short outing ("Day Out"). */
+export interface OutingEntry {
+  userId: string;
+  name: string;
+  roll: string;
+  category: PersonCategoryKey;
+  reason: string | null;
+  outAt: string;
+  minutesGone: number;
+  limitMinutes: number;
+  overdue: boolean;
+}
+
 
 export type StudentType = "HM" | "HF" | "DM" | "DF";
 
@@ -149,6 +189,23 @@ export interface Scan {
   isCorrection: boolean;
   originalScanId?: string;
   personId?: string;
+}
+
+/**
+ * One row of the `daily_stats` table.
+ * Tracking per-day entries/exits per gate; rolls to a fresh row at midnight
+ * (new date), so historical days persist while today's counters start at 0.
+ */
+export interface DailyGateStats {
+  date: string; // YYYY-MM-DD
+  gateId: string;
+  gateCode?: string;
+  entries: number;
+  exits: number;
+  peakHour?: number;
+  peakCount?: number;
+  onCampusLast?: number;
+  updatedAt?: string;
 }
 
 export interface GatePass {

@@ -4,11 +4,58 @@
  */
 import { create } from "zustand";
 import { addScan, isDuplicate, statsToday, findGateById } from "@/lib/db";
-import type { Scan, Person, Student, Gate, ScanDirection, ExitReason } from "@/lib/types";
+import type { Scan, Person, Student, Gate, ScanDirection, ExitReason, CategoryBreakdown, OutingEntry } from "@/lib/types";
 import type { ToastData } from "@/components/ui/toast";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 import { validateRollNumber } from "@/lib/rollNumber";
+
+/**
+ * Fetch today's operator gate stats from the server.
+ *
+ * The browser's anon Supabase client is blocked by RLS from reading the
+ * auth-protected `movement_logs` / `daily_stats` tables, so the page must ask a
+ * server route (which runs with the service client) for today's counts.
+ * Falls back to the local `statsToday()` only if the request itself fails.
+ */
+async function fetchTodayStats(gateId?: string): Promise<{
+  entries: number;
+  exits: number;
+  onCampus: number;
+  recentScans: Scan[];
+  breakdown: CategoryBreakdown | null;
+  outing: OutingEntry[];
+} | null> {
+  try {
+    const authStore = useAuthStore.getState();
+    const token = authStore.token;
+    if (!token) return null;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    };
+    const sessionToken = authStore.user?.currentSessionToken;
+    if (sessionToken) headers["X-Session-Token"] = sessionToken;
+
+    const url = gateId ? `/api/operator/stats?gateId=${encodeURIComponent(gateId)}` : "/api/operator/stats";
+    const res = await fetch(url, { headers, cache: "no-store" });
+    if (!res.ok) return null;
+    const result = await res.json();
+    if (!result?.success || !result?.data) return null;
+    return {
+      entries: result.data.entries ?? 0,
+      exits: result.data.exits ?? 0,
+      onCampus: result.data.onCampus ?? 0,
+      recentScans: result.data.recentScans ?? [],
+      breakdown: result.data.breakdown ?? null,
+      outing: result.data.outing ?? [],
+    };
+  } catch {
+    return null;
+  }
+}
+
 
 type ScanState = "idle" | "detecting" | "confirming" | "selecting_reason" | "success" | "error";
 
@@ -26,23 +73,44 @@ interface OperatorState {
   selectedReason: ExitReason | null;
   photoVerificationDone: boolean;
   error: ScanError | null;
+  /** Thumbprint (biometric) confirmation for the current scan person */
+  thumbprintVerified: boolean;
+  /** True when verification was allowed because the person has no thumbprint on file */
+  thumbprintFallback: boolean;
 
   // Data
   lastScan: Scan | null;
   todaysStats: { entries: number; exits: number; onCampus: number } | null;
   recentScans: Scan[];
+  /** Inside-campus counts per person category + outing list */
+  breakdown: CategoryBreakdown | null;
+  outing: OutingEntry[];
   gate: Gate | null;
+  gateId: string | null;
 
   // Actions
   startScan: (roll: string) => void;
   setDirection: (direction: ScanDirection) => void;
   setReason: (reason: ExitReason) => void;
+  setThumbprintStatus: (verified: boolean, fallback?: boolean) => void;
   confirmScan: (addToast: (toast: Omit<ToastData, "id">) => void, overrideDirection?: ScanDirection, overrideReason?: ExitReason | string) => void;
-  cancelScan: () => void;
+    cancelScan: () => void;
   reset: () => void;
   loadStats: () => void;
   setGate: (gateId: string) => void;
+  // Internal: fetch today's stats (server-first, local fallback). Not part
+  // of the public UI-facing surface; prefixed with _ by convention.
+  _fetchTodayStats: () => Promise<{ entries: number; exits: number; onCampus: number; recentScans: Scan[]; breakdown: CategoryBreakdown | null; outing: OutingEntry[] } | null>;
 }
+
+const EMPTY_BREAKDOWN: CategoryBreakdown = {
+  hostellers: { inside: 0, inToday: 0, outToday: 0 },
+  dayscholars: { inside: 0, inToday: 0, outToday: 0 },
+  facultyStaff: { inside: 0, inToday: 0, outToday: 0 },
+  authorities: { inside: 0, inToday: 0, outToday: 0 },
+  visitors: { inside: 0, inToday: 0, outToday: 0 },
+  others: { inside: 0, inToday: 0, outToday: 0 },
+};
 
 export const useOperatorStore = create<OperatorState>()((set, get) => ({
   state: "idle",
@@ -50,18 +118,23 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
   selectedDirection: "IN",
   selectedReason: null,
   photoVerificationDone: false,
+  thumbprintVerified: false,
+  thumbprintFallback: false,
   error: null,
 
   lastScan: null,
   todaysStats: null,
   recentScans: [],
+  breakdown: null,
+  outing: [],
   gate: null,
+  gateId: null,
 
   startScan: async (roll) => {
     const cleanRoll = roll.trim().toUpperCase();
     if (!cleanRoll) return;
 
-    set({ state: "detecting", error: null });
+    set({ state: "detecting", error: null, thumbprintVerified: false, thumbprintFallback: false });
 
     const authStore = useAuthStore.getState();
     const token = authStore.token;
@@ -128,6 +201,8 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
         selectedDirection: direction,
         selectedReason: null,
         photoVerificationDone: false,
+        thumbprintVerified: false,
+        thumbprintFallback: false,
         error: null,
       });
     } catch (err) {
@@ -152,6 +227,9 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
   setReason: (reason) => {
     set({ selectedReason: reason, state: "confirming" });
   },
+
+  setThumbprintStatus: (verified, fallback) =>
+    set({ thumbprintVerified: verified, thumbprintFallback: fallback ?? false }),
 
   // Clears only the error field, leaving other state intact
   clearError: () => set({ error: null }),
@@ -251,44 +329,77 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
       });
   },
 
-  cancelScan: () => {
+    cancelScan: () => {
     set({
       state: "idle",
       currentStudent: null,
       selectedDirection: "IN",
       selectedReason: null,
       photoVerificationDone: false,
+      thumbprintVerified: false,
+      thumbprintFallback: false,
       error: null,
     });
   },
 
+  // Fetch today's stats. Prefer the server route /api/operator/stats (server
+  // runs with the service client, which the browser's anon client cannot use
+  // due to RLS); fall back to the local statsToday() if the request fails.
+  _fetchTodayStats: async (): Promise<{ entries: number; exits: number; onCampus: number; recentScans: Scan[]; breakdown: CategoryBreakdown | null; outing: OutingEntry[] } | null> => {
+    const serverStats = await fetchTodayStats(get().gateId ?? undefined);
+    if (serverStats) return serverStats;
+
+    const localStats = await statsToday(get().gateId ?? undefined);
+    return {
+      entries: localStats.entries,
+      exits: localStats.exits,
+      onCampus: localStats.onCampus,
+      recentScans: localStats.recentScans as Scan[],
+      breakdown: EMPTY_BREAKDOWN,
+      outing: [],
+    };
+  },
+
   reset: async () => {
-    const stats = await statsToday();
+    const stats = await get()._fetchTodayStats();
     set({
       state: "idle",
       currentStudent: null,
       selectedDirection: "IN",
       selectedReason: null,
       photoVerificationDone: false,
+      thumbprintVerified: false,
+      thumbprintFallback: false,
       error: null,
-      todaysStats: stats,
-      recentScans: stats.recentScans,
+      todaysStats: stats
+        ? { entries: stats.entries, exits: stats.exits, onCampus: stats.onCampus }
+        : null,
+      recentScans: stats?.recentScans ?? [],
+      breakdown: stats?.breakdown ?? null,
+      outing: stats?.outing ?? [],
     });
   },
 
   loadStats: async () => {
-    const stats = await statsToday();
-    set({ todaysStats: stats, recentScans: stats.recentScans });
+    const stats = await get()._fetchTodayStats();
+    if (stats) {
+      set({
+        todaysStats: { entries: stats.entries, exits: stats.exits, onCampus: stats.onCampus },
+        recentScans: stats.recentScans,
+        breakdown: stats.breakdown,
+        outing: stats.outing,
+      });
+    }
   },
 
   setGate: async (gateId) => {
     if (!gateId) {
-      set({ gate: null });
+      set({ gate: null, gateId: null });
       return;
     }
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(gateId);
     const normalizedGateId = !isUuid && /^\d+$/.test(gateId) ? `gate-${gateId}` : gateId;
     const gate = await findGateById(normalizedGateId);
-    set({ gate: gate ?? null });
+    set({ gate: gate ?? null, gateId: gate?.id ?? normalizedGateId });
   },
 }));

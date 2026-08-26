@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { addScan, isDuplicate, findUserById } from "@/lib/db"
+import { addScan, isDuplicate, findUserById, findGateById } from "@/lib/db"
 import { withAuthorization } from "@/middleware/authorization"
 import { withRateLimit } from "@/lib/rate-limit"
 import type { ScanDirection, ExitReason } from "@/lib/types"
@@ -57,11 +57,18 @@ async function handlePost(req: NextRequest) {
     // Verify operator ↔ gate assignment for operators
     if (authRole === "operator" && authOperatorId) {
       const op = await findUserById(authOperatorId)
-      if (op && op.gateId && op.gateId !== gateId) {
-        return NextResponse.json(
-          { success: false, error: { code: "FORBIDDEN", message: "Operator not assigned to this gate" } },
-          { status: 403 }
-        )
+      if (op && op.gateId) {
+        // Resolve canonical gate records for both IDs to compare them properly
+        const [opGate, reqGate] = await Promise.all([
+          findGateById(op.gateId),
+          findGateById(gateId)
+        ])
+        if (opGate && reqGate && opGate.id !== reqGate.id) {
+          return NextResponse.json(
+            { success: false, error: { code: "FORBIDDEN", message: "Operator not assigned to this gate" } },
+            { status: 403 }
+          )
+        }
       }
     }
 

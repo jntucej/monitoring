@@ -160,11 +160,28 @@ echo "Database initialization complete!"
 echo "Your Gate Monitoring System database is now ready for the POC."
 ```
 
+## Daily Gate Stats (`daily_stats`)
+
+`daily_stats` tracks **per-day** entries/exits per gate:
+
+- One row per `(date, gate_id)`. A scan after midnight creates a **fresh row**, so
+  each day's counters start at **0** automatically (no cron job required).
+- Historical days stay recorded (rows persist by date), so past days remain viewable.
+- Populated live by `trg_daily_stats_on_movement` on every new `movement_logs` insert.
+- Backfilled from existing history by migration `0003_daily_gate_stats.sql`, or on demand:
+
+  ```bash
+  node scripts/backfill-daily-stats.js
+  ```
+
+Read today's/historical counts via the app helper `getDailyStats(date?, gateId?)`
+or the API `GET /api/analytics/daily-stats?date=YYYY-MM-DD&gateId=<uuid>`.
+
 ## Verification Checklist
 
 After initialization, verify the following:
 
-- [ ] All tables exist (users, students, gates, gate_logs, gate_passes, campus_occupancy, alerts, audit_logs, notifications, sessions, user_student_mapping)
+- [ ] All tables exist (users, students, gates, gate_logs, gate_passes, campus_occupancy, daily_stats, alerts, audit_logs, notifications, sessions, user_student_mapping)
 - [ ] All extensions are enabled (pgcrypto, pg_trgm, uuid-ossp)
 - [ ] All foreign key constraints are properly set up
 - [ ] All CHECK constraints are properly set up

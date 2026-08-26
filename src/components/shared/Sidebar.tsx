@@ -46,10 +46,9 @@ interface NavGroup {
 const ROLE_NAV_GROUPS: Record<string, NavGroup[]> = {
   operator: [
     {
-      groupLabel: "Gate Terminals",
+      groupLabel: "Gate Terminal",
       items: [
-        { href: "/gate/1", label: "Gate 1 Scanner", icon: ScanLine, badge: "LIVE" },
-        { href: "/gate/2", label: "Gate 2 Scanner", icon: ScanLine },
+        { href: "/gate/active", label: "Gate Scanner", icon: ScanLine, badge: "LIVE" },
       ],
     },
     {
@@ -219,7 +218,22 @@ export function Sidebar() {
   }, [storeRole, pathname]);
 
   const currentRole = role || "admin";
-  const navGroups = ROLE_NAV_GROUPS[currentRole] || ROLE_NAV_GROUPS.admin;
+  const rawNavGroups = ROLE_NAV_GROUPS[currentRole] || ROLE_NAV_GROUPS.admin;
+  const assignedGateId = user?.gateId || "1";
+  const navGroups = rawNavGroups.map(group => ({
+    ...group,
+    items: group.items.map(item => {
+      let href = item.href;
+      if (href === "/gate/active") {
+        href = `/gate/${assignedGateId}`;
+      } else if (href === "/gate/history") {
+        href = `/gate/${assignedGateId}?tab=history`;
+      } else if (href === "/gate/manual") {
+        href = `/gate/${assignedGateId}?tab=scandesk&mode=manual`;
+      }
+      return { ...item, href };
+    })
+  }));
 
   const handleLogout = async () => {
     sessionStorage.removeItem("gate-monitor-role");

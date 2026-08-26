@@ -70,7 +70,7 @@ const ROLE_TABS: Record<string, NavTab[]> = {
 export function MobileBottomNav() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { role } = useAuthStore();
+  const { role, user } = useAuthStore();
 
   const currentRole = (role as Role) || "operator";
   const tabs = ROLE_TABS[currentRole] || ROLE_TABS.operator;
@@ -81,15 +81,11 @@ export function MobileBottomNav() {
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[var(--bg-surface)]/90 backdrop-blur-xl border-t border-[var(--border)] pb-safe shadow-2xl select-none">
       <div className="h-16 grid grid-cols-4 items-center px-1">
         {tabs.map((tab) => {
-          // Dynamically adjust gate ID in the tab href if we are current on a gate route
+          // Dynamically adjust gate ID in the tab href based on the active operator's assigned gate
           let tabHref = tab.href;
-          const isGateRoute = pathname.startsWith("/gate/");
-          if (isGateRoute && tab.href.startsWith("/gate/1")) {
-            const parts = pathname.split("/");
-            if (parts.length >= 3) {
-              const currentGateId = parts[2];
-              tabHref = tab.href.replace("/gate/1", `/gate/${currentGateId}`);
-            }
+          const assignedGateId = user?.gateId || "1";
+          if (tab.href.startsWith("/gate/1")) {
+            tabHref = tab.href.replace("/gate/1", `/gate/${assignedGateId}`);
           }
 
           const [basePath, searchStr] = tabHref.split("?");

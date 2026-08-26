@@ -1,10 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
-import { UserPlus, User, Loader2, XCircle } from "lucide-react";
+import { UserPlus, User, Loader2, XCircle, Fingerprint, ShieldCheck } from "lucide-react";
 import type { User as UserType } from "@/lib/types";
+import { useAuthStore } from "@/stores/authStore";
 
 export function UserManagement() {
   const [users, setUsers] = useState<UserType[]>([]);
+  const [gates, setGates] = useState<Array<{ id: string; name: string }>>([]);
+  const [gateId, setGateId] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -14,10 +17,80 @@ export function UserManagement() {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
+  /** Auth headers required by every /api route (withAuthorization). */
+  const authHeaders = (): Record<string, string> => {
+    const auth = useAuthStore.getState();
+    const h: Record<string, string> = { "Content-Type": "application/json" };
+    if (auth.token) h["Authorization"] = `Bearer ${auth.token}`;
+    if (auth.user?.currentSessionToken) h["X-Session-Token"] = auth.user.currentSessionToken;
+    return h;
+  };
+
+  const patchUser = async (id: string, updates: Record<string, unknown>) => {
+    const res = await fetch(`/api/users/${id}`, {
+      method: "PATCH",
+      headers: authHeaders(),
+      body: JSON.stringify(updates),
+    });
+    return { ok: res.ok, json: await res.json().catch(() => null) };
+  };
+
+  /** Register a (mock-captured) thumbprint for a user via the admin route. */
+  const registerThumbprint = async (user: UserType) => {
+    setBusy(true);
+    setMsg(null);
+    try {
+      // MOCK capture — PREFIX must match the operator scanner's `sig:${userId}`.
+      // Replace with the real biometric scanner SDK here.
+      const signature = `sig:${user.id}`;
+      const res = await fetch("/api/operator/register-thumbprint", {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({ userId: user.id, signature }),
+      });
+      const j = await res.json();
+      if (res.ok && j.success) {
+        setMsg(`✅ Thumbprint registered for ${user.name}.`);
+        load();
+      } else {
+        setMsg(`❌ ${j.error?.message ?? "Failed to register thumbprint"}`);
+      }
+    } catch {
+      setMsg("❌ Network error");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  /** Remove a user's stored thumbprint. */
+  const clearThumbprint = async (user: UserType) => {
+    if (!confirm(`Clear thumbprint for ${user.name}?`)) return;
+    setBusy(true);
+    setMsg(null);
+    try {
+      const res = await fetch("/api/operator/register-thumbprint", {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({ userId: user.id, clear: true }),
+      });
+      const j = await res.json();
+      if (res.ok && j.success) {
+        setMsg(`✅ Thumbprint cleared for ${user.name}.`);
+        load();
+      } else {
+        setMsg(`❌ ${j.error?.message ?? "Failed to clear thumbprint"}`);
+      }
+    } catch {
+      setMsg("❌ Network error");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const load = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/users", { cache: "no-store" });
+      const res = await fetch("/api/users", { cache: "no-store", headers: authHeaders() });
       const json = await res.json();
       if (json.success) setUsers(Array.isArray(json.data) ? json.data : []);
     } catch (e) {
@@ -27,8 +100,17 @@ export function UserManagement() {
     }
   };
 
+  const loadGates = async () => {
+    try {
+      const res = await fetch("/api/gates", { cache: "no-store" });
+      const json = await res.json();
+      if (json?.success && Array.isArray(json.data)) setGates(json.data);
+    } catch { /* gate list is optional */ }
+  };
+
   useEffect(() => {
     load();
+    loadGates();
   }, []);
 
   const submit = async (e: React.FormEvent) => {
@@ -38,8 +120,8 @@ export function UserManagement() {
     try {
       const res = await fetch("/api/users", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, role, isActive: true }),
+        headers: authHeaders(),
+        body: JSON.stringify({ name, email, role, gateId: role === "operator" ? gateId || undefined : undefined, isActive: true }),
       });
       const j = await res.json();
       if (res.ok && j.success) {
@@ -58,21 +140,35 @@ export function UserManagement() {
     }
   };
 
-  const toggleActive = async (user: UserType) => {
+  const changeRole = async (user: UserType, newRole: string) => {
     setBusy(true);
     setMsg(null);
     try {
-      const res = await fetch(`/api/users/${user.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}), // No fields to update for now
-      });
-      const j = await res.json();
-      if (res.ok && j.success) {
-        setMsg("✅ User updated.");
+      const { ok, json } = await patchUser(user.id, { role: newRole });
+      if (ok && json?.success) {
+        setMsg(`✅ ${user.name} is now a ${newRole}.`);
         load();
       } else {
-        setMsg(`❌ ${j.error?.message ?? "Failed to update user"}`);
+        setMsg(`❌ ${json?.error?.message ?? "Failed to change role"}`);
+      }
+    } catch {
+      setMsg("❌ Network error");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const cycleStatus = async (user: UserType) => {
+    const next = user.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE";
+    setBusy(true);
+    setMsg(null);
+    try {
+      const { ok, json } = await patchUser(user.id, { status: next });
+      if (ok && json?.success) {
+        setMsg(`✅ ${user.name} is now ${next}.`);
+        load();
+      } else {
+        setMsg(`❌ ${json?.error?.message ?? "Failed to update status"}`);
       }
     } catch {
       setMsg("❌ Network error");
@@ -131,6 +227,25 @@ export function UserManagement() {
               <option value="student">Student</option>
             </select>
           </div>
+          {(role === "operator" || role === "supervisor") && (
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                {role === "operator" ? "Assign Gate" : "Primary Gate"}
+              </label>
+              <select
+                value={gateId}
+                onChange={(e) => setGateId(e.target.value)}
+                className="block w-full rounded-md border-gray-700 bg-gray-800 text-white sm:text-sm p-2"
+              >
+                <option value="">— No gate —</option>
+                {gates.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <div className="flex gap-2">
             <button
               type="submit"
@@ -178,14 +293,67 @@ export function UserManagement() {
                 </div>
               </div>
               <div className="flex items-center gap-2 flex-wrap">
+                {/* Thumbprint (biometric) registration status + actions */}
+                {user.thumbprintHash ? (
+                  <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 flex items-center gap-1">
+                    <ShieldCheck className="w-3 h-3" /> Biometric ✓
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-gray-500/10 text-gray-400 border border-gray-500/25">
+                    No biometric
+                  </span>
+                )}
                 <button
-                  onClick={() => toggleActive(user)}
-                  className="text-sm font-medium px-3 py-1 rounded-full bg-gray-500/10 text-gray-400"
+                  onClick={() => registerThumbprint(user)}
+                  disabled={busy}
+                  className="text-xs font-semibold px-3 py-1 rounded-full bg-sky-500/10 text-sky-300 border border-sky-500/20 hover:bg-sky-500/20 disabled:opacity-50 flex items-center gap-1"
                 >
-                  Status
+                  <Fingerprint className="w-3 h-3" />
+                  {user.thumbprintHash ? "Re-register" : "Register"}
                 </button>
-                <button className="text-sm font-medium text-sky-400 hover:underline">Edit</button>
-                <button className="text-sm font-medium text-rose-400 hover:underline">Delete</button>
+                {user.thumbprintHash && (
+                  <button
+                    onClick={() => clearThumbprint(user)}
+                    disabled={busy}
+                    className="text-xs font-medium text-rose-400 hover:underline disabled:opacity-50"
+                  >
+                    Clear
+                  </button>
+                )}
+                <select
+                  value={user.role}
+                  disabled={busy}
+                  onChange={(e) => changeRole(user, e.target.value)}
+                  className="text-xs rounded-full bg-sky-500/10 text-sky-300 px-2 py-1 border border-sky-500/20"
+                >
+                  {["operator", "supervisor", "admin", "student", "parent", "warden"].map((r) => (
+                    <option key={r} value={r}>{r}</option>
+                  ))}
+                </select>
+                <button
+                  onClick={() => cycleStatus(user)}
+                  disabled={busy}
+                  className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                    user.status === "ACTIVE"
+                      ? "bg-emerald-500/10 text-emerald-400"
+                      : "bg-gray-500/10 text-gray-400"
+                  }`}
+                >
+                  {user.status}
+                </button>
+                <button
+                  onClick={async () => {
+                    if (!confirm(`Deactivate ${user.name}? They will no longer be able to sign in.`)) return;
+                    setBusy(true);
+                    const { ok, json } = await patchUser(user.id, { status: "DEPROVISIONED" });
+                    setMsg(ok && json?.success ? `✅ ${user.name} deactivated.` : `❌ ${json?.error?.message ?? "Failed"}`);
+                    setBusy(false);
+                    load();
+                  }}
+                  className="text-sm font-medium text-rose-400 hover:underline"
+                >
+                  Delete
+                </button>
               </div>
             </div>
           ))}
