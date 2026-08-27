@@ -332,12 +332,12 @@ export default function AdminDashboardPage() {
       {/* Campus Command & Telemetry Operational Strip */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div
-          onClick={() => router.push("/sysadmin/alerts/rules")}
+          onClick={() => router.push("/admin/alerts")}
           className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] hover:border-rose-500/40 hover:bg-rose-500/5 transition cursor-pointer group flex flex-col justify-between"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] group-hover:text-rose-400">
-              Security Rules
+              Outpass Alerts
             </span>
             <div className="p-2 rounded-lg bg-rose-500/10 text-rose-400 group-hover:scale-110 transition-transform">
               <Shield className="w-4 h-4" />
@@ -345,21 +345,21 @@ export default function AdminDashboardPage() {
           </div>
           <div className="mt-3">
             <div className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-rose-400 transition-colors">
-              Alert Rules & Thresholds
+              Security & Curfew Desk
             </div>
             <p className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
-              Configure anomaly limits <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+              Review flagged attempts <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
             </p>
           </div>
         </div>
 
         <div
-          onClick={() => router.push("/sysadmin/scheduling")}
+          onClick={() => router.push("/admin/announcements")}
           className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] hover:border-amber-500/40 hover:bg-amber-500/5 transition cursor-pointer group flex flex-col justify-between"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] group-hover:text-amber-400">
-              AI Scheduling
+              Campus Broadcasts
             </span>
             <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400 group-hover:scale-110 transition-transform">
               <Sparkles className="w-4 h-4" />
@@ -367,10 +367,10 @@ export default function AdminDashboardPage() {
           </div>
           <div className="mt-3">
             <div className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-amber-400 transition-colors">
-              Smart Shift Assistant
+              Announcements Manager
             </div>
             <p className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
-              Optimize gate staffing <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+              Issue gate alerts & news <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
             </p>
           </div>
         </div>
@@ -398,12 +398,12 @@ export default function AdminDashboardPage() {
         </div>
 
         <div
-          onClick={() => router.push("/sysadmin/integrations")}
+          onClick={() => router.push("/admin/gates")}
           className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] hover:border-emerald-500/40 hover:bg-emerald-500/5 transition cursor-pointer group flex flex-col justify-between"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] group-hover:text-emerald-400">
-              Integration Hub
+              Gate Control Desk
             </span>
             <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 group-hover:scale-110 transition-transform">
               <Database className="w-4 h-4" />
@@ -411,10 +411,10 @@ export default function AdminDashboardPage() {
           </div>
           <div className="mt-3">
             <div className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-emerald-400 transition-colors">
-              LDAP & LMS Telemetry
+              Active Gates & Terminals
             </div>
             <p className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
-              Sync campus systems <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+              Configure scanner status <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
             </p>
           </div>
         </div>
