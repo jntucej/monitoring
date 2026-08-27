@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/supabaseClient";
 import { withAuthorization } from "@/middleware/authorization";
+import { addAudit } from "@/lib/db";
+import { Role } from "@/lib/types";
 
 async function handleGet() {
   try {
@@ -30,6 +32,8 @@ async function handleGet() {
 async function handlePatch(req: NextRequest) {
   try {
     const { id, retention_days, auto_delete } = await req.json();
+    const actorId = req.headers.get("x-user-id") || "sysadmin";
+    const actorRole = (req.headers.get("x-user-role") || "sysadmin") as Role;
     const supabase = getSupabaseServiceClient();
 
     const updateFields: Record<string, any> = { updated_at: new Date().toISOString() };
@@ -37,6 +41,14 @@ async function handlePatch(req: NextRequest) {
     if (typeof auto_delete === "boolean") updateFields.auto_delete = auto_delete;
 
     const { data } = await supabase.from("retention_policies").update(updateFields).eq("id", id).select("*").single();
+
+    await addAudit({
+      action: "RETENTION_POLICY_UPDATED",
+      userId: actorId,
+      userName: "SysAdmin",
+      role: actorRole,
+      details: `Updated retention policy '${id}': retention_days=${retention_days}, auto_delete=${auto_delete}`,
+    });
 
     return NextResponse.json({ success: true, data: data || { id, ...updateFields } });
   } catch (error: any) {

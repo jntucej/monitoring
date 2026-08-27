@@ -3,9 +3,19 @@ import { generateBase32Secret } from "@/lib/totp";
 import { findUserById, addAudit } from "@/lib/db";
 import { getSupabaseServiceClient } from "@/lib/supabaseClient";
 import { withRateLimit } from "@/lib/rate-limit";
+import { verifyEnrollToken } from "@/lib/mfa-enroll";
 
 async function handlePost(req: NextRequest) {
-  const userId = req.headers.get("x-user-id");
+  let userId = req.headers.get("x-user-id");
+
+  // Bootstrap path: no authenticated session yet. A valid short-lived
+  // mfa_enroll JWT (issued by /api/auth/mfa/bootstrap) may mint a setup
+  // secret for exactly one target sysadmin.
+  const enrollToken = req.headers.get("x-mfa-enroll-token");
+  if (!userId && enrollToken) {
+    userId = await verifyEnrollToken(enrollToken);
+  }
+
   if (!userId) {
     return NextResponse.json(
       { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required" } },

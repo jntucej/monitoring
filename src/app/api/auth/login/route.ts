@@ -111,6 +111,30 @@ async function handleLogin(req: NextRequest) {
       );
     }
 
+    // SECURITY: sysadmins MUST have TOTP 2FA enrolled before a session is
+    // issued. Block login early (before any session token is minted) so an
+    // unenrolled admin can never hold usable credentials mid-setup.
+    if (profile.role === "sysadmin") {
+      const { data: mfaRow } = await service
+        .from("users")
+        .select("two_factor_enabled")
+        .eq("id", authData.user.id)
+        .single();
+
+      if (!mfaRow?.two_factor_enabled) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: "MFA_REQUIRED",
+              message: "Two-factor authentication is required for administrator accounts.",
+            },
+          },
+          { status: 403 }
+        );
+      }
+    }
+
     // Generate unique session token for single active session enforcement
     const currentSessionToken = randomUUID();
     const { error: sessionUpdateError } = await service

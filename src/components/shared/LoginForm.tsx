@@ -17,6 +17,7 @@ import { useAuthStore, useHasHydrated } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 import { useRoles } from "@/hooks/useRoles";
 import type { Role } from "@/lib/types";
+import { getDefaultRouteForRole } from "@/lib/route-helpers";
 
 interface LoginFormProps {
   role: Role | "all";
@@ -144,6 +145,14 @@ export function LoginForm({ role, title, subtitle }: LoginFormProps) {
     }
 
     const result = await login(identifier, passwordOrPin);
+
+    // SECURITY: sysadmins must complete TOTP enrollment before they can sign in.
+    if (!result.success && result.code === "MFA_REQUIRED") {
+      triggerShake("Two-factor authentication is required. Complete setup in Security Settings, then sign in again.");
+      router.push("/sysadmin/security");
+      return;
+    }
+
     if (result.success) {
       if (rememberMe) {
         localStorage.setItem("gate-monitor-remember", "true");
@@ -212,8 +221,10 @@ export function LoginForm({ role, title, subtitle }: LoginFormProps) {
       }
 
       case "admin":
+        router.push("/admin");
+        break;
       case "sysadmin":
-        router.push("/admin/dashboard");
+        router.push("/sysadmin");
         break;
       case "faculty":
         router.push("/faculty");

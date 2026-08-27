@@ -47,7 +47,7 @@ async function handlePost(req: NextRequest) {
 
   try {
     const body = await req.json().catch(() => ({}));
-    const { action = "create", anonymize = false, tables, backupData, truncate = false } = body;
+    const { action = "create", anonymize = false, tables, backupData, truncate = false, checksum } = body;
 
     if (action === "restore") {
       if (!backupData || typeof backupData !== "object") {
@@ -57,7 +57,12 @@ async function handlePost(req: NextRequest) {
         );
       }
 
-      const result = await restoreDatabaseBackup(backupData, { truncate });
+      // Optional integrity gate: callers may pass the SHA-256 checksum recorded
+      // at backup time; a mismatched payload aborts before touching the database.
+      const result = await restoreDatabaseBackup(backupData, {
+        truncate,
+        expectedChecksum: typeof checksum === "string" && checksum.trim() !== "" ? checksum : undefined,
+      });
 
       await addAudit({
         action: "BACKUP_RESTORED",

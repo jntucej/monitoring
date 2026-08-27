@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { DoorOpen, PlusCircle, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import type { Gate } from "@/lib/types";
+import { getAuthHeaders } from "@/lib/utils";
 
 export function GateManagement() {
   const [gates, setGates] = useState<Gate[]>([]);
@@ -17,7 +18,10 @@ export function GateManagement() {
   const load = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/gates", { cache: "no-store" });
+      const res = await fetch("/api/gates", {
+        headers: getAuthHeaders(),
+        cache: "no-store",
+      });
       const json = await res.json();
       if (json.success) setGates(Array.isArray(json.data) ? json.data : []);
     } catch (e) {
@@ -38,7 +42,7 @@ export function GateManagement() {
     try {
       const res = await fetch("/api/gates", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({ name, location, type, isActive: true }),
       });
       const j = await res.json();
@@ -64,7 +68,7 @@ export function GateManagement() {
     try {
       const res = await fetch(`/api/gates/${gate.id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({ isActive: !gate.isActive }),
       });
       const j = await res.json();

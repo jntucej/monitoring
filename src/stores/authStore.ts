@@ -20,8 +20,8 @@ interface AuthState {
 }
 
 interface AuthActions {
-  login: (login: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  pinLogin: (employeeId: string, pin: string) => Promise<{ success: boolean; error?: string }>;
+  login: (login: string, password: string) => Promise<{ success: boolean; error?: string; code?: string }>;
+  pinLogin: (employeeId: string, pin: string) => Promise<{ success: boolean; error?: string; code?: string }>;
   logout: () => Promise<void>;
   checkSession: () => Promise<boolean>;
   setRole: (role: Role) => void;
@@ -68,6 +68,13 @@ export const useAuthStore = create<AuthState & AuthActions>()(
               return { success: true };
             }
           }
+          const errBody = await response.json().catch(() => null);
+          set({ loading: false });
+          return {
+            success: false,
+            error: errBody?.error?.message || "Invalid credentials",
+            code: errBody?.error?.code,
+          };
         } catch (error) {
           console.error("Login error:", error);
         }

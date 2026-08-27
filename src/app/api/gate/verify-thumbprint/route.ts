@@ -86,7 +86,7 @@ async function handlePost(req: NextRequest) {
       });
     }
 
-    const isValid = bcrypt.compareSync(signature, stored.hash);
+    const isValid = await bcrypt.compare(signature, stored.hash);
 
     if (!isValid) {
       await logAudit("THUMBPRINT_FAILED", { reason: "Invalid thumbprint match", attempt: attemptNum });

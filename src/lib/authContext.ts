@@ -75,7 +75,6 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
     .select('*')
     .eq('id', user.id)
     .single();
-
   if (profileError || !profile) {
     // We have a valid Supabase user but no corresponding profile in our public.users table.
     // This is a critical data integrity issue and should be treated as an auth failure.
@@ -86,6 +85,14 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
   if (profile.id !== user.id) {
     // This should theoretically never happen if the database is consistent.
     throw new Error('UNAUTHORIZED: User ID mismatch');
+  }
+
+  // SECURITY: sysadmins must have TOTP 2FA enrolled. Enforced on EVERY
+  // authorized API request — not just login — so enrollment can't be bypassed
+  // by holding a pre-existing access token, and disabling 2FA kills access
+  // immediately. Defense in depth alongside the /api/auth/login gate.
+  if (profile.role === 'sysadmin' && !profile.two_factor_enabled) {
+    throw new Error('MFA_REQUIRED: administrator accounts must enable two-factor authentication');
   }
 
   // Return the validated context

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 import { UserCheck, CheckCircle, XCircle, Plus, RefreshCw, Send } from "lucide-react";
+import { getAuthHeaders } from "@/lib/utils";
 
 interface RoleRequest {
   id: string;
@@ -21,8 +22,7 @@ interface RoleRequest {
 }
 
 export function PromotionRequests() {
-  const { user, token } = useAuthStore();
-  const currentSessionToken = user?.currentSessionToken || token;
+  const { user } = useAuthStore();
   const { addToast } = useUIStore();
 
   const [requests, setRequests] = useState<RoleRequest[]>([]);
@@ -39,12 +39,7 @@ export function PromotionRequests() {
   const fetchRequests = useCallback(async () => {
     setLoading(true);
     try {
-      const headers: Record<string, string> = {
-        "X-User-Id": user?.id || "",
-        "X-User-Role": user?.role || "",
-      };
-      if (currentSessionToken) headers["X-Session-Token"] = currentSessionToken;
-
+      const headers = getAuthHeaders();
       const url = filterStatus !== "ALL"
         ? `/api/admin/role-requests?status=${filterStatus}`
         : "/api/admin/role-requests";
@@ -59,7 +54,7 @@ export function PromotionRequests() {
     } finally {
       setLoading(false);
     }
-  }, [user, currentSessionToken, filterStatus]);
+  }, [filterStatus]);
 
   useEffect(() => {
     fetchRequests();
@@ -67,13 +62,10 @@ export function PromotionRequests() {
 
   const handleAction = async (requestId: string, status: "APPROVED" | "REJECTED") => {
     try {
-      const headers: Record<string, string> = {
+      const headers = {
+        ...getAuthHeaders(),
         "Content-Type": "application/json",
-        "X-User-Id": user?.id || "",
-        "X-User-Role": user?.role || "",
       };
-      if (currentSessionToken) headers["X-Session-Token"] = currentSessionToken;
-
       const res = await fetch(`/api/admin/role-requests/${requestId}`, {
         method: "PATCH",
         headers,
@@ -102,13 +94,10 @@ export function PromotionRequests() {
     setSubmitting(true);
 
     try {
-      const headers: Record<string, string> = {
+      const headers = {
+        ...getAuthHeaders(),
         "Content-Type": "application/json",
-        "X-User-Id": user?.id || "",
-        "X-User-Role": user?.role || "",
       };
-      if (currentSessionToken) headers["X-Session-Token"] = currentSessionToken;
-
       const res = await fetch("/api/admin/role-requests", {
         method: "POST",
         headers,

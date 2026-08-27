@@ -4,12 +4,11 @@ import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 import { BookOpen, RefreshCw, CheckCircle, Settings, ShieldCheck } from "lucide-react";
+import { getAuthHeaders } from "@/lib/utils";
 
 export function LMSIntegration() {
-  const { token } = useAuthStore();
   const { addToast } = useUIStore();
   const [config, setConfig] = useState({
     platform: "moodle",
@@ -25,9 +24,7 @@ export function LMSIntegration() {
   const fetchStatus = async () => {
     setLoading(true);
     try {
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (token) headers["Authorization"] = `Bearer ${token}`;
-
+      const headers = getAuthHeaders();
       const res = await fetch("/api/integrations/lms/status", { headers });
       const result = await res.json();
       if (result.success && result.data) {
@@ -47,9 +44,7 @@ export function LMSIntegration() {
   const handleSyncNow = async () => {
     setSyncing(true);
     try {
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (token) headers["Authorization"] = `Bearer ${token}`;
-
+      const headers = getAuthHeaders();
       const res = await fetch("/api/integrations/lms/sync", { method: "POST", headers });
       const result = await res.json();
       if (result.success) {

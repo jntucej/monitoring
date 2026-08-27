@@ -46,6 +46,14 @@ async function handlePatch(req: NextRequest) {
       );
     }
 
+    // Security check: Only sysadmin can approve promotion to sysadmin
+    if (status === "APPROVED" && request.new_role === "sysadmin" && actorRole !== "sysadmin") {
+      return NextResponse.json(
+        { success: false, error: { code: "FORBIDDEN", message: "Only a sysadmin can approve promotion to sysadmin" } },
+        { status: 403 }
+      );
+    }
+
     // Update request status
     const now = new Date().toISOString();
     const { error: updateErr } = await supabase

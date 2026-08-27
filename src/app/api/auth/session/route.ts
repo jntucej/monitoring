@@ -53,11 +53,15 @@ async function handleSessionCheck(req: NextRequest) {
 
     // 4. Fetch full user profile
     const service = getSupabaseServiceClient();
-    const { data: profile } = await service
+    const { data: profile, error: profileErr } = await service
       .from("users")
-      .select("id, name, role, employee_id, unique_id, email, status, handle, gate_id")
+      .select("id, name, role, unique_id, login_identifier, email, status, handle, gate_id")
       .eq("id", userId)
       .maybeSingle();
+
+    if (profileErr) {
+      console.error("Session profile fetch error:", profileErr);
+    }
 
     if (!profile || profile.status !== "ACTIVE") {
       return NextResponse.json(
@@ -90,7 +94,7 @@ async function handleSessionCheck(req: NextRequest) {
           id: profile.id,
           name: profile.name,
           role: profile.role,
-          employeeId: profile.employee_id,
+          employeeId: profile.unique_id || profile.login_identifier || null,
           uniqueId: profile.unique_id,
           email: profile.email,
           status: profile.status,

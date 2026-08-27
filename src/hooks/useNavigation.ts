@@ -46,6 +46,50 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
 
   switch (roleCode) {
     case "sysadmin":
+      return [
+        {
+          groupLabel: "System Governance",
+          items: [
+            { href: "/sysadmin", label: "System Overview", icon: "LayoutDashboard", badge: "SYSADMIN" },
+            { href: "/sysadmin/students", label: "Students Management", icon: "GraduationCap" },
+            { href: "/sysadmin/staff", label: "Staff Management", icon: "Briefcase" },
+            { href: "/sysadmin/roles", label: "Roles & Permissions", icon: "ShieldCheck" },
+            { href: "/sysadmin/audit", label: "SysAdmin Audit Telemetry", icon: "ShieldAlert" },
+            { href: "/sysadmin/departments", label: "Department & HOD Desk", icon: "Building2" },
+            { href: "/sysadmin/promotions", label: "Role Promotions", icon: "UserCheck" },
+            { href: "/sysadmin/sessions", label: "Active Sessions", icon: "Users" },
+            { href: "/sysadmin/health", label: "System Health", icon: "Activity" },
+          ],
+        },
+        {
+          groupLabel: "Integrations & Automation",
+          items: [
+            { href: "/sysadmin/sso", label: "SSO Configuration", icon: "Shield" },
+            { href: "/sysadmin/integrations", label: "Integration Hub", icon: "Database" },
+            { href: "/sysadmin/jobs", label: "Scheduled Background Jobs", icon: "Clock" },
+            { href: "/sysadmin/scheduling", label: "Smart Scheduling", icon: "Sparkles" },
+          ],
+        },
+        {
+          groupLabel: "Security & Policy",
+          items: [
+            { href: "/sysadmin/security", label: "Zero-Trust Security", icon: "Lock" },
+            { href: "/sysadmin/compliance", label: "Compliance & Retention", icon: "ShieldCheck" },
+            { href: "/sysadmin/exit-reasons", label: "Exit Reasons & Outpass", icon: "DoorOpen" },
+            { href: "/sysadmin/alerts/rules", label: "Alert Rules", icon: "Bell" },
+            { href: "/sysadmin/navigation", label: "Navigation Editor", icon: "Layout" },
+            { href: "/help", label: "Help & Docs", icon: "BookOpen" },
+          ],
+        },
+        {
+          groupLabel: "General & Information",
+          items: [
+            { href: "/profile", label: "My Profile", icon: "User" },
+            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+          ],
+        },
+      ];
+
     case "admin":
       return [
         {
@@ -74,20 +118,12 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
             { href: "/admin/occupancy", label: "Density Heatmap & Digital Twin", icon: "MapPin", badge: "2D LIVE" },
             { href: "/admin/analytics/users", label: "User Behavioral Analytics", icon: "Users" },
             { href: "/admin/sustainability", label: "Green IT & Sustainability", icon: "Leaf" },
-            { href: "/sysadmin/audit", label: "SysAdmin Audit Telemetry", icon: "ShieldAlert" },
           ],
         },
         {
-          groupLabel: "Administration & Governance",
+          groupLabel: "Administration & Settings",
           items: [
             { href: "/admin/users", label: "User Accounts & Roles", icon: "UserCog" },
-            { href: "/sysadmin/promotions", label: "Role Promotion Workflow", icon: "UserCheck" },
-            { href: "/sysadmin/integrations", label: "Integration Hub", icon: "Database" },
-            { href: "/sysadmin/jobs", label: "Scheduled Background Jobs", icon: "Clock" },
-            { href: "/sysadmin/sessions", label: "Active User Sessions", icon: "Users" },
-            { href: "/sysadmin/compliance", label: "Compliance & Retention", icon: "ShieldCheck" },
-            { href: "/sysadmin/security", label: "Zero-Trust Security", icon: "Lock" },
-            { href: "/help", label: "Help & Docs", icon: "BookOpen" },
             { href: "/admin/announcements", label: "Broadcast Announcements", icon: "Megaphone" },
             { href: "/admin/support", label: "Support Desk Triage", icon: "LifeBuoy" },
             { href: "/admin/gates", label: "Gate Hardware Desk", icon: "QrCode" },

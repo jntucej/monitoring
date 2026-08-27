@@ -1,27 +1,56 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, Download, UserX, Play, Database } from "lucide-react";
+import { Edit2, ShieldCheck, Download, UserX, Play, Database } from "lucide-react";
+import { Modal } from "@/components/ui/modal";
+import { Input } from "@/components/ui/input";
+import { getAuthHeaders } from "@/lib/utils";
 
 export function ComplianceSettings() {
-  const { user, token } = useAuthStore();
-  const currentSessionToken = user?.currentSessionToken || token;
   const { addToast } = useUIStore();
 
   const [policies, setPolicies] = useState<any[]>([]);
   const [targetUserId, setTargetUserId] = useState("");
   const [exportData, setExportData] = useState<string | null>(null);
+  const [editingPolicy, setEditingPolicy] = useState<any | null>(null);
+  const [savingPolicy, setSavingPolicy] = useState(false);
 
-  const getHeaders = () => {
-    const h: Record<string, string> = { "Content-Type": "application/json" };
-    if (token) h["Authorization"] = `Bearer ${token}`;
-    if (currentSessionToken) h["X-Session-Token"] = currentSessionToken;
-    return h;
+  const getHeaders = () => ({
+    ...getAuthHeaders(),
+    "Content-Type": "application/json",
+  });
+
+  const handleUpdatePolicy = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingPolicy) return;
+    setSavingPolicy(true);
+    try {
+      const res = await fetch("/api/admin/retention-policies", {
+        method: "PATCH",
+        headers: getHeaders(),
+        body: JSON.stringify({
+          id: editingPolicy.id,
+          retention_days: Number(editingPolicy.retention_days),
+          auto_delete: Boolean(editingPolicy.auto_delete),
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        addToast({ variant: "success", title: "Policy Updated", message: "Retention lifecycle policy updated." });
+        setEditingPolicy(null);
+        fetchPolicies();
+      } else {
+        addToast({ variant: "error", title: "Error", message: data.error?.message || "Failed to update policy" });
+      }
+    } catch {
+      addToast({ variant: "error", title: "Error", message: "Network request error" });
+    } finally {
+      setSavingPolicy(false);
+    }
   };
 
   const fetchPolicies = async () => {
@@ -88,14 +117,19 @@ export function ComplianceSettings() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-600">
-                <tr><th className="p-3">Data Category</th><th className="p-3">Retention Window</th><th className="p-3">Auto Sweep</th></tr>
+                <tr><th className="p-3">Data Category</th><th className="p-3">Retention Window</th><th className="p-3">Auto Sweep</th><th className="p-3 text-right">Actions</th></tr>
               </thead>
               <tbody className="divide-y">
                 {policies.map((p) => (
                   <tr key={p.id}>
                     <td className="p-3 font-medium capitalize">{p.data_category.replace("_", " ")}</td>
                     <td className="p-3 font-mono">{p.retention_days} days</td>
-                    <td className="p-3"><Badge variant="success">Enabled</Badge></td>
+                    <td className="p-3"><Badge variant={p.auto_delete ? "success" : "offline"}>{p.auto_delete ? "Enabled" : "Disabled"}</Badge></td>
+                    <td className="p-3 text-right">
+                      <Button variant="secondary" size="sm" className="h-7 text-xs gap-1" onClick={() => setEditingPolicy({ ...p })}>
+                        <Edit2 className="w-3 h-3" /> Edit
+                      </Button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -119,6 +153,42 @@ export function ComplianceSettings() {
           </div>
         )}
       </Card>
+
+      <Modal isOpen={!!editingPolicy} onClose={() => setEditingPolicy(null)} title="Edit Retention Policy">
+        {editingPolicy && (
+          <form onSubmit={handleUpdatePolicy} className="space-y-4">
+            <div>
+              <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase">Data Category</label>
+              <div className="p-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded text-sm font-semibold capitalize">
+                {editingPolicy.data_category.replace("_", " ")}
+              </div>
+            </div>
+            <Input
+              label="Retention Window (Days)"
+              type="number"
+              value={editingPolicy.retention_days}
+              onChange={(e) => setEditingPolicy({ ...editingPolicy, retention_days: e.target.value })}
+              required
+            />
+            <div className="flex items-center gap-2 pt-2">
+              <input
+                type="checkbox"
+                id="auto_delete"
+                checked={editingPolicy.auto_delete}
+                onChange={(e) => setEditingPolicy({ ...editingPolicy, auto_delete: e.target.checked })}
+                className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <label htmlFor="auto_delete" className="text-sm font-medium text-[var(--text-primary)] cursor-pointer">
+                Enable Auto Sweep (Purge records older than retention limit)
+              </label>
+            </div>
+            <div className="flex justify-end gap-2 pt-4 border-t border-[var(--border)]">
+              <Button type="button" variant="secondary" onClick={() => setEditingPolicy(null)}>Cancel</Button>
+              <Button type="submit" variant="primary" loading={savingPolicy}>Save Policy</Button>
+            </div>
+          </form>
+        )}
+      </Modal>
     </div>
   );
 }

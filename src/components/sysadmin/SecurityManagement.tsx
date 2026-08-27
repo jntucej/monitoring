@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShieldCheck, ShieldAlert, Lock, Globe, KeyRound } from "lucide-react";
+import { getAuthHeaders } from "@/lib/utils";
 
 interface SecurityStats {
   failedLogins24h: number;
@@ -17,7 +17,6 @@ interface SecurityStats {
 }
 
 export function SecurityManagement() {
-  const { token } = useAuthStore();
   const { addToast } = useUIStore();
   const [stats, setStats] = useState<SecurityStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -27,9 +26,7 @@ export function SecurityManagement() {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (token) headers["Authorization"] = `Bearer ${token}`;
-
+      const headers = getAuthHeaders();
       const res = await fetch("/api/admin/security/stats", { headers });
       const result = await res.json();
       if (result.success) {
@@ -48,9 +45,7 @@ export function SecurityManagement() {
 
   const handleSave = async () => {
     try {
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (token) headers["Authorization"] = `Bearer ${token}`;
-
+      const headers = getAuthHeaders();
       const ips = ipInput.split(",").map((s) => s.trim()).filter(Boolean);
       const res = await fetch("/api/admin/security/ip-allowlist", {
         method: "POST",

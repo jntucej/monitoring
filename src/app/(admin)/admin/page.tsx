@@ -9,6 +9,7 @@ import { StudentList } from "@/components/admin/StudentList";
 import {
   Activity, GraduationCap, Briefcase, HardHat,
   UserCheck, RefreshCw, AlertCircle, Flame, ShieldAlert, X, Radio,
+  Shield, Zap, Sparkles, Database, ArrowRight
 } from "lucide-react";
 import type { DashboardData } from "@/lib/types";
 import { getAuthHeaders } from "@/lib/utils";
@@ -328,39 +329,94 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Person Category Infometrics Breakdown Bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-[var(--bg-surface)] border border-[var(--border)] p-4 rounded-xl">
+      {/* Campus Command & Telemetry Operational Strip */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div
-          onClick={() => router.push("/admin/students")}
-          className="space-y-1 border-r border-[var(--border)] pr-3 cursor-pointer group hover:bg-blue-500/5 p-2 rounded-lg transition"
+          onClick={() => router.push("/sysadmin/alerts/rules")}
+          className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] hover:border-rose-500/40 hover:bg-rose-500/5 transition cursor-pointer group flex flex-col justify-between"
         >
-          <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider group-hover:text-blue-400">Students →</span>
-          <div className="text-lg font-bold text-blue-400">{studentStats.onCampus} <span className="text-xs font-normal text-[var(--text-muted)]">/ {studentStats.total}</span></div>
-          <div className="text-[11px] text-[var(--text-muted)]">In: <span className="text-emerald-400 font-semibold">{studentStats.inToday}</span> | Out: <span className="text-amber-400 font-semibold">{studentStats.outToday}</span></div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] group-hover:text-rose-400">
+              Security Rules
+            </span>
+            <div className="p-2 rounded-lg bg-rose-500/10 text-rose-400 group-hover:scale-110 transition-transform">
+              <Shield className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-3">
+            <div className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-rose-400 transition-colors">
+              Alert Rules & Thresholds
+            </div>
+            <p className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
+              Configure anomaly limits <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+            </p>
+          </div>
         </div>
+
         <div
-          onClick={() => router.push("/admin/faculty")}
-          className="space-y-1 border-r border-[var(--border)] pr-3 pl-2 cursor-pointer group hover:bg-emerald-500/5 p-2 rounded-lg transition"
+          onClick={() => router.push("/sysadmin/scheduling")}
+          className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] hover:border-amber-500/40 hover:bg-amber-500/5 transition cursor-pointer group flex flex-col justify-between"
         >
-          <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider group-hover:text-emerald-400">Faculty →</span>
-          <div className="text-lg font-bold text-emerald-400">{facultyStats.onCampus} <span className="text-xs font-normal text-[var(--text-muted)]">/ {facultyStats.total}</span></div>
-          <div className="text-[11px] text-[var(--text-muted)]">In: <span className="text-emerald-400 font-semibold">{facultyStats.inToday}</span> | Out: <span className="text-amber-400 font-semibold">{facultyStats.outToday}</span></div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] group-hover:text-amber-400">
+              AI Scheduling
+            </span>
+            <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400 group-hover:scale-110 transition-transform">
+              <Sparkles className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-3">
+            <div className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-amber-400 transition-colors">
+              Smart Shift Assistant
+            </div>
+            <p className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
+              Optimize gate staffing <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+            </p>
+          </div>
         </div>
+
         <div
-          onClick={() => router.push("/admin/staff")}
-          className="space-y-1 border-r border-[var(--border)] pr-3 pl-2 cursor-pointer group hover:bg-purple-500/5 p-2 rounded-lg transition"
+          onClick={() => router.push("/admin/occupancy")}
+          className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] hover:border-blue-500/40 hover:bg-blue-500/5 transition cursor-pointer group flex flex-col justify-between"
         >
-          <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider group-hover:text-purple-400">Staff →</span>
-          <div className="text-lg font-bold text-purple-400">{staffStats.onCampus} <span className="text-xs font-normal text-[var(--text-muted)]">/ {staffStats.total}</span></div>
-          <div className="text-[11px] text-[var(--text-muted)]">In: <span className="text-emerald-400 font-semibold">{staffStats.inToday}</span> | Out: <span className="text-amber-400 font-semibold">{staffStats.outToday}</span></div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] group-hover:text-blue-400">
+              Spatial Density
+            </span>
+            <div className="p-2 rounded-lg bg-blue-500/10 text-blue-400 group-hover:scale-110 transition-transform">
+              <Zap className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-3">
+            <div className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-blue-400 transition-colors">
+              Live Digital Twin
+            </div>
+            <p className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
+              Monitor zone capacity <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+            </p>
+          </div>
         </div>
+
         <div
-          onClick={() => router.push("/admin/workers")}
-          className="space-y-1 pl-2 cursor-pointer group hover:bg-amber-500/5 p-2 rounded-lg transition"
+          onClick={() => router.push("/sysadmin/integrations")}
+          className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] hover:border-emerald-500/40 hover:bg-emerald-500/5 transition cursor-pointer group flex flex-col justify-between"
         >
-          <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider group-hover:text-amber-400">Workers →</span>
-          <div className="text-lg font-bold text-amber-400">{workerStats.onCampus} <span className="text-xs font-normal text-[var(--text-muted)]">/ {workerStats.total}</span></div>
-          <div className="text-[11px] text-[var(--text-muted)]">In: <span className="text-emerald-400 font-semibold">{workerStats.inToday}</span> | Out: <span className="text-amber-400 font-semibold">{workerStats.outToday}</span></div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] group-hover:text-emerald-400">
+              Integration Hub
+            </span>
+            <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 group-hover:scale-110 transition-transform">
+              <Database className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-3">
+            <div className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-emerald-400 transition-colors">
+              LDAP & LMS Telemetry
+            </div>
+            <p className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
+              Sync campus systems <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+            </p>
+          </div>
         </div>
       </div>
 

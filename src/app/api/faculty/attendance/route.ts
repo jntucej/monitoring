@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient, supabase } from "@/lib/supabaseClient";
+import { getDepartments } from "@/lib/departments";
 
 export interface HeatmapDay {
   date: string; // YYYY-MM-DD
@@ -53,23 +54,6 @@ export interface DepartmentAttendanceSummary {
 
 export const dynamic = "force-dynamic";
 
-const DEPARTMENT_MAP: Record<string, string> = {
-  "01": "CIVIL",
-  "02": "EEE",
-  "03": "ME",
-  "04": "ECE",
-  "05": "CSE",
-  "12": "IT",
-  "00": "STAFF",
-  "CIVIL": "CIVIL",
-  "EEE": "EEE",
-  "ME": "ME",
-  "ECE": "ECE",
-  "CSE": "CSE",
-  "IT": "IT",
-  "STAFF": "STAFF",
-};
-
 function formatTime(isoString: string | null | undefined): string | null {
   if (!isoString) return null;
   try {
@@ -86,6 +70,13 @@ function formatTime(isoString: string | null | undefined): string | null {
 
 export async function GET(req: NextRequest) {
   try {
+    const depts = await getDepartments();
+    const deptCodeToShortName: Record<string, string> = {};
+    depts.forEach((d) => {
+      deptCodeToShortName[d.code] = d.shortName;
+      if (d.numericCode) deptCodeToShortName[d.numericCode] = d.shortName;
+    });
+
     let service = supabase;
     try {
       service = getSupabaseServiceClient();
@@ -134,7 +125,7 @@ export async function GET(req: NextRequest) {
     const records: FacultyMemberAttendance[] = facultyUsers.map((u) => {
       const emp = u.employee_details || {};
       const rawDept = emp.department_id || u.department_id || "CSE";
-      const department = DEPARTMENT_MAP[rawDept] || rawDept || "CSE";
+      const department = deptCodeToShortName[rawDept] || rawDept || "CSE";
       const uLogs = logsByUser[u.id] || [];
 
       // Filter today's movement logs

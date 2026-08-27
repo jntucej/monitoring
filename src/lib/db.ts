@@ -577,7 +577,7 @@ export async function getNotifications(recipientType: string, recipientId: strin
   const safeId = sanitizePostgrestParam(recipientId);
 
   if (safeType && safeType !== 'all') {
-    query = query.or(`recipient_type.eq.${safeType},recipient_type.eq.all`);
+    query = query.in('recipient_type', [safeType, 'all']);
   }
 
   if (safeId) {
@@ -619,11 +619,10 @@ export async function findPersonByUniqueId(uniqueId: string): Promise<Person | n
   try {
     let query = client.from('users').select('*, student_details!student_details_user_id_fkey(*), employee_details(*)');
     if (isUuid) {
-      query = query.or(`unique_id.eq.${formattedId},id.eq.${formattedId}`);
-    } else {
-      query = query.eq('unique_id', formattedId);
+      const { data: userData } = await client.from('users').select('*, student_details!student_details_user_id_fkey(*), employee_details(*)').eq('id', formattedId).maybeSingle();
+      if (userData) return mPerson(userData);
     }
-    const { data: userData, error: uErr } = await query.maybeSingle();
+    const { data: userData, error: uErr } = await client.from('users').select('*, student_details!student_details_user_id_fkey(*), employee_details(*)').eq('unique_id', formattedId).maybeSingle();
     if (!uErr && userData) {
       return mPerson(userData);
     }
@@ -631,13 +630,15 @@ export async function findPersonByUniqueId(uniqueId: string): Promise<Person | n
 
   // Tier 2: Query simple users table without joins (if explicit join failed)
   try {
-    let query = client.from('users').select('*');
     if (isUuid) {
-      query = query.or(`unique_id.eq.${formattedId},id.eq.${formattedId}`);
-    } else {
-      query = query.eq('unique_id', formattedId);
+      const { data: simpleUser } = await client.from('users').select('*').eq('id', formattedId).maybeSingle();
+      if (simpleUser) {
+        const { data: sDet } = await client.from('student_details').select('*').eq('user_id', simpleUser.id).maybeSingle();
+        const { data: eDet } = await client.from('employee_details').select('*').eq('user_id', simpleUser.id).maybeSingle();
+        return mPerson({ ...simpleUser, student_details: sDet || undefined, employee_details: eDet || undefined });
+      }
     }
-    const { data: simpleUser } = await query.maybeSingle();
+    const { data: simpleUser } = await client.from('users').select('*').eq('unique_id', formattedId).maybeSingle();
     if (simpleUser) {
       const { data: sDet } = await client.from('student_details').select('*').eq('user_id', simpleUser.id).maybeSingle();
       const { data: eDet } = await client.from('employee_details').select('*').eq('user_id', simpleUser.id).maybeSingle();
@@ -984,24 +985,24 @@ export async function createUser(userData: {
   loginIdentifier?: string;
   initialPinHash?: string;
 }): Promise<User | null> {
+  const uniqueId = userData.employeeId || userData.loginIdentifier || userData.email || userData.id;
+
   const { data, error } = await supabase
     .from('users')
     .insert({
       id: userData.id,
+      unique_id: uniqueId,
       name: userData.name,
       role: userData.role,
-      employee_id: userData.employeeId || null,
       email: userData.email || null,
       phone: userData.phone || null,
       gate_id: userData.gateId || null,
-      parent_id: userData.parentId || null,
       supervised_gates: userData.supervisedGates || null,
       assigned_hostel: userData.assignedHostel || null,
-      is_hod: userData.isHod || false,
       department_id: userData.departmentId || null,
       can_view_gender: userData.canViewGender || null,
       status: userData.status || 'ACTIVE',
-      login_identifier: userData.loginIdentifier || null,
+      login_identifier: userData.loginIdentifier || uniqueId,
       initial_pin_hash: userData.initialPinHash || null,
     })
     .select()
@@ -1010,6 +1011,34 @@ export async function createUser(userData: {
   if (error) {
     console.error('Error creating user:', error);
     return null;
+  }
+
+  // Insert/upsert auxiliary employee_details if applicable
+  if (userData.employeeId || userData.isHod || ['faculty', 'staff', 'worker', 'operator', 'admin', 'sysadmin'].includes(userData.role)) {
+    try {
+      await supabase.from('employee_details').upsert({
+        user_id: userData.id,
+        employee_id: (userData.employeeId || uniqueId).trim().toUpperCase(),
+        is_hod: userData.isHod || false,
+        department_id: userData.departmentId || null,
+      }, { onConflict: 'user_id' });
+    } catch (eErr) {
+      console.warn('Non-fatal employee_details upsert error:', eErr);
+    }
+  }
+
+  // Insert/upsert auxiliary student_details if applicable
+  if (userData.parentId || userData.role === 'student') {
+    try {
+      await supabase.from('student_details').upsert({
+        user_id: userData.id,
+        roll: (userData.loginIdentifier || uniqueId).trim().toUpperCase(),
+        parent_id: userData.parentId || null,
+        department_id: userData.departmentId || null,
+      }, { onConflict: 'user_id' });
+    } catch (sErr) {
+      console.warn('Non-fatal student_details upsert error:', sErr);
+    }
   }
 
   await addAudit({
@@ -1173,7 +1202,13 @@ export async function updateAccountStatus(userId: string, newStatus: AccountStat
 
 export async function updateUserRole(userId: string, newRole: Role, actorId: string): Promise<boolean> {
   const { data: user } = await supabase.from('users').select('name, role').eq('id', userId).single();
-  const { data: actor } = await supabase.from('users').select('name').eq('id', actorId).single();
+  const { data: actor } = await supabase.from('users').select('name, role').eq('id', actorId).maybeSingle();
+
+  // SECURITY GUARD: Only sysadmin (or system processes) can assign sysadmin role
+  if (newRole === 'sysadmin' && actorId !== 'system' && actor?.role !== 'sysadmin') {
+    console.error(`Forbidden role escalation attempt: actor ${actorId} (${actor?.role}) tried to grant sysadmin to ${userId}`);
+    return false;
+  }
 
   const { error } = await supabase.from('users').update({ role: newRole }).eq('id', userId);
   if (error) return false;
@@ -1354,14 +1389,6 @@ export async function addScan(input: {
     }
   }
 
-  const duplicate = await isDuplicate(uniqueId, input.direction);
-  if (duplicate) {
-    const last = await lastScanFor(uniqueId);
-    if (last) {
-      return { scan: last, duplicate: true };
-    }
-  }
-
   const gate = await findGateById(input.gateId);
   if (!gate) throw new Error("Invalid gate ID");
 
@@ -1370,6 +1397,38 @@ export async function addScan(input: {
 
   const ts = new Date().toISOString();
   const id = (input.clientEventId && isUuid(input.clientEventId)) ? input.clientEventId : crypto.randomUUID();
+
+  // Attempt atomic database scan insertion via stored RPC with row lock
+  try {
+    const { data: rpcRes, error: rpcErr } = await client.rpc('process_gate_scan', {
+      p_scan_id: id,
+      p_user_id: person.id,
+      p_direction: input.direction,
+      p_reason: input.reason || null,
+      p_gate_id: gate.id,
+      p_gate_name: gate.name,
+      p_operator_id: op.id,
+      p_operator_name: op.name,
+      p_timestamp: ts,
+      p_is_manual: !!input.isManual,
+      p_dup_window_minutes: 5,
+    });
+
+    if (!rpcErr && rpcRes && rpcRes.length > 0) {
+      const res = rpcRes[0];
+      const logData = res.inserted_log;
+      const isDup = !!res.is_duplicate;
+      return { scan: mScan({ ...logData, users: person }), duplicate: isDup };
+    }
+  } catch { /* fallback to standard query path if RPC is missing */ }
+
+  const duplicate = await isDuplicate(uniqueId, input.direction);
+  if (duplicate) {
+    const last = await lastScanFor(uniqueId);
+    if (last) {
+      return { scan: last, duplicate: true };
+    }
+  }
 
   const scanRow = {
     id,
@@ -1898,29 +1957,17 @@ export async function getPersonStatus(uniqueId: string): Promise<{ status: "IN" 
     : `unique_id.eq.${formattedId}`;
 
   // First get the person by ID using parameterized query
-  const { data: person, error: personErr } = await client
-    .from('users')
-    .select('id, name')
-    .or(orFilter)
-    .maybeSingle();
+  let person: { id: string; name: string } | null = null;
+  if (isUuid) {
+    const { data: pById } = await client.from('users').select('id, name').eq('id', formattedId).maybeSingle();
+    person = pById;
+  }
+  if (!person) {
+    const { data: pByUniqueId, error: personErr } = await client.from('users').select('id, name').eq('unique_id', formattedId).maybeSingle();
+    if (!personErr && pByUniqueId) person = pByUniqueId;
+  }
 
-  if (personErr || !person) {
-    // Fallback to legacy students table
-    const { data: legacyStudent } = await supabase
-      .from('students')
-      .select('id, name')
-      .eq('roll', formattedId)
-      .maybeSingle();
-    
-    if (legacyStudent) {
-      const lastScan = await lastScanFor(formattedId);
-      return {
-        status: lastScan?.direction === "IN" ? "IN" : "OUT",
-        lastScan,
-        name: legacyStudent.name,
-      };
-    }
-    
+  if (!person) {
     return { status: "OUT", lastScan: null };
   }
 

@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useAuthStore, useHasHydrated } from "@/stores/authStore";
 import type { Role } from "@/lib/types";
 
+import { getDefaultRouteForRole } from "@/lib/route-helpers";
+
 interface AuthGuardProps {
   children: React.ReactNode;
   allowedRoles?: Role[];
@@ -45,25 +47,8 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
 
     // Check role authorization if specified
     if (allowedRoles && allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
-      switch (user.role) {
-        case "admin":
-          router.replace("/admin");
-          break;
-        case "operator":
-          router.replace("/gate/1");
-          break;
-        case "student":
-          router.replace("/student");
-          break;
-        case "parent":
-          router.replace("/parent");
-          break;
-        case "sysadmin":
-          router.replace("/sysadmin");
-          break;
-        default:
-          router.replace("/login");
-      }
+      const defaultRoute = getDefaultRouteForRole(user.role, user.gateId);
+      router.replace(defaultRoute);
       return;
     }
 

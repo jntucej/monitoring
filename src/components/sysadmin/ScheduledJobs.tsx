@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 import { Clock, Play, RefreshCw, CheckCircle2, XCircle } from "lucide-react";
+import { getAuthHeaders } from "@/lib/utils";
 
 interface Job {
   id: string;
@@ -25,8 +25,6 @@ interface JobRun {
 }
 
 export function ScheduledJobs() {
-  const { user, token } = useAuthStore();
-  const currentSessionToken = user?.currentSessionToken || token;
   const { addToast } = useUIStore();
 
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -37,12 +35,7 @@ export function ScheduledJobs() {
   const fetchJobs = useCallback(async () => {
     setLoading(true);
     try {
-      const headers: Record<string, string> = {
-        "X-User-Id": user?.id || "",
-        "X-User-Role": user?.role || "",
-      };
-      if (currentSessionToken) headers["X-Session-Token"] = currentSessionToken;
-
+      const headers = getAuthHeaders();
       const res = await fetch("/api/admin/jobs", { headers });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -54,7 +47,7 @@ export function ScheduledJobs() {
     } finally {
       setLoading(false);
     }
-  }, [user, currentSessionToken]);
+  }, []);
 
   useEffect(() => {
     fetchJobs();
@@ -62,13 +55,10 @@ export function ScheduledJobs() {
 
   const handleToggleJob = async (jobId: string, currentEnabled: boolean) => {
     try {
-      const headers: Record<string, string> = {
+      const headers = {
+        ...getAuthHeaders(),
         "Content-Type": "application/json",
-        "X-User-Id": user?.id || "",
-        "X-User-Role": user?.role || "",
       };
-      if (currentSessionToken) headers["X-Session-Token"] = currentSessionToken;
-
       const res = await fetch(`/api/admin/jobs/${jobId}`, {
         method: "PATCH",
         headers,
@@ -88,12 +78,7 @@ export function ScheduledJobs() {
   const handleRunNow = async (jobId: string) => {
     setRunningJobId(jobId);
     try {
-      const headers: Record<string, string> = {
-        "X-User-Id": user?.id || "",
-        "X-User-Role": user?.role || "",
-      };
-      if (currentSessionToken) headers["X-Session-Token"] = currentSessionToken;
-
+      const headers = getAuthHeaders();
       const res = await fetch(`/api/admin/jobs/${jobId}/run`, { method: "POST", headers });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.error?.message || "Failed to execute job");

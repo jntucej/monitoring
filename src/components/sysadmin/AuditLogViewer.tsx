@@ -3,13 +3,11 @@
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { generateCSV } from "@/lib/export";
-import { useAuthStore } from "@/stores/authStore";
+import { getAuthHeaders } from "@/lib/utils";
 import { AuditFilters } from "./AuditFilters";
 import { AuditLogRow } from "./AuditLogRow";
 
 export function AuditLogViewer() {
-  const { token, user } = useAuthStore();
-  const sessionToken = user?.currentSessionToken;
   const [logs, setLogs] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -34,8 +32,10 @@ export function AuditLogViewer() {
       params.set("limit", limit.toString());
       params.set("offset", ((page - 1) * limit).toString());
 
-      const headers: Record<string, string> = sessionToken ? { "X-Session-Token": sessionToken } : {};
-      const res = await fetch(`/api/admin/audit?${params.toString()}`, { headers });
+      const res = await fetch(`/api/admin/audit?${params.toString()}`, {
+        headers: getAuthHeaders(),
+        cache: "no-store",
+      });
       const json = await res.json();
 
       if (res.ok && json.success) {

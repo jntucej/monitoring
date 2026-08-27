@@ -1,32 +1,20 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/supabaseClient";
+import { getDepartments } from "@/lib/departments";
+import { withAuthorization } from "@/middleware/authorization";
+import { addAudit } from "@/lib/db";
+import { Role } from "@/lib/types";
 
 export async function GET() {
   const supabase = getSupabaseServiceClient();
 
-  const DEFAULT_DEPT_NAMES: Record<string, string> = {
-    "01": "Computer Science & Engineering",
-    "02": "Information Technology",
-    "03": "Electronics & Communication Engineering",
-    "04": "Electrical & Electronics Engineering",
-    "05": "Mechanical Engineering",
-    "06": "Civil Engineering",
-    "CSE": "Computer Science & Engineering",
-    "IT": "Information Technology",
-    "ECE": "Electronics & Communication Engineering",
-    "EEE": "Electrical & Electronics Engineering",
-    "ME": "Mechanical Engineering",
-    "CIVIL": "Civil Engineering"
-  };
-
   try {
-    const { data: dbDepts } = await supabase.from('departments').select('*');
+    const dbDepts = await getDepartments();
     const deptNameMap = new Map<string, string>();
-    if (dbDepts && dbDepts.length > 0) {
-      dbDepts.forEach((d: any) => {
-        deptNameMap.set(d.code, d.name);
-      });
-    }
+    dbDepts.forEach(d => {
+      deptNameMap.set(d.code, d.name);
+      if (d.numericCode) deptNameMap.set(d.numericCode, d.name);
+    });
 
     const { data: users, error: usersError } = await supabase.from('users').select('id, department_id, role, name');
     if (usersError) throw usersError;
@@ -41,19 +29,17 @@ export async function GET() {
 
     const departmentsMap = new Map<string, any>();
 
-    // Pre-populate with dbDepts if available
-    if (dbDepts && dbDepts.length > 0) {
-      dbDepts.forEach((d: any) => {
-        departmentsMap.set(d.code, {
-          code: d.code,
-          name: d.name,
-          hod: "Not Assigned",
-          totalStudents: 0,
-          facultyCount: 0,
-          heatmap: { y1: 0, y2: 0, y3: 0, y4: 0, le: 0 },
-        });
+    // Pre-populate with dbDepts
+    dbDepts.forEach(d => {
+      departmentsMap.set(d.code, {
+        code: d.code,
+        name: d.name,
+        hod: d.hod || "Not Assigned",
+        totalStudents: 0,
+        facultyCount: 0,
+        heatmap: { y1: 0, y2: 0, y3: 0, y4: 0, le: 0 },
       });
-    }
+    });
 
     (users || []).forEach(u => {
       const dCode = u.department_id;
@@ -62,7 +48,7 @@ export async function GET() {
       if (!departmentsMap.has(dCode)) {
         departmentsMap.set(dCode, {
           code: dCode,
-          name: deptNameMap.get(dCode) || DEFAULT_DEPT_NAMES[dCode] || dCode,
+          name: deptNameMap.get(dCode) || dCode,
           hod: "Not Assigned",
           totalStudents: 0,
           facultyCount: 0,
@@ -101,3 +87,68 @@ export async function GET() {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
+
+async function handlePost(req: NextRequest) {
+  const supabase = getSupabaseServiceClient();
+  try {
+    const body = await req.json();
+    const { code, name, numericCode, hodUserId } = body;
+
+    if (!code || !name) {
+      return NextResponse.json({ success: false, error: { code: "BAD_REQUEST", message: "Department Code and Name are required" } }, { status: 400 });
+    }
+
+    const payload = {
+      code,
+      name,
+      numeric_code: numericCode || null,
+    };
+
+    const { data, error } = await supabase.from("departments").upsert([payload]).select().single();
+    if (error && error.code !== "42P01") throw error;
+
+    if (hodUserId) {
+      // Reassign HOD
+      await supabase.from("employee_details").update({ is_hod: false }).eq("department_id", code);
+      await supabase.from("employee_details").update({ is_hod: true, department_id: code }).eq("user_id", hodUserId);
+    }
+
+    const actorId = req.headers.get("x-user-id") || "sysadmin";
+    const actorRole = (req.headers.get("x-user-role") || "sysadmin") as Role;
+
+    await addAudit({
+      action: "DEPARTMENT_UPSERT",
+      userId: actorId,
+      userName: "SysAdmin",
+      role: actorRole,
+      details: `Saved department '${code}' (${name}).`,
+    });
+
+    return NextResponse.json({ success: true, data: data || payload });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 500 });
+  }
+}
+
+async function handleDelete(req: NextRequest) {
+  const supabase = getSupabaseServiceClient();
+  try {
+    const { searchParams } = new URL(req.url);
+    const code = searchParams.get("code");
+    if (!code) {
+      return NextResponse.json({ success: false, error: { code: "BAD_REQUEST", message: "Missing department code" } }, { status: 400 });
+    }
+
+    const { error } = await supabase.from("departments").delete().eq("code", code);
+    if (error && error.code !== "42P01") throw error;
+
+    return NextResponse.json({ success: true, message: `Deleted department ${code}` });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 500 });
+  }
+}
+
+export const POST = withAuthorization(handlePost, { requiredRole: ["sysadmin", "admin"] });
+export const PATCH = withAuthorization(handlePost, { requiredRole: ["sysadmin", "admin"] });
+export const DELETE = withAuthorization(handleDelete, { requiredRole: ["sysadmin"] });
+

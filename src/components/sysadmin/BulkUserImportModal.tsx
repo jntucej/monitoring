@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Upload, X, CheckCircle2, AlertTriangle, FileText } from "lucide-react";
-import { useAuthStore } from "@/stores/authStore";
+import { getAuthHeaders } from "@/lib/utils";
 
 interface BulkUserImportModalProps {
   onClose: () => void;
@@ -10,8 +10,6 @@ interface BulkUserImportModalProps {
 }
 
 export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalProps) {
-  const { token, user } = useAuthStore();
-  const sessionToken = user?.currentSessionToken;
   const [jsonText, setJsonText] = useState("");
   const [busy, setBusy] = useState(false);
   const [resultMsg, setResultMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -64,13 +62,9 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
         return;
       }
 
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (token) headers["Authorization"] = `Bearer ${token}`;
-      if (sessionToken) headers["X-Session-Token"] = sessionToken;
-
       const res = await fetch("/api/users/bulk", {
         method: "POST",
-        headers,
+        headers: getAuthHeaders(),
         body: JSON.stringify({ users: usersList }),
       });
       const json = await res.json();

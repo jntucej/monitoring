@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 import { Users, LogOut, RefreshCw } from "lucide-react";
+import { getAuthHeaders } from "@/lib/utils";
 
 interface ActiveSession {
   userId: string;
@@ -16,8 +16,6 @@ interface ActiveSession {
 }
 
 export function ActiveSessions() {
-  const { user, token } = useAuthStore();
-  const currentSessionToken = user?.currentSessionToken || token;
   const { addToast } = useUIStore();
 
   const [sessions, setSessions] = useState<ActiveSession[]>([]);
@@ -27,12 +25,7 @@ export function ActiveSessions() {
   const fetchSessions = useCallback(async () => {
     setLoading(true);
     try {
-      const headers: Record<string, string> = {
-        "X-User-Id": user?.id || "",
-        "X-User-Role": user?.role || "",
-      };
-      if (currentSessionToken) headers["X-Session-Token"] = currentSessionToken;
-
+      const headers = getAuthHeaders();
       const res = await fetch("/api/admin/sessions", { headers });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -43,7 +36,7 @@ export function ActiveSessions() {
     } finally {
       setLoading(false);
     }
-  }, [user, currentSessionToken]);
+  }, []);
 
   useEffect(() => {
     fetchSessions();
@@ -56,12 +49,7 @@ export function ActiveSessions() {
 
     setRevokingId(targetUserId);
     try {
-      const headers: Record<string, string> = {
-        "X-User-Id": user?.id || "",
-        "X-User-Role": user?.role || "",
-      };
-      if (currentSessionToken) headers["X-Session-Token"] = currentSessionToken;
-
+      const headers = getAuthHeaders();
       const res = await fetch(`/api/admin/sessions/${targetUserId}`, {
         method: "DELETE",
         headers,

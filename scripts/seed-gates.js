@@ -25,7 +25,6 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 async function seedGates() {
   const gates = [
     {
-      id: "11111111-1111-1111-1111-111111111111",
       gate_code: "GATE-01",
       name: "Main Campus Gate",
       location: "Main Entrance",
@@ -33,7 +32,6 @@ async function seedGates() {
       is_active: true,
     },
     {
-      id: "22222222-2222-2222-2222-222222222222",
       gate_code: "GATE-02",
       name: "Hostel Gate 1",
       location: "Boys Hostel Block A",
@@ -41,7 +39,6 @@ async function seedGates() {
       is_active: true,
     },
     {
-      id: "33333333-3333-3333-3333-333333333333",
       gate_code: "GATE-03",
       name: "Library Gate",
       location: "Academic Block 2",
@@ -52,14 +49,15 @@ async function seedGates() {
 
   console.log("Seeding gates into Supabase...");
   for (const g of gates) {
-    const { data, error } = await supabase.from('gates').upsert(g).select();
+    const { data, error } = await supabase.from('gates').upsert(g, { onConflict: 'gate_code' }).select();
     if (error) {
       console.error(`Error seeding gate ${g.name}:`, error.message);
     } else {
-      console.log(`✅ Seeded gate: ${g.name} (${g.id})`);
+      console.log(`✅ Seeded gate: ${g.name}`);
     }
   }
 }
 
 seedGates().catch(console.error);
+
 

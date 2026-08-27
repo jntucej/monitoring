@@ -143,3 +143,81 @@ export async function PATCH(req: NextRequest) {
     );
   }
 }
+
+/**
+ * DELETE /api/users/[id] — remove user account and profile data.
+ */
+export async function DELETE(req: NextRequest) {
+  try {
+    const id = getIdFromPath(req);
+    const actorId = req.headers.get("x-user-id") || "";
+    const actorRole = req.headers.get("x-user-role") || "";
+
+    if (!actorId) {
+      return NextResponse.json(
+        { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required" } },
+        { status: 401 }
+      );
+    }
+
+    if (actorRole !== "admin" && actorRole !== "sysadmin") {
+      return NextResponse.json(
+        { success: false, error: { code: "FORBIDDEN", message: "Only administrators can delete user accounts" } },
+        { status: 403 }
+      );
+    }
+
+    const target = await findUserById(id);
+    if (!target) {
+      return NextResponse.json(
+        { success: false, error: { code: "NOT_FOUND", message: "User not found" } },
+        { status: 404 }
+      );
+    }
+
+    if (actorRole === "admin" && target.role === "sysadmin") {
+      return NextResponse.json(
+        { success: false, error: { code: "FORBIDDEN", message: "Admins cannot delete sysadmin accounts" } },
+        { status: 403 }
+      );
+    }
+
+    const service = getSupabaseServiceClient();
+
+    // Delete sub-table details
+    await Promise.all([
+      service.from("student_details").delete().eq("user_id", id),
+      service.from("employee_details").delete().eq("user_id", id),
+      service.from("worker_details").delete().eq("user_id", id),
+    ]);
+
+    // Delete user record
+    const { error } = await service.from("users").delete().eq("id", id);
+    if (error) {
+      return NextResponse.json(
+        { success: false, error: { code: "DELETE_FAILED", message: error.message } },
+        { status: 500 }
+      );
+    }
+
+    try {
+      const actor = await findUserById(actorId);
+      await addAudit({
+        action: "USER_DELETED",
+        userId: actorId,
+        userName: actor?.name || "System",
+        role: actorRole as Role,
+        details: `Deleted user account ${target.name} (${target.id})`,
+      });
+    } catch { /* best effort */ }
+
+    return NextResponse.json({ success: true, message: `User ${target.name} deleted successfully` });
+  } catch (error) {
+    console.error("DELETE /api/users/[id] error:", error);
+    return NextResponse.json(
+      { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to delete user" } },
+      { status: 500 }
+    );
+  }
+}
+

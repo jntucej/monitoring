@@ -4,6 +4,7 @@ import { UserPlus, User, Loader2, XCircle, Fingerprint, ShieldCheck, Upload } fr
 import type { User as UserType } from "@/lib/types";
 import { useAuthStore } from "@/stores/authStore";
 import { BulkUserImportModal } from "./BulkUserImportModal";
+import { getAuthHeaders } from "@/lib/utils";
 
 export function UserManagement() {
   const [users, setUsers] = useState<UserType[]>([]);
@@ -21,11 +22,10 @@ export function UserManagement() {
 
   /** Auth headers required by every /api route (withAuthorization). */
   const authHeaders = (): Record<string, string> => {
-    const auth = useAuthStore.getState();
-    const h: Record<string, string> = { "Content-Type": "application/json" };
-    if (auth.token) h["Authorization"] = `Bearer ${auth.token}`;
-    if (auth.user?.currentSessionToken) h["X-Session-Token"] = auth.user.currentSessionToken;
-    return h;
+    return {
+      ...getAuthHeaders(),
+      "Content-Type": "application/json",
+    };
   };
 
   const patchUser = async (id: string, updates: Record<string, unknown>) => {
@@ -104,7 +104,7 @@ export function UserManagement() {
 
   const loadGates = async () => {
     try {
-      const res = await fetch("/api/gates", { cache: "no-store" });
+      const res = await fetch("/api/gates", { cache: "no-store", headers: authHeaders() });
       const json = await res.json();
       if (json?.success && Array.isArray(json.data)) setGates(json.data);
     } catch { /* gate list is optional */ }

@@ -153,6 +153,11 @@ export function withAuthorization(
             { success: false, error: { code: 'ACCOUNT_INACTIVE', message: 'Account is not active' } },
             { status: 403 }
           );
+        } else if (error.message.includes('MFA_REQUIRED')) {
+          return NextResponse.json(
+            { success: false, error: { code: 'MFA_REQUIRED', message: 'Two-factor authentication enrollment is required for administrator accounts.' } },
+            { status: 403 }
+          );
         } else if (error.message.includes('FORBIDDEN')) {
           return NextResponse.json(
             { success: false, error: { code: 'FORBIDDEN', message: 'Insufficient permissions' } },

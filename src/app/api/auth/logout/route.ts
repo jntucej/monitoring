@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withAuthAndStatus } from "@/middleware/auth";
 import { withRateLimit } from "@/lib/rate-limit";
 import { supabase, getSupabaseServiceClient } from "@/lib/supabaseClient";
 
@@ -39,7 +38,7 @@ async function handlePost(req: NextRequest) {
   return NextResponse.json({ success: true });
 }
 
-export const POST = withRateLimit(
-  withAuthAndStatus(handlePost),
-  { keyPrefix: 'logout', maxRequests: 10 }
-);
+export const POST = withRateLimit(handlePost, {
+  keyPrefix: "logout",
+  maxRequests: 30,
+});

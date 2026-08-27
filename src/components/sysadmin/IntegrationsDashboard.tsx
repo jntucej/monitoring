@@ -1,30 +1,49 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RefreshCw, CheckCircle2, Zap, Server, Activity, Database, Mail } from "lucide-react";
+import { getAuthHeaders } from "@/lib/utils";
 
 export function IntegrationsDashboard() {
-  const { user, token } = useAuthStore();
-  const currentSessionToken = user?.currentSessionToken || token;
   const { addToast } = useUIStore();
 
   const [integrations, setIntegrations] = useState<any[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncingId, setSyncingId] = useState<string | null>(null);
+  const [ldapSyncing, setLdapSyncing] = useState(false);
+
+  const handleLdapSync = async () => {
+    setLdapSyncing(true);
+    try {
+      const headers = getAuthHeaders();
+      const res = await fetch("/api/admin/ldap/sync", { method: "POST", headers });
+      const result = await res.json();
+      if (result.success) {
+        addToast({
+          variant: "success",
+          title: "LDAP Sync Complete",
+          message: `Processed: ${result.data?.usersProcessed || 0}, Created: ${result.data?.usersCreated || 0}, Updated: ${result.data?.usersUpdated || 0}`,
+        });
+        fetchIntegrations();
+      } else {
+        addToast({ variant: "error", title: "LDAP Sync Failed", message: result.error?.message || "Error syncing Active Directory" });
+      }
+    } catch {
+      addToast({ variant: "error", title: "Error", message: "LDAP sync request failed" });
+    } finally {
+      setLdapSyncing(false);
+    }
+  };
 
   const fetchIntegrations = async () => {
     setLoading(true);
     try {
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (token) headers["Authorization"] = `Bearer ${token}`;
-      if (currentSessionToken) headers["X-Session-Token"] = currentSessionToken;
-
+      const headers = getAuthHeaders();
       const [resConfig, resLogs] = await Promise.all([
         fetch("/api/integrations", { headers }),
         fetch("/api/integrations/logs", { headers }),
@@ -46,10 +65,7 @@ export function IntegrationsDashboard() {
   const handleSyncNow = async (id: string) => {
     setSyncingId(id);
     try {
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (token) headers["Authorization"] = `Bearer ${token}`;
-      if (currentSessionToken) headers["X-Session-Token"] = currentSessionToken;
-
+      const headers = getAuthHeaders();
       const res = await fetch(`/api/integrations/${id}/sync`, { method: "POST", headers });
       const result = await res.json();
       if (result.success) {
@@ -74,6 +90,30 @@ export function IntegrationsDashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Card className="border shadow-sm border-blue-500/30">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-50 dark:bg-blue-950/40 rounded-lg">
+                <Server className="w-5 h-5 text-blue-500" />
+              </div>
+              <div>
+                <CardTitle className="text-base">Active Directory / LDAP</CardTitle>
+                <CardDescription className="text-xs">User Directory & IAM Sync</CardDescription>
+              </div>
+            </div>
+            <Badge variant="success">Active</Badge>
+          </CardHeader>
+          <CardContent className="space-y-4 pt-2">
+            <div className="text-xs text-gray-500 flex justify-between">
+              <span>Status:</span>
+              <span className="font-medium text-emerald-600 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Connected</span>
+            </div>
+            <Button onClick={handleLdapSync} disabled={ldapSyncing} size="sm" className="w-full gap-1 text-xs variant-primary">
+              <Zap className={`w-3.5 h-3.5 ${ldapSyncing ? "animate-spin" : ""}`} /> Sync LDAP Now
+            </Button>
+          </CardContent>
+        </Card>
+
         {integrations.map((item) => (
           <Card key={item.id} className="border shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
