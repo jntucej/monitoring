@@ -13,8 +13,8 @@ import type {
   User, DashboardData, Role, AccountStatus, PersonTypeStats, DailyGateStats
 } from "./types";
 
-export function sanitizePostgrestParam(val: string): string {
-  if (!val) return "";
+export function sanitizePostgrestParam(val: string | null | undefined): string {
+  if (!val || typeof val !== "string") return "";
   return val.replace(/[^a-zA-Z0-9_\-\.\@]/g, "").trim();
 }
 

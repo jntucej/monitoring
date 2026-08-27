@@ -1,6 +1,8 @@
 /**
  * Security Hardening & Zero-Trust Architecture Utility
+ * Uses `system_settings` database table for persistence with in-memory caching.
  */
+import { getSupabaseServiceClient } from "./supabaseClient";
 
 export interface SecurityStats {
   failedLogins24h: number;
@@ -44,6 +46,21 @@ export function verifyScanSignature(
 }
 
 export async function getSecurityStats(): Promise<SecurityStats> {
+  try {
+    const supabase = getSupabaseServiceClient();
+    const { data } = await supabase.from("system_settings").select("value").eq("id", "security_ip_allowlist").single();
+    if (data?.value) {
+      if (Array.isArray(data.value.allowed_ips)) {
+        inMemoryAllowedIps = data.value.allowed_ips;
+      }
+      if (typeof data.value.forced_2fa === "boolean") {
+        inMemoryForced2FA = data.value.forced_2fa;
+      }
+    }
+  } catch (err) {
+    console.error("Error loading security settings from DB:", err);
+  }
+
   return {
     failedLogins24h: 3,
     activeSessions: 14,
@@ -56,5 +73,21 @@ export async function getSecurityStats(): Promise<SecurityStats> {
 export async function updateIpAllowlist(ips: string[], force2FA?: boolean): Promise<SecurityStats> {
   inMemoryAllowedIps = ips;
   if (force2FA !== undefined) inMemoryForced2FA = force2FA;
+
+  try {
+    const supabase = getSupabaseServiceClient();
+    await supabase.from("system_settings").upsert({
+      id: "security_ip_allowlist",
+      value: {
+        allowed_ips: inMemoryAllowedIps,
+        forced_2fa: inMemoryForced2FA,
+      },
+      updated_at: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.error("Error updating security settings in DB:", err);
+  }
+
   return getSecurityStats();
 }
+

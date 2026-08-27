@@ -104,22 +104,15 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
     health.status = 'unhealthy';
   }
 
-  // Get active users (last 5 minutes)
+  // Get active users (checking active sessions via users handle)
   try {
-    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-    const { count: sessions } = await supabase
-      .from('sessions')
-      .select('*', { count: 'exact', head: true })
-      .gte('last_active', fiveMinutesAgo);
+    const { count: activeCount } = await supabase
+      .from('users')
+      .select('id', { count: 'exact', head: true })
+      .not('handle', 'is', null);
 
-    health.metrics.activeSessions = sessions || 0;
-
-    const { count: users } = await supabase
-      .from('sessions')
-      .select('user_id', { count: 'exact', head: true })
-      .gte('last_active', fiveMinutesAgo);
-
-    health.metrics.activeUsers = users || 0;
+    health.metrics.activeSessions = activeCount || 0;
+    health.metrics.activeUsers = activeCount || 0;
   } catch (error) {
     console.error('Error getting active users:', error);
   }
@@ -127,16 +120,16 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
   // Get recent alerts
   try {
     const { data: alerts } = await supabase
-      .from('system_alerts')
+      .from('alerts')
       .select('*')
-      .order('created_at', { ascending: false })
+      .order('timestamp', { ascending: false })
       .limit(10);
 
     health.recentAlerts = (alerts || []).map(a => ({
       id: a.id,
       severity: a.severity,
       message: a.message,
-      timestamp: a.created_at,
+      timestamp: a.timestamp || a.created_at,
     }));
   } catch (error) {
     console.error('Error getting recent alerts:', error);

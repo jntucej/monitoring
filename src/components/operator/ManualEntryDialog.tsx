@@ -3,10 +3,10 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, X, Check, Info, User, ArrowRight, Lock, Eye, EyeOff } from "lucide-react";
-import { findStudentByRoll } from "@/lib/db";
 import { parseRollNumber, validateRollNumber } from "@/lib/rollNumber";
 import { Button } from "@/components/ui/button";
 import { useUIStore } from "@/stores/uiStore";
+import { useAuthStore } from "@/stores/authStore";
 import type { ScanDirection, ExitReason } from "@/lib/types";
 import { supabase } from "@/lib/supabaseClient";
 import { useCampusConfig } from "@/hooks/useCampusConfig";
@@ -82,7 +82,21 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
     }
 
     setSearching(true);
-    const found = await findStudentByRoll(cleanInput);
+    let found = null;
+    try {
+      const authState = useAuthStore.getState();
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (authState.token) headers["Authorization"] = `Bearer ${authState.token}`;
+      if (authState.user?.currentSessionToken) headers["X-Session-Token"] = authState.user.currentSessionToken;
+
+      const res = await fetch(`/api/persons?uniqueId=${encodeURIComponent(cleanInput)}`, { headers });
+      const json = await res.json().catch(() => null);
+      if (res.ok && json?.success && json?.data) {
+        found = json.data;
+      }
+    } catch (err) {
+      console.error("Error fetching person by roll:", err);
+    }
     setSearching(false);
     if (found) {
       setStudent(found);

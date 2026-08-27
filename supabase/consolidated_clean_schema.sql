@@ -53,7 +53,9 @@ CREATE TABLE IF NOT EXISTS users (
                        CHECK (status IN ('ACTIVE','LOCKED','SUSPENDED','DISABLED','DEPROVISIONED')),
   auth_provider        TEXT NOT NULL DEFAULT 'email',
   login_identifier     TEXT UNIQUE,
+  pin_hash             TEXT,
   initial_pin_hash     TEXT,
+  flag_status          TEXT CHECK (flag_status IN ('OVERDUE', 'UNAUTHORIZED_EXIT', 'NO_GATE_PASS', 'SUSPENDED', 'CURFEW_VIOLATION', 'MANUAL_LOCKDOWN')),
   last_password_change TIMESTAMPTZ,
   created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at           TIMESTAMPTZ
@@ -286,6 +288,110 @@ CREATE TABLE IF NOT EXISTS backups (
   created_by   UUID REFERENCES auth.users(id) ON DELETE SET NULL,
   status       VARCHAR(20) NOT NULL CHECK (status IN ('pending','completed','failed')),
   error        TEXT
+);
+
+-- 3.6 WEBAUTHN, ALERT RULES, SECURITY, TICKETS, PREDICTIONS & GATE RULES
+CREATE TABLE IF NOT EXISTS webauthn_credentials (
+  id TEXT PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  credential_id TEXT UNIQUE NOT NULL,
+  public_key TEXT NOT NULL,
+  counter BIGINT NOT NULL DEFAULT 0,
+  transports TEXT[] DEFAULT '{}',
+  device_name TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  last_used_at TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS alert_rules (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  metric TEXT NOT NULL,
+  threshold DOUBLE PRECISION NOT NULL,
+  duration_minutes INTEGER NOT NULL DEFAULT 5,
+  severity TEXT NOT NULL DEFAULT 'warning' CHECK (severity IN ('critical', 'warning', 'info', 'low', 'medium', 'high')),
+  channel TEXT NOT NULL DEFAULT 'opsgenie',
+  enabled BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS system_settings (
+  id TEXT PRIMARY KEY,
+  value JSONB NOT NULL DEFAULT '{}'::jsonb,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS sso_config (
+  id TEXT PRIMARY KEY DEFAULT 'default',
+  provider_id TEXT NOT NULL DEFAULT 'google',
+  enabled BOOLEAN NOT NULL DEFAULT true,
+  client_id TEXT NOT NULL,
+  issuer_url TEXT NOT NULL,
+  group_mappings JSONB NOT NULL DEFAULT '{}'::jsonb,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS support_tickets (
+  id TEXT PRIMARY KEY,
+  ticket_number TEXT UNIQUE NOT NULL,
+  user_id TEXT NOT NULL,
+  user_name TEXT NOT NULL,
+  user_role TEXT NOT NULL,
+  category TEXT NOT NULL DEFAULT 'system_issue',
+  priority TEXT NOT NULL DEFAULT 'medium',
+  subject TEXT NOT NULL,
+  description TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'open',
+  assigned_to TEXT,
+  assigned_name TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS support_ticket_comments (
+  id TEXT PRIMARY KEY,
+  ticket_id TEXT NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL,
+  user_name TEXT NOT NULL,
+  user_role TEXT NOT NULL,
+  comment TEXT NOT NULL,
+  is_internal BOOLEAN NOT NULL DEFAULT false,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS gate_access_rules (
+  id TEXT PRIMARY KEY,
+  gate_id TEXT NOT NULL DEFAULT 'ALL',
+  rule_name TEXT NOT NULL,
+  days_of_week JSONB NOT NULL DEFAULT '[0,1,2,3,4,5,6]'::jsonb,
+  start_time TEXT NOT NULL DEFAULT '06:00',
+  end_time TEXT NOT NULL DEFAULT '22:00',
+  action TEXT NOT NULL DEFAULT 'allow',
+  priority INT NOT NULL DEFAULT 1,
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  override_reason TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS predictions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  type VARCHAR(50) NOT NULL,
+  target VARCHAR(100) NOT NULL,
+  predicted_value DOUBLE PRECISION NOT NULL,
+  confidence_interval_low DOUBLE PRECISION NOT NULL,
+  confidence_interval_high DOUBLE PRECISION NOT NULL,
+  timestamp TIMESTAMPTZ NOT NULL,
+  model_version VARCHAR(20) DEFAULT 'v1.0-arima',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS zones (
+  id VARCHAR(50) PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  type VARCHAR(50) NOT NULL,
+  capacity INTEGER NOT NULL DEFAULT 500,
+  gate_ids TEXT[] DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 -- ============================================================================
 -- SECTION 4: FUNCTIONS (all SECURITY DEFINER with locked search_path)
