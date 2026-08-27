@@ -10,4 +10,4 @@ CREATE INDEX IF NOT EXISTS idx_audit_logs_composite
 ON audit_logs(timestamp DESC, user_id, action);
 
 CREATE INDEX IF NOT EXISTS idx_users_onboarding 
-ON users(id, role, account_status);
+ON users(id, role, status);
