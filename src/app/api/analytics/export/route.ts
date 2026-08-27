@@ -1,15 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withAuthAndStatus } from "@/middleware/auth";
 import { withAuthorization } from "@/middleware/authorization";
-import { exportDailyReport } from "@/lib/export";
+import { exportRangeReport } from "@/lib/export";
 
 async function handleGet(req: NextRequest) {
   try {
     const params = req.nextUrl.searchParams;
     const format = (params.get("format") as "pdf" | "csv") || "csv";
     const from = params.get("from") || new Date().toISOString().slice(0, 10);
+    const to = params.get("to") || from;
+    const department = params.get("department") || undefined;
+    const personType = params.get("personType") || undefined;
+    const direction = params.get("direction") || undefined;
+    const gate = params.get("gate") || undefined;
+    const search = params.get("search") || undefined;
+    const sortBy = (params.get("sortBy") as any) || undefined;
 
-    const result = await exportDailyReport(from, format);
+    const result = await exportRangeReport({
+      from,
+      to,
+      format,
+      department,
+      personType,
+      direction,
+      gate,
+      search,
+      sortBy,
+    });
 
     if (!result.success) {
       return NextResponse.json(
@@ -18,7 +35,7 @@ async function handleGet(req: NextRequest) {
       );
     }
 
-    const contentType = format === "csv" ? "text/csv" : "text/html";
+    const contentType = format === "csv" ? "text/csv; charset=utf-8" : "text/html; charset=utf-8";
     return new NextResponse(result.data, {
       headers: {
         "Content-Type": contentType,
@@ -35,5 +52,5 @@ async function handleGet(req: NextRequest) {
 }
 
 export const GET = withAuthAndStatus(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "supervisor"] })
+  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin"] })
 );

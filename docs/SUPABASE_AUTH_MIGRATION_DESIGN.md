@@ -261,7 +261,6 @@ Admin → Create User Form → Backend → Supabase Auth → public.users → Em
 - Users cannot promote themselves
 - Users cannot change their own role
 - Operator cannot promote operator
-- Supervisor cannot promote supervisor
 - Only authorized administrative authority can change roles
 - Role changes must invalidate sessions
 - Client-provided role never trusted
@@ -275,7 +274,6 @@ Admin → Create User Form → Backend → Supabase Auth → public.users → Em
 
 ### Role Hierarchy
 ```
-SYSTEM_ADMIN > ADMIN > SUPERVISOR > OPERATOR > STUDENT/PARENT
 ```
 
 ## 11. Account Status Model
@@ -368,7 +366,6 @@ Supabase Auth → auth.users → public.users → status validation → authoriz
 | `is_admin()` | Checks `public.users` | Checks `public.users` | None |
 | `get_parent_students()` | Returns student IDs | Returns student IDs | None |
 | `is_operator()` | Checks `public.users` | Checks `public.users` | None |
-| `is_supervisor()` | Checks `public.users` | Checks `public.users` | None |
 
 ## 14. SECURITY DEFINER Review
 
@@ -382,7 +379,6 @@ Supabase Auth → auth.users → public.users → status validation → authoriz
 | `is_sysadmin()` | Checks if user is sysadmin | RLS policies | `users` | Uses `auth.uid()` | Low | Required for RLS |
 | `is_warden()` | Checks if user is warden | RLS policies | `users` | Uses `auth.uid()` | Low | Required for RLS |
 | `is_operator()` | Checks if user is operator | RLS policies | `users` | Uses `auth.uid()` | Low | Required for RLS |
-| `is_supervisor()` | Checks if user is supervisor | RLS policies | `users` | Uses `auth.uid()` | Low | Required for RLS |
 | `get_supervised_gates()` | Gets gates supervised by user | RLS policies | `users` | Uses `auth.uid()` | Low | Required for RLS |
 | `get_warden_hostel()` | Gets hostel assigned to warden | RLS policies | `users` | Uses `auth.uid()` | Low | Required for RLS |
 | `maintain_user_student_mapping()` | Maintains user-student mapping | Triggers | `students`, `user_student_mapping` | Trigger-based | Medium | Required for data integrity |
@@ -514,7 +510,6 @@ Supabase Auth → auth.users → public.users → status validation → authoriz
 
 ### Functional Criteria
 - [ ] Users can authenticate using Supabase Auth
-- [ ] All existing roles (SYSTEM_ADMIN, ADMIN, SUPERVISOR, OPERATOR, STUDENT, PARENT) are supported
 - [ ] All existing account statuses (ACTIVE, LOCKED, SUSPENDED, DISABLED, DEPROVISIONED) are supported
 - [ ] Login identifiers (employee ID, roll number) are supported in UI
 - [ ] Initial credentials can be securely provisioned by administrators

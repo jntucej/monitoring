@@ -55,7 +55,7 @@ async function handleGet(req: NextRequest) {
       }
 
       // Privileged roles can view any person details
-      if (["operator", "supervisor", "admin", "sysadmin"].includes(authRole || "")) {
+      if (["operator", "admin", "sysadmin"].includes(authRole || "")) {
         return NextResponse.json({ success: true, data: person });
       }
 
@@ -84,7 +84,7 @@ async function handleGet(req: NextRequest) {
     }
 
     if (q) {
-      if (!["supervisor", "admin", "sysadmin", "operator"].includes(authRole || "")) {
+      if (![, "admin", "sysadmin", "operator"].includes(authRole || "")) {
         return NextResponse.json(
           { success: false, error: { code: "FORBIDDEN", message: "Insufficient permissions to search persons." } },
           { status: 403 }
@@ -94,7 +94,7 @@ async function handleGet(req: NextRequest) {
       return NextResponse.json({ success: true, data });
     }
 
-    if (!["admin", "sysadmin", "supervisor"].includes(authRole || "")) {
+    if (!["admin", "sysadmin"].includes(authRole || "")) {
       return NextResponse.json(
         { success: false, error: { code: "FORBIDDEN", message: "You do not have permission to list persons." } },
         { status: 403 }
@@ -287,7 +287,7 @@ async function handleDelete(req: NextRequest) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["operator", "supervisor", "admin", "sysadmin", "parent", "faculty", "staff"] }),
+  withAuthorization(handleGet, { requiredRole: ["operator", "admin", "sysadmin", "parent", "faculty", "staff"] }),
   { keyPrefix: "persons_get", maxRequests: 100 }
 );
 

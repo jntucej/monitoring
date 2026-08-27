@@ -3,11 +3,13 @@
 import React from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
+import { useCollegeInfo } from "@/hooks/useCollegeInfo";
 import { User, Mail, Shield, CheckCircle, Tag, LogOut, Moon, Sun, School, Smartphone } from "lucide-react";
 
 export function UserProfileTab() {
   const { user, role, logout } = useAuthStore();
-  const { theme, setTheme, addToast } = useUIStore();
+  const { theme, setTheme, deviceProfile, setDeviceProfile, addToast } = useUIStore();
+  const { college } = useCollegeInfo();
 
   const handleLogout = async () => {
     try {
@@ -35,6 +37,17 @@ export function UserProfileTab() {
       message: `Switched to ${nextTheme.toUpperCase()} mode`,
       variant: "info",
       duration: 1500,
+    });
+  };
+
+  const toggleDeviceProfile = () => {
+    const nextProfile = deviceProfile === "high-end" ? "low-profile" : "high-end";
+    setDeviceProfile(nextProfile);
+    addToast({
+      title: `Device Mode: ${nextProfile === "high-end" ? "High-End Spec" : "Low-Profile Mobile"}`,
+      message: nextProfile === "high-end" ? "Camera QR Scanner active first." : "Manual Entry Desk active first for older devices.",
+      variant: "info",
+      duration: 2000,
     });
   };
 
@@ -102,7 +115,7 @@ export function UserProfileTab() {
               <School className="w-4 h-4 text-[var(--text-muted)]" />
               <span>Institution</span>
             </div>
-            <span className="text-xs font-bold text-[var(--text-primary)]">JNTUH CEJ</span>
+            <span className="text-xs font-bold text-[var(--text-primary)]">{college?.shortName || "College"}</span>
           </div>
 
           <div className="flex items-center justify-between py-2">
@@ -117,6 +130,19 @@ export function UserProfileTab() {
 
       {/* Theme and Actions Panel */}
       <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 space-y-3 shadow-md">
+        <button
+          onClick={toggleDeviceProfile}
+          className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-[var(--bg-elevated)] active:scale-[0.99] transition-all text-xs font-semibold text-[var(--text-primary)] border border-[var(--border)]/40"
+        >
+          <div className="flex items-center gap-3">
+            <Smartphone className={`w-5 h-5 ${deviceProfile === "high-end" ? "text-emerald-400" : "text-amber-400"}`} />
+            <span>Hardware Mode: {deviceProfile === "high-end" ? "High-End (Camera)" : "Low-Profile (Manual)"}</span>
+          </div>
+          <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${deviceProfile === "high-end" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30" : "bg-amber-500/10 text-amber-400 border border-amber-500/30"}`}>
+            {deviceProfile === "high-end" ? "High-End First" : "Low-Profile First"}
+          </span>
+        </button>
+
         <button
           onClick={toggleTheme}
           className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-[var(--bg-elevated)] active:scale-[0.99] transition-all text-xs font-semibold text-[var(--text-primary)]"

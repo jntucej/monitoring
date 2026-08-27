@@ -7,13 +7,21 @@ test.describe('Gate Monitor Operator & Workflow E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
     page.on('console', msg => console.log('BROWSERLOG:', msg.text()));
 
+    // Credentials come from the environment (.env.local) — never hardcoded.
+    const operatorId = process.env.TEST_OPERATOR_ID;
+    const operatorPin = process.env.TEST_OPERATOR_PIN;
+    if (!operatorId || !operatorPin) {
+      throw new Error(
+        'E2E credentials missing: set TEST_OPERATOR_ID and TEST_OPERATOR_PIN in .env.local'
+      );
+    }
+
     // Perform login prior to each operator workflow test
     await page.goto('/login/operator');
     await expect(page.locator('text=Gate Operator Portal')).toBeVisible();
 
-    // Use OP-001 credential
-    await page.fill('input[placeholder="Enter your identifier"]', 'OP-001');
-    await page.fill('input[placeholder="Enter password or PIN"]', '12345678');
+    await page.fill('input[placeholder="Enter your identifier"]', operatorId);
+    await page.fill('input[placeholder="Enter password or PIN"]', operatorPin);
     await page.click('button[type="submit"]');
 
     // Wait redirect

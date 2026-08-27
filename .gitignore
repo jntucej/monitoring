@@ -52,5 +52,5 @@ next-env.d.ts
 
 # logs and workspace outputs
 *.log
-repomix-output.xml
+repomix-output*
 .DS_Store

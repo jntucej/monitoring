@@ -1,4 +1,8 @@
+"use client";
+
 import { LucideIcon } from "lucide-react";
+import { motion } from "framer-motion";
+import { useUIStore } from "@/stores/uiStore";
 
 interface StatCardProps {
   label: string;
@@ -6,26 +10,44 @@ interface StatCardProps {
   icon: LucideIcon;
   color: string;
   trend?: string;
+  onClick?: () => void;
 }
 
-export function StatCard({ label, value, icon: Icon, color, trend }: StatCardProps) {
+export function StatCard({ label, value, icon: Icon, color, trend, onClick }: StatCardProps) {
+  const { deviceProfile } = useUIStore();
+  const isHighEnd = deviceProfile === "high-end";
+
   return (
-    <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-5">
-      <div className="flex items-center gap-4">
+    <motion.div
+      whileHover={isHighEnd ? { y: -4, scale: 1.015 } : {}}
+      whileTap={isHighEnd ? { scale: 0.98 } : {}}
+      transition={{ type: "spring", stiffness: 350, damping: 25 }}
+      onClick={onClick}
+      className={`group relative overflow-hidden bg-[var(--bg-surface)] rounded-2xl border border-[var(--border)] p-5 transition-all duration-300 ${
+        onClick ? "cursor-pointer hover:border-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/10" : ""
+      }`}
+    >
+      {/* Reactive Ambient Back Glow */}
+      <div
+        className="absolute -top-12 -right-12 w-28 h-28 rounded-full blur-2xl opacity-0 group-hover:opacity-40 transition-opacity duration-500 pointer-events-none"
+        style={{ backgroundColor: color }}
+      />
+
+      <div className="relative z-10 flex items-center gap-4">
         <div
-          className={`w-12 h-12 rounded-lg flex items-center justify-center`}
-          style={{ backgroundColor: `${color}20`, color }}
+          className="w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 duration-300 shadow-sm"
+          style={{ backgroundColor: `${color}18`, color }}
         >
           <Icon className="w-6 h-6" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm text-[var(--text-muted)]">{label}</p>
-          <p className="text-2xl font-bold">{value}</p>
+          <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">{label}</p>
+          <p className="text-2xl font-black text-[var(--text-primary)] mt-0.5 tracking-tight">{value}</p>
           {trend ? (
-            <p className="text-xs text-[var(--text-muted)] mt-0.5 truncate">{trend}</p>
+            <p className="text-xs font-medium text-[var(--text-muted)] mt-1 truncate">{trend}</p>
           ) : null}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

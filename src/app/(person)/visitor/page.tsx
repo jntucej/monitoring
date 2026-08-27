@@ -231,7 +231,7 @@ export default function VisitorManagementPage() {
       {error && (
         <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 flex items-center gap-3">
           <AlertCircle className="w-5 h-5 shrink-0" />
-          <p className="text-sm">{error}</p>
+          <p className="text-sm">{typeof error === "string" ? error : (error as any)?.message || String(error)}</p>
         </div>
       )}
 

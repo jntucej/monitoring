@@ -18,7 +18,6 @@ The database migration roadmap transitions the Gate Monitoring System from initi
 | `0002_functions_triggers_rls.sql` | Logic & RLS Base | Basic PL/pgSQL helper functions and preliminary RLS policy setup. | Initiated Row Level Security policy structure on core tables. |
 | `0003_complete_schema_fixes.sql` | Schema Alignment | Adjusted enum constraints, fixed nullability columns, added `login_identifier` and password hashing columns. | Resolved data integrity mismatches between Next.js models and SQL schema. |
 | `0004_supabase_auth_integration.sql` | Auth Layer Integration | Synchronized local `users` table with Supabase `auth.users` provider. | Enabled dual-token validation and secure password management. |
-| `0005_security_hardening.sql` | Security Hardening | Hardened `SECURITY DEFINER` functions, added missing supervisor/operator RLS policies, and added `trigger_notify_session_invalidation`. | Prevented privilege escalation, enforced strict gate data isolation, and enabled live session invalidation. |
 
 ---
 

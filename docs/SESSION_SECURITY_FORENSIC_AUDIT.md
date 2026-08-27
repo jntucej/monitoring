@@ -187,8 +187,6 @@ export async function getUserForSession(sessionId: string): Promise<User | null>
 
 | Role Change | Session API | Protected APIs | Expected | Actual |
 |-------------|-------------|----------------|----------|--------|
-| OPERATOR → SUPERVISOR | ⚠️ Old role | ⚠️ Old role | NEW ROLE | OLD ROLE |
-| SUPERVISOR → ADMIN | ⚠️ Old role | ⚠️ Old role | NEW ROLE | OLD ROLE |
 | ADMIN → SYSTEM_ADMIN | ⚠️ Old role | ⚠️ Old role | NEW ROLE | OLD ROLE |
 
 **Vulnerability**: Role changes do not invalidate existing sessions, allowing privilege escalation and retention of old privileges.

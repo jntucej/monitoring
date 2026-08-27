@@ -257,9 +257,7 @@
 
 ---
 
-## 6. Supervisor Endpoints
 
-### 6.1 GET /api/supervisor/corrections
 - **Authentication Required:** NO (no middleware)
 - **Required Role(s):** None
 - **Permission:** None
@@ -275,13 +273,11 @@
 - **PII Returned:** Scan data with student names, rolls, departments
 - **Security Risk:** HIGH - No authentication
 
-### 6.2 POST /api/supervisor/corrections
 - **Authentication Required:** NO (no middleware)
 - **Required Role(s):** None
 - **Permission:** None
 - **Resource:** Correct scan
 - **User Identity Source:** Client-provided userId, userName, role (TRUSTED!)
-- **Operator Identity Source:** Client-provided (defaults to "sv-1", "Supervisor", "supervisor")
 - **Gate Identity Source:** N/A
 - **Account Status Check:** NO
 - **Resource Authorization Check:** NO (client controls logId, newDirection, newReason, reason, userId, userName, role)
@@ -291,7 +287,6 @@
 - **PII Returned:** Corrected scan
 - **Security Risk:** CRITICAL - Client controls operator identity, role, no authorization
 
-### 6.3 GET /api/supervisor/live-events
 - **Authentication Required:** NO (no middleware)
 - **Required Role(s):** None
 - **Permission:** None
@@ -384,15 +379,12 @@
 ## 9. Gate Scan Endpoint (Protected)
 
 ### 9.1 POST /api/gate/scan
-- **Authentication Required:** YES (withAuthorization with requiredRole: ['operator', 'supervisor'])
-- **Required Role(s):** operator, supervisor
 - **Permission:** gate:create (via resource validation)
 - **Resource:** Gate scan
 - **User Identity Source:** Auth context from withAuthorization (derived from Supabase token)
 - **Operator Identity Source:** auth.userId (server-derived, NOT client-provided)
 - **Gate Identity Source:** Client-provided gateId (validated against auth.gateId/supervised_gates)
 - **Account Status Check:** Yes (withAuthorization validates ACTIVE)
-- **Resource Authorization Check:** Yes (validateGateAccess checks operator gate assignment / supervisor gates)
 - **RLS Dependency:** Yes (gate_logs table RLS)
 - **Rate Limiting:** Yes (30 req/hr per IP)
 - **Audit Logging:** Yes (logAuditEvent on success/failure)
@@ -400,8 +392,6 @@
 - **Security Risk:** LOW - Properly protected, server-derived identity, resource authorization
 
 ### 9.2 GET /api/gate/scan
-- **Authentication Required:** YES (withAuthorization with requiredRole: ['operator', 'supervisor', 'admin', 'sysadmin'])
-- **Required Role(s):** operator, supervisor, admin, sysadmin
 - **Permission:** gate:read
 - **Resource:** Gate statistics
 - **User Identity Source:** Auth context from withAuthorization
@@ -427,9 +417,6 @@
 | POST /api/passes | ✅ | ✅ | requestedById, requestedByName | Student PII |
 | PUT /api/passes/[passId] | ✅ | ✅ | by, approverId, action | Pass data |
 | GET /api/admin/dashboard | ✅ | ✅ | N/A | Aggregated |
-| GET /api/supervisor/corrections | ✅ | ✅ | N/A | Scan data |
-| POST /api/supervisor/corrections | ✅ | ✅ | userId, userName, role | Scan data |
-| GET /api/supervisor/live-events | ✅ | ✅ | N/A | Student movements |
 | GET /api/alerts | ✅ | ✅ | N/A | Alert data |
 | GET /api/notifications | ✅ | ✅ | type, id params | Notifications |
 | GET /api/gate/logs | ✅ | ✅ | N/A | Full scan history |
@@ -483,7 +470,6 @@
 | users | ✅ | 5 policies | No policy for sysadmin user creation |
 | students | ✅ | 4 policies | No operator policy (operators use getGateStudentInfo RPC) |
 | gates | ✅ | 2 policies | - |
-| gate_logs | ✅ | 2 policies | No supervisor policy (only operator + admin) |
 | gate_passes | ✅ | 3 policies | - |
 | alerts | ✅ | 2 policies | No operator policy |
 | audit_logs | ✅ | 1 policy | Only sysadmin can SELECT; no INSERT policy (triggers handle) |
@@ -569,7 +555,6 @@
 - **GET /api/students** - Full student records: name, roll, department, year, section, batch, photo, email, phone, parentName, parentPhone, parentId, qrCode, idValidUntil
 - **GET /api/students/[roll]** - Above + campus status + 20 scan history entries
 - **GET /api/gate/logs** - All scans with student names, rolls, departments, operator names
-- **GET /api/supervisor/live-events** - Real-time student movements
 - **POST /api/passes** - Creates passes with student PII, client controls requester identity
 
 ### Minimal Exposure (Protected Endpoints)

@@ -29,7 +29,6 @@ gate-monitor/src/
 │   │   └── student/          # Digital ID Card & Pass History
 │   ├── (sysadmin)/
 │   │   └── sysadmin/         # System Security Console & Settings
-│   ├── supervisor/
 │   │   ├── corrections/      # Flagged Scan Review & Corrections Desk
 │   │   └── live/             # Real-Time Campus Gate Feed
 │   ├── login/                # Dual Credentials / 4-Digit PIN Authentication
@@ -42,7 +41,6 @@ gate-monitor/src/
 │   ├── parent/               # ChildStatus, ChildActivity, RequestPassForm
 │   ├── shared/               # Header, Sidebar, StatusBadge
 │   ├── student/              # DigitalIdCard, ActivePasses, RecentActivity
-│   ├── supervisor/           # LiveFeed, CorrectionsList
 │   ├── sysadmin/             # GateManagement, UserManagement, SystemSettings
 │   └── ui/                   # Button, Card, Badge, Input, Modal, Skeleton, Toast
 ├── hooks/
@@ -70,7 +68,6 @@ gate-monitor/src/
 1. **Operator Viewfinder Overhead**:
    - Camera viewport had fixed height constraints (`min-h-[360px]`) causing vertical overflow on small mobile screens (320px–375px) when combined with bottom stats and recent scan list.
    - Requires adaptive viewport scaling and sticky operational action buttons (64px minimum height).
-2. **Table Horizontal Overflow on Admin & Supervisor Screens**:
    - `StudentList`, `UserManagement`, and `CorrectionsList` rendered standard HTML tables without responsive card stack fallback, leading to horizontal page scroll on viewports below 768px.
 3. **Modal & Dialog Backdrop Clutter**:
    - `ManualEntryDialog` and `ScanConfirmationModal` relied on fixed width containers without accounting for safe-area insets (`env(safe-area-inset-bottom)`), obscuring buttons on iPhones with home bars.
@@ -85,7 +82,6 @@ gate-monitor/src/
 
 ### C. Role-Specific UX Weaknesses
 - **Operator**: Needs zero-modal streamlined scanning flow where photo verification runs in parallel with backend validation, returning to scanner state automatically in <1.5s on success.
-- **Supervisor**: Required real-time socket/polling status indicators with clear visual feedback for offline or connecting states.
 - **Admin & SysAdmin**: Multi-column form fields need single-column stacking on mobile viewports with bottom-sheet filter controls.
 - **Student**: Digital ID QR code needs maximum high-contrast display with toggleable brightness boost for quick scanner readability.
 - **Parent**: Requires immediate single-card status of child (ON_CAMPUS / HOME_OUT) with clear timestamp and pass approval state.
@@ -112,7 +108,6 @@ src/
 │   │   ├── MobileOperatorLayout.tsx # Optimized single-hand mobile layout
 │   │   ├── ScannerReticle.tsx       # Canvas/HTML scan viewfinder with animation
 │   │   └── InstantFeedback.tsx      # Color + Icon + Audio/Haptic state flash
-│   ├── supervisor/
 │   │   ├── LiveEventCard.tsx        # Mobile-first stacked event card
 │   │   └── CorrectionsDrawer.tsx    # Bottom-sheet review interface
 │   └── shared/
@@ -143,7 +138,6 @@ src/
 3. **Phase 3: Global Responsive Application Shell** (Adaptive Header, Mobile Bottom Nav, Drawer Overlay, Network Banner).
 4. **Phase 4: Streamlined Authentication UX** (Dual Credentials & 4-Digit PIN login with clear validation error handling).
 5. **Phase 5: Mobile-First Operator Interface** (High-speed scanner, 64px action targets, instant haptic/visual feedback).
-6. **Phase 6: Supervisor Live Monitoring & Corrections** (Stacked event cards for mobile, data table for desktop, bottom-sheet review).
 7. **Phase 7: Campus Admin Dashboard** (Overview, Responsive Student Roster, Filter Bottom-Sheets, Gate Reports).
 8. **Phase 8: System Admin Security Console** (Role management, audit logs, safety-confirmed destructive actions).
 9. **Phase 9: Student Mobile Experience** (High-contrast Digital ID QR, vertical timeline, pass cards).

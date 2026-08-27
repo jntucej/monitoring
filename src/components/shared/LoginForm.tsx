@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Lock,
@@ -13,35 +13,73 @@ import {
   EyeOff,
 } from "lucide-react";
 import Link from "next/link";
-import { useAuthStore } from "@/stores/authStore";
+import { useAuthStore, useHasHydrated } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
+import { useRoles } from "@/hooks/useRoles";
 import type { Role } from "@/lib/types";
 
 interface LoginFormProps {
-  role: Role;
+  role: Role | "all";
   title: string;
   subtitle: string;
 }
 
 export function LoginForm({ role, title, subtitle }: LoginFormProps) {
   const router = useRouter();
-  const { login, pinLogin, loading } = useAuthStore();
+  const hasHydrated = useHasHydrated();
+  const { user, authenticated, login, pinLogin, loading } = useAuthStore();
   const { addToast } = useUIStore();
   const [showPassword, setShowPassword] = useState(false);
 
-  const roles = [
-    { name: 'Admin', path: '/login/admin' },
-    { name: 'Operator', path: '/login/operator' },
-    { name: 'Guardian', path: '/login/guardian' },
-    { name: 'Users', path: '/login/student' },
-    { name: 'Supervisor', path: '/login/supervisor' },
-  ];
+  useEffect(() => {
+    if (hasHydrated && authenticated && user) {
+      redirectAfterLogin(user.role);
+    }
+  }, [hasHydrated, authenticated, user]);
+
+  const { roles: fetchedRoles } = useRoles();
+  const roles = fetchedRoles.length > 0
+    ? fetchedRoles.map((r) => ({
+        name: r.display_name,
+        path: r.code === 'admin' ? '/login/admin' : r.code === 'operator' ? '/login/operator' : r.code === 'guardian' || r.code === 'parent' ? '/login/guardian' : `/login/${r.code}`,
+      }))
+    : [
+        { name: 'Admin', path: '/login/admin' },
+        { name: 'Operator', path: '/login/operator' },
+        { name: 'Guardian', path: '/login/guardian' },
+        { name: 'Users', path: '/login/student' },
+      ];
 
   const [loginIdentifier, setLoginIdentifier] = useState("");
   const [passwordOrPin, setPasswordOrPin] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [isShaking, setIsShaking] = useState(false);
+
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetMsg, setResetMsg] = useState<string | null>(null);
+  const [resetLoading, setResetLoading] = useState(false);
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetEmail) return;
+    setResetLoading(true);
+    setResetMsg(null);
+    try {
+      const res = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: resetEmail }),
+      });
+      const json = await res.json();
+      setResetMsg(json.data?.message || "Password reset instructions sent.");
+    } catch {
+      setResetMsg("Failed to send reset email. Try again later.");
+    } finally {
+      setResetLoading(false);
+    }
+  };
 
   const triggerShake = (msg: string) => {
     setErrorMsg(msg);
@@ -172,9 +210,7 @@ export function LoginForm({ role, title, subtitle }: LoginFormProps) {
         }
         break;
       }
-      case "supervisor":
-        router.push("/supervisor/live");
-        break;
+
       case "admin":
       case "sysadmin":
         router.push("/admin/dashboard");
@@ -257,9 +293,18 @@ export function LoginForm({ role, title, subtitle }: LoginFormProps) {
         </div>
 
         <div className="space-y-1.5">
-          <label className="block text-xs font-semibold text-[var(--text-secondary)]">
-            Password or Security PIN
-          </label>
+          <div className="flex items-center justify-between">
+            <label className="block text-xs font-semibold text-[var(--text-secondary)]">
+              Password or Security PIN
+            </label>
+            <button
+              type="button"
+              onClick={() => setShowResetModal(true)}
+              className="text-[11px] font-semibold text-sky-400 hover:underline"
+            >
+              Forgot Password?
+            </button>
+          </div>
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
@@ -315,6 +360,48 @@ export function LoginForm({ role, title, subtitle }: LoginFormProps) {
           <span>Encrypted Authorization</span>
         </span>
       </div>
+
+      {showResetModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
+            <h3 className="font-bold text-lg text-white">Reset Password</h3>
+            <p className="text-xs text-[var(--text-muted)]">
+              Enter your registered email address to receive password reset instructions.
+            </p>
+            <form onSubmit={handlePasswordReset} className="space-y-3">
+              <input
+                type="email"
+                required
+                placeholder="name@college.edu"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm focus:outline-none text-white"
+              />
+              {resetMsg && (
+                <div className="p-2.5 bg-sky-500/10 border border-sky-500/20 text-sky-300 rounded-lg text-xs font-medium">
+                  {resetMsg}
+                </div>
+              )}
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => { setShowResetModal(false); setResetMsg(null); }}
+                  className="px-3 py-1.5 text-xs text-[var(--text-muted)] hover:text-white font-medium"
+                >
+                  Close
+                </button>
+                <button
+                  type="submit"
+                  disabled={resetLoading || !resetEmail}
+                  className="px-4 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-bold disabled:opacity-50"
+                >
+                  {resetLoading ? "Sending..." : "Send Reset Link"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

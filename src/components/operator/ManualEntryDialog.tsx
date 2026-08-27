@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useUIStore } from "@/stores/uiStore";
 import type { ScanDirection, ExitReason } from "@/lib/types";
 import { supabase } from "@/lib/supabaseClient";
-import { EXIT_REASON_CONFIGS } from "@/lib/types";
+import { useCampusConfig } from "@/hooks/useCampusConfig";
 
 interface ManualEntryDialogProps {
   isOpen: boolean;
@@ -18,6 +18,9 @@ interface ManualEntryDialogProps {
 }
 
 export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialogProps) {
+  const { exitReasons } = useCampusConfig();
+  const validExitReasons = exitReasons.length > 0 ? exitReasons : [];
+  
   const [rollInput, setRollInput] = useState("");
   const [step, setStep] = useState<"input" | "confirm">("input");
   const [student, setStudent] = useState<any>(null);
@@ -72,7 +75,7 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
     if (!isKnownPrefix && !validateRollNumber(cleanInput)) {
       addToast({
         title: "Invalid Roll Format",
-        message: `"${cleanInput}" does not match the expected 10-character JNTUH roll number schema (e.g. 24JJ1A0501).`,
+        message: `"${cleanInput}" does not match the expected 10-character roll number schema (e.g. 24JJ1A0501).`,
         variant: "error",
       });
       return;
@@ -97,7 +100,7 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
     if (pin.length !== 4) {
       addToast({
         title: "Invalid PIN",
-        message: "Please enter a valid 4-digit supervisor PIN.",
+        message: "Please enter a valid 4-digit admin PIN.",
         variant: "error",
       });
       return;
@@ -144,14 +147,14 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
       if (!verifyData || !verifyData.success) {
         addToast({
           title: "PIN Verification Failed",
-          message: "Invalid supervisor PIN. Please try again.",
+          message: "Invalid admin PIN. Please try again.",
           variant: "error",
         });
         setSubmitting(false);
         return;
       }
 
-      // Get the authenticated supervisor ID from the token
+      // Get the authenticated admin ID from the token
       const token = verifyData.data.token;
 
       // Now submit the manual scan
@@ -247,7 +250,7 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
               <form onSubmit={handleSearch} className="space-y-4">
                 <div className="space-y-1.5">
                   <label className="block text-xs font-semibold text-[var(--text-secondary)]">
-                    JNTUH Student Roll Number
+                    Student Roll Number
                   </label>
                   <div className="relative">
                     <input
@@ -280,7 +283,7 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
                     className="p-3 bg-[var(--action-primary)]/5 border border-[var(--action-primary)]/20 rounded-xl space-y-2"
                   >
                     <div className="flex items-center justify-between text-xs font-semibold text-[var(--action-primary)]">
-                      <span>Verified JNTUH Structure</span>
+                      <span>Verified Institutional Structure</span>
                       <Check className="w-3.5 h-3.5" />
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-xs">
@@ -425,7 +428,7 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
                       </label>
                       <div className="grid grid-cols-2 gap-2">
                         {["Home Out", "Day Out", "Leave", "Regular"].map((r) => {
-                          const config = EXIT_REASON_CONFIGS.find((c) => c.code === r);
+                          const config = validExitReasons.find((c) => c.code === r);
                           const requiresApproval = config?.requiresApproval ?? false;
                           const passRequired = requiresApproval && (student.personType === "student" || !student.personType);
                           const hasApprovedPass = approvedPasses.some((p) => p.reason === r);
@@ -463,11 +466,11 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
                   </div>
                 )}
 
-                {/* Supervisor PIN entry */}
+                {/* Admin PIN entry */}
                 <div className="space-y-2">
                   <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase flex items-center gap-2">
                     <Lock className="w-3.5 h-3.5" />
-                    Supervisor PIN (required for manual entry)
+                    Admin PIN (required for manual entry)
                   </label>
                   <div className="relative">
                     <input
@@ -492,7 +495,7 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
                     </button>
                   </div>
                   <p className="text-xs text-[var(--text-muted)]">
-                    Enter 4-digit supervisor PIN to authorize this manual entry.
+                    Enter 4-digit admin PIN to authorize this manual entry.
                   </p>
                 </div>
 

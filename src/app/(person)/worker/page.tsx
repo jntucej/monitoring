@@ -54,7 +54,7 @@ export default function WorkerDashboard() {
           <HardHat className="w-7 h-7" />
         </div>
         <p className="text-sm font-semibold text-[var(--text-primary)]">Unable to Load Worker Profile</p>
-        <p className="text-xs text-[var(--text-muted)]">{error}</p>
+        <p className="text-xs text-[var(--text-muted)]">{typeof error === "string" ? error : (error as any)?.message || String(error)}</p>
       </div>
     );
   }

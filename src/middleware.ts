@@ -8,6 +8,11 @@ const publicRoutes = [
   '/api/auth/login',
   '/api/auth/pin-login',
   '/api/auth/session',
+  '/api/config/college-info',
+  '/api/config/roles',
+  '/api/faculty/attendance',
+  '/api/workers/shifts',
+  '/api/gate/devices',
   '/api/health',
   '/api/metrics',
   // The logout route should still be protected to prevent CSRF attacks

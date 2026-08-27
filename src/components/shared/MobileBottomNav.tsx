@@ -35,12 +35,6 @@ const ROLE_TABS: Record<string, NavTab[]> = {
     { href: "/gate/1?tab=history", label: "History", icon: History },
     { href: "/gate/1?tab=profile", label: "Profile", icon: User },
   ],
-  supervisor: [
-    { href: "/supervisor/live", label: "Live", icon: Radio },
-    { href: "/supervisor/corrections", label: "Corrections", icon: ShieldAlert },
-    { href: "/admin/alerts", label: "Alerts", icon: AlertTriangle },
-    { href: "/supervisor/live?tab=profile", label: "Profile", icon: User },
-  ],
   admin: [
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { href: "/admin/students", label: "Students", icon: Users },

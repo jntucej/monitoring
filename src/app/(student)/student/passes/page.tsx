@@ -5,13 +5,15 @@ import { QrCode, Plus, CheckCircle2, Clock, XCircle, ArrowLeft, AlertCircle, Spa
 import Link from "next/link";
 import { useUIStore } from "@/stores/uiStore";
 import type { GatePass } from "@/lib/types";
+import { usePassTypes } from "@/hooks/usePassTypes";
 
 export default function StudentPassesPage() {
   const { addToast } = useUIStore();
   const [passes, setPasses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNewModal, setShowNewModal] = useState(false);
-  const [passType, setPassType] = useState<"Outing" | "Home Leave" | "Emergency">("Outing");
+  const { passTypes, loading: loadingPassTypes } = usePassTypes();
+  const [passType, setPassType] = useState("");
   const [reasonText, setReasonText] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -77,7 +79,7 @@ export default function StudentPassesPage() {
         },
         body: JSON.stringify({
           roll,
-          reason: `${passType}: ${reasonText}`,
+          reason: passType,
           from: new Date().toISOString(),
           to: new Date(Date.now() + 4 * 3600 * 1000).toISOString(),
           description: reasonText,
@@ -251,13 +253,15 @@ export default function StudentPassesPage() {
                 <label className="text-xs font-semibold text-[var(--text-secondary)]">Pass Category</label>
                 <select
                   value={passType}
-                  onChange={(e) => setPassType(e.target.value as any)}
-                  className="w-full p-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-xs font-semibold"
-                  disabled={submitting}
+                  onChange={(e) => setPassType(e.target.value)}
+                  className="w-full p-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-xs font-semibold select-none"
+                  disabled={submitting || loadingPassTypes}
+                  required
                 >
-                  <option value="Outing">Evening Outing (Local)</option>
-                  <option value="Home Leave">Weekend Home Leave</option>
-                  <option value="Emergency">Emergency Leave</option>
+                  <option value="" disabled>Select pass type</option>
+                  {passTypes.map((t) => (
+                    <option key={t.code} value={t.code}>{t.name} ({t.description})</option>
+                  ))}
                 </select>
               </div>
 

@@ -1,8 +1,8 @@
 export type Role =
   | "operator"
-  | "supervisor"
   | "admin"
   | "sysadmin"
+  | "supervisor"
   | "guardian" // unified role for parents/guardians of wards
   | "parent" // @deprecated legacy alias kept for schema/code coherence
   | "student"
@@ -74,6 +74,8 @@ export interface Person {
   updatedAt?: string;
   /** True when a thumbprint (biometric) is registered for this person */
   hasThumbprint?: boolean;
+  /** Administrative flag status: null | "NONE" | "FLAGGED" | "SUSPENDED" */
+  flagStatus?: string | null;
   // Related details if loaded
   studentDetails?: StudentDetails;
   employeeDetails?: EmployeeDetails;
@@ -121,6 +123,10 @@ export interface User {
   assignedHostel?: string;
   isHod?: boolean;
   departmentId?: string;
+  photoUrl?: string;
+  avatarUrl?: string;
+  identifier?: string;
+  passwordHash?: string;
   canViewGender?: string[];
   status: AccountStatus;
   personType?: PersonType;
@@ -278,6 +284,7 @@ export interface PersonTypeStats {
   onCampus: number;
   inToday: number;
   outToday: number;
+  attendanceRate?: number;
 }
 
 export interface DashboardData {
@@ -301,6 +308,13 @@ export interface DashboardData {
   personTypeBreakdown: Record<PersonType, PersonTypeStats>;
   alerts: Alert[];
   gatePasses: GatePass[];
+  facultyMetrics?: {
+    totalFaculty: number;
+    onCampus: number;
+    inToday: number;
+    outToday: number;
+    attendancePercentage: number;
+  };
 }
 
 export interface ApiResponse<T> {
@@ -321,27 +335,6 @@ export interface ExitReasonConfig {
   parentNotification: "silent" | "push" | "sms" | "urgent";
   autoApproveTimeRange?: string;
 }
-
-export const EXIT_REASON_CONFIGS: ExitReasonConfig[] = [
-  { code: "Regular", name: "Regular", description: "Regular exit/entry", applicableTo: ["HM", "HF", "DM", "DF"], requiresApproval: false, parentNotification: "silent" },
-  { code: "Home Out", name: "Home Out", description: "Going home for overnight/weekend", applicableTo: ["HM", "HF"], maxDurationHours: 48, requiresApproval: true, approvalBy: "warden", parentNotification: "sms" },
-  { code: "Day Out", name: "Day Out", description: "Full day outing", applicableTo: ["HM", "HF"], maxDurationHours: 8, requiresApproval: true, approvalBy: "warden", parentNotification: "sms" },
-  { code: "Leave", name: "Leave", description: "Leave application (covers medical, events, and other special cases)", applicableTo: ["HM", "HF", "DM", "DF"], requiresApproval: true, approvalBy: "faculty", parentNotification: "push" },
-];
-
-export const STUDENT_TYPE_RULES: Record<StudentType, {
-  curfew?: string;
-  shortOutingMax: number;
-  dayOutMax: number;
-  homeOutMax: number;
-  allowedExitReasons: ExitReason[];
-  mustExitBy?: string;
-}> = {
-  HM: { curfew: "21:00", shortOutingMax: 3, dayOutMax: 8, homeOutMax: 48, allowedExitReasons: ["Regular", "Home Out", "Day Out", "Leave"] },
-  HF: { curfew: "18:30", shortOutingMax: 2, dayOutMax: 6, homeOutMax: 48, allowedExitReasons: ["Regular", "Home Out", "Day Out", "Leave"] },
-  DM: { shortOutingMax: 0, dayOutMax: 0, homeOutMax: 0, allowedExitReasons: ["Regular", "Leave"], mustExitBy: "17:30" },
-  DF: { shortOutingMax: 0, dayOutMax: 0, homeOutMax: 0, allowedExitReasons: ["Regular", "Leave"], mustExitBy: "17:30" },
-};
 
 export const DEPARTMENT_CODES: Record<string, string> = {
   "01": "CSE",

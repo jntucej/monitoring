@@ -175,13 +175,12 @@ export function withAuth(handler: (req: NextRequest) => Promise<Response>) {
       );
     }
 
-    // Create new request with user information
-    const newRequest = new NextRequest(req);
-    newRequest.headers.set('x-user-id', profile.id);
-    newRequest.headers.set('x-user-role', profile.role);
-    newRequest.headers.set('x-user-email', profile.email);
+    // Attach user information to request headers
+    req.headers.set('x-user-id', profile.id);
+    req.headers.set('x-user-role', profile.role);
+    req.headers.set('x-user-email', profile.email);
 
-    return handler(newRequest);
+    return handler(req);
   };
 }
 

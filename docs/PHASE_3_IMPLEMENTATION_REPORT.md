@@ -120,7 +120,6 @@
 - **Security Verification**:
   - ✅ Users cannot change their own role
   - ✅ Operators cannot promote themselves
-  - ✅ Supervisors cannot promote themselves
   - ✅ Admins cannot create SYSTEM_ADMIN
   - ✅ Only authorized administrative authority can modify roles
   - ✅ Role changes invalidate sessions
@@ -141,7 +140,6 @@
 | gates | ✅ Updated | ✅ | ✅ | ✅ | Updated operator policies |
 | gate_logs | ✅ Updated | ✅ | ✅ | ✅ | Updated operator policies |
 | gate_passes | ✅ Updated | ✅ | ✅ Updated | ✅ | Updated parent policies |
-| alerts | ✅ Updated | ✅ | ✅ | ✅ | Updated supervisor policies |
 | audit_logs | ✅ Updated | ✅ | ✅ | ✅ | Updated sysadmin policy |
 | notifications | ✅ | ✅ | ✅ | ✅ | No changes needed |
 | sessions | ✅ | ✅ | ✅ | ✅ | No changes needed |

@@ -97,7 +97,6 @@ Burst B (8 requests in ~3.4s):
   access to ALL gates (including inactive).
 - Replaced with `"Authenticated users can view active gates"` (TO authenticated).
 - Added `"Operators can view campus occupancy for their gate"` (was admin-only).
-- Added `"Supervisors can view all gate logs"` (was operator+admin only).
 - Added `idx_campus_occupancy_last_gate` index for policy performance.
 
 ## Expected Impact

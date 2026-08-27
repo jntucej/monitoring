@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/stores/authStore";
+import { useAuthStore, useHasHydrated } from "@/stores/authStore";
 import type { Role } from "@/lib/types";
 
 interface AuthGuardProps {
@@ -12,10 +12,14 @@ interface AuthGuardProps {
 
 export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   const router = useRouter();
-  const { user, authenticated } = useAuthStore();
+  const hasHydrated = useHasHydrated();
+  const { user, authenticated, checkSession } = useAuthStore();
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
+    // Wait until store has hydrated from localStorage
+    if (!hasHydrated) return;
+
     // If not authenticated or no user set, redirect to login with role hint if available
     if (!authenticated || !user) {
       let targetRole: Role | null = null;
@@ -23,7 +27,6 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
       if (typeof window !== "undefined") {
         const path = window.location.pathname;
         if (path.startsWith("/gate")) targetRole = "operator";
-        else if (path.startsWith("/supervisor")) targetRole = "supervisor";
         else if (path.startsWith("/admin")) targetRole = "admin";
         else if (path.startsWith("/sysadmin")) targetRole = "sysadmin";
         else if (path.startsWith("/student")) targetRole = "student";
@@ -49,9 +52,6 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
         case "operator":
           router.replace("/gate/1");
           break;
-        case "supervisor":
-          router.replace("/supervisor/live");
-          break;
         case "student":
           router.replace("/student");
           break;
@@ -68,9 +68,12 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
     }
 
     setIsChecking(false);
-  }, [user, authenticated, allowedRoles, router]);
 
-  if (isChecking || !authenticated || !user) {
+    // Revalidate session asynchronously in background without blocking rendering
+    checkSession();
+  }, [user, authenticated, allowedRoles, router, hasHydrated, checkSession]);
+
+  if (!hasHydrated || isChecking || !authenticated || !user) {
     return (
       <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[var(--bg-base)] text-[var(--text-primary)]">
         <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4" />

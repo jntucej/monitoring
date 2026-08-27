@@ -17,7 +17,6 @@ This document outlines the comprehensive security testing plan for the Gate Moni
 ### Test Environment
 - **Environment**: Staging environment matching production configuration
 - **Tools**: Postman, Burp Suite, OWASP ZAP, custom test scripts
-- **Accounts**: Test accounts for each role (SYSTEM_ADMIN, ADMIN, SUPERVISOR, OPERATOR, STUDENT, PARENT, WARDEN)
 - **Data**: Realistic test data with proper relationships
 
 ### Test Principles
@@ -38,7 +37,6 @@ This document outlines the comprehensive security testing plan for the Gate Moni
 | UNAUTH-02 | Access gate scan endpoint without authentication | 401 Unauthorized |
 | UNAUTH-03 | Access student data endpoint without authentication | 401 Unauthorized |
 | UNAUTH-04 | Access admin dashboard without authentication | 401 Unauthorized |
-| UNAUTH-05 | Access supervisor corrections without authentication | 401 Unauthorized |
 
 #### 2. Invalid Token Tests
 | Test Case | Description | Expected Result |
@@ -87,12 +85,10 @@ This document outlines the comprehensive security testing plan for the Gate Moni
 | Test Case | Description | Expected Result |
 |-----------|-------------|-----------------|
 | RBAC-01 | Operator accesses admin endpoint | 403 Forbidden |
-| RBAC-02 | Supervisor accesses system admin endpoint | 403 Forbidden |
 | RBAC-03 | Student accesses operator endpoint | 403 Forbidden |
 | RBAC-04 | Parent accesses admin endpoint | 403 Forbidden |
 | RBAC-05 | Warden accesses system admin endpoint | 403 Forbidden |
 | RBAC-06 | Admin accesses system admin endpoint (role change) | 403 Forbidden |
-| RBAC-07 | Operator accesses supervisor endpoint | 403 Forbidden |
 
 #### 2. Gate Scan Authorization Tests
 | Test Case | Description | Expected Result |
@@ -147,10 +143,8 @@ This document outlines the comprehensive security testing plan for the Gate Moni
 | USER-02 | Admin changes user role | 403 Forbidden (only SYSTEM_ADMIN) |
 | USER-03 | Admin suspends user | 200 OK |
 | USER-04 | Admin deletes user | 403 Forbidden (only SYSTEM_ADMIN) |
-| USER-05 | Supervisor creates user | 403 Forbidden |
 | USER-06 | Operator views own profile | 200 OK |
 | USER-07 | Operator views another user's profile | 403 Forbidden |
-| USER-08 | Supervisor views supervised operator profile | 200 OK |
 
 ## INPUT VALIDATION TESTING
 
@@ -231,7 +225,6 @@ This document outlines the comprehensive security testing plan for the Gate Moni
 |-----------|-------------|--------|-----------------|
 | IDOR-06 | Operator scans at unauthorized gate | `{"gateId": "gate-2"}` (assigned to gate-1) | 403 Forbidden |
 | IDOR-07 | Operator views unauthorized gate activity | `/api/gate/logs?gateId=gate-2` (assigned to gate-1) | 403 Forbidden |
-| IDOR-08 | Supervisor views unauthorized gate | `/api/supervisor/live-events?gateId=gate-2` (supervises gate-1) | 403 Forbidden |
 
 #### 3. Pass IDOR Tests
 | Test Case | Description | Attack | Expected Result |
@@ -244,7 +237,6 @@ This document outlines the comprehensive security testing plan for the Gate Moni
 | Test Case | Description | Attack | Expected Result |
 |-----------|-------------|--------|-----------------|
 | IDOR-12 | User accesses another user's profile | `/api/admin/users/user-123` (as user-456) | 403 Forbidden |
-| IDOR-13 | Supervisor accesses non-supervised user | `/api/admin/users/user-123` (supervises user-456) | 403 Forbidden |
 | IDOR-14 | Admin changes another admin's role | Change role of equal-level admin | 403 Forbidden |
 
 ## DATA SECURITY TESTING
@@ -335,7 +327,6 @@ This document outlines the comprehensive security testing plan for the Gate Moni
 | Test Case | Description | Expected Result |
 |-----------|-------------|-----------------|
 | LOGIC-13 | Operator requests correction | Correction request created |
-| LOGIC-14 | Supervisor approves correction | New scan record created |
 | LOGIC-15 | Correction for old scan | 400 Bad Request |
 | LOGIC-16 | Multiple corrections for same scan | Business rule validation |
 
@@ -345,9 +336,7 @@ This document outlines the comprehensive security testing plan for the Gate Moni
 
 | Test Case | Description | Attack | Expected Result |
 |-----------|-------------|--------|-----------------|
-| ESC-01 | Operator → Supervisor | Modify role in JWT | 403 Forbidden |
 | ESC-02 | Operator → Admin | Modify role in request body | 403 Forbidden |
-| ESC-03 | Supervisor → Admin | Modify role in session | 403 Forbidden |
 | ESC-04 | Admin → System Admin | Modify role in database | 403 Forbidden |
 | ESC-05 | Student → Operator | Modify role in localStorage | 403 Forbidden |
 | ESC-06 | Parent → Student | Modify role in API request | 403 Forbidden |
@@ -463,16 +452,15 @@ This document outlines the comprehensive security testing plan for the Gate Moni
 ### Test Accounts
 | Role | Username | Password | PIN | Notes |
 |------|----------|----------|-----|-------|
-| SYSTEM_ADMIN | sysadmin | [secure] | 12345678 | Full access |
-| ADMIN | admin | [secure] | 12345678 | Admin access |
-| SUPERVISOR | supervisor | [secure] | 12345678 | Supervises gate-1 |
-| OPERATOR | operator1 | [secure] | 12345678 | Assigned to gate-1 |
-| OPERATOR | operator2 | [secure] | 12345678 | Assigned to gate-2 |
+| SYSTEM_ADMIN | sysadmin | [secure] | `[SEED_DEFAULT_PIN]` | Full access |
+| ADMIN | admin | [secure] | `[SEED_DEFAULT_PIN]` | Admin access |
+| OPERATOR | operator1 | [secure] | `[SEED_DEFAULT_PIN]` | Assigned to gate-1 |
+| OPERATOR | operator2 | [secure] | `[SEED_DEFAULT_PIN]` | Assigned to gate-2 |
 | STUDENT | 24JJ1A0308 | [secure] | N/A | Regular student |
 | STUDENT | 24JJ1A0309 | [secure] | N/A | Hostel student |
 | PARENT | parent1 | [secure] | N/A | Parent of 24JJ1A0308 |
 | PARENT | parent2 | [secure] | N/A | Parent of 24JJ1A0309 |
-| WARDEN | warden1 | [secure] | 12345678 | Warden for CSE department |
+| WARDEN | warden1 | [secure] | `[SEED_DEFAULT_PIN]` | Warden for CSE department |
 
 ### Test Data
 1. **Students**: At least 10 students with various attributes

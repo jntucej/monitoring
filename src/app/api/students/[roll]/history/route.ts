@@ -22,7 +22,7 @@ async function handleGet(req: NextRequest) {
     const authRole = req.headers.get("x-user-role");
 
     // Authorization Check
-    const isAllowedRole = ["supervisor", "admin", "sysadmin"].includes(authRole || "");
+    const isAllowedRole = ["admin", "sysadmin"].includes(authRole || "");
 
     if (!isAllowedRole) {
       if (authRole === "student") {
@@ -64,6 +64,6 @@ async function handleGet(req: NextRequest) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["supervisor", "admin", "sysadmin", "student"] }),
+  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "student"] }),
   { keyPrefix: "student_history", maxRequests: 50 }
 );

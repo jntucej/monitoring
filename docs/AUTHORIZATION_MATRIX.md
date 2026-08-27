@@ -33,26 +33,17 @@ This document defines the authorization requirements for all API endpoints in th
 
 | Endpoint | HTTP Method | Authentication | Allowed Roles | Permission | Resource Scope | Client-controlled IDs | Server-derived IDs | RLS Dependency | Audit Required | Rate Limit | PII Returned |
 |----------|-------------|----------------|---------------|------------|----------------|-----------------------|--------------------|----------------|---------------|------------|--------------|
-| `/api/gate/scan` | POST | Required | OPERATOR, SUPERVISOR | `gate:scan:create` | Gate scan creation | `studentId`, `gateId`, `direction` | `operatorId`, `userId` | `Operators can view logs for their gates` | GATE_SCAN | 60 requests/1 minute | Student info (limited) |
-| `/api/gate/logs` | GET | Required | OPERATOR, SUPERVISOR, ADMIN, SYSTEM_ADMIN | `gate:logs:read` | Gate logs access | `gateId`, `studentId`, `dateRange` | `userId` | `Operators can view logs for their gates` | None | 30 requests/1 minute | Scan records |
-| `/api/gate/logs/{id}` | GET | Required | OPERATOR, SUPERVISOR, ADMIN, SYSTEM_ADMIN | `gate:logs:read` | Individual log access | `id` | `userId` | `Operators can view logs for their gates` | None | 30 requests/1 minute | Scan record |
-| `/api/gate/logs/{id}/correction` | PUT | Required | SUPERVISOR, ADMIN, SYSTEM_ADMIN | `gate:logs:correct` | Scan correction | `id`, correction data | `userId` | None | SCAN_CORRECTION | 10 requests/1 minute | None |
 
 ### Student Endpoints
 
 | Endpoint | HTTP Method | Authentication | Allowed Roles | Permission | Resource Scope | Client-controlled IDs | Server-derived IDs | RLS Dependency | Audit Required | Rate Limit | PII Returned |
 |----------|-------------|----------------|---------------|------------|----------------|-----------------------|--------------------|----------------|---------------|------------|--------------|
-| `/api/students` | GET | Required | ADMIN, SYSTEM_ADMIN, SUPERVISOR, WARDEN | `students:read` | Student management | `roll`, `department`, `hostel` filters | `userId` | `Admins can view all student data` | None | 20 requests/1 minute | Student profiles |
-| `/api/students/{roll}` | GET | Required | ADMIN, SYSTEM_ADMIN, SUPERVISOR, OPERATOR, STUDENT (self), PARENT (children) | `students:read` | Individual student access | `roll` | `userId`, `studentId` | `Students can view their own data` | None | 30 requests/1 minute | Student profile (limited) |
-| `/api/students/{roll}/gate-info` | GET | Required | OPERATOR, SUPERVISOR | `students:gate:read` | Gate verification info | `roll` | `userId`, `studentId` | `Students can view their own data` | None | 60 requests/1 minute | Minimal student info |
 
 ### Gate Pass Endpoints
 
 | Endpoint | HTTP Method | Authentication | Allowed Roles | Permission | Resource Scope | Client-controlled IDs | Server-derived IDs | RLS Dependency | Audit Required | Rate Limit | PII Returned |
 |----------|-------------|----------------|---------------|------------|----------------|-----------------------|--------------------|----------------|---------------|------------|--------------|
-| `/api/passes` | GET | Required | ADMIN, SYSTEM_ADMIN, SUPERVISOR, STUDENT, PARENT | `passes:read` | Gate pass access | `studentId`, `status` filters | `userId` | `Students can view their own gate passes` | None | 20 requests/1 minute | Pass records |
 | `/api/passes` | POST | Required | STUDENT, PARENT | `passes:create` | Gate pass creation | Pass details | `userId`, `studentId` | `Students can create own passes` | None | 5 requests/1 minute | None |
-| `/api/passes/{id}` | GET | Required | ADMIN, SYSTEM_ADMIN, SUPERVISOR, STUDENT, PARENT | `passes:read` | Individual pass access | `id` | `userId` | `Students can view their own gate passes` | None | 30 requests/1 minute | Pass record |
 | `/api/passes/{id}/approve` | PUT | Required | ADMIN, SYSTEM_ADMIN, PARENT (limited) | `passes:approve` | Pass approval | `id` | `userId` | None | PASS_APPROVAL | 10 requests/1 minute | None |
 | `/api/passes/{id}/reject` | PUT | Required | ADMIN, SYSTEM_ADMIN, PARENT (limited) | `passes:reject` | Pass rejection | `id` | `userId` | None | PASS_REJECTION | 10 requests/1 minute | None |
 
@@ -60,10 +51,7 @@ This document defines the authorization requirements for all API endpoints in th
 
 | Endpoint | HTTP Method | Authentication | Allowed Roles | Permission | Resource Scope | Client-controlled IDs | Server-derived IDs | RLS Dependency | Audit Required | Rate Limit | PII Returned |
 |----------|-------------|----------------|---------------|------------|----------------|-----------------------|--------------------|----------------|---------------|------------|--------------|
-| `/api/admin/dashboard` | GET | Required | ADMIN, SYSTEM_ADMIN, SUPERVISOR | `admin:dashboard:read` | Dashboard data | None | `userId` | None | None | 30 requests/1 minute | Aggregated data |
 | `/api/admin/reports` | GET | Required | ADMIN, SYSTEM_ADMIN | `admin:reports:read` | Report generation | Report parameters | `userId` | None | None | 10 requests/1 minute | Aggregated data |
-| `/api/admin/alerts` | GET | Required | ADMIN, SYSTEM_ADMIN, SUPERVISOR | `admin:alerts:read` | Alert management | Alert filters | `userId` | `Supervisors can view alerts for their gates` | None | 20 requests/1 minute | Alert records |
-| `/api/admin/alerts/{id}` | PUT | Required | ADMIN, SYSTEM_ADMIN, SUPERVISOR | `admin:alerts:update` | Alert resolution | `id` | `userId` | None | None | 10 requests/1 minute | None |
 
 ## Role Hierarchy and Permissions
 
@@ -73,14 +61,12 @@ This document defines the authorization requirements for all API endpoints in th
 |------|-------------|-------------|
 | SYSTEM_ADMIN | System administrator with full access | All permissions |
 | ADMIN | Administrative staff | Administrative permissions, user management |
-| SUPERVISOR | Gate supervisors | Operational oversight, scan corrections |
 | OPERATOR | Gate operators | Gate scanning, student verification |
 | STUDENT | Students | Access to own records, pass requests |
 | PARENT | Parents | Access to child records, pass approvals |
 
 ### Permission Matrix
 
-| Permission | SYSTEM_ADMIN | ADMIN | SUPERVISOR | OPERATOR | STUDENT | PARENT |
 |------------|--------------|-------|------------|----------|---------|--------|
 | `auth:login` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `auth:logout` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |

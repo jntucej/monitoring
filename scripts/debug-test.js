@@ -1,4 +1,7 @@
 const { createClient } = require('@supabase/supabase-js');
+const { loadLocalEnv } = require('./lib/env-loader');
+
+loadLocalEnv();
 
 async function debug() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -7,13 +10,23 @@ async function debug() {
     console.error("Missing env vars");
     return;
   }
+
+  const operatorId = process.env.TEST_OPERATOR_ID;
+  const operatorPin = process.env.TEST_OPERATOR_PIN;
+  if (!operatorId || !operatorPin) {
+    console.error(
+      "CRITICAL ERROR: TEST_OPERATOR_ID and TEST_OPERATOR_PIN are required.\n" +
+      "Add them to .env.local (values are NOT stored in this repo)."
+    );
+    return;
+  }
   const supabase = createClient(url, key);
 
-  // Get OP-001 user
+  // Get the operator user
   const { data: operator, error: opErr } = await supabase
     .from('users')
     .select('*')
-    .eq('unique_id', 'OP-001')
+    .eq('unique_id', operatorId)
     .single();
 
   if (opErr || !operator) {
@@ -21,34 +34,22 @@ async function debug() {
     return;
   }
 
-  // Let's call the API via fetch to localhost:3000
-  // First, we need to log in to get session token
-  const loginRes = await fetch("http://localhost:3000/api/auth/login", {
+  // Call the API via fetch to localhost:3000.
+  // Supabase Auth is the sole authentication authority — the legacy custom
+  // password login no longer exists, so only the PIN endpoint is exercised.
+  console.log("Trying PIN login...");
+  const pinRes = await fetch("http://localhost:3000/api/auth/pin-login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ identifier: "OP-001", password: "password" }) // try password
+    body: JSON.stringify({ employeeId: operatorId, pin: operatorPin })
   }).catch(e => null);
 
-  if (!loginRes || !loginRes.ok) {
-    // try PIN login
-    console.log("Password login failed, trying PIN login...");
-    const pinRes = await fetch("http://localhost:3000/api/auth/pin-login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ employeeId: "OP-001", pin: "12345678" })
-    }).catch(e => null);
-    
-    if (pinRes && pinRes.ok) {
-      const result = await pinRes.json();
-      console.log("PIN login success:", result);
-      await testScan(result.data.token, result.data.user.currentSessionToken, operator.id);
-    } else {
-      console.log("PIN login failed", pinRes ? await pinRes.text() : "no server running");
-    }
-  } else {
-    const result = await loginRes.json();
-    console.log("Login success:", result);
+  if (pinRes && pinRes.ok) {
+    const result = await pinRes.json();
+    console.log("PIN login success:", result);
     await testScan(result.data.token, result.data.user.currentSessionToken, operator.id);
+  } else {
+    console.log("PIN login failed", pinRes ? await pinRes.text() : "no server running");
   }
 }
 

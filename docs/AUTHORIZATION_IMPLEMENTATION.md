@@ -39,7 +39,6 @@ This document describes the implementation of the centralized authorization syst
 ```typescript
 // Basic role-based authorization
 export const GET = withAuthorization(handleGet, {
-  requiredRole: ['admin', 'supervisor']
 });
 
 // Resource-specific authorization
@@ -87,7 +86,6 @@ operatorId: auth.userId,
 
 **Solution**:
 - Operators can only access gates they're assigned to
-- Supervisors can only access gates they supervise
 - Admins can access all gates
 - Gate status validation (only ACTIVE gates allowed)
 
@@ -183,9 +181,7 @@ The system implements fine-grained access control for different resource types:
 |--------------|-------------|
 | **User** | Users can access their own info; admins can access all users |
 | **Student** | Students can access their own info; parents can access their children; operators can access for gate verification; admins can access all |
-| **Gate** | Operators can only access assigned gates; supervisors can access supervised gates; admins can access all |
 | **Gate Pass** | Students can access their own passes; parents can access their children's passes; admins can access all |
-| **Gate Log** | Operators can only access logs for their assigned gates; supervisors can access logs for supervised gates; admins can access all |
 
 ## Error Handling
 

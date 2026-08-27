@@ -18,8 +18,8 @@ function getScanId(req: NextRequest): string {
 
 async function handlePatch(req: NextRequest, { auth }: { auth: AuthContext }) {
   try {
-    const supervisorId = auth.userId;
-    const supervisorRole = auth.role;
+    const adminId = auth.userId;
+    const adminRole = auth.role;
 
     const scanId = getScanId(req);
     const body = await req.json();
@@ -47,16 +47,16 @@ async function handlePatch(req: NextRequest, { auth }: { auth: AuthContext }) {
       );
     }
 
-    // Get the supervisor's name for audit logging
+    // Get the admin's name for audit logging
     const { data: profile, error: profileError } = await supabase
       .from("users")
       .select("name")
-      .eq("id", supervisorId)
+      .eq("id", adminId)
       .single();
 
     if (profileError || !profile) {
       return NextResponse.json(
-        { success: false, error: { code: "USER_NOT_FOUND", message: "Supervisor profile not found." } },
+        { success: false, error: { code: "USER_NOT_FOUND", message: "Admin profile not found." } },
         { status: 404 }
       );
     }
@@ -66,9 +66,9 @@ async function handlePatch(req: NextRequest, { auth }: { auth: AuthContext }) {
       newDirection as ScanDirection,
       newReason as ExitReason | undefined,
       correctionReason,
-      supervisorId,
+      adminId,
       profile.name,
-      supervisorRole || "supervisor"
+      adminRole || "admin" 
     );
 
     if (!corrected) {
@@ -95,6 +95,6 @@ async function handlePatch(req: NextRequest, { auth }: { auth: AuthContext }) {
 }
 
 export const PATCH = withRateLimit(
-  withAuthorization(handlePatch, { requiredRole: ["supervisor", "admin", "sysadmin"] }),
+  withAuthorization(handlePatch, { requiredRole: ["admin", "sysadmin"] }),
   { keyPrefix: "scan_correction", maxRequests: 30 }
 );

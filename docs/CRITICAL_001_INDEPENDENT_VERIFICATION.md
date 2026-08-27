@@ -210,7 +210,6 @@ export type AccountStatus =
 | Role | Can Change Status | Audit Event Created | Session Revocation |
 |------|-------------------|----------------------|--------------------|
 | Operator | ❌ No | N/A | N/A |
-| Supervisor | ❌ No | N/A | N/A |
 | Student | ❌ No | N/A | N/A |
 | Parent | ❌ No | N/A | N/A |
 | Admin | ✅ Yes | ✅ Yes | ✅ Yes |

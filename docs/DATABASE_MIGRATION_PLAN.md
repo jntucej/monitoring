@@ -5,7 +5,6 @@
 The application currently uses Supabase with the following schema components:
 
 ### Tables
-- `users` - System users with various roles (operator, supervisor, admin, sysadmin, parent, student, warden)
 - `students` - Student records with personal and academic information
 - `gates` - Physical gate locations and configurations
 - `gate_logs` - Scan records for student entry/exit
@@ -108,7 +107,6 @@ The application expects the following RLS policies:
 
 ### Alerts Table
 - Admins can view all alerts
-- Supervisors can view alerts for their gates
 
 ### Audit Logs Table
 - Sysadmins can view all audit logs

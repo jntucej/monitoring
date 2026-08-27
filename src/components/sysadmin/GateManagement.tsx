@@ -156,7 +156,7 @@ export function GateManagement() {
         <div className="p-8 flex flex-col items-center gap-4 text-center">
           <XCircle className="w-10 h-10 text-red-500" />
           <h4 className="font-semibold text-lg">Could not load gates</h4>
-          <p className="text-sm text-[var(--text-muted)]">{error}</p>
+          <p className="text-sm text-[var(--text-muted)]">{typeof error === "string" ? error : (error as any)?.message || String(error)}</p>
         </div>
       ) : gates.length === 0 ? (
         <div className="p-8 text-center text-sm text-[var(--text-muted)]">

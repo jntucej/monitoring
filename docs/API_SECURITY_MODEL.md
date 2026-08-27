@@ -37,7 +37,6 @@ Authenticated Request → Role Validation → Resource Authorization → Field-L
 ```
 
 ### Authorization Requirements
-1. **Role-Based Access Control**: Access determined by user role (SYSTEM_ADMIN, ADMIN, SUPERVISOR, OPERATOR, STUDENT, PARENT, WARDEN)
 2. **Resource-Level Authorization**: Access to specific resources (students, gates, passes) based on ownership and permissions
 3. **Field-Level Security**: Only return fields appropriate for the user's role
 4. **Gate Context Validation**: Operators can only perform operations on gates they're assigned to
@@ -60,7 +59,6 @@ Authenticated Request → Role Validation → Resource Authorization → Field-L
 |----------|--------|----------------|---------------|----------------|
 | `/api/gate/scan` | POST | ✅ | ✅ (OPERATOR+) | Validates operator gate assignment, derives operatorId from session |
 | `/api/gate/scan` | GET | ✅ | ✅ (OPERATOR+) | Returns statistics for authorized gates only |
-| `/api/gate/logs` | GET | ✅ | ✅ (SUPERVISOR+) | Field-level filtering based on role |
 
 ### Student Endpoints
 
@@ -80,14 +78,9 @@ Authenticated Request → Role Validation → Resource Authorization → Field-L
 | `/api/passes/[passId]` | PUT | ✅ | ✅ (ADMIN+) | Approval/rejection with proper authorization |
 | `/api/passes/[passId]/approve` | POST | ✅ | ✅ (PARENT/WARDEN+) | Validates approval authority |
 
-### Supervisor Endpoints
 
 | Endpoint | Method | Authentication | Authorization | Security Notes |
 |----------|--------|----------------|---------------|----------------|
-| `/api/supervisor/corrections` | GET | ✅ | ✅ (SUPERVISOR+) | Returns correction requests for supervised gates |
-| `/api/supervisor/corrections` | POST | ✅ | ✅ (OPERATOR+) | Creates correction request |
-| `/api/supervisor/corrections/[id]` | PUT | ✅ | ✅ (SUPERVISOR+) | Approves/rejects correction requests |
-| `/api/supervisor/live-events` | GET | ✅ | ✅ (SUPERVISOR+) | Returns live gate activity for supervised gates |
 
 ### Admin Endpoints
 
@@ -290,7 +283,6 @@ Authenticated Operator → Session Validation → Gate Assignment Lookup → Ope
 
 ### Correction Workflow
 ```
-Correction Request → Supervisor Review → Approval/Rejection → New Correction Record → Audit Log Entry
 ```
 
 ### Timestamp Security

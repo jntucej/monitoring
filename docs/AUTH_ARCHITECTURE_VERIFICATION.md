@@ -104,7 +104,6 @@ This document provides an audit of the current authentication architecture again
   - `createUser` function inserts directly into `public.users` (db.ts line 648)
   - Users created with password hashes (db.ts line 659)
   - No reference to Supabase Auth user creation
-  - All roles (SYSTEM_ADMIN, ADMIN, SUPERVISOR, OPERATOR, STUDENT, PARENT) created the same way
 
 ### 7. ADMIN CREATION
 

@@ -24,13 +24,11 @@
 | `SESSION_ERROR` at login | Auth user missing/unconfirmed | Auto-provisioned by `/api/auth/pin-login`; retry once, else re-run seed script |
 | "Duplicate scan detected" | Same person+direction within window | Expected dedupe; no action |
 | Exit buttons disabled | No APPROVED pass for student | Guardian/Admin must approve pass first |
-| Campus count wrong | Missed OUT scans after curfew | Reconcile via `/gate/history` corrections (supervisor role) |
 | 500 on `/api/*` | Supabase env var missing on deploy | Verify `NEXT_PUBLIC_SUPABASE_URL`, anon key, `SUPABASE_SERVICE_ROLE_KEY` in Vercel |
 
 ## 3. Escalation Paths
 
 1. **L1 — Operator:** local issues, offline queue handling.
-2. **L2 — Supervisor (`SUP-001`):** scan corrections, approvals, gate reconciliation.
 3. **L3 — Admin (`ADM-001`):** user management, pass overrides, reports.
 4. **L4 — Platform owner:** Vercel/Supabase incidents, secrets rotation, DB restores.
 
@@ -42,7 +40,7 @@
   supabase db dump -f backup-$(date +%F).sql
   ```
 - **Restore drill (quarterly):** restore latest dump into a staging project; run `node scripts/test-db.js` against it; verify counts (~370 users, ~285 student_details, 35 employee_details).
-- **Seed reference data:** `node scripts/seed-data.js` (idempotent upserts; safe to re-run).
+- **Seed reference data:** `node scripts/seed-data.js` (idempotent upserts; safe to re-run; requires `SEED_DEFAULT_PIN`).
 
 ## 5. Deployment Checklist
 
@@ -50,7 +48,7 @@
 - [ ] RLS enabled on all tables; policies reviewed
 - [ ] Env vars set on Vercel (URL, anon key, service-role key)
 - [ ] Supabase Auth → Site URL matches production domain
-- [ ] **Default PINs rotated** (`ADM-001`, `SUP-001`, `OP-001`, wardens)
+- [ ] **Default PINs rotated** (`ADM-001`, `SUP-001`, `OP-001`, wardens) — bootstrap PIN comes from `SEED_DEFAULT_PIN` at seed time
 - [ ] `npx playwright test` green
 - [ ] Post-deploy smoke test: operator login → scan → history entry visible
 

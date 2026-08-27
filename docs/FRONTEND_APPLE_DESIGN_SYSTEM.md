@@ -22,7 +22,6 @@ The JNTUH UCoEJ Gate Monitoring System frontend is redesigned around a calm, res
    - Technical backend errors (e.g. `JWT expired`, `RLS policy denied`) are translated into clear, actionable, friendly messages (`"Unable to complete operation. Please sign in again."`).
 3. **Dual Interaction Paradigms**:
    - **Mobile-First Operator & Student/Parent**: 1-handed phone/tablet optimization, sticky bottom navigation, 64px primary touch controls, camera-first scan desk.
-   - **Desktop-First Supervisor & Admin/SysAdmin**: Compact sidebar, command-driven data presentation, responsive table card-fallbacks, keyboard shortcuts.
 
 ---
 
@@ -34,7 +33,6 @@ gate-monitor/src/
 │   ├── login/                # Clean, dual-credential / 4-digit PIN authentication (No role picker)
 │   ├── (operator)/
 │   │   └── gate/[gateId]/    # Streamlined high-speed operator scanning desk
-│   ├── supervisor/
 │   │   ├── live/             # Real-time campus gate feed
 │   │   └── corrections/      # Flagged scan review drawer & desk
 │   ├── (admin)/
@@ -77,7 +75,6 @@ Status is never conveyed by color alone. Every badge and alert uses **Icon + Tex
 - [ ] Phase 3: Apple-Inspired Global CSS & UI Components (`globals.css`, `TouchButton`, `Modal`, `BottomSheet`)
 - [ ] Phase 4: Clean Login Page (Remove role dropdown, integrate backend-authenticated session handling)
 - [ ] Phase 5: High-Speed Operator Mobile Desk (`/gate/[gateId]`)
-- [ ] Phase 6: Supervisor Desktop/Mobile Feed & Corrections
 - [ ] Phase 7: Campus Admin & System Admin Governance Consoles
 - [ ] Phase 8: Student Digital ID & Parent Mobile Status Screens
 

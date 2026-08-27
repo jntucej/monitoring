@@ -65,3 +65,60 @@ export interface WorkerAnalytics {
     night: number;
   };
 }
+export interface FacultyAttendanceStats {
+  rate: number;
+  today: number;
+  total: number;
+}
+
+export interface WorkerAdherenceStats {
+  rate: number;
+  onTime: number;
+  late: number;
+}
+
+export interface PeakHour {
+  hour: number;
+  count: number;
+}
+
+export interface DepartmentActivity {
+  department: string;
+  entries: number;
+  exits: number;
+}
+
+export interface WeekdayComparison {
+  weekday: number;
+  weekend: number;
+}
+
+export interface TimelinessStats {
+  onTime: number;
+  late: number;
+  absent: number;
+}
+
+export interface HourlyPattern {
+  hour: number;
+  students: number;
+  faculty: number;
+}
+
+export interface MovementRatio {
+  student: number;
+  faculty: number;
+  staff: number;
+  worker: number;
+}
+
+export interface EnhancedAnalytics {
+  facultyAttendance: FacultyAttendanceStats;
+  workerShiftAdherence: WorkerAdherenceStats;
+  peakHours: PeakHour[];
+  departmentActivity: DepartmentActivity[];
+  weekdayVsWeekend: WeekdayComparison;
+  facultyTimeliness: TimelinessStats;
+  hourlyPattern: HourlyPattern[];
+  movementRatio: MovementRatio;
+}

@@ -284,7 +284,6 @@ The login ID architecture properly prevents enumeration while maintaining custom
 | `is_sysadmin()` | Checks if user is sysadmin | RLS policies | `public` | `user_id UUID` | Uses `auth.uid()` | `users` | Low | **YES** - Required for RLS to check roles |
 | `is_warden()` | Checks if user is warden | RLS policies | `public` | `user_id UUID` | Uses `auth.uid()` | `users` | Low | **YES** - Required for RLS to check roles |
 | `is_operator()` | Checks if user is operator | RLS policies | `public` | `user_id UUID` | Uses `auth.uid()` | `users` | Low | **YES** - Required for RLS to check roles |
-| `is_supervisor()` | Checks if user is supervisor | RLS policies | `public` | `user_id UUID` | Uses `auth.uid()` | `users` | Low | **YES** - Required for RLS to check roles |
 | `get_supervised_gates()` | Gets gates supervised by user | RLS policies | `public` | `user_id UUID` | Uses `auth.uid()` | `users` | Low | **YES** - Required for RLS to access user data |
 | `get_warden_hostel()` | Gets hostel assigned to warden | RLS policies | `public` | `user_id UUID` | Uses `auth.uid()` | `users` | Low | **YES** - Required for RLS to access user data |
 | `maintain_user_student_mapping()` | Maintains user-student mapping | Triggers | `public` | None | Trigger-based | `students`, `user_student_mapping` | Medium | **YES** - Required for data integrity |
@@ -317,8 +316,6 @@ The login ID architecture properly prevents enumeration while maintaining custom
    - ✅ **VERIFIED**: Role update endpoint prevents operators from promoting operators
    - ✅ **VERIFIED**: Role hierarchy validation prevents self-promotion
 
-3. **SUPERVISOR cannot promote themselves**
-   - ✅ **VERIFIED**: Role update endpoint prevents supervisors from promoting supervisors
    - ✅ **VERIFIED**: Role hierarchy validation prevents self-promotion
 
 4. **ADMIN cannot create SYSTEM_ADMIN**

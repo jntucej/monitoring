@@ -7,7 +7,6 @@ Users access the system via specialized portals based on their role:
 - **Individual Access (Students/Faculty/Staff):** Digital ID, QR scan or manual ID entry.
 - **Guardian Portal:** Real-time movement oversight.
 - **Gate Operator Desk:** Scanner interaction and manual gate status entry.
-- **Supervisor Operations:** Monitoring and approval.
 - **Administration & IT:** Full system management.
 
 ## 2. Authentication Protocol
@@ -21,5 +20,4 @@ Users access the system via specialized portals based on their role:
 ## 3. RBAC (Role-Based Access Control)
 Access is enforced at the middleware level:
 - `Individual`: Limited access to own data/passes.
-- `Operator/Supervisor/Admin/SysAdmin`: Hierarchical access to backend analytics and system configuration.
 - Audit logs capture every access attempt, regardless of outcome, ensuring full traceability.

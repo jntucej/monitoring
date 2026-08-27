@@ -377,7 +377,7 @@ code {
 <pre class="hljs"><code><div>+-----------------------------------------------------------------------------------+
 |                                   CLIENT LAYER                                    |
 |   +-------------------+    +---------------------+    +-----------------------+   |
-|   | Operator Scanner  |    | Student / Parent App|    | Admin / Supervisor    |   |
+|   | Operator Scanner  |    | Student / Parent App|    | Admin / Admin    |   |
 |   | (PWA / Mobile UI) |    | (Pass Requests UI)  |    | Dashboard UI          |   |
 +---------+--------------------------+--------------------------+-------------------+
           |                          |                          |
@@ -515,11 +515,11 @@ code {
 );
 </div></code></pre>
 <h4 id="322-users">3.2.2 <code>users</code></h4>
-<p>Central user registry for system administrative staff, supervisors, operators, wardens, parents, and student accounts.</p>
+<p>Central user registry for system administrative staff, admins, operators, wardens, parents, and student accounts.</p>
 <pre class="hljs"><code><div><span class="hljs-keyword">CREATE TABLE</span> users (
   id UUID <span class="hljs-keyword">PRIMARY KEY</span> <span class="hljs-keyword">DEFAULT</span> gen_random_uuid(),
   name TEXT <span class="hljs-keyword">NOT NULL</span>,
-  role TEXT <span class="hljs-keyword">NOT NULL</span> <span class="hljs-keyword">CHECK</span> (role <span class="hljs-keyword">IN</span> (<span class="hljs-string">&#x27;operator&#x27;</span>, <span class="hljs-string">&#x27;supervisor&#x27;</span>, <span class="hljs-string">&#x27;admin&#x27;</span>, <span class="hljs-string">&#x27;sysadmin&#x27;</span>, <span class="hljs-string">&#x27;parent&#x27;</span>, <span class="hljs-string">&#x27;student&#x27;</span>, <span class="hljs-string">&#x27;warden&#x27;</span>)),
+  role TEXT <span class="hljs-keyword">NOT NULL</span> <span class="hljs-keyword">CHECK</span> (role <span class="hljs-keyword">IN</span> (<span class="hljs-string">&#x27;operator&#x27;</span>, <span class="hljs-string">&#x27;admin&#x27;</span>, <span class="hljs-string">&#x27;admin&#x27;</span>, <span class="hljs-string">&#x27;sysadmin&#x27;</span>, <span class="hljs-string">&#x27;parent&#x27;</span>, <span class="hljs-string">&#x27;student&#x27;</span>, <span class="hljs-string">&#x27;warden&#x27;</span>)),
   employee_id TEXT,
   email TEXT,
   phone TEXT,

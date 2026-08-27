@@ -8,7 +8,7 @@ import { useOperatorStore } from "@/stores/operatorStore";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/toast";
 import { ScanConfirmation } from "@/components/operator/ScanConfirmation";
-import { ThumbprintScanner } from "@/components/operator/ThumbprintScanner";
+import { WebAuthnScanner } from "@/components/operator/WebAuthnScanner";
 import { SuccessFlash } from "@/components/operator/SuccessFlash";
 import { Scanner } from "@/components/operator/Scanner";
 import { ScanViewfinder } from "@/components/operator/ScanViewfinder";
@@ -19,24 +19,15 @@ import { BreakdownPanel } from "@/components/operator/BreakdownPanel";
 import { OutingPanel } from "@/components/operator/OutingPanel";
 import { ScanDetailModal } from "@/components/operator/ScanDetailModal";
 import type { Scan as ScanRecord } from "@/lib/types";
-
-const GATE_NAMES: Record<string, string> = {
-  "gate-1": "Gate 1 (Main Gate)",
-  "gate-2": "Gate 2 (Hostel Gate)",
-  "gate-3": "Gate 3 (Back Gate)",
-  "1": "Gate 1 (Main Gate)",
-  "2": "Gate 2 (Hostel Gate)",
-  "3": "Gate 3 (Back Gate)",
-  "a52afdfb-dbd5-42b8-b616-da9d99295100": "Gate 1 (Main Gate)",
-  "80efc275-d9b1-415d-b13a-caed784f3b22": "Gate 2 (Hostel Gate)",
-  "a5a5c683-86cd-4f00-9e3d-e0b61b563e1f": "Gate 3 (Back Gate)",
-};
+import { useCollegeInfo } from "@/hooks/useCollegeInfo";
+import { useUIStore } from "@/stores/uiStore";
 
 export default function OperatorPage() {
   const params = useParams<{ gateId: string }>();
   const searchParams = useSearchParams();
   const router = useRouter();
   
+  const { college } = useCollegeInfo();
   const gateIdParam = params?.gateId;
   const isSpecialPath = gateIdParam === "history" || gateIdParam === "manual";
   
@@ -67,8 +58,21 @@ export default function OperatorPage() {
   // Log detail modal selection
   const [selectedScan, setSelectedScan] = useState<ScanRecord | null>(null);
 
+  const { deviceProfile } = useUIStore();
+
   // Local active tab for the desk panel: scan, manual, entry
-  const [operatorSubMode, setOperatorSubMode] = useState<"scan" | "manual" | "entry">("scan");
+  const [operatorSubMode, setOperatorSubMode] = useState<"scan" | "manual" | "entry">(
+    deviceProfile === "low-profile" ? "manual" : "scan"
+  );
+
+  // Sync mode with deviceProfile changes
+  useEffect(() => {
+    if (deviceProfile === "low-profile") {
+      setOperatorSubMode("manual");
+    } else if (deviceProfile === "high-end") {
+      setOperatorSubMode("scan");
+    }
+  }, [deviceProfile]);
   
   // Redirect special routing path shortcuts (/gate/history & /gate/manual) to operators dynamic gate path
   useEffect(() => {
@@ -163,7 +167,21 @@ export default function OperatorPage() {
     reset();
   }, [authenticated, gateId, setGate, reset]);
 
-  const gateName = GATE_NAMES[gateId] || operatorStore.gate?.name || `Gate ${gateId}`;
+  const [gateName, setGateName] = useState("Loading...");
+
+  useEffect(() => {
+    fetch("/api/gates")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data)) {
+          const match = data.data.find(
+            (g: any) => g.id === gateId || g.gate_code === gateId || g.gateCode === gateId || g.id === `gate-${gateId}`
+          );
+          setGateName(match?.name || operatorStore.gate?.name || `Gate ${gateId}`);
+        }
+      })
+      .catch(() => setGateName(operatorStore.gate?.name || `Gate ${gateId}`));
+  }, [gateId, operatorStore.gate?.name]);
 
   const handleQRScanned = (scannedPayload: string) => {
     let rollCandidate = scannedPayload.trim();
@@ -189,18 +207,8 @@ export default function OperatorPage() {
     !operatorStore.thumbprintVerified &&
     !operatorStore.thumbprintFallback;
 
-  const handleThumbprintResult = (result: { verified: boolean; fallback?: boolean; code?: string }) => {
-    if (result.verified) {
-      operatorStore.setThumbprintStatus(true, false);
-      addToast({ variant: "success", title: "Biometric Verified", message: "Thumbprint matched successfully." });
-    } else if (result.fallback) {
-      operatorStore.setThumbprintStatus(true, true);
-      addToast({ variant: "info", title: "Thumbprint Not in Database", message: "Continuing with photo verification." });
-    } else {
-      operatorStore.setThumbprintStatus(false, false);
-      addToast({ variant: "error", title: "Access Denied", message: "Thumbprint verification failed. Please escalate to a supervisor." });
-      cancelScan();
-    }
+  const handleWebAuthnVerified = (verified: boolean) => {
+    if (verified) { operatorStore.setThumbprintStatus(true, false); addToast({ variant: "success", title: "Biometric Verified", message: "Identity confirmed via biometric." }); } else { operatorStore.setThumbprintStatus(false, false); addToast({ variant: "error", title: "Access Denied", message: "Biometric verification failed." }); cancelScan(); }
   };
 
   useEffect(() => {
@@ -230,7 +238,7 @@ export default function OperatorPage() {
             <div className="bg-[var(--bg-surface)] p-5 rounded-2xl border border-[var(--border)] space-y-3">
               <h3 className="font-bold text-sm">Desk Statistics Information</h3>
               <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                Aggregated values are refreshed live from the backend API of JNTUH CEJ. Offline movements will sync automatically when status switches to online.
+                Aggregated values are refreshed live from the backend API of {college?.shortName || "Loading..."}. Offline movements will sync automatically when status switches to online.
               </p>
             </div>
           </div>
@@ -272,28 +280,57 @@ export default function OperatorPage() {
           <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
             {/* Operational Mode Navigation */}
             <div className="flex bg-[var(--bg-surface)] p-1.5 rounded-2xl border border-[var(--border)] gap-1 shadow-sm">
-              <button
-                onClick={() => setOperatorSubMode("scan")}
-                className={`flex-grow py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
-                  operatorSubMode === "scan"
-                    ? "bg-[var(--action-primary)] text-slate-950 shadow-md"
-                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                }`}
-              >
-                <Scan className="w-4 h-4" />
-                <span>Scan QR</span>
-              </button>
-              <button
-                onClick={() => setOperatorSubMode("manual")}
-                className={`flex-grow py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
-                  operatorSubMode === "manual"
-                    ? "bg-[var(--action-primary)] text-slate-950 shadow-md"
-                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                }`}
-              >
-                <KeyRound className="w-4 h-4" />
-                <span>Manual Enter</span>
-              </button>
+              {deviceProfile === "low-profile" ? (
+                <>
+                  <button
+                    onClick={() => setOperatorSubMode("manual")}
+                    className={`flex-grow py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
+                      operatorSubMode === "manual"
+                        ? "bg-amber-400 text-slate-950 shadow-md font-extrabold"
+                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                    }`}
+                  >
+                    <KeyRound className="w-4 h-4" />
+                    <span>Manual Enter</span>
+                  </button>
+                  <button
+                    onClick={() => setOperatorSubMode("scan")}
+                    className={`flex-grow py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
+                      operatorSubMode === "scan"
+                        ? "bg-[var(--action-primary)] text-slate-950 shadow-md"
+                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                    }`}
+                  >
+                    <Scan className="w-4 h-4" />
+                    <span>Scan QR</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => setOperatorSubMode("scan")}
+                    className={`flex-grow py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
+                      operatorSubMode === "scan"
+                        ? "bg-[var(--action-primary)] text-slate-950 shadow-md font-extrabold"
+                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                    }`}
+                  >
+                    <Scan className="w-4 h-4" />
+                    <span>Scan QR</span>
+                  </button>
+                  <button
+                    onClick={() => setOperatorSubMode("manual")}
+                    className={`flex-grow py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
+                      operatorSubMode === "manual"
+                        ? "bg-amber-400 text-slate-950 shadow-md"
+                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                    }`}
+                  >
+                    <KeyRound className="w-4 h-4" />
+                    <span>Manual Enter</span>
+                  </button>
+                </>
+              )}
               <button
                 onClick={() => setOperatorSubMode("entry")}
                 className={`flex-grow relative py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
@@ -511,15 +548,14 @@ export default function OperatorPage() {
         }}
       />
 
-      {/* Thumbprint (biometric) confirmation step after the ID scan */}
+      {/* WebAuthn (biometric) confirmation step after the ID scan */}
       {showThumbprint && (
-        <ThumbprintScanner
+        <WebAuthnScanner
           key={currentStudent?.id || "thumbprint"}
           isOpen={true}
           personId={currentStudent?.id || ""}
           personName={currentStudent?.fullName || currentStudent?.name || "User"}
-          personUniqueId={currentStudent?.uniqueId || currentStudent?.roll}
-          onResult={handleThumbprintResult}
+          onVerified={handleWebAuthnVerified}
           onCancel={() => cancelScan()}
         />
       )}

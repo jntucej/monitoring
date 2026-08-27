@@ -33,6 +33,24 @@ export const getSupabaseServiceClient = (): SupabaseClient => {
 
   return serviceClient
 }
+// Read-replica client for read-heavy operations
+let readReplicaClient: SupabaseClient | null = null;
+
+export const getReadOnlyClient = (): SupabaseClient => {
+  const readUrl = process.env.SUPABASE_READ_REPLICA_URL || supabaseUrl;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey;
+
+  if (!readReplicaClient) {
+    readReplicaClient = createClient(readUrl, serviceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
+  }
+
+  return readReplicaClient;
+};
 
 // Function to resolve login identifier to email
 export const resolveLoginIdentifier = async (loginId: string): Promise<string | null> => {

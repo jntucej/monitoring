@@ -63,7 +63,7 @@ const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
             ))}
           </div>
         )}
-        {error && <p className="mt-1 text-sm text-[var(--action-danger)]">⚠️ {error}</p>}
+        {error && <p className="mt-1 text-sm text-[var(--action-danger)]">⚠️ {typeof error === "string" ? error : (error as any)?.message || String(error)}</p>}
       </div>
     );
   }

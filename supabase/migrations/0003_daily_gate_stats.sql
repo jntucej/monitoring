@@ -59,7 +59,7 @@ CREATE POLICY dstats_select_operator ON daily_stats FOR SELECT TO authenticated
 
 DROP POLICY IF EXISTS dstats_select_staff ON daily_stats;
 CREATE POLICY dstats_select_staff ON daily_stats FOR SELECT TO authenticated
-  USING (is_supervisor(auth.uid()) OR is_admin(auth.uid()) OR is_warden(auth.uid()));
+  USING (is_admin(auth.uid()) OR is_warden(auth.uid()));
 
 DROP POLICY IF EXISTS dstats_all_service ON daily_stats;
 CREATE POLICY dstats_all_service ON daily_stats FOR ALL TO service_role USING (true) WITH CHECK (true);

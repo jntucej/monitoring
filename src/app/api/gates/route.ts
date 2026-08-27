@@ -39,7 +39,7 @@ async function handlePost(req: NextRequest) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "supervisor", "operator"] }),
+  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "operator"] }),
   { keyPrefix: "gate_get", maxRequests: 50 }
 );
 

@@ -10,7 +10,6 @@
 
 The JNTUH UCoEJ Gate Monitoring System frontend is built with **Next.js 16 (App Router)**, **React 19**, **Tailwind CSS v4**, **Framer Motion**, **Zustand**, and **Lucide Icons**. While the backend database and API layer have undergone security hardening and role-based access control (RBAC) enforcement, the current frontend user interface exhibits significant visual inconsistencies, incomplete design token application, non-responsive app shell architecture, lack of accessible component primitives, and substandard user experience across distinct role personas.
 
-This document presents a complete audit of the existing codebase, identifies visual and functional defects across all six primary user roles (**Gate Operator**, **Gate Supervisor**, **Admin**, **System Administrator**, **Student**, **Parent**), and outlines an actionable 16-phase redesign implementation strategy.
 
 ---
 
@@ -30,7 +29,6 @@ gate-monitor/src/
 │   ├── (parent)/parent/           # Parent portal (dashboard, child, passes, settings)
 │   ├── (student)/student/         # Student portal (ID card, passes, history)
 │   ├── (sysadmin)/sysadmin/       # System Administrator console
-│   ├── supervisor/                # Supervisor feed & correction desk (live, corrections)
 │   └── api/                       # Next.js API route handlers
 ├── components/
 │   ├── admin/                     # StatCard, EntryExitChart, StudentList
@@ -38,7 +36,6 @@ gate-monitor/src/
 │   ├── parent/                    # ChildStatus, ChildActivity, RequestPassForm
 │   ├── shared/                    # Sidebar, Header, StatusBadge
 │   ├── student/                   # DigitalIdCard, ActivePasses, RecentActivity
-│   ├── supervisor/                # LiveFeed, CorrectionsList
 │   ├── sysadmin/                  # GateManagement, UserManagement, SystemSettings
 │   └── ui/                        # Low-level primitives (button, card, badge, modal, input, select, skeleton, table, tabs, toast)
 ├── hooks/
@@ -70,16 +67,13 @@ gate-monitor/src/
 - **Theme Inconsistency**: `globals.css` defines `:root[data-theme="dark"]` and `:root[data-theme="light"]`, but no unified Theme Toggle component exists in `Header` or `Sidebar`.
 
 ### 2.2 Authentication Flow (`app/login/page.tsx`, `useAuth.ts`)
-- **Mock Select Box**: The login page renders a raw HTML `<select>` dropdown with hardcoded text options (`Gate Operator`, `Gate Supervisor`, etc.) without linking to `authStore.login()` or `authStore.pinLogin()`.
 - **Missing Credentials Form**: No username/password input fields or 4-digit PIN pad present on the main login screen.
-- **Unprotected Routes**: Direct navigation to `/admin`, `/gate/1`, or `/supervisor/live` bypasses validation if local storage contains stale data.
 
 ### 2.3 Gate Operator High-Speed Interface (`app/(operator)/gate/[gateId]/page.tsx`)
 - **UX Clutter & High Latency**: Scan confirmation requires multiple button taps ("Confirm Entry", "Photo Verification", "Exit Reason Selector"), slowing down high-throughput gate processing during rush hours (8:30 AM - 9:15 AM).
 - **Inadequate Offline Visual Indicator**: Offline queue status is buried in a small badge inside a card instead of a full-width header alert banner with manual sync controls.
 - **Lack of Sound & Tactile Feedback**: No visual audio waveform or haptic feedback tone on successful/failed scans.
 
-### 2.4 Supervisor Real-Time Feed & Corrections Desk (`app/supervisor/`)
 - **Static Live Feed**: `LiveFeed.tsx` relies on basic polling rather than websocket/SSE simulated real-time stream with event badges.
 - **Correction Actions**: Resolving a flag or overriding an entry exit timestamp lacks visual audit trail confirmation and diff previews.
 
@@ -120,7 +114,6 @@ The design tokens enforced across all UI components guarantee high legibility, s
 3. **Phase 3: Global application shell & navigation** — Build dynamic responsive `Sidebar`, header with theme switcher, user menu, mobile drawer, and layout wrapper.
 4. **Phase 4: Authentication UX** — Implement unified multi-role login with PIN pad option, credentials form, role selector tabs, and error alerts.
 5. **Phase 5: Operator experience** — Revamp high-speed scanner view, reticle animations, quick direction/reason buttons, offline banner, and audio feedback.
-6. **Phase 6: Supervisor experience** — Enhance real-time event feed, filtering, manual entry correction desk, and discrepancy alerts.
 7. **Phase 7: Admin experience** — Upgrade dashboard stats grid, Recharts entry/exit trends, live student directory table with filters and export buttons.
 8. **Phase 8: System Administrator experience** — Build gate management table, user account manager, role assigner, and system configuration toggles.
 9. **Phase 9: Student experience** — Create dynamic digital student ID with dynamic QR code generation, holographic security overlay, active pass status, and history.

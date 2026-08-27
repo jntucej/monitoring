@@ -218,8 +218,8 @@ export async function validateStudentAccess(token: string, studentId: string): P
     return context;
   }
 
-  // Admins, supervisors, and system admins can access students based on RLS
-  if (['admin', 'sysadmin', 'supervisor', 'warden'].includes(context.role)) {
+  // Admins and system admins can access students based on RLS
+  if (['admin', 'sysadmin', 'warden'].includes(context.role)) {
     return context;
   }
 
@@ -244,22 +244,6 @@ export async function validateGateAccess(token: string, gateId: string): Promise
     }
   }
 
-  // Supervisors can access gates they supervise
-  if (context.role === 'supervisor') {
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('supervised_gates')
-      .eq('id', context.userId)
-      .single();
-
-    if (userError || !user || !user.supervised_gates) {
-      throw new Error('FORBIDDEN: No supervised gates');
-    }
-
-    if (!user.supervised_gates.includes(gateId)) {
-      throw new Error('FORBIDDEN: Not supervising this gate');
-    }
-  }
 
   // Admins and system admins can access all gates
   if (['admin', 'sysadmin'].includes(context.role)) {
@@ -393,8 +377,8 @@ async function validatePassOperation(
     return context;
   }
 
-  // Admins, supervisors, and system admins can access passes based on RLS
-  if (['admin', 'sysadmin', 'supervisor'].includes(context.role)) {
+  // Admins and system admins can access passes based on RLS
+  if (['admin', 'sysadmin'].includes(context.role)) {
     return context;
   }
 
@@ -430,24 +414,6 @@ async function validateLogOperation(
     return context;
   }
 
-  // Supervisors can access logs for gates they supervise
-  if (context.role === 'supervisor') {
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('supervised_gates')
-      .eq('id', context.userId)
-      .single();
-
-    if (userError || !user || !user.supervised_gates) {
-      throw new Error('FORBIDDEN: No supervised gates');
-    }
-
-    if (!user.supervised_gates.includes(log.gate_id)) {
-      throw new Error('FORBIDDEN: Not supervising this gate');
-    }
-
-    return context;
-  }
 
   // Admins and system admins can access all logs
   if (['admin', 'sysadmin'].includes(context.role)) {
@@ -465,7 +431,7 @@ async function validateLogOperation(
  * @returns Minimal student information for gate verification
  */
 export async function getGateStudentInfo(token: string, roll: string) {
-  const context = await requireRole(token, ['operator', 'supervisor']);
+  const context = await requireRole(token, ['operator', 'admin']);
 
   const formattedId = roll.trim().toUpperCase();
 

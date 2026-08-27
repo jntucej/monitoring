@@ -29,7 +29,7 @@ async function handleGet(req: NextRequest) {
     }
 
     // Authorization: enforce ownership when caller is not an admin
-    const isAdmin = ["admin", "supervisor", "sysadmin"].includes(authRole || "");
+    const isAdmin = ["admin", "sysadmin"].includes(authRole || "");
     if (!isAdmin) {
       const isOwner =
         (authRole === "student" && pass.roll === authUserId) ||
@@ -55,6 +55,7 @@ async function handleGet(req: NextRequest) {
 async function handlePut(req: NextRequest) {
   try {
     const approverId = req.headers.get("x-user-id");
+    const authRole = req.headers.get("x-user-role") || "warden";
     if (!approverId) {
       return NextResponse.json(
         { success: false, error: { code: "UNAUTHORIZED", message: "Could not identify approver." } },
@@ -90,8 +91,8 @@ async function handlePut(req: NextRequest) {
 
     const result =
       action === "approve"
-        ? await approvePass(passId, approverId, comment, approverId)
-        : await rejectPass(passId, approverId, comment, approverId);
+        ? await approvePass(passId, authRole || "warden", comment, approverId)
+        : await rejectPass(passId, authRole || "warden", comment, approverId);
 
     return NextResponse.json({ success: true, data: result });
   } catch (error) {
@@ -104,11 +105,11 @@ async function handlePut(req: NextRequest) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "supervisor", "sysadmin", "parent", "student"] }),
+  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "parent", "student", "warden"] }),
   { keyPrefix: "passes_get", maxRequests: 100 }
 );
 
 export const PUT = withRateLimit(
-  withAuthorization(handlePut, { requiredRole: ["admin", "supervisor", "sysadmin"] }),
+  withAuthorization(handlePut, { requiredRole: ["admin", "sysadmin", "warden"] }),
   { keyPrefix: "passes_update", maxRequests: 20 }
 );

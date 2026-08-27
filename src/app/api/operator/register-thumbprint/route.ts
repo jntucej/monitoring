@@ -7,7 +7,7 @@ import { findUserById, hashThumbprint, registerThumbprint, clearThumbprint } fro
 /**
  * POST /api/operator/register-thumbprint
  *
- * Registers (or clears) a user's thumbprint. Admin/sysadmin only.
+ * Registers (or clears) a user's thumbprint. Sysadmin only.
  * The raw signature is bcrypt-hashed server-side; only the hash is stored.
  *
  * Body:
@@ -103,6 +103,6 @@ async function handlePost(req: NextRequest) {
 }
 
 export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["admin", "sysadmin"] }),
+  withAuthorization(handlePost, { requiredRole: ["sysadmin"] }),
   { keyPrefix: "thumbprint_register", maxRequests: 30 }
 );

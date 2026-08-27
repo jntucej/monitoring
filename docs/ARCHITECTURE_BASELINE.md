@@ -158,7 +158,6 @@
 |------|-------------|-------------|-------------|
 | `sysadmin` | System Administrator | Highest system authority, can manage system-level accounts and security controls | Highest |
 | `admin` | Administrator | Administrative authority, can manage users, students, operational configuration | High |
-| `supervisor` | Supervisor | Operational supervisory authority, can review activity and approve actions | Medium |
 | `operator` | Operator | Gate scanning/verification authority, can perform gate operations | Medium |
 | `student` | Student | Can access only their own permitted information | Low |
 | `parent` | Parent | Can access only linked child/children information | Low |

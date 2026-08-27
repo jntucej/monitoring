@@ -17,7 +17,6 @@ The **Gate Monitoring System** is a high-availability, security-hardened access 
 +-----------------------------------------------------------------------------------+
 |                                   CLIENT LAYER                                    |
 |   +-------------------+    +---------------------+    +-----------------------+   |
-|   | Operator Scanner  |    | Student / Parent App|    | Admin / Supervisor    |   |
 |   | (PWA / Mobile UI) |    | (Pass Requests UI)  |    | Dashboard UI          |   |
 +---------+--------------------------+--------------------------+-------------------+
           |                          |                          |
@@ -142,12 +141,10 @@ CREATE TABLE gates (
 ```
 
 #### 3.2.2 `users`
-Central user registry for system administrative staff, supervisors, operators, wardens, parents, and student accounts.
 ```sql
 CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
-  role TEXT NOT NULL CHECK (role IN ('operator', 'supervisor', 'admin', 'sysadmin', 'parent', 'student', 'warden')),
   employee_id TEXT,
   email TEXT,
   phone TEXT,

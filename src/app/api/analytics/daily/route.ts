@@ -41,7 +41,7 @@ async function handleGet(req: NextRequest) {
       const rawRole = scan.users?.role;
       let role = rawRole || "student";
       if (role === "guardian") role = "parent";
-      if (role === "operator" || role === "supervisor" || role === "admin" || role === "sysadmin") {
+      if (role === "operator" || role === "admin" || role === "sysadmin") {
         role = "staff";
       }
       const pType = (role as keyof typeof stats.byType) || "student";
@@ -75,5 +75,5 @@ async function handleGet(req: NextRequest) {
 }
 
 export const GET = withAuthAndStatus(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "supervisor", "operator"] })
+  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "operator"] })
 );

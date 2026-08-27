@@ -6,6 +6,7 @@
  */
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { useEffect, useState } from "react";
 import type { User, Role } from "@/lib/types";
 
 interface AuthState {
@@ -15,14 +16,17 @@ interface AuthState {
   role: Role | null;
   authenticated: boolean;
   loading: boolean;
+  _hasHydrated: boolean;
 }
 
 interface AuthActions {
   login: (login: string, password: string) => Promise<{ success: boolean; error?: string }>;
   pinLogin: (employeeId: string, pin: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
+  checkSession: () => Promise<boolean>;
   setRole: (role: Role) => void;
   setLoading: (loading: boolean) => void;
+  setHasHydrated: (hydrated: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState & AuthActions>()(
@@ -34,6 +38,9 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       role: null,
       authenticated: false,
       loading: false,
+      _hasHydrated: false,
+
+      setHasHydrated: (hydrated: boolean) => set({ _hasHydrated: hydrated }),
 
       login: async (login, password) => {
         set({ loading: true });
@@ -101,6 +108,46 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
         set({ loading: false });
         return { success: false, error: "Invalid PIN" };
+      },
+
+      checkSession: async () => {
+        const { token, refreshToken, user } = get();
+        if (!token || !user) return false;
+
+        try {
+          const headers: Record<string, string> = {
+            Authorization: `Bearer ${token}`,
+          };
+          if (refreshToken) {
+            headers["X-Refresh-Token"] = refreshToken;
+          }
+          if (user.currentSessionToken) {
+            headers["X-Session-Token"] = user.currentSessionToken;
+          }
+
+          const res = await fetch("/api/auth/session", { method: "GET", headers });
+          const result = await res.json().catch(() => null);
+
+          if (res.ok && result?.success && result?.data) {
+            const { token: newToken, refreshToken: newRefreshToken, user: updatedUser } = result.data;
+            set({
+              user: updatedUser,
+              token: newToken || token,
+              refreshToken: newRefreshToken || refreshToken,
+              role: updatedUser.role as Role,
+              authenticated: true,
+            });
+            return true;
+          } else if (res.status === 401 || res.status === 403) {
+            // Session expired or account inactive
+            get().logout();
+            return false;
+          }
+        } catch (err) {
+          console.error("Session revalidation warning:", err);
+          // On network error/offline, maintain current session state gracefully
+        }
+        return true;
       },
 
       logout: async () => {
@@ -180,6 +227,9 @@ export const useAuthStore = create<AuthState & AuthActions>()(
     }),
     {
       name: "gate-monitor-auth",
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
       partialize: (state) => ({
         user: state.user,
         token: state.token,
@@ -190,3 +240,23 @@ export const useAuthStore = create<AuthState & AuthActions>()(
     }
   )
 );
+
+export function useHasHydrated() {
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    const isHydrated = useAuthStore.persist.hasHydrated();
+    if (isHydrated) {
+      setHydrated(true);
+      return;
+    }
+    const unsubFinish = useAuthStore.persist.onFinishHydration(() => setHydrated(true));
+    setHydrated(useAuthStore.persist.hasHydrated());
+
+    return () => {
+      unsubFinish();
+    };
+  }, []);
+
+  return hydrated;
+}

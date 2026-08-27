@@ -1,6 +1,5 @@
 # Gate Operator Quick-Start Guide
 
-**For:** Gate operators (`OP-*`) and supervisors
 **Read time:** 5 minutes
 
 ---
@@ -11,7 +10,6 @@
 2. Enter your **Operator ID** (e.g. `OP-001`) and your **PIN**.
 3. You land directly on your assigned gate terminal, e.g. **Gate 1 (Main Gate)**.
 
-> Too many wrong PINs? The system locks attempts for 15 minutes. Contact your supervisor.
 
 ## 2. The Scanner Screen
 

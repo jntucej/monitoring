@@ -331,7 +331,7 @@ export function Scanner({
               </div>
               <div>
                 <h2 className="text-sm font-bold text-white">QR Scanner</h2>
-                <p className="text-[11px] text-slate-400">JNTUH CEJ Gate Verification</p>
+                <p className="text-[11px] text-slate-400">Institutional Gate Verification</p>
               </div>
             </div>
             <div className="flex items-center gap-2">

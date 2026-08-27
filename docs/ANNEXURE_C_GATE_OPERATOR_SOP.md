@@ -4,7 +4,6 @@
 **Document Code:** SOP-OPS-001  
 **Version:** 1.0.0  
 **Effective Date:** August 17, 2026  
-**Target Audience:** Gate Security Operators, Security Supervisors, Campus Security Personnel  
 
 ---
 
@@ -66,7 +65,6 @@ This Standard Operating Procedure (SOP) outlines the required protocol for Gate 
 - Display Green Flash    - Display Green Flash   - Red Flash           - Red Siren Flash
 - Play Audio Chime       - Play Audio Chime      - Play Error Tone     - System Alert Raised
 - Allow Exit             - Allow Entrance        - Direct to Security  - Detain & Contact
-                                                   Desk                  Supervisor
 ```
 
 ### 3.3 Status Indicators & Action Rules
@@ -74,9 +72,7 @@ This Standard Operating Procedure (SOP) outlines the required protocol for Gate 
 | Visual Indicator | Audio Feedback | Backend Status Reason | Mandatory Action Required |
 | :--- | :--- | :--- | :--- |
 | **GREEN FLASH** | Single High Beep | `PASS_VALID` / `REGULAR_ALLOW` | **ALLOW ENTRY / EXIT.** Student details log automatically. |
-| **RED FLASH** | Double Low Beep | `EXPIRED_PASS` | **DENY EXIT.** Inform student pass is expired. Direct to supervisor. |
 | **RED FLASH** | Double Low Beep | `NO_PASS_FOUND` | **DENY EXIT.** Hostel students require active approved pass for outbound movement. |
-| **RED SIREN** | Warning Alert | `ACCOUNT_SUSPENDED` | **HOLD STUDENT.** Account administratively locked/suspended. Escalate to Supervisor. |
 | **YELLOW WARNING**| Single Warning | `CURFEW_VIOLATION` | **ALLOW WITH WARNING.** Log late return flag; system notifies Warden automatically. |
 
 ---
@@ -96,13 +92,10 @@ If a student's mobile screen is cracked or damaged, preventing optical QR readin
 In event of fire, campus emergency, or total power failure:
 1. Physical gate barriers automatically drop/unlock via fail-safe power relays.
 2. Security staff must clear physical passageways immediately.
-3. Once safe, Supervisor logs an institutional emergency audit entry in the system.
 
 ---
 
-## 5. Supervisor Escalation & Audit Compliance
 
-### 5.1 When to Escalate to Gate Supervisor
 - Student disputes a pass denial or claims system approval error.
 - Repeated scan failure on valid physical ID card.
 - Suspicion of identity theft, card sharing, or screenshot reuse.

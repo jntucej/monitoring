@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS users (
   handle               TEXT UNIQUE,
   name                 TEXT NOT NULL,
   role                 TEXT NOT NULL
-                       CHECK (role IN ('operator','supervisor','admin','sysadmin',
+                       CHECK (role IN ('operator','admin','sysadmin',
                                        'guardian','student','warden','faculty',
                                        'staff','worker','visitor')),
   email                TEXT UNIQUE NOT NULL,
@@ -317,11 +317,7 @@ AS $$ DECLARE r TEXT; BEGIN
   SELECT role INTO r FROM users WHERE id = user_id; RETURN r = 'operator';
 EXCEPTION WHEN OTHERS THEN RETURN FALSE; END; $$;
 
-CREATE OR REPLACE FUNCTION is_supervisor(user_id UUID)
-RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
-AS $$ DECLARE r TEXT; BEGIN
-  SELECT role INTO r FROM users WHERE id = user_id; RETURN r = 'supervisor';
-EXCEPTION WHEN OTHERS THEN RETURN FALSE; END; $$;
+
 
 -- 4.2 SCOPE HELPERS
 CREATE OR REPLACE FUNCTION get_guardian_wards(p_guardian_id UUID)
@@ -581,11 +577,11 @@ CREATE POLICY edetails_select_owner   ON employee_details FOR SELECT TO authenti
 CREATE POLICY edetails_manage_admin   ON employee_details FOR ALL TO authenticated
   USING (is_admin(auth.uid())) WITH CHECK (is_admin(auth.uid()));
 
--- 6.5 MOVEMENT LOGS (operator scope = own gate; supervisor/admin broad; self = own trail; insert by operator/admin/warden)
+-- 6.5 MOVEMENT LOGS (operator scope = own gate; admin broad; self = own trail; insert by operator/admin/warden)
 CREATE POLICY mlog_select_operator ON movement_logs FOR SELECT TO authenticated
   USING (is_operator(auth.uid()) AND gate_id = (SELECT gate_id FROM users WHERE id = auth.uid()));
 CREATE POLICY mlog_select_staff  ON movement_logs FOR SELECT TO authenticated
-  USING (is_supervisor(auth.uid()) OR is_admin(auth.uid()) OR is_warden(auth.uid()));
+  USING (is_admin(auth.uid()) OR is_warden(auth.uid()));
 CREATE POLICY mlog_select_own    ON movement_logs FOR SELECT TO authenticated USING (user_id = auth.uid());
 CREATE POLICY mlog_insert_staff  ON movement_logs FOR INSERT TO authenticated
   WITH CHECK (is_operator(auth.uid()) OR is_admin(auth.uid()) OR is_warden(auth.uid()));
@@ -594,7 +590,7 @@ CREATE POLICY mlog_insert_staff  ON movement_logs FOR INSERT TO authenticated
 CREATE POLICY dstats_select_operator ON daily_stats FOR SELECT TO authenticated
   USING (is_operator(auth.uid()) AND gate_id = (SELECT gate_id FROM users WHERE id = auth.uid()));
 CREATE POLICY dstats_select_staff ON daily_stats FOR SELECT TO authenticated
-  USING (is_supervisor(auth.uid()) OR is_admin(auth.uid()) OR is_warden(auth.uid()));
+  USING (is_admin(auth.uid()) OR is_warden(auth.uid()));
 CREATE POLICY dstats_select_own   ON daily_stats FOR SELECT TO authenticated USING (true);
 CREATE POLICY dstats_all_service ON daily_stats FOR ALL TO service_role USING (true) WITH CHECK (true);
 
@@ -602,7 +598,7 @@ CREATE POLICY dstats_all_service ON daily_stats FOR ALL TO service_role USING (t
 CREATE POLICY occ_select_operator ON campus_occupancy FOR SELECT TO authenticated
   USING (is_operator(auth.uid()) AND last_gate_id = (SELECT gate_id FROM users WHERE id = auth.uid()));
 CREATE POLICY occ_select_staff   ON campus_occupancy FOR SELECT TO authenticated
-  USING (is_supervisor(auth.uid()) OR is_admin(auth.uid()) OR is_warden(auth.uid()));
+  USING (is_admin(auth.uid()) OR is_warden(auth.uid()));
 CREATE POLICY occ_select_own     ON campus_occupancy FOR SELECT TO authenticated USING (user_id = auth.uid());
 
 -- 6.7 VISITOR LOGS (broad authenticated; inserts by operators/admin)
@@ -616,17 +612,16 @@ CREATE POLICY vlogs_update_auth ON visitor_logs FOR UPDATE TO authenticated
 CREATE POLICY passes_select_own ON gate_passes FOR SELECT TO authenticated
   USING (user_id = auth.uid() OR user_id = ANY(get_guardian_wards(auth.uid())));
 CREATE POLICY passes_select_staff ON gate_passes FOR SELECT TO authenticated
-  USING (is_admin(auth.uid()) OR is_supervisor(auth.uid()) OR is_warden(auth.uid()));
+  USING (is_admin(auth.uid()) OR is_warden(auth.uid()));
 CREATE POLICY passes_insert_own ON gate_passes FOR INSERT TO authenticated WITH CHECK (
   user_id = auth.uid() OR user_id = ANY(get_guardian_wards(auth.uid())) OR is_admin(auth.uid()));
 CREATE POLICY passes_update_approvers ON gate_passes FOR UPDATE TO authenticated USING (
-  is_admin(auth.uid()) OR is_supervisor(auth.uid()) OR is_warden(auth.uid()))
-  WITH CHECK (is_admin(auth.uid()) OR is_supervisor(auth.uid()) OR is_warden(auth.uid()));
+  is_admin(auth.uid()) OR is_warden(auth.uid()))
+  WITH CHECK (is_admin(auth.uid()) OR is_warden(auth.uid()));
 
--- 6.9 ALERTS (admin; supervisors by gate; operators own gate)
+-- 6.9 ALERTS (admin; operators own gate)
 CREATE POLICY alerts_select_admin ON alerts FOR SELECT TO authenticated USING (is_admin(auth.uid()));
-CREATE POLICY alerts_select_sup  ON alerts FOR SELECT TO authenticated
-  USING (is_supervisor(auth.uid()) AND gate_id = ANY(get_supervised_gates(auth.uid())));
+
 CREATE POLICY alerts_select_op   ON alerts FOR SELECT TO authenticated
   USING (is_operator(auth.uid()) AND (gate_id = (SELECT gate_id FROM users WHERE id = auth.uid()) OR gate_id IS NULL));
 CREATE POLICY alerts_resolve_admin ON alerts FOR UPDATE TO authenticated USING (is_admin(auth.uid())) WITH CHECK (is_admin(auth.uid()));
@@ -708,7 +703,7 @@ ON CONFLICT (gate_code) DO UPDATE
 -- SECTION 9: DOCUMENTATION COMMENTS
 -- ============================================================================
 COMMENT ON TABLE users IS 'Unified identity for every person on campus; role = access level, unique_id = fixed lookup identifier';
-COMMENT ON COLUMN users.role IS 'Access level: operator|supervisor|admin|sysadmin|guardian|student|warden|faculty|staff|worker|visitor';
+COMMENT ON COLUMN users.role IS 'Access level: operator|admin|sysadmin|guardian|student|warden|faculty|staff|worker|visitor';
 COMMENT ON COLUMN users.unique_id IS 'Fixed identifying detail (roll number, employee id, phone) used for lookup/index';
 COMMENT ON TABLE student_details IS 'Optional student layer keyed by user_id; roll/year/section/hostel indexed by user';
 COMMENT ON TABLE employee_details IS 'Optional employee layer for faculty/staff/worker keyed by user_id';

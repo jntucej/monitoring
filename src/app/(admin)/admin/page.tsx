@@ -1,110 +1,367 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import { StatCard } from "@/components/admin/StatCard";
 import { EntryExitChart } from "@/components/admin/EntryExitChart";
 import { StudentList } from "@/components/admin/StudentList";
-import { Users, DoorOpen, Activity, AlertTriangle } from "lucide-react";
+import {
+  Activity, GraduationCap, Briefcase, HardHat,
+  UserCheck, RefreshCw, AlertCircle, Flame, ShieldAlert, X, Radio,
+} from "lucide-react";
 import type { DashboardData } from "@/lib/types";
+import { getAuthHeaders } from "@/lib/utils";
+import { useUIStore } from "@/stores/uiStore";
+
+const LOCKDOWN_SCOPES = [
+  { id: "students", label: "Students",       color: "bg-blue-500/10 border-blue-500/30 text-blue-400" },
+  { id: "faculty",  label: "Faculty",        color: "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" },
+  { id: "staff",    label: "Staff",          color: "bg-purple-500/10 border-purple-500/30 text-purple-400" },
+  { id: "workers",  label: "Workers",        color: "bg-amber-500/10 border-amber-500/30 text-amber-400" },
+  { id: "all",      label: "ALL CATEGORIES", color: "bg-rose-500/10 border-rose-500/30 text-rose-400" },
+];
+
+function LockdownDialog() {
+  const [open, setOpen]         = useState(false);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [sending, setSending]   = useState(false);
+  const [sent, setSent]         = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const { deviceProfile }       = useUIStore();
+  const isHighEnd               = deviceProfile === "high-end";
+
+  const toggle = (id: string) => {
+    if (id === "all") { setSelected(["all"]); return; }
+    setSelected(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev.filter(x => x !== "all"), id]
+    );
+  };
+
+  const broadcast = async () => {
+    if (selected.length === 0 || sending) return;
+    setSending(true);
+    setApiError(null);
+    try {
+      const res = await fetch("/api/admin/lockdown", {
+        method: "POST",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ scopes: selected }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setSent(true);
+        setTimeout(() => { setOpen(false); setSent(false); setSelected([]); }, 2200);
+      } else {
+        setApiError(json.error?.message || "Broadcast failed");
+      }
+    } catch {
+      setApiError("Network error");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        className="group inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-bold uppercase tracking-widest hover:bg-rose-500/20 transition-all"
+      >
+        <Flame className="w-3.5 h-3.5 group-hover:animate-pulse" />
+        Lockdown
+      </button>
+      <AnimatePresence>
+        {open && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50"
+              onClick={() => setOpen(false)}
+            />
+            <motion.div
+              initial={isHighEnd ? { opacity: 0, scale: 0.9, y: 20 } : { opacity: 0 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={isHighEnd ? { opacity: 0, scale: 0.9, y: 20 } : { opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
+            >
+              <div className="pointer-events-auto w-full max-w-md bg-slate-900 border border-rose-500/30 rounded-3xl p-6 shadow-2xl shadow-rose-500/20">
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center">
+                      <ShieldAlert className="w-5 h-5 text-rose-400" />
+                    </div>
+                    <div>
+                      <h2 className="font-bold text-white text-lg">Emergency Lockdown</h2>
+                      <p className="text-xs text-rose-300">Broadcast stop-flow to all gate operators</p>
+                    </div>
+                  </div>
+                  <button onClick={() => setOpen(false)} className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-colors">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <p className="text-xs text-slate-400 mb-4 leading-relaxed">
+                  Select scope. Operators see a <strong className="text-white">red-banner alert</strong> immediately.
+                  This does <em>not</em> physically lock gates — it issues a mandatory hold broadcast.
+                </p>
+                <div className="grid grid-cols-2 gap-2 mb-5">
+                  {LOCKDOWN_SCOPES.map(s => (
+                    <button
+                      key={s.id}
+                      onClick={() => toggle(s.id)}
+                      className={`px-3 py-2.5 rounded-xl border text-xs font-bold transition-all ${s.id === "all" ? "col-span-2" : ""} ${
+                        selected.includes(s.id)
+                          ? s.color + " ring-2 ring-offset-1 ring-offset-slate-900 ring-current"
+                          : "bg-white/5 border-white/10 text-slate-400 hover:border-white/20"
+                      }`}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={broadcast}
+                  disabled={selected.length === 0 || sending || sent}
+                  className="w-full py-3 rounded-2xl bg-rose-500 hover:bg-rose-400 disabled:opacity-40 text-white font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-rose-500/30"
+                >
+                  {sent
+                    ? <><Radio className="w-4 h-4 animate-pulse" /> Broadcast Sent to All Gates!</>
+                    : sending
+                    ? <><Radio className="w-4 h-4 animate-spin" /> Sending…</>
+                    : <><ShieldAlert className="w-4 h-4" /> Broadcast Emergency Alert</>}
+                </button>
+                {apiError && (
+                  <p className="mt-2 text-xs text-rose-400 text-center">{apiError}</p>
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
 
 export default function AdminDashboardPage() {
+  const router = useRouter();
+
+
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const load = useCallback(async (showLoadingState = false) => {
+    if (showLoadingState) setLoading(true);
+    setIsRefreshing(true);
+    try {
+      const headers = getAuthHeaders();
+      const res = await fetch("/api/admin/dashboard", { headers, cache: "no-store" });
+      const json = await res.json();
+      if (json.success && json.data) {
+        setData(json.data);
+        setError(null);
+      } else {
+        const msg = typeof json.error === "string" ? json.error : json.error?.message ?? "Failed to load dashboard. Database might be initializing.";
+        setError(msg);
+      }
+    } catch (e: any) {
+      setError(e?.message ?? "Network error connecting to API");
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  }, []);
 
   useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const res = await fetch("/api/admin/dashboard", { cache: "no-store" });
-        const json = await res.json();
-        if (cancelled) return;
-        if (json.success) {
-          setData(json.data);
-        } else {
-          setError(json.error?.message ?? "Failed to load dashboard");
-        }
-      } catch (e: any) {
-        if (!cancelled) setError(e?.message ?? "Network error");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    load();
-    // Refresh every 30s for live feel (only when tab is active)
-    const t = setInterval(() => {
+    load(true);
+    const interval = setInterval(() => {
       if (typeof document !== "undefined" && document.hidden) return;
-      load();
+      load(false);
     }, 30_000);
-    return () => {
-      cancelled = true;
-      clearInterval(t);
-    };
-  }, []);
+    return () => clearInterval(interval);
+  }, [load]);
 
   if (loading) {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-          <p className="text-[var(--text-muted)]">Loading live data…</p>
+          <h1 className="text-2xl font-bold text-[var(--text-primary)]">Admin Dashboard</h1>
+          <p className="text-sm text-[var(--text-muted)]">Loading live campus telemetry data…</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="h-24 rounded-xl bg-[var(--bg-surface)] animate-pulse" />
+            <div key={i} className="h-28 rounded-xl bg-[var(--bg-surface)] animate-pulse border border-[var(--border)]" />
           ))}
         </div>
       </div>
     );
   }
 
-  if (error) {
+  if (error && !data) {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-        <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-4 text-rose-400">
-          {error}. Make sure the database is reachable.
+        <h1 className="text-2xl font-bold text-[var(--text-primary)]">Admin Dashboard</h1>
+        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-6 text-rose-400 space-y-3">
+          <div className="flex items-center gap-2 font-semibold">
+            <AlertCircle className="w-5 h-5" />
+            <span>Connection Warning</span>
+          </div>
+          <p className="text-sm">{error}.</p>
+          <button
+            onClick={() => load(true)}
+            className="px-4 py-2 bg-rose-500 text-white rounded-lg text-xs font-bold hover:bg-rose-600 transition flex items-center gap-2"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            Retry Connection
+          </button>
         </div>
       </div>
     );
   }
 
-  const activeGates = (data?.locations ?? []).filter((l) => l.isActive).length;
+  const studentStats = data?.personTypeBreakdown?.student || { total: 0, onCampus: 0, inToday: 0, outToday: 0 };
+  const facultyStats = data?.personTypeBreakdown?.faculty || { total: 0, onCampus: 0, inToday: 0, outToday: 0 };
+  const staffStats = data?.personTypeBreakdown?.staff || { total: 0, onCampus: 0, inToday: 0, outToday: 0 };
+  const workerStats = data?.personTypeBreakdown?.worker || { total: 0, onCampus: 0, inToday: 0, outToday: 0 };
+
+  const facultyRate = facultyStats.total > 0
+    ? Math.round((facultyStats.onCampus / facultyStats.total) * 100)
+    : 0;
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-        <p className="text-[var(--text-muted)]">Live gate activity, students, and alerts</p>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-[var(--text-primary)]">Admin Dashboard</h1>
+          <p className="text-xs text-[var(--text-muted)]">Real-time gate telemetry, student, faculty & worker infometrics</p>
+        </div>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <button
+            onClick={() => load(false)}
+            disabled={isRefreshing}
+            className={`px-3.5 py-1.5 rounded-lg bg-[var(--bg-surface)] border text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-all flex items-center gap-2 ${
+              isRefreshing
+                ? "border-emerald-500/50 shadow-[0_0_12px_rgba(16,185,129,0.25)]"
+                : "border-[var(--border)]"
+            }`}
+          >
+            <Activity
+              className={`w-3.5 h-3.5 text-emerald-400 transition-all ${
+                isRefreshing
+                  ? "drop-shadow-[0_0_8px_rgba(16,185,129,0.9)] animate-pulse scale-110"
+                  : "drop-shadow-[0_0_4px_rgba(16,185,129,0.4)]"
+              }`}
+            />
+            {isRefreshing ? "Syncing..." : "Live Refresh"}
+          </button>
+          <LockdownDialog />
+        </div>
       </div>
 
+      {/* 4 Separate Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           label="Students on Campus"
-          value={(data?.onCampus ?? 0).toLocaleString()}
-          icon={Users}
+          value={studentStats.onCampus.toLocaleString()}
+          icon={GraduationCap}
           color="#3b82f6"
-          trend={data?.trendOnCampus}
+          trend={`${studentStats.inToday} in / ${studentStats.outToday} out today`}
+          onClick={() => router.push("/admin/students")}
         />
         <StatCard
-          label="Active Gates"
-          value={activeGates.toString()}
-          icon={DoorOpen}
+          label="Faculty on Campus"
+          value={facultyStats.onCampus.toLocaleString()}
+          icon={UserCheck}
           color="#10b981"
+          trend={`${facultyRate}% attendance rate`}
+          onClick={() => router.push("/admin/faculty")}
         />
         <StatCard
-          label="Today's Scans"
-          value={(data?.totalScans ?? 0).toLocaleString()}
-          icon={Activity}
+          label="Staff on Campus"
+          value={staffStats.onCampus.toLocaleString()}
+          icon={Briefcase}
           color="#8b5cf6"
-          trend={data?.trendScans}
+          trend={`${staffStats.inToday} entries today`}
+          onClick={() => router.push("/admin/staff")}
         />
         <StatCard
-          label="Active Alerts"
-          value={(data?.activeAlerts ?? 0).toString()}
-          icon={AlertTriangle}
+          label="Workers on Campus"
+          value={workerStats.onCampus.toLocaleString()}
+          icon={HardHat}
           color="#f59e0b"
+          trend={`${workerStats.inToday} entries today`}
+          onClick={() => router.push("/admin/workers")}
         />
+      </div>
+
+      {/* Faculty Dedicated Infometrics Banner */}
+      <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-lg bg-emerald-500/20 text-emerald-400">
+            <UserCheck className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-[var(--text-primary)]">Faculty Infometrics Summary</h3>
+            <p className="text-xs text-[var(--text-muted)]">Live teaching staff tracking & presence</p>
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-6 text-xs">
+          <div>
+            <span className="text-[var(--text-muted)] block text-[10px] uppercase">On Campus</span>
+            <span className="font-bold text-emerald-400 text-sm">{facultyStats.onCampus} / {facultyStats.total}</span>
+          </div>
+          <div>
+            <span className="text-[var(--text-muted)] block text-[10px] uppercase">Entries Today</span>
+            <span className="font-bold text-blue-400 text-sm">{facultyStats.inToday}</span>
+          </div>
+          <div>
+            <span className="text-[var(--text-muted)] block text-[10px] uppercase">Exits Today</span>
+            <span className="font-bold text-amber-400 text-sm">{facultyStats.outToday}</span>
+          </div>
+          <div>
+            <span className="text-[var(--text-muted)] block text-[10px] uppercase">Attendance %</span>
+            <span className="font-bold text-emerald-400 text-sm">{facultyRate}%</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Person Category Infometrics Breakdown Bar */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-[var(--bg-surface)] border border-[var(--border)] p-4 rounded-xl">
+        <div
+          onClick={() => router.push("/admin/students")}
+          className="space-y-1 border-r border-[var(--border)] pr-3 cursor-pointer group hover:bg-blue-500/5 p-2 rounded-lg transition"
+        >
+          <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider group-hover:text-blue-400">Students →</span>
+          <div className="text-lg font-bold text-blue-400">{studentStats.onCampus} <span className="text-xs font-normal text-[var(--text-muted)]">/ {studentStats.total}</span></div>
+          <div className="text-[11px] text-[var(--text-muted)]">In: <span className="text-emerald-400 font-semibold">{studentStats.inToday}</span> | Out: <span className="text-amber-400 font-semibold">{studentStats.outToday}</span></div>
+        </div>
+        <div
+          onClick={() => router.push("/admin/faculty")}
+          className="space-y-1 border-r border-[var(--border)] pr-3 pl-2 cursor-pointer group hover:bg-emerald-500/5 p-2 rounded-lg transition"
+        >
+          <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider group-hover:text-emerald-400">Faculty →</span>
+          <div className="text-lg font-bold text-emerald-400">{facultyStats.onCampus} <span className="text-xs font-normal text-[var(--text-muted)]">/ {facultyStats.total}</span></div>
+          <div className="text-[11px] text-[var(--text-muted)]">In: <span className="text-emerald-400 font-semibold">{facultyStats.inToday}</span> | Out: <span className="text-amber-400 font-semibold">{facultyStats.outToday}</span></div>
+        </div>
+        <div
+          onClick={() => router.push("/admin/staff")}
+          className="space-y-1 border-r border-[var(--border)] pr-3 pl-2 cursor-pointer group hover:bg-purple-500/5 p-2 rounded-lg transition"
+        >
+          <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider group-hover:text-purple-400">Staff →</span>
+          <div className="text-lg font-bold text-purple-400">{staffStats.onCampus} <span className="text-xs font-normal text-[var(--text-muted)]">/ {staffStats.total}</span></div>
+          <div className="text-[11px] text-[var(--text-muted)]">In: <span className="text-emerald-400 font-semibold">{staffStats.inToday}</span> | Out: <span className="text-amber-400 font-semibold">{staffStats.outToday}</span></div>
+        </div>
+        <div
+          onClick={() => router.push("/admin/workers")}
+          className="space-y-1 pl-2 cursor-pointer group hover:bg-amber-500/5 p-2 rounded-lg transition"
+        >
+          <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider group-hover:text-amber-400">Workers →</span>
+          <div className="text-lg font-bold text-amber-400">{workerStats.onCampus} <span className="text-xs font-normal text-[var(--text-muted)]">/ {workerStats.total}</span></div>
+          <div className="text-[11px] text-[var(--text-muted)]">In: <span className="text-emerald-400 font-semibold">{workerStats.inToday}</span> | Out: <span className="text-amber-400 font-semibold">{workerStats.outToday}</span></div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

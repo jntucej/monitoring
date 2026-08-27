@@ -77,12 +77,12 @@ async function handlePost(req: NextRequest) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ['admin', 'supervisor', 'sysadmin', 'operator'] }),
+  withAuthorization(handleGet, { requiredRole: ['admin', 'sysadmin', 'operator'] }),
   { keyPrefix: 'gate_logs_list', maxRequests: 100 }
 );
 
 export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ['operator', 'supervisor'] }),
+  withAuthorization(handlePost, { requiredRole: ['operator', ] }),
   { keyPrefix: 'gate_logs_create', maxRequests: 30 }
 );
 

@@ -10,7 +10,7 @@ async function handleGet(req: NextRequest) {
   } catch (error) {
     console.error("Error fetching dashboard data:", error);
     return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to load dashboard" } },
+      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to load dashboard stats' } },
       { status: 500 }
     );
   }

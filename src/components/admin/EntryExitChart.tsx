@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { getAuthHeaders } from "@/lib/utils";
 
 type Point = { name: string; entries: number; exits: number };
 
@@ -30,7 +31,7 @@ export function EntryExitChart() {
 
         const res = await fetch(
           `/api/gate/logs?from=${startStr}&to=${endStr}&limit=1000`,
-          { cache: "no-store" }
+          { headers: getAuthHeaders(), cache: "no-store" }
         );
         const json = await res.json();
 

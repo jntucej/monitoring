@@ -113,16 +113,16 @@ async function handlePut(req: NextRequest) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["operator", "supervisor", "admin", "sysadmin"] }),
+  withAuthorization(handleGet, { requiredRole: ["operator", "admin", "sysadmin"] }),
   { keyPrefix: "visitors_get", maxRequests: 100 }
 );
 
 export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["operator", "supervisor", "admin", "sysadmin"] }),
+  withAuthorization(handlePost, { requiredRole: ["operator", "admin", "sysadmin"] }),
   { keyPrefix: "visitors_post", maxRequests: 30 }
 );
 
 export const PUT = withRateLimit(
-  withAuthorization(handlePut, { requiredRole: ["operator", "supervisor", "admin", "sysadmin"] }),
+  withAuthorization(handlePut, { requiredRole: ["operator", "admin", "sysadmin"] }),
   { keyPrefix: "visitors_put", maxRequests: 30 }
 );

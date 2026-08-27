@@ -8,6 +8,7 @@ import { PersonBadge } from "@/components/shared/PersonBadge";
 import { Briefcase, Building, Clock, FileText, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import type { Person } from "@/lib/types";
+import { getAuthHeaders } from "@/lib/utils";
 
 export default function FacultyDashboardPage() {
   const [person, setPerson] = useState<Person | null>(null);
@@ -27,7 +28,7 @@ export default function FacultyDashboardPage() {
           return;
         }
         
-        const res = await fetch(`/api/persons/${encodeURIComponent(uniqueId)}`, { cache: "no-store" });
+        const res = await fetch(`/api/persons/${encodeURIComponent(uniqueId)}`, { headers: getAuthHeaders(), cache: "no-store" });
         const json = await res.json();
         
         if (!cancelled && json.success) {

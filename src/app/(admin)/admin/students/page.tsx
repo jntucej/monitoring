@@ -1,118 +1,204 @@
 "use client";
-import { useEffect, useState } from "react";
-import { User, Search, UserPlus } from "lucide-react";
+import { useEffect, useState, useMemo, useCallback } from "react";
+import { User, Search, RefreshCw, GraduationCap, Ban, AlertTriangle } from "lucide-react";
 import { parseRollNumber, getStudentYearFromRoll } from "@/lib/rollNumber";
 import type { Student } from "@/lib/types";
+import { getAuthHeaders } from "@/lib/utils";
 
 export default function AdminStudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [query, setQuery] = useState("");
+  const [selectedBranch, setSelectedBranch] = useState("ALL");
+  const [selectedYear, setSelectedYear] = useState("ALL");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState<Record<string, boolean>>({});
+
+  const loadStudents = useCallback(async (q?: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const url = q?.trim()
+        ? `/api/students?q=${encodeURIComponent(q.trim())}`
+        : "/api/students";
+      const res = await fetch(url, { headers: getAuthHeaders(), cache: "no-store" });
+      const json = await res.json();
+      if (Array.isArray(json.data)) {
+        setStudents(json.data);
+      } else {
+        const msg = typeof json.error === "string" ? json.error : json.error?.message || "Failed to load roster";
+        setError(msg);
+      }
+    } catch (e: any) {
+      setError(e?.message || "Network error");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const url = query.trim()
-          ? `/api/students?q=${encodeURIComponent(query.trim())}`
-          : "/api/students";
-        const res = await fetch(url, { cache: "no-store" });
-        const json = await res.json();
-        if (!cancelled) {
-          setStudents(Array.isArray(json.data) ? json.data : []);
-          setLoading(false);
-        }
-      } catch {
-        if (!cancelled) setLoading(false);
+    const t = setTimeout(() => loadStudents(query), 250);
+    return () => clearTimeout(t);
+  }, [query, loadStudents]);
+
+  const patchUser = useCallback(async (id: string, patch: Record<string, unknown>) => {
+    setPending(prev => ({ ...prev, [id]: true }));
+    try {
+      const res = await fetch(`/api/users/${id}`, {
+        method: "PATCH",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify(patch),
+      });
+      const json = await res.json();
+      if (json.success && json.data) {
+        setStudents(prev => prev.map(s => s.id === id ? { ...s, ...json.data } : s));
       }
-    };
-    setLoading(true);
-    const t = setTimeout(load, 250);
-    return () => {
-      cancelled = true;
-      clearTimeout(t);
-    };
-  }, [query]);
+    } catch (e) {
+      console.error("patchUser error:", e);
+    } finally {
+      setPending(prev => { const n = { ...prev }; delete n[id]; return n; });
+    }
+  }, []);
+
+  const toggleFlag = useCallback((student: Student) => {
+    const cur = (student as any).flagStatus ?? null;
+    const next = cur === "suspicious" ? null : "suspicious";
+    setStudents(prev => prev.map(s => s.id === student.id ? { ...s, flagStatus: next } as any : s));
+    patchUser(student.id, { flagStatus: next });
+  }, [patchUser]);
+
+  const toggleSuspend = useCallback((student: Student) => {
+    const next = student.status === "SUSPENDED" ? "ACTIVE" : "SUSPENDED";
+    setStudents(prev => prev.map(s => s.id === student.id ? { ...s, status: next } : s));
+    patchUser(student.id, { status: next });
+  }, [patchUser]);
+
+  const filteredStudents = useMemo(() => students.filter(s => {
+    const roll = s.uniqueId || s.roll || "";
+    const dept = (s.department || "").toUpperCase();
+    const yearStr = (getStudentYearFromRoll(roll) || s.year || "").toString();
+    if (selectedBranch !== "ALL" && !dept.includes(selectedBranch)) return false;
+    if (selectedYear !== "ALL") {
+      if (selectedYear === "LE" && !roll.toUpperCase().includes("LE") && !roll.toUpperCase().includes("5A")) return false;
+      if (selectedYear !== "LE" && !yearStr.includes(selectedYear)) return false;
+    }
+    return true;
+  }), [students, selectedBranch, selectedYear]);
+
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Students</h1>
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <GraduationCap className="w-6 h-6 text-blue-400" />
+            Registered Students &amp; Roster
+          </h1>
           <p className="text-[var(--text-muted)]">
-            {loading ? "Loading…" : `${students.length} student${students.length === 1 ? "" : "s"} registered`}
+            {loading
+              ? "Loading roster…"
+              : `${filteredStudents.length} student${filteredStudents.length === 1 ? "" : "s"} listed (${students.length} total)`}
           </p>
         </div>
-        <button className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-[var(--action-primary)] text-white hover:brightness-110">
-          <UserPlus className="w-4 h-4" />
-          Add Student
+        <button onClick={() => loadStudents(query)}
+          className="p-2 rounded-lg hover:bg-white/5 text-[var(--text-muted)] transition-colors"
+          title="Refresh">
+          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
         </button>
       </div>
-
-      <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)]">
-        <div className="p-4 border-b border-[var(--border)] flex justify-between items-center gap-2">
-          <h3 className="font-semibold">All Students</h3>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-muted)]" />
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search students..."
-              className="pl-10 pr-4 py-2 w-64 bg-[var(--bg-base)] border border-[var(--border)] rounded-lg text-sm"
-            />
-          </div>
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+          <input value={query} onChange={e => setQuery(e.target.value)}
+            placeholder="Search by name or roll…"
+            className="w-full pl-9 pr-4 py-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
         </div>
+        <select value={selectedBranch} onChange={e => setSelectedBranch(e.target.value)}
+          className="px-3 py-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-sm focus:outline-none">
+          {["ALL","CSE","IT","ECE","EEE","ME"].map(b => (
+            <option key={b} value={b}>{b === "ALL" ? "All Branches" : b}</option>
+          ))}
+        </select>
+        <select value={selectedYear} onChange={e => setSelectedYear(e.target.value)}
+          className="px-3 py-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-sm focus:outline-none">
+          {[["ALL","All Years"],["1","1st Year"],["2","2nd Year"],["3","3rd Year"],["4","4th Year"],["LE","Lateral Entry"]].map(([v,l]) => (
+            <option key={v} value={v}>{l}</option>
+          ))}
+        </select>
+      </div>
+      {error && (
+        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-sm">{error}</div>
+      )}
+      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-[var(--border)] text-left text-[var(--text-muted)]">
                 <th className="p-4 font-medium">Student</th>
-                <th className="p-4 font-medium">Roll No</th>
+                <th className="p-4 font-medium">Roll</th>
                 <th className="p-4 font-medium">Branch</th>
                 <th className="p-4 font-medium">Year</th>
                 <th className="p-4 font-medium">Status</th>
+                <th className="p-4 font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border)]">
               {loading ? (
-                <tr><td colSpan={5} className="p-8 text-center text-[var(--text-muted)]">Loading…</td></tr>
-              ) : students.length === 0 ? (
-                <tr><td colSpan={5} className="p-8 text-center text-[var(--text-muted)]">
+                <tr><td colSpan={6} className="p-8 text-center text-[var(--text-muted)]">Loading…</td></tr>
+              ) : filteredStudents.length === 0 ? (
+                <tr><td colSpan={6} className="p-8 text-center text-[var(--text-muted)]">
                   {query ? "No matches" : "No students registered yet"}
                 </td></tr>
-              ) : (
-                students.map((student) => {
-                  const decoded = parseRollNumber(student.roll);
-                  const branch = decoded?.departmentFullName ?? student.department ?? "—";
-                  const year = getStudentYearFromRoll(student.roll) ?? student.year ?? "—";
-                  const active = (student.status ?? "active").toLowerCase() === "active";
-                  return (
-                    <tr key={student.id} className="hover:bg-white/5">
-                      <td className="p-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full flex items-center justify-center bg-blue-500/20 text-blue-400">
-                            <User className="w-4 h-4" />
-                          </div>
-                          <span className="font-medium">{student.name}</span>
+              ) : filteredStudents.map(student => {
+                const decoded = parseRollNumber(student.roll);
+                const branch = decoded?.departmentFullName ?? student.department ?? "—";
+                const year = getStudentYearFromRoll(student.roll) ?? student.year ?? "—";
+                const isSuspended = student.status === "SUSPENDED";
+                const isFlagged = !!(student as any).flagStatus;
+                const isBusy = !!pending[student.id];
+                return (
+                  <tr key={student.id} className="hover:bg-white/5">
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full flex items-center justify-center bg-blue-500/20 text-blue-400">
+                          <User className="w-4 h-4" />
                         </div>
-                      </td>
-                      <td className="p-4 font-mono text-[var(--text-muted)]">{student.roll}</td>
-                      <td className="p-4">{branch}</td>
-                      <td className="p-4">{year}</td>
-                      <td className="p-4">
-                        <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${
-                          active
-                            ? "bg-emerald-500/10 text-emerald-400"
-                            : "bg-rose-500/10 text-rose-400"
-                        }`}>
-                          {active ? "Active" : "Inactive"}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
+                        <span className="font-medium">{student.name}</span>
+                      </div>
+                    </td>
+                    <td className="p-4 font-mono text-[var(--text-muted)]">{student.roll}</td>
+                    <td className="p-4">{branch}</td>
+                    <td className="p-4">{year}</td>
+                    <td className="p-4">
+                      <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${
+                        isSuspended ? "bg-rose-500/10 text-rose-400"
+                        : isFlagged  ? "bg-amber-500/10 text-amber-400"
+                        : "bg-emerald-500/10 text-emerald-400"
+                      }`}>
+                        {isSuspended ? "Suspended" : isFlagged ? "Flagged" : "Active"}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center gap-1.5">
+                        <button onClick={() => toggleFlag(student)} disabled={isBusy}
+                          title={isFlagged ? "Remove flag" : "Flag as suspicious"}
+                          className={`p-1.5 rounded-lg transition-all disabled:opacity-40 ${
+                            isFlagged ? "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
+                            : "text-[var(--text-muted)] hover:bg-amber-500/10 hover:text-amber-400"}`}>
+                          <AlertTriangle className="w-3.5 h-3.5" />
+                        </button>
+                        <button onClick={() => toggleSuspend(student)} disabled={isBusy}
+                          title={isSuspended ? "Lift suspension" : "Suspend student"}
+                          className={`p-1.5 rounded-lg transition-all disabled:opacity-40 ${
+                            isSuspended ? "bg-rose-500/20 text-rose-400 hover:bg-rose-500/30"
+                            : "text-[var(--text-muted)] hover:bg-rose-500/10 hover:text-rose-400"}`}>
+                          <Ban className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

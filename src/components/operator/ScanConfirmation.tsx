@@ -3,11 +3,12 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { User, CheckCircle2, LogIn, Home, Sun, Clock, X, Briefcase, Fingerprint } from "lucide-react";
-import { EXIT_REASON_CONFIGS, ExitReason, StudentType, Student, ScanDirection } from "@/lib/types";
+import { ExitReason, StudentType, Student, ScanDirection } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { PersonBadge } from "@/components/shared/PersonBadge";
 import { useAuthStore } from "@/stores/authStore";
+import { useCampusConfig } from "@/hooks/useCampusConfig";
 
 interface ScanConfirmationProps {
   student: Student;
@@ -44,6 +45,9 @@ export function ScanConfirmation({
   isInline = false,
   thumbprintVerified = false,
 }: ScanConfirmationProps) {
+  const { exitReasons } = useCampusConfig();
+  const validExitReasons = exitReasons.length > 0 ? exitReasons : [];
+  
   // Photo verification state
   const [photoVerified, setPhotoVerified] = useState(false);
   const [countdown, setCountdown] = useState(2);
@@ -124,8 +128,8 @@ export function ScanConfirmation({
   }, [student.id, student.uniqueId, student.roll]);
 
   const applicableReasons = (student.personType && student.personType !== "student")
-    ? [EXIT_REASON_CONFIGS.find((cfg) => cfg.code === "Regular") || EXIT_REASON_CONFIGS[0]]
-    : EXIT_REASON_CONFIGS.filter(
+    ? [validExitReasons.find((cfg) => cfg.code === "Regular") || validExitReasons[0]].filter(Boolean)
+    : validExitReasons.filter(
         (config) => !student.studentType || config.applicableTo.includes(student.studentType)
       );
 

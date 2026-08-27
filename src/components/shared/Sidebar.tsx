@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import * as Icons from "lucide-react";
 import {
   ShieldCheck,
   LayoutDashboard,
@@ -31,6 +32,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import type { Role } from "@/lib/types";
 import { useAuthStore } from "@/stores/authStore";
+import { useNavigation, NavGroup as DynamicNavGroup } from "@/hooks/useNavigation";
 import { useUIStore } from "@/stores/uiStore";
 
 interface NavGroup {
@@ -43,132 +45,7 @@ interface NavGroup {
   }>;
 }
 
-const ROLE_NAV_GROUPS: Record<string, NavGroup[]> = {
-  operator: [
-    {
-      groupLabel: "Gate Terminal",
-      items: [
-        { href: "/gate/active", label: "Gate Scanner", icon: ScanLine, badge: "LIVE" },
-      ],
-    },
-    {
-      groupLabel: "Operations",
-      items: [
-        { href: "/gate/history", label: "Scan Log History", icon: History },
-        { href: "/gate/manual", label: "Manual Entry Desk", icon: UserCheck },
-      ],
-    },
-  ],
-  supervisor: [
-    {
-      groupLabel: "Monitoring",
-      items: [
-        { href: "/supervisor/live", label: "Live Feed & Feed", icon: LayoutDashboard, badge: "ACTIVE" },
-        { href: "/supervisor/corrections", label: "Corrections Desk", icon: ShieldCheck },
-      ],
-    },
-    {
-      groupLabel: "Approvals & Audit",
-      items: [
-        { href: "/supervisor/approvals", label: "Pass Approvals", icon: CheckSquare },
-        { href: "/supervisor/reports", label: "Warden Reports", icon: FileSpreadsheet },
-      ],
-    },
-  ],
-  admin: [
-    {
-      groupLabel: "Analytics & Oversight",
-      items: [
-        { href: "/admin", label: "Dashboard Overview", icon: LayoutDashboard },
-        { href: "/admin/analytics", label: "Campus Analytics", icon: FileSpreadsheet, badge: "NEW" },
-        { href: "/admin/students", label: "Person Roster", icon: GraduationCap },
-        { href: "/admin/alerts", label: "Security Alerts", icon: AlertTriangle, badge: "SECURE" },
-        { href: "/admin/reports", label: "Gate Reports", icon: FileSpreadsheet },
-      ],
-    },
-    {
-      groupLabel: "Access Control & Roster",
-      items: [
-        { href: "/admin/users", label: "User Access Roles", icon: Users },
-        { href: "/admin/workers", label: "Worker Management", icon: HardHat, badge: "RESTRICT" },
-      ],
-    },
-  ],
-  sysadmin: [
-    {
-      groupLabel: "System Management",
-      items: [
-        { href: "/sysadmin", label: "System Console", icon: Settings },
-        { href: "/sysadmin/audit", label: "Audit & Security", icon: Shield },
-      ],
-    },
-  ],
-  guardian: [
-    {
-      groupLabel: "Ward Portal",
-      items: [
-        { href: "/parent", label: "Ward Overview", icon: Users },
-        { href: "/parent/request", label: "Request Pass", icon: QrCode },
-      ],
-    },
-  ],
-  // legacy alias: map 'parent' role into the same guardian portal nav
-  parent: [
-    {
-      groupLabel: "Ward Portal",
-      items: [
-        { href: "/parent", label: "Ward Overview", icon: Users },
-        { href: "/parent/request", label: "Request Pass", icon: QrCode },
-      ],
-    },
-  ],
-  student: [
-    {
-      groupLabel: "My Identity",
-      items: [
-        { href: "/student", label: "Digital ID Card", icon: GraduationCap },
-        { href: "/student/passes", label: "Gate Passes", icon: QrCode, badge: "QR" },
-        { href: "/student/profile", label: "My Profile", icon: User },
-      ],
-    },
-  ],
-  faculty: [
-    {
-      groupLabel: "Department Console",
-      items: [
-        { href: "/faculty", label: "Department Dashboard", icon: Building2 },
-        { href: "/hod", label: "HOD Department Console", icon: ShieldCheck },
-        { href: "/visitor", label: "Visitor Management", icon: Users },
-      ],
-    },
-  ],
-  staff: [
-    {
-      groupLabel: "Staff Console",
-      items: [
-        { href: "/staff", label: "Staff Dashboard", icon: UserCheck },
-        { href: "/visitor", label: "Visitor Desk", icon: Users },
-      ],
-    },
-  ],
-  worker: [
-    {
-      groupLabel: "Worker Console",
-      items: [
-        { href: "/worker", label: "Worker Dashboard", icon: HardHat, badge: "SHIFT" },
-      ],
-    },
-  ],
-  warden: [
-    {
-      groupLabel: "Hostel Control",
-      items: [
-        { href: "/supervisor/live", label: "Hostel Gate Feed", icon: LayoutDashboard },
-        { href: "/supervisor/reports", label: "Leave Approvals", icon: FileSpreadsheet },
-      ],
-    },
-  ],
-};
+const iconMap: Record<string, any> = Icons;
 
 const ROLE_LABELS: Record<string, string> = {
   operator: "Gate Guard / Operator",
@@ -184,15 +61,20 @@ const ROLE_LABELS: Record<string, string> = {
   warden: "Hostel Warden",
 };
 
+import { useCollegeInfo } from "@/hooks/useCollegeInfo";
+
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { role: storeRole, user, logout } = useAuthStore();
   const { isMobileSidebarOpen, toggleMobileSidebar } = useUIStore();
+  const { college, loading: collegeLoading } = useCollegeInfo();
 
   const [role, setRole] = useState<Role | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
+  const tempRole = role || "admin";
+  const { navigation, loading: navLoading } = useNavigation(tempRole);
 
   useEffect(() => {
     if (storeRole) {
@@ -218,11 +100,11 @@ export function Sidebar() {
   }, [storeRole, pathname]);
 
   const currentRole = role || "admin";
-  const rawNavGroups = ROLE_NAV_GROUPS[currentRole] || ROLE_NAV_GROUPS.admin;
+  const rawNavGroups = navigation || [];
   const assignedGateId = user?.gateId || "1";
-  const navGroups = rawNavGroups.map(group => ({
+  const navGroups = rawNavGroups.map((group: any) => ({
     ...group,
-    items: group.items.map(item => {
+    items: group.items.map((item: any) => {
       let href = item.href;
       if (href === "/gate/active") {
         href = `/gate/${assignedGateId}`;
@@ -260,7 +142,9 @@ export function Sidebar() {
           </div>
           {!isCollapsed && (
             <div className="min-w-0 flex-1 truncate">
-              <div className="font-bold text-sm leading-tight text-[var(--text-primary)] truncate">JNTUH CEJ</div>
+              <div className="font-bold text-sm leading-tight text-[var(--text-primary)] truncate">
+                {collegeLoading ? 'Loading...' : college?.shortName || 'Loading...'}
+              </div>
               <div className="text-[11px] text-[var(--text-muted)] font-medium truncate">Gate Monitor</div>
             </div>
           )}
@@ -302,7 +186,7 @@ export function Sidebar() {
 
       {/* Interactive Accordion Navigation Groups */}
       <nav className="flex-1 p-3 space-y-4 overflow-y-auto custom-scrollbar">
-        {navGroups.map((group) => {
+        {navLoading ? <div className="p-4 text-xs animate-pulse text-[var(--text-muted)] text-center font-semibold">Loading Navigation...</div> : navGroups.map((group) => {
           const isGroupCollapsed = collapsedGroups[group.groupLabel];
           return (
             <div key={group.groupLabel} className="space-y-1">
@@ -319,9 +203,15 @@ export function Sidebar() {
 
               {!isGroupCollapsed && (
                 <div className="space-y-1">
-                  {group.items.map((item) => {
-                    const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
-                    const Icon = item.icon;
+                  {group.items.map((item: any) => {
+                    const isExactMatch = pathname === item.href;
+                    const isSubPathMatch =
+                      item.href !== "/admin" &&
+                      item.href !== "/" &&
+                      item.href !== "/hod" &&
+                      pathname.startsWith(item.href);
+                    const isActive = isExactMatch || isSubPathMatch;
+                    const Icon = (item.icon && typeof item.icon === 'string' ? iconMap[item.icon] : item.icon) || Icons.HelpCircle;
                     return (
                       <Link
                         key={item.href}

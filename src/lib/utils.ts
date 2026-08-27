@@ -107,3 +107,23 @@ export function formatNumber(n: number): string {
 export function todayISO(): string {
   return new Date().toISOString().slice(0, 10);
 }
+
+export function getAuthHeaders(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  try {
+    const { useAuthStore } = require("@/stores/authStore");
+    const state = useAuthStore.getState();
+    const token = state.token;
+    const sessionToken = state.user?.currentSessionToken || state.user?.handle;
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    if (sessionToken) {
+      headers["X-Session-Token"] = sessionToken;
+    }
+    return headers;
+  } catch {
+    return {};
+  }
+}

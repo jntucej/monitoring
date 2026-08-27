@@ -126,6 +126,6 @@ async function handlePost(req: NextRequest) {
 }
 
 export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["operator", "supervisor", "admin", "sysadmin"] }),
+  withAuthorization(handlePost, { requiredRole: ["operator", "admin", "sysadmin"] }),
   { keyPrefix: "thumbprint_verify", maxRequests: 30 }
 );

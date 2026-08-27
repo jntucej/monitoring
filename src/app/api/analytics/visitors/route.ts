@@ -93,5 +93,5 @@ async function handleGet(req: NextRequest) {
 }
 
 export const GET = withAuthAndStatus(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "supervisor"] })
+  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin"] })
 );

@@ -1,25 +1,17 @@
-import { supabase, invalidateAllUserSessions } from './supabaseClient';
+import { supabase as browserClient, invalidateAllUserSessions, getSupabaseServiceClient } from './supabaseClient';
 import { randomUUID } from "crypto";
 import bcrypt from 'bcryptjs';
+
+// Conditionally use service role on the server, and browser client on the client
+// This ensures that API routes have necessary DB privileges since they handle their own auth checks
+const isServer = typeof window === 'undefined';
+export const supabase = isServer ? getSupabaseServiceClient() : browserClient;
 
 import type {
   Department, DepartmentCode, Gate, Person, Student, PersonType, StudentDetails, EmployeeDetails, VisitorLog,
   Scan, ScanDirection, ExitReason, GatePass, GatePassStatus, Alert, AlertSeverity, AuditEntry,
   User, DashboardData, Role, AccountStatus, PersonTypeStats, DailyGateStats
 } from "./types";
-
-/* ------------------------------------------------------------------ *
- *  COLLEGE DATA
- * ------------------------------------------------------------------ */
-export const COLLEGE = {
-  name: "JNTUH CEJ",
-  shortName: "JNTUH CEJ",
-  address: "JNTUH CEJ, Nachupally (Kondagattu), Jagtial Dist, Telangana — 505 501",
-  logo: "🏛️",
-  accreditation: "NAAC A+ Grade",
-  website: "https://jntuhcej.ac.in/",
-  principal: "Dr. G. Narsimha",
-};
 
 export function sanitizePostgrestParam(val: string): string {
   if (!val) return "";
@@ -61,11 +53,7 @@ export const DEPARTMENTS: Department[] = [
   { code: "ME",  name: "Mechanical Engineering",          hod: "Dr. R. Mahesh" },
 ];
 
-export const GATES: Gate[] = [
-  { id: "11111111-1111-1111-1111-111111111111", gateCode: "MAIN", name: "Gate 1 (Main)", location: "Main Entrance", type: "main", isActive: true },
-  { id: "22222222-2222-2222-2222-222222222222", gateCode: "HOSTEL", name: "Gate 2 (Hostel)", location: "Hostel Side", type: "hostel", isActive: true },
-  { id: "33333333-3333-3333-3333-333333333333", gateCode: "BACK", name: "Gate 3 (Back Gate)", location: "Back Side", type: "back", isActive: false },
-];
+
 
 type Reason = ExitReason;
 
@@ -135,6 +123,7 @@ export function mPerson(r: any): Person {
     createdAt: r.created_at || undefined,
     updatedAt: r.updated_at || undefined,
     hasThumbprint: !!r.thumbprint_hash,
+    flagStatus: r.flag_status ?? null,
     studentDetails,
     employeeDetails,
     // Backwards-compatibility aliases
@@ -183,6 +172,8 @@ function mUser(r: any): User {
     uniqueId: r.unique_id || undefined,
     thumbprintHash: r.thumbprint_hash || undefined,
     thumbprintVerifiedAt: r.thumbprint_verified_at || undefined,
+    // flag_status is not on the User type but we pass it through for API consumers
+    ...( r.flag_status !== undefined ? { flagStatus: r.flag_status } : {} ),
   };
 }
 
@@ -559,10 +550,6 @@ export async function getAllGatesLive(): Promise<Gate[]> {
         isActive: !!g.is_active,
       });
     }
-  } else {
-    for (const g of GATES) {
-      gateMap.set(g.id, g);
-    }
   }
 
   return Array.from(gateMap.values());
@@ -929,16 +916,7 @@ export async function findGateById(id: string): Promise<Gate | null> {
   }
 
   const query = id.toLowerCase();
-  const fallbackMatch = GATES.find(g => {
-    const gId = g.id?.toLowerCase();
-    const code = g.gateCode?.toLowerCase();
-    return gId === query ||
-           code === query ||
-           (query === "1" || query === "gate-1" ? (code === "gate-01" || code === "main" || code === "gate-1") : false) ||
-           (query === "2" || query === "gate-2" ? (code === "gate-02" || code === "hostel" || code === "gate-2") : false) ||
-           (query === "3" || query === "gate-3" ? (code === "gate-03" || code === "back" || code === "gate-3") : false);
-  });
-  return fallbackMatch || GATES[0] || null;
+  return null;
 }
 
 export async function findAllGates(): Promise<Gate[]> {
@@ -970,7 +948,7 @@ export async function findAllGates(): Promise<Gate[]> {
   }
 
   const { data, error } = await supabase.from('gates').select('*');
-  if (error || !data) return GATES;
+  if (error || !data) return [];
   return data.map(g => ({ id: g.id, name: g.name, location: g.location, type: g.type, isActive: !!g.is_active }));
 }
 
@@ -1349,6 +1327,18 @@ export async function addScan(input: {
     client = getSupabaseServiceClient();
   } catch { /* fallback */ }
 
+  if (input.reason) {
+    const { data: validReason, error: rErr } = await client
+        .from('config_exit_reasons')
+        .select('code')
+        .eq('code', input.reason)
+        .maybeSingle();
+    
+    if (!validReason && (!rErr || (rErr.code !== '42P01' && rErr.code !== 'PGRST205'))) {
+       throw new Error(`Invalid exit reason: ${input.reason}`);
+    }
+  }
+
   const isUuid = (str?: string) => !!str && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
 
   // DB Idempotency Check via clientEventId
@@ -1505,21 +1495,22 @@ export async function getAllLogs(f?: {
 export async function addAudit(entry: {
   action: string;
   userId: string;
-  userName: string;
-  role: Role;
-  details: string;
+  userName?: string;
+  role?: Role;
+  details: string | Record<string, any>;
   gateId?: string;
 }) {
   const id = `audit-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
   const timestamp = new Date().toISOString();
+  const detailsStr = typeof entry.details === "string" ? entry.details : JSON.stringify(entry.details);
 
   const auditRow = {
     id,
     action: entry.action,
     user_id: entry.userId,
-    user_name: entry.userName,
-    role: entry.role,
-    details: entry.details,
+    user_name: entry.userName || "System User",
+    role: entry.role || "sysadmin",
+    details: detailsStr,
     gate_id: entry.gateId || null,
     timestamp,
   };
@@ -1651,17 +1642,34 @@ export async function dashboard(): Promise<DashboardData> {
   // Calculate person type breakdown
   const personTypes: PersonType[] = ["student", "faculty", "staff", "worker", "visitor", "parent"];
   const personTypeBreakdown: Record<PersonType, PersonTypeStats> = {
-    student: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
-    faculty: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
-    staff: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
-    worker: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
-    visitor: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
-    parent: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
+    student: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
+    faculty: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
+    staff: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
+    worker: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
+    visitor: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
+    parent: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
   };
 
   allPersons.forEach((p: Person) => {
     if (personTypeBreakdown[p.personType]) {
       personTypeBreakdown[p.personType].total++;
+    }
+  });
+
+  // Calculate current on-campus counts per type from campus_occupancy or persons
+  let occupants: any[] = [];
+  try {
+    const occRes = await supabase.from('campus_occupancy').select('user_id, current_status');
+    occupants = occRes.data || [];
+  } catch {
+    occupants = [];
+  }
+  const occupantMap = new Map((occupants || []).map((o: any) => [o.user_id, o.current_status]));
+
+  allPersons.forEach((p: Person) => {
+    const status = occupantMap.get(p.id) || "OUT";
+    if (status === "IN" && personTypeBreakdown[p.personType]) {
+      personTypeBreakdown[p.personType].onCampus++;
     }
   });
 
@@ -1672,6 +1680,28 @@ export async function dashboard(): Promise<DashboardData> {
       else personTypeBreakdown[type].outToday++;
     }
   });
+
+  // Compute attendance rates per type
+  Object.keys(personTypeBreakdown).forEach((k) => {
+    const key = k as PersonType;
+    const stats = personTypeBreakdown[key];
+    stats.attendanceRate = stats.total > 0
+      ? Math.round((Math.max(stats.onCampus, stats.inToday) / stats.total) * 100)
+      : 0;
+  });
+
+  const facultyStats = personTypeBreakdown.faculty;
+  const totalFaculty = facultyStats.total || 0;
+  const onCampusFaculty = facultyStats.onCampus || 0;
+  const facultyMetrics = {
+    totalFaculty,
+    onCampus: onCampusFaculty,
+    inToday: facultyStats.inToday || 0,
+    outToday: facultyStats.outToday || 0,
+    attendancePercentage: totalFaculty > 0 
+      ? Math.round((onCampusFaculty / totalFaculty) * 100) 
+      : 0,
+  };
 
   const passes = await findGatePasses({ limit: 10 });
 
@@ -1688,6 +1718,7 @@ export async function dashboard(): Promise<DashboardData> {
     activityFeed: todayScans.slice(0, 20),
     deptBreakdown,
     personTypeBreakdown,
+    facultyMetrics,
     alerts: activeAlerts,
     gatePasses: passes,
   };
@@ -1948,3 +1979,108 @@ export async function getLinkedPersons(parentId: string): Promise<Person[]> {
 }
 
 export const getParentChildren = getLinkedPersons;
+
+/* ------------------------------------------------------------------ *
+ *  STUDENT FLAGS
+ * ------------------------------------------------------------------ */
+
+export type FlagStatus = 'suspicious' | 'restricted' | null;
+
+/**
+ * Set or clear an admin advisory flag on a user.
+ * Does NOT affect users.status — purely a gate-alert signal.
+ */
+export async function setUserFlag(userId: string, flag: FlagStatus, actorId: string): Promise<boolean> {
+  const { getSupabaseServiceClient } = await import('./supabaseClient');
+  const service = getSupabaseServiceClient();
+  const { data: user } = await service.from('users').select('name').eq('id', userId).single();
+  const { error } = await service.from('users').update({ flag_status: flag ?? null }).eq('id', userId);
+  if (error) { console.error('setUserFlag error:', error); return false; }
+  await addAudit({
+    action: flag ? 'USER_FLAG_SET' : 'USER_FLAG_CLEARED',
+    userId: actorId,
+    userName: 'Admin',
+    role: 'admin',
+    details: `Flag ${flag ?? 'cleared'} for user ${user?.name ?? userId}`,
+  });
+  return true;
+}
+
+/* ------------------------------------------------------------------ *
+ *  LOCKDOWN BROADCASTS
+ * ------------------------------------------------------------------ */
+
+export interface Lockdown {
+  id: string;
+  scopes: string[];
+  message: string | null;
+  issuedBy: string | null;
+  issuedAt: string;
+  liftedAt: string | null;
+}
+
+function mLockdown(r: any): Lockdown {
+  return {
+    id: r.id,
+    scopes: r.scopes ?? [],
+    message: r.message ?? null,
+    issuedBy: r.issued_by ?? null,
+    issuedAt: r.issued_at,
+    liftedAt: r.lifted_at ?? null,
+  };
+}
+
+/** Returns the currently active lockdown, or null if none. */
+export async function getActiveLockdown(): Promise<Lockdown | null> {
+  const { getSupabaseServiceClient } = await import('./supabaseClient');
+  const service = getSupabaseServiceClient();
+  const { data, error } = await service
+    .from('lockdown_broadcasts')
+    .select('*')
+    .is('lifted_at', null)
+    .order('issued_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) { console.error('getActiveLockdown error:', error); return null; }
+  return data ? mLockdown(data) : null;
+}
+
+/** Broadcasts a new lockdown. */
+export async function createLockdown(scopes: string[], message: string | null, issuedBy: string): Promise<Lockdown | null> {
+  const { getSupabaseServiceClient } = await import('./supabaseClient');
+  const service = getSupabaseServiceClient();
+  const { data, error } = await service
+    .from('lockdown_broadcasts')
+    .insert({ scopes, message: message ?? null, issued_by: issuedBy })
+    .select()
+    .single();
+  if (error || !data) { console.error('createLockdown error:', error); return null; }
+  await addAudit({
+    action: 'LOCKDOWN_BROADCAST',
+    userId: issuedBy,
+    userName: 'Admin',
+    role: 'admin',
+    details: `Lockdown issued for scopes: ${scopes.join(', ')}`,
+  });
+  return mLockdown(data);
+}
+
+/** Lifts (ends) an active lockdown. */
+export async function liftLockdown(lockdownId: string, liftedBy: string): Promise<boolean> {
+  const { getSupabaseServiceClient } = await import('./supabaseClient');
+  const service = getSupabaseServiceClient();
+  const { error } = await service
+    .from('lockdown_broadcasts')
+    .update({ lifted_at: new Date().toISOString(), lifted_by: liftedBy })
+    .eq('id', lockdownId)
+    .is('lifted_at', null);
+  if (error) { console.error('liftLockdown error:', error); return false; }
+  await addAudit({
+    action: 'LOCKDOWN_LIFTED',
+    userId: liftedBy,
+    userName: 'Admin',
+    role: 'admin',
+    details: `Lockdown ${lockdownId} lifted`,
+  });
+  return true;
+}

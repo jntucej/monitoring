@@ -35,7 +35,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         </div>
         {error && (
           <p className="mt-1 text-sm text-[var(--action-danger)] flex items-center gap-1">
-            ⚠️ {error}
+            ⚠️ {typeof error === "string" ? error : (error as any)?.message || String(error)}
           </p>
         )}
         {helper && !error && <p className="mt-1 text-xs text-[var(--text-muted)]">{helper}</p>}

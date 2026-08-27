@@ -1,10 +1,18 @@
 const { spawn } = require("child_process");
 const http = require("http");
+const { loadLocalEnv } = require("./lib/env-loader");
+
+loadLocalEnv();
 
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const TEST_OPERATOR_ID = process.env.TEST_OPERATOR_ID;
+const TEST_OPERATOR_PIN = process.env.TEST_OPERATOR_PIN;
 
-if (!SERVICE_ROLE_KEY) {
-  console.error("CRITICAL ERROR: SUPABASE_SERVICE_ROLE_KEY environment variable is required.");
+if (!SERVICE_ROLE_KEY || !TEST_OPERATOR_ID || !TEST_OPERATOR_PIN) {
+  console.error(
+    "CRITICAL ERROR: SUPABASE_SERVICE_ROLE_KEY, TEST_OPERATOR_ID and TEST_OPERATOR_PIN are required.\n" +
+    "Add TEST_OPERATOR_ID / TEST_OPERATOR_PIN to .env.local (values are NOT stored in this repo)."
+  );
   process.exit(1);
 }
 
@@ -66,7 +74,7 @@ async function runTests() {
     console.log("Attempting Login for Session A...");
     const loginA = await makeRequest(
       { path: "/api/auth/pin-login", method: "POST", headers: { "Content-Type": "application/json" } },
-      { employeeId: "OP-001", pin: "12345678" }
+      { employeeId: TEST_OPERATOR_ID, pin: TEST_OPERATOR_PIN }
     );
     if (loginA.statusCode !== 200 || !loginA.data?.success) {
       throw new Error(`Session A login failed: ${JSON.stringify(loginA.data)}`);
@@ -80,7 +88,7 @@ async function runTests() {
     console.log("\nAttempting Login for Session B (Simulating second device)...");
     const loginB = await makeRequest(
       { path: "/api/auth/pin-login", method: "POST", headers: { "Content-Type": "application/json" } },
-      { employeeId: "OP-001", pin: "12345678" }
+      { employeeId: TEST_OPERATOR_ID, pin: TEST_OPERATOR_PIN }
     );
     if (loginB.statusCode !== 200 || !loginB.data?.success) {
       throw new Error(`Session B login failed: ${JSON.stringify(loginB.data)}`);
@@ -114,11 +122,11 @@ async function runTests() {
     if (testReqB.statusCode !== 200) throw new Error("FAIL: Session B request failed!");
     console.log("PASS: Session B request completed successfully.");
 
-    console.log("\nTesting supervisor verification (verifyOnly) does not affect existing handle...");
-    console.log("Simulating Supervisor manual entry verification under existing Session B...");
+    console.log("\nTesting admin verification (verifyOnly) does not affect existing handle...");
+    console.log("Simulating Admin manual entry verification under existing Session B...");
     const verifySup = await makeRequest(
       { path: "/api/auth/pin-login", method: "POST", headers: { "Content-Type": "application/json" } },
-      { employeeId: "OP-001", pin: "12345678", verifyOnly: true }
+      { employeeId: TEST_OPERATOR_ID, pin: TEST_OPERATOR_PIN, verifyOnly: true }
     );
     if (verifySup.statusCode !== 200 || !verifySup.data?.success) {
       throw new Error(`verifyOnly verification failed: ${JSON.stringify(verifySup.data)}`);

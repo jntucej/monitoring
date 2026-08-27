@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
-import { User, Search } from "lucide-react";
+import { User, Search, AlertTriangle } from "lucide-react";
 import { parseRollNumber } from "@/lib/rollNumber";
 import type { Student } from "@/lib/types";
+import { getAuthHeaders } from "@/lib/utils";
 
 const DEPT_COLORS: Record<string, string> = {
   CSE: "bg-blue-500/20 text-blue-400",
@@ -24,7 +25,7 @@ export function StudentList() {
         const url = query.trim()
           ? `/api/students?q=${encodeURIComponent(query.trim())}`
           : "/api/students";
-        const res = await fetch(url, { cache: "no-store" });
+        const res = await fetch(url, { headers: getAuthHeaders(), cache: "no-store" });
         const json = await res.json();
         if (!cancelled) {
           setStudents(Array.isArray(json.data) ? json.data : []);
@@ -52,13 +53,13 @@ export function StudentList() {
           </p>
         </div>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-muted)]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by roll, name, dept…"
-            className="pl-10 pr-4 py-2 w-64 bg-[var(--bg-base)] border border-[var(--border)] rounded-lg text-sm"
+            className="pl-9 pr-4 py-2 w-64 bg-[var(--bg-base)] border border-[var(--border)] rounded-lg text-sm"
           />
         </div>
       </div>
@@ -78,10 +79,13 @@ export function StudentList() {
             const branch = decoded?.departmentFullName ?? dept ?? "—";
             const colorClass =
               (dept && DEPT_COLORS[dept]) ?? "bg-slate-500/20 text-slate-400";
+            const isOnCampus = student.status === "INSIDE" || student.status === "ON_CAMPUS";
+            const isWarning = student.flagStatus || student.status === "SUSPENDED";
+
             return (
               <div
                 key={student.id}
-                className="flex items-center justify-between p-2 rounded-lg hover:bg-white/5"
+                className="flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition"
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center ${colorClass}`}>
@@ -89,10 +93,27 @@ export function StudentList() {
                   </div>
                   <div>
                     <p className="font-medium">{name}</p>
-                    <p className="text-sm text-[var(--text-muted)] font-mono">{roll}</p>
+                    <p className="text-xs text-[var(--text-muted)] font-mono">{roll}</p>
                   </div>
                 </div>
-                <p className="text-sm text-[var(--text-secondary)]">{branch}</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-[var(--text-secondary)] hidden sm:inline">{branch}</span>
+                  {isWarning && (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/40 animate-pulse flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3" />
+                      WRN
+                    </span>
+                  )}
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                      isOnCampus
+                        ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                        : "bg-slate-500/10 text-slate-400 border border-slate-500/20"
+                    }`}
+                  >
+                    {isOnCampus ? "ON CAMPUS" : "OUTSIDE"}
+                  </span>
+                </div>
               </div>
             );
           })

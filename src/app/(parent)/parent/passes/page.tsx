@@ -37,7 +37,7 @@ export default function ParentPassesPage() {
         setPasses(Array.isArray(json.data) ? json.data : []);
         setError(null);
       } else {
-        setError(json.error?.message ?? "Failed to load passes");
+        setError(typeof json.error === "string" ? json.error : json.error?.message ?? "Failed to load passes");
       }
     } catch (err: any) {
       console.error("Failed to load pass requests:", err);

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { FileText, Download, BarChart3, Loader2 } from "lucide-react";
+import { getAuthHeaders } from "@/lib/utils";
 import type { DashboardData } from "@/lib/types";
 
 interface GeneratedReport {
@@ -66,7 +67,7 @@ export default function AdminReportsPage() {
     let cancelled = false;
     const load = async () => {
       try {
-        const res = await fetch("/api/admin/dashboard", { cache: "no-store" });
+        const res = await fetch("/api/admin/dashboard", { headers: getAuthHeaders(), cache: "no-store" });
         const json = await res.json();
         if (!cancelled) {
           if (json.success) setData(json.data);

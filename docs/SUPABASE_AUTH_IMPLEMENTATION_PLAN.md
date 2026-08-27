@@ -384,16 +384,12 @@ export async function invalidateAllSessions(userId: string): Promise<boolean> {
 | `/api/users/[id]` (PUT) | Yes | ADMIN, SYSTEM_ADMIN | user:update | All | Users: admin update |
 | `/api/users/[id]/role` | Yes | SYSTEM_ADMIN | user:update:role | All | Users: sysadmin update role |
 | `/api/users/[id]/status` | Yes | ADMIN, SYSTEM_ADMIN | user:update:status | All | Users: admin update |
-| `/api/gate/scan` | Yes | OPERATOR, SUPERVISOR, ADMIN, SYSTEM_ADMIN | gate:scan | Gate assignment | Gate_logs: operator view own gates |
-| `/api/gate/logs` | Yes | OPERATOR, SUPERVISOR, ADMIN, SYSTEM_ADMIN | gate:read | Gate assignment | Gate_logs: operator view own gates |
 | `/api/students` | Yes | ADMIN, SYSTEM_ADMIN, WARDEN | student:read | Department/hostel | Students: admin view all, warden view hostel |
 | `/api/students/[roll]` | Yes | ADMIN, SYSTEM_ADMIN, WARDEN, PARENT, STUDENT | student:read | Self or child | Students: student view own, parent view children |
 | `/api/passes` | Yes | ADMIN, SYSTEM_ADMIN, PARENT, STUDENT | pass:read | Self or child | Gate_passes: student view own, parent view children |
 | `/api/passes` (POST) | Yes | PARENT, STUDENT | pass:create | Self or child | Gate_passes: student create own, parent create for children |
 | `/api/passes/[id]` | Yes | ADMIN, SYSTEM_ADMIN, PARENT, STUDENT | pass:read | Self or child | Gate_passes: student view own, parent view children |
 | `/api/passes/[id]/approve` | Yes | ADMIN, PARENT | pass:approve | Approval authority | Gate_passes: admin approve all, parent approve own |
-| `/api/alerts` | Yes | ADMIN, SYSTEM_ADMIN, SUPERVISOR | alert:read | Supervised gates | Alerts: admin view all, supervisor view own gates |
-| `/api/alerts/[id]/resolve` | Yes | ADMIN, SYSTEM_ADMIN, SUPERVISOR | alert:resolve | Supervised gates | Alerts: admin resolve all, supervisor resolve own gates |
 
 ## 7. Authorization Changes
 
@@ -401,14 +397,12 @@ export async function invalidateAllSessions(userId: string): Promise<boolean> {
 
 #### Role Hierarchy
 ```
-SYSTEM_ADMIN > ADMIN > SUPERVISOR > OPERATOR > STUDENT/PARENT
 ```
 
 #### Role Assignment Rules
 - Users cannot promote themselves
 - Users cannot change their own role
 - Operator cannot promote operator
-- Supervisor cannot promote supervisor
 - Only authorized administrative authority can change roles
 - Role changes must invalidate sessions
 - Client-provided role never trusted
@@ -432,7 +426,6 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 
   // Validate role hierarchy
-  const validRoles = ['SYSTEM_ADMIN', 'ADMIN', 'SUPERVISOR', 'OPERATOR', 'STUDENT', 'PARENT'];
 
   if (!validRoles.includes(role)) {
     return NextResponse.json({ error: 'Invalid role' }, { status: 400 });
@@ -459,8 +452,6 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  // Prevent supervisors from promoting supervisors
-  if (actorRole === 'SUPERVISOR' && targetUser.role === 'SUPERVISOR') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -540,7 +531,6 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 | `is_sysadmin()` | Checks if user is sysadmin | RLS policies | Uses `auth.uid()` | `users` | Low | Yes | None |
 | `is_warden()` | Checks if user is warden | RLS policies | Uses `auth.uid()` | `users` | Low | Yes | None |
 | `is_operator()` | Checks if user is operator | RLS policies | Uses `auth.uid()` | `users` | Low | Yes | None |
-| `is_supervisor()` | Checks if user is supervisor | RLS policies | Uses `auth.uid()` | `users` | Low | Yes | None |
 | `get_supervised_gates()` | Gets gates supervised by user | RLS policies | Uses `auth.uid()` | `users` | Low | Yes | None |
 | `get_warden_hostel()` | Gets hostel assigned to warden | RLS policies | Uses `auth.uid()` | `users` | Low | Yes | None |
 | `maintain_user_student_mapping()` | Maintains user-student mapping | Triggers | Trigger-based | `students`, `user_student_mapping` | Medium | Yes | None |

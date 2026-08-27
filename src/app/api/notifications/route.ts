@@ -20,7 +20,7 @@ async function handleGet(req: NextRequest) {
     }
 
     // Authorization: Prevent user enumeration
-    const isAdmin = ['admin', 'supervisor', 'sysadmin'].includes(authRole || '');
+    const isAdmin = ['admin', 'sysadmin'].includes(authRole || '');
     if (!isAdmin) {
         if (recipientId !== authUserId || recipientType !== authRole) {
             return NextResponse.json(
@@ -42,6 +42,6 @@ async function handleGet(req: NextRequest) {
 }
 
 export const GET = withRateLimit(
-    withAuthorization(handleGet, { requiredRole: ['admin', 'supervisor', 'sysadmin', 'parent', 'student'] }),
+    withAuthorization(handleGet, { requiredRole: ['admin', 'sysadmin', 'parent', 'student'] }),
     { keyPrefix: 'notifications_list', maxRequests: 60 }
 );

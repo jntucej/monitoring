@@ -17,7 +17,7 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
     let parentId = params.get("parentId") || undefined;
 
     // Authorization: Non-admins can only query their own data.
-    const isAdmin = ['admin', 'supervisor', 'sysadmin', 'operator'].includes(authRole);
+    const isAdmin = ['admin', 'sysadmin', 'operator'].includes(authRole);
 
     if (!isAdmin) {
       if (authRole === 'student') {
@@ -110,7 +110,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
           { status: 403 }
         );
       }
-    } else if (!['admin', 'sysadmin', 'supervisor'].includes(authRole)) {
+    } else if (!['admin', 'sysadmin', ].includes(authRole)) {
       return NextResponse.json(
         { success: false, error: { code: "FORBIDDEN", message: "Insufficient permissions to create a pass." } },
         { status: 403 }
@@ -144,11 +144,11 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ['admin', 'supervisor', 'sysadmin', 'operator', 'parent', 'student'] }),
+  withAuthorization(handleGet, { requiredRole: ['admin', 'sysadmin', 'operator', 'parent', 'student', 'warden'] }),
   { keyPrefix: 'passes_list', maxRequests: 100 }
 );
 
 export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ['student', 'parent', 'admin', 'supervisor', 'sysadmin', 'operator'] }),
+  withAuthorization(handlePost, { requiredRole: ['student', 'parent', 'admin', 'sysadmin', 'operator'] }),
   { keyPrefix: 'passes_create', maxRequests: 10 }
 );

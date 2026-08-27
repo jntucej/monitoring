@@ -78,7 +78,6 @@ Authorization: Bearer <jwt_token>
 
 ### POST /gate/scan
 **Description:** Record a gate scan  
-**Authorization:** operator, supervisor
 
 ### GET /gate/logs
 **Description:** Get gate logs

@@ -16,7 +16,7 @@ import { getSupabaseServiceClient } from "@/lib/supabaseClient";
 
 // Roles assignable via this API. Intersection of src/lib/types.ts `Role`
 // and the CHECK constraint on public.users.role in consolidated_clean_schema.sql.
-const VALID_ROLES: Role[] = ['operator', 'supervisor', 'admin', 'sysadmin', 'parent', 'student', 'warden'];
+const VALID_ROLES: Role[] = ['operator', 'admin', 'sysadmin', 'parent', 'student', 'warden'];
 const VALID_STATUSES = ['ACTIVE', 'LOCKED', 'SUSPENDED', 'DISABLED', 'DEPROVISIONED'];
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

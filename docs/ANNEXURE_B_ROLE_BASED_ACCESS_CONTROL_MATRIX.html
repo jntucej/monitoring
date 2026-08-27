@@ -395,10 +395,10 @@ code {
 <td style="text-align:left">Administrative staff managing student records, issuing global announcements, generating analytical reports, and executing secondary gate pass approvals.</td>
 </tr>
 <tr>
-<td style="text-align:left"><code>supervisor</code></td>
+<td style="text-align:left"><code>admin</code></td>
 <td style="text-align:left">Level 2</td>
 <td style="text-align:left">Gate Cluster / Hostel</td>
-<td style="text-align:left">Gate supervisors overseeing multiple assigned gates, reviewing scan logs, resolving alerts, and authorizing manual scan corrections.</td>
+<td style="text-align:left">Gate admins overseeing multiple assigned gates, reviewing scan logs, resolving alerts, and authorizing manual scan corrections.</td>
 </tr>
 <tr>
 <td style="text-align:left"><code>operator</code></td>
@@ -474,7 +474,7 @@ code {
 <td style="text-align:left"><code>/api/auth/pin-login</code></td>
 <td style="text-align:left">POST</td>
 <td style="text-align:left">Optional</td>
-<td style="text-align:left"><code>operator</code>, <code>supervisor</code></td>
+<td style="text-align:left"><code>operator</code>, <code>admin</code></td>
 <td style="text-align:left"><code>auth:pin</code></td>
 <td style="text-align:left">Quick Terminal Login</td>
 <td style="text-align:left">PIN Hash Verification</td>
@@ -598,7 +598,7 @@ code {
 <td style="text-align:left"><code>/api/gate/scan</code></td>
 <td style="text-align:left">POST</td>
 <td style="text-align:left">Required</td>
-<td style="text-align:left"><code>operator</code>, <code>supervisor</code></td>
+<td style="text-align:left"><code>operator</code>, <code>admin</code></td>
 <td style="text-align:left"><code>gate:scan:create</code></td>
 <td style="text-align:left">Gate Entry/Exit Event</td>
 <td style="text-align:left"><strong>Derived from JWT Session</strong></td>
@@ -608,7 +608,7 @@ code {
 <td style="text-align:left"><code>/api/gate/logs</code></td>
 <td style="text-align:left">GET</td>
 <td style="text-align:left">Required</td>
-<td style="text-align:left"><code>operator</code>, <code>supervisor</code>, <code>admin</code>, <code>sysadmin</code></td>
+<td style="text-align:left"><code>operator</code>, <code>admin</code>, <code>admin</code>, <code>sysadmin</code></td>
 <td style="text-align:left"><code>gate:logs:read</code></td>
 <td style="text-align:left">Scan Event History</td>
 <td style="text-align:left">Assigned Gate Filter</td>
@@ -618,10 +618,10 @@ code {
 <td style="text-align:left"><code>/api/gate/logs/[id]/correction</code></td>
 <td style="text-align:left">PUT</td>
 <td style="text-align:left">Required</td>
-<td style="text-align:left"><code>supervisor</code>, <code>admin</code>, <code>sysadmin</code></td>
+<td style="text-align:left"><code>admin</code>, <code>admin</code>, <code>sysadmin</code></td>
 <td style="text-align:left"><code>gate:logs:correct</code></td>
 <td style="text-align:left">Scan Error Override</td>
-<td style="text-align:left">Supervisor Session ID</td>
+<td style="text-align:left">Admin Session ID</td>
 <td style="text-align:left"><code>SCAN_CORRECTION</code></td>
 </tr>
 </tbody>
@@ -645,7 +645,7 @@ code {
 <td style="text-align:left"><code>/api/students</code></td>
 <td style="text-align:left">GET</td>
 <td style="text-align:left">Required</td>
-<td style="text-align:left"><code>admin</code>, <code>sysadmin</code>, <code>supervisor</code>, <code>warden</code></td>
+<td style="text-align:left"><code>admin</code>, <code>sysadmin</code>, <code>admin</code>, <code>warden</code></td>
 <td style="text-align:left"><code>students:read</code></td>
 <td style="text-align:left">Student Directory</td>
 <td style="text-align:left">DB Authorization Filter</td>
@@ -665,7 +665,7 @@ code {
 <td style="text-align:left"><code>/api/passes</code></td>
 <td style="text-align:left">GET</td>
 <td style="text-align:left">Required</td>
-<td style="text-align:left"><code>admin</code>, <code>sysadmin</code>, <code>supervisor</code>, <code>student</code>, <code>parent</code></td>
+<td style="text-align:left"><code>admin</code>, <code>sysadmin</code>, <code>admin</code>, <code>student</code>, <code>parent</code></td>
 <td style="text-align:left"><code>passes:read</code></td>
 <td style="text-align:left">Pass Requests</td>
 <td style="text-align:left">Student/Parent Relation</td>
@@ -710,7 +710,7 @@ code {
 <li><strong>Operator Identity</strong>: Under NO circumstances is <code>operator_id</code> accepted from the client POST body in <code>/api/gate/scan</code>. The server strictly extracts <code>operator_id</code> from the verified JWT payload (<code>req.user.id</code>).</li>
 <li><strong>Student Gate Pass Ownership</strong>: When a student requests a pass, <code>student_id</code> is extracted from the authenticated user record bound to that student account.</li>
 <li><strong>Parent Authorization</strong>: Parents can only view or approve passes where <code>students.parent_id</code> matches the parent's authenticated <code>user.id</code>.</li>
-<li><strong>Supervisor Gate Scope</strong>: Supervisors are strictly restricted to reading logs and alerts for gate IDs included in their <code>users.supervised_gates</code> array.</li>
+<li><strong>Admin Gate Scope</strong>: Admins are strictly restricted to reading logs and alerts for gate IDs included in their <code>users.supervised_gates</code> array.</li>
 </ol>
 <hr>
 <h2 id="5-automatic-session-revocation-policies">5. Automatic Session Revocation Policies</h2>

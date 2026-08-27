@@ -2,11 +2,11 @@
 import { useState } from "react";
 import { Ticket, Loader2, CheckCircle2 } from "lucide-react";
 import type { Student } from "@/lib/types";
-
-const PASS_TYPES = ["Day Pass", "Weekend Pass", "Emergency Leave"] as const;
+import { usePassTypes } from "@/hooks/usePassTypes";
 
 export function RequestPassForm() {
-  const [passType, setPassType] = useState<typeof PASS_TYPES[number]>("Day Pass");
+  const { passTypes, loading: loadingPassTypes } = usePassTypes();
+  const [passType, setPassType] = useState("");
   const [reason, setReason] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -39,9 +39,9 @@ export function RequestPassForm() {
         toIso = new Date(to).toISOString();
       } else {
         const t = new Date();
-        if (passType === "Day Pass") t.setHours(t.getHours() + 8);
-        else if (passType === "Weekend Pass") t.setDate(t.getDate() + 2);
-        else t.setHours(t.getHours() + 4);
+        const selectedType = passTypes.find((pt) => pt.code === passType);
+        const duration = selectedType?.defaultDurationHours || 4;
+        t.setHours(t.getHours() + duration);
         toIso = t.toISOString();
       }
 
@@ -50,7 +50,7 @@ export function RequestPassForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           roll: child.roll,
-          reason: `${passType}${reason ? ` — ${reason}` : ""}`,
+          reason: passType,
           from: fromIso,
           to: toIso,
           description: reason,
@@ -83,11 +83,14 @@ export function RequestPassForm() {
           <select
             id="passType"
             value={passType}
-            onChange={(e) => setPassType(e.target.value as typeof PASS_TYPES[number])}
+            onChange={(e) => setPassType(e.target.value)}
             className="mt-1 block w-full rounded-md border-gray-700 bg-gray-800 py-2 pl-3 pr-10 text-base text-white focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
+            disabled={loadingPassTypes}
+            required
           >
-            {PASS_TYPES.map((t) => (
-              <option key={t} value={t}>{t}</option>
+            <option value="" disabled>Select pass type</option>
+            {passTypes.map((t) => (
+              <option key={t.code} value={t.code}>{t.name}</option>
             ))}
           </select>
         </div>

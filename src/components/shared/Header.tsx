@@ -9,8 +9,6 @@ import { useAuthStore } from "@/stores/authStore";
 const PAGE_TITLES: Record<string, string> = {
   "/gate/1": "Gate 1 Scanner — High Speed Scanner Desk",
   "/gate/2": "Gate 2 Scanner — High Speed Scanner Desk",
-  "/supervisor/live": "Real-Time Campus Feed",
-  "/supervisor/corrections": "Supervisor Corrections Desk",
   "/admin": "Campus Overview Dashboard",
   "/admin/students": "Student Master Roster",
   "/admin/alerts": "Security & Anomaly Alerts",
@@ -20,12 +18,15 @@ const PAGE_TITLES: Record<string, string> = {
   "/student": "Digital ID & Gate Pass Management",
 };
 
+import { useCollegeInfo } from "@/hooks/useCollegeInfo";
+
 export function Header() {
   const pathname = usePathname();
   const { theme, setTheme, toggleMobileSidebar, addToast } = useUIStore();
   const { role, user } = useAuthStore();
+  const { college } = useCollegeInfo();
 
-  const title = PAGE_TITLES[pathname] || "JNTUH CEJ Gate Monitor";
+  const title = PAGE_TITLES[pathname] || `${college?.shortName || "College"} Gate Monitor`;
 
   const handleToggleTheme = () => {
     const nextTheme = theme === "dark" ? "light" : "dark";
@@ -54,7 +55,7 @@ export function Header() {
             {title}
           </h1>
           <p className="text-[11px] text-[var(--text-muted)] hidden sm:block">
-            JNTUH CEJ
+            {college?.shortName || "College"}
           </p>
         </div>
       </div>

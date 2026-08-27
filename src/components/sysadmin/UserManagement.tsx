@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
-import { UserPlus, User, Loader2, XCircle, Fingerprint, ShieldCheck } from "lucide-react";
+import { UserPlus, User, Loader2, XCircle, Fingerprint, ShieldCheck, Upload } from "lucide-react";
 import type { User as UserType } from "@/lib/types";
 import { useAuthStore } from "@/stores/authStore";
+import { BulkUserImportModal } from "./BulkUserImportModal";
 
 export function UserManagement() {
   const [users, setUsers] = useState<UserType[]>([]);
@@ -11,9 +12,10 @@ export function UserManagement() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [showBulkModal, setShowBulkModal] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<"admin" | "supervisor" | "operator" | "parent" | "student">("operator");
+  const [role, setRole] = useState<"admin" | "operator" | "parent" | "student">("operator");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
@@ -182,13 +184,22 @@ export function UserManagement() {
       <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
         <h3 className="font-semibold">User Management</h3>
         {msg && <div className={`text-sm ${msg.startsWith("✅") ? "text-emerald-400" : "text-rose-400"}`}>{msg}</div>}
-        <button
-          onClick={() => setShowForm((s) => !s)}
-          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-sky-600 text-white hover:bg-sky-700"
-        >
-          <UserPlus className="w-5 h-5" />
-          Add User
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowBulkModal(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-white hover:bg-[var(--bg-base)]"
+          >
+            <Upload className="w-4 h-4 text-sky-400" />
+            Bulk Import
+          </button>
+          <button
+            onClick={() => setShowForm((s) => !s)}
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-sky-600 text-white hover:bg-sky-700"
+          >
+            <UserPlus className="w-5 h-5" />
+            Add User
+          </button>
+        </div>
       </div>
 
       {showForm && (
@@ -221,13 +232,13 @@ export function UserManagement() {
               className="block w-full rounded-md border-gray-700 bg-gray-800 text-white sm:text-sm p-2"
             >
               <option value="admin">Admin</option>
-              <option value="supervisor">Supervisor</option>
+              <option value="admin">Admin</option>
               <option value="operator">Operator</option>
               <option value="parent">Parent</option>
               <option value="student">Student</option>
             </select>
           </div>
-          {(role === "operator" || role === "supervisor") && (
+          {role === "operator" && (
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
                 {role === "operator" ? "Assign Gate" : "Primary Gate"}
@@ -273,7 +284,7 @@ export function UserManagement() {
         <div className="p-8 flex flex-col items-center gap-4 text-center">
           <XCircle className="w-10 h-10 text-red-500" />
           <h4 className="font-semibold text-lg">Could not load users</h4>
-          <p className="text-sm text-[var(--text-muted)]">{error}</p>
+          <p className="text-sm text-[var(--text-muted)]">{typeof error === "string" ? error : (error as any)?.message || String(error)}</p>
         </div>
       ) : users.length === 0 ? (
         <div className="p-8 text-center text-sm text-[var(--text-muted)]">
@@ -326,7 +337,7 @@ export function UserManagement() {
                   onChange={(e) => changeRole(user, e.target.value)}
                   className="text-xs rounded-full bg-sky-500/10 text-sky-300 px-2 py-1 border border-sky-500/20"
                 >
-                  {["operator", "supervisor", "admin", "student", "parent", "warden"].map((r) => (
+                  {["operator", "admin", "student", "parent", "warden"].map((r) => (
                     <option key={r} value={r}>{r}</option>
                   ))}
                 </select>
@@ -358,6 +369,15 @@ export function UserManagement() {
             </div>
           ))}
         </div>
+      )}
+      {showBulkModal && (
+        <BulkUserImportModal
+          onClose={() => setShowBulkModal(false)}
+          onSuccess={() => {
+            setShowBulkModal(false);
+            load();
+          }}
+        />
       )}
     </div>
   );

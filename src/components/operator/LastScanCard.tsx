@@ -1,6 +1,5 @@
 "use client";
 
-import { COLLEGE } from "@/lib/db";
 import type { ScanDirection, ExitReason } from "@/lib/types";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { formatTime } from "@/lib/utils";

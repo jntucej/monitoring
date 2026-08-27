@@ -5,14 +5,16 @@ import { usePathname } from "next/navigation";
 import { Menu, Sun, Moon, Bell, ShieldCheck, LogOut, Wifi } from "lucide-react";
 import { useUIStore } from "@/stores/uiStore";
 import { useAuthStore } from "@/stores/authStore";
+import { useCollegeInfo } from "@/hooks/useCollegeInfo";
 
 const PAGE_TITLES: Record<string, string> = {
   "/gate/1": "Gate 1 Mobile Scanner Desk",
   "/gate/2": "Gate 2 Mobile Scanner Desk",
-  "/supervisor/live": "Real-Time Campus Feed",
-  "/supervisor/corrections": "Supervisor Corrections",
   "/admin": "Campus Overview Dashboard",
   "/admin/students": "Student Master Roster",
+  "/admin/faculty": "Faculty Attendance & Heatmap",
+  "/admin/staff": "Staff Oversight & Movement Logs",
+  "/admin/workers": "Worker Shift & Presence Tracker",
   "/admin/alerts": "Security Alerts",
   "/admin/reports": "Gate Analytics",
   "/sysadmin": "System Administration",
@@ -24,10 +26,11 @@ export function DynamicHeader() {
   const pathname = usePathname();
   const { theme, setTheme, toggleMobileSidebar, addToast } = useUIStore();
   const { role, user, logout } = useAuthStore();
+  const { college } = useCollegeInfo();
   const [tapCount, setTapCount] = useState(0);
   const tapTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const title = PAGE_TITLES[pathname] || "JNTUH CEJ Gate Monitor";
+  const title = PAGE_TITLES[pathname] || `${college?.shortName || "College"} Gate Monitor`;
 
   // Secret Triple-tap gesture on top-right area to instantly logout
   const handleSecretTripleTap = () => {
@@ -73,7 +76,7 @@ export function DynamicHeader() {
             {title}
           </h1>
           <p className="text-[10px] text-[var(--text-muted)] hidden sm:block">
-            JNTUH CEJ, Jagtial
+            {college?.shortName ? `${college.shortName}` : "College"}
           </p>
         </div>
       </div>

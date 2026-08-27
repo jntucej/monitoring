@@ -1,6 +1,5 @@
 # Gate Monitor — Admin User Manual
 
-**Audience:** Principal / Admin office, Security Supervisors
 **Version:** 1.0.0 · August 2026
 
 ---
@@ -40,25 +39,21 @@ Gate passes flow: **Student/Parent request → Guardian approval → Admin appro
 
 - `/admin/reports` — daily entry/exit summaries
 - `/api/analytics/export` — CSV export for registers
-- Reports respect the operator/supervisor audit trail in `movement_logs`
 
 ## 6. Managing Users & Roles
 
-Roles: `admin`, `supervisor`, `operator`, `warden`, `faculty`, `staff`, `worker`, `student`, `guardian`.
 
 To add a user:
 1. Use the admin users API/screen (`POST /api/users`) with the person's details.
 2. The system invites them by email; their account becomes active after first login.
-3. Assign operators to a specific `gate_id`; supervisors may cover multiple gates via `supervised_gates`.
 
 ## 7. Changing Default PINs ⚠️
 
-All seeded accounts ship with PIN `12345678`. **Before production use**, rotate every system-account PIN:
+All seeded accounts ship with a shared bootstrap PIN taken from the `SEED_DEFAULT_PIN` environment variable at seed time (it is never hardcoded in this repository). **Before production use**, rotate every system-account PIN:
 
 | Account | ID |
 |---|---|
 | Admin | `ADM-001` |
-| Supervisor | `SUP-001` |
 | Operator | `OP-001` |
 | Wardens | `WDN-001`, `WDN-002` |
 

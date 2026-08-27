@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { PersonBadge } from "@/components/shared/PersonBadge";
 import { Building, Users, CheckCircle2, XCircle, Search, RefreshCw, ShieldAlert } from "lucide-react";
+import { getAuthHeaders } from "@/lib/utils";
 
 interface FacultyMember {
   id: string;
@@ -24,7 +25,7 @@ export default function HodConsolePage() {
   const fetchDepartmentFaculty = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/persons?type=faculty`, { cache: "no-store" });
+      const res = await fetch(`/api/hod/faculty`, { headers: getAuthHeaders(), cache: "no-store" });
       const json = await res.json();
       if (json.success && Array.isArray(json.data)) {
         setFacultyList(json.data);
@@ -48,7 +49,7 @@ export default function HodConsolePage() {
   );
 
   const totalCount = facultyList.length;
-  // Campus status is fetched from the API alongside faculty list (/api/persons?type=faculty returns status)
+  // Campus status is fetched from the API alongside faculty list (/api/hod/faculty returns status)
   const activeOnCampus = facultyList.filter((f: any) => f.campusStatus === "IN" || f.status === "IN").length;
   const offCampus = totalCount - activeOnCampus;
 

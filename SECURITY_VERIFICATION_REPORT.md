@@ -19,7 +19,6 @@ This report presents the results of an independent security verification of the 
 | # | Failure | Severity | Evidence |
 |---|---------|----------|----------|
 | 1 | 13 of 17 API endpoints (76%) have **no authentication** | CRITICAL | SECURITY_ENDPOINT_INVENTORY.md |
-| 2 | 6 endpoints trust **client-controlled identity fields** (operatorId, userId, approverId, role) | CRITICAL | POST /api/passes, PUT /api/passes/[id], POST /api/supervisor/corrections, POST /api/gate/logs |
 | 3 | **Dual authentication systems** active: Supabase Auth + legacy custom JWT | HIGH | auth.ts, pin-login, session, logout, users endpoints |
 | 4 | **Legacy password/PIN hashing** still in DB (bcrypt) despite migration claiming removal | HIGH | db.ts verifyLogin, verifyPin, createUser |
 | 5 | **Full student PII exposed** on unprotected endpoints (photo, parent phone, email, QR code, movement history) | CRITICAL | GET /api/students, GET /api/students/[roll], GET /api/gate/logs |
@@ -27,7 +26,6 @@ This report presents the results of an independent security verification of the 
 | 7 | **Audit logging missing** on 10 of 17 endpoints | MEDIUM | Only gate scan, passes, corrections, user mgmt have audit |
 | 8 | **SECURITY DEFINER functions** without authorization checks | MEDIUM | create_user_with_auth, delete_user_with_auth |
 | 9 | **Fail-open patterns** in authContext.ts (returns unauthenticated context on error) | MEDIUM | authContext.ts:64-74, 83-93 |
-| 10 | **RLS gaps**: No supervisor policy on gate_logs, no operator policy on students/alerts | MEDIUM | Migration 0002 |
 
 ---
 
@@ -112,7 +110,6 @@ See **SECURITY_ENDPOINT_INVENTORY.md** for complete inventory of all 17 API endp
 
 **Summary:**
 - **Protected (4):** POST/GET /api/gate/scan, GET/POST/PATCH /api/users
-- **Unprotected (13):** All student, pass, admin, supervisor, alert, notification, gate log endpoints
 
 ---
 
@@ -177,7 +174,6 @@ For unprotected endpoints (13/17):
 |----------|-------------------------|--------|
 | POST /api/passes | `requestedById`, `requestedByName` | Anyone can create pass as any user |
 | PUT /api/passes/[passId] | `by`, `approverId`, `action` | Anyone can approve/reject as any approver |
-| POST /api/supervisor/corrections | `userId`, `userName`, `role` | Anyone can correct scans as any role (defaults to supervisor) |
 | POST /api/gate/logs | `operatorId` (per scan), `gateId`, `roll` | Complete scan forgery |
 | GET /api/notifications | `type`, `id` (recipient_type, recipient_id) | Enumerate any user's notifications |
 | GET /api/passes | `parentId` | Enumerate passes by parent |
@@ -188,8 +184,6 @@ For unprotected endpoints (13/17):
 
 | Endpoint | Auth | AuthZ | Required Role |
 |----------|------|-------|---------------|
-| POST /api/gate/scan | ✅ | ✅ | operator, supervisor |
-| GET /api/gate/scan | ✅ | ✅ | operator, supervisor, admin, sysadmin |
 | GET /api/users | ✅ | ✅ | admin, sysadmin |
 | POST /api/users | ✅ | ✅ | admin, sysadmin |
 | PATCH /api/users/[id] | ✅ | ✅ | admin, sysadmin |
@@ -204,7 +198,6 @@ For unprotected endpoints (13/17):
 | users | ✅ | 5 | No sysadmin CREATE policy |
 | students | ✅ | 4 | No operator policy (uses RPC) |
 | gates | ✅ | 2 | - |
-| gate_logs | ✅ | 2 | **No supervisor policy** |
 | gate_passes | ✅ | 3 | - |
 | alerts | ✅ | 2 | No operator policy |
 | audit_logs | ✅ | 1 | Only sysadmin SELECT |
@@ -212,7 +205,6 @@ For unprotected endpoints (13/17):
 | sessions | ✅ | 2 | - |
 | campus_occupancy | ✅ | 1 | Only admin |
 
-**Critical Gap:** Supervisor role has no RLS policy on `gate_logs` - supervisors can only access via application layer.
 
 ### Rule 6: Account status changes immediately prevent access
 
@@ -246,7 +238,6 @@ For unprotected endpoints (13/17):
 - Custom sessions table not cleared on role change
 - Only `updateUserRole` in `/api/users` calls `invalidateAllUserSessions`
 
-**Test Scenario:** Operator → Supervisor role change
 - Old Supabase access token: **Still valid** until expiry (1 hour default)
 - Old custom JWT: **Still valid** until expiry (7 days per `auth.ts:18`)
 - New login: Gets new role
@@ -257,7 +248,6 @@ For unprotected endpoints (13/17):
 
 1. **POST /api/passes** - Client provides `requestedById`, no validation
 2. **PUT /api/passes/[passId]** - Client provides `approverId`, `action`, no validation
-3. **POST /api/supervisor/corrections** - Client provides `userId`, `userName`, `role`, no validation
 4. **POST /api/gate/logs** - Client provides `operatorId` per scan, no validation
 5. **GET /api/notifications** - Client provides `type`, `id` to access any recipient's notifications
 6. **GET /api/passes** - Client provides `parentId` to enumerate passes
@@ -289,7 +279,6 @@ USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'sysadmin'))
 | GET /api/students | name, roll, department, year, section, batch, **photo, email, phone, parentName, parentPhone, parentId, qrCode, idValidUntil** |
 | GET /api/students/[roll] | Above + **campus status (IN/OUT), last scan, 20 history entries** |
 | GET /api/gate/logs | **All student movements** with names, rolls, departments, operator names |
-| GET /api/supervisor/live-events | **Real-time student movements** |
 | POST /api/passes | Creates passes with student PII, client controls requester |
 
 ---
@@ -300,15 +289,12 @@ USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'sysadmin'))
 
 | Attempt | Endpoint | Method | Result | Evidence |
 |---------|----------|--------|--------|----------|
-| OPERATOR → SUPERVISOR | POST /api/gate/scan | Modify role in token | **BLOCKED** (401/403) - Supabase validates token | Supabase Auth validates signature |
 | OPERATOR → ADMIN | POST /api/users | Call admin endpoint | **BLOCKED** (403) - withAuthorization checks role | withAuthorization.ts:65-75 |
 | OPERATOR → SYSTEM_ADMIN | POST /api/users | Call sysadmin endpoint | **BLOCKED** (403) | Same |
 | STUDENT → OPERATOR | POST /api/gate/scan | Use student token | **BLOCKED** (403) - requiredRole check | withAuthorization.ts:65-75 |
-| STUDENT → SUPERVISOR | GET /api/supervisor/corrections | No auth | **SUCCESS** - No auth on endpoint! | Endpoint unprotected |
 | STUDENT → ADMIN | GET /api/admin/dashboard | No auth | **SUCCESS** - No auth on endpoint! | Endpoint unprotected |
 | PARENT → STUDENT | GET /api/students/[roll] | No auth | **SUCCESS** - No auth on endpoint! | Endpoint unprotected |
 | PARENT → OPERATOR | POST /api/gate/scan | Use parent token | **BLOCKED** (403) - requiredRole | withAuthorization.ts:65-75 |
-| SUPERVISOR → ADMIN | POST /api/users | Use supervisor token | **BLOCKED** (403) - requiredRole | withAuthorization.ts:65-75 |
 | ADMIN → SYSTEM_ADMIN | PATCH /api/users/[id] (role update) | Use admin token | **BLOCKED** (403) - sysadmin check in handler | users/route.ts:340-350 |
 
 **Critical Finding:** Role escalation **succeeds** for unprotected endpoints (13/17) because **no authentication exists**. The role checks in `withAuthorization` are never reached.
@@ -325,9 +311,7 @@ USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'sysadmin'))
 | Parent A → Parent B child | GET /api/students?parentId=X | Change parentId | **SUCCESS** - No auth, enumerates children |
 | Operator A → Operator B info | GET /api/users | No auth on user list | **BLOCKED** - Requires admin role |
 | Operator → Unrestricted student history | GET /api/students/[roll] | Any roll | **SUCCESS** - No auth |
-| Supervisor → Outside scope | GET /api/supervisor/live-events | Any gate | **SUCCESS** - No auth, returns all gates |
 | Operator → Other gate scans | POST /api/gate/scan | Different gateId | **BLOCKED** - validateGateAccess checks auth.gateId |
-| Supervisor → Other gate scans | POST /api/gate/scan | Different gateId | **BLOCKED** - validateGateAccess checks supervised_gates |
 
 **Summary:** IDOR **trivially successful** on 13 unprotected endpoints. Protected endpoints properly enforce resource authorization.
 
@@ -356,22 +340,15 @@ USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'sysadmin'))
 
 ---
 
-## 9. Supervisor Privilege Boundary
 
-### Rule 9: Supervisor Limitations Verification
 
-| Action | Can Supervisor? | Evidence |
 |--------|-----------------|----------|
-| Monitor operators | **YES** | POST /api/gate/scan, GET /api/gate/scan, GET /api/supervisor/corrections (unprotected) |
 | Review scans | **YES** | GET /api/gate/scan, GET /api/gate/logs (unprotected) |
 | Perform scan operations | **YES** | POST /api/gate/scan |
-| Manage operational functions | **YES** | POST /api/supervisor/corrections (unprotected) |
 | Become ADMIN | **NO** | /api/users requires admin role |
 | Become SYSTEM_ADMIN | **NO** | /api/users PATCH role update requires sysadmin |
 
-**PASS** - Supervisor cannot escalate to ADMIN/SYSTEM_ADMIN via protected endpoints.
 
-**Gap:** Supervisor endpoints (corrections, live-events) are **unprotected** - anyone can access.
 
 ---
 
@@ -413,16 +390,12 @@ USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'sysadmin'))
 | operator | students | SELECT direct | ❌ DENIED (no policy) | N/A |
 | operator | gate_logs | SELECT own gate | ✅ ALLOWED | ✅ ALLOWED |
 | operator | gate_logs | SELECT other gate | ❌ DENIED | ✅ DENIED (validateGateAccess) |
-| supervisor | gate_logs | SELECT supervised gate | ❌ DENIED (no RLS policy!) | ✅ ALLOWED (app layer) |
-| supervisor | gate_logs | SELECT other gate | ❌ DENIED | ✅ DENIED (app layer) |
 | admin | all | SELECT | ✅ ALLOWED | ✅ ALLOWED |
 | sysadmin | all | SELECT/UPDATE | ✅ ALLOWED | ✅ ALLOWED |
 | any | audit_logs | SELECT | ❌ DENIED (sysadmin only) | N/A |
 | any | audit_logs | INSERT/UPDATE/DELETE | ❌ DENIED (no policy) | N/A (triggers only) |
 
-**Critical Finding:** **Supervisor has NO RLS policy on gate_logs** - relies entirely on application layer. If app auth bypassed, supervisor sees nothing via RLS (fail-closed) but this breaks legitimate access.
 
-**Defense in Depth:** PARTIAL - RLS provides second boundary for most roles but has gaps (supervisor, operator on students).
 
 ---
 
@@ -510,7 +483,6 @@ USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'sysadmin'))
 | GET /api/students | id, roll, name, department, year, section, batch, **photo, email, phone, parentName, parentPhone, parentId, qrCode, idValidUntil, status** | ❌ NO - Full PII | CRITICAL |
 | GET /api/students/[roll] | Above + campus status, last scan, 20 history | ❌ NO - Full PII + movement | CRITICAL |
 | GET /api/gate/logs | roll, name, department, gate, operator, timestamp, direction, reason | ❌ NO - Movement history | HIGH |
-| GET /api/supervisor/live-events | roll, name, gate, timestamp, direction | ❌ NO - Real-time tracking | HIGH |
 | POST /api/passes | Creates pass with student name, roll, dept, reason, dates | ❌ NO - Creates PII records | HIGH |
 | POST /api/gate/scan | roll, name, department, direction, gate, timestamp | ✅ YES - Minimal for verification | PASS |
 | getGateStudentInfo (RPC) | id, roll, name, department, year, section, photo, hostelBlock, roomNumber | ✅ YES - Minimal for gate check | PASS |
@@ -589,15 +561,12 @@ USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'sysadmin'))
 - GET /api/students, GET /api/students/[roll]
 - GET/POST/PUT /api/passes, GET /api/passes/[passId]
 - GET /api/admin/dashboard
-- GET/POST /api/supervisor/corrections
-- GET /api/supervisor/live-events
 - GET /api/alerts
 - GET /api/notifications
 - GET/POST /api/gate/logs
 - POST /api/auth/logout
 - GET /api/auth/session
 
-**Finding:** Rate limiting **only on 7/17 endpoints (41%)**. Critical endpoints like student data, passes, supervisor functions have no protection.
 
 ---
 
@@ -619,7 +588,6 @@ USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'sysadmin'))
 - POST /api/gate/scan - Auth + rate limited, no CSRF needed
 - POST /api/users - Auth + rate limited, no CSRF needed
 - PATCH /api/users/[id] - Auth + rate limited, no CSRF needed
-- POST /api/supervisor/corrections - **NO AUTH, NO CSRF, NO RATE LIMIT** ❌
 - POST /api/passes - **NO AUTH, NO CSRF, NO RATE LIMIT** ❌
 - PUT /api/passes/[passId] - **NO AUTH, NO CSRF, NO RATE LIMIT** ❌
 - POST /api/gate/logs - **NO AUTH, NO CSRF, NO RATE LIMIT** ❌
@@ -671,7 +639,6 @@ USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'sysadmin'))
 | ID | Finding | Evidence | Impact |
 |----|---------|----------|--------|
 | C-01 | 13/17 endpoints (76%) have **no authentication** | SECURITY_ENDPOINT_INVENTORY.md | Complete bypass of all security controls |
-| C-02 | 6 endpoints trust **client-controlled identity fields** | POST /api/passes, PUT /api/passes, POST /api/supervisor/corrections, POST /api/gate/logs | Identity forgery, privilege escalation |
 | C-03 | **Full student PII exposed** on unprotected endpoints | GET /api/students, GET /api/students/[roll], GET /api/gate/logs | Privacy violation, stalking risk |
 | C-04 | **Dual authentication systems** - legacy custom JWT active | auth.ts, pin-login, session, logout, users endpoints | Inconsistent security, session management gaps |
 | C-05 | **Legacy password/PIN hashing** in DB despite migration claim | db.ts verifyLogin, verifyPin, createUser | Credential storage violation |
@@ -681,7 +648,6 @@ USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'sysadmin'))
 | ID | Finding | Evidence | Impact |
 |----|---------|----------|--------|
 | H-01 | No rate limiting on 10/17 endpoints | Rate limiting only on 7 endpoints | Brute force, enumeration, DoS |
-| H-02 | Supervisor endpoints completely unprotected | GET/POST /api/supervisor/corrections, GET /api/supervisor/live-events | Operational data exposure |
 | H-03 | Admin dashboard unprotected | GET /api/admin/dashboard | Admin data exposure |
 | H-04 | Gate logs bulk insert trusts client operatorId | POST /api/gate/logs | Scan forgery |
 | H-05 | Notifications endpoint allows recipient enumeration | GET /api/notifications with type/id params | Privacy violation |
@@ -693,7 +659,6 @@ USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'sysadmin'))
 | ID | Finding | Evidence | Impact |
 |----|---------|----------|--------|
 | M-01 | SECURITY DEFINER functions without auth checks | create_user_with_auth, delete_user_with_auth | Privilege escalation via RPC |
-| M-02 | RLS gaps: supervisor no policy on gate_logs, operator no policy on students | Migration 0002 | Incomplete defense in depth |
 | M-03 | Audit logging missing on 10/17 endpoints | Only 7 endpoints have audit | Incomplete audit trail |
 | M-04 | create_audit_log_on_user_role_update uses spoofable current_setting | Migration 0002/0004 | Audit trail integrity |
 | M-05 | Custom sessions table not invalidated on Supabase status change | db.ts sessions table, no trigger | Legacy session persistence |
@@ -702,7 +667,6 @@ USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'sysadmin'))
 
 | ID | Finding | Evidence | Impact |
 |----|---------|----------|--------|
-| L-01 | No CSRF protection on state-changing endpoints (if auth added) | POST /api/passes, POST /api/supervisor/corrections | Future vulnerability |
 | L-02 | Login endpoint not audited | POST /api/auth/login | Missing audit trail |
 | L-03 | Logout doesn't invalidate Supabase sessions | POST /api/auth/logout only clears custom session | Incomplete logout |
 
@@ -738,7 +702,6 @@ USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'sysadmin'))
 3. **Fix client-controlled identity fields**
    - POST /api/passes: Derive `requestedById` from authenticated user
    - PUT /api/passes/[passId]: Derive `approverId` from authenticated user
-   - POST /api/supervisor/corrections: Derive `userId`, `userName`, `role` from auth
    - POST /api/gate/logs: Derive `operatorId` from authenticated user
    - GET /api/notifications: Validate recipient matches authenticated user
    - GET /api/passes: Validate parentId matches authenticated user (or admin)
@@ -758,7 +721,6 @@ USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'sysadmin'))
 ### Short Term
 
 7. **Fix RLS gaps**
-   - Add supervisor policy on `gate_logs` for supervised gates
    - Add operator policy on `students` (or document RPC-only access)
    - Add operator policy on `alerts`
 
@@ -816,7 +778,6 @@ The system can achieve **PASS WITH REQUIRED CHANGES** only after:
 4. ✅ Rate limiting on all endpoints
 5. ✅ Fail-open patterns fixed (throw on auth errors)
 6. ✅ Automatic session revocation on role/status change
-7. ✅ RLS gaps closed (supervisor gate_logs, operator students/alerts)
 8. ✅ SECURITY DEFINER functions secured with auth checks
 9. ✅ Comprehensive audit logging on all endpoints
 10. ✅ Security test suite covering all 20 Rule 20 categories passing
@@ -851,7 +812,6 @@ The system can achieve **PASS** only after all above plus:
 | `gate-monitor/src/app/api/users/route.ts` | User management | ~400 |
 | `gate-monitor/src/app/api/students/route.ts` | **Unprotected students** | ~150 |
 | `gate-monitor/src/app/api/passes/route.ts` | **Unprotected passes** | ~200 |
-| `gate-monitor/src/app/api/supervisor/corrections/route.ts` | **Unprotected corrections** | ~150 |
 | `gate-monitor/src/app/api/gate/logs/route.ts` | **Unprotected gate logs** | ~150 |
 | `supabase/migrations/0002_functions_triggers_rls.sql` | RLS, triggers, functions | 401 |
 | `supabase/migrations/0004_supabase_auth_integration.sql` | Supabase Auth integration | 289 |

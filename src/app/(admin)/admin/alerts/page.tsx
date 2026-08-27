@@ -1,14 +1,15 @@
 "use client";
 import { useEffect, useState } from "react";
-import { AlertTriangle, Bell, CheckCircle, Check } from "lucide-react";
+import { AlertTriangle, Bell, CheckCircle, Check, ShieldAlert, RefreshCw } from "lucide-react";
 import type { Alert } from "@/lib/types";
+import { getAuthHeaders } from "@/lib/utils";
 
 const SEVERITY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
-  critical: { bg: "bg-rose-500/10", text: "text-rose-400", label: "Critical" },
-  high: { bg: "bg-amber-500/10", text: "text-amber-400", label: "High" },
-  medium: { bg: "bg-blue-500/10", text: "text-blue-400", label: "Medium" },
-  low: { bg: "bg-slate-500/10", text: "text-slate-400", label: "Low" },
-  info: { bg: "bg-cyan-500/10", text: "text-cyan-400", label: "Info" },
+  critical: { bg: "bg-rose-500/10 border-rose-500/30", text: "text-rose-400", label: "Critical Breach" },
+  high: { bg: "bg-amber-500/10 border-amber-500/30", text: "text-amber-400", label: "High Suspicious" },
+  medium: { bg: "bg-blue-500/10 border-blue-500/30", text: "text-blue-400", label: "Medium Alert" },
+  low: { bg: "bg-slate-500/10 border-slate-500/30", text: "text-slate-400", label: "Low Priority" },
+  info: { bg: "bg-cyan-500/10 border-cyan-500/30", text: "text-cyan-400", label: "Info Log" },
 };
 
 function timeAgo(iso: string): string {
@@ -32,14 +33,15 @@ export default function AdminAlertsPage() {
   const load = async () => {
     try {
       const url = filter === "all" ? "/api/alerts" : `/api/alerts?resolved=${filter === "resolved"}`;
-      const res = await fetch(url, { cache: "no-store" });
+      const res = await fetch(url, { headers: getAuthHeaders(), cache: "no-store" });
       if (!res.ok) throw new Error("Failed to fetch alerts");
       const json = await res.json();
       if (json.success) {
         setAlerts(Array.isArray(json.data) ? json.data : []);
         setError(null);
       } else {
-        setError(json.error?.message ?? "Failed to load alerts");
+        const msg = typeof json.error === "string" ? json.error : json.error?.message ?? "Failed to load alerts";
+        setError(msg);
       }
     } catch (err: any) {
       console.error("Failed to load alerts:", err);
@@ -55,17 +57,17 @@ export default function AdminAlertsPage() {
     const t = setInterval(() => {
       if (typeof document !== "undefined" && document.hidden) return;
       load();
-    }, 30_000);
+    }, 15_000);
     return () => clearInterval(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
   const resolve = async (id: string) => {
     setBusyId(id);
     try {
+      const headers = { ...getAuthHeaders(), "Content-Type": "application/json" };
       const res = await fetch(`/api/alerts/${id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers,
       });
       const json = await res.json();
       if (json.success) {
