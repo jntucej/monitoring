@@ -83,18 +83,18 @@ export function Sidebar() {
       const storedRole = (sessionStorage.getItem("gate-monitor-role") || localStorage.getItem("gate-monitor-role")) as Role;
       if (storedRole) {
         setRole(storedRole);
-      } else if (pathname.includes("/admin")) {
-        setRole("admin");
-      } else if (pathname.includes("/gate")) {
-        setRole("operator");
-      } else if (pathname.includes("/supervisor")) {
-        setRole("supervisor");
-      } else if (pathname.includes("/student")) {
-        setRole("student");
-      } else if (pathname.includes("/parent")) {
-        setRole("parent");
-      } else if (pathname.includes("/sysadmin")) {
+      } else if (pathname.startsWith("/sysadmin")) {
         setRole("sysadmin");
+      } else if (pathname.startsWith("/admin")) {
+        setRole("admin");
+      } else if (pathname.startsWith("/gate")) {
+        setRole("operator");
+      } else if (pathname.startsWith("/supervisor")) {
+        setRole("supervisor");
+      } else if (pathname.startsWith("/student")) {
+        setRole("student");
+      } else if (pathname.startsWith("/parent")) {
+        setRole("parent");
       }
     }
   }, [storeRole, pathname]);

@@ -28,9 +28,9 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
 
       if (typeof window !== "undefined") {
         const path = window.location.pathname;
-        if (path.startsWith("/gate")) targetRole = "operator";
+        if (path.startsWith("/sysadmin")) targetRole = "sysadmin";
         else if (path.startsWith("/admin")) targetRole = "admin";
-        else if (path.startsWith("/sysadmin")) targetRole = "sysadmin";
+        else if (path.startsWith("/gate")) targetRole = "operator";
         else if (path.startsWith("/student")) targetRole = "student";
         else if (path.startsWith("/parent")) targetRole = "parent";
         else if (path.startsWith("/person")) targetRole = "student";
