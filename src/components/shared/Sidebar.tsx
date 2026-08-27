@@ -77,26 +77,28 @@ export function Sidebar() {
   const { navigation, loading: navLoading } = useNavigation(tempRole);
 
   useEffect(() => {
-    if (storeRole) {
-      setRole(storeRole);
+    let activeRole: Role = "admin";
+    if (pathname.startsWith("/sysadmin")) {
+      activeRole = "sysadmin";
+    } else if (pathname.startsWith("/admin")) {
+      activeRole = "admin";
+    } else if (pathname.startsWith("/gate")) {
+      activeRole = "operator";
+    } else if (pathname.startsWith("/supervisor")) {
+      activeRole = "supervisor";
+    } else if (pathname.startsWith("/student")) {
+      activeRole = "student";
+    } else if (pathname.startsWith("/parent")) {
+      activeRole = "parent";
+    } else if (storeRole) {
+      activeRole = storeRole;
     } else {
       const storedRole = (sessionStorage.getItem("gate-monitor-role") || localStorage.getItem("gate-monitor-role")) as Role;
       if (storedRole) {
-        setRole(storedRole);
-      } else if (pathname.startsWith("/sysadmin")) {
-        setRole("sysadmin");
-      } else if (pathname.startsWith("/admin")) {
-        setRole("admin");
-      } else if (pathname.startsWith("/gate")) {
-        setRole("operator");
-      } else if (pathname.startsWith("/supervisor")) {
-        setRole("supervisor");
-      } else if (pathname.startsWith("/student")) {
-        setRole("student");
-      } else if (pathname.startsWith("/parent")) {
-        setRole("parent");
+        activeRole = storedRole;
       }
     }
+    setRole(activeRole);
   }, [storeRole, pathname]);
 
   const currentRole = role || "admin";
