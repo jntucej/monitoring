@@ -36,6 +36,24 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
 
   const { addToast } = useUIStore();
 
+  const [viewportHeight, setViewportHeight] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.visualViewport) return;
+    const updateHeight = () => {
+      if (window.visualViewport) {
+        setViewportHeight(window.visualViewport.height);
+      }
+    };
+    updateHeight();
+    window.visualViewport.addEventListener("resize", updateHeight);
+    window.visualViewport.addEventListener("scroll", updateHeight);
+    return () => {
+      window.visualViewport?.removeEventListener("resize", updateHeight);
+      window.visualViewport?.removeEventListener("scroll", updateHeight);
+    };
+  }, []);
+
   useEffect(() => {
     if (!student) {
       setApprovedPasses([]);
@@ -257,7 +275,8 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 15 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 max-w-md w-full shadow-2xl overflow-hidden"
+            style={{ maxHeight: viewportHeight ? `${viewportHeight - 32}px` : "calc(100dvh - 2rem)" }}
+            className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 max-w-md w-full max-h-[calc(100dvh-2rem)] shadow-2xl overflow-y-auto overscroll-y-contain custom-scrollbar"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -271,7 +290,8 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
                   reset();
                   onClose();
                 }}
-                className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors"
+                aria-label="Close dialog"
+                className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors active:scale-95"
               >
                 <X className="w-5 h-5" />
               </button>

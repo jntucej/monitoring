@@ -3,7 +3,9 @@ import { useEffect, useState } from "react";
 import { User, Search, AlertTriangle } from "lucide-react";
 import { parseRollNumber } from "@/lib/rollNumber";
 import type { Student } from "@/lib/types";
-import { getAuthHeaders } from "@/lib/utils";
+import { motion } from "framer-motion";
+import { useGlossyMotion, staggerContainer, fadeInUp } from "@/lib/animations";
+import { getAuthHeaders } from "@/hooks/useAuthHeaders";
 
 const DEPT_COLORS: Record<string, string> = {
   CSE: "bg-blue-500/20 text-blue-400",
@@ -15,6 +17,7 @@ const DEPT_COLORS: Record<string, string> = {
 
 export function StudentList() {
   const [students, setStudents] = useState<Student[]>([]);
+  const isGlossyMotion = useGlossyMotion();
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -45,25 +48,30 @@ export function StudentList() {
 
   return (
     <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)]">
-      <div className="p-4 border-b border-[var(--border)] flex justify-between items-center gap-2">
+      <div className="p-4 border-b border-[var(--border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h3 className="font-semibold">All Students</h3>
           <p className="text-xs text-[var(--text-muted)]">
             {query ? "Search results" : `Total: ${students.length}`}
           </p>
         </div>
-        <div className="relative">
+        <div className="relative w-full sm:w-56">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by roll, name, dept…"
-            className="pl-9 pr-4 py-2 w-64 bg-[var(--bg-base)] border border-[var(--border)] rounded-lg text-sm"
+            className="pl-9 pr-4 py-2 w-full sm:w-56 bg-[var(--bg-base)] border border-[var(--border)] rounded-lg text-sm"
           />
         </div>
       </div>
-      <div className="p-4 space-y-2 max-h-96 overflow-y-auto">
+      <motion.div
+        variants={isGlossyMotion ? staggerContainer : {}}
+        initial={isGlossyMotion ? "hidden" : false}
+        animate={isGlossyMotion ? "visible" : undefined}
+        className="p-4 space-y-2 max-h-96 overflow-y-auto overscroll-y-contain card-list-wrapper"
+      >
         {loading ? (
           <div className="text-center py-8 text-[var(--text-muted)] text-sm">Loading…</div>
         ) : students.length === 0 ? (
@@ -83,9 +91,10 @@ export function StudentList() {
             const isWarning = student.flagStatus || student.status === "SUSPENDED";
 
             return (
-              <div
+              <motion.div
+                variants={isGlossyMotion ? fadeInUp : {}}
                 key={student.id}
-                className="flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition"
+                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-white/5 transition min-h-[44px]"
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center ${colorClass}`}>
@@ -114,11 +123,11 @@ export function StudentList() {
                     {isOnCampus ? "ON CAMPUS" : "OUTSIDE"}
                   </span>
                 </div>
-              </div>
+              </motion.div>
             );
           })
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }

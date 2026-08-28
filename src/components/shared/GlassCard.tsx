@@ -1,6 +1,9 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useGlossyMotion, fadeInUp, cardHover } from "@/lib/animations";
 import { motion, useMotionValue, useSpring, useTransform, Transition } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useGlass, GateStatus } from "@/context/GlassContext";
@@ -14,6 +17,8 @@ export interface GlassCardProps {
   className?: string;
   onDragEnd?: (id: string, newIndex: number) => void;
   index?: number;
+  href?: string;
+  onClick?: () => void;
 }
 
 export function GlassCard({
@@ -25,9 +30,18 @@ export function GlassCard({
   className,
   onDragEnd,
   index = 0,
+  href,
+  onClick,
 }: GlassCardProps) {
+  const router = useRouter();
   const { isDark, isTouchDevice, prefersReducedMotion, setActiveGate, activeGate, performanceTier, displayMode } = useGlass();
   const cardRef = useRef<HTMLDivElement>(null);
+  const isGlossyMotion = useGlossyMotion();
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    if (onClick) onClick();
+    else if (href) router.push(href);
+  };
 
   // Critically damped springs for heavy industrial precision
   const getTransition = (): Transition => {
@@ -120,12 +134,17 @@ export function GlassCard({
   return (
     <motion.div
       ref={cardRef}
+      initial={isGlossyMotion ? "hidden" : false}
+      animate={isGlossyMotion ? "visible" : undefined}
+      variants={fadeInUp}
+      whileHover={isGlossyMotion ? cardHover : {}}
+      whileTap={isGlossyMotion ? { scale: 0.97 } : { scale: isTouchDevice ? 0.97 : 1 }}
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       style={{
-        rotateX: can3D ? rotateX : 0,
-        rotateY: can3D ? rotateY : 0,
+        rotateX: can3D && isGlossyMotion ? rotateX : 0,
+        rotateY: can3D && isGlossyMotion ? rotateY : 0,
         transformStyle: "preserve-3d",
       }}
       transition={getTransition()}
@@ -133,12 +152,13 @@ export function GlassCard({
       dragConstraints={{ left: -60, right: 60, top: -60, bottom: 60 }}
       dragElastic={0.2}
       onDragEnd={handleDragEnd}
-      whileTap={{ scale: isTouchDevice ? 0.97 : 1 }}
+      onClick={href || onClick ? handleCardClick : undefined}
       className={cn(
         "relative w-full max-w-sm p-6 rounded-2xl border transition-colors duration-500 overflow-hidden shadow-xl",
         getContainerBackground(),
         getBlurClass(),
         isActive && "ring-2 ring-emerald-400/50",
+        (href || onClick) ? "cursor-pointer hover:border-emerald-400/50 hover:shadow-emerald-500/10" : "",
         className
       )}
     >
@@ -198,7 +218,7 @@ export function GlassCard({
       )}
 
       {/* Content Z-lift Layer with High Contrast Typography */}
-      <div style={{ transform: can3D ? "translateZ(20px)" : "none", transformStyle: "preserve-3d" }} className="relative z-10">
+      <div style={{ transform: can3D ? "translateZ(20px)" : "none", transformStyle: can3D ? "preserve-3d" : "flat" }} className="relative z-10">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-lg font-bold tracking-tight text-slate-50 dark:text-white">{title}</h3>
           <span className={cn("text-xs font-mono px-2.5 py-1 rounded-full border font-semibold", current.bg, current.textCol, current.border)}>

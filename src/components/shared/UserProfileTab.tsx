@@ -31,7 +31,7 @@ export function UserProfileTab() {
   };
 
   const toggleTheme = () => {
-    const nextTheme = theme === "dark" ? "light" : "dark";
+    const nextTheme = theme === "dark" ? "glass" : theme === "glass" ? "light" : "dark";
     setTheme(nextTheme);
     addToast({
       title: "Theme Changed",

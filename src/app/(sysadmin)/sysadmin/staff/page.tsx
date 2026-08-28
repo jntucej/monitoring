@@ -229,7 +229,7 @@ export default function SysAdminStaffPage() {
         {/* Table */}
         <div className="border border-[var(--border)] rounded-xl overflow-hidden bg-[var(--bg-surface)]">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[700px]">
               <thead>
                 <tr className="bg-[var(--bg-elevated)]/60 text-xs text-[var(--text-muted)] uppercase tracking-wider">
                   <th className="px-4 py-3 text-left">Employee ID</th>

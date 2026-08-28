@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { fadeInUp } from "@/lib/animations";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { StatCard } from "@/components/admin/StatCard";
@@ -12,7 +13,7 @@ import {
   Shield, Zap, Sparkles, Database, ArrowRight
 } from "lucide-react";
 import type { DashboardData } from "@/lib/types";
-import { getAuthHeaders } from "@/lib/utils";
+import { getAuthHeaders } from "@/hooks/useAuthHeaders";
 import { useUIStore } from "@/stores/uiStore";
 
 const LOCKDOWN_SCOPES = [
@@ -189,7 +190,7 @@ export default function AdminDashboardPage() {
           <h1 className="text-2xl font-bold text-[var(--text-primary)]">Admin Dashboard</h1>
           <p className="text-sm text-[var(--text-muted)]">Loading live campus telemetry data…</p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {[0, 1, 2, 3].map((i) => (
             <div key={i} className="h-28 rounded-xl bg-[var(--bg-surface)] animate-pulse border border-[var(--border)]" />
           ))}
@@ -230,7 +231,7 @@ export default function AdminDashboardPage() {
     : 0;
 
   return (
-    <div className="space-y-6">
+    <motion.div initial="hidden" animate="visible" variants={fadeInUp} className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -261,7 +262,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* 4 Separate Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         <StatCard
           label="Students on Campus"
           value={studentStats.onCampus.toLocaleString()}
@@ -328,10 +329,10 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Campus Command & Telemetry Operational Strip */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         <div
           onClick={() => router.push("/admin/alerts")}
-          className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] hover:border-rose-500/40 hover:bg-rose-500/5 transition cursor-pointer group flex flex-col justify-between"
+          className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] hover:border-rose-500/40 hover:bg-rose-500/5 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer group flex flex-col justify-between"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] group-hover:text-rose-400">
@@ -422,6 +423,6 @@ export default function AdminDashboardPage() {
         <EntryExitChart />
         <StudentList />
       </div>
-    </div>
+    </motion.div>
   );
 }

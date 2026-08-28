@@ -123,12 +123,12 @@ export function GlassInteractiveCard({
       style={{
         rotateX: canTilt ? rotateX : 0,
         rotateY: canTilt ? rotateY : 0,
-        transformStyle: "preserve-3d",
+        transformStyle: canTilt ? "preserve-3d" : "flat",
       }}
       whileTap={{ scale: 0.98 }}
       transition={{ type: "spring", stiffness: 220, damping: 32 }}
       className={cn(
-        "relative w-full p-6 sm:p-8 rounded-3xl border shadow-2xl transition-colors duration-500 overflow-hidden",
+        "relative w-full p-6 sm:p-8 rounded-3xl border shadow-2xl transition-colors duration-500 overflow-hidden cinematic-shimmer-effect",
         getContainerBackground(),
         getBlurClass(),
         className

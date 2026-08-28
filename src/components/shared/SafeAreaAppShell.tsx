@@ -2,10 +2,10 @@
 
 import React, { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 import { DynamicHeader } from "./DynamicHeader";
-import { MobileBottomNav } from "./MobileBottomNav";
 import { NetworkStatusBanner } from "./NetworkStatusBanner";
 import { Sidebar } from "./Sidebar";
 
@@ -15,7 +15,7 @@ interface SafeAreaAppShellProps {
 
 export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
   const { authenticated } = useAuthStore();
-  const { theme, setTheme } = useUIStore();
+  const { theme, setTheme, isSidebarCollapsed } = useUIStore();
   const pathname = usePathname();
 
   // The System Administrator workspace owns a full-screen, standalone shell
@@ -27,8 +27,8 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
   // Initialize theme from localStorage on client-side mount
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const savedTheme = localStorage.getItem("gate-monitor-theme") as "dark" | "light" | null;
-      if (savedTheme) {
+      const savedTheme = localStorage.getItem("gate-monitor-theme") as "dark" | "light" | "glass" | null;
+      if (savedTheme && (savedTheme === "dark" || savedTheme === "light" || savedTheme === "glass")) {
         setTheme(savedTheme);
       } else {
         // Default to dark per project requirement
@@ -37,27 +37,48 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
     }
   }, [setTheme]);
 
+  const showNav = authenticated && !isStandaloneSysadmin;
+
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] antialiased selection:bg-[var(--action-primary)] selection:text-white">
+    <div className="min-h-[100dvh] flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] antialiased selection:bg-[var(--action-primary)] selection:text-white">
       {/* Network & Offline Status Bar */}
       <NetworkStatusBanner />
 
-      <div className="flex-1 flex w-full">
-        {/* Desktop Sidebar (hidden for the standalone SysAdmin shell) */}
-        {authenticated && !isStandaloneSysadmin && <Sidebar />}
+      {/* Unified Responsive Navigation (Desktop Sidebar + Mobile Drawer + Bottom Tabs) */}
+      {showNav && <Sidebar />}
 
+      <div
+        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
+          showNav ? (isSidebarCollapsed ? "md:pl-16" : "md:pl-64") : ""
+        }`}
+      >
         {/* Main Content Workspace */}
         <div className="flex-1 flex flex-col min-w-0">
-          {authenticated && !isStandaloneSysadmin && <DynamicHeader />}
+          {showNav && <DynamicHeader />}
 
-          <main className={`${isStandaloneSysadmin ? "flex-1 overflow-y-auto w-full h-full" : "flex-1 p-3 sm:p-5 md:p-6 pb-24 md:pb-6 overflow-y-auto max-w-7xl mx-auto w-full"}`}>
-            {children}
+          <main
+            className={`overscroll-contain ${
+              isStandaloneSysadmin
+                ? "flex-1 overflow-y-auto w-full h-full"
+                : "flex-1 p-3 sm:p-5 md:p-6 pb-24 lg:pb-6 overflow-y-auto max-w-7xl mx-auto w-full"
+            }`}
+          >
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`${pathname || "page"}-${theme}`}
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                className="w-full h-full flex flex-col"
+              >
+                {children}
+              </motion.div>
+            </AnimatePresence>
           </main>
         </div>
       </div>
-
-      {/* Mobile Touch Navigation (Authenticated only, hidden for standalone SysAdmin shell) */}
-      {authenticated && !isStandaloneSysadmin && <MobileBottomNav />}
     </div>
   );
 }
+

@@ -205,7 +205,7 @@ export function ScanConfirmation({
             onClick={() => handleConfirmClick(direction, code)}
             disabled={isDisabled}
             className={cn(
-              "py-2.5 px-2 rounded-xl border font-bold text-[11px] flex flex-col items-center justify-center gap-1 transition-all active:scale-95",
+              "py-3 px-2 min-h-[44px] rounded-xl border font-bold text-[11px] flex flex-col items-center justify-center gap-1 transition-all active:scale-95",
               isSelected
                 ? "bg-[var(--action-primary)] border-[var(--action-primary)] text-white"
                 : photoVerified && !isDisabled
@@ -413,9 +413,11 @@ export function ScanConfirmation({
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.96 }}
       transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md pb-safe select-none"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md pb-safe select-none overflow-hidden"
     >
-      {content}
+      <div className="w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-y-contain rounded-3xl">
+        {content}
+      </div>
     </motion.div>
   );
 }

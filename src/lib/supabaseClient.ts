@@ -4,6 +4,18 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
+function validateEnv() {
+  const required = [
+    'NEXT_PUBLIC_SUPABASE_URL',
+    'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+  ];
+  const missing = required.filter((key) => !process.env[key]);
+  if (missing.length && typeof window !== 'undefined') {
+    console.warn(`[SupabaseClient] Warning: Missing environment variables: ${missing.join(', ')}`);
+  }
+}
+validateEnv();
+
 // Client for browser-side usage (anonymous access)
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {

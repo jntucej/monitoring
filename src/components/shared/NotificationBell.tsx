@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Bell, BellOff, Info, AlertCircle, AlertTriangle } from "lucide-react";
+import { motion } from "framer-motion";
 import { useAuthStore } from "@/stores/authStore";
 import { getNotifications, markNotificationRead, markAllNotificationsRead, getUnreadCount } from "@/lib/notification-service";
 import { Notification } from "@/lib/notification-types";
 import { supabase } from "@/lib/supabaseClient";
+import { useGlossyMotion } from "@/lib/animations";
 
 const PRIORITY_ICONS = {
   low: Info,
@@ -23,6 +25,7 @@ const PRIORITY_COLORS = {
 
 export function NotificationBell() {
   const { user } = useAuthStore();
+  const isGlossyMotion = useGlossyMotion();
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -125,22 +128,27 @@ export function NotificationBell() {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] rounded-lg transition-colors"
-        aria-label="Notifications"
+      <motion.div
+        animate={isGlossyMotion && unreadCount > 0 ? { rotate: [0, -15, 15, -10, 10, 0] } : {}}
+        transition={{ duration: 0.5 }}
       >
-        {unreadCount > 0 ? (
-          <>
-            <Bell className="w-5 h-5 text-[var(--action-primary)] animate-pulse" />
-            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-              {unreadCount > 9 ? '9+' : unreadCount}
-            </span>
-          </>
-        ) : (
-          <BellOff className="w-5 h-5" />
-        )}
-      </button>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="relative p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] rounded-lg transition-colors"
+          aria-label="Notifications"
+        >
+          {unreadCount > 0 ? (
+            <>
+              <Bell className="w-5 h-5 text-[var(--action-primary)] animate-pulse" />
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            </>
+          ) : (
+            <BellOff className="w-5 h-5" />
+          )}
+        </button>
+      </motion.div>
 
       {isOpen && (
         <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 max-h-[500px] bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl shadow-2xl overflow-hidden z-50">

@@ -20,7 +20,7 @@ export function ScanViewfinder({
   error,
 }: ScanViewfinderProps) {
   return (
-    <div className="relative flex-1 min-h-[300px] rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 bg-slate-950 border-2 border-emerald-500/40 shadow-2xl shadow-emerald-500/10">
+    <div className="relative flex-1 min-h-[30vh] max-h-[50vh] aspect-video w-full rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 bg-slate-950 border-2 border-emerald-500/40 shadow-2xl shadow-emerald-500/10">
       {/* Cyber HUD Viewfinder overlay */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden bg-slate-950">
         <motion.div

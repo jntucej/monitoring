@@ -5,7 +5,7 @@
  * `Authorization: Bearer <token>` on API calls.
  */
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 import { useEffect, useState } from "react";
 import type { User, Role } from "@/lib/types";
 
@@ -119,8 +119,8 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       },
 
       checkSession: async () => {
-        const { token, refreshToken, user } = get();
-        if (!token || !user) return false;
+        const { token, refreshToken, user, authenticated } = get();
+        if (!token || !user || !authenticated) return false;
 
         try {
           const headers: Record<string, string> = {
@@ -147,8 +147,8 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             });
             return true;
           } else if (res.status === 401 || res.status === 403) {
-            // Session expired or account inactive
-            get().logout();
+            // Session expired or invalid on server
+            await get().logout();
             return false;
           }
         } catch (err) {
@@ -159,17 +159,34 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       },
 
       logout: async () => {
+        const { token, authenticated } = get();
+        if (!token && !authenticated) {
+          if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
+            window.location.href = "/login";
+          }
+          return;
+        }
+
+        // Clear auth store state FIRST to prevent concurrent re-triggers
+        set({
+          user: null,
+          token: null,
+          refreshToken: null,
+          role: null,
+          authenticated: false,
+          loading: false,
+        });
+
         // Best-effort server-side revocation of the Supabase session.
-        const token = get().token;
-        try {
-          if (token) {
+        if (token) {
+          try {
             await fetch("/api/auth/logout", {
               method: "POST",
               headers: { Authorization: `Bearer ${token}` },
             });
+          } catch (error) {
+            console.error("Logout request error:", error);
           }
-        } catch (error) {
-          console.error("Logout request error:", error);
         }
 
         // Reset operator store state
@@ -206,17 +223,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           console.error("Failed to reset admin store on logout:", e);
         }
 
-        // Clear auth store state
-        set({
-          user: null,
-          token: null,
-          refreshToken: null,
-          role: null,
-          authenticated: false,
-          loading: false,
-        });
-
-        // Clear storage and hard-redirect to login
+        // Clear storage and hard-redirect to login if not already on login page
         if (typeof window !== "undefined") {
           try {
             localStorage.removeItem("gate-monitor-token");
@@ -226,7 +233,9 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           } catch (e) {
             console.error("Error clearing storage on logout:", e);
           }
-          window.location.href = "/login";
+          if (!window.location.pathname.startsWith("/login")) {
+            window.location.href = "/login";
+          }
         }
       },
 
@@ -236,6 +245,11 @@ export const useAuthStore = create<AuthState & AuthActions>()(
     }),
     {
       name: "gate-monitor-auth",
+      storage: createJSONStorage(() => (typeof window !== "undefined" ? sessionStorage : {
+        getItem: () => null,
+        setItem: () => {},
+        removeItem: () => {},
+      })),
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },

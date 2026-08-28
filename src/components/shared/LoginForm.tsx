@@ -25,6 +25,22 @@ interface LoginFormProps {
   subtitle: string;
 }
 
+function formatLoginError(code?: string, defaultMsg?: string): string {
+  switch (code) {
+    case "INVALID_CREDENTIALS":
+      return "Invalid username or password.";
+    case "ACCOUNT_INACTIVE":
+      return "Your account is inactive. Contact support.";
+    case "MFA_REQUIRED":
+      return "Two-factor authentication is required. Please set it up in your security settings.";
+    case "SESSION_EXPIRED":
+      return "Your session expired. Please log in again.";
+    default:
+      if (defaultMsg === "Invalid credentials") return "Invalid username or password.";
+      return defaultMsg || "Invalid credentials.";
+  }
+}
+
 export function LoginForm({ role, title, subtitle }: LoginFormProps) {
   const router = useRouter();
   const hasHydrated = useHasHydrated();
@@ -106,8 +122,9 @@ export function LoginForm({ role, title, subtitle }: LoginFormProps) {
     // it probably checks or relies on user.role after login.
     // For now, let's keep the logic as is.
 
-    // For operator login, attempt PIN authentication first to avoid unnecessary 401 logs from password auth
-    if (role === "operator") {
+    const isPurePin = /^\d{4,8}$/.test(passwordOrPin);
+
+    if (isPurePin || role === "operator") {
       const pinResult = await pinLogin(identifier, passwordOrPin);
       if (pinResult.success) {
         if (rememberMe) {
@@ -119,8 +136,7 @@ export function LoginForm({ role, title, subtitle }: LoginFormProps) {
           variant: "success",
         });
         const authStore = useAuthStore.getState();
-        const userRole = authStore.role;
-        redirectAfterLogin(userRole);
+        redirectAfterLogin(authStore.role);
         return;
       }
 
@@ -135,56 +151,38 @@ export function LoginForm({ role, title, subtitle }: LoginFormProps) {
           variant: "success",
         });
         const authStore = useAuthStore.getState();
-        const userRole = authStore.role;
-        redirectAfterLogin(userRole);
+        redirectAfterLogin(authStore.role);
         return;
       }
 
-      triggerShake(pinResult.error || result.error || "Invalid credentials.");
-      return;
-    }
-
-    const result = await login(identifier, passwordOrPin);
-
-    // SECURITY: sysadmins must complete TOTP enrollment before they can sign in.
-    if (!result.success && result.code === "MFA_REQUIRED") {
-      triggerShake("Two-factor authentication is required. Complete setup in Security Settings, then sign in again.");
-      router.push("/sysadmin/security");
-      return;
-    }
-
-    if (result.success) {
-      if (rememberMe) {
-        localStorage.setItem("gate-monitor-remember", "true");
-      }
-      addToast({
-        title: "Access Granted",
-        message: `Authenticated successfully.`,
-        variant: "success",
-      });
-      // Redirect based on role
-      const authStore = useAuthStore.getState();
-      const userRole = authStore.role;
-      redirectAfterLogin(userRole);
-      return;
-    }
-
-    const pinResult = await pinLogin(identifier, passwordOrPin);
-    if (pinResult.success) {
-      if (rememberMe) {
-        localStorage.setItem("gate-monitor-remember", "true");
-      }
-      addToast({
-        title: "Access Granted",
-        message: `Authenticated via Security PIN.`,
-        variant: "success",
-      });
-      const authStore = useAuthStore.getState();
-      const userRole = authStore.role;
-      redirectAfterLogin(userRole);
+      triggerShake(formatLoginError(pinResult.code || result.code, pinResult.error || result.error));
       return;
     } else {
-      triggerShake(result.error || pinResult.error || "Invalid credentials.");
+      const result = await login(identifier, passwordOrPin);
+
+      // SECURITY: sysadmins must complete TOTP enrollment before they can sign in.
+      if (!result.success && result.code === "MFA_REQUIRED") {
+        triggerShake(formatLoginError("MFA_REQUIRED"));
+        router.push("/sysadmin/security");
+        return;
+      }
+
+      if (result.success) {
+        if (rememberMe) {
+          localStorage.setItem("gate-monitor-remember", "true");
+        }
+        addToast({
+          title: "Access Granted",
+          message: `Authenticated successfully.`,
+          variant: "success",
+        });
+        const authStore = useAuthStore.getState();
+        redirectAfterLogin(authStore.role);
+        return;
+      }
+
+      triggerShake(formatLoginError(result.code, result.error));
+      return;
     }
   };
 

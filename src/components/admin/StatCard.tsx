@@ -2,11 +2,11 @@
 
 import { LucideIcon } from "lucide-react";
 import { motion } from "framer-motion";
-import { useUIStore } from "@/stores/uiStore";
+import { CountUp } from "@/components/shared/CountUp";
 
 interface StatCardProps {
   label: string;
-  value: string;
+  value: string | number;
   icon: LucideIcon;
   color: string;
   trend?: string;
@@ -14,6 +14,9 @@ interface StatCardProps {
 }
 
 export function StatCard({ label, value, icon: Icon, color, trend, onClick }: StatCardProps) {
+  const numericValue = typeof value === "number" ? value : parseFloat(String(value).replace(/,/g, ""));
+  const isNumeric = !isNaN(numericValue);
+
   return (
     <motion.div
       whileHover={{ y: -4, scale: 1.015 }}
@@ -39,7 +42,9 @@ export function StatCard({ label, value, icon: Icon, color, trend, onClick }: St
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">{label}</p>
-          <p className="text-2xl font-black text-[var(--text-primary)] mt-0.5 tracking-tight">{value}</p>
+          <p className="kpi-number text-fluid-2xl text-[var(--text-primary)] mt-1">
+            {isNumeric ? <CountUp value={numericValue} /> : value}
+          </p>
           {trend ? (
             <p className="text-xs font-medium text-[var(--text-muted)] mt-1 truncate">{trend}</p>
           ) : null}

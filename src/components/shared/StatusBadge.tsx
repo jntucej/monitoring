@@ -1,8 +1,10 @@
 "use client";
 
 import * as React from "react";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { ScanDirection, ExitReason } from "@/lib/types";
+import { useGlossyMotion, statusPulse } from "@/lib/animations";
 
 interface StatusBadgeProps {
   direction: ScanDirection;
@@ -24,6 +26,7 @@ const dotSizes = {
 };
 
 export function StatusBadge({ direction, reason, className, size = "md" }: StatusBadgeProps) {
+  const isGlossyMotion = useGlossyMotion();
   const isEntry = direction === "IN";
 
   const bgColor = isEntry
@@ -54,7 +57,8 @@ export function StatusBadge({ direction, reason, className, size = "md" }: Statu
   const label = isEntry ? "ENTRY" : reason ? reason.toUpperCase() : "EXIT";
 
   return (
-    <span
+    <motion.span
+      animate={isGlossyMotion && isEntry ? statusPulse : {}}
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full font-medium",
         sizeClasses[size],
@@ -63,9 +67,9 @@ export function StatusBadge({ direction, reason, className, size = "md" }: Statu
         className
       )}
     >
-      <span className={cn("rounded-full", dotSizes[size], dotColor)} />
+      <span className={cn("rounded-full", dotSizes[size], dotColor, isEntry && "animate-pulse")} />
       <span className="leading-tight">{icon}</span>
       <span className="leading-tight">{label}</span>
-    </span>
+    </motion.span>
   );
 }

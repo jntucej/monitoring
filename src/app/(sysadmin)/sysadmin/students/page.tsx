@@ -251,7 +251,7 @@ export default function SysAdminStudentsPage() {
         {/* Table */}
         <div className="border border-slate-800 rounded-xl overflow-hidden bg-[#0d1220]">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[700px]">
               <thead>
                 <tr className="bg-slate-900/60 text-xs text-slate-400 uppercase tracking-wider">
                   <th className="px-4 py-3 text-left">Roll No</th>

@@ -41,14 +41,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="dark" data-scroll-behavior="smooth" suppressHydrationWarning className={`${inter.variable} h-full antialiased`}>
+    <html lang="en" data-theme="dark" data-scroll-behavior="smooth" suppressHydrationWarning className={`${inter.variable} h-full antialiased dark`}>
       <body className="min-h-full flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] font-[var(--font-family)]">
-        {/* Restore saved theme before first paint — prevents dark flash for light-theme users.
-            Runs synchronously before content renders. Must stay in sync with uiStore.setTheme
-            ("gate-monitor-theme" key + data-theme attribute + dark class). */}
+        {/* Restore saved theme before first paint — defaults strictly to dark theme */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem("gate-monitor-theme");if(t==="light"||t==="dark"||t==="glass"){document.documentElement.setAttribute("data-theme",t);document.documentElement.classList.toggle("dark",t==="dark"||t==="glass")}}catch(e){}`,
+            __html: `try{var t=localStorage.getItem("gate-monitor-theme");if(t==="light"||t==="dark"||t==="glass"){document.documentElement.setAttribute("data-theme",t);document.documentElement.classList.toggle("dark",t==="dark"||t==="glass")}else{document.documentElement.setAttribute("data-theme","dark");document.documentElement.classList.add("dark");localStorage.setItem("gate-monitor-theme","dark");}}catch(e){document.documentElement.setAttribute("data-theme","dark");document.documentElement.classList.add("dark");}`,
           }}
         />
         <ClientProviders>{children}</ClientProviders>

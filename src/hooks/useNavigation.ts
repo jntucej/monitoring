@@ -295,6 +295,22 @@ export function useNavigation(roleCode?: string) {
     }
 
     const defaults = getDefaultNavigation(roleCode, isHod, dept);
+    const cacheKey = `gate-monitor-nav-${roleCode}-${isHod ? 'hod' : 'regular'}`;
+    const CACHE_TTL_MS = 5 * 60 * 1000;
+
+    if (typeof window !== "undefined") {
+      try {
+        const cachedStr = localStorage.getItem(cacheKey);
+        if (cachedStr) {
+          const parsed = JSON.parse(cachedStr);
+          if (parsed.timestamp && Date.now() - parsed.timestamp < CACHE_TTL_MS && Array.isArray(parsed.data)) {
+            setNavigation(parsed.data);
+            setLoading(false);
+            return;
+          }
+        }
+      } catch {}
+    }
 
     const fetchNav = async () => {
       setLoading(true);
@@ -303,6 +319,9 @@ export function useNavigation(roleCode?: string) {
         const json = await res.json();
         if (json.success && Array.isArray(json.data) && json.data.length > 0) {
           setNavigation(json.data);
+          try {
+            localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: json.data }));
+          } catch {}
         } else {
           setNavigation(defaults);
         }

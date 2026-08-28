@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { addScan, isDuplicate, findUserById, findGateById, getActiveLockdown } from "@/lib/db"
 import { withAuthorization } from "@/middleware/authorization"
 import { withRateLimit } from "@/lib/rate-limit"
+import { validateRollNumber } from "@/lib/rollNumber"
 import type { ScanDirection, ExitReason } from "@/lib/types"
 
 import { logAuditEvent } from "@/lib/audit"
@@ -71,6 +72,17 @@ async function handlePost(req: NextRequest) {
         { success: false, error: { code: "BAD_REQUEST", message: "Missing required fields" } },
         { status: 400 }
       )
+    }
+
+    // Input Validation: Check roll number / identifier format
+    const cleanRoll = roll.trim().toUpperCase();
+    const isUuidLike = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanRoll);
+    const isEmployeeIdLike = /^[A-Z0-9_-]{3,24}$/i.test(cleanRoll);
+    if (!validateRollNumber(cleanRoll) && !isUuidLike && !isEmployeeIdLike) {
+      return NextResponse.json(
+        { success: false, error: { code: "INVALID_ID", message: "Invalid identifier format" } },
+        { status: 400 }
+      );
     }
 
     // Verify operator ↔ gate assignment for operators

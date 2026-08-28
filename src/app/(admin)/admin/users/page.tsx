@@ -227,7 +227,7 @@ export default function AdminUsersPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[700px]">
               <thead>
                 <tr className="border-b border-[var(--border)] text-left text-[var(--text-muted)] bg-white/5">
                   <th className="p-4 font-medium">User Profile</th>

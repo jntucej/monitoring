@@ -1,12 +1,25 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode, useRef } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode, useRef } from "react";
 import { useReducedMotion } from "framer-motion";
 import { useUIStore } from "@/stores/uiStore";
+import { GateMonitorWS } from "@/lib/websocket";
+import { AlertPayload, GateStatusChangePayload } from "@/lib/mockData";
 
 export type GateStatus = "entry" | "exit" | "idle" | "warning";
-export type PerformanceTier = "splusplus" | "performance" | "legacy" | "emergency";
+export type PerformanceTier = "splusplus" | "performance" | "legacy" | "emergency" | "high" | "medium" | "low";
 export type DisplayMode = "indoor" | "outdoor";
+
+export interface GateCardState {
+  id: string;
+  gateId: string;
+  name: string;
+  status: GateStatus;
+  location: string;
+  lastUpdate: number;
+}
+
+export type { AlertPayload };
 
 interface GlassState {
   isDark: boolean;
@@ -20,11 +33,31 @@ interface GlassState {
   setGateTraffic: (level: number) => void;
   isTouchDevice: boolean;
   prefersReducedMotion: boolean;
+  setPrefersReducedMotion: (v: boolean) => void;
   performanceTier: PerformanceTier;
+  setPerformanceTier: (v: PerformanceTier) => void;
   isLowEndDevice: boolean;
+  // --- WEBSOCKET REAL-TIME LIVE DATA ---
+  gateStatuses: Record<string, GateStatus>;
+  setGateStatus: (gateId: string, status: GateStatus) => void;
+  wsConnected: boolean;
+  wsReconnecting: boolean;
+  wsError: string | null;
+  lastAlertGateId: string | null;
+  cards: GateCardState[];
+  setCards: React.Dispatch<React.SetStateAction<GateCardState[]>>;
+  activeAlerts: AlertPayload[];
+  dismissAlert: (timestamp: string) => void;
 }
 
 const GlassContext = createContext<GlassState | undefined>(undefined);
+
+const INITIAL_CARDS: GateCardState[] = [
+  { id: "card-1", gateId: "gate-1", name: "Gate 1 — Main Entrance", status: "idle", location: "South Campus", lastUpdate: Date.now() },
+  { id: "card-2", gateId: "gate-2", name: "Gate 2 — Hostel Block", status: "idle", location: "North Hostel", lastUpdate: Date.now() },
+  { id: "card-3", gateId: "gate-3", name: "Gate 3 — Academic Block", status: "idle", location: "East Wing", lastUpdate: Date.now() },
+  { id: "card-4", gateId: "gate-4", name: "Gate 4 — Service Entry", status: "idle", location: "West Maintenance", lastUpdate: Date.now() },
+];
 
 export function GlassProvider({
   children,
@@ -34,11 +67,99 @@ export function GlassProvider({
   initialDark?: boolean;
 }) {
   const store = useUIStore();
-  const prefersReducedMotion = useReducedMotion();
+  const framerReducedMotion = useReducedMotion();
+  const [manualReducedMotion, setPrefersReducedMotion] = useState<boolean>(false);
+  const prefersReducedMotion = !!framerReducedMotion || manualReducedMotion;
+
   const [activeGate, setActiveGate] = useState<string | null>(null);
-  const [gateTraffic, setGateTraffic] = useState(45);
+  const [gateTraffic, setGateTraffic] = useState(35);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [displayMode, setDisplayModeState] = useState<DisplayMode>("indoor");
+
+  const [cards, setCards] = useState<GateCardState[]>(INITIAL_CARDS);
+  const [wsConnected, setWsConnected] = useState<boolean>(false);
+  const [wsReconnecting, setWsReconnecting] = useState<boolean>(false);
+  const [wsError, setWsError] = useState<string | null>(null);
+  const [activeAlerts, setActiveAlerts] = useState<AlertPayload[]>([]);
+
+  // --- WEBSOCKET REAL-TIME STATE ---
+  const [gateStatuses, setGateStatuses] = useState<Record<string, GateStatus>>({
+    "gate-1": "idle",
+    "gate-2": "entry",
+    "gate-3": "exit",
+    "gate-4": "idle",
+  });
+  const [lastAlertGateId, setLastAlertGateId] = useState<string | null>(null);
+
+  const setGateStatus = useCallback((gateId: string, status: GateStatus) => {
+    setGateStatuses((prev) => ({ ...prev, [gateId]: status }));
+    setCards((prev) =>
+      prev.map((card) =>
+        card.gateId === gateId ? { ...card, status, lastUpdate: Date.now() } : card
+      )
+    );
+  }, []);
+
+  const dismissAlert = useCallback((timestamp: string) => {
+    setActiveAlerts((prev) => prev.filter((a) => a.timestamp.toString() !== timestamp));
+  }, []);
+
+  // --- WEBSOCKET LIVE FEED SUBSCRIPTION ---
+  const wsRef = useRef<GateMonitorWS | null>(null);
+
+  useEffect(() => {
+    const isMock = process.env.NEXT_PUBLIC_WS_MOCK === "true";
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8080";
+
+    if (wsRef.current) {
+      wsRef.current.disconnect();
+    }
+    const ws = new GateMonitorWS(wsUrl, isMock);
+    wsRef.current = ws;
+
+    const unsubTraffic = ws.onTrafficUpdate((newTraffic) => {
+      setGateTraffic(newTraffic);
+    });
+
+    const unsubStatus = ws.onGateStatusChange((data: GateStatusChangePayload) => {
+      setGateStatuses((prev) => ({ ...prev, [data.gateId]: data.status }));
+      setCards((prev) =>
+        prev.map((card) =>
+          card.gateId === data.gateId
+            ? { ...card, status: data.status, lastUpdate: data.timestamp }
+            : card
+        )
+      );
+    });
+
+    const unsubAlert = ws.onAlert((data: AlertPayload) => {
+      setLastAlertGateId(data.gateId);
+      setActiveAlerts((prev) => {
+        const next = [...prev, data];
+        if (next.length > 10) next.shift();
+        return next;
+      });
+    });
+
+    const unsubConn = ws.onConnectionChange((connected) => {
+      setWsConnected(connected);
+      setWsReconnecting(!connected && !isMock);
+      if (connected) setWsError(null);
+    });
+
+    ws.connect();
+
+    return () => {
+      unsubTraffic();
+      unsubStatus();
+      unsubAlert();
+      unsubConn();
+      ws.disconnect();
+      if (wsRef.current === ws) {
+        wsRef.current = null;
+      }
+    };
+  }, []);
 
   // --- RUNTIME FPS DETECTION ---
   const [performanceTier, setPerformanceTier] = useState<PerformanceTier>("splusplus");
@@ -111,11 +232,11 @@ export function GlassProvider({
   }, []);
 
   const toggleTheme = () => {
-    const nextTheme = store.theme === "dark" ? "light" : store.theme === "light" ? "glass" : "dark";
+    const nextTheme = store.theme === "dark" ? "glass" : store.theme === "glass" ? "light" : "dark";
     store.setTheme(nextTheme);
   };
 
-  const isLowEndDevice = performanceTier === "legacy" || performanceTier === "emergency";
+  const isLowEndDevice = performanceTier === "legacy" || performanceTier === "emergency" || performanceTier === "low";
 
   return (
     <GlassContext.Provider
@@ -130,9 +251,21 @@ export function GlassProvider({
         gateTraffic,
         setGateTraffic,
         isTouchDevice,
-        prefersReducedMotion: !!prefersReducedMotion,
+        prefersReducedMotion,
+        setPrefersReducedMotion,
         performanceTier,
+        setPerformanceTier,
         isLowEndDevice,
+        gateStatuses,
+        setGateStatus,
+        wsConnected,
+        wsReconnecting,
+        wsError,
+        lastAlertGateId,
+        cards,
+        setCards,
+        activeAlerts,
+        dismissAlert,
       }}
     >
       {children}

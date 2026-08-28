@@ -23,6 +23,8 @@ export function rateLimit(keyOrReq: string | NextRequest, pointsOrConfig?: numbe
     // Legacy support: rateLimit(key, points)
     const key = keyOrReq;
     const points = (pointsOrConfig as number) || 5;
+    const isDev = process.env.NODE_ENV !== "production" || key.includes("127.0.0.1") || key.includes("::1") || key.includes("unknown") || key.includes("global");
+    const effectivePoints = isDev ? Math.max(points * 10, 1000) : points;
     const now = Date.now();
     if (store[key] && store[key].resetTime < now) {
       delete store[key];
@@ -32,7 +34,7 @@ export function rateLimit(keyOrReq: string | NextRequest, pointsOrConfig?: numbe
       return Promise.resolve({ limited: false });
     }
     store[key].count++;
-    if (store[key].count > points) {
+    if (store[key].count > effectivePoints) {
       const retryAfter = Math.ceil((store[key].resetTime - now) / 1000);
       return Promise.resolve({ limited: true, retryAfter });
     }
@@ -49,6 +51,10 @@ export function rateLimit(keyOrReq: string | NextRequest, pointsOrConfig?: numbe
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 
                req.headers.get('x-real-ip') || 
                'unknown';
+
+    // In local development / test environments, raise rate limits to prevent dev lockouts
+    const isDev = process.env.NODE_ENV !== "production" || ip === "127.0.0.1" || ip === "::1" || ip === "unknown" || ip === "localhost";
+    const effectiveMaxRequests = isDev ? Math.max(maxRequests * 10, 200) : maxRequests;
     
     const key = `${keyPrefix}:${ip}`;
     const now = Date.now();
@@ -62,12 +68,12 @@ export function rateLimit(keyOrReq: string | NextRequest, pointsOrConfig?: numbe
         count: 1,
         resetTime: now + windowMs,
       };
-      return { limited: false, remaining: maxRequests - 1, resetTime: new Date(store[key].resetTime) };
+      return { limited: false, remaining: effectiveMaxRequests - 1, resetTime: new Date(store[key].resetTime) };
     }
 
     store[key].count++;
 
-    if (store[key].count > maxRequests) {
+    if (store[key].count > effectiveMaxRequests) {
       return { 
         limited: true, 
         remaining: 0, 
@@ -77,7 +83,7 @@ export function rateLimit(keyOrReq: string | NextRequest, pointsOrConfig?: numbe
 
     return { 
       limited: false, 
-      remaining: maxRequests - store[key].count, 
+      remaining: effectiveMaxRequests - store[key].count, 
       resetTime: new Date(store[key].resetTime) 
     };
   };

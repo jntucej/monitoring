@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { CountUp } from "@/components/shared/CountUp";
 import {
   Users,
   CheckCircle2,
@@ -65,7 +66,9 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
             <Users className="w-3.5 h-3.5 text-blue-400" />
             Total Faculty
           </div>
-          <div className="text-2xl font-black text-[var(--text-primary)]">{summary.totalFaculty}</div>
+          <div className="text-2xl font-black text-[var(--text-primary)]">
+            <CountUp value={summary.totalFaculty} />
+          </div>
           <p className="text-[10px] text-[var(--text-muted)]">Across {departmentSummaries.length} departments</p>
         </div>
 
@@ -74,7 +77,9 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
             Present Today
           </div>
-          <div className="text-2xl font-black text-emerald-400">{summary.presentToday}</div>
+          <div className="text-2xl font-black text-emerald-400">
+            <CountUp value={summary.presentToday} />
+          </div>
           <p className="text-[10px] text-[var(--text-muted)]">{summary.overallAttendanceRate}% attendance rate</p>
         </div>
 
@@ -83,7 +88,9 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
             <Building2 className="w-3.5 h-3.5 text-indigo-400" />
             Currently Inside
           </div>
-          <div className="text-2xl font-black text-indigo-400">{summary.currentlyInside}</div>
+          <div className="text-2xl font-black text-indigo-400">
+            <CountUp value={summary.currentlyInside} />
+          </div>
           <p className="text-[10px] text-[var(--text-muted)]">Active on campus</p>
         </div>
 
@@ -92,7 +99,9 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
             <ArrowRightLeft className="w-3.5 h-3.5 text-amber-400" />
             Currently Outside
           </div>
-          <div className="text-2xl font-black text-amber-400">{summary.currentlyOutside}</div>
+          <div className="text-2xl font-black text-amber-400">
+            <CountUp value={summary.currentlyOutside} />
+          </div>
           <p className="text-[10px] text-[var(--text-muted)]">Punched out / Off site</p>
         </div>
 
@@ -101,7 +110,9 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
             <Clock className="w-3.5 h-3.5 text-rose-400" />
             Late Check-ins
           </div>
-          <div className="text-2xl font-black text-rose-400">{summary.lateArrivals}</div>
+          <div className="text-2xl font-black text-rose-400">
+            <CountUp value={summary.lateArrivals} />
+          </div>
           <p className="text-[10px] text-[var(--text-muted)]">After 10:00 AM cut-off</p>
         </div>
 
@@ -110,7 +121,9 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
             <UserX className="w-3.5 h-3.5 text-slate-400" />
             Absent / Unchecked
           </div>
-          <div className="text-2xl font-black text-[var(--text-muted)]">{summary.absentCount}</div>
+          <div className="text-2xl font-black text-[var(--text-muted)]">
+            <CountUp value={summary.absentCount} />
+          </div>
           <p className="text-[10px] text-[var(--text-muted)]">No scan logged today</p>
         </div>
       </div>
@@ -231,8 +244,8 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
             No faculty members match the applied filters.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+          <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <table className="w-full text-left border-collapse min-w-[700px]">
               <thead>
                 <tr className="border-b border-[var(--border)] text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">
                   <th className="pb-3 px-3">Faculty Details</th>

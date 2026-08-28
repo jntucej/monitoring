@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { CountUp } from "@/components/shared/CountUp";
 import {
   Briefcase,
   CheckCircle2,
@@ -82,7 +83,9 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
             <Briefcase className="w-3.5 h-3.5 text-purple-400" />
             Total Staff
           </div>
-          <div className="text-2xl font-black text-[var(--text-primary)]">{summary.totalStaff}</div>
+          <div className="text-2xl font-black text-[var(--text-primary)]">
+            <CountUp value={summary.totalStaff} />
+          </div>
           <p className="text-[10px] text-[var(--text-muted)] font-mono">Administrative Roster</p>
         </div>
 
@@ -91,7 +94,9 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
             Present Today
           </div>
-          <div className="text-2xl font-black text-emerald-400">{summary.presentToday}</div>
+          <div className="text-2xl font-black text-emerald-400">
+            <CountUp value={summary.presentToday} />
+          </div>
           <p className="text-[10px] text-[var(--text-muted)]">{summary.overallAttendanceRate}% daily rate</p>
         </div>
 
@@ -100,7 +105,9 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
             <Building2 className="w-3.5 h-3.5 text-indigo-400" />
             Currently Inside
           </div>
-          <div className="text-2xl font-black text-indigo-400">{summary.currentlyInside}</div>
+          <div className="text-2xl font-black text-indigo-400">
+            <CountUp value={summary.currentlyInside} />
+          </div>
           <p className="text-[10px] text-[var(--text-muted)]">Inside Campus</p>
         </div>
 
@@ -109,7 +116,9 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
             <Clock className="w-3.5 h-3.5 text-amber-400" />
             Currently Outside
           </div>
-          <div className="text-2xl font-black text-amber-400">{summary.currentlyOutside}</div>
+          <div className="text-2xl font-black text-amber-400">
+            <CountUp value={summary.currentlyOutside} />
+          </div>
           <p className="text-[10px] text-[var(--text-muted)] font-mono">Off Campus</p>
         </div>
 
@@ -118,7 +127,9 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
             <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />
             Warnings (WRN)
           </div>
-          <div className="text-2xl font-black text-rose-400">{summary.warningCount}</div>
+          <div className="text-2xl font-black text-rose-400">
+            <CountUp value={summary.warningCount} />
+          </div>
           <p className="text-[10px] text-rose-400/80">Flagged exceptions</p>
         </div>
       </div>
@@ -170,8 +181,8 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
           <span className="text-xs text-[var(--text-muted)]">{filteredRecords.length} records</span>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        <div className="overflow-x-auto -mx-4 sm:mx-0">
+          <table className="w-full text-left border-collapse min-w-[700px]">
             <thead>
               <tr className="border-b border-[var(--border)] text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider bg-white/5">
                 <th className="py-3 px-4">Staff Member</th>

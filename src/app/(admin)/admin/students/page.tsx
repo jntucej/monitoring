@@ -131,7 +131,7 @@ export default function AdminStudentsPage() {
       )}
       <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm min-w-[700px]">
             <thead>
               <tr className="border-b border-[var(--border)] text-left text-[var(--text-muted)]">
                 <th className="p-4 font-medium">Student</th>

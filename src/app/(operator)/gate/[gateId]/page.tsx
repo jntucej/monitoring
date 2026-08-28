@@ -167,12 +167,20 @@ export default function OperatorPage() {
   const gateInitializedRef = useRef<string | null>(null);
 
   useEffect(() => {
+    let mounted = true;
     if (!authenticated) return;
     if (gateInitializedRef.current === gateId) return;
     gateInitializedRef.current = gateId;
 
-    setGate(gateId);
-    reset();
+    const init = async () => {
+      await setGate(gateId);
+      if (mounted) reset();
+    };
+    init();
+
+    return () => {
+      mounted = false;
+    };
   }, [authenticated, gateId, setGate, reset]);
 
   const [gateName, setGateName] = useState("Loading...");
@@ -298,36 +306,36 @@ export default function OperatorPage() {
             <div className="flex bg-[var(--bg-surface)] p-1.5 rounded-2xl border border-[var(--border)] gap-1 shadow-sm">
               <button
                 onClick={() => setOperatorSubMode("scan")}
-                className={`flex-grow py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
+                className={`flex-grow py-2.5 px-2 min-h-[44px] rounded-xl font-bold text-[10px] sm:text-xs whitespace-nowrap flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] ${
                   operatorSubMode === "scan"
                     ? "bg-[var(--action-primary)] text-slate-950 shadow-md font-extrabold"
                     : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 }`}
               >
-                <Scan className="w-4 h-4" />
-                <span>Scan QR</span>
+                <Scan className="w-4 h-4 shrink-0" />
+                <span className="truncate">Scan QR</span>
               </button>
               <button
                 onClick={() => setOperatorSubMode("manual")}
-                className={`flex-grow py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
+                className={`flex-grow py-2.5 px-2 min-h-[44px] rounded-xl font-bold text-[10px] sm:text-xs whitespace-nowrap flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] ${
                   operatorSubMode === "manual"
                     ? "bg-amber-400 text-slate-950 shadow-md font-extrabold"
                     : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 }`}
               >
-                <KeyRound className="w-4 h-4" />
-                <span>Manual Enter</span>
+                <KeyRound className="w-4 h-4 shrink-0" />
+                <span className="truncate">Manual Enter</span>
               </button>
               <button
                 onClick={() => setOperatorSubMode("entry")}
-                className={`flex-grow relative py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
+                className={`flex-grow relative py-2.5 px-2 min-h-[44px] rounded-xl font-bold text-[10px] sm:text-xs whitespace-nowrap flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] ${
                   operatorSubMode === "entry"
                     ? "bg-[var(--action-primary)] text-slate-950 shadow-md font-extrabold"
                     : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 }`}
               >
-                <UserCheck className="w-4 h-4" />
-                <span>Entry Details</span>
+                <UserCheck className="w-4 h-4 shrink-0" />
+                <span className="truncate">Entry Details</span>
                 {(state === "confirming" || state === "error") && (
                   <span className="absolute top-1.5 right-2 w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse border-2 border-[var(--bg-surface)]" />
                 )}
@@ -526,7 +534,7 @@ export default function OperatorPage() {
 
   return (
     <div className="min-h-[85vh] flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] pb-safe">
-      <main className="flex-1 max-w-lg w-full mx-auto p-2 sm:p-4 space-y-4">
+      <main className="flex-1 w-full max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto p-2 sm:p-4 space-y-4">
         {/* Emergency Lockdown Active Alert Header Banner */}
         {activeLockdown && (
           <div className="bg-rose-600 text-white p-4 rounded-xl border border-rose-700 shadow-lg flex items-center justify-between animate-pulse">

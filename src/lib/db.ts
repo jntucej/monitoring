@@ -2,10 +2,19 @@ import { supabase as browserClient, invalidateAllUserSessions, getSupabaseServic
 import { randomUUID } from "crypto";
 import bcrypt from 'bcryptjs';
 
-// Conditionally use service role on the server, and browser client on the client
-// This ensures that API routes have necessary DB privileges since they handle their own auth checks
-const isServer = typeof window === 'undefined';
-export const supabase = isServer ? getSupabaseServiceClient() : browserClient;
+// Always export the browser client for general use, and helper for server context
+export const supabase = browserClient;
+
+export function getDbClient() {
+  if (typeof window === 'undefined') {
+    try {
+      return getSupabaseServiceClient();
+    } catch {
+      return browserClient;
+    }
+  }
+  return browserClient;
+}
 
 import type {
   Department, DepartmentCode, Gate, Person, Student, PersonType, StudentDetails, EmployeeDetails, VisitorLog,

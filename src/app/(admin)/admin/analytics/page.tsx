@@ -542,8 +542,8 @@ export default function AdminAnalyticsPage() {
             <div className="space-y-6">
               <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-6 shadow-sm">
                 <h3 className="font-semibold mb-4">Department Access Activity</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                <div className="overflow-x-auto -mx-4 sm:mx-0">
+                  <table className="w-full text-sm min-w-[700px]">
                     <thead>
                       <tr className="border-b border-[var(--border)] text-left text-muted-foreground">
                         <th className="p-3">Department</th>

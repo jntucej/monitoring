@@ -1,7 +1,9 @@
 "use client";
 import React, { useState } from "react";
 import { User, ArrowDownLeft, ArrowUpRight, ChevronRight, ShieldCheck } from "lucide-react";
+import { motion } from "framer-motion";
 import type { Scan } from "@/lib/types";
+import { useGlossyMotion, staggerContainer, fadeInUp } from "@/lib/animations";
 
 interface RecentScansProps {
   scans: Scan[];
@@ -11,6 +13,7 @@ interface RecentScansProps {
 type FilterTab = "ALL" | "IN" | "OUT" | "FLAGGED";
 
 export function RecentScans({ scans, onSelect }: RecentScansProps) {
+  const isGlossyMotion = useGlossyMotion();
   const [filter, setFilter] = useState<FilterTab>("ALL");
 
   const filteredScans = (scans || []).filter((scan) => {
@@ -65,13 +68,20 @@ export function RecentScans({ scans, onSelect }: RecentScansProps) {
         </div>
       </div>
 
-      <div className="space-y-3.5">
+      <motion.div
+        variants={isGlossyMotion ? staggerContainer : {}}
+        initial={isGlossyMotion ? "hidden" : false}
+        animate={isGlossyMotion ? "visible" : undefined}
+        className="space-y-3.5 overscroll-y-contain max-h-[420px] overflow-y-auto custom-scrollbar"
+      >
         {filteredScans.length > 0 ? (
           filteredScans.map((scan) => (
-            <button
+            <motion.button
               key={scan.id}
+              variants={isGlossyMotion ? fadeInUp : {}}
+              whileHover={{ x: 4 }}
               onClick={() => onSelect?.(scan)}
-              className="w-full flex items-center justify-between text-xs py-2 border-b border-[var(--border)]/30 last:border-b-0 hover:bg-[var(--bg-base)] rounded-lg px-1 -mx-1 transition-colors text-left"
+              className="w-full flex items-center justify-between text-xs py-3 px-2 border-b border-[var(--border)]/30 last:border-b-0 hover:bg-[var(--bg-base)] rounded-xl transition-colors text-left min-h-[44px]"
             >
               <div className="flex items-center gap-3 min-w-0">
                 <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${scan.direction === 'IN' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-[var(--action-danger)]/10 text-[var(--action-danger)]'}`}>
@@ -108,14 +118,14 @@ export function RecentScans({ scans, onSelect }: RecentScansProps) {
                 </div>
                 <ChevronRight className="w-4 h-4 text-[var(--text-muted)]" />
               </div>
-            </button>
+            </motion.button>
           ))
         ) : (
           <div className="text-center py-6 text-[var(--text-muted)] text-xs">
             No gate scans registered for filter "{filter}".
           </div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }

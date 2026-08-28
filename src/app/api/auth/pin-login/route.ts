@@ -140,6 +140,26 @@ async function mintSupabaseSession(email: string, expectedId?: string) {
 
 async function handlePinLogin(req: NextRequest) {
   try {
+    // CSRF Protection: Verify Host matches Origin for state-changing requests
+    const origin = req.headers.get("origin");
+    const host = req.headers.get("host");
+    if (origin && host) {
+      try {
+        const originUrl = new URL(origin);
+        if (originUrl.host !== host) {
+          return NextResponse.json(
+            { success: false, error: { code: "FORBIDDEN", message: "CSRF verification failed: Cross-Origin request blocked." } },
+            { status: 403 }
+          );
+        }
+      } catch {
+        return NextResponse.json(
+          { success: false, error: { code: "FORBIDDEN", message: "CSRF verification failed: Invalid origin format." } },
+          { status: 403 }
+        );
+      }
+    }
+
     const body = await req.json().catch(() => null);
     const { employeeId, pin, verifyOnly } = body || {};
 

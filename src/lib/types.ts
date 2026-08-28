@@ -1,3 +1,6 @@
+export type UUID = string & { readonly __brand: unique symbol };
+export type RollNumber = string & { readonly __brand: unique symbol };
+
 export type Role =
   | "operator"
   | "admin"

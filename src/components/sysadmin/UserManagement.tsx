@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { UserPlus, User, Loader2, XCircle, Fingerprint, ShieldCheck, Upload } from "lucide-react";
+import { UserPlus, User, Loader2, XCircle, Fingerprint, ShieldCheck, Upload, KeyRound } from "lucide-react";
 import type { User as UserType } from "@/lib/types";
 import { useAuthStore } from "@/stores/authStore";
 import { BulkUserImportModal } from "./BulkUserImportModal";
@@ -35,6 +35,27 @@ export function UserManagement() {
       body: JSON.stringify(updates),
     });
     return { ok: res.ok, json: await res.json().catch(() => null) };
+  };
+
+  /** Reset a user's operator security PIN */
+  const resetPin = async (user: UserType) => {
+    const newPin = prompt(`Enter new 4-8 digit security PIN for ${user.name}:`);
+    if (!newPin) return;
+    if (!/^\d{4,8}$/.test(newPin.trim())) {
+      alert("PIN must be between 4 and 8 digits.");
+      return;
+    }
+    setBusy(true);
+    setMsg(null);
+    try {
+      const { ok, json } = await patchUser(user.id, { pin: newPin.trim() });
+      setMsg(ok && json?.success ? `✅ Security PIN updated for ${user.name}.` : `❌ ${json?.error?.message ?? "Failed to update PIN"}`);
+    } catch {
+      setMsg("❌ Network error while resetting PIN");
+    } finally {
+      setBusy(false);
+      load();
+    }
   };
 
   /** Register a (mock-captured) thumbprint for a user via the admin route. */
@@ -331,6 +352,14 @@ export function UserManagement() {
                     Clear
                   </button>
                 )}
+                <button
+                  onClick={() => resetPin(user)}
+                  disabled={busy}
+                  className="text-xs font-semibold px-3 py-1 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20 hover:bg-purple-500/20 disabled:opacity-50 flex items-center gap-1"
+                >
+                  <KeyRound className="w-3 h-3" />
+                  Reset PIN
+                </button>
                 <select
                   value={user.role}
                   disabled={busy}

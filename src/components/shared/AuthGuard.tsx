@@ -57,6 +57,13 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
 
     // Revalidate session asynchronously in background without blocking rendering
     checkSession();
+
+    // Auto-refresh session check every 5 minutes
+    const interval = setInterval(() => {
+      checkSession();
+    }, 5 * 60 * 1000);
+
+    return () => clearInterval(interval);
   }, [user, authenticated, allowedRoles, router, hasHydrated, checkSession]);
 
   if (!hasHydrated || isChecking || !authenticated || !user) {

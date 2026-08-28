@@ -10,7 +10,7 @@ export interface ModalProps {
   onClose: () => void;
   title?: string;
   children: React.ReactNode;
-  size?: "sm" | "md" | "lg" | "xl" | "fullscreen";
+  size?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | "fullscreen";
   showClose?: boolean;
 }
 
@@ -19,6 +19,10 @@ const sizeClasses = {
   md: "max-w-md",
   lg: "max-w-2xl",
   xl: "max-w-4xl",
+  "2xl": "max-w-6xl",
+  "3xl": "max-w-7xl",
+  "4xl": "max-w-[85vw]",
+  "5xl": "max-w-[92vw]",
   fullscreen: "w-full h-full m-0 rounded-none",
 };
 
@@ -55,7 +59,8 @@ const Modal = ({
             {showClose && (
               <button
                 onClick={onClose}
-                className="absolute top-4 right-4 p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors"
+                aria-label="Close modal"
+                className="absolute top-3 right-3 p-3 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors active:scale-95"
               >
                 <X className="w-5 h-5" />
               </button>
