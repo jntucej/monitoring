@@ -224,10 +224,9 @@ export default function SupervisorDashboardPage() {
 
   const filteredPasses = passes.filter((p) => {
     if (passTypeFilter === "ALL") return true;
-    if (passTypeFilter === "SHORT_OUTING") return p.reason?.toLowerCase().includes("short") || p.reason?.toLowerCase().includes("outing");
-    if (passTypeFilter === "HOME_OUTING") return p.reason?.toLowerCase().includes("home") || p.reason?.toLowerCase().includes("leave");
-    if (passTypeFilter === "EMERGENCY") return p.reason?.toLowerCase().includes("emergency") || p.reason?.toLowerCase().includes("medical");
-    if (passTypeFilter === "ACADEMIC") return p.reason?.toLowerCase().includes("academic") || p.reason?.toLowerCase().includes("project") || p.reason?.toLowerCase().includes("lab");
+    if (passTypeFilter === "DAY_PASS") return p.reason?.toLowerCase().includes("day");
+    if (passTypeFilter === "HOME_OUT") return p.reason?.toLowerCase().includes("home");
+    if (passTypeFilter === "DAILY_OUTING") return p.reason?.toLowerCase().includes("daily") || p.reason?.toLowerCase().includes("outing") || p.reason?.toLowerCase().includes("short");
     return true;
   });
 
@@ -436,7 +435,7 @@ export default function SupervisorDashboardPage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <h2 className="text-lg font-bold text-[var(--text-primary)]">Outpass Approvals Desk</h2>
             <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-              {["ALL", "SHORT_OUTING", "HOME_OUTING", "EMERGENCY", "ACADEMIC"].map((f) => (
+              {["ALL", "DAY_PASS", "HOME_OUT", "DAILY_OUTING"].map((f) => (
                 <button key={f} onClick={() => setPassTypeFilter(f)} className={`px-3 py-1 rounded-xl text-[11px] font-bold shrink-0 ${passTypeFilter === f ? "bg-indigo-500 text-white" : "bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border)]"}`}>
                   {f.replace("_", " ")}
                 </button>

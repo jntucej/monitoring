@@ -27,6 +27,15 @@ async function handleGet(req: NextRequest) {
       approvalFlow: item.approval_flow,
     }));
 
+    if (mapped.length === 0) {
+      const defaultTypes = [
+        { code: "day_pass", name: "Day Pass", description: "Full day out (returns by evening curfew)", defaultDurationHours: 12, requiresApproval: true, approvalFlow: "warden" },
+        { code: "home_out", name: "Home Out", description: "Weekend or overnight home leave", defaultDurationHours: 48, requiresApproval: true, approvalFlow: "warden" },
+        { code: "daily_outing", name: "Daily Outing", description: "Short daily local outing (2-4 hours)", defaultDurationHours: 4, requiresApproval: true, approvalFlow: "warden" },
+      ];
+      return NextResponse.json({ success: true, data: defaultTypes });
+    }
+
     return NextResponse.json({ success: true, data: mapped });
   } catch (error: any) {
     console.error('Error fetching pass types:', error);

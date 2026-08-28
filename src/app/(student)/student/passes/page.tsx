@@ -72,6 +72,9 @@ export default function StudentPassesPage() {
         setSubmitting(false);
         return;
       }
+      const selectedType = passTypes.find((pt) => pt.code === passType);
+      const durationHours = selectedType?.defaultDurationHours || 4;
+
       const res = await fetch("/api/passes", {
         method: "POST",
         headers: {
@@ -81,7 +84,7 @@ export default function StudentPassesPage() {
           roll,
           reason: passType,
           from: new Date().toISOString(),
-          to: new Date(Date.now() + 4 * 3600 * 1000).toISOString(),
+          to: new Date(Date.now() + durationHours * 3600 * 1000).toISOString(),
           description: reasonText,
         }),
       });
@@ -90,7 +93,7 @@ export default function StudentPassesPage() {
       if (res.ok && json.success) {
         addToast({
           title: "Pass Request Submitted",
-          message: passType === "Emergency" ? "Emergency pass auto-approved!" : "Request sent for approval.",
+          message: "Pass request sent for Warden approval.",
           variant: "success",
         });
         setShowNewModal(false);

@@ -52,15 +52,30 @@ async function findPinUser(identifier: string) {
 }
 
 /**
- * Ensure the email exists in Supabase Auth AND is confirmed.
+ * Ensure the email exists in Supabase Auth AND is confirmed, with matching ID.
  * Seeded users live in public.users but may be missing from Auth, or exist
- * as unconfirmed (e.g. created via invite). Magic-link OTP fails for both.
+ * with mismatched IDs or as unconfirmed. Magic-link OTP fails for invalid state.
  */
-async function ensureAuthUser(service: SupabaseClient, email: string): Promise<boolean> {
+async function ensureAuthUser(service: SupabaseClient, email: string, expectedId?: string): Promise<boolean> {
   const probe = await service.auth.admin.generateLink({ type: "magiclink", email });
 
   if (!probe.error && probe.data?.user) {
-    // User exists — confirm the email if it is not confirmed yet.
+    if (expectedId && probe.data.user.id !== expectedId) {
+      console.log(`Re-aligning auth user ID (${probe.data.user.id}) to match public.users.id (${expectedId}) for ${email}`);
+      await service.auth.admin.deleteUser(probe.data.user.id).catch(() => {});
+      const { error: createError } = await service.auth.admin.createUser({
+        id: expectedId,
+        email,
+        email_confirm: true,
+      });
+      if (createError) {
+        console.error("Re-creation of auth user error:", createError.message);
+        return false;
+      }
+      return true;
+    }
+
+    // User exists and ID matches — confirm the email if it is not confirmed yet.
     if (!probe.data.user.email_confirmed_at) {
       const { error: confirmError } = await service.auth.admin.updateUserById(
         probe.data.user.id,
@@ -73,8 +88,9 @@ async function ensureAuthUser(service: SupabaseClient, email: string): Promise<b
 
   const msg = (probe.error?.message ?? "").toLowerCase();
   if (msg.includes("user not found") || msg.includes("unable to find user") || probe.error?.status === 404) {
-    // Missing from Auth entirely — provision a confirmed user.
+    // Missing from Auth entirely — provision a confirmed user with explicit expectedId.
     const { error: createError } = await service.auth.admin.createUser({
+      id: expectedId,
       email,
       email_confirm: true,
     });
@@ -90,10 +106,10 @@ async function ensureAuthUser(service: SupabaseClient, email: string): Promise<b
 }
 
 /** Exchange a service-generated magic-link token for a real Supabase session. */
-async function mintSupabaseSession(email: string) {
+async function mintSupabaseSession(email: string, expectedId?: string) {
   const service = getSupabaseServiceClient();
 
-  if (!(await ensureAuthUser(service, email))) return null;
+  if (!(await ensureAuthUser(service, email, expectedId))) return null;
 
   // Fresh token AFTER the user exists and is confirmed.
   const { data, error } = await service.auth.admin.generateLink({
@@ -152,7 +168,7 @@ async function handlePinLogin(req: NextRequest) {
       return NextResponse.json(INVALID_PIN, { status: 401 });
     }
 
-    const session = await mintSupabaseSession(user.email);
+    const session = await mintSupabaseSession(user.email, user.id);
     if (!session) {
       console.error("PIN login: failed to mint Supabase session");
       return NextResponse.json(

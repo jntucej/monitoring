@@ -90,11 +90,32 @@ async function handleLogin(req: NextRequest) {
 
     // 3. Defense in depth: profile must exist AND be ACTIVE.
     const service = getSupabaseServiceClient();
-    const { data: profile } = await service
+    let { data: profile } = await service
       .from("users")
       .select("id, name, role, employee_id, unique_id, gate_id, status")
       .eq("id", authData.user.id)
       .maybeSingle();
+
+    if (!profile) {
+      // Self-healing check: check if profile exists by email (ID mismatch recovery)
+      const { data: profileByEmail } = await service
+        .from("users")
+        .select("id, name, role, employee_id, unique_id, gate_id, status")
+        .eq("email", email)
+        .maybeSingle();
+
+      if (profileByEmail) {
+        console.log(`Re-aligning auth user ID (${authData.user.id}) to match public.users.id (${profileByEmail.id}) for ${email}`);
+        await service.auth.admin.deleteUser(authData.user.id).catch(() => {});
+        await service.auth.admin.createUser({
+          id: profileByEmail.id,
+          email,
+          email_confirm: true,
+          password,
+        }).catch(() => {});
+        profile = profileByEmail;
+      }
+    }
 
     if (!profile) {
       // Valid auth user without a provisioned profile — revoke immediately.

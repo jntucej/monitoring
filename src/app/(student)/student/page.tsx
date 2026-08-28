@@ -122,16 +122,16 @@ export default function StudentDashboardPage() {
               </Link>
 
               <Link
-                href="/student/passes?action=emergency"
-                className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/15 transition-all flex items-center justify-between group"
+                href="/student/passes?action=new"
+                className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/15 transition-all flex items-center justify-between group"
               >
                 <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-xl bg-rose-500/20 text-rose-400 group-hover:scale-105 transition-transform">
-                    <AlertTriangle className="w-4 h-4" />
+                  <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400 group-hover:scale-105 transition-transform">
+                    <Clock className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-slate-100">Emergency Outing</div>
-                    <div className="text-[10px] text-slate-400">Immediate warden dispatch</div>
+                    <div className="text-xs font-bold text-slate-100">Daily Outing</div>
+                    <div className="text-[10px] text-slate-400">Short outing (2-4 hrs)</div>
                   </div>
                 </div>
               </Link>
