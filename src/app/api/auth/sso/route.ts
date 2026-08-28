@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
       .from("users")
       .select("*")
       .eq("email", ssoEmail)
-      .single();
+      .maybeSingle();
 
     let userRecord = existingUser;
     if (!existingUser) {
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
     const role = body.role || mapExternalGroupToRole(groups);
 
     const supabase = getSupabaseServiceClient();
-    const { data: existingUser } = await supabase.from("users").select("*").eq("email", email).single();
+    const { data: existingUser } = await supabase.from("users").select("*").eq("email", email).maybeSingle();
 
     let userId = existingUser?.id;
     let finalRole = existingUser?.role || role;

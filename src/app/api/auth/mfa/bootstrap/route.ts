@@ -59,7 +59,7 @@ async function handlePost(req: NextRequest) {
       .from("users")
       .select("id, role, two_factor_enabled")
       .eq("email", email)
-      .single();
+      .maybeSingle();
 
     // Uniform response whether or not the account exists/qualifies.
     if (!profile || profile.role !== "sysadmin" || profile.two_factor_enabled) return uniformFailure();

@@ -954,7 +954,12 @@ export async function findAllGates(): Promise<Gate[]> {
 }
 
 export async function findAllUsers(): Promise<User[]> {
-  const { data, error } = await supabase.from('users').select('*, employee_details(*)');
+  let client = supabase;
+  try {
+    const { getSupabaseServiceClient } = await import('./supabaseClient');
+    client = getSupabaseServiceClient();
+  } catch { /* fallback to default client */ }
+  const { data, error } = await client.from('users').select('*, employee_details(*)');
   if (error || !data) return [];
   return data.map(mUser);
 }

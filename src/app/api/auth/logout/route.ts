@@ -14,26 +14,28 @@ import { supabase, getSupabaseServiceClient } from "@/lib/supabaseClient";
 async function handlePost(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
   if (authHeader?.startsWith("Bearer ")) {
-    try {
-      const {
-        data: { user },
-        error: getUserErr,
-      } = await supabase.auth.getUser(authHeader.slice(7));
+    const rawToken = authHeader.slice(7).trim();
+    if (rawToken && rawToken !== "undefined" && rawToken !== "null" && rawToken.startsWith("eyJ")) {
+      try {
+        const {
+          data: { user },
+          error: getUserErr,
+        } = await supabase.auth.getUser(rawToken);
 
-      if (!getUserErr && user?.id) {
-        const service = getSupabaseServiceClient();
-        try {
-          await service.from("users").update({ handle: null }).eq("id", user.id);
-        } catch (dbErr) {
-          console.error("Logout database session token clear error:", dbErr);
+        if (!getUserErr && user?.id) {
+          const service = getSupabaseServiceClient();
+          try {
+            await service.from("users").update({ handle: null }).eq("id", user.id);
+          } catch (dbErr) {
+            console.error("Logout database session token clear error:", dbErr);
+          }
+          await service.auth.admin.signOut(rawToken).catch(() => {
+            // Token may already be expired or revoked; swallow to avoid 403 error logs
+          });
         }
-        const token = authHeader.slice(7);
-        await service.auth.admin.signOut(token).catch((signOutErr) => {
-          console.error("Logout session revocation error:", signOutErr);
-        });
+      } catch (err) {
+        console.error("Logout error:", err);
       }
-    } catch (err) {
-      console.error("Logout error:", err);
     }
   }
   return NextResponse.json({ success: true });

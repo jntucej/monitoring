@@ -20,10 +20,12 @@ async function handleSessionCheck(req: NextRequest) {
     let { data: authData, error: authError } = await supabase.auth.getUser(token);
     let newSession = null;
 
-    // 2. If token expired/invalid and refresh token is provided, attempt session refresh
-    if ((authError || !authData?.user) && refreshToken) {
+    // 2. If token expired/invalid and valid refresh token string is provided, attempt session refresh
+    const validRefreshToken = typeof refreshToken === "string" && refreshToken.trim().length > 10 && refreshToken !== "undefined" && refreshToken !== "null" ? refreshToken.trim() : null;
+
+    if ((authError || !authData?.user) && validRefreshToken) {
       const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession({
-        refresh_token: refreshToken,
+        refresh_token: validRefreshToken,
       });
 
       if (!refreshError && refreshData?.session && refreshData?.user) {

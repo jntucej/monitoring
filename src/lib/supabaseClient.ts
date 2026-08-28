@@ -110,9 +110,9 @@ export const invalidateAllUserSessions = async (userId: string, jwtToken?: strin
 
     // If a JWT token was supplied, revoke it via Auth Admin API
     if (jwtToken && jwtToken.startsWith("eyJ")) {
-      const { error } = await serviceClient.auth.admin.signOut(jwtToken);
+      const { error } = await serviceClient.auth.admin.signOut(jwtToken).catch((e) => ({ error: e }));
       if (error) {
-        console.error('Error invalidating user sessions via signOut:', error);
+        console.warn('Notice invalidating user sessions via signOut (token may be expired):', error.message || error);
       }
     }
 

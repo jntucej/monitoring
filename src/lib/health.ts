@@ -88,12 +88,12 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
   try {
     const { data: gates } = await supabase
       .from('gates')
-      .select('status');
+      .select('is_active');
 
     const gateStatuses = gates || [];
     health.components.gateways.total = gateStatuses.length;
-    health.components.gateways.online = gateStatuses.filter(g => g.status === 'active').length;
-    health.components.gateways.offline = gateStatuses.filter(g => g.status !== 'active').length;
+    health.components.gateways.online = gateStatuses.filter(g => g.is_active).length;
+    health.components.gateways.offline = gateStatuses.filter(g => !g.is_active).length;
 
     if (health.components.gateways.offline > 0) {
       health.components.gateways.status = 'degraded';

@@ -23,7 +23,7 @@ async function handlePost(req: NextRequest) {
     }
 
     const supabase = getSupabaseServiceClient();
-    const { data: user } = await supabase.from("users").select("id, two_factor_secret, two_factor_enabled").eq("id", userId).single();
+    const { data: user } = await supabase.from("users").select("id, two_factor_secret, two_factor_enabled").eq("id", userId).maybeSingle();
 
     if (!user || !user.two_factor_secret) {
       return NextResponse.json(
