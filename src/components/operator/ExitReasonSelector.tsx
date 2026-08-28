@@ -14,8 +14,12 @@ interface ExitReasonSelectorProps {
 }
 
 const REASON_META: Record<string, { icon: string; color: string }> = {
+  "home_out": { icon: "🏠", color: "bg-[var(--action-danger)]" },
   "Home Out": { icon: "🏠", color: "bg-[var(--action-danger)]" },
-  "Day Out": { icon: "☀️", color: "bg-[var(--action-warning)]" },
+  "day_pass": { icon: "☀️", color: "bg-[var(--action-warning)]" },
+  "Day Pass": { icon: "☀️", color: "bg-[var(--action-warning)]" },
+  "daily_outing": { icon: "🚶", color: "bg-[var(--action-info)]" },
+  "Daily Outing": { icon: "🚶", color: "bg-[var(--action-info)]" },
   "Leave": { icon: "📝", color: "bg-[var(--action-info)]" },
   "Regular": { icon: "🚶", color: "bg-[var(--action-danger)]" },
 };
@@ -47,7 +51,11 @@ export function ExitReasonSelector({ isOpen, selected, onSelect, onCancel, appro
                 const meta = REASON_META[config.code] || { icon: "📝", color: "bg-[var(--action-info)]" };
                 const requiresApproval = config.requiresApproval ?? false;
                 const passRequired = requiresApproval && (personType === "student" || !personType);
-                const hasApprovedPass = approvedPasses.some((p) => p.reason === config.code);
+                const hasApprovedPass = approvedPasses.some((p) => 
+                  p.reason === config.code || 
+                  p.reason?.toLowerCase() === config.code.toLowerCase() ||
+                  p.reason?.toLowerCase() === config.name?.toLowerCase()
+                );
                 const isDisabled = passRequired && !hasApprovedPass;
 
                 return (
