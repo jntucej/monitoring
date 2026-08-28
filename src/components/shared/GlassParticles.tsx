@@ -11,16 +11,17 @@ export interface GlassParticlesProps {
 }
 
 /**
- * Ambient GPU-accelerated floating glass shard particle stream.
- * Gracefully degrades on mobile and disables when reduced motion is preferred or performance tier is legacy/emergency.
- */
+  * Ambient GPU-accelerated floating glass shard particle stream.
+  * Gracefully degrades on mobile, outdoor mode, or when reduced motion is preferred or performance tier is legacy/emergency.
+  * Uses neutral tone particles exclusively (Emerald/Rose are strictly reserved for operational status beacons).
+  */
 export function GlassParticles({
   count: defaultCount = 12,
   isDark = true,
   className = "",
 }: GlassParticlesProps) {
   const shouldReduceMotion = useReducedMotion();
-  const { performanceTier, isTouchDevice } = useGlass();
+  const { performanceTier, isTouchDevice, displayMode } = useGlass();
   const [mounted, setMounted] = useState(false);
   const [particles, setParticles] = useState<
     Array<{ id: number; x: number; y: number; duration: number; delay: number }>
@@ -42,12 +43,14 @@ export function GlassParticles({
 
   if (
     shouldReduceMotion ||
+    displayMode === "outdoor" ||
     performanceTier === "emergency" ||
     performanceTier === "legacy" ||
     !mounted
   ) return null;
 
-  const colorClass = isDark ? "bg-emerald-400/20" : "bg-rose-400/20";
+  // Neutral floating shards — NEVER use Emerald (#10b981) or Rose (#f43f5e) in ambient backgrounds!
+  const colorClass = isDark ? "bg-white/10" : "bg-slate-400/15";
 
   return (
     <div

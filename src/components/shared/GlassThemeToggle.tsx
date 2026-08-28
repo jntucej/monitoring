@@ -9,8 +9,9 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
-import { Sun, Moon, Sparkles } from "lucide-react";
+import { Sun, Moon, Sparkles, SunMedium } from "lucide-react";
 import { useUIStore } from "@/stores/uiStore";
+import { useGlass } from "@/context/GlassContext";
 
 export interface GlassThemeToggleProps {
   isDark?: boolean;
@@ -20,8 +21,8 @@ export interface GlassThemeToggleProps {
 }
 
 /**
- * Premium Apple HIG Glass-morphism Dark / Light / Glass Theme Toggle Component.
- * Uses GPU-accelerated transforms (animate.x) & cursor spring parallax.
+ * Premium Apple HIG Glass-morphism Dark / Light / Glass / Outdoor Theme Toggle Component.
+ * Upgraded with 56px minimum touch target hit wrappers for industrial glove accessibility.
  */
 export function GlassThemeToggle({
   isDark: propIsDark,
@@ -30,6 +31,7 @@ export function GlassThemeToggle({
   className = "",
 }: GlassThemeToggleProps) {
   const store = useUIStore();
+  const { displayMode, toggleDisplayMode } = useGlass();
   const shouldReduceMotion = useReducedMotion();
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -67,83 +69,85 @@ export function GlassThemeToggle({
       propOnToggle();
       return;
     }
-    // Cycle: dark -> light -> glass -> dark
     if (currentTheme === "dark") store.setTheme("light");
     else if (currentTheme === "light") store.setTheme("glass");
     else store.setTheme("dark");
   };
 
+  // Critically damped spring transition for industrial accuracy
   const springTransition = shouldReduceMotion
     ? { duration: 0 }
-    : ({ type: "spring", stiffness: 500, damping: 30 } as const);
+    : ({ type: "spring", stiffness: 220, damping: 32 } as const);
 
   const modeLabel =
     currentTheme === "glass" ? "Glass mode" : currentTheme === "light" ? "Light mode" : "Dark mode";
 
-  // GPU Transform offset calculation (36px for 80px track, 24px for 56px track)
-  const cardThumbOffset = currentTheme === "dark" ? 0 : 36;
-  const headerThumbOffset = currentTheme === "dark" ? 0 : 24;
+  // Offset calculation for tracks
+  const cardThumbOffset = currentTheme === "dark" ? 0 : currentTheme === "light" ? 36 : 18;
+  const headerThumbOffset = currentTheme === "dark" ? 0 : 28;
 
   if (!showCard) {
     return (
-      <button
-        type="button"
-        role="switch"
-        aria-checked={isDarkEffective}
-        aria-label="Toggle appearance"
-        onClick={handleCycleTheme}
-        className={`relative w-14 h-8 rounded-full backdrop-blur-md border transition-colors duration-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
-          isDarkEffective
-            ? "bg-white/10 border-white/20"
-            : "bg-black/5 border-black/10"
-        } ${className}`}
-      >
-        <motion.div
-          animate={{ x: headerThumbOffset }}
-          transition={springTransition}
-          className={`absolute top-0.5 left-0.5 w-7 h-7 rounded-full shadow flex items-center justify-center backdrop-blur-md border will-change-transform ${
-            currentTheme === "glass"
-              ? "bg-emerald-500/20 border-emerald-400/40 text-emerald-300"
-              : isDarkEffective
-              ? "bg-neutral-900/90 border-white/20 text-emerald-300"
-              : "bg-white border-black/5 text-amber-500"
-          }`}
+      <div className="relative min-h-[56px] min-w-[56px] flex items-center justify-center p-1">
+        <button
+          type="button"
+          role="switch"
+          aria-checked={isDarkEffective}
+          aria-label="Toggle gate console appearance"
+          onClick={handleCycleTheme}
+          className={`relative w-16 h-9 rounded-full backdrop-blur-md border transition-colors duration-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
+            isDarkEffective
+              ? "bg-white/10 border-white/20"
+              : "bg-black/5 border-black/10"
+          } ${className}`}
         >
-          <AnimatePresence mode="wait" initial={false}>
-            {currentTheme === "glass" ? (
-              <motion.span
-                key="glass"
-                initial={{ opacity: 0, scale: 0.5, rotate: -180 }}
-                animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                exit={{ opacity: 0, scale: 0.5, rotate: 180 }}
-                transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
-              >
-                <Sparkles className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-              </motion.span>
-            ) : isDarkEffective ? (
-              <motion.span
-                key="moon"
-                initial={{ opacity: 0, rotate: -90 }}
-                animate={{ opacity: 1, rotate: 0 }}
-                exit={{ opacity: 0, rotate: 90 }}
-                transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
-              >
-                <Moon className="w-3.5 h-3.5 text-emerald-300" strokeWidth={2} />
-              </motion.span>
-            ) : (
-              <motion.span
-                key="sun"
-                initial={{ opacity: 0, rotate: 90 }}
-                animate={{ opacity: 1, rotate: 0 }}
-                exit={{ opacity: 0, rotate: -90 }}
-                transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
-              >
-                <Sun className="w-3.5 h-3.5 text-amber-500" strokeWidth={2} />
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </motion.div>
-      </button>
+          <motion.div
+            animate={{ x: headerThumbOffset }}
+            transition={springTransition}
+            className={`absolute top-1 left-1 w-7 h-7 rounded-full shadow flex items-center justify-center backdrop-blur-md border will-change-transform ${
+              currentTheme === "glass"
+                ? "bg-emerald-500/20 border-emerald-400/40 text-emerald-300"
+                : isDarkEffective
+                ? "bg-neutral-900/90 border-white/20 text-emerald-300"
+                : "bg-white border-black/5 text-amber-500"
+            }`}
+          >
+            <AnimatePresence mode="wait" initial={false}>
+              {currentTheme === "glass" ? (
+                <motion.span
+                  key="glass"
+                  initial={{ opacity: 0, scale: 0.5, rotate: -180 }}
+                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                  exit={{ opacity: 0, scale: 0.5, rotate: 180 }}
+                  transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
+                >
+                  <Sparkles className="w-4 h-4 text-emerald-400" />
+                </motion.span>
+              ) : isDarkEffective ? (
+                <motion.span
+                  key="moon"
+                  initial={{ opacity: 0, rotate: -90 }}
+                  animate={{ opacity: 1, rotate: 0 }}
+                  exit={{ opacity: 0, rotate: 90 }}
+                  transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
+                >
+                  <Moon className="w-4 h-4 text-emerald-300" strokeWidth={2} />
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="sun"
+                  initial={{ opacity: 0, rotate: 90 }}
+                  animate={{ opacity: 1, rotate: 0 }}
+                  exit={{ opacity: 0, rotate: -90 }}
+                  transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
+                >
+                  <Sun className="w-4 h-4 text-amber-500" strokeWidth={2} />
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        </button>
+      </div>
     );
   }
 
@@ -189,23 +193,12 @@ export function GlassThemeToggle({
           ref={cardRef}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
-          whileHover={
-            shouldReduceMotion
-              ? undefined
-              : {
-                  y: -3,
-                  boxShadow: isDarkEffective
-                    ? "0 20px 40px -12px rgba(16, 185, 129, 0.25)"
-                    : "0 20px 40px -12px rgba(244, 63, 94, 0.2)",
-                }
-          }
-          transition={{ type: "spring", stiffness: 400, damping: 25 }}
           className={`relative overflow-hidden backdrop-blur-2xl border rounded-3xl px-6 sm:px-10 py-7 sm:py-8 flex flex-col items-center gap-6 shadow-2xl transition-colors duration-700 ${
             currentTheme === "glass"
-              ? "bg-white/10 border-white/20 shadow-emerald-500/10"
+              ? "bg-slate-900/70 border-white/20 shadow-emerald-500/10"
               : isDarkEffective
-              ? "bg-white/5 border-white/10"
-              : "bg-white/60 border-white/80"
+              ? "bg-slate-900/60 border-white/10"
+              : "bg-white/80 border-white/80"
           }`}
         >
           {/* Shimmer Lens Flare Sweep on mount */}
@@ -317,15 +310,15 @@ export function GlassThemeToggle({
               </AnimatePresence>
             </motion.div>
           </button>
-          {/* Tri-mode selection pills */}
-          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/10 dark:bg-white/5 border border-white/10 text-xs select-none">
+          {/* Tri-mode + Outdoor selection pills with glove-accessible min 44-48px touch targets */}
+          <div className="flex flex-wrap items-center justify-center gap-2 p-1.5 rounded-2xl bg-black/10 dark:bg-white/5 border border-white/10 text-xs select-none">
             <button
               type="button"
               onClick={() => store.setTheme("dark")}
-              className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
+              className={`min-h-[44px] px-4 py-2.5 rounded-xl font-semibold transition-all ${
                 currentTheme === "dark"
                   ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-sm"
-                  : "text-neutral-400 hover:text-white"
+                  : "text-slate-400 hover:text-white"
               }`}
             >
               Dark
@@ -333,10 +326,10 @@ export function GlassThemeToggle({
             <button
               type="button"
               onClick={() => store.setTheme("light")}
-              className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
+              className={`min-h-[44px] px-4 py-2.5 rounded-xl font-semibold transition-all ${
                 currentTheme === "light"
-                  ? "bg-white text-neutral-900 shadow border border-neutral-300"
-                  : "text-neutral-400 hover:text-white"
+                  ? "bg-white text-slate-900 shadow border border-slate-300"
+                  : "text-slate-400 hover:text-white"
               }`}
             >
               Light
@@ -344,23 +337,43 @@ export function GlassThemeToggle({
             <button
               type="button"
               onClick={() => store.setTheme("glass")}
-              className={`px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1 ${
+              className={`min-h-[44px] px-4 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-1.5 ${
                 currentTheme === "glass"
                   ? "bg-emerald-400/20 text-emerald-200 border border-emerald-400/40 shadow-inner"
-                  : "text-neutral-400 hover:text-white"
+                  : "text-slate-400 hover:text-white"
               }`}
             >
-              <Sparkles className="w-3 h-3 text-emerald-400" />
+              <Sparkles className="w-4 h-4 text-emerald-400" />
               Glass
+            </button>
+
+            {/* Dedicated High-Contrast Outdoor Display Mode Toggle */}
+            <button
+              type="button"
+              onClick={toggleDisplayMode}
+              className={`min-h-[44px] px-4 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-1.5 ${
+                displayMode === "outdoor"
+                  ? "bg-amber-500/30 text-amber-200 border border-amber-400/50 shadow-md ring-2 ring-amber-400/30"
+                  : "text-slate-400 hover:text-amber-300"
+              }`}
+            >
+              <SunMedium className="w-4 h-4 text-amber-400" />
+              Outdoor Mode
             </button>
           </div>
 
           <p
-            className={`text-xs text-center max-w-xs transition-colors duration-700 ${
-              isDarkEffective ? "text-white/70" : "text-neutral-600"
+            className={`text-xs text-center max-w-xs transition-colors duration-700 font-medium ${
+              displayMode === "outdoor"
+                ? "text-amber-300"
+                : isDarkEffective
+                ? "text-slate-200"
+                : "text-slate-700"
             }`}
           >
-            {isDarkEffective
+            {displayMode === "outdoor"
+              ? "High-contrast glare protection enabled · Zero blur"
+              : isDarkEffective
               ? "Emerald entry status · Rose alert status"
               : "Clear gate status · All systems active"}
           </p>

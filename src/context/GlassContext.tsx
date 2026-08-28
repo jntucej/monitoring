@@ -6,10 +6,14 @@ import { useUIStore } from "@/stores/uiStore";
 
 export type GateStatus = "entry" | "exit" | "idle" | "warning";
 export type PerformanceTier = "splusplus" | "performance" | "legacy" | "emergency";
+export type DisplayMode = "indoor" | "outdoor";
 
 interface GlassState {
   isDark: boolean;
   toggleTheme: () => void;
+  displayMode: DisplayMode;
+  setDisplayMode: (mode: DisplayMode) => void;
+  toggleDisplayMode: () => void;
   activeGate: string | null;
   setActiveGate: (id: string | null) => void;
   gateTraffic: number;
@@ -34,11 +38,33 @@ export function GlassProvider({
   const [activeGate, setActiveGate] = useState<string | null>(null);
   const [gateTraffic, setGateTraffic] = useState(45);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const [displayMode, setDisplayModeState] = useState<DisplayMode>("indoor");
 
   // --- RUNTIME FPS DETECTION ---
   const [performanceTier, setPerformanceTier] = useState<PerformanceTier>("splusplus");
   const frameCountRef = useRef(0);
   const lastFpsCheckRef = useRef(typeof performance !== "undefined" ? performance.now() : 0);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const savedMode = localStorage.getItem("gate-monitor-display-mode") as DisplayMode | null;
+    if (savedMode === "outdoor" || savedMode === "indoor") {
+      setDisplayModeState(savedMode);
+      document.documentElement.setAttribute("data-display-mode", savedMode);
+    }
+  }, []);
+
+  const setDisplayMode = (mode: DisplayMode) => {
+    setDisplayModeState(mode);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("gate-monitor-display-mode", mode);
+      document.documentElement.setAttribute("data-display-mode", mode);
+    }
+  };
+
+  const toggleDisplayMode = () => {
+    setDisplayMode(displayMode === "indoor" ? "outdoor" : "indoor");
+  };
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -96,6 +122,9 @@ export function GlassProvider({
       value={{
         isDark,
         toggleTheme,
+        displayMode,
+        setDisplayMode,
+        toggleDisplayMode,
         activeGate,
         setActiveGate,
         gateTraffic,
@@ -118,3 +147,4 @@ export const useGlass = () => {
   }
   return context;
 };
+
