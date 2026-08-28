@@ -4,7 +4,8 @@ import React from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 import { useCollegeInfo } from "@/hooks/useCollegeInfo";
-import { User, Mail, Shield, CheckCircle, Tag, LogOut, Moon, Sun, School, Smartphone } from "lucide-react";
+import { User, Mail, Shield, CheckCircle, Tag, LogOut, School, Smartphone } from "lucide-react";
+import { GlassThemeToggle } from "@/components/shared/GlassThemeToggle";
 
 export function UserProfileTab() {
   const { user, role, logout } = useAuthStore();
@@ -117,35 +118,16 @@ export function UserProfileTab() {
         </div>
       </div>
 
-      {/* Theme and Actions Panel */}
-      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 space-y-3 shadow-md">
-        <button
-          onClick={toggleTheme}
-          className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-[var(--bg-elevated)] active:scale-[0.99] transition-all text-xs font-semibold text-[var(--text-primary)]"
-        >
-          <div className="flex items-center gap-3">
-            {theme === "dark" ? (
-              <>
-                <Sun className="w-5 h-5 text-amber-400" />
-                <span>Switch to Light Theme</span>
-              </>
-            ) : (
-              <>
-                <Moon className="w-5 h-5 text-indigo-400" />
-                <span>Switch to Dark Theme</span>
-              </>
-            )}
-          </div>
-          <span className="text-[10px] uppercase font-bold text-[var(--text-muted)]">
-            {theme === "dark" ? "Dark Mode" : "Light Mode"}
-          </span>
-        </button>
+      {/* Appearance & Glass Theme Control Card */}
+      <GlassThemeToggle showCard={true} />
 
+      {/* Sign Out Action Card */}
+      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 space-y-3 shadow-md">
         <button
           onClick={handleLogout}
           className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-rose-500/10 text-rose-400 border border-transparent hover:border-rose-500/20 active:scale-[0.99] transition-all text-xs font-semibold text-left"
         >
-          <LogOut className="w-5 h-5 text-rose-450" />
+          <LogOut className="w-5 h-5 text-rose-400" />
           <span>Sign Out of Device</span>
         </button>
       </div>

@@ -6,7 +6,7 @@ interface AuditLogRowProps {
     action: string;
     user_name?: string;
     user_role?: string;
-    details: any;
+    details: Record<string, unknown> | string | number | boolean | null;
     timestamp?: string;
   };
 }

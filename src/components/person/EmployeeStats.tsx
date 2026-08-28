@@ -18,7 +18,7 @@ interface EmployeeStatsProps {
 export function EmployeeStats({ stats, loading = false }: EmployeeStatsProps) {
   if (loading) {
     return (
-      <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6 animate-pulse space-y-4">
+      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-6 animate-pulse space-y-4">
         <div className="h-6 w-36 bg-[var(--border)] rounded" />
         <div className="grid grid-cols-2 gap-4">
           <div className="h-20 bg-[var(--border)] rounded-lg" />
@@ -37,7 +37,7 @@ export function EmployeeStats({ stats, loading = false }: EmployeeStatsProps) {
     : null;
 
   return (
-    <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6 space-y-6 shadow-sm">
+    <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-6 space-y-6 shadow-sm">
       <div className="flex items-center justify-between">
         <h3 className="font-bold text-base text-[var(--text-primary)] flex items-center gap-2">
           <ShieldCheck className="w-5 h-5 text-emerald-500" />

@@ -70,7 +70,7 @@ export function ChildActivity() {
                 </div>
                 <div className="text-right">
                   <p className="text-sm">{t}</p>
-                  <p className="text-xs text-gray-400">{a.gateName}</p>
+                  <p className="text-xs text-[var(--text-muted)]">{a.gateName}</p>
                 </div>
               </div>
             );

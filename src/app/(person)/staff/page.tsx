@@ -76,7 +76,7 @@ export default function StaffDashboardPage() {
           </div>
 
           {/* Staff Shift Card */}
-          <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] space-y-2">
+          <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] space-y-2">
             <div className="flex items-center gap-2 text-xs font-semibold text-purple-400">
               <UserCheck className="w-4 h-4" />
               Administrative Assignment

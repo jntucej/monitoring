@@ -89,7 +89,7 @@ export default function HodConsolePage() {
 
       {/* Overview Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] flex items-center justify-between">
           <div>
             <p className="text-xs text-[var(--text-muted)] font-medium">Department Faculty</p>
             <p className="text-2xl font-bold text-[var(--text-primary)] mt-1">{totalCount || 8}</p>
@@ -97,7 +97,7 @@ export default function HodConsolePage() {
           <Users className="w-8 h-8 text-blue-400/50" />
         </div>
 
-        <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] flex items-center justify-between">
           <div>
             <p className="text-xs text-[var(--text-muted)] font-medium">Currently On Campus</p>
             <p className="text-2xl font-bold text-emerald-400 mt-1">{activeOnCampus || 6}</p>
@@ -105,7 +105,7 @@ export default function HodConsolePage() {
           <CheckCircle2 className="w-8 h-8 text-emerald-400/50" />
         </div>
 
-        <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] flex items-center justify-between">
           <div>
             <p className="text-xs text-[var(--text-muted)] font-medium">Off Campus / Leave</p>
             <p className="text-2xl font-bold text-amber-400 mt-1">{offCampus || 2}</p>
@@ -132,7 +132,7 @@ export default function HodConsolePage() {
         </div>
 
         {/* Table */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-[var(--bg-base)] text-[var(--text-muted)] font-semibold border-b border-[var(--border)] uppercase">

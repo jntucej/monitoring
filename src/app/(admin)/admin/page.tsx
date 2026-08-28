@@ -85,23 +85,23 @@ function LockdownDialog() {
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
               className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
             >
-              <div className="pointer-events-auto w-full max-w-md bg-slate-900 border border-rose-500/30 rounded-3xl p-6 shadow-2xl shadow-rose-500/20">
+              <div className="pointer-events-auto w-full max-w-md bg-[var(--bg-surface)] border border-rose-500/30 rounded-3xl p-6 shadow-2xl shadow-rose-500/20">
                 <div className="flex items-center justify-between mb-5">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-2xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center">
                       <ShieldAlert className="w-5 h-5 text-rose-400" />
                     </div>
                     <div>
-                      <h2 className="font-bold text-white text-lg">Emergency Lockdown</h2>
+                      <h2 className="font-bold text-[var(--text-primary)] text-lg">Emergency Lockdown</h2>
                       <p className="text-xs text-rose-300">Broadcast stop-flow to all gate operators</p>
                     </div>
                   </div>
-                  <button onClick={() => setOpen(false)} className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-colors">
+                  <button onClick={() => setOpen(false)} className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
-                <p className="text-xs text-slate-400 mb-4 leading-relaxed">
-                  Select scope. Operators see a <strong className="text-white">red-banner alert</strong> immediately.
+                <p className="text-xs text-[var(--text-muted)] mb-4 leading-relaxed">
+                  Select scope. Operators see a <strong className="text-[var(--text-primary)]">red-banner alert</strong> immediately.
                   This does <em>not</em> physically lock gates — it issues a mandatory hold broadcast.
                 </p>
                 <div className="grid grid-cols-2 gap-2 mb-5">
@@ -111,8 +111,8 @@ function LockdownDialog() {
                       onClick={() => toggle(s.id)}
                       className={`px-3 py-2.5 rounded-xl border text-xs font-bold transition-all ${s.id === "all" ? "col-span-2" : ""} ${
                         selected.includes(s.id)
-                          ? s.color + " ring-2 ring-offset-1 ring-offset-slate-900 ring-current"
-                          : "bg-white/5 border-white/10 text-slate-400 hover:border-white/20"
+                          ? s.color + " ring-2 ring-offset-1 ring-offset-[var(--bg-surface)] ring-current"
+                          : "bg-[var(--bg-elevated)] border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--border-strong)]"
                       }`}
                     >
                       {s.label}

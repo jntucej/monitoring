@@ -2,10 +2,11 @@
 
 import { useState, useRef } from "react";
 import { usePathname } from "next/navigation";
-import { Menu, Sun, Moon, Bell, ShieldCheck, LogOut, Wifi } from "lucide-react";
+import { Menu, Bell, ShieldCheck, LogOut, Wifi } from "lucide-react";
 import { useUIStore } from "@/stores/uiStore";
 import { useAuthStore } from "@/stores/authStore";
 import { useCollegeInfo } from "@/hooks/useCollegeInfo";
+import { GlassThemeToggle } from "./GlassThemeToggle";
 
 const PAGE_TITLES: Record<string, string> = {
   "/gate/1": "Gate 1 Mobile Scanner Desk",
@@ -94,18 +95,8 @@ export function DynamicHeader() {
           </div>
         </div>
 
-        {/* Theme Toggle Button */}
-        <button
-          onClick={toggleTheme}
-          className="p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] rounded-xl transition-all active:scale-95"
-          title="Toggle Theme"
-        >
-          {theme === "dark" ? (
-            <Sun className="w-4 h-4 text-amber-400" />
-          ) : (
-            <Moon className="w-4 h-4 text-indigo-600" />
-          )}
-        </button>
+        {/* Glass & Appearance Theme Toggle */}
+        <GlassThemeToggle showCard={false} />
 
         {/* Quick User Avatar */}
         <div className="flex items-center gap-2 pl-1 border-l border-[var(--border)]">

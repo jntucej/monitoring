@@ -60,7 +60,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
     <div className="space-y-6">
       {/* 6 KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] space-y-1">
+        <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-1">
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--text-muted)]">
             <Users className="w-3.5 h-3.5 text-blue-400" />
             Total Faculty
@@ -69,7 +69,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
           <p className="text-[10px] text-[var(--text-muted)]">Across {departmentSummaries.length} departments</p>
         </div>
 
-        <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] space-y-1">
+        <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-1">
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--text-muted)]">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
             Present Today
@@ -78,7 +78,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
           <p className="text-[10px] text-[var(--text-muted)]">{summary.overallAttendanceRate}% attendance rate</p>
         </div>
 
-        <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] space-y-1">
+        <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-1">
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--text-muted)]">
             <Building2 className="w-3.5 h-3.5 text-indigo-400" />
             Currently Inside
@@ -87,7 +87,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
           <p className="text-[10px] text-[var(--text-muted)]">Active on campus</p>
         </div>
 
-        <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] space-y-1">
+        <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-1">
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--text-muted)]">
             <ArrowRightLeft className="w-3.5 h-3.5 text-amber-400" />
             Currently Outside
@@ -96,7 +96,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
           <p className="text-[10px] text-[var(--text-muted)]">Punched out / Off site</p>
         </div>
 
-        <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] space-y-1">
+        <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-1">
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--text-muted)]">
             <Clock className="w-3.5 h-3.5 text-rose-400" />
             Late Check-ins
@@ -105,7 +105,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
           <p className="text-[10px] text-[var(--text-muted)]">After 10:00 AM cut-off</p>
         </div>
 
-        <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] space-y-1">
+        <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-1">
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--text-muted)]">
             <UserX className="w-3.5 h-3.5 text-slate-400" />
             Absent / Unchecked
@@ -116,7 +116,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
       </div>
 
       {/* Department Breakdown Section */}
-      <div className="p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] space-y-4">
+      <div className="p-5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
             <Building2 className="w-4 h-4 text-indigo-400" />
@@ -147,7 +147,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                 </span>
               </div>
 
-              <div className="w-full h-1.5 bg-[var(--surface)] rounded-full overflow-hidden mb-2">
+              <div className="w-full h-1.5 bg-[var(--bg-surface)] rounded-full overflow-hidden mb-2">
                 <div
                   className="h-full bg-emerald-500 rounded-full transition-all"
                   style={{ width: `${dept.attendanceRate}%` }}
@@ -165,7 +165,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="p-4 rounded-2xl bg-[var(--surface)] border border-[var(--border)] flex flex-col md:flex-row gap-4 justify-between items-center">
+      <div className="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)] flex flex-col md:flex-row gap-4 justify-between items-center">
         <div className="relative w-full md:w-80">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
           <input
@@ -210,7 +210,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
       </div>
 
       {/* Roster Table */}
-      <div className="p-6 rounded-2xl bg-[var(--surface)] border border-[var(--border)] space-y-4">
+      <div className="p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
@@ -339,14 +339,14 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
         >
           <div className="space-y-6 max-h-[80vh] overflow-y-auto pr-1">
             {/* Top Profile Summary Header */}
-            <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="relative">
                   <div className="w-12 h-12 rounded-full bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center font-bold text-indigo-400 text-lg">
                     {selectedFaculty.fullName.replace("Dr. ", "").replace("Prof. ", "").charAt(0)}
                   </div>
                   <span
-                    className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-[var(--surface)] ${
+                    className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-[var(--bg-surface)] ${
                       selectedFaculty.status === "INSIDE"
                         ? "bg-emerald-500"
                         : selectedFaculty.status === "OUTSIDE"
@@ -413,7 +413,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
             </div>
             {/* 4 Metric Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] space-y-1">
+              <div className="p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-1">
                 <span className="text-[11px] font-medium text-[var(--text-muted)] flex items-center gap-1">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Attendance Rate
                 </span>
@@ -423,7 +423,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                 <p className="text-[10px] text-[var(--text-muted)]">30-day average</p>
               </div>
 
-              <div className="p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] space-y-1">
+              <div className="p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-1">
                 <span className="text-[11px] font-medium text-[var(--text-muted)] flex items-center gap-1">
                   <Clock className="w-3.5 h-3.5 text-indigo-400" /> Today&apos;s Time Logged
                 </span>
@@ -435,7 +435,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                 </p>
               </div>
 
-              <div className="p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] space-y-1">
+              <div className="p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-1">
                 <span className="text-[11px] font-medium text-[var(--text-muted)] flex items-center gap-1">
                   <Calendar className="w-3.5 h-3.5 text-blue-400" /> Days Present
                 </span>
@@ -445,7 +445,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                 <p className="text-[10px] text-[var(--text-muted)]">Working days present</p>
               </div>
 
-              <div className="p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] space-y-1">
+              <div className="p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-1">
                 <span className="text-[11px] font-medium text-[var(--text-muted)] flex items-center gap-1">
                   <AlertTriangle className="w-3.5 h-3.5 text-amber-400" /> Late Arrivals
                 </span>
@@ -456,7 +456,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
               </div>
             </div>
             {/* 30-Day Attendance Heatmap Calendar */}
-            <div className="p-5 rounded-xl bg-[var(--surface)] border border-[var(--border)] space-y-4">
+            <div className="p-5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
                   <h4 className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider flex items-center gap-2">
@@ -558,7 +558,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
               )}
 
             {/* Movement Gate Logs */}
-            <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] space-y-3">
+            <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-3">
               <h4 className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider flex items-center gap-2">
                 <Activity className="w-4 h-4 text-emerald-400" />
                 Recent Gate Scans & Terminal Activity

@@ -293,7 +293,7 @@ export default function SupervisorDashboardPage() {
             const Icon = t.icon;
             const active = activeTab === t.id;
             return (
-              <button key={t.id} onClick={() => setActiveTab(t.id)} className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shrink-0 ${active ? "bg-[var(--action-primary)] text-white shadow-md shadow-[var(--action-primary)]/20" : "bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-white"}`}>
+              <button key={t.id} onClick={() => setActiveTab(t.id)} className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shrink-0 ${active ? "bg-[var(--action-primary)] text-white shadow-md shadow-[var(--action-primary)]/20" : "bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}>
                 <Icon className="w-4 h-4" />
                 <span>{t.label}</span>
                 {t.badge !== undefined && t.badge > 0 && <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-rose-500/20 text-rose-400 border border-rose-500/30">{t.badge}</span>}

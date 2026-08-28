@@ -8,7 +8,6 @@ import { DynamicHeader } from "./DynamicHeader";
 import { MobileBottomNav } from "./MobileBottomNav";
 import { NetworkStatusBanner } from "./NetworkStatusBanner";
 import { Sidebar } from "./Sidebar";
-import { Sun, Moon } from "lucide-react";
 
 interface SafeAreaAppShellProps {
   children: React.ReactNode;

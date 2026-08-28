@@ -246,7 +246,7 @@ export default function VisitorManagementPage() {
                 placeholder="Search visitor, ID, host..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                className="w-full pl-9 pr-4 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border)] text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-amber-500/40"
               />
             </div>
             <button
@@ -273,7 +273,7 @@ export default function VisitorManagementPage() {
                 return (
                   <div
                     key={v.id}
-                    className="p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-sm hover:border-amber-500/40 transition-all flex flex-col justify-between space-y-4"
+                    className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm hover:border-amber-500/40 transition-all flex flex-col justify-between space-y-4"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-1">
@@ -341,7 +341,7 @@ export default function VisitorManagementPage() {
       {/* TAB 2: REGISTER VISITOR */}
       {activeTab === "register" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-sm space-y-4">
+          <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-4">
             <h2 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
               <UserPlus className="w-5 h-5 text-amber-500" />
               Visitor Entry Registration
@@ -438,7 +438,7 @@ export default function VisitorManagementPage() {
                 <QRCode value={newVisitorPass.uniqueId} size={160} />
               </div>
 
-              <div className="w-full text-xs text-[var(--text-muted)] space-y-1 bg-[var(--surface)] p-3 rounded-lg border border-[var(--border)]">
+              <div className="w-full text-xs text-[var(--text-muted)] space-y-1 bg-[var(--bg-surface)] p-3 rounded-lg border border-[var(--border)]">
                 <p><span className="font-semibold text-[var(--text-primary)]">Host:</span> {newVisitorPass.visitorHost || "N/A"}</p>
                 <p><span className="font-semibold text-[var(--text-primary)]">Purpose:</span> {newVisitorPass.visitorPurpose || "General Visit"}</p>
               </div>
@@ -462,7 +462,7 @@ export default function VisitorManagementPage() {
       {/* TAB 3: VISIT HISTORY */}
       {activeTab === "logs" && (
         <div className="space-y-4">
-          <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-sm">
+          <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm">
             <h3 className="font-bold text-sm text-[var(--text-primary)] mb-3">Completed Visitor Logs</h3>
 
             {completedVisitors.length === 0 ? (

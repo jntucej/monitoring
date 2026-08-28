@@ -100,8 +100,8 @@ export default function StudentDashboardPage() {
                     <Send className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-slate-100">Request Local Pass</div>
-                    <div className="text-[10px] text-slate-400">Day outing up to 21:00</div>
+                    <div className="text-xs font-bold text-[var(--text-primary)]">Request Local Pass</div>
+                    <div className="text-[10px] text-[var(--text-muted)]">Day outing up to 21:00</div>
                   </div>
                 </div>
               </Link>
@@ -115,8 +115,8 @@ export default function StudentDashboardPage() {
                     <Calendar className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-slate-100">Outstation Leave</div>
-                    <div className="text-[10px] text-slate-400">Multi-day home permissions</div>
+                    <div className="text-xs font-bold text-[var(--text-primary)]">Outstation Leave</div>
+                    <div className="text-[10px] text-[var(--text-muted)]">Multi-day home permissions</div>
                   </div>
                 </div>
               </Link>
@@ -130,8 +130,8 @@ export default function StudentDashboardPage() {
                     <Clock className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-slate-100">Daily Outing</div>
-                    <div className="text-[10px] text-slate-400">Short outing (2-4 hrs)</div>
+                    <div className="text-xs font-bold text-[var(--text-primary)]">Daily Outing</div>
+                    <div className="text-[10px] text-[var(--text-muted)]">Short outing (2-4 hrs)</div>
                   </div>
                 </div>
               </Link>
@@ -139,40 +139,40 @@ export default function StudentDashboardPage() {
 
             {/* Curfew & Movement Analytics Cards (Option B) */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="p-4 rounded-2xl bg-[var(--bg-surface-elevated)] border border-[var(--border)] space-y-1">
-                <div className="flex items-center justify-between text-slate-400">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Curfew Score</span>
-                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <div className="p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Curfew Score</span>
+                  <ShieldCheck className="w-4 h-4 text-[var(--action-primary)]" />
                 </div>
-                <div className="text-xl font-black text-slate-100">{studentStats.curfewScore}%</div>
-                <div className="text-[10px] text-emerald-400 font-medium">On-Time Return Track</div>
+                <div className="text-xl font-black text-[var(--text-primary)]">{studentStats.curfewScore}%</div>
+                <div className="text-[10px] text-[var(--action-primary)] font-medium">On-Time Return Track</div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-[var(--bg-surface-elevated)] border border-[var(--border)] space-y-1">
-                <div className="flex items-center justify-between text-slate-400">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Monthly Outings</span>
-                  <TrendingUp className="w-4 h-4 text-indigo-400" />
+              <div className="p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Monthly Outings</span>
+                  <TrendingUp className="w-4 h-4 text-[var(--action-info)]" />
                 </div>
-                <div className="text-xl font-black text-slate-100">{studentStats.monthlyOutings}</div>
-                <div className="text-[10px] text-slate-400 font-medium">Scans this month</div>
+                <div className="text-xl font-black text-[var(--text-primary)]">{studentStats.monthlyOutings}</div>
+                <div className="text-[10px] text-[var(--text-muted)] font-medium">Scans this month</div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-[var(--bg-surface-elevated)] border border-[var(--border)] space-y-1">
-                <div className="flex items-center justify-between text-slate-400">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Active Passes</span>
-                  <FileCheck className="w-4 h-4 text-amber-400" />
+              <div className="p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Active Passes</span>
+                  <FileCheck className="w-4 h-4 text-[var(--action-warning)]" />
                 </div>
-                <div className="text-xl font-black text-slate-100">{studentStats.activePassesCount}</div>
-                <div className="text-[10px] text-amber-400 font-medium">Ready at turnstile</div>
+                <div className="text-xl font-black text-[var(--text-primary)]">{studentStats.activePassesCount}</div>
+                <div className="text-[10px] text-[var(--action-warning)] font-medium">Ready at turnstile</div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-[var(--bg-surface-elevated)] border border-[var(--border)] space-y-1">
-                <div className="flex items-center justify-between text-slate-400">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Last Gate Scan</span>
-                  <Clock className="w-4 h-4 text-sky-400" />
+              <div className="p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Last Gate Scan</span>
+                  <Clock className="w-4 h-4 text-[var(--action-info)]" />
                 </div>
-                <div className="text-xs font-bold text-slate-100 truncate">{studentStats.lastGateTime}</div>
-                <div className="text-[10px] text-sky-400 font-medium">Verified Server Log</div>
+                <div className="text-xs font-bold text-[var(--text-primary)] truncate">{studentStats.lastGateTime}</div>
+                <div className="text-[10px] text-[var(--action-info)] font-medium">Verified Server Log</div>
               </div>
             </div>
 

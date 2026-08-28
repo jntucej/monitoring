@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ToastProvider } from "@/components/ui/toast";
-import { SafeAreaAppShell } from "@/components/shared/SafeAreaAppShell";
+import { ClientProviders } from "./ClientProviders";
 import { supabase } from "@/lib/supabaseClient";
 
 const inter = Inter({
@@ -42,12 +41,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="dark" data-scroll-behavior="smooth" className={`${inter.variable} h-full antialiased`}>
+    <html lang="en" data-theme="dark" data-scroll-behavior="smooth" suppressHydrationWarning className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] font-[var(--font-family)]">
-        <ToastProvider>
-          <SafeAreaAppShell>{children}</SafeAreaAppShell>
-        </ToastProvider>
+        {/* Restore saved theme before first paint — prevents dark flash for light-theme users.
+            Runs synchronously before content renders. Must stay in sync with uiStore.setTheme
+            ("gate-monitor-theme" key + data-theme attribute + dark class). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem("gate-monitor-theme");if(t==="light"||t==="dark"||t==="glass"){document.documentElement.setAttribute("data-theme",t);document.documentElement.classList.toggle("dark",t==="dark"||t==="glass")}}catch(e){}`,
+          }}
+        />
+        <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
   );
 }
+
+

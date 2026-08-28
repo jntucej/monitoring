@@ -89,6 +89,91 @@ html.light {
   --focus-ring: #059669;
 }
 
+/* ===== CINEMATIC GLASS THEME — Apple HIG Frosted Glass & Ambient Refraction ===== */
+:root[data-theme="glass"],
+html.glass {
+  --bg-base: #030712;        /* Ultra Deep Neutral-950 Background */
+  --bg-surface: rgba(255, 255, 255, 0.05); /* Translucent 5% Frosted Surface */
+  --bg-elevated: rgba(255, 255, 255, 0.09);/* Translucent 9% Elevated Surface */
+  --text-primary: #ffffff;   /* Pure White */
+  --text-secondary: #e2e8f0; /* Crisp Slate-200 Subtext */
+  --text-muted: #94a3b8;     /* Soft Slate-400 */
+  --border: rgba(255, 255, 255, 0.12); /* Ultra-fine Glass Rim Border */
+  --border-strong: rgba(255, 255, 255, 0.25);
+
+  --action-primary: #10b981; /* Vibrant Emerald */
+  --action-danger: #f43f5e;  /* Vibrant Rose */
+  --action-warning: #f59e0b; /* Vibrant Amber */
+  --action-info: #3b82f6;    /* Vibrant Royal Blue */
+  --focus-ring: #10b981;
+}
+
+/* Glass Mode Global Ambient Refractive Glow Mesh */
+html[data-theme="glass"] body::before {
+  content: "";
+  position: fixed;
+  top: -15vh;
+  left: -10vw;
+  width: 50vw;
+  height: 50vh;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.22) 0%, rgba(16, 185, 129, 0) 70%);
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+  animation: cinematic-float-glow 14s ease-in-out infinite alternate;
+}
+
+html[data-theme="glass"] body::after {
+  content: "";
+  position: fixed;
+  bottom: -15vh;
+  right: -10vw;
+  width: 55vw;
+  height: 55vh;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(244, 63, 94, 0.18) 0%, rgba(244, 63, 94, 0) 70%);
+  filter: blur(90px);
+  pointer-events: none;
+  z-index: 0;
+  animation: cinematic-float-glow 18s ease-in-out infinite alternate-reverse;
+}
+
+/* Glass Mode Universal Card & Panel Frosted Blur Enhancement */
+html[data-theme="glass"] [class*="bg-[var(--bg-surface)]"],
+html[data-theme="glass"] [class*="bg-[var(--bg-elevated)]"] {
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36);
+  transition: backdrop-filter 0.5s ease, background-color 0.5s ease, border-color 0.5s ease;
+}
+
+/* Cinematic Motion Keyframes & Utilities */
+@keyframes cinematic-float-glow {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(4vw, 3vh) scale(1.1); }
+  100% { transform: translate(-2vw, -2vh) scale(0.95); }
+}
+
+@keyframes cinematic-shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.cinematic-shimmer-effect {
+  position: relative;
+  overflow: hidden;
+}
+.cinematic-shimmer-effect::after {
+  content: "";
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0) 100%);
+  transform: translateX(-100%);
+  animation: cinematic-shimmer 4s infinite;
+  pointer-events: none;
+}
+
 /* ===== SEMANTIC HIG STATUS SURFACES ===== */
 .status-entry     { color: var(--action-primary); }
 .status-exit      { color: var(--action-danger); }

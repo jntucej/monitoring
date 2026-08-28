@@ -6,7 +6,7 @@ import type { ToastData, ToastVariant } from "@/components/ui/toast";
 
 interface UIState {
   toasts: ToastData[];
-  theme: "dark" | "light";
+  theme: "dark" | "light" | "glass";
   isMobileSidebarOpen: boolean;
 }
 
@@ -14,7 +14,7 @@ interface UIActions {
   addToast: (toast: Omit<ToastData, "id">) => void;
   removeToast: (id: string) => void;
   clearAllToasts: () => void;
-  setTheme: (theme: "dark" | "light") => void;
+  setTheme: (theme: "dark" | "light" | "glass") => void;
   toggleMobileSidebar: () => void;
   success: (message: string, title?: string) => void;
   error: (message: string, title?: string) => void;
@@ -43,7 +43,7 @@ export const useUIStore = create<UIState & UIActions>()((set) => ({
   setTheme: (theme) => {
     if (typeof window !== "undefined") {
       document.documentElement.setAttribute("data-theme", theme);
-      if (theme === "dark") {
+      if (theme === "dark" || theme === "glass") {
         document.documentElement.classList.add("dark");
       } else {
         document.documentElement.classList.remove("dark");

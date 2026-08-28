@@ -195,7 +195,10 @@ export interface Scan {
   isCorrection: boolean;
   originalScanId?: string;
   personId?: string;
+  student_photo?: string;
 }
+
+export type ScanLog = Scan;
 
 /**
  * One row of the `daily_stats` table.

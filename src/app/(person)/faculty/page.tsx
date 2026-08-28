@@ -93,7 +93,7 @@ export default function FacultyDashboardPage() {
           </div>
 
           {/* Department Card */}
-          <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] space-y-2">
+          <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] space-y-2">
             <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400">
               <Briefcase className="w-4 h-4" />
               Academic Assignment

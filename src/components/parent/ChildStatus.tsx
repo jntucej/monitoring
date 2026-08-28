@@ -88,7 +88,7 @@ export function ChildStatus() {
         return (
           <div key={child.id} className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-6 flex items-center justify-between gap-3 flex-wrap">
             <div className="flex items-center gap-4">
-              <div className="relative w-16 h-16 rounded-full border-2 border-gray-400 overflow-hidden">
+              <div className="relative w-16 h-16 rounded-full border-2 border-[var(--border-strong)] overflow-hidden">
                 {child.photoUrl || child.photo ? (
                   <img src={child.photoUrl || child.photo} alt={name} className="rounded-full w-full h-full object-cover" />
                 ) : (

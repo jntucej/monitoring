@@ -116,7 +116,7 @@ export default function WorkerDashboard() {
       </div>
 
       {/* Entry / Exit Activity History */}
-      <div className="p-6 rounded-2xl bg-[var(--surface)] border border-[var(--border)] space-y-4">
+      <div className="p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-4">
         <h2 className="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
           <History className="w-4 h-4 text-blue-400" />
           Recent Gate Activity History

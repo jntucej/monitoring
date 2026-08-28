@@ -77,14 +77,14 @@ export function RequestPassForm() {
       <h3 className="font-semibold mb-4">Request a Pass</h3>
       <form className="space-y-4" onSubmit={submit}>
         <div>
-          <label htmlFor="passType" className="block text-sm font-medium text-gray-300">
+          <label htmlFor="passType" className="block text-sm font-medium text-[var(--text-secondary)]">
             Pass Type
           </label>
           <select
             id="passType"
             value={passType}
             onChange={(e) => setPassType(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-700 bg-gray-800 py-2 pl-3 pr-10 text-base text-white focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
+            className="mt-1 block w-full rounded-md border-[var(--border-strong)] bg-[var(--bg-elevated)] py-2 pl-3 pr-10 text-base text-[var(--text-primary)] focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
             disabled={loadingPassTypes}
             required
           >
@@ -96,28 +96,28 @@ export function RequestPassForm() {
         </div>
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <label htmlFor="from" className="block text-sm font-medium text-gray-300">From</label>
+            <label htmlFor="from" className="block text-sm font-medium text-[var(--text-secondary)]">From</label>
             <input
               id="from"
               type="datetime-local"
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-700 bg-gray-800 text-white sm:text-sm p-2"
+              className="mt-1 block w-full rounded-md border-[var(--border-strong)] bg-[var(--bg-elevated)] text-[var(--text-primary)] sm:text-sm p-2"
             />
           </div>
           <div>
-            <label htmlFor="to" className="block text-sm font-medium text-gray-300">To</label>
+            <label htmlFor="to" className="block text-sm font-medium text-[var(--text-secondary)]">To</label>
             <input
               id="to"
               type="datetime-local"
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-700 text-white sm:text-sm p-2 bg-gray-800"
+              className="mt-1 block w-full rounded-md border-[var(--border-strong)] text-[var(--text-primary)] sm:text-sm p-2 bg-[var(--bg-elevated)]"
             />
           </div>
         </div>
         <div>
-          <label htmlFor="reason" className="block text-sm font-medium text-gray-300">
+          <label htmlFor="reason" className="block text-sm font-medium text-[var(--text-secondary)]">
             Reason
           </label>
           <textarea
@@ -126,7 +126,7 @@ export function RequestPassForm() {
             onChange={(e) => setReason(e.target.value)}
             rows={3}
             placeholder="Optional details for the admin…"
-            className="mt-1 block w-full rounded-md border-gray-700 bg-gray-800 text-white shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
+            className="mt-1 block w-full rounded-md border-[var(--border-strong)] bg-[var(--bg-elevated)] text-white shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
           ></textarea>
         </div>
         <button

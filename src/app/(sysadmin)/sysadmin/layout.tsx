@@ -1,7 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
+import { Menu, X } from "lucide-react";
 import {
   ShieldCheck,
   LayoutDashboard,
@@ -23,6 +26,8 @@ import {
   LogOut,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
+import { useUIStore } from "@/stores/uiStore";
+import { GlassThemeToggle } from "@/components/shared/GlassThemeToggle";
 
 const NAV = [
   {
@@ -60,101 +65,178 @@ const NAV = [
   },
 ];
 
+// Shared nav list — renders once for the desktop sidebar and the mobile drawer
+function NavList({ onNavigate }: { onNavigate?: () => void }) {
+  const pathname = usePathname();
+  const isActive = (href: string) =>
+    href === "/sysadmin" ? pathname === "/sysadmin" : pathname?.startsWith(href);
+
+  return (
+    <nav className="flex-1 overflow-y-auto p-3 space-y-5">
+      {NAV.map((group) => (
+        <div key={group.group}>
+          <p className="px-3 pb-1.5 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">
+            {group.group}
+          </p>
+          <div className="space-y-0.5">
+            {group.items.map((item) => {
+              const active = isActive(item.href);
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={onNavigate}
+                  className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] ${
+                    active
+                      ? "bg-rose-600/15 text-rose-400 ring-1 ring-rose-500/30"
+                      : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
+                  }`}
+                >
+                  <Icon className="w-4 h-4 shrink-0" />
+                  <span className="truncate">{item.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </nav>
+  );
+}
+
+// Shared account footer — used by both shells
+function UserFooter({
+  user,
+  logout,
+}: {
+  user: { name?: string } | null;
+  logout: () => void;
+}) {
+  return (
+    <div className="p-3 border-t border-[var(--border)] space-y-2">
+      <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)]">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="w-7 h-7 rounded-full bg-rose-600/20 text-rose-300 flex items-center justify-center text-xs font-bold ring-1 ring-rose-500/30 shrink-0">
+            {user?.name ? user.name.charAt(0).toUpperCase() : "S"}
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs font-bold truncate">{user?.name || "System Admin"}</p>
+            <p className="text-[10px] text-[var(--text-muted)] font-mono truncate">SYSADMIN</p>
+          </div>
+        </div>
+        <button
+          onClick={logout}
+          className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-rose-400 hover:bg-rose-500/10 transition-colors focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+          aria-label="Sign out"
+          title="Sign Out"
+        >
+          <LogOut className="w-4 h-4" />
+        </button>
+      </div>
+      <Link
+        href="/login"
+        className="w-full py-1.5 px-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[11px] text-[var(--text-muted)] hover:text-rose-400 text-center font-semibold block"
+      >
+        Exit to Portal Login
+      </Link>
+    </div>
+  );
+}
+
 export default function SysadminStandaloneShellLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
   const { user, logout } = useAuthStore();
-
-  const isActive = (href: string) =>
-    href === "/sysadmin" ? pathname === "/sysadmin" : pathname?.startsWith(href);
+  const { theme, setTheme } = useUIStore();
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
-    <div className="min-h-screen w-full flex bg-[#0b0f1a] text-slate-100">
+    <div className="min-h-screen w-full flex bg-[var(--bg-base)] text-[var(--text-primary)]">
       {/* Standalone SysAdmin Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 shrink-0 border-r border-slate-800 bg-[#0d1220]">
-        <div className="p-5 border-b border-slate-800">
+      <aside className="hidden md:flex flex-col w-64 shrink-0 border-r border-[var(--border)] bg-[var(--bg-surface)]">
+        <div className="p-5 border-b border-[var(--border)]">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-rose-600/20 text-rose-400 flex items-center justify-center ring-1 ring-rose-500/40">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div className="min-w-0">
               <p className="text-sm font-bold tracking-tight">SysAdmin</p>
-              <p className="text-[10px] text-slate-400 font-mono uppercase">Control Room</p>
+              <p className="text-[10px] text-[var(--text-muted)] font-mono uppercase">Control Room</p>
             </div>
           </div>
         </div>
 
-        <nav className="flex-1 overflow-y-auto p-3 space-y-5">
-          {NAV.map((group) => (
-            <div key={group.group}>
-              <p className="px-3 pb-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                {group.group}
-              </p>
-              <div className="space-y-0.5">
-                {group.items.map((item) => {
-                  const active = isActive(item.href);
-                  const Icon = item.icon;
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
-                        active
-                          ? "bg-rose-600/15 text-rose-300 ring-1 ring-rose-500/30"
-                          : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
-                      }`}
-                    >
-                      <Icon className="w-4 h-4 shrink-0" />
-                      <span className="truncate">{item.label}</span>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </nav>
-<div className="p-3 border-t border-slate-800 space-y-2">
-          <div className="flex items-center justify-between p-2 rounded-lg bg-slate-800/50 border border-slate-700/50">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="w-7 h-7 rounded-full bg-rose-600/20 text-rose-300 flex items-center justify-center text-xs font-bold ring-1 ring-rose-500/30 shrink-0">
-                {user?.name ? user.name.charAt(0).toUpperCase() : "S"}
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-bold truncate">{user?.name || "System Admin"}</p>
-                <p className="text-[10px] text-slate-400 font-mono truncate">SYSADMIN</p>
-              </div>
-            </div>
-            <button
-              onClick={logout}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
-              title="Sign Out"
+        <NavList />
+        <UserFooter user={user} logout={logout} />
+      </aside>
+
+      {/* Mobile Navigation Drawer — follows Sidebar drawer pattern */}
+      <AnimatePresence>
+        {drawerOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-black/60 md:hidden"
+              onClick={() => setDrawerOpen(false)}
+            />
+            <motion.aside
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] flex flex-col bg-[var(--bg-surface)] border-r border-[var(--border)] md:hidden"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Navigation menu"
             >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
-          <Link
-            href="/login"
-            className="w-full py-1.5 px-2 rounded-lg bg-slate-800/50 border border-slate-700/50 text-[11px] text-slate-400 hover:text-rose-300 text-center font-semibold block"
-          >
-            Exit to Portal Login
-          </Link>
-        </div>
-</aside>
+              <div className="p-5 border-b border-[var(--border)] flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-rose-600/20 text-rose-400 flex items-center justify-center ring-1 ring-rose-500/40">
+                    <ShieldCheck className="w-5 h-5" />
+                  </div>
+                  <p className="text-sm font-bold tracking-tight">SysAdmin</p>
+                </div>
+                <button
+                  onClick={() => setDrawerOpen(false)}
+                  className="p-2 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+                  aria-label="Close navigation menu"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <NavList onNavigate={() => setDrawerOpen(false)} />
+              <UserFooter user={user} logout={logout} />
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Main Standalone Workspace */}
       <div className="flex-1 min-w-0 flex flex-col">
-        <header className="h-14 sticky top-0 z-40 flex items-center justify-between px-4 sm:px-6 bg-[#0d1220]/90 backdrop-blur-xl border-b border-slate-800 select-none">
-          <p className="text-sm font-bold tracking-tight">🔐 System Administration Console</p>
+        <header className="h-14 sticky top-0 z-40 flex items-center justify-between px-4 sm:px-6 bg-[var(--bg-surface)]/90 backdrop-blur-xl border-b border-[var(--border)] select-none">
           <div className="flex items-center gap-2">
-            <span className="hidden sm:inline-flex items-center gap-1 px-2 py-1 rounded-full bg-rose-600/10 text-rose-300 border border-rose-500/30 text-[10px] font-bold uppercase">
+            <button
+              onClick={() => setDrawerOpen(true)}
+              className="md:hidden p-2 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+              aria-label="Open navigation menu"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <p className="text-sm font-bold tracking-tight">🔐 System Administration Console</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <GlassThemeToggle showCard={false} />
+            <span className="hidden sm:inline-flex items-center gap-1 px-2 py-1 rounded-full bg-rose-600/10 text-rose-400 border border-rose-500/30 text-[10px] font-bold uppercase">
               <ShieldCheck className="w-3 h-3" /> Elevated Security
             </span>
             <button
               onClick={logout}
-              className="md:hidden p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10"
+              className="md:hidden p-2 rounded-lg text-[var(--text-muted)] hover:text-rose-400 hover:bg-rose-500/10"
               title="Sign Out"
             >
               <LogOut className="w-4 h-4" />

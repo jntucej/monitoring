@@ -1,11 +1,13 @@
 "use client";
 
-import type { ScanDirection, ExitReason } from "@/lib/types";
+import type { ScanDirection, ExitReason, ScanLog } from "@/lib/types";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { formatTime } from "@/lib/utils";
 
+export type { ScanLog };
+
 interface LastScanCardProps {
-  lastScan: any | null;
+  lastScan: ScanLog | null;
 }
 
 export function LastScanCard({ lastScan }: LastScanCardProps) {

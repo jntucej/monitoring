@@ -77,10 +77,10 @@ export function WorkerStats({ loading = false, uniqueId }: WorkerStatsProps) {
   if (loading || fetching) {
     return (
       <div className="grid grid-cols-2 gap-4 animate-pulse">
-        <div className="h-24 rounded-xl bg-[var(--surface)] border border-[var(--border)]" />
-        <div className="h-24 rounded-xl bg-[var(--surface)] border border-[var(--border)]" />
-        <div className="h-24 rounded-xl bg-[var(--surface)] border border-[var(--border)]" />
-        <div className="h-24 rounded-xl bg-[var(--surface)] border border-[var(--border)]" />
+        <div className="h-24 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)]" />
+        <div className="h-24 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)]" />
+        <div className="h-24 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)]" />
+        <div className="h-24 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)]" />
       </div>
     );
   }
@@ -88,7 +88,7 @@ export function WorkerStats({ loading = false, uniqueId }: WorkerStatsProps) {
   return (
     <div className="grid grid-cols-2 gap-4">
       {/* Shift Status */}
-      <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] space-y-1">
+      <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-1">
         <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-medium">
           <UserCheck className="w-3.5 h-3.5 text-blue-400" />
           Shift Status
@@ -102,7 +102,7 @@ export function WorkerStats({ loading = false, uniqueId }: WorkerStatsProps) {
       </div>
 
       {/* Today Entry */}
-      <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] space-y-1">
+      <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-1">
         <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-medium">
           <Clock className="w-3.5 h-3.5 text-purple-400" />
           Today's Gate Entry
@@ -114,7 +114,7 @@ export function WorkerStats({ loading = false, uniqueId }: WorkerStatsProps) {
       </div>
 
       {/* Last Exit */}
-      <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] space-y-1">
+      <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-1">
         <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-medium">
           <Clock className="w-3.5 h-3.5 text-amber-400" />
           Last Recorded Exit
@@ -126,7 +126,7 @@ export function WorkerStats({ loading = false, uniqueId }: WorkerStatsProps) {
       </div>
 
       {/* Shift Compliance */}
-      <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] space-y-1">
+      <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-1">
         <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-medium">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
           Shift Adherence
