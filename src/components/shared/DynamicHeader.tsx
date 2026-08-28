@@ -24,7 +24,7 @@ const PAGE_TITLES: Record<string, string> = {
 
 export function DynamicHeader() {
   const pathname = usePathname();
-  const { theme, setTheme, toggleMobileSidebar, addToast } = useUIStore();
+  const { theme, setTheme, deviceProfile, toggleMobileSidebar, addToast } = useUIStore();
   const { role, user, logout } = useAuthStore();
   const { college } = useCollegeInfo();
   const [tapCount, setTapCount] = useState(0);
@@ -82,6 +82,18 @@ export function DynamicHeader() {
       </div>
 
       <div className="flex items-center gap-1.5 sm:gap-3">
+        {/* Hardware Experience Badge */}
+        <div
+          className={`hidden md:flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase border transition-all ${
+            deviceProfile === "high-end"
+              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.15)]"
+              : "bg-amber-500/10 text-amber-400 border-amber-500/30"
+          }`}
+        >
+          <span className={`w-1.5 h-1.5 rounded-full ${deviceProfile === "high-end" ? "bg-emerald-400 animate-ping" : "bg-amber-400"}`} />
+          <span>{deviceProfile === "high-end" ? "HIGH-END UI" : "LOW-SPEC UI"}</span>
+        </div>
+
         {/* Hidden Triple Tap Logout Trigger Target */}
         <div
           onClick={handleSecretTripleTap}

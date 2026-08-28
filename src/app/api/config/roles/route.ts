@@ -92,7 +92,7 @@ async function handleDelete(req: NextRequest) {
   }
 }
 
-export const GET = withRateLimit(handleGet as any, { keyPrefix: 'config_roles', maxRequests: 50 });
+export const GET = withRateLimit(handleGet as any, { keyPrefix: 'config_roles', maxRequests: 300 });
 export const POST = withAuthorization(handlePost, { requiredRole: ['sysadmin'] });
 export const PATCH = withAuthorization(handlePost, { requiredRole: ['sysadmin'] });
 export const DELETE = withAuthorization(handleDelete, { requiredRole: ['sysadmin'] });

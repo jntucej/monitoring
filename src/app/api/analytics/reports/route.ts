@@ -10,14 +10,11 @@ async function handleGet() {
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (error || !reports) {
-      const mockReports = [
-        { id: "rpt-peak-hours", name: "Peak Gate Flow & Occupancy", description: "Hourly flow across Main & South gates", schedule_cron: "0 8 * * *", created_by: "sysadmin", created_at: new Date().toISOString() },
-      ];
-      return NextResponse.json({ success: true, data: mockReports });
+    if (error) {
+      return NextResponse.json({ success: true, data: [] });
     }
 
-    return NextResponse.json({ success: true, data: reports });
+    return NextResponse.json({ success: true, data: reports || [] });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 500 });
   }

@@ -9,7 +9,7 @@ export function getDefaultRouteForRole(role: Role | string, gateId?: string): st
     guardian: "/parent",
     parent: "/parent",
     student: "/student",
-    warden: "/warden",
+    warden: "/supervisor",
     faculty: "/faculty",
     staff: "/staff",
     worker: "/worker",

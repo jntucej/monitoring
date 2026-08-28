@@ -142,7 +142,6 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       ];
 
     case "operator":
-    case "supervisor":
       return [
         {
           groupLabel: "Gate Operations Desk",
@@ -161,6 +160,34 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "General",
           items: [
+            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+          ],
+        },
+      ];
+
+    case "supervisor":
+    case "warden":
+      return [
+        {
+          groupLabel: "Supervisor & Warden Desk",
+          items: [
+            { href: "/supervisor", label: "Supervisor Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
+            { href: "/supervisor?tab=approvals", label: "Outpass Approvals", icon: "CheckSquare", badge: "PENDING" },
+            { href: "/supervisor?tab=curfew", label: "Curfew & Wards Roster", icon: "Clock" },
+            { href: "/gate/active", label: "Gate Terminal Desk", icon: "QrCode" },
+          ],
+        },
+        {
+          groupLabel: "Campus Radar & Directory",
+          items: [
+            { href: "/admin/alerts", label: "Security Radar", icon: "ShieldAlert", badge: "ALERTS" },
+            { href: "/admin/students", label: "Students Roster", icon: "GraduationCap" },
+          ],
+        },
+        {
+          groupLabel: "General & Support",
+          items: [
+            { href: "/profile", label: "My Profile", icon: "User" },
             { href: "/about", label: "About Campus", icon: "HelpCircle" },
           ],
         },

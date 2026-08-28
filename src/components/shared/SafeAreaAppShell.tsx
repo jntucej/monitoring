@@ -37,11 +37,9 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
       }
 
       const savedProfile = localStorage.getItem("gate-monitor-device-profile") as "high-end" | "low-profile" | null;
-      if (savedProfile) {
-        setDeviceProfile(savedProfile);
-      } else {
-        setDeviceProfile("high-end");
-      }
+      const initialProfile = savedProfile || "high-end";
+      setDeviceProfile(initialProfile);
+      document.documentElement.setAttribute("data-device-profile", initialProfile);
     }
   }, [setTheme, setDeviceProfile]);
 

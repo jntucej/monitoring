@@ -226,6 +226,10 @@ export function LoginForm({ role, title, subtitle }: LoginFormProps) {
       case "sysadmin":
         router.push("/sysadmin");
         break;
+      case "supervisor":
+      case "warden":
+        router.push("/supervisor");
+        break;
       case "faculty":
         router.push("/faculty");
         break;

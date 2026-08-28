@@ -125,6 +125,30 @@ html.light {
   border-color: rgba(99, 102, 241, 0.5);
   transform: translateY(-2px);
 }
+/* High-End vs Low-Profile Specific UI Hardware Profiles */
+html[data-device-profile="high-end"] .glass-card {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.4), 0 0 15px 0 rgba(16, 185, 129, 0.1);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html[data-device-profile="high-end"] .glass-card:hover {
+  box-shadow: 0 12px 40px -5px rgba(0, 0, 0, 0.5), 0 0 25px 0 rgba(16, 185, 129, 0.25);
+  border-color: rgba(16, 185, 129, 0.45);
+  transform: translateY(-3px);
+}
+
+html[data-device-profile="low-profile"] .glass-card {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background-color: var(--bg-surface) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: none !important;
+}
 
 .tabular-nums {
   font-variant-numeric: tabular-nums;

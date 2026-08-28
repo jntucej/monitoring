@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { User, CheckCircle2, LogIn, Home, Sun, Clock, X, Briefcase, Fingerprint } from "lucide-react";
+import { User, CheckCircle2, LogIn, Home, Sun, Clock, X, Briefcase, Fingerprint, ShieldAlert, Flag } from "lucide-react";
 import { ExitReason, StudentType, Student, ScanDirection } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
@@ -55,6 +55,36 @@ export function ScanConfirmation({
   const [selectedReason, setSelectedReason] = useState<ExitReason | null>(null);
   const [approvedPasses, setApprovedPasses] = useState<any[]>([]);
   const [loadingPasses, setLoadingPasses] = useState(false);
+  const [isFlagged, setIsFlagged] = useState(
+    student.status === "SUSPENDED" || student.flagStatus === "suspicious"
+  );
+  const [flaggingLoading, setFlaggingLoading] = useState(false);
+
+  const handleToggleFlagAccount = async () => {
+    if (flaggingLoading) return;
+    const nextStatus = isFlagged ? "ACTIVE" : "SUSPENDED";
+    const nextFlagStatus = isFlagged ? null : "suspicious";
+    setFlaggingLoading(true);
+    try {
+      const authStore = useAuthStore.getState();
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (authStore.token) headers["Authorization"] = `Bearer ${authStore.token}`;
+      if (authStore.user?.currentSessionToken) headers["X-Session-Token"] = authStore.user.currentSessionToken;
+
+      const res = await fetch(`/api/users/${student.id}`, {
+        method: "PATCH",
+        headers,
+        body: JSON.stringify({ status: nextStatus, flagStatus: nextFlagStatus }),
+      });
+      if (res.ok) {
+        setIsFlagged(!isFlagged);
+      }
+    } catch (e) {
+      console.error("Failed to update account flag status:", e);
+    } finally {
+      setFlaggingLoading(false);
+    }
+  };
 
   // Start photo verification countdown when component mounts
   useEffect(() => {
@@ -276,6 +306,35 @@ export function ScanConfirmation({
           <p className="text-xs text-[var(--text-muted)] mt-0.5">
             {student.department || student.designation} {student.year && `- Year ${student.year}`}
           </p>
+        </div>
+
+        {/* Account Security Flagging & Alert Controls */}
+        <div className="pt-2 flex flex-col items-center gap-2">
+          {isFlagged && (
+            <div className="w-full p-3 rounded-xl bg-rose-500/20 border-2 border-rose-500/50 text-rose-300 text-center space-y-1 animate-pulse">
+              <div className="flex items-center justify-center gap-1.5 font-black text-xs uppercase tracking-wider text-rose-400">
+                <ShieldAlert className="w-4 h-4 text-rose-400" />
+                SECURITY HOLD: ACCOUNT IS FLAGGED / BLOCKED
+              </div>
+              <p className="text-[10px] text-rose-200">
+                This account is currently suspended or flagged suspicious. Gate movement is restricted.
+              </p>
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={handleToggleFlagAccount}
+            disabled={flaggingLoading}
+            className={`px-3.5 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 ${
+              isFlagged
+                ? "bg-rose-500/20 border-rose-500/40 text-rose-300 hover:bg-rose-500/30"
+                : "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20"
+            }`}
+          >
+            <Flag className="w-3.5 h-3.5" />
+            <span>{isFlagged ? "UNFLAG / UNBLOCK ACCOUNT" : "FLAG THIS ACCOUNT / BLOCK ID"}</span>
+          </button>
         </div>
       </div>
 

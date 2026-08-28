@@ -10,27 +10,49 @@ export interface RoleConfig {
   default_redirect: string;
 }
 
+let cachedRoles: RoleConfig[] | null = null;
+let rolesPromise: Promise<RoleConfig[]> | null = null;
+
+async function loadRoles(): Promise<RoleConfig[]> {
+  if (cachedRoles) return cachedRoles;
+  if (!rolesPromise) {
+    rolesPromise = fetch('/api/config/roles')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (json?.success && Array.isArray(json.data)) {
+          cachedRoles = json.data;
+          return json.data;
+        }
+        return [];
+      })
+      .catch(() => [])
+      .finally(() => {
+        rolesPromise = null;
+      });
+  }
+  return rolesPromise;
+}
+
 export function useRoles() {
-  const [roles, setRoles] = useState<RoleConfig[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [roles, setRoles] = useState<RoleConfig[]>(cachedRoles || []);
+  const [loading, setLoading] = useState(!cachedRoles);
 
   useEffect(() => {
-    const fetchRoles = async () => {
-      try {
-        const res = await fetch('/api/config/roles');
-        if (res.ok) {
-          const json = await res.json();
-          if (json.success) {
-            setRoles(json.data);
-          }
-        }
-      } catch (err) {
-        console.error('Error fetching roles:', err);
-      } finally {
+    if (cachedRoles) {
+      setRoles(cachedRoles);
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
+    loadRoles().then((data) => {
+      if (!cancelled) {
+        setRoles(data);
         setLoading(false);
       }
+    });
+    return () => {
+      cancelled = true;
     };
-    fetchRoles();
   }, []);
 
   return { roles, loading };

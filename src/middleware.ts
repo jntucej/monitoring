@@ -61,6 +61,9 @@ export async function middleware(req: NextRequest) {
     if (path.startsWith('/worker') && role !== 'worker' && role !== 'sysadmin' && role !== 'admin') {
       return NextResponse.redirect(new URL(defaultRoute, req.url));
     }
+    if (path.startsWith('/supervisor') && !['supervisor', 'warden', 'admin', 'sysadmin'].includes(role)) {
+      return NextResponse.redirect(new URL(defaultRoute, req.url));
+    }
   }
 
   return NextResponse.next();
@@ -77,6 +80,7 @@ export const config = {
     '/parent/:path*',
     '/staff/:path*',
     '/worker/:path*',
+    '/supervisor/:path*',
   ],
 };
 

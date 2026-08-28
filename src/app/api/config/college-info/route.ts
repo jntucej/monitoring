@@ -120,7 +120,7 @@ async function handlePatch(req: NextRequest) {
   }
 }
 
-export const GET = withRateLimit(handleGet, { keyPrefix: 'college_info_get', maxRequests: 100 });
+export const GET = withRateLimit(handleGet, { keyPrefix: 'college_info_get', maxRequests: 300 });
 export const PATCH = withRateLimit(
   withAuthorization(handlePatch, { requiredRole: ['admin', 'sysadmin'] }),
   { keyPrefix: 'college_info_patch', maxRequests: 10 }

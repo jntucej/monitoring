@@ -2,23 +2,41 @@ import { NextRequest, NextResponse } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { getCurrentOccupancy } from "@/lib/occupancy";
 import { getPredictions } from "@/lib/predictive";
+import { getSupabaseServiceClient } from "@/lib/supabaseClient";
 
 async function handleGet(req: NextRequest) {
   try {
+    const supabase = getSupabaseServiceClient();
     const occupancy = await getCurrentOccupancy();
     const predictions = await getPredictions("traffic");
 
-    const gates = [
-      { id: "gate_main_1", name: "Main Gate Alpha", status: "online", last_scan: new Date().toISOString(), flow_rate: "45 scans/min" },
-      { id: "gate_north_2", name: "North Gate Bravo", status: "online", last_scan: new Date().toISOString(), flow_rate: "18 scans/min" },
-      { id: "gate_south_1", name: "South Gate Charlie", status: "maintenance", last_scan: new Date(Date.now() - 3600 * 1000).toISOString(), flow_rate: "0 scans/min" },
-      { id: "gate_hostel_b", name: "Hostel Gate Boys", status: "online", last_scan: new Date().toISOString(), flow_rate: "22 scans/min" },
-    ];
+    // Query real gates from database
+    const { data: dbGates } = await supabase
+      .from("gates")
+      .select("id, name, is_active, location, gate_code")
+      .order("name", { ascending: true });
 
-    const alerts = [
-      { id: "alt_1", location: "Academic Block North", severity: "high", message: "Capacity threshold exceeded (82%)" },
-      { id: "alt_2", location: "South Gate Charlie", severity: "medium", message: "Maintenance required on Turnstile #2" },
-    ];
+    // Query recent unhandled security alerts
+    const { data: dbAlerts } = await supabase
+      .from("security_alerts")
+      .select("id, location, alert_type, message, created_at")
+      .order("created_at", { ascending: false })
+      .limit(5);
+
+    const gates = (dbGates || []).map((g) => ({
+      id: g.id,
+      name: g.name || `Gate ${g.gate_code}`,
+      status: g.is_active ? "online" : "maintenance",
+      last_scan: new Date().toISOString(),
+      flow_rate: g.is_active ? "Active" : "Offline",
+    }));
+
+    const alerts = (dbAlerts || []).map((a) => ({
+      id: a.id,
+      location: a.location || "Campus Perimeter",
+      severity: a.alert_type === "CRITICAL" ? "high" : "medium",
+      message: a.message || "Security alert logged",
+    }));
 
     return NextResponse.json({
       success: true,

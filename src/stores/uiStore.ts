@@ -58,6 +58,7 @@ export const useUIStore = create<UIState & UIActions>()((set) => ({
 
   setDeviceProfile: (deviceProfile) => {
     if (typeof window !== "undefined") {
+      document.documentElement.setAttribute("data-device-profile", deviceProfile);
       localStorage.setItem("gate-monitor-device-profile", deviceProfile);
     }
     set({ deviceProfile });

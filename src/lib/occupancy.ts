@@ -18,9 +18,21 @@ export interface ZoneOccupancy {
 
 export async function getCurrentOccupancy(): Promise<{ total: number; capacity: number; zones: ZoneOccupancy[] }> {
   try {
+    // Get live count of inside people from users table
+    const { count: insideStudents } = await supabase
+      .from("users")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "INSIDE");
+
+    const { count: totalUsersCount } = await supabase
+      .from("users")
+      .select("*", { count: "exact", head: true });
+
+    const totalInside = insideStudents ?? 0;
+    const capacityTotal = Math.max((totalUsersCount ?? 0) * 2, 1000);
+
     const { data: zones } = await supabase.from("zones").select("*");
     
-    // Default zones fallback if database table not yet populated
     const baseZones = (zones && zones.length > 0) ? zones : [
       { id: "zone_academic_north", name: "Academic Block North (CSE/ECE)", type: "academic", capacity: 800 },
       { id: "zone_academic_south", name: "Academic Block South (ME/CE)", type: "academic", capacity: 600 },
@@ -30,12 +42,12 @@ export async function getCurrentOccupancy(): Promise<{ total: number; capacity: 
       { id: "zone_sports_complex", name: "Sports & Recreation Hub", type: "sports", capacity: 400 },
     ];
 
-    const resultZones: ZoneOccupancy[] = baseZones.map((z: any, idx: number) => {
-      // Calculate realistic dynamic occupancy
-      const mockPercentages = [45, 68, 82, 35, 91, 24];
-      const pct = mockPercentages[idx % mockPercentages.length];
-      const count = Math.round((z.capacity * pct) / 100);
-      
+    const resultZones: ZoneOccupancy[] = baseZones.map((z: any) => {
+      // Proportionally divide active inside users across zones
+      const share = z.capacity / 3900;
+      const count = Math.min(Math.round(totalInside * share), z.capacity);
+      const pct = z.capacity > 0 ? Math.round((count / z.capacity) * 100) : 0;
+
       let status: "normal" | "moderate" | "high" | "critical" = "normal";
       if (pct >= 85) status = "critical";
       else if (pct >= 60) status = "high";
@@ -50,10 +62,10 @@ export async function getCurrentOccupancy(): Promise<{ total: number; capacity: 
         occupancy_percentage: pct,
         status,
         breakdown: {
-          students: Math.round(count * 0.75),
-          faculty: Math.round(count * 0.12),
-          staff: Math.round(count * 0.08),
-          visitors: Math.round(count * 0.05),
+          students: Math.round(count * 0.8),
+          faculty: Math.round(count * 0.1),
+          staff: Math.round(count * 0.07),
+          visitors: Math.round(count * 0.03),
         },
       };
     });
@@ -63,7 +75,7 @@ export async function getCurrentOccupancy(): Promise<{ total: number; capacity: 
 
     return { total, capacity, zones: resultZones };
   } catch {
-    return { total: 2450, capacity: 3900, zones: [] };
+    return { total: 0, capacity: 3900, zones: [] };
   }
 }
 
@@ -71,20 +83,31 @@ export async function getOccupancyHistory(): Promise<Array<{ timestamp: string; 
   const history: Array<{ timestamp: string; total: number; zones: Record<string, number> }> = [];
   const now = Date.now();
 
-  for (let i = 24; i >= 0; i--) {
-    const time = new Date(now - i * 3600 * 1000).toISOString();
-    const factor = Math.sin((24 - i) / 3) * 0.4 + 0.5;
-    const total = Math.round(3900 * factor);
-    history.push({
-      timestamp: time,
-      total,
-      zones: {
-        zone_academic_north: Math.round(800 * factor),
-        zone_academic_south: Math.round(600 * factor),
-        zone_hostel_boys: Math.round(1000 * (1 - factor * 0.5)),
-        zone_hostel_girls: Math.round(800 * (1 - factor * 0.5)),
-      },
-    });
+  try {
+    const { count: insideCount } = await supabase
+      .from("users")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "INSIDE");
+
+    const currentTotal = insideCount ?? 0;
+
+    for (let i = 24; i >= 0; i--) {
+      const time = new Date(now - i * 3600 * 1000).toISOString();
+      const factor = Math.max(0.2, Math.sin((24 - i) / 3) * 0.5 + 0.5);
+      const total = Math.round(currentTotal * factor);
+      history.push({
+        timestamp: time,
+        total,
+        zones: {
+          zone_academic_north: Math.round(total * 0.3),
+          zone_academic_south: Math.round(total * 0.25),
+          zone_hostel_boys: Math.round(total * 0.25),
+          zone_hostel_girls: Math.round(total * 0.2),
+        },
+      });
+    }
+  } catch {
+    // Return empty history on error
   }
 
   return history;

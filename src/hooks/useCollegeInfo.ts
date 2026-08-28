@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useAuthStore } from '@/stores/authStore';
 
 export interface CollegeInfo {
   name: string;
@@ -12,33 +11,52 @@ export interface CollegeInfo {
   updatedAt?: string;
 }
 
+let cachedCollege: CollegeInfo | null = null;
+let collegePromise: Promise<CollegeInfo | null> | null = null;
+
+async function loadCollegeInfo(token?: string | null): Promise<CollegeInfo | null> {
+  if (cachedCollege) return cachedCollege;
+  if (!collegePromise) {
+    collegePromise = fetch('/api/config/college-info', {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (json?.success && json.data) {
+          cachedCollege = json.data;
+          return json.data;
+        }
+        return null;
+      })
+      .catch(() => null)
+      .finally(() => {
+        collegePromise = null;
+      });
+  }
+  return collegePromise;
+}
+
 export function useCollegeInfo() {
-  const [college, setCollege] = useState<CollegeInfo | null>(null);
-  const [loading, setLoading] = useState(true);
-  const { token } = useAuthStore();
+  const [college, setCollege] = useState<CollegeInfo | null>(cachedCollege);
+  const [loading, setLoading] = useState(!cachedCollege);
 
   useEffect(() => {
+    if (cachedCollege) {
+      setCollege(cachedCollege);
+      setLoading(false);
+      return;
+    }
     let mounted = true;
-    const fetchCollegeInfo = async () => {
-      try {
-        const res = await fetch('/api/config/college-info', {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
-        const json = await res.json();
-        if (mounted && json.success) {
-          setCollege(json.data);
-        } else if (mounted) {
-          console.error('Failed to fetch college info:', json.error);
-        }
-      } catch (err) {
-        if (mounted) console.error('Error fetching college info:', err);
-      } finally {
-        if (mounted) setLoading(false);
+    loadCollegeInfo().then((data) => {
+      if (mounted) {
+        if (data) setCollege(data);
+        setLoading(false);
       }
+    });
+    return () => {
+      mounted = false;
     };
-    fetchCollegeInfo();
-    return () => { mounted = false; };
-  }, [token]);
+  }, []);
 
   return { college, loading };
 }

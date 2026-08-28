@@ -398,23 +398,23 @@ export default function AdminDashboardPage() {
         </div>
 
         <div
-          onClick={() => router.push("/admin/gates")}
+          onClick={() => router.push("/admin/students")}
           className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] hover:border-emerald-500/40 hover:bg-emerald-500/5 transition cursor-pointer group flex flex-col justify-between"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] group-hover:text-emerald-400">
-              Gate Control Desk
+              ID Flagging & Accounts
             </span>
             <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 group-hover:scale-110 transition-transform">
-              <Database className="w-4 h-4" />
+              <ShieldAlert className="w-4 h-4 text-emerald-400" />
             </div>
           </div>
           <div className="mt-3">
             <div className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-emerald-400 transition-colors">
-              Active Gates & Terminals
+              Manage Security Holds & Bans
             </div>
             <p className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
-              Configure scanner status <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+              Flag/unflag accounts for scanning <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
             </p>
           </div>
         </div>

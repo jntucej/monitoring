@@ -84,8 +84,8 @@ export function Sidebar() {
       activeRole = "admin";
     } else if (pathname.startsWith("/gate")) {
       activeRole = "operator";
-    } else if (pathname.startsWith("/supervisor")) {
-      activeRole = "supervisor";
+    } else if (pathname.startsWith("/supervisor") || pathname.startsWith("/warden")) {
+      activeRole = storeRole === "warden" ? "warden" : "supervisor";
     } else if (pathname.startsWith("/student")) {
       activeRole = "student";
     } else if (pathname.startsWith("/parent")) {
