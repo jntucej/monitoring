@@ -94,7 +94,6 @@ function ColumnSideDrawer({
 }) {
   const pathname = usePathname();
   const { user, logout } = useAuthStore();
-  const { deviceProfile, setDeviceProfile } = useUIStore();
 
   return (
     <AnimatePresence>
@@ -155,19 +154,6 @@ function ColumnSideDrawer({
                   );
                 })}
               </div>
-
-              <div className="space-y-1.5 pt-2 border-t border-slate-800">
-                <p className="text-[9px] font-mono font-bold uppercase tracking-widest text-slate-400 px-2">Hardware Mode</p>
-                <button
-                  onClick={() => setDeviceProfile(deviceProfile === "high-end" ? "low-profile" : "high-end")}
-                  className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs font-semibold text-white"
-                >
-                  <div className="flex items-center gap-2">
-                    {deviceProfile === "high-end" ? <Sparkles className="w-4 h-4 text-emerald-400" /> : <Smartphone className="w-4 h-4 text-amber-400" />}
-                    <span>{deviceProfile === "high-end" ? "High-Spec HUD" : "Low-Profile"}</span>
-                  </div>
-                </button>
-              </div>
             </div>
 
             <div className="pt-3 border-t border-slate-800">
@@ -186,8 +172,7 @@ function ColumnSideDrawer({
 export function MobileBottomNav() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { role, user, logout } = useAuthStore();
-  const { deviceProfile, setDeviceProfile, addToast } = useUIStore();
+  const { role, user } = useAuthStore();
   const [isColumnDrawerOpen, setIsColumnDrawerOpen] = useState(false);
 
   let activeRole: string = role || "";
@@ -208,16 +193,6 @@ export function MobileBottomNav() {
   const tabs = ROLE_TABS[activeRole] || ROLE_TABS.admin;
   const extraLinks = EXTRA_COLUMN_LINKS[activeRole] || [];
   const currentTabParam = searchParams?.get("tab") || null;
-
-  const toggleHardwareProfile = () => {
-    const next = deviceProfile === "high-end" ? "low-profile" : "high-end";
-    setDeviceProfile(next);
-    addToast({
-      title: `Hardware Mode: ${next === "high-end" ? "High-End Spec" : "Low-Profile"}`,
-      message: next === "high-end" ? "Camera HUD enabled" : "Manual entry mode active",
-      variant: "info",
-    });
-  };
 
   return (
     <>

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { correctScan } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
-import { supabase } from "@/lib/supabaseClient";
+import { getSupabaseServiceClient } from "@/lib/supabaseClient";
 import type { AuthContext } from "@/lib/authContext";
 import type { ScanDirection, ExitReason } from "@/lib/types";
 
@@ -48,11 +48,12 @@ async function handlePatch(req: NextRequest, { auth }: { auth: AuthContext }) {
     }
 
     // Get the admin's name for audit logging
-    const { data: profile, error: profileError } = await supabase
+    const service = getSupabaseServiceClient();
+    const { data: profile, error: profileError } = await service
       .from("users")
       .select("name")
       .eq("id", adminId)
-      .single();
+      .maybeSingle();
 
     if (profileError || !profile) {
       return NextResponse.json(

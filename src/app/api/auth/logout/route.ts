@@ -27,7 +27,8 @@ async function handlePost(req: NextRequest) {
         } catch (dbErr) {
           console.error("Logout database session token clear error:", dbErr);
         }
-        await service.auth.admin.signOut(user.id).catch((signOutErr) => {
+        const token = authHeader.slice(7);
+        await service.auth.admin.signOut(token).catch((signOutErr) => {
           console.error("Logout session revocation error:", signOutErr);
         });
       }

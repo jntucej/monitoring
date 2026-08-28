@@ -29,8 +29,6 @@ function LockdownDialog() {
   const [sending, setSending]   = useState(false);
   const [sent, setSent]         = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
-  const { deviceProfile }       = useUIStore();
-  const isHighEnd               = deviceProfile === "high-end";
 
   const toggle = (id: string) => {
     if (id === "all") { setSelected(["all"]); return; }
@@ -81,9 +79,9 @@ function LockdownDialog() {
               onClick={() => setOpen(false)}
             />
             <motion.div
-              initial={isHighEnd ? { opacity: 0, scale: 0.9, y: 20 } : { opacity: 0 }}
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={isHighEnd ? { opacity: 0, scale: 0.9, y: 20 } : { opacity: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
               className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
             >

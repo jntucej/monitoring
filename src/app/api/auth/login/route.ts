@@ -98,13 +98,13 @@ async function handleLogin(req: NextRequest) {
 
     if (!profile) {
       // Valid auth user without a provisioned profile — revoke immediately.
-      await service.auth.admin.signOut(authData.user.id).catch(() => {});
+      await service.auth.admin.signOut(authData.session.access_token).catch(() => {});
       return NextResponse.json(GENERIC_FAILURE, { status: 401 });
     }
 
     if (profile.status !== "ACTIVE") {
       // Kill the session that was just created for a non-active account.
-      await service.auth.admin.signOut(authData.user.id).catch(() => {});
+      await service.auth.admin.signOut(authData.session.access_token).catch(() => {});
       return NextResponse.json(
         { success: false, error: { code: "ACCOUNT_INACTIVE", message: "Account is not active." } },
         { status: 403 }
@@ -119,7 +119,7 @@ async function handleLogin(req: NextRequest) {
         .from("users")
         .select("two_factor_enabled")
         .eq("id", authData.user.id)
-        .single();
+        .maybeSingle();
 
       if (!mfaRow?.two_factor_enabled) {
         return NextResponse.json(

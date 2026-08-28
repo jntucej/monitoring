@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { findGatePasses, createGatePass, getParentChildren } from "@/lib/db";
-import { supabase } from "@/lib/supabaseClient";
+import { supabase, getSupabaseServiceClient } from "@/lib/supabaseClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import type { AuthContext } from "@/lib/authContext";
@@ -22,11 +22,12 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
     if (!isAdmin) {
       if (authRole === 'student') {
         // Students must query by their own roll number, which we can get from their user profile.
-        const { data: profile } = await supabase
+        const service = getSupabaseServiceClient();
+        const { data: profile } = await service
           .from('users')
           .select('unique_id')
           .eq('id', authUserId)
-          .single();
+          .maybeSingle();
 
         const userRoll = profile?.unique_id;
         if (!userRoll) {

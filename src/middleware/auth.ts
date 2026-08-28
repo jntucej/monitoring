@@ -54,7 +54,7 @@ export async function authMiddleware(req: NextRequest) {
     .from('users')
     .select('*')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
 
   if (profileError || !profile) {
     return NextResponse.json(
@@ -143,7 +143,7 @@ export function withAuth(handler: (req: NextRequest) => Promise<Response>) {
       .from('users')
       .select('*')
       .eq('id', user.id)
-      .single();
+      .maybeSingle();
 
     if (profileError || !profile) {
       return NextResponse.json(

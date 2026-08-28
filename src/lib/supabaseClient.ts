@@ -102,31 +102,31 @@ export const createEphemeralSupabaseClient = (): SupabaseClient =>
   });
 
 // Function to invalidate all user sessions (requires service role).
-// Revokes Supabase Auth sessions (refresh tokens) via the Admin API and
-// records the invalidation through the `invalidate_all_user_sessions` RPC.
-export const invalidateAllUserSessions = async (userId: string): Promise<boolean> => {
+// Revokes Supabase Auth sessions (refresh tokens) via the Admin API when token is provided,
+// and records the invalidation through the `invalidate_all_user_sessions` RPC.
+export const invalidateAllUserSessions = async (userId: string, jwtToken?: string): Promise<boolean> => {
   try {
-    const serviceClient = getSupabaseServiceClient()
+    const serviceClient = getSupabaseServiceClient();
 
-    // Call the Supabase Auth Admin API to sign out the user
-    const { error } = await serviceClient.auth.admin.signOut(userId)
-
-    if (error) {
-      console.error('Error invalidating user sessions:', error)
-      return false
+    // If a JWT token was supplied, revoke it via Auth Admin API
+    if (jwtToken && jwtToken.startsWith("eyJ")) {
+      const { error } = await serviceClient.auth.admin.signOut(jwtToken);
+      if (error) {
+        console.error('Error invalidating user sessions via signOut:', error);
+      }
     }
 
-    // Call the database function to log the session invalidation
+    // Call the database function to log/process the session invalidation
     const { error: dbError } = await serviceClient
-      .rpc('invalidate_all_user_sessions', { p_user_id: userId })
+      .rpc('invalidate_all_user_sessions', { p_user_id: userId });
 
     if (dbError) {
-      console.error('Error logging session invalidation:', dbError)
+      console.error('Error logging session invalidation:', dbError);
     }
 
-    return true
+    return true;
   } catch (err) {
-    console.error('Error in invalidateAllUserSessions:', err)
-    return false
+    console.error('Error in invalidateAllUserSessions:', err);
+    return false;
   }
-}
+};

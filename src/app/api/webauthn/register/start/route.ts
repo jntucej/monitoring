@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuthenticatedUser } from '@/lib/authContext';
+import { requireRole } from '@/lib/authContext';
 import { startRegistration } from '@/lib/webauthn';
 
 export async function POST(req: NextRequest) {
@@ -9,14 +9,16 @@ export async function POST(req: NextRequest) {
     if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const user = await requireAuthenticatedUser(token);
+    // Biometric registration is restricted to sysadmin only.
+    const user = await requireRole(token, 'sysadmin');
     const options = await startRegistration(user.userId, user.handle || user.userId);
     return NextResponse.json(options);
   } catch (error: any) {
     console.error('WebAuthn registration start error:', error);
+    const status = error.message?.includes('FORBIDDEN') ? 403 : 500;
     return NextResponse.json(
       { error: error.message || 'Failed to start registration' },
-      { status: 500 }
+      { status }
     );
   }
 }

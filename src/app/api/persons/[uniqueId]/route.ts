@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { findPersonByUniqueId, getPersonHistory, getPersonStatus } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
-import { supabase } from "@/lib/supabaseClient";
+import { getSupabaseServiceClient } from "@/lib/supabaseClient";
 
 function getUniqueId(req: NextRequest): string {
   const segments = new URL(req.url).pathname.split("/").filter(Boolean);
@@ -20,7 +20,8 @@ async function handleGet(req: NextRequest) {
     if (!isAllowedRole) {
       if (authRole === "student" || authRole === "parent" || authRole === "guardian" || authRole === "worker") {
         // Query users and student_details to check owner or guardian link
-        const { data: userCheck } = await supabase
+        const service = getSupabaseServiceClient();
+        const { data: userCheck } = await service
           .from("users")
           .select("id, unique_id, student_details!student_details_user_id_fkey(guardian_id)")
           .eq("unique_id", uniqueId)

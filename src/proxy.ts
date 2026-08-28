@@ -3,7 +3,7 @@ import { rateLimit } from './lib/rate-limit';
 import { verifyCsrf } from './middleware/csrf';
 import { getDefaultRouteForRole } from './lib/route-helpers';
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
   if (path.startsWith('/api')) {
@@ -69,6 +69,8 @@ export async function middleware(req: NextRequest) {
   return NextResponse.next();
 }
 
+export const middleware = proxy;
+
 export const config = {
   matcher: [
     '/api/:path*',
@@ -83,4 +85,3 @@ export const config = {
     '/supervisor/:path*',
   ],
 };
-

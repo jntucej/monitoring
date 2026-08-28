@@ -14,13 +14,10 @@ interface StatCardProps {
 }
 
 export function StatCard({ label, value, icon: Icon, color, trend, onClick }: StatCardProps) {
-  const { deviceProfile } = useUIStore();
-  const isHighEnd = deviceProfile === "high-end";
-
   return (
     <motion.div
-      whileHover={isHighEnd ? { y: -4, scale: 1.015 } : {}}
-      whileTap={isHighEnd ? { scale: 0.98 } : {}}
+      whileHover={{ y: -4, scale: 1.015 }}
+      whileTap={{ scale: 0.98 }}
       transition={{ type: "spring", stiffness: 350, damping: 25 }}
       onClick={onClick}
       className={`group relative overflow-hidden bg-[var(--bg-surface)] rounded-2xl border border-[var(--border)] p-5 transition-all duration-300 ${

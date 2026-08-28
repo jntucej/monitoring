@@ -74,7 +74,7 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
     .from('users')
     .select('*')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
   if (profileError || !profile) {
     // We have a valid Supabase user but no corresponding profile in our public.users table.
     // This is a critical data integrity issue and should be treated as an auth failure.

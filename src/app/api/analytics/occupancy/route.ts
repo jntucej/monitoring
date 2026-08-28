@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withAuthAndStatus } from "@/middleware/auth";
 import { withAuthorization } from "@/middleware/authorization";
-import { supabase } from "@/lib/supabaseClient";
+import { getSupabaseServiceClient } from "@/lib/supabaseClient";
 import { OccupancyStats } from "@/lib/analytics-types";
 
 async function handleGet(req: NextRequest) {
   try {
+    const supabase = getSupabaseServiceClient();
     const { data: users, error } = await supabase
       .from("users")
       .select("id, role, status")
-      .eq("status", "active");
+      .eq("status", "ACTIVE");
 
     if (error) throw error;
 
@@ -61,6 +61,6 @@ async function handleGet(req: NextRequest) {
   }
 }
 
-export const GET = withAuthAndStatus(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "operator"] })
-);
+export const GET = withAuthorization(handleGet, {
+  requiredRole: ["admin", "sysadmin", "operator"],
+});

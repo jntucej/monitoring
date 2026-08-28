@@ -116,16 +116,11 @@ export function withRateLimit(
 
         const response = await handler(req, ...args);
     
-    const headers = new Headers(response.headers);
-    headers.set('X-RateLimit-Limit', (config.maxRequests || DEFAULT_MAX_REQUESTS).toString());
-    headers.set('X-RateLimit-Remaining', result.remaining.toString());
-    headers.set('X-RateLimit-Reset', result.resetTime.toISOString());
+    response.headers.set('X-RateLimit-Limit', (config.maxRequests || DEFAULT_MAX_REQUESTS).toString());
+    response.headers.set('X-RateLimit-Remaining', result.remaining.toString());
+    response.headers.set('X-RateLimit-Reset', result.resetTime.toISOString());
 
-    return new Response(response.body, {
-      status: response.status,
-      statusText: response.statusText,
-      headers,
-    });
+    return response;
   };
 }
 

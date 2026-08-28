@@ -61,21 +61,8 @@ export default function OperatorPage() {
   const [activeLockdown, setActiveLockdown] = useState<any>(null);
   const [showVoiceModal, setShowVoiceModal] = useState(false);
 
-  const { deviceProfile } = useUIStore();
-
   // Local active tab for the desk panel: scan, manual, entry
-  const [operatorSubMode, setOperatorSubMode] = useState<"scan" | "manual" | "entry">(
-    deviceProfile === "low-profile" ? "manual" : "scan"
-  );
-
-  // Sync mode with deviceProfile changes
-  useEffect(() => {
-    if (deviceProfile === "low-profile") {
-      setOperatorSubMode("manual");
-    } else if (deviceProfile === "high-end") {
-      setOperatorSubMode("scan");
-    }
-  }, [deviceProfile]);
+  const [operatorSubMode, setOperatorSubMode] = useState<"scan" | "manual" | "entry">("scan");
 
   // Poll for Active Lockdown
   useEffect(() => {
@@ -309,62 +296,33 @@ export default function OperatorPage() {
           <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
             {/* Operational Mode Navigation */}
             <div className="flex bg-[var(--bg-surface)] p-1.5 rounded-2xl border border-[var(--border)] gap-1 shadow-sm">
-              {deviceProfile === "low-profile" ? (
-                <>
-                  <button
-                    onClick={() => setOperatorSubMode("manual")}
-                    className={`flex-grow py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
-                      operatorSubMode === "manual"
-                        ? "bg-amber-400 text-slate-950 shadow-md font-extrabold"
-                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                    }`}
-                  >
-                    <KeyRound className="w-4 h-4" />
-                    <span>Manual Enter</span>
-                  </button>
-                  <button
-                    onClick={() => setOperatorSubMode("scan")}
-                    className={`flex-grow py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
-                      operatorSubMode === "scan"
-                        ? "bg-[var(--action-primary)] text-slate-950 shadow-md"
-                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                    }`}
-                  >
-                    <Scan className="w-4 h-4" />
-                    <span>Scan QR</span>
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={() => setOperatorSubMode("scan")}
-                    className={`flex-grow py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
-                      operatorSubMode === "scan"
-                        ? "bg-[var(--action-primary)] text-slate-950 shadow-md font-extrabold"
-                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                    }`}
-                  >
-                    <Scan className="w-4 h-4" />
-                    <span>Scan QR</span>
-                  </button>
-                  <button
-                    onClick={() => setOperatorSubMode("manual")}
-                    className={`flex-grow py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
-                      operatorSubMode === "manual"
-                        ? "bg-amber-400 text-slate-950 shadow-md"
-                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                    }`}
-                  >
-                    <KeyRound className="w-4 h-4" />
-                    <span>Manual Enter</span>
-                  </button>
-                </>
-              )}
+              <button
+                onClick={() => setOperatorSubMode("scan")}
+                className={`flex-grow py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
+                  operatorSubMode === "scan"
+                    ? "bg-[var(--action-primary)] text-slate-950 shadow-md font-extrabold"
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                }`}
+              >
+                <Scan className="w-4 h-4" />
+                <span>Scan QR</span>
+              </button>
+              <button
+                onClick={() => setOperatorSubMode("manual")}
+                className={`flex-grow py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
+                  operatorSubMode === "manual"
+                    ? "bg-amber-400 text-slate-950 shadow-md font-extrabold"
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                }`}
+              >
+                <KeyRound className="w-4 h-4" />
+                <span>Manual Enter</span>
+              </button>
               <button
                 onClick={() => setOperatorSubMode("entry")}
                 className={`flex-grow relative py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
                   operatorSubMode === "entry"
-                    ? "bg-[var(--action-primary)] text-slate-950 shadow-md"
+                    ? "bg-[var(--action-primary)] text-slate-950 shadow-md font-extrabold"
                     : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 }`}
               >

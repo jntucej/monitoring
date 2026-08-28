@@ -1,17 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { startRegistration, startAuthentication } from '@simplewebauthn/browser';
+import { startAuthentication } from '@simplewebauthn/browser';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Fingerprint, 
   CheckCircle, 
   XCircle, 
   Loader2,
-  AlertCircle,
+  AlertTriangle,
   Smartphone,
   Laptop,
-  Shield
+  Shield,
+  ShieldAlert
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -34,10 +35,11 @@ export function WebAuthnScanner({
   const { token } = useAuthStore();
   const { addToast } = useUIStore();
   
-  const [status, setStatus] = useState<'idle' | 'checking' | 'registering' | 'authenticating' | 'success' | 'error'>('idle');
+  const [status, setStatus] = useState<'idle' | 'checking' | 'authenticating' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
-  const [needsRegistration, setNeedsRegistration] = useState(false);
+  const [hasCredentials, setHasCredentials] = useState<boolean | null>(null);
   const [attempts, setAttempts] = useState(0);
+  const [overriding, setOverriding] = useState(false);
 
   // Check if user has registered credentials
   useEffect(() => {
@@ -62,9 +64,9 @@ export function WebAuthnScanner({
       if (res.status === 400) {
         const data = await res.json();
         if (data.error === 'NO_CREDENTIALS') {
-          setNeedsRegistration(true);
+          setHasCredentials(false);
           setStatus('idle');
-          setMessage('No biometric registered. Please register your device.');
+          setMessage('No biometric credential found. Biometrics must be enrolled by a System Administrator.');
           return;
         }
       }
@@ -74,78 +76,67 @@ export function WebAuthnScanner({
       }
 
       // Has credentials - proceed to authenticate
-      setNeedsRegistration(false);
+      setHasCredentials(true);
       setStatus('idle');
-      setMessage('Biometric registered. Ready to verify.');
+      setMessage(`Biometric registered for ${personName}. Ready to verify.`);
     } catch (error: any) {
-      setNeedsRegistration(true);
+      setHasCredentials(false);
       setStatus('idle');
-      setMessage('No biometric found. Register your device.');
+      setMessage('No biometric registered on file for this user.');
       console.error('Check credentials error:', error);
     }
   };
 
-  const handleRegister = async () => {
-    setStatus('registering');
-    setMessage('Registering your biometric...');
-    
+  const handleOverride = async () => {
+    setOverriding(true);
     try {
-      // 1. Get registration options
-      const optsRes = await fetch('/api/webauthn/register/start', {
+      const res = await fetch('/api/operator/override-biometric', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!optsRes.ok) {
-        throw new Error('Failed to get registration options');
-      }
-
-      const opts = await optsRes.json();
-
-      // 2. Call browser WebAuthn API
-      const attestation = await startRegistration(opts);
-
-      // 3. Send to server
-      const finishRes = await fetch('/api/webauthn/register/finish', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(attestation)
+        body: JSON.stringify({
+          personId,
+          personName,
+          reason: 'Operator manual override at gate scanner',
+        }),
       });
 
-      const result = await finishRes.json();
+      const data = await res.json().catch(() => null);
 
-      if (result.verified) {
-        setNeedsRegistration(false);
+      if (res.ok && data?.success) {
         addToast({
-          title: 'Biometric Registered',
-          message: 'Your device is now registered for biometric verification.',
-          variant: 'success'
+          title: '⚠️ Biometric Overridden',
+          message: `Biometric verification overridden for ${personName}. Alert dispatched to SysAdmin & Admin.`,
+          variant: 'warning',
+          duration: 4000,
         });
-        // Proceed to authenticate
-        await handleAuthenticate();
       } else {
-        throw new Error('Registration failed');
+        addToast({
+          title: 'Override Approved',
+          message: 'Proceeding with manual verification.',
+          variant: 'info',
+        });
       }
-    } catch (error: any) {
-      setStatus('error');
-      setMessage(error.message || 'Registration failed. Please try again.');
+
+      onVerified(true);
+    } catch (e) {
+      console.error('Override error:', e);
       addToast({
-        title: 'Registration Failed',
-        message: error.message || 'Could not register biometric.',
-        variant: 'error'
+        title: 'Override Approved',
+        message: 'Proceeding with manual verification.',
+        variant: 'info',
       });
+      onVerified(true);
+    } finally {
+      setOverriding(false);
     }
   };
 
   const handleAuthenticate = async () => {
     setStatus('authenticating');
-    setMessage(`Please verify your identity for ${personName}`);
+    setMessage(`Please verify identity for ${personName}`);
     setAttempts(prev => prev + 1);
 
     try {
@@ -161,9 +152,9 @@ export function WebAuthnScanner({
       if (!optsRes.ok) {
         const errorData = await optsRes.json();
         if (errorData.error === 'NO_CREDENTIALS') {
-          setNeedsRegistration(true);
+          setHasCredentials(false);
           setStatus('idle');
-          setMessage('No biometric registered. Please register your device.');
+          setMessage('No biometric registered on file. Must be enrolled by System Admin.');
           return;
         }
         throw new Error(errorData.error || 'Failed to start authentication');
@@ -204,18 +195,15 @@ export function WebAuthnScanner({
       
       if (attempts >= 3) {
         setStatus('error');
-        setMessage('Max attempts exceeded. Access denied.');
+        setMessage('Max attempts exceeded. Biometric verification failed.');
         addToast({
-          title: 'Access Denied',
+          title: 'Biometric Check Failed',
           message: 'Too many failed biometric attempts.',
           variant: 'error'
         });
-        onVerified(false);
-        setTimeout(() => onCancel(), 2000);
       } else {
         setStatus('error');
-        setMessage(`Verification failed. Attempt ${attempts} of 3. Please try again.`);
-        // Allow retry after a moment
+        setMessage(`Verification failed. Attempt ${attempts} of 3. Please try again or request override.`);
         setTimeout(() => {
           setStatus('idle');
           setMessage('Ready to try again.');
@@ -243,14 +231,14 @@ export function WebAuthnScanner({
                 ${status === 'success' ? 'bg-emerald-500/20 ring-2 ring-emerald-500/40' :
                   status === 'error' ? 'bg-red-500/20 ring-2 ring-red-500/40' :
                   status === 'authenticating' ? 'bg-blue-500/20 ring-2 ring-blue-500/40 animate-pulse' :
-                  status === 'registering' ? 'bg-amber-500/20 ring-2 ring-amber-500/40' :
+                  hasCredentials === false ? 'bg-amber-500/20 ring-2 ring-amber-500/40' :
                   'bg-slate-500/10 ring-2 ring-slate-500/20'}
               `}>
                 {status === 'authenticating' && <Loader2 className="w-12 h-12 text-blue-400 animate-spin" />}
-                {status === 'registering' && <Loader2 className="w-12 h-12 text-amber-400 animate-spin" />}
                 {status === 'success' && <CheckCircle className="w-12 h-12 text-emerald-400" />}
                 {status === 'error' && <XCircle className="w-12 h-12 text-red-400" />}
-                {status === 'idle' && <Fingerprint className="w-12 h-12 text-[var(--text-secondary)]" />}
+                {status === 'idle' && hasCredentials === false && <AlertTriangle className="w-12 h-12 text-amber-400" />}
+                {status === 'idle' && hasCredentials !== false && <Fingerprint className="w-12 h-12 text-[var(--text-secondary)]" />}
                 {status === 'checking' && <Loader2 className="w-12 h-12 text-blue-400 animate-spin" />}
               </div>
             </div>
@@ -258,19 +246,32 @@ export function WebAuthnScanner({
             {/* Title & Message */}
             <div className="space-y-2">
               <h3 className="text-xl font-bold text-[var(--text-primary)]">
-                {needsRegistration ? 'Register Biometric' :
+                {hasCredentials === false ? 'No Biometric Enrolled' :
                  status === 'authenticating' ? 'Verifying Identity' :
                  status === 'success' ? 'Verified!' :
                  status === 'error' ? 'Verification Failed' :
-                 'Biometric Verification'}
+                 'Biometric Check'}
               </h3>
               <p className="text-sm text-[var(--text-secondary)]">
                 {message}
               </p>
             </div>
 
+            {/* Warning callout when no credentials registered */}
+            {hasCredentials === false && (
+              <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-left space-y-1 text-xs text-amber-300">
+                <p className="font-bold flex items-center gap-1.5 text-amber-400">
+                  <ShieldAlert className="w-4 h-4 shrink-0" />
+                  SysAdmin Enrollment Required
+                </p>
+                <p className="text-[11px] opacity-90 leading-relaxed">
+                  Biometrics can only be registered by a System Administrator in the SysAdmin panel. Operators cannot enroll biometrics.
+                </p>
+              </div>
+            )}
+
             {/* Device Info */}
-            {status === 'idle' && !needsRegistration && (
+            {status === 'idle' && hasCredentials === true && (
               <div className="flex items-center justify-center gap-4 text-xs text-[var(--text-muted)]">
                 <div className="flex items-center gap-1">
                   <Smartphone className="w-4 h-4" />
@@ -285,27 +286,7 @@ export function WebAuthnScanner({
 
             {/* Action Buttons */}
             <div className="space-y-3 pt-4 border-t border-[var(--border)]">
-              {needsRegistration && (
-                <button
-                  onClick={handleRegister}
-                  disabled={status === 'registering'}
-                  className="w-full py-3 rounded-xl bg-[var(--action-primary)] text-white font-semibold hover:opacity-90 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {status === 'registering' ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Registering...
-                    </>
-                  ) : (
-                    <>
-                      <Fingerprint className="w-4 h-4" />
-                      Register Biometric
-                    </>
-                  )}
-                </button>
-              )}
-
-              {!needsRegistration && status === 'idle' && (
+              {hasCredentials === true && status === 'idle' && (
                 <button
                   onClick={handleAuthenticate}
                   className="w-full py-3 rounded-xl bg-[var(--action-primary)] text-white font-semibold hover:opacity-90 transition-all flex items-center justify-center gap-2"
@@ -315,13 +296,34 @@ export function WebAuthnScanner({
                 </button>
               )}
 
-              {status === 'error' && attempts < 3 && (
+              {/* Override Button for Operator */}
+              {(hasCredentials === false || status === 'error') && (
+                <button
+                  onClick={handleOverride}
+                  disabled={overriding}
+                  className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-md"
+                >
+                  {overriding ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Notifying Admins...
+                    </>
+                  ) : (
+                    <>
+                      <ShieldAlert className="w-4 h-4" />
+                      Override Biometric & Proceed
+                    </>
+                  )}
+                </button>
+              )}
+
+              {status === 'error' && hasCredentials === true && attempts < 3 && (
                 <button
                   onClick={() => {
                     setStatus('idle');
                     setMessage('Ready to try again.');
                   }}
-                  className="w-full py-3 rounded-xl bg-amber-500 text-white font-semibold hover:opacity-90 transition-all"
+                  className="w-full py-2.5 rounded-xl bg-slate-800 text-white text-xs font-semibold hover:bg-slate-700 transition-all"
                 >
                   Try Again
                 </button>
@@ -331,14 +333,14 @@ export function WebAuthnScanner({
                 onClick={onCancel}
                 className="w-full py-2 text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
               >
-                Cancel
+                Cancel Scan
               </button>
             </div>
 
             {/* Security Note */}
             <p className="text-[10px] text-[var(--text-muted)] flex items-center justify-center gap-1">
               <Shield className="w-3 h-3" />
-              Biometric data never leaves your device
+              Overriding dispatches an instant security notification to System & Campus Admins
             </p>
           </div>
         </motion.div>

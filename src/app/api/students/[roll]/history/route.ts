@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getStudentHistory } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
-import { supabase } from "@/lib/supabaseClient";
+import { getSupabaseServiceClient } from "@/lib/supabaseClient";
 
 /**
  * Extract the [roll] dynamic segment from the request URL.
@@ -27,11 +27,12 @@ async function handleGet(req: NextRequest) {
     if (!isAllowedRole) {
       if (authRole === "student") {
         // Student must be accessing their own record.
-        const { data: profile, error } = await supabase
+        const service = getSupabaseServiceClient();
+        const { data: profile, error } = await service
           .from("users")
           .select("unique_id")
           .eq("id", authUserId)
-          .single();
+          .maybeSingle();
         if (error || !profile || profile.unique_id !== roll) {
           return NextResponse.json(
             { success: false, error: { code: "FORBIDDEN", message: "You can only view your own student record." } },
