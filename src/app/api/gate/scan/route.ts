@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
-import { addScan, isDuplicate, findUserById, findGateById } from "@/lib/db"
+import { addScan, isDuplicate, findUserById, findGateById, getActiveLockdown } from "@/lib/db"
 import { withAuthorization } from "@/middleware/authorization"
 import { withRateLimit } from "@/lib/rate-limit"
 import type { ScanDirection, ExitReason } from "@/lib/types"
+
+import { logAuditEvent } from "@/lib/audit"
 
 interface ScanBody {
   roll: string
@@ -14,10 +16,27 @@ interface ScanBody {
   clientEventId?: string
   local_id?: string
   id?: string
+  sysTag?: string
+  geo?: { latitude?: number | null; longitude?: number | null; accuracy?: number | null }
 }
 
 async function handlePost(req: NextRequest) {
   try {
+    // Check Emergency Campus Lockdown
+    const activeLockdown = await getActiveLockdown();
+    if (activeLockdown) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "LOCKDOWN_ACTIVE",
+            message: `Campus lockdown active (${activeLockdown.message || "Emergency Lockdown Enforced"}). All gate scans are blocked.`,
+          },
+        },
+        { status: 403 }
+      );
+    }
+
     // CSRF Protection: Verify Host matches Origin for state-changing requests
     const origin = req.headers.get("origin");
     const host = req.headers.get("host");
@@ -89,6 +108,26 @@ async function handlePost(req: NextRequest) {
       isManual: isManual ?? false,
       clientEventId,
     })
+
+    // Log SysTag & GPS Geolocation event for SysAdmin audit stream
+    try {
+      await logAuditEvent({
+        action: "GATE_SCAN_RECORDED",
+        userId: operatorId,
+        userName: `Operator ${operatorId}`,
+        userRole: authRole || "operator",
+        details: {
+          roll,
+          direction,
+          gateId,
+          sysTag: body.sysTag || `SYS_TAG_SCAN_${Date.now()}`,
+          geo: body.geo || null,
+          isManual: isManual ?? false,
+        },
+      });
+    } catch {
+      // non-blocking
+    }
 
     return NextResponse.json(
       { success: true, duplicate: result.duplicate, scan: result.scan },

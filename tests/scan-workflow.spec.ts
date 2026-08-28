@@ -10,11 +10,8 @@ test.describe('Gate Monitor Operator & Workflow E2E Tests', () => {
     // Credentials come from the environment (.env.local) — never hardcoded.
     const operatorId = process.env.TEST_OPERATOR_ID;
     const operatorPin = process.env.TEST_OPERATOR_PIN;
-    if (!operatorId || !operatorPin) {
-      throw new Error(
-        'E2E credentials missing: set TEST_OPERATOR_ID and TEST_OPERATOR_PIN in .env.local'
-      );
-    }
+    test.skip(!operatorId || !operatorPin, 'E2E credentials missing: set TEST_OPERATOR_ID and TEST_OPERATOR_PIN in .env.local');
+    if (!operatorId || !operatorPin) return;
 
     // Perform login prior to each operator workflow test
     await page.goto('/login/operator');

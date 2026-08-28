@@ -47,8 +47,9 @@ export default function FacultyDashboardPage() {
     };
   }, []);
 
-  // HOD elevated privileges are disabled for normal HOD/faculty during initial testing phase
-  const isHod = false;
+  const authRaw = typeof window !== "undefined" ? localStorage.getItem("gate-monitor-auth") : null;
+  const authUser = authRaw ? JSON.parse(authRaw)?.state?.user || JSON.parse(authRaw)?.user : null;
+  const isHod = Boolean(authUser?.isHod || authUser?.role === "hod" || person?.employeeDetails?.isHod);
 
   return (
     <div className="space-y-6 pb-12 max-w-6xl mx-auto px-4 sm:px-6">

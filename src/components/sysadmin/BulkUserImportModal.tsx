@@ -30,6 +30,45 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
     }
     return records;
   };
+  const downloadSampleTemplate = (format: "csv" | "json" = "csv") => {
+    if (format === "json") {
+      const sample = [
+        {
+          name: "John Doe",
+          email: "john.doe@college.edu",
+          role: "operator",
+          status: "ACTIVE",
+          employeeId: "EMP1001",
+          phone: "+15550192",
+          gateId: "1"
+        },
+        {
+          name: "Alice Smith",
+          email: "alice.smith@college.edu",
+          role: "student",
+          status: "ACTIVE",
+          phone: "+15550193",
+          assignedHostel: "Hostel A"
+        }
+      ];
+      setJsonText(JSON.stringify(sample, null, 2));
+      return;
+    }
+
+    const csvContent =
+      "name,email,role,status,employeeId,phone,gateId,assignedHostel\n" +
+      "John Doe,john.doe@college.edu,operator,ACTIVE,EMP1001,+15550192,1,\n" +
+      "Alice Smith,alice.smith@college.edu,student,ACTIVE,,+15550193,,Hostel A\n";
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "bulk_user_import_template.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -103,11 +142,27 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
           Upload a CSV file or paste JSON array containing user objects with columns: <code>name, email, role</code> (optional: <code>employeeId, phone</code>).
         </p>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           <label className="cursor-pointer px-3 py-1.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-xs font-semibold hover:bg-[var(--bg-base)] flex items-center gap-2">
             <FileText className="w-4 h-4 text-sky-400" /> Choose CSV / JSON File
             <input type="file" accept=".csv,.json" onChange={handleFileUpload} className="hidden" />
           </label>
+
+          <button
+            type="button"
+            onClick={() => downloadSampleTemplate("csv")}
+            className="px-3 py-1.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-xs font-semibold hover:bg-[var(--bg-base)] text-sky-400 flex items-center gap-1.5"
+          >
+            <Upload className="w-3.5 h-3.5 rotate-180" /> Sample CSV
+          </button>
+
+          <button
+            type="button"
+            onClick={() => downloadSampleTemplate("json")}
+            className="px-3 py-1.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-xs font-semibold hover:bg-[var(--bg-base)] text-purple-400 flex items-center gap-1.5"
+          >
+            Load Sample JSON
+          </button>
         </div>
 
         <textarea

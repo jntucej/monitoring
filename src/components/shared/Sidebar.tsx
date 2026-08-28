@@ -102,21 +102,30 @@ export function Sidebar() {
   }, [storeRole, pathname]);
 
   const currentRole = role || "admin";
+  const isAdminOrSysadmin = currentRole === "admin" || currentRole === "sysadmin";
   const rawNavGroups = navigation || [];
   const assignedGateId = user?.gateId || "1";
   const navGroups = rawNavGroups.map((group: any) => ({
     ...group,
-    items: group.items.map((item: any) => {
-      let href = item.href;
-      if (href === "/gate/active") {
-        href = `/gate/${assignedGateId}`;
-      } else if (href === "/gate/history") {
-        href = `/gate/${assignedGateId}?tab=history`;
-      } else if (href === "/gate/manual") {
-        href = `/gate/${assignedGateId}?tab=scandesk&mode=manual`;
-      }
-      return { ...item, href };
-    })
+    items: group.items
+      .filter((item: any) => {
+        // Hide gate management/configuration links from non-admin roles
+        if (!isAdminOrSysadmin && (item.href?.includes("/admin/gates") || item.href === "/admin/gates/schedule")) {
+          return false;
+        }
+        return true;
+      })
+      .map((item: any) => {
+        let href = item.href;
+        if (href === "/gate/active") {
+          href = `/gate/${assignedGateId}`;
+        } else if (href === "/gate/history") {
+          href = `/gate/${assignedGateId}?tab=history`;
+        } else if (href === "/gate/manual") {
+          href = `/gate/${assignedGateId}?tab=scandesk&mode=manual`;
+        }
+        return { ...item, href };
+      })
   }));
 
   const handleLogout = async () => {

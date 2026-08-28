@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useUIStore } from "@/stores/uiStore";
-import { BookOpen, RefreshCw, CheckCircle, Settings, ShieldCheck } from "lucide-react";
+import { BookOpen, RefreshCw, Settings, Save } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
 
 export function LMSIntegration() {
@@ -20,6 +20,7 @@ export function LMSIntegration() {
   });
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
+  const [showConfig, setShowConfig] = useState(false);
 
   const fetchStatus = async () => {
     setLoading(true);
@@ -28,7 +29,7 @@ export function LMSIntegration() {
       const res = await fetch("/api/integrations/lms/status", { headers });
       const result = await res.json();
       if (result.success && result.data) {
-        setConfig(result.data);
+        setConfig((prev) => ({ ...prev, ...result.data }));
       }
     } catch {
       addToast({ variant: "error", title: "Error", message: "Failed to fetch LMS status" });

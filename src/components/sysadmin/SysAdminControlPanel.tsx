@@ -179,30 +179,41 @@ export function SysAdminControlPanel() {
               <tr>
                 <th className="py-2.5 px-3">Action Event</th>
                 <th className="py-2.5 px-3">User / Executed By</th>
-                <th className="py-2.5 px-3">Role</th>
+                <th className="py-2.5 px-3">Sys Tag & Location (Admin Only)</th>
                 <th className="py-2.5 px-3">Timestamp</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 font-mono">
               {auditLogs.length > 0 ? (
-                auditLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="py-2.5 px-3 font-semibold text-rose-300">
-                      {log.action}
-                    </td>
-                    <td className="py-2.5 px-3 text-slate-200">
-                      {log.user_name || "System Core"}
-                    </td>
-                    <td className="py-2.5 px-3">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 uppercase">
-                        {log.user_role || "system"}
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-3 text-slate-400 text-[11px]">
-                      {new Date(log.timestamp).toLocaleString()}
-                    </td>
-                  </tr>
-                ))
+                auditLogs.map((log) => {
+                  const details = log.details || {};
+                  const sysTag = details.sysTag || "SYS_TAG_VERIFIED";
+                  const geo = details.geo;
+                  const gpsText = geo && geo.latitude ? `${geo.latitude}, ${geo.longitude}` : "GPS N/A";
+                  return (
+                    <tr key={log.id} className="hover:bg-slate-800/40 transition-colors">
+                      <td className="py-2.5 px-3 font-semibold text-rose-300">
+                        {log.action}
+                      </td>
+                      <td className="py-2.5 px-3 text-slate-200">
+                        {log.user_name || "System Core"} ({log.user_role || "system"})
+                      </td>
+                      <td className="py-2.5 px-3">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 w-fit">
+                            {sysTag}
+                          </span>
+                          <span className="text-[10px] text-emerald-400 font-mono">
+                            📍 {gpsText}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-2.5 px-3 text-slate-400 text-[11px]">
+                        {new Date(log.timestamp).toLocaleString()}
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
                   <td colSpan={4} className="py-6 text-center text-slate-500 font-sans">

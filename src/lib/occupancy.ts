@@ -32,15 +32,42 @@ export async function getCurrentOccupancy(): Promise<{ total: number; capacity: 
     const capacityTotal = Math.max((totalUsersCount ?? 0) * 2, 1000);
 
     const { data: zones } = await supabase.from("zones").select("*");
-    
-    const baseZones = (zones && zones.length > 0) ? zones : [
-      { id: "zone_academic_north", name: "Academic Block North (CSE/ECE)", type: "academic", capacity: 800 },
-      { id: "zone_academic_south", name: "Academic Block South (ME/CE)", type: "academic", capacity: 600 },
-      { id: "zone_hostel_boys", name: "Boys Hostel Complex", type: "hostel", capacity: 1000 },
-      { id: "zone_hostel_girls", name: "Girls Hostel Complex", type: "hostel", capacity: 800 },
-      { id: "zone_admin_central", name: "Administrative Block & Library", type: "admin", capacity: 300 },
-      { id: "zone_sports_complex", name: "Sports & Recreation Hub", type: "sports", capacity: 400 },
-    ];
+    const { data: dbGates } = await supabase.from("gates").select("id, name, location");
+    const { data: dbDepts } = await supabase.from("departments").select("id, name, code");
+
+    let baseZones = zones && zones.length > 0 ? zones : [];
+
+    if (baseZones.length === 0) {
+      if (dbGates && dbGates.length > 0) {
+        baseZones = dbGates.map((g) => ({
+          id: `zone_gate_${g.id}`,
+          name: `${g.name} Zone (${g.location || 'Access Area'})`,
+          type: "gate_zone",
+          capacity: 500,
+        }));
+      }
+      if (dbDepts && dbDepts.length > 0) {
+        baseZones.push(
+          ...dbDepts.map((d) => ({
+            id: `zone_dept_${d.id}`,
+            name: `${d.name} (${d.code || 'Dept'})`,
+            type: "academic",
+            capacity: 600,
+          }))
+        );
+      }
+    }
+
+    if (baseZones.length === 0) {
+      baseZones = [
+        { id: "zone_academic_north", name: "Academic Block North (CSE/ECE)", type: "academic", capacity: 800 },
+        { id: "zone_academic_south", name: "Academic Block South (ME/CE)", type: "academic", capacity: 600 },
+        { id: "zone_hostel_boys", name: "Boys Hostel Complex", type: "hostel", capacity: 1000 },
+        { id: "zone_hostel_girls", name: "Girls Hostel Complex", type: "hostel", capacity: 800 },
+        { id: "zone_admin_central", name: "Administrative Block & Library", type: "admin", capacity: 300 },
+        { id: "zone_sports_complex", name: "Sports & Recreation Hub", type: "sports", capacity: 400 },
+      ];
+    }
 
     const resultZones: ZoneOccupancy[] = baseZones.map((z: any) => {
       // Proportionally divide active inside users across zones

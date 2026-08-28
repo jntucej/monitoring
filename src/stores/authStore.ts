@@ -25,6 +25,7 @@ interface AuthActions {
   logout: () => Promise<void>;
   checkSession: () => Promise<boolean>;
   setRole: (role: Role) => void;
+  setUser: (user: User | null) => void;
   setLoading: (loading: boolean) => void;
   setHasHydrated: (hydrated: boolean) => void;
 }
@@ -230,6 +231,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       },
 
       setRole: (role) => set({ role }),
+      setUser: (user) => set({ user }),
       setLoading: (loading) => set({ loading }),
     }),
     {

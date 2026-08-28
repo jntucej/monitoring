@@ -9,6 +9,14 @@ export function DigitalIdCard() {
   const [student, setStudent] = useState<Student | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState(30);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCountdown((prev) => (prev > 1 ? prev - 1 : 30));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -119,13 +127,17 @@ export function DigitalIdCard() {
         </div>
       </div>
 
-      {/* QR Code */}
-      <div className="mt-6 p-4 bg-white rounded-lg">
-        <QRCode value={student.roll} size={160} />
+      {/* Dynamic Anti-Screenshot QR Code */}
+      <div className="mt-6 p-4 bg-white rounded-2xl flex flex-col items-center shadow-lg relative">
+        <QRCode value={JSON.stringify({ roll: student.roll, ts: Math.floor(Date.now() / 30000) })} size={160} />
+        <div className="mt-2 text-[10px] font-bold text-slate-700 font-mono flex items-center gap-1.5 bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+          Anti-Screenshot Security Token • Refreshes in {countdown}s
+        </div>
       </div>
       <p className="mt-2 text-xs text-[var(--text-muted)] flex items-center gap-1">
-        <QrCode className="w-3 h-3" />
-        Scan for verification
+        <QrCode className="w-3.5 h-3.5 text-indigo-400" />
+        Live Gate Verification Token
       </p>
     </div>
   );

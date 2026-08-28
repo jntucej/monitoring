@@ -8,6 +8,7 @@ export type AuditAction =
   | 'PASS_APPROVED'
   | 'PASS_REJECTED'
   | 'SCAN_CREATED'
+  | 'GATE_SCAN_RECORDED'
   | 'SCAN_CORRECTED'
   | 'VISITOR_CHECK_IN'
   | 'VISITOR_CHECK_OUT'
@@ -22,7 +23,9 @@ export type AuditAction =
   | 'BACKUP_RESTORED'
   | 'EMERGENCY_BROADCAST'
   | 'GATE_OFFLINE'
-  | 'GATE_ONLINE';
+  | 'GATE_ONLINE'
+  | 'SMART_SCHEDULE_APPLIED'
+  | 'CRON_REPORTS_EXECUTED';
 
 export interface AuditLog {
   id?: string;

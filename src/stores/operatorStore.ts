@@ -4,11 +4,13 @@
  */
 import { create } from "zustand";
 import { addScan, isDuplicate, statsToday, findGateById } from "@/lib/db";
+import { playAudioFeedback } from "@/lib/sound";
 import type { Scan, Person, Student, Gate, ScanDirection, ExitReason, CategoryBreakdown, OutingEntry } from "@/lib/types";
 import type { ToastData } from "@/components/ui/toast";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 import { validateRollNumber } from "@/lib/rollNumber";
+import { getClientLocation, getClientSysTag } from "@/lib/geo";
 
 /**
  * Fetch today's operator gate stats from the server.
@@ -238,34 +240,54 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
     const { currentStudent } = get();
     if (!currentStudent) return;
 
+    // Strict 100% Online-Only Check
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      playAudioFeedback("error");
+      addToast({
+        variant: "error",
+        title: "Server Connection Required",
+        message: "Action blocked: Active live server API connection is strictly required.",
+      });
+      set({
+        error: {
+          message: "100% Strict Online Policy: Active server connection required to process scans.",
+          code: "OFFLINE_BLOCKED",
+        },
+      });
+      return;
+    }
+
     const directionToUse = overrideDirection || get().selectedDirection;
     const reasonToUse = (overrideReason as ExitReason) || get().selectedReason;
     const uniqueId = currentStudent.uniqueId || currentStudent.roll || "";
     const operatorId = useAuthStore.getState().user?.id || "op-1";
 
-    // Fire-and-forget: call server-side API to bypass RLS
-    Promise.resolve()
-      .then(() => {
-        const authStore = useAuthStore.getState();
-        const token = authStore.token;
-        const sessionToken = authStore.user?.currentSessionToken;
-        const headers: Record<string, string> = { "Content-Type": "application/json" };
-        if (token) headers["Authorization"] = `Bearer ${token}`;
-        if (sessionToken) headers["X-Session-Token"] = sessionToken;
+    // Async execution with GPS geolocation & sysTag telemetry
+    (async () => {
+      const geo = await getClientLocation();
+      const sysTag = getClientSysTag();
+      const authStore = useAuthStore.getState();
+      const token = authStore.token;
+      const sessionToken = authStore.user?.currentSessionToken;
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+      if (sessionToken) headers["X-Session-Token"] = sessionToken;
 
-        return fetch("/api/gate/scan", {
-          method: "POST",
-          headers,
-          body: JSON.stringify({
-            roll: uniqueId,
-            direction: directionToUse,
-            reason: reasonToUse || (directionToUse === "OUT" ? "Regular" : undefined),
-            gateId: get().gate?.id || "gate-1",
-            operatorId,
-            isManual: false,
-          }),
-        });
-      })
+      return fetch("/api/gate/scan", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          roll: uniqueId,
+          direction: directionToUse,
+          reason: reasonToUse || (directionToUse === "OUT" ? "Regular" : undefined),
+          gateId: get().gate?.id || "gate-1",
+          operatorId,
+          isManual: false,
+          sysTag,
+          geo,
+        }),
+      });
+    })()
       .then(async (res) => {
         const result = await res.json();
         // Handle session expiry — log out and redirect to login instead of showing "verification denied"
@@ -282,6 +304,7 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
       .then((result) => {
         if (!result) return;
         if (result?.duplicate) {
+          playAudioFeedback("warning");
           addToast({
             variant: "error",
             title: "Duplicate Scan",
@@ -292,9 +315,11 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
         }
 
         if (!result?.success) {
+          playAudioFeedback("error");
           throw new Error(result?.error?.message || "Scan failed");
         }
 
+        playAudioFeedback("success");
         addToast({
           variant: "success",
           title: "Scan Recorded",

@@ -10,6 +10,7 @@ import { useAuthStore } from "@/stores/authStore";
 import type { ScanDirection, ExitReason } from "@/lib/types";
 import { supabase } from "@/lib/supabaseClient";
 import { useCampusConfig } from "@/hooks/useCampusConfig";
+import { getClientLocation, getClientSysTag } from "@/lib/geo";
 
 interface ManualEntryDialogProps {
   isOpen: boolean;
@@ -171,6 +172,21 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
       // Get the authenticated admin ID from the token
       const token = verifyData.data.token;
 
+      // Get client GPS geolocation & system tag
+      const geo = await getClientLocation();
+      const sysTag = getClientSysTag();
+
+      // Check online status
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        addToast({
+          title: "Server Connection Required",
+          message: "Action blocked: Active live server API connection is strictly required.",
+          variant: "error",
+        });
+        setSubmitting(false);
+        return;
+      }
+
       // Now submit the manual scan
       const scanRes = await fetch("/api/gate/scan", {
         method: "POST",
@@ -184,6 +200,8 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
           reason: direction === "OUT" ? reason : undefined,
           gateId: gateId,
           isManual: true,
+          sysTag,
+          geo,
         }),
       });
 

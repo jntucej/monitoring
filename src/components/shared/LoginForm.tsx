@@ -358,6 +358,13 @@ export function LoginForm({ role, title, subtitle }: LoginFormProps) {
             </>
           )}
         </button>
+
+        <a
+          href="/api/auth/sso"
+          className="w-full rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-primary)] font-semibold text-xs hover:bg-[var(--bg-base)] transition-all flex items-center justify-center gap-2 py-2.5 mt-2"
+        >
+          <span>Sign In with Campus SSO / OIDC</span>
+        </a>
       </form>
 
       <div className="flex items-center justify-between pt-3 border-t border-[var(--border)] text-xs text-[var(--text-muted)]">

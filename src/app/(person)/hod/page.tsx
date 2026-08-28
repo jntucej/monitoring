@@ -29,6 +29,11 @@ export default function HodConsolePage() {
       const json = await res.json();
       if (json.success && Array.isArray(json.data)) {
         setFacultyList(json.data);
+        if (json.department) {
+          setDepartment(json.department);
+        } else if (json.data[0]?.department) {
+          setDepartment(json.data[0].department);
+        }
       }
     } catch (err) {
       console.error("Failed to load department faculty:", err);

@@ -5,6 +5,7 @@ import { Bell, BellOff, Info, AlertCircle, AlertTriangle } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { getNotifications, markNotificationRead, markAllNotificationsRead, getUnreadCount } from "@/lib/notification-service";
 import { Notification } from "@/lib/notification-types";
+import { supabase } from "@/lib/supabaseClient";
 
 const PRIORITY_ICONS = {
   low: Info,
@@ -48,10 +49,43 @@ export function NotificationBell() {
   useEffect(() => {
     if (user?.id) {
       loadNotifications();
-      const interval = setInterval(loadNotifications, 30000);
-      return () => clearInterval(interval);
+
+      // Realtime Server-Sent Events (SSE) stream for instant alerts
+      let eventSource: EventSource | null = null;
+      try {
+        const streamUrl = `/api/notifications/stream?userId=${encodeURIComponent(user.id)}&role=${encodeURIComponent(user.role || "user")}`;
+        eventSource = new EventSource(streamUrl);
+        eventSource.onmessage = (event) => {
+          try {
+            const parsed = JSON.parse(event.data);
+            if (parsed.type === "notifications" && Array.isArray(parsed.data)) {
+              setNotifications(parsed.data);
+              setUnreadCount(parsed.unreadCount ?? parsed.data.filter((n: any) => !n.read).length);
+            }
+          } catch {}
+        };
+      } catch (err) {
+        console.error("SSE stream setup error:", err);
+      }
+
+      // Realtime Supabase listener
+      const channel = supabase
+        .channel(`user-notifications-${user.id}`)
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
+          () => {
+            loadNotifications();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        if (eventSource) eventSource.close();
+        supabase.removeChannel(channel);
+      };
     }
-  }, [user?.id]);
+  }, [user?.id, user?.role]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

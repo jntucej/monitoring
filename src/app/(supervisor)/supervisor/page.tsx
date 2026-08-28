@@ -167,8 +167,38 @@ export default function SupervisorDashboardPage() {
     setSelectedPasses((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
   };
 
-  const handleAddStrike = (studentId: string) => {
-    setStudentStrikes((prev) => ({ ...prev, [studentId]: (prev[studentId] || 0) + 1 }));
+  const handleAddStrike = async (studentId: string) => {
+    const newCount = (studentStrikes[studentId] || 0) + 1;
+    setStudentStrikes((prev) => ({ ...prev, [studentId]: newCount }));
+    try {
+      await fetch("/api/admin/audit", {
+        method: "POST",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventType: "CURFEW_STRIKE_ADDED",
+          details: { studentId, strikeCount: newCount },
+        }),
+      });
+    } catch {
+      // non-blocking log
+    }
+  };
+
+  const handleToggleLockdown = async () => {
+    const nextState = !isLockdown;
+    try {
+      const res = await fetch("/api/admin/lockdown", {
+        method: "POST",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ scopes: ["students", "all"], reason: nextState ? "Supervisor Emergency Lockdown" : "Lockdown Lifted" }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setIsLockdown(nextState);
+      }
+    } catch {
+      setIsLockdown(nextState);
+    }
   };
 
   const exportMovementCSV = () => {
@@ -227,7 +257,7 @@ export default function SupervisorDashboardPage() {
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button
-              onClick={() => setIsLockdown(!isLockdown)}
+              onClick={handleToggleLockdown}
               className={`px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border ${
                 isLockdown
                   ? "bg-rose-500 text-white border-rose-600 animate-pulse shadow-lg shadow-rose-500/30"
@@ -529,12 +559,15 @@ export default function SupervisorDashboardPage() {
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
                 {Array.from({ length: 12 }, (_, i) => {
                   const roomNum = selectedFloor * 100 + i + 1;
-                  const isOut = i % 4 === 1;
-                  const isLate = i % 7 === 3;
+                  const matchStudent = students[i % (students.length || 1)];
+                  const isOut = matchStudent ? (matchStudent.status !== "ACTIVE" || Boolean(matchStudent.checkedOutAt)) : false;
+                  const strikes = matchStudent ? (studentStrikes[matchStudent.id] || 0) : 0;
+                  const isLate = strikes > 1;
                   return (
                     <div key={roomNum} className={`p-3 rounded-xl border text-center space-y-1 ${isLate ? "bg-rose-500/10 border-rose-500/30 text-rose-300" : isOut ? "bg-amber-500/10 border-amber-500/30 text-amber-300" : "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"}`}>
                       <p className="font-mono font-bold text-sm">R-{roomNum}</p>
-                      <p className="text-[10px] uppercase font-bold">{isLate ? "OVERDUE" : isOut ? "ON PASS" : "PRESENT"}</p>
+                      <p className="text-[10px] font-bold truncate text-[var(--text-primary)]">{matchStudent?.fullName ? matchStudent.fullName.split(" ")[0] : "Occupant"}</p>
+                      <p className="text-[9px] uppercase font-bold">{isLate ? "OVERDUE" : isOut ? "ON PASS" : "PRESENT"}</p>
                     </div>
                   );
                 })}

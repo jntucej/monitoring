@@ -51,11 +51,17 @@ export function WorkerStats({ loading = false, uniqueId }: WorkerStatsProps) {
             ? new Date(lastTodayOut.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
             : null;
 
+          const validScans = history.filter((s: any) => {
+            const hr = new Date(s.timestamp).getHours();
+            return hr >= 6 && hr <= 22;
+          });
+          const adherence = history.length > 0 ? Math.round((validScans.length / history.length) * 100) : 100;
+
           setData({
             shiftStatus: isIn ? "ON DUTY" : "OFF DUTY",
             todayEntry: entryTime,
             todayExit: exitTime,
-            adherencePct: null, // requires aggregation query — show "—"
+            adherencePct: adherence,
           });
         }
       } catch {

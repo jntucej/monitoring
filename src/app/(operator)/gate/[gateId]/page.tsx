@@ -3,12 +3,13 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { RefreshCw, AlertCircle, Scan, KeyRound, UserCheck, LayoutDashboard, Clock, User as UserIcon } from "lucide-react";
+import { RefreshCw, AlertCircle, Scan, KeyRound, UserCheck, LayoutDashboard, Clock, User as UserIcon, Mic, ShieldAlert } from "lucide-react";
 import { useOperatorStore } from "@/stores/operatorStore";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/toast";
 import { ScanConfirmation } from "@/components/operator/ScanConfirmation";
 import { WebAuthnScanner } from "@/components/operator/WebAuthnScanner";
+import { VoiceAssistantModal } from "@/components/operator/VoiceAssistantModal";
 import { SuccessFlash } from "@/components/operator/SuccessFlash";
 import { Scanner } from "@/components/operator/Scanner";
 import { ScanViewfinder } from "@/components/operator/ScanViewfinder";
@@ -57,6 +58,8 @@ export default function OperatorPage() {
 
   // Log detail modal selection
   const [selectedScan, setSelectedScan] = useState<ScanRecord | null>(null);
+  const [activeLockdown, setActiveLockdown] = useState<any>(null);
+  const [showVoiceModal, setShowVoiceModal] = useState(false);
 
   const { deviceProfile } = useUIStore();
 
@@ -73,6 +76,24 @@ export default function OperatorPage() {
       setOperatorSubMode("scan");
     }
   }, [deviceProfile]);
+
+  // Poll for Active Lockdown
+  useEffect(() => {
+    const checkLockdown = async () => {
+      try {
+        const res = await fetch("/api/admin/lockdown");
+        const json = await res.json();
+        if (json.success && json.data) {
+          setActiveLockdown(json.data);
+        } else {
+          setActiveLockdown(null);
+        }
+      } catch {}
+    };
+    checkLockdown();
+    const interval = setInterval(checkLockdown, 10000);
+    return () => clearInterval(interval);
+  }, []);
   
   // Redirect special routing path shortcuts (/gate/history & /gate/manual) to operators dynamic gate path
   useEffect(() => {
@@ -184,6 +205,10 @@ export default function OperatorPage() {
   }, [gateId, operatorStore.gate?.name]);
 
   const handleQRScanned = (scannedPayload: string) => {
+    if (activeLockdown) {
+      addToast({ variant: "error", title: "Lockdown Active", message: "Scans are blocked during active campus lockdown." });
+      return;
+    }
     let rollCandidate = scannedPayload.trim();
     if (rollCandidate.startsWith("{")) {
       try {
@@ -198,17 +223,21 @@ export default function OperatorPage() {
     startScan(rollCandidate);
   };
 
-  // Show the thumbprint (biometric) confirmation whenever the scan flow is
-  // "confirming" AND the person hasn't already passed a thumbprint step.
-  // Derived (not stored in state) so it can't get out of sync with the flow.
-  const showThumbprint =
+  const showWebAuthn =
     state === "confirming" &&
     !!currentStudent &&
     !operatorStore.thumbprintVerified &&
     !operatorStore.thumbprintFallback;
 
   const handleWebAuthnVerified = (verified: boolean) => {
-    if (verified) { operatorStore.setThumbprintStatus(true, false); addToast({ variant: "success", title: "Biometric Verified", message: "Identity confirmed via biometric." }); } else { operatorStore.setThumbprintStatus(false, false); addToast({ variant: "error", title: "Access Denied", message: "Biometric verification failed." }); cancelScan(); }
+    if (verified) {
+      operatorStore.setThumbprintStatus(true, false);
+      addToast({ variant: "success", title: "Biometric Verified", message: "Identity confirmed via biometric scanner." });
+    } else {
+      operatorStore.setThumbprintStatus(false, false);
+      addToast({ variant: "error", title: "Access Denied", message: "Biometric verification failed." });
+      cancelScan();
+    }
   };
 
   useEffect(() => {
@@ -349,50 +378,71 @@ export default function OperatorPage() {
 
             {/* Switchable Workspace */}
             <div className="min-h-[220px]">
-              {effectiveSubMode === "scan" && (
-                <ScanViewfinder
-                  onStartScanner={() => setShowCameraScanner(true)}
-                  onManualEntry={() => setOperatorSubMode("manual")}
-                  scanning={state === "detecting"}
-                  lastScanRoll={lastScan?.roll}
-                />
-              )}
-
-              {effectiveSubMode === "manual" && (
-                <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 space-y-4 shadow-sm">
+              {activeLockdown ? (
+                <div className="bg-rose-500/10 border border-rose-500/30 rounded-2xl p-6 text-center space-y-3 shadow-md">
+                  <ShieldAlert className="w-10 h-10 text-rose-500 mx-auto animate-pulse" />
                   <div className="space-y-1">
-                    <h3 className="text-sm font-bold text-[var(--text-primary)]">Manual Student Lookup</h3>
-                    <p className="text-xs text-[var(--text-muted)]">Type student roll number to check gate pass permission</p>
+                    <h3 className="font-extrabold text-sm text-rose-400 uppercase tracking-wide">
+                      Scans Restricted — Campus Lockdown Active
+                    </h3>
+                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                      {activeLockdown.message || "Emergency lockdown is in effect. All gate scan transactions are blocked by system security."}
+                    </p>
                   </div>
-
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      if (manualRollInput.trim()) {
-                        startScan(manualRollInput.trim().toUpperCase());
-                      }
-                    }}
-                    className="space-y-3"
-                  >
-                    <input
-                      type="text"
-                      maxLength={10}
-                      value={manualRollInput}
-                      onChange={(e) => setManualRollInput(e.target.value.toUpperCase())}
-                      placeholder="e.g. 24JJ1A0501"
-                      className="w-full px-4 py-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-base font-mono font-bold tracking-wider text-[var(--text-primary)] uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
-                    />
-
-                    <button
-                      type="submit"
-                      disabled={!manualRollInput.trim() || state === "detecting"}
-                      className="w-full py-3.5 px-4 rounded-xl bg-[var(--action-primary)] border border-emerald-500/20 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-bold text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.99]"
-                    >
-                      <KeyRound className="w-5 h-5" />
-                      <span>Verify Roll Number</span>
-                    </button>
-                  </form>
                 </div>
+              ) : (
+                <>
+                  {effectiveSubMode === "scan" && (
+                    <ScanViewfinder
+                      onStartScanner={() => setShowCameraScanner(true)}
+                      onManualEntry={() => setOperatorSubMode("manual")}
+                      scanning={state === "detecting"}
+                      lastScanRoll={lastScan?.roll}
+                    />
+                  )}
+
+                  {effectiveSubMode === "manual" && (
+                    <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 space-y-4 shadow-sm">
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-bold text-[var(--text-primary)]">Manual Student Lookup</h3>
+                        <p className="text-xs text-[var(--text-muted)]">Type student roll number to check gate pass permission</p>
+                      </div>
+
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          if (activeLockdown) {
+                            addToast({ variant: "error", title: "Lockdown Active", message: "Scans are blocked during active campus lockdown." });
+                            return;
+                          }
+                          if (manualRollInput.trim()) {
+                            startScan(manualRollInput.trim().toUpperCase());
+                          }
+                        }}
+                        className="space-y-3"
+                      >
+                        <input
+                          type="text"
+                          maxLength={10}
+                          value={manualRollInput}
+                          onChange={(e) => setManualRollInput(e.target.value.toUpperCase())}
+                          placeholder="e.g. 24JJ1A0501"
+                          disabled={!!activeLockdown}
+                          className="w-full px-4 py-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-base font-mono font-bold tracking-wider text-[var(--text-primary)] uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none disabled:opacity-50"
+                        />
+
+                        <button
+                          type="submit"
+                          disabled={!manualRollInput.trim() || state === "detecting" || !!activeLockdown}
+                          className="w-full py-3.5 px-4 rounded-xl bg-[var(--action-primary)] border border-emerald-500/20 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-bold text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.99]"
+                        >
+                          <KeyRound className="w-5 h-5" />
+                          <span>Verify Roll Number</span>
+                        </button>
+                      </form>
+                    </div>
+                  )}
+                </>
               )}
 
               {effectiveSubMode === "entry" && (
@@ -519,16 +569,60 @@ export default function OperatorPage() {
   return (
     <div className="min-h-[85vh] flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] pb-safe">
       <main className="flex-1 max-w-lg w-full mx-auto p-2 sm:p-4 space-y-4">
+        {/* Emergency Lockdown Active Alert Header Banner */}
+        {activeLockdown && (
+          <div className="bg-rose-600 text-white p-4 rounded-xl border border-rose-700 shadow-lg flex items-center justify-between animate-pulse">
+            <div className="flex items-center gap-3">
+              <ShieldAlert className="w-7 h-7 shrink-0 text-amber-200" />
+              <div>
+                <h4 className="font-extrabold text-sm uppercase tracking-wider">🚨 CAMPUS LOCKDOWN IN EFFECT</h4>
+                <p className="text-xs opacity-90">{activeLockdown.message || "All gate scans are currently restricted by security administration."}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Gate Operational Status Bar */}
         <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] shadow-sm">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-xs font-bold text-[var(--text-primary)]">{gateName}</span>
           </div>
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--bg-base)] border border-[var(--border)] text-[10px] text-[var(--text-secondary)]">
-            <span className="font-bold text-emerald-400">Online</span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowVoiceModal(!showVoiceModal)}
+              className="p-1.5 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20 hover:bg-purple-500/20 flex items-center gap-1 text-xs font-semibold"
+              title="Voice Assistant"
+            >
+              <Mic className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Voice</span>
+            </button>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--bg-base)] border border-[var(--border)] text-[10px] text-[var(--text-secondary)]">
+              <span className="font-bold text-emerald-400">Online</span>
+            </div>
           </div>
         </div>
+
+        {/* Voice Assistant Modal */}
+        {showVoiceModal && (
+          <VoiceAssistantModal
+            onExecuteCommand={(cmd) => {
+              if (activeLockdown) {
+                addToast({ variant: "error", title: "Lockdown Active", message: "Scans are blocked during active campus lockdown." });
+                return;
+              }
+              if ((cmd.action === "SCAN" || cmd.action === "ENTRY" || cmd.action === "MANUAL_ENTRY") && cmd.roll_number) {
+                startScan(cmd.roll_number);
+                setOperatorSubMode("manual");
+                setManualRollInput(cmd.roll_number);
+              } else if (cmd.action === "EXIT") {
+                if (currentStudent) confirmScan(addToast, "OUT");
+              } else if (cmd.action === "UNKNOWN") {
+                cancelScan();
+              }
+            }}
+          />
+        )}
 
         {/* Dynamic Inner view */}
         {renderActiveView()}
@@ -548,10 +642,10 @@ export default function OperatorPage() {
         }}
       />
 
-      {/* WebAuthn (biometric) confirmation step after the ID scan */}
-      {showThumbprint && (
+      {/* WebAuthn / Passkey Biometric confirmation step after the ID scan */}
+      {showWebAuthn && (
         <WebAuthnScanner
-          key={currentStudent?.id || "thumbprint"}
+          key={currentStudent?.id || "webauthn"}
           isOpen={true}
           personId={currentStudent?.id || ""}
           personName={currentStudent?.fullName || currentStudent?.name || "User"}
