@@ -232,9 +232,11 @@ html[data-theme="glass"] body::after {
   animation: cinematic-float-glow 18s ease-in-out infinite alternate-reverse;
 }
 
-/* Glass Mode Universal Card & Panel Frosted Blur Enhancement */
-html[data-theme="glass"] [class*="bg-[var(--bg-surface)]"],
-html[data-theme="glass"] [class*="bg-[var(--bg-elevated)]"] {
+/* Glass Mode Universal Card & Panel Frosted Blur Enhancement - scoped to .enable-glass for GPU optimization */
+html.enable-glass[data-theme="glass"] [class*="bg-[var(--bg-surface)]"],
+html.enable-glass[data-theme="glass"] [class*="bg-[var(--bg-elevated)]"],
+.enable-glass html[data-theme="glass"] [class*="bg-[var(--bg-surface)]"],
+.enable-glass html[data-theme="glass"] [class*="bg-[var(--bg-elevated)]"] {
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36);

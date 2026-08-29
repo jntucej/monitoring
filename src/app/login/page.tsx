@@ -11,8 +11,8 @@ export default function UnifiedLoginPage() {
         
         <LoginForm
           role="all"
-          title="College System Login"
-          subtitle="One secure portal. Automatic routing based on your role."
+          title="Login"
+          subtitle=" routing based on ur role."
         />
       </div>
     </Suspense>

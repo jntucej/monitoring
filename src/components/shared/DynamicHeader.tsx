@@ -10,16 +10,16 @@ import { useGlass } from "@/context/GlassContext";
 import { GlassThemeToggle } from "./GlassThemeToggle";
 
 const PAGE_TITLES: Record<string, string> = {
-  "/gate/1": "Gate 1 Mobile Scanner Desk",
-  "/gate/2": "Gate 2 Mobile Scanner Desk",
-  "/admin": "Campus Overview Dashboard",
-  "/admin/students": "Student Master Roster",
-  "/admin/faculty": "Faculty Attendance & Heatmap",
-  "/admin/staff": "Staff Oversight & Movement Logs",
-  "/admin/workers": "Worker Shift & Presence Tracker",
+  "/gate/1": "Mobile Scanner Desk",
+  "/gate/2": "Mobile Scanner Desk",
+  "/admin": "Campus Dashboard",
+  "/admin/students": "Student Roster",
+  "/admin/faculty": "Attendance & Heatmap",
+  "/admin/staff": "Oversight & Movement Logs",
+  "/admin/workers": "Shift & Presence Tracker",
   "/admin/alerts": "Security Alerts",
   "/admin/reports": "Gate Analytics",
-  "/sysadmin": "System Administration",
+  "/sysadmin": "Administration",
   "/parent": "Parent Student Tracker",
   "/student": "Digital ID & Pass Desk",
 };
@@ -72,8 +72,8 @@ export function DynamicHeader() {
         >
           <Menu className="w-5 h-5" />
         </button>
-        <div>
-          <h1 className="text-sm sm:text-base font-bold text-[var(--text-primary)] leading-snug tracking-tight">
+        <div className="min-w-0">
+          <h1 className="text-xs sm:text-base font-bold text-[var(--text-primary)] leading-snug tracking-tight truncate max-w-[130px] xs:max-w-[180px] sm:max-w-none">
             {title}
           </h1>
           <p className="text-[10px] text-[var(--text-muted)] hidden sm:block">

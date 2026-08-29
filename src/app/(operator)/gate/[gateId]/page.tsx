@@ -105,17 +105,46 @@ export default function OperatorPage() {
     }
   }, [searchParams, isSpecialPath, gateIdParam]);
 
-    // Periodic sync of stats and logs for real-time feel (every 5 seconds)
+  // Ref to store polling interval ID
+  const statsIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Dynamic periodic sync of stats: 5s on desktop, 15s on mobile (width < 768)
   useEffect(() => {
     if (!authenticated) return;
-    // Load immediately, then poll every 5s while the page is visible.
-    const tick = () => {
+
+    const setupInterval = () => {
+      if (statsIntervalRef.current) {
+        clearInterval(statsIntervalRef.current);
+        statsIntervalRef.current = null;
+      }
+
       if (typeof document !== "undefined" && document.hidden) return;
+
       loadStats();
+
+      const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+      const pollInterval = isMobile ? 15000 : 5000;
+
+      statsIntervalRef.current = setInterval(() => {
+        if (typeof document !== "undefined" && document.hidden) return;
+        loadStats();
+      }, pollInterval);
     };
-    tick();
-    const interval = setInterval(tick, 5000);
-    return () => clearInterval(interval);
+
+    setupInterval();
+
+    const handleVisibilityChange = () => {
+      setupInterval();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      if (statsIntervalRef.current) {
+        clearInterval(statsIntervalRef.current);
+      }
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, [authenticated, loadStats]);
   const [showCameraScanner, setShowCameraScanner] = useState(false);
   const [manualRollInput, setManualRollInput] = useState("");

@@ -7,9 +7,11 @@ import {
   useSpring,
   useTransform,
   useReducedMotion,
+  Transition,
 } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useGlass } from "@/context/GlassContext";
+import { useGlossyMotion } from "@/lib/animations";
 
 export interface GlassInteractiveCardProps {
   children: React.ReactNode;
@@ -31,7 +33,19 @@ export function GlassInteractiveCard({
 }: GlassInteractiveCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
+  const isGlossyMotion = useGlossyMotion();
   const { isDark: contextIsDark, performanceTier, displayMode } = useGlass();
+
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const getTransition = (): Transition => {
+    if (isMobile || performanceTier === "legacy") {
+      return { duration: 0.2, ease: "easeOut" };
+    }
+    if (performanceTier === "emergency") {
+      return { duration: 0 };
+    }
+    return { type: "spring", stiffness: 220, damping: 32 };
+  };
 
   const isDark = propIsDark !== undefined ? propIsDark : contextIsDark;
 
@@ -125,8 +139,9 @@ export function GlassInteractiveCard({
         rotateY: canTilt ? rotateY : 0,
         transformStyle: canTilt ? "preserve-3d" : "flat",
       }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ type: "spring", stiffness: 220, damping: 32 }}
+      whileHover={isGlossyMotion && performanceTier !== "legacy" && performanceTier !== "emergency" ? { scale: 1.01 } : undefined}
+      whileTap={isGlossyMotion && performanceTier !== "legacy" && performanceTier !== "emergency" ? { scale: 0.98 } : undefined}
+      transition={getTransition()}
       className={cn(
         "relative w-full p-6 sm:p-8 rounded-3xl border shadow-2xl transition-colors duration-500 overflow-hidden cinematic-shimmer-effect",
         getContainerBackground(),

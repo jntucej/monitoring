@@ -5,9 +5,11 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
+import { useGlass } from "@/context/GlassContext";
 import { DynamicHeader } from "./DynamicHeader";
 import { NetworkStatusBanner } from "./NetworkStatusBanner";
 import { Sidebar } from "./Sidebar";
+import { GlassDeviceFallback } from "./GlassDeviceFallback";
 
 interface SafeAreaAppShellProps {
   children: React.ReactNode;
@@ -16,7 +18,18 @@ interface SafeAreaAppShellProps {
 export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
   const { authenticated } = useAuthStore();
   const { theme, setTheme, isSidebarCollapsed } = useUIStore();
+  const { performanceTier } = useGlass();
   const pathname = usePathname();
+
+  // Toggle .enable-glass class on <html> based on performanceTier
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    if (performanceTier === "legacy" || performanceTier === "emergency") {
+      document.documentElement.classList.remove("enable-glass");
+    } else {
+      document.documentElement.classList.add("enable-glass");
+    }
+  }, [performanceTier]);
 
   // The System Administrator workspace owns a full-screen, standalone shell
   // (own sidebar/header via the (sysadmin) route layout). Hide the shared
@@ -63,6 +76,7 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
                 : "flex-1 p-3 sm:p-5 md:p-6 pb-24 lg:pb-6 overflow-y-auto max-w-7xl mx-auto w-full"
             }`}
           >
+            <GlassDeviceFallback />
             <AnimatePresence mode="wait">
               <motion.div
                 key={`${pathname || "page"}-${theme}`}
@@ -81,4 +95,5 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
     </div>
   );
 }
+
 

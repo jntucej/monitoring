@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,7 +26,7 @@ interface DigitalTwinData {
   alerts: Array<{ id: string; location: string; severity: string; message: string }>;
 }
 
-export function CampusDigitalTwin() {
+function CampusDigitalTwinView() {
   const { token } = useAuthStore();
   const [twinData, setTwinData] = useState<DigitalTwinData | null>(null);
   const [selectedZone, setSelectedZone] = useState<any>(null);
@@ -231,5 +232,54 @@ export function CampusDigitalTwin() {
         </div>
       )}
     </Card>
+  );
+}
+
+// Lazy-load campus digital twin view with ssr: false
+const DynamicDigitalTwinView = dynamic(
+  () => Promise.resolve(CampusDigitalTwinView),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="p-8 text-center text-xs text-[var(--text-secondary)]">
+        Initializing 2D Campus Digital Twin Engine...
+      </div>
+    ),
+  }
+);
+
+/**
+ * Campus Digital Twin component lazy-loaded via next/dynamic (ssr: false)
+ * and IntersectionObserver to defer mounting until visible.
+ */
+export function CampusDigitalTwin() {
+  const [isVisible, setIsVisible] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={containerRef}>
+      {isVisible ? (
+        <DynamicDigitalTwinView />
+      ) : (
+        <div className="p-8 text-center text-xs text-[var(--text-secondary)]">
+          Initializing 2D Campus Digital Twin Engine...
+        </div>
+      )}
+    </div>
   );
 }

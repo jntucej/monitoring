@@ -187,8 +187,28 @@ export function GlassProvider({
     setDisplayMode(displayMode === "indoor" ? "outdoor" : "indoor");
   };
 
+  // Mobile-first performance detection: Force legacy tier and outdoor display mode on mobile devices
   useEffect(() => {
     if (typeof window === "undefined") return;
+    const isMobile =
+      window.innerWidth < 768 ||
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+      setPerformanceTier("legacy");
+      setDisplayModeState("outdoor");
+      document.documentElement.setAttribute("data-display-mode", "outdoor");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const isMobile =
+      window.innerWidth < 768 ||
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+      setPerformanceTier("legacy");
+      return;
+    }
     if (prefersReducedMotion) {
       setPerformanceTier("emergency");
       return;

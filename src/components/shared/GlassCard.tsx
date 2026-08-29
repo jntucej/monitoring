@@ -8,6 +8,9 @@ import { motion, useMotionValue, useSpring, useTransform, Transition } from "fra
 import { cn } from "@/lib/utils";
 import { useGlass, GateStatus } from "@/context/GlassContext";
 
+import { WordByWordText } from "./WordByWordText";
+import { GlossyFloatingContainer } from "./GlossyFloatingContainer";
+
 export interface GlassCardProps {
   id: string;
   title: string;
@@ -43,18 +46,21 @@ export function GlassCard({
     else if (href) router.push(href);
   };
 
-  // Critically damped springs for heavy industrial precision
+  // Critically damped springs for heavy industrial precision (or smooth easeOut on mobile/legacy)
   const getTransition = (): Transition => {
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+    if (isMobile || performanceTier === "legacy") {
+      return { duration: 0.2, ease: "easeOut" };
+    }
     switch (performanceTier) {
       case "splusplus":
         return { type: "spring", stiffness: 220, damping: 32 };
       case "performance":
         return { type: "spring", stiffness: 150, damping: 30 };
-      case "legacy":
-        return { duration: 0.2, ease: "easeOut" };
       case "emergency":
-      default:
         return { duration: 0 };
+      default:
+        return { duration: 0.2, ease: "easeOut" };
     }
   };
 
@@ -137,8 +143,8 @@ export function GlassCard({
       initial={isGlossyMotion ? "hidden" : false}
       animate={isGlossyMotion ? "visible" : undefined}
       variants={fadeInUp}
-      whileHover={isGlossyMotion ? cardHover : {}}
-      whileTap={isGlossyMotion ? { scale: 0.97 } : { scale: isTouchDevice ? 0.97 : 1 }}
+      whileHover={isGlossyMotion && performanceTier !== "legacy" && performanceTier !== "emergency" ? cardHover : undefined}
+      whileTap={isGlossyMotion && performanceTier !== "legacy" && performanceTier !== "emergency" ? { scale: 0.97 } : undefined}
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -220,12 +226,16 @@ export function GlassCard({
       {/* Content Z-lift Layer with High Contrast Typography */}
       <div style={{ transform: can3D ? "translateZ(20px)" : "none", transformStyle: can3D ? "preserve-3d" : "flat" }} className="relative z-10">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-lg font-bold tracking-tight text-slate-50 dark:text-white">{title}</h3>
+          <h3 className="text-lg font-bold tracking-tight text-slate-50 dark:text-white">
+            <WordByWordText text={title} />
+          </h3>
           <span className={cn("text-xs font-mono px-2.5 py-1 rounded-full border font-semibold", current.bg, current.textCol, current.border)}>
             {current.text}
           </span>
         </div>
-        <p className={cn("text-sm mb-4 font-medium", isDark ? "text-slate-200" : "text-slate-700")}>{subtitle}</p>
+        <p className={cn("text-sm mb-4 font-medium", isDark ? "text-slate-200" : "text-slate-700")}>
+          <WordByWordText text={subtitle} delay={0.05} />
+        </p>
         {children}
         <button
           type="button"

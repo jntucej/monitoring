@@ -337,7 +337,10 @@ interface MobileBottomBarProps {
 
 function MobileBottomBar({ toggleMobileSidebar, bottomTabs, pathname }: MobileBottomBarProps) {
   return (
-    <div className="flex md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[var(--bg-surface)]/90 backdrop-blur-xl border-t border-[var(--border)] pb-safe select-none">
+    <div
+      className="flex md:hidden sticky bottom-0 left-0 right-0 z-40 bg-[var(--bg-surface)]/90 backdrop-blur-xl border-t border-[var(--border)] pb-safe select-none"
+      style={{ willChange: "transform" }}
+    >
       <div className="w-full flex items-center justify-around h-16 px-1 overflow-x-auto no-scrollbar flex-nowrap gap-1">
         {/* Menu Button to trigger drawer */}
         <button

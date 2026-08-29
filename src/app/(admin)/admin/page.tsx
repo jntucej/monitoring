@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { fadeInUp } from "@/lib/animations";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -174,13 +174,42 @@ export default function AdminDashboardPage() {
     }
   }, []);
 
+  // Dynamic polling interval ref: 30s desktop -> 60s mobile (< 768px)
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
-    load(true);
-    const interval = setInterval(() => {
+    const setupInterval = () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+
       if (typeof document !== "undefined" && document.hidden) return;
-      load(false);
-    }, 30_000);
-    return () => clearInterval(interval);
+
+      const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+      const pollInterval = isMobile ? 60000 : 30000;
+
+      pollIntervalRef.current = setInterval(() => {
+        if (typeof document !== "undefined" && document.hidden) return;
+        load(false);
+      }, pollInterval);
+    };
+
+    load(true);
+    setupInterval();
+
+    const handleVisibilityChange = () => {
+      setupInterval();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+      }
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, [load]);
 
   if (loading) {
@@ -233,10 +262,10 @@ export default function AdminDashboardPage() {
   return (
     <motion.div initial="hidden" animate="visible" variants={fadeInUp} className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)]">Admin Dashboard</h1>
-          <p className="text-xs text-[var(--text-muted)]">Real-time gate telemetry, student, faculty & worker infometrics</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] tracking-tight">Admin Dashboard</h1>
+          <p className="text-[11px] sm:text-xs text-[var(--text-muted)]">Real-time gate telemetry, student, faculty & worker infometrics</p>
         </div>
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <button
@@ -262,7 +291,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* 4 Separate Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
         <StatCard
           label="Students on Campus"
           value={studentStats.onCampus.toLocaleString()}

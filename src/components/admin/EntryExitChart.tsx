@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { useEffect, useState, useRef } from "react";
+import dynamic from "next/dynamic";
 import { getAuthHeaders } from "@/lib/utils";
 
 type Point = { name: string; entries: number; exits: number };
@@ -9,20 +9,73 @@ function fmtDay(d: Date): string {
   return d.toLocaleDateString("en-IN", { weekday: "short" });
 }
 
+// Lazy-load recharts bundle via next/dynamic with ssr: false
+const DynamicRechartsBar = dynamic(
+  () =>
+    import("recharts").then((mod) => {
+      const { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } = mod;
+      return function RechartsContent({ data }: { data: Point[] }) {
+        return (
+          <ResponsiveContainer width="100%" height="85%">
+            <BarChart data={data} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+              <XAxis dataKey="name" stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "var(--bg-elevated)",
+                  borderColor: "var(--border)",
+                  color: "var(--text-primary)",
+                }}
+              />
+              <Legend iconSize={10} />
+              <Bar dataKey="entries" fill="var(--action-primary)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="exits" fill="var(--action-danger)" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        );
+      };
+    }),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[80%] flex items-center justify-center text-[var(--text-muted)] text-sm">
+        Loading chart…
+      </div>
+    ),
+  }
+);
+
 /**
  * Renders the last 7 days of entry/exit activity pulled from /api/gate/logs.
- * The chart re-fetches every 60 seconds so it stays live.
+ * Lazy-loaded via next/dynamic (ssr: false) and IntersectionObserver when visible.
  */
 export function EntryExitChart() {
   const [data, setData] = useState<Point[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // IntersectionObserver to defer mounting until visible in viewport
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
+    if (!isVisible) return;
     let cancelled = false;
     const load = async () => {
       try {
-        // Build last-7-day buckets client-side from the 7 most recent days of logs.
-        // We pull a generous window (7 days, capped) and aggregate by date.
         const today = new Date();
         const start = new Date(today);
         start.setDate(today.getDate() - 6);
@@ -35,7 +88,6 @@ export function EntryExitChart() {
         );
         const json = await res.json();
 
-        // Initialise empty buckets for the last 7 days
         const buckets: Record<string, { entries: number; exits: number }> = {};
         for (let i = 0; i < 7; i++) {
           const d = new Date(start);
@@ -74,32 +126,17 @@ export function EntryExitChart() {
       cancelled = true;
       clearInterval(t);
     };
-  }, []);
+  }, [isVisible]);
 
   return (
-    <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-6 h-96">
+    <div ref={containerRef} className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-6 h-96">
       <h3 className="font-semibold mb-4">Weekly Entry/Exit</h3>
-      {loading ? (
+      {!isVisible || loading ? (
         <div className="h-[80%] flex items-center justify-center text-[var(--text-muted)] text-sm">
           Loading…
         </div>
       ) : (
-        <ResponsiveContainer width="100%" height="85%">
-          <BarChart data={data} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-            <XAxis dataKey="name" stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} />
-            <YAxis stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "var(--bg-elevated)",
-                borderColor: "var(--border)",
-                color: "var(--text-primary)",
-              }}
-            />
-            <Legend iconSize={10} />
-            <Bar dataKey="entries" fill="var(--action-primary)" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="exits" fill="var(--action-danger)" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
+        <DynamicRechartsBar data={data} />
       )}
     </div>
   );

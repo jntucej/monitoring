@@ -298,7 +298,7 @@ export function LoginForm({ role, title, subtitle }: LoginFormProps) {
               type="text"
               value={loginIdentifier}
               onChange={(e) => setLoginIdentifier(e.target.value)}
-              placeholder="Enter your identifier"
+              placeholder="Enter ID"
               className="w-full pl-10 pr-4 py-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-sm font-semibold text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none transition-all"
             />
             <UserCheck className="w-4 h-4 absolute left-3.5 top-3.5 text-[var(--text-muted)]" />
@@ -323,7 +323,7 @@ export function LoginForm({ role, title, subtitle }: LoginFormProps) {
               type={showPassword ? "text" : "password"}
               value={passwordOrPin}
               onChange={(e) => setPasswordOrPin(e.target.value)}
-              placeholder="Enter password or PIN"
+              placeholder="password or PIN"
               className="w-full pl-10 pr-12 py-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none transition-all"
             />
             <Lock className="w-4 h-4 absolute left-3.5 top-3.5 text-[var(--text-muted)]" />
