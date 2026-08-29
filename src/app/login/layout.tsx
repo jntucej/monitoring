@@ -10,5 +10,5 @@ export default function LoginLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <main className="h-screen">{children}</main>;
+  return <main className="min-h-[100dvh] flex flex-col">{children}</main>;
 }

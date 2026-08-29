@@ -774,6 +774,7 @@ html.glass .input-focus:focus-visible {
 html, body {
   max-width: 100vw;
   overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Touch targets safeguard for interactive components */
@@ -825,6 +826,9 @@ button, a, [role="button"], .clickable-card {
    MOBILE UI REDESIGN & TOUCH UTILITIES
    ============================================================ */
 @layer utilities {
+  .-webkit-overflow-scrolling-touch {
+    -webkit-overflow-scrolling: touch;
+  }
   .touch-target {
     min-height: 44px;
     min-width: 44px;
