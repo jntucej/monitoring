@@ -456,6 +456,75 @@ AS $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM auth.users WHERE id = p_user_id) THEN RETURN FALSE; END IF;
   RETURN TRUE;
 END; $$;
+
+CREATE OR REPLACE FUNCTION invalidate_all_user_sessions(p_user_id UUID)
+RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+BEGIN
+  UPDATE public.users 
+  SET handle = NULL, updated_at = NOW()
+  WHERE id = p_user_id;
+  
+  RETURN FOUND;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION process_gate_scan(
+  p_scan_id UUID,
+  p_user_id UUID,
+  p_direction VARCHAR,
+  p_reason VARCHAR,
+  p_gate_id UUID,
+  p_gate_name VARCHAR,
+  p_operator_id UUID,
+  p_operator_name VARCHAR,
+  p_timestamp TIMESTAMPTZ,
+  p_is_manual BOOLEAN,
+  p_dup_window_minutes INT DEFAULT 5
+)
+RETURNS TABLE (
+  inserted_log JSONB,
+  is_duplicate BOOLEAN
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_recent_id UUID;
+  v_log JSONB;
+BEGIN
+  SELECT id INTO v_recent_id
+  FROM movement_logs
+  WHERE user_id = p_user_id
+    AND direction = p_direction
+    AND timestamp >= (p_timestamp - (p_dup_window_minutes || ' minutes')::INTERVAL)
+  ORDER BY timestamp DESC
+  LIMIT 1
+  FOR UPDATE;
+
+  IF v_recent_id IS NOT NULL THEN
+    SELECT to_jsonb(m.*) INTO v_log
+    FROM movement_logs m
+    WHERE id = v_recent_id;
+
+    RETURN QUERY SELECT v_log, TRUE;
+    RETURN;
+  END IF;
+
+  INSERT INTO movement_logs (
+    id, user_id, direction, reason, gate_id, gate_name,
+    operator_id, operator_name, timestamp, is_manual, is_correction
+  ) VALUES (
+    p_scan_id, p_user_id, p_direction, p_reason, p_gate_id, p_gate_name,
+    p_operator_id, p_operator_name, p_timestamp, p_is_manual, FALSE
+  );
+
+  SELECT to_jsonb(m.*) INTO v_log
+  FROM movement_logs m
+  WHERE id = p_scan_id;
+
+  RETURN QUERY SELECT v_log, FALSE;
+END;
+$$;
 -- 4.4 SECURED USER PROVISIONING (sysadmin only)
 CREATE OR REPLACE FUNCTION create_user_with_auth(
   p_name TEXT, p_role TEXT, p_unique_id TEXT, p_email TEXT, p_phone TEXT,
@@ -796,6 +865,13 @@ CREATE INDEX IF NOT EXISTS idx_apimetrics_timestamp ON api_metrics(timestamp DES
 CREATE INDEX IF NOT EXISTS idx_apimetrics_status_code ON api_metrics(status_code);
 CREATE INDEX IF NOT EXISTS idx_sysalerts_severity ON system_alerts(severity);
 CREATE INDEX IF NOT EXISTS idx_sysalerts_resolved ON system_alerts(resolved);
+
+-- Composite performance indexes for movement_logs and daily_stats
+CREATE INDEX IF NOT EXISTS idx_mlogs_user_timestamp ON movement_logs(user_id, timestamp DESC);
+CREATE INDEX IF NOT EXISTS idx_mlogs_gate_timestamp ON movement_logs(gate_id, timestamp DESC);
+CREATE INDEX IF NOT EXISTS idx_mlogs_timestamp_direction ON movement_logs(timestamp DESC, direction);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_daily_stats_date_gate ON daily_stats(date, gate_id);
+CREATE INDEX IF NOT EXISTS idx_daily_stats_gate_date ON daily_stats(gate_id, date DESC);
 
 -- ============================================================================
 -- SECTION 8: SEED DATA
