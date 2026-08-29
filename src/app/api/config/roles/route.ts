@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabaseClient';
+import { getSupabaseServiceClient } from '@/lib/supabaseClient';
 import { withRateLimit } from '@/lib/rate-limit';
 import { withAuthorization } from '@/middleware/authorization';
 import { addAudit } from '@/lib/db';
@@ -7,7 +7,8 @@ import { Role } from '@/lib/types';
 
 async function handleGet(req: NextRequest) {
   try {
-    const { data, error } = await supabase
+    const service = getSupabaseServiceClient();
+    const { data, error } = await service
       .from('config_roles')
       .select('*')
       .eq('is_active', true)
@@ -55,7 +56,8 @@ async function handlePost(req: NextRequest) {
       is_active: true,
     };
 
-    const { data, error } = await supabase.from('config_roles').upsert([payload]).select().single();
+    const service = getSupabaseServiceClient();
+    const { data, error } = await service.from('config_roles').upsert([payload]).select().single();
     if (error) throw error;
 
     const actorId = req.headers.get('x-user-id') || 'sysadmin';
@@ -83,7 +85,8 @@ async function handleDelete(req: NextRequest) {
       return NextResponse.json({ success: false, error: { code: 'BAD_REQUEST', message: 'Missing role code' } }, { status: 400 });
     }
 
-    const { error } = await supabase.from('config_roles').update({ is_active: false }).eq('code', code);
+    const service = getSupabaseServiceClient();
+    const { error } = await service.from('config_roles').update({ is_active: false }).eq('code', code);
     if (error) throw error;
 
     return NextResponse.json({ success: true, message: `Deactivated role ${code}` });

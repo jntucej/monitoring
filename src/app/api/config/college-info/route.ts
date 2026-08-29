@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabaseClient';
+import { getSupabaseServiceClient } from '@/lib/supabaseClient';
 import { withAuthorization } from '@/middleware/authorization';
 import { withRateLimit } from '@/lib/rate-limit';
 import { getCached, setCached, invalidateCache } from '@/lib/cache';
@@ -12,7 +12,8 @@ async function handleGet(req: NextRequest) {
       return NextResponse.json({ success: true, data: cached });
     }
 
-    const { data, error } = await supabase
+    const service = getSupabaseServiceClient();
+    const { data, error } = await service
       .from('config_college_info')
       .select('*')
       .limit(1)
@@ -73,7 +74,8 @@ async function handlePatch(req: NextRequest) {
       }
     }
 
-    const { data: existing } = await supabase
+    const service = getSupabaseServiceClient();
+    const { data: existing } = await service
       .from('config_college_info')
       .select('id')
       .limit(1)
@@ -81,14 +83,14 @@ async function handlePatch(req: NextRequest) {
 
     let result;
     if (existing) {
-      result = await supabase
+      result = await service
         .from('config_college_info')
         .update(updates)
         .eq('id', existing.id)
         .select()
         .single();
     } else {
-      result = await supabase
+      result = await service
         .from('config_college_info')
         .insert({ ...updates, id: crypto.randomUUID() })
         .select()

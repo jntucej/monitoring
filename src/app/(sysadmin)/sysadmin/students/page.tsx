@@ -53,6 +53,7 @@ export default function SysAdminStudentsPage() {
   const [editForm, setEditForm] = useState({
     name: "", email: "", phone: "", branch: "",
     hostelRoom: "", isHosteller: false, customMetaJson: "{}",
+    newPassword: "", newPin: "",
   });
 
   const loadStudents = useCallback(async () => {
@@ -85,12 +86,13 @@ export default function SysAdminStudentsPage() {
         addToast({ variant: "error", title: "Invalid JSON", message: "Custom metadata must be valid JSON." });
         setBusy(false); return;
       }
+      const studentEmail = createForm.email.trim() || `${createForm.roll.trim().toLowerCase()}@jntuhcej.ac.in`;
       const res = await fetch("/api/users", {
         method: "POST",
         headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({
           uniqueId: createForm.roll, name: createForm.name, role: "student",
-          email: createForm.email || undefined, phone: createForm.phone || undefined,
+          email: studentEmail, phone: createForm.phone || undefined,
           department: createForm.branch || undefined,
           metadata: { ...parsedMeta, hostelRoom: createForm.hostelRoom, isHosteller: createForm.isHosteller },
         }),
@@ -125,6 +127,8 @@ export default function SysAdminStudentsPage() {
         body: JSON.stringify({
           name: editForm.name || undefined, email: editForm.email || undefined,
           phone: editForm.phone || undefined, department: editForm.branch || undefined,
+          password: editForm.newPassword || undefined,
+          pin: editForm.newPin || undefined,
           metadata: { ...parsedMeta, hostelRoom: editForm.hostelRoom, isHosteller: editForm.isHosteller },
         }),
       });
@@ -185,6 +189,7 @@ export default function SysAdminStudentsPage() {
       branch: s.department || "", hostelRoom: s.hostelRoom || s.studentDetails?.hostelRoom || "",
       isHosteller: s.isHosteller ?? s.studentDetails?.isHosteller ?? false,
       customMetaJson: JSON.stringify(s.metadata || {}, null, 2),
+      newPassword: "", newPin: "",
     });
   };
 
@@ -385,6 +390,16 @@ export default function SysAdminStudentsPage() {
                   <input type="checkbox" checked={editForm.isHosteller} onChange={(e) => setEditForm({ ...editForm, isHosteller: e.target.checked })} className="rounded border-slate-600" />
                   <Home className="w-3.5 h-3.5" /> Hosteller
                 </label>
+                <div className="grid grid-cols-2 gap-3 p-3 bg-slate-900/60 border border-slate-800 rounded-xl">
+                  <div>
+                    <label className="text-xs font-semibold text-amber-400 block mb-1">Reset Password (Optional)</label>
+                    <input type="password" placeholder="New Auth Password" value={editForm.newPassword} onChange={(e) => setEditForm({ ...editForm, newPassword: e.target.value })} className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-amber-400" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-amber-400 block mb-1">Reset Kiosk PIN (Optional)</label>
+                    <input type="text" placeholder="4-8 digit PIN" value={editForm.newPin} onChange={(e) => setEditForm({ ...editForm, newPin: e.target.value })} className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-amber-400" />
+                  </div>
+                </div>
                 <div>
                   <label className="text-xs font-semibold text-slate-400 block mb-1">Custom Metadata (JSON)</label>
                   <textarea rows={4} value={editForm.customMetaJson} onChange={(e) => setEditForm({ ...editForm, customMetaJson: e.target.value })} className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs font-mono text-slate-200 focus:outline-none focus:border-emerald-500" />

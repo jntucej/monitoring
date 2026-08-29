@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { RequestPassForm } from "@/components/parent/RequestPassForm";
 import { Ticket, Clock, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import type { GatePass, GatePassStatus } from "@/lib/types";
+import { getPassTypeName } from "@/hooks/usePassTypes";
+import { getAuthHeaders } from "@/lib/utils";
 
 function statusStyle(status: string) {
   if (status === "APPROVED" || status === "COMPLETED") {
@@ -30,7 +32,10 @@ export default function ParentPassesPage() {
       const authRaw = localStorage.getItem("gate-monitor-auth");
       const auth = authRaw ? JSON.parse(authRaw) : null;
       const parentId = auth?.user?.parentId ?? auth?.user?.id ?? "pa-1";
-      const res = await fetch(`/api/passes?parentId=${parentId}`, { cache: "no-store" });
+      const res = await fetch(`/api/passes?parentId=${parentId}`, { 
+        headers: getAuthHeaders(),
+        cache: "no-store" 
+      });
       if (!res.ok) throw new Error("Failed to fetch passes");
       const json = await res.json();
       if (json.success) {
@@ -84,7 +89,7 @@ export default function ParentPassesPage() {
               {passes.map((pass) => (
                 <div key={pass.id} className="p-3 bg-[var(--bg-base)]/50 rounded-lg border border-[var(--border)]/40">
                   <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <p className="font-medium">{pass.reason}</p>
+                    <p className="font-medium">{getPassTypeName(pass.reason)}</p>
                     <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${statusStyle(pass.finalStatus)}`}>
                       {statusIcon(pass.finalStatus)}
                       <span>{pass.finalStatus}</span>

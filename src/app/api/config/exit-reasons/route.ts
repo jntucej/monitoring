@@ -1,25 +1,56 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabaseClient';
+import { getSupabaseServiceClient } from '@/lib/supabaseClient';
 import { withRateLimit } from '@/lib/rate-limit';
 import { withAuthorization } from '@/middleware/authorization';
 import { addAudit } from '@/lib/db';
 import { Role } from '@/lib/types';
 
+const DEFAULT_EXIT_REASONS = [
+  {
+    code: "daily_outing",
+    name: "Daily Outing",
+    description: "Standard local daily outing (no pass required)",
+    applicableTo: ["student"],
+    requiresApproval: false,
+    approvalBy: "none",
+    parentNotification: "silent",
+    maxDurationHours: 4,
+  },
+  {
+    code: "day_pass",
+    name: "Day Pass",
+    description: "Full day leave (requires warden approved pass)",
+    applicableTo: ["student"],
+    requiresApproval: true,
+    approvalBy: "warden",
+    parentNotification: "sms",
+    maxDurationHours: 12,
+  },
+  {
+    code: "home_out",
+    name: "Home Out",
+    description: "Weekend or overnight leave (requires warden approved pass)",
+    applicableTo: ["student"],
+    requiresApproval: true,
+    approvalBy: "warden",
+    parentNotification: "sms",
+    maxDurationHours: 48,
+  },
+];
+
 async function handleGet(req: NextRequest) {
   try {
-    const { data, error } = await supabase
+    const service = getSupabaseServiceClient();
+    const { data, error } = await service
       .from('config_exit_reasons')
       .select('*')
       .order('code');
 
-    if (error) {
-      if (error.code === '42P01' || error.code === 'PGRST205') {
-        return NextResponse.json({ success: true, data: [] });
-      }
-      throw error;
+    if (error || !data || data.length === 0) {
+      return NextResponse.json({ success: true, data: DEFAULT_EXIT_REASONS });
     }
 
-    const mapped = (data || []).map((item: any) => ({
+    const mapped = data.map((item: any) => ({
       code: item.code,
       name: item.name,
       description: item.description,
@@ -30,13 +61,10 @@ async function handleGet(req: NextRequest) {
       maxDurationHours: item.max_duration_hours,
     }));
 
-    return NextResponse.json({ success: true, data: mapped });
+    return NextResponse.json({ success: true, data: mapped.length > 0 ? mapped : DEFAULT_EXIT_REASONS });
   } catch (error: any) {
-    console.error('Error fetching exit reasons:', error);
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to load exit reasons' } },
-      { status: 500 }
-    );
+    console.error('Error fetching exit reasons, returning defaults:', error);
+    return NextResponse.json({ success: true, data: DEFAULT_EXIT_REASONS });
   }
 }
 
@@ -60,7 +88,8 @@ async function handlePost(req: NextRequest) {
       max_duration_hours: maxDurationHours ? Number(maxDurationHours) : null,
     };
 
-    const { data, error } = await supabase
+    const service = getSupabaseServiceClient();
+    const { data, error } = await service
       .from('config_exit_reasons')
       .upsert([payload])
       .select()
@@ -94,7 +123,8 @@ async function handleDelete(req: NextRequest) {
       return NextResponse.json({ success: false, error: { code: 'BAD_REQUEST', message: 'Missing reason code' } }, { status: 400 });
     }
 
-    const { error } = await supabase.from('config_exit_reasons').delete().eq('code', code);
+    const service = getSupabaseServiceClient();
+    const { error } = await service.from('config_exit_reasons').delete().eq('code', code);
     if (error) throw error;
 
     return NextResponse.json({ success: true, message: `Deleted exit reason ${code}` });

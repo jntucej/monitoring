@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// In-memory store for rate limiting (use Redis in production)
 interface RateLimitStore {
   [key: string]: {
     count: number;
@@ -18,110 +17,199 @@ export interface RateLimitConfig {
   keyPrefix?: string;
 }
 
-export function rateLimit(keyOrReq: string | NextRequest, pointsOrConfig?: number | RateLimitConfig) {
-  if (typeof keyOrReq === 'string') {
-    // Legacy support: rateLimit(key, points)
-    const key = keyOrReq;
-    const points = (pointsOrConfig as number) || 5;
-    const isDev = process.env.NODE_ENV !== "production" || key.includes("127.0.0.1") || key.includes("::1") || key.includes("unknown") || key.includes("global");
-    const effectivePoints = isDev ? Math.max(points * 10, 1000) : points;
-    const now = Date.now();
-    if (store[key] && store[key].resetTime < now) {
-      delete store[key];
-    }
-    if (!store[key]) {
-      store[key] = { count: 1, resetTime: now + 60 * 1000 };
-      return Promise.resolve({ limited: false });
-    }
-    store[key].count++;
-    if (store[key].count > effectivePoints) {
-      const retryAfter = Math.ceil((store[key].resetTime - now) / 1000);
-      return Promise.resolve({ limited: true, retryAfter });
-    }
-    return Promise.resolve({ limited: false });
-  }
+export interface RateLimitResult {
+  limited: boolean;
+  remaining: number;
+  resetTime: Date;
+  retryAfter?: number;
+}
 
-  // NextRequest rate limiter function: rateLimit(config)(req)
-  const config = (keyOrReq as unknown as RateLimitConfig) || {};
+/**
+ * Distributed rate limiter.
+ * Operates statelessly across serverless invocations using Upstash Redis REST API
+ * or Supabase API metrics DB check when running in serverless production.
+ * Falls back to local in-memory store in development/test.
+ */
+export async function checkRateLimit(
+  reqOrKey: NextRequest | string,
+  config: RateLimitConfig = {}
+): Promise<RateLimitResult> {
   const windowMs = config.windowMs || DEFAULT_WINDOW;
   const maxRequests = config.maxRequests || DEFAULT_MAX_REQUESTS;
   const keyPrefix = config.keyPrefix || 'rate_limit';
 
-  return function (req: NextRequest): { limited: boolean; remaining: number; resetTime: Date } {
-    const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 
-               req.headers.get('x-real-ip') || 
-               'unknown';
+  let ip = 'global';
+  if (typeof reqOrKey === 'string') {
+    ip = reqOrKey;
+  } else {
+    ip =
+      reqOrKey.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+      reqOrKey.headers.get('x-real-ip') ||
+      'unknown';
+  }
 
-    // In local development / test environments, raise rate limits to prevent dev lockouts
-    const isDev = process.env.NODE_ENV !== "production" || ip === "127.0.0.1" || ip === "::1" || ip === "unknown" || ip === "localhost";
-    const effectiveMaxRequests = isDev ? Math.max(maxRequests * 10, 200) : maxRequests;
-    
-    const key = `${keyPrefix}:${ip}`;
-    const now = Date.now();
+  const isDev =
+    process.env.NODE_ENV !== 'production' ||
+    ip === '127.0.0.1' ||
+    ip === '::1' ||
+    ip === 'unknown' ||
+    ip === 'localhost';
 
-    if (store[key] && store[key].resetTime < now) {
-      delete store[key];
-    }
+  const effectiveMaxRequests = isDev ? Math.max(maxRequests * 10, 200) : maxRequests;
+  const key = `${keyPrefix}:${ip}`;
 
-    if (!store[key]) {
-      store[key] = {
-        count: 1,
-        resetTime: now + windowMs,
+  // 1. Upstash Redis REST distributed rate limiter (if configured)
+  const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
+  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (redisUrl && redisToken && !isDev) {
+    try {
+      const windowSeconds = Math.ceil(windowMs / 1000);
+      const res = await fetch(`${redisUrl}/pipeline`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${redisToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify([
+          ['INCR', key],
+          ['EXPIRE', key, windowSeconds, 'NX'],
+        ]),
+        cache: 'no-store',
+      });
+
+      const data = await res.json();
+      const currentCount = Number(data?.[0]?.result ?? 1);
+      const resetTime = new Date(Date.now() + windowMs);
+      const limited = currentCount > effectiveMaxRequests;
+      const remaining = Math.max(0, effectiveMaxRequests - currentCount);
+
+      return {
+        limited,
+        remaining,
+        resetTime,
+        retryAfter: limited ? Math.ceil(windowMs / 1000) : 0,
       };
-      return { limited: false, remaining: effectiveMaxRequests - 1, resetTime: new Date(store[key].resetTime) };
+    } catch (err) {
+      console.warn('[rate-limit] Redis distributed rate limiter error, falling back:', err);
     }
+  }
 
-    store[key].count++;
+  // 2. Supabase DB distributed rate limit check for production serverless fallback
+  if (process.env.NODE_ENV === 'production' && !isDev) {
+    try {
+      const { getSupabaseServiceClient } = await import('./supabaseClient');
+      const client = getSupabaseServiceClient();
+      const windowStart = new Date(Date.now() - windowMs).toISOString();
 
-    if (store[key].count > effectiveMaxRequests) {
-      return { 
-        limited: true, 
-        remaining: 0, 
-        resetTime: new Date(store[key].resetTime) 
+      const { count } = await client
+        .from('api_metrics')
+        .select('*', { count: 'exact', head: true })
+        .eq('endpoint', key)
+        .gte('timestamp', windowStart);
+
+      const currentCount = (count || 0) + 1;
+      const resetTime = new Date(Date.now() + windowMs);
+      const limited = currentCount > effectiveMaxRequests;
+      const remaining = Math.max(0, effectiveMaxRequests - currentCount);
+
+      void client.from('api_metrics').insert({
+        endpoint: key,
+        response_time: 0,
+        status_code: limited ? 429 : 200,
+        timestamp: new Date().toISOString(),
+      });
+
+      return {
+        limited,
+        remaining,
+        resetTime,
+        retryAfter: limited ? Math.ceil(windowMs / 1000) : 0,
       };
+    } catch (dbErr) {
+      console.warn('[rate-limit] DB distributed rate limiter error, falling back:', dbErr);
     }
+  }
 
-    return { 
-      limited: false, 
-      remaining: effectiveMaxRequests - store[key].count, 
-      resetTime: new Date(store[key].resetTime) 
+  // 3. In-memory rate limiter fallback (development/test)
+  const now = Date.now();
+  if (store[key] && store[key].resetTime < now) {
+    delete store[key];
+  }
+
+  if (!store[key]) {
+    store[key] = {
+      count: 1,
+      resetTime: now + windowMs,
     };
+    return {
+      limited: false,
+      remaining: effectiveMaxRequests - 1,
+      resetTime: new Date(store[key].resetTime),
+    };
+  }
+
+  store[key].count++;
+  const resetTime = new Date(store[key].resetTime);
+
+  if (store[key].count > effectiveMaxRequests) {
+    const retryAfter = Math.ceil((store[key].resetTime - now) / 1000);
+    return {
+      limited: true,
+      remaining: 0,
+      resetTime,
+      retryAfter,
+    };
+  }
+
+  return {
+    limited: false,
+    remaining: effectiveMaxRequests - store[key].count,
+    resetTime,
   };
 }
 
-// Rate limiting middleware for API routes
+// Legacy function signature for backward compatibility with rateLimit(key, points)
+export function rateLimit(keyOrReq: string | NextRequest, pointsOrConfig?: number | RateLimitConfig) {
+  if (typeof keyOrReq === 'string') {
+    const points = (pointsOrConfig as number) || 5;
+    return checkRateLimit(keyOrReq, { maxRequests: points, windowMs: 60 * 1000 });
+  }
+  const config = (keyOrReq as unknown as RateLimitConfig) || {};
+  return (req: NextRequest) => checkRateLimit(req, config);
+}
+
+// Rate limiting middleware wrapper for Next.js API routes
 export function withRateLimit(
   handler: (req: NextRequest, ...args: any[]) => Promise<Response>,
   config: RateLimitConfig = {}
 ) {
   return async (req: NextRequest, ...args: any[]) => {
-    const limiter = (rateLimit as Function)(config);
-    const result = limiter(req);
+    const result = await checkRateLimit(req, config);
 
     if (result.limited) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: { 
-            code: 'RATE_LIMIT_EXCEEDED', 
+        {
+          success: false,
+          error: {
+            code: 'RATE_LIMIT_EXCEEDED',
             message: 'Too many requests. Please try again later.',
             resetAt: result.resetTime.toISOString(),
-          } 
+          },
         },
-        { 
+        {
           status: 429,
           headers: {
-            'Retry-After': Math.ceil((result.resetTime.getTime() - Date.now()) / 1000).toString(),
+            'Retry-After': (result.retryAfter || 60).toString(),
             'X-RateLimit-Limit': (config.maxRequests || DEFAULT_MAX_REQUESTS).toString(),
             'X-RateLimit-Remaining': '0',
             'X-RateLimit-Reset': result.resetTime.toISOString(),
-          }
+          },
         }
       );
     }
 
-        const response = await handler(req, ...args);
-    
+    const response = await handler(req, ...args);
+
     response.headers.set('X-RateLimit-Limit', (config.maxRequests || DEFAULT_MAX_REQUESTS).toString());
     response.headers.set('X-RateLimit-Remaining', result.remaining.toString());
     response.headers.set('X-RateLimit-Reset', result.resetTime.toISOString());

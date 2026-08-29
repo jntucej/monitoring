@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createVisitor, checkInVisitor, checkOutVisitor } from "@/lib/db";
-import { supabase } from "@/lib/supabaseClient";
+import { getSupabaseServiceClient } from "@/lib/supabaseClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 
 async function handleGet(req: NextRequest) {
   try {
+    const service = getSupabaseServiceClient();
     const params = req.nextUrl.searchParams;
     const status = params.get("status") || "active";
 
-    const { data, error } = await supabase
+    const { data, error } = await service
       .from("visitor_logs")
       .select("*, person:person_id(*), host:host_person_id(*)")
       .eq("status", status)

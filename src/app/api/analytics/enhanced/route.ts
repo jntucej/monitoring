@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
+import { getSupabaseServiceClient } from "@/lib/supabaseClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import type { EnhancedAnalytics } from "@/lib/analytics-types";
 
 async function handleGet(req: NextRequest) {
   try {
+    const service = getSupabaseServiceClient();
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
 
-    const { data: logs } = await supabase
+    const { data: logs } = await service
       .from('movement_logs')
       .select('*')
       .gte('timestamp', todayStart.toISOString());

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
+import { getSupabaseServiceClient } from "@/lib/supabaseClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 
@@ -16,8 +16,9 @@ async function handlePatch(req: NextRequest) {
   try {
     const id = getId(req);
     const body = await req.json();
+    const service = getSupabaseServiceClient();
 
-    const { error } = await supabase
+    const { error } = await service
       .from('gates')
       .update({
         name: body.name,
@@ -41,7 +42,8 @@ async function handleDelete(req: NextRequest) {
   try {
     const id = getId(req);
 
-    const { error } = await supabase.from('gates').delete().eq('id', id);
+    const service = getSupabaseServiceClient();
+    const { error } = await service.from('gates').delete().eq('id', id);
 
     if (error) {
       return NextResponse.json({ success: false, error: 'Failed to delete gate' }, { status: 500 });

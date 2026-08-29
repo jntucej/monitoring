@@ -1,5 +1,20 @@
 import type { NextConfig } from "next";
 
+const isProd = process.env.NODE_ENV === "production";
+const allowedOrigin =
+  process.env.ALLOWED_ORIGIN ||
+  process.env.NEXT_PUBLIC_APP_URL ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
+  (isProd ? "" : "*");
+
+const corsHeaderOrigin = allowedOrigin || (isProd ? "self" : "*");
+
+if (isProd && !process.env.ALLOWED_ORIGIN && !process.env.NEXT_PUBLIC_APP_URL && !process.env.VERCEL_URL) {
+  console.warn(
+    "[CORS WARNING] ALLOWED_ORIGIN environment variable is not explicitly set in production. Restricting Access-Control-Allow-Origin to 'self'."
+  );
+}
+
 const nextConfig: NextConfig = {
   // Configure webpack to handle native modules
   webpack: (config, { isServer }) => {
@@ -31,7 +46,7 @@ const nextConfig: NextConfig = {
         source: "/api/(.*)",
         headers: [
           { key: "Access-Control-Allow-Credentials", value: "true" },
-          { key: "Access-Control-Allow-Origin", value: process.env.ALLOWED_ORIGIN || (process.env.NODE_ENV === "production" ? "" : "*") },
+          { key: "Access-Control-Allow-Origin", value: corsHeaderOrigin },
           { key: "Access-Control-Allow-Methods", value: "GET,DELETE,PATCH,POST,PUT,OPTIONS" },
           { key: "Access-Control-Allow-Headers", value: "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, x-user-id, x-user-role, x-operator-id" },
         ],

@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { getActiveLockdown } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 45; // ponytail: limit lifetime to 45s for serverless execution
 
 /**
  * GET /api/admin/lockdown/stream — Real-time SSE endpoint for lockdown status updates.
@@ -43,8 +44,15 @@ export async function GET(req: NextRequest) {
       // Poll interval for push stream
       const interval = setInterval(sendEvent, 2000);
 
+      // Auto-terminate after 45s so serverless function closes gracefully
+      const timeout = setTimeout(() => {
+        clearInterval(interval);
+        try { controller.close(); } catch {}
+      }, 45000);
+
       req.signal.addEventListener("abort", () => {
         clearInterval(interval);
+        clearTimeout(timeout);
         try {
           controller.close();
         } catch {}
@@ -60,3 +68,4 @@ export async function GET(req: NextRequest) {
     },
   });
 }
+

@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { getNotifications } from "@/lib/db";
 
+// ponytail: SSE streams limit lifetime to 45s so serverless containers close gracefully before hard function timeouts. EventSource client automatically reconnects.
 export async function GET(req: NextRequest) {
   const userId = req.nextUrl.searchParams.get("userId") || req.headers.get("x-user-id");
   const role = req.nextUrl.searchParams.get("role") || req.headers.get("x-user-role") || "user";
@@ -38,8 +39,15 @@ export async function GET(req: NextRequest) {
       await checkAndSend();
       const interval = setInterval(checkAndSend, 4000);
 
+      // Auto-terminate after 45 seconds to stay within serverless function limits
+      const timeout = setTimeout(() => {
+        clearInterval(interval);
+        try { controller.close(); } catch {}
+      }, 45000);
+
       req.signal.addEventListener("abort", () => {
         clearInterval(interval);
+        clearTimeout(timeout);
         try { controller.close(); } catch {}
       });
     },

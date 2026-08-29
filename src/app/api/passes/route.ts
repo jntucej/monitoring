@@ -3,6 +3,7 @@ import { findGatePasses, createGatePass, getParentChildren } from "@/lib/db";
 import { supabase, getSupabaseServiceClient } from "@/lib/supabaseClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
+import { validatePassRequestPayload } from "@/lib/validation";
 import type { AuthContext } from "@/lib/authContext";
 import type { Student } from "@/lib/types";
 
@@ -76,7 +77,14 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
     const authRole = auth.role;
     const authUserId = auth.userId;
 
-    const body = await req.json();
+    const body = await req.json().catch(() => null);
+    const validation = validatePassRequestPayload(body);
+    if (!validation.valid) {
+      return NextResponse.json(
+        { success: false, error: { code: "INVALID_PAYLOAD", message: validation.error || "Invalid request body" } },
+        { status: 400 }
+      );
+    }
     const { roll, reason, from, to, description } = body;
 
     if (!roll || !reason || !from || !to) {
@@ -84,6 +92,17 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
         { success: false, error: { code: "MISSING_FIELDS", message: "roll, reason, from, to are required" } },
         { status: 400 }
       );
+    }
+
+    if (reason === 'day_pass') {
+      const fromDate = new Date(from);
+      const toDate = new Date(to);
+      if (fromDate.getFullYear() !== toDate.getFullYear() || fromDate.getMonth() !== toDate.getMonth() || fromDate.getDate() !== toDate.getDate()) {
+        return NextResponse.json(
+          { success: false, error: { code: "INVALID_DATES", message: "Day Pass return time must be on the same calendar day as departure. Use Home Out for overnight leave." } },
+          { status: 400 }
+        );
+      }
     }
 
     // Validate that the user is authorized to create a pass for this roll
@@ -125,6 +144,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
       to,
       description,
       requestedById,
+      isParentRequest: authRole === 'parent',
     });
 
     if (!pass) {

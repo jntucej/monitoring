@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabaseClient';
+import { getSupabaseServiceClient } from '@/lib/supabaseClient';
 import { withRateLimit } from '@/lib/rate-limit';
 import { withAuthorization } from '@/middleware/authorization';
 import { addAudit } from '@/lib/db';
@@ -7,10 +7,11 @@ import { Role } from '@/lib/types';
 
 async function handleGet(req: NextRequest) {
   try {
+    const service = getSupabaseServiceClient();
     const { searchParams } = new URL(req.url);
     const roleCode = searchParams.get('role');
 
-    let query = supabase
+    let query = service
       .from('config_navigation')
       .select('*')
       .eq('is_active', true)
@@ -76,7 +77,8 @@ async function handlePost(req: NextRequest) {
       is_active: true,
     };
 
-    const { data, error } = await supabase.from('config_navigation').upsert([payload]).select().single();
+    const service = getSupabaseServiceClient();
+    const { data, error } = await service.from('config_navigation').upsert([payload]).select().single();
     if (error) throw error;
 
     const actorId = req.headers.get('x-user-id') || 'sysadmin';
@@ -104,7 +106,8 @@ async function handleDelete(req: NextRequest) {
       return NextResponse.json({ success: false, error: { code: 'BAD_REQUEST', message: 'Missing nav item ID' } }, { status: 400 });
     }
 
-    const { error } = await supabase.from('config_navigation').delete().eq('id', id);
+    const service = getSupabaseServiceClient();
+    const { error } = await service.from('config_navigation').delete().eq('id', id);
     if (error) throw error;
 
     return NextResponse.json({ success: true, message: `Deleted navigation item ${id}` });

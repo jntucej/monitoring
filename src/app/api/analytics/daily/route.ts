@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withAuthAndStatus } from "@/middleware/auth";
 import { withAuthorization } from "@/middleware/authorization";
-import { supabase } from "@/lib/supabaseClient";
+import { getSupabaseServiceClient } from "@/lib/supabaseClient";
 import { DailyStats } from "@/lib/analytics-types";
 
 async function handleGet(req: NextRequest) {
   try {
+    const service = getSupabaseServiceClient();
     const params = req.nextUrl.searchParams;
     const date = params.get("date") || new Date().toISOString().slice(0, 10);
 
-    const { data: scans, error } = await supabase
+    const { data: scans, error } = await service
       .from("movement_logs")
       .select("*, users:users!movement_logs_user_id_fkey(role)")
       .gte("timestamp", `${date}T00:00:00.000Z`)

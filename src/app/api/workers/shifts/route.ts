@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
+import { getSupabaseServiceClient } from "@/lib/supabaseClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 
 async function handleGet(req: NextRequest) {
   try {
+    const service = getSupabaseServiceClient();
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
 
     const [workersRes, logsRes] = await Promise.all([
-      supabase.from('users').select('*').eq('role', 'worker'),
-      supabase.from('movement_logs').select('*').gte('timestamp', todayStart.toISOString())
+      service.from('users').select('*').eq('role', 'worker'),
+      service.from('movement_logs').select('*').gte('timestamp', todayStart.toISOString())
     ]);
 
     const workers = workersRes.data || [];

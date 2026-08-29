@@ -96,14 +96,16 @@ export default function OperatorPage() {
   // Adjust operatorSubMode when URL parameters change
   useEffect(() => {
     const mode = searchParams?.get("mode");
-    if (mode === "manual") {
-      setOperatorSubMode("manual");
+    let targetMode: "scan" | "manual" | "entry" | null = null;
+    if (mode === "manual" || (isSpecialPath && gateIdParam === "manual")) {
+      targetMode = "manual";
     } else if (mode === "scan") {
-      setOperatorSubMode("scan");
-    } else if (isSpecialPath && gateIdParam === "manual") {
-      setOperatorSubMode("manual");
+      targetMode = "scan";
     }
-  }, [searchParams, isSpecialPath, gateIdParam]);
+    if (targetMode && operatorSubMode !== targetMode) {
+      setOperatorSubMode(targetMode);
+    }
+  }, [searchParams, isSpecialPath, gateIdParam, operatorSubMode]);
 
   // Ref to store polling interval ID
   const statsIntervalRef = useRef<NodeJS.Timeout | null>(null);

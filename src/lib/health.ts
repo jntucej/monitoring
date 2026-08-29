@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient';
+import { supabase, getSupabaseServiceClient } from './supabaseClient';
 
 export interface SystemHealth {
   status: 'healthy' | 'degraded' | 'unhealthy';
@@ -25,6 +25,10 @@ export interface SystemHealth {
       status: 'healthy' | 'degraded' | 'unhealthy';
       [key: string]: any;
     };
+    env?: {
+      status: 'healthy' | 'degraded' | 'unhealthy';
+      error?: string;
+    };
   };
   metrics: {
     activeUsers: number;
@@ -41,6 +45,14 @@ export interface SystemHealth {
   }>;
 }
 
+function getClient() {
+  try {
+    return getSupabaseServiceClient();
+  } catch {
+    return supabase;
+  }
+}
+
 // Check system health
 export async function checkSystemHealth(): Promise<SystemHealth> {
   const startTime = Date.now();
@@ -52,6 +64,7 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
       database: { status: 'healthy', latency: 0 },
       gateways: { status: 'healthy', online: 0, offline: 0, total: 0 },
       services: { status: 'healthy' },
+      env: { status: 'healthy' },
     },
     metrics: {
       activeUsers: 0,
@@ -66,7 +79,8 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
   // Check database
   try {
     const dbStart = Date.now();
-    const { data, error } = await supabase
+    const dbClient = getClient();
+    const { data, error } = await dbClient
       .from('users')
       .select('id', { count: 'exact', head: true })
       .limit(1);
@@ -82,6 +96,23 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
     health.components.database.status = 'unhealthy';
     health.components.database.error = String(error);
     health.status = 'unhealthy';
+  }
+
+  // Check environment variables health
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!supabaseUrl || !anonKey) {
+      health.components.env = {
+        status: 'unhealthy',
+        error: 'Missing required environment variables',
+      };
+      if ((health.status as string) === 'healthy') {
+        health.status = 'degraded';
+      }
+    }
+  } catch (envErr) {
+    console.error('Error checking env health:', envErr);
   }
 
   // Check gateways

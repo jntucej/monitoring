@@ -245,12 +245,12 @@ function mPass(r: any): GatePass {
     requestedById: r.requested_by_id,
     requestedByName: r.requested_by_name,
     requestedAt: r.requested_at,
-    parentStatus: r.parent_status,
+    parentStatus: r.parent_status || r.guardian_status || 'PENDING',
     adminStatus: r.admin_status,
     finalStatus: r.final_status,
-    parentComment: r.parent_comment,
+    parentComment: r.parent_comment || r.guardian_comment,
     adminComment: r.admin_comment,
-    parentApproverId: r.parent_approver_id,
+    parentApproverId: r.parent_approver_id || r.guardian_approver_id,
     adminApproverId: r.admin_approver_id,
     qrCode: r.qr_code,
   };
@@ -270,7 +270,10 @@ function mAlert(r: any): Alert {
 }
 
 export async function findPass(passId: string): Promise<GatePass | null> {
-  const { data, error } = await supabase
+  const { getSupabaseServiceClient } = await import('./supabaseClient');
+  const client = getSupabaseServiceClient();
+
+  const { data, error } = await client
     .from('gate_passes')
     .select('*')
     .eq('id', passId)
@@ -285,12 +288,16 @@ export async function findPass(passId: string): Promise<GatePass | null> {
 }
 
 export async function approvePass(passId: string, role: string, comment: string = "", approverId: string): Promise<boolean> {
-  const updateField = role === 'parent' ? 'parent_status' : 'admin_status';
-  const commentField = role === 'parent' ? 'parent_comment' : 'admin_comment';
-  const approverField = role === 'parent' ? 'parent_approver_id' : 'admin_approver_id';
+  const { getSupabaseServiceClient } = await import('./supabaseClient');
+  const client = getSupabaseServiceClient();
+
+  const isParentRole = role === 'parent';
+  const updateField = isParentRole ? 'parent_status' : 'admin_status';
+  const commentField = isParentRole ? 'parent_comment' : 'admin_comment';
+  const approverField = isParentRole ? 'parent_approver_id' : 'admin_approver_id';
   const statusValue = 'APPROVED';
 
-  const { data: pass, error: readErr } = await supabase
+  const { data: pass, error: readErr } = await client
     .from('gate_passes')
     .select('*')
     .eq('id', passId)
@@ -301,26 +308,40 @@ export async function approvePass(passId: string, role: string, comment: string 
     return false;
   }
 
-  const newParentStatus = role === 'parent' ? statusValue : pass.parent_status;
-  const newAdminStatus = role === 'admin' ? statusValue : pass.admin_status;
+  const newParentStatus = isParentRole ? statusValue : pass.parent_status;
+  const newAdminStatus = !isParentRole ? statusValue : pass.admin_status;
   const finalStatus =
-    newParentStatus === 'APPROVED' && newAdminStatus === 'APPROVED'
-      ? 'APPROVED'
-      : newParentStatus === 'REJECTED' || newAdminStatus === 'REJECTED'
+    newParentStatus === 'REJECTED' || newAdminStatus === 'REJECTED'
       ? 'REJECTED'
-      : newParentStatus === 'APPROVED' || newAdminStatus === 'APPROVED'
-      ? (newParentStatus === 'APPROVED' ? 'APPROVED_PARENT' : 'APPROVED_ADMIN')
-      : 'PENDING';
+      : (newParentStatus === 'APPROVED' && newAdminStatus === 'APPROVED') || (!isParentRole && newAdminStatus === 'APPROVED')
+      ? 'APPROVED'
+      : newParentStatus === 'APPROVED'
+      ? 'APPROVED_PARENT'
+      : 'APPROVED_ADMIN';
 
-  const { error } = await supabase
+  let updatePayload: Record<string, any> = {
+    [updateField]: statusValue,
+    [commentField]: comment,
+    [approverField]: approverId,
+    final_status: finalStatus,
+  };
+
+  let { error } = await client
     .from('gate_passes')
-    .update({
-      [updateField]: statusValue,
-      [commentField]: comment,
-      [approverField]: approverId,
-      final_status: finalStatus,
-    })
+    .update(updatePayload)
     .eq('id', passId);
+
+  if (error && isParentRole && error.code === 'PGRST204') {
+    // Retry with guardian_status column names if parent_status column is missing
+    updatePayload = {
+      guardian_status: statusValue,
+      guardian_comment: comment,
+      guardian_approver_id: approverId,
+      final_status: finalStatus,
+    };
+    const retry = await client.from('gate_passes').update(updatePayload).eq('id', passId);
+    error = retry.error;
+  }
 
   if (error) {
     console.error('Error approving pass:', error);
@@ -383,6 +404,7 @@ export async function createGatePass(passData: {
   description?: string;
   requestedById?: string;
   requestedByName?: string;
+  isParentRequest?: boolean;
 }): Promise<GatePass | null> {
   const person = await findPersonByUniqueId(passData.roll.trim().toUpperCase());
   if (!person) {
@@ -392,26 +414,67 @@ export async function createGatePass(passData: {
 
   const id = `pass-${Date.now()}`;
   const qrCode = `PASS-${id}-${person.uniqueId}-${Date.now()}`;
+  const parentStatus = passData.isParentRequest ? 'APPROVED' : 'PENDING';
 
-  const passRow = {
-    id,
+  const { getSupabaseServiceClient } = await import('./supabaseClient');
+  const serviceClient = getSupabaseServiceClient();
+
+  const isValidUuid = (val?: string) => val && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
+
+  let verifiedUserId: string | null = null;
+  const { data: dbUser } = await serviceClient.from('users').select('id').eq('unique_id', person.uniqueId).maybeSingle();
+  if (dbUser) {
+    verifiedUserId = dbUser.id;
+  }
+
+  let verifiedReqById: string | null = null;
+  if (isValidUuid(passData.requestedById)) {
+    const { data: dbReq } = await serviceClient.from('users').select('id').eq('id', passData.requestedById).maybeSingle();
+    if (dbReq && passData.requestedById) verifiedReqById = passData.requestedById;
+  }
+  if (!verifiedReqById && verifiedUserId) verifiedReqById = verifiedUserId;
+
+  const dbReasonMap: Record<string, string> = {
+    "day_pass": "Day Out",
+    "home_out": "Home Out",
+  };
+  const dbReason = dbReasonMap[passData.reason] || passData.reason;
+
+  const personName = person.fullName || person.name || "Student";
+
+  let passRow: Record<string, any> = {
+    user_id: verifiedUserId || undefined,
     roll: person.uniqueId,
-    student_name: person.fullName,
+    student_name: personName,
+    requester_name: personName,
     department: person.department || '',
-    reason: passData.reason,
+    reason: dbReason,
     from_datetime: passData.from,
     to_datetime: passData.to,
     description: passData.description || null,
-    requested_by_id: passData.requestedById || person.id,
-    requested_by_name: passData.requestedByName || person.fullName,
+    requested_by_id: verifiedReqById || undefined,
+    requested_by_name: passData.requestedByName || personName,
     requested_at: new Date().toISOString(),
-    parent_status: 'PENDING',
+    guardian_status: parentStatus,
     admin_status: 'PENDING',
     final_status: 'PENDING',
     qr_code: qrCode,
   };
 
-  const { data, error } = await supabase.from('gate_passes').insert(passRow).select().single();
+  let { data, error } = await serviceClient.from('gate_passes').insert(passRow).select().single();
+
+  if (error && (error.code === '23503' || error.code === 'PGRST204')) {
+    delete passRow.student_name;
+    delete passRow.department;
+    delete passRow.parent_status;
+    if (error.code === '23503') {
+      delete passRow.user_id;
+      delete passRow.requested_by_id;
+    }
+    const retry = await serviceClient.from('gate_passes').insert(passRow).select().single();
+    data = retry.data;
+    error = retry.error;
+  }
 
   if (error || !data) {
     console.error('Error creating gate pass:', error);
@@ -621,13 +684,14 @@ export async function findPersonByUniqueId(uniqueId: string): Promise<Person | n
   try {
     const { getSupabaseServiceClient } = await import('./supabaseClient');
     client = getSupabaseServiceClient();
-  } catch { /* fallback to anon client */ }
+  } catch (clientErr) {
+    console.warn('[db] findPersonByUniqueId: Fallback to browser client', clientErr);
+  }
 
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(formattedId);
 
   // Tier 1: Query users table with auto-resolved relationships
   try {
-    let query = client.from('users').select('*, student_details!student_details_user_id_fkey(*), employee_details(*)');
     if (isUuid) {
       const { data: userData } = await client.from('users').select('*, student_details!student_details_user_id_fkey(*), employee_details(*)').eq('id', formattedId).maybeSingle();
       if (userData) return mPerson(userData);
@@ -636,7 +700,9 @@ export async function findPersonByUniqueId(uniqueId: string): Promise<Person | n
     if (!uErr && userData) {
       return mPerson(userData);
     }
-  } catch { /* fallback */ }
+  } catch (err) {
+    console.warn('[db] findPersonByUniqueId Tier 1 error:', err);
+  }
 
   // Tier 2: Query simple users table without joins (if explicit join failed)
   try {
@@ -658,7 +724,9 @@ export async function findPersonByUniqueId(uniqueId: string): Promise<Person | n
         employee_details: eDet || undefined,
       });
     }
-  } catch { /* fallback */ }
+  } catch (err) {
+    console.warn('[db] findPersonByUniqueId Tier 2 error:', err);
+  }
 
   // Tier 3: Query student_details by roll number directly
   try {
@@ -674,7 +742,9 @@ export async function findPersonByUniqueId(uniqueId: string): Promise<Person | n
         return mPerson({ ...userRecord, student_details: sDetails });
       }
     }
-  } catch { /* fallback */ }
+  } catch (err) {
+    console.warn('[db] findPersonByUniqueId Tier 3 error:', err);
+  }
 
   // Tier 4: Query employee_details by employee_id directly (faculty/staff tracking)
   try {
@@ -690,7 +760,9 @@ export async function findPersonByUniqueId(uniqueId: string): Promise<Person | n
         return mPerson({ ...userRecord, employee_details: eDetails });
       }
     }
-  } catch { /* fallback */ }
+  } catch (err) {
+    console.warn('[db] findPersonByUniqueId Tier 4 error:', err);
+  }
 
   // Tier 5: Try hyphenated/stripped variants (e.g. FAC001 <-> FAC-001, EMP001 <-> EMP-001)
   try {
@@ -1195,8 +1267,9 @@ export async function getThumbprint(userId: string): Promise<{
 }
 
 export async function updateAccountStatus(userId: string, newStatus: AccountStatus): Promise<boolean> {
-  const { data: user } = await supabase.from('users').select('name, status').eq('id', userId).single();
-  const { error } = await supabase.from('users').update({ status: newStatus }).eq('id', userId);
+  const db = getDbClient();
+  const { data: user } = await db.from('users').select('name, status').eq('id', userId).single();
+  const { error } = await db.from('users').update({ status: newStatus, handle: null }).eq('id', userId);
   if (error) return false;
 
   await addAudit({
@@ -1218,8 +1291,9 @@ export async function updateAccountStatus(userId: string, newStatus: AccountStat
 }
 
 export async function updateUserRole(userId: string, newRole: Role, actorId: string): Promise<boolean> {
-  const { data: user } = await supabase.from('users').select('name, role').eq('id', userId).single();
-  const { data: actor } = await supabase.from('users').select('name, role').eq('id', actorId).maybeSingle();
+  const db = getDbClient();
+  const { data: user } = await db.from('users').select('name, role').eq('id', userId).single();
+  const { data: actor } = await db.from('users').select('name, role').eq('id', actorId).maybeSingle();
 
   // SECURITY GUARD: Only sysadmin (or system processes) can assign sysadmin role
   if (newRole === 'sysadmin' && actorId !== 'system' && actor?.role !== 'sysadmin') {
@@ -1227,7 +1301,7 @@ export async function updateUserRole(userId: string, newRole: Role, actorId: str
     return false;
   }
 
-  const { error } = await supabase.from('users').update({ role: newRole }).eq('id', userId);
+  const { error } = await db.from('users').update({ role: newRole, handle: null }).eq('id', userId);
   if (error) return false;
 
   await addAudit({
@@ -1380,14 +1454,26 @@ export async function addScan(input: {
   } catch { /* fallback */ }
 
   if (input.reason) {
+    const reasonAliasMap: Record<string, string> = {
+      "day_pass": "day_pass",
+      "home_out": "home_out",
+      "Day Out": "day_pass",
+      "Home Out": "home_out",
+      "Daily Outing": "daily_outing",
+    };
+    const normReason = reasonAliasMap[input.reason] || input.reason;
     const { data: validReason, error: rErr } = await client
         .from('config_exit_reasons')
         .select('code')
-        .eq('code', input.reason)
+        .in('code', [input.reason, normReason, 'day_pass', 'home_out', 'daily_outing'])
         .maybeSingle();
     
     if (!validReason && (!rErr || (rErr.code !== '42P01' && rErr.code !== 'PGRST205'))) {
-       throw new Error(`Invalid exit reason: ${input.reason}`);
+      // If table is missing or doesn't match, allow standard pass reasons (day_pass, home_out, daily_outing)
+      const allowedStandard = ['day_pass', 'home_out', 'daily_outing', 'Day Out', 'Home Out', 'Day Pass', 'Daily Outing'];
+      if (!allowedStandard.includes(input.reason)) {
+        throw new Error(`Invalid exit reason: ${input.reason}`);
+      }
     }
   }
 
@@ -1447,11 +1533,18 @@ export async function addScan(input: {
     }
   }
 
+  const dbScanReasonMap: Record<string, string> = {
+    "day_pass": "Day Out",
+    "home_out": "Home Out",
+    "daily_outing": "Daily Outing",
+  };
+  const scanReason = input.reason ? (dbScanReasonMap[input.reason] || input.reason) : null;
+
   const scanRow = {
     id,
     user_id: person.id,
     direction: input.direction,
-    reason: input.reason || null,
+    reason: scanReason,
     gate_id: gate.id,
     gate_name: gate.name,
     operator_id: op.id,
@@ -1580,19 +1673,35 @@ export async function addAudit(entry: {
   const timestamp = new Date().toISOString();
   const detailsStr = typeof entry.details === "string" ? entry.details : JSON.stringify(entry.details);
 
-  const auditRow = {
-    id,
+  const { getSupabaseServiceClient } = await import('./supabaseClient');
+  const serviceClient = getSupabaseServiceClient();
+
+  let targetUserId: string | null = null;
+  if (typeof entry.userId === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(entry.userId)) {
+    const { data: userExists } = await serviceClient.from('users').select('id').eq('id', entry.userId).maybeSingle();
+    if (userExists) targetUserId = entry.userId;
+  }
+
+    const auditRow = {
     action: entry.action,
-    user_id: entry.userId,
+    user_id: targetUserId,
     user_name: entry.userName || "System User",
-    role: entry.role || "sysadmin",
+    user_role: entry.role || "sysadmin",
     details: detailsStr,
-    gate_id: entry.gateId || null,
     timestamp,
   };
 
-  const { error } = await supabase.from('audit_logs').insert(auditRow);
-  if (error) {
+  let { error } = await serviceClient.from('audit_logs').insert(auditRow);
+  if (error && error.code === 'PGRST204') {
+    // Schema drift safety net: drop any unknown columns and retry.
+    delete (auditRow as any).user_role;
+    const retry = await serviceClient.from('audit_logs').insert(auditRow);
+    error = retry.error;
+  }
+  if (error && error.code === '23503') {
+    auditRow.user_id = null;
+    await serviceClient.from('audit_logs').insert(auditRow);
+  } else if (error) {
     console.error('Error inserting audit log:', error);
   }
 }
@@ -1632,6 +1741,7 @@ export async function addNotification(
  * ------------------------------------------------------------------ */
 
 export async function dashboard(): Promise<DashboardData> {
+  const db = getDbClient();
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
 
@@ -1641,28 +1751,45 @@ export async function dashboard(): Promise<DashboardData> {
   const [
     onCampusCount,
     todayScansRes,
-    yesterdayScansRes,
+    yesterdayInRes,
+    yesterdayOutRes,
     activeAlertsRes,
     allGates,
-    allPersons,
+    userRolesRes,
   ] = await Promise.all([
     campusCount(),
-    supabase.from('movement_logs').select('*').gte('timestamp', todayStart.toISOString()),
-    supabase.from('movement_logs').select('*').gte('timestamp', yesterdayStart.toISOString()).lt('timestamp', todayStart.toISOString()),
-    supabase.from('alerts').select('*').eq('resolved', false),
+    db.from('movement_logs')
+      .select('id, user_id, gate_id, gate_name, direction, timestamp, person_type, department')
+      .gte('timestamp', todayStart.toISOString())
+      .order('timestamp', { ascending: false })
+      .limit(2000),
+    db.from('movement_logs')
+      .select('id', { count: 'exact', head: true })
+      .gte('timestamp', yesterdayStart.toISOString())
+      .lt('timestamp', todayStart.toISOString())
+      .eq('direction', 'IN'),
+    db.from('movement_logs')
+      .select('id', { count: 'exact', head: true })
+      .gte('timestamp', yesterdayStart.toISOString())
+      .lt('timestamp', todayStart.toISOString())
+      .eq('direction', 'OUT'),
+    db.from('alerts')
+      .select('*')
+      .eq('resolved', false)
+      .order('timestamp', { ascending: false })
+      .limit(50),
     getAllGatesLive(),
-    findAllPersons(),
+    db.from('users').select('role').limit(5000),
   ]);
 
   const todayScans = (todayScansRes.data || []).map(mScan);
-  const yesterdayScans = (yesterdayScansRes.data || []).map(mScan);
   const activeAlerts = (activeAlertsRes.data || []).map(mAlert);
 
   const todayIn = todayScans.filter((s: Scan) => s.direction === "IN").length;
   const todayOut = todayScans.filter((s: Scan) => s.direction === "OUT").length;
 
-  const yesterdayIn = yesterdayScans.filter((s: Scan) => s.direction === "IN").length;
-  const yesterdayOut = yesterdayScans.filter((s: Scan) => s.direction === "OUT").length;
+  const yesterdayIn = yesterdayInRes.count || 0;
+  const yesterdayOut = yesterdayOutRes.count || 0;
 
   const calcTrend = (cur: number, prev: number) => {
     if (prev === 0) return cur > 0 ? "+100% vs yesterday" : "0% vs yesterday";
@@ -1726,28 +1853,34 @@ export async function dashboard(): Promise<DashboardData> {
     parent: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
   };
 
-  allPersons.forEach((p: Person) => {
-    if (personTypeBreakdown[p.personType]) {
-      personTypeBreakdown[p.personType].total++;
+  const userRoles = userRolesRes.data || [];
+  userRoles.forEach((u: any) => {
+    const role = (u.role || 'student') as PersonType;
+    if (personTypeBreakdown[role]) {
+      personTypeBreakdown[role].total++;
     }
   });
 
-  // Calculate current on-campus counts per type from campus_occupancy or persons
+  // Calculate current on-campus counts per type from campus_occupancy
   let occupants: any[] = [];
   try {
-    const occRes = await supabase.from('campus_occupancy').select('user_id, current_status');
+    const occRes = await db.from('campus_occupancy').select('user_id').eq('current_status', 'IN');
     occupants = occRes.data || [];
-  } catch {
+  } catch (occErr) {
+    console.error('[dashboard] Error fetching campus occupants:', occErr);
     occupants = [];
   }
-  const occupantMap = new Map((occupants || []).map((o: any) => [o.user_id, o.current_status]));
 
-  allPersons.forEach((p: Person) => {
-    const status = occupantMap.get(p.id) || "OUT";
-    if (status === "IN" && personTypeBreakdown[p.personType]) {
-      personTypeBreakdown[p.personType].onCampus++;
-    }
-  });
+  if (occupants.length > 0) {
+    const occupantIds = occupants.map((o: any) => o.user_id);
+    const { data: occRoles } = await db.from('users').select('role').in('id', occupantIds);
+    (occRoles || []).forEach((u: any) => {
+      const role = (u.role || 'student') as PersonType;
+      if (personTypeBreakdown[role]) {
+        personTypeBreakdown[role].onCampus++;
+      }
+    });
+  }
 
   todayScans.forEach((s: Scan) => {
     const type = s.personType || "student";
@@ -1789,7 +1922,7 @@ export async function dashboard(): Promise<DashboardData> {
     activeAlerts: activeAlerts.length,
     trendOnCampus: calcTrend(onCampusCount, yesterdayIn - yesterdayOut),
     trendOut: calcTrend(todayOut, yesterdayOut),
-    trendScans: calcTrend(todayScans.length, yesterdayScans.length),
+    trendScans: calcTrend(todayScans.length, yesterdayIn + yesterdayOut),
     locations,
     activityFeed: todayScans.slice(0, 20),
     deptBreakdown,

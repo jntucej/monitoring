@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { Ticket, Loader2, Clock, CheckCircle2, XCircle } from "lucide-react";
 import type { GatePass } from "@/lib/types";
+import { getPassTypeName } from "@/hooks/usePassTypes";
+import { getAuthHeaders } from "@/lib/utils";
 
 function expiryLabel(to: string, status: string): string {
   if (status === "REJECTED") return "Rejected";
@@ -36,7 +38,10 @@ export function ActivePasses() {
           if (!cancelled) setLoading(false);
           return;
         }
-        const res = await fetch(`/api/passes?roll=${encodeURIComponent(roll)}`, { cache: "no-store" });
+        const res = await fetch(`/api/passes?roll=${encodeURIComponent(roll)}`, { 
+          headers: getAuthHeaders(),
+          cache: "no-store" 
+        });
         const json = await res.json();
         if (!cancelled) {
           setPasses(Array.isArray(json.data) ? json.data : []);
@@ -71,7 +76,7 @@ export function ActivePasses() {
               <div key={pass.id} className={`flex items-center gap-4 p-3 rounded-lg ${s.bg}`}>
                 {s.icon}
                 <div className="flex-1">
-                  <p className={`font-medium ${s.text}`}>{pass.reason}</p>
+                  <p className={`font-medium ${s.text}`}>{getPassTypeName(pass.reason)}</p>
                   <p className={`text-sm ${s.text} opacity-80`}>
                     {expiryLabel(pass.to, pass.finalStatus)}
                   </p>

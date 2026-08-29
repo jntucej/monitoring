@@ -88,11 +88,14 @@ async function handlePost(req: NextRequest) {
   try {
     const body = await req.json().catch(() => null);
     const {
-      name, email, role, status = 'ACTIVE',
-      employeeId, phone, gateId, parentId, supervisedGates,
+      name, role, status = 'ACTIVE',
+      employeeId, uniqueId, phone, gateId, parentId, supervisedGates,
       assignedHostel, isHod, departmentId, canViewGender,
       loginIdentifier, pin, sendInvite = false,
     } = body || {};
+
+    const rawEmail = body?.email;
+    const email = rawEmail || ((uniqueId || employeeId) ? `${(uniqueId || employeeId).trim().toLowerCase()}@jntuhcej.ac.in` : undefined);
 
     if (!name || !email || !role) {
       return NextResponse.json(

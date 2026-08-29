@@ -3,11 +3,13 @@
  * Reuses the repo-standard jose HS256 pattern from mobile-auth.ts.
  */
 import { SignJWT, jwtVerify } from "jose";
+import { getEnv } from "@/lib/env";
 
 const ENROLL_TTL_SECONDS = 10 * 60;
 
 function getSigningKey(): Uint8Array {
-  const secret = process.env.MFA_ENROLL_SECRET || process.env.MOBILE_TOKEN_SECRET;
+  const env = getEnv();
+  const secret = env.mfaEnrollSecret || (env.isProduction ? null : "default_dev_mfa_enroll_secret_must_be_32_chars_long");
   if (!secret || secret.length < 32) {
     throw new Error("MFA_ENROLL_SECRET (or MOBILE_TOKEN_SECRET fallback) must be configured (>= 32 chars)");
   }

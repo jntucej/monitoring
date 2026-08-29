@@ -1,6 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 import { Person } from "@/lib/types";
 import { findPersonByUniqueId } from "@/lib/db";
+import { getEnv } from "@/lib/env";
 
 export interface MobileSession {
   token: string;
@@ -12,14 +13,13 @@ const MOBILE_TOKEN_TTL_SECONDS = 30 * 24 * 60 * 60; // 30 days
 
 /**
  * HMAC signing secret for mobile session tokens.
- * FAILS CLOSED when MOBILE_TOKEN_SECRET is not configured: token generation
- * and validation both throw, so no unsigned/forgeable token is ever accepted.
  */
 function getSigningKey(): Uint8Array {
-  const secret = process.env.MOBILE_TOKEN_SECRET;
+  const env = getEnv();
+  const secret = env.mobileTokenSecret || (env.isProduction ? null : "default_dev_mobile_token_secret_must_be_32_chars_long");
   if (!secret || secret.length < 32) {
     throw new Error(
-      "MOBILE_TOKEN_SECRET is not configured (must be >= 32 chars) — refusing to issue or accept mobile tokens"
+      "MOBILE_TOKEN_SECRET is not configured (must be >= 32 chars) — set MOBILE_TOKEN_SECRET environment variable"
     );
   }
   return new TextEncoder().encode(secret);

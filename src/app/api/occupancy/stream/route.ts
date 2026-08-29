@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { getCurrentOccupancy } from "@/lib/occupancy";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 45; // ponytail: limit lifetime to 45s for serverless execution
 
 export async function GET(req: NextRequest) {
   const encoder = new TextEncoder();
@@ -20,9 +21,16 @@ export async function GET(req: NextRequest) {
       await sendUpdate();
       const interval = setInterval(sendUpdate, 5000);
 
+      // Auto-terminate after 45s so serverless function closes gracefully before timeout
+      const timeout = setTimeout(() => {
+        clearInterval(interval);
+        try { controller.close(); } catch {}
+      }, 45000);
+
       req.signal.addEventListener("abort", () => {
         clearInterval(interval);
-        controller.close();
+        clearTimeout(timeout);
+        try { controller.close(); } catch {}
       });
     },
   });

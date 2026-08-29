@@ -1,20 +1,9 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { getEnv } from './env';
 
-// Supabase configuration
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-
-function validateEnv() {
-  const required = [
-    'NEXT_PUBLIC_SUPABASE_URL',
-    'NEXT_PUBLIC_SUPABASE_ANON_KEY',
-  ];
-  const missing = required.filter((key) => !process.env[key]);
-  if (missing.length && typeof window !== 'undefined') {
-    console.warn(`[SupabaseClient] Warning: Missing environment variables: ${missing.join(', ')}`);
-  }
-}
-validateEnv();
+const env = getEnv();
+const supabaseUrl = env.supabaseUrl;
+const supabaseAnonKey = env.supabaseAnonKey;
 
 // Client for browser-side usage (anonymous access)
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
@@ -29,7 +18,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 let serviceClient: SupabaseClient | null = null
 
 export const getSupabaseServiceClient = (): SupabaseClient => {
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || env.supabaseServiceRoleKey;
   if (!serviceKey) {
     throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY environment variable');
   }
@@ -45,6 +34,7 @@ export const getSupabaseServiceClient = (): SupabaseClient => {
 
   return serviceClient
 }
+
 // Read-replica client for read-heavy operations
 let readReplicaClient: SupabaseClient | null = null;
 
@@ -113,30 +103,34 @@ export const createEphemeralSupabaseClient = (): SupabaseClient =>
     },
   });
 
-// Function to invalidate all user sessions (requires service role).
-// Revokes Supabase Auth sessions (refresh tokens) via the Admin API when token is provided,
-// and records the invalidation through the `invalidate_all_user_sessions` RPC.
+/**
+ * Function to invalidate all user sessions.
+ * 1. Clears the active session token (`handle`) in the users table.
+ * 2. Revokes Supabase Auth session via Admin API if JWT token is provided.
+ */
 export const invalidateAllUserSessions = async (userId: string, jwtToken?: string): Promise<boolean> => {
   try {
-    const serviceClient = getSupabaseServiceClient();
+    const client = getSupabaseServiceClient();
 
-    // If a JWT token was supplied, revoke it via Auth Admin API
+    // 1. Clear active session handle in DB
+    const { error: dbError } = await client
+      .from('users')
+      .update({ handle: null })
+      .eq('id', userId);
+
+    if (dbError) {
+      console.error('Error clearing session handle in users table:', dbError);
+    }
+
+    // 2. Revoke JWT token via Auth Admin API if provided
     if (jwtToken && jwtToken.startsWith("eyJ")) {
-      const { error } = await serviceClient.auth.admin.signOut(jwtToken).catch((e) => ({ error: e }));
-      if (error) {
-        console.warn('Notice invalidating user sessions via signOut (token may be expired):', error.message || error);
+      const { error: signOutErr } = await client.auth.admin.signOut(jwtToken).catch((e) => ({ error: e }));
+      if (signOutErr) {
+        console.warn('Notice revoking session via signOut:', signOutErr.message || signOutErr);
       }
     }
 
-    // Call the database function to log/process the session invalidation
-    const { error: dbError } = await serviceClient
-      .rpc('invalidate_all_user_sessions', { p_user_id: userId });
-
-    if (dbError) {
-      console.error('Error logging session invalidation:', dbError);
-    }
-
-    return true;
+    return !dbError;
   } catch (err) {
     console.error('Error in invalidateAllUserSessions:', err);
     return false;

@@ -75,13 +75,17 @@ export function ExitReasonSelector({ isOpen, selected, onSelect, onCancel, appro
                       <span>{meta.icon}</span>
                       <span>{config.name || config.code}</span>
                     </div>
-                    {passRequired && (
+                    {!passRequired ? (
+                      <span className="text-[8px] font-extrabold px-1 rounded border scale-90 bg-emerald-500/20 text-emerald-300 border-emerald-500/30">
+                        No Pass Needed
+                      </span>
+                    ) : (
                       <span className={`text-[8px] font-extrabold px-1 rounded border scale-90 ${
                         hasApprovedPass 
                           ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" 
                           : "bg-rose-500/20 text-rose-400 border-rose-500/30"
                       }`}>
-                        {hasApprovedPass ? "Pass Active" : "No Pass"}
+                        {hasApprovedPass ? "Pass Active" : "Pass Required"}
                       </span>
                     )}
                   </motion.button>

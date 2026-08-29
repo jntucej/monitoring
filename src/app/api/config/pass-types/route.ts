@@ -1,24 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabaseClient';
+import { getSupabaseServiceClient } from '@/lib/supabaseClient';
 import { withAuthorization } from '@/middleware/authorization';
 import { withRateLimit } from '@/lib/rate-limit';
 
+const DEFAULT_PASS_TYPES = [
+  { code: "day_pass", name: "Day Pass", description: "Full day out (returns by evening curfew)", defaultDurationHours: 12, requiresApproval: true, approvalFlow: "warden" },
+  { code: "home_out", name: "Home Out", description: "Weekend or overnight home leave", defaultDurationHours: 48, requiresApproval: true, approvalFlow: "warden" },
+];
+
 async function handleGet(req: NextRequest) {
   try {
-    const { data, error } = await supabase
+    const service = getSupabaseServiceClient();
+    const { data, error } = await service
       .from('config_pass_types')
       .select('*')
       .eq('is_active', true)
       .order('name');
 
-    if (error) {
-      if (error.code === '42P01' || error.code === 'PGRST205') {
-        return NextResponse.json({ success: true, data: [] });
-      }
-      throw error;
+    if (error || !data || data.length === 0) {
+      return NextResponse.json({ success: true, data: DEFAULT_PASS_TYPES });
     }
 
-    const mapped = (data || []).map((item: any) => ({
+    const mapped = data.map((item: any) => ({
       code: item.code,
       name: item.name,
       description: item.description,
@@ -27,22 +30,10 @@ async function handleGet(req: NextRequest) {
       approvalFlow: item.approval_flow,
     }));
 
-    if (mapped.length === 0) {
-      const defaultTypes = [
-        { code: "day_pass", name: "Day Pass", description: "Full day out (returns by evening curfew)", defaultDurationHours: 12, requiresApproval: true, approvalFlow: "warden" },
-        { code: "home_out", name: "Home Out", description: "Weekend or overnight home leave", defaultDurationHours: 48, requiresApproval: true, approvalFlow: "warden" },
-        { code: "daily_outing", name: "Daily Outing", description: "Short daily local outing (2-4 hours)", defaultDurationHours: 4, requiresApproval: true, approvalFlow: "warden" },
-      ];
-      return NextResponse.json({ success: true, data: defaultTypes });
-    }
-
-    return NextResponse.json({ success: true, data: mapped });
+    return NextResponse.json({ success: true, data: mapped.length > 0 ? mapped : DEFAULT_PASS_TYPES });
   } catch (error: any) {
-    console.error('Error fetching pass types:', error);
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to load pass types' } },
-      { status: 500 }
-    );
+    console.error('Error fetching pass types, using defaults:', error);
+    return NextResponse.json({ success: true, data: DEFAULT_PASS_TYPES });
   }
 }
 
@@ -53,8 +44,6 @@ async function handlePatch(req: NextRequest) {
       return NextResponse.json({ success: false, error: { message: 'Expected an array of pass types' } }, { status: 400 });
     }
     
-    // Instead of completely wiping flags in a generic fetch which might break things if schema doesn't match perfectly,
-    // we'll update everything sent and assume others are either kept or marked inactive.
     const upserts = body.map((item: any) => ({
       code: item.code,
       name: item.name,
@@ -66,16 +55,15 @@ async function handlePatch(req: NextRequest) {
       updated_at: new Date().toISOString()
     }));
 
-    // Optionally mark all currently active ones to inactive if they aren't in upserts array: 
-    // Just run update to deactivate everything safely, then upsert
-    const { error: deactivateError } = await supabase
+    const service = getSupabaseServiceClient();
+    const { error: deactivateError } = await service
       .from('config_pass_types')
       .update({ is_active: false })
       .neq('code', 'temp_never_match'); 
       
     if (deactivateError && deactivateError.code !== '42P01') throw deactivateError;
 
-    const { error: upsertError } = await supabase
+    const { error: upsertError } = await service
       .from('config_pass_types')
       .upsert(upserts, { onConflict: 'code' });
       

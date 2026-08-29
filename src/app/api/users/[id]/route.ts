@@ -93,6 +93,29 @@ export async function PATCH(req: NextRequest) {
       }
     }
 
+    if (isAdmin && body?.pin !== undefined) {
+      if (typeof body.pin !== "string" || !/^\d{4,8}$/.test(body.pin)) {
+        return NextResponse.json({ success: false, error: { code: "INVALID_PIN", message: "PIN must be 4-8 digits" } }, { status: 400 });
+      }
+      const { hashPin } = await import("@/lib/db");
+      const initialPinHash = await hashPin(body.pin);
+      const service = getSupabaseServiceClient();
+      await service.from("users").update({ initial_pin_hash: initialPinHash }).eq("id", id);
+      await addAudit({ action: "USER_PIN_RESET", userId: actorId, userName: "System", role: actorRole as Role, details: `Reset PIN for user ${id}` });
+    }
+
+    if (isAdmin && body?.password !== undefined) {
+      if (typeof body.password !== "string" || body.password.length < 8) {
+        return NextResponse.json({ success: false, error: { code: "INVALID_PASSWORD", message: "Password must be at least 8 characters" } }, { status: 400 });
+      }
+      const service = getSupabaseServiceClient();
+      const { error: pwdErr } = await service.auth.admin.updateUserById(id, { password: body.password });
+      if (pwdErr) {
+        return NextResponse.json({ success: false, error: { code: "UPDATE_FAILED", message: "Failed to reset password: " + pwdErr.message } }, { status: 500 });
+      }
+      await addAudit({ action: "USER_PASSWORD_RESET", userId: actorId, userName: "System", role: actorRole as Role, details: `Reset password for user ${id}` });
+    }
+
     const allowedFields = ["name", "phone", "photoUrl", "photo_url", "avatarUrl", "avatar_url", "notificationPreferences", "notification_preferences"];
     if (isAdmin) {
       allowedFields.push("gateId", "supervisedGates", "assignedHostel", "departmentId");

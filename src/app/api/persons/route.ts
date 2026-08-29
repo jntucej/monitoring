@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { findAllPersons, searchPersons, findPersonByUniqueId, findPersonsByType, getLinkedPersons, mPerson } from "@/lib/db";
-import { supabase } from "@/lib/supabaseClient";
+import { getSupabaseServiceClient } from "@/lib/supabaseClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import type { Person, PersonType } from "@/lib/types";
@@ -144,7 +144,8 @@ async function handlePost(req: NextRequest) {
       status: "ACTIVE",
     };
 
-    const { data: newUser, error } = await supabase.from("users").insert(userRow).select().single();
+    const service = getSupabaseServiceClient();
+    const { data: newUser, error } = await service.from("users").insert(userRow).select().single();
     if (error || !newUser) {
       return NextResponse.json(
         { success: false, error: { code: "DB_ERROR", message: error?.message || "Database insert failed" } },
@@ -153,14 +154,14 @@ async function handlePost(req: NextRequest) {
     }
 
     if (["faculty", "staff", "worker"].includes(personType)) {
-      await supabase.from("employee_details").insert({
+      await service.from("employee_details").insert({
         user_id: id,
         employee_id: uniqueId.trim().toUpperCase(),
         designation: designation || null,
         department_id: department || null,
       });
     } else if (personType === "student") {
-      await supabase.from("student_details").insert({
+      await service.from("student_details").insert({
         user_id: id,
         roll: uniqueId.trim().toUpperCase(),
         department_id: department || null,
@@ -220,7 +221,8 @@ async function handlePatch(req: NextRequest) {
       }
     }
 
-    let query = supabase.from("users").update(userUpdates);
+    const service = getSupabaseServiceClient();
+    let query = service.from("users").update(userUpdates);
     if (id) query = query.eq("id", id);
     else query = query.eq("unique_id", uniqueId);
 
@@ -233,7 +235,7 @@ async function handlePatch(req: NextRequest) {
     }
 
     if (updates.designation !== undefined) {
-      await supabase
+      await service
         .from("employee_details")
         .update({ designation: updates.designation })
         .eq("user_id", updatedUser.id);
@@ -268,7 +270,8 @@ async function handleDelete(req: NextRequest) {
       );
     }
 
-    const { error } = await supabase.from("users").update({ status: "DISABLED" }).eq("id", id);
+    const service = getSupabaseServiceClient();
+    const { error } = await service.from("users").update({ status: "DISABLED" }).eq("id", id);
     if (error) {
       return NextResponse.json(
         { success: false, error: { code: "DB_ERROR", message: error.message } },
