@@ -10,6 +10,7 @@ import { DynamicHeader } from "./DynamicHeader";
 import { NetworkStatusBanner } from "./NetworkStatusBanner";
 import { Sidebar } from "./Sidebar";
 import { GlassDeviceFallback } from "./GlassDeviceFallback";
+import { FloatingOrbs } from "./FloatingOrbs";
 
 interface SafeAreaAppShellProps {
   children: React.ReactNode;
@@ -53,7 +54,10 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
   const showNav = authenticated && !isStandaloneSysadmin;
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] antialiased selection:bg-[var(--action-primary)] selection:text-white">
+    <div className="relative min-h-[100dvh] flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] antialiased selection:bg-[var(--action-primary)] selection:text-white">
+      {/* Ambient Desktop Mouse-Parallax Orbs Layer */}
+      <FloatingOrbs />
+
       {/* Network & Offline Status Bar */}
       <NetworkStatusBanner />
 

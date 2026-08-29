@@ -63,7 +63,15 @@ export function DynamicHeader() {
   };
 
   return (
-    <header className="h-14 sm:h-16 sticky top-0 z-40 px-3 sm:px-6 flex items-center justify-between backdrop-blur-xl bg-[var(--bg-surface)]/80 border-b border-[var(--border)] select-none">
+    <header className="relative h-14 sm:h-16 sticky top-0 z-40 px-3 sm:px-6 flex items-center justify-between bg-transparent border-b border-[var(--border)] select-none">
+      {/* Inner backdrop glass layer for iOS Safari chrome tint optimization */}
+      <div 
+        className="absolute inset-0 -z-10 pointer-events-none backdrop-blur-xl bg-[var(--glass-bg,var(--bg-surface))]"
+        style={{
+          WebkitBackdropFilter: "blur(24px) saturate(200%)",
+          backdropFilter: "blur(24px) saturate(200%)",
+        }}
+      />
       <div className="flex items-center gap-2.5">
         <button
           onClick={toggleMobileSidebar}

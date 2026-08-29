@@ -152,6 +152,7 @@ export default function GateDetailPage() {
           icon={Activity}
           color="#10b981"
           trend="Total throughput"
+          onClick={() => router.push("/admin/reports")}
         />
         <StatCard
           label="Entries (IN)"
@@ -159,6 +160,7 @@ export default function GateDetailPage() {
           icon={CheckCircle2}
           color="#3b82f6"
           trend="Checked in campus"
+          onClick={() => router.push("/admin/attendance")}
         />
         <StatCard
           label="Exits (OUT)"
@@ -166,6 +168,7 @@ export default function GateDetailPage() {
           icon={Clock}
           color="#f59e0b"
           trend="Checked out campus"
+          onClick={() => router.push("/admin/attendance")}
         />
         <StatCard
           label="Peak Activity"
@@ -173,6 +176,7 @@ export default function GateDetailPage() {
           icon={TrendingUp}
           color="#8b5cf6"
           trend="Highest density hour"
+          onClick={() => router.push("/admin/analytics/predictive")}
         />
       </div>
 

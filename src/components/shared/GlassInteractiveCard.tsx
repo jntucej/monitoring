@@ -36,7 +36,19 @@ export function GlassInteractiveCard({
   const isGlossyMotion = useGlossyMotion();
   const { isDark: contextIsDark, performanceTier, displayMode } = useGlass();
 
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  // Mobile Touch Detection (pointer: coarse physical screen check)
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const touch = window.matchMedia("(pointer: coarse)").matches;
+      setIsTouchDevice(touch);
+      setIsMobile(window.innerWidth < 768 && touch);
+    }
+  }, []);
+
   const getTransition = (): Transition => {
     if (isMobile || performanceTier === "legacy") {
       return { duration: 0.2, ease: "easeOut" };
@@ -64,16 +76,6 @@ export function GlassInteractiveCard({
   // Holographic Gloss Position
   const glossX = useTransform(smoothX, [-50, 50], ["30%", "70%"]);
   const glossY = useTransform(smoothY, [-50, 50], ["30%", "70%"]);
-
-  // Mobile Touch Detection
-  const [isTouchDevice, setIsTouchDevice] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setIsTouchDevice("ontouchstart" in window || navigator.maxTouchPoints > 0);
-    }
-  }, []);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (isTouchDevice || shouldReduceMotion || displayMode === "outdoor" || !cardRef.current) return;

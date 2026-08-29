@@ -10,10 +10,18 @@ export function GlassDeviceFallback() {
   const { isTouchDevice, performanceTier, displayMode } = useGlass();
 
   const isGlossy = theme === "glass";
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const supportsBackdrop =
+    typeof window !== "undefined" &&
+    typeof CSS !== "undefined" &&
+    typeof CSS.supports === "function" &&
+    (CSS.supports("backdrop-filter", "blur(1px)") ||
+      CSS.supports("-webkit-backdrop-filter", "blur(1px)"));
+
+  const isTouch = typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches;
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768 && isTouch;
   const isLowFps = performanceTier === "legacy" || performanceTier === "emergency" || performanceTier === "low";
 
-  if (!isGlossy || (!isMobile && !isTouchDevice && !isLowFps)) {
+  if (!isGlossy || (!isMobile && !(isTouchDevice || isTouch) && !isLowFps && supportsBackdrop)) {
     return null;
   }
 

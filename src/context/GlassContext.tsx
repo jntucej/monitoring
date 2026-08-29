@@ -27,6 +27,11 @@ interface GlassState {
   displayMode: DisplayMode;
   setDisplayMode: (mode: DisplayMode) => void;
   toggleDisplayMode: () => void;
+  isLiveStream: boolean;
+  setIsLiveStream: (v: boolean) => void;
+  toggleLiveStream: () => void;
+  isLiveLoading: boolean;
+  triggerLiveRefresh: () => void;
   activeGate: string | null;
   setActiveGate: (id: string | null) => void;
   gateTraffic: number;
@@ -75,6 +80,25 @@ export function GlassProvider({
   const [gateTraffic, setGateTraffic] = useState(35);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [displayMode, setDisplayModeState] = useState<DisplayMode>("indoor");
+
+  // --- LIVE TELEMETRY & SINE WAVE REFRESH STATE ---
+  const [isLiveStream, setIsLiveStream] = useState<boolean>(true);
+  const [isLiveLoading, setIsLiveLoading] = useState<boolean>(false);
+
+  const triggerLiveRefresh = useCallback(() => {
+    setIsLiveLoading(true);
+    setTimeout(() => {
+      setIsLiveLoading(false);
+    }, 2800);
+  }, []);
+
+  const toggleLiveStream = useCallback(() => {
+    setIsLiveStream((prev) => {
+      const next = !prev;
+      if (next) triggerLiveRefresh();
+      return next;
+    });
+  }, [triggerLiveRefresh]);
 
   const [cards, setCards] = useState<GateCardState[]>(INITIAL_CARDS);
   const [wsConnected, setWsConnected] = useState<boolean>(false);
@@ -161,10 +185,18 @@ export function GlassProvider({
     };
   }, []);
 
-  // --- RUNTIME FPS DETECTION ---
-  const [performanceTier, setPerformanceTier] = useState<PerformanceTier>("splusplus");
+  // --- RUNTIME FPS DETECTION & REF-THROTTLED TIER ENGINE ---
+  const [performanceTier, setPerformanceTierState] = useState<PerformanceTier>("splusplus");
+  const performanceTierRef = useRef<PerformanceTier>("splusplus");
   const frameCountRef = useRef(0);
   const lastFpsCheckRef = useRef(typeof performance !== "undefined" ? performance.now() : 0);
+
+  const setPerformanceTier = useCallback((newTier: PerformanceTier) => {
+    if (performanceTierRef.current !== newTier) {
+      performanceTierRef.current = newTier;
+      setPerformanceTierState(newTier);
+    }
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -190,21 +222,19 @@ export function GlassProvider({
   // Mobile-first performance detection: Force legacy tier and outdoor display mode on mobile devices
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const isMobile =
-      window.innerWidth < 768 ||
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isTouch = window.matchMedia("(pointer: coarse)").matches;
+    const isMobile = window.innerWidth < 768 && isTouch;
     if (isMobile) {
       setPerformanceTier("legacy");
       setDisplayModeState("outdoor");
       document.documentElement.setAttribute("data-display-mode", "outdoor");
     }
-  }, []);
+  }, [setPerformanceTier]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const isMobile =
-      window.innerWidth < 768 ||
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isTouch = window.matchMedia("(pointer: coarse)").matches;
+    const isMobile = window.innerWidth < 768 && isTouch;
     if (isMobile) {
       setPerformanceTier("legacy");
       return;
@@ -221,13 +251,17 @@ export function GlassProvider({
       const now = performance.now();
       const delta = now - lastFpsCheckRef.current;
 
-      if (delta >= 1000) {
+      // Sample every 2000ms (2 seconds) to avoid micro-jitter state updates
+      if (delta >= 2000) {
         const fps = Math.round((frameCountRef.current * 1000) / delta);
+        const targetTier: PerformanceTier =
+          fps >= 55 ? "splusplus" : fps >= 30 ? "performance" : fps >= 15 ? "legacy" : "emergency";
 
-        if (fps >= 55) setPerformanceTier("splusplus");
-        else if (fps >= 30) setPerformanceTier("performance");
-        else if (fps >= 15) setPerformanceTier("legacy");
-        else setPerformanceTier("emergency");
+        // ONLY trigger React re-render when tier actually changes
+        if (performanceTierRef.current !== targetTier) {
+          performanceTierRef.current = targetTier;
+          setPerformanceTierState(targetTier);
+        }
 
         frameCountRef.current = 0;
         lastFpsCheckRef.current = now;
@@ -241,13 +275,13 @@ export function GlassProvider({
     return () => {
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
     };
-  }, [prefersReducedMotion]);
+  }, [prefersReducedMotion, setPerformanceTier]);
 
   const isDark = store.theme ? store.theme !== "light" : initialDark;
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setIsTouchDevice("ontouchstart" in window || navigator.maxTouchPoints > 0);
+      setIsTouchDevice(window.matchMedia("(pointer: coarse)").matches);
     }
   }, []);
 
@@ -266,6 +300,11 @@ export function GlassProvider({
         displayMode,
         setDisplayMode,
         toggleDisplayMode,
+        isLiveStream,
+        setIsLiveStream,
+        toggleLiveStream,
+        isLiveLoading,
+        triggerLiveRefresh,
         activeGate,
         setActiveGate,
         gateTraffic,

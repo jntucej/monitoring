@@ -218,7 +218,15 @@ export default function SysadminStandaloneShellLayout({
 
       {/* Main Standalone Workspace */}
       <div className="flex-1 min-w-0 flex flex-col">
-        <header className="h-14 sticky top-0 z-40 flex items-center justify-between px-4 sm:px-6 bg-[var(--bg-surface)]/90 backdrop-blur-xl border-b border-[var(--border)] select-none">
+        <header className="relative h-14 sticky top-0 z-40 flex items-center justify-between px-4 sm:px-6 bg-transparent border-b border-[var(--border)] select-none">
+          {/* Inner backdrop glass layer for iOS Safari chrome tint optimization */}
+          <div 
+            className="absolute inset-0 -z-10 pointer-events-none backdrop-blur-xl bg-[var(--glass-bg,var(--bg-surface))]"
+            style={{
+              WebkitBackdropFilter: "blur(24px) saturate(200%)",
+              backdropFilter: "blur(24px) saturate(200%)",
+            }}
+          />
           <div className="flex items-center gap-2">
             <button
               onClick={() => setDrawerOpen(true)}

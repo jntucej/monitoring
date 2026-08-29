@@ -61,7 +61,11 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
     <div className="space-y-6">
       {/* 6 KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-1">
+        <div
+          onClick={() => { setSelectedStatus("ALL"); setSelectedDept("ALL"); }}
+          className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] hover:border-indigo-500/40 cursor-pointer transition-all space-y-1 group shadow-sm"
+          title="Click to show all faculty records"
+        >
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--text-muted)]">
             <Users className="w-3.5 h-3.5 text-blue-400" />
             Total Faculty
@@ -69,10 +73,14 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
           <div className="text-2xl font-black text-[var(--text-primary)]">
             <CountUp value={summary.totalFaculty} />
           </div>
-          <p className="text-[10px] text-[var(--text-muted)]">Across {departmentSummaries.length} departments</p>
+          <p className="text-[10px] text-[var(--text-muted)] truncate">Across {departmentSummaries.length} departments</p>
         </div>
 
-        <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-1">
+        <div
+          onClick={() => setSelectedStatus("INSIDE")}
+          className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] hover:border-emerald-500/40 cursor-pointer transition-all space-y-1 group shadow-sm"
+          title="Click to filter present faculty"
+        >
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--text-muted)]">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
             Present Today
@@ -83,7 +91,11 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
           <p className="text-[10px] text-[var(--text-muted)]">{summary.overallAttendanceRate}% attendance rate</p>
         </div>
 
-        <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-1">
+        <div
+          onClick={() => setSelectedStatus("INSIDE")}
+          className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] hover:border-indigo-500/40 cursor-pointer transition-all space-y-1 group shadow-sm"
+          title="Click to filter faculty inside campus"
+        >
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--text-muted)]">
             <Building2 className="w-3.5 h-3.5 text-indigo-400" />
             Currently Inside
@@ -94,7 +106,11 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
           <p className="text-[10px] text-[var(--text-muted)]">Active on campus</p>
         </div>
 
-        <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-1">
+        <div
+          onClick={() => setSelectedStatus("OUTSIDE")}
+          className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] hover:border-amber-500/40 cursor-pointer transition-all space-y-1 group shadow-sm"
+          title="Click to filter faculty currently outside"
+        >
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--text-muted)]">
             <ArrowRightLeft className="w-3.5 h-3.5 text-amber-400" />
             Currently Outside
@@ -105,7 +121,11 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
           <p className="text-[10px] text-[var(--text-muted)]">Punched out / Off site</p>
         </div>
 
-        <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-1">
+        <div
+          onClick={() => setSelectedStatus("LATE")}
+          className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] hover:border-rose-500/40 cursor-pointer transition-all space-y-1 group shadow-sm"
+          title="Click to filter late arrivals"
+        >
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--text-muted)]">
             <Clock className="w-3.5 h-3.5 text-rose-400" />
             Late Check-ins

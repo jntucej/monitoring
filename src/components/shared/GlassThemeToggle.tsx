@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Sun, Moon, Sparkles, SunMedium, MessageSquare } from "lucide-react";
+import { Sun, Moon, Sparkles, Radio, MessageSquare } from "lucide-react";
 import { useUIStore } from "@/stores/uiStore";
 import { useGlass } from "@/context/GlassContext";
 import { useState, useEffect } from "react";
@@ -16,7 +16,7 @@ export interface GlassThemeToggleProps {
 
 export function GlassThemeToggle({ className = "" }: GlassThemeToggleProps) {
   const store = useUIStore();
-  const { displayMode, toggleDisplayMode } = useGlass();
+  const { isLiveStream, toggleLiveStream, triggerLiveRefresh } = useGlass();
   const currentTheme = store.theme || "dark";
   const [showFeedback, setShowFeedback] = useState(false);
   const [lastTheme, setLastTheme] = useState<string | null>(null);
@@ -43,7 +43,7 @@ export function GlassThemeToggle({ className = "" }: GlassThemeToggleProps) {
 
   const themes = [
     { id: "dark", icon: Moon, label: "Dark" },
-    { id: "glass", icon: Sparkles, label: "Glass" },
+    { id: "glass", icon: Sparkles, label: "Glossy Liquid" },
     { id: "light", icon: Sun, label: "Light" },
   ];
 
@@ -83,17 +83,24 @@ export function GlassThemeToggle({ className = "" }: GlassThemeToggleProps) {
           })}
         </div>
 
-        {/* Outdoor Mode Toggle Pill */}
+        {/* Live Data Telemetry Refresh Toggle Pill */}
         <button
-          onClick={toggleDisplayMode}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-semibold uppercase tracking-wider transition-colors border hidden sm:flex ${
-            displayMode === "outdoor"
-              ? "bg-amber-500/10 text-amber-500 border-amber-500/30 ring-1 ring-amber-500/50"
-              : "bg-[var(--bg-elevated)] text-[var(--text-muted)] border-[var(--border)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)]"
+          onClick={() => {
+            toggleLiveStream();
+            triggerLiveRefresh();
+          }}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-semibold uppercase tracking-wider transition-all border hidden sm:flex cursor-pointer ${
+            isLiveStream
+              ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.25)] hover:bg-emerald-500/25"
+              : "bg-[var(--bg-elevated)] text-[var(--text-muted)] border-[var(--border)] hover:text-[var(--text-primary)]"
           }`}
+          title="Toggle Real-Time Live Data Telemetry (Click to trigger sine wave loading & metric refresh)"
         >
-          <SunMedium className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-          <span className="hidden lg:inline">Outdoor</span>
+          <Radio className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${isLiveStream ? "animate-pulse text-emerald-400" : ""}`} />
+          <span className="hidden lg:inline">{isLiveStream ? "Live Data" : "Paused"}</span>
+          {isLiveStream && (
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+          )}
         </button>
 
         {/* Feedback / Report Option */}
