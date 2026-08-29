@@ -54,7 +54,7 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
   const showNav = authenticated && !isStandaloneSysadmin;
 
   return (
-    <div className="relative h-[100dvh] min-h-[100dvh] flex flex-col overflow-hidden bg-[var(--bg-base)] text-[var(--text-primary)] antialiased selection:bg-[var(--action-primary)] selection:text-white">
+    <div className="relative min-h-[100dvh] flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] antialiased selection:bg-[var(--action-primary)] selection:text-white">
       {/* Ambient Desktop Mouse-Parallax Orbs Layer */}
       <FloatingOrbs />
 
@@ -74,11 +74,11 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
           {showNav && <DynamicHeader />}
 
           <main
-            className={`overscroll-contain -webkit-overflow-scrolling-touch ${
+            className={
               isStandaloneSysadmin
-                ? "flex-1 overflow-y-auto w-full h-full"
-                : "flex-1 p-3 sm:p-5 md:p-6 pb-24 lg:pb-6 overflow-y-auto max-w-7xl mx-auto w-full"
-            }`}
+                ? "flex-1 w-full"
+                : "flex-1 p-3 sm:p-5 md:p-6 pb-24 lg:pb-6 max-w-7xl mx-auto w-full"
+            }
           >
             <GlassDeviceFallback />
             <AnimatePresence mode="wait">
@@ -88,7 +88,7 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.12, ease: "easeOut" }}
-                className="w-full min-h-full flex flex-col"
+                className="w-full flex flex-col"
               >
                 {children}
               </motion.div>

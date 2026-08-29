@@ -154,7 +154,7 @@ export default function SysadminStandaloneShellLayout({
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
-    <div className="h-[100dvh] min-h-[100dvh] w-full flex overflow-hidden bg-[var(--bg-base)] text-[var(--text-primary)]">
+    <div className="min-h-[100dvh] w-full flex flex-col md:flex-row bg-[var(--bg-base)] text-[var(--text-primary)]">
       {/* Standalone SysAdmin Sidebar */}
       <aside className="hidden md:flex flex-col w-64 shrink-0 border-r border-[var(--border)] bg-[var(--bg-surface)]">
         <div className="p-5 border-b border-[var(--border)]">
@@ -252,7 +252,7 @@ export default function SysadminStandaloneShellLayout({
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto -webkit-overflow-scrolling-touch p-4 sm:p-6 pb-24 md:pb-6">{children}</main>
+        <main className="flex-1 p-4 sm:p-6 pb-24 md:pb-6">{children}</main>
       </div>
     </div>
   );
