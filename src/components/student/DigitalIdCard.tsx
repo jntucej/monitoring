@@ -77,22 +77,22 @@ export function DigitalIdCard() {
   const photoSrc = student.photo || "/avatar-placeholder.png";
 
   return (
-    <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-8 flex flex-col items-center">
+    <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-4 sm:p-8 flex flex-col items-center">
       {/* Student Photo */}
-      <div className="relative w-32 h-32 rounded-full mb-4 border-4 border-sky-500 overflow-hidden">
+      <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full mb-4 border-4 border-sky-500 overflow-hidden">
         <img src={photoSrc} alt={student.name} className="rounded-full w-full h-full object-cover" />
       </div>
 
       {/* Basic Info */}
-      <h2 className="text-2xl font-bold">{student.name}</h2>
-      <p className="text-[var(--text-secondary)] font-mono text-lg">{student.roll}</p>
+      <h2 className="text-xl sm:text-2xl font-bold text-center">{student.name}</h2>
+      <p className="text-[var(--text-secondary)] font-mono text-base sm:text-lg">{student.roll}</p>
 
       {decoded && (
         <div className="mt-3 px-4 py-2 bg-[var(--bg-base)]/50 rounded-lg text-center">
-          <p className="text-sm font-medium text-[var(--text-primary)]">
+          <p className="text-xs sm:text-sm font-medium text-[var(--text-primary)]">
             {decoded.departmentFullName}
           </p>
-          <p className="text-xs text-[var(--text-muted)]">
+          <p className="text-[10px] sm:text-xs text-[var(--text-muted)]">
             {decoded.entryMode} • Batch {decoded.admissionYear}
           </p>
         </div>
@@ -101,28 +101,28 @@ export function DigitalIdCard() {
       {/* Roll Number Breakdown */}
       <div className="mt-6 w-full max-w-sm">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-medium text-[var(--text-muted)] uppercase">Roll Number Breakdown</span>
+          <span className="text-[10px] sm:text-xs font-medium text-[var(--text-muted)] uppercase">Roll Number Breakdown</span>
         </div>
         <div className="grid grid-cols-5 gap-px bg-[var(--border)] rounded-lg overflow-hidden">
-          <div className="bg-[var(--bg-base)] p-2 text-center">
-            <div className="text-xs text-[var(--text-muted)]">Year</div>
-            <div className="font-mono text-sm font-medium text-[var(--text-primary)]">{decoded?.yearCode ?? "—"}</div>
+          <div className="bg-[var(--bg-base)] p-1.5 sm:p-2 text-center">
+            <div className="text-[9px] sm:text-xs text-[var(--text-muted)]">Year</div>
+            <div className="font-mono text-xs sm:text-sm font-medium text-[var(--text-primary)]">{decoded?.yearCode ?? "—"}</div>
           </div>
-          <div className="bg-[var(--bg-base)] p-2 text-center">
-            <div className="text-xs text-[var(--text-muted)]">College</div>
-            <div className="font-mono text-sm font-medium text-[var(--text-primary)]">{decoded?.collegeCode ?? "—"}</div>
+          <div className="bg-[var(--bg-base)] p-1.5 sm:p-2 text-center">
+            <div className="text-[9px] sm:text-xs text-[var(--text-muted)]">College</div>
+            <div className="font-mono text-xs sm:text-sm font-medium text-[var(--text-primary)]">{decoded?.collegeCode ?? "—"}</div>
           </div>
-          <div className="bg-[var(--bg-base)] p-2 text-center">
-            <div className="text-xs text-[var(--text-muted)]">Entry</div>
-            <div className="font-mono text-sm font-medium text-[var(--text-primary)]">{decoded?.entryModeCode ?? "—"}</div>
+          <div className="bg-[var(--bg-base)] p-1.5 sm:p-2 text-center">
+            <div className="text-[9px] sm:text-xs text-[var(--text-muted)]">Entry</div>
+            <div className="font-mono text-xs sm:text-sm font-medium text-[var(--text-primary)]">{decoded?.entryModeCode ?? "—"}</div>
           </div>
-          <div className="bg-[var(--bg-base)] p-2 text-center">
-            <div className="text-xs text-[var(--text-muted)]">Dept</div>
-            <div className="font-mono text-sm font-medium text-[var(--text-primary)]">{decoded?.departmentCode ?? "—"}</div>
+          <div className="bg-[var(--bg-base)] p-1.5 sm:p-2 text-center">
+            <div className="text-[9px] sm:text-xs text-[var(--text-muted)]">Dept</div>
+            <div className="font-mono text-xs sm:text-sm font-medium text-[var(--text-primary)]">{decoded?.departmentCode ?? "—"}</div>
           </div>
-          <div className="bg-[var(--bg-base)] p-2 text-center">
-            <div className="text-xs text-[var(--text-muted)]">Serial</div>
-            <div className="font-mono text-sm font-medium text-[var(--text-primary)]">{decoded?.serial ?? "—"}</div>
+          <div className="bg-[var(--bg-base)] p-1.5 sm:p-2 text-center">
+            <div className="text-[9px] sm:text-xs text-[var(--text-muted)]">Serial</div>
+            <div className="font-mono text-xs sm:text-sm font-medium text-[var(--text-primary)]">{decoded?.serial ?? "—"}</div>
           </div>
         </div>
       </div>

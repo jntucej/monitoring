@@ -41,7 +41,7 @@ export function RecentScans({ scans, onSelect }: RecentScansProps) {
         </div>
 
         {/* Live Filter Stream Tabs */}
-        <div className="flex items-center gap-1 bg-[var(--bg-elevated)] p-1 rounded-xl border border-[var(--border)] self-start sm:self-auto">
+        <div className="flex items-center gap-1 bg-[var(--bg-elevated)] p-1 rounded-xl border border-[var(--border)] self-start sm:self-auto overflow-x-auto max-w-full no-scrollbar">
           {(["ALL", "IN", "OUT", "FLAGGED"] as FilterTab[]).map((tab) => {
             const isActive = filter === tab;
             return (

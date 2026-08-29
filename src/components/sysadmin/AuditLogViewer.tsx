@@ -103,7 +103,7 @@ export function AuditLogViewer() {
           <div className="p-8 text-center text-sm text-[var(--text-muted)]">No audit records found.</div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+            <table className="w-full text-left text-sm min-w-[750px]">
               <thead className="bg-[var(--bg-elevated)] text-xs text-[var(--text-muted)] uppercase font-semibold border-b border-[var(--border)]">
                 <tr>
                   <th className="py-2.5 px-4">Timestamp</th>

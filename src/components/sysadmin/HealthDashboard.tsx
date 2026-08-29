@@ -248,7 +248,7 @@ export function HealthDashboard() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs min-w-[650px]">
               <thead>
                 <tr className="border-b border-[var(--border)] text-[var(--text-muted)]">
                   <th className="pb-2">Severity</th>

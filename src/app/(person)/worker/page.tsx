@@ -123,7 +123,7 @@ export default function WorkerDashboard() {
         </h2>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse min-w-[650px]">
             <thead>
               <tr className="border-b border-[var(--border)] text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">
                 <th className="pb-3 px-2">Date & Time</th>

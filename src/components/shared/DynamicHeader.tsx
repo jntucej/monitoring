@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { Menu, Bell, ShieldCheck, LogOut, Wifi, WifiOff, RefreshCw } from "lucide-react";
 import { useUIStore } from "@/stores/uiStore";
@@ -32,6 +32,21 @@ export function DynamicHeader() {
   const { wsConnected } = useGlass();
   const [tapCount, setTapCount] = useState(0);
   const tapTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [isOnline, setIsOnline] = useState(true);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsOnline(navigator.onLine);
+      const handleOn = () => setIsOnline(true);
+      const handleOff = () => setIsOnline(false);
+      window.addEventListener("online", handleOn);
+      window.addEventListener("offline", handleOff);
+      return () => {
+        window.removeEventListener("online", handleOn);
+        window.removeEventListener("offline", handleOff);
+      };
+    }
+  }, []);
 
   const title = PAGE_TITLES[pathname] || `${college?.shortName || "College"} Gate Monitor`;
 
@@ -63,7 +78,7 @@ export function DynamicHeader() {
   };
 
   return (
-    <header className="relative h-14 sm:h-16 sticky top-0 z-40 px-3 sm:px-6 flex items-center justify-between bg-transparent border-b border-[var(--border)] select-none">
+    <header className="relative h-14 sm:h-16 sticky top-0 z-40 px-2 sm:px-6 flex items-center justify-between gap-2 bg-transparent border-b border-[var(--border)] select-none">
       {/* Inner backdrop glass layer for iOS Safari chrome tint optimization */}
       <div 
         className="absolute inset-0 -z-10 pointer-events-none backdrop-blur-xl bg-[var(--glass-bg,var(--bg-surface))]"
@@ -72,42 +87,60 @@ export function DynamicHeader() {
           backdropFilter: "blur(24px) saturate(200%)",
         }}
       />
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0 flex-1">
         <button
           onClick={toggleMobileSidebar}
-          className="lg:hidden p-2 -ml-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] rounded-xl transition-all active:scale-95"
+          className="md:hidden p-1.5 -ml-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] rounded-xl transition-all active:scale-95 shrink-0"
           aria-label="Toggle Navigation Menu"
         >
           <Menu className="w-5 h-5" />
         </button>
-        <div className="min-w-0">
-          <h1 className="text-xs sm:text-base font-bold text-[var(--text-primary)] leading-snug tracking-tight truncate max-w-[130px] xs:max-w-[180px] sm:max-w-none">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-xs sm:text-base font-bold text-[var(--text-primary)] leading-snug tracking-tight truncate">
             {title}
           </h1>
-          <p className="text-[10px] text-[var(--text-muted)] hidden sm:block">
-            {college?.shortName ? `${college.shortName}` : "College"}
-          </p>
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5 sm:gap-3">
+      <div className="flex items-center gap-1 sm:gap-2.5 shrink-0">
+        {/* Network Status Dot / Badge */}
+        <div 
+          className="network-status px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] sm:text-[11px] font-semibold flex items-center gap-1 sm:gap-1.5 backdrop-blur-md"
+          title={isOnline ? "Network Status: Online" : "Network Status: Offline"}
+        >
+          {isOnline ? (
+            <>
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+              <span className="hidden md:inline">Online</span>
+            </>
+          ) : (
+            <>
+              <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" />
+              <span className="text-rose-400 hidden md:inline">Offline</span>
+            </>
+          )}
+        </div>
+
         {/* WebSocket Connection Reconnecting Indicator */}
         {!wsConnected && (
-          <div className="px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[11px] font-semibold flex items-center gap-1.5 backdrop-blur-md animate-pulse">
-            <RefreshCw className="w-3 h-3 animate-spin" />
-            <span className="hidden xs:inline">Reconnecting WS…</span>
+          <div 
+            className="px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] sm:text-[11px] font-semibold flex items-center gap-1 sm:gap-1.5 backdrop-blur-md animate-pulse"
+            title="Reconnecting WebSocket..."
+          >
+            <RefreshCw className="w-3 h-3 animate-spin shrink-0" />
+            <span className="hidden md:inline">Reconnecting WS…</span>
           </div>
         )}
 
         {/* Hidden Triple Tap Logout Trigger Target */}
         <div
           onClick={handleSecretTripleTap}
-          className="p-1 rounded-lg cursor-pointer hover:bg-[var(--bg-elevated)] transition-colors text-[var(--text-muted)]"
-          title="Security Badge (Triple-tap to logout)"
+          className="p-0.5 sm:p-1 rounded-lg cursor-pointer hover:bg-[var(--bg-elevated)] transition-colors text-[var(--text-muted)]"
+          title={`Role Badge: ${role || "Secured"} (Triple-tap to logout)`}
         >
-          <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-[var(--action-primary)]/10 text-[var(--action-primary)] border border-[var(--action-primary)]/20 text-[11px] font-semibold">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline capitalize">{role || "Secured"}</span>
+          <div className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full bg-[var(--action-primary)]/10 text-[var(--action-primary)] border border-[var(--action-primary)]/20 text-[10px] sm:text-[11px] font-semibold">
+            <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+            <span className="hidden md:inline capitalize">{role || "Secured"}</span>
           </div>
         </div>
 
@@ -115,8 +148,11 @@ export function DynamicHeader() {
         <GlassThemeToggle showCard={false} />
 
         {/* Quick User Avatar */}
-        <div className="flex items-center gap-2 pl-1 border-l border-[var(--border)]">
-          <div className="w-7 h-7 rounded-full bg-[var(--action-primary)]/20 text-[var(--action-primary)] flex items-center justify-center text-xs font-bold ring-1 ring-[var(--action-primary)]/30">
+        <div className="flex items-center gap-2 pl-1 border-l border-[var(--border)] shrink-0">
+          <div 
+            className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[var(--action-primary)]/20 text-[var(--action-primary)] flex items-center justify-center text-[10px] sm:text-xs font-bold ring-1 ring-[var(--action-primary)]/30"
+            title={user?.name || role || "User"}
+          >
             {user?.name ? user.name.charAt(0).toUpperCase() : (role?.charAt(0).toUpperCase() || "U")}
           </div>
         </div>

@@ -19,10 +19,20 @@ function isItemActive(pathname: string | null, href: string): boolean {
   if (!pathname) return false;
   if (href === pathname) return true;
   if (href.includes("?")) {
-    const [basePath] = href.split("?");
-    if (pathname === basePath) return true;
+    const [basePath, query] = href.split("?");
+    if (pathname !== basePath) return false;
+    if (typeof window !== "undefined") {
+      const currentQuery = window.location.search;
+      const hrefParam = new URLSearchParams(query).get("tab");
+      const currentParam = new URLSearchParams(currentQuery).get("tab");
+      return hrefParam === currentParam;
+    }
+    return true;
   }
   if (href !== "/" && href.length > 2 && pathname.startsWith(href) && !href.includes("?")) {
+    if (typeof window !== "undefined" && window.location.search.includes("tab=")) {
+      return false;
+    }
     return true;
   }
   return false;
@@ -70,7 +80,7 @@ function DesktopSidebar({
   return (
     <aside
       aria-label="Primary navigation"
-      className={`hidden md:flex fixed inset-y-0 left-0 z-30 flex-col bg-[var(--bg-surface)]/95 backdrop-blur-xl border-r border-[var(--border)] select-none transition-all duration-300 ${
+      className={`hidden md:flex fixed inset-y-0 left-0 z-30 flex-col bg-[var(--bg-surface)]/95 backdrop-blur-xl border-r border-[var(--border)] select-none transition-all duration-300 glass-nav-rail ${
         isSidebarCollapsed ? "w-16" : "w-64"
       }`}
     >
@@ -225,14 +235,14 @@ function MobileDrawer({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={toggleMobileSidebar}
-            className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+            className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
           />
           <motion.aside
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="lg:hidden fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] flex flex-col bg-[var(--bg-surface)] border-r border-[var(--border)] shadow-2xl"
+            className="md:hidden fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] flex flex-col bg-[var(--bg-surface)] border-r border-[var(--border)] shadow-2xl"
             role="dialog"
             aria-modal="true"
             aria-label="Mobile navigation menu"
@@ -337,24 +347,26 @@ interface MobileBottomBarProps {
 
 function MobileBottomBar({ toggleMobileSidebar, bottomTabs, pathname }: MobileBottomBarProps) {
   return (
-    <div
-      className="flex md:hidden sticky bottom-0 left-0 right-0 z-40 bg-[var(--bg-surface)]/90 backdrop-blur-xl border-t border-[var(--border)] pb-safe select-none"
+    <nav
+      aria-label="Mobile navigation bar"
+      className="glass-nav-dock fixed bottom-0 inset-x-0 z-40 flex md:hidden bg-[var(--bg-surface)]/95 backdrop-blur-xl border-t border-[var(--border)] pb-safe select-none shadow-2xl"
       style={{ willChange: "transform" }}
     >
-      <div className="w-full flex items-center justify-around h-16 px-1 overflow-x-auto no-scrollbar flex-nowrap gap-1">
+      <div className="w-full max-w-md mx-auto grid grid-cols-5 h-14 items-center px-1">
         {/* Menu Button to trigger drawer */}
         <button
           type="button"
           onClick={toggleMobileSidebar}
-          className="flex flex-col items-center justify-center h-full min-w-[64px] flex-1 py-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] active:scale-95 transition-all min-h-[44px] shrink-0"
+          className="flex flex-col items-center justify-center h-full w-full py-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] active-tap transition-all min-h-[44px]"
           aria-label="Open Navigation Drawer"
+          title="Navigation Menu"
         >
-          <Menu className="w-5 h-5 mb-1" />
-          <span className="text-[10px] font-semibold">Menu</span>
+          <Menu className="w-5 h-5 shrink-0" />
+          <span className="w-1.5 h-1.5 rounded-full mt-1 bg-transparent" />
         </button>
 
         {/* Dynamic tabs */}
-        {bottomTabs.map((item) => {
+        {bottomTabs.slice(0, 4).map((item) => {
           const active = isItemActive(pathname, item.href);
           const Icon = (item.icon && iconMap[item.icon]) || Icons.HelpCircle;
 
@@ -362,24 +374,24 @@ function MobileBottomBar({ toggleMobileSidebar, bottomTabs, pathname }: MobileBo
             <Link
               key={item.href}
               href={item.href}
-              className={`relative flex flex-col items-center justify-center h-full min-w-[64px] flex-1 py-1 transition-all min-h-[44px] shrink-0 ${
+              title={item.label}
+              className={`relative flex flex-col items-center justify-center h-full w-full py-1 active-tap transition-all min-h-[44px] ${
                 active
-                  ? "text-[var(--action-primary)] font-semibold"
+                  ? "text-[var(--action-primary)] font-bold"
                   : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               }`}
             >
-              <Icon className="w-5 h-5 mb-1 shrink-0" />
-              <span className="text-[10px] sm:text-xs whitespace-nowrap truncate max-w-[72px] text-center font-medium">{item.label}</span>
+              <Icon className={`w-5 h-5 shrink-0 transition-transform ${active ? "scale-110" : ""}`} />
               <span
-                className={`absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full transition-all ${
-                  active ? "bg-[var(--action-primary)] opacity-100 scale-100" : "opacity-0 scale-0"
+                className={`w-1.5 h-1.5 rounded-full mt-1 transition-all ${
+                  active ? "bg-[var(--action-primary)] opacity-100 scale-100 shadow-[0_0_6px_var(--action-primary)]" : "opacity-0 scale-0"
                 }`}
               />
             </Link>
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 }
 

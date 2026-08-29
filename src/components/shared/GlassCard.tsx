@@ -226,7 +226,7 @@ export function GlassCard({
       {/* Content Z-lift Layer with High Contrast Typography */}
       <div style={{ transform: can3D ? "translateZ(20px)" : "none", transformStyle: can3D ? "preserve-3d" : "flat" }} className="relative z-10">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-lg font-bold tracking-tight text-slate-50 dark:text-white">
+          <h3 className="text-lg font-bold tracking-tight text-[var(--text-primary)]">
             <WordByWordText text={title} />
           </h3>
           <span className={cn("text-xs font-mono px-2.5 py-1 rounded-full border font-semibold", current.bg, current.textCol, current.border)}>

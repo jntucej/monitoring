@@ -123,7 +123,7 @@ export default function AlertRulesPage() {
           <CardContent>
             {loading ? <div className="py-6 text-center text-xs">Loading rules...</div> : rules.length === 0 ? <div className="py-6 text-center text-xs">No alert rules created yet.</div> : (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left">
+                <table className="w-full text-sm text-left min-w-[650px]">
                   <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-600">
                     <tr>
                       <th className="p-3">Name</th>

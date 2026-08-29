@@ -53,10 +53,13 @@ export const useUIStore = create<UIState & UIActions>()(
         if (typeof window !== "undefined") {
           document.documentElement.setAttribute("data-theme", theme);
           document.documentElement.classList.remove("dark", "light", "glass");
-          if (theme === "dark" || theme === "glass") {
+          if (theme === "dark") {
             document.documentElement.classList.add("dark");
+          } else if (theme === "glass") {
+            document.documentElement.classList.add("glass");
+          } else if (theme === "light") {
+            document.documentElement.classList.add("light");
           }
-          document.documentElement.classList.add(theme);
           localStorage.setItem("gate-monitor-theme", theme);
         }
         set({ theme });

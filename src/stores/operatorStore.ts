@@ -262,7 +262,7 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
     const uniqueId = currentStudent.uniqueId || currentStudent.roll || "";
     const operatorId = useAuthStore.getState().user?.id || "op-1";
 
-    // Async execution with GPS geolocation & sysTag telemetry
+    // Async execution with GPS geolocation & sysTag telemetry with strict 5s timeout
     (async () => {
       const geo = await getClientLocation();
       const sysTag = getClientSysTag();
@@ -273,24 +273,49 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
       if (token) headers["Authorization"] = `Bearer ${token}`;
       if (sessionToken) headers["X-Session-Token"] = sessionToken;
 
-      return fetch("/api/gate/scan", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          roll: uniqueId,
-          direction: directionToUse,
-          reason: reasonToUse || (directionToUse === "OUT" ? "Regular" : undefined),
-          gateId: get().gate?.id || "gate-1",
-          operatorId,
-          isManual: false,
-          sysTag,
-          geo,
-        }),
-      });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      try {
+        const res = await fetch("/api/gate/scan", {
+          method: "POST",
+          headers,
+          signal: controller.signal,
+          body: JSON.stringify({
+            roll: uniqueId,
+            direction: directionToUse,
+            reason: reasonToUse || (directionToUse === "OUT" ? "Regular" : undefined),
+            gateId: get().gate?.id || get().gateId || useAuthStore.getState().user?.gateId || "gate-1",
+            operatorId,
+            isManual: false,
+            sysTag,
+            geo,
+          }),
+        });
+        clearTimeout(timeoutId);
+        return res;
+      } catch (e: any) {
+        clearTimeout(timeoutId);
+        if (e.name === "AbortError") {
+          throw new Error("Scan request timed out (5s). Network connection may be slow.");
+        }
+        throw e;
+      }
     })()
       .then(async (res) => {
-        const result = await res.json();
-        // Handle session expiry — log out and redirect to login instead of showing "verification denied"
+        const result = await res.json().catch(() => null);
+        if (res.status === 409) {
+          playAudioFeedback("warning");
+          addToast({
+            variant: "error",
+            title: "Duplicate Scan",
+            message: `Duplicate scan detected. Same student scanned recently.`,
+          });
+          set({ state: "error", error: { message: "Duplicate scan detected", code: "DUPLICATE" } });
+          return null;
+        }
+
+        // Handle session expiry — log out and redirect to login
         if (res.status === 401 && result?.error?.code === "SESSION_EXPIRED") {
           const authStore = useAuthStore.getState();
           authStore.logout();
@@ -310,7 +335,7 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
             title: "Duplicate Scan",
             message: `This student was already scanned ${directionToUse === "OUT" ? "out" : "in"} recently.`,
           });
-          set({ error: { message: "Duplicate scan detected", code: "DUPLICATE" } });
+          set({ state: "error", error: { message: "Duplicate scan detected", code: "DUPLICATE" } });
           return;
         }
 
@@ -424,7 +449,7 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
     }
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(gateId);
     const normalizedGateId = !isUuid && /^\d+$/.test(gateId) ? `gate-${gateId}` : gateId;
-    const gate = await findGateById(normalizedGateId);
+    const gate = (await findGateById(normalizedGateId)) || (await findGateById(gateId));
     set({ gate: gate ?? null, gateId: gate?.id ?? normalizedGateId });
   },
 }));

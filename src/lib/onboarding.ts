@@ -13,7 +13,7 @@ export interface OnboardingStep {
 const ROLE_STEPS: Record<string, OnboardingStep[]> = {
   operator: [
     { id: "op_scan_overview", title: "Gate Scanner Overview", description: "Learn how to use camera and manual scan modes.", targetPath: "/gate/[gateId]", role: "operator" },
-    { id: "op_offline_mode", title: "Offline Queueing", description: "Understand how scans queue when offline and auto-sync.", targetPath: "/gate/[gateId]", role: "operator" },
+    { id: "op_online_resilience", title: "Network Resilience & Health Check", description: "Understand real-time server health, retry buttons, and online status.", targetPath: "/gate/[gateId]", role: "operator" },
   ],
   admin: [
     { id: "adm_dashboard", title: "Executive Dashboard", description: "Monitor real-time campus occupancy and gate metrics.", targetPath: "/admin/dashboard", role: "admin" },

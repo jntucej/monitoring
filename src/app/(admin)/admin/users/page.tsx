@@ -147,7 +147,7 @@ export default function AdminUsersPage() {
           <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-4">
             <h3 className="font-semibold text-sm mb-4 text-[var(--text-primary)]">Year-wise Branch Density (Headcount Matrix)</h3>
             <div className="overflow-x-auto">
-              <table className="w-full text-xs text-center border-collapse">
+              <table className="w-full text-xs text-center border-collapse min-w-[650px]">
                 <thead>
                   <tr className="text-[var(--text-muted)] border-b border-[var(--border)]">
                     <th className="p-2 text-left w-1/4 uppercase tracking-wider font-semibold text-[10px]">Branch / Department</th>

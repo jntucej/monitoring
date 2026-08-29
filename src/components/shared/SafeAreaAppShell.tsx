@@ -83,11 +83,11 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
             <GlassDeviceFallback />
             <AnimatePresence mode="wait">
               <motion.div
-                key={`${pathname || "page"}-${theme}`}
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                key={pathname || "page"}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.12, ease: "easeOut" }}
                 className="w-full h-full flex flex-col"
               >
                 {children}

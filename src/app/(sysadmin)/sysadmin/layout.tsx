@@ -218,7 +218,7 @@ export default function SysadminStandaloneShellLayout({
 
       {/* Main Standalone Workspace */}
       <div className="flex-1 min-w-0 flex flex-col">
-        <header className="relative h-14 sticky top-0 z-40 flex items-center justify-between px-4 sm:px-6 bg-transparent border-b border-[var(--border)] select-none">
+        <header className="relative h-14 sticky top-0 z-40 flex items-center justify-between gap-2 px-3 sm:px-6 bg-transparent border-b border-[var(--border)] select-none">
           {/* Inner backdrop glass layer for iOS Safari chrome tint optimization */}
           <div 
             className="absolute inset-0 -z-10 pointer-events-none backdrop-blur-xl bg-[var(--glass-bg,var(--bg-surface))]"
@@ -227,24 +227,24 @@ export default function SysadminStandaloneShellLayout({
               backdropFilter: "blur(24px) saturate(200%)",
             }}
           />
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             <button
               onClick={() => setDrawerOpen(true)}
-              className="md:hidden p-2 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+              className="md:hidden p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] shrink-0"
               aria-label="Open navigation menu"
             >
               <Menu className="w-5 h-5" />
             </button>
-            <p className="text-sm font-bold tracking-tight">🔐 System Administration Console</p>
+            <p className="text-xs sm:text-sm font-bold tracking-tight truncate">🔐 System Administration Console</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <GlassThemeToggle showCard={false} />
-            <span className="hidden sm:inline-flex items-center gap-1 px-2 py-1 rounded-full bg-rose-600/10 text-rose-400 border border-rose-500/30 text-[10px] font-bold uppercase">
+            <span className="hidden md:inline-flex items-center gap-1 px-2 py-1 rounded-full bg-rose-600/10 text-rose-400 border border-rose-500/30 text-[10px] font-bold uppercase shrink-0">
               <ShieldCheck className="w-3 h-3" /> Elevated Security
             </span>
             <button
               onClick={logout}
-              className="md:hidden p-2 rounded-lg text-[var(--text-muted)] hover:text-rose-400 hover:bg-rose-500/10"
+              className="md:hidden p-1.5 rounded-lg text-[var(--text-muted)] hover:text-rose-400 hover:bg-rose-500/10 shrink-0"
               title="Sign Out"
             >
               <LogOut className="w-4 h-4" />
@@ -252,7 +252,7 @@ export default function SysadminStandaloneShellLayout({
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 pb-20 md:pb-6">{children}</main>
       </div>
     </div>
   );

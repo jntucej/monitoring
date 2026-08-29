@@ -122,7 +122,7 @@ export function WorkerShiftTracker({ shifts, summary }: WorkerShiftTrackerProps)
 
         <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse min-w-[650px]">
               <thead>
                 <tr className="border-b border-[var(--border)] text-[11px] font-bold text-muted-foreground uppercase tracking-wider bg-[var(--bg-elevated)]/50">
                   <th className="py-3 px-4">Worker</th>

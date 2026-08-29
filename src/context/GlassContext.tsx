@@ -277,7 +277,7 @@ export function GlassProvider({
     };
   }, [prefersReducedMotion, setPerformanceTier]);
 
-  const isDark = store.theme ? store.theme !== "light" : initialDark;
+  const isDark = store.theme ? store.theme === "dark" : initialDark;
 
   useEffect(() => {
     if (typeof window !== "undefined") {

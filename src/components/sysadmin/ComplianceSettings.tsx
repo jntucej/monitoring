@@ -115,7 +115,7 @@ export function ComplianceSettings() {
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
+            <table className="w-full text-sm text-left min-w-[650px]">
               <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-600">
                 <tr><th className="p-3">Data Category</th><th className="p-3">Retention Window</th><th className="p-3">Auto Sweep</th><th className="p-3 text-right">Actions</th></tr>
               </thead>

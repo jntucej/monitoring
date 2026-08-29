@@ -134,7 +134,7 @@ export default function HodConsolePage() {
         {/* Table */}
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs min-w-[650px]">
               <thead className="bg-[var(--bg-base)] text-[var(--text-muted)] font-semibold border-b border-[var(--border)] uppercase">
                 <tr>
                   <th className="p-3.5">Faculty Member</th>

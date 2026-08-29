@@ -17,7 +17,7 @@ function seedAuth(page: Page) {
       version: 0,
     };
     try {
-      localStorage.setItem("gate-monitor-auth", JSON.stringify(payload));
+      sessionStorage.setItem("gate-monitor-auth", JSON.stringify(payload));
     } catch (e) {
       /* ignore */
     }
@@ -27,10 +27,28 @@ function seedAuth(page: Page) {
 test.describe("Glass responsive navigation", () => {
   test("mobile shows bottom dock, desktop shows left rail", async ({ page }) => {
     await seedAuth(page);
+    // Mock the session endpoint so the fake token passes validation and
+    // the page stays on /admin instead of being hard-redirected to /login.
+    await page.route("**/api/auth/session", (route) => {
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          success: true,
+          data: {
+            token: "fake-token-for-layout-test",
+            refreshToken: null,
+            user: { id: "u1", name: "Test Admin", role: "admin", employeeId: "ADM1", gateId: "1" },
+          },
+        }),
+      });
+    });
 
     // Mobile viewport (iPhone-ish) — expect the dock, not the rail.
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/admin");
+    // Wait for the bottom dock to render before measuring.
+    await page.locator(".glass-nav-dock").waitFor({ state: "attached", timeout: 10000 });
     await page.waitForTimeout(800);
 
     const dockMobile = await page
@@ -50,6 +68,7 @@ test.describe("Glass responsive navigation", () => {
     // Desktop viewport — expect the rail, not the dock.
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/admin");
+    await page.locator(".glass-nav-rail").waitFor({ state: "attached", timeout: 10000 });
     await page.waitForTimeout(800);
 
     const railDesktop = await page
@@ -81,9 +100,24 @@ test.describe("Glass responsive navigation", () => {
 
   test("nav items present in both dock and rail", async ({ page }) => {
     await seedAuth(page);
+    await page.route("**/api/auth/session", (route) => {
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          success: true,
+          data: {
+            token: "fake-token-for-layout-test",
+            refreshToken: null,
+            user: { id: "u1", name: "Test Admin", role: "admin", employeeId: "ADM1", gateId: "1" },
+          },
+        }),
+      });
+    });
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/admin");
+    await page.locator(".glass-nav-dock").waitFor({ state: "attached", timeout: 10000 });
     await page.waitForTimeout(800);
-    await expect(page.locator(".glass-nav-dock button")).toHaveCount(4);
+    await expect(page.locator(".glass-nav-dock a")).toHaveCount(4);
   });
 });

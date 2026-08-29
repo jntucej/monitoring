@@ -24,7 +24,7 @@ export function GlassThemeToggle({ className = "" }: GlassThemeToggleProps) {
   // Sync initial state defensively
   useEffect(() => {
     setLastTheme(currentTheme);
-  }, []);
+  }, [currentTheme]);
 
   const handleThemeChange = (newTheme: "dark" | "light" | "glass") => {
     if (typeof document !== "undefined") {
@@ -43,18 +43,18 @@ export function GlassThemeToggle({ className = "" }: GlassThemeToggleProps) {
 
   const themes = [
     { id: "dark", icon: Moon, label: "Dark" },
-    { id: "glass", icon: Sparkles, label: "Glossy Liquid" },
+    { id: "glass", icon: Sparkles, label: "Glossy" },
     { id: "light", icon: Sun, label: "Light" },
   ];
 
   return (
     <>
-      <div className={`flex flex-row gap-2 items-center ${className}`}>
+      <div className={`flex flex-row items-center gap-1.5 sm:gap-2 ${className}`}>
         {/* Segmented Control Track */}
         <div
           role="radiogroup"
           aria-label="Theme selection"
-          className="flex items-center p-1 rounded-full bg-[var(--bg-elevated)] border border-[var(--border)] shadow-inner relative"
+          className="flex items-center p-0.5 sm:p-1 rounded-full bg-[var(--bg-elevated)] border border-[var(--border)] shadow-inner relative shrink-0"
         >
           {themes.map((t) => {
             const isActive = currentTheme === t.id;
@@ -65,7 +65,7 @@ export function GlassThemeToggle({ className = "" }: GlassThemeToggleProps) {
                 role="radio"
                 aria-checked={isActive}
                 onClick={() => handleThemeChange(t.id as any)}
-                className={`relative flex items-center justify-center w-10 h-10 min-w-[44px] min-h-[44px] rounded-full transition-colors z-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] ${
+                className={`relative flex items-center justify-center w-7 h-7 sm:w-9 sm:h-9 rounded-full transition-colors z-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] ${
                   isActive ? "text-[var(--text-primary)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                 }`}
                 aria-label={`Switch to ${t.label} theme`}
@@ -77,19 +77,19 @@ export function GlassThemeToggle({ className = "" }: GlassThemeToggleProps) {
                     transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
                   />
                 )}
-                <Icon className="w-4 h-4 sm:w-4 sm:h-4 relative z-20" />
+                <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 relative z-20" />
               </button>
             );
           })}
         </div>
 
-        {/* Live Data Telemetry Refresh Toggle Pill */}
+        {/* Live Data Telemetry Refresh Toggle Pill - Visible on all screen sizes */}
         <button
           onClick={() => {
             toggleLiveStream();
             triggerLiveRefresh();
           }}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-semibold uppercase tracking-wider transition-all border hidden sm:flex cursor-pointer ${
+          className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold uppercase tracking-wider transition-all border cursor-pointer shrink-0 ${
             isLiveStream
               ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.25)] hover:bg-emerald-500/25"
               : "bg-[var(--bg-elevated)] text-[var(--text-muted)] border-[var(--border)] hover:text-[var(--text-primary)]"
@@ -97,7 +97,7 @@ export function GlassThemeToggle({ className = "" }: GlassThemeToggleProps) {
           title="Toggle Real-Time Live Data Telemetry (Click to trigger sine wave loading & metric refresh)"
         >
           <Radio className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${isLiveStream ? "animate-pulse text-emerald-400" : ""}`} />
-          <span className="hidden lg:inline">{isLiveStream ? "Live Data" : "Paused"}</span>
+          <span className="hidden md:inline">{isLiveStream ? "Live Data" : "Paused"}</span>
           {isLiveStream && (
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
           )}
@@ -107,9 +107,9 @@ export function GlassThemeToggle({ className = "" }: GlassThemeToggleProps) {
         <button
           onClick={() => setShowFeedback(true)}
           title="Report Theme Issue"
-          className="p-1.5 rounded-full text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors active:scale-95"
+          className="p-1 sm:p-1.5 rounded-full text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors active:scale-95 shrink-0 hidden xs:flex items-center justify-center"
         >
-          <MessageSquare className="w-4 h-4 sm:w-4 sm:h-4" />
+          <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
         </button>
       </div>
 

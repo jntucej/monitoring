@@ -546,7 +546,8 @@ export async function getAllGatesLive(): Promise<Gate[]> {
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
 
-  const { data: persistentGates } = await supabase.from('gates').select('*');
+  const client = getDbClient();
+  const { data: persistentGates } = await client.from('gates').select('*');
   const gateMap = new Map<string, Gate>();
 
   if (persistentGates) {
@@ -856,6 +857,8 @@ export async function checkOutVisitor(personId: string): Promise<boolean> {
  * ------------------------------------------------------------------ */
 
 export async function findGateById(id: string): Promise<Gate | null> {
+  if (!id) return null;
+
   if (typeof window !== "undefined") {
     try {
       const authStore = (await import("@/stores/authStore")).useAuthStore.getState();
@@ -868,7 +871,7 @@ export async function findGateById(id: string): Promise<Gate | null> {
       const res = await fetch("/api/gates", { headers });
       if (res.ok) {
         const result = await res.json();
-        if (result.success && Array.isArray(result.data)) {
+        if (result.success && Array.isArray(result.data) && result.data.length > 0) {
           const query = id.toLowerCase();
           const match = result.data.find((g: any) => {
             const gId = g.id?.toLowerCase();
@@ -877,18 +880,16 @@ export async function findGateById(id: string): Promise<Gate | null> {
             return gId === query ||
                    code === query ||
                    name === query ||
-                   (query === "1" || query === "gate-1" ? (code === "gate-01" || code === "main") : false) ||
-                   (query === "2" || query === "gate-2" ? (code === "gate-02" || code === "hostel") : false) ||
-                   (query === "3" || query === "gate-3" ? (code === "gate-03" || code === "back") : false);
+                   (query === "1" || query === "gate-1" ? (code === "gate-01" || code === "main" || code === "gate-1" || code === "1") : false) ||
+                   (query === "2" || query === "gate-2" ? (code === "gate-02" || code === "hostel" || code === "gate-2" || code === "2") : false) ||
+                   (query === "3" || query === "gate-3" ? (code === "gate-03" || code === "back" || code === "gate-3" || code === "3") : false);
           });
           if (match) {
             return { id: match.id, name: match.name, location: match.location, type: match.type, isActive: !!match.is_active };
           }
-          if (id === "1" || id === "gate-1") {
-            const first = result.data[0];
-            if (first) {
-              return { id: first.id, name: first.name, location: first.location, type: first.type, isActive: !!first.is_active };
-            }
+          const first = result.data[0];
+          if (first) {
+            return { id: first.id, name: first.name, location: first.location, type: first.type, isActive: !!first.is_active };
           }
         }
       }
@@ -897,15 +898,17 @@ export async function findGateById(id: string): Promise<Gate | null> {
     }
   }
 
+  const client = getDbClient();
+
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
   if (isUuid) {
-    const { data, error } = await supabase.from('gates').select('*').eq('id', id).single();
+    const { data, error } = await client.from('gates').select('*').eq('id', id).maybeSingle();
     if (!error && data) {
       return { id: data.id, name: data.name, location: data.location, type: data.type, isActive: !!data.is_active };
     }
   }
 
-  const { data: allData } = await supabase.from('gates').select('*');
+  const { data: allData } = await client.from('gates').select('*');
   if (allData && allData.length > 0) {
     const query = id.toLowerCase();
     const match = allData.find(g => {
@@ -915,9 +918,9 @@ export async function findGateById(id: string): Promise<Gate | null> {
       return gId === query ||
              code === query ||
              name === query ||
-             (query === "1" || query === "gate-1" ? (code === "gate-01" || code === "main") : false) ||
-             (query === "2" || query === "gate-2" ? (code === "gate-02" || code === "hostel") : false) ||
-             (query === "3" || query === "gate-3" ? (code === "gate-03" || code === "back") : false);
+             (query === "1" || query === "gate-1" ? (code === "gate-01" || code === "main" || code === "gate-1" || code === "1") : false) ||
+             (query === "2" || query === "gate-2" ? (code === "gate-02" || code === "hostel" || code === "gate-2" || code === "2") : false) ||
+             (query === "3" || query === "gate-3" ? (code === "gate-03" || code === "back" || code === "gate-3" || code === "3") : false);
     });
     if (match) {
       return { id: match.id, name: match.name, location: match.location, type: match.type, isActive: !!match.is_active };
@@ -925,8 +928,7 @@ export async function findGateById(id: string): Promise<Gate | null> {
     return { id: allData[0].id, name: allData[0].name, location: allData[0].location, type: allData[0].type, isActive: !!allData[0].is_active };
   }
 
-  const query = id.toLowerCase();
-  return null;
+  return { id: id || "gate-1", name: "Main Gate", location: "Main Entrance", type: "main", isActive: true };
 }
 
 export async function findAllGates(): Promise<Gate[]> {
@@ -957,7 +959,8 @@ export async function findAllGates(): Promise<Gate[]> {
     }
   }
 
-  const { data, error } = await supabase.from('gates').select('*');
+  const client = getDbClient();
+  const { data, error } = await client.from('gates').select('*');
   if (error || !data) return [];
   return data.map(g => ({ id: g.id, name: g.name, location: g.location, type: g.type, isActive: !!g.is_active }));
 }
@@ -1321,8 +1324,8 @@ export async function campusCount(): Promise<number> {
   return count;
 }
 
-export async function isDuplicate(uniqueId: string, direction: ScanDirection, min = 5): Promise<boolean> {
-  const cutoff = new Date(Date.now() - min * 60000).toISOString();
+export async function isDuplicate(uniqueId: string, direction: ScanDirection, windowSeconds = 5): Promise<boolean> {
+  const cutoff = new Date(Date.now() - windowSeconds * 1000).toISOString();
   const formattedId = uniqueId.trim().toUpperCase();
 
   // Use service client to bypass RLS

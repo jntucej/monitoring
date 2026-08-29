@@ -102,7 +102,7 @@ export function ActiveSessions() {
           <div className="py-12 text-center text-xs text-[var(--text-muted)]">No active sessions detected.</div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs min-w-[650px]">
               <thead>
                 <tr className="border-b border-[var(--border)] text-[var(--text-muted)] bg-[var(--bg-elevated)]/40">
                   <th className="p-4">User</th>

@@ -8,8 +8,10 @@ import type { ScanDirection, ExitReason } from "@/lib/types"
 import { logAuditEvent } from "@/lib/audit"
 
 interface ScanBody {
-  roll: string
-  direction: ScanDirection
+  roll?: string
+  personId?: string
+  direction?: ScanDirection
+  scanType?: string
   reason?: ExitReason
   gateId: string
   operatorId?: string
@@ -61,13 +63,23 @@ async function handlePost(req: NextRequest) {
     const body: ScanBody = await req.json()
     const authOperatorId = req.headers.get("x-user-id")
     const authRole = req.headers.get("x-user-role")
-    const { roll, direction, reason, gateId, isManual } = body
+
+    const roll = body.roll || body.personId;
+    const rawDir = body.direction || body.scanType;
+    let direction: ScanDirection = "IN";
+    if (rawDir) {
+      const u = String(rawDir).toUpperCase();
+      if (u === "ENTRY" || u === "IN") direction = "IN";
+      else if (u === "EXIT" || u === "OUT") direction = "OUT";
+    }
+
+    const { reason, gateId, isManual } = body
     const clientEventId = body.clientEventId || body.local_id || body.id
 
     // Use authenticated operator ID from request context (prevent operator forgery)
     const operatorId = authOperatorId || body.operatorId
 
-    if (!roll || !direction || !gateId || !operatorId) {
+    if (!roll || !gateId || !operatorId) {
       return NextResponse.json(
         { success: false, error: { code: "BAD_REQUEST", message: "Missing required fields" } },
         { status: 400 }
@@ -103,11 +115,11 @@ async function handlePost(req: NextRequest) {
       }
     }
 
-    const duplicate = await isDuplicate(roll, direction)
+    const duplicate = await isDuplicate(roll, direction, 5)
     if (duplicate) {
       return NextResponse.json(
-        { success: true, duplicate: true, message: "Duplicate scan detected" },
-        { status: 200 }
+        { success: false, duplicate: true, error: "Duplicate scan detected", message: "Duplicate scan detected" },
+        { status: 409 }
       )
     }
 

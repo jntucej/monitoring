@@ -135,4 +135,52 @@ test.describe('Gate Monitor Operator & Workflow E2E Tests', () => {
     await expect(page.locator('text=Person with ID 24JJ1A0599 not found')).toBeVisible({ timeout: 8000 });
   });
 
+  test('Network resilience: Operator sees error and can retry on network failure', async ({ page }) => {
+    // Intercept scan POST endpoint and simulate network failure
+    await page.route('**/api/gate/scan', route => route.abort('connectionrefused'));
+
+    await page.click('button:has-text("Manual Enter")');
+    await page.fill('input[placeholder="e.g. 24JJ1A0501"]', '24JJ1A0501');
+    await page.click('button:has-text("Verify Roll Number")');
+    await expect(page.locator('text=Identity Verified')).toBeVisible({ timeout: 5000 });
+
+    const confirmButton = page.getByRole('button', { name: 'Entry', exact: true });
+    await confirmButton.click();
+
+    // UI displays Network Error state with Retry button
+    await expect(page.locator('.scan-error')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('#retry-btn')).toBeVisible();
+
+    // Restore network response
+    await page.unroute('**/api/gate/scan');
+    await page.route('**/api/gate/scan', route => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ success: true, scan: { id: 's-1', roll: '24JJ1A0501', direction: 'IN' } }),
+    }));
+
+    await page.click('#retry-btn');
+    await expect(page.locator('.scan-success')).toBeVisible({ timeout: 5000 });
+  });
+
+  test('Idempotency: Server rejects duplicate scan requests within short window', async ({ page }) => {
+    // Trigger two rapid scans for same student
+    await page.evaluate(() => {
+      (window as any).__handleQRScannedForTesting('24JJ1A0501');
+    });
+    await expect(page.locator('text=Identity Verified')).toBeVisible({ timeout: 5000 });
+
+    // Mock server 409 Conflict response for duplicate request
+    await page.route('**/api/gate/scan', route => route.fulfill({
+      status: 409,
+      contentType: 'application/json',
+      body: JSON.stringify({ success: false, duplicate: true, error: 'Duplicate scan detected' }),
+    }));
+
+    const confirmButton = page.getByRole('button', { name: 'Entry', exact: true });
+    await confirmButton.click();
+
+    await expect(page.locator('.scan-error')).toContainText('Duplicate scan detected');
+  });
+
 });
