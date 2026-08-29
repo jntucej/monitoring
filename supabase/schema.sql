@@ -682,9 +682,48 @@ RETURNS TRIGGER LANGUAGE plpgsql SET search_path = public
 AS $$ BEGIN
   NEW.updated_at = NOW(); RETURN NEW;
 END; $$;
+
+-- Automatic Auth User Sync Trigger (creates public.users profile when auth.users is created)
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+BEGIN
+  INSERT INTO public.users (
+    id,
+    unique_id,
+    name,
+    email,
+    role,
+    status,
+    auth_provider,
+    created_at,
+    updated_at
+  )
+  VALUES (
+    NEW.id,
+    COALESCE(NEW.raw_user_meta_data->>'unique_id', NEW.email),
+    COALESCE(NEW.raw_user_meta_data->>'name', SPLIT_PART(NEW.email, '@', 1)),
+    NEW.email,
+    COALESCE(NEW.raw_user_meta_data->>'role', 'student'),
+    'ACTIVE',
+    'email',
+    NOW(),
+    NOW()
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    email = EXCLUDED.email,
+    updated_at = NOW();
+
+  RETURN NEW;
+END; $$;
+
 -- ============================================================================
 -- SECTION 5: TRIGGERS
 -- ============================================================================
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
 CREATE TRIGGER trg_occupancy_on_movement
   AFTER INSERT ON movement_logs FOR EACH ROW EXECUTE FUNCTION update_campus_occupancy_on_movement();
 CREATE TRIGGER trg_daily_stats_on_movement
