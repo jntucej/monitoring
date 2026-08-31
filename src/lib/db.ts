@@ -9,7 +9,10 @@ export function getDbClient() {
   if (typeof window === 'undefined') {
     try {
       return getSupabaseServiceClient();
-    } catch {
+    } catch (e) {
+      // Loud, not silent: a missing service key on the server means RLS will
+      // silently swallow every write/read. Surface it in server logs.
+      console.error('[db] getDbClient: SUPABASE_SERVICE_ROLE_KEY missing — falling back to anon client. Server-side writes WILL be blocked by RLS. Set the env var in .env.local / Vercel.', e);
       return browserClient;
     }
   }
@@ -28,8 +31,9 @@ export function sanitizePostgrestParam(val: string | null | undefined): string {
 }
 
 export async function resolveAlert(alertId: string, userId: string): Promise<boolean> {
-  const { data: user } = await supabase.from('users').select('name').eq('id', userId).single();
-  const { error } = await supabase
+  const db = getDbClient();
+  const { data: user } = await db.from('users').select('name').eq('id', userId).single();
+  const { error } = await db
     .from('alerts')
     .update({
       resolved: true,
@@ -606,26 +610,53 @@ export async function correctScan(
 }
 
 export async function getAllGatesLive(): Promise<Gate[]> {
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-
   const client = getDbClient();
   const { data: persistentGates } = await client.from('gates').select('*');
-  const gateMap = new Map<string, Gate>();
+  if (!persistentGates || persistentGates.length === 0) return [];
 
-  if (persistentGates) {
-    for (const g of persistentGates) {
-      gateMap.set(g.id, {
-        id: g.id,
-        name: g.name,
-        location: g.location,
-        type: g.type,
-        isActive: !!g.is_active,
-      });
+  // Fetch online operators (status ACTIVE and session handle IS NOT NULL)
+  const { data: onlineOperators } = await client
+    .from('users')
+    .select('id, gate_id, supervised_gates, role')
+    .eq('status', 'ACTIVE')
+    .not('handle', 'is', null)
+    .in('role', ['operator', 'admin', 'sysadmin']);
+
+  // Fetch recent scans (within last 15 minutes)
+  const fifteenMinsAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+  const { data: recentScans } = await client
+    .from('movement_logs')
+    .select('gate_id')
+    .gte('timestamp', fifteenMinsAgo);
+
+  const activeGateIdsFromScans = new Set((recentScans || []).map((s: any) => s.gate_id));
+  const activeGateIdsFromOperators = new Set<string>();
+
+  if (onlineOperators) {
+    for (const op of onlineOperators) {
+      if (op.gate_id) activeGateIdsFromOperators.add(op.gate_id);
+      if (Array.isArray(op.supervised_gates)) {
+        for (const sg of op.supervised_gates) activeGateIdsFromOperators.add(sg);
+      }
     }
   }
 
-  return Array.from(gateMap.values());
+  return persistentGates.map((g: any) => {
+    const isConfiguredActive = g.is_active !== false;
+    const hasOnlineOperator = activeGateIdsFromOperators.has(g.id);
+    const hasRecentScan = activeGateIdsFromScans.has(g.id);
+
+    // Gate is ONLINE only if it is configured active AND has an online operator or recent scan activity
+    const isOnline = isConfiguredActive && (hasOnlineOperator || hasRecentScan);
+
+    return {
+      id: g.id,
+      name: g.name,
+      location: g.location,
+      type: g.type,
+      isActive: isOnline,
+    };
+  });
 }
 
 export async function getAlerts(resolved?: boolean): Promise<Alert[]> {
@@ -804,19 +835,40 @@ export async function findByQr(payload: string): Promise<Person | null> {
 }
 
 export async function findAllPersons(type?: PersonType): Promise<Person[]> {
-  let query = supabase.from('users').select('*, student_details!student_details_user_id_fkey(*), employee_details(*)');
+  const db = getDbClient();
+
+  // ponytail: two plain queries + JS merge avoids PostgREST embed ambiguity
+  // (student_details has 2 FKs to users: user_id + guardian_id), which makes
+  // embedded selects fail depending on constraint naming.
+  let query = db.from('users').select('*');
   if (type) {
     query = query.eq('role', type);
   }
-
   const { data, error } = await query;
-  if (error || !data) {
-    // Try without joins
-    const { data: fallbackData } = await supabase.from('users').select('*');
-    return (fallbackData || []).map(mPerson);
-  }
 
-  return data.map(mPerson);
+  if (error || !data) {
+    console.error('findAllPersons users query error:', error);
+    return [];
+  }
+  if (data.length === 0) return [];
+
+  // Fetch auxiliary details for these users and merge
+  const ids = data.map((u: any) => u.id);
+  const [studentRows, employeeRows] = await Promise.all([
+    db.from('student_details').select('*').in('user_id', ids),
+    db.from('employee_details').select('*').in('user_id', ids),
+  ]);
+
+  const studentMap = new Map((studentRows.data || []).map((s: any) => [s.user_id, s]));
+  const employeeMap = new Map((employeeRows.data || []).map((e: any) => [e.user_id, e]));
+
+  return data.map((u: any) =>
+    mPerson({
+      ...u,
+      student_details: studentMap.get(u.id),
+      employee_details: employeeMap.get(u.id),
+    })
+  );
 }
 
 export const findAllStudents = () => findAllPersons('student');
@@ -828,7 +880,8 @@ export async function findPersonsByType(type: PersonType): Promise<Person[]> {
 export async function searchPersons(q: string, type?: PersonType): Promise<Person[]> {
   const safeQ = sanitizePostgrestParam(q);
   const searchTerm = `%${safeQ.toLowerCase()}%`;
-  let query = supabase.from('users').select('*, student_details!student_details_user_id_fkey(*), employee_details(*)');
+  const db = getDbClient();
+  let query = db.from('users').select('*');
 
   if (type) {
     query = query.eq('role', type);
@@ -838,10 +891,27 @@ export async function searchPersons(q: string, type?: PersonType): Promise<Perso
 
   const { data, error } = await query;
   if (error || !data) {
+    console.error('searchPersons query error:', error);
     return [];
   }
+  if (data.length === 0) return [];
 
-  return data.map(mPerson);
+  const ids = data.map((u: any) => u.id);
+  const [studentRows, employeeRows] = await Promise.all([
+    db.from('student_details').select('*').in('user_id', ids),
+    db.from('employee_details').select('*').in('user_id', ids),
+  ]);
+
+  const studentMap = new Map((studentRows.data || []).map((s: any) => [s.user_id, s]));
+  const employeeMap = new Map((employeeRows.data || []).map((e: any) => [e.user_id, e]));
+
+  return data.map((u: any) =>
+    mPerson({
+      ...u,
+      student_details: studentMap.get(u.id),
+      employee_details: employeeMap.get(u.id),
+    })
+  );
 }
 
 export const searchStudents = (q: string) => searchPersons(q, 'student');
@@ -1017,13 +1087,7 @@ export async function findAllGates(): Promise<Gate[]> {
       if (res.ok) {
         const result = await res.json();
         if (result.success && Array.isArray(result.data)) {
-          return result.data.map((g: any) => ({
-            id: g.id,
-            name: g.name,
-            location: g.location,
-            type: g.type,
-            isActive: !!g.is_active
-          }));
+          return result.data;
         }
       }
     } catch (err) {
@@ -1031,18 +1095,11 @@ export async function findAllGates(): Promise<Gate[]> {
     }
   }
 
-  const client = getDbClient();
-  const { data, error } = await client.from('gates').select('*');
-  if (error || !data) return [];
-  return data.map(g => ({ id: g.id, name: g.name, location: g.location, type: g.type, isActive: !!g.is_active }));
+  return getAllGatesLive();
 }
 
 export async function findAllUsers(): Promise<User[]> {
-  let client = supabase;
-  try {
-    const { getSupabaseServiceClient } = await import('./supabaseClient');
-    client = getSupabaseServiceClient();
-  } catch { /* fallback to default client */ }
+  const client = getDbClient();
   const { data, error } = await client.from('users').select('*, employee_details(*)');
   if (error || !data) return [];
   return data.map(mUser);
@@ -1073,10 +1130,14 @@ export async function createUser(userData: {
   status?: AccountStatus;
   loginIdentifier?: string;
   initialPinHash?: string;
+  hostelRoom?: string;
+  isHosteller?: boolean;
+  uniqueId?: string;
 }): Promise<User | null> {
-  const uniqueId = userData.employeeId || userData.loginIdentifier || userData.email || userData.id;
+  const db = getDbClient();
+  const uniqueId = userData.uniqueId || userData.employeeId || userData.loginIdentifier || userData.email || userData.id;
 
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from('users')
     .insert({
       id: userData.id,
@@ -1087,7 +1148,7 @@ export async function createUser(userData: {
       phone: userData.phone || null,
       gate_id: userData.gateId || null,
       supervised_gates: userData.supervisedGates || null,
-      assigned_hostel: userData.assignedHostel || null,
+      assigned_hostel: userData.assignedHostel || userData.hostelRoom || null,
       department_id: userData.departmentId || null,
       can_view_gender: userData.canViewGender || null,
       status: userData.status || 'ACTIVE',
@@ -1105,7 +1166,7 @@ export async function createUser(userData: {
   // Insert/upsert auxiliary employee_details if applicable
   if (userData.employeeId || userData.isHod || ['faculty', 'staff', 'worker', 'operator', 'admin', 'sysadmin'].includes(userData.role)) {
     try {
-      await supabase.from('employee_details').upsert({
+      await db.from('employee_details').upsert({
         user_id: userData.id,
         employee_id: (userData.employeeId || uniqueId).trim().toUpperCase(),
         is_hod: userData.isHod || false,
@@ -1118,12 +1179,14 @@ export async function createUser(userData: {
 
   // Insert/upsert auxiliary student_details if applicable
   if (userData.parentId || userData.role === 'student') {
+    const studentRoll = (userData.uniqueId || userData.employeeId || (userData.loginIdentifier && !userData.loginIdentifier.includes('@') ? userData.loginIdentifier : null) || uniqueId).trim().toUpperCase();
     try {
-      await supabase.from('student_details').upsert({
+      await db.from('student_details').upsert({
         user_id: userData.id,
-        roll: (userData.loginIdentifier || uniqueId).trim().toUpperCase(),
+        roll: studentRoll,
         parent_id: userData.parentId || null,
         department_id: userData.departmentId || null,
+        room_number: userData.hostelRoom || userData.assignedHostel || null,
       }, { onConflict: 'user_id' });
     } catch (sErr) {
       console.warn('Non-fatal student_details upsert error:', sErr);
@@ -2154,7 +2217,7 @@ export async function getPersonHistory(uniqueId: string, limit: number = 20): Pr
   } catch { /* fallback to anon client */ }
   const { data, error } = await client
     .from('movement_logs')
-    .select('*, users!inner(*)')
+    .select('*, users:users!movement_logs_user_id_fkey!inner(*)')
     .eq('users.unique_id', formattedId)
     .order('timestamp', { ascending: false })
     .limit(limit);

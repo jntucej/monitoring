@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 import type { Student } from "@/lib/types";
+import { getAuthHeaders } from "@/lib/utils";
 
 export function ChildStatus() {
   const [children, setChildren] = useState<Student[]>([]);
@@ -17,7 +18,7 @@ export function ChildStatus() {
         const auth = authRaw ? JSON.parse(authRaw) : null;
         const parentId = auth?.user?.parentId ?? auth?.user?.id ?? "pa-1";
 
-        const res = await fetch(`/api/students?parentId=${parentId}`, { cache: "no-store" });
+        const res = await fetch(`/api/students?parentId=${parentId}`, { headers: getAuthHeaders(), cache: "no-store" });
         const json = await res.json();
         if (cancelled) return;
         const kids: Student[] = Array.isArray(json.data) ? json.data : [];
@@ -30,9 +31,12 @@ export function ChildStatus() {
             const roll = k.uniqueId || k.roll || "";
             if (!roll) return;
             try {
-              const r = await fetch(`/api/persons/${encodeURIComponent(roll)}/status`, { cache: "no-store" });
+              const r = await fetch(`/api/persons/${encodeURIComponent(roll)}`, { headers: getAuthHeaders(), cache: "no-store" });
               const j = await r.json();
-              stat[roll] = j.data ?? { status: "OUT", last: null };
+              // persons API returns { person, campusStatus, lastScan, history }
+              stat[roll] = j?.data?.campusStatus
+                ? { status: j.data.campusStatus, last: j.data.lastScan ?? null }
+                : { status: "OUT", last: null };
             } catch {
               stat[roll] = { status: "OUT", last: null };
             }

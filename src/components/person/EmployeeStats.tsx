@@ -5,7 +5,7 @@ import { Calendar, CheckCircle2, Clock, ShieldCheck, AlertCircle } from "lucide-
 
 interface EmployeeStatsProps {
   stats?: {
-    isOnCampus?: boolean;
+    isOnCampus?: boolean | null;
     lastScanTime?: string;
     lastScanType?: "IN" | "OUT";
     daysPresentThisWeek?: number;

@@ -6,10 +6,12 @@ import { EmployeeStats } from "@/components/person/EmployeeStats";
 import { RecentActivity } from "@/components/student/RecentActivity";
 import { PersonBadge } from "@/components/shared/PersonBadge";
 import { UserCheck, Clock, Shield } from "lucide-react";
-import type { Person } from "@/lib/types";
+import type { Person, Scan } from "@/lib/types";
+import { getAuthHeaders } from "@/lib/utils";
 
 export default function StaffDashboardPage() {
   const [person, setPerson] = useState<Person | null>(null);
+  const [personData, setPersonData] = useState<{ campusStatus?: string; lastScan?: Scan | null; history?: Scan[] }>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,11 +28,16 @@ export default function StaffDashboardPage() {
           return;
         }
         
-        const res = await fetch(`/api/persons/${encodeURIComponent(uniqueId)}`, { cache: "no-store" });
+        const res = await fetch(`/api/persons/${encodeURIComponent(uniqueId)}`, { headers: getAuthHeaders(), cache: "no-store" });
         const json = await res.json();
         
         if (!cancelled && json.success) {
           setPerson(json.data?.person ?? json.data ?? null);
+          setPersonData({
+            campusStatus: json.data?.campusStatus,
+            lastScan: json.data?.lastScan ?? null,
+            history: Array.isArray(json.data?.history) ? json.data.history : [],
+          });
         }
       } catch (err) {
         console.error("Failed to load staff details:", err);
@@ -52,11 +59,11 @@ export default function StaffDashboardPage() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-extrabold tracking-tight text-[var(--text-primary)]">
-              Staff Portal
+              <span className="sm:hidden">💼</span><span className="hidden sm:inline">💼 Staff Portal</span>
             </h1>
             <PersonBadge type="staff" />
           </div>
-          <p className="text-xs text-[var(--text-muted)] mt-1">
+          <p className="text-xs text-[var(--text-muted)] mt-1 hidden sm:block">
             Welcome back, {person?.fullName || "Staff Member"}. Track your daily campus access & digital staff ID pass.
           </p>
         </div>
@@ -65,14 +72,23 @@ export default function StaffDashboardPage() {
       {/* Main Grid: Digital ID & Stats */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="space-y-3">
-          <h2 className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-wider">Digital Staff Identity Pass</h2>
+          <h2 className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-wider"><span className="sm:hidden">🪪</span><span className="hidden sm:inline">🪪 Digital Staff ID</span></h2>
           <PersonIdCard person={person} type="staff" />
         </div>
 
         <div className="space-y-6">
           <div className="space-y-3">
-            <h2 className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-wider">Shift & Access Metrics</h2>
-            <EmployeeStats loading={loading} />
+            <h2 className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-wider"><span className="sm:hidden">📊</span><span className="hidden sm:inline">📊 Shift & Access Metrics</span></h2>
+            <EmployeeStats stats={{
+              isOnCampus: personData.campusStatus === undefined ? null : personData.campusStatus === "IN",
+              lastScanTime: personData.lastScan?.timestamp,
+              lastScanType: personData.lastScan?.direction,
+              totalScansThisMonth: personData.history?.filter((s) => {
+                const d = new Date(s.timestamp);
+                const now = new Date();
+                return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+              }).length,
+            }} loading={loading} />
           </div>
 
           {/* Staff Shift Card */}
@@ -99,7 +115,7 @@ export default function StaffDashboardPage() {
       <div className="space-y-4 pt-4 border-t border-[var(--border)]">
         <div className="flex items-center gap-2">
           <Clock className="w-5 h-5 text-purple-500" />
-          <h2 className="text-lg font-bold text-[var(--text-primary)]">Staff Entry & Exit Logs</h2>
+          <h2 className="text-lg font-bold text-[var(--text-primary)]"><span className="sm:hidden">🕐</span><span className="hidden sm:inline">🕐 Staff Entry & Exit</span></h2>
         </div>
         <RecentActivity />
       </div>

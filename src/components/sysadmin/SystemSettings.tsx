@@ -6,6 +6,7 @@ import { getAuthHeaders } from "@/lib/utils";
 
 interface SystemConfig {
   notificationsEnabled?: boolean;
+  mfaRequiredForAdmin?: boolean;
 }
 
 export function SystemSettings() {
@@ -92,6 +93,24 @@ export function SystemSettings() {
                 className={`text-sm font-medium px-3 py-1 rounded-full ${config?.notificationsEnabled ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"}`}
               >
                 {config?.notificationsEnabled ? "Enabled" : "Disabled"}
+              </button>
+            </div>
+
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div>
+                <p className="font-medium flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4" /> Require 2FA for Administrators
+                </p>
+                <p className="text-sm text-[var(--text-muted)]">
+                  When ON, sysadmin accounts must enroll TOTP two-factor auth before login and API access.
+                </p>
+              </div>
+              <button
+                onClick={() => save("mfaRequiredForAdmin", !config?.mfaRequiredForAdmin)}
+                disabled={busy}
+                className={`text-sm font-medium px-3 py-1 rounded-full ${config?.mfaRequiredForAdmin ? "bg-emerald-500/10 text-emerald-400" : "bg-slate-500/10 text-slate-400"}`}
+              >
+                {config?.mfaRequiredForAdmin ? "Required" : "Optional"}
               </button>
             </div>
 

@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, ArrowLeft, Loader2, Filter } from "lucide-react";
 import type { Scan } from "@/lib/types";
+import { getAuthHeaders } from "@/lib/utils";
 
 export default function StudentHistoryPage() {
   const [scans, setScans] = useState<Scan[]>([]);
@@ -19,10 +20,13 @@ export default function StudentHistoryPage() {
           if (!cancelled) setLoading(false);
           return;
         }
-        const res = await fetch(`/api/students/${encodeURIComponent(roll)}/history?limit=200`, { cache: "no-store" });
+        const res = await fetch(`/api/persons/${encodeURIComponent(roll)}/history?limit=200`, {
+          headers: getAuthHeaders(),
+          cache: "no-store",
+        });
         const json = await res.json();
         if (!cancelled) {
-          setScans(Array.isArray(json.data) ? json.data : []);
+          setScans(Array.isArray(json?.data?.history) ? json.data.history : []);
           setLoading(false);
         }
       } catch {

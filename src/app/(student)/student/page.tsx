@@ -29,10 +29,13 @@ export default function StudentDashboardPage() {
         const roll = auth?.state?.user?.uniqueId ?? auth?.state?.user?.roll ?? auth?.user?.uniqueId ?? auth?.user?.roll;
         if (!roll) return;
 
-        const res = await fetch(`/api/students/${roll}/history`, { headers: getAuthHeaders(), cache: "no-store" });
+        const res = await fetch(`/api/persons/${encodeURIComponent(roll)}/history`, {
+          headers: getAuthHeaders(),
+          cache: "no-store",
+        });
         const json = await res.json();
-        if (json.success && Array.isArray(json.data)) {
-          const scans = json.data;
+        if (json.success && Array.isArray(json.data?.history)) {
+          const scans = json.data.history;
           const monthly = scans.filter((s: any) => {
             const scanDate = new Date(s.timestamp || s.scanned_at);
             const now = new Date();
@@ -60,7 +63,7 @@ export default function StudentDashboardPage() {
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="flex items-center gap-2 mb-2">
               <FileCheck className="w-5 h-5 text-[var(--action-primary)]" />
-              <h2 className="text-lg font-bold text-[var(--text-primary)]">Gate Pass Requests</h2>
+              <h2 className="text-lg font-bold text-[var(--text-primary)]"><span className="sm:hidden">📋</span><span className="hidden sm:inline">📋 Gate Pass Requests</span></h2>
             </div>
             <ActivePasses />
           </div>
@@ -70,7 +73,7 @@ export default function StudentDashboardPage() {
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="flex items-center gap-2 mb-2">
               <Clock className="w-5 h-5 text-[var(--action-primary)]" />
-              <h2 className="text-lg font-bold text-[var(--text-primary)]">Personal Entrance History</h2>
+              <h2 className="text-lg font-bold text-[var(--text-primary)]"><span className="sm:hidden">🕐</span><span className="hidden sm:inline">🕐 Personal Entrance History</span></h2>
             </div>
             <RecentActivity />
           </div>
@@ -141,7 +144,7 @@ export default function StudentDashboardPage() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div className="p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Curfew Score</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]"><span className="sm:hidden">🔓</span><span className="hidden sm:inline">🔓 Curfew Score</span></span>
                   <ShieldCheck className="w-4 h-4 text-[var(--action-primary)]" />
                 </div>
                 <div className="text-xl font-black text-[var(--text-primary)]">{studentStats.curfewScore}%</div>
@@ -150,7 +153,7 @@ export default function StudentDashboardPage() {
 
               <div className="p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Monthly Outings</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]"><span className="sm:hidden">📊</span><span className="hidden sm:inline">📊 Monthly Outings</span></span>
                   <TrendingUp className="w-4 h-4 text-[var(--action-info)]" />
                 </div>
                 <div className="text-xl font-black text-[var(--text-primary)]">{studentStats.monthlyOutings}</div>
@@ -159,7 +162,7 @@ export default function StudentDashboardPage() {
 
               <div className="p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Active Passes</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]"><span className="sm:hidden">📄</span><span className="hidden sm:inline">📄 Active Passes</span></span>
                   <FileCheck className="w-4 h-4 text-[var(--action-warning)]" />
                 </div>
                 <div className="text-xl font-black text-[var(--text-primary)]">{studentStats.activePassesCount}</div>
@@ -168,7 +171,7 @@ export default function StudentDashboardPage() {
 
               <div className="p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Last Gate Scan</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]"><span className="sm:hidden">⏱</span><span className="hidden sm:inline">⏱ Last Gate Scan</span></span>
                   <Clock className="w-4 h-4 text-[var(--action-info)]" />
                 </div>
                 <div className="text-xs font-bold text-[var(--text-primary)] truncate">{studentStats.lastGateTime}</div>
@@ -180,7 +183,7 @@ export default function StudentDashboardPage() {
             <div className="space-y-3">
               <div className="flex items-center gap-2 justify-center sm:justify-start">
                 <QrCode className="w-5 h-5 text-[var(--action-primary)]" />
-                <h2 className="text-lg font-bold text-[var(--text-primary)]">Digital Campus ID Card</h2>
+                <h2 className="text-lg font-bold text-[var(--text-primary)]"><span className="sm:hidden">🪪</span><span className="hidden sm:inline">🪪 Digital Campus ID Card</span></h2>
               </div>
               <div className="max-w-md mx-auto sm:max-w-none">
                 <DigitalIdCard />
@@ -196,12 +199,12 @@ export default function StudentDashboardPage() {
       {/* Dynamic Tab Heading */}
       <div className="text-center sm:text-left border-b border-[var(--border)] pb-4 space-y-1">
         <h1 className="text-2xl font-extrabold tracking-tight text-[var(--text-primary)]">
-          {currentTab === "idcard" && "Student Hub"}
-          {currentTab === "passes" && "Gate Passes Desk"}
-          {currentTab === "history" && "Activity History"}
-          {currentTab === "profile" && "Account Center"}
+          {currentTab === "idcard" && <><span className="sm:hidden">🪪</span><span className="hidden sm:inline">🪪 Student Hub</span></>}
+          {currentTab === "passes" && <><span className="sm:hidden">📋</span><span className="hidden sm:inline">📋 Gate Passes Desk</span></>}
+          {currentTab === "history" && <><span className="sm:hidden">🕐</span><span className="hidden sm:inline">🕐 Activity History</span></>}
+          {currentTab === "profile" && <><span className="sm:hidden">👤</span><span className="hidden sm:inline">👤 Account Center</span></>}
         </h1>
-        <p className="text-xs text-[var(--text-muted)]">
+        <p className="text-xs text-[var(--text-muted)] hidden sm:block">
           {currentTab === "idcard" && "Your permanent digital identity card & boarding passes"}
           {currentTab === "passes" && "Track permissions, request leaves, and review warden status"}
           {currentTab === "history" && "Complete audit trail of your entries and exits"}

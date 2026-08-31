@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { CountUp } from "@/components/shared/CountUp";
-import { WordByWordText } from "@/components/shared/WordByWordText";
 import { GlossyFloatingContainer } from "@/components/shared/GlossyFloatingContainer";
 import { ArrowUpRight } from "lucide-react";
 
@@ -20,6 +19,7 @@ export function OperatorStats({ entries, exits, onCampus }: OperatorStatsProps) 
     {
       id: "ENTRIES",
       label: "ENTRIES",
+      emoji: "📥",
       value: entries,
       color: "text-[var(--action-primary)]",
       glow: "shadow-emerald-500/10",
@@ -28,6 +28,7 @@ export function OperatorStats({ entries, exits, onCampus }: OperatorStatsProps) 
     {
       id: "EXITS",
       label: "EXITS",
+      emoji: "📤",
       value: exits,
       color: "text-[var(--action-danger)]",
       glow: "shadow-red-500/10",
@@ -36,6 +37,7 @@ export function OperatorStats({ entries, exits, onCampus }: OperatorStatsProps) 
     {
       id: "ON CAMPUS",
       label: "ON CAMPUS",
+      emoji: "🏕",
       value: onCampus,
       color: "text-[var(--focus-ring)]",
       glow: "shadow-sky-500/10",
@@ -56,14 +58,15 @@ export function OperatorStats({ entries, exits, onCampus }: OperatorStatsProps) 
           >
             <div className="flex items-center justify-between gap-1 mb-1">
               <p className="text-xs font-semibold text-[var(--text-muted)] uppercase truncate">
-                <WordByWordText text={card.label} />
+                <span className="sm:hidden">{card.emoji || "📊"}</span>
+                <span className="hidden sm:inline">{card.emoji || "📊"} {card.label}</span>
               </p>
               <ArrowUpRight className="w-3.5 h-3.5 text-[var(--text-muted)] opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
             </div>
             <p className={`kpi-number text-fluid-2xl font-extrabold ${card.color}`}>
               <CountUp value={card.value} />
             </p>
-            <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono">Open Full Page</p>
+            <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono hidden sm:block">Open Full Page</p>
           </motion.div>
         </GlossyFloatingContainer>
       ))}

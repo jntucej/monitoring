@@ -166,9 +166,9 @@ export default function VisitorManagementPage() {
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight text-[var(--text-primary)] flex items-center gap-2">
             <Users className="w-7 h-7 text-amber-500" />
-            Visitor Access Control
+            <span className="sm:hidden">👤</span><span className="hidden sm:inline">👤 Visitor Access</span>
           </h1>
-          <p className="text-xs text-[var(--text-muted)] mt-1">
+          <p className="text-xs text-[var(--text-muted)] mt-1 hidden sm:block">
             Register guests, issue temporary digital QR passes, and manage real-time campus check-ins/outs
           </p>
         </div>
@@ -343,8 +343,7 @@ export default function VisitorManagementPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-4">
             <h2 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
-              <UserPlus className="w-5 h-5 text-amber-500" />
-              Visitor Entry Registration
+              <UserPlus className="w-5 h-5 text-amber-500" /> <span className="sm:hidden">📝</span><span className="hidden sm:inline">📝 Visitor Entry Registration</span>
             </h2>
             <p className="text-xs text-[var(--text-muted)]">
               Fill out guest credentials to issue an active QR pass for campus access.

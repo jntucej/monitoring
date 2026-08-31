@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { QrCode, Loader2, AlertCircle } from "lucide-react";
 import { QRCode } from "react-qrcode-logo";
 import { parseRollNumber } from "@/lib/rollNumber";
+import { getAuthHeaders } from "@/lib/utils";
 import type { Student } from "@/lib/types";
 
 export function DigitalIdCard() {
@@ -32,7 +33,7 @@ export function DigitalIdCard() {
           }
           return;
         }
-        const res = await fetch(`/api/students/${encodeURIComponent(roll)}`, { cache: "no-store" });
+        const res = await fetch(`/api/students/${encodeURIComponent(roll)}`, { headers: getAuthHeaders(), cache: "no-store" });
         const json = await res.json();
         if (!cancelled) {
           if (res.ok && json.success) {

@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/supabaseClient";
+import { getAllGatesLive } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 
 async function handleGet(req: NextRequest) {
-  const service = getSupabaseServiceClient();
-  const { data, error } = await service.from('gates').select('*');
-  if (error) {
+  try {
+    const data = await getAllGatesLive();
+    return NextResponse.json({ success: true, data });
+  } catch (error) {
     return NextResponse.json({ success: false, error: 'Failed to fetch gates' }, { status: 500 });
   }
-  return NextResponse.json({ success: true, data });
 }
 
 async function handlePost(req: NextRequest) {

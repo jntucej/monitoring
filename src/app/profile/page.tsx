@@ -140,7 +140,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <AuthGuard allowedRoles={["student", "faculty", "staff", "warden", "operator", "admin", "sysadmin", "parent"]}>
+    <AuthGuard allowedRoles={["student", "faculty", "staff", "warden", "operator", "admin", "sysadmin", "parent", "guardian", "worker"]}>
       <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
         <div className="bg-[var(--bg-surface)] border border-[var(--border)] p-6 rounded-2xl flex flex-col sm:flex-row items-center gap-5">
           <div className="relative">

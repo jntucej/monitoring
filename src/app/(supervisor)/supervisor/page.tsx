@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   ShieldCheck,
-  RefreshCw,
   AlertTriangle,
   Users,
   CheckSquare,
@@ -27,6 +26,7 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { getAuthHeaders } from "@/lib/utils";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import type { GatePass, Alert } from "@/lib/types";
 
 interface WardenStudent {
@@ -114,7 +114,8 @@ export default function SupervisorDashboardPage() {
     }
   }, []);
 
-  useEffect(() => { loadData(); }, [loadData]);
+  // Live toggle drives refetch; polls every 20s while Live.
+  useLiveRefresh(loadData, { intervalMs: 20000 });
 
   const handlePassAction = async (passId: string, action: "approve" | "reject", comment: string) => {
     if (action === "reject" && !comment.trim()) {
@@ -246,7 +247,10 @@ export default function SupervisorDashboardPage() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)]">Supervisor & Warden Desk</h1>
+                <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)]">
+                  <span className="sm:hidden">🏫</span>
+                  <span className="hidden sm:inline">🏫 Supervisor & Warden Desk</span>
+                </h1>
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
                   {user?.employeeId || user?.uniqueId || "WDN-001"}
                 </span>
@@ -273,11 +277,6 @@ export default function SupervisorDashboardPage() {
             >
               <Download className="w-4 h-4" />
               <span className="hidden sm:inline">Export CSV</span>
-            </button>
-
-            <button onClick={loadData} disabled={refreshing} className="px-3 py-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] text-xs font-bold hover:bg-[var(--bg-surface)] transition-all flex items-center gap-2">
-              <RefreshCw className={`w-4 h-4 text-indigo-400 ${refreshing ? "animate-spin" : ""}`} />
-              <span className="hidden sm:inline">{refreshing ? "Syncing..." : "Sync"}</span>
             </button>
           </div>
         </div>
@@ -353,7 +352,7 @@ export default function SupervisorDashboardPage() {
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
-                <CheckSquare className="w-5 h-5 text-indigo-400" /> Pending Outpasses ({passes.length})
+                <CheckSquare className="w-5 h-5 text-indigo-400" /> <span className="sm:hidden">📋</span><span className="hidden sm:inline">📋 Pending Outpasses ({passes.length})</span>
               </h2>
               {passes.length > 0 && (
                 <button onClick={() => setActiveTab("approvals")} className="text-xs text-indigo-400 font-semibold hover:underline">
@@ -403,7 +402,7 @@ export default function SupervisorDashboardPage() {
 
           <div className="space-y-4">
             <h2 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
-              <ShieldAlert className="w-5 h-5 text-rose-400" /> Curfew Radar ({alerts.length})
+              <ShieldAlert className="w-5 h-5 text-rose-400" /> <span className="sm:hidden">🔔</span><span className="hidden sm:inline">🔔 Curfew Radar ({alerts.length})</span>
             </h2>
             <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 space-y-3">
               {alerts.length === 0 ? (
@@ -433,7 +432,9 @@ export default function SupervisorDashboardPage() {
       {activeTab === "approvals" && (
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <h2 className="text-lg font-bold text-[var(--text-primary)]">Outpass Approvals Desk</h2>
+            <h2 className="text-lg font-bold text-[var(--text-primary)]">
+              <span className="sm:hidden">📋</span><span className="hidden sm:inline">📋 Outpass Approvals</span>
+            </h2>
             <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
               {["ALL", "DAY_PASS", "HOME_OUT", "DAILY_OUTING"].map((f) => (
                 <button key={f} onClick={() => setPassTypeFilter(f)} className={`px-3 py-1 rounded-xl text-[11px] font-bold shrink-0 ${passTypeFilter === f ? "bg-indigo-500 text-white" : "bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border)]"}`}>
@@ -504,7 +505,9 @@ export default function SupervisorDashboardPage() {
       {activeTab === "curfew" && (
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <h2 className="text-lg font-bold text-[var(--text-primary)]">Hostel Wards Directory</h2>
+            <h2 className="text-lg font-bold text-[var(--text-primary)]">
+              <span className="sm:hidden">👥</span><span className="hidden sm:inline">👥 Hostel Wards</span>
+            </h2>
             <div className="flex items-center gap-3 w-full sm:w-auto">
               <div className="flex items-center bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-1 text-xs">
                 <button onClick={() => setRosterViewMode("list")} className={`px-2 py-1 rounded-lg font-bold flex items-center gap-1 ${rosterViewMode === "list" ? "bg-indigo-500 text-white" : "text-[var(--text-muted)]"}`}>

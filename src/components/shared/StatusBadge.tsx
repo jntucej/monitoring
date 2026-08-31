@@ -69,7 +69,8 @@ export function StatusBadge({ direction, reason, className, size = "md" }: Statu
     >
       <span className={cn("rounded-full", dotSizes[size], dotColor, isEntry && "animate-pulse")} />
       <span className="leading-tight">{icon}</span>
-      <span className="leading-tight">{label}</span>
+      <span className="leading-tight sm:hidden">{icon}</span>
+      <span className="leading-tight hidden sm:inline">{label}</span>
     </motion.span>
   );
 }

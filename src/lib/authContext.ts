@@ -10,6 +10,7 @@
 
 import { supabase, getSupabaseServiceClient } from './supabaseClient';
 import { Role, AccountStatus } from './types';
+import { getCached, setCached } from './cache';
 
 /**
  * Authenticated User Context
@@ -55,6 +56,31 @@ export interface AuthContext {
 }
 
 /**
+ * Whether administrators (sysadmin) must have TOTP 2FA enrolled.
+ * Read from system_config.global_settings.mfaRequiredForAdmin (cached 60s).
+ *
+ * ponytail: fails OPEN — if config is unavailable we do NOT lock admins out.
+ * Upgrade path: fail-closed with a break-glass env override.
+ */
+export async function isMfaRequiredForAdmin(): Promise<boolean> {
+  const cached = await getCached<boolean>("system_config:mfaRequiredForAdmin");
+  if (cached !== null) return cached;
+  try {
+    const service = getSupabaseServiceClient();
+    const { data } = await service
+      .from("system_config")
+      .select("value")
+      .eq("key", "global_settings")
+      .maybeSingle();
+    const required = !!(data?.value as any)?.mfaRequiredForAdmin;
+    await setCached("system_config:mfaRequiredForAdmin", required, 60);
+    return required;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Create an authenticated context from a Supabase session token
  *
  * @param token - Supabase access token
@@ -87,11 +113,12 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
     throw new Error('UNAUTHORIZED: User ID mismatch');
   }
 
-  // SECURITY: sysadmins must have TOTP 2FA enrolled. Enforced on EVERY
-  // authorized API request — not just login — so enrollment can't be bypassed
-  // by holding a pre-existing access token, and disabling 2FA kills access
-  // immediately. Defense in depth alongside the /api/auth/login gate.
-  if (profile.role === 'sysadmin' && !profile.two_factor_enabled) {
+  // SECURITY (optional): sysadmins must have TOTP 2FA enrolled WHEN the
+  // deployment enables it via system_config.global_settings.mfaRequiredForAdmin.
+  // Enforced on EVERY authorized API request — not just login — so enrollment
+  // can't be bypassed by holding a pre-existing access token, and disabling
+  // 2FA kills access immediately.
+  if (profile.role === 'sysadmin' && (await isMfaRequiredForAdmin()) && !profile.two_factor_enabled) {
     throw new Error('MFA_REQUIRED: administrator accounts must enable two-factor authentication');
   }
 

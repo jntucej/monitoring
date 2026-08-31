@@ -1,9 +1,12 @@
 "use client";
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { User, Search, RefreshCw, GraduationCap, Ban, AlertTriangle } from "lucide-react";
 import { parseRollNumber, getStudentYearFromRoll } from "@/lib/rollNumber";
 import type { Student } from "@/lib/types";
 import { getAuthHeaders } from "@/lib/utils";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh"
+import { CampusStatusBar } from "@/components/admin/CampusStatusBar";
+import { StudentInfographics } from "@/components/admin/StudentInfographics";
 
 export default function AdminStudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
@@ -23,14 +26,19 @@ export default function AdminStudentsPage() {
         : "/api/students";
       const res = await fetch(url, { headers: getAuthHeaders(), cache: "no-store" });
       const json = await res.json();
+      console.log("[Students Page] API Response:", { success: json.success, data_type: typeof json.data, is_array: Array.isArray(json.data), count: Array.isArray(json.data) ? json.data.length : 0 });
       if (Array.isArray(json.data)) {
         setStudents(json.data);
+        console.log("[Students Page] Loaded students:", json.data.length, "First student:", json.data[0]);
       } else {
         const msg = typeof json.error === "string" ? json.error : json.error?.message || "Failed to load roster";
         setError(msg);
+        console.error("[Students Page] Error:", msg);
       }
     } catch (e: any) {
-      setError(e?.message || "Network error");
+      const msg = e?.message || "Network error";
+      setError(msg);
+      console.error("[Students Page] Fetch error:", msg);
     } finally {
       setLoading(false);
     }
@@ -40,6 +48,9 @@ export default function AdminStudentsPage() {
     const t = setTimeout(() => loadStudents(query), 250);
     return () => clearTimeout(t);
   }, [query, loadStudents]);
+
+  // Live toggle also refetches when flipped back on.
+  useLiveRefresh(() => loadStudents(query), {});
 
   const patchUser = useCallback(async (id: string, patch: Record<string, unknown>) => {
     setPending(prev => ({ ...prev, [id]: true }));
@@ -76,18 +87,31 @@ export default function AdminStudentsPage() {
   const filteredStudents = useMemo(() => students.filter(s => {
     const roll = s.uniqueId || s.roll || "";
     const dept = (s.department || "").toUpperCase();
-    const yearStr = (getStudentYearFromRoll(roll) || s.year || "").toString();
-    if (selectedBranch !== "ALL" && !dept.includes(selectedBranch)) return false;
+    // Get year from roll number or database, with proper null handling
+    const yearFromRoll = getStudentYearFromRoll(roll);
+    const yearStr = (yearFromRoll || s.year || "").toString();
+    
+    // Branch filter - handle empty department
+    if (selectedBranch !== "ALL" && dept && !dept.includes(selectedBranch)) return false;
+    
+    // Year filter - handle empty year
     if (selectedYear !== "ALL") {
-      if (selectedYear === "LE" && !roll.toUpperCase().includes("LE") && !roll.toUpperCase().includes("5A")) return false;
-      if (selectedYear !== "LE" && !yearStr.includes(selectedYear)) return false;
+      if (selectedYear === "LE") {
+        // Lateral entry: check roll number for "LE" or "5A"
+        if (!roll.toUpperCase().includes("LE") && !roll.toUpperCase().includes("5A")) return false;
+      } else if (yearStr && !yearStr.includes(selectedYear)) {
+        return false;
+      }
     }
     return true;
   }), [students, selectedBranch, selectedYear]);
 
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-[var(--bg)]">
+      <CampusStatusBar />
+      <div className="space-y-6 p-6">
+        <StudentInfographics />
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
@@ -100,11 +124,6 @@ export default function AdminStudentsPage() {
               : `${filteredStudents.length} student${filteredStudents.length === 1 ? "" : "s"} listed (${students.length} total)`}
           </p>
         </div>
-        <button onClick={() => loadStudents(query)}
-          className="p-2 rounded-lg hover:bg-white/5 text-[var(--text-muted)] transition-colors"
-          title="Refresh">
-          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-        </button>
       </div>
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
@@ -152,7 +171,9 @@ export default function AdminStudentsPage() {
               ) : filteredStudents.map(student => {
                 const decoded = parseRollNumber(student.roll);
                 const branch = decoded?.departmentFullName ?? student.department ?? "—";
-                const year = getStudentYearFromRoll(student.roll) ?? student.year ?? "—";
+                // Try to get year from roll number first, then fall back to database year
+                const yearFromRoll = getStudentYearFromRoll(student.roll);
+                const year = yearFromRoll ?? student.year ?? "—";
                 const isSuspended = student.status === "SUSPENDED";
                 const isFlagged = !!(student as any).flagStatus;
                 const isBusy = !!pending[student.id];
@@ -202,6 +223,7 @@ export default function AdminStudentsPage() {
             </tbody>
           </table>
         </div>
+      </div>
       </div>
     </div>
   );

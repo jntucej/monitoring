@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
   Briefcase, Search, RefreshCw, UserPlus, Edit, Trash2,
@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 
 interface StaffRecord {
   id: string;
@@ -59,7 +60,8 @@ export default function SysAdminStaffPage() {
     } finally { setLoading(false); }
   }, [addToast]);
 
-  useEffect(() => { loadStaff(); }, [loadStaff]);
+  // Live toggle drives refetch; polls every 30s while Live.
+  useLiveRefresh(loadStaff, { intervalMs: 30000 });
 
 
   const handleCreateStaff = async (e: React.FormEvent) => {
@@ -200,9 +202,6 @@ export default function SysAdminStaffPage() {
             <p className="text-sm text-[var(--text-muted)] mt-1">Manage faculty, operators, admins, and all non-student personnel. {staffList.length} records.</p>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => loadStaff()} className="p-2.5 rounded-xl bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] border border-[var(--border-strong)]/50" title="Refresh">
-              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-            </button>
             <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-500 shadow-lg shadow-emerald-900/30">
               <UserPlus className="w-4 h-4" /> Add Staff
             </button>

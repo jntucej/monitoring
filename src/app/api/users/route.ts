@@ -13,6 +13,7 @@ import type { Role } from "@/lib/types";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { getSupabaseServiceClient } from "@/lib/supabaseClient";
+import { isMfaRequiredForAdmin } from "@/lib/authContext";
 
 // Roles assignable via this API. Intersection of src/lib/types.ts `Role`
 // and the CHECK constraint on public.users.role in consolidated_clean_schema.sql.
@@ -90,12 +91,16 @@ async function handlePost(req: NextRequest) {
     const {
       name, role, status = 'ACTIVE',
       employeeId, uniqueId, phone, gateId, parentId, supervisedGates,
-      assignedHostel, isHod, departmentId, canViewGender,
+      assignedHostel, hostelRoom, isHod, departmentId, department, canViewGender,
       loginIdentifier, pin, sendInvite = false,
     } = body || {};
 
+    const effectiveUniqueId = uniqueId || employeeId;
+    const effectiveDept = departmentId || department;
+    const effectiveHostel = assignedHostel || hostelRoom;
+
     const rawEmail = body?.email;
-    const email = rawEmail || ((uniqueId || employeeId) ? `${(uniqueId || employeeId).trim().toLowerCase()}@jntuhcej.ac.in` : undefined);
+    const email = rawEmail || (effectiveUniqueId ? `${effectiveUniqueId.trim().toLowerCase()}@jntuhcej.ac.in` : undefined);
 
     if (!name || !email || !role) {
       return NextResponse.json(
@@ -170,12 +175,12 @@ async function handlePost(req: NextRequest) {
         email: String(email).trim(),
         password: temporaryPassword,
         email_confirm: true,
-        user_metadata: { name: String(name), role: String(role), employee_id: employeeId ?? null },
+        user_metadata: { name: String(name), role: String(role), employee_id: effectiveUniqueId ?? null },
       });
       if (createErr || !data?.user) {
         console.error('Auth user creation failed:', createErr);
         return NextResponse.json(
-          { success: false, error: { code: "AUTH_PROVISION_FAILED", message: "Failed to create authentication account" } },
+          { success: false, error: { code: "AUTH_PROVISION_FAILED", message: createErr?.message || "Failed to create authentication account" } },
           { status: 500 }
         );
       }
@@ -189,16 +194,18 @@ async function handlePost(req: NextRequest) {
       role: role as Role,
       email: String(email).trim(),
       employeeId: employeeId || undefined,
+      uniqueId: effectiveUniqueId || undefined,
       phone: phone || undefined,
       gateId: gateId || undefined,
       parentId: parentId || undefined,
       supervisedGates: supervisedGates || undefined,
-      assignedHostel: assignedHostel || undefined,
+      assignedHostel: effectiveHostel || undefined,
+      hostelRoom: effectiveHostel || undefined,
       isHod: !!isHod,
-      departmentId: departmentId || undefined,
+      departmentId: effectiveDept || undefined,
       canViewGender: canViewGender || undefined,
       status,
-      loginIdentifier: loginIdentifier || employeeId || String(email).trim(),
+      loginIdentifier: loginIdentifier || effectiveUniqueId || String(email).trim(),
       initialPinHash: pin ? await hashPin(pin) : undefined,
     });
 
@@ -297,6 +304,31 @@ async function handlePatch(req: NextRequest) {
           { success: false, error: { code: "FORBIDDEN", message: "Administrators cannot grant system administrator privileges." } },
           { status: 403 }
         );
+      }
+
+      // Guard: if 2FA-for-admins is required, a newly promoted sysadmin who
+      // hasn't enrolled would be locked out of login AND every API route
+      // (enrollment itself needs an authenticated session). Block the
+      // promotion until they enroll, instead of stranding them.
+      if (role === 'sysadmin' && (await isMfaRequiredForAdmin())) {
+        const service = getSupabaseServiceClient();
+        const { data: targetMfa } = await service
+          .from("users")
+          .select("two_factor_enabled")
+          .eq("id", targetUserId)
+          .maybeSingle();
+        if (!targetMfa?.two_factor_enabled) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: {
+                code: "MFA_REQUIRED",
+                message: "This user must enroll in two-factor authentication (Profile → Security) before being promoted to sysadmin.",
+              },
+            },
+            { status: 403 }
+          );
+        }
       }
 
       // Update role (also revokes all Supabase Auth sessions)

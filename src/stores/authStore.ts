@@ -138,13 +138,19 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
           if (res.ok && result?.success && result?.data) {
             const { token: newToken, refreshToken: newRefreshToken, user: updatedUser } = result.data;
-            set({
-              user: updatedUser,
-              token: newToken || token,
-              refreshToken: newRefreshToken || refreshToken,
-              role: updatedUser.role as Role,
-              authenticated: true,
-            });
+            const current = get();
+            const userChanged = JSON.stringify(current.user) !== JSON.stringify(updatedUser);
+            const tokenChanged = (newToken && newToken !== current.token) || (newRefreshToken && newRefreshToken !== current.refreshToken);
+
+            if (userChanged || tokenChanged || !current.authenticated) {
+              set({
+                user: updatedUser,
+                token: newToken || token,
+                refreshToken: newRefreshToken || refreshToken,
+                role: updatedUser.role as Role,
+                authenticated: true,
+              });
+            }
             return true;
           } else if (res.status === 401 || res.status === 403) {
             // Session expired or invalid on server

@@ -7,6 +7,66 @@ import type { ScanDirection, ExitReason } from "@/lib/types"
 
 import { logAuditEvent } from "@/lib/audit"
 
+// Haversine formula to calculate distance between two GPS coordinates (in meters)
+function distanceBetweenCoords(
+  lat1: number, lon1: number, lat2: number, lon2: number
+): number {
+  const R = 6371000; // Earth's radius in meters
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+// Back Gate coordinates - UPDATE THESE TO MATCH YOUR ACTUAL CAMPUS BACK GATE LOCATION
+const BACK_GATE_COORDS = {
+  latitude: 12.9716,
+  longitude: 77.5946,
+  allowedRadiusMeters: 200,
+};
+
+// Check if operator's geolocation is near the Back Gate
+async function verifyBackGateLocation(
+  gateId: string,
+  geo: { latitude?: number | null; longitude?: number | null; accuracy?: number | null } | undefined,
+  operatorId: string
+): Promise<{ allowed: boolean; error?: string }> {
+  const gate = await findGateById(gateId);
+  if (!gate || gate.gateCode !== "BACK") {
+    return { allowed: true };
+  }
+
+  if (!geo?.latitude || !geo?.longitude) {
+    console.warn(`Back Gate scan by operator ${operatorId} without geolocation data`);
+    return {
+      allowed: true,
+      error: "WARNING: No geolocation data provided. Back Gate scan recorded but verification skipped.",
+    };
+  }
+
+  const distance = distanceBetweenCoords(
+    geo.latitude,
+    geo.longitude,
+    BACK_GATE_COORDS.latitude,
+    BACK_GATE_COORDS.longitude
+  );
+
+  if (distance > BACK_GATE_COORDS.allowedRadiusMeters) {
+    return {
+      allowed: false,
+      error: `Geo-location mismatch: Operator is ${Math.round(distance)}m away from Back Gate. Must be within ${BACK_GATE_COORDS.allowedRadiusMeters}m.`,
+    };
+  }
+
+  return { allowed: true };
+}
+
+
 interface ScanBody {
   roll?: string
   personId?: string
@@ -112,6 +172,39 @@ async function handlePost(req: NextRequest) {
             { status: 403 }
           )
         }
+      }
+    }
+
+    // BACK GATE: Auto-assign based on geolocation
+    if (body.geo) {
+      const geoCheck = await verifyBackGateLocation(gateId, body.geo, operatorId);
+      if (!geoCheck.allowed) {
+        await logAuditEvent({
+          action: "BACK_GATE_GEO_MISMATCH",
+          userId: operatorId,
+          userName: `Operator ${operatorId}`,
+          userRole: authRole || "operator",
+          details: { gateId, requestedGeo: body.geo, error: geoCheck.error },
+        });
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: "GEOLOCATION_MISMATCH",
+              message: geoCheck.error || "Operator not at Back Gate location",
+              distance: Math.round(distanceBetweenCoords(
+                body.geo.latitude!,
+                body.geo.longitude!,
+                BACK_GATE_COORDS.latitude,
+                BACK_GATE_COORDS.longitude
+              )),
+            },
+          },
+          { status: 403 }
+        );
+      }
+      if (geoCheck.error) {
+        console.warn(geoCheck.error);
       }
     }
 

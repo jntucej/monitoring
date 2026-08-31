@@ -87,7 +87,10 @@ export default function AdminAlertsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Alerts</h1>
+          <h1 className="text-2xl font-bold">
+            <span className="sm:hidden">🔔</span>
+            <span className="hidden sm:inline">🔔 Alerts</span>
+          </h1>
           <p className="text-[var(--text-muted)]">System alerts and notifications</p>
         </div>
         <div className="flex gap-2">
@@ -111,7 +114,8 @@ export default function AdminAlertsPage() {
         <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
           <h3 className="font-semibold flex items-center gap-2">
             <Bell className="w-5 h-5 text-[var(--action-warning)]" />
-            Alerts
+            <span className="hidden sm:inline">🔔 Alerts</span>
+            <span className="sm:hidden">🔔</span>
           </h3>
           <span className="text-sm text-[var(--text-muted)]">
             {loading ? "Loading…" : `${alerts.length} alert${alerts.length === 1 ? "" : "s"}`}

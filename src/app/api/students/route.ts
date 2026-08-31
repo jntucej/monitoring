@@ -121,18 +121,25 @@ async function handleGet(req: NextRequest) {
     }
 
     const data = await findAllStudents();
-    // Strip PII from the full listing as well
-    const sanitized = data.map((s: Student) => ({
+    // Return full administrative fields for admin/sysadmin
+    const sanitized = data.map((s: any) => ({
       id: s.id,
-      roll: s.roll,
-      name: s.name,
-      department: s.department,
-      year: s.year,
-      section: s.section,
-      batch: s.batch,
-      photo: s.photo,
-      status: s.status,
-      flagStatus: (s as any).flagStatus ?? null,
+      uniqueId: s.uniqueId || s.roll || "",
+      roll: s.roll || s.uniqueId || "",
+      name: s.fullName || s.name || s.roll || s.uniqueId || "Student",
+      email: s.email || "",
+      phone: s.phone || "",
+      department: s.department || s.departmentId || "",
+      year: s.studentDetails?.year || s.year || "",
+      section: s.studentDetails?.section || s.section || "",
+      batch: s.studentDetails?.batch || s.batch || "",
+      photo: s.photoUrl || s.photo || "",
+      status: (s.status || "ACTIVE").toUpperCase(),
+      hostelRoom: s.studentDetails?.roomNumber || s.hostelRoom || "",
+      isHosteller: !!(s.studentDetails?.roomNumber || s.isHosteller),
+      createdAt: s.createdAt || "",
+      studentDetails: s.studentDetails,
+      flagStatus: s.flagStatus ?? null,
     }));
     return NextResponse.json({ success: true, data: sanitized });
   } catch (error: unknown) {

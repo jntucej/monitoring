@@ -2,11 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/supabaseClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
+import { invalidateCache } from "@/lib/cache";
 
 const defaultConfig = {
   notificationsEnabled: true,
   securityLevel: "high",
-  mfaRequiredForAdmin: true,
+  // Default OFF: deployments without a 2FA enrollment flow would otherwise
+  // lock every sysadmin out. Toggle ON from System Settings when ready.
+  mfaRequiredForAdmin: false,
   sessionTimeoutMinutes: 60,
   maxLoginAttempts: 5,
   auditRetentionDays: 90,
@@ -98,6 +101,11 @@ async function handlePatch(req: NextRequest) {
         },
         { status: 500 }
       );
+    }
+
+    // The MFA gate caches this flag for 60s; flip it immediately on change.
+    if ("mfaRequiredForAdmin" in mergedValue) {
+      await invalidateCache("system_config:*");
     }
 
     return NextResponse.json({ success: true, data: toConfig(upserted?.value) });

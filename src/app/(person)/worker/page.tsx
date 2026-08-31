@@ -7,7 +7,9 @@ import { WorkerStats } from "@/components/person/WorkerStats";
 import { AccessRestrictions } from "@/components/person/AccessRestrictions";
 import { PersonBadge } from "@/components/shared/PersonBadge";
 import { Person } from "@/lib/types";
-import { HardHat, History, RefreshCw, Clock } from "lucide-react";
+import { getAuthHeaders } from "@/lib/utils";
+import { HardHat, History, Clock } from "lucide-react";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 
 export default function WorkerDashboard() {
   const { user } = useAuthStore();
@@ -25,7 +27,7 @@ export default function WorkerDashboard() {
     }
     if (showLoading) setLoading(true);
     try {
-      const res = await fetch(`/api/persons/${encodeURIComponent(uniqueId)}`, { cache: "no-store" });
+      const res = await fetch(`/api/persons/${encodeURIComponent(uniqueId)}`, { headers: getAuthHeaders(), cache: "no-store" });
       const data = await res.json();
       if (res.ok && data.success) {
         setPerson(data.data?.person ?? data.data ?? null);
@@ -46,6 +48,9 @@ export default function WorkerDashboard() {
       loadPersonData(true);
     }
   }, [user]);
+
+  // Live toggle drives refetch; polls every 30s while Live.
+  useLiveRefresh(() => loadPersonData(true), { intervalMs: 30000 });
 
   if (error && !person) {
     return (
@@ -72,23 +77,15 @@ export default function WorkerDashboard() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-black text-white tracking-tight">
-                Worker Portal & Gate Pass
+                <span className="sm:hidden">🔧</span><span className="hidden sm:inline">🔧 Worker Portal & Gate Pass</span>
               </h1>
               <PersonBadge type="worker" />
             </div>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-gray-400 mt-1 hidden sm:block">
               Time-restricted campus entry identity & shift management
             </p>
           </div>
         </div>
-
-        <button
-          onClick={() => loadPersonData(true)}
-          className="self-start sm:self-center px-4 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-semibold border border-gray-600/50 transition flex items-center gap-2"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-          Refresh Status
-        </button>
       </div>
 
       {/* Access Restriction Banner */}
@@ -99,8 +96,7 @@ export default function WorkerDashboard() {
         {/* Digital Worker ID Card */}
         <div className="space-y-4">
           <h2 className="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
-            <HardHat className="w-4 h-4 text-gray-400" />
-            Digital Worker Identity
+            <HardHat className="w-4 h-4 text-gray-400" /> <span className="sm:hidden">🪪</span><span className="hidden sm:inline">🪪 Digital Worker ID</span>
           </h2>
           <PersonIdCard person={activeWorker} />
         </div>
@@ -108,8 +104,7 @@ export default function WorkerDashboard() {
         {/* Worker Stats */}
         <div className="space-y-4">
           <h2 className="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
-            <Clock className="w-4 h-4 text-emerald-400" />
-            Shift Metrics & Log
+            <Clock className="w-4 h-4 text-emerald-400" /> <span className="sm:hidden">⏱</span><span className="hidden sm:inline">⏱ Shift Metrics & Log</span>
           </h2>
           <WorkerStats loading={loading} uniqueId={user?.uniqueId || undefined} />
         </div>
@@ -118,8 +113,7 @@ export default function WorkerDashboard() {
       {/* Entry / Exit Activity History */}
       <div className="p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-4">
         <h2 className="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
-          <History className="w-4 h-4 text-blue-400" />
-          Recent Gate Activity History
+          <History className="w-4 h-4 text-blue-400" /> <span className="sm:hidden">🕐</span><span className="hidden sm:inline">🕐 Recent Gate Activity</span>
         </h2>
 
         <div className="overflow-x-auto">

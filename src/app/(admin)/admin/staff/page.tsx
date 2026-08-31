@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Briefcase, RefreshCw, AlertCircle } from "lucide-react";
+import React, { useState } from "react";
+import { Briefcase, AlertCircle } from "lucide-react";
 import { StaffTracking, StaffMember } from "@/components/admin/StaffTracking";
 import { getAuthHeaders } from "@/lib/utils";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh"
+import { CampusStatusBar } from "@/components/admin/CampusStatusBar";
 
 export default function AdminStaffPage() {
   const [records, setRecords] = useState<StaffMember[]>([]);
@@ -42,12 +44,13 @@ export default function AdminStaffPage() {
     }
   };
 
-  useEffect(() => {
-    fetchStaffData();
-  }, []);
+  // Live toggle drives refetch; polls every 30s while Live.
+  useLiveRefresh(fetchStaffData, { intervalMs: 30000 });
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="min-h-screen bg-[var(--bg)]">
+      <CampusStatusBar />
+      <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -59,14 +62,6 @@ export default function AdminStaffPage() {
             Real-time staff gate entries, presence tracking, exception flags (WRN), and log history.
           </p>
         </div>
-        <button
-          onClick={fetchStaffData}
-          disabled={loading}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-medium text-sm transition disabled:opacity-50"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-          Refresh Live Data
-        </button>
       </div>
 
       {error && (
@@ -83,6 +78,7 @@ export default function AdminStaffPage() {
       ) : (
         <StaffTracking records={records} summary={summary} />
       )}
+    </div>
     </div>
   );
 }

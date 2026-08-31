@@ -74,6 +74,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           groupLabel: "Security & Policy",
           items: [
             { href: "/sysadmin/security", label: "Zero-Trust Security", icon: "Lock" },
+            { href: "/security", label: "Security Status", icon: "ShieldCheck" },
             { href: "/sysadmin/compliance", label: "Compliance & Retention", icon: "ShieldCheck" },
             { href: "/sysadmin/exit-reasons", label: "Exit Reasons & Outpass", icon: "DoorOpen" },
             { href: "/sysadmin/alerts/rules", label: "Alert Rules", icon: "Bell" },
@@ -96,6 +97,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           groupLabel: "Executive Command",
           items: [
             { href: "/admin", label: "Campus Dashboard", icon: "LayoutDashboard", badge: "LIVE" },
+            { href: "/admin/overview", label: "Overview", icon: "Info" },
             { href: "/admin/alerts", label: "Security Alerts", icon: "ShieldAlert", badge: "SECURE" },
           ],
         },
@@ -129,6 +131,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
             { href: "/admin/gates", label: "Gate Hardware Desk", icon: "QrCode" },
             { href: "/admin/gates/schedule", label: "Gate Access Rules", icon: "Clock" },
             { href: "/admin/health", label: "System Health & Ops", icon: "Activity" },
+            { href: "/security", label: "Security Status", icon: "ShieldCheck" },
             { href: "/admin/settings", label: "System Settings", icon: "Settings" },
           ],
         },
@@ -205,6 +208,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "General",
           items: [
+            { href: "/person?tab=profile", label: "My Profile", icon: "User" },
             { href: "/about", label: "About Campus", icon: "HelpCircle" },
           ],
         },
@@ -222,6 +226,24 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "General",
           items: [
+            { href: "/person?tab=profile", label: "My Profile", icon: "User" },
+            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+          ],
+        },
+      ];
+
+    case "worker":
+      return [
+        {
+          groupLabel: "Worker Portal",
+          items: [
+            { href: "/worker", label: "Worker Gate Pass", icon: "HardHat", badge: "SHIFT" },
+          ],
+        },
+        {
+          groupLabel: "General",
+          items: [
+            { href: "/profile", label: "My Profile", icon: "User" },
             { href: "/about", label: "About Campus", icon: "HelpCircle" },
           ],
         },
@@ -261,6 +283,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "General",
           items: [
+            { href: "/profile", label: "My Profile", icon: "User" },
             { href: "/about", label: "About Campus", icon: "HelpCircle" },
           ],
         },

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode, useRef } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode, useRef, useMemo } from "react";
 import { useReducedMotion } from "framer-motion";
 import { useUIStore } from "@/stores/uiStore";
 import { GateMonitorWS } from "@/lib/websocket";
@@ -9,6 +9,7 @@ import { AlertPayload, GateStatusChangePayload } from "@/lib/mockData";
 export type GateStatus = "entry" | "exit" | "idle" | "warning";
 export type PerformanceTier = "splusplus" | "performance" | "legacy" | "emergency" | "high" | "medium" | "low";
 export type DisplayMode = "indoor" | "outdoor";
+export type SecurityMode = "secure" | "elevated" | "critical";
 
 export interface GateCardState {
   id: string;
@@ -42,6 +43,7 @@ interface GlassState {
   performanceTier: PerformanceTier;
   setPerformanceTier: (v: PerformanceTier) => void;
   isLowEndDevice: boolean;
+  securityMode: SecurityMode;
   // --- WEBSOCKET REAL-TIME LIVE DATA ---
   gateStatuses: Record<string, GateStatus>;
   setGateStatus: (gateId: string, status: GateStatus) => void;
@@ -106,6 +108,19 @@ export function GlassProvider({
   const [wsError, setWsError] = useState<string | null>(null);
   const [activeAlerts, setActiveAlerts] = useState<AlertPayload[]>([]);
 
+  // --- SECURITY POSTURE — derived from live telemetry signals ---
+  const securityMode: SecurityMode = useMemo(() => {
+    const hasCriticalAlert = activeAlerts.some((a) => a.severity === "critical");
+    if (hasCriticalAlert) {
+      return "critical";
+    }
+    const hasWarningAlert = activeAlerts.some((a) => a.severity === "warning");
+    if (hasWarningAlert) {
+      return "elevated";
+    }
+    return "secure";
+  }, [activeAlerts]);
+
   // --- WEBSOCKET REAL-TIME STATE ---
   const [gateStatuses, setGateStatuses] = useState<Record<string, GateStatus>>({
     "gate-1": "idle",
@@ -160,9 +175,13 @@ export function GlassProvider({
       setLastAlertGateId(data.gateId);
       setActiveAlerts((prev) => {
         const next = [...prev, data];
-        if (next.length > 10) next.shift();
+        if (next.length > 5) next.shift();
         return next;
       });
+      // Auto-clear alert after 10 seconds to avoid stale posture triggers
+      setTimeout(() => {
+        setActiveAlerts((prev) => prev.filter((a) => a.timestamp !== data.timestamp));
+      }, 10000);
     });
 
     const unsubConn = ws.onConnectionChange((connected) => {
@@ -315,6 +334,7 @@ export function GlassProvider({
         performanceTier,
         setPerformanceTier,
         isLowEndDevice,
+        securityMode,
         gateStatuses,
         setGateStatus,
         wsConnected,

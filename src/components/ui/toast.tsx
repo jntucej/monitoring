@@ -4,6 +4,7 @@ import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from "lucide-react";
+import { useUIStore } from "@/stores/uiStore";
 
 export type ToastVariant = "success" | "error" | "info" | "warning";
 
@@ -24,6 +25,10 @@ interface ToastContextValue {
 
 const ToastContext = React.createContext<ToastContextValue | undefined>(undefined);
 
+// ponytail: two toast APIs existed (context + zustand useUIStore) but only the
+// context queue rendered. Context now proxies to useUIStore so all ~33 callers
+// of useUIStore().addToast get visible toasts too — one queue, one renderer.
+
 const toastIcons: Record<ToastVariant, React.ReactNode> = {
   success: <CheckCircle className="w-5 h-5" />,
   error: <AlertCircle className="w-5 h-5" />,
@@ -39,29 +44,20 @@ const toastStyles: Record<ToastVariant, string> = {
 };
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
-  const [toasts, setToasts] = React.useState<ToastData[]>([]);
-
-  const removeToast = React.useCallback((id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  }, []);
+  // Single source of truth: the zustand UI store queue (already used by
+  // useUIStore().addToast across the app). The context API becomes a thin
+  // alias so legacy useToast() callers keep working.
+  const toasts = useUIStore((s) => s.toasts);
+  const storeAdd = useUIStore((s) => s.addToast);
+  const removeToast = useUIStore((s) => s.removeToast);
+  const clearAllToasts = useUIStore((s) => s.clearAllToasts);
 
   const addToast = React.useCallback(
-    (toast: Omit<ToastData, "id">) => {
-      const id = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      const duration = toast.duration ?? 4000;
-      const newToast: ToastData = { ...toast, id, duration };
-      setToasts((prev) => [...prev, newToast]);
-
-      if (duration > 0) {
-        setTimeout(() => removeToast(id), duration);
-      }
-    },
-    [removeToast]
+    (toast: Omit<ToastData, "id">) => storeAdd(toast),
+    [storeAdd]
   );
 
-  const clearAll = React.useCallback(() => {
-    setToasts([]);
-  }, []);
+  const clearAll = React.useCallback(() => clearAllToasts(), [clearAllToasts]);
 
   return (
     <ToastContext.Provider value={{ toasts, addToast, removeToast, clearAll }}>

@@ -6,8 +6,11 @@ export default function ParentDashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Parent Dashboard</h1>
-        <p className="text-[var(--text-muted)]">Monitor your child's campus activity</p>
+        <h1 className="text-2xl font-bold">
+          <span className="sm:hidden">👨‍👩‍👧</span>
+          <span className="hidden sm:inline">👨‍👩‍👧 Parent Dashboard</span>
+        </h1>
+        <p className="text-[var(--text-muted)] hidden sm:block">Monitor your child's campus activity</p>
       </div>
 
       <ChildStatus />

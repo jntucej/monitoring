@@ -27,7 +27,7 @@ async function handleGet(req: NextRequest) {
           .eq("unique_id", uniqueId)
           .maybeSingle();
 
-        const isSelf = userCheck?.id === authUserId || userCheck?.unique_id === uniqueId;
+        const isSelf = userCheck?.id === authUserId;
         const isChildOfGuardian = userCheck?.student_details && (userCheck.student_details as any).guardian_id === authUserId;
 
         if (!isSelf && !isChildOfGuardian) {

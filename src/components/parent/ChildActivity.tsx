@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
 import type { Scan } from "@/lib/types";
+import { getAuthHeaders } from "@/lib/utils";
 
 export function ChildActivity() {
   const [activities, setActivities] = useState<Scan[]>([]);
@@ -14,8 +15,12 @@ export function ChildActivity() {
       try {
         const authRaw = localStorage.getItem("gate-monitor-auth");
         const auth = authRaw ? JSON.parse(authRaw) : null;
-        const parentId = auth?.user?.parentId ?? auth?.user?.id ?? "pa-1";
-        const res = await fetch(`/api/students?parentId=${parentId}`, { cache: "no-store" });
+        const parentId = auth?.state?.user?.id ?? auth?.user?.id;
+        if (!parentId) {
+          if (!cancelled) setLoading(false);
+          return;
+        }
+        const res = await fetch(`/api/students?parentId=${parentId}`, { headers: getAuthHeaders(), cache: "no-store" });
         const json = await res.json();
         if (cancelled) return;
         const kids = Array.isArray(json.data) ? json.data : [];
@@ -26,10 +31,13 @@ export function ChildActivity() {
           return;
         }
         setChildRoll(first.roll);
-        const r2 = await fetch(`/api/students/${encodeURIComponent(first.roll)}/history?limit=10`, { cache: "no-store" });
+        const r2 = await fetch(`/api/persons/${encodeURIComponent(first.uniqueId || first.roll)}/history?limit=10`, {
+          headers: getAuthHeaders(),
+          cache: "no-store",
+        });
         const j2 = await r2.json();
         if (!cancelled) {
-          setActivities(Array.isArray(j2.data) ? j2.data : []);
+          setActivities(Array.isArray(j2?.data?.history) ? j2.data.history : []);
           setLoading(false);
         }
       } catch {

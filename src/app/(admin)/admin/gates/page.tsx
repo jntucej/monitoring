@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { GateDeviceTracker, GateDevice } from "@/components/admin/GateDeviceTracker";
-import { ShieldCheck, RefreshCw, AlertCircle, Signal } from "lucide-react";
+import { AlertCircle, Signal } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 
 export default function AdminGatesPage() {
   const [devices, setDevices] = useState<GateDevice[]>([]);
@@ -33,11 +34,8 @@ export default function AdminGatesPage() {
     }
   };
 
-  useEffect(() => {
-    fetchDevices();
-    const interval = setInterval(fetchDevices, 20000); // 20s auto-refresh
-    return () => clearInterval(interval);
-  }, []);
+  // Live toggle drives refetch; polls every 20s while Live.
+  useLiveRefresh(fetchDevices, { intervalMs: 20000 });
 
   return (
     <div className="p-6 space-y-6">
@@ -52,14 +50,6 @@ export default function AdminGatesPage() {
             Monitor real-time gate terminal status, operator shifts, scan activity, and hardware health.
           </p>
         </div>
-        <button
-          onClick={fetchDevices}
-          disabled={loading}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--action-primary)] text-white font-medium text-sm hover:opacity-90 transition disabled:opacity-50"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-          Refresh Status
-        </button>
       </div>
 
       {error && (
@@ -75,7 +65,7 @@ export default function AdminGatesPage() {
           <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
-        <GateDeviceTracker devices={devices} onRefresh={fetchDevices} />
+        <GateDeviceTracker devices={devices} />
       )}
     </div>
   );

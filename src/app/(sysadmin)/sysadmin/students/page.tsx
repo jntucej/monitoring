@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
   GraduationCap, Search, RefreshCw, UserPlus, Edit, Trash2,
@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { BulkUserImportModal } from "@/components/sysadmin/BulkUserImportModal";
 
 interface StudentRecord {
@@ -22,6 +23,7 @@ interface StudentRecord {
   status: "ACTIVE" | "SUSPENDED" | string;
   hostelRoom?: string;
   isHosteller?: boolean;
+  createdAt?: string;
   metadata?: Record<string, any>;
   studentDetails?: {
     roll?: string;
@@ -44,6 +46,7 @@ export default function SysAdminStudentsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingStudent, setEditingStudent] = useState<StudentRecord | null>(null);
   const [busy, setBusy] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const [createForm, setCreateForm] = useState({
     roll: "", name: "", email: "", phone: "", branch: "CSE",
@@ -58,20 +61,26 @@ export default function SysAdminStudentsPage() {
 
   const loadStudents = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const res = await fetch("/api/students", { headers: getAuthHeaders(), cache: "no-store" });
-      const json = await res.json();
-      if (res.ok && Array.isArray(json.data)) {
+      const json = await res.json().catch(() => ({ success: false, error: { message: "Invalid server response." } }));
+      if (res.ok && json.success && Array.isArray(json.data)) {
         setStudents(json.data);
       } else {
-        addToast({ variant: "error", title: "Error", message: json.error?.message || "Failed to load student roster" });
+        const msg = json.error?.message || `Failed to load student roster (HTTP ${res.status})`;
+        setLoadError(msg);
+        addToast({ variant: "error", title: "Error", message: msg });
       }
     } catch {
-      addToast({ variant: "error", title: "Error", message: "Network error loading students" });
+      const msg = "Network error loading students";
+      setLoadError(msg);
+      addToast({ variant: "error", title: "Error", message: msg });
     } finally { setLoading(false); }
   }, [addToast]);
 
-  useEffect(() => { loadStudents(); }, [loadStudents]);
+  // Live toggle drives refetch; polls every 30s while Live.
+  useLiveRefresh(loadStudents, { intervalMs: 30000 });
 
   const handleCreateStudent = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,11 +103,14 @@ export default function SysAdminStudentsPage() {
           uniqueId: createForm.roll, name: createForm.name, role: "student",
           email: studentEmail, phone: createForm.phone || undefined,
           department: createForm.branch || undefined,
+          departmentId: createForm.branch || undefined,
+          hostelRoom: createForm.hostelRoom || undefined,
+          isHosteller: createForm.isHosteller,
           metadata: { ...parsedMeta, hostelRoom: createForm.hostelRoom, isHosteller: createForm.isHosteller },
         }),
       });
-      const json = await res.json();
-      if (res.ok) {
+      const json = await res.json().catch(() => ({ success: false, error: { message: "Invalid server response." } }));
+      if (res.ok && json.success) {
         addToast({ variant: "success", title: "Created", message: `Student ${createForm.name} added.` });
         setShowCreateModal(false);
         setCreateForm({ roll: "", name: "", email: "", phone: "", branch: "CSE", hostelRoom: "", isHosteller: false, customMetaJson: "{}" });
@@ -132,8 +144,8 @@ export default function SysAdminStudentsPage() {
           metadata: { ...parsedMeta, hostelRoom: editForm.hostelRoom, isHosteller: editForm.isHosteller },
         }),
       });
-      const json = await res.json();
-      if (res.ok) {
+      const json = await res.json().catch(() => ({ success: false, error: { message: "Invalid server response." } }));
+      if (res.ok && json.success !== false) {
         addToast({ variant: "success", title: "Updated", message: `Student updated.` });
         setEditingStudent(null);
         loadStudents();
@@ -209,6 +221,14 @@ export default function SysAdminStudentsPage() {
     return Array.from(set).sort();
   }, [students]);
 
+  // ponytail: newest 5 by createdAt — needs /api/students to return createdAt
+  const recentStudents = useMemo(() => {
+    return [...students]
+      .filter((s) => s.createdAt)
+      .sort((a, b) => (a.createdAt! < b.createdAt! ? 1 : -1))
+      .slice(0, 5);
+  }, [students]);
+
 
   return (
     <AuthGuard allowedRoles={["sysadmin", "admin"]}>
@@ -222,9 +242,6 @@ export default function SysAdminStudentsPage() {
             <p className="text-sm text-slate-400 mt-1">Manage student roster. {students.length} records.</p>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => loadStudents()} className="p-2.5 rounded-xl bg-slate-800/80 text-slate-300 hover:bg-slate-700 border border-slate-700/50" title="Refresh">
-              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-            </button>
             <button onClick={() => setShowBulkModal(true)} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-600 text-white text-sm font-semibold hover:bg-sky-500">
               <Upload className="w-4 h-4" /> Bulk Import
             </button>
@@ -253,6 +270,35 @@ export default function SysAdminStudentsPage() {
         </div>
 
 
+        {loadError && (
+          <div className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-red-800/60 bg-red-950/40 text-sm text-red-300">
+            <span><strong className="font-semibold">Failed to load roster:</strong> {loadError}</span>
+            <button onClick={() => loadStudents()} className="px-3 py-1.5 rounded-lg bg-red-900/60 text-red-100 text-xs font-semibold hover:bg-red-800 whitespace-nowrap">Retry</button>
+          </div>
+        )}
+
+        {/* Recently added — quick access to edit the newest students */}
+        {recentStudents.length > 0 && (
+          <div>
+            <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <UserPlus className="w-3.5 h-3.5 text-emerald-400" /> Recently Added
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {recentStudents.map((s) => (
+                <div key={s.id} className="flex items-center gap-2 pl-3 pr-1.5 py-1.5 rounded-xl bg-[#0d1220] border border-emerald-900/50">
+                  <div className="text-xs">
+                    <span className="font-semibold text-white">{s.name}</span>
+                    <span className="ml-2 font-mono text-emerald-400">{s.roll || s.uniqueId}</span>
+                  </div>
+                  <button onClick={() => openEditModal(s)} className="p-1.5 rounded-lg hover:bg-slate-700 text-blue-400" title={`Edit ${s.name}`}>
+                    <Edit className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Table */}
         <div className="border border-slate-800 rounded-xl overflow-hidden bg-[#0d1220]">
           <div className="overflow-x-auto">
@@ -271,7 +317,19 @@ export default function SysAdminStudentsPage() {
                 {loading ? (
                   <tr><td colSpan={6} className="px-4 py-12 text-center text-slate-500"><RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2" />Loading...</td></tr>
                 ) : filteredStudents.length === 0 ? (
-                  <tr><td colSpan={6} className="px-4 py-12 text-center text-slate-500">No students found.</td></tr>
+                  <tr>
+                    <td colSpan={6} className="px-4 py-12 text-center text-slate-500">
+                      No students found.
+                      {students.length === 0 && !search && !loadError && (
+                        <div className="mt-2 text-xs text-slate-600 max-w-md mx-auto">
+                          DB has rows but this list is empty? The server may be falling back to the
+                          anon client (RLS silently returns 0 rows). Verify
+                          <code className="mx-1 px-1 py-0.5 rounded bg-slate-800 text-emerald-400">SUPABASE_SERVICE_ROLE_KEY</code>
+                          is set in the deployment environment, then redeploy.
+                        </div>
+                      )}
+                    </td>
+                  </tr>
                 ) : (
                   filteredStudents.map((s) => (
                     <tr key={s.id} className="hover:bg-slate-800/40 transition-colors">

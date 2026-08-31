@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { HardHat, RefreshCw, AlertCircle } from "lucide-react";
+import React, { useState } from "react";
+import { HardHat, AlertCircle } from "lucide-react";
 import { WorkerShiftTracker, WorkerShift } from "@/components/admin/WorkerShiftTracker";
 import { getAuthHeaders } from "@/lib/utils";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh"
+import { CampusStatusBar } from "@/components/admin/CampusStatusBar";
 
 export default function AdminWorkersPage() {
   const [shifts, setShifts] = useState<WorkerShift[]>([]);
@@ -41,12 +43,13 @@ export default function AdminWorkersPage() {
     }
   };
 
-  useEffect(() => {
-    fetchShifts();
-  }, []);
+  // Live toggle drives refetch; polls every 30s while Live.
+  useLiveRefresh(fetchShifts, { intervalMs: 30000 });
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="min-h-screen bg-[var(--bg)]">
+      <CampusStatusBar />
+      <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -58,14 +61,6 @@ export default function AdminWorkersPage() {
             Track daily worker shifts, contractor compliance, late check-ins, and duty progress.
           </p>
         </div>
-        <button
-          onClick={fetchShifts}
-          disabled={loading}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--action-primary)] text-white font-medium text-sm hover:opacity-90 transition disabled:opacity-50"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-          Refresh Shifts
-        </button>
       </div>
 
       {error && (
@@ -82,6 +77,7 @@ export default function AdminWorkersPage() {
       ) : (
         <WorkerShiftTracker shifts={shifts} summary={summary} />
       )}
+    </div>
     </div>
   );
 }

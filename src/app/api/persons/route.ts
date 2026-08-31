@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomBytes } from "crypto";
 import { findAllPersons, searchPersons, findPersonByUniqueId, findPersonsByType, getLinkedPersons, mPerson } from "@/lib/db";
 import { getSupabaseServiceClient } from "@/lib/supabaseClient";
 import { withAuthorization } from "@/middleware/authorization";
@@ -123,7 +124,7 @@ async function handlePost(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { uniqueId, fullName, personType, department, designation, email, phone } = body;
+    const { uniqueId, fullName, personType, department, designation, email, phone } = body || {};
 
     if (!uniqueId || !fullName || !personType) {
       return NextResponse.json(
@@ -132,21 +133,40 @@ async function handlePost(req: NextRequest) {
       );
     }
 
-    const id = crypto.randomUUID();
+    const cleanEmail = email?.trim().toLowerCase() || `${uniqueId.trim().toLowerCase()}@jntuhcej.ac.in`;
+    const tempPassword = randomBytes(16).toString("hex") + "Aa1!";
+    const service = getSupabaseServiceClient();
+
+    const { data: authData, error: authErr } = await service.auth.admin.createUser({
+      email: cleanEmail,
+      password: tempPassword,
+      email_confirm: true,
+      user_metadata: { name: String(fullName).trim(), role: personType, unique_id: uniqueId.trim().toUpperCase() },
+    });
+
+    if (authErr || !authData?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: { code: "AUTH_ERROR", message: authErr?.message || "Failed to create authentication account" } },
+        { status: 500 }
+      );
+    }
+
+    const id = authData.user.id;
     const userRow = {
       id,
       unique_id: uniqueId.trim().toUpperCase(),
-      name: fullName,
+      name: String(fullName).trim(),
       role: personType,
-      email: email || `${uniqueId.trim().toLowerCase()}@gatekeeper.edu`,
+      email: cleanEmail,
       phone: phone || null,
       department_id: department || null,
       status: "ACTIVE",
+      login_identifier: uniqueId.trim().toUpperCase(),
     };
 
-    const service = getSupabaseServiceClient();
     const { data: newUser, error } = await service.from("users").insert(userRow).select().single();
     if (error || !newUser) {
+      await service.auth.admin.deleteUser(id).catch(() => {});
       return NextResponse.json(
         { success: false, error: { code: "DB_ERROR", message: error?.message || "Database insert failed" } },
         { status: 500 }
@@ -154,18 +174,18 @@ async function handlePost(req: NextRequest) {
     }
 
     if (["faculty", "staff", "worker"].includes(personType)) {
-      await service.from("employee_details").insert({
+      await service.from("employee_details").upsert({
         user_id: id,
         employee_id: uniqueId.trim().toUpperCase(),
         designation: designation || null,
         department_id: department || null,
-      });
+      }, { onConflict: "user_id" });
     } else if (personType === "student") {
-      await service.from("student_details").insert({
+      await service.from("student_details").upsert({
         user_id: id,
         roll: uniqueId.trim().toUpperCase(),
         department_id: department || null,
-      });
+      }, { onConflict: "user_id" });
     }
 
     return NextResponse.json({ success: true, data: mPerson(newUser) });

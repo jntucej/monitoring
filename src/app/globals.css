@@ -870,3 +870,118 @@ button, a, [role="button"], .clickable-card {
   }
 }
 
+/* ============================================================
+   GLOSSY THEME TEXT COLOR FIXES — Override hardcoded dark-mode colors
+   ============================================================ */
+
+/* Primary text colors — force dark text on light backgrounds */
+html.glass [class*="text-white"],
+html.glass [class*="text-slate-100"],
+html.glass [class*="text-slate-200"],
+html.glass [class*="text-slate-300"],
+html.glass [class*="text-gray-100"],
+html.glass [class*="text-gray-200"],
+html.glass [class*="text-gray-300"] {
+  color: var(--text-secondary, #334155) !important;
+}
+
+html.glass [class*="text-slate-400"],
+html.glass [class*="text-gray-400"] {
+  color: var(--text-muted, #64748b) !important;
+}
+
+html.glass [class*="text-slate-500"],
+html.glass [class*="text-gray-500"] {
+  color: var(--text-muted, #64748b) !important;
+}
+
+/* Background overrides — dark backgrounds on glossy must become light */
+html.glass [class*="bg-slate-900"],
+html.glass [class*="bg-slate-800"],
+html.glass [class*="bg-slate-700"],
+html.glass [class*="bg-gray-900"],
+html.glass [class*="bg-gray-800"],
+html.glass [class*="bg-gray-700"] {
+  background-color: var(--bg-surface, rgba(255,255,255,0.76)) !important;
+}
+
+html.glass [class*="bg-slate-950"],
+html.glass [class*="bg-gray-950"] {
+  background-color: var(--bg-base, #edf4fe) !important;
+}
+
+/* Force text on those dark backgrounds to be readable */
+html.glass [class*="bg-slate-900"] *,
+html.glass [class*="bg-slate-800"] *,
+html.glass [class*="bg-slate-700"] *,
+html.glass [class*="bg-gray-900"] *,
+html.glass [class*="bg-gray-800"] *,
+html.glass [class*="bg-gray-700"] *,
+html.glass [class*="bg-slate-950"] *,
+html.glass [class*="bg-gray-950"] * {
+  color: var(--text-primary, #0f172a) !important;
+}
+
+/* Operator/Scanner dark panel overrides */
+html.glass .scanner-panel,
+html.glass [class*="bg-slate-950"],
+html.glass [class*="bg-slate-900"] {
+  background: var(--bg-surface, rgba(255,255,255,0.76)) !important;
+  color: var(--text-primary, #0f172a) !important;
+}
+
+html.glass .scanner-panel *,
+html.glass [class*="bg-slate-950"] *,
+html.glass [class*="bg-slate-900"] * {
+  color: var(--text-primary, #0f172a) !important;
+}
+
+/* Specific component fixes */
+html.glass .bg-gray-800,
+html.glass .bg-gray-900 {
+  background-color: var(--bg-elevated, rgba(255,255,255,0.92)) !important;
+}
+
+html.glass .bg-gray-800 *,
+html.glass .bg-gray-900 * {
+  color: var(--text-primary, #0f172a) !important;
+}
+
+/* Navbar/sidebar dark backgrounds */
+html.glass .sidebar,
+html.glass [class*="bg-slate-900"],
+html.glass [class*="bg-slate-800"] {
+  background: var(--bg-surface, rgba(255,255,255,0.76)) !important;
+}
+
+/* Input fields on glossy */
+html.glass input,
+html.glass textarea,
+html.glass select {
+  background-color: var(--bg-elevated, rgba(255,255,255,0.92)) !important;
+  color: var(--text-primary, #0f172a) !important;
+  border-color: var(--border, rgba(255,255,255,0.85)) !important;
+}
+
+/* Table rows on glossy */
+html.glass table tbody tr {
+  background-color: var(--bg-surface, rgba(255,255,255,0.76)) !important;
+  color: var(--text-primary, #0f172a) !important;
+}
+
+html.glass table tbody tr:hover {
+  background-color: var(--bg-elevated, rgba(255,255,255,0.92)) !important;
+}
+
+/* Modal/dialog dark overrides */
+html.glass [class*="bg-slate-900"],
+html.glass [class*="bg-gray-900"] {
+  background: var(--bg-surface, rgba(255,255,255,0.76)) !important;
+}
+
+/* Badge & tag text */
+html.glass [class*="bg-slate-800"] [class*="text-slate-"],
+html.glass [class*="bg-gray-800"] [class*="text-gray-"] {
+  color: var(--text-secondary, #334155) !important;
+}
+

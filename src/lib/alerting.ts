@@ -26,53 +26,9 @@ export interface AlertHistory {
   status: "active" | "resolved";
 }
 
-let inMemoryRules: AlertRule[] = [
-  {
-    id: "rule-1",
-    name: "High API Error Rate",
-    metric: "http_requests_failed_pct",
-    threshold: 5,
-    durationMinutes: 5,
-    severity: "critical",
-    channel: "opsgenie",
-    enabled: true,
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "rule-2",
-    name: "High DB Response Latency",
-    metric: "db_query_duration_ms",
-    threshold: 500,
-    durationMinutes: 3,
-    severity: "warning",
-    channel: "pagerduty",
-    enabled: true,
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "rule-3",
-    name: "Gate Controller Disconnection",
-    metric: "gate_heartbeat_offline_mins",
-    threshold: 10,
-    durationMinutes: 10,
-    severity: "critical",
-    channel: "webhook",
-    enabled: true,
-    createdAt: new Date().toISOString(),
-  },
-];
+let inMemoryRules: AlertRule[] = [];
 
-let inMemoryAlerts: AlertHistory[] = [
-  {
-    id: "alert-101",
-    ruleId: "rule-3",
-    ruleName: "Gate Controller Disconnection",
-    severity: "critical",
-    message: "Gate #3 turnstile controller lost heartbeat for 12 minutes.",
-    triggeredAt: new Date(Date.now() - 3600000).toISOString(),
-    status: "resolved",
-  },
-];
+let inMemoryAlerts: AlertHistory[] = [];
 
 export async function getAlertRules(): Promise<AlertRule[]> {
   try {

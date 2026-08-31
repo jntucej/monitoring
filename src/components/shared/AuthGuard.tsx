@@ -18,12 +18,16 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   const { user, authenticated, checkSession } = useAuthStore();
   const [isChecking, setIsChecking] = useState(true);
 
+  const userId = user?.id;
+  const userRole = user?.role;
+  const gateId = user?.gateId;
+
   useEffect(() => {
-    // Wait until store has hydrated from localStorage
+    // Wait until store has hydrated from localStorage/sessionStorage
     if (!hasHydrated) return;
 
-    // If not authenticated or no user set, redirect to login with role hint if available
-    if (!authenticated || !user) {
+    // If not authenticated or no user set, redirect to login
+    if (!authenticated || !userId) {
       let targetRole: Role | null = null;
 
       if (typeof window !== "undefined") {
@@ -47,15 +51,19 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
     }
 
     // Check role authorization if specified
-    if (allowedRoles && allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
-      const defaultRoute = getDefaultRouteForRole(user.role, user.gateId);
+    if (allowedRoles && allowedRoles.length > 0 && userRole && !allowedRoles.includes(userRole)) {
+      const defaultRoute = getDefaultRouteForRole(userRole, gateId);
       router.replace(defaultRoute);
       return;
     }
 
     setIsChecking(false);
+  }, [hasHydrated, authenticated, userId, userRole, gateId, allowedRoles, router]);
 
-    // Revalidate session asynchronously in background without blocking rendering
+  // Revalidate session asynchronously in background without causing infinite re-render loop
+  useEffect(() => {
+    if (!hasHydrated || !authenticated || !userId) return;
+
     checkSession();
 
     // Auto-refresh session check every 5 minutes
@@ -64,7 +72,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
     }, 5 * 60 * 1000);
 
     return () => clearInterval(interval);
-  }, [user, authenticated, allowedRoles, router, hasHydrated, checkSession]);
+  }, [hasHydrated, authenticated, userId, checkSession]);
 
   if (!hasHydrated || isChecking || !authenticated || !user) {
     return (

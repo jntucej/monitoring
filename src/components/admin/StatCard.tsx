@@ -4,13 +4,13 @@ import { useState } from "react";
 import { LucideIcon, ArrowUpRight, Activity } from "lucide-react";
 import { motion } from "framer-motion";
 import { CountUp, SineWaveLoader } from "@/components/shared/CountUp";
-import { WordByWordText } from "@/components/shared/WordByWordText";
 import { GlossyFloatingContainer } from "@/components/shared/GlossyFloatingContainer";
 import { Modal } from "@/components/ui/modal";
 import { useGlass } from "@/context/GlassContext";
 
 interface StatCardProps {
   label: string;
+  emoji?: string;
   value: string | number;
   icon: LucideIcon;
   color: string;
@@ -20,7 +20,7 @@ interface StatCardProps {
   isLoading?: boolean;
 }
 
-export function StatCard({ label, value, icon: Icon, color, trend, onClick, index = 0, isLoading = false }: StatCardProps) {
+export function StatCard({ label, emoji, value, icon: Icon, color, trend, onClick, index = 0, isLoading = false }: StatCardProps) {
   const { isLiveLoading } = useGlass();
   const [showModal, setShowModal] = useState(false);
   const numericValue = typeof value === "number" ? value : parseFloat(String(value).replace(/,/g, ""));
@@ -62,7 +62,8 @@ export function StatCard({ label, value, icon: Icon, color, trend, onClick, inde
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-1">
                 <p className="text-[10px] sm:text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider truncate">
-                  <WordByWordText text={label} />
+                  <span className="sm:hidden text-base">{emoji}</span>
+                  <span className="hidden sm:inline">{emoji ? `${emoji} ${label}` : label}</span>
                 </p>
                 <ArrowUpRight className="w-3.5 h-3.5 text-[var(--text-muted)] opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
               </div>

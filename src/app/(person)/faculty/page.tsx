@@ -7,11 +7,12 @@ import { RecentActivity } from "@/components/student/RecentActivity";
 import { PersonBadge } from "@/components/shared/PersonBadge";
 import { Briefcase, Building, Clock, FileText, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import type { Person } from "@/lib/types";
+import type { Person, Scan } from "@/lib/types";
 import { getAuthHeaders } from "@/lib/utils";
 
 export default function FacultyDashboardPage() {
   const [person, setPerson] = useState<Person | null>(null);
+  const [personData, setPersonData] = useState<{ campusStatus?: string; lastScan?: Scan | null; history?: Scan[] }>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,6 +34,11 @@ export default function FacultyDashboardPage() {
         
         if (!cancelled && json.success) {
           setPerson(json.data?.person ?? json.data ?? null);
+          setPersonData({
+            campusStatus: json.data?.campusStatus,
+            lastScan: json.data?.lastScan ?? null,
+            history: Array.isArray(json.data?.history) ? json.data.history : [],
+          });
         }
       } catch (err) {
         console.error("Failed to load faculty details:", err);
@@ -58,11 +64,11 @@ export default function FacultyDashboardPage() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-extrabold tracking-tight text-[var(--text-primary)]">
-              Department Portal
+              <span className="sm:hidden">👨‍🏫</span><span className="hidden sm:inline">👨‍🏫 Department Portal</span>
             </h1>
             <PersonBadge type="faculty" />
           </div>
-          <p className="text-xs text-[var(--text-muted)] mt-1">
+          <p className="text-xs text-[var(--text-muted)] mt-1 hidden sm:block">
             Welcome back, {person?.fullName || "Professor"}. View your digital identity card and campus attendance history.
           </p>
         </div>
@@ -82,14 +88,23 @@ export default function FacultyDashboardPage() {
       {/* Main Grid: Digital ID & Stats */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="space-y-3">
-          <h2 className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-wider">Digital Faculty Identity Card</h2>
+          <h2 className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-wider"><span className="sm:hidden">🪪</span><span className="hidden sm:inline">🪪 Digital Faculty ID</span></h2>
           <PersonIdCard person={person} type="faculty" />
         </div>
 
         <div className="space-y-6">
           <div className="space-y-3">
-            <h2 className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-wider">Attendance Insights</h2>
-            <EmployeeStats loading={loading} />
+            <h2 className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-wider"><span className="sm:hidden">📊</span><span className="hidden sm:inline">📊 Attendance Insights</span></h2>
+            <EmployeeStats stats={{
+              isOnCampus: personData.campusStatus === undefined ? null : personData.campusStatus === "IN",
+              lastScanTime: personData.lastScan?.timestamp,
+              lastScanType: personData.lastScan?.direction,
+              totalScansThisMonth: personData.history?.filter((s) => {
+                const d = new Date(s.timestamp);
+                const now = new Date();
+                return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+              }).length,
+            }} loading={loading} />
           </div>
 
           {/* Department Card */}
@@ -112,7 +127,7 @@ export default function FacultyDashboardPage() {
       <div className="space-y-4 pt-4 border-t border-[var(--border)]">
         <div className="flex items-center gap-2">
           <Clock className="w-5 h-5 text-emerald-500" />
-          <h2 className="text-lg font-bold text-[var(--text-primary)]">Entrance & Departure History</h2>
+          <h2 className="text-lg font-bold text-[var(--text-primary)]"><span className="sm:hidden">🕐</span><span className="hidden sm:inline">🕐 Entrance & Departure</span></h2>
         </div>
         <RecentActivity />
       </div>

@@ -1,6 +1,6 @@
 import { supabase } from './supabaseClient';
 
-export type AuditAction = 
+export type AuditAction =
   | 'LOGIN'
   | 'LOGOUT'
   | 'LOGIN_FAILED'
@@ -25,7 +25,9 @@ export type AuditAction =
   | 'GATE_OFFLINE'
   | 'GATE_ONLINE'
   | 'SMART_SCHEDULE_APPLIED'
-  | 'CRON_REPORTS_EXECUTED';
+  | 'CRON_REPORTS_EXECUTED'
+  | 'BACK_GATE_GEO_MISMATCH';
+
 
 export interface AuditLog {
   id?: string;

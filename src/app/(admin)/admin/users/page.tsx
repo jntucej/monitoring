@@ -102,16 +102,6 @@ export default function AdminUsersPage() {
             <Grid className="w-3.5 h-3.5" />
             {activeTab === "heatmap" ? "View Role Directory" : "View Branch Heatmaps"}
           </button>
-          <button
-            onClick={() => {
-              loadUsers();
-              loadDepartments();
-            }}
-            disabled={loading || loadingDepts}
-            className="p-1.5 rounded-lg bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading || loadingDepts ? "animate-spin" : ""}`} />
-          </button>
         </div>
       </div>
 

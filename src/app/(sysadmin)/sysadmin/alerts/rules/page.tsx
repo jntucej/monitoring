@@ -46,8 +46,8 @@ export default function AlertRulesPage() {
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
-    metric: "unauthorized_entry_burst",
-    threshold: "5",
+    metric: "",
+    threshold: "",
     durationMinutes: "5",
     severity: "warning",
     channel: "opsgenie",

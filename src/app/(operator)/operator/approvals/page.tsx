@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { CheckCircle, XCircle, ShieldCheck, Clock, RefreshCw, MessageSquare } from "lucide-react";
+import { useState, useCallback } from "react";
+import { CheckCircle, XCircle, ShieldCheck, Clock, MessageSquare } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { getAuthHeaders } from "@/lib/utils";
 import type { GatePass } from "@/lib/types";
 import { getPassTypeName } from "@/hooks/usePassTypes";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 
 export default function WardenApprovalsPage() {
   const [passes, setPasses] = useState<GatePass[]>([]);
@@ -33,7 +34,8 @@ export default function WardenApprovalsPage() {
     }
   }, []);
 
-  useEffect(() => { loadPasses(); }, [loadPasses]);
+  // Live toggle drives refetch; polls every 20s while Live.
+  useLiveRefresh(loadPasses, { intervalMs: 20000 });
 
   const handleAction = useCallback(async (passId: string, action: "approve" | "reject", comment: string) => {
     if (action === "reject" && !comment.trim()) {
@@ -66,14 +68,13 @@ export default function WardenApprovalsPage() {
             <ShieldCheck className="w-5 h-5 text-indigo-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-[var(--text-primary)]">Warden Authorizations</h1>
-            <p className="text-xs text-[var(--text-muted)]">Review and approve or reject outgoing student passes</p>
+            <h1 className="text-2xl font-bold text-[var(--text-primary)]">
+              <span className="sm:hidden">🛡️</span>
+              <span className="hidden sm:inline">🛡️ Warden Authorizations</span>
+            </h1>
+            <p className="text-xs text-[var(--text-muted)] hidden sm:block">Review and approve or reject outgoing student passes</p>
           </div>
         </div>
-        <button onClick={loadPasses}
-          className="p-2 rounded-lg hover:bg-white/5 text-[var(--text-muted)] transition-colors" title="Refresh">
-          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-        </button>
       </div>
 
       {error && (

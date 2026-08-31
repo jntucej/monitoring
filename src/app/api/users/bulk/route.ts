@@ -42,7 +42,11 @@ async function handlePost(req: NextRequest) {
     const results: Array<{ email: string; success: boolean; id?: string; error?: string }> = [];
 
     for (const item of usersList) {
-      const { name, email, role, status = "ACTIVE", employeeId, phone, gateId, assignedHostel } = item || {};
+      const {
+        name, email, role, status = "ACTIVE",
+        employeeId, uniqueId, phone, gateId,
+        assignedHostel, hostelRoom, departmentId, department, isHosteller,
+      } = item || {};
 
       if (!email || !EMAIL_PATTERN.test(email)) {
         results.push({ email: email || "unknown", success: false, error: "Invalid or missing email" });
@@ -102,9 +106,13 @@ async function handlePost(req: NextRequest) {
           role: role as Role,
           status,
           employeeId: employeeId?.trim(),
+          uniqueId: (uniqueId || employeeId)?.trim(),
           phone: phone?.trim(),
           gateId,
-          assignedHostel,
+          assignedHostel: assignedHostel || hostelRoom,
+          hostelRoom,
+          isHosteller,
+          departmentId: departmentId || department,
         });
 
         if (!profile) {

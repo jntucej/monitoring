@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Users, RefreshCw, AlertCircle } from "lucide-react";
+import React, { useState } from "react";
+import { Users, AlertCircle } from "lucide-react";
 import { FacultyTracking } from "@/components/admin/FacultyTracking";
 import { FacultyMemberAttendance, DepartmentAttendanceSummary } from "@/app/api/faculty/attendance/route";
 import { getAuthHeaders } from "@/lib/utils";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh"
+import { CampusStatusBar } from "@/components/admin/CampusStatusBar";
 
 export default function AdminFacultyPage() {
   const [records, setRecords] = useState<FacultyMemberAttendance[]>([]);
@@ -46,12 +48,13 @@ export default function AdminFacultyPage() {
     }
   };
 
-  useEffect(() => {
-    fetchFacultyAttendance();
-  }, []);
+  // Live toggle drives refetch; polls every 30s while Live.
+  useLiveRefresh(fetchFacultyAttendance, { intervalMs: 30000 });
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="min-h-screen bg-[var(--bg)]">
+      <CampusStatusBar />
+      <div className="p-6 space-y-6">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -63,14 +66,6 @@ export default function AdminFacultyPage() {
             Real-time entry/exit logs, punctuality tracking, and department-level attendance metrics.
           </p>
         </div>
-        <button
-          onClick={fetchFacultyAttendance}
-          disabled={loading}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm transition disabled:opacity-50"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-          Refresh Live Data
-        </button>
       </div>
 
       {error && (
@@ -91,6 +86,7 @@ export default function AdminFacultyPage() {
           departmentSummaries={departmentSummaries}
         />
       )}
+    </div>
     </div>
   );
 }

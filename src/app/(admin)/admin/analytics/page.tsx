@@ -5,9 +5,10 @@ import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, Legend
 } from "recharts";
 import { 
-  Download, RefreshCw, FileText, FileSpreadsheet, UserCheck, HardHat, Clock, Building2, Calendar, TrendingUp
+  Download, FileText, FileSpreadsheet, UserCheck, HardHat, Clock, Building2, Calendar, TrendingUp
 } from "lucide-react";
 import { useUIStore } from "@/stores/uiStore";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { OccupancyStats, DailyStats, VisitorAnalytics, EnhancedAnalytics } from "@/lib/analytics-types";
 import { getAuthHeaders } from "@/lib/utils";
 
@@ -67,6 +68,9 @@ export default function AdminAnalyticsPage() {
   useEffect(() => {
     loadData();
   }, [dateRange]);
+
+  // Live toggle also refetches when flipped back on.
+  useLiveRefresh(loadData, { intervalMs: 60000 });
 
   const handleExport = async (format: "pdf" | "csv") => {
     try {
@@ -140,13 +144,7 @@ export default function AdminAnalyticsPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">Analytics Dashboard</h1>
-          <p className="text-sm text-muted-foreground">
-            Campus access insights and person-type occupancy trends
-          </p>
-        </div>
+      <div className="flex items-center justify-end flex-wrap gap-4">
         <div className="flex items-center gap-2 flex-wrap">
           <input
             type="date"
@@ -160,13 +158,6 @@ export default function AdminAnalyticsPage() {
             onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
             className="px-3 py-1.5 rounded-lg bg-[var(--bg-surface)] border border-[var(--border)] text-sm"
           />
-          <button
-            onClick={() => loadData()}
-            className="px-3 py-1.5 rounded-lg bg-[var(--action-primary)] text-white text-sm font-medium flex items-center gap-1 hover:opacity-90 transition"
-          >
-            <RefreshCw className="w-4 h-4" />
-            Refresh
-          </button>
           <button
             onClick={() => handleExport("csv")}
             className="px-3 py-1.5 rounded-lg bg-[var(--bg-surface)] border border-[var(--border)] text-sm font-medium flex items-center gap-1 hover:bg-[var(--bg-elevated)] transition"

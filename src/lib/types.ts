@@ -293,6 +293,16 @@ export interface PersonTypeStats {
   attendanceRate?: number;
 }
 
+export interface CampusStatusCardConfig {
+  type: PersonType;
+  label: string;
+  icon: string;
+  color: string;
+  stats: PersonTypeStats;
+  href: string;
+  footer: string;
+}
+
 export interface DashboardData {
   onCampus: number;
   todayIn: number;

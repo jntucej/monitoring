@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { PersonBadge } from "@/components/shared/PersonBadge";
-import { Building, Users, CheckCircle2, XCircle, Search, RefreshCw, ShieldAlert } from "lucide-react";
+import { Building, Users, CheckCircle2, XCircle, Search, ShieldAlert } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 
 interface FacultyMember {
   id: string;
@@ -42,9 +43,8 @@ export default function HodConsolePage() {
     }
   };
 
-  useEffect(() => {
-    fetchDepartmentFaculty();
-  }, []);
+  // Live toggle drives refetch; polls every 30s while Live.
+  useLiveRefresh(fetchDepartmentFaculty, { intervalMs: 30000 });
 
   const filteredFaculty = facultyList.filter(
     (f) =>
@@ -66,25 +66,16 @@ export default function HodConsolePage() {
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-extrabold tracking-tight text-[var(--text-primary)] flex items-center gap-2">
               <Building className="w-6 h-6 text-emerald-400" />
-              HOD Department Console
+              <span className="sm:hidden">🏛️</span><span className="hidden sm:inline">🏛️ HOD Department Console</span>
             </h1>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
               {department}
             </span>
           </div>
-          <p className="text-xs text-[var(--text-muted)] mt-1">
+          <p className="text-xs text-[var(--text-muted)] mt-1 hidden sm:block">
             Departmental supervision, faculty attendance monitoring, and campus presence status.
           </p>
         </div>
-
-        <button
-          onClick={fetchDepartmentFaculty}
-          disabled={loading}
-          className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-          Refresh Status
-        </button>
       </div>
 
       {/* Overview Stat Cards */}
@@ -117,7 +108,7 @@ export default function HodConsolePage() {
       {/* Faculty List Section */}
       <div className="space-y-4 pt-2">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <h2 className="text-lg font-bold text-[var(--text-primary)]">Department Faculty Roster</h2>
+          <h2 className="text-lg font-bold text-[var(--text-primary)]"><span className="sm:hidden">👥</span><span className="hidden sm:inline">👥 Faculty Roster</span></h2>
           
           <div className="relative w-full sm:w-64">
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-[var(--text-muted)]" />

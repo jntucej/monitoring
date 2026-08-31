@@ -13,6 +13,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { withRateLimit } from "@/lib/rate-limit";
 import { supabase, getSupabaseServiceClient } from "@/lib/supabaseClient";
+import { isMfaRequiredForAdmin } from "@/lib/authContext";
 
 const GENERIC_FAILURE = {
   success: false,
@@ -132,10 +133,10 @@ async function handleLogin(req: NextRequest) {
       );
     }
 
-    // SECURITY: sysadmins MUST have TOTP 2FA enrolled before a session is
-    // issued. Block login early (before any session token is minted) so an
-    // unenrolled admin can never hold usable credentials mid-setup.
-    if (profile.role === "sysadmin") {
+    // SECURITY (optional): sysadmins must have TOTP 2FA enrolled before a
+    // session is issued — but only when the deployment enables it via
+    // system_config.global_settings.mfaRequiredForAdmin (default OFF).
+    if (profile.role === "sysadmin" && (await isMfaRequiredForAdmin())) {
       const { data: mfaRow } = await service
         .from("users")
         .select("two_factor_enabled")

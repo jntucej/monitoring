@@ -917,9 +917,8 @@ CREATE INDEX IF NOT EXISTS idx_daily_stats_gate_date ON daily_stats(gate_id, dat
 -- ============================================================================
 -- Gates are data-driven; no fixed gate-1/2/3 ids. Seed logical campus gates.
 INSERT INTO gates (gate_code, name, location, type, is_active) VALUES
-  ('MAIN',   'Main Gate',     'Main Entrance', 'main',    TRUE),
-  ('HOSTEL', 'Hostel Gate',   'Hostel Side',   'hostel',  TRUE),
-  ('BACK',   'Back Gate',     'Back Side',     'back',    FALSE)
+  ('MAIN',   'Main Campus Gate', 'Main Entrance',   'main',    TRUE),
+  ('HOSTEL', 'Hostel Gate 1',    'Boys Hostel Block A', 'hostel', TRUE)
 ON CONFLICT (gate_code) DO UPDATE
   SET name = EXCLUDED.name, location = EXCLUDED.location,
       type = EXCLUDED.type, is_active = EXCLUDED.is_active;
