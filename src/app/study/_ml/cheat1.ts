@@ -1,0 +1,9 @@
+import type { CS } from "./CheatData";
+
+export const cheat1: CS[] = [
+  { title: "Simple Linear Regression", def: "Predicts y from one feature X via best-fit line.", formula: "ŷ = mx + c", symbols: [["m","slope"],["c","intercept"],["ŷ","predicted"],["x","feature"],["y","target"]], examPoints: ["Fit minimises sum of squared residuals"], remember: "Best-fit line through the scatter." },
+  { title: "Multiple Linear Regression", def: "Linear model with many features.", formula: "ŷ = w0 + w1·x1 + ... + wn·xn", examPoints: ["Linear in parameters","Train via normal equations or gradient descent"], remember: "One weight per feature, summed up." },
+  { title: "Polynomial Regression", def: "Polynomial features X,X²,X³ — but linear weights, so curves.", formula: "ŷ = w0 + w1·x + w2·x² + ... + wp·xp", steps: ["Feature expansion","Linear fit","Predict"], examPoints: ["Nonlinear features, linear weights","High degree → overfitting"], remember: "Bend the line with powers." },
+  { title: "Logistic Regression", def: "Linear score → probability via sigmoid; classification.", formula: "σ(z)=1/(1+e−z); z=wx+b; P(y=1|x)=σ(z)", symbols: [["σ(z)","sigmoid"],["z","linear score"]], steps: ["Compute z=wx+b","Sigmoid→prob","Threshold 0.5→class"], pros: ["Probabilistic","Fast interpretable"], cons: ["Linear boundary only"], examPoints: ["Maps to (0,1)","BCE loss common"], remember: "Line in, squeeze through sigmoid, decide at 0.5." },
+  { title: "kNN", def: "Predict by majority vote/average of k nearest neighbors.", steps: ["Store all data","Compute distance","Pick k nearest","Vote/Average"], cons: ["Lazy—slow predict","Curse of dimensionality","Sensitive to scale"], examPoints: ["Standardise features","Small k=noisy, large k=smooth"], remember: "Your neighbors decide." },
+];

@@ -1,0 +1,10 @@
+import type { CS } from "./CheatData";
+
+export const cheat0: CS[] = [
+  { title: "What is ML", def: "Algorithms that improve automatically through experience (data), without explicit programming.", examPoints: ["Tom Mitchell: P measured by T improves with E", "Generalisation is the core goal"], remember: "Experience in, performance up." },
+  { title: "ML Paradigms", def: "Supervised, Unsupervised, Semi-supervised, Reinforcement.", examPoints: ["Supervised: labelled → predict output", "Unsupervised: unlabelled → find structure", "Semi-supervised: few labels + lots unlabelled", "Reinforcement: learn via rewards"], remember: "Labels? Supervised. No labels? Unsupervised. Rewards? Reinforcement." },
+  { title: "Data Types", def: "Structured (tabular) vs Unstructured (text/image). Numerical, Categorical (nominal/ordinal), Time-series.", examPoints: ["Categorical: nominal vs ordinal", "Unstructured needs preprocessing"], remember: "Know the type before you model." },
+  { title: "Pre-processing", def: "Clean, encode, scale, split — four moves before any model.", steps: ["Handle missing & outliers", "Encode categoricals (one-hot/label)", "Scale features (norm/standardise)", "Train/test split"], examPoints: ["Scale for distance models (kNN,SVM)", "Fit preprocessing on train only — avoid leakage"], remember: "Clean, scale, encode, split." },
+  { title: "Feature Engineering", def: "Create, transform, select features to expose signal.", examPoints: ["Good features > good models", "Transformation, subset selection, PCA"], remember: "Garbage features, garbage model." },
+  { title: "PCA", def: "Project onto uncorrelated axes (PCs) keeping max variance.", steps: ["Standardise", "Covariance", "Eigenvectors", "Rank by variance", "Keep top-k", "Project"], examPoints: ["Unsupervised dim-reduction", "Standardise first", "PC1 = most variance"], remember: "Project onto variance-maximising axes." },
+];

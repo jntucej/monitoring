@@ -1,10 +1,19 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { StudyHeader } from "./layout";
-import { ChevronRight, FileText, FlaskConical, Clock } from "lucide-react";
+import { ChevronRight, FileText, FlaskConical, Clock, BrainCircuit } from "lucide-react";
 
 const RESOURCES = [
+  {
+    href: "/study/ml/cheat",
+    title: "🧠 ML Cheat Sheets — Units I–III",
+    description: "Dense formula cards, algorithm steps, and memory triggers. Scan in under 30s.",
+    icon: BrainCircuit,
+    accent: "text-indigo-400",
+    bg: "bg-indigo-500/10 border-indigo-500/20",
+  },
   {
     href: "/study/notes",
     title: "Study Notes",
@@ -24,8 +33,6 @@ const RESOURCES = [
 ];
 
 export default function StudyIndexPage() {
-  const router = useRouter();
-
   return (
     <>
       <StudyHeader title="Study Portal" />
@@ -39,11 +46,10 @@ export default function StudyIndexPage() {
 
         <div className="grid gap-4 sm:grid-cols-2">
           {RESOURCES.map((r) => (
-            <button
+            <Link
               key={r.href}
-              type="button"
-              onClick={() => router.push(r.href)}
-              className="glass-card rounded-2xl p-5 text-left space-y-3 group cursor-pointer"
+              href={r.href}
+              className="glass-card rounded-2xl p-5 text-left space-y-3 group cursor-pointer block"
             >
               <div className={`w-10 h-10 rounded-xl border flex items-center justify-center ${r.bg}`}>
                 <r.icon className={`w-5 h-5 ${r.accent}`} />
@@ -55,7 +61,7 @@ export default function StudyIndexPage() {
                 </div>
                 <p className="text-xs text-[var(--text-muted)] mt-1 leading-relaxed">{r.description}</p>
               </div>
-            </button>
+            </Link>
           ))}
         </div>
 
