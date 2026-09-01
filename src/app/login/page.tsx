@@ -10,9 +10,8 @@ export default function UnifiedLoginPage() {
         <div className="absolute top-1/4 right-1/4 w-[28rem] h-[28rem] bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none" />
         
         <LoginForm
-          role="all"
           title="Login"
-          subtitle=" routing based on ur role."
+          subtitle="Enter your credentials or security PIN to access your dashboard."
         />
       </div>
     </Suspense>

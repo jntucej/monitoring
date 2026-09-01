@@ -6,7 +6,7 @@
  */
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { useEffect, useState } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 import type { User, Role } from "@/lib/types";
 
 interface AuthState {
@@ -87,7 +87,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       pinLogin: async (employeeId, pin) => {
         set({ loading: true });
         try {
-          // Convert to uppercase for consistency
           const cleanEmployeeId = employeeId.trim().toUpperCase();
           const response = await fetch("/api/auth/pin-login", {
             method: "POST",
@@ -95,21 +94,27 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             body: JSON.stringify({ employeeId: cleanEmployeeId, pin }),
           });
 
-          if (response.ok) {
-            const result = await response.json();
-            if (result.success && result.data) {
-              const { token, refreshToken, user } = result.data;
-              set({
-                user,
-                token,
-                refreshToken: refreshToken ?? null,
-                role: user.role as Role,
-                authenticated: true,
-                loading: false,
-              });
-              return { success: true };
-            }
+          const result = await response.json().catch(() => null);
+
+          if (response.ok && result?.success && result?.data) {
+            const { token, refreshToken, user } = result.data;
+            set({
+              user,
+              token,
+              refreshToken: refreshToken ?? null,
+              role: user.role as Role,
+              authenticated: true,
+              loading: false,
+            });
+            return { success: true };
           }
+
+          set({ loading: false });
+          return {
+            success: false,
+            error: result?.error?.message || "Invalid PIN",
+            code: result?.error?.code,
+          };
         } catch (error) {
           console.error("PIN login error:", error);
         }
@@ -271,21 +276,14 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 );
 
 export function useHasHydrated() {
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    const isHydrated = useAuthStore.persist.hasHydrated();
-    if (isHydrated) {
-      setHydrated(true);
-      return;
-    }
-    const unsubFinish = useAuthStore.persist.onFinishHydration(() => setHydrated(true));
-    setHydrated(useAuthStore.persist.hasHydrated());
-
-    return () => {
-      unsubFinish();
-    };
-  }, []);
-
-  return hydrated;
+  // useSyncExternalStore is the canonical way to read external store state —
+  // no setState-in-effect, no cascading renders, SSR-safe (renders false on server).
+  const subscribe = useCallback(
+    (onStoreChange: () => void) => {
+      const unsubFinish = useAuthStore.persist.onFinishHydration(onStoreChange);
+      return () => unsubFinish();
+    },
+    []
+  );
+  return useSyncExternalStore(subscribe, () => useAuthStore.persist.hasHydrated(), () => false);
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Lock,
@@ -15,12 +15,10 @@ import {
 import Link from "next/link";
 import { useAuthStore, useHasHydrated } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
-import { useRoles } from "@/hooks/useRoles";
 import type { Role } from "@/lib/types";
 import { getDefaultRouteForRole } from "@/lib/route-helpers";
 
 interface LoginFormProps {
-  role: Role | "all";
   title: string;
   subtitle: string;
 }
@@ -29,6 +27,8 @@ function formatLoginError(code?: string, defaultMsg?: string): string {
   switch (code) {
     case "INVALID_CREDENTIALS":
       return "Invalid username or password.";
+    case "INVALID_PIN":
+      return "Invalid PIN or user not found.";
     case "ACCOUNT_INACTIVE":
       return "Your account is inactive. Contact support.";
     case "MFA_REQUIRED":
@@ -41,31 +41,57 @@ function formatLoginError(code?: string, defaultMsg?: string): string {
   }
 }
 
-export function LoginForm({ role, title, subtitle }: LoginFormProps) {
+export function LoginForm({ title, subtitle }: LoginFormProps) {
   const router = useRouter();
   const hasHydrated = useHasHydrated();
   const { user, authenticated, login, pinLogin, loading } = useAuthStore();
   const { addToast } = useUIStore();
   const [showPassword, setShowPassword] = useState(false);
 
+  // Unified redirect: after login, route each role to its default dashboard.
+  // Reuses the shared route helper (ponytail: don't duplicate the 60-line switch).
+  const redirectAfterLogin = useCallback(
+    (role: Role | null) => {
+      if (!role) {
+        router.push("/");
+        return;
+      }
+      if (role === "operator") {
+        const authStore = useAuthStore.getState();
+        const u = authStore.user;
+        if (u?.gateId) {
+          router.push(`/gate/${u.gateId}`);
+          return;
+        }
+        // No assigned gate — pick the first active gate from the API.
+        fetch("/api/gates", {
+          headers: { Authorization: `Bearer ${authStore.token}` },
+        })
+          .then((res) => (res.ok ? res.json() : null))
+          .then((body) => {
+            if (body?.success && Array.isArray(body.data) && body.data.length > 0) {
+              const activeGate = body.data.find((g: { is_active?: boolean; isActive?: boolean }) => g.is_active || g.isActive) || body.data[0];
+              router.push(`/gate/${activeGate.id}`);
+            } else {
+              router.push("/");
+            }
+          })
+          .catch((err) => {
+            console.error("Failed to fetch gates for operator redirection:", err);
+            router.push("/");
+          });
+        return;
+      }
+      router.push(getDefaultRouteForRole(role));
+    },
+    [router]
+  );
+
   useEffect(() => {
     if (hasHydrated && authenticated && user) {
       redirectAfterLogin(user.role);
     }
-  }, [hasHydrated, authenticated, user]);
-
-  const { roles: fetchedRoles } = useRoles();
-  const roles = fetchedRoles.length > 0
-    ? fetchedRoles.map((r) => ({
-        name: r.display_name,
-        path: r.code === 'admin' ? '/login/admin' : r.code === 'operator' ? '/login/operator' : r.code === 'guardian' || r.code === 'parent' ? '/login/guardian' : `/login/${r.code}`,
-      }))
-    : [
-        { name: 'Admin', path: '/login/admin' },
-        { name: 'Operator', path: '/login/operator' },
-        { name: 'Guardian', path: '/login/guardian' },
-        { name: 'Users', path: '/login/student' },
-      ];
+  }, [hasHydrated, authenticated, user, redirectAfterLogin]);
 
   const [loginIdentifier, setLoginIdentifier] = useState("");
   const [passwordOrPin, setPasswordOrPin] = useState("");
@@ -118,13 +144,9 @@ export function LoginForm({ role, title, subtitle }: LoginFormProps) {
       return;
     }
 
-    // Role-specific login? The current AuthStore doesn't seem to enforce role strictly at login, 
-    // it probably checks or relies on user.role after login.
-    // For now, let's keep the logic as is.
-
     const isPurePin = /^\d{4,8}$/.test(passwordOrPin);
 
-    if (isPurePin || role === "operator") {
+    if (isPurePin) {
       const pinResult = await pinLogin(identifier, passwordOrPin);
       if (pinResult.success) {
         if (rememberMe) {
@@ -139,23 +161,7 @@ export function LoginForm({ role, title, subtitle }: LoginFormProps) {
         redirectAfterLogin(authStore.role);
         return;
       }
-
-      const result = await login(identifier, passwordOrPin);
-      if (result.success) {
-        if (rememberMe) {
-          localStorage.setItem("gate-monitor-remember", "true");
-        }
-        addToast({
-          title: "Access Granted",
-          message: `Authenticated successfully.`,
-          variant: "success",
-        });
-        const authStore = useAuthStore.getState();
-        redirectAfterLogin(authStore.role);
-        return;
-      }
-
-      triggerShake(formatLoginError(pinResult.code || result.code, pinResult.error || result.error));
+      triggerShake(formatLoginError(pinResult.code, pinResult.error));
       return;
     } else {
       const result = await login(identifier, passwordOrPin);
@@ -186,71 +192,6 @@ export function LoginForm({ role, title, subtitle }: LoginFormProps) {
     }
   };
 
-  // Helper function to redirect based on role after successful login
-  const redirectAfterLogin = async (role: Role | null) => {
-    switch (role) {
-      case "operator": {
-        const authStore = useAuthStore.getState();
-        const user = authStore.user;
-        console.log("LoginForm Redirecting Operator user:", JSON.stringify(user));
-        if (user?.gateId) {
-          router.push(`/gate/${user.gateId}`);
-        } else {
-          try {
-            const token = authStore.token;
-            const res = await fetch("/api/gates", {
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
-            });
-            const body = await res.json();
-            if (body.success && Array.isArray(body.data) && body.data.length > 0) {
-              const activeGate = body.data.find((g: any) => g.is_active || g.isActive) || body.data[0];
-              router.push(`/gate/${activeGate.id}`);
-            } else {
-              router.push("/");
-            }
-          } catch (err) {
-            console.error("Failed to fetch gates for operator redirection:", err);
-            router.push("/");
-          }
-        }
-        break;
-      }
-
-      case "admin":
-        router.push("/admin");
-        break;
-      case "sysadmin":
-        router.push("/sysadmin");
-        break;
-      case "supervisor":
-      case "warden":
-        router.push("/supervisor");
-        break;
-      case "faculty":
-        router.push("/faculty");
-        break;
-      case "staff":
-        router.push("/staff");
-        break;
-      case "worker":
-        router.push("/worker");
-        break;
-      case "student":
-        router.push("/student");
-        break;
-      case "guardian":
-        router.push("/guardian");
-        break;
-      case "visitor":
-        router.push("/visitor");
-        break;
-      default:
-        router.push("/");
-    }
-  };
-
   return (
     <div
       className={`glass-card w-full max-w-lg p-6 sm:p-8 rounded-3xl space-y-6 transition-all border border-slate-800/50 shadow-2xl ${
@@ -258,19 +199,9 @@ export function LoginForm({ role, title, subtitle }: LoginFormProps) {
       }`}
     >
       <div className="flex items-center justify-between mb-4">
-        <Link href="/login" className="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center gap-1">
-          <ChevronLeft className="w-4 h-4" /> Back
+        <Link href="/" className="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center gap-1">
+          <ChevronLeft className="w-4 h-4" /> Back to Home
         </Link>
-        <div className="text-xs text-[var(--text-muted)]">
-          Switch: 
-          <select 
-            onChange={(e) => router.push(e.target.value)} 
-            className="ml-2 bg-[var(--bg-base)] border border-[var(--border)] rounded px-2"
-            value={`/login/${role}`}
-          >
-            {roles.map(r => <option key={r.name} value={r.path}>{r.name}</option>)}
-          </select>
-        </div>
       </div>
       <div className="text-center space-y-2">
         <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">

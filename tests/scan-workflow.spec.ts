@@ -14,11 +14,11 @@ test.describe('Gate Monitor Operator & Workflow E2E Tests', () => {
     if (!operatorId || !operatorPin) return;
 
     // Perform login prior to each operator workflow test
-    await page.goto('/login/operator');
-    await expect(page.locator('text=Gate Operator Portal')).toBeVisible();
+    await page.goto('/login');
+    await expect(page.locator('button[type="submit"]')).toBeVisible();
 
-    await page.fill('input[placeholder="Enter your identifier"]', operatorId);
-    await page.fill('input[placeholder="Enter password or PIN"]', operatorPin);
+    await page.fill('input[placeholder="Enter ID"]', operatorId);
+    await page.fill('input[placeholder="password or PIN"]', operatorPin);
     await page.click('button[type="submit"]');
 
     // Wait redirect
