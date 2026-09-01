@@ -4,15 +4,13 @@ import Link from "next/link";
 import { useState } from "react";
 import { StudyHeader } from "../../layout";
 import { cheat0 } from "../../_ml/cheat0";
-import { cheat1 } from "../../_ml/cheat1";
-import { cheat2 } from "../../_ml/cheat2";
 import { cheat3 } from "../../_ml/cheat3";
 import { cheat4 } from "../../_ml/cheat4";
 import type { CS } from "../../_ml/CheatData";
-import { BookOpen, ChevronRight, Lightbulb, Target } from "lucide-react";
+import { Lightbulb, Target } from "lucide-react";
 
 const UNITS = [
-  { id: "I", title: "Unit I", subtitle: "Intro, Model Prep, Feature Eng", cards: [...cheat0, ...cheat1, ...cheat2] },
+  { id: "I", title: "Unit I", subtitle: "Intro, Model Prep, Feature Eng", cards: cheat0 },
   { id: "II", title: "Unit II", subtitle: "Supervised Learning", cards: cheat4 },
   { id: "III", title: "Unit III", subtitle: "Unsupervised Learning", cards: cheat3 },
 ];
@@ -99,8 +97,8 @@ export default function CheatSheetPage() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        {unit.cards.map((c) => (
-          <Card key={c.title} c={c} />
+        {unit.cards.map((c, idx) => (
+          <Card key={`${c.title}-${idx}`} c={c} />
         ))}
       </div>
 
