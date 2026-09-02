@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { StudyHeader } from "./layout";
-import { ChevronRight, FileText, FlaskConical, Clock, BrainCircuit, BookOpen } from "lucide-react";
+import { ChevronRight, FileText, BrainCircuit, BookOpen } from "lucide-react";
 
 const RESOURCES = [
   {
@@ -63,11 +62,6 @@ export default function StudyIndexPage() {
               </div>
             </Link>
           ))}
-        </div>
-
-        <div className="flex items-center gap-2 text-[11px] text-[var(--text-muted)] justify-center pt-4">
-          <Clock className="w-3.5 h-3.5" />
-          <span>Access lasts for this browser tab session. Closing the tab signs you out.</span>
         </div>
       </main>
     </>

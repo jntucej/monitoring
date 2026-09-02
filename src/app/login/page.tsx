@@ -18,7 +18,7 @@ export default function UnifiedLoginPage() {
           />
 
           <Link
-            href="/study-login"
+            href="/study"
             className="glass-card flex items-center justify-between gap-3 rounded-2xl px-5 py-3.5 group"
           >
             <span className="flex items-center gap-2.5">
