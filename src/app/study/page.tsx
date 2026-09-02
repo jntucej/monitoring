@@ -3,30 +3,30 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { StudyHeader } from "./layout";
-import { ChevronRight, FileText, FlaskConical, Clock, BrainCircuit } from "lucide-react";
+import { ChevronRight, FileText, FlaskConical, Clock, BrainCircuit, BookOpen } from "lucide-react";
 
 const RESOURCES = [
   {
     href: "/study/ml/cheat",
-    title: "🧠 ML Cheat Sheets — Units I–III",
-    description: "Dense formula cards, algorithm steps, and memory triggers. Scan in under 30s.",
+    title: "🧠 ML Cheat Sheets — IT503PC",
+    description: "Visual cheat sheets for Units I–III. Formulas, algorithms, comparisons, memory triggers.",
     icon: BrainCircuit,
     accent: "text-indigo-400",
     bg: "bg-indigo-500/10 border-indigo-500/20",
+  },
+  {
+    href: "/study/ml",
+    title: "📊 ML Knowledge Dashboard",
+    description: "Full visual knowledge system with topic pages, diagrams, and exam points.",
+    icon: BookOpen,
+    accent: "text-sky-400",
+    bg: "bg-sky-500/10 border-sky-500/20",
   },
   {
     href: "/study/notes",
     title: "Study Notes",
     description: "Core concepts and reference material, organized by topic.",
     icon: FileText,
-    accent: "text-sky-400",
-    bg: "bg-sky-500/10 border-sky-500/20",
-  },
-  {
-    href: "/study/practice",
-    title: "Practice Sets",
-    description: "Problems to solve with worked solutions for self-checking.",
-    icon: FlaskConical,
     accent: "text-emerald-400",
     bg: "bg-emerald-500/10 border-emerald-500/20",
   },
