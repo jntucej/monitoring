@@ -59,10 +59,12 @@ function GateCard() {
       return;
     }
 
-    const expectedId = (process.env.NEXT_PUBLIC_STUDY_ID || "akarsh").trim();
+    // Case-insensitive ID + trimmed inputs: mobile keyboards autocapitalize the
+    // ID field and paste jobs add stray spaces — don't lock people out over that.
+    const expectedId = (process.env.NEXT_PUBLIC_STUDY_ID || "akarsh").trim().toLowerCase();
     const expectedPass = (process.env.NEXT_PUBLIC_STUDY_PASS || "1234").trim();
 
-    if (id.trim() !== expectedId || pass !== expectedPass) {
+    if (id.trim().toLowerCase() !== expectedId || pass.trim() !== expectedPass) {
       triggerShake("Invalid ID or Password.");
       return;
     }
@@ -124,6 +126,9 @@ function GateCard() {
               onChange={(e) => setId(e.target.value)}
               placeholder="Enter access ID"
               autoComplete="off"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               className="w-full pl-10 pr-4 py-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none transition-all"
             />
             <UserCheck className="w-4 h-4 absolute left-3.5 top-3.5 text-[var(--text-muted)]" />
