@@ -1,20 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { UNITS, TOPIC_LIST, topicsForUnit } from "../_ml";
+import { UNITS_CONFIG, ALL_CHEAT_TOPICS } from "./data";
 import { Brain, ChevronRight, Search } from "lucide-react";
 import { useState } from "react";
 
-const UNIT_ACCENT: Record<string, { dot: string; ring: string }> = {
-  I: { dot: "bg-sky-400", ring: "border-sky-500/30" },
-  II: { dot: "bg-emerald-400", ring: "border-emerald-500/30" },
-  III: { dot: "bg-fuchsia-400", ring: "border-fuchsia-500/30" },
+const UNIT_ACCENT: Record<string, { dot: string; border: string }> = {
+  I: { dot: "bg-sky-400", border: "border-sky-500/30" },
+  II: { dot: "bg-emerald-400", border: "border-emerald-500/30" },
+  III: { dot: "bg-fuchsia-400", border: "border-fuchsia-500/30" },
 };
 
 export default function MlDashboard() {
   const [q, setQ] = useState("");
-  const results = q.trim() ? TOPIC_LIST.filter((t) =>
-    [t.title, t.definition, ...(t.keyPoints ?? [])].join(" ").toLowerCase().includes(q.toLowerCase())
+  const results = q.trim() ? ALL_CHEAT_TOPICS.filter((t) =>
+    [t.title, t.definition, ...(t.keywords ?? [])].join(" ").toLowerCase().includes(q.toLowerCase())
   ).slice(0, 8) : [];
 
   return (
@@ -39,7 +39,7 @@ export default function MlDashboard() {
           <div className="absolute z-10 mt-2 w-full rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] shadow-2xl overflow-hidden">
             {results.map((r) => (
               <Link key={r.id} href={`/study/ml/topic/${r.id}`} className="block px-4 py-2.5 text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--action-primary)]">
-                <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle ${UNIT_ACCENT[r.unit]?.dot}" />{r.title}
+                <span className={`inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle ${UNIT_ACCENT[r.unit]?.dot}`} />{r.title}
               </Link>
             ))}
           </div>
@@ -47,16 +47,16 @@ export default function MlDashboard() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        {Object.values(UNITS).map((u) => {
-          const topics = topicsForUnit(u.id);
+        {Object.values(UNITS_CONFIG).map((u) => {
+          const topicCount = u.categories.reduce((sum, c) => sum + c.topicIds.length, 0);
           return (
             <Link key={u.id} href={`/study/ml/unit/${u.id}`} className="glass-card rounded-2xl p-5 space-y-3 group">
               <div className="flex items-center justify-between">
-                <span className={`w-8 h-8 rounded-xl border flex items-center justify-center font-bold text-sm ${UNIT_ACCENT[u.id]?.ring} ${UNIT_ACCENT[u.id]?.dot}`} />
-                <span className="text-[10px] font-bold text-[var(--text-muted)]">{topics.length} topics</span>
+                <span className={`w-8 h-8 rounded-xl border flex items-center justify-center font-bold text-sm ${UNIT_ACCENT[u.id]?.border} ${UNIT_ACCENT[u.id]?.dot}`} />
+                <span className="text-[10px] font-bold text-[var(--text-muted)]">{topicCount} topics</span>
               </div>
               <div>
-                <h3 className="font-bold text-sm text-[var(--text-primary)]">Unit {u.id} — {u.title}</h3>
+                <h3 className="font-bold text-sm text-[var(--text-primary)]">{u.title}</h3>
                 <p className="text-[11px] text-[var(--text-muted)] mt-1 leading-relaxed">{u.description}</p>
               </div>
               <div className="flex items-center text-[11px] font-semibold text-[var(--action-primary)]">
@@ -66,6 +66,14 @@ export default function MlDashboard() {
           );
         })}
       </div>
+
+      <Link href="/study/ml/cheat" className="glass-card flex items-center justify-between gap-3 rounded-2xl p-5 group">
+        <div>
+          <h3 className="font-bold text-sm text-[var(--text-primary)]">📝 Quick Cheat Sheets</h3>
+          <p className="text-[11px] text-[var(--text-muted)] mt-1">Dense formula + exam-point cards for rapid revision</p>
+        </div>
+        <ChevronRight className="w-5 h-5 text-[var(--action-primary)] group-hover:translate-x-0.5 transition-transform" />
+      </Link>
     </div>
   );
 }

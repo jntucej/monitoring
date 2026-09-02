@@ -3,14 +3,13 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { use } from "react";
-import { UNITS, getTopic, topicsForUnit } from "../../../_ml";
+import { UNITS_CONFIG, TOPIC_MAP } from "../../data";
 import { ArrowLeft, FolderTree } from "lucide-react";
 
 export default function MlUnitPage({ params }: { params: Promise<{ unit: string }> }) {
   const { unit: unitId } = use(params);
-  const unit = UNITS[unitId.toUpperCase()];
+  const unit = UNITS_CONFIG[unitId.toUpperCase() as "I" | "II" | "III"];
   if (!unit) return notFound();
-      const unitTopics = topicsForUnit(unitId.toUpperCase());
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-5">
@@ -23,14 +22,14 @@ export default function MlUnitPage({ params }: { params: Promise<{ unit: string 
         <p className="text-xs text-[var(--text-muted)] mt-1">{unit.description}</p>
       </header>
 
-      {unit.structure.map((section) => (
-        <section key={section.category} className="space-y-2">
+      {unit.categories.map((section) => (
+        <section key={section.name} className="space-y-2">
           <h2 className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1.5">
-            <FolderTree className="w-3.5 h-3.5" /> {section.category}
+            <FolderTree className="w-3.5 h-3.5" /> {section.name}
           </h2>
           <div className="space-y-2">
-            {section.topics.map((id) => {
-              const t = getTopic(id);
+            {section.topicIds.map((id) => {
+              const t = TOPIC_MAP[id];
               if (!t) return null;
               return (
                 <Link key={id} href={`/study/ml/topic/${id}`} className="glass-card flex items-center justify-between gap-3 rounded-xl px-4 py-3 group">
