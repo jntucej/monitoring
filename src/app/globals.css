@@ -139,6 +139,14 @@ html.dark {
   --action-warning: #f59e0b; /* Bright Amber */
   --action-info: #3b82f6;    /* Vibrant Royal Blue */
   --focus-ring: #10b981;
+
+  /* Study-resource per-unit accents (theme-adaptive — see pdc/ml cheat sheets) */
+  --unit-a: #38bdf8;  /* sky 400 — Unit I */
+  --unit-b: #34d399;  /* emerald 400 — Unit II */
+  --unit-c: #e879f9;  /* fuchsia 400 — Unit III */
+  --unit-a-soft: rgba(56, 189, 248, 0.12);
+  --unit-b-soft: rgba(52, 211, 153, 0.12);
+  --unit-c-soft: rgba(232, 121, 249, 0.12);
 }
 
 /* ===== LIGHT THEME — Crisp Pure White High-Contrast ===== */
@@ -186,6 +194,14 @@ html.light {
   --action-warning: #d97706; /* Amber-600 */
   --action-info: #2563eb;    /* Blue-600 */
   --focus-ring: #059669;
+
+  /* Study-resource per-unit accents (theme-adaptive) */
+  --unit-a: #0284c7;  /* sky 600 — Unit I */
+  --unit-b: #059669;  /* emerald 600 — Unit II */
+  --unit-c: #d946ef;  /* fuchsia 500 — Unit III */
+  --unit-a-soft: rgba(2, 132, 199, 0.12);
+  --unit-b-soft: rgba(5, 150, 105, 0.12);
+  --unit-c-soft: rgba(217, 70, 239, 0.12);
 }
 
 /* High-contrast badge overrides for Light mode */
@@ -258,6 +274,14 @@ html.glass {
   --action-warning: #d97706;
   --action-info: #00c6ff;
   --focus-ring: #0072ff;
+
+  /* Study-resource per-unit accents (theme-adaptive) */
+  --unit-a: #00b3ff;  /* vivid sky — Unit I */
+  --unit-b: #00c896;  /* vivid emerald — Unit II */
+  --unit-c: #c084fc;  /* soft purple — Unit III */
+  --unit-a-soft: rgba(0, 179, 255, 0.14);
+  --unit-b-soft: rgba(0, 200, 150, 0.14);
+  --unit-c-soft: rgba(192, 132, 252, 0.14);
 }
 
 /* Dark theme specific text shadow for readability */

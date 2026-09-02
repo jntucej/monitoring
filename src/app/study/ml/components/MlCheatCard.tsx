@@ -51,14 +51,14 @@ export function MlCheatCard({ topic }: { topic: CheatTopic }) {
       {topic.visual && <Visual visual={topic.visual} />}
 
       {topic.formula && (
-        <div className="rounded-lg bg-indigo-500/5 border border-indigo-500/20 px-3 py-2 space-y-1">
-          <p className="font-mono text-xs text-indigo-300 font-bold">{topic.formula.expression}</p>
+        <div className="rounded-lg border border-[var(--unit-c)]/40 bg-[var(--unit-c-soft)] px-3 py-2 space-y-1">
+          <p className="font-mono text-xs font-bold text-[var(--unit-c)]">{topic.formula.expression}</p>
           {topic.formula.symbols && (
             <p className="text-[9px] text-[var(--text-muted)]">
               {Object.entries(topic.formula.symbols).map(([k, v]) => `${k}: ${v}`).join("  •  ")}
             </p>
           )}
-          {topic.formula.examNote && <p className="text-[9px] text-amber-400 italic">⚠ {topic.formula.examNote}</p>}
+          {topic.formula.examNote && <p className="text-[9px] text-amber-500 dark:text-amber-300 italic">⚠ {topic.formula.examNote}</p>}
         </div>
       )}
 

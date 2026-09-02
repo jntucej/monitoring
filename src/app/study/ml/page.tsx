@@ -6,9 +6,9 @@ import { Brain, ChevronRight, Search } from "lucide-react";
 import { useState } from "react";
 
 const UNIT_ACCENT: Record<string, { dot: string; border: string }> = {
-  I: { dot: "bg-sky-400", border: "border-sky-500/30" },
-  II: { dot: "bg-emerald-400", border: "border-emerald-500/30" },
-  III: { dot: "bg-fuchsia-400", border: "border-fuchsia-500/30" },
+  I: { dot: "bg-[var(--unit-a)]", border: "border-[var(--unit-a)]" },
+  II: { dot: "bg-[var(--unit-b)]", border: "border-[var(--unit-b)]" },
+  III: { dot: "bg-[var(--unit-c)]", border: "border-[var(--unit-c)]" },
 };
 
 export default function MlDashboard() {
