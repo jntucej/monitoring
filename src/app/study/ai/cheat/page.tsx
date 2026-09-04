@@ -63,9 +63,9 @@ export default function AiCheatPage() {
         {results.length > 0 && (
           <div className="absolute z-10 mt-2 w-full rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] shadow-2xl overflow-hidden">
             {results.map((r) => (
-              <button key={r.id} onClick={() => { setActive(UNITS.findIndex((u) => u.id === r.unit)); setQ(""); }} className="block w-full text-left px-4 py-2.5 text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--action-primary)]">
+              <Link key={r.id} href={`/study/ai/topic/${r.id}`} onClick={() => setQ("")} className="block px-4 py-2.5 text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--action-primary)]">
                 <span className={`inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle ${UNIT_ACCENT[r.unit].dot}`} />{r.title}
-              </button>
+              </Link>
             ))}
           </div>
         )}
