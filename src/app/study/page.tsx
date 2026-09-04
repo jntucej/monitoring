@@ -6,6 +6,15 @@ import { ChevronRight, FileText, BrainCircuit, BookOpen, Zap } from "lucide-reac
 
 const RESOURCES = [
   {
+    href: "/study/ai/cheat",
+    title: "🧠 AI Cheat Sheets — Artificial Intelligence",
+    description: "Interactive cheat sheets for Units I–III. Search algorithms, alpha-beta, CSP, logic, FOL, unification.",
+    icon: BrainCircuit,
+    accent: "text-[var(--unit-a)]",
+    bg: "var(--unit-a-soft)",
+    border: "var(--unit-a)",
+  },
+  {
     href: "/study/ml/cheat",
     title: "🧠 ML Cheat Sheets — IT503PC",
     description: "Visual cheat sheets for Units I–III. Formulas, algorithms, comparisons, memory triggers.",
