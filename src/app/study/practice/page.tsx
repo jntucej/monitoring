@@ -20,7 +20,7 @@ export default function PracticePage() {
       <StudyHeader title="Practice Sets" />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-4">
         <h1 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
-          <FlaskConical className="w-5 h-5 text-emerald-400" />
+          <FlaskConical className="w-5 h-5 text-[var(--action-success)]" />
           Practice Sets
         </h1>
         {SETS.map((s) => (

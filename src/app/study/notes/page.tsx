@@ -24,7 +24,7 @@ export default function StudyNotesPage() {
       <StudyHeader title="Study Notes" />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-4">
         <h1 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
-          <FileText className="w-5 h-5 text-sky-400" />
+          <FileText className="w-5 h-5 text-[var(--unit-a)]" />
           Study Notes
         </h1>
         {NOTES.map((n) => (

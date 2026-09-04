@@ -58,7 +58,7 @@ export function MlCheatCard({ topic }: { topic: CheatTopic }) {
               {Object.entries(topic.formula.symbols).map(([k, v]) => `${k}: ${v}`).join("  •  ")}
             </p>
           )}
-          {topic.formula.examNote && <p className="text-[9px] text-amber-500 dark:text-amber-300 italic">⚠ {topic.formula.examNote}</p>}
+                    {topic.formula.examNote && <p className="text-[9px] text-[var(--action-warning)] italic">⚠ {topic.formula.examNote}</p>}
         </div>
       )}
 
@@ -79,8 +79,8 @@ export function MlCheatCard({ topic }: { topic: CheatTopic }) {
           {topic.differences.map((d, i) => (
             <div key={i} className="grid grid-cols-3 text-[10px] gap-1">
               <span className="font-medium text-[var(--text-primary)]">{d.feature}</span>
-              <span className="text-emerald-400">{d.valA}</span>
-              <span className="text-rose-400">{d.valB}</span>
+                            <span className="text-[var(--action-success)]">{d.valA}</span>
+              <span className="text-[var(--action-danger)]">{d.valB}</span>
             </div>
           ))}
         </div>
@@ -88,9 +88,9 @@ export function MlCheatCard({ topic }: { topic: CheatTopic }) {
 
       {topic.examPoints && (
         <div className="space-y-0.5">
-          <p className="text-[9px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1"><Target className="w-2.5 h-2.5" /> Exam Points</p>
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-[var(--action-warning)] flex items-center gap-1"><Target className="w-2.5 h-2.5" /> Exam Points</p>
           {topic.examPoints.map((p, i) => (
-            <p key={i} className="text-[10.5px] text-[var(--text-secondary)] pl-3 border-l border-amber-500/30">{p}</p>
+            <p key={i} className="text-[10.5px] text-[var(--text-secondary)] pl-3 border-l border-[var(--action-warning)]/40">{p}</p>
           ))}
         </div>
       )}

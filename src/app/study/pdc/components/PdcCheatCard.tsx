@@ -45,7 +45,7 @@ export function PdcCheatCard({ topic }: { topic: PdcCheatTopic }) {
               {Object.entries(topic.formula.symbols).map(([k, v]) => `${k}: ${v}`).join("  •  ")}
             </p>
           )}
-          {topic.formula.examNote && <p className="text-[9px] italic text-amber-500 dark:text-amber-300">⚠ {topic.formula.examNote}</p>}
+          {topic.formula.examNote && <p className="text-[9px] italic text-[var(--action-warning)]">⚠ {topic.formula.examNote}</p>}
         </div>
       )}
 
@@ -91,9 +91,9 @@ export function PdcCheatCard({ topic }: { topic: PdcCheatTopic }) {
 
       {topic.examPoints && (
         <div className="space-y-0.5">
-          <p className="text-[9px] font-bold uppercase tracking-wider text-amber-500 dark:text-amber-400 flex items-center gap-1"><Target className="w-2.5 h-2.5" /> Exam Points</p>
+          <p className="text-[9px] font-bold uppercase tracking-wider text-[var(--action-warning)] flex items-center gap-1"><Target className="w-2.5 h-2.5" /> Exam Points</p>
           {topic.examPoints.map((p, i) => (
-            <p key={i} className="text-[10.5px] text-[var(--text-secondary)] pl-3 border-l border-amber-500/30">{p}</p>
+            <p key={i} className="text-[10.5px] text-[var(--text-secondary)] pl-3 border-l border-[var(--action-warning)]/40">{p}</p>
           ))}
         </div>
       )}

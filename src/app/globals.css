@@ -91,7 +91,18 @@
   --action-danger: #f43f5e;
   --action-warning: #f59e0b;
   --action-info: #3b82f6;
+  --action-success: #10b981; /* emerald — "good/true" rows in comparisons */
   --focus-ring: #10b981;
+
+  /* Study-resource per-unit accents — also defined per-theme below
+     (dark / glass / light). These exist in the base :root so a valid
+     colour is always present even before the theme attribute is applied. */
+  --unit-a: #38bdf8;  /* sky 400 — Unit I */
+  --unit-b: #34d399;  /* emerald 400 — Unit II */
+  --unit-c: #e879f9;  /* fuchsia 400 — Unit III */
+  --unit-a-soft: rgba(56, 189, 248, 0.12);
+  --unit-b-soft: rgba(52, 211, 153, 0.12);
+  --unit-c-soft: rgba(232, 121, 249, 0.12);
 }
 
 /* ===== DARK THEME — Deep High Contrast Developer & Security Aesthetic ===== */
@@ -131,13 +142,14 @@ html.dark {
   --text-primary: #eef1f6;   /* Pure Crisp White Text */
   --text-secondary: #cbd5e1; /* Slate-300 Readable Subtitle */
   --text-muted: #94a3b8;     /* Slate-400 Soft Contrast */
-  --border: rgba(255, 255, 255, 0.14); /* Vivid border */
+    --border: rgba(255, 255, 255, 0.14); /* Vivid border */
   --border-strong: rgba(255, 255, 255, 0.28);
 
   --action-primary: #10b981; /* High-contrast Emerald Green */
   --action-danger: #f43f5e;  /* Vivid Crimson Red */
   --action-warning: #f59e0b; /* Bright Amber */
   --action-info: #3b82f6;    /* Vibrant Royal Blue */
+  --action-success: #10b981; /* emerald — good/true rows */
   --focus-ring: #10b981;
 
   /* Study-resource per-unit accents (theme-adaptive — see pdc/ml cheat sheets) */
@@ -193,6 +205,7 @@ html.light {
   --action-danger: #dc2626;  /* Red-600 */
   --action-warning: #d97706; /* Amber-600 */
   --action-info: #2563eb;    /* Blue-600 */
+  --action-success: #059669; /* emerald — good/true rows */
   --focus-ring: #059669;
 
   /* Study-resource per-unit accents (theme-adaptive) */
@@ -273,6 +286,7 @@ html.glass {
   --action-danger: #ef4444;
   --action-warning: #d97706;
   --action-info: #00c6ff;
+  --action-success: #00c896; /* vivid emerald — good/true rows */
   --focus-ring: #0072ff;
 
   /* Study-resource per-unit accents (theme-adaptive) */
@@ -463,8 +477,8 @@ body, .canvas-root {
 
 /* Numeric Precision Utilities */
 .glass-card {
-  /* Solid fallback for mobile GPU protection */
-  background-color: rgba(15, 23, 42, 0.85);
+  /* Theme-aware card surface — uses CSS variables so all three themes respond */
+  background-color: var(--bg-surface);
 
   /* Lightweight blur to prevent scroll jank on Android */
   backdrop-filter: blur(12px);
@@ -474,19 +488,115 @@ body, .canvas-root {
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
 
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--border);
   box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.25);
-  
-  /* Element-specific Glow */
-  transition: box-shadow 0.3s ease-out;
+
+  /* Smooth theme morph transition */
+  transition: background-color 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.3s ease-out;
 }
 
 .glass-card:hover {
-  box-shadow: 0 0 60px 0px rgba(99, 102, 241, 0.6); /* Intensified indigo glow */
-  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 8px 40px -8px var(--focus-ring);
+  border-color: var(--focus-ring);
   transform: translateY(-2px);
 }
-/* High-End vs Low-Profile Specific UI Hardware Profiles */
+
+/* ===== THEME-SPECIFIC .glass-card OVERRIDES =====
+   These ensure every study resource container morphs correctly across all three themes. */
+
+/* Dark theme — deep slate cards */
+html.dark .glass-card,
+:root[data-theme="dark"] .glass-card {
+  background-color: rgba(15, 23, 42, 0.85);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.35);
+}
+html.dark .glass-card:hover,
+:root[data-theme="dark"] .glass-card:hover {
+  box-shadow: 0 0 60px 0px rgba(99, 102, 241, 0.5);
+  border-color: rgba(99, 102, 241, 0.45);
+}
+
+/* Glossy / Glass theme — frosted translucent cards with ambient float */
+html.glass .glass-card,
+:root[data-theme="glass"] .glass-card,
+:root[data-theme="glossy-liquid"] .glass-card {
+  background-color: rgba(255, 255, 255, 0.72);
+  border-color: rgba(255, 255, 255, 0.92);
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.65) 100%);
+  box-shadow: 0 26px 54px -12px rgba(0, 114, 255, 0.16),
+              0 12px 24px -8px rgba(31, 38, 135, 0.12),
+              0 2px 6px rgba(0, 0, 0, 0.04),
+              inset 0 1.5px 2px rgba(255, 255, 255, 1),
+              inset 0 -1.5px 2px rgba(0, 114, 255, 0.10);
+  backdrop-filter: blur(28px) saturate(210%);
+  -webkit-backdrop-filter: blur(28px) saturate(210%);
+}
+html.glass .glass-card:hover,
+:root[data-theme="glass"] .glass-card:hover,
+:root[data-theme="glossy-liquid"] .glass-card:hover {
+  box-shadow: 0 30px 60px -10px rgba(0, 114, 255, 0.22),
+              0 16px 32px -8px rgba(31, 38, 135, 0.18),
+              0 2px 6px rgba(0, 0, 0, 0.04),
+              inset 0 1.5px 2px rgba(255, 255, 255, 1),
+              inset 0 -1.5px 2px rgba(0, 114, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.98);
+  transform: translateY(-4px);
+}
+
+/* Light theme — crisp white cards with subtle shadow */
+html.light .glass-card,
+:root[data-theme="light"] .glass-card {
+  background-color: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.08),
+              0 2px 6px -2px rgba(0, 0, 0, 0.04);
+}
+html.light .glass-card:hover,
+:root[data-theme="light"] .glass-card:hover {
+  box-shadow: 0 8px 30px -6px rgba(0, 0, 0, 0.12),
+              0 4px 10px -4px rgba(0, 0, 0, 0.06);
+  border-color: #94a3b8;
+  transform: translateY(-2px);
+}
+
+/* ============================================================
+   INNER CARD HIGHLIGHT OVERRIDES
+   Fix bg-[var(--action-primary)]/5 type blocks so they
+   don't bleed into white card surfaces in glass / light themes.
+   ============================================================ */
+
+/* Study cheat-sheet inner highlight blocks — fix for glass theme */
+html.glass .glass-card [class*="bg-[var(--action-primary)]/5"],
+html.glass .glass-card [class*="bg-[var(--action-primary)]/10"],
+html.glass .glass-card [class*="bg-[var(--action-success)]/10"],
+html.glass .glass-card [class*="bg-[var(--action-danger)]/10"],
+html.glass .glass-card [class*="bg-[var(--action-warning)]/10"],
+html.glass .glass-card [class*="bg-[var(--action-info)]/10"] {
+  background-color: rgba(0, 114, 255, 0.08) !important;
+}
+html.glass .glass-card [class*="border-[var(--action-primary)]/20"],
+html.glass .glass-card [class*="border-[var(--action-primary)]/40"] {
+  border-color: rgba(0, 114, 255, 0.25) !important;
+}
+
+/* Light theme inner highlight blocks */
+html.light .glass-card [class*="bg-[var(--action-primary)]/5"],
+html.light .glass-card [class*="bg-[var(--action-primary)]/10"],
+html.light .glass-card [class*="bg-[var(--action-success)]/10"],
+html.light .glass-card [class*="bg-[var(--action-danger)]/10"],
+html.light .glass-card [class*="bg-[var(--action-warning)]/10"],
+html.light .glass-card [class*="bg-[var(--action-info)]/10"] {
+  background-color: rgba(5, 150, 105, 0.10) !important;
+}
+html.light .glass-card [class*="border-[var(--action-primary)]/20"],
+html.light .glass-card [class*="border-[var(--action-primary)]/40"] {
+  border-color: rgba(5, 150, 105, 0.30) !important;
+}
+
+/* ===== High-End vs Low-Profile Specific UI Hardware Profiles ===== */
 html[data-device-profile="high-end"] .glass-card {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
