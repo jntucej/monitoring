@@ -2,57 +2,56 @@
 
 import Link from "next/link";
 import { StudyHeader } from "./layout";
-import { ChevronRight, BrainCircuit, Zap, Cpu, Binary, FileCode, Network, Brain } from "lucide-react";
+import { ChevronRight, BrainCircuit, Zap, Cpu, Binary, Network, Brain } from "lucide-react";
 
 const SUBJECT_CHEATS = [
   {
+    href: "/study/atcd/cheat",
+    title: "⚙️ IT501PC: Automata Theory & Compiler Design (ATCD)",
+    description: "Units I–V: DFA/NFA, Regular Expressions, Pumping Lemma, PDA, Turing Machines, Lex & LR Parsers (SLR, LALR, CLR).",
+    icon: Binary,
+    color: "#a855f7",
+    code: "IT501PC",
+  },
+  {
+    href: "/study/dccn/cheat",
+    title: "🌐 IT502PC: Data Communications & Computer Networks (DCCN)",
+    description: "Units I–V: ISO/OSI model, Framing/CRC, CSMA/CD, IPv4 Subnetting, TCP 3-Way Handshake, DNS, RSA & TLS.",
+    icon: Network,
+    color: "#06b6d4",
+    code: "IT502PC",
+  },
+  {
+    href: "/study/aca/cheat",
+    title: "💻 IT511PE: Advanced Computer Architecture (ACA)",
+    description: "Units I–V: Parallelism, Amdahl/Gustafson laws, Non-linear Pipelining, MESI/Directory Coherence & GPU CUDA.",
+    icon: Cpu,
+    color: "#6366f1",
+    code: "IT511PE",
+  },
+  {
     href: "/study/ai/cheat",
-    title: "🧠 Artificial Intelligence (AI)",
-    description: "Interactive cheat sheets for Units I–V. Search, Minimax, CSP, Logic, Planning & Bayes Nets.",
+    title: "🧠 IT522PE: Artificial Intelligence (AI)",
+    description: "Units I–V: Uninformed & Informed Search, Minimax & Alpha-Beta, CSP, Propositional & FOL, Planning & Bayes Nets.",
     icon: BrainCircuit,
     color: "#10b981",
+    code: "IT522PE",
   },
   {
     href: "/study/ml/cheat",
-    title: "🤖 Machine Learning (ML)",
-    description: "Visual cheat sheets for Units I–V. Feature Eng, Regression, Classification, Clustering, ANNs & Deep ML.",
+    title: "🤖 IT503PC: Machine Learning (ML)",
+    description: "Units I–V: Feature Engineering, Linear/Logistic Regression, Naïve Bayes, Decision Trees, ANNs & Deep ML.",
     icon: Brain,
     color: "#3b82f6",
+    code: "IT503PC",
   },
   {
     href: "/study/pdc/cheat",
     title: "⚡ Parallel & Distributed Computing (PDC)",
-    description: "Interactive cheat sheets for Units I–V. Amdahl's Law, Flynn's Taxonomy, Pipelining, MPI & Distributed Consensus.",
+    description: "Units I–V: Amdahl's Law, Flynn's Taxonomy, Pipeline Steppers, Memory Consistency & Distributed Consensus.",
     icon: Zap,
     color: "#8b5cf6",
-  },
-  {
-    href: "/study/aca/cheat",
-    title: "💻 Advanced Computer Architecture (ACA)",
-    description: "Cheat sheets for Units I–V. Pipelining, Tomasulo, MESI Cache Coherence, Topologies & GPU CUDA.",
-    icon: Cpu,
-    color: "#6366f1",
-  },
-  {
-    href: "/study/automata/cheat",
-    title: "⚙️ Automata & Formal Languages (TOC/FLAT)",
-    description: "Cheat sheets for Units I–V. DFA/NFA, Regular Expressions, CFG/CNF, Turing Machines & Undecidability.",
-    icon: Binary,
-    color: "#a855f7",
-  },
-  {
-    href: "/study/cd/cheat",
-    title: "🛠️ Compiler Design (CD)",
-    description: "Cheat sheets for Units I–V. 6 Compiler Phases, FIRST/FOLLOW, LR Parsers, SDT, TAC & DAG Optimization.",
-    icon: FileCode,
-    color: "#f59e0b",
-  },
-  {
-    href: "/study/dccn/cheat",
-    title: "🌐 Data Comm & Computer Networks (DCCN)",
-    description: "Cheat sheets for Units I–V. OSI Model, CRC, CSMA/CD, IPv4 Subnetting, TCP/UDP, RSA & TLS.",
-    icon: Network,
-    color: "#06b6d4",
+    code: "PDC",
   },
 ];
 
@@ -62,9 +61,9 @@ export default function StudyIndexPage() {
       <StudyHeader title="Study Portal" />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)]">CS & Engineering Cheat Sheets Portal 📝</h1>
+          <h1 className="text-2xl font-bold text-[var(--text-primary)]">CS 3-1 Engineering Cheat Sheets Portal 📝</h1>
           <p className="text-sm text-[var(--text-muted)] mt-1">
-            Dense, visual, interactive revision cards across 7 core Computer Science subjects. Scan formulas, algorithms, worked numericals & exam points in under 30s.
+            Exact syllabus alignment for IT501PC, IT502PC, IT511PE, IT522PE & IT503PC. Dense, visual, interactive revision cards across Units I–V.
           </p>
         </div>
 
@@ -75,11 +74,16 @@ export default function StudyIndexPage() {
               href={r.href}
               className="glass-card rounded-2xl p-5 text-left space-y-3 group cursor-pointer block border border-[var(--border)] hover:border-[var(--action-primary)] transition-all"
             >
-              <div
-                className="w-10 h-10 rounded-xl border flex items-center justify-center"
-                style={{ backgroundColor: `color-mix(in srgb, ${r.color} 12%, transparent)`, borderColor: r.color }}
-              >
-                <r.icon className="w-5 h-5" style={{ color: r.color }} />
+              <div className="flex items-center justify-between">
+                <div
+                  className="w-10 h-10 rounded-xl border flex items-center justify-center"
+                  style={{ backgroundColor: `color-mix(in srgb, ${r.color} 12%, transparent)`, borderColor: r.color }}
+                >
+                  <r.icon className="w-5 h-5" style={{ color: r.color }} />
+                </div>
+                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-[var(--bg-elevated)] border border-[var(--border)]" style={{ color: r.color }}>
+                  {r.code}
+                </span>
               </div>
               <div>
                 <div className="flex items-center justify-between">
@@ -95,4 +99,5 @@ export default function StudyIndexPage() {
     </>
   );
 }
+
 
