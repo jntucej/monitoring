@@ -1,4 +1,4 @@
-import type { CheatTopic } from "../../types";
+import type { AiCheatTopic } from "./types";
 import { unit1aTopics } from "./unit1a";
 import { unit1bTopics } from "./unit1b";
 import { unit2aTopics } from "./unit2a";
@@ -10,7 +10,7 @@ import { unit3bTopics } from "./unit3b";
 import { unit4Topics } from "./unit4a";
 import { unit5Topics } from "./unit5a";
 
-export const ALL_AI_TOPICS: CheatTopic[] = [
+export const ALL_AI_TOPICS: AiCheatTopic[] = [
   ...unit1aTopics,
   ...unit1bTopics,
   ...unit2aTopics,
@@ -23,11 +23,10 @@ export const ALL_AI_TOPICS: CheatTopic[] = [
   ...unit5Topics,
 ];
 
-export const AI_TOPIC_MAP: Record<string, CheatTopic> = ALL_AI_TOPICS.reduce(
+export const AI_TOPIC_MAP: Record<string, AiCheatTopic> = ALL_AI_TOPICS.reduce(
   (acc, t) => {
     acc[t.id] = t;
     return acc;
   },
-  {} as Record<string, CheatTopic>
+  {} as Record<string, AiCheatTopic>
 );
-

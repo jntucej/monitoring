@@ -1,19 +1,15 @@
-import type { CheatTopic } from "../../types";
+import type { CheatTopic } from "./types";
 
 export const unit4Topics: CheatTopic[] = [
   {
     id: "biological-vs-artificial-neuron",
-    subjectId: "ml",
-    unitId: "ml-unit-4",
-    unitNumber: "IV",
+    unit: "IV",
     title: "Biological vs Artificial Neuron",
-    tier: "CORE",
-    kind: "comparison",
     category: "Neural Networks",
     importance: "HIGH",
     definition:
       "Artificial Neural Networks (ANN) are computational models inspired by biological brain networks. Biological components map directly to artificial mathematical components.",
-    oneLineIdea: "Biological brain mapping: Dendrites → Inputs, Soma → Processing Node, Synapses → Weights, Axon → Output.",
+    coreIdea: "Biological brain mapping: Dendrites → Inputs, Soma → Processing Node, Synapses → Weights, Axon → Output.",
     differences: [
       { feature: "Biological Element", valA: "Dendrites (receive signals)", valB: "Soma (cell body processing)" },
       { feature: "Artificial Counterpart", valA: "Input Vector (x₁, x₂, …, xₙ)", valB: "Summation Node ∑ wᵢ xᵢ + b" },
@@ -35,17 +31,13 @@ export const unit4Topics: CheatTopic[] = [
   },
   {
     id: "artificial-neuron-model",
-    subjectId: "ml",
-    unitId: "ml-unit-4",
-    unitNumber: "IV",
+    unit: "IV",
     title: "Artificial Neuron Mathematical Model",
-    tier: "CORE",
-    kind: "concept",
     category: "Neural Networks",
     importance: "HIGH",
     definition:
       "The basic processing element of an ANN. It receives inputs x_i, computes weighted sum z = ∑ w_i x_i + b, and applies a non-linear activation function g(z) to produce output y.",
-    oneLineIdea: "Net input z = wᵀx + b ⟹ Output y = g(z).",
+    coreIdea: "Net input z = wᵀx + b ⟹ Output y = g(z).",
     formula: {
       expression: "y = g( z ) = g( ∑_{i=1}^{n} w_i x_i + b )",
       symbols: { x_i: "input features", w_i: "connection weights", b: "bias threshold", "g(z)": "activation function" },
@@ -70,17 +62,13 @@ export const unit4Topics: CheatTopic[] = [
   },
   {
     id: "activation-functions",
-    subjectId: "ml",
-    unitId: "ml-unit-4",
-    unitNumber: "IV",
+    unit: "IV",
     title: "Activation Functions & Derivatives",
-    tier: "CORE",
-    kind: "formula",
     category: "Neural Networks",
     importance: "HIGH",
     definition:
       "Activation functions introduce non-linearity into neural networks, enabling them to learn complex non-linear decision boundaries.",
-    oneLineIdea: "Without non-linear activations, multi-layer neural networks collapse into simple linear regression.",
+    coreIdea: "Without non-linear activations, multi-layer neural networks collapse into simple linear regression.",
     formula: {
       expression: "σ(z) = 1 / (1 + e^{-z})   •   ReLU(z) = max(0, z)   •   tanh(z) = (e^z - e^{-z}) / (e^z + e^{-z})",
       symbols: { "σ'(z)": "σ(z)(1 − σ(z))", "ReLU'(z)": "1 if z > 0 else 0", "tanh'(z)": "1 − tanh²(z)" },
@@ -110,17 +98,13 @@ export const unit4Topics: CheatTopic[] = [
   },
   {
     id: "ann-architectures",
-    subjectId: "ml",
-    unitId: "ml-unit-4",
-    unitNumber: "IV",
+    unit: "IV",
     title: "ANN Architectures: Feedforward vs Recurrent",
-    tier: "CORE",
-    kind: "concept",
     category: "Neural Networks",
     importance: "MEDIUM",
     definition:
       "Neural networks are organized into Input Layer, Hidden Layers, and Output Layer. Architecture dictates how signals flow through connections.",
-    oneLineIdea: "Feedforward = acyclic forward flow. Recurrent = cyclic feedback loops with memory.",
+    coreIdea: "Feedforward = acyclic forward flow. Recurrent = cyclic feedback loops with memory.",
     differences: [
       { feature: "Single-Layer Perceptron", valA: "Input → Output (no hidden layer)", valB: "Only linear decision boundaries" },
       { feature: "Multi-Layer Perceptron (MLP)", valA: "Input → Hidden → Output", valB: "Universal function approximator" },
@@ -136,17 +120,13 @@ export const unit4Topics: CheatTopic[] = [
   },
   {
     id: "perceptron",
-    subjectId: "ml",
-    unitId: "ml-unit-4",
-    unitNumber: "IV",
+    unit: "IV",
     title: "The Perceptron Model & XOR Limitation",
-    tier: "CORE",
-    kind: "concept",
     category: "Neural Networks",
     importance: "HIGH",
     definition:
       "Invented by Frank Rosenblatt (1958), the Perceptron is the simplest feedforward neural network for binary classification using a step activation function.",
-    oneLineIdea: "Perceptron creates a linear decision hyperplane w₁x₁ + w₂x₂ + b = 0. Fails on non-linearly separable XOR.",
+    coreIdea: "Perceptron creates a linear decision hyperplane w₁x₁ + w₂x₂ + b = 0. Fails on non-linearly separable XOR.",
     formula: {
       expression: "f(x) = 1 if (wᵀx + b ≥ 0) else 0",
       examNote: "Minsky & Papert (1969) proved single Perceptrons cannot learn XOR, triggering the first AI Winter.",
@@ -168,17 +148,13 @@ export const unit4Topics: CheatTopic[] = [
   },
   {
     id: "perceptron-learning-rule",
-    subjectId: "ml",
-    unitId: "ml-unit-4",
-    unitNumber: "IV",
+    unit: "IV",
     title: "Perceptron Learning Rule & Convergence",
-    tier: "CORE",
-    kind: "algorithm",
     category: "Neural Networks",
     importance: "HIGH",
     definition:
       "A supervised iterative learning algorithm that updates weights only when the predicted class ŷ differs from the true target y.",
-    oneLineIdea: "Weight update: wᵢ ← wᵢ + α (y − ŷ) xᵢ  and  b ← b + α (y − ŷ).",
+    coreIdea: "Weight update: wᵢ ← wᵢ + α (y − ŷ) xᵢ  and  b ← b + α (y − ŷ).",
     formula: {
       expression: "Δw_i = α ( y - ŷ ) x_i",
       symbols: { α: "learning rate (0 < α ≤ 1)", y: "true target label", ŷ: "predicted output {0,1}" },
@@ -191,12 +167,7 @@ export const unit4Topics: CheatTopic[] = [
       "Calculate error e = (y − ŷ).",
       "Update weights: wᵢ ← wᵢ + α · e · xᵢ  and bias: b ← b + α · e.",
       "Repeat epochs until all samples are correctly classified.",
-    ],
-    complexity: {
-      time: "O(epochs · n · d)",
-      space: "O(d)",
-    },
-    examPoints: [
+    ],    examPoints: [
       "State the Perceptron Weight Update equation.",
       "State the Perceptron Convergence Theorem: if data is linearly separable, training completes in finite steps.",
     ],
@@ -205,59 +176,19 @@ export const unit4Topics: CheatTopic[] = [
   },
   {
     id: "perceptron-numerical",
-    subjectId: "ml",
-    unitId: "ml-unit-4",
-    unitNumber: "IV",
+    unit: "IV",
     title: "Perceptron Step-by-Step Worked Numerical",
-    tier: "CORE",
-    kind: "numerical",
     category: "Neural Networks",
     importance: "HIGH",
     definition:
       "Step-by-step numerical execution of the Perceptron learning algorithm for a single training step.",
-    oneLineIdea: "Trace net input, step activation, error calculation, and weight update.",
-    workedNumerical: {
-      title: "Single-Step Perceptron Weight Update",
-      given: [
-        "Input vector x = [1, 0]",
-        "Target y = 1",
-        "Initial weights w = [0.5, -0.5]",
-        "Initial bias b = 0",
-        "Learning rate α = 0.1",
-      ],
-      formula: "wᵢ(new) = wᵢ + α(y - ŷ)xᵢ  •  b(new) = b + α(y - ŷ)",
-      steps: [
-        {
-          stepNumber: 1,
-          title: "Compute Net Input z",
-          formula: "z = w₁x₁ + w₂x₂ + b",
-          calculation: "z = (0.5)(1) + (-0.5)(0) + 0 = 0.5",
-          result: "z = 0.5",
-        },
-        {
-          stepNumber: 2,
-          title: "Apply Step Activation Function",
-          formula: "ŷ = 1 if z ≥ 0 else 0",
-          calculation: "Since z = 0.5 ≥ 0 ⟹ ŷ = 1",
-          result: "ŷ = 1",
-        },
-        {
-          stepNumber: 3,
-          title: "Compute Classification Error",
-          formula: "e = y - ŷ",
-          calculation: "e = 1 - 1 = 0",
-          result: "e = 0 (No classification error)",
-        },
-        {
-          stepNumber: 4,
-          title: "Update Weights and Bias",
-          formula: "Δw = α · e · x",
-          calculation: "Δw₁ = (0.1)(0)(1) = 0, Δw₂ = (0.1)(0)(0) = 0, Δb = (0.1)(0) = 0",
-          result: "w = [0.5, -0.5], b = 0 (Weights remain unchanged)",
-        },
-      ],
-      answer: "Updated Weights: w₁ = 0.5, w₂ = -0.5, Bias b = 0",
-    },
+    coreIdea: "Trace net input z = wᵀx + b → Step(z) activation → error e = (y − ŷ) → weight update Δw = α · e · x.",
+    steps: [
+      "1. Compute net sum z = w₁x₁ + w₂x₂ + b = (0.5)(1) + (-0.5)(0) + 0 = 0.5.",
+      "2. Apply step function: ŷ = 1 since z = 0.5 ≥ 0.",
+      "3. Compute error e = y − ŷ = 1 − 1 = 0.",
+      "4. Weight update Δw = α · e · x = 0. Weights remain w = [0.5, -0.5], b = 0.",
+    ],
     examPoints: [
       "Execute Perceptron update step for 2 epochs on AND gate — guaranteed 10-mark numerical.",
     ],
@@ -266,17 +197,13 @@ export const unit4Topics: CheatTopic[] = [
   },
   {
     id: "ann-learning-process",
-    subjectId: "ml",
-    unitId: "ml-unit-4",
-    unitNumber: "IV",
+    unit: "IV",
     title: "ANN Learning Process & Loss Functions",
-    tier: "CORE",
-    kind: "workflow",
     category: "Neural Networks",
     importance: "MEDIUM",
     definition:
       "The iterative process of training an ANN: initialize weights, perform forward pass, compute loss function L(w), calculate gradients, and update weights via gradient descent.",
-    oneLineIdea: "Loss Function L(w) measures prediction error. Gradient Descent updates w ← w − α ∇L.",
+    coreIdea: "Loss Function L(w) measures prediction error. Gradient Descent updates w ← w − α ∇L.",
     formula: {
       expression: "MSE = (1/2) ∑ (y - ŷ)²   •   Cross-Entropy = − ∑ y log(ŷ)",
       symbols: { "L(w)": "Loss function", "∇L": "Gradient vector of partial derivatives" },
@@ -299,17 +226,13 @@ export const unit4Topics: CheatTopic[] = [
   },
   {
     id: "backpropagation",
-    subjectId: "ml",
-    unitId: "ml-unit-4",
-    unitNumber: "IV",
+    unit: "IV",
     title: "Backpropagation Algorithm",
-    tier: "CORE",
-    kind: "algorithm",
     category: "Neural Networks",
     importance: "HIGH",
     definition:
       "The fundamental algorithm for training multilayer neural networks. It applies the calculus Chain Rule to propagate output error backwards layer-by-layer to compute partial derivatives for weight updates.",
-    oneLineIdea: "Forward pass computes predictions; Backprop distributes error backward via Chain Rule to update weights.",
+    coreIdea: "Forward pass computes predictions; Backprop distributes error backward via Chain Rule to update weights.",
     formula: {
       expression: "Δw_{ji} = α · δ_j · a_i   where δ_k = y_k - a_k  (output)  and  δ_j = g'(in_j) ∑ w_{kj} δ_k  (hidden)",
       symbols: { "δ_j": "error gradient delta at unit j", "a_i": "activation input from layer below", α: "learning rate" },
@@ -333,59 +256,19 @@ export const unit4Topics: CheatTopic[] = [
   },
   {
     id: "backpropagation-numerical",
-    subjectId: "ml",
-    unitId: "ml-unit-4",
-    unitNumber: "IV",
+    unit: "IV",
     title: "Backpropagation Step-by-Step Worked Numerical",
-    tier: "CORE",
-    kind: "numerical",
     category: "Neural Networks",
     importance: "HIGH",
     definition:
       "Full numerical walkthrough of 1 forward pass and 1 backward pass weight update for a 2-layer neural network with Sigmoid activation.",
-    oneLineIdea: "Trace forward activations → output error → output delta → hidden delta → updated weights.",
-    workedNumerical: {
-      title: "MLP Backpropagation Single-Step Weight Update",
-      given: [
-        "Inputs x₁ = 0.05, x₂ = 0.10",
-        "Hidden weights w₁=0.15, w₂=0.20, w₃=0.25, w₄=0.30",
-        "Output weights w₅=0.40, w₆=0.45, w₇=0.50, w₈=0.55",
-        "Biases b₁ = 0.35, b₂ = 0.60",
-        "Targets y₁ = 0.01, y₂ = 0.99, Learning rate α = 0.5",
-      ],
-      formula: "δ_k = a_k(1 - a_k)(y_k - a_k)  •  Δw_{kj} = α · δ_k · a_j",
-      steps: [
-        {
-          stepNumber: 1,
-          title: "Forward Pass — Hidden Layer Activations",
-          formula: "net_h1 = w₁x₁ + w₂x₂ + b₁,  a_h1 = σ(net_h1)",
-          calculation: "net_h1 = (0.15)(0.05) + (0.20)(0.10) + 0.35 = 0.3775 ⟹ a_h1 = σ(0.3775) = 0.5932",
-          result: "a_h1 = 0.5932,  a_h2 = 0.5969",
-        },
-        {
-          stepNumber: 2,
-          title: "Forward Pass — Output Layer Activations",
-          formula: "net_o1 = w₅a_h1 + w₆a_h2 + b₂,  a_o1 = σ(net_o1)",
-          calculation: "net_o1 = (0.40)(0.5932) + (0.45)(0.5969) + 0.60 = 1.1059 ⟹ a_o1 = σ(1.1059) = 0.7514",
-          result: "a_o1 = 0.7514,  Total Error E = 0.2983",
-        },
-        {
-          stepNumber: 3,
-          title: "Backward Pass — Output Error Delta δ_o1",
-          formula: "δ_o1 = a_o1(1 - a_o1)(y₁ - a_o1)",
-          calculation: "δ_o1 = (0.7514)(1 - 0.7514)(0.01 - 0.7514) = -0.1385",
-          result: "δ_o1 = -0.1385",
-        },
-        {
-          stepNumber: 4,
-          title: "Update Output Weight w₅",
-          formula: "w₅(new) = w₅ + α · δ_o1 · a_h1",
-          calculation: "w₅(new) = 0.40 + (0.5)(-0.1385)(0.5932) = 0.40 - 0.0411 = 0.3589",
-          result: "w₅(new) = 0.3589",
-        },
-      ],
-      answer: "Updated Weight w₅ = 0.3589 (reduced from 0.40 to minimize loss)",
-    },
+    coreIdea: "Trace forward activations → output error → output delta → hidden delta → updated weights.",
+    steps: [
+      "1. Forward Pass Hidden: net_h1 = w₁x₁ + w₂x₂ + b₁ = 0.3775 ⟹ a_h1 = σ(0.3775) = 0.5932.",
+      "2. Forward Pass Output: net_o1 = w₅a_h1 + w₆a_h2 + b₂ = 1.1059 ⟹ a_o1 = σ(1.1059) = 0.7514. Total Error E = 0.2983.",
+      "3. Backward Pass Output Error Delta: δ_o1 = a_o1(1 - a_o1)(y₁ - a_o1) = (0.7514)(1 - 0.7514)(0.01 - 0.7514) = -0.1385.",
+      "4. Update Output Weight w₅: w₅(new) = w₅ + α · δ_o1 · a_h1 = 0.40 + (0.5)(-0.1385)(0.5932) = 0.3589.",
+    ],
     examPoints: [
       "Execute Backpropagation forward and backward step for 1 output neuron — classic 10-mark numerical.",
     ],
@@ -394,17 +277,13 @@ export const unit4Topics: CheatTopic[] = [
   },
   {
     id: "softmax-cross-entropy",
-    subjectId: "ml",
-    unitId: "ml-unit-4",
-    unitNumber: "IV",
+    unit: "IV",
     title: "Softmax Activation & Cross-Entropy Loss",
-    tier: "SUPPORTING",
-    kind: "formula",
     category: "Neural Networks",
     importance: "MEDIUM",
     definition:
       "Softmax converts raw output scores (logits) into a probability distribution summing to 1 across K classes. Cross-Entropy measures distance between true distribution y and predicted probabilities ŷ.",
-    oneLineIdea: "Softmax(z_k) = e^{z_k} / ∑ e^{z_j}. Cross-Entropy Loss = − ∑ y_k log(ŷ_k).",
+    coreIdea: "Softmax(z_k) = e^{z_k} / ∑ e^{z_j}. Cross-Entropy Loss = − ∑ y_k log(ŷ_k).",
     formula: {
       expression: "Softmax(z_k) = e^{z_k} / ∑_{j=1}^{K} e^{z_j}",
       symbols: { "z_k": "unnormalized logit for class k", "Softmax(z_k)": "class probability ∈ (0,1)" },
@@ -418,12 +297,8 @@ export const unit4Topics: CheatTopic[] = [
   },
   {
     id: "sgd-minibatch",
-    subjectId: "ml",
-    unitId: "ml-unit-4",
-    unitNumber: "IV",
+    unit: "IV",
     title: "SGD & Mini-Batch Gradient Descent",
-    tier: "SUPPORTING",
-    kind: "concept",
     category: "Neural Networks",
     importance: "LOW",
     definition:

@@ -1,19 +1,15 @@
-import type { CheatTopic } from "../../types";
+import type { CheatTopic } from "./types";
 
 export const unit5Topics: CheatTopic[] = [
   {
     id: "deep-learning-intro",
-    subjectId: "ml",
-    unitId: "ml-unit-5",
-    unitNumber: "V",
+    unit: "V",
     title: "Introduction to Deep Learning",
-    tier: "CORE",
-    kind: "concept",
     category: "Advanced Machine Learning",
     importance: "HIGH",
     definition:
       "A subset of Machine Learning based on Deep Neural Networks (many hidden layers) that automatically learn hierarchical representations from raw data without manual feature engineering.",
-    oneLineIdea: "Traditional ML = Manual Feature Engineering + Model. Deep Learning = End-to-End Hierarchical Feature Learning.",
+    coreIdea: "Traditional ML = Manual Feature Engineering + Model. Deep Learning = End-to-End Hierarchical Feature Learning.",
     differences: [
       { feature: "Feature Extraction", valA: "Traditional ML requires hand-crafted features", valB: "Deep Learning learns features automatically from raw pixels/audio" },
       { feature: "Data Dependency", valA: "Traditional ML plateaus with big data", valB: "Deep Learning performance scales continuously with massive data" },
@@ -34,17 +30,13 @@ export const unit5Topics: CheatTopic[] = [
   },
   {
     id: "reinforcement-learning-intro",
-    subjectId: "ml",
-    unitId: "ml-unit-5",
-    unitNumber: "V",
+    unit: "V",
     title: "Reinforcement Learning Foundations",
-    tier: "CORE",
-    kind: "concept",
     category: "Advanced Machine Learning",
     importance: "HIGH",
     definition:
       "An autonomous agent learns to make optimal decisions in an environment by performing actions, observing state transitions, and receiving scalar rewards or penalties.",
-    oneLineIdea: "Agent interacts with Environment via Trial & Error to maximize cumulative return R = ∑ γᵗ rₜ.",
+    coreIdea: "Agent interacts with Environment via Trial & Error to maximize cumulative return R = ∑ γᵗ rₜ.",
     formula: {
       expression: "Return R_t = ∑_{k=0}^{\infty} γ^k r_{t+k+1}",
       symbols: { "γ": "discount factor ∈ [0, 1]", "r_t": "immediate reward at step t" },
@@ -71,17 +63,13 @@ export const unit5Topics: CheatTopic[] = [
   },
   {
     id: "case-study-image-recognition",
-    subjectId: "ml",
-    unitId: "ml-unit-5",
-    unitNumber: "V",
+    unit: "V",
     title: "Case Study: Image Recognition Pipeline",
-    tier: "CORE",
-    kind: "case-study",
     category: "Applications of ML",
     importance: "HIGH",
     definition:
       "Automated visual classification using Convolutional Neural Networks (CNNs) to recognize objects, faces, or handwritten digits (MNIST / ImageNet).",
-    oneLineIdea: "Raw Image Pixels → Convolutional Filters → Pooling → Fully Connected → Softmax Class Probabilities.",
+    coreIdea: "Raw Image Pixels → Convolutional Filters → Pooling → Fully Connected → Softmax Class Probabilities.",
     steps: [
       "Image Preprocessing: resize image, normalize pixel intensities to [0, 1], apply data augmentation.",
       "Convolutional Layers: apply learnable 2D filters to detect edges, textures, and shapes.",
@@ -98,17 +86,13 @@ export const unit5Topics: CheatTopic[] = [
   },
   {
     id: "case-study-speech-recognition",
-    subjectId: "ml",
-    unitId: "ml-unit-5",
-    unitNumber: "V",
+    unit: "V",
     title: "Case Study: Speech Recognition Pipeline",
-    tier: "CORE",
-    kind: "case-study",
     category: "Applications of ML",
     importance: "HIGH",
     definition:
       "Converting continuous human speech audio waveforms into written text transcripts using acoustic modeling and sequence learning.",
-    oneLineIdea: "Audio Waveform → Framing & Windowing → MFCC Features → Acoustic Model → Language Model → Text.",
+    coreIdea: "Audio Waveform → Framing & Windowing → MFCC Features → Acoustic Model → Language Model → Text.",
     steps: [
       "Audio Sampling & Framing: slice continuous audio into short 25ms overlapping frames.",
       "Feature Extraction: compute Mel-Frequency Cepstral Coefficients (MFCCs) per frame.",
@@ -125,17 +109,13 @@ export const unit5Topics: CheatTopic[] = [
   },
   {
     id: "case-study-spam-filtering",
-    subjectId: "ml",
-    unitId: "ml-unit-5",
-    unitNumber: "V",
+    unit: "V",
     title: "Case Study: Email Spam Filtering Pipeline",
-    tier: "CORE",
-    kind: "case-study",
     category: "Applications of ML",
     importance: "HIGH",
     definition:
       "Binary text classification system that filters incoming emails into Spam or Ham (legitimate) based on text content and metadata features.",
-    oneLineIdea: "Raw Email Text → Tokenization & Stop-word Removal → TF-IDF Vectorization → Naïve Bayes / SVM → Spam/Ham Label.",
+    coreIdea: "Raw Email Text → Tokenization & Stop-word Removal → TF-IDF Vectorization → Naïve Bayes / SVM → Spam/Ham Label.",
     steps: [
       "Text Cleaning: remove HTML tags, punctuation, numbers, and lowercasing.",
       "Tokenization & Stemming: split body into words and reduce to word roots (Porter Stemmer).",
@@ -152,17 +132,13 @@ export const unit5Topics: CheatTopic[] = [
   },
   {
     id: "case-study-fraud-detection",
-    subjectId: "ml",
-    unitId: "ml-unit-5",
-    unitNumber: "V",
+    unit: "V",
     title: "Case Study: Online Credit Card Fraud Detection",
-    tier: "CORE",
-    kind: "case-study",
     category: "Applications of ML",
     importance: "HIGH",
     definition:
       "Real-time transaction classification to identify fraudulent financial transactions amidst extreme class imbalance (e.g. 99.9% legitimate, 0.1% fraud).",
-    oneLineIdea: "Transaction Features → Imbalanced Resampling (SMOTE) → Anomaly / Isolation Forest → Alert / Block Transaction.",
+    coreIdea: "Transaction Features → Imbalanced Resampling (SMOTE) → Anomaly / Isolation Forest → Alert / Block Transaction.",
     steps: [
       "Feature Engineering: amount, merchant location, time delta, card velocity, IP geolocation.",
       "Handling Class Imbalance: apply SMOTE (Synthetic Minority Over-sampling Technique) or Random Undersampling.",
@@ -179,17 +155,13 @@ export const unit5Topics: CheatTopic[] = [
   },
   {
     id: "q-learning",
-    subjectId: "ml",
-    unitId: "ml-unit-5",
-    unitNumber: "V",
+    unit: "V",
     title: "Q-Learning Algorithm (Model-Free RL)",
-    tier: "SUPPORTING",
-    kind: "algorithm",
     category: "Advanced Machine Learning",
     importance: "MEDIUM",
     definition:
       "A model-free off-policy Temporal Difference reinforcement learning algorithm that learns the quality of actions Q(s, a) without requiring an explicit environment transition model.",
-    oneLineIdea: "Q(s, a) ← Q(s, a) + α [ r + γ max_a' Q(s', a') − Q(s, a) ].",
+    coreIdea: "Q(s, a) ← Q(s, a) + α [ r + γ max_a' Q(s', a') − Q(s, a) ].",
     formula: {
       expression: "Q(s, a) ← Q(s, a) + α [ r + γ \\max_{a'} Q(s', a') - Q(s, a) ]",
       symbols: { "Q(s,a)": "expected cumulative return taking action a in state s", α: "learning rate", γ: "discount factor" },

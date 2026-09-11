@@ -1,20 +1,15 @@
-import type { CheatTopic } from "../../types";
+import type { AiCheatTopic } from "./types";
 
-export const unit4Topics: CheatTopic[] = [
+export const unit4Topics: AiCheatTopic[] = [
   {
     id: "ontological-engineering",
-    subjectId: "ai",
-    unitId: "ai-unit-4",
-    unitNumber: "IV",
+    unit: "IV",
     title: "Ontological Engineering",
-    tier: "CORE",
-    kind: "concept",
-    syllabusRef: "Unit IV — Ontological engineering",
     category: "Knowledge Representation",
     importance: "HIGH",
     definition:
       "The process of constructing upper-level ontologies that represent general concepts—such as Actions, Time, Physical Objects, Beliefs, and Measurements—that apply across multiple specific domains.",
-    oneLineIdea: "Upper-level ontology = general taxonomy (Objects, Time, Actions) reusable across all AI domain models.",
+    coreIdea: "Upper-level ontology = general taxonomy (Objects, Time, Actions) reusable across all AI domain models.",
     keyPoints: [
       "Upper Ontology: organizes high-level categories (e.g. Particulars vs Abstract Objects).",
       "Domain Ontology: specializes upper categories for specific tasks (e.g. Medical diagnosis, E-commerce).",
@@ -29,18 +24,13 @@ export const unit4Topics: CheatTopic[] = [
   },
   {
     id: "categories-and-objects",
-    subjectId: "ai",
-    unitId: "ai-unit-4",
-    unitNumber: "IV",
+    unit: "IV",
     title: "Categories and Objects",
-    tier: "CORE",
-    kind: "concept",
-    syllabusRef: "Unit IV — Categories and objects",
     category: "Knowledge Representation",
     importance: "HIGH",
     definition:
       "Category representation organizes individual objects into sets/classes using relations such as Subclass (Inheritance), Disjointness, Exhaustive Decomposition, and Partitioning.",
-    oneLineIdea: "Subclass (A ⊂ B), Disjoint (A ∩ B = ∅), Partition = Disjoint + Exhaustive Decomposition.",
+    coreIdea: "Subclass (A ⊂ B), Disjoint (A ∩ B = ∅), Partition = Disjoint + Exhaustive Decomposition.",
     formula: {
       expression: "Partition(S, C₁, C₂) ≡ Disjoint(C₁, C₂) ∧ ExhaustiveDecomposition(S, C₁, C₂)",
       symbols: { "Subclass(C₁, C₂)": "C₁ is a subset of C₂", "Disjoint(C₁, C₂)": "no object belongs to both C₁ and C₂" },
@@ -60,18 +50,13 @@ export const unit4Topics: CheatTopic[] = [
   },
   {
     id: "events-and-processes",
-    subjectId: "ai",
-    unitId: "ai-unit-4",
-    unitNumber: "IV",
+    unit: "IV",
     title: "Events, Time and Event Calculus",
-    tier: "CORE",
-    kind: "concept",
-    syllabusRef: "Unit IV — Events",
     category: "Knowledge Representation",
     importance: "HIGH",
     definition:
       "Representing temporal change where fluents (state variables) change values over time intervals via events using Event Calculus.",
-    oneLineIdea: "Fluents (states) hold at time t. Events initiate or terminate fluents at specific time points.",
+    coreIdea: "Fluents (states) hold at time t. Events initiate or terminate fluents at specific time points.",
     formula: {
       expression: "HoldsAt(f, t) ⇐ InitiatedAt(f, t₁) ∧ (t₁ < t) ∧ ¬ Clipped(f, t₁, t)",
       symbols: { "HoldsAt(f, t)": "fluent f is true at time t", "InitiatedAt(f, t₁)": "event at t₁ makes f true", "Clipped(f, t₁, t)": "f was terminated between t₁ and t" },
@@ -92,18 +77,13 @@ export const unit4Topics: CheatTopic[] = [
 
   {
     id: "mental-events-objects",
-    subjectId: "ai",
-    unitId: "ai-unit-4",
-    unitNumber: "IV",
+    unit: "IV",
     title: "Mental Events and Mental Objects",
-    tier: "CORE",
-    kind: "concept",
-    syllabusRef: "Unit IV — Mental events and mental objects",
     category: "Knowledge Representation",
     importance: "MEDIUM",
     definition:
       "Representing knowledge about agents' mental states (Beliefs, Desires, Intentions) using Modal Logic and Propositional Attitudes.",
-    oneLineIdea: "Believes(Agent, Proposition) represents internal agent mental state without requiring proposition truth.",
+    coreIdea: "Believes(Agent, Proposition) represents internal agent mental state without requiring proposition truth.",
     keyPoints: [
       "Propositional Attitudes: relations between agents and propositions (e.g., Believes, Knows, Wants).",
       "Referential Opacity: substituting co-referential terms inside mental attitudes may change truth value.",
@@ -118,18 +98,13 @@ export const unit4Topics: CheatTopic[] = [
   },
   {
     id: "reasoning-systems-categories",
-    subjectId: "ai",
-    unitId: "ai-unit-4",
-    unitNumber: "IV",
+    unit: "IV",
     title: "Reasoning Systems for Categories",
-    tier: "CORE",
-    kind: "workflow",
-    syllabusRef: "Unit IV — Reasoning systems for categories",
     category: "Knowledge Representation",
     importance: "HIGH",
     definition:
       "Specialized inference engines designed for category hierarchies: Semantic Networks (graph-based inheritance) and Description Logics (formal concept definitions).",
-    oneLineIdea: "Semantic Networks = visual graph inheritance. Description Logics = formal subsumption taxonomy logic.",
+    coreIdea: "Semantic Networks = visual graph inheritance. Description Logics = formal subsumption taxonomy logic.",
     differences: [
       { feature: "Semantic Networks", valA: "Graphical nodes (categories) & edges (IS-A, Has-A)", valB: "Intuitive, but lacks formal semantics" },
       { feature: "Description Logics", valA: "Formal syntax with Concepts, Roles, Individuals", valB: "Decidable subset of FOL for taxonomy classification" },
@@ -149,18 +124,13 @@ export const unit4Topics: CheatTopic[] = [
   },
   {
     id: "default-information",
-    subjectId: "ai",
-    unitId: "ai-unit-4",
-    unitNumber: "IV",
+    unit: "IV",
     title: "Default Information & Non-Monotonic Reasoning",
-    tier: "CORE",
-    kind: "concept",
-    syllabusRef: "Unit IV — Default information",
     category: "Knowledge Representation",
     importance: "HIGH",
     definition:
       "Reasoning under incomplete knowledge using default assumptions that can be retracted when new counter-evidence arrives (Non-Monotonic Logic).",
-    oneLineIdea: "Standard Logic is Monotonic (adding facts never invalidates proofs). Non-Monotonic Logic retracts defaults when retracted.",
+    coreIdea: "Standard Logic is Monotonic (adding facts never invalidates proofs). Non-Monotonic Logic retracts defaults when retracted.",
     formula: {
       expression: "Default Rule: α : β / γ   (If α is known and β is consistent, infer γ)",
       symbols: { α: "prerequisite", β: "justification", γ: "consequent" },
@@ -181,17 +151,13 @@ export const unit4Topics: CheatTopic[] = [
 
   {
     id: "exact-inference",
-    subjectId: "ai",
-    unitId: "ai-unit-4",
-    unitNumber: "IV",
+    unit: "IV",
     title: "Exact Inference in Bayesian Networks",
-    tier: "CORE",
-    kind: "algorithm",
     category: "Uncertainty",
     importance: "MEDIUM",
     definition:
       "Computes posterior P(Query | Evidence) by summing over hidden (unobserved) variables. Enumeration evaluates the joint sum; Variable Elimination caches intermediate factors.",
-    oneLineIdea: "Variable Elimination pushes summations inward over CPT factors to avoid redundant math.",
+    coreIdea: "Variable Elimination pushes summations inward over CPT factors to avoid redundant math.",
     formula: {
       expression: "P(X | e) = α ∑_y P(X, e, y)",
       symbols: { X: "query variable", e: "observed evidence", y: "hidden variables" },
@@ -202,14 +168,7 @@ export const unit4Topics: CheatTopic[] = [
       "Order hidden variables y₁, …, yₖ for elimination.",
       "Group factors containing y_i and sum it out to produce a new factor.",
       "Repeat until only query variable remains, then normalize.",
-    ],
-    complexity: {
-      time: "O(n · 2^w) where w is tree-width",
-      space: "O(n · 2^w)",
-      completeness: "Complete",
-      optimality: "Exact",
-    },
-    examPoints: [
+    ],    examPoints: [
       "Execute Variable Elimination on a 4-node network — typical numerical 10-marker.",
       "State why variable ordering matters for elimination factor size.",
     ],
@@ -218,22 +177,13 @@ export const unit4Topics: CheatTopic[] = [
   },
   {
     id: "approximate-inference",
-    subjectId: "ai",
-    unitId: "ai-unit-4",
-    unitNumber: "IV",
+    unit: "IV",
     title: "Approximate Inference & Sampling",
-    tier: "CORE",
-    kind: "algorithm",
     category: "Uncertainty",
     importance: "MEDIUM",
     definition:
       "When exact inference is intractable, Monte Carlo algorithms estimate probabilities by generating random samples: Direct Sampling, Rejection Sampling, Likelihood Weighting, and MCMC (Gibbs Sampling).",
-    oneLineIdea: "Sample full assignments using CPT probabilities → ratio of matches approximates P(Q|e).",
-    complexity: {
-      time: "O(N · n) for N samples on n nodes",
-      space: "O(n) per sample",
-    },
-    keyPoints: [
+    coreIdea: "Sample full assignments using CPT probabilities → ratio of matches approximates P(Q|e).",    keyPoints: [
       "Direct Sampling: top-down sampling following topological order.",
       "Rejection Sampling: discards samples inconsistent with evidence e (slow if e is rare).",
       "Likelihood Weighting: fixes evidence variables and weights each sample by P(evidence | parents).",
@@ -248,17 +198,13 @@ export const unit4Topics: CheatTopic[] = [
   },
   {
     id: "first-order-probability",
-    subjectId: "ai",
-    unitId: "ai-unit-4",
-    unitNumber: "IV",
+    unit: "IV",
     title: "Relational & First-Order Probability",
-    tier: "CORE",
-    kind: "concept",
     category: "Uncertainty",
     importance: "LOW",
     definition:
       "Combines First-Order Logic (objects, relations) with Probabilistic Models (Bayesian Networks) into Relational Probabilistic Models (RPMs) and Markov Logic Networks (MLNs).",
-    oneLineIdea: "First-Order Logic handles complex multi-object domains; Probability handles uncertainty.",
+    coreIdea: "First-Order Logic handles complex multi-object domains; Probability handles uncertainty.",
     keyPoints: [
       "Propositional Bayesian networks fail when the number of objects is unknown or variable.",
       "Relational probability models use parameterized random variables (e.g. Loves(x, y)).",

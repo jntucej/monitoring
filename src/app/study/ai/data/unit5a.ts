@@ -1,20 +1,15 @@
-import type { CheatTopic } from "../../types";
+import type { AiCheatTopic } from "./types";
 
-export const unit5Topics: CheatTopic[] = [
+export const unit5Topics: AiCheatTopic[] = [
   {
     id: "acting-under-uncertainty",
-    subjectId: "ai",
-    unitId: "ai-unit-5",
-    unitNumber: "V",
+    unit: "V",
     title: "Acting Under Uncertainty",
-    tier: "CORE",
-    kind: "concept",
-    syllabusRef: "Unit V — Acting under uncertainty",
     category: "Uncertainty & Probability",
     importance: "HIGH",
     definition:
       "Agents act under uncertainty due to partial observability, non-determinism, laziness (too many rules to specify), and ignorance (missing domain knowledge).",
-    oneLineIdea: "Probabilistic reasoning replaces strict true/false logic with degrees of belief ranging from 0 to 1.",
+    coreIdea: "Probabilistic reasoning replaces strict true/false logic with degrees of belief ranging from 0 to 1.",
     keyPoints: [
       "Logical rules fail in real-world domains due to qualification & ramification problems.",
       "Probability provides a summaries of ignorance, combining available evidence.",
@@ -29,18 +24,13 @@ export const unit5Topics: CheatTopic[] = [
   },
   {
     id: "basic-probability-notation",
-    subjectId: "ai",
-    unitId: "ai-unit-5",
-    unitNumber: "V",
+    unit: "V",
     title: "Basic Probability Notation & Axioms",
-    tier: "CORE",
-    kind: "formula",
-    syllabusRef: "Unit V — Basic probability notation",
     category: "Uncertainty & Probability",
     importance: "HIGH",
     definition:
       "Mathematical foundation of probability describing prior (unconditional) probability P(A) and posterior (conditional) probability P(A|B) governed by Kolmogorov's Axioms.",
-    oneLineIdea: "Conditional P(A|B) = P(A ∧ B) / P(B). Axioms: P ∈ [0,1], P(True)=1, P(A ∨ B) = P(A)+P(B)-P(A ∧ B).",
+    coreIdea: "Conditional P(A|B) = P(A ∧ B) / P(B). Axioms: P ∈ [0,1], P(True)=1, P(A ∨ B) = P(A)+P(B)-P(A ∧ B).",
     formula: {
       expression: "P(A | B) = P(A ∧ B) / P(B)   •   P(A ∨ B) = P(A) + P(B) - P(A ∧ B)",
       symbols: { "P(A|B)": "conditional probability of A given B", "P(A ∧ B)": "joint probability of A and B" },
@@ -56,18 +46,13 @@ export const unit5Topics: CheatTopic[] = [
 
   {
     id: "full-joint-distributions",
-    subjectId: "ai",
-    unitId: "ai-unit-5",
-    unitNumber: "V",
+    unit: "V",
     title: "Full Joint Probability Distributions",
-    tier: "CORE",
-    kind: "concept",
-    syllabusRef: "Unit V — Full joint distributions",
     category: "Uncertainty & Probability",
     importance: "HIGH",
     definition:
       "An exhaustive probability table specifying the probability of every possible combination of atomic events across all random variables in the domain.",
-    oneLineIdea: "Full Joint Distribution allows answering any probabilistic query via Marginalization (Summing Out).",
+    coreIdea: "Full Joint Distribution allows answering any probabilistic query via Marginalization (Summing Out).",
     formula: {
       expression: "P(Y) = ∑_z P(Y, Z = z)",
       symbols: { Y: "query variable", Z: "unobserved (hidden) variables summed out" },
@@ -87,18 +72,13 @@ export const unit5Topics: CheatTopic[] = [
   },
   {
     id: "independence",
-    subjectId: "ai",
-    unitId: "ai-unit-5",
-    unitNumber: "V",
+    unit: "V",
     title: "Independence & Conditional Independence",
-    tier: "CORE",
-    kind: "formula",
-    syllabusRef: "Unit V — Independence",
     category: "Uncertainty & Probability",
     importance: "HIGH",
     definition:
       "Independence simplifies joint distributions: Absolute Independence P(A, B) = P(A)P(B); Conditional Independence P(A, B | C) = P(A|C) P(B|C).",
-    oneLineIdea: "Conditional Independence P(A|B, C) = P(A|C) decomposes complex joint tables into smaller local tables.",
+    coreIdea: "Conditional Independence P(A|B, C) = P(A|C) decomposes complex joint tables into smaller local tables.",
     formula: {
       expression: "Absolute: P(A, B) = P(A)P(B)   •   Conditional: P(A, B | C) = P(A|C) P(B|C)",
       symbols: { "P(A,B|C)": "A and B are conditionally independent given C" },
@@ -113,48 +93,19 @@ export const unit5Topics: CheatTopic[] = [
   },
   {
     id: "bayes-rule",
-    subjectId: "ai",
-    unitId: "ai-unit-5",
-    unitNumber: "V",
+    unit: "V",
     title: "Bayes' Rule & Worked Numerical",
-    tier: "CORE",
-    kind: "numerical",
-    syllabusRef: "Unit V — Bayes' rule and its use",
     category: "Uncertainty & Probability",
     importance: "HIGH",
     definition:
       "Bayes' Rule calculates posterior probability P(Cause|Effect) from causal likelihood P(Effect|Cause) and prior probability P(Cause).",
-    oneLineIdea: "P(H|E) = [P(E|H) · P(H)] / P(E). Turn causal likelihood into diagnostic posterior.",
-    workedNumerical: {
-      title: "Medical Diagnosis Bayes' Rule Calculation",
-      given: [
-        "Prior probability of meningitis P(M) = 0.00005",
-        "Likelihood of stiff neck given meningitis P(S|M) = 0.70",
-        "Prior probability of stiff neck P(S) = 0.01",
-      ],
-      formula: "P(M | S) = [ P(S | M) · P(M) ] / P(S)",
-      steps: [
-        {
-          stepNumber: 1,
-          title: "Identify Given Priors & Likelihood",
-          calculation: "P(M) = 0.00005, P(S|M) = 0.70, P(S) = 0.01",
-        },
-        {
-          stepNumber: 2,
-          title: "Substitute into Bayes' Rule Formula",
-          formula: "P(M|S) = (0.70 × 0.00005) / 0.01",
-          calculation: "Numerator = 0.000035",
-          result: "Numerator = 0.000035",
-        },
-        {
-          stepNumber: 3,
-          title: "Compute Final Posterior Probability",
-          calculation: "P(M|S) = 0.000035 / 0.01 = 0.0035",
-          result: "P(M|S) = 0.0035 (0.35%)",
-        },
-      ],
-      answer: "Posterior probability P(Meningitis | StiffNeck) = 0.0035 (0.35%)",
-    },
+    coreIdea: "P(H|E) = [P(E|H) · P(H)] / P(E). Turn causal likelihood into diagnostic posterior.",
+    steps: [
+      "1. Identify Priors: P(Meningitis) = 0.00005, P(StiffNeck) = 0.01.",
+      "2. Identify Likelihood: P(StiffNeck | Meningitis) = 0.70.",
+      "3. Substitute into Bayes' Rule: P(M|S) = (0.70 × 0.00005) / 0.01.",
+      "4. Compute Posterior: P(M|S) = 0.000035 / 0.01 = 0.0035 (0.35%).",
+    ],
     examPoints: [
       "State Bayes' Rule formula and compute medical diagnosis posterior — guaranteed 10-mark numerical.",
     ],
@@ -164,18 +115,13 @@ export const unit5Topics: CheatTopic[] = [
 
   {
     id: "representing-knowledge-uncertain",
-    subjectId: "ai",
-    unitId: "ai-unit-5",
-    unitNumber: "V",
+    unit: "V",
     title: "Representing Knowledge in Uncertain Domains",
-    tier: "CORE",
-    kind: "concept",
-    syllabusRef: "Unit V — Representing knowledge in uncertain domains",
     category: "Uncertainty & Probability",
     importance: "HIGH",
     definition:
       "Structuring uncertain knowledge using network graphs that explicitly assert conditional independence relations to prevent exponential state space explosion.",
-    oneLineIdea: "Network topology encodes conditional independence assertions among domain variables.",
+    coreIdea: "Network topology encodes conditional independence assertions among domain variables.",
     keyPoints: [
       "Causal chains: X → Y → Z.",
       "Common Cause: Y → X and Y → Z (X and Z independent given Y).",
@@ -189,18 +135,13 @@ export const unit5Topics: CheatTopic[] = [
   },
   {
     id: "bayesian-networks-semantics",
-    subjectId: "ai",
-    unitId: "ai-unit-5",
-    unitNumber: "V",
+    unit: "V",
     title: "Bayesian Network Semantics & DAG Topology",
-    tier: "CORE",
-    kind: "concept",
-    syllabusRef: "Unit V — Bayesian network semantics",
     category: "Bayesian Networks",
     importance: "HIGH",
     definition:
       "A Bayesian Network is a Directed Acyclic Graph (DAG) where nodes represent random variables, directed links represent direct influence, and each node has a Conditional Probability Table (CPT).",
-    oneLineIdea: "Full joint distribution factorizes as product of local node CPTs: P(X₁…Xₙ) = ∏ P(Xᵢ | Parents(Xᵢ)).",
+    coreIdea: "Full joint distribution factorizes as product of local node CPTs: P(X₁…Xₙ) = ∏ P(Xᵢ | Parents(Xᵢ)).",
     formula: {
       expression: "P(X₁, …, Xₙ) = ∏_{i=1}^{n} P(X_i | Parents(X_i))",
       symbols: { "Parents(X_i)": "direct parent nodes in the DAG" },
@@ -219,18 +160,13 @@ export const unit5Topics: CheatTopic[] = [
   },
   {
     id: "efficient-conditional-distributions",
-    subjectId: "ai",
-    unitId: "ai-unit-5",
-    unitNumber: "V",
+    unit: "V",
     title: "Efficient Representation of Conditional Distributions",
-    tier: "CORE",
-    kind: "formula",
-    syllabusRef: "Unit V — Efficient representation of conditional distributions",
     category: "Bayesian Networks",
     importance: "MEDIUM",
     definition:
       "Compacting large CPT tables using canonical parameterized distributions such as Noisy-OR for boolean variables.",
-    oneLineIdea: "Noisy-OR reduces CPT parameter complexity from O(2^k) to linear O(k) for k parents.",
+    coreIdea: "Noisy-OR reduces CPT parameter complexity from O(2^k) to linear O(k) for k parents.",
     formula: {
       expression: "P(Y = false | X₁, …, X_k) = ∏_{i: X_i = true} q_i",
       symbols: { "q_i": "probability that parent X_i alone fails to cause Y" },
@@ -244,18 +180,13 @@ export const unit5Topics: CheatTopic[] = [
   },
   {
     id: "approximate-inference-bbn",
-    subjectId: "ai",
-    unitId: "ai-unit-5",
-    unitNumber: "V",
+    unit: "V",
     title: "Approximate Inference in Bayesian Networks",
-    tier: "CORE",
-    kind: "algorithm",
-    syllabusRef: "Unit V — Approximate inference",
     category: "Bayesian Networks",
     importance: "HIGH",
     definition:
       "Monte Carlo sampling algorithms for large Bayesian networks where exact inference is NP-hard: Direct Sampling, Rejection Sampling, Likelihood Weighting, and MCMC (Gibbs Sampling).",
-    oneLineIdea: "Sample full network assignments using CPT probabilities → fraction of matching samples estimates P(Q|e).",
+    coreIdea: "Sample full network assignments using CPT probabilities → fraction of matching samples estimates P(Q|e).",
     differences: [
       { feature: "Rejection Sampling", valA: "Discards samples inconsistent with evidence e", valB: "Extremely slow if evidence e is rare" },
       { feature: "Likelihood Weighting", valA: "Fixes evidence variables, weights each sample by P(e | parents)", valB: "Keeps all samples, highly efficient" },
@@ -275,18 +206,13 @@ export const unit5Topics: CheatTopic[] = [
   },
   {
     id: "relational-fol-probability",
-    subjectId: "ai",
-    unitId: "ai-unit-5",
-    unitNumber: "V",
+    unit: "V",
     title: "Relational & First-Order Probability",
-    tier: "CORE",
-    kind: "concept",
-    syllabusRef: "Unit V — Relational/FOL probability",
     category: "Uncertainty & Probability",
     importance: "LOW",
     definition:
       "Combining First-Order Logic (objects, relations, quantifiers) with Probabilistic Models into Relational Probabilistic Models (RPMs) and Markov Logic Networks (MLNs).",
-    oneLineIdea: "First-Order Logic handles multi-object relations; Probability handles uncertainty.",
+    coreIdea: "First-Order Logic handles multi-object relations; Probability handles uncertainty.",
     keyPoints: [
       "Propositional Bayesian Networks cannot scale when object counts vary or are unknown.",
       "Relational probability models define parameterized random variables over domain objects (e.g., Loves(x, y)).",
@@ -300,49 +226,19 @@ export const unit5Topics: CheatTopic[] = [
   },
   {
     id: "dempster-shafer-theory",
-    subjectId: "ai",
-    unitId: "ai-unit-5",
-    unitNumber: "V",
+    unit: "V",
     title: "Dempster-Shafer Theory & Worked Numerical",
-    tier: "CORE",
-    kind: "numerical",
-    syllabusRef: "Unit V — Dempster-Shafer theory",
     category: "Uncertainty & Probability",
     importance: "HIGH",
     definition:
       "A mathematical framework for reasoning with uncertainty that distinguishes between uncertainty and ignorance using Basic Probability Assignment (mass function m), Belief (Bel), and Plausibility (Pl).",
-    oneLineIdea: "Belief Bel(A) = lower bound (proven support); Plausibility Pl(A) = upper bound (unrefuted support).",
-    workedNumerical: {
-      title: "Dempster-Shafer Belief & Plausibility Calculation",
-      given: [
-        "Frame of Discernment Θ = {Flu, Cold, Allergy}",
-        "Mass m₁({Flu}) = 0.6, m₁({Cold}) = 0.2, m₁({Flu, Cold}) = 0.2",
-      ],
-      formula: "Bel(A) = ∑_{B ⊆ A} m(B)   •   Pl(A) = ∑_{B ∩ A ≠ ∅} m(B) = 1 − Bel(Aᶜ)",
-      steps: [
-        {
-          stepNumber: 1,
-          title: "Compute Belief Bel({Flu})",
-          formula: "Bel({Flu}) = ∑_{B ⊆ {Flu}} m(B)",
-          calculation: "Subsets of {Flu} is only {Flu} ⟹ Bel({Flu}) = m({Flu}) = 0.6",
-          result: "Bel({Flu}) = 0.6",
-        },
-        {
-          stepNumber: 2,
-          title: "Compute Plausibility Pl({Flu})",
-          formula: "Pl({Flu}) = ∑_{B ∩ {Flu} ≠ ∅} m(B)",
-          calculation: "Intersects {Flu}: {Flu} and {Flu, Cold} ⟹ Pl({Flu}) = 0.6 + 0.2 = 0.8",
-          result: "Pl({Flu}) = 0.8",
-        },
-        {
-          stepNumber: 3,
-          title: "Form Belief Interval [Bel, Pl]",
-          calculation: "Interval for Flu = [0.6, 0.8]",
-          result: "Belief Interval [0.6, 0.8]",
-        },
-      ],
-      answer: "Bel({Flu}) = 0.6, Pl({Flu}) = 0.8, Belief Interval = [0.6, 0.8]",
-    },
+    coreIdea: "Belief Bel(A) = lower bound (proven support); Plausibility Pl(A) = upper bound (unrefuted support).",
+    steps: [
+      "1. Mass Assignment: m({Flu}) = 0.6, m({Cold}) = 0.2, m({Flu, Cold}) = 0.2.",
+      "2. Compute Belief Bel({Flu}) = sum of mass of all subsets of {Flu} = 0.6.",
+      "3. Compute Plausibility Pl({Flu}) = sum of mass of sets intersecting {Flu} = 0.6 + 0.2 = 0.8.",
+      "4. Form Belief Interval [Bel, Pl] = [0.6, 0.8]. Gap (0.2) represents ignorance.",
+    ],
     examPoints: [
       "Define Mass function m, Belief Bel, and Plausibility Pl in Dempster-Shafer theory — classic 10-marker.",
       "Execute Dempster's Rule of Combination for two independent mass assignments m₁ and m₂.",
@@ -352,18 +248,13 @@ export const unit5Topics: CheatTopic[] = [
   },
   {
     id: "exact-inference-variable-elimination",
-    subjectId: "ai",
-    unitId: "ai-unit-5",
-    unitNumber: "V",
+    unit: "V",
     title: "Exact Inference: Variable Elimination",
-    tier: "SUPPORTING",
-    kind: "algorithm",
-    syllabusRef: "Unit V — Bayesian networks",
     category: "Bayesian Networks",
     importance: "HIGH",
     definition:
       "Dynamic programming algorithm for exact BBN inference that computes marginal probabilities by summing out unobserved hidden variables one by one.",
-    oneLineIdea: "Push summations inside factor products: O(n · 2^w) where w is tree-width.",
+    coreIdea: "Push summations inside factor products: O(n · 2^w) where w is tree-width.",
     steps: [
       "Form initial factors from CPTs.",
       "Order hidden variables Y₁, …, Y_k for elimination.",

@@ -4,15 +4,16 @@ import type { AiCheatTopic } from "../data/types";
 import { AiVisual } from "./AiVisual";
 import { Lightbulb, Target } from "lucide-react";
 
-const UNIT_ACCENT: Record<"I" | "II" | "III", string> = {
+const UNIT_ACCENT: Record<string, string> = {
   I: "var(--unit-a)",
   II: "var(--unit-b)",
   III: "var(--unit-c)",
+  IV: "#3b82f6",
+  V: "#ec4899",
 };
 
 export function AiCheatCard({ topic }: { topic: AiCheatTopic }) {
-  const uNum = (topic.unitNumber || topic.unit || "I") as "I" | "II" | "III";
-  const accent = UNIT_ACCENT[uNum] ?? "var(--unit-a)";
+  const accent = UNIT_ACCENT[topic.unit] ?? "var(--unit-a)";
   const diffRows = topic.differences ?? [];
   const hasDiff = diffRows.length > 0;
   const has3col = diffRows.some((r) => (r as any).valC !== undefined);

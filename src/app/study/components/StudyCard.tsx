@@ -319,7 +319,7 @@ export function StudyCard({
           {topic.visual && mode === "full" && (
             <div className="pt-2">
               <p className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2">🎮 Interactive Visual Stepper</p>
-              <AiVisual visual={topic.visual} />
+              <AiVisual visual={topic.visual as any} />
             </div>
           )}
 

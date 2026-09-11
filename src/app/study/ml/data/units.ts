@@ -1,19 +1,18 @@
-import type { StudyUnit } from "../../types";
+import type { UnitSpec, UnitId } from "./types";
 
-export const UNITS_CONFIG: Record<"I" | "II" | "III" | "IV" | "V", StudyUnit> = {
+export const UNITS_CONFIG: Record<UnitId, UnitSpec> = {
   I: {
-    id: "ml-unit-1",
-    unitNumber: "I",
+    id: "I",
     title: "Unit I — Foundations & Feature Engineering",
     subtitle: "Introduction, Data Types, Pre-processing & PCA",
     description: "Machine Learning concepts, E-T-P framework, Data Preprocessing pipeline, Feature Selection & Principal Component Analysis.",
     categories: [
       {
-        name: "🎯 Core Syllabus Topics",
+        name: "Introduction",
         topicIds: ["introduction", "human-learning", "what-is-ml", "ml-types", "ml-activities", "applications"]
       },
       {
-        name: "🎯 Model Preparation & Pre-processing",
+        name: "Model Preparation",
         topicIds: [
           "data-types",
           "data-structure",
@@ -25,20 +24,19 @@ export const UNITS_CONFIG: Record<"I" | "II" | "III" | "IV" | "V", StudyUnit> = 
         ]
       },
       {
-        name: "🎯 Feature Engineering & PCA",
+        name: "Feature Engineering",
         topicIds: ["feature-engineering", "feature-transformation", "feature-subset-selection", "pca"]
       }
     ]
   },
   II: {
-    id: "ml-unit-2",
-    unitNumber: "II",
+    id: "II",
     title: "Unit II — Supervised Learning",
     subtitle: "Regression, Classification & MLE",
     description: "Linear, Polynomial & Logistic Regression, MLE parameter estimation, Naïve Bayes, kNN, Decision Trees, SVM & Random Forest.",
     categories: [
       {
-        name: "🎯 Core Regression",
+        name: "Supervised & Regression",
         topicIds: [
           "supervised-learning-intro",
           "regression-intro",
@@ -50,7 +48,7 @@ export const UNITS_CONFIG: Record<"I" | "II" | "III" | "IV" | "V", StudyUnit> = 
         ]
       },
       {
-        name: "🎯 Core Classification",
+        name: "Classification",
         topicIds: [
           "classification-intro",
           "naive-bayes",
@@ -63,31 +61,29 @@ export const UNITS_CONFIG: Record<"I" | "II" | "III" | "IV" | "V", StudyUnit> = 
     ]
   },
   III: {
-    id: "ml-unit-3",
-    unitNumber: "III",
+    id: "III",
     title: "Unit III — Unsupervised Learning",
     subtitle: "Clustering & Density-Based Methods",
     description: "Partitioning (k-Means, k-Medoids), Hierarchical Clustering (Dendrograms), and Density-Based Spatial Clustering (DBSCAN).",
     categories: [
       {
-        name: "🎯 Core Unsupervised Foundations",
+        name: "Unsupervised Foundations",
         topicIds: ["unsupervised-learning-intro", "supervised-vs-unsupervised", "clustering-intro"]
       },
       {
-        name: "🎯 Core Clustering Algorithms",
+        name: "Clustering Algorithms",
         topicIds: ["kmeans", "kmedoids", "hierarchical-clustering", "dbscan"]
       }
     ]
   },
   IV: {
-    id: "ml-unit-4",
-    unitNumber: "IV",
+    id: "IV",
     title: "Unit IV — Artificial Neural Networks",
-    subtitle: "Biological vs Artificial Neuron, Perceptron, Backpropagation",
-    description: "Biological vs Artificial Neurons, Activation Functions & Derivatives, Perceptron Learning Rule, ANN Architectures, Backpropagation equations & worked numericals.",
+    subtitle: "Neuron Models · Perceptron · Backpropagation",
+    description: "Biological vs Artificial Neuron, Activation Functions, Single-Layer Perceptron, Perceptron Learning Rule, Backpropagation Algorithm.",
     categories: [
       {
-        name: "🎯 Core Neuron & Perceptron Topics",
+        name: "Neuron & Perceptron",
         topicIds: [
           "biological-vs-artificial-neuron",
           "artificial-neuron-model",
@@ -99,16 +95,11 @@ export const UNITS_CONFIG: Record<"I" | "II" | "III" | "IV" | "V", StudyUnit> = 
         ]
       },
       {
-        name: "🎯 Core Backpropagation Topics",
+        name: "Backpropagation & Learning",
         topicIds: [
           "ann-learning-process",
           "backpropagation",
-          "backpropagation-numerical"
-        ]
-      },
-      {
-        name: "📚 Supporting Topics",
-        topicIds: [
+          "backpropagation-numerical",
           "softmax-cross-entropy",
           "sgd-minibatch"
         ]
@@ -116,35 +107,24 @@ export const UNITS_CONFIG: Record<"I" | "II" | "III" | "IV" | "V", StudyUnit> = 
     ]
   },
   V: {
-    id: "ml-unit-5",
-    unitNumber: "V",
-    title: "Unit V — Advanced ML & Applications",
-    subtitle: "Deep Learning, Reinforcement Learning & Case Studies",
-    description: "Deep Learning foundations, Reinforcement Learning (Agent, Environment, MDP, Rewards), and 4 Industry Case Studies (Image, Speech, Spam, Fraud).",
+    id: "V",
+    title: "Unit V — Advanced ML & Case Studies",
+    subtitle: "Deep Learning · Reinforcement Learning · Applications",
+    description: "Deep Learning, Reinforcement Learning (Agent, MDP, Q-Learning), 4 Industry Case Studies (Image, Speech, Spam, Fraud).",
     categories: [
       {
-        name: "🎯 Core Advanced ML Topics",
-        topicIds: [
-          "deep-learning-intro",
-          "reinforcement-learning-intro"
-        ]
+        name: "Advanced ML",
+        topicIds: ["deep-learning-intro", "reinforcement-learning-intro", "q-learning"]
       },
       {
-        name: "🎯 Core Case Studies",
+        name: "Case Studies",
         topicIds: [
           "case-study-image-recognition",
           "case-study-speech-recognition",
           "case-study-spam-filtering",
           "case-study-fraud-detection"
         ]
-      },
-      {
-        name: "📚 Supporting Topics",
-        topicIds: [
-          "q-learning"
-        ]
       }
     ]
   }
 };
-
