@@ -2,53 +2,57 @@
 
 import Link from "next/link";
 import { StudyHeader } from "./layout";
-import { ChevronRight, FileText, BrainCircuit, BookOpen, Zap } from "lucide-react";
+import { ChevronRight, BrainCircuit, Zap, Cpu, Binary, FileCode, Network, Brain } from "lucide-react";
 
-const RESOURCES = [
+const SUBJECT_CHEATS = [
   {
     href: "/study/ai/cheat",
-    title: "🧠 AI Cheat Sheets — Artificial Intelligence",
-    description: "Interactive cheat sheets for Units I–III. Search algorithms, alpha-beta, CSP, logic, FOL, unification.",
+    title: "🧠 Artificial Intelligence (AI)",
+    description: "Interactive cheat sheets for Units I–V. Search, Minimax, CSP, Logic, Planning & Bayes Nets.",
     icon: BrainCircuit,
-    accent: "text-[var(--unit-a)]",
-    bg: "var(--unit-a-soft)",
-    border: "var(--unit-a)",
+    color: "#10b981",
   },
   {
     href: "/study/ml/cheat",
-    title: "🧠 ML Cheat Sheets — IT503PC",
-    description: "Visual cheat sheets for Units I–III. Formulas, algorithms, comparisons, memory triggers.",
-    icon: BrainCircuit,
-    accent: "text-[var(--unit-a)]",
-    bg: "var(--unit-a-soft)",
-    border: "var(--unit-a)",
+    title: "🤖 Machine Learning (ML)",
+    description: "Visual cheat sheets for Units I–V. Feature Eng, Regression, Classification, Clustering, ANNs & Deep ML.",
+    icon: Brain,
+    color: "#3b82f6",
   },
   {
     href: "/study/pdc/cheat",
-    title: "⚡ PDC Cheat Sheets — Parallel & Distributed Computing",
-    description: "Interactive cheat sheets for Units I–III. Amdahl slider, Flynn grid, pipeline diagrams, memory consistency.",
+    title: "⚡ Parallel & Distributed Computing (PDC)",
+    description: "Interactive cheat sheets for Units I–V. Amdahl's Law, Flynn's Taxonomy, Pipelining, MPI & Distributed Consensus.",
     icon: Zap,
-    accent: "text-[var(--unit-b)]",
-    bg: "var(--unit-b-soft)",
-    border: "var(--unit-b)",
+    color: "#8b5cf6",
   },
   {
-    href: "/study/ml",
-    title: "📊 ML Knowledge Dashboard",
-    description: "Full visual knowledge system with topic pages, diagrams, and exam points.",
-    icon: BookOpen,
-    accent: "text-[var(--unit-a)]",
-    bg: "var(--unit-a-soft)",
-    border: "var(--unit-a)",
+    href: "/study/aca/cheat",
+    title: "💻 Advanced Computer Architecture (ACA)",
+    description: "Cheat sheets for Units I–V. Pipelining, Tomasulo, MESI Cache Coherence, Topologies & GPU CUDA.",
+    icon: Cpu,
+    color: "#6366f1",
   },
   {
-    href: "/study/notes",
-    title: "Study Notes",
-    description: "Core concepts and reference material, organized by topic.",
-    icon: FileText,
-    accent: "text-[var(--unit-c)]",
-    bg: "var(--unit-c-soft)",
-    border: "var(--unit-c)",
+    href: "/study/automata/cheat",
+    title: "⚙️ Automata & Formal Languages (TOC/FLAT)",
+    description: "Cheat sheets for Units I–V. DFA/NFA, Regular Expressions, CFG/CNF, Turing Machines & Undecidability.",
+    icon: Binary,
+    color: "#a855f7",
+  },
+  {
+    href: "/study/cd/cheat",
+    title: "🛠️ Compiler Design (CD)",
+    description: "Cheat sheets for Units I–V. 6 Compiler Phases, FIRST/FOLLOW, LR Parsers, SDT, TAC & DAG Optimization.",
+    icon: FileCode,
+    color: "#f59e0b",
+  },
+  {
+    href: "/study/dccn/cheat",
+    title: "🌐 Data Comm & Computer Networks (DCCN)",
+    description: "Cheat sheets for Units I–V. OSI Model, CRC, CSMA/CD, IPv4 Subnetting, TCP/UDP, RSA & TLS.",
+    icon: Network,
+    color: "#06b6d4",
   },
 ];
 
@@ -58,24 +62,24 @@ export default function StudyIndexPage() {
       <StudyHeader title="Study Portal" />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)]">Welcome, Candidate 👋</h1>
+          <h1 className="text-2xl font-bold text-[var(--text-primary)]">CS & Engineering Cheat Sheets Portal 📝</h1>
           <p className="text-sm text-[var(--text-muted)] mt-1">
-            Pick a resource below to start learning. Everything here is shared for the group.
+            Dense, visual, interactive revision cards across 7 core Computer Science subjects. Scan formulas, algorithms, worked numericals & exam points in under 30s.
           </p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          {RESOURCES.map((r) => (
+          {SUBJECT_CHEATS.map((r) => (
             <Link
               key={r.href}
               href={r.href}
-              className="glass-card rounded-2xl p-5 text-left space-y-3 group cursor-pointer block"
+              className="glass-card rounded-2xl p-5 text-left space-y-3 group cursor-pointer block border border-[var(--border)] hover:border-[var(--action-primary)] transition-all"
             >
               <div
                 className="w-10 h-10 rounded-xl border flex items-center justify-center"
-                style={{ background: r.bg, borderColor: r.border }}
+                style={{ backgroundColor: `color-mix(in srgb, ${r.color} 12%, transparent)`, borderColor: r.color }}
               >
-                <r.icon className={`w-5 h-5 ${r.accent}`} />
+                <r.icon className="w-5 h-5" style={{ color: r.color }} />
               </div>
               <div>
                 <div className="flex items-center justify-between">
@@ -91,3 +95,4 @@ export default function StudyIndexPage() {
     </>
   );
 }
+
