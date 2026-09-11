@@ -11,7 +11,8 @@ const UNIT_ACCENT: Record<"I" | "II" | "III", string> = {
 };
 
 export function AiCheatCard({ topic }: { topic: AiCheatTopic }) {
-  const accent = UNIT_ACCENT[topic.unit] ?? "var(--unit-a)";
+  const uNum = (topic.unitNumber || topic.unit || "I") as "I" | "II" | "III";
+  const accent = UNIT_ACCENT[uNum] ?? "var(--unit-a)";
   const diffRows = topic.differences ?? [];
   const hasDiff = diffRows.length > 0;
   const has3col = diffRows.some((r) => (r as any).valC !== undefined);

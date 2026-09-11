@@ -1,112 +1,240 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { StudyHeader } from "../../layout";
-import { cheat0 } from "../../_ml/cheat0";
-import { cheat3 } from "../../_ml/cheat3";
-import { cheat4 } from "../../_ml/cheat4";
-import type { CS } from "../../_ml/CheatData";
-import { Lightbulb, Target } from "lucide-react";
+import { ALL_CHEAT_TOPICS, UNITS_CONFIG } from "../data";
+import { StudyCard, type DisplayMode } from "../../components/StudyCard";
+import { StudySidebar } from "../../components/StudySidebar";
+import { StudyTOC } from "../../components/StudyTOC";
+import { ArrowLeft, Search, Zap, Sparkles, BookOpen } from "lucide-react";
 
-const UNITS = [
-  { id: "I", title: "Unit I", subtitle: "Intro, Model Prep, Feature Eng", cards: cheat0 },
-  { id: "II", title: "Unit II", subtitle: "Supervised Learning", cards: cheat4 },
-  { id: "III", title: "Unit III", subtitle: "Unsupervised Learning", cards: cheat3 },
-];
+const UNIT_ACCENTS: Record<string, string> = {
+  I: "var(--unit-a)",
+  II: "var(--unit-b)",
+  III: "var(--unit-c)",
+  IV: "#3b82f6",
+  V: "#ec4899",
+};
 
-function Card({ c }: { c: CS }) {
+export default function MlCheatPage() {
+  const [activeUnitNum, setActiveUnitNum] = useState<"I" | "II" | "III" | "IV" | "V">("I");
+  const [displayMode, setDisplayMode] = useState<DisplayMode>("full");
+  const [tierFilter, setTierFilter] = useState<"ALL" | "CORE" | "EXTENDED" | "SUPPORTING">("ALL");
+  const [q, setQ] = useState("");
+  const [revisedSet, setRevisedSet] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("revised_ml_topics");
+      if (saved) setRevisedSet(new Set(JSON.parse(saved)));
+    } catch (e) {}
+  }, []);
+
+  const toggleRevised = (id: string) => {
+    setRevisedSet((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      try {
+        localStorage.setItem("revised_ml_topics", JSON.stringify(Array.from(next)));
+      } catch (e) {}
+      return next;
+    });
+  };
+
+  const currentUnit = UNITS_CONFIG[activeUnitNum];
+
+  const unitTopics = useMemo(() => {
+    let list = ALL_CHEAT_TOPICS.filter((t) => (t.unitNumber || t.unit) === activeUnitNum);
+    if (tierFilter !== "ALL") {
+      list = list.filter((t) => (t.tier || "CORE") === tierFilter);
+    }
+    return list;
+  }, [activeUnitNum, tierFilter]);
+
+  const searchResults = useMemo(() => {
+    if (!q.trim()) return [];
+    const query = q.toLowerCase();
+    return ALL_CHEAT_TOPICS.filter((t) =>
+      [t.title, t.definition, t.oneLineIdea, t.complexity?.time, ...(t.keywords ?? []), ...t.examPoints]
+        .join(" ")
+        .toLowerCase()
+        .includes(query)
+    ).slice(0, 8);
+  }, [q]);
+
+  const coreCount = ALL_CHEAT_TOPICS.filter((t) => (t.unitNumber || t.unit) === activeUnitNum && (t.tier || "CORE") === "CORE").length;
+  const extCount = ALL_CHEAT_TOPICS.filter((t) => (t.unitNumber || t.unit) === activeUnitNum && (t.tier || "CORE") !== "CORE").length;
+
+
   return (
-    <div className="glass-card rounded-xl p-4 space-y-2.5">
-      <h3 className="text-sm font-bold text-[var(--text-primary)]">{c.title}</h3>
-      {c.def && <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">{c.def}</p>}
+    <div className="max-w-7xl mx-auto px-4 py-6 space-y-6 text-[var(--text-primary)]">
+      <StudyHeader title="ML Cheat Sheets" />
 
-      {c.formula && (
-        <div className="rounded-lg bg-[var(--action-primary)]/5 border border-[var(--action-primary)]/20 px-3 py-2">
-          <p className="font-mono text-xs text-[var(--action-primary)]">{c.formula}</p>
-          {c.symbols && (
-            <p className="text-[9px] text-[var(--text-muted)] mt-1">
-              {c.symbols.map(([k, v]) => `${k}: ${v}`).join("  •  ")}
-            </p>
-          )}
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[var(--border)] pb-4">
+        <div>
+          <Link href="/study/ml" className="text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center gap-1 mb-1">
+            <ArrowLeft className="w-3.5 h-3.5" /> ML Dashboard
+          </Link>
+          <h1 className="text-2xl font-extrabold text-[var(--text-primary)] flex items-center gap-2">
+            🧠 Machine Learning Knowledge Engine
+          </h1>
+          <p className="text-xs text-[var(--text-muted)] pt-0.5">
+            IT503PC Units I–V • Exam cheat sheets, worked numericals & active recall self-tests.
+          </p>
         </div>
-      )}
 
-      {c.steps && (
-        <ol className="space-y-0.5">
-          {c.steps.map((s, i) => (
-            <li key={i} className="flex items-start gap-1.5 text-[10.5px] text-[var(--text-secondary)]">
-              <span className="w-3.5 h-3.5 rounded-full bg-[var(--action-primary)]/15 text-[8px] font-bold text-[var(--action-primary)] flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
-              {s}
-            </li>
-          ))}
-        </ol>
-      )}
-
-      {c.examPoints && (
-        <div className="space-y-0.5">
-          <p className="text-[9px] font-bold uppercase tracking-wider text-[var(--action-warning)] flex items-center gap-1"><Target className="w-2.5 h-2.5" /> Exam</p>
-          {c.examPoints.map((p, i) => (
-            <p key={i} className="text-[10.5px] text-[var(--text-secondary)] pl-3 border-l border-[var(--action-warning)]/40">{p}</p>
-          ))}
-        </div>
-      )}
-
-      {c.remember && (
-        <div className="flex items-start gap-1.5 rounded-lg bg-[var(--action-primary)]/5 border border-[var(--action-primary)]/20 px-2.5 py-1.5">
-          <Lightbulb className="w-3 h-3 text-[var(--action-primary)] flex-shrink-0 mt-0.5" />
-          <p className="text-[10px] font-medium text-[var(--action-primary)]">{c.remember}</p>
-        </div>
-      )}
-    </div>
-  );
-}
-
-export default function CheatSheetPage() {
-  const [active, setActive] = useState(0);
-  const unit = UNITS[active];
-
-  return (
-    <div className="max-w-4xl mx-auto px-4 py-6 space-y-5">
-      <StudyHeader title="Cheat Sheets" />
-
-      <header className="space-y-0.5">
-        <h1 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
-          📝 ML Cheat Sheets
-        </h1>
-        <p className="text-xs text-[var(--text-muted)]">
-          One dense card per concept — formula, exam points, memory trigger. Scan in under 30s.
-        </p>
-      </header>
-
-      <div className="flex gap-2">
-        {UNITS.map((u, i) => (
+        {/* Display Mode Switcher */}
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] text-xs font-bold">
           <button
-            key={u.id}
-            onClick={() => setActive(i)}
-            className={`flex-1 rounded-xl px-3 py-2.5 text-center transition-all ${
-              i === active
-                ? "bg-[var(--action-primary)] text-white shadow-md"
-                : "bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--action-primary)]/40"
+            onClick={() => setDisplayMode("full")}
+            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
+              displayMode === "full" ? "bg-[var(--action-primary)] text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             }`}
           >
-            <div className="text-xs font-bold">{u.title}</div>
-            <div className="text-[9px] opacity-80">{u.subtitle}</div>
+            <BookOpen className="w-3.5 h-3.5" /> Full Notes
           </button>
-        ))}
-      </div>
-
-      <div className="grid gap-3 sm:grid-cols-2">
-        {unit.cards.map((c, idx) => (
-          <Card key={`${c.title}-${idx}`} c={c} />
-        ))}
-      </div>
-
-      {unit.cards.length === 0 && (
-        <div className="text-center py-10 text-sm text-[var(--text-muted)]">
-          Coming soon — content being added.
+          <button
+            onClick={() => setDisplayMode("revision")}
+            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
+              displayMode === "revision" ? "bg-[var(--action-primary)] text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+            }`}
+          >
+            <Zap className="w-3.5 h-3.5" /> ⚡ Revision
+          </button>
+          <button
+            onClick={() => setDisplayMode("recall")}
+            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
+              displayMode === "recall" ? "bg-[var(--action-primary)] text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5" /> 🧠 Self-Test
+          </button>
         </div>
-      )}
+      </div>
+
+      {/* Global Search Bar */}
+      <div className="relative">
+        <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-[var(--text-muted)]" />
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search Linear Regression, Naïve Bayes, PCA, Perceptron, Backprop, Case Studies..."
+          className="w-full pl-10 pr-4 py-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
+        />
+        {searchResults.length > 0 && (
+          <div className="absolute z-20 mt-2 w-full rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)] shadow-2xl overflow-hidden divide-y divide-[var(--border)]">
+            {searchResults.map((r) => (
+              <Link
+                key={r.id}
+                href={`/study/ml/topic/${r.id}`}
+                onClick={() => setQ("")}
+                className="block px-4 py-3 text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--action-primary)]"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-sm text-[var(--text-primary)]">{r.title}</span>
+                  <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-[var(--bg-elevated)] border border-[var(--border)]">
+                    Unit {r.unitNumber || r.unit} • {r.tier || "CORE"}
+                  </span>
+                </div>
+                <p className="text-[11px] text-[var(--text-muted)] line-clamp-1 mt-0.5">{r.oneLineIdea || r.definition}</p>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
+
+      {/* 3-Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Sidebar */}
+        <div className="lg:col-span-3">
+          <StudySidebar
+            units={UNITS_CONFIG}
+            allTopics={ALL_CHEAT_TOPICS}
+            activeUnitNumber={activeUnitNum}
+            onSelectUnit={(num) => setActiveUnitNum(num as any)}
+            revisedTopicIds={revisedSet}
+            accentMap={UNIT_ACCENTS}
+          />
+        </div>
+
+        {/* Center Content Stream */}
+        <div className="lg:col-span-6 space-y-4">
+          <div className="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h2 className="text-base font-extrabold text-[var(--text-primary)]">{currentUnit.title}</h2>
+                <p className="text-xs text-[var(--text-muted)]">{currentUnit.subtitle}</p>
+              </div>
+
+              <div className="flex items-center gap-1.5 text-[11px] font-bold">
+                <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                  🎯 {coreCount} Core
+                </span>
+                {extCount > 0 && (
+                  <span className="px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400 border border-purple-500/30">
+                    📚 {extCount} Supporting
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Filter Pills */}
+            <div className="flex items-center gap-2 pt-1 border-t border-[var(--border)] text-xs font-semibold">
+              <span className="text-[10px] uppercase font-bold text-[var(--text-muted)]">Filter:</span>
+              <button
+                onClick={() => setTierFilter("ALL")}
+                className={`px-2.5 py-1 rounded-lg transition-all ${
+                  tierFilter === "ALL" ? "bg-[var(--action-primary)] text-white" : "bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                }`}
+              >
+                All ({ALL_CHEAT_TOPICS.filter((t) => (t.unitNumber || t.unit) === activeUnitNum).length})
+              </button>
+              <button
+                onClick={() => setTierFilter("CORE")}
+                className={`px-2.5 py-1 rounded-lg transition-all ${
+                  tierFilter === "CORE" ? "bg-emerald-500 text-white font-bold" : "bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-emerald-400"
+                }`}
+              >
+                🎯 Core ({coreCount})
+              </button>
+              {extCount > 0 && (
+                <button
+                  onClick={() => setTierFilter("SUPPORTING")}
+                  className={`px-2.5 py-1 rounded-lg transition-all ${
+                    tierFilter === "SUPPORTING" ? "bg-purple-500 text-white font-bold" : "bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-purple-400"
+                  }`}
+                >
+                  📚 Supporting ({extCount})
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Cards */}
+          <div className="space-y-4">
+            {unitTopics.map((topic) => (
+              <StudyCard
+                key={topic.id}
+                topic={topic}
+                mode={displayMode}
+                accentColor={UNIT_ACCENTS[topic.unitNumber || topic.unit || "I"]}
+                onToggleRevised={toggleRevised}
+                isRevised={revisedSet.has(topic.id)}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Right Sidebar TOC */}
+        <div className="hidden lg:block lg:col-span-3 sticky top-6">
+          <StudyTOC topic={unitTopics[0]} siblings={unitTopics.slice(1)} />
+        </div>
+      </div>
     </div>
   );
 }
+

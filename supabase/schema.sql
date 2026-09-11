@@ -1,13 +1,4 @@
--- ============================================================================
--- GATE MONITOR SYSTEM - UNIFIED USER MODEL (SINGLE-FILE DATABASE RESET)
--- ============================================================================
--- Model: EVERY person on campus is a single `users` row. Access and identity
--- are derived from role + unique_id. No separate student/parent split.
--- Optional detail layers (student_details / employee_details) are keyed by
--- user_id so student-style info stays indexable without special-casing.
--- Gates are fully data-driven (auto-generated UUIDs, NO fixed 1/2/3 ids).
 
--- Extensions
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

@@ -1,4 +1,4 @@
-import type { CheatTopic } from "./types";
+import type { CheatTopic } from "../../types";
 import { unit1aTopics } from "./unit1a";
 import { unit1bTopics } from "./unit1b";
 import { unit1cTopics } from "./unit1c";
@@ -10,6 +10,8 @@ import { unit2dTopics } from "./unit2d";
 import { unit3aTopics } from "./unit3a";
 import { unit3bTopics } from "./unit3b";
 import { unit3cTopics } from "./unit3c";
+import { unit4Topics } from "./unit4a";
+import { unit5Topics } from "./unit5a";
 
 export const ALL_CHEAT_TOPICS: CheatTopic[] = [
   ...unit1aTopics,
@@ -22,7 +24,9 @@ export const ALL_CHEAT_TOPICS: CheatTopic[] = [
   ...unit2dTopics,
   ...unit3aTopics,
   ...unit3bTopics,
-  ...unit3cTopics
+  ...unit3cTopics,
+  ...unit4Topics,
+  ...unit5Topics,
 ];
 
 export const TOPIC_MAP: Record<string, CheatTopic> = ALL_CHEAT_TOPICS.reduce(
@@ -32,3 +36,4 @@ export const TOPIC_MAP: Record<string, CheatTopic> = ALL_CHEAT_TOPICS.reduce(
   },
   {} as Record<string, CheatTopic>
 );
+
