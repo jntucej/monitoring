@@ -1,41 +1,6 @@
-export type Importance = "HIGH" | "MEDIUM" | "LOW";
-export type UnitId = "I" | "II" | "III" | "IV" | "V";
+import type { AutomataCheatTopic, AutomataUnit, Importance, UnitId, FormulaSpec, DifferenceRow } from "@/app/study/automata/data/types";
 
-export interface FormulaSpec {
-  expression: string;
-  symbols?: Record<string, string>;
-  use?: string;
-  examNote?: string;
-}
+export type { Importance, UnitId, FormulaSpec, DifferenceRow };
+export type AtcdCheatTopic = AutomataCheatTopic;
+export type AtcdUnit = AutomataUnit;
 
-export interface DifferenceRow {
-  feature: string;
-  valA: string;
-  valB: string;
-  valC?: string;
-}
-
-export interface AtcdCheatTopic {
-  id: string;
-  title: string;
-  unit: UnitId;
-  category: string;
-  importance: Importance;
-  definition: string;
-  coreIdea?: string;
-  formula?: FormulaSpec;
-  steps?: string[];
-  keyPoints?: string[];
-  differences?: DifferenceRow[];
-  examPoints: string[];
-  memoryTrigger: string;
-  keywords?: string[];
-}
-
-export interface AtcdUnit {
-  id: UnitId;
-  title: string;
-  subtitle: string;
-  description: string;
-  categories: Array<{ name: string; topicIds: string[] }>;
-}

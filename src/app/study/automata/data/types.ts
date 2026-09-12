@@ -15,6 +15,26 @@ export interface DifferenceRow {
   valC?: string;
 }
 
+export interface TrapSpec {
+  warning: string;
+  explanation: string;
+  correctBehavior: string;
+}
+
+export interface ConceptChainLink {
+  fromTopicId: string;
+  toTopicId: string;
+  relationship: string;
+  description: string;
+}
+
+export interface BuildModeSpec {
+  prompt: string;
+  validation: string[];
+  hints?: string[];
+  exampleSolution: any;
+}
+
 export interface AutomataCheatTopic {
   id: string;
   title: string;
@@ -23,6 +43,7 @@ export interface AutomataCheatTopic {
   importance: Importance;
   definition: string;
   coreIdea?: string;
+  why?: string;
   formula?: FormulaSpec;
   steps?: string[];
   keyPoints?: string[];
@@ -30,6 +51,10 @@ export interface AutomataCheatTopic {
   examPoints: string[];
   memoryTrigger: string;
   keywords?: string[];
+  trap?: TrapSpec;
+  conceptChain?: ConceptChainLink[];
+  buildMode?: BuildModeSpec;
+  predictOperation?: string;
 }
 
 export interface AutomataUnit {

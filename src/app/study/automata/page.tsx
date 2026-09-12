@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { AUTOMATA_UNITS, ALL_AUTOMATA_TOPICS } from "./data";
-import { ArrowRight, ChevronRight, Binary } from "lucide-react";
+import { ArrowRight, ChevronRight, Binary, LayoutGrid } from "lucide-react";
 
 const UNIT_ACCENT: Record<string, { text: string; dot: string }> = {
   I: { text: "text-[var(--unit-a)]", dot: "bg-[var(--unit-a)]" },
@@ -14,7 +14,7 @@ const UNIT_ACCENT: Record<string, { text: string; dot: string }> = {
 
 export default function AutomataDashboard() {
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+    <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
       <header className="space-y-1">
         <p className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 text-purple-400">
           <Binary className="w-3.5 h-3.5" /> Automata & Formal Languages
@@ -41,7 +41,7 @@ export default function AutomataDashboard() {
                 <p className="text-[11px] text-[var(--text-muted)] leading-relaxed line-clamp-3">{u.description}</p>
               </div>
               <div className="flex items-center text-[11px] font-semibold gap-1 text-purple-400">
-                Open cheat sheets <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                Open cheat sheets <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </div>
             </Link>
           );
@@ -49,7 +49,7 @@ export default function AutomataDashboard() {
       </div>
 
       <Link href="/study/automata/cheat" className="glass-card rounded-2xl p-5 block space-y-2 group">
-        <h3 className="font-bold text-sm text-[var(--text-primary)] flex items-center gap-2">📝 Quick Automata Cheat Sheets <ArrowRight className="w-4 h-4 text-purple-400 group-hover:translate-x-0.5 transition-transform" /></h3>
+        <h3 className="font-bold text-sm text-[var(--text-primary)] flex items-center gap-2">📝 Quick Automata Cheat Sheets <ChevronRight className="w-4 h-4 text-purple-400 group-hover:translate-x-0.5 transition-transform" /></h3>
         <p className="text-[11px] text-[var(--text-muted)]">All Units I–V in one tabbed, searchable, interactive card view for rapid revision.</p>
       </Link>
     </div>

@@ -1,7 +1,22 @@
 "use client";
 
 import type { AutomataCheatTopic } from "../data/types";
-import { Lightbulb, Target } from "lucide-react";
+import { AutomataPlayground } from "./simulators/AutomataPlayground";
+import { DfaMinimizationPlayground } from "./simulators/DfaMinimizationPlayground";
+import { PumpingLemmaPlayground } from "./simulators/PumpingLemmaPlayground";
+import { CfgParseTreePlayground } from "./simulators/CfgParseTreePlayground";
+import { PdaPlayground } from "./simulators/PdaPlayground";
+import { TuringMachinePlayground } from "./simulators/TuringMachinePlayground";
+import { HaltingProblemPlayground } from "./simulators/HaltingProblemPlayground";
+import { CompilerPipelinePlayground } from "./simulators/CompilerPipelinePlayground";
+import { ParsingAlgorithmPlayground } from "./simulators/ParsingAlgorithmPlayground";
+import { SdtTacPlayground } from "./simulators/SdtTacPlayground";
+import { PredictMode } from "./predict/PredictMode";
+import { TrapAlert } from "./predict/TrapAlert";
+import { ConceptChain } from "./predict/ConceptChain";
+import { BuildMode } from "./predict/BuildMode";
+import { useMastery } from "./predict/MasteryProvider";
+import { Lightbulb, Target, Layers } from "lucide-react";
 
 const UNIT_ACCENT: Record<string, string> = {
   I: "var(--unit-a)",
@@ -10,6 +25,19 @@ const UNIT_ACCENT: Record<string, string> = {
   IV: "#3b82f6",
   V: "#ec4899",
 };
+
+function renderSimulator(id: string, unit: string) {
+  if (id === "dfa-minimization-myhill-nerode") return <DfaMinimizationPlayground />;
+  if (id.includes("pumping-lemma")) return <PumpingLemmaPlayground />;
+  if (id.startsWith("cfg-")) return <CfgParseTreePlayground topicId={id} />;
+  if (id.includes("pda")) return <PdaPlayground />;
+  if (id.includes("turing-machine")) return <TuringMachinePlayground />;
+  if (id === "decidability-halting-pcp") return <HaltingProblemPlayground />;
+  if (unit === "IV") return <CompilerPipelinePlayground />;
+  if (id.includes("sdd") || id.includes("sdts") || id.includes("intermediate-code")) return <SdtTacPlayground />;
+  if (unit === "V") return <ParsingAlgorithmPlayground />;
+  return <AutomataPlayground topicId={id} />;
+}
 
 export function AutomataCheatCard({ topic }: { topic: AutomataCheatTopic }) {
   const accent = UNIT_ACCENT[topic.unit] ?? "var(--unit-a)";
@@ -32,6 +60,11 @@ export function AutomataCheatCard({ topic }: { topic: AutomataCheatTopic }) {
           <p className="text-[10.5px] font-semibold" style={{ color: "var(--unit-accent)" }}>💡 {topic.coreIdea}</p>
         </div>
       )}
+
+      {/* Executable Interactive Simulator */}
+      <div className="my-2">
+        {renderSimulator(topic.id, topic.unit)}
+      </div>
 
       {topic.formula && (
         <div className="rounded-lg border px-3 py-2 space-y-1" style={{ borderColor: "var(--unit-accent)", background: `color-mix(in srgb, ${accent} 8%, transparent)` }}>
