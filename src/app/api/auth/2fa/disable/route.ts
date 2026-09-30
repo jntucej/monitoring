@@ -3,6 +3,7 @@ import { verifyTOTPCode } from "@/lib/totp";
 import { addAudit } from "@/lib/db";
 import { getSupabaseServiceClient } from "@/lib/supabaseClient";
 import { withRateLimit } from "@/lib/rate-limit";
+import { withAuthorization } from "@/middleware/authorization";
 
 async function handlePost(req: NextRequest) {
   const actorId = req.headers.get("x-user-id");
@@ -30,7 +31,11 @@ async function handlePost(req: NextRequest) {
     }
 
     const supabase = getSupabaseServiceClient();
-    const { data: targetUser } = await supabase.from("users").select("id, two_factor_secret, two_factor_enabled").eq("id", userIdToDisable).maybeSingle();
+    const { data: targetUser } = await supabase
+      .from("users")
+      .select("id, two_factor_secret, two_factor_enabled")
+      .eq("id", userIdToDisable)
+      .maybeSingle();
 
     if (!targetUser) {
       return NextResponse.json(
@@ -51,25 +56,32 @@ async function handlePost(req: NextRequest) {
 
     await supabase
       .from("users")
-      .update({ two_factor_enabled: false, two_factor_secret: null })
+      .update({
+        two_factor_enabled: false,
+        two_factor_secret: null,
+      })
       .eq("id", userIdToDisable);
 
     await addAudit({
       userId: actorId,
       action: "2FA_DISABLED",
-      details: { disabledForUserId: userIdToDisable, sysadminOverride: !isSelf },
+      details: {
+        timestamp: new Date().toISOString(),
+        targetUserId: userIdToDisable,
+        isSysAdminOverride: isSysAdmin && !isSelf,
+      },
     });
 
     return NextResponse.json({
       success: true,
-      message: `2FA disabled for user ${userIdToDisable}`,
+      message: "Two-Factor Authentication (2FA) successfully disabled",
     });
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: { code: "SERVER_ERROR", message: error.message } },
+      { success: false, error: { code: "SERVER_ERROR", message: error.message || "Internal server error" } },
       { status: 500 }
     );
   }
 }
 
-export const POST = withRateLimit(handlePost, { keyPrefix: "2fa_disable", maxRequests: 10 });
+export const POST = withRateLimit(withAuthorization(handlePost));

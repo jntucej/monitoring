@@ -3,6 +3,7 @@ import { verifyTOTPCode } from "@/lib/totp";
 import { getSupabaseServiceClient } from "@/lib/supabaseClient";
 import { addAudit } from "@/lib/db";
 import { withRateLimit } from "@/lib/rate-limit";
+import { withAuthorization } from "@/middleware/authorization";
 
 async function handlePost(req: NextRequest) {
   try {
@@ -10,17 +11,21 @@ async function handlePost(req: NextRequest) {
 
     if (!userId || !token) {
       return NextResponse.json(
-        { success: false, error: { code: "BAD_REQUEST", message: "User ID and TOTP token are required" } },
+        { success: false, error: { code: "BAD_REQUEST", message: "User ID and TOTP token required" } },
         { status: 400 }
       );
     }
 
     const supabase = getSupabaseServiceClient();
-    const { data: user } = await supabase.from("users").select("id, two_factor_secret, two_factor_enabled").eq("id", userId).maybeSingle();
+    const { data: user } = await supabase
+      .from("users")
+      .select("id, two_factor_secret, two_factor_enabled")
+      .eq("id", userId)
+      .maybeSingle();
 
     if (!user || !user.two_factor_enabled || !user.two_factor_secret) {
       return NextResponse.json(
-        { success: false, error: { code: "BAD_REQUEST", message: "2FA is not enabled for this user" } },
+        { success: false, error: { code: "BAD_REQUEST", message: "2FA not enabled for user" } },
         { status: 400 }
       );
     }
@@ -52,10 +57,10 @@ async function handlePost(req: NextRequest) {
     });
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: { code: "SERVER_ERROR", message: error.message } },
+      { success: false, error: { code: "SERVER_ERROR", message: error.message || "Internal server error" } },
       { status: 500 }
     );
   }
 }
 
-export const POST = withRateLimit(handlePost, { keyPrefix: "2fa_auth", maxRequests: 10 });
+export const POST = withRateLimit(withAuthorization(handlePost), { keyPrefix: "2fa_auth", maxRequests: 10 });

@@ -3,19 +3,23 @@ import { getSupabaseServiceClient } from "@/lib/supabaseClient";
 import { addAudit, updateUserRole, findUserById } from "@/lib/db";
 import { sendNotification } from "@/lib/notification-service";
 import { withRateLimit } from "@/lib/rate-limit";
+import { withAuthorization } from "@/middleware/authorization";
+import type { Role } from "@/lib/types";
+
+const ADMIN_ROLES: Role[] = ["sysadmin", "admin", "faculty", "hod", "staff"];
 
 async function handleGet(req: NextRequest) {
   const actorRole = req.headers.get("x-user-role");
-  if (!actorRole || !["sysadmin", "admin", "faculty", "hod", "staff"].includes(actorRole)) {
+
+  if (!actorRole || !ADMIN_ROLES.includes(actorRole)) {
     return NextResponse.json(
       { success: false, error: { code: "FORBIDDEN", message: "Access denied" } },
       { status: 403 }
     );
   }
 
-  const { searchParams } = new URL(req.url);
+  const searchParams = new URL(req.url);
   const status = searchParams.get("status");
-
   const supabase = getSupabaseServiceClient();
 
   try {
@@ -31,11 +35,9 @@ async function handleGet(req: NextRequest) {
     const { data: requests, error } = await query;
 
     if (error) {
-      // If table doesn't exist yet or query fails, return empty list gracefully
       return NextResponse.json({ success: true, data: [] });
     }
 
-    // Fetch associated user names for targets & requesters
     const userIds = Array.from(
       new Set(
         (requests || []).flatMap((r) => [r.requester_id, r.target_user_id, r.approved_by].filter(Boolean))
@@ -54,81 +56,91 @@ async function handleGet(req: NextRequest) {
       id: r.id,
       requesterId: r.requester_id,
       requesterName: usersMap[r.requester_id]?.name || "Unknown Requester",
-      requesterRole: usersMap[r.requester_id]?.role || "unknown",
+      requesterRole: usersMap[r.requester_id]?.role,
       targetUserId: r.target_user_id,
-      targetUserName: usersMap[r.target_user_id]?.name || "Unknown Target",
-      targetCurrentRole: usersMap[r.target_user_id]?.role || "unknown",
-      newRole: r.new_role,
+      targetUserName: usersMap[r.target_user_id]?.name,
+      targetUserRole: usersMap[r.target_user_id]?.role,
+      requestedRole: r.requested_role,
       status: r.status,
-      reason: r.reason,
       approvedBy: r.approved_by,
-      approverName: r.approved_by ? usersMap[r.approved_by]?.name : null,
+      approverName: usersMap[r.approved_by]?.name,
       createdAt: r.created_at,
       updatedAt: r.updated_at,
     }));
 
     return NextResponse.json({ success: true, data: enriched });
-  } catch (err: any) {
-    return NextResponse.json({ success: true, data: [] });
-  }
-}
-
-async function handlePost(req: NextRequest) {
-  const actorId = req.headers.get("x-user-id");
-  if (!actorId) {
-    return NextResponse.json(
-      { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required" } },
-      { status: 401 }
-    );
-  }
-
-  try {
-    const { targetUserId, newRole, reason } = await req.json().catch(() => ({}));
-
-    if (!targetUserId || !newRole) {
-      return NextResponse.json(
-        { success: false, error: { code: "BAD_REQUEST", message: "Target user ID and new role are required" } },
-        { status: 400 }
-      );
-    }
-
-    const supabase = getSupabaseServiceClient();
-
-    const { data: created, error } = await supabase
-      .from("role_change_requests")
-      .insert({
-        requester_id: actorId,
-        target_user_id: targetUserId,
-        new_role: newRole,
-        reason: reason || "Role promotion requested",
-        status: "PENDING",
-        created_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
-
-    if (error) {
-      return NextResponse.json(
-        { success: false, error: { code: "DATABASE_ERROR", message: error.message } },
-        { status: 500 }
-      );
-    }
-
-    const actor = await findUserById(actorId);
-    await addAudit({
-      userId: actorId,
-      action: "ROLE_PROMOTION_REQUESTED",
-      details: { targetUserId, newRole, requestId: created?.id },
-    });
-
-    return NextResponse.json({ success: true, data: created });
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: { code: "SERVER_ERROR", message: error.message } },
+      { success: false, error: { code: "SERVER_ERROR", message: error.message || "Internal server error" } },
       { status: 500 }
     );
   }
 }
 
-export const GET = withRateLimit(handleGet, { keyPrefix: "role_requests_get", maxRequests: 60 });
-export const POST = withRateLimit(handlePost, { keyPrefix: "role_requests_post", maxRequests: 20 });
+async function handlePost(req: NextRequest) {
+  const actorId = req.headers.get("x-user-id");
+  const actorRole = req.headers.get("x-user-role");
+
+  if (!actorId || !ADMIN_ROLES.includes(actorRole || "")) {
+    return NextResponse.json(
+      { success: false, error: { code: "FORBIDDEN", message: "Access denied" } },
+      { status: 403 }
+    );
+  }
+
+  try {
+    const { userId, requestedRole, reason } = await req.json().catch(() => ({}));
+
+    if (!userId || !requestedRole) {
+      return NextResponse.json(
+        { success: false, error: { code: "BAD_REQUEST", message: "userId and requestedRole required" } },
+        { status: 400 }
+      );
+    }
+
+    const supabase = getSupabaseServiceClient();
+    const { data: targetUser } = await supabase.from("users").select("id, name, role").eq("id", userId).maybeSingle();
+
+    if (!targetUser) {
+      return NextResponse.json(
+        { success: false, error: { code: "NOT_FOUND", message: "User not found" } },
+        { status: 404 }
+      );
+    }
+
+    const { data: request, error: insertError } = await supabase
+      .from("role_change_requests")
+      .insert({
+        requester_id: actorId,
+        target_user_id: userId,
+        requested_role: requestedRole,
+        reason,
+        status: "PENDING",
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      return NextResponse.json(
+        { success: false, error: { code: "SERVER_ERROR", message: insertError.message } },
+        { status: 500 }
+      );
+    }
+
+    await addAudit({
+      userId: actorId,
+      action: "ROLE_REQUEST_CREATED",
+      details: { timestamp: new Date().toISOString(), targetId: userId, requestedRole },
+    });
+
+    return NextResponse.json({ success: true, data: request });
+  } catch (error: any) {
+    return NextResponse.json(
+      { success: false, error: { code: "SERVER_ERROR", message: error.message || "Internal server error" } },
+      { status: 500 }
+    );
+  }
+}
+
+export const GET = withRateLimit(withAuthorization(handleGet, { requiredRole: ADMIN_ROLES }));
+export const POST = withRateLimit(withAuthorization(handlePost, { requiredRole: ADMIN_ROLES }));

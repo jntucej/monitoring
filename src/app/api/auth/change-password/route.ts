@@ -19,7 +19,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: any }) {
 
     if (!currentPassword || !newPassword) {
       return NextResponse.json(
-        { success: false, error: { code: "BAD_REQUEST", message: "Current and new password are required" } },
+        { success: false, error: { code: "BAD_REQUEST", message: "Current and new password required" } },
         { status: 400 }
       );
     }
@@ -41,7 +41,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: any }) {
       );
     }
 
-    // Verify current password against custom bcrypt hash if present or via supabase auth
+    // Verify current password against custom bcrypt hash in supabase auth
     const passHash = (user as any).password_hash || user.passwordHash;
     if (passHash) {
       const match = await bcrypt.compare(currentPassword, passHash);
@@ -53,36 +53,38 @@ async function handlePost(req: NextRequest, { auth }: { auth: any }) {
       }
     }
 
-    // Update in Supabase Auth if auth user exists
-    try {
-      await supabase.auth.admin.updateUserById(userId, { password: newPassword });
-    } catch (authErr) {
-      console.warn("Supabase auth admin update notice:", authErr);
-    }
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
 
-    // Update password hash in users table if needed
-    const newHash = await bcrypt.hash(newPassword, 10);
-    await supabase.from("users").update({ password_hash: newHash, updated_at: new Date().toISOString() }).eq("id", userId);
+    // Update Supabase Auth user password
+    const { error: authError } = await supabase.auth.admin.updateUserById(
+      userId,
+      { password: hashedPassword }
+    );
+
+    if (authError) {
+      return NextResponse.json(
+        { success: false, error: { code: "SERVER_ERROR", message: authError.message || "Failed to update password" } },
+        { status: 500 }
+      );
+    }
 
     await addAudit({
       userId,
-      action: "USER_PASSWORD_CHANGED",
+      action: "PASSWORD_CHANGED",
       details: { timestamp: new Date().toISOString() },
     });
 
     return NextResponse.json({
       success: true,
-      message: "Password updated successfully",
+      message: "Password successfully changed",
     });
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: { code: "SERVER_ERROR", message: error.message || "Failed to update password" } },
+      { success: false, error: { code: "SERVER_ERROR", message: error.message || "Internal server error" } },
       { status: 500 }
     );
   }
 }
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost),
-  { keyPrefix: "auth_change_password", maxRequests: 5 }
-);
+export const POST = withRateLimit(withAuthorization(handlePost));
