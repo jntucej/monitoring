@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/supabaseClient";
 import { addAudit, findUserById } from "@/lib/db";
 import { withRateLimit } from "@/lib/rate-limit";
+import { withAuthorization } from "@/middleware/authorization";
 import bcrypt from "bcryptjs";
 
-async function handlePost(req: NextRequest) {
-  const userId = req.headers.get("x-user-id");
+async function handlePost(req: NextRequest, { auth }: { auth: any }) {
+  const userId = auth?.user?.id || req.headers.get("x-user-id");
   if (!userId) {
     return NextResponse.json(
       { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required" } },
@@ -81,4 +82,7 @@ async function handlePost(req: NextRequest) {
   }
 }
 
-export const POST = withRateLimit(handlePost, { keyPrefix: "auth_change_password", maxRequests: 5 });
+export const POST = withRateLimit(
+  withAuthorization(handlePost),
+  { keyPrefix: "auth_change_password", maxRequests: 5 }
+);
