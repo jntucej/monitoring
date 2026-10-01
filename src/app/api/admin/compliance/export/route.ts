@@ -10,7 +10,7 @@ async function handlePost(req: NextRequest) {
     const [resUser, resLogs, resPasses] = await Promise.all([
       supabase.from("users").select("*").eq("id", userId).maybeSingle(),
       supabase.from("movement_logs").select("*").eq("user_id", userId),
-      supabase.from("passes").select("*").eq("user_id", userId),
+      supabase.from("gate_passes").select("*").eq("user_id", userId),
     ]);
 
     const exportBundle = {
