@@ -1,7 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable prefer-const */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/supabaseClient";
 
-export async function GET() {
+import { withAuthorization } from "@/middleware/authorization";
+async function handleGet() {
   try {
     const supabase = getSupabaseServiceClient();
     const now = new Date();
@@ -58,3 +62,4 @@ export async function GET() {
   }
 }
 
+export const GET = withAuthorization(handleGet);
