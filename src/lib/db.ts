@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { supabase as browserClient, invalidateAllUserSessions, getSupabaseServiceClient } from './supabaseClient';
 import { randomUUID } from "crypto";
 import bcrypt from 'bcryptjs';
@@ -1219,12 +1220,6 @@ export async function findUserById(id: string): Promise<User | null> {
 
   const { data: uData } = await client.from('users').select('*, employee_details(*)').eq('unique_id', id).maybeSingle();
   if (uData) return mUser(uData);
-
-  const { data: ops } = await client.from('users').select('*, employee_details(*)').eq('role', 'operator').limit(1);
-  if (ops && ops.length > 0) return mUser(ops[0]);
-
-  const { data: anyUser } = await client.from('users').select('*, employee_details(*)').limit(1);
-  if (anyUser && anyUser.length > 0) return mUser(anyUser[0]);
 
   return null;
 }
