@@ -93,6 +93,7 @@ export interface Person {
   parentName?: string;
   parentPhone?: string;
   parentId?: string;
+  guardianId?: string;
   studentType?: StudentType;
   gender?: "male" | "female";
   hostelBlock?: string;

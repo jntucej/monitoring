@@ -90,7 +90,7 @@ async function handlePost(req: NextRequest) {
     const body = await req.json().catch(() => null);
     const {
       name, role, status = 'ACTIVE',
-      employeeId, uniqueId, phone, gateId, parentId, supervisedGates,
+      employeeId, uniqueId, phone, gateId, parentId, guardianId, supervisedGates,
       assignedHostel, hostelRoom, isHod, departmentId, department, canViewGender,
       loginIdentifier, pin, sendInvite = false,
     } = body || {};
@@ -197,7 +197,7 @@ async function handlePost(req: NextRequest) {
       uniqueId: effectiveUniqueId || undefined,
       phone: phone || undefined,
       gateId: gateId || undefined,
-      parentId: parentId || undefined,
+      parentId: parentId || guardianId || undefined, guardianId: guardianId || parentId || undefined,
       supervisedGates: supervisedGates || undefined,
       assignedHostel: effectiveHostel || undefined,
       hostelRoom: effectiveHostel || undefined,

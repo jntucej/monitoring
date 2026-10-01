@@ -84,7 +84,7 @@ export function mPerson(r: any): Person {
     year: r.student_details.year,
     section: r.student_details.section,
     batch: r.student_details.batch,
-    parentId: r.student_details.guardian_id,
+    parentId: r.student_details.guardian_id, guardianId: r.student_details.guardian_id,
     studentType: r.student_details.student_type,
     hostelBlock: r.student_details.hostel_block,
     roomNumber: r.student_details.room_number,
@@ -147,7 +147,7 @@ export function mPerson(r: any): Person {
     batch: studentDetails?.batch || r.batch,
     parentName: r.parent_name,
     parentPhone: r.parent_phone,
-    parentId: studentDetails?.parentId || r.guardian_id,
+    parentId: studentDetails?.guardianId || studentDetails?.parentId || r.guardian_id, guardianId: studentDetails?.guardianId || studentDetails?.parentId || r.guardian_id,
     studentType: studentDetails?.studentType || r.student_type,
     gender: studentDetails?.gender || r.gender,
     hostelBlock: (studentDetails as any)?.hostel_block || studentDetails?.hostelBlock || r.hostel_block,
@@ -173,7 +173,7 @@ function mUser(r: any): User {
     role: r.role,
     gateId: r.gate_id || undefined,
     pin: r.pin,
-    parentId: r.guardian_id || undefined,
+    parentId: r.guardian_id || undefined, guardianId: r.guardian_id || undefined,
     supervisedGates: r.supervised_gates || undefined,
     assignedHostel: r.assigned_hostel || undefined,
     isHod,
@@ -489,6 +489,7 @@ export async function findGatePasses(filters: {
   status?: string;
   roll?: string;
   parentId?: string;
+    guardianId?: string;
   limit?: number;
 }): Promise<GatePass[]> {
   // Use service client to bypass RLS — access control is enforced at the API layer
@@ -1119,6 +1120,7 @@ export async function createUser(userData: {
   phone?: string;
   gateId?: string;
   parentId?: string;
+    guardianId?: string;
   supervisedGates?: string[];
   assignedHostel?: string;
   isHod?: boolean;
@@ -1181,7 +1183,7 @@ export async function createUser(userData: {
       await db.from('student_details').upsert({
         user_id: userData.id,
         roll: studentRoll,
-        guardian_id: userData.parentId || null,
+        guardian_id: userData.guardianId || userData.parentId || null,
         department_id: userData.departmentId || null,
         room_number: userData.hostelRoom || userData.assignedHostel || null,
       }, { onConflict: 'user_id' });

@@ -29,7 +29,7 @@ async function handleGet(req: NextRequest) {
     const params = req.nextUrl.searchParams;
     const roll = params.get("roll");
     const q = params.get("q");
-    let parentId = params.get("parentId");
+    let parentId = params.get("guardianId") || params.get("parentId");
 
     // Force parentId to be the user's own ID if client role is parent or guardian to prevent tampering
     if (authRole === "parent" || authRole === "guardian") {
