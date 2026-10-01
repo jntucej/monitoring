@@ -349,7 +349,7 @@ export async function approvePass(passId: string, role: string, comment: string 
   }
 
   if (approverId) {
-    const { data: user } = await supabase.from('users').select('name').eq('id', approverId).single();
+    const { data: user } = await getDbClient().from('users').select('name').eq('id', approverId).single();
     await addAudit({
       action: `GATE_PASS_APPROVED_${role.toUpperCase()}`,
       userId: approverId,
@@ -383,7 +383,7 @@ export async function rejectPass(passId: string, role: string, comment: string =
   }
 
   if (approverId) {
-    const { data: user } = await supabase.from('users').select('name').eq('id', approverId).single();
+    const { data: user } = await getDbClient().from('users').select('name').eq('id', approverId).single();
     await addAudit({
       action: `GATE_PASS_REJECTED_${role.toUpperCase()}`,
       userId: approverId,
@@ -655,7 +655,7 @@ export async function getAllGatesLive(): Promise<Gate[]> {
 }
 
 export async function getAlerts(resolved?: boolean): Promise<Alert[]> {
-  let query = supabase.from('alerts').select('*').order('timestamp', { ascending: false });
+  let query = getDbClient().from('alerts').select('*').order('timestamp', { ascending: false });
   if (typeof resolved === 'boolean') {
     query = query.eq('resolved', resolved);
   }
@@ -670,7 +670,7 @@ export async function getAlerts(resolved?: boolean): Promise<Alert[]> {
 }
 
 export async function getNotifications(recipientType: string, recipientId: string): Promise<Alert[]> {
-  let query = supabase.from('alerts').select('*').order('timestamp', { ascending: false });
+  let query = getDbClient().from('alerts').select('*').order('timestamp', { ascending: false });
 
   const safeType = sanitizePostgrestParam(recipientType);
   const safeId = sanitizePostgrestParam(recipientId);
@@ -932,14 +932,14 @@ export async function createVisitor(data: {
     created_at: new Date().toISOString(),
   };
 
-  const { data: newPerson, error } = await supabase.from('users').insert(userRow).select().single();
+  const { data: newPerson, error } = await getDbClient().from('users').insert(userRow).select().single();
   if (error || !newPerson) {
     console.error('Error creating visitor:', error);
     return null;
   }
 
   // Create visitor log
-  await supabase.from('visitor_logs').insert({
+  await getDbClient().from('visitor_logs').insert({
     id: randomUUID(),
     user_id: id,
     check_in_at: new Date().toISOString(),
@@ -959,7 +959,7 @@ export async function checkInVisitor(personId: string, hostPersonId?: string, pu
 
   if (pErr) return false;
 
-  await supabase.from('visitor_logs').insert({
+  await getDbClient().from('visitor_logs').insert({
     id: randomUUID(),
     user_id: personId,
     check_in_at: now,
@@ -1237,7 +1237,7 @@ export async function findUserByLogin(login: string): Promise<User | null> {
 
 /** Verify an operator PIN against the bcrypt-hashed `initial_pin_hash`. */
 export async function verifyPin(userId: string, pin: string): Promise<boolean> {
-  const { data, error } = await supabase.from('users').select('initial_pin_hash').eq('id', userId).single();
+  const { data, error } = await getDbClient().from('users').select('initial_pin_hash').eq('id', userId).single();
   if (error || !data || !data.initial_pin_hash) return false;
   return await bcrypt.compare(pin, data.initial_pin_hash);
 }
@@ -1783,7 +1783,7 @@ export async function addNotification(
     resolved: false,
   };
 
-  const { error } = await supabase.from('alerts').insert(notifRow);
+  const { error } = await getDbClient().from('alerts').insert(notifRow);
   if (error) {
     console.error('Error creating notification:', error);
   }

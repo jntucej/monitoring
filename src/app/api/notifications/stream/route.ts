@@ -1,8 +1,9 @@
 import { NextRequest } from "next/server";
+import { withAuthorization } from "@/middleware/authorization";
 import { getNotifications } from "@/lib/db";
 
 // ponytail: SSE streams limit lifetime to 45s so serverless containers close gracefully before hard function timeouts. EventSource client automatically reconnects.
-export async function GET(req: NextRequest) {
+async function handleGet(req: NextRequest) {
   const userId = req.nextUrl.searchParams.get("userId") || req.headers.get("x-user-id");
   const role = req.nextUrl.searchParams.get("role") || req.headers.get("x-user-role") || "user";
   const encoder = new TextEncoder();
@@ -61,3 +62,5 @@ export async function GET(req: NextRequest) {
     },
   });
 }
+
+export const GET = withAuthorization(handleGet);
