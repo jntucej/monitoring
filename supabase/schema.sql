@@ -971,40 +971,58 @@ CREATE TABLE IF NOT EXISTS public.attendance_records (
 );
 
 CREATE TABLE IF NOT EXISTS public.config_college_info (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  data JSONB,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT,
+    address TEXT,
+    phone TEXT,
+    email TEXT,
+    logo TEXT,
+    accreditation TEXT,
+    website TEXT,
+    principal TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS public.config_exit_reasons (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  code TEXT,
-  data JSONB,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+    code TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS public.config_navigation (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  data JSONB,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    role_code TEXT NOT NULL,
+    group_label TEXT,
+    href TEXT NOT NULL,
+    label TEXT NOT NULL,
+    icon_name TEXT,
+    order INTEGER DEFAULT 1,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS public.config_pass_types (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  data JSONB,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+    code TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    requires_approval BOOLEAN DEFAULT false,
+    approval_flow TEXT,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS public.config_roles (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  code TEXT,
-  data JSONB,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+    code TEXT PRIMARY KEY,
+    display_name TEXT NOT NULL,
+    permissions JSONB,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS public.data_compliance_logs (
