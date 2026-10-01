@@ -1008,10 +1008,11 @@ CREATE TABLE IF NOT EXISTS public.config_roles (
 );
 
 CREATE TABLE IF NOT EXISTS public.data_compliance_logs (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  data JSONB,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+    id VARCHAR(50) PRIMARY KEY,
+    action TEXT NOT NULL,
+    details TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS public.departments (
@@ -1096,10 +1097,12 @@ CREATE TABLE IF NOT EXISTS public.passes (
 );
 
 CREATE TABLE IF NOT EXISTS public.retention_policies (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  data JSONB,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+    id VARCHAR(50) PRIMARY KEY,
+    data_category TEXT NOT NULL,
+    retention_days INTEGER NOT NULL,
+    auto_delete BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS public.role_change_requests (
