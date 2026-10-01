@@ -1061,10 +1061,15 @@ CREATE TABLE IF NOT EXISTS public.integration_logs (
 );
 
 CREATE TABLE IF NOT EXISTS public.job_runs (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  data JSONB,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    job_id VARCHAR(100) NOT NULL,
+    status TEXT NOT NULL,
+    start_time TIMESTAMPTZ NOT NULL,
+    end_time TIMESTAMPTZ,
+    records_affected INTEGER,
+    error_message TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS public.lms_attendance_logs (
@@ -1127,10 +1132,15 @@ CREATE TABLE IF NOT EXISTS public.scans (
 );
 
 CREATE TABLE IF NOT EXISTS public.scheduled_jobs (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  data JSONB,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+    id VARCHAR(100) PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    cron_expression TEXT,
+    enabled BOOLEAN DEFAULT true,
+    last_run TIMESTAMPTZ,
+    next_run TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS public.security_alerts (
