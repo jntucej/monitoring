@@ -248,12 +248,12 @@ function mPass(r: any): GatePass {
     requestedById: r.requested_by_id,
     requestedByName: r.requested_by_name,
     requestedAt: r.requested_at,
-    parentStatus: r.parent_status || r.guardian_status || 'PENDING',
+    parentStatus: r.guardian_status || r.guardian_status || 'PENDING',
     adminStatus: r.admin_status,
     finalStatus: r.final_status,
-    parentComment: r.parent_comment || r.guardian_comment,
+    parentComment: r.guardian_comment || r.guardian_comment,
     adminComment: r.admin_comment,
-    parentApproverId: r.parent_approver_id || r.guardian_approver_id,
+    parentApproverId: r.guardian_approver_id || r.guardian_approver_id,
     adminApproverId: r.admin_approver_id,
     qrCode: r.qr_code,
   };
@@ -295,9 +295,9 @@ export async function approvePass(passId: string, role: string, comment: string 
   const client = getSupabaseServiceClient();
 
   const isParentRole = role === 'parent';
-  const updateField = isParentRole ? 'parent_status' : 'admin_status';
-  const commentField = isParentRole ? 'parent_comment' : 'admin_comment';
-  const approverField = isParentRole ? 'parent_approver_id' : 'admin_approver_id';
+  const updateField = isParentRole ? 'guardian_status' : 'admin_status';
+  const commentField = isParentRole ? 'guardian_comment' : 'admin_comment';
+  const approverField = isParentRole ? 'guardian_approver_id' : 'admin_approver_id';
   const statusValue = 'APPROVED';
 
   const { data: pass, error: readErr } = await client
@@ -311,7 +311,7 @@ export async function approvePass(passId: string, role: string, comment: string 
     return false;
   }
 
-  const newParentStatus = isParentRole ? statusValue : pass.parent_status;
+  const newParentStatus = isParentRole ? statusValue : pass.guardian_status;
   const newAdminStatus = !isParentRole ? statusValue : pass.admin_status;
   const finalStatus =
     newParentStatus === 'REJECTED' || newAdminStatus === 'REJECTED'
@@ -335,7 +335,7 @@ export async function approvePass(passId: string, role: string, comment: string 
     .eq('id', passId);
 
   if (error && isParentRole && error.code === 'PGRST204') {
-    // Retry with guardian_status column names if parent_status column is missing
+    // Retry with guardian_status column names if guardian_status column is missing
     updatePayload = {
       guardian_status: statusValue,
       guardian_comment: comment,
@@ -366,9 +366,9 @@ export async function approvePass(passId: string, role: string, comment: string 
 }
 
 export async function rejectPass(passId: string, role: string, comment: string = "", approverId?: string): Promise<boolean> {
-  const updateField = role === 'parent' ? 'parent_status' : 'admin_status';
-  const commentField = role === 'parent' ? 'parent_comment' : 'admin_comment';
-  const approverField = role === 'parent' ? 'parent_approver_id' : 'admin_approver_id';
+  const updateField = role === 'parent' ? 'guardian_status' : 'admin_status';
+  const commentField = role === 'parent' ? 'guardian_comment' : 'admin_comment';
+  const approverField = role === 'parent' ? 'guardian_approver_id' : 'admin_approver_id';
 
   const { error } = await supabase
     .from('gate_passes')
@@ -467,7 +467,7 @@ export async function createGatePass(passData: {
 
   if (error && (error.code === '23503' || error.code === 'PGRST204')) {
     delete passRow.department;
-    delete passRow.parent_status;
+    delete passRow.guardian_status;
     if (error.code === '23503') {
       delete passRow.user_id;
       delete passRow.requested_by_id;
