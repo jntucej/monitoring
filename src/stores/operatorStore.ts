@@ -76,9 +76,9 @@ interface OperatorState {
   photoVerificationDone: boolean;
   error: ScanError | null;
   /** Thumbprint (biometric) confirmation for the current scan person */
-  thumbprintVerified: boolean;
+  
   /** True when verification was allowed because the person has no thumbprint on file */
-  thumbprintFallback: boolean;
+  
 
   // Data
   lastScan: Scan | null;
@@ -94,7 +94,7 @@ interface OperatorState {
   startScan: (roll: string) => void;
   setDirection: (direction: ScanDirection) => void;
   setReason: (reason: ExitReason) => void;
-  setThumbprintStatus: (verified: boolean, fallback?: boolean) => void;
+  
   confirmScan: (addToast: (toast: Omit<ToastData, "id">) => void, overrideDirection?: ScanDirection, overrideReason?: ExitReason | string) => void;
     cancelScan: () => void;
   reset: () => void;
@@ -120,8 +120,8 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
   selectedDirection: "IN",
   selectedReason: null,
   photoVerificationDone: false,
-  thumbprintVerified: false,
-  thumbprintFallback: false,
+  
+  
   error: null,
 
   lastScan: null,
@@ -136,7 +136,7 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
     const cleanRoll = roll.trim().toUpperCase();
     if (!cleanRoll) return;
 
-    set({ state: "detecting", error: null, thumbprintVerified: false, thumbprintFallback: false });
+    set({ state: "detecting", error: null,   });
 
     const authStore = useAuthStore.getState();
     const token = authStore.token;
@@ -203,8 +203,8 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
         selectedDirection: direction,
         selectedReason: null,
         photoVerificationDone: false,
-        thumbprintVerified: false,
-        thumbprintFallback: false,
+        
+        
         error: null,
       });
     } catch (err) {
@@ -230,8 +230,7 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
     set({ selectedReason: reason, state: "confirming" });
   },
 
-  setThumbprintStatus: (verified, fallback) =>
-    set({ thumbprintVerified: verified, thumbprintFallback: fallback ?? false }),
+  
 
   // Clears only the error field, leaving other state intact
   clearError: () => set({ error: null }),
@@ -281,8 +280,7 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
           method: "POST",
           headers,
           signal: controller.signal,
-          body: JSON.stringify({
-            roll: uniqueId,
+          body: JSON.stringify({ clientEventId: crypto.randomUUID(), roll: uniqueId,
             direction: directionToUse,
             reason: reasonToUse || (directionToUse === "OUT" ? "Regular" : undefined),
             gateId: get().gate?.id || get().gateId || useAuthStore.getState().user?.gateId || "gate-1",
@@ -386,8 +384,8 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
       selectedDirection: "IN",
       selectedReason: null,
       photoVerificationDone: false,
-      thumbprintVerified: false,
-      thumbprintFallback: false,
+      
+      
       error: null,
     });
   },
@@ -418,8 +416,8 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
       selectedDirection: "IN",
       selectedReason: null,
       photoVerificationDone: false,
-      thumbprintVerified: false,
-      thumbprintFallback: false,
+      
+      
       error: null,
       todaysStats: stats
         ? { entries: stats.entries, exits: stats.exits, onCampus: stats.onCampus }

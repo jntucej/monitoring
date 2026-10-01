@@ -134,7 +134,6 @@ export function mPerson(r: any): Person {
     checkedOutAt: r.checked_out_at || undefined,
     createdAt: r.created_at || undefined,
     updatedAt: r.updated_at || undefined,
-    hasThumbprint: !!r.thumbprint_hash,
     flagStatus: r.flag_status ?? null,
     studentDetails,
     employeeDetails,
@@ -182,8 +181,6 @@ function mUser(r: any): User {
     status: r.status || "ACTIVE",
     personType: r.person_type || undefined,
     uniqueId: r.unique_id || undefined,
-    thumbprintHash: r.thumbprint_hash || undefined,
-    thumbprintVerifiedAt: r.thumbprint_verified_at || undefined,
     // flag_status is not on the User type but we pass it through for API consumers
     ...( r.flag_status !== undefined ? { flagStatus: r.flag_status } : {} ),
   };
