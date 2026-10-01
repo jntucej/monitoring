@@ -51,7 +51,7 @@ async function handlePost(req: NextRequest) {
     const { data, error } = await supabase.from("announcements").insert(row).select("*").single();
 
     if (error) {
-      return NextResponse.json({ success: true, data: row });
+      return NextResponse.json({ success: false, error: { code: "DB_ERROR", message: error.message } }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, data });
