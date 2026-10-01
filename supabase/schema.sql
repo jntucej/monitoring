@@ -458,6 +458,9 @@ BEGIN
   RETURN FOUND;
 END;
 $$;
+REVOKE EXECUTE ON FUNCTION invalidate_all_user_sessions(UUID) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION invalidate_all_user_sessions(UUID) FROM anon;
+GRANT EXECUTE ON FUNCTION invalidate_all_user_sessions(UUID) TO authenticated, service_role;
 
 CREATE OR REPLACE FUNCTION process_gate_scan(
   p_scan_id UUID,
