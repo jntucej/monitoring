@@ -86,7 +86,7 @@ export function mPerson(r: any): Person {
     year: r.student_details.year,
     section: r.student_details.section,
     batch: r.student_details.batch,
-    parentId: r.student_details.parent_id,
+    parentId: r.student_details.guardian_id,
     studentType: r.student_details.student_type,
     hostelBlock: r.student_details.hostel_block,
     roomNumber: r.student_details.room_number,
@@ -149,7 +149,7 @@ export function mPerson(r: any): Person {
     batch: studentDetails?.batch || r.batch,
     parentName: r.parent_name,
     parentPhone: r.parent_phone,
-    parentId: studentDetails?.parentId || r.parent_id,
+    parentId: studentDetails?.parentId || r.guardian_id,
     studentType: studentDetails?.studentType || r.student_type,
     gender: studentDetails?.gender || r.gender,
     hostelBlock: (studentDetails as any)?.hostel_block || studentDetails?.hostelBlock || r.hostel_block,
@@ -175,7 +175,7 @@ function mUser(r: any): User {
     role: r.role,
     gateId: r.gate_id || undefined,
     pin: r.pin,
-    parentId: r.parent_id || undefined,
+    parentId: r.guardian_id || undefined,
     supervisedGates: r.supervised_gates || undefined,
     assignedHostel: r.assigned_hostel || undefined,
     isHod,
@@ -241,7 +241,7 @@ function mPass(r: any): GatePass {
   return {
     id: r.id,
     roll: r.roll,
-    studentName: r.student_name,
+    studentName: r.requester_name,
     department: r.department,
     reason: r.reason,
     from: r.from_datetime,
@@ -450,7 +450,6 @@ export async function createGatePass(passData: {
   let passRow: Record<string, any> = {
     user_id: verifiedUserId || undefined,
     roll: person.uniqueId,
-    student_name: personName,
     requester_name: personName,
     department: person.department || '',
     reason: dbReason,
@@ -469,7 +468,6 @@ export async function createGatePass(passData: {
   let { data, error } = await serviceClient.from('gate_passes').insert(passRow).select().single();
 
   if (error && (error.code === '23503' || error.code === 'PGRST204')) {
-    delete passRow.student_name;
     delete passRow.department;
     delete passRow.parent_status;
     if (error.code === '23503') {
@@ -1185,7 +1183,7 @@ export async function createUser(userData: {
       await db.from('student_details').upsert({
         user_id: userData.id,
         roll: studentRoll,
-        parent_id: userData.parentId || null,
+        guardian_id: userData.parentId || null,
         department_id: userData.departmentId || null,
         room_number: userData.hostelRoom || userData.assignedHostel || null,
       }, { onConflict: 'user_id' });

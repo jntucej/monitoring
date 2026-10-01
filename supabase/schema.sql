@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS users (
   auth_provider        TEXT NOT NULL DEFAULT 'email',
   login_identifier     TEXT UNIQUE,
   pin_hash             TEXT,
+  password_hash TEXT,
   initial_pin_hash     TEXT,
   flag_status          TEXT CHECK (flag_status IN ('OVERDUE', 'UNAUTHORIZED_EXIT', 'NO_GATE_PASS', 'SUSPENDED', 'CURFEW_VIOLATION', 'MANUAL_LOCKDOWN')),
   last_password_change TIMESTAMPTZ,
