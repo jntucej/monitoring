@@ -41,7 +41,10 @@ async function handlePost(req: NextRequest) {
         restricted: true,
         created_at: new Date().toISOString(),
       };
-      await supabase.from("gate_holidays").insert(row);
+      const { error } = await supabase.from("gate_holidays").insert(row);
+    if (error) {
+      return NextResponse.json({ success: false, error: { code: "DB_ERROR", message: error.message } }, { status: 500 });
+    }
       return NextResponse.json({ success: true, data: row });
     }
 
@@ -58,7 +61,10 @@ async function handlePost(req: NextRequest) {
       created_at: new Date().toISOString(),
     };
 
-    await supabase.from("gate_access_rules").insert(row);
+    const { error } = await supabase.from("gate_access_rules").insert(row);
+    if (error) {
+      return NextResponse.json({ success: false, error: { code: "DB_ERROR", message: error.message } }, { status: 500 });
+    }
     return NextResponse.json({ success: true, data: row });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 500 });
