@@ -7,7 +7,7 @@ import { withAuthorization } from "@/middleware/authorization";
 import { verifyEnrollToken } from "@/lib/mfa-enroll";
 
 async function handlePost(req: NextRequest) {
-  const userId = req.headers.get("x-user-id");
+  let userId = req.headers.get("x-user-id");
 
   // Bootstrap path: authenticated session yet. valid short-lived
   // mfa_enroll JWT (issued by /api/auth/mfa/bootstrap) mint setup

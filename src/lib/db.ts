@@ -7,17 +7,15 @@ import bcrypt from 'bcryptjs';
 export const supabase = browserClient;
 
 export function getDbClient() {
-  if (typeof window === 'undefined') {
-    try {
-      return getSupabaseServiceClient();
-    } catch (e) {
-      // Loud, not silent: a missing service key on the server means RLS will
-      // silently swallow every write/read. Surface it in server logs.
-      console.error('[db] getDbClient: SUPABASE_SERVICE_ROLE_KEY missing — falling back to anon client. Server-side writes WILL be blocked by RLS. Set the env var in .env.local / Vercel.', e);
-      return browserClient;
+    if (typeof window === 'undefined') {
+        try {
+            return getSupabaseServiceClient();
+        } catch (e) {
+            console.error('[db] getDbClient: Failed to create service client. Env var SUPABASE_SERVICE_ROLE_KEY missing?', e);
+            throw new Error('Database client initialization failed on server. Missing SUPABASE_SERVICE_ROLE_KEY.');
+        }
     }
-  }
-  return browserClient;
+    return browserClient;
 }
 
 import type {

@@ -8,6 +8,7 @@ export type Role =
   | "supervisor"
   | "guardian" // unified role for parents/guardians of wards
   | "parent" // @deprecated legacy alias kept for schema/code coherence
+  | "hod"
   | "student"
   | "warden"
   | "faculty"

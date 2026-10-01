@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabaseClient";
+import { getDbClient } from "@/lib/db";
 
 export interface UserEngagementMetric {
   id: string;
@@ -14,7 +14,7 @@ export interface UserEngagementMetric {
 
 export async function getUserEngagementMetrics(): Promise<UserEngagementMetric[]> {
   try {
-    const { data: users } = await supabase.from("users").select("id, name, email, role, created_at").limit(50);
+    const { data: users } = await getDbClient().from("users").select("id, name, email, role, created_at").limit(50);
 
     const metrics: UserEngagementMetric[] = (users || []).map((u: any, idx: number) => {
       const loginFreq = (idx % 7) + 2;

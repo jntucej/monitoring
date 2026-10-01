@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabaseClient";
+import { getDbClient } from "@/lib/db";
 import { AttendanceRecord } from "@/lib/integration-types";
 
 // Generate attendance report for a specific date
@@ -6,7 +6,7 @@ export async function generateAttendanceReport(
   date: string = new Date().toISOString().slice(0, 10)
 ): Promise<AttendanceRecord[]> {
   // Get all persons who are students, faculty, or staff
-  const { data: persons } = await supabase
+  const { data: persons } = await getDbClient()
     .from("users")
     .select("id, unique_id, name, role, department_id")
     .in("role", ["student", "faculty", "staff"]);
@@ -14,7 +14,7 @@ export async function generateAttendanceReport(
   if (!persons || persons.length === 0) return [];
 
   // Get all scans for the date
-  const { data: scans } = await supabase
+  const { data: scans } = await getDbClient()
     .from("movement_logs")
     .select("user_id, direction, timestamp")
     .gte("timestamp", `${date}T00:00:00.000Z`)
@@ -98,7 +98,7 @@ export async function syncAttendanceToHR(
 
   for (const record of records) {
     try {
-      const { error } = await supabase.from("attendance_records").upsert(
+      const { error } = await getDbClient().from("attendance_records").upsert(
         {
           person_id: record.personId,
           date: record.date,

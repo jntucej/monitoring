@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
+import { getDbClient } from "@/lib/db";
 
 let feedbackStore: Array<{
   id: string;
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     };
 
     try {
-      await supabase.from("feedback").insert([
+      await getDbClient().from("feedback").insert([
         {
           theme,
           comment,
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    const { data, error } = await supabase.from("feedback").select("*").order("created_at", { ascending: false }).limit(100);
+    const { data, error } = await getDbClient().from("feedback").select("*").order("created_at", { ascending: false }).limit(100);
     if (!error && data && data.length > 0) {
       return NextResponse.json({ success: true, data });
     }

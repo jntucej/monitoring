@@ -11,14 +11,14 @@ const ADMIN_ROLES: Role[] = ["sysadmin", "admin", "faculty", "hod", "staff"];
 async function handleGet(req: NextRequest) {
   const actorRole = req.headers.get("x-user-role");
 
-  if (!actorRole || !ADMIN_ROLES.includes(actorRole)) {
+  if (!actorRole || !ADMIN_ROLES.includes(actorRole as Role)) {
     return NextResponse.json(
       { success: false, error: { code: "FORBIDDEN", message: "Access denied" } },
       { status: 403 }
     );
   }
 
-  const searchParams = new URL(req.url);
+  const { searchParams } = new URL(req.url);
   const status = searchParams.get("status");
   const supabase = getSupabaseServiceClient();
 
@@ -81,7 +81,7 @@ async function handlePost(req: NextRequest) {
   const actorId = req.headers.get("x-user-id");
   const actorRole = req.headers.get("x-user-role");
 
-  if (!actorId || !ADMIN_ROLES.includes(actorRole || "")) {
+  if (!actorId || !ADMIN_ROLES.includes(actorRole as Role)) {
     return NextResponse.json(
       { success: false, error: { code: "FORBIDDEN", message: "Access denied" } },
       { status: 403 }

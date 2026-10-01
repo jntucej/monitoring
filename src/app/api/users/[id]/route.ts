@@ -70,7 +70,7 @@ async function handlePatch(req: NextRequest) {
       if (body.flags && Array.isArray(body.flags)) {
         for (const flag of body.flags) {
           if (VALID_FLAGS.includes(flag)) {
-            await setUserFlag(id, flag);
+            await setUserFlag(id, flag, actorId);
           }
         }
       }

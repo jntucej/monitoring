@@ -1,11 +1,11 @@
-import { supabase } from "@/lib/supabaseClient";
+import { getDbClient } from "@/lib/db";
 import { LMSConfig, AttendanceRecord, SyncResult, getLMSProvider } from "./lms-provider";
 
 export type { LMSConfig, AttendanceRecord, SyncResult };
 
 export async function getLMSConfig(): Promise<LMSConfig> {
   try {
-    const { data } = await supabase.from("lms_config").select("*").eq("id", "default").single();
+    const { data } = await getDbClient().from("lms_config").select("*").eq("id", "default").single();
     if (data) {
       return {
         platform: data.platform || "moodle",
@@ -34,7 +34,7 @@ export async function getLMSConfig(): Promise<LMSConfig> {
 
 export async function updateLMSConfig(config: Partial<LMSConfig>): Promise<LMSConfig> {
   try {
-    await supabase.from("lms_config").upsert({
+    await getDbClient().from("lms_config").upsert({
       id: "default",
       platform: config.platform || "moodle",
       api_url: config.api_url,
@@ -59,7 +59,7 @@ export async function syncLMSRosters(): Promise<SyncResult> {
     const provider = getLMSProvider(config.platform);
     const result = await provider.syncRosters(config);
 
-    await supabase.from("lms_config").upsert({
+    await getDbClient().from("lms_config").upsert({
       id: "default",
       last_synced_at: now,
       status: result.errors.length ? "error" : "connected",
@@ -81,7 +81,7 @@ export async function pushLMSAttendance(record: AttendanceRecord): Promise<boole
     if (!config.auto_push_attendance) return false;
 
     try {
-      await supabase.from("lms_attendance_logs").insert({
+      await getDbClient().from("lms_attendance_logs").insert({
         user_id: record.userId,
         course_id: record.courseId || "default_course",
         timestamp: record.timestamp || new Date().toISOString(),

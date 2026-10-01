@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabaseClient";
+import { getDbClient } from "@/lib/db";
 
 export interface SustainabilityMetrics {
   digital_passes_count: number;
@@ -10,7 +10,7 @@ export interface SustainabilityMetrics {
 
 export async function getSustainabilityMetrics(): Promise<SustainabilityMetrics> {
   try {
-    const { count: passCount } = await supabase.from("gate_passes").select("*", { count: "exact", head: true });
+    const { count: passCount } = await getDbClient().from("gate_passes").select("*", { count: "exact", head: true });
     const digitalPasses = passCount || 14850;
     const paperSaved = digitalPasses * 2; // 2 sheets per physical pass
     const carbonSaved = Math.round(paperSaved * 0.005 * 100) / 100; // ~5g CO2 per sheet of paper

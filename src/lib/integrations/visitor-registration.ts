@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabaseClient";
+import { getDbClient } from "@/lib/db";
 import { VisitorPreRegistration } from "@/lib/integration-types";
 import { sendEmail } from "@/lib/integrations/email";
 import { sendSMS } from "@/lib/integrations/sms";
@@ -17,7 +17,7 @@ export async function createVisitorPreRegistration(
     const id = `visit_${token}`;
     const qrCode = generateQR(token);
 
-    const { data: registration, error } = await supabase
+    const { data: registration, error } = await getDbClient()
       .from("visitor_pre_registrations")
       .insert({
         id,
@@ -66,7 +66,7 @@ export async function approveVisitorRegistration(
   adminId: string
 ): Promise<boolean> {
   try {
-    const { error } = await supabase
+    const { error } = await getDbClient()
       .from("visitor_pre_registrations")
       .update({
         status: "approved",
@@ -79,7 +79,7 @@ export async function approveVisitorRegistration(
     if (error) throw error;
 
     // Notify visitor via email/SMS
-    const { data: reg } = await supabase
+    const { data: reg } = await getDbClient()
       .from("visitor_pre_registrations")
       .select("*")
       .eq("id", id)
@@ -147,7 +147,7 @@ Campus Access Management
 
 // Get pending registrations
 export async function getPendingRegistrations(hostId?: string): Promise<VisitorPreRegistration[]> {
-  let query = supabase
+  let query = getDbClient()
     .from("visitor_pre_registrations")
     .select("*")
     .eq("status", "pending")
@@ -184,7 +184,7 @@ export async function getPendingRegistrations(hostId?: string): Promise<VisitorP
 export async function checkInPreRegisteredVisitor(id: string): Promise<boolean> {
   try {
     // Get registration details
-    const { data: reg, error: regError } = await supabase
+    const { data: reg, error: regError } = await getDbClient()
       .from("visitor_pre_registrations")
       .select("*")
       .eq("id", id)
@@ -198,7 +198,7 @@ export async function checkInPreRegisteredVisitor(id: string): Promise<boolean> 
     const uniqueId = `VIS-${id}`;
 
     // Create person record if not exists
-    const { data: existing } = await supabase
+    const { data: existing } = await getDbClient()
       .from("users")
       .select("id")
       .eq("unique_id", uniqueId)
@@ -207,7 +207,7 @@ export async function checkInPreRegisteredVisitor(id: string): Promise<boolean> 
     let personId: string;
 
     if (!existing) {
-      const { data: person, error: personError } = await supabase
+      const { data: person, error: personError } = await getDbClient()
         .from("users")
         .insert({
           id: crypto.randomUUID(),
@@ -232,7 +232,7 @@ export async function checkInPreRegisteredVisitor(id: string): Promise<boolean> 
     }
 
     // Create visitor log
-    const { error: logError } = await supabase
+    const { error: logError } = await getDbClient()
       .from("visitor_logs")
       .insert({
         user_id: personId,
@@ -248,7 +248,7 @@ export async function checkInPreRegisteredVisitor(id: string): Promise<boolean> 
     }
 
     // Update registration status
-    await supabase
+    await getDbClient()
       .from("visitor_pre_registrations")
       .update({
         status: "checked_in",

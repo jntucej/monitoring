@@ -1,4 +1,4 @@
-import { supabase } from "./supabaseClient";
+import { getDbClient } from "@/lib/db";
 
 export interface ExportFilters {
   from: string;
@@ -91,13 +91,13 @@ export async function exportRangeReport(filters: ExportFilters | string, toDate?
   const toIso = `${to}T23:59:59.999Z`;
 
   const [scansRes, usersRes] = await Promise.all([
-    supabase
+    getDbClient()
       .from("movement_logs")
       .select("*")
       .gte("timestamp", fromIso)
       .lte("timestamp", toIso)
       .order("timestamp", { ascending: false }),
-    supabase
+    getDbClient()
       .from("users")
       .select("id, unique_id, name, role, department"),
   ]);

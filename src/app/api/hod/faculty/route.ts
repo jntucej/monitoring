@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
+import { getDbClient } from "@/lib/db";
 import { withAuth } from "@/middleware/auth";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -17,7 +17,7 @@ async function handleGet(req: NextRequest, context: { auth: any }) {
         departmentId = hodDeptId; // Force HOD to only see their department
     }
     
-    let query = supabase
+    let query = getDbClient()
       .from('users')
       .select('*, employee_details(*)')
       .eq('role', 'faculty');

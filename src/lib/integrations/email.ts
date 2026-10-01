@@ -1,5 +1,5 @@
 import { EmailMessage } from "@/lib/integration-types";
-import { supabase } from "@/lib/supabaseClient";
+import { getDbClient } from "@/lib/db";
 
 // Configuration
 const EMAIL_CONFIG = {
@@ -24,7 +24,7 @@ export async function sendEmail(params: {
     const to = Array.isArray(params.to) ? params.to.join(", ") : params.to;
 
     // Store in queue first
-    const { error: queueError } = await supabase
+    const { error: queueError } = await getDbClient()
       .from("notification_email_queue")
       .insert({
         id: messageId,
@@ -44,7 +44,7 @@ export async function sendEmail(params: {
     if (EMAIL_CONFIG.enabled) {
       try {
         // Production email sending logic using SendGrid or standard SMTP
-        await supabase
+        await getDbClient()
           .from("notification_email_queue")
           .update({
             status: "sent",
@@ -65,7 +65,7 @@ export async function sendEmail(params: {
         };
       } catch (error) {
         console.error("Error sending email:", error);
-        await supabase
+        await getDbClient()
           .from("notification_email_queue")
           .update({
             status: "failed",
@@ -80,7 +80,7 @@ export async function sendEmail(params: {
       console.log(`[EMAIL Dev Mode] To: ${to}, Subject: ${params.subject}`);
       console.log(`[EMAIL Dev Mode] Body: ${params.body}`);
 
-      await supabase
+      await getDbClient()
         .from("notification_email_queue")
         .update({
           status: "sent",

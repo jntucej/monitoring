@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient';
+import { getDbClient } from "@/lib/db";
 import { 
   Notification, 
   NotificationType, 
@@ -147,7 +147,7 @@ export async function sendNotification(
     }
 
     // Check preferences
-    const { data: prefs } = await supabase
+    const { data: prefs } = await getDbClient()
       .from('notification_preferences')
       .select('*')
       .eq('user_id', recipientId)
@@ -185,7 +185,7 @@ export async function sendNotification(
     };
 
     // Create notification record in DB
-    const { data: notification, error } = await supabase
+    const { data: notification, error } = await getDbClient()
       .from('notifications')
       .insert({
         id: notifId,
@@ -254,7 +254,7 @@ async function deliverNotification(notification: Notification, channels: Notific
     }
   }
 
-  await supabase
+  await getDbClient()
     .from('notifications')
     .update({ delivered_at: new Date().toISOString() })
     .eq('id', notification.id);
@@ -262,7 +262,7 @@ async function deliverNotification(notification: Notification, channels: Notific
 
 async function sendPushNotification(notification: Notification) {
   console.log(`[PUSH] ${notification.title}: ${notification.message}`);
-  await supabase
+  await getDbClient()
     .from('notification_push_queue')
     .insert({
       notification_id: notification.id,
@@ -276,14 +276,14 @@ async function sendPushNotification(notification: Notification) {
 
 async function sendSMSNotification(notification: Notification) {
   console.log(`[SMS] ${notification.title}: ${notification.message}`);
-  const { data: person } = await supabase
+  const { data: person } = await getDbClient()
     .from('users')
     .select('phone')
     .eq('unique_id', notification.recipientId)
     .single();
 
   if (person?.phone) {
-    await supabase
+    await getDbClient()
       .from('notification_sms_queue')
       .insert({
         notification_id: notification.id,
@@ -296,14 +296,14 @@ async function sendSMSNotification(notification: Notification) {
 
 async function sendEmailNotification(notification: Notification) {
   console.log(`[EMAIL] ${notification.title}: ${notification.message}`);
-  const { data: person } = await supabase
+  const { data: person } = await getDbClient()
     .from('users')
     .select('email')
     .eq('unique_id', notification.recipientId)
     .single();
 
   if (person?.email) {
-    await supabase
+    await getDbClient()
       .from('notification_email_queue')
       .insert({
         notification_id: notification.id,
@@ -321,7 +321,7 @@ export async function getNotifications(
   limit: number = 50,
   unreadOnly: boolean = false
 ): Promise<Notification[]> {
-  let query = supabase
+  let query = getDbClient()
     .from('notifications')
     .select('*')
     .or(`recipient_id.eq.${userId},recipient_id.eq.all`)
@@ -357,7 +357,7 @@ export async function getNotifications(
 
 // Mark notification as read
 export async function markNotificationRead(notificationId: string): Promise<boolean> {
-  const { error } = await supabase
+  const { error } = await getDbClient()
     .from('notifications')
     .update({ read: true, read_at: new Date().toISOString() })
     .eq('id', notificationId);
@@ -371,7 +371,7 @@ export async function markNotificationRead(notificationId: string): Promise<bool
 
 // Mark all notifications as read
 export async function markAllNotificationsRead(userId: string): Promise<boolean> {
-  const { error } = await supabase
+  const { error } = await getDbClient()
     .from('notifications')
     .update({ read: true, read_at: new Date().toISOString() })
     .or(`recipient_id.eq.${userId},recipient_id.eq.all`)
@@ -386,7 +386,7 @@ export async function markAllNotificationsRead(userId: string): Promise<boolean>
 
 // Get unread count
 export async function getUnreadCount(userId: string): Promise<number> {
-  const { count, error } = await supabase
+  const { count, error } = await getDbClient()
     .from('notifications')
     .select('*', { count: 'exact', head: true })
     .or(`recipient_id.eq.${userId},recipient_id.eq.all`)
@@ -403,7 +403,7 @@ export async function getUnreadCount(userId: string): Promise<number> {
 export async function getNotificationPreferences(
   userId: string
 ): Promise<NotificationPreferences | null> {
-  const { data, error } = await supabase
+  const { data, error } = await getDbClient()
     .from('notification_preferences')
     .select('*')
     .eq('user_id', userId)
@@ -444,7 +444,7 @@ export async function updateNotificationPreferences(
   userId: string,
   preferences: Partial<NotificationPreferences>
 ): Promise<boolean> {
-  const { error } = await supabase
+  const { error } = await getDbClient()
     .from('notification_preferences')
     .upsert({
       user_id: userId,

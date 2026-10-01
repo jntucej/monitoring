@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabaseClient";
+import { getDbClient } from "@/lib/db";
 import { publishAlert } from "@/lib/alerting";
 
 export interface PredictionItem {
@@ -38,7 +38,7 @@ export async function generatePredictions(): Promise<PredictionItem[]> {
   const predictions: PredictionItem[] = [];
 
   try {
-    const { data: logs } = await supabase
+    const { data: logs } = await getDbClient()
       .from("movement_logs")
       .select("timestamp")
       .order("timestamp", { ascending: false })
@@ -102,7 +102,7 @@ export async function generatePredictions(): Promise<PredictionItem[]> {
   });
 
   try {
-    await supabase.from("predictions").insert(
+    await getDbClient().from("predictions").insert(
       predictions.map((p) => ({
         type: p.type,
         target: p.target,
@@ -120,7 +120,7 @@ export async function generatePredictions(): Promise<PredictionItem[]> {
 
 export async function getPredictions(type?: string): Promise<PredictionItem[]> {
   try {
-    let query = supabase.from("predictions").select("*").order("timestamp", { ascending: false }).limit(30);
+    let query = getDbClient().from("predictions").select("*").order("timestamp", { ascending: false }).limit(30);
     if (type) {
       query = query.eq("type", type);
     }

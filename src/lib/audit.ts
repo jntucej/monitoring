@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient';
+import { getDbClient } from "@/lib/db";
 
 export type AuditAction =
   | 'LOGIN'
@@ -44,7 +44,7 @@ export interface AuditLog {
 // Log an audit event
 export async function logAuditEvent(log: AuditLog): Promise<boolean> {
   try {
-    const { error } = await supabase
+    const { error } = await getDbClient()
       .from('audit_logs')
       .insert({
         action: log.action,
@@ -77,7 +77,7 @@ export async function getAuditLogs(filters: {
   limit?: number;
   offset?: number;
 }): Promise<{ logs: AuditLog[]; total: number }> {
-  let query = supabase
+  let query = getDbClient()
     .from('audit_logs')
     .select('*', { count: 'exact' })
     .order('timestamp', { ascending: false });

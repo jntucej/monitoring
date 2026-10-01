@@ -1,4 +1,4 @@
-import { supabase } from "./supabaseClient";
+import { getDbClient } from "@/lib/db";
 import { getCached, setCached } from "./cache";
 
 export interface DepartmentInfo {
@@ -28,7 +28,7 @@ export async function getDepartments(): Promise<DepartmentInfo[]> {
       return cached;
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await getDbClient()
       .from("departments")
       .select("*");
 
