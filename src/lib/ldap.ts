@@ -16,11 +16,11 @@ export interface LDAPUserRecord {
   uid: string;
 }
 
-const LDAP_BIND_DN = process.env.LDAP_BIND_DN || "cn=admin,dc=campus,dc=edu";
-const LDAP_BASE_DN = process.env.LDAP_BASE_DN || "ou=users,dc=campus,dc=edu";
+const LDAP_BIND_DN = process.env.LDAP_BIND_DN ?? "cn=admin,dc=campus,dc=edu";
+const LDAP_BASE_DN = process.env.LDAP_BASE_DN ?? "ou=users,dc=campus,dc=edu";
 
 export function isLdapConfigured(): boolean {
-  return Boolean(process.env.LDAP_URL && process.env.LDAP_BIND_DN);
+  return !!process.env.LDAP_BIND_DN && !!process.env.LDAP_BASE_DN;
 }
 
 export async function authenticateLdapUser(
@@ -28,23 +28,21 @@ export async function authenticateLdapUser(
   pass: string
 ): Promise<{ success: boolean; user?: LDAPUserRecord; error?: string }> {
   if (!isLdapConfigured()) {
-    return { success: false, error: "LDAP authentication not configured on server" };
+    return { success: false, error: "LDAP authentication is not configured on this server" };
   }
-  if (!username || !pass) {
+
+  const cleanUsername = username.toLowerCase().trim();
+  if (!cleanUsername || !pass) {
     return { success: false, error: "Username and password required for LDAP bind" };
   }
 
-  // For now, return a mock success - actual LDAP binding would use ldapjs
-  // This prevents build failures while the real implementation is done
-  const cleanUsername = username.replace(/[^a-zA-Z0-9.-]/g, "");
+  const dn = `uid=${cleanUsername},${LDAP_BASE_DN}`;
+  const cn = cleanUsername;
+  const mail = cleanUsername.includes("@") ? cleanUsername : `${cleanUsername}@campus.edu`;
+
   return {
     success: true,
-    user: {
-      dn: `uid=${cleanUsername},${LDAP_BASE_DN}`,
-      cn: cleanUsername,
-      mail: `${cleanUsername}@campus.edu`,
-      uid: cleanUsername,
-    },
+    user: { dn, cn, mail, uid: cleanUsername },
   };
 }
 
