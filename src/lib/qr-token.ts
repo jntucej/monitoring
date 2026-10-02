@@ -1,8 +1,8 @@
 import { SignJWT, jwtVerify } from "jose";
 import { getEnv } from "@/lib/env";
 
-function getSigningKey(): Uint8Array {
-  const secret = getEnv("MOBILE_TOKEN_SECRET");
+export function getSigningKey(): Uint8Array {
+  const secret = getEnv().mobileTokenSecret;
   if (!secret || secret.length < 32) {
     throw new Error("MOBILE_TOKEN_SECRET must be set and at least 32 characters long");
   }
@@ -18,7 +18,7 @@ export async function generateQrToken(roll: string): Promise<string> {
 
 export async function validateQrToken(token: string): Promise<string | null> {
   try {
-    const payload = await jwtVerify(token, getSigningKey(), {
+    const { payload } = await jwtVerify(token, getSigningKey(), {
       algorithms: ["HS256"],
     });
     if (payload.purpose === "qr_verification" && typeof payload.roll === "string") {

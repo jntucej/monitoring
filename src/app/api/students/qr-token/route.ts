@@ -14,14 +14,14 @@ async function handleGet(req: NextRequest) {
     }
 
     const user = await findUserById(userId);
-    if (!user || !user.student_details?.roll) {
+    if (!user || !user.studentDetails?.roll) {
       return NextResponse.json(
         { success: false, error: { code: "FORBIDDEN", message: "Only students can generate QR tokens" } },
         { status: 403 }
       );
     }
 
-    const qrToken = await generateQrToken(user.student_details.roll);
+    const qrToken = await generateQrToken(user.studentDetails.roll);
     return NextResponse.json({ success: true, data: { qrToken } });
   } catch (err) {
     return NextResponse.json(
