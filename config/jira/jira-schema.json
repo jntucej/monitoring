@@ -1,0 +1,38 @@
+{
+  "required_fields": [
+    "CR ID",
+    "Summary",
+    "Issue Type",
+    "Priority",
+    "Primary Owner",
+    "Reporter",
+    "Component",
+    "Labels",
+    "Team",
+    "Feature",
+    "Story Points",
+    "Description"
+  ],
+  "output_fields": [
+    "CR ID",
+    "Summary",
+    "Issue Type",
+    "Priority",
+    "Primary Owner",
+    "Reporter",
+    "Component",
+    "Labels",
+    "Team",
+    "Feature",
+    "Story Points",
+    "Description"
+  ],
+  "field_constraints": {
+    "Issue Type": [
+      "Task",
+      "Story",
+      "Bug",
+      "Epic"
+    ]
+  }
+}

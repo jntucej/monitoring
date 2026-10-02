@@ -1,0 +1,37 @@
+flowchart TD
+    A[Landing Page<br/>/] --> B{User Authentication Status}
+
+    B -->|Unauthenticated| C[Role Selection Login Portal<br/>/login or /login/:role]
+    B -->|Remembered / Active Session| D{LocalStorage / Session Check}
+
+    D -->|forcedRole / savedRole| AutoNav[Direct Route to Role Portal]
+    D -->|Active JWT / Auth Token| AuthRouter[Verify Token & Role<br/>POST /api/auth/me]
+    D -->|None / Fresh Session| C
+
+    C --> E[User Enters Credentials / MFA / WebAuthn / Face ID]
+    E --> F{Auth & Role Verification<br/>Supabase GoTrue + DB}
+    F -->|Invalid| Err[Show Error & Retry]
+    F -->|Valid| AuthRouter
+
+    AutoNav --> AuthRouter
+
+    AuthRouter --> G{Role-Based Routing Matrix}
+
+    %% Core System & Security Roles
+    G -->|sysadmin| R_SYS[SysAdmin Portal<br/>/sysadmin]
+    G -->|admin| R_ADM[Admin Dashboard<br/>/admin]
+    G -->|supervisor| R_SUP[Supervisor Portal<br/>/supervisor]
+    G -->|operator| R_OP[Gate Console<br/>/gate/:gateId]
+
+    %% Stakeholders & End-Users
+    G -->|student| R_STU[Student Portal<br/>/student]
+    G -->|parent / guardian| R_PAR[Guardian Portal<br/>/parent]
+    G -->|faculty| R_FAC[Faculty Portal<br/>/faculty]
+    G -->|hod| R_HOD[HOD Dashboard<br/>/hod]
+    G -->|warden| R_WAR[Warden Portal<br/>/warden]
+    G -->|staff| R_STF[Staff Portal<br/>/staff]
+    G -->|worker| R_WRK[Worker Portal<br/>/worker]
+    G -->|visitor| R_VIS[Visitor Kiosk<br/>/visitor]
+
+    %% Failed Auth Flow
+    Err --> C

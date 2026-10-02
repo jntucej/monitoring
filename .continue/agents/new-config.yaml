@@ -1,6 +1,0 @@
-- name: OmniRoute
-  provider: openai
-  model: auto
-  apiBase: http://localhost:20128/v1
-  apiKey: sk-9ae5fac89541788c-8e1ca7-5a810ec0
-  default: true   # optional – makes this the default model

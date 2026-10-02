@@ -1,0 +1,87 @@
+flowchart TD
+    A[Supervisor Login<br/>/login?role=supervisor] --> B{Auth Check}
+    B -->|Valid| C[Supervisor Console: /supervisor]
+    B -->|Invalid| A
+
+    C --> D[Load Dashboard<br/>GET /api/supervisor/dashboard]
+    D --> E[Display KPIs<br/>Gates: X, Operators: Y, Active Alerts: Z]
+    E --> F{Supervisor Operations Tabs}
+
+    %% Live Gate Monitor Flow
+    F -->|Click Live Gate Stream| G1[Multi-Gate Live View<br/>/supervisor/gates]
+    G1 --> H1[Load Gate Grid<br/>GET /api/supervisor/gates/all]
+    H1 --> I1[Gate Cards with Live Status<br/>Color Coded]
+    I1 --> J1[Click Gate Card]
+    J1 --> K1[Gate Detail Drawer<br/>Live Scan Feed]
+    K1 --> L1[Real-time Updates<br/>WebSocket Stream]
+    L1 --> M1{Action Buttons}
+    M1 -->|View Scans| N1[Full Scan History Modal]
+    M1 -->|Lock Gate| N2[Confirm Lockdown -> POST /api/gates/:id/lock]
+    M1 -->|Unlock Gate| N3[POST /api/gates/:id/unlock]
+
+    %% Operator Monitoring Flow
+    F -->|Click Operators Tab| G2[Operator Status Grid<br/>/supervisor/operators]
+    G2 --> H2[Load All Operators<br/>GET /api/supervisor/operators]
+    H2 --> I2[Operator Cards<br/>Name, Current Gate, Shift Status]
+    I2 --> J2[Click Operator Card]
+    J2 --> K2[Operator Detail Modal]
+    K2 --> L2{Operator Actions}
+    L2 -->|Message| N4[Send Message -> POST /api/operators/:id/message]
+    L2 -->|Reassign Gate| N5[Gate Selector -> POST /api/operators/:id/reassign]
+    L2 -->|End Shift| N6[Confirm -> POST /api/operators/:id/end-shift]
+
+    %% Approvals & Override Flow
+    F -->|Click Approvals Tab| G3[Pending Approvals<br/>/supervisor/approvals]
+    G3 --> H3[Load Pending Items<br/>GET /api/supervisor/approvals/pending]
+    H3 --> I3[Approval Queue Cards]
+    I3 --> J3{Click Approval Card}
+    J3 --> K3[Approval Detail Modal]
+    K3 --> L3{Override Decision}
+    L3 -->|Approve / Override| N7[Enter Reason -> POST /api/approvals/:id/override-approve]
+    L3 -->|Reject| N8[Enter Reason -> POST /api/approvals/:id/reject]
+    L3 -->|Escalate to Admin| N9[POST /api/approvals/:id/escalate-admin]
+
+    %% Emergency Lockdown Flow
+    F -->|Click Emergency Tab| G4[Emergency Controls<br/>/supervisor/emergency]
+    G4 --> H4{Emergency Actions}
+    H4 -->|Campus-Wide Lockdown| J1[Confirm + 2FA -> POST /api/system/lockdown]
+    J1 --> K4[All Gates Locked -> Broadcast Alert]
+    
+    H4 -->|Gate-Specific Lockdown| J2[Select Gates -> POST /api/gates/lock]
+    H4 -->|Evacuation Mode| J3[Confirm -> POST /api/system/evacuation]
+
+    %% Alert Dispatch Flow
+    F -->|Click Alerts Tab| G5[Security Alerts<br/>/supervisor/alerts]
+    G5 --> H5[Load Active Alerts<br/>GET /api/supervisor/alerts]
+    H5 --> I5[Alert Cards<br/>Priority Color Coding]
+    I5 --> J4[Click Alert Card]
+    J4 --> K7[Alert Detail Drawer]
+    K7 --> L6{Actions}
+    L6 -->|Acknowledge| N12[POST /api/alerts/:id/acknowledge]
+    L6 -->|Resolve| N13[Resolution Form -> POST /api/alerts/:id/resolve]
+    L6 -->|Escalate| N14[POST /api/alerts/:id/escalate]
+    L6 -->|Dispatch Security| N15[Select Team -> POST /api/security/dispatch]
+    L6 -->|View CCTV| N16[Open CCTV Feed Modal]
+
+    %% Incident Logbook Flow
+    F -->|Click Incident Log| G6[Incident Logbook<br/>/supervisor/incidents]
+    G6 --> H6[Load Incidents<br/>GET /api/supervisor/incidents]
+    H6 --> I6[Timeline View]
+    I6 --> J5{Add Incident}
+    J5 -->|Add New| K10[New Incident Form -> POST /api/incidents/create]
+
+    %% Shift Reports Flow
+    F -->|Click Reports Tab| G7[Shift Reports<br/>/supervisor/reports]
+    G7 --> H7{Select Report Type}
+    H7 -->|Daily Summary| J6[Select Date -> GET /api/reports/daily/:date]
+    H7 -->|Operator Performance| J7[Date Range -> GET /api/reports/operators]
+
+    %% Settings Flow
+    F -->|Click Settings Tab| G8[Supervisor Settings<br/>/supervisor/settings]
+    G8 --> H8[Configure Alert Thresholds & Shift Rules]
+    H8 --> I8[Save Settings -> PATCH /api/supervisor/settings]
+
+    %% Logout Flow
+    C --> X[Profile -> Logout -> POST /api/auth/logout]
+    X --> Y[Clear Session]
+    Y --> A

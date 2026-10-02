@@ -1,0 +1,91 @@
+flowchart TD
+    A[Student Login<br/>/login?role=student] --> B{Auth Check}
+    B -->|Valid JWT| C[Student Portal: /student]
+    B -->|Invalid| A
+
+    C --> D{Student Dashboard Tabs}
+
+    %% Digital ID Card Flow
+    D -->|Click Digital ID Tab| E1[Load Digital ID<br/>GET /api/student/id]
+    E1 --> F1[Display QR Badge<br/>Dynamic QR Code]
+    F1 --> G1[Student Info Card<br/>Photo, Roll No, Branch, Year]
+    G1 --> H1{Action Buttons}
+    H1 -->|Download QR| I1[Generate PNG/PDF<br/>GET /api/student/id/download]
+    H1 -->|Refresh QR| J1[Regenerate Token<br/>POST /api/student/id/refresh]
+    H1 -->|Add to Wallet| K1[Apple Wallet / Google Pay Pass]
+
+    %% Campus Status Flow
+    D -->|Click Status Tab| E2[Load Live Status<br/>GET /api/student/status]
+    E2 --> F2{Check Current State}
+    F2 -->|INSIDE CAMPUS| G2[Status Badge: On Campus]
+    G2 --> H2[Last Entry Details<br/>Gate Name, Time, Operator]
+    H2 --> I2[Curfew Countdown<br/>Time Remaining: X Hours]
+    F2 -->|OUTSIDE CAMPUS| G3[Status Badge: Off Campus]
+    G3 --> H3[Active Pass Details<br/>Pass Type, Destination, Expiry]
+    H3 --> I3[Return Countdown<br/>Time Left to Return]
+    F2 -->|HOSTEL| G4[Status Badge: In Hostel]
+    G4 --> H4[Room Check-in Status<br/>Block, Room No]
+
+    %% Outing Pass Flow
+    D -->|Click Pass Hub Tab| E3[Load Passes<br/>GET /api/student/passes]
+    E3 --> F3[Display Pass Cards<br/>Active, Pending, History]
+    F3 --> G3{Click Action}
+    G3 -->|Request New Pass| H5[Navigate to /student/passes/new]
+    H5 --> I5[Pass Request Form]
+    I5 --> J5[Select Pass Type<br/>Day Outing / Medical / Home Leave / Late Pass]
+    J5 --> K5[Fill Form Fields<br/>Date, Time, Destination, Reason]
+    K5 --> L5[Click Submit Button]
+    L5 --> M5[POST /api/passes/request]
+    M5 --> N5[Show Success Message<br/>Pass Request Sent]
+    N5 --> O5[Navigate Back to /student/passes]
+    
+    G3 -->|View Pass Details| H6[Pass Detail Modal]
+    H6 --> I6[Display QR Code<br/>Pass ID, Approval Chain]
+    I6 --> J6{Modal Actions}
+    J6 -->|Download Pass| K6[PDF with QR<br/>GET /api/passes/:id/download]
+    J6 -->|Cancel Pass| L6[Confirm Cancellation -> POST /api/passes/:id/cancel]
+    J6 -->|Close| M6[Close Modal]
+
+    %% Activity History Flow
+    D -->|Click History Tab| E4[Load Entry/Exit Log<br/>GET /api/student/history]
+    E4 --> F4[Timeline View<br/>Chronological List]
+    F4 --> G4[Each Entry Card Shows<br/>Direction IN/OUT, Gate, Time]
+    G4 --> H7[Filter Options]
+    H7 --> I7{Apply Filter}
+    I7 -->|Date Range| J7[Date Picker -> Refetch Data]
+    I7 -->|Gate Filter| K7[Dropdown -> Refetch Data]
+    I7 -->|Export| L7[Generate CSV/PDF<br/>GET /api/student/history/export]
+
+    %% Profile & Security Flow
+    D -->|Click Profile Tab| E5[Student Profile Page<br/>/student/profile]
+    E5 --> F5[Profile Info Section]
+    F5 --> G5[Click Edit Profile Button]
+    G5 --> H8[Edit Form Modal<br/>Email, Phone, Emergency Contact]
+    H8 --> I8[Update Fields -> Click Save]
+    I8 --> J8[PATCH /api/student/profile]
+    J8 --> K8[Success Toast -> Reload Profile]
+
+    E5 --> F6[Security Settings Section]
+    F6 --> G6{Security Actions}
+    G6 -->|Enroll WebAuthn| H9[Browser Biometric Prompt<br/>Fingerprint / Face ID]
+    H9 --> I9[POST /api/auth/webauthn/register]
+    I9 --> J9[Success: Biometric Enrolled]
+    G6 -->|Change Password| H10[Password Change Form]
+    H10 --> I10[Old Password, New Password Fields]
+    I10 --> J10[Click Update Password]
+    J10 --> K10[POST /api/auth/change-password]
+    K10 --> L10[Success Toast -> Force Re-login]
+
+    %% Notifications Flow
+    C --> X[Bell Icon Click]
+    X --> Y[Notifications Dropdown<br/>GET /api/notifications]
+    Y --> Z{Click Notification}
+    Z -->|Pass Approved| A1[Navigate to /student/passes]
+    Z -->|Alert / Curfew Warning| A2[Show Alert Modal]
+    Z -->|Announcement| A3[Navigate to /announcements/:id]
+
+    %% Logout Flow
+    C --> B1[Profile Menu -> Logout]
+    B1 --> B2[POST /api/auth/logout]
+    B2 --> B3[Clear Tokens & Session]
+    B3 --> A

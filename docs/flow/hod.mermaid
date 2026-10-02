@@ -1,0 +1,131 @@
+flowchart TD
+    A[HOD Login<br/>/login?role=hod] --> B{Auth Check}
+    B -->|Valid| C[Department Portal: /hod]
+    B -->|Invalid| A
+
+    C --> D[Load Department Context<br/>GET /api/hod/department]
+    D --> E[Display Department Info<br/>Name, Student Count, Faculty Count]
+    E --> F{HOD Dashboard Tabs}
+
+    %% Live Roster Flow
+    F -->|Click Live Roster Tab| G1[Department Roster<br/>/hod/roster]
+    G1 --> H1[Load All Department Members<br/>GET /api/hod/roster]
+    H1 --> I1[Filter Bar<br/>Role, Year, Status]
+    I1 --> J1[Display Grid<br/>Students & Faculty Cards]
+    J1 --> K1{Filter by}
+    K1 -->|All| L1[Show All]
+    K1 -->|Present| L2[Show Currently On-Campus]
+    K1 -->|Absent| L3[Show Currently Off-Campus]
+    J1 --> M1[Click Person Card]
+    M1 --> N1[Person Detail Modal<br/>Photo, Info, Current Status]
+    N1 --> O1{Modal Actions}
+    O1 -->|View History| P1[Entry/Exit Timeline]
+    O1 -->|Generate Pass| P2[Create Pass Form]
+
+    %% Pass Approvals Flow
+    F -->|Click Approvals Tab| G2[Pass Approvals<br/>/hod/approvals]
+    G2 --> H2[Load Pending Passes<br/>GET /api/hod/approvals/pending]
+    H2 --> I2[Approval Cards<br/>Student Name, Pass Type, Date]
+    I2 --> J2{Click Pass Card}
+    J2 --> K2[Pass Detail Modal]
+    K2 --> L2[Display<br/>Student Details, Pass Reason, Dates]
+    L2 --> M2{Approval Buttons}
+    M2 -->|Approve| N2[Enter Comments -> Click Approve]
+    N2 --> O2[POST /api/passes/:id/approve]
+    O2 --> P3[Pass Approved -> Notify Student & Parent]
+    P3 --> Q1[Approval Logged]
+    Q1 --> H2
+    
+    M2 -->|Reject| N3[Enter Rejection Reason]
+    N3 --> O3[POST /api/passes/:id/reject]
+    O3 --> P4[Student Notified]
+    P4 --> Q2[Refresh List]
+    Q2 --> H2
+    
+    M2 -->|Request More Info| N4[Add Comment]
+    N4 --> O4[POST /api/passes/:id/comment]
+    O4 --> P5[Comment Sent to Student]
+    P5 --> Q2
+
+    %% Bulk Pass Generation Flow
+    F -->|Click Bulk Passes| G3[Field Trip / Event Passes<br/>/hod/bulk-pass]
+    G3 --> H3[Create Bulk Pass Form]
+    H3 --> I3[Select Students<br/>Checkbox Multi-Select]
+    I3 --> J3[Enter Trip Details<br/>Destination, Date, Purpose]
+    J3 --> K3[Set Return Deadline]
+    K3 --> L3[Click Generate Passes]
+    L3 --> M3[POST /api/passes/bulk-create]
+    M3 --> N5[Bulk Passes Generated]
+    N5 --> O5[Passes Sent to Students]
+    O5 --> P6[Download Pass List PDF]
+
+    %% Duty Leave Management Flow
+    F -->|Click Duty Leave Tab| G4[Faculty Duty Leave<br/>/hod/duty-leave]
+    G4 --> H4[Load Faculty Leave Requests<br/>GET /api/hod/duty-leave]
+    H4 --> I4[Faculty Leave Cards]
+    I4 --> J4{Click Leave Request}
+    J4 --> K4[Leave Detail Modal<br/>Faculty, Dates, Event/Conference]
+    K4 --> L4{Decision}
+    L4 -->|Approve| M4[Click Approve]
+    M4 --> N6[POST /api/duty-leave/:id/approve]
+    N6 --> O6[Notify Faculty]
+    O6 --> P7[HR Updated]
+    P7 --> H4
+    
+    L4 -->|Reject| M5[Enter Reason]
+    M5 --> N7[POST /api/duty-leave/:id/reject]
+    N7 --> P8[Faculty Notified]
+    P8 --> H4
+
+    %% Analytics & Reports Flow
+    F -->|Click Analytics Tab| G5[Department Analytics<br/>/hod/analytics]
+    G5 --> H5[Load Analytics Data<br/>GET /api/hod/analytics]
+    H5 --> I5[Dashboard Grid]
+    I5 --> J5{View Metrics}
+    J5 -->|Attendance Trends| K5[Line Chart: Daily Attendance %]
+    K5 --> L5[Filter: Last 7/30/90 Days]
+    
+    J5 -->|Defaulter List| K6[Table: Students Below Threshold]
+    K6 --> L6[Export Defaulters PDF]
+    L6 --> M6[Click Download]
+    
+    J5 -->|Curfew Breaches| K7[Bar Chart: Curfew Violations by Hostel]
+    K7 --> L7[Click Student -> View Details]
+    
+    J5 -->|Pass Usage| K8[Pie Chart: Pass Types Used]
+    K8 --> L8[Monthly Breakdown]
+
+    %% Export Report Flow
+    F -->|Click Export Tab| G6[Export Reports<br/>/hod/export]
+    G6 --> H6[Report Templates]
+    H6 --> I6{Select Template}
+    I6 -->|Attendance Report| J6[Select Date Range & Class]
+    J6 --> K9[Click Generate]
+    K9 --> L9[GET /api/reports/attendance]
+    L9 --> M7[Download Excel]
+    
+    I6 -->|Department Movement| J7[Select Period]
+    J7 --> K10[GET /api/reports/movement]
+    K10 --> M8[Download PDF]
+
+    %% Notifications Flow
+    C --> X[Bell Icon]
+    X --> Y[Notification Dropdown]
+    Y --> Z[Notifications List<br/>Pass Approvals, Alerts, Announcements]
+    Z --> A1{Click Notification}
+    A1 -->|Pass Request| B1[Navigate to Approvals Tab]
+    A1 -->|Defaulter Alert| B2[Navigate to Analytics Defaulter View]
+
+    %% Settings Flow
+    F -->|Click Settings Tab| G7[HOD Settings<br/>/hod/settings]
+    G7 --> H7[Settings Form]
+    H7 --> I7[Configure Auto-Approval Rules]
+    I7 --> J9[Save Settings]
+    J9 --> K11[PATCH /api/hod/settings]
+    K11 --> L10[Success Toast]
+
+    %% Logout Flow
+    C --> V1[Profile -> Logout]
+    V1 --> V2[POST /api/auth/logout]
+    V2 --> V3[Clear Session]
+    V3 --> A

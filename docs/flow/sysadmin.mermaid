@@ -1,0 +1,117 @@
+flowchart TD
+    A[SysAdmin Login<br/>/login?role=sysadmin] --> B{Auth Check}
+    B -->|Valid| C[SysAdmin Dashboard: /sysadmin]
+    B -->|Invalid| A
+
+    C --> D{SysAdmin Control Center Tabs}
+
+    %% Sessions & Security Flow
+    D -->|Click Sessions Tab| E1[Active Sessions<br/>/sysadmin/sessions]
+    E1 --> F1[Load Session List<br/>GET /api/system/sessions]
+    F1 --> G1[Session Cards<br/>User, IP, Last Active, Device]
+    G1 --> H1{Click Session}
+    H1 --> I1[Session Detail Modal]
+    I1 --> J1{Revoke Actions}
+    J1 -->|Revoke Single| K1[POST /api/system/sessions/:id/revoke]
+    J1 -->|Revoke All Others| K2[POST /api/system/sessions/revoke-others]
+    J1 -->|Force Logout| K3[POST /api/system/sessions/:id/kill]
+
+    %% RBAC Roles Flow
+    D -->|Click Roles Tab| E2[Roles & Permissions<br/>/sysadmin/roles]
+    E2 --> F2[Load Role Matrix<br/>GET /api/system/roles]
+    F2 --> G2[Role Cards Grid]
+    G2 --> H2[Click Role Card]
+    H2 --> I2[Role Detail Editor]
+    I2 --> J2[Edit Permissions Checkboxes]
+    J2 --> K4[Click Save -> POST /api/system/roles/:id]
+    K4 --> L1[Role Updated Toast]
+
+    E2 --> H3[Click "Add New Role"]
+    H3 --> I3[Role Creation Form]
+    I3 --> J3[Enter Role Name, Description]
+    J3 --> K5[Define Permissions Matrix]
+    K5 --> L2[POST /api/system/roles/create]
+
+    %% SSO & Identity Flow
+    D -->|Click SSO Tab| E3[SSO Configuration<br/>/sysadmin/sso]
+    E3 --> F3[SSO Provider Cards<br/>Google, SAML, LDAP, OAuth]
+    F3 --> G3{Configure Provider}
+    G3 -->|Google Workspace| H4[OAuth Flow Setup<br/>Client ID, Secret]
+    G3 -->|SAML| H5[SAML Metadata Upload<br/>IdP Certificate]
+    G3 -->|LDAP| H6[LDAP Server Config<br/>Host, Port, Base DN]
+    
+    H4 --> I4[Click Test Connection]
+    I4 --> J4[Verify Connection -> Success/Fail Alert]
+    J4 --> K6[Enable Provider Toggle]
+
+    %% Integrations Flow
+    D -->|Click Integrations Tab| E4[Third-Party Integrations<br/>/sysadmin/integrations]
+    E4 --> F4[Integration Cards<br/>ERP, LMS, RFID, Attendance]
+    F4 --> G4{Configure Integration}
+    G4 -->|ERP Sync| H5[ERP Config Modal<br/>API Endpoint, Auth Token]
+    G4 -->|RFID Gateways| H6[RFID Controller Setup<br/>IP, Port, Protocol]
+    G4 -->|Webhooks| H7[Webhook URL List<br/>Add/Edit/Delete URLs]
+    
+    H5 --> I5[Click "Test Sync" -> POST /api/integrations/erp/test]
+    I5 --> J5[Sync Result Preview]
+    J5 --> K7[Click "Run Full Sync"]
+
+    %% Cron Jobs Flow
+    D -->|Click Jobs Tab| E5[Background Jobs<br/>/sysadmin/jobs]
+    E5 --> F5[Job List<br/>Nightly Sync, Cleanup, Reports]
+    F5 --> G5[Click Job Card]
+    G5 --> H6[Job Detail: Schedule, Last Run, Next Run]
+    H6 --> I6{Job Actions}
+    I6 -->|Run Now| J6[POST /api/cron/:jobId/trigger]
+    I6 -->|Edit Schedule| J7[Cron Expression Editor]
+    I6 -->|View Logs| J8[Job Execution Logs Modal]
+
+    %% Audit Logs Flow
+    D -->|Click Audit Tab| E6[System Audit Trail<br/>/sysadmin/audit]
+    E6 --> F6[Load Audit Logs<br/>GET /api/system/audit]
+    F6 --> G6[Filter Bar<br/>User, Action, Date Range]
+    G6 --> H7[Log Table View]
+    H7 --> I7{Click Log Row}
+    I7 --> J9[Log Detail Modal<br/>Full JSON Payload]
+
+    %% Navigation Editor Flow
+    D -->|Click Navigation Tab| E7[Navigation Editor<br/>/sysadmin/navigation]
+    E7 --> F7[Drag & Drop Menu Builder]
+    F7 --> G7[Add/Remove Menu Items]
+    G7 --> H8[Set Role Permissions per Item]
+    H8 --> I8[Click Save -> POST /api/system/navigation]
+
+    %% Academic Scheduling Flow
+    D -->|Click Scheduling Tab| E8[Academic Calendar<br/>/sysadmin/scheduling]
+    E8 --> F8[Calendar View<br/>Events, Holidays, Exams]
+    F8 --> G8[Add Event Button]
+    G8 --> H9[Event Form<br/>Name, Date, Type, Recurrence]
+    H9 --> I9[Save Event -> POST /api/system/events]
+
+    %% Department Master Flow
+    D -->|Click Departments Tab| E9[Department Master<br/>/sysadmin/departments]
+    E9 --> F9[Department List]
+    F9 --> G9[Add/Edit Department]
+    G9 --> H10[Form: Name, Code, HOD, Building]
+    H10 --> I10[Save -> PATCH /api/system/departments]
+
+    %% Student Promotions Flow
+    D -->|Click Promotions Tab| E10[Batch Promotions<br/>/sysadmin/promotions]
+    E10 --> F10[Promotion Config<br/>Select Current Year -> Target Year]
+    F10 --> G10[Preview Student List]
+    G10 --> H11[Click "Execute Promotion"]
+    H11 --> I11[POST /api/system/students/promote]
+    I11 --> J10[Success: Year Updated for All]
+
+    %% Health & Telemetry Flow
+    D -->|Click Health Tab| E11[System Health<br/>/sysadmin/health]
+    E11 --> F11[Dashboard: DB, Cache, API Status]
+    F11 --> G11[Metrics Cards<br/>CPU, Memory, Response Time]
+    G11 --> H12[Click "View Details"]
+    H12 --> I12[Detailed Metrics Modal<br/>Graphs, Logs]
+
+    %% Logout Flow
+    C --> X[Profile -> Logout]
+    X --> Y[POST /api/auth/logout]
+    Y --> Z[Clear Session]
+    Z --> A
