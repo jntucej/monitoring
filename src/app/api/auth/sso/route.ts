@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Step 2: Code exchange & token validation
-    const exchange = await exchangeOIDCAuthorizationCode(code, redirectUri, config);
+    const exchange = await exchangeOIDCAuthorizationCode(config, code, redirectUri);
     let ssoEmail = url.searchParams.get("email") || `sso_${code.substring(0, 8)}@college.edu`;
     let ssoName = url.searchParams.get("name") || ssoEmail.split("@")[0];
 

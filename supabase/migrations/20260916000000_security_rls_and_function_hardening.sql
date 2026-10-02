@@ -278,7 +278,9 @@ CREATE POLICY tcomments_insert ON public.support_ticket_comments
             AND t.user_id = (SELECT auth.uid())::text
         )
       )
--- ----------------------------------------------------------------------------
+    )
+  );
+
 -- SECTION 6: ANNOUNCEMENTS (published-readable to auth users; own dismissals)
 -- ----------------------------------------------------------------------------
 -- Access model (b)+(c). Verified:
