@@ -1209,11 +1209,11 @@ export async function findUserById(id: string): Promise<User | null> {
   } catch { /* fallback */ }
 
   if (isUuid) {
-    const { data, error } = await client.from('users').select('*, employee_details(*)').eq('id', id).maybeSingle();
+    const { data, error } = await client.from('users').select('*, employee_details(*), student_details(*)').eq('id', id).maybeSingle();
     if (!error && data) return mUser(data);
   }
 
-  const { data: uData } = await client.from('users').select('*, employee_details(*)').eq('unique_id', id).maybeSingle();
+  const { data: uData } = await client.from('users').select('*, employee_details(*), student_details(*)').eq('unique_id', id).maybeSingle();
   if (uData) return mUser(uData);
 
   return null;

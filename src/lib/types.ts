@@ -134,6 +134,10 @@ export interface User {
   canViewGender?: string[];
   status: AccountStatus;
   personType?: PersonType;
+  /** Joined student_details row (present when fetched with student_details(*)) */
+  studentDetails?: StudentDetails;
+  /** Joined employee_details row (present when fetched with employee_details(*)) */
+  employeeDetails?: EmployeeDetails;
   /** bcrypt hash of the user's thumbprint/biometric signature (never raw) */
   /** When the thumbprint was last registered */
 }

@@ -5,11 +5,12 @@
  * view anyone's history.
  * Response: success: true, data: { history: Scan[] }
  */
-import NextRequest, NextResponse "next/server";
-import getPersonHistory "@/lib/db";
-import withAuthorization "@/middleware/authorization";
-import withRateLimit "@/lib/rate-limit";
-import getSupabaseServiceClient "@/lib/supabaseClient";
+import { NextRequest, NextResponse } from "next/server";
+import { getPersonHistory } from "@/lib/db";
+import { getSupabaseServiceClient } from "@/lib/supabaseClient";
+import { withAuthorization } from "@/middleware/authorization";
+import { withRateLimit } from "@/lib/rate-limit";
+import type { AuthContext } from "@/lib/authContext";
 
 function getUniqueId(req: NextRequest): string {
   return decodeURIComponent(
@@ -17,46 +18,43 @@ function getUniqueId(req: NextRequest): string {
   );
 }
 
-export async function GET(req: NextRequest) {
+async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   try {
-    // Check authentication - user must be logged in
-    const auth = (req as any).auth;
-    if (!auth || !auth.userId) {
-      return NextResponse.json(
-        { success: false, error: "Unauthenticated" },
-        { status: 401 }
-      );
-    }
+    const uniqueId = getUniqueId(req);
+    const authRole = auth.role;
+    const isPrivileged = ["admin", "sysadmin", "operator"].includes(authRole);
 
-    const isAllowedRole = ["admin", "sysadmin", "operator"].includes(
-      auth.role || ""
-    );
-    // Students can only view their own history
-    const authRole = auth.role || "";
-    if (authRole === "student") {
-      const uniqueId = getUniqueId(req);
-      if (auth.userId !== uniqueId) {
+    // Non-privileged callers may only view their own history.
+    if (!isPrivileged) {
+      const service = getSupabaseServiceClient();
+      const { data: profile } = await service
+        .from("users")
+        .select("unique_id")
+        .eq("id", auth.userId)
+        .maybeSingle();
+
+      if (!profile?.unique_id || profile.unique_id !== uniqueId) {
         return NextResponse.json(
-          { success: false, error: "Forbidden: can only view own history" },
+          { success: false, error: { code: "FORBIDDEN", message: "You can only view your own history." } },
           { status: 403 }
         );
       }
-    } else if (!isAllowedRole) {
-      // Non-student, non-privileged roles denied
-      return NextResponse.json(
-        { success: false, error: "Forbidden: insufficient permissions" },
-        { status: 403 }
-      );
     }
 
-    const uniqueId = getUniqueId(req);
-    const history = await getPersonHistory({ userId: uniqueId });
+    const history = await getPersonHistory(uniqueId);
     return NextResponse.json({ success: true, data: { history } });
   } catch (err) {
     console.error("Persons history error:", err);
     return NextResponse.json(
-      { success: false, error: "Internal server error" },
+      { success: false, error: { code: "INTERNAL_ERROR", message: "Internal server error" } },
       { status: 500 }
     );
   }
 }
+
+export const GET = withRateLimit(
+  withAuthorization(handleGet, {
+    requiredRole: ["admin", "sysadmin", "operator", "student", "faculty", "staff", "worker", "parent", "warden"],
+  }),
+  { keyPrefix: "person_history", maxRequests: 60 }
+);
