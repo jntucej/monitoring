@@ -1,0 +1,16 @@
+CR ID,Summary,Description,Priority,Component Area,Security Sensitive,Architecture Blocker,QA Required,Primary Owner
+CR-01,"WebAuthn scanner verifies operator, not student",Replace scanner verification with target-bound Face ID verification API.,P0,Authentication,Yes,Yes,Yes,Akarsh
+CR-02,Legacy thumbprint route/scripts are mock,Delete or replace legacy thumbprint routes and scripts with Face ID APIs.,P0,Authentication,Yes,No,Yes,Ashwitha
+CR-03,No face enrollment/verification schema,Add face_enrollments and face_verification_events for Face ID storage and auditing.,P0,Database,Yes,Yes,Yes,Akarsh
+CR-04,Override flow too weak,Require supervisor PIN plus alert for override operations.,P1,Authentication,Yes,No,Yes,Ashwitha
+CR-05,WebAuthn registration sysadmin-only,Define self-service and administrator Face ID enrollment policy.,P1,Authentication,Yes,Yes,Yes,Akarsh
+CR-06,UI/types still thumbprint,Rename all thumbprint references to Face ID terminology.,P1,Application,No,No,Yes,Ashwitha
+CR-07,No Face ID tests,"Add unit, API, E2E and spoof-resistance tests.",P1,QA,Yes,No,Yes,Dhanavarsha
+CR-08,Face provider not selected,Choose between on-premises and cloud Face ID provider architecture.,P0,Infrastructure,Yes,Yes,Yes,Junaid
+CR-09,Gate camera hardware not provisioned,Specify rugged camera/tablet hardware with IR and liveness capabilities.,P1,Hardware,Yes,Yes,Yes,Junaid
+CR-10,Face template privacy not designed,"Define KMS encryption, consent, retention and revocation controls.",P0,Security,Yes,Yes,Yes,Junaid
+CR-11,No liveness/anti-spoof plan,Implement 3D depth or challenge-response liveness protection.,P0,Security,Yes,Yes,Yes,Junaid
+CR-12,Strict online policy vs face latency,Evaluate local inference or a low-latency provider to prevent gate delays.,P1,Infrastructure,No,Yes,Yes,Akarsh
+CR-13,Thumbprint columns still in schema,Deprecate thumbprint columns and remove them after the Face ID pilot.,P2,Database,No,No,Yes,Akarsh
+CR-14,Scripts/docs reference thumbprint,Delete generate-thumbprint-hash and seed-thumbprints references.,P2,Documentation,No,No,Yes,Ashwitha
+CR-15,operatorStore naming stale,Rename operatorStore and related fields to Face ID terminology.,P2,Application,No,No,Yes,Ashwitha

@@ -43,6 +43,7 @@ tsconfig*.tsbuildinfo
 
 # supabase local cache
 supabase/.temp/
+**/supabase/.temp/
 *.tsbuildinfo
 next-env.d.ts
 
@@ -54,3 +55,26 @@ next-env.d.ts
 *.log
 repomix-output*
 .DS_Store
+
+# macOS
+**/.DS_Store
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# local AI-tooling config (contains credentials — never commit)
+.continue/
+
+# scratch / one-off scripts and dumps (not part of the app)
+/diff.txt
+/route_dump.txt
+/tables_code.txt
+/tables_sql.txt
+/get_file.js
+/mark-done.js
+/print_api.js
+/print_file.js
+/print_fn.js
+/chunk.ts
+/txt.b64

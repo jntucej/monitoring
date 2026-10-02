@@ -1,0 +1,62 @@
+# This file is a starting point. The full compose with web/worker services lands in a later pass.
+# Replace <WSL_USER> with your actual Linux username (output of `whoami`).
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    env_file: [.env]
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [gate-net]
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [gate-net]
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: always
+    env_file: [.env]
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    networks: [gate-net]
+    depends_on:
+      postgres: { condition: service_healthy }
+
+volumes:
+  pgdata:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/akarsh/gate-monitor-data/pgdata
+  redisdata:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/akarsh/gate-monitor-data/redisdata
+
+networks:
+  gate-net:
+    driver: bridge

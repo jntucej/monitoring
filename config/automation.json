@@ -1,0 +1,12 @@
+{
+  "project": {
+    "name": "Gate Monitor",
+    "key": "GITM"
+  },
+  "paths": {
+    "config_dir": "config",
+    "data_dir": "data/jira",
+    "roles_schema": "team/roles_schema.csv",
+    "jira_import_dir": "jira/import"
+  }
+}

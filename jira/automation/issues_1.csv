@@ -1,0 +1,166 @@
+Summary,Description,Issue Type,Priority,Status,Labels
+"WebAuthn scanner verifies operator, not student","CR ID: CR-01
+
+Component Area: Authentication
+
+Security Sensitive: Yes
+
+Architecture Blocker: Yes
+
+QA Required: Yes
+
+Replace scanner verification with target-bound Face ID verification API.",Task,P0,To Do,FS
+Legacy thumbprint route/scripts are mock,"CR ID: CR-02
+
+Component Area: Authentication
+
+Security Sensitive: Yes
+
+Architecture Blocker: No
+
+QA Required: Yes
+
+Delete or replace legacy thumbprint routes and scripts with Face ID APIs.",Task,P0,To Do,FS
+No face enrollment/verification schema,"CR ID: CR-03
+
+Component Area: Database
+
+Security Sensitive: Yes
+
+Architecture Blocker: Yes
+
+QA Required: Yes
+
+Add face_enrollments and face_verification_events for Face ID storage and auditing.",Task,P0,To Do,FS
+Override flow too weak,"CR ID: CR-04
+
+Component Area: Authentication
+
+Security Sensitive: Yes
+
+Architecture Blocker: No
+
+QA Required: Yes
+
+Require supervisor PIN plus alert for override operations.",Task,P1,To Do,FS
+WebAuthn registration sysadmin-only,"CR ID: CR-05
+
+Component Area: Authentication
+
+Security Sensitive: Yes
+
+Architecture Blocker: Yes
+
+QA Required: Yes
+
+Define self-service and administrator Face ID enrollment policy.",Task,P1,To Do,FS
+UI/types still thumbprint,"CR ID: CR-06
+
+Component Area: Application
+
+Security Sensitive: No
+
+Architecture Blocker: No
+
+QA Required: Yes
+
+Rename all thumbprint references to Face ID terminology.",Task,P1,To Do,FS
+No Face ID tests,"CR ID: CR-07
+
+Component Area: QA
+
+Security Sensitive: Yes
+
+Architecture Blocker: No
+
+QA Required: Yes
+
+Add unit, API, E2E and spoof-resistance tests.",Task,P1,To Do,QA
+Face provider not selected,"CR ID: CR-08
+
+Component Area: Infrastructure
+
+Security Sensitive: Yes
+
+Architecture Blocker: Yes
+
+QA Required: Yes
+
+Choose between on-premises and cloud Face ID provider architecture.",Task,P0,To Do,IS
+Gate camera hardware not provisioned,"CR ID: CR-09
+
+Component Area: Hardware
+
+Security Sensitive: Yes
+
+Architecture Blocker: Yes
+
+QA Required: Yes
+
+Specify rugged camera/tablet hardware with IR and liveness capabilities.",Task,P1,To Do,IS
+Face template privacy not designed,"CR ID: CR-10
+
+Component Area: Security
+
+Security Sensitive: Yes
+
+Architecture Blocker: Yes
+
+QA Required: Yes
+
+Define KMS encryption, consent, retention and revocation controls.",Task,P0,To Do,IS
+No liveness/anti-spoof plan,"CR ID: CR-11
+
+Component Area: Security
+
+Security Sensitive: Yes
+
+Architecture Blocker: Yes
+
+QA Required: Yes
+
+Implement 3D depth or challenge-response liveness protection.",Task,P0,To Do,IS
+Strict online policy vs face latency,"CR ID: CR-12
+
+Component Area: Infrastructure
+
+Security Sensitive: No
+
+Architecture Blocker: Yes
+
+QA Required: Yes
+
+Evaluate local inference or a low-latency provider to prevent gate delays.",Task,P1,To Do,IT
+Thumbprint columns still in schema,"CR ID: CR-13
+
+Component Area: Database
+
+Security Sensitive: No
+
+Architecture Blocker: No
+
+QA Required: Yes
+
+Deprecate thumbprint columns and remove them after the Face ID pilot.",Task,P2,To Do,FS
+Scripts/docs reference thumbprint,"CR ID: CR-14
+
+Component Area: Documentation
+
+Security Sensitive: No
+
+Architecture Blocker: No
+
+QA Required: Yes
+
+Delete generate-thumbprint-hash and seed-thumbprints references.",Task,P2,To Do,FS
+operatorStore naming stale,"CR ID: CR-15
+
+Component Area: Application
+
+Security Sensitive: No
+
+Architecture Blocker: No
+
+QA Required: Yes
+
+Rename operatorStore and related fields to Face ID terminology.",Task,P2,To Do,FS

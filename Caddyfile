@@ -1,0 +1,22 @@
+{
+    admin off
+    log {
+        output file /var/log/caddy/access.log
+        format json
+    }
+}
+
+{$PUBLIC_URL:gate.example.com} {
+    tls admin@example.com
+
+    header {
+        X-Frame-Options "DENY"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    }
+
+    reverse_proxy web:3000 {
+        flush_interval -1
+    }
+}

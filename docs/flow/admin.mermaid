@@ -1,0 +1,105 @@
+flowchart TD
+    A[Admin Login<br/>/login?role=admin] --> B{Auth Check}
+    B -->|Valid| C[Dashboard: /admin]
+    B -->|Invalid| A
+
+    C --> D{Admin Navigation Menu Click}
+    
+    %% Dashboard Overview Flow
+    D -->|Click Overview Tab| E1[Load Overview KPIs<br/>GET /api/admin/overview]
+    E1 --> F1[Display: Real-time Counters<br/>Students: X, Staff: Y, Gates: Z]
+    F1 --> G1[Stats Cards Widgets<br/>Campus Occupancy, Today's Entries/Exits]
+    G1 --> H1[Quick Actions Button Row]
+    H1 --> I1{Click Quick Action}
+    I1 -->|View Live Occupancy| O1[Navigate to /admin/occupancy]
+    I1 -->|Check Alerts| O2[Navigate to /admin/alerts]
+    I1 -->|Export Report| O3[Modal: Select Report Type -> Export PDF/Excel]
+
+    %% Students Management Flow
+    D -->|Click Students Tab| E2[Load Students List<br/>GET /api/admin/students]
+    E2 --> F2[Display Data Table<br/>Roll No, Name, Status, Last Scan]
+    F2 --> G2[Click Table Row]
+    G2 --> H2[Open Student Detail Modal / Side Panel<br/>/admin/students/:id]
+    H2 --> I2{Modal Actions}
+    I2 -->|Edit Details| J2[Form Fields Update -> Save Changes]
+    I2 -->|View History| K2[Sub-tab: Entry/Exit Timeline]
+    I2 -->|Generate Pass| L2[Click Generate Pass Button<br/>Navigate to /admin/students/:id/passes]
+    I2 -->|Close| M2[Close Modal]
+
+    %% Faculty Management Flow
+    D -->|Click Faculty Tab| E3[Load Faculty List<br/>GET /api/admin/faculty]
+    E3 --> F3[Faculty Grid View]
+    F3 --> G3[Click Faculty Card]
+    G3 --> H3[Faculty Profile Page<br/>/admin/faculty/:id]
+    H3 --> I3[Action Buttons Row]
+    I3 -->|Edit Faculty| J3[Edit Form -> Save / Update]
+    I3 -->|View HR Assignments| K3[Tab: Duty Shifts, Roles]
+
+    %% Gate Management Flow
+    D -->|Click Gates Tab| E4[Load Gate List<br/>GET /api/gates]
+    E4 --> F4[Gate Cards with Status Indicator]
+    F4 --> G4[Click Gate Card]
+    G4 --> H4[Gate Detail Page<br/>/admin/gates/:gateId]
+    H4 --> I4[Gate Configuration Section]
+    I4 --> J4{Configure Settings}
+    J4 -->|Edit Gate Hours| K4[Time Picker Modal Save]
+    J4 -->|Curfew Rules| L4[Curfew Policy Editor Save]
+    J4 -->|View Live Feed| M4[Real-time Scan Stream<br/>WebSocket: wss://api/gates/:gateId/live]
+
+    %% Occupancy Flow
+    D -->|Click Occupancy| E5[Live Occupancy Map<br/>/admin/occupancy]
+    E5 --> F5[Load Live Data<br/>GET /api/analytics/occupancy/live]
+    F5 --> G5[Interactive Campus Map<br/>Color-coded Buildings]
+    G5 --> H5[Click Building]
+    H5 --> I5[Building Occupancy Modal<br/>Floor-wise Occupancy]
+    I5 --> J5[Filter by Time Range]
+    J5 --> K5[Update Charts - Area Chart Timeline]
+
+    %% Alerts Flow
+    D -->|Click Alerts| E6[Alerts Dashboard<br/>/admin/alerts]
+    E6 --> F6[Load Alerts List<br/>GET /api/alerts]
+    F6 --> G6[Alert Cards: High/Medium/Low Priority]
+    G6 --> H6[Click Alert Card]
+    H6 --> I6[Alert Detail Modal]
+    I6 --> J6{Action Buttons}
+    J6 -->|Acknowledge| K6[POST /api/alerts/:id/acknowledge]
+    J6 -->|Resolve| L6[Resolution Modal Input -> POST /api/alerts/:id/resolve]
+    J6 -->|Escalate| M6[Send to Supervisor via /api/alerts/:id/escalate]
+
+    %% Reports & Export Flow
+    D -->|Click Reports| E7[Reports Center<br/>/admin/reports]
+    E7 --> F7[Report Templates Grid]
+    F7 --> G7[Click Template Card]
+    G7 --> H7[Report Config Screen]
+    H7 --> I7[Select Date Range<br/>Start Date - End Date]
+    I7 --> J7[Select Data Filters<br/>Role, Gate, Department]
+    J7 --> K7[Click Generate Button]
+    K7 --> L7[Background Job Queue<br/>POST /api/reports/generate]
+    L7 --> M7[Progress Bar / Loading Spinner]
+    M7 --> N7[Report Ready Notification<br/>Email/Download Link]
+    N7 --> O7[Click Download<br/>GET /api/reports/:jobId/download]
+
+    %% Analytics Hub Flow
+    D -->|Click Analytics| E8[Analytics Dashboard<br/>/admin/analytics]
+    E8 --> F8[Analytics Tab Selector]
+    F8 --> G8{Select Sub-tab}
+    G8 -->|Advanced Analytics| H8[Load Advanced Metrics<br/>Predictive Models]
+    G8 -->|Predictive Flow| I8[Out/In Flow Predictions<br/>AI Timeline Chart]
+    G8 -->|Behavioral| J8[Anomaly Detection Heatmap]
+
+    %% Settings Flow
+    D -->|Click Settings| E9[Admin Settings<br/>/admin/settings]
+    E9 --> F9[Settings Categories Menu]
+    F9 --> G9[Click Category]
+    G9 --> H9[Settings Form]
+    H9 --> I9[Modify Setting Values]
+    I9 --> J9[Click Save Changes Button]
+    J9 --> K9[POST /api/admin/settings/save]
+    K9 --> L9[Success Toast Notification]
+    K9 --> M9[Refresh Settings Page]
+
+    %% Logout Flow
+    C --> X[Menu: Profile -> Logout]
+    X --> Y[POST /api/auth/logout]
+    Y --> Z[Clear Session & Tokens]
+    Z --> A

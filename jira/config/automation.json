@@ -1,0 +1,35 @@
+{
+  "paths": {
+    "issues": "jira/issues",
+    "automation": "jira/automation",
+    "jira_schema": "jira/schema/jira-fields.json",
+    "roles_schema": "jira/schema/jira-team.md"
+  },
+  "files": {
+    "issue_pattern": "issues_*.csv"
+  },
+  "project": {
+    "key": "",
+    "name": "",
+    "type": "software"
+  },
+  "generation": {
+    "create_only_if_missing": true,
+    "output_fields": [
+      "Summary",
+      "Description",
+      "Issue Type",
+      "Priority",
+      "Status",
+      "Labels"
+    ],
+    "defaults": {
+      "Issue Type": "Task",
+      "Status": "To Do"
+    },
+    "label_sources": ["Labels", "role"]
+  },
+  "validation": {
+    "strict": true
+  }
+}
