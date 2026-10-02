@@ -421,7 +421,7 @@ export function Sidebar() {
     else if (storeRole) activeRole = storeRole;
     else {
       if (typeof window !== "undefined") {
-        const storedRole = (sessionStorage.getItem("gate-monitor-role") ||
+        const storedRole = (localStorage.getItem("gate-monitor-role") ||
           localStorage.getItem("gate-monitor-role")) as Role;
         if (storedRole) activeRole = storedRole;
       }

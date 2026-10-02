@@ -1,9 +1,10 @@
 import { NextRequest } from "next/server";
+import { withAuthorization } from "@/middleware/authorization";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 45; // ponytail: limit lifetime to 45s for serverless execution
 
-export async function GET(req: NextRequest) {
+async function handleGet(req: NextRequest) {
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream({
@@ -45,3 +46,5 @@ export async function GET(req: NextRequest) {
   });
 }
 
+
+export const GET = withAuthorization(handleGet, { requiredRole: ["sysadmin", "admin", "operator", "supervisor"] });

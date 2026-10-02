@@ -1,5 +1,5 @@
 import { createHash } from 'crypto';
-import { supabase } from './supabaseClient';
+import { getDbClient } from "@/lib/db";
 
 export interface BackupOptions {
   includeTables?: string[];
@@ -50,7 +50,7 @@ export async function createDatabaseBackup(
     for (const table of tablesToBackup) {
       if (options.excludeTables?.includes(table)) continue;
 
-      const { data, error } = await supabase
+      const { data, error } = await getDbClient()
         .from(table)
         .select('*');
 
@@ -92,7 +92,7 @@ export async function createDatabaseBackup(
     };
 
     // Log backup in metadata table
-    await supabase
+    await getDbClient()
       .from('backups')
       .insert({
         id: metadata.id,
@@ -162,10 +162,10 @@ export async function restoreDatabaseBackup(
 
       if (options.truncate) {
         // Safe table truncation without relying on hardcoded UUIDs
-        const { error: delErr } = await supabase.from(table).delete().not(pkColumn, 'is', null);
+        const { error: delErr } = await getDbClient().from(table).delete().not(pkColumn, 'is', null);
         if (delErr) {
           // Secondary fallback if primary key column varies
-          await supabase.from(table).delete().neq(pkColumn, '');
+          await getDbClient().from(table).delete().neq(pkColumn, '');
         }
       }
 
@@ -174,7 +174,7 @@ export async function restoreDatabaseBackup(
       for (let i = 0; i < records.length; i += batchSize) {
         const batch = records.slice(i, i + batchSize);
         const upsertOptions = pkColumn ? { onConflict: pkColumn } : undefined;
-        const { error } = await supabase
+        const { error } = await getDbClient()
           .from(table)
           .upsert(batch, upsertOptions);
 
@@ -199,7 +199,7 @@ export async function restoreDatabaseBackup(
 // List available backups
 export async function listBackups(): Promise<BackupMetadata[]> {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getDbClient()
       .from('backups')
       .select('*')
       .order('created_at', { ascending: false });
@@ -263,7 +263,7 @@ export async function verifyLatestBackup(): Promise<BackupVerificationResult> {
   // 1. Table row counts & schema existence validation
   for (const table of coreTables) {
     try {
-      const { count, error } = await supabase.from(table).select('*', { count: 'exact', head: true });
+      const { count, error } = await getDbClient().from(table).select('*', { count: 'exact', head: true });
       if (error || count === null) {
         failures.push(`Table schema '${table}': ${error?.message ?? 'no count returned'}`);
         continue;
@@ -277,14 +277,14 @@ export async function verifyLatestBackup(): Promise<BackupVerificationResult> {
 
   // 2. Foreign-Key relationship consistency validation
   try {
-    const { data: orphanScans } = await supabase
+    const { data: orphanScans } = await getDbClient()
       .from('scans')
       .select('id, gate_id')
       .not('gate_id', 'is', null)
       .limit(50);
     
     if (orphanScans && orphanScans.length > 0) {
-      const { data: validGates } = await supabase.from('gates').select('id');
+      const { data: validGates } = await getDbClient().from('gates').select('id');
       const gateIdSet = new Set((validGates || []).map(g => g.id));
       const invalidRefs = orphanScans.filter(s => !gateIdSet.has(s.gate_id));
       if (invalidRefs.length > 0) {
@@ -295,7 +295,7 @@ export async function verifyLatestBackup(): Promise<BackupVerificationResult> {
 
   // 3. Cryptographic payload checksum validation
   try {
-    const { data: latestBackup } = await supabase
+    const { data: latestBackup } = await getDbClient()
       .from('backups')
       .select('checksum, size')
       .eq('status', 'completed')

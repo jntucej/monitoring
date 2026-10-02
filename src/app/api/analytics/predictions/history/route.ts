@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
-import { supabase } from "@/lib/supabaseClient";
+import { getDbClient } from "@/lib/db";
 
 async function handleGet(req: NextRequest) {
   try {
-    const { data: history } = await supabase
+    const { data: history } = await getDbClient()
       .from("predictions")
       .select("*")
       .order("created_at", { ascending: false })

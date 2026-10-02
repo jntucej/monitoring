@@ -8,6 +8,7 @@ export type Role =
   | "supervisor"
   | "guardian" // unified role for parents/guardians of wards
   | "parent" // @deprecated legacy alias kept for schema/code coherence
+  | "hod"
   | "student"
   | "warden"
   | "faculty"
@@ -76,7 +77,6 @@ export interface Person {
   createdAt?: string;
   updatedAt?: string;
   /** True when a thumbprint (biometric) is registered for this person */
-  hasThumbprint?: boolean;
   /** Administrative flag status: null | "NONE" | "FLAGGED" | "SUSPENDED" */
   flagStatus?: string | null;
   // Related details if loaded
@@ -92,6 +92,7 @@ export interface Person {
   parentName?: string;
   parentPhone?: string;
   parentId?: string;
+  guardianId?: string;
   studentType?: StudentType;
   gender?: "male" | "female";
   hostelBlock?: string;
@@ -134,9 +135,7 @@ export interface User {
   status: AccountStatus;
   personType?: PersonType;
   /** bcrypt hash of the user's thumbprint/biometric signature (never raw) */
-  thumbprintHash?: string;
   /** When the thumbprint was last registered */
-  thumbprintVerifiedAt?: string;
 }
 
 export type ExitReason = "Home Out" | "Day Out" | "Leave" | "Regular";

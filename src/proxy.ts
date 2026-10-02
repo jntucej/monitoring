@@ -1,87 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from './lib/rate-limit';
 import { verifyCsrf } from './middleware/csrf';
-import { getDefaultRouteForRole } from './lib/route-helpers';
 
+/**
+ * Edge middleware protects API-wide controls only. Page authorization is enforced
+ * by authenticated API handlers, never by mutable client cookies or headers.
+ */
 export async function proxy(req: NextRequest) {
-  const path = req.nextUrl.pathname;
+  const { pathname } = req.nextUrl;
 
-  if (path.startsWith('/api')) {
-    // Global rate limit check for API routes
-    const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 'global';
-    const limitResult = (await rateLimit(`api_global:${ip}`, 300)) as { limited: boolean };
-    if (limitResult.limited) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'RATE_LIMIT_EXCEEDED',
-            message: 'Too many requests. Please try again later.',
-          },
-        },
-        { status: 429 }
-      );
-    }
+  if (!pathname.startsWith('/api')) return NextResponse.next();
 
-    // Global CSRF verification for state-changing HTTP mutation methods
-    const csrfError = verifyCsrf(req);
-    if (csrfError) {
-      return csrfError;
-    }
-
-    return NextResponse.next();
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    || req.headers.get('x-real-ip')
+    || 'unknown';
+  const limitResult = await rateLimit(`api_global:${ip}`, 300) as { limited: boolean };
+  if (limitResult.limited) {
+    return NextResponse.json(
+      { success: false, error: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many requests. Please try again later.' } },
+      { status: 429 },
+    );
   }
 
-  // Role-based path restrictions for page routes
-  const role = req.headers.get('x-user-role') || req.cookies.get('user-role')?.value || req.cookies.get('role')?.value;
-  if (role) {
-    const defaultRoute = getDefaultRouteForRole(role);
-
-    if (path.startsWith('/admin') && role !== 'admin') {
-      return NextResponse.redirect(new URL(defaultRoute, req.url));
-    }
-    if (path.startsWith('/gate') && role !== 'operator' && role !== 'sysadmin' && role !== 'admin') {
-      return NextResponse.redirect(new URL(defaultRoute, req.url));
-    }
-    if (path.startsWith('/sysadmin') && role !== 'sysadmin') {
-      return NextResponse.redirect(new URL(defaultRoute, req.url));
-    }
-    if (path.startsWith('/student') && role !== 'student' && role !== 'sysadmin' && role !== 'admin') {
-      return NextResponse.redirect(new URL(defaultRoute, req.url));
-    }
-    if (path.startsWith('/faculty') && role !== 'faculty' && role !== 'sysadmin' && role !== 'admin') {
-      return NextResponse.redirect(new URL(defaultRoute, req.url));
-    }
-    if (path.startsWith('/parent') && !['parent', 'guardian', 'sysadmin', 'admin'].includes(role)) {
-      return NextResponse.redirect(new URL(defaultRoute, req.url));
-    }
-    if (path.startsWith('/staff') && role !== 'staff' && role !== 'sysadmin' && role !== 'admin') {
-      return NextResponse.redirect(new URL(defaultRoute, req.url));
-    }
-    if (path.startsWith('/worker') && role !== 'worker' && role !== 'sysadmin' && role !== 'admin') {
-      return NextResponse.redirect(new URL(defaultRoute, req.url));
-    }
-    if (path.startsWith('/supervisor') && !['supervisor', 'warden', 'admin', 'sysadmin'].includes(role)) {
-      return NextResponse.redirect(new URL(defaultRoute, req.url));
-    }
-  }
-
+  const csrfError = verifyCsrf(req);
+  if (csrfError) return csrfError;
   return NextResponse.next();
 }
 
-export const middleware = proxy;
-
 export const config = {
-  matcher: [
-    '/api/:path*',
-    '/admin/:path*',
-    '/sysadmin/:path*',
-    '/gate/:path*',
-    '/student/:path*',
-    '/faculty/:path*',
-    '/parent/:path*',
-    '/staff/:path*',
-    '/worker/:path*',
-    '/supervisor/:path*',
-  ],
+  matcher: ['/api/:path*'],
 };

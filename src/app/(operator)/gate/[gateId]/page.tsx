@@ -8,7 +8,6 @@ import { useOperatorStore } from "@/stores/operatorStore";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/toast";
 import { ScanConfirmation } from "@/components/operator/ScanConfirmation";
-import { WebAuthnScanner } from "@/components/operator/WebAuthnScanner";
 import { VoiceAssistantModal } from "@/components/operator/VoiceAssistantModal";
 import { SuccessFlash } from "@/components/operator/SuccessFlash";
 import { Scanner } from "@/components/operator/Scanner";
@@ -249,23 +248,9 @@ export default function OperatorPage() {
     startScan(rollCandidate);
   };
 
-  const showWebAuthn =
-    state === "confirming" &&
-    !!currentStudent &&
-    !operatorStore.thumbprintVerified &&
-    !operatorStore.thumbprintFallback;
+  const showWebAuthn = false;
 
-  const handleWebAuthnVerified = (verified: boolean) => {
-    if (verified) {
-      operatorStore.setThumbprintStatus(true, false);
-      addToast({ variant: "success", title: "Biometric Verified", message: "Identity confirmed via biometric scanner." });
-    } else {
-      operatorStore.setThumbprintStatus(false, false);
-      addToast({ variant: "error", title: "Access Denied", message: "Biometric verification failed." });
-      cancelScan();
-    }
-  };
-
+  
   useEffect(() => {
     if (typeof window !== "undefined") {
       (window as any).__handleQRScannedForTesting = handleQRScanned;
@@ -526,7 +511,6 @@ export default function OperatorPage() {
                       onConfirm={(dir, reason) => confirmScan(addToast, dir, reason)}
                       onCancel={cancelScan}
                       isInline={true}
-                      thumbprintVerified={operatorStore.thumbprintVerified || operatorStore.thumbprintFallback}
                     />
                   )}
 
@@ -655,16 +639,7 @@ export default function OperatorPage() {
       />
 
       {/* WebAuthn / Passkey Biometric confirmation step after the ID scan */}
-      {showWebAuthn && (
-        <WebAuthnScanner
-          key={currentStudent?.id || "webauthn"}
-          isOpen={true}
-          personId={currentStudent?.id || ""}
-          personName={currentStudent?.fullName || currentStudent?.name || "User"}
-          onVerified={handleWebAuthnVerified}
-          onCancel={() => cancelScan()}
-        />
-      )}
+      
     </div>
   );
 }

@@ -44,9 +44,9 @@ async function handleGet(req: NextRequest) {
     const typeFilter = req.nextUrl.searchParams.get("type");
 
     // Total students with optional filters
-    let query = svc.from("users").select("id, role, status, flag_status, gender", { count: "exact" }).eq("role", "student");
+    let query = svc.from("users").select("id, role, status, flag_status, student_details!student_details_user_id_fkey!inner(gender)", { count: "exact" }).eq("role", "student");
     if (statusFilter && statusFilter !== "ALL") query = query.eq("status", statusFilter);
-    if (genderFilter && genderFilter !== "ALL") query = query.eq("gender", genderFilter);
+    if (genderFilter && genderFilter !== "ALL") query = query.eq("student_details.gender", genderFilter);
     const { data: allStudents, error: studentsErr } = await query;
     if (studentsErr) throw studentsErr;
 
@@ -58,7 +58,7 @@ async function handleGet(req: NextRequest) {
     // Department breakdown
     let deptQuery = svc.from("users").select(`
         id,
-        student_details:user_details!users_id_fkey (department)
+        student_details!student_details_user_id_fkey!inner(department)
       `).eq("role", "student");
     if (deptFilter && deptFilter !== "ALL") deptQuery = deptQuery.eq("student_details.department", deptFilter);
     const { data: deptData } = await deptQuery;
@@ -79,13 +79,13 @@ async function handleGet(req: NextRequest) {
       .sort((a, b) => b.count - a.count);
 
     // Student type breakdown (HM/HF/DM/DF)
-    let typeQuery = svc.from("users").select("id, student_type").eq("role", "student");
+    let typeQuery = svc.from("users").select("id, student_details!student_details_user_id_fkey!inner(student_type)").eq("role", "student");
     if (typeFilter && typeFilter !== "ALL") typeQuery = typeQuery.eq("student_type", typeFilter);
     const { data: typeData } = await typeQuery;
 
     const typeCounts: Record<string, number> = {};
     (typeData || []).forEach((u: any) => {
-      const t = u.student_type || "DM";
+      const t = u.student_details?.student_type || "DM";
       typeCounts[t] = (typeCounts[t] || 0) + 1;
     });
 
@@ -98,13 +98,13 @@ async function handleGet(req: NextRequest) {
       }));
 
     // Gender breakdown
-    let genderQuery = svc.from("users").select("id, gender").eq("role", "student");
+    let genderQuery = svc.from("users").select("id, student_details!student_details_user_id_fkey!inner(gender)").eq("role", "student");
     if (genderFilter && genderFilter !== "ALL") genderQuery = genderQuery.eq("gender", genderFilter);
     const { data: genderData } = await genderQuery;
 
     const genderCounts: Record<string, number> = {};
     (genderData || []).forEach((u: any) => {
-      const g = (u.gender || "male").toLowerCase();
+      const g = (u.student_details?.gender || "male").toLowerCase();
       genderCounts[g] = (genderCounts[g] || 0) + 1;
     });
 
@@ -116,7 +116,7 @@ async function handleGet(req: NextRequest) {
       }));
 
     // Year breakdown
-    let yearQuery = svc.from("users").select("id, student_details").eq("role", "student");
+    let yearQuery = svc.from("users").select("id, student_details!student_details_user_id_fkey!inner(year)").eq("role", "student");
     if (yearFilter && yearFilter !== "ALL") yearQuery = yearQuery.eq("student_details.year", yearFilter);
     const { data: yearData } = await yearQuery;
 

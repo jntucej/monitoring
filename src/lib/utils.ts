@@ -109,12 +109,19 @@ export function todayISO(): string {
 }
 
 export function getAuthHeaders(): Record<string, string> {
-  if (typeof window === "undefined") return {};
+  if (typeof window === "undefined") {
+    return {};
+  }
+  
   try {
-    const { useAuthStore } = require("@/stores/authStore");
-    const state = useAuthStore.getState();
+    const raw = localStorage.getItem("gate-monitor-auth");
+    if (!raw) return {};
+    
+    const parsed = JSON.parse(raw);
+    const state = parsed?.state || {};
     const token = state.token;
     const sessionToken = state.user?.currentSessionToken || state.user?.handle;
+    
     const headers: Record<string, string> = {};
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
@@ -122,8 +129,9 @@ export function getAuthHeaders(): Record<string, string> {
     if (sessionToken) {
       headers["X-Session-Token"] = sessionToken;
     }
+    
     return headers;
-  } catch {
+  } catch (e) {
     return {};
   }
 }

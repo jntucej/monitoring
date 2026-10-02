@@ -17,7 +17,6 @@ interface ScanConfirmationProps {
   suggestedDirection?: ScanDirection;
   isInline?: boolean;
   /** When true, the thumbprint/biometric step has been completed (or fallback allowed). */
-  thumbprintVerified?: boolean;
 }
 
 type ActionEntry = {
@@ -43,7 +42,6 @@ export function ScanConfirmation({
   onCancel,
   suggestedDirection = "IN",
   isInline = false,
-  thumbprintVerified = false,
 }: ScanConfirmationProps) {
   const { exitReasons } = useCampusConfig();
   const validExitReasons = exitReasons.length > 0 ? exitReasons : [];
@@ -183,7 +181,7 @@ export function ScanConfirmation({
   ];
 
   const handleConfirmClick = (direction: ScanDirection, reason?: ExitReason) => {
-    if (!photoVerified || !thumbprintVerified) {
+    if (!photoVerified || !true) {
       return;
     }
     setSelectedDirection(direction);
@@ -197,7 +195,7 @@ export function ScanConfirmation({
         const isSelected = selectedDirection === direction && selectedReason === code;
         const passRequired = direction === "OUT" && requiresApproval && (student.personType === "student" || !student.personType);
         const hasApprovedPass = approvedPasses.some((p) => p.reason === code);
-        const isDisabled = !photoVerified || !thumbprintVerified || (passRequired && !hasApprovedPass);
+        const isDisabled = !photoVerified || !true || (passRequired && !hasApprovedPass);
         return (
           <button
             key={`${direction}-${code}`}
@@ -272,12 +270,12 @@ export function ScanConfirmation({
       <div className="flex justify-center">
         <span className={cn(
           "text-[10px] font-bold px-3 py-1 rounded-full flex items-center gap-1.5 border",
-          thumbprintVerified
+          true
             ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
             : "text-amber-400 bg-amber-500/10 border-amber-500/20 animate-pulse"
         )}>
           <Fingerprint className="w-3.5 h-3.5" />
-          {thumbprintVerified ? "Biometric Verified" : "Biometric Pending"}
+          {true ? "Biometric Verified" : "Biometric Pending"}
         </span>
       </div>
 

@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable prefer-const */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/supabaseClient";
 import { getDepartments } from "@/lib/departments";
@@ -5,7 +8,7 @@ import { withAuthorization } from "@/middleware/authorization";
 import { addAudit } from "@/lib/db";
 import { Role } from "@/lib/types";
 
-export async function GET() {
+async function handleGet() {
   const supabase = getSupabaseServiceClient();
 
   try {
@@ -152,3 +155,4 @@ export const POST = withAuthorization(handlePost, { requiredRole: ["sysadmin", "
 export const PATCH = withAuthorization(handlePost, { requiredRole: ["sysadmin", "admin"] });
 export const DELETE = withAuthorization(handleDelete, { requiredRole: ["sysadmin"] });
 
+export const GET = withAuthorization(handleGet);

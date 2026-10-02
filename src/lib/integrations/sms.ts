@@ -1,5 +1,5 @@
 import { SMSMessage } from "@/lib/integration-types";
-import { supabase } from "@/lib/supabaseClient";
+import { getDbClient } from "@/lib/db";
 
 // Configuration
 const SMS_CONFIG = {
@@ -20,7 +20,7 @@ export async function sendSMS(params: {
     const messageId = `sms_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
     // Store in queue first
-    const { error: queueError } = await supabase
+    const { error: queueError } = await getDbClient()
       .from("notification_sms_queue")
       .insert({
         id: messageId,
@@ -38,7 +38,7 @@ export async function sendSMS(params: {
     if (SMS_CONFIG.enabled) {
       try {
         // Actual Twilio/provider integration logic goes here
-        await supabase
+        await getDbClient()
           .from("notification_sms_queue")
           .update({
             status: "sent",
@@ -57,7 +57,7 @@ export async function sendSMS(params: {
         };
       } catch (error) {
         console.error("Error sending SMS:", error);
-        await supabase
+        await getDbClient()
           .from("notification_sms_queue")
           .update({
             status: "failed",
@@ -71,7 +71,7 @@ export async function sendSMS(params: {
       // Development mode - log and update status
       console.log(`[SMS Dev Mode] To: ${params.to}, Message: ${params.message}`);
 
-      await supabase
+      await getDbClient()
         .from("notification_sms_queue")
         .update({
           status: "sent",
@@ -130,7 +130,7 @@ export async function sendEmergencySMS(
 
 // Get SMS delivery status
 export async function getSMSStatus(messageId: string): Promise<string> {
-  const { data, error } = await supabase
+  const { data, error } = await getDbClient()
     .from("notification_sms_queue")
     .select("status")
     .eq("id", messageId)

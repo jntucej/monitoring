@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabaseClient";
+import { getDbClient } from "@/lib/db";
 
 export interface ZoneOccupancy {
   id: string;
@@ -19,21 +19,21 @@ export interface ZoneOccupancy {
 export async function getCurrentOccupancy(): Promise<{ total: number; capacity: number; zones: ZoneOccupancy[] }> {
   try {
     // Get live count of inside people from users table
-    const { count: insideStudents } = await supabase
+    const { count: insideStudents } = await getDbClient()
       .from("users")
       .select("*", { count: "exact", head: true })
       .eq("status", "INSIDE");
 
-    const { count: totalUsersCount } = await supabase
+    const { count: totalUsersCount } = await getDbClient()
       .from("users")
       .select("*", { count: "exact", head: true });
 
     const totalInside = insideStudents ?? 0;
     const capacityTotal = Math.max((totalUsersCount ?? 0) * 2, 1000);
 
-    const { data: zones } = await supabase.from("zones").select("*");
-    const { data: dbGates } = await supabase.from("gates").select("id, name, location");
-    const { data: dbDepts } = await supabase.from("departments").select("id, name, code");
+    const { data: zones } = await getDbClient().from("zones").select("*");
+    const { data: dbGates } = await getDbClient().from("gates").select("id, name, location");
+    const { data: dbDepts } = await getDbClient().from("departments").select("id, name, code");
 
     let baseZones = zones && zones.length > 0 ? zones : [];
 
@@ -111,7 +111,7 @@ export async function getOccupancyHistory(): Promise<Array<{ timestamp: string; 
   const now = Date.now();
 
   try {
-    const { count: insideCount } = await supabase
+    const { count: insideCount } = await getDbClient()
       .from("users")
       .select("*", { count: "exact", head: true })
       .eq("status", "INSIDE");

@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS users (
   auth_provider        TEXT NOT NULL DEFAULT 'email',
   login_identifier     TEXT UNIQUE,
   pin_hash             TEXT,
+  password_hash TEXT,
   initial_pin_hash     TEXT,
   flag_status          TEXT CHECK (flag_status IN ('OVERDUE', 'UNAUTHORIZED_EXIT', 'NO_GATE_PASS', 'SUSPENDED', 'CURFEW_VIOLATION', 'MANUAL_LOCKDOWN')),
   last_password_change TIMESTAMPTZ,
@@ -458,6 +459,9 @@ BEGIN
   RETURN FOUND;
 END;
 $$;
+REVOKE EXECUTE ON FUNCTION invalidate_all_user_sessions(UUID) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION invalidate_all_user_sessions(UUID) FROM anon;
+GRANT EXECUTE ON FUNCTION invalidate_all_user_sessions(UUID) TO authenticated, service_role;
 
 CREATE OR REPLACE FUNCTION process_gate_scan(
   p_scan_id UUID,
@@ -938,15 +942,274 @@ COMMENT ON COLUMN student_details.student_type IS 'HM=Hostel Male|HF=Hostel Fema
 -- ============================================================================
 -- SECTION 10: PERMISSIONS
 -- ============================================================================
-GRANT USAGE ON SCHEMA public TO postgres, anon, authenticated, service_role;
-GRANT ALL ON ALL TABLES IN SCHEMA public TO postgres, anon, authenticated, service_role;
-GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO postgres, anon, authenticated, service_role;
-GRANT ALL ON ALL FUNCTIONS IN SCHEMA public TO postgres, anon, authenticated, service_role;
+GRANT USAGE ON SCHEMA public TO postgres, authenticated, service_role;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO postgres, authenticated, service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO postgres, authenticated, service_role;
+GRANT ALL ON ALL FUNCTIONS IN SCHEMA public TO postgres, authenticated, service_role;
 
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO postgres, anon, authenticated, service_role;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO postgres, anon, authenticated, service_role;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO postgres, anon, authenticated, service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO postgres, authenticated, service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO postgres, authenticated, service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO postgres, authenticated, service_role;
 
 -- ============================================================================
 -- END OF CONSOLIDATED UNIFIED SCHEMA
 -- ============================================================================
+
+-- Auto-generated schema reconciliation for missing tables
+CREATE TABLE IF NOT EXISTS public.announcements (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  data JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.attendance_records (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  data JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.config_college_info (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT,
+    address TEXT,
+    phone TEXT,
+    email TEXT,
+    logo TEXT,
+    accreditation TEXT,
+    website TEXT,
+    principal TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.config_exit_reasons (
+    code TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.config_navigation (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    role_code TEXT NOT NULL,
+    group_label TEXT,
+    href TEXT NOT NULL,
+    label TEXT NOT NULL,
+    icon_name TEXT,
+    order INTEGER DEFAULT 1,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.config_pass_types (
+    code TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    requires_approval BOOLEAN DEFAULT false,
+    approval_flow TEXT,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.config_roles (
+    code TEXT PRIMARY KEY,
+    display_name TEXT NOT NULL,
+    permissions JSONB,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.data_compliance_logs (
+    id VARCHAR(50) PRIMARY KEY,
+    action TEXT NOT NULL,
+    details TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.departments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT,
+  code TEXT,
+  data JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.feedback (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  data JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.gate_holidays (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  date TEXT,
+  data JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.gate_schedules (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  data JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.integration_configs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  data JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.integration_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  data JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.job_runs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    job_id VARCHAR(100) NOT NULL,
+    status TEXT NOT NULL,
+    start_time TIMESTAMPTZ NOT NULL,
+    end_time TIMESTAMPTZ,
+    records_affected INTEGER,
+    error_message TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.lms_attendance_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  data JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.lms_config (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  data JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.lockdown_broadcasts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  data JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.passes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id TEXT,
+  data JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.retention_policies (
+    id VARCHAR(50) PRIMARY KEY,
+    data_category TEXT NOT NULL,
+    retention_days INTEGER NOT NULL,
+    auto_delete BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.role_change_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  data JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.saved_report_definitions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  data JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.scans (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  data JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.scheduled_jobs (
+    id VARCHAR(100) PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    cron_expression TEXT,
+    enabled BOOLEAN DEFAULT true,
+    last_run TIMESTAMPTZ,
+    next_run TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.security_alerts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  data JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.sessions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id TEXT,
+  data JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.students (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  data JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.system_config (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  data JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.user_announcement_dismissals (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  data JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.visitor_pre_registrations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  data JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.webauthn_challenges (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id TEXT,
+  type TEXT,
+  data JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+

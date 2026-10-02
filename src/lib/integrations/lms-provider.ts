@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabaseClient";
+import { getDbClient } from "@/lib/db";
 
 export type LMSPlatform = "moodle" | "canvas" | "blackboard" | "sakai";
 
@@ -66,8 +66,8 @@ export class MoodleProvider implements LMSProvider {
       }
     }
 
-    const { data: usersData } = await supabase.from("users").select("id").eq("role", "student");
-    const { data: deptsData } = await supabase.from("departments").select("id");
+    const { data: usersData } = await getDbClient().from("users").select("id").eq("role", "student");
+    const { data: deptsData } = await getDbClient().from("departments").select("id");
 
     return {
       synced_courses: syncedCourses || (deptsData?.length || 12),
@@ -138,8 +138,8 @@ export class CanvasProvider implements LMSProvider {
       }
     }
 
-    const { data: usersData } = await supabase.from("users").select("id").eq("role", "student");
-    const { data: deptsData } = await supabase.from("departments").select("id");
+    const { data: usersData } = await getDbClient().from("users").select("id").eq("role", "student");
+    const { data: deptsData } = await getDbClient().from("departments").select("id");
 
     return {
       synced_courses: syncedCourses || (deptsData?.length || 12),
@@ -213,8 +213,8 @@ export class BlackboardProvider implements LMSProvider {
       }
     }
 
-    const { data: usersData } = await supabase.from("users").select("id").eq("role", "student");
-    const { data: deptsData } = await supabase.from("departments").select("id");
+    const { data: usersData } = await getDbClient().from("users").select("id").eq("role", "student");
+    const { data: deptsData } = await getDbClient().from("departments").select("id");
 
     return {
       synced_courses: syncedCourses || (deptsData?.length || 12),
@@ -288,8 +288,8 @@ export class SakaiProvider implements LMSProvider {
       }
     }
 
-    const { data: usersData } = await supabase.from("users").select("id").eq("role", "student");
-    const { data: deptsData } = await supabase.from("departments").select("id");
+    const { data: usersData } = await getDbClient().from("users").select("id").eq("role", "student");
+    const { data: deptsData } = await getDbClient().from("departments").select("id");
 
     return {
       synced_courses: syncedCourses || (deptsData?.length || 12),

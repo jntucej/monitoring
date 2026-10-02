@@ -240,7 +240,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             localStorage.removeItem("gate-monitor-token");
             localStorage.removeItem("gate-monitor-auth");
             localStorage.removeItem("gate-monitor-role");
-            sessionStorage.clear();
+            localStorage.clear();
           } catch (e) {
             console.error("Error clearing storage on logout:", e);
           }

@@ -3,6 +3,7 @@ import { verifyTOTPCode } from "@/lib/totp";
 import { findUserById, addAudit } from "@/lib/db";
 import { getSupabaseServiceClient } from "@/lib/supabaseClient";
 import { withRateLimit } from "@/lib/rate-limit";
+import { withAuthorization } from "@/middleware/authorization";
 
 async function handlePost(req: NextRequest) {
   const userId = req.headers.get("x-user-id");
@@ -17,17 +18,21 @@ async function handlePost(req: NextRequest) {
     const { token } = await req.json().catch(() => ({}));
     if (!token) {
       return NextResponse.json(
-        { success: false, error: { code: "BAD_REQUEST", message: "6-digit TOTP token is required" } },
+        { success: false, error: { code: "BAD_REQUEST", message: "6-digit TOTP token required" } },
         { status: 400 }
       );
     }
 
     const supabase = getSupabaseServiceClient();
-    const { data: user } = await supabase.from("users").select("id, two_factor_secret, two_factor_enabled").eq("id", userId).maybeSingle();
+    const { data: user } = await supabase
+      .from("users")
+      .select("id, two_factor_secret, two_factor_enabled")
+      .eq("id", userId)
+      .maybeSingle();
 
     if (!user || !user.two_factor_secret) {
       return NextResponse.json(
-        { success: false, error: { code: "BAD_REQUEST", message: "2FA setup has not been initiated" } },
+        { success: false, error: { code: "BAD_REQUEST", message: "2FA setup not initiated" } },
         { status: 400 }
       );
     }
@@ -55,10 +60,10 @@ async function handlePost(req: NextRequest) {
     });
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: { code: "SERVER_ERROR", message: error.message } },
+      { success: false, error: { code: "SERVER_ERROR", message: error.message || "Internal server error" } },
       { status: 500 }
     );
   }
 }
 
-export const POST = withRateLimit(handlePost, { keyPrefix: "2fa_verify", maxRequests: 10 });
+export const POST = withRateLimit(withAuthorization(handlePost));

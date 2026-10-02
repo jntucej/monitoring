@@ -3,14 +3,15 @@ import { generateBase32Secret } from "@/lib/totp";
 import { findUserById, addAudit } from "@/lib/db";
 import { getSupabaseServiceClient } from "@/lib/supabaseClient";
 import { withRateLimit } from "@/lib/rate-limit";
+import { withAuthorization } from "@/middleware/authorization";
 import { verifyEnrollToken } from "@/lib/mfa-enroll";
 
 async function handlePost(req: NextRequest) {
   let userId = req.headers.get("x-user-id");
 
-  // Bootstrap path: no authenticated session yet. A valid short-lived
-  // mfa_enroll JWT (issued by /api/auth/mfa/bootstrap) may mint a setup
-  // secret for exactly one target sysadmin.
+  // Bootstrap path: authenticated session yet. valid short-lived
+  // mfa_enroll JWT (issued by /api/auth/mfa/bootstrap) mint setup
+  // secret exactly one target sysadmin.
   const enrollToken = req.headers.get("x-mfa-enroll-token");
   if (!userId && enrollToken) {
     userId = await verifyEnrollToken(enrollToken);
@@ -36,7 +37,7 @@ async function handlePost(req: NextRequest) {
     const appName = "GateMonitor";
     const otpauthUrl = `otpauth://totp/${encodeURIComponent(appName)}:${encodeURIComponent(user.email || user.name)}?secret=${secret}&issuer=${encodeURIComponent(appName)}`;
 
-    // Store secret temporarily or directly in database
+    // Store secret temporarily directly in database
     const supabase = getSupabaseServiceClient();
     await supabase.from("users").update({ two_factor_secret: secret }).eq("id", userId);
 
@@ -51,15 +52,15 @@ async function handlePost(req: NextRequest) {
       data: {
         secret,
         otpauthUrl,
-        message: "Scan the QR code or enter secret into your authenticator app",
+        message: "Scan code or enter secret in authenticator app",
       },
     });
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: { code: "SERVER_ERROR", message: error.message } },
+      { success: false, error: { code: "SERVER_ERROR", message: error.message || "Internal server error" } },
       { status: 500 }
     );
   }
 }
 
-export const POST = withRateLimit(handlePost, { keyPrefix: "2fa_setup", maxRequests: 10 });
+export const POST = withRateLimit(withAuthorization(handlePost));

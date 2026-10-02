@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withRateLimit } from "@/lib/rate-limit";
-import { supabase, getSupabaseServiceClient } from "@/lib/supabaseClient";
+import { getSupabaseServiceClient } from "@/lib/supabaseClient";
+import { getDbClient } from "@/lib/db";
 
 /**
  * POST /api/auth/logout — Revoke the active Supabase Auth session.
@@ -20,7 +21,7 @@ async function handlePost(req: NextRequest) {
         const {
           data: { user },
           error: getUserErr,
-        } = await supabase.auth.getUser(rawToken);
+        } = await getDbClient().auth.getUser(rawToken);
 
         if (!getUserErr && user?.id) {
           const service = getSupabaseServiceClient();

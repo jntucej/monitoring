@@ -1,8 +1,4 @@
-/**
- * Single Sign-On (SSO) & OIDC Identity Provider Integration Engine
- * Uses `sso_config` database table for persistence with in-memory fallback.
- * Includes JWT id_token validation and PKCE code challenge helpers using `jose`.
- */
+/** Single Sign-On (SSO) and OIDC identity provider integration. */
 import { getSupabaseServiceClient } from "./supabaseClient";
 import * as jose from "jose";
 
@@ -12,7 +8,7 @@ export interface SSOConfig {
   clientId: string;
   clientSecret?: string;
   issuerUrl: string;
-  groupMappings: Record<string, string>; // e.g. { "Security-Admins": "sysadmin" }
+  groupMappings: Record<string, string>;
 }
 
 export interface OIDCTokenValidationResult {
@@ -48,14 +44,13 @@ export async function getSSOConfig(): Promise<SSOConfig> {
       };
     }
   } catch (err) {
-    console.error("Error fetching SSO config from DB:", err);
+    console.warn("Failed to load SSO config from database, using memory fallback", err);
   }
   return inMemorySSOConfig;
 }
 
 export async function updateSSOConfig(config: Partial<SSOConfig>): Promise<SSOConfig> {
   inMemorySSOConfig = { ...inMemorySSOConfig, ...config };
-
   try {
     const supabase = getSupabaseServiceClient();
     await supabase.from("sso_config").upsert({
@@ -69,99 +64,82 @@ export async function updateSSOConfig(config: Partial<SSOConfig>): Promise<SSOCo
       updated_at: new Date().toISOString(),
     });
   } catch (err) {
-    console.error("Error updating SSO config in DB:", err);
+    console.warn("Failed to persist SSO config", err);
   }
-
   return inMemorySSOConfig;
 }
 
 export function mapExternalGroupToRole(groups: string[]): string {
   for (const group of groups) {
-    if (inMemorySSOConfig.groupMappings[group]) {
-      return inMemorySSOConfig.groupMappings[group];
-    }
+    const role = inMemorySSOConfig.groupMappings[group];
+    if (role) return role;
   }
   return "student";
 }
 
 /**
- * Validates an OIDC ID token signature and claims using `jose`.
+ * Verifies signature and required OpenID Connect claims before exposing an ID token.
+ * Providers must expose their JWKS at the standard OIDC discovery-compatible path.
  */
 export async function validateOIDCIdToken(
   idToken: string,
   expectedClientId?: string,
-  issuerUrl?: string
+  issuerUrl?: string,
 ): Promise<OIDCTokenValidationResult> {
   try {
-    const decoded = jose.decodeJwt(idToken);
-    const now = Math.floor(Date.now() / 1000);
-
-    if (decoded.exp && decoded.exp < now) {
-      return { valid: false, error: "OIDC Token has expired" };
+    if (!expectedClientId || !issuerUrl) {
+      return { valid: false, error: "OIDC client ID and issuer are required" };
     }
-
-    if (expectedClientId && decoded.aud) {
-      const audList = Array.isArray(decoded.aud) ? decoded.aud : [decoded.aud];
-      if (!audList.includes(expectedClientId)) {
-        return { valid: false, error: `Audience mismatch: expected ${expectedClientId}` };
-      }
-    }
-
-    if (issuerUrl && decoded.iss && !decoded.iss.includes(issuerUrl)) {
-      return { valid: false, error: `Issuer mismatch: expected ${issuerUrl}` };
-    }
-
-    return { valid: true, claims: decoded };
-  } catch (err: any) {
-    return { valid: false, error: `Invalid OIDC JWT format: ${err.message}` };
+    const normalizedIssuer = issuerUrl.replace(/\/$/, "");
+    const jwks = jose.createRemoteJWKSet(new URL(`${normalizedIssuer}/.well-known/jwks.json`));
+    const { payload } = await jose.jwtVerify(idToken, jwks, {
+      issuer: normalizedIssuer,
+      audience: expectedClientId,
+      algorithms: ["RS256", "ES256"],
+    });
+    return { valid: true, claims: payload };
+  } catch {
+    return { valid: false, error: "OIDC ID token signature or claims are invalid" };
   }
 }
 
-/**
- * Exchanges authorization code for tokens with remote OIDC token endpoint.
- */
+export function getAuthorizationUrl(config: SSOConfig, redirectUri: string, state: string): string {
+  const providerUrls: Record<SSOConfig["providerId"], string> = {
+    google: "https://accounts.google.com/o/oauth2/v2/auth",
+    azure_ad: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
+    okta: `${config.issuerUrl.replace(/\/$/, "")}/v1/authorize`,
+  };
+  const params = new URLSearchParams({
+    client_id: config.clientId,
+    redirect_uri: redirectUri,
+    response_type: "code",
+    scope: "openid profile email",
+    state,
+  });
+  return `${providerUrls[config.providerId]}?${params}`;
+}
+
 export async function exchangeOIDCAuthorizationCode(
+  config: SSOConfig,
   code: string,
   redirectUri: string,
-  config: SSOConfig
-): Promise<{ id_token?: string; access_token?: string; error?: string }> {
-  try {
-    let tokenEndpoint = `${config.issuerUrl.replace(/\/$/, "")}/oauth/token`;
-    if (config.providerId === "google") {
-      tokenEndpoint = "https://oauth2.googleapis.com/token";
-    } else if (config.providerId === "azure_ad") {
-      tokenEndpoint = "https://login.microsoftonline.com/common/oauth2/v2.0/token";
-    }
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000);
-
-    const bodyParams = new URLSearchParams({
+): Promise<{ id_token?: string; access_token?: string }> {
+  const tokenUrl = config.providerId === "google"
+    ? "https://oauth2.googleapis.com/token"
+    : config.providerId === "azure_ad"
+      ? "https://login.microsoftonline.com/common/oauth2/v2.0/token"
+      : `${config.issuerUrl.replace(/\/$/, "")}/v1/token`;
+  const response = await fetch(tokenUrl, {
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
       grant_type: "authorization_code",
       code,
       redirect_uri: redirectUri,
       client_id: config.clientId,
-      client_secret: config.clientSecret || "demo_secret",
-    });
-
-    const res = await fetch(tokenEndpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: bodyParams,
-      signal: controller.signal,
-    }).catch(() => null);
-
-    clearTimeout(timeoutId);
-
-    if (res && res.ok) {
-      const tokens = await res.json();
-      return { id_token: tokens.id_token, access_token: tokens.access_token };
-    }
-
-    return { error: "Token endpoint exchange returned non-200 status or timed out" };
-  } catch (err: any) {
-    return { error: err.message };
-  }
+      client_secret: config.clientSecret || "",
+    }),
+  });
+  if (!response.ok) throw new Error("OIDC authorization-code exchange failed");
+  return response.json();
 }
-
-

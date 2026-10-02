@@ -18,9 +18,9 @@ async function handleGet(req: NextRequest) {
 
     // Query recent unhandled security alerts
     const { data: dbAlerts } = await supabase
-      .from("security_alerts")
-      .select("id, location, alert_type, message, created_at")
-      .order("created_at", { ascending: false })
+      .from("alerts")
+      .select("id, gates(name), severity, message, timestamp")
+      .order("timestamp", { ascending: false })
       .limit(5);
 
     const gates = (dbGates || []).map((g) => ({
@@ -31,10 +31,10 @@ async function handleGet(req: NextRequest) {
       flow_rate: g.is_active ? "Active" : "Offline",
     }));
 
-    const alerts = (dbAlerts || []).map((a) => ({
+    const alerts = (dbAlerts || []).map((a: any) => ({
       id: a.id,
-      location: a.location || "Campus Perimeter",
-      severity: a.alert_type === "CRITICAL" ? "high" : "medium",
+      location: a.gates?.name || "Campus Perimeter",
+      severity: (a.severity === "critical" || a.severity === "high") ? "high" : "medium",
       message: a.message || "Security alert logged",
     }));
 

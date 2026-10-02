@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabaseClient";
+import { getDbClient } from "@/lib/db";
 
 export interface ScheduleSuggestion {
   id: string;
@@ -65,12 +65,17 @@ export async function applyScheduleSuggestion(suggestionId: string): Promise<boo
     const suggestions = await generateScheduleSuggestions();
     const target = suggestions.find((s) => s.id === suggestionId);
     if (target && target.suggested_action.gate_id) {
-      await supabase.from("gate_schedules").upsert({
-        gate_id: target.suggested_action.gate_id,
-        open_time: target.suggested_action.new_open_time || "08:00",
-        close_time: target.suggested_action.new_close_time || "21:00",
-        updated_at: new Date().toISOString(),
-      });
+      await getDbClient().from("gate_access_rules").insert({
+      id: `rule-auto-${Date.now()}`,
+      gate_id: target.suggested_action.gate_id,
+      rule_name: "Automated AI Suggestion: " + target.title,
+      start_time: target.suggested_action.new_open_time || "08:00",
+      end_time: target.suggested_action.new_close_time || "21:00",
+      action: "allow",
+      priority: 10,
+      is_active: true,
+      created_at: new Date().toISOString()
+    });
     }
   } catch {}
   return true;

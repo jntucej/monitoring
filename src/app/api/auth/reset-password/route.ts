@@ -9,7 +9,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { withRateLimit } from "@/lib/rate-limit";
-import { supabase } from "@/lib/supabaseClient";
+import { getDbClient } from "@/lib/db";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -25,7 +25,7 @@ async function handleReset(req: NextRequest) {
   }
 
   try {
-    await supabase.auth.resetPasswordForEmail(email.trim());
+    await getDbClient().auth.resetPasswordForEmail(email.trim());
   } catch (resetErr) {
     // Never surface whether the account exists.
     console.error("Password reset request error:", resetErr);

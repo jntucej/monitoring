@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withAuthAndStatus } from "@/middleware/auth";
 import { withAuthorization } from "@/middleware/authorization";
-import { supabase } from "@/lib/supabaseClient";
+import { getDbClient } from "@/lib/db";
 import { VisitorAnalytics } from "@/lib/analytics-types";
 
 async function handleGet(req: NextRequest) {
@@ -10,7 +10,7 @@ async function handleGet(req: NextRequest) {
     const from = params.get("from") || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
     const to = params.get("to") || new Date().toISOString().slice(0, 10);
 
-    const { data: visitors, error } = await supabase
+    const { data: visitors, error } = await getDbClient()
       .from("visitor_logs")
       .select("*, persons!visitor_logs_person_id_fkey(full_name)")
       .gte("check_in_at", `${from}T00:00:00.000Z`)
@@ -20,7 +20,7 @@ async function handleGet(req: NextRequest) {
       console.warn("Could not query foreign key relation directly, trying plain visitor_logs query:", error.message);
     }
 
-    const { data: logs } = await supabase
+    const { data: logs } = await getDbClient()
       .from("visitor_logs")
       .select("*")
       .gte("check_in_at", `${from}T00:00:00.000Z`)

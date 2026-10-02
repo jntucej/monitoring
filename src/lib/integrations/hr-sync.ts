@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabaseClient";
+import { getDbClient } from "@/lib/db";
 import { HREmployee } from "@/lib/integration-types";
 
 // Sync employees from HR system
@@ -53,7 +53,7 @@ export async function syncEmployeesFromHR(): Promise<{
     for (const emp of mockEmployees) {
       try {
         // Check if person already exists
-        const { data: existing } = await supabase
+        const { data: existing } = await getDbClient()
           .from("users")
           .select("id, name, department_id, status")
           .eq("unique_id", emp.employeeId)
@@ -61,7 +61,7 @@ export async function syncEmployeesFromHR(): Promise<{
 
         if (existing) {
           // Update existing person
-          const { error } = await supabase
+          const { error } = await getDbClient()
             .from("users")
             .update({
               name: emp.fullName,
@@ -80,7 +80,7 @@ export async function syncEmployeesFromHR(): Promise<{
           }
 
           // Update employee details
-          await supabase
+          await getDbClient()
             .from("employee_details")
             .upsert(
               {
@@ -95,7 +95,7 @@ export async function syncEmployeesFromHR(): Promise<{
             );
         } else {
           // Create new person
-          const { data: person, error: personError } = await supabase
+          const { data: person, error: personError } = await getDbClient()
             .from("users")
             .insert({
               id: crypto.randomUUID(),
@@ -118,7 +118,7 @@ export async function syncEmployeesFromHR(): Promise<{
           }
 
           // Create employee details
-          await supabase.from("employee_details").insert({
+          await getDbClient().from("employee_details").insert({
             user_id: person.id,
             employee_id: emp.employeeId,
             designation: emp.designation,
