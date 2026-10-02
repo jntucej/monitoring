@@ -78,3 +78,10 @@ __pycache__/
 /print_fn.js
 /chunk.ts
 /txt.b64
+
+# Scratch scripts
+fix-*.js*
+create_missing_tables.js
+dumpScanner.js
+test_merge.ts
+test-del.js
