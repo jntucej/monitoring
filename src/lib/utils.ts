@@ -114,7 +114,7 @@ export function getAuthHeaders(): Record<string, string> {
   }
   
   try {
-    const raw = sessionStorage.getItem("gate-monitor-auth");
+    const raw = localStorage.getItem("gate-monitor-auth");
     if (!raw) return {};
     
     const parsed = JSON.parse(raw);
