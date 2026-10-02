@@ -67,6 +67,7 @@ __pycache__/
 .continue/
 
 # scratch / one-off scripts and dumps (not part of the app)
+/scratch/
 /diff.txt
 /route_dump.txt
 /tables_code.txt
