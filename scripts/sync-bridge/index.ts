@@ -62,23 +62,23 @@ const sink = createSink({
 });
 let fetcher: LogFetcher;
 
-if (USE_TCP) {
-  fetcher = createTcpLogFetcher({
-    host: DEVICE_HOST,
-    port: DEVICE_PORT,
-    timeoutMs: TCP_TIMEOUT_MS,
-  });
-} else if (TEXT_FILE_PATH) {
-  const fileFetcher = await createTextFileLogFetcher(TEXT_FILE_PATH);
-  fetcher = fileFetcher;
-} else if (BINARY_FILE_PATH) {
-  const fileFetcher = await createBinaryFileLogFetcher(BINARY_FILE_PATH, BINARY_BLOCK_SIZE);
-  fetcher = fileFetcher;
-} else {
-  console.error(
-    '[sync-bridge] No log source configured. Set one of: USE_TCP/USE_FAKE_DEVICE_LOGS, BIOMETRIC_TEXT_FILE_PATH, BIOMETRIC_BINARY_FILE_PATH',
-  );
-  process.exit(1);
+async function initFetcher(): Promise<LogFetcher> {
+  if (USE_TCP) {
+    return createTcpLogFetcher({
+      host: DEVICE_HOST,
+      port: DEVICE_PORT,
+      timeoutMs: TCP_TIMEOUT_MS,
+    });
+  } else if (TEXT_FILE_PATH) {
+    return await createTextFileLogFetcher(TEXT_FILE_PATH);
+  } else if (BINARY_FILE_PATH) {
+    return await createBinaryFileLogFetcher(BINARY_FILE_PATH, BINARY_BLOCK_SIZE);
+  } else {
+    console.error(
+      '[sync-bridge] no log source configured. Set one of: USE_TCP / USE_FAKE_DEVICE_LOGS, BIOMETRIC_TEXT_FILE_PATH, BIOMETRIC_BINARY_FILE_PATH',
+    );
+    process.exit(1);
+  }
 }
 
 
@@ -182,6 +182,7 @@ async function waitForInterrupt(): Promise<void> {
 }
 
 async function main(): Promise<void> {
+  fetcher = await initFetcher();
   console.log(`[sync-bridge] starting serial=${DEVICE_SERIAL} interval_ms=${SYNC_INTERVAL_MS}`);
 
   runOnce();
