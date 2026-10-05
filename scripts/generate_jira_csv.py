@@ -11,6 +11,7 @@ Usage:
 import os
 import sys
 import csv
+import json
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import jira_lib as jl

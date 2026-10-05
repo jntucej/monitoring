@@ -16,6 +16,9 @@ Workflow for the 4-person team. Full model: [docs/BRANCHING.md](docs/BRANCHING.m
   ```
 
 - No `develop` / `release/*` unless we adopt batch releases.
+- **Prefixes are lowercase and case-sensitive.** `feature/FS-1-x` passes the CI
+  check; `Feature/FS-1-x` fails. After the `/`, the token must be letters,
+  digits, `.`, `_`, or `-` (any case) and cannot be empty.
 
 ## Pull requests
 
@@ -23,7 +26,13 @@ Workflow for the 4-person team. Full model: [docs/BRANCHING.md](docs/BRANCHING.m
 2. Open a PR → `main`.
 3. Get **1 approval** (dismissed if you push more commits).
 4. Resolve all conversation threads before merge.
-5. Squash-merge; delete the branch.
+5. Check the **QA Evidence** sticky comment → artifact on the workflow run.
+6. Squash-merge. **Never merge with a red check.**
+
+CI (GitHub Free — see [docs/GITHUB_FREE_SETUP.md](docs/GITHUB_FREE_SETUP.md)):
+
+- `Branch name guard` — fails if the branch doesn't match the convention above.
+- `QA Evidence` — uploads `qa-evidence-pr-<n>` (30-day retention) and comments the link.
 
 ## Who reviews what (CODEOWNERS)
 

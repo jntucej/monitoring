@@ -1,0 +1,43 @@
+name: Clean old artifacts
+
+on:
+  schedule:
+    - cron: '0 3 * * 0'   # every Sunday at 3 AM UTC
+  workflow_dispatch:      # allow a manual run
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+            // ponytail: bounded to 10 pages (1000 artifacts) per run so a large
+            // backlog converges over successive weekly runs instead of hanging.
+            let page = 1;
+            let deleted = 0;
+            while (page <= 10) {
+              const { data } = await github.rest.actions.listArtifactsForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                per_page: 100,
+                page
+              });
+              const old = data.artifacts.filter(
+                a => new Date(a.created_at).getTime() < cutoff
+              );
+              for (const a of old) {
+                await github.rest.actions.deleteArtifact({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  artifact_id: a.id
+                });
+                deleted++;
+              }
+              if (data.artifacts.length < 100) break;
+              page++;
+            }
+            core.info(`Deleted ${deleted} artifacts older than 30 days.`);
