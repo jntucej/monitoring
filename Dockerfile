@@ -24,6 +24,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
+
 EXPOSE 3000
 ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
@@ -41,9 +42,11 @@ RUN adduser --system --uid 1001 nextjs
 COPY package.json package-lock.json* ./
 RUN npm ci --omit=dev
 
+COPY --chown=nextjs:nodejs tsconfig.json ./tsconfig.json
 COPY --chown=nextjs:nodejs worker ./worker
 COPY --chown=nextjs:nodejs scripts ./scripts
-COPY --chown=nextjs:nodejs src/lib/db ./src/lib/db
+COPY --chown=nextjs:nodejs src ./src
 
 USER nextjs
+
 CMD ["node", "worker/index.mjs"]
