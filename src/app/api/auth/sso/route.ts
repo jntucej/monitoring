@@ -43,12 +43,12 @@ export async function GET(req: NextRequest) {
     }
 
     // Step 2: Code exchange & token validation
-    const exchange = await exchangeOIDCAuthorizationCode(config, code, redirectUri);
+    const exchange = await exchangeOIDCAuthorizationCode(code, provider, redirectUri);
     let ssoEmail = url.searchParams.get("email") || `sso_${code.substring(0, 8)}@college.edu`;
     let ssoName = url.searchParams.get("name") || ssoEmail.split("@")[0];
 
-    if (exchange.id_token) {
-      const validation = await validateOIDCIdToken(exchange.id_token, config.clientId, config.issuerUrl);
+    if (exchange.idToken) {
+      const validation = await validateOIDCIdToken(exchange.idToken, provider, config.clientId);
       if (validation.valid && validation.claims) {
         if (typeof validation.claims.email === "string") ssoEmail = validation.claims.email;
         if (typeof validation.claims.name === "string") ssoName = validation.claims.name;
@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
       userRecord = newUser;
     }
 
-    const sessionToken = exchange.id_token || `sso_token_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const sessionToken = exchange.idToken || `sso_token_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
     return NextResponse.redirect(
       `${url.origin}/login?sso_success=true&role=${userRole}&token=${sessionToken}&email=${encodeURIComponent(ssoEmail)}`
@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
     let name = body.name || email.split("@")[0];
 
     if (rawToken) {
-      const validation = await validateOIDCIdToken(rawToken, config.clientId, config.issuerUrl);
+      const validation = await validateOIDCIdToken(rawToken, provider || config.providerId, config.clientId);
       if (validation.valid && validation.claims) {
         if (typeof validation.claims.email === "string") email = validation.claims.email;
         if (typeof validation.claims.name === "string") name = validation.claims.name;
