@@ -659,17 +659,7 @@ AS $$ BEGIN
   RETURN NEW;
 END; $$;
 
--- 4.7 SESSION INVALIDATION NOTIFY (role/status changes -> app-layer session revoke)
-CREATE OR REPLACE FUNCTION notify_session_invalidation()
-RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
-AS $$ BEGIN
-  IF (TG_OP = 'UPDATE' AND (OLD.role IS DISTINCT FROM NEW.role OR OLD.status IS DISTINCT FROM NEW.status)) THEN
-    PERFORM pg_notify('session_invalidation',
-      json_build_object('user_id',NEW.id,'old_role',OLD.role,'new_role',NEW.role,
-        'old_status',OLD.status,'new_status',NEW.status,'timestamp',NOW())::text);
-  END IF;
-  RETURN NEW;
-END; $$;
+-- 4.7 [REMOVED] notify_session_invalidation: pg_notify channel had no listener; sessions table already enforces invalidation via RLS
 
 -- 4.8 UPDATED_AT MAINTENANCE
 CREATE OR REPLACE FUNCTION update_updated_at()
@@ -731,8 +721,6 @@ CREATE TRIGGER trg_audit_on_pass_update
   AFTER UPDATE ON gate_passes FOR EACH ROW EXECUTE FUNCTION create_audit_log_on_pass_update();
 CREATE TRIGGER trg_audit_on_user_change
   AFTER INSERT OR UPDATE ON users FOR EACH ROW EXECUTE FUNCTION create_audit_log_on_user_change();
-CREATE TRIGGER trg_notify_session_invalidation
-  AFTER UPDATE ON users FOR EACH ROW EXECUTE FUNCTION notify_session_invalidation();
 CREATE TRIGGER trg_users_updated_at
   BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER trg_notif_prefs_updated_at
