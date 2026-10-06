@@ -180,8 +180,8 @@ CREATE OR REPLACE FUNCTION public.is_admin(p_uid uuid)
  STABLE
 AS $function$
 SELECT EXISTS (
-  SELECT 1 FROM public.users
-  WHERE id = p_uid AND role IN ('admin', 'super_admin')
+ SELECT 1 FROM public.users
+ WHERE id = p_uid AND role IN ('admin', 'super_admin')
 )
 $function$;
 
@@ -190,7 +190,7 @@ CREATE OR REPLACE FUNCTION public.is_admin_check(p_uid uuid)
  LANGUAGE plpgsql
 AS $function$
 BEGIN
-  IF NOT public.is_admin(p_uid) THEN
+ IF NOT public.is_admin(p_uid) THEN
     RAISE EXCEPTION 'admin only';
   END IF;
 END
