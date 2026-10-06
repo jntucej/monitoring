@@ -1,6 +1,6 @@
 /**
- * Pre-deploy & Pre-build Environment Validation Script
- * Validates required client and server environment variables before deployment/build.
+ * Pre-deploy / Pre-build Environment Validation Script
+ * Validates required self-hosted database, cache, and token secrets before build/deployment.
  */
 
 const fs = require('fs');
@@ -21,17 +21,10 @@ function loadEnvFile(filePath) {
   }
 }
 
-// Load env files if running locally
+// Load env files when running locally
 const rootDir = path.resolve(__dirname, '..');
 loadEnvFile(path.join(rootDir, '.env.local'));
 loadEnvFile(path.join(rootDir, '.env'));
-
-const REQUIRED_ENV = {
-  client: ['NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_ANON_KEY'],
-  server: ['SUPABASE_SERVICE_ROLE_KEY'],
-};
-
-const OPTIONAL_WARN_ENV = ['MOBILE_TOKEN_SECRET', 'ALLOWED_ORIGIN', 'UPSTASH_REDIS_REST_URL'];
 
 function validate() {
   console.log('🔍 Running Pre-Deploy Environment Validation...');
@@ -39,42 +32,40 @@ function validate() {
   const errors = [];
   const warnings = [];
 
-  for (const varName of REQUIRED_ENV.client) {
-    if (!process.env[varName]) {
-      errors.push(`Missing required client environment variable: ${varName}`);
+  // Self-hosted required database configuration
+  const hasDb = process.env.DATABASE_URL || (process.env.POSTGRES_DB && process.env.POSTGRES_PASSWORD);
+  if (!hasDb) {
+    if (isProd) {
+      errors.push('Missing required database configuration: Set DATABASE_URL or (POSTGRES_DB and POSTGRES_PASSWORD)');
+    } else {
+      warnings.push('DATABASE_URL is not set (will default to postgres://postgres:postgres@localhost:5432/gate_monitor)');
     }
   }
 
-  for (const varName of REQUIRED_ENV.server) {
-    if (!process.env[varName]) {
-      if (isProd) {
-        errors.push(`Missing required server environment variable in production: ${varName}`);
-      } else {
-        warnings.push(`Missing server environment variable: ${varName}`);
-      }
-    }
+  // Token secret
+  const hasJwt = process.env.AUTH_JWT_SECRET || process.env.MOBILE_TOKEN_SECRET || process.env.JWT_SECRET;
+  if (!hasJwt && isProd) {
+    warnings.push('AUTH_JWT_SECRET / MOBILE_TOKEN_SECRET not set: will use fallback secret (recommended to set in production)');
   }
 
-  for (const varName of OPTIONAL_WARN_ENV) {
-    if (!process.env[varName]) {
-      warnings.push(`Optional variable not set: ${varName}`);
-    }
+  // Cache configuration
+  if (!process.env.REDIS_URL && !process.env.UPSTASH_REDIS_REST_URL) {
+    warnings.push('REDIS_URL is not set (cache manager will operate in in-memory mode)');
   }
 
   if (warnings.length > 0) {
-    console.warn('⚠️ Environment Warnings:');
-    warnings.forEach((w) => console.warn(`   - ${w}`));
+    console.log('\n⚠️  Environment Warnings:');
+    warnings.forEach((w) => console.log(`   - ${w}`));
   }
 
   if (errors.length > 0) {
-    console.error('❌ Environment Validation Failed:');
+    console.error('\n❌ Environment Validation Failed:');
     errors.forEach((e) => console.error(`   - ${e}`));
-    if (isProd) {
-      process.exit(1);
-    }
-  } else {
-    console.log('✅ Environment Validation Passed!');
+    console.error('\nPlease set the required environment variables in .env or your deployment environment.\n');
+    process.exit(1);
   }
+
+  console.log('\n✅ Environment Validation Passed!\n');
 }
 
 validate();
