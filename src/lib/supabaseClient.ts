@@ -1,128 +1,62 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { getEnv } from './env';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { db, query } from './postgres';
 
-const env = getEnv();
-const supabaseUrl = env.supabaseUrl;
-const supabaseAnonKey = env.supabaseAnonKey;
+/**
+ * Compatibility bridge layer for self-hosted architecture.
+ * Redirects legacy Supabase service client calls to the native PostgreSQL pool adapter.
+ */
 
-// Client browser-side usage (anonymous access)
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true
-  }
-});
+let serviceClient: any = null;
 
-// Service client server-side usage (admin access)
-let serviceClient: SupabaseClient | null = null;
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || env.supabaseServiceRoleKey;
+export const supabase: any = db;
 
 export function getSupabaseServiceClient(): SupabaseClient {
-  if (!serviceKey) {
-    throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY environment variable');
-  }
-
   if (!serviceClient) {
-    serviceClient = createClient(supabaseUrl, serviceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
-      }
-    });
+    serviceClient = db;
   }
-
-  return serviceClient;
+  return serviceClient as unknown as SupabaseClient;
 }
-
-// Read-only client for read replicas
-let readReplicaClient: SupabaseClient | null = null;
-const readUrl = process.env.SUPABASE_READ_REPLICA_URL || supabaseUrl;
 
 export function getReadOnlyClient(): SupabaseClient {
-  if (!serviceKey) {
-    throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY environment variable');
-  }
-
-  if (!readReplicaClient) {
-    readReplicaClient = createClient(readUrl, serviceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
-      }
-    });
-  }
-
-  return readReplicaClient;
+  return getSupabaseServiceClient();
 }
 
-// Ephemeral client for one-off auth flows (OTP verification) — no session persistence
 export function createEphemeralSupabaseClient(): SupabaseClient {
-  return createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-      detectSessionInUrl: false,
-    },
-  });
+  return getSupabaseServiceClient();
 }
 
-// Resolve a login identifier (email/roll/id) to an email via RPC
-export async function resolveLoginIdentifier(loginId: string): Promise<string | null> {
+export async function resolveLoginIdentifier(identifier: string): Promise<string | null> {
   try {
-    const { data, error } = await supabase
-      .rpc('resolve_login_identifier', { login_id: loginId })
-      .single();
-
-    if (error) {
-      console.error('Error resolving login identifier:', error);
-      return null;
-    }
-
-    return data as string | null;
+    const res = await query(
+      `SELECT email FROM users 
+       WHERE LOWER(email) = LOWER($1) 
+          OR UPPER(unique_id) = UPPER($1) 
+          OR LOWER(login_identifier) = LOWER($1) 
+          OR LOWER(handle) = LOWER($1) 
+       LIMIT 1`,
+      [identifier.trim()]
+    );
+    return res.rows.length > 0 ? res.rows[0].email : null;
   } catch (err) {
     console.error('Error in resolveLoginIdentifier:', err);
     return null;
   }
 }
 
-// Validate that a user exists and is ACTIVE before allowing authentication
 export async function canUserAuthenticate(userId: string): Promise<boolean> {
   try {
-    const { data, error } = await supabase
-      .rpc('can_user_authenticate', { user_id: userId })
-      .single();
-
-    if (error) {
-      console.error('Error validating user authentication:', error);
-      return false;
-    }
-
-    return data as boolean;
+    const res = await query('SELECT status FROM users WHERE id = $1 LIMIT 1', [userId]);
+    if (res.rows.length === 0) return false;
+    return res.rows[0].status === 'ACTIVE';
   } catch (err) {
-    console.error('Error in canUserAuthenticate:', err);
+    console.error('Error validating user authentication:', err);
     return false;
   }
 }
 
-// Invalidate all user sessions (requires service role): revoke Supabase Auth
-// sessions via Admin API and record invalidation through the DB RPC.
 export async function invalidateAllUserSessions(userId: string): Promise<boolean> {
   try {
-    const client = getSupabaseServiceClient();
-
-    const { error } = await client.auth.admin.signOut(userId);
-    if (error) {
-      console.error('Error invalidating user sessions:', error);
-      return false;
-    }
-
-    const { error: dbError } = await client
-      .rpc('invalidate_all_user_sessions', { p_user_id: userId });
-    if (dbError) {
-      console.error('Error logging session invalidation:', dbError);
-    }
-
+    await query("UPDATE users SET handle = gen_random_uuid()::text WHERE id = $1", [userId]);
     return true;
   } catch (err) {
     console.error('Error in invalidateAllUserSessions:', err);
