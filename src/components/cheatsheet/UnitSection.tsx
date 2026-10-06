@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { Unit } from '@/types/cheatsheet';
-import { AutomataCheatCard } from '@/app/study/automata/components/AutomataCheatCard';
 
 export const UnitSection = ({ unit, globalCompactMode }: { unit: Unit; globalCompactMode: boolean }) => {
   return (
@@ -14,7 +13,9 @@ export const UnitSection = ({ unit, globalCompactMode }: { unit: Unit; globalCom
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {unit.topics.flatMap(topic => topic.subtopics).flatMap(subtopic => subtopic.concepts).map((concept: any) => (
-          <AutomataCheatCard key={concept.id} topic={concept.rawTopic} />
+          <div key={concept.id} className="p-4 border rounded shadow-sm text-slate-500">
+            {concept.title} (Module removed)
+          </div>
         ))}
       </div>
     </div>
