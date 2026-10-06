@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ClientProviders } from "./ClientProviders";
-import { supabase } from "@/lib/supabaseClient";
+import { getDbClient } from "@/lib/db";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -14,7 +14,8 @@ export async function generateMetadata(): Promise<Metadata> {
   let description = "Student Gate Monitoring System";
   
   try {
-    const { data } = await supabase
+    const dbClient = getDbClient();
+    const { data } = await dbClient
       .from('config_college_info')
       .select('name, short_name')
       .limit(1)

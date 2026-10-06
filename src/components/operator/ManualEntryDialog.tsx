@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useUIStore } from "@/stores/uiStore";
 import { useAuthStore } from "@/stores/authStore";
 import type { ScanDirection, ExitReason } from "@/lib/types";
-import { supabase } from "@/lib/supabaseClient";
+
 import { useCampusConfig } from "@/hooks/useCampusConfig";
 import { getClientLocation, getClientSysTag } from "@/lib/geo";
 
@@ -64,13 +64,17 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
       if (!rollNum) return;
       setLoadingPasses(true);
       try {
-        const { data, error } = await supabase
-          .from("gate_passes")
-          .select("*")
-          .eq("roll", rollNum)
-          .in("final_status", ["APPROVED", "APPROVED_PARENT", "APPROVED_ADMIN"]);
-        if (!error && data) {
-          setApprovedPasses(data);
+        const res = await fetch(`/api/passes?roll=${encodeURIComponent(rollNum)}`);
+        if (res.ok) {
+          const json = await res.json();
+          const rawList = Array.isArray(json.data) ? json.data : Array.isArray(json) ? json : [];
+          const validPasses = rawList.filter((p: any) => {
+            const status = (p.final_status || p.status || "").toUpperCase();
+            return ["APPROVED", "APPROVED_PARENT", "APPROVED_ADMIN"].includes(status);
+          });
+          setApprovedPasses(validPasses);
+        } else {
+          setApprovedPasses([]);
         }
       } catch (err) {
         console.error("Error loading approved passes:", err);
