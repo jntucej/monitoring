@@ -7,7 +7,7 @@ import { withAuthorization } from "@/middleware/authorization";
 
 const VALID_ROLES: Role[] = ["operator", "admin", "sysadmin", "parent", "student", "warden", "faculty", "staff"];
 const VALID_STATUSES: AccountStatus[] = ["ACTIVE", "LOCKED", "SUSPENDED", "DISABLED", "DEPROVISIONED"];
-const VALID_FLAGS: Array<FlagStatus> = ["suspicious", "restricted", null];
+const VALID_FLAGS: Array<FlagStatus> = ["OVERDUE", "UNAUTHORIZED_EXIT", "NO_GATE_PASS", "SUSPENDED", "CURFEW_VIOLATION", "MANUAL_LOCKDOWN"]; // null handled separately in setUserFlag
 
 function getIdFromPath(req: NextRequest): string {
   const segments = new URL(req.url).pathname.split("/").filter(Boolean);
