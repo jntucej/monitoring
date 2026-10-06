@@ -1,18 +1,24 @@
 /* eslint-disable */
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { supabase as browserClient, invalidateAllUserSessions, getSupabaseServiceClient } from './supabaseClient';
 import { randomUUID } from "crypto";
 import bcrypt from 'bcryptjs';
+import { db, query, withTransaction, getPostgresPool } from "./postgres";
+
+export { db, query, withTransaction, getPostgresPool };
 
 // Always export the browser client for general use, and helper for server context
 export const supabase = browserClient;
 
-export function getDbClient() {
+export function getDbClient(): SupabaseClient {
     if (typeof window === 'undefined') {
+        if (process.env.DATABASE_URL) {
+            return db as unknown as SupabaseClient;
+        }
         try {
             return getSupabaseServiceClient();
         } catch (e) {
-            console.error('[db] getDbClient: Failed to create service client. Env var SUPABASE_SERVICE_ROLE_KEY missing?', e);
-            throw new Error('Database client initialization failed on server. Missing SUPABASE_SERVICE_ROLE_KEY.');
+            return db as unknown as SupabaseClient;
         }
     }
     return browserClient;
