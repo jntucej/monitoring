@@ -45,10 +45,10 @@ async function handleGet(req: NextRequest) {
   try {
     let service;
     try {
-      const { getSupabaseServiceClient } = await import("@/lib/supabaseClient");
+      const { getSupabaseServiceClient } = await import("@/lib/dbClient");
       service = getSupabaseServiceClient();
     } catch {
-      const { supabase } = await import("@/lib/supabaseClient");
+      const { supabase } = await import("@/lib/dbClient");
       service = supabase;
     }
 

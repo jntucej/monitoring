@@ -1,4 +1,4 @@
-import { supabase, getSupabaseServiceClient } from './supabaseClient';
+import { supabase, getSupabaseServiceClient } from './dbClient';
 
 export interface SystemHealth {
   status: 'healthy' | 'degraded' | 'unhealthy';

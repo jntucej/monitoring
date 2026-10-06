@@ -2,7 +2,7 @@
 /* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseServiceClient, supabase } from "@/lib/supabaseClient";
+import { getSupabaseServiceClient, supabase } from "@/lib/dbClient";
 
 export const dynamic = "force-dynamic";
 

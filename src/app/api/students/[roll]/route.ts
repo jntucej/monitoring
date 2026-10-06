@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { findStudentByRoll, getStudentHistory, getStudentStatus } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
-import { getSupabaseServiceClient } from "@/lib/supabaseClient";
+import { getSupabaseServiceClient } from "@/lib/dbClient";
 
 /**
  * Extract the [roll] dynamic segment from the request URL.

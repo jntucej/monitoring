@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseServiceClient } from '@/lib/supabaseClient';
+import { getSupabaseServiceClient } from '@/lib/dbClient';
 import { withRateLimit } from '@/lib/rate-limit';
 import { withAuthorization } from '@/middleware/authorization';
 import { addAudit } from '@/lib/db';

@@ -9,7 +9,7 @@
  * - Prevents client-side identity spoofing
  */
 
-import { supabase, getSupabaseServiceClient } from './supabaseClient';
+import { supabase, getSupabaseServiceClient } from './dbClient';
 import { Role, AccountStatus } from './types';
 import { getCached, setCached } from './cache';
 import { verifyAuthToken } from './auth-token';

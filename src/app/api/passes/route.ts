@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { findGatePasses, createGatePass, getParentChildren } from "@/lib/db";
-import { supabase, getSupabaseServiceClient } from "@/lib/supabaseClient";
+import { supabase, getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { validatePassRequestPayload } from "@/lib/validation";

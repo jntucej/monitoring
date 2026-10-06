@@ -2,7 +2,7 @@
  * Advanced Alerting & Incident Management Dispatcher
  * Persisted using Supabase `alert_rules` and `alerts` tables.
  */
-import { getSupabaseServiceClient } from "./supabaseClient";
+import { getSupabaseServiceClient } from "./dbClient";
 
 export interface AlertRule {
   id: string;

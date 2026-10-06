@@ -3,7 +3,7 @@
  * Each handler performs actual DB work and returns rows affected.
  */
 
-import { getSupabaseServiceClient } from "./supabaseClient";
+import { getSupabaseServiceClient } from "./dbClient";
 
 export interface JobExecutionResult {
   recordsAffected: number;

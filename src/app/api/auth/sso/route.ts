@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSSOConfig, mapExternalGroupToRole, validateOIDCIdToken, exchangeOIDCAuthorizationCode } from "@/lib/sso";
-import { getSupabaseServiceClient } from "@/lib/supabaseClient";
+import { getSupabaseServiceClient } from "@/lib/dbClient";
 
 /**
  * GET /api/auth/sso — Initiate OIDC Authorization Flow or handle OAuth Callback

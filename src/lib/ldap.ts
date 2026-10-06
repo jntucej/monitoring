@@ -1,4 +1,4 @@
-import { getSupabaseServiceClient } from "./supabaseClient";
+import { getSupabaseServiceClient } from "./dbClient";
 
 export interface LDAPSyncResult {
   syncedAt: string;

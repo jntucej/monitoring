@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { findPersonByUniqueId, getPersonHistory, getPersonStatus } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
-import { getSupabaseServiceClient } from "@/lib/supabaseClient";
+import { getSupabaseServiceClient } from "@/lib/dbClient";
 
 function getUniqueId(req: NextRequest): string {
   const segments = new URL(req.url).pathname.split("/").filter(Boolean);

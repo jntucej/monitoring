@@ -1,6 +1,6 @@
 /* eslint-disable */
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { supabase as browserClient, invalidateAllUserSessions, getSupabaseServiceClient } from './supabaseClient';
+import { supabase as browserClient, invalidateAllUserSessions, getSupabaseServiceClient } from './dbClient';
 import { randomUUID } from "crypto";
 import bcrypt from 'bcryptjs';
 import { db, query, withTransaction, getPostgresPool } from "./postgres";
@@ -276,7 +276,7 @@ function mAlert(r: any): Alert {
 }
 
 export async function findPass(passId: string): Promise<GatePass | null> {
-  const { getSupabaseServiceClient } = await import('./supabaseClient');
+  const { getSupabaseServiceClient } = await import('./dbClient');
   const client = getSupabaseServiceClient();
 
   const { data, error } = await client
@@ -294,7 +294,7 @@ export async function findPass(passId: string): Promise<GatePass | null> {
 }
 
 export async function approvePass(passId: string, role: string, comment: string = "", approverId: string): Promise<boolean> {
-  const { getSupabaseServiceClient } = await import('./supabaseClient');
+  const { getSupabaseServiceClient } = await import('./dbClient');
   const client = getSupabaseServiceClient();
 
   const isParentRole = role === 'parent';
@@ -422,7 +422,7 @@ export async function createGatePass(passData: {
   const qrCode = `PASS-${id}-${person.uniqueId}-${Date.now()}`;
   const parentStatus = passData.isParentRequest ? 'APPROVED' : 'PENDING';
 
-  const { getSupabaseServiceClient } = await import('./supabaseClient');
+  const { getSupabaseServiceClient } = await import('./dbClient');
   const serviceClient = getSupabaseServiceClient();
 
   const isValidUuid = (val?: string) => val && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
@@ -496,7 +496,7 @@ export async function findGatePasses(filters: {
   limit?: number;
 }): Promise<GatePass[]> {
   // Use service client to bypass RLS — access control is enforced at the API layer
-  const { getSupabaseServiceClient } = await import('./supabaseClient');
+  const { getSupabaseServiceClient } = await import('./dbClient');
   const serviceClient = getSupabaseServiceClient();
   let query = serviceClient.from('gate_passes').select('*');
 
@@ -701,7 +701,7 @@ export async function getNotifications(recipientType: string, recipientId: strin
 // NOTE: Session lifecycle is fully owned by Supabase Auth (GoTrue).
 // The legacy custom `sessions` table functions (`getUserForSession`,
 // `createSession`, `invalidateSession`) were removed. To revoke a user's
-// sessions, use `invalidateAllUserSessions` from '@/lib/supabaseClient'.
+// sessions, use `invalidateAllUserSessions` from '@/lib/dbClient'.
 
 /* ------------------------------------------------------------------ *
  *  UNIFIED PERSONS FUNCTIONS
@@ -714,7 +714,7 @@ export async function findPersonByUniqueId(uniqueId: string): Promise<Person | n
   // Use service client to bypass RLS — access control is enforced at the API layer
   let client = supabase;
   try {
-    const { getSupabaseServiceClient } = await import('./supabaseClient');
+    const { getSupabaseServiceClient } = await import('./dbClient');
     client = getSupabaseServiceClient();
   } catch (clientErr) {
     console.warn('[db] findPersonByUniqueId: Fallback to browser client', clientErr);
@@ -1210,7 +1210,7 @@ export async function findUserById(id: string): Promise<User | null> {
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
   let client = supabase;
   try {
-    const { getSupabaseServiceClient } = await import('./supabaseClient');
+    const { getSupabaseServiceClient } = await import('./dbClient');
     client = getSupabaseServiceClient();
   } catch { /* fallback */ }
 
@@ -1269,7 +1269,7 @@ export async function hashThumbprint(signature: string): Promise<string> {
 export async function registerThumbprint(userId: string, hash: string): Promise<boolean> {
   let client = supabase;
   try {
-    const { getSupabaseServiceClient } = await import('./supabaseClient');
+    const { getSupabaseServiceClient } = await import('./dbClient');
     client = getSupabaseServiceClient();
   } catch { /* fallback to anon client */ }
 
@@ -1284,7 +1284,7 @@ export async function registerThumbprint(userId: string, hash: string): Promise<
 export async function clearThumbprint(userId: string): Promise<boolean> {
   let client = supabase;
   try {
-    const { getSupabaseServiceClient } = await import('./supabaseClient');
+    const { getSupabaseServiceClient } = await import('./dbClient');
     client = getSupabaseServiceClient();
   } catch { /* fallback to anon client */ }
 
@@ -1307,7 +1307,7 @@ export async function getThumbprint(userId: string): Promise<{
 } | null> {
   let client = supabase;
   try {
-    const { getSupabaseServiceClient } = await import('./supabaseClient');
+    const { getSupabaseServiceClient } = await import('./dbClient');
     client = getSupabaseServiceClient();
   } catch { /* fallback to anon client */ }
 
@@ -1383,7 +1383,7 @@ export async function updateUserRole(userId: string, newRole: Role, actorId: str
 
 // NOTE: `revokeAllSessions` (legacy custom-sessions table) was REMOVED.
 // Session revocation is handled by `invalidateAllUserSessions` in
-// '@/lib/supabaseClient', which calls Supabase Auth's Admin signOut API.
+// '@/lib/dbClient', which calls Supabase Auth's Admin signOut API.
 
 /* ------------------------------------------------------------------ *
  *  SCAN & LOG LOGIC
@@ -1394,7 +1394,7 @@ export async function lastScanFor(uniqueId: string): Promise<Scan | null> {
   // Use service client to bypass RLS
   let client = supabase;
   try {
-    const { getSupabaseServiceClient } = await import('./supabaseClient');
+    const { getSupabaseServiceClient } = await import('./dbClient');
     client = getSupabaseServiceClient();
   } catch { /* fallback to anon client */ }
   const { data, error } = await client
@@ -1426,7 +1426,7 @@ export async function scansToday(): Promise<Scan[]> {
 export async function personsInside(): Promise<Person[]> {
   let client = supabase;
   try {
-    const { getSupabaseServiceClient } = await import('./supabaseClient');
+    const { getSupabaseServiceClient } = await import('./dbClient');
     client = getSupabaseServiceClient();
   } catch { /* fallback */ }
 
@@ -1444,7 +1444,7 @@ export const studentsInside = personsInside;
 export async function campusCount(): Promise<number> {
   let client = supabase;
   try {
-    const { getSupabaseServiceClient } = await import('./supabaseClient');
+    const { getSupabaseServiceClient } = await import('./dbClient');
     client = getSupabaseServiceClient();
   } catch { /* fallback */ }
 
@@ -1464,7 +1464,7 @@ export async function isDuplicate(uniqueId: string, direction: ScanDirection, wi
   // Use service client to bypass RLS
   let client = supabase;
   try {
-    const { getSupabaseServiceClient } = await import('./supabaseClient');
+    const { getSupabaseServiceClient } = await import('./dbClient');
     client = getSupabaseServiceClient();
   } catch { /* fallback to anon client */ }
 
@@ -1508,7 +1508,7 @@ export async function addScan(input: {
 
   let client = supabase;
   try {
-    const { getSupabaseServiceClient } = await import('./supabaseClient');
+    const { getSupabaseServiceClient } = await import('./dbClient');
     client = getSupabaseServiceClient();
   } catch { /* fallback */ }
 
@@ -1732,7 +1732,7 @@ export async function addAudit(entry: {
   const timestamp = new Date().toISOString();
   const detailsStr = typeof entry.details === "string" ? entry.details : JSON.stringify(entry.details);
 
-  const { getSupabaseServiceClient } = await import('./supabaseClient');
+  const { getSupabaseServiceClient } = await import('./dbClient');
   const serviceClient = getSupabaseServiceClient();
 
   let targetUserId: string | null = null;
@@ -2035,7 +2035,7 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
 export async function getDailyStats(date?: string, gateId?: string): Promise<DailyGateStats | DailyGateStats[] | null> {
   let client = supabase;
   try {
-    const { getSupabaseServiceClient } = await import('./supabaseClient');
+    const { getSupabaseServiceClient } = await import('./dbClient');
     client = getSupabaseServiceClient();
   } catch { /* fallback to anon client */ }
 
@@ -2181,7 +2181,7 @@ export async function getPersonStatus(uniqueId: string): Promise<{ status: "IN" 
   // Use service client to bypass RLS — access control is enforced at the API layer
   let client = supabase;
   try {
-    const { getSupabaseServiceClient } = await import('./supabaseClient');
+    const { getSupabaseServiceClient } = await import('./dbClient');
     client = getSupabaseServiceClient();
   } catch { /* fallback to anon client */ }
 
@@ -2234,7 +2234,7 @@ export async function getPersonHistory(uniqueId: string, limit: number = 20): Pr
   // Use service client to bypass RLS
   let client = supabase;
   try {
-    const { getSupabaseServiceClient } = await import('./supabaseClient');
+    const { getSupabaseServiceClient } = await import('./dbClient');
     client = getSupabaseServiceClient();
   } catch { /* fallback to anon client */ }
   const { data, error } = await client
@@ -2273,7 +2273,7 @@ export type FlagStatus = 'OVERDUE' | 'UNAUTHORIZED_EXIT' | 'NO_GATE_PASS' | 'SUS
  * Does NOT affect users.status — purely a gate-alert signal.
  */
 export async function setUserFlag(userId: string, flag: FlagStatus, actorId: string): Promise<boolean> {
-  const { getSupabaseServiceClient } = await import('./supabaseClient');
+  const { getSupabaseServiceClient } = await import('./dbClient');
   const service = getSupabaseServiceClient();
   const { data: user } = await service.from('users').select('name').eq('id', userId).single();
   const { error } = await service.from('users').update({ flag_status: flag ?? null }).eq('id', userId);
@@ -2319,7 +2319,7 @@ function mLockdown(r: any): Lockdown {
 
 /** Returns the currently active lockdown, or null if none. */
 export async function getActiveLockdown(): Promise<Lockdown | null> {
-  const { getSupabaseServiceClient } = await import('./supabaseClient');
+  const { getSupabaseServiceClient } = await import('./dbClient');
   const service = getSupabaseServiceClient();
   // CEJ-96 fix: filter/order on real columns (created_at) and pick the most
   // recent non-lifted row from the data JSONB payload.
@@ -2335,7 +2335,7 @@ export async function getActiveLockdown(): Promise<Lockdown | null> {
 
 /** Broadcasts a new lockdown. */
 export async function createLockdown(scopes: string[], message: string | null, issuedBy: string): Promise<Lockdown | null> {
-  const { getSupabaseServiceClient } = await import('./supabaseClient');
+  const { getSupabaseServiceClient } = await import('./dbClient');
   const service = getSupabaseServiceClient();
   // CEJ-96 fix: write the lockdown payload into the `data` JSONB column that
   // actually exists on lockdown_broadcasts.
@@ -2367,7 +2367,7 @@ export async function createLockdown(scopes: string[], message: string | null, i
 
 /** Lifts (ends) an active lockdown. */
 export async function liftLockdown(lockdownId: string, liftedBy: string): Promise<boolean> {
-  const { getSupabaseServiceClient } = await import('./supabaseClient');
+  const { getSupabaseServiceClient } = await import('./dbClient');
   const service = getSupabaseServiceClient();
   // CEJ-96 fix: merge lifted_at/lifted_by into the existing data JSONB
   // payload (there are no lifted_* columns on the stub table).

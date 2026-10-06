@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createVisitor, checkInVisitor, checkOutVisitor } from "@/lib/db";
-import { getSupabaseServiceClient } from "@/lib/supabaseClient";
+import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 

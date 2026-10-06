@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/lib/dbClient';
 
 // Middleware to collect API performance metrics
 export async function metricsMiddleware(req: NextRequest, handler: () => Promise<Response>) {

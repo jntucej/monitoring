@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { correctScan } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
-import { getSupabaseServiceClient } from "@/lib/supabaseClient";
+import { getSupabaseServiceClient } from "@/lib/dbClient";
 import type { AuthContext } from "@/lib/authContext";
 import type { ScanDirection, ExitReason } from "@/lib/types";
 

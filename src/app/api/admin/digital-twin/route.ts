@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { getCurrentOccupancy } from "@/lib/occupancy";
 import { getPredictions } from "@/lib/predictive";
-import { getSupabaseServiceClient } from "@/lib/supabaseClient";
+import { getSupabaseServiceClient } from "@/lib/dbClient";
 
 async function handleGet(req: NextRequest) {
   try {

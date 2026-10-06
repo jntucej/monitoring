@@ -2,7 +2,7 @@
 Uses sso_config database table, persistence with in-memory fallback.
 Includes JWT id_token validation, PKCE code challenge helpers using jose.
 */
-import { getSupabaseServiceClient } from "./supabaseClient";
+import { getSupabaseServiceClient } from "./dbClient";
 import * as jose from "jose";
 
 export interface SSOConfig {

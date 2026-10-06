@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateBase32Secret } from "@/lib/totp";
 import { findUserById, addAudit } from "@/lib/db";
-import { getSupabaseServiceClient } from "@/lib/supabaseClient";
+import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withRateLimit } from "@/lib/rate-limit";
 import { withAuthorization } from "@/middleware/authorization";
 import { verifyEnrollToken } from "@/lib/mfa-enroll";

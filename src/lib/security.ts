@@ -2,7 +2,7 @@
  * Security Hardening & Zero-Trust Architecture Utility
  * Uses `system_settings` database table for persistence with in-memory caching.
  */
-import { getSupabaseServiceClient } from "./supabaseClient";
+import { getSupabaseServiceClient } from "./dbClient";
 
 export interface SecurityStats {
   failedLogins24h: number;

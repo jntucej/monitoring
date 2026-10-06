@@ -97,7 +97,7 @@ export async function checkRateLimit(
   // 2. Supabase DB distributed rate limit check for production serverless fallback
   if (process.env.NODE_ENV === 'production' && !isDev) {
     try {
-      const { getSupabaseServiceClient } = await import('./supabaseClient');
+      const { getSupabaseServiceClient } = await import('./dbClient');
       const client = getSupabaseServiceClient();
       const windowStart = new Date(Date.now() - windowMs).toISOString();
 
