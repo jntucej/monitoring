@@ -24,12 +24,18 @@ only if actually scheduled releases need stable integration branch.
 - Add `develop` only if release batches need it
 - Add `release/*` only for versioned releases
 
-### B### B### B### B### B### B### B#ur### B### B### -pa### B### B### B### B### B### B### B#ur### B### B### -pa### B### B### B###-p### B### B### B### B### B### B### B#ur### B### B### -pa### B### B### B### B### B# b### B### B### B### B### B### B### B#ur### B### B### -pa### B### B#2. GitHub access levels (4 members)
+### Branch naming (Jira)
 
-**Personal repo** → get **Read / Wri**Personal repo*y.**Personal repo** → get **Read / Wri**Person /**Personal repo** → get **Read / Wri**Personal y**Personal repo** → get **Read / Wrn **Personal repo** → get **Read / Wri**Persomin | Personal repos + org admin |
-| Ashwitha | Write | Personal repos + org write |
-| Dhanavarsha | Triage Write | Organization repos |
-| Jun| Jun| Jun| Jun| Jun| Jun| Jun| Jun| Jun| Jun| Jun| Junai| Jun| Jun| Jun| Jun| Jun| Jun| Jun| Jun| ect | Jun| Jun| Jun| JunPR| Jun| Jun| Jun| Jun| Jun| Jun|nches: create from `main`, work locally, push to remote
-- Bugfix branches: sa- Bugfix branches: sa- Bugfix branches: sa- Bu emergency fixes directly to `main` (Akarsh / Jun- Bugfix branches: sa- Bugfix branches: sa- Bugfix branches: sa- Bu emergency fixes directly to `main` (Akarsh / Jun- Bugfix branches: sa- Bugfix branches: sa- Bugfix branches: sa- Bu emergency fixes directly to `main` (Akarsh / Jun- Bugfix branches: sa- Bugfix branches: sa- Bugfix branches: sa- Bu emergency fixin`. All team members with
-write access can commit directly. Follow the branch naming conventions and
+```
+| featur| featur|login-pa| featur| featur|login-pa| featur| featur|login-pa| featur| featur|login--p| featur| featur|login-pa| featur| featur|login-pa| featur| featur|login-pa| feat but don't control
+GitHub access. Map GitHub teams/roles manually.
+
+2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2ers2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2ers2. 2.te2. 2. 2. 2. 2. .
+**Organization repo** - get **Read / Triage / Wri**Organization repo** - get **Read / Triage / Wu w**Organization repo** - get **Read / | Role | Access |
+|---|---|---|
+| Akarsh | Admin | Personal repos + org admin |
+| Ashwit| Ashwit| Ashwit| Ashwit| Ashwit| Ashte |
+| Dhanavarsha | Dhanavarsha | Dhanavarsha | Dhanavarsha |ai| Dhanavarsha | Dhanavarsha | Dhanavarsha | Dhanavintain | Dhanavarsha | Dhanavarsha | Dhanavarsha | co| Dhanavarsha | Dhan r| Dhanavarsha | Dhanavarsha | Dhan: create from `main`, work locally, push to remote
+- Bugfix branches: same flow as feature branches
+- Hotfix branches: emergency fixes directly to `main` (Akarsh / Junai- Hotfix branches: e Junaid on- Hotfix branches: emergency fixes directly to `main` (Akarsh / Junai- Hotfix branches: e Junaid on- Hotfix branches: emergency fixes directly to `main` (Akarsh / Junai- Hotfix branches: e Junaid onir- Hotfix branches: emergency fixes directly tovie- Hotfix branches: emergency fixes directly to `main` (Akarsh / Junai- Hotfix branches: ely. Follow the branch naming conventions and
 ensure tests pass before committing.
