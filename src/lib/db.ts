@@ -1793,13 +1793,38 @@ export async function addNotification(
  *  DASHBOARD & STATS
  * ------------------------------------------------------------------ */
 
-export async function dashboard(): Promise<DashboardData> {
+// CEJ-88 fix: dashboard() now accepts an optional gateId so callers can
+// scope the scan/trend queries and the per-gate locations list to a single
+// gate. When gateId is omitted the behaviour stays campus-wide.
+export async function dashboard(gateId?: string | null): Promise<DashboardData> {
   const db = getDbClient();
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
 
   const yesterdayStart = new Date(todayStart);
   yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+
+  // CEJ-88/89 fix: movement_logs has no person_type/department columns —
+  // embed the joined user (mScan expects r.users) instead of selecting
+  // non-existent columns, and scope every scan query to the requested gate.
+  let todayScansBuilder: any = db.from('movement_logs')
+    .select('*, users:users!movement_logs_user_id_fkey!inner(unique_id, name, role, department_id, student_details:student_details!student_details_user_id_fkey(year))')
+    .gte('timestamp', todayStart.toISOString());
+  let yesterdayInBuilder: any = db.from('movement_logs')
+    .select('id', { count: 'exact', head: true })
+    .gte('timestamp', yesterdayStart.toISOString())
+    .lt('timestamp', todayStart.toISOString())
+    .eq('direction', 'IN');
+  let yesterdayOutBuilder: any = db.from('movement_logs')
+    .select('id', { count: 'exact', head: true })
+    .gte('timestamp', yesterdayStart.toISOString())
+    .lt('timestamp', todayStart.toISOString())
+    .eq('direction', 'OUT');
+  if (gateId) {
+    todayScansBuilder = todayScansBuilder.eq('gate_id', gateId);
+    yesterdayInBuilder = yesterdayInBuilder.eq('gate_id', gateId);
+    yesterdayOutBuilder = yesterdayOutBuilder.eq('gate_id', gateId);
+  }
 
   const [
     onCampusCount,
@@ -1811,21 +1836,11 @@ export async function dashboard(): Promise<DashboardData> {
     userRolesRes,
   ] = await Promise.all([
     campusCount(),
-    db.from('movement_logs')
-      .select('id, user_id, gate_id, gate_name, direction, timestamp, person_type, department')
-      .gte('timestamp', todayStart.toISOString())
+    todayScansBuilder
       .order('timestamp', { ascending: false })
       .limit(2000),
-    db.from('movement_logs')
-      .select('id', { count: 'exact', head: true })
-      .gte('timestamp', yesterdayStart.toISOString())
-      .lt('timestamp', todayStart.toISOString())
-      .eq('direction', 'IN'),
-    db.from('movement_logs')
-      .select('id', { count: 'exact', head: true })
-      .gte('timestamp', yesterdayStart.toISOString())
-      .lt('timestamp', todayStart.toISOString())
-      .eq('direction', 'OUT'),
+    yesterdayInBuilder,
+    yesterdayOutBuilder,
     db.from('alerts')
       .select('*')
       .eq('resolved', false)
@@ -1851,7 +1866,13 @@ export async function dashboard(): Promise<DashboardData> {
     return `${sign}${diff.toFixed(1)}% vs yesterday`;
   };
 
-  const locations = allGates.map((gate: Gate) => {
+  // CEJ-88 fix: when a gateId was requested, only list that gate (the page
+  // looks up its own gate in this array).
+  const gatesForDisplay = gateId
+    ? allGates.filter((gate: Gate) => String(gate.id) === String(gateId))
+    : allGates;
+
+  const locations = gatesForDisplay.map((gate: Gate) => {
     const gateScans = todayScans.filter((s: Scan) => s.gateId === gate.id);
     const lastScan = gateScans.length > 0 ? gateScans[0] : null;
     return {
@@ -1870,9 +1891,14 @@ export async function dashboard(): Promise<DashboardData> {
   };
 
   todayScans.forEach((scan: Scan) => {
-    if (scan.department && deptCounts[scan.department]) {
-      if (scan.direction === "IN") deptCounts[scan.department].in++;
-      else deptCounts[scan.department].out++;
+    // mScan() returns the department as a full name (or a raw code) — map it
+    // back to the DEPARTMENTS code so it matches the deptCounts keys.
+    const deptCode = scan.department
+      ? DEPARTMENTS.find((d) => d.code === scan.department || d.name === scan.department)?.code
+      : undefined;
+    if (deptCode && deptCounts[deptCode]) {
+      if (scan.direction === "IN") deptCounts[deptCode].in++;
+      else deptCounts[deptCode].out++;
     }
   });
 
@@ -2234,7 +2260,7 @@ export const getParentChildren = getLinkedPersons;
  *  STUDENT FLAGS
  * ------------------------------------------------------------------ */
 
-export type FlagStatus = 'suspicious' | 'restricted' | null;
+export type FlagStatus = 'OVERDUE' | 'UNAUTHORIZED_EXIT' | 'NO_GATE_PASS' | 'SUSPENDED' | 'CURFEW_VIOLATION' | 'MANUAL_LOCKDOWN';
 
 /**
  * Set or clear an admin advisory flag on a user.
@@ -2270,13 +2296,18 @@ export interface Lockdown {
 }
 
 function mLockdown(r: any): Lockdown {
+  // CEJ-96 fix: lockdown_broadcasts is a generic stub table
+  // (id, data JSONB, created_at, updated_at) — every payload column lives
+  // inside `data`, not as a real column. Read the JSONB payload instead of
+  // non-existent columns (scopes/message/issued_by/issued_at/lifted_at).
+  const d = r.data ?? {};
   return {
     id: r.id,
-    scopes: r.scopes ?? [],
-    message: r.message ?? null,
-    issuedBy: r.issued_by ?? null,
-    issuedAt: r.issued_at,
-    liftedAt: r.lifted_at ?? null,
+    scopes: d.scopes ?? [],
+    message: d.message ?? null,
+    issuedBy: d.issued_by ?? null,
+    issuedAt: d.issued_at ?? r.created_at,
+    liftedAt: d.lifted_at ?? null,
   };
 }
 
@@ -2284,24 +2315,37 @@ function mLockdown(r: any): Lockdown {
 export async function getActiveLockdown(): Promise<Lockdown | null> {
   const { getSupabaseServiceClient } = await import('./supabaseClient');
   const service = getSupabaseServiceClient();
+  // CEJ-96 fix: filter/order on real columns (created_at) and pick the most
+  // recent non-lifted row from the data JSONB payload.
   const { data, error } = await service
     .from('lockdown_broadcasts')
     .select('*')
-    .is('lifted_at', null)
-    .order('issued_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .order('created_at', { ascending: false })
+    .limit(25);
   if (error) { console.error('getActiveLockdown error:', error); return null; }
-  return data ? mLockdown(data) : null;
+  const active = (data || []).find((r: any) => !r.data?.lifted_at);
+  return active ? mLockdown(active) : null;
 }
 
 /** Broadcasts a new lockdown. */
 export async function createLockdown(scopes: string[], message: string | null, issuedBy: string): Promise<Lockdown | null> {
   const { getSupabaseServiceClient } = await import('./supabaseClient');
   const service = getSupabaseServiceClient();
+  // CEJ-96 fix: write the lockdown payload into the `data` JSONB column that
+  // actually exists on lockdown_broadcasts.
+  const issuedAt = new Date().toISOString();
   const { data, error } = await service
     .from('lockdown_broadcasts')
-    .insert({ scopes, message: message ?? null, issued_by: issuedBy })
+    .insert({
+      data: {
+        scopes,
+        message: message ?? null,
+        issued_by: issuedBy,
+        issued_at: issuedAt,
+        lifted_at: null,
+        lifted_by: null,
+      },
+    })
     .select()
     .single();
   if (error || !data) { console.error('createLockdown error:', error); return null; }
@@ -2319,11 +2363,22 @@ export async function createLockdown(scopes: string[], message: string | null, i
 export async function liftLockdown(lockdownId: string, liftedBy: string): Promise<boolean> {
   const { getSupabaseServiceClient } = await import('./supabaseClient');
   const service = getSupabaseServiceClient();
+  // CEJ-96 fix: merge lifted_at/lifted_by into the existing data JSONB
+  // payload (there are no lifted_* columns on the stub table).
+  const { data: row, error: fetchErr } = await service
+    .from('lockdown_broadcasts')
+    .select('*')
+    .eq('id', lockdownId)
+    .maybeSingle();
+  if (fetchErr || !row) { console.error('liftLockdown fetch error:', fetchErr); return false; }
+  if (row.data?.lifted_at) { return true; } // already lifted
   const { error } = await service
     .from('lockdown_broadcasts')
-    .update({ lifted_at: new Date().toISOString(), lifted_by: liftedBy })
-    .eq('id', lockdownId)
-    .is('lifted_at', null);
+    .update({
+      data: { ...(row.data || {}), lifted_at: new Date().toISOString(), lifted_by: liftedBy },
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', lockdownId);
   if (error) { console.error('liftLockdown error:', error); return false; }
   await addAudit({
     action: 'LOCKDOWN_LIFTED',
