@@ -12,6 +12,8 @@
 import { supabase, getSupabaseServiceClient } from './supabaseClient';
 import { Role, AccountStatus } from './types';
 import { getCached, setCached } from './cache';
+import { verifyAuthToken } from './auth-token';
+import { query } from './postgres';
 
 /**
  * Authenticated User Context
@@ -88,31 +90,32 @@ export async function isMfaRequiredForAdmin(): Promise<boolean> {
  * @returns AuthContext with validated user information
  */
 export async function createAuthContext(token: string): Promise<AuthContext> {
-  // Validate the token with Supabase
-  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+  // Validate token using self-hosted JWT verification
+  let userId: string | null = null;
+  const payload = await verifyAuthToken(token);
+  if (payload && payload.sub) {
+    userId = payload.sub;
+  } else {
+    // Fallback attempt with Supabase auth for backwards compatibility if needed
+    try {
+      const { data: { user } } = await supabase.auth.getUser(token);
+      if (user) userId = user.id;
+    } catch {
+      // ignore fallback error
+    }
+  }
 
-  if (authError || !user) {
+  if (!userId) {
     throw new Error('UNAUTHORIZED: Invalid or expired token');
   }
 
-  // Get the user profile from public.users using the service client to bypass RLS on server-side lookups
-  const service = getSupabaseServiceClient();
-  const { data: profile, error: profileError } = await service
-    .from('users')
-    .select('*')
-    .eq('id', user.id)
-    .maybeSingle();
-  if (profileError || !profile) {
-    // We have a valid Supabase user but no corresponding profile in our public.users table.
-    // This is a critical data integrity issue and should be treated as an auth failure.
+  // Get user profile from PostgreSQL users table
+  const userRes = await query('SELECT * FROM users WHERE id = $1 LIMIT 1', [userId]);
+  if (userRes.rows.length === 0) {
     throw new Error('UNAUTHORIZED: User profile not found');
   }
 
-  // Sanity check to ensure the ID from the token matches the profile ID.
-  if (profile.id !== user.id) {
-    // This should theoretically never happen if the database is consistent.
-    throw new Error('UNAUTHORIZED: User ID mismatch');
-  }
+  const profile = userRes.rows[0];
 
   // SECURITY (optional): sysadmins must have TOTP 2FA enrolled WHEN the
   // deployment enables it via system_config.global_settings.mfaRequiredForAdmin.

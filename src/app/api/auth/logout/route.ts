@@ -1,48 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withRateLimit } from "@/lib/rate-limit";
-import { getSupabaseServiceClient } from "@/lib/supabaseClient";
-import { getDbClient } from "@/lib/db";
 
-/**
- * POST /api/auth/logout — Revoke the active Supabase Auth session.
- *
- * Resolves the bearer token to its user and revokes every refresh token for
- * that user via the Admin API (server-side sign-out). Best-effort: failures
- * never block the client from clearing its own local state.
- *
- * Rate limited: 10 requests / min / IP.
- */
 async function handlePost(req: NextRequest) {
-  const authHeader = req.headers.get("authorization");
-  if (authHeader?.startsWith("Bearer ")) {
-    const rawToken = authHeader.slice(7).trim();
-    if (rawToken && rawToken !== "undefined" && rawToken !== "null" && rawToken.startsWith("eyJ")) {
-      try {
-        const {
-          data: { user },
-          error: getUserErr,
-        } = await getDbClient().auth.getUser(rawToken);
+  const response = NextResponse.json({ success: true, message: "Logged out successfully." });
 
-        if (!getUserErr && user?.id) {
-          const service = getSupabaseServiceClient();
-          try {
-            await service.from("users").update({ handle: null }).eq("id", user.id);
-          } catch (dbErr) {
-            console.error("Logout database session token clear error:", dbErr);
-          }
-          await service.auth.admin.signOut(rawToken).catch(() => {
-            // Token may already be expired or revoked; swallow to avoid 403 error logs
-          });
-        }
-      } catch (err) {
-        console.error("Logout error:", err);
-      }
-    }
-  }
-  return NextResponse.json({ success: true });
+  // Clear authentication cookies
+  response.cookies.set("access_token", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0,
+  });
+
+  response.cookies.set("refresh_token", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0,
+  });
+
+  return response;
 }
 
 export const POST = withRateLimit(handlePost, {
-  keyPrefix: "logout",
-  maxRequests: 30,
+  windowMs: 60 * 1000,
+  maxRequests: 60,
+  keyPrefix: "logout_limit",
 });

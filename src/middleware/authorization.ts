@@ -14,7 +14,8 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
+import { query } from "@/lib/postgres";
+import { randomUUID } from "crypto";
 import { Role, AccountStatus } from "@/lib/types";
 import {
   requireAuthenticatedUser as requireAuthUser,
@@ -294,19 +295,17 @@ export async function logAuditEvent(
   ipAddress: string | null = null
 ) {
   try {
-    const { error } = await supabase
-      .from('audit_logs')
-      .insert({
-        event_type: eventType,
-        user_id: userId,
-        details: details,
-        ip_address: ipAddress,
-        timestamp: new Date().toISOString()
-      });
-
-    if (error) {
-      console.error('Failed to log audit event:', error);
-    }
+    await query(
+      `INSERT INTO audit_logs (id, event_type, user_id, details, ip_address, created_at)
+       VALUES ($1, $2, $3, $4, $5, NOW())`,
+      [
+        randomUUID(),
+        eventType,
+        userId,
+        typeof details === "object" ? JSON.stringify(details) : details,
+        ipAddress || null,
+      ]
+    );
   } catch (err) {
     console.error('Error logging audit event:', err);
   }
