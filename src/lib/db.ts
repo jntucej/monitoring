@@ -929,6 +929,7 @@ export async function createVisitor(data: {
   const userRow = {
     id,
     unique_id: visitorId,
+    handle: visitorId.toLowerCase().replace(/[^a-z0-9_]/g, '_'),
     name: data.fullName,
     role: 'visitor',
     phone: data.phone || null,
@@ -2398,3 +2399,5 @@ export async function liftLockdown(lockdownId: string, liftedBy: string): Promis
   });
   return true;
 }
+
+export const provisionProfile = createUser;

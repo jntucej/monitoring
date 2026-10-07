@@ -155,6 +155,7 @@ async function handlePost(req: NextRequest) {
     const userRow = {
       id,
       unique_id: uniqueId.trim().toUpperCase(),
+      handle: (cleanEmail || uniqueId).toLowerCase().replace(/[^a-z0-9_]/g, "_"),
       name: String(fullName).trim(),
       role: personType,
       email: cleanEmail,

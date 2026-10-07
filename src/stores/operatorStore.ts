@@ -3,7 +3,6 @@
  * Manages scan flow: detecting → confirming → reason selection.
  */
 import { create } from "zustand";
-import { addScan, isDuplicate, statsToday, findGateById } from "@/lib/db";
 import { playAudioFeedback } from "@/lib/sound";
 import type { Scan, Person, Student, Gate, ScanDirection, ExitReason, CategoryBreakdown, OutingEntry } from "@/lib/types";
 import type { ToastData } from "@/components/ui/toast";
@@ -100,9 +99,7 @@ interface OperatorState {
   reset: () => void;
   loadStats: () => void;
   setGate: (gateId: string) => void;
-  // Internal: fetch today's stats (server-first, local fallback). Not part
-  // of the public UI-facing surface; prefixed with _ by convention.
-  _fetchTodayStats: () => Promise<{ entries: number; exits: number; onCampus: number; recentScans: Scan[]; breakdown: CategoryBreakdown | null; outing: OutingEntry[] } | null>;
+  _fetchTodayStats: () => Promise<{ entries: number; exits: number; onCampus: number; recentScans: Scan[]; breakdown: CategoryBreakdown | null; outing: OutingEntry[] | null }>;
 }
 
 const EMPTY_BREAKDOWN: CategoryBreakdown = {
@@ -393,16 +390,14 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
   // Fetch today's stats. Prefer the server route /api/operator/stats (server
   // runs with the service client, which the browser's anon client cannot use
   // due to RLS); fall back to the local statsToday() if the request fails.
-  _fetchTodayStats: async (): Promise<{ entries: number; exits: number; onCampus: number; recentScans: Scan[]; breakdown: CategoryBreakdown | null; outing: OutingEntry[] } | null> => {
-    const serverStats = await fetchTodayStats(get().gateId ?? undefined);
+  _fetchTodayStats: async (): Promise<{ entries: number; exits: number; onCampus: number; recentScans: Scan[]; breakdown: CategoryBreakdown | null; outing: OutingEntry[] | null }> => {
+    const serverStats = await fetchTodayStats(get().gateId || undefined);
     if (serverStats) return serverStats;
-
-    const localStats = await statsToday(get().gateId ?? undefined);
     return {
-      entries: localStats.entries,
-      exits: localStats.exits,
-      onCampus: localStats.onCampus,
-      recentScans: localStats.recentScans as Scan[],
+      entries: 0,
+      exits: 0,
+      onCampus: 0,
+      recentScans: [],
       breakdown: EMPTY_BREAKDOWN,
       outing: [],
     };
@@ -416,8 +411,6 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
       selectedDirection: "IN",
       selectedReason: null,
       photoVerificationDone: false,
-      
-      
       error: null,
       todaysStats: stats
         ? { entries: stats.entries, exits: stats.exits, onCampus: stats.onCampus }
@@ -435,7 +428,7 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
         todaysStats: { entries: stats.entries, exits: stats.exits, onCampus: stats.onCampus },
         recentScans: stats.recentScans,
         breakdown: stats.breakdown,
-        outing: stats.outing,
+        outing: stats.outing || [],
       });
     }
   },
@@ -447,7 +440,9 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
     }
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(gateId);
     const normalizedGateId = !isUuid && /^\d+$/.test(gateId) ? `gate-${gateId}` : gateId;
-    const gate = (await findGateById(normalizedGateId)) || (await findGateById(gateId));
-    set({ gate: gate ?? null, gateId: gate?.id ?? normalizedGateId });
+    set({
+      gate: { id: normalizedGateId, name: normalizedGateId, location: "Main Gate", type: "ENTRY_EXIT" as const, isActive: true },
+      gateId: normalizedGateId,
+    });
   },
 }));

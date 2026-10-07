@@ -66,9 +66,7 @@ async function handlePinLogin(req: NextRequest) {
     if (!pinValid && user.password_hash) {
       pinValid = await verifyPassword(cleanPin, user.password_hash);
     }
-    if (!pinValid && (user.pin_hash === cleanPin || user.initial_pin_hash === cleanPin)) {
-      pinValid = true;
-    }
+
 
     if (!pinValid) {
       return NextResponse.json(INVALID_PIN, { status: 401 });

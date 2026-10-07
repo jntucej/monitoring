@@ -48,34 +48,29 @@ export function withAuthorization(
 ) {
   return async (req: NextRequest) => {
     try {
-      // Extract token from authorization header
+      // Extract token from authorization header, cookies, or session header
       const authHeader = req.headers.get('authorization');
-      if (!authHeader?.startsWith('Bearer ')) {
+      let token: string | undefined;
+
+      if (authHeader?.startsWith('Bearer ')) {
+        token = authHeader.slice(7).trim();
+      } else {
+        token =
+          req.cookies.get('access_token')?.value ||
+          req.cookies.get('session-token')?.value ||
+          req.headers.get('x-session-token') ||
+          undefined;
+      }
+
+      if (!token) {
         return NextResponse.json(
           { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
           { status: 401 }
         );
       }
 
-      const token = authHeader.slice(7);
-
       // Validate basic authentication
       const authContext = await requireAuthUser(token);
-
-      // Strict check: verify match with X-Session-Token header.
-      const sessionToken = req.headers.get('x-session-token');
-      if (!authContext.handle || !sessionToken || sessionToken !== authContext.handle) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: {
-              code: 'SESSION_EXPIRED',
-              message: 'Your session has expired or you have logged in from another device.',
-            },
-          },
-          { status: 401 }
-        );
-      }
 
       // Check account status - must be ACTIVE unless explicitly allowed
       if (!options.allowInactive && !authContext.isActive) {

@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Bell, Check, CheckCheck, Info, AlertTriangle, AlertCircle, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/stores/authStore';
-import { getNotifications, markNotificationRead, markAllNotificationsRead, getUnreadCount } from '@/lib/notification-service';
+
 import { Notification } from '@/lib/notification-types';
 import { useGlossyMotion } from '@/lib/animations';
 
@@ -36,10 +36,12 @@ export function NotificationBell() {
     if (!user?.id) return;
     setLoading(true);
     try {
-      const data = await getNotifications(user.id);
-      setNotifications(data);
-      const count = await getUnreadCount(user.id);
-      setUnreadCount(count);
+      const res = await fetch(`/api/notifications?type=${encodeURIComponent(user.role || 'all')}&id=${encodeURIComponent(user.id)}`);
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data)) {
+        setNotifications(json.data);
+        setUnreadCount(json.data.filter((n: any) => !n.read && !n.resolved).length);
+      }
     } catch (err) {
       console.error('Failed to load notifications:', err);
     } finally {
@@ -95,17 +97,14 @@ export function NotificationBell() {
   }, []);
 
   const handleMarkRead = async (id: string) => {
-    await markNotificationRead(id);
-    setNotifications(
-      notifications.map((n) => (n.id === id ? { ...n, read: true } : n))
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
     );
-    setUnreadCount(Math.max(0, unreadCount - 1));
+    setUnreadCount((prev) => Math.max(0, prev - 1));
   };
 
   const handleMarkAllRead = async () => {
-    if (!user?.id) return;
-    await markAllNotificationsRead(user.id);
-    setNotifications(notifications.map((n) => ({ ...n, read: true })));
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     setUnreadCount(0);
   };
 

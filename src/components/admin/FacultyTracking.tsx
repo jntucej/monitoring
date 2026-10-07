@@ -20,7 +20,7 @@ import {
   Info,
   ChevronRight,
 } from "lucide-react";
-import { FacultyMemberAttendance, DepartmentAttendanceSummary, HeatmapDay } from "@/app/api/faculty/attendance/route";
+import type { FacultyMemberAttendance, DepartmentAttendanceSummary, HeatmapDay } from "@/app/api/faculty/attendance/route";
 import { Modal } from "@/components/ui/modal";
 
 interface FacultyTrackingProps {

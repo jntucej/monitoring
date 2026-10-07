@@ -750,7 +750,7 @@ CREATE POLICY mlog_select_operator ON movement_logs FOR SELECT TO authenticated
 CREATE POLICY mlog_select_staff  ON movement_logs FOR SELECT TO authenticated
   USING (is_admin(current_setting('app.current_user_id', true)::uuid) OR is_warden(current_setting('app.current_user_id', true)::uuid));
 CREATE POLICY mlog_select_own    ON movement_logs FOR SELECT TO authenticated USING (user_id = current_setting('app.current_user_id', true)::uuid);
-CREATE POLICY mlog_insert_staff  ON movement_logs FOR INSERT INTO TO authenticated
+CREATE POLICY mlog_insert_staff  ON movement_logs FOR INSERT TO authenticated
   WITH CHECK (is_operator(current_setting('app.current_user_id', true)::uuid) OR is_admin(current_setting('app.current_user_id', true)::uuid) OR is_warden(current_setting('app.current_user_id', true)::uuid));
 
 -- 6.5b DAILY STATS (operator own gate; staff broad; admin read all; service writes/backfills)
@@ -770,7 +770,7 @@ CREATE POLICY occ_select_own     ON campus_occupancy FOR SELECT TO authenticated
 
 -- 6.7 VISITOR LOGS (broad authenticated; inserts by operators/admin)
 CREATE POLICY vlogs_select_auth ON visitor_logs FOR SELECT TO authenticated USING (true);
-CREATE POLICY vlogs_insert_auth ON visitor_logs FOR INSERT INTO TO authenticated
+CREATE POLICY vlogs_insert_auth ON visitor_logs FOR INSERT TO authenticated
   WITH CHECK (is_operator(current_setting('app.current_user_id', true)::uuid) OR is_admin(current_setting('app.current_user_id', true)::uuid));
 CREATE POLICY vlogs_update_auth ON visitor_logs FOR UPDATE TO authenticated
   USING (is_operator(current_setting('app.current_user_id', true)::uuid) OR is_admin(current_setting('app.current_user_id', true)::uuid));
@@ -780,7 +780,7 @@ CREATE POLICY passes_select_own ON gate_passes FOR SELECT TO authenticated
   USING (user_id = current_setting('app.current_user_id', true)::uuid OR user_id = ANY(get_guardian_wards(current_setting('app.current_user_id', true)::uuid)));
 CREATE POLICY passes_select_staff ON gate_passes FOR SELECT TO authenticated
   USING (is_admin(current_setting('app.current_user_id', true)::uuid) OR is_warden(current_setting('app.current_user_id', true)::uuid));
-CREATE POLICY passes_insert_own ON gate_passes FOR INSERT INTO TO authenticated WITH CHECK (
+CREATE POLICY passes_insert_own ON gate_passes FOR INSERT TO authenticated WITH CHECK (
   user_id = current_setting('app.current_user_id', true)::uuid OR user_id = ANY(get_guardian_wards(current_setting('app.current_user_id', true)::uuid)) OR is_admin(current_setting('app.current_user_id', true)::uuid));
 CREATE POLICY passes_update_approvers ON gate_passes FOR UPDATE TO authenticated USING (
   is_admin(current_setting('app.current_user_id', true)::uuid) OR is_warden(current_setting('app.current_user_id', true)::uuid))

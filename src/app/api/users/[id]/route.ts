@@ -65,7 +65,7 @@ async function handlePatch(req: NextRequest) {
         updates.role = body.role;
       }
       if (body.account_status && VALID_STATUSES.includes(body.account_status as AccountStatus)) {
-        updates.account_status = body.account_status;
+        updates.status = body.account_status || body.status;
       }
       if (body.flags && Array.isArray(body.flags)) {
         for (const flag of body.flags) {

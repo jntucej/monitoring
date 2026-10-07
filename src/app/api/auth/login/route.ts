@@ -82,25 +82,36 @@ async function handleLogin(req: NextRequest) {
     if (!passwordValid && (user.pin_hash || user.initial_pin_hash)) {
       passwordValid = await verifyPassword(rawPassword, user.pin_hash || user.initial_pin_hash);
     }
-    if (!passwordValid && user.password_hash === rawPassword) {
-      passwordValid = true;
-    }
+
 
     if (!passwordValid) {
       return NextResponse.json(GENERIC_FAILURE, { status: 401 });
     }
 
     const requiresMfa = (user.role === "sysadmin" || user.role === "admin") && (await isMfaRequiredForAdmin());
-    if (requiresMfa && user.totp_secret && !body.totp_code) {
-      return NextResponse.json(
-        {
-          success: true,
-          mfa_required: true,
-          user_id: user.id,
-          message: "TOTP 2FA verification required.",
-        },
-        { status: 200 }
-      );
+    if (requiresMfa && user.totp_secret) {
+      if (!body.totp_code) {
+        return NextResponse.json(
+          {
+            success: true,
+            mfa_required: true,
+            user_id: user.id,
+            message: "TOTP 2FA verification required.",
+          },
+          { status: 200 }
+        );
+      }
+      const { verifyTOTPCode } = await import("@/lib/totp");
+      const totpValid = verifyTOTPCode(user.totp_secret, String(body.totp_code));
+      if (!totpValid) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: { code: "INVALID_MFA_CODE", message: "Invalid two-factor authentication code." },
+          },
+          { status: 401 }
+        );
+      }
     }
 
     const access_token = await signAccessToken({

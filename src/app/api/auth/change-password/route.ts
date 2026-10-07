@@ -57,9 +57,7 @@ async function handleChangePassword(req: NextRequest, { auth }: { auth: AuthCont
     if (!valid && (user.pin_hash || user.initial_pin_hash)) {
       valid = await verifyPassword(currentPassword, user.pin_hash || user.initial_pin_hash);
     }
-    if (!valid && user.password_hash === currentPassword) {
-      valid = true;
-    }
+
 
     if (!valid) {
       return NextResponse.json(

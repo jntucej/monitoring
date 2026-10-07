@@ -105,30 +105,53 @@ export async function withTransaction<T>(
  */
 export interface FilterCondition {
   column: string;
-  op: "=" | "!=" | ">" | "<" | ">=" | "<=" | "LIKE" | "ILIKE" | "IN" | "IS";
+  op: "=" | "!=" | ">" | "<" | ">=" | "<=" | "LIKE" | "ILIKE" | "IN" | "IS" | "NOT_IS";
   value: any;
+  rawClause?: string;
 }
 
 export class PostgresQueryBuilder<T = any> {
   private tableName: string;
   private selectColumns: string = "*";
+  private rawColumns: string = "*";
+  private embeddedRelations: string[] = [];
   private filters: FilterCondition[] = [];
+  private orClauses: string[] = [];
   private orderClause?: string;
   private limitCount?: number;
   private offsetCount?: number;
   private isSingle: boolean = false;
   private isMaybeSingle: boolean = false;
   private countMode: boolean = false;
+  private headOnly: boolean = false;
+  private pendingMutation?: { type: "insert" | "update" | "delete" | "upsert"; data?: any; options?: any };
 
   constructor(table: string) {
     this.tableName = table;
   }
 
   select(columns: string = "*", options?: { count?: "exact" | "planned" | "estimated"; head?: boolean }) {
-    this.selectColumns = columns;
+    this.rawColumns = columns;
     if (options?.count) {
       this.countMode = true;
     }
+    if (options?.head) {
+      this.headOnly = true;
+    }
+
+    const relationMatches = columns.match(/([a-zA-Z0-9_]+)\s*\(\*\)/g);
+    if (relationMatches) {
+      this.embeddedRelations = relationMatches.map(m => m.replace(/\s*\(\*\)/, "").trim());
+    }
+
+    let clean = columns
+      .replace(/[a-zA-Z0-9_]+:[a-zA-Z0-9_!]+\s*\([^)]*\)/g, "")
+      .replace(/[a-zA-Z0-9_]+\s*\([^)]*\)/g, "")
+      .replace(/,\s*,/g, ",")
+      .replace(/^,\s*|\s*,$/g, "")
+      .trim();
+
+    this.selectColumns = clean.length > 0 ? clean : "*";
     return this;
   }
 
@@ -180,6 +203,41 @@ export class PostgresQueryBuilder<T = any> {
   is(column: string, value: null | boolean) {
     this.filters.push({ column, op: "IS", value });
     return this;
+  }
+
+  not(column: string, op: string, value: any) {
+    if (op === "is" && value === null) {
+      this.filters.push({ column, op: "NOT_IS", value: null });
+    } else if (op === "eq") {
+      this.filters.push({ column, op: "!=", value });
+    } else if (op === "in") {
+      const formatted = Array.isArray(value) ? value.map(v => typeof v === 'string' ? `'${v.replace(/'/g, "''")}'` : v).join(", ") : "NULL";
+      this.filters.push({ column, op: "=" as any, value: null, rawClause: `${column} NOT IN (${formatted})` });
+    } else {
+      this.filters.push({ column, op: "!=", value });
+    }
+    return this;
+  }
+
+  or(filterString: string) {
+    this.orClauses.push(filterString);
+    return this;
+  }
+
+  filter(column: string, op: string, value: any) {
+    switch (op) {
+      case "eq": return this.eq(column, value);
+      case "neq": return this.neq(column, value);
+      case "gt": return this.gt(column, value);
+      case "gte": return this.gte(column, value);
+      case "lt": return this.lt(column, value);
+      case "lte": return this.lte(column, value);
+      case "like": return this.like(column, value);
+      case "ilike": return this.ilike(column, value);
+      case "in": return this.in(column, Array.isArray(value) ? value : [value]);
+      case "is": return this.is(column, value);
+      default: return this.eq(column, value);
+    }
   }
 
   order(column: string, options?: { ascending?: boolean }) {
@@ -266,6 +324,36 @@ export class PostgresQueryBuilder<T = any> {
     onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null
   ): Promise<TResult1 | TResult2> {
     return this.execute().then(onfulfilled, onrejected);
+  }
+
+  async upsert(rows: Record<string, any> | Record<string, any>[], options?: { onConflict?: string; ignoreDuplicates?: boolean }) {
+    const list = Array.isArray(rows) ? rows : [rows];
+    if (list.length === 0) return { data: [], error: null };
+    const keys = Object.keys(list[0]);
+    const params: any[] = [];
+    const valueTuples = list.map((row) => {
+      const tuple = keys.map((k) => {
+        params.push(row[k]);
+        return `$${params.length}`;
+      });
+      return `(${tuple.join(", ")})`;
+    });
+    const conflictCol = options?.onConflict || "id";
+    let sql = `INSERT INTO ${this.tableName} (${keys.join(", ")}) VALUES ${valueTuples.join(", ")}`;
+    if (options?.ignoreDuplicates) {
+      sql += ` ON CONFLICT (${conflictCol}) DO NOTHING`;
+    } else {
+      const updateSet = keys.filter(k => k !== conflictCol).map(k => `${k} = EXCLUDED.${k}`).join(", ");
+      sql += updateSet.length > 0 ? ` ON CONFLICT (${conflictCol}) DO UPDATE SET ${updateSet}` : ` ON CONFLICT (${conflictCol}) DO NOTHING`;
+    }
+    sql += " RETURNING *";
+    try {
+      const res = await query(sql, params);
+      const data = Array.isArray(rows) ? res.rows : res.rows[0];
+      return { data, error: null };
+    } catch (err: any) {
+      return { data: null, error: { message: err.message, code: err.code } };
+    }
   }
 
   async insert(rows: Record<string, any> | Record<string, any>[]) {
