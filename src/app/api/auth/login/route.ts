@@ -1,44 +1,39 @@
 /**
  * POST /api/auth/login
- * Password authentication backed by Supabase Auth. Supabase Auth is the SOLE authentication authority:
- * Credentials verified ONLY via `supabase.auth.signInWithPassword`.
- * Endpoint issues genuine Supabase access/refresh tokens; mints custom opaque tokens own.
- * Matching ACTIVE profile `public.users` additionally required.
+ * Native PostgreSQL authentication — no Supabase dependency.
+ * Credentials verified via bcrypt against password_hash stored in users table.
+ * Issues JWT access token + opaque refresh token stored in sessions table.
  * Rate limited: 5 attempts / 15 min / IP.
  */
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { withRateLimit } from "@/lib/rate-limit";
-import { supabase, getSupabaseServiceClient } from "@/lib/supabaseClient";
-import { isMfaRequiredForAdmin } from "@/lib/authContext";
+import { findUserByLoginIdentifier, createSession, query, verifyPassword } from "@/lib/db-postgres";
 import { SignJWT } from "jose";
 import { getSigningKey } from "@/lib/qr-token";
+import { logAuditEvent } from "@/lib/audit";
 
 const GENERIC_FAILURE = {
   success: false,
   error: { code: "INVALID_CREDENTIALS", message: "Invalid credentials or user not found." },
 };
 
-async function resolveIdentifierToEmail(login: string): Promise<string | null> {
+async function resolveIdentifierToUser(login: string): Promise<any | null> {
   try {
-    const supabaseAdmin = getSupabaseServiceClient();
-    const { data: byLoginIdentifier, error: loginErr } = await supabaseAdmin
-      .from("users")
-      .select("email")
-      .eq("login_identifier", login.toLowerCase().trim())
-      .eq("status", "ACTIVE")
-      .single();
+    // Try login_identifier (employee ID, roll number, etc.)
+    const user = await findUserByLoginIdentifier(login.toLowerCase().trim());
+    if (user) return user;
 
-    if (byLoginIdentifier?.email) return byLoginIdentifier.email;
+    // Also try by unique_id (uppercase)
+    const user2 = await findUserByLoginIdentifier(login.toUpperCase().trim());
+    if (user2) return user2;
 
-    const { data: byUniqueId, error: uniqueIdErr } = await supabaseAdmin
-      .from("users")
-      .select("email")
-      .eq("unique_id", login.toUpperCase().trim())
-      .eq("status", "ACTIVE")
-      .single();
-
-    return byUniqueId?.email ?? null;
+    // Also try by email
+    const { rows } = await query(
+      "SELECT u.*, ed.*, sd.* FROM users u LEFT JOIN employee_details ed ON u.id = ed.user_id LEFT JOIN student_details sd ON u.id = sd.user_id WHERE u.email = $1 AND u.status = 'ACTIVE'",
+      [login.toLowerCase().trim()]
+    );
+    return rows[0] || null;
   } catch (resolveErr) {
     console.error("Identifier resolution error:", resolveErr);
     return null;
@@ -52,54 +47,78 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(GENERIC_FAILURE, { status: 400 });
     }
 
-    const email = await resolveIdentifierToEmail(login.trim());
-    if (!email) {
-      return NextResponse.json(GENERIC_FAILURE, { status: 401 });
-    }
-
     // Normalize password (trim)
     const normalizedPassword = password.trim();
     if (!normalizedPassword) {
       return NextResponse.json(GENERIC_FAILURE, { status: 401 });
     }
 
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password: normalizedPassword,
-    });
-
-    if (authError || !authData?.session || !authData?.user) {
-      console.error("Supabase auth error:", authError);
+    // Resolve user by identifier
+    const profile = await resolveIdentifierToUser(login.trim());
+    if (!profile) {
       return NextResponse.json(GENERIC_FAILURE, { status: 401 });
     }
 
-    // Fetch user profile to ensure ACTIVE status and get role
-    const supabaseAdmin = getSupabaseServiceClient();
-    const { data: profile, error: profileError } = await supabaseAdmin
-      .from("users")
-      .select("id, role, status")
-      .eq("id", authData.user.id)
-      .eq("status", "ACTIVE")
-      .single();
-
-    if (profileError || !profile) {
-      console.error("Profile fetch error:", profileError);
+    // Verify password against bcrypt hash stored in users table
+    const passwordValid = await verifyPassword(profile.id, normalizedPassword);
+    if (!passwordValid) {
+      // Log failed attempt
+      await logAuditEvent({
+        action: "LOGIN_FAILED",
+        userId: profile.id,
+        userName: profile.name,
+        userRole: profile.role,
+        details: { reason: "invalid_password", login: login.trim() },
+        ipAddress: req.headers.get("x-forwarded-for")?.split(",")[0] || req.headers.get("x-real-ip") || "unknown",
+        userAgent: req.headers.get("user-agent") || "unknown",
+      }).catch(() => {});
       return NextResponse.json(GENERIC_FAILURE, { status: 401 });
     }
 
-    // Create custom token (JWT) for session management
-    const customTokenPayload = {
-      sub: authData.user.id,
-      email: authData.user.email ?? "",
+    if (profile.status !== "ACTIVE") {
+      return NextResponse.json(GENERIC_FAILURE, { status: 401 });
+    }
+
+    // Generate tokens
+    const now = Math.floor(Date.now() / 1000);
+    const accessTokenExpiry = now + 3600; // 1 hour
+    const refreshToken = randomUUID();
+    const refreshTokenExpiry = now + 60 * 60 * 24 * 30; // 30 days
+
+    const tokenPayload = {
+      sub: profile.id,
+      email: profile.email || "",
       role: profile.role,
-      iat: Math.floor(Date.now() / 1000),
-      exp: Math.floor(Date.now() / 1000) + 3600, // 1 hour
+      iat: now,
+      exp: accessTokenExpiry,
     };
 
     const signingKey = getSigningKey();
-    const access_token = await new SignJWT(customTokenPayload)
+    const access_token = await new SignJWT(tokenPayload)
       .setProtectedHeader({ alg: "HS256", typ: "JWT" })
       .sign(signingKey);
+
+    // Store session in database
+    await createSession({
+      user_id: profile.id,
+      session_token: access_token,
+      refresh_token: refreshToken,
+      expires_at: new Date(accessTokenExpiry * 1000),
+      created_at: new Date(now * 1000),
+      ip_address: req.headers.get("x-forwarded-for")?.split(",")[0] || req.headers.get("x-real-ip") || null,
+      user_agent: req.headers.get("user-agent") || null,
+    });
+
+    // Log successful login
+    await logAuditEvent({
+      action: "LOGIN",
+      userId: profile.id,
+      userName: profile.name,
+      userRole: profile.role,
+      details: { login: login.trim() },
+      ipAddress: req.headers.get("x-forwarded-for")?.split(",")[0] || req.headers.get("x-real-ip") || "unknown",
+      userAgent: req.headers.get("user-agent") || "unknown",
+    }).catch(() => {});
 
     const cookieOptions = {
       httpOnly: true,
@@ -111,18 +130,24 @@ export async function POST(req: NextRequest) {
 
     const response = NextResponse.json({
       success: true,
-      access_token,
+      data: {
+        token: access_token,
+        refreshToken: refreshToken,
+        user: {
+          id: profile.id,
+          email: profile.email,
+          name: profile.name,
+          role: profile.role,
+        },
+      },
       expires_in: 3600,
       token_type: "Bearer",
     });
 
     response.cookies.set("session-token", access_token, cookieOptions);
 
-    // Also set refresh token if available (from Supabase)
-    if (authData.session?.refresh_token) {
-      const refreshCookieOptions = { ...cookieOptions, maxAge: 60 * 60 * 24 * 30 }; // 30 days
-      response.cookies.set("refresh-token", authData.session.refresh_token, refreshCookieOptions);
-    }
+    const refreshCookieOptions = { ...cookieOptions, maxAge: 60 * 60 * 24 * 30 }; // 30 days
+    response.cookies.set("refresh-token", refreshToken, refreshCookieOptions);
 
     return response;
   } catch (err) {

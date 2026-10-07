@@ -94,20 +94,30 @@ export async function checkRateLimit(
     }
   }
 
-  // 2. Supabase DB distributed rate limit check for production serverless fallback
+  // 2. PostgreSQL DB distributed rate limit check for production serverless fallback
   if (process.env.NODE_ENV === 'production' && !isDev) {
     try {
-      const { getSupabaseServiceClient } = await import('./supabaseClient');
-      const client = getSupabaseServiceClient();
-      const windowStart = new Date(Date.now() - windowMs).toISOString();
+      const { rows } = await query(
+        `SELECT COUNT(*) as count FROM api_metrics 
+         WHERE endpoint = $1 AND timestamp >= $2`,
+        [key, new Date(Date.now() - windowMs).toISOString()]
+      );
 
-      const { count } = await client
-        .from('api_metrics')
-        .select('*', { count: 'exact', head: true })
-        .eq('endpoint', key)
-        .gte('timestamp', windowStart);
+      const currentCount = parseInt(rows[0]?.count || '0', 10);
+      const limited = currentCount >= effectiveMaxRequests;
+      const remaining = Math.max(0, effectiveMaxRequests - currentCount);
+      const resetTime = new Date(Date.now() + windowMs);
 
-      const currentCount = (count || 0) + 1;
+      return {
+        limited,
+        remaining,
+        resetTime,
+        retryAfter: limited ? Math.ceil(windowMs / 1000) : 0,
+      };
+    } catch (err) {
+      console.warn('[rate-limit] PostgreSQL distributed rate limiter error, falling back:', err);
+    }
+  } currentCount = (count || 0) + 1;
       const resetTime = new Date(Date.now() + windowMs);
       const limited = currentCount > effectiveMaxRequests;
       const remaining = Math.max(0, effectiveMaxRequests - currentCount);

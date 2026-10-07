@@ -60,8 +60,8 @@ export interface AuthContext {
  * Whether administrators (sysadmin) must have TOTP 2FA enrolled.
  * Read from system_config.global_settings.mfaRequiredForAdmin (cached 60s).
  *
- * ponytail: fails OPEN — if config is unavailable we do NOT lock admins out.
  * Upgrade path: fail-closed with a break-glass env override.
+ * If config is unavailable, MFA IS required for admins (fail-closed).
  */
 export async function isMfaRequiredForAdmin(): Promise<boolean> {
   const cached = await getCached<boolean>("system_config:mfaRequiredForAdmin");
@@ -77,7 +77,8 @@ export async function isMfaRequiredForAdmin(): Promise<boolean> {
     await setCached("system_config:mfaRequiredForAdmin", required, 60);
     return required;
   } catch {
-    return false;
+    // FAIL-CLOSED: If config is unavailable, require MFA for admins
+    return true;
   }
 }
 

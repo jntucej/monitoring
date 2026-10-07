@@ -1,10 +1,9 @@
 /* eslint-disable */
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseServiceClient } from "@/lib/supabaseClient";
-import { addAudit, findUserById } from "@/lib/db";
 import { withRateLimit } from "@/lib/rate-limit";
 import { withAuthorization } from "@/middleware/authorization";
-import bcrypt from "bcryptjs";
+import { query, verifyPassword, updatePasswordHash } from "@/lib/db-postgres";
+import { logAuditEvent } from "@/lib/audit";
 
 async function handlePost(req: NextRequest, { auth }: { auth: any }) {
   const userId = auth?.user?.id || req.headers.get("x-user-id");
@@ -32,49 +31,26 @@ async function handlePost(req: NextRequest, { auth }: { auth: any }) {
       );
     }
 
-    const supabase = getSupabaseServiceClient();
-    const user = await findUserById(userId);
-
-    if (!user) {
+    // Verify current password against hash stored in users table
+    const passwordValid = await verifyPassword(userId, currentPassword);
+    if (!passwordValid) {
       return NextResponse.json(
-        { success: false, error: { code: "NOT_FOUND", message: "User profile not found" } },
-        { status: 404 }
+        { success: false, error: { code: "UNAUTHORIZED", message: "Incorrect current password" } },
+        { status: 401 }
       );
     }
 
-    // Verify current password against custom bcrypt hash in supabase auth
-    const passHash = (user as any).password_hash || user.passwordHash;
-    if (passHash) {
-      const match = await bcrypt.compare(currentPassword, passHash);
-      if (!match) {
-        return NextResponse.json(
-          { success: false, error: { code: "UNAUTHORIZED", message: "Incorrect current password" } },
-          { status: 401 }
-        );
-      }
-    }
+    // Hash new password and update in database
+    const hashedPassword = await (await import("bcryptjs")).default.hash(newPassword, 12);
+    await updatePasswordHash(userId, hashedPassword);
 
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, 12);
-
-    // Update Supabase Auth user password
-    const { error: authError } = await supabase.auth.admin.updateUserById(
-      userId,
-      { password: hashedPassword }
-    );
-
-    if (authError) {
-      return NextResponse.json(
-        { success: false, error: { code: "SERVER_ERROR", message: authError.message || "Failed to update password" } },
-        { status: 500 }
-      );
-    }
-
-    await addAudit({
-      userId,
+    await logAuditEvent({
       action: "PASSWORD_CHANGED",
+      userId: userId,
+      userName: null,
+      userRole: null,
       details: { timestamp: new Date().toISOString() },
-    });
+    }).catch(() => {});
 
     return NextResponse.json({
       success: true,
