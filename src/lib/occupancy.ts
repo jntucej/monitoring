@@ -18,11 +18,11 @@ export interface ZoneOccupancy {
 
 export async function getCurrentOccupancy(): Promise<{ total: number; capacity: number; zones: ZoneOccupancy[] }> {
   try {
-    // Get live count of inside people from users table
+    // Get live count of inside people from campus_occupancy table
     const { count: insideStudents } = await getDbClient()
-      .from("users")
+      .from("campus_occupancy")
       .select("*", { count: "exact", head: true })
-      .eq("status", "INSIDE");
+      .eq("current_status", "IN");
 
     const { count: totalUsersCount } = await getDbClient()
       .from("users")

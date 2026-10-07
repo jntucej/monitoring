@@ -20,7 +20,6 @@ async function handlePost(
   const params = await context.params;
   const path = params.path ? params.path.join("/") : "";
 
-  // Mobile login route: POST /api/mobile/login
   if (path === "login") {
     if (process.env.MOBILE_LOGIN_ENABLED === "false") {
       return NextResponse.json(
@@ -31,10 +30,9 @@ async function handlePost(
 
     try {
       const body = await req.json().catch(() => null);
-      const { uniqueId, code, deviceId } = body ?? {};
+      const { uniqueId, code, deviceId, password, pin } = (body ?? {}) as Record<string, unknown>;
 
-      if (!uniqueId || !code || !deviceId) {
-        // Uniform failure — do NOT leak which field is missing
+      if (!uniqueId || (!code && !password && !pin)) {
         return uniformFailure();
       }
 
@@ -50,6 +48,68 @@ async function handlePost(
       const person = await findPersonByUniqueId(formattedUniqueId);
       if (!person) {
         return uniformFailure();
+      }
+
+      if (person.status && person.status.toUpperCase() !== "ACTIVE") {
+        return NextResponse.json(
+          { success: false, error: { code: "ACCOUNT_INACTIVE", message: `Account is ${person.status}` } },
+          { status: 403 }
+        );
+      }
+
+      // Check if login with password or pin
+      if (password || pin) {
+        const { query } = await import("@/lib/postgres");
+        const { verifyPassword } = await import("@/lib/auth-token");
+        const userRes = await query(
+          `SELECT * FROM users WHERE (UPPER(unique_id) = UPPER($1) OR LOWER(email) = LOWER($1)) AND status = 'ACTIVE' LIMIT 1`,
+          [formattedUniqueId]
+        );
+
+        if (userRes.rows.length === 0) {
+          return uniformFailure();
+        }
+
+        const user = userRes.rows[0];
+        const credential = String(password || pin || "").trim();
+        let credentialValid = false;
+
+        if (user.password_hash) {
+          credentialValid = await verifyPassword(credential, user.password_hash);
+        }
+        if (!credentialValid && user.pin_hash) {
+          credentialValid = await verifyPassword(credential, user.pin_hash);
+        }
+        if (!credentialValid && user.initial_pin_hash) {
+          credentialValid = await verifyPassword(credential, user.initial_pin_hash);
+        }
+
+        if (!credentialValid) {
+          return uniformFailure();
+        }
+
+        const targetDeviceId = String(deviceId || "mobile-device");
+        const token = await generateMobileToken(person.id, person.uniqueId, targetDeviceId);
+
+        await addAudit({
+          action: "MOBILE_LOGIN",
+          userId: person.id,
+          userName: person.fullName,
+          role: (person.personType || "student") as unknown as Role,
+          details: {
+            uniqueId: person.uniqueId,
+            deviceId: targetDeviceId,
+            method: password ? "password" : "pin",
+          },
+        });
+
+        return NextResponse.json({
+          success: true,
+          token,
+          person,
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        });
+      }
       }
 
       if (person.status && person.status.toUpperCase() !== "ACTIVE") {
@@ -137,7 +197,6 @@ export async function GET(
   const params = await context.params;
   const path = params.path ? params.path.join("/") : "";
 
-  // Authenticate mobile request via Authorization header: Bearer <token>
   const authHeader = req.headers.get("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -151,18 +210,11 @@ export async function GET(
     return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
   }
 
-  // Mobile profile: GET /api/mobile/profile
-  if (path === "profile") {
-    return NextResponse.json({ person });
-  }
-
-  // Mobile history: GET /api/mobile/history
+  if (path === "profile") return NextResponse.json({ person });
   if (path === "history") {
     const history = await getPersonHistory(person.id);
     return NextResponse.json({ history });
   }
-
-  // Mobile digital ID: GET /api/mobile/idcard
   if (path === "idcard") {
     return NextResponse.json({
       uniqueId: person.uniqueId,
@@ -175,6 +227,5 @@ export async function GET(
       status: person.status,
     });
   }
-
   return NextResponse.json({ error: "Endpoint not found" }, { status: 404 });
 }

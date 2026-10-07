@@ -1,12 +1,5 @@
-/**
- * GET /api/persons/[uniqueId]/history
- * Self-service activity feed ANY account type (student, faculty, staff, admin, worker).
- * Also guardian access child's history. Privileged roles (admin/sysadmin/operator)
- * view anyone's history.
- * Response: success: true, data: { history: Scan[] }
- */
 import { NextRequest, NextResponse } from "next/server";
-import { getPersonHistory } from "@/lib/db";
+import { getPersonHistory, getParentChildren } from "@/lib/db";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -24,7 +17,6 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
     const authRole = auth.role;
     const isPrivileged = ["admin", "sysadmin", "operator"].includes(authRole);
 
-    // Non-privileged callers may only view their own history.
     if (!isPrivileged) {
       const service = getSupabaseServiceClient();
       const { data: profile } = await service
@@ -33,9 +25,17 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
         .eq("id", auth.userId)
         .maybeSingle();
 
-      if (!profile?.unique_id || profile.unique_id !== uniqueId) {
+      let isOwn = profile?.unique_id && profile.unique_id === uniqueId;
+      let isGuardianOfStudent = false;
+
+      if (!isOwn && (authRole === "parent" || authRole === "guardian")) {
+        const children = await getParentChildren(auth.userId);
+        isGuardianOfStudent = children.some(c => c.roll === uniqueId || c.id === uniqueId);
+      }
+
+      if (!isOwn && !isGuardianOfStudent) {
         return NextResponse.json(
-          { success: false, error: { code: "FORBIDDEN", message: "You can only view your own history." } },
+          { success: false, error: { code: "FORBIDDEN", message: "You can only view your own history or your child's history." } },
           { status: 403 }
         );
       }
@@ -54,7 +54,7 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
 
 export const GET = withRateLimit(
   withAuthorization(handleGet, {
-    requiredRole: ["admin", "sysadmin", "operator", "student", "faculty", "staff", "worker", "parent", "warden"],
+    requiredRole: ["admin", "sysadmin", "operator", "student", "faculty", "staff", "worker", "parent", "warden", "supervisor"],
   }),
   { keyPrefix: "person_history", maxRequests: 60 }
 );

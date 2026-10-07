@@ -118,6 +118,12 @@ export interface FilterCondition {
   rawClause?: string;
 }
 
+interface EmbeddedRelation {
+  alias: string;
+  targetTable: string;
+  fields: string[];
+}
+
 export class PostgresQueryBuilder<T = any> {
   private tableName: string;
   private selectColumns: string = "*";
@@ -268,70 +274,221 @@ export class PostgresQueryBuilder<T = any> {
   single() {
     this.isSingle = true;
     this.limitCount = 1;
-    return this.execute();
+    return this;
   }
 
   maybeSingle() {
     this.isMaybeSingle = true;
     this.limitCount = 1;
-    return this.execute();
+    return this;
+  }
+
+  private parsePostgrestOrClause(clauseStr: string, params: any[]): string[] {
+    const tokens = clauseStr.split(/,(?![^()]*\))/).map((t) => t.trim()).filter(Boolean);
+    const sqlParts: string[] = [];
+    for (const token of tokens) {
+      const match = token.match(/^([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)\.(.*)$/);
+      if (match) {
+        const [, col, op, val] = match;
+        let cleanVal: any = val;
+        if (cleanVal.startsWith('"') && cleanVal.endsWith('"')) cleanVal = cleanVal.slice(1, -1);
+        else if (cleanVal.startsWith("'") && cleanVal.endsWith("'")) cleanVal = cleanVal.slice(1, -1);
+        switch (op.toLowerCase()) {
+          case "eq": params.push(cleanVal); sqlParts.push(`${col} = $${params.length}`); break;
+          case "neq": params.push(cleanVal); sqlParts.push(`${col} != $${params.length}`); break;
+          case "ilike": params.push(cleanVal); sqlParts.push(`${col} ILIKE $${params.length}`); break;
+          case "like": params.push(cleanVal); sqlParts.push(`${col} LIKE $${params.length}`); break;
+          case "gt": params.push(cleanVal); sqlParts.push(`${col} > $${params.length}`); break;
+          case "gte": params.push(cleanVal); sqlParts.push(`${col} >= $${params.length}`); break;
+          case "lt": params.push(cleanVal); sqlParts.push(`${col} < $${params.length}`); break;
+          case "lte": params.push(cleanVal); sqlParts.push(`${col} <= $${params.length}`); break;
+          case "is": if (cleanVal === "null") sqlParts.push(`${col} IS NULL`); else if (cleanVal === "true") sqlParts.push(`${col} IS TRUE`); else if (cleanVal === "false") sqlParts.push(`${col} IS FALSE`); break;
+          default: params.push(cleanVal); sqlParts.push(`${col} = $${params.length}`); break;
+        }
+      } else if (/^[a-zA-Z0-9_.]+\s*(=|!=|>|<|>=|<=|ILIKE|LIKE|IS)\s*.+$/i.test(token)) {
+        sqlParts.push(token);
+      }
+    }
+    return sqlParts;
   }
 
   private buildWhereClause(params: any[]): string {
     if (this.filters.length === 0 && this.orClauses.length === 0) return "";
     const whereParts: string[] = [];
-
-    // Process regular filters (ANDed)
     for (const f of this.filters) {
+      if (f.rawClause) { whereParts.push(f.rawClause); continue; }
       if (f.op === "IN") {
         if (!Array.isArray(f.value) || f.value.length === 0) {
-          return "1=0";
+          whereParts.push("1=0");
+        } else {
+          const placeholders = f.value.map((v) => { params.push(v); return `$${params.length}`; });
+          whereParts.push(`${f.column} IN (${placeholders.join(", ")})`);
         }
-        const placeholders = f.value.map((v) => {
-          params.push(v);
-          return `$${params.length}`;
-        });
-        whereParts.push(`${f.column} IN (${placeholders.join(", ")})`);
+        continue;
       }
       if (f.op === "IS") {
         whereParts.push(`${f.column} IS ${f.value === null ? "NULL" : f.value ? "TRUE" : "FALSE"}`);
+        continue;
+      }
+      if (f.op === "NOT_IS") {
+        whereParts.push(`${f.column} IS NOT ${f.value === null ? "NULL" : f.value ? "TRUE" : "FALSE"}`);
+        continue;
       }
       params.push(f.value);
       whereParts.push(`${f.column} ${f.op} $${params.length}`);
     }
-
-    // Process OR clauses (grouped with parentheses)
     if (this.orClauses.length > 0) {
-      const orClauses = this.orClauses.map(clause => `(${clause})`).join(" OR ");
-      whereParts.push(orClauses);
+      for (const rawOr of this.orClauses) {
+        const parsed = this.parsePostgrestOrClause(rawOr, params);
+        if (parsed.length > 0) whereParts.push(`(${parsed.join(" OR ")})`);
+      }
     }
+    return whereParts.length > 0 ? `WHERE ${whereParts.join(" AND ")}` : "";
+  }
 
-    return `WHERE ${whereParts.join(" AND ")}`;
+  private buildSelectClause(): string {
+    let baseCols = this.selectColumns;
+    if (baseCols === "*" && this.embeddedRelations.length > 0) baseCols = `${this.tableName}.*`;
+    if (this.embeddedRelations.length === 0) return baseCols;
+    const relationSubqueries: string[] = [];
+    for (const rel of this.embeddedRelations) {
+      const { alias, targetTable, fields } = rel;
+      let joinCondition = "";
+      if (this.tableName === "movement_logs" && targetTable === "users") joinCondition = `users.id = ${this.tableName}.user_id`;
+      else if (this.tableName === "movement_logs" && targetTable === "gates") joinCondition = `gates.id = ${this.tableName}.gate_id`;
+      else if (this.tableName === "gate_passes" && targetTable === "users") joinCondition = `users.id = ${this.tableName}.user_id`;
+      else if (this.tableName === "student_details" && targetTable === "users") joinCondition = `users.id = ${this.tableName}.user_id`;
+      else if (this.tableName === "users" && targetTable === "student_details") joinCondition = `student_details.user_id = ${this.tableName}.id`;
+      else if (this.tableName === "users" && targetTable === "employee_details") joinCondition = `employee_details.user_id = ${this.tableName}.id`;
+      else joinCondition = `${targetTable}.id = ${this.tableName}.${targetTable.replace(/s$/, "")}_id`;
+      const selectFields = fields.includes("*") ? "*" : fields.map((f) => `"${f}"`).join(", ");
+      relationSubqueries.push(`(SELECT row_to_json(rel_sub) FROM (SELECT ${selectFields} FROM ${targetTable} WHERE ${joinCondition} LIMIT 1) rel_sub) AS "${alias}"`);
+    }
+    return `${baseCols}, ${relationSubqueries.join(", ")}`;
+  }
+
+  insert(rows: Record<string, any> | Record<string, any>[]) {
+    this.pendingMutation = { type: "insert", data: rows };
+    return this;
+  }
+
+  update(values: Record<string, any>) {
+    this.pendingMutation = { type: "update", data: values };
+    return this;
+  }
+
+  delete() {
+    this.pendingMutation = { type: "delete" };
+    return this;
+  }
+
+  upsert(rows: Record<string, any> | Record<string, any>[], options?: { onConflict?: string; ignoreDuplicates?: boolean }) {
+    this.pendingMutation = { type: "upsert", data: rows, options };
+    return this;
   }
 
   async execute(): Promise<{ data: any; error: any; count?: number }> {
     try {
+      if (this.pendingMutation?.type === "insert") {
+        const raw = this.pendingMutation.data;
+        const list = Array.isArray(raw) ? raw : [raw];
+        if (list.length === 0) return { data: [], error: null };
+        const keys = Object.keys(list[0]);
+        const params: any[] = [];
+        const valueTuples = list.map((row) => {
+          const tuple = keys.map((k) => { params.push(row[k]); return `$${params.length}`; });
+          return `(${tuple.join(", ")})`;
+        });
+        const returningCols = this.selectColumns === "*" ? "*" : this.selectColumns;
+        const sql = `INSERT INTO ${this.tableName} (${keys.map((k) => `"${k}"`).join(", ")}) VALUES ${valueTuples.join(", ")} RETURNING ${returningCols}`;
+        const res = await query(sql, params);
+        if (this.isSingle || this.isMaybeSingle || !Array.isArray(raw)) {
+          const singleRow = res.rows[0] || null;
+          if (this.isSingle && !singleRow) return { data: null, error: { message: "Row not found", code: "PGRST116" } };
+          return { data: singleRow, error: null };
+        }
+        return { data: res.rows, error: null };
+      }
+      if (this.pendingMutation?.type === "update") {
+        const values = this.pendingMutation.data || {};
+        const keys = Object.keys(values);
+        if (keys.length === 0) return { data: [], error: null };
+        const params: any[] = [];
+        const setClauses = keys.map((k) => { params.push(values[k]); return `"${k}" = $${params.length}`; });
+        const where = this.buildWhereClause(params);
+        const returningCols = this.selectColumns === "*" ? "*" : this.selectColumns;
+        const sql = `UPDATE ${this.tableName} SET ${setClauses.join(", ")} ${where} RETURNING ${returningCols}`;
+        const res = await query(sql, params);
+        if (this.isSingle || this.isMaybeSingle) {
+          const singleRow = res.rows[0] || null;
+          if (this.isSingle && !singleRow) return { data: null, error: { message: "Row not found", code: "PGRST116" } };
+          return { data: singleRow, error: null };
+        }
+        return { data: res.rows, error: null };
+      }
+      if (this.pendingMutation?.type === "delete") {
+        const params: any[] = [];
+        const where = this.buildWhereClause(params);
+        const returningCols = this.selectColumns === "*" ? "*" : this.selectColumns;
+        const sql = `DELETE FROM ${this.tableName} ${where} RETURNING ${returningCols}`;
+        const res = await query(sql, params);
+        if (this.isSingle || this.isMaybeSingle) return { data: res.rows[0] || null, error: null };
+        return { data: res.rows, error: null };
+      }
+      if (this.pendingMutation?.type === "upsert") {
+        const raw = this.pendingMutation.data;
+        const list = Array.isArray(raw) ? raw : [raw];
+        if (list.length === 0) return { data: [], error: null };
+        const keys = Object.keys(list[0]);
+        const params: any[] = [];
+        const valueTuples = list.map((row) => {
+          const tuple = keys.map((k) => { params.push(row[k]); return `$${params.length}`; });
+          return `(${tuple.join(", ")})`;
+        });
+        const conflictCol = this.pendingMutation.options?.onConflict || "id";
+        const returningCols = this.selectColumns === "*" ? "*" : this.selectColumns;
+        let sql = `INSERT INTO ${this.tableName} (${keys.map((k) => `"${k}"`).join(", ")}) VALUES ${valueTuples.join(", ")}`;
+        if (this.pendingMutation.options?.ignoreDuplicates) {
+          sql += ` ON CONFLICT (${conflictCol}) DO NOTHING`;
+        } else {
+          const updateSet = keys.filter((k) => k !== conflictCol).map((k) => `"${k}" = EXCLUDED."${k}"`).join(", ");
+          sql += updateSet.length > 0 ? ` ON CONFLICT (${conflictCol}) DO UPDATE SET ${updateSet}` : ` ON CONFLICT (${conflictCol}) DO NOTHING`;
+        }
+        sql += ` RETURNING ${returningCols}`;
+        const res = await query(sql, params);
+        if (this.isSingle || this.isMaybeSingle || !Array.isArray(raw)) {
+          const singleRow = res.rows[0] || null;
+          if (this.isSingle && !singleRow) return { data: null, error: { message: "Row not found", code: "PGRST116" } };
+          return { data: singleRow, error: null };
+        }
+        return { data: res.rows, error: null };
+      }
+
       const params: any[] = [];
       const where = this.buildWhereClause(params);
-      let sql = `SELECT ${this.selectColumns} FROM ${this.tableName} ${where}`;
+      if (this.countMode && this.headOnly) {
+        const countSql = `SELECT COUNT(*)::int as count FROM ${this.tableName} ${where}`;
+        const countRes = await query(countSql, params);
+        return { data: null, count: countRes.rows[0]?.count ?? 0, error: null };
+      }
+      const selectCols = this.buildSelectClause();
+      let sql = `SELECT ${selectCols} FROM ${this.tableName} ${where}`;
       if (this.orderClause) sql += ` ${this.orderClause}`;
       if (this.limitCount !== undefined) sql += ` LIMIT ${this.limitCount}`;
       if (this.offsetCount !== undefined) sql += ` OFFSET ${this.offsetCount}`;
-
       const res = await query(sql, params);
-
       if (this.isSingle) {
-        if (res.rows.length === 0) {
-          return { data: null, error: { message: "Row not found", code: "PGRST116" } };
-        }
+        if (res.rows.length === 0) return { data: null, error: { message: "Row not found", code: "PGRST116" } };
         return { data: res.rows[0], error: null };
       }
-
-      if (this.isMaybeSingle) {
-        return { data: res.rows[0] || null, error: null };
+      if (this.isMaybeSingle) return { data: res.rows[0] || null, error: null };
+      let totalCount: number | undefined = undefined;
+      if (this.countMode) {
+        const countSql = `SELECT COUNT(*)::int as count FROM ${this.tableName} ${where}`;
+        const countRes = await query(countSql, params.slice(0, where ? params.length : 0));
+        totalCount = countRes.rows[0]?.count ?? res.rowCount ?? 0;
       }
-
-      return { data: res.rows, error: null, count: res.rowCount ?? undefined };
+      return { data: res.rows, error: null, count: totalCount ?? res.rowCount ?? undefined };
     } catch (err: any) {
       return { data: null, error: { message: err.message, code: err.code } };
     }
@@ -344,89 +501,55 @@ export class PostgresQueryBuilder<T = any> {
     return this.execute().then(onfulfilled, onrejected);
   }
 
-  async upsert(rows: Record<string, any> | Record<string, any>[], options?: { onConflict?: string; ignoreDuplicates?: boolean }) {
-    const list = Array.isArray(rows) ? rows : [rows];
-    if (list.length === 0) return { data: [], error: null };
-    const keys = Object.keys(list[0]);
-    const params: any[] = [];
-    const valueTuples = list.map((row) => {
-      const tuple = keys.map((k) => {
-        params.push(row[k]);
-        return `$${params.length}`;
-      });
-      return `(${tuple.join(", ")})`;
-    });
-    const conflictCol = options?.onConflict || "id";
-    let sql = `INSERT INTO ${this.tableName} (${keys.join(", ")}) VALUES ${valueTuples.join(", ")}`;
-    if (options?.ignoreDuplicates) {
-      sql += ` ON CONFLICT (${conflictCol}) DO NOTHING`;
-    } else {
-      const updateSet = keys.filter(k => k !== conflictCol).map(k => `${k} = EXCLUDED.${k}`).join(", ");
-      sql += updateSet.length > 0 ? ` ON CONFLICT (${conflictCol}) DO UPDATE SET ${updateSet}` : ` ON CONFLICT (${conflictCol}) DO NOTHING`;
-    }
-    sql += " RETURNING *";
-    try {
-      const res = await query(sql, params);
-      const data = Array.isArray(rows) ? res.rows : res.rows[0];
-      return { data, error: null };
-    } catch (err: any) {
-      return { data: null, error: { message: err.message, code: err.code } };
-    }
-  }
-
-  async insert(rows: Record<string, any> | Record<string, any>[]) {
-    const list = Array.isArray(rows) ? rows : [rows];
-    if (list.length === 0) return { data: [], error: null };
-
-    const keys = Object.keys(list[0]);
-    const params: any[] = [];
-    const valueTuples = list.map((row) => {
-      const tuple = keys.map((k) => {
-        params.push(row[k]);
-        return `$${params.length}`;
-      });
-      return `(${tuple.join(", ")})`;
-    });
-
-    const sql = `INSERT INTO ${this.tableName} (${keys.join(", ")}) VALUES ${valueTuples.join(", ")} RETURNING *`;
-    try {
-      const res = await query(sql, params);
-      const data = Array.isArray(rows) ? res.rows : res.rows[0];
-      return { data, error: null };
-    } catch (err: any) {
-      return { data: null, error: { message: err.message, code: err.code } };
-    }
-  }
-
-  async update(values: Record<string, any>) {
-    const params: any[] = [];
-    const setClauses = Object.keys(values).map((k) => {
-      params.push(values[k]);
-      return `${k} = $${params.length}`;
-    });
-
-    const where = this.buildWhereClause(params);
-    const sql = `UPDATE ${this.tableName} SET ${setClauses.join(", ")} ${where} RETURNING *`;
-    try {
-      const res = await query(sql, params);
-      return { data: res.rows, error: null };
-    } catch (err: any) {
-      return { data: null, error: { message: err.message, code: err.code } };
-    }
-  }
-
-  async delete() {
-    const params: any[] = [];
-    const where = this.buildWhereClause(params);
-    const sql = `DELETE FROM ${this.tableName} ${where} RETURNING *`;
-    try {
-      const res = await query(sql, params);
-      return { data: res.rows, error: null };
-    } catch (err: any) {
-      return { data: null, error: { message: err.message, code: err.code } };
-    }
-  }
 }
+
+export const authAdmin = {
+  async createUser(attributes: { email: string; password?: string; user_metadata?: Record<string, any>; app_metadata?: Record<string, any>; email_confirm?: boolean; phone?: string; role?: string; }) {
+    const crypto = await import("crypto");
+    const bcrypt = await import("bcryptjs");
+    const id = crypto.randomUUID();
+    const email = attributes.email.toLowerCase().trim();
+    const name = attributes.user_metadata?.name || attributes.user_metadata?.full_name || email.split("@")[0];
+    const role = attributes.role || attributes.user_metadata?.role || "student";
+    const passwordHash = attributes.password ? await bcrypt.hash(attributes.password, 10) : null;
+    const uniqueId = attributes.user_metadata?.unique_id || email.split("@")[0].toUpperCase();
+    try {
+      const res = await query(`INSERT INTO users (id, unique_id, email, name, role, status, password_hash, created_at) VALUES ($1, $2, $3, $4, $5, 'ACTIVE', $6, NOW()) ON CONFLICT (email) DO UPDATE SET name = EXCLUDED.name, role = EXCLUDED.role, password_hash = COALESCE(EXCLUDED.password_hash, users.password_hash) RETURNING id, unique_id, email, name, role, status, created_at`, [id, uniqueId, email, name, role, passwordHash]);
+      const user = res.rows[0] || { id, email, name, role };
+      return { data: { user: { id: user.id, email: user.email, user_metadata: { ...attributes.user_metadata, name: user.name, role: user.role } } }, error: null };
+    } catch (err: any) {
+      return { data: null, error: { message: err.message, code: err.code } };
+    }
+  },
+  async deleteUser(userId: string) {
+    try { await query("DELETE FROM users WHERE id = $1", [userId]); return { data: null, error: null }; } catch (err: any) { return { data: null, error: { message: err.message, code: err.code } }; }
+  },
+  async updateUserById(userId: string, attributes: { password?: string; email?: string; user_metadata?: Record<string, any>; app_metadata?: Record<string, any>; }) {
+    try {
+      const updates: string[] = [];
+      const params: any[] = [userId];
+      if (attributes.password) { const bcrypt = await import("bcryptjs"); const hash = await bcrypt.hash(attributes.password, 10); params.push(hash); updates.push(`password_hash = $${params.length}`); }
+      if (attributes.email) { params.push(attributes.email.toLowerCase().trim()); updates.push(`email = $${params.length}`); }
+      if (attributes.user_metadata?.name) { params.push(attributes.user_metadata.name); updates.push(`name = $${params.length}`); }
+      if (updates.length > 0) {
+        updates.push("updated_at = NOW()");
+        const res = await query(`UPDATE users SET ${updates.join(", ")} WHERE id = $1 RETURNING id, unique_id, email, name, role, status`, params);
+        return { data: { user: res.rows[0] || { id: userId } }, error: null };
+      }
+      return { data: { user: { id: userId } }, error: null };
+    } catch (err: any) { return { data: null, error: { message: err.message, code: err.code } }; }
+  },
+  async inviteUserByEmail(email: string, options?: { data?: Record<string, any> }) { return this.createUser({ email, user_metadata: options?.data }); },
+  async listUsers() { try { const res = await query("SELECT id, unique_id, email, name, role, status, created_at FROM users"); return { data: { users: res.rows }, error: null }; } catch (err: any) { return { data: { users: [] }, error: { message: err.message, code: err.code } }; } },
+  async getUserById(userId: string) { try { const res = await query("SELECT id, unique_id, email, name, role, status, created_at FROM users WHERE id = $1 LIMIT 1", [userId]); if (res.rows.length === 0) return { data: null, error: { message: "User not found", code: "NOT_FOUND" } }; return { data: { user: res.rows[0] }, error: null }; } catch (err: any) { return { data: null, error: { message: err.message, code: err.code } }; } },
+  async signOut(userIdOrToken: string) {
+    try {
+      await query(`UPDATE sessions SET revoked_at = NOW() WHERE refresh_hash = $1 OR user_id::text = $1 OR id::text = $1`, [userIdOrToken]);
+      await query("UPDATE users SET session_version = session_version + 1 WHERE id::text = $1", [userIdOrToken]);
+      return { error: null };
+    } catch (err: any) { return { error: { message: err.message } }; }
+  },
+};
 
 /**
  * Self-Hosted DB client providing fluent query interface and direct pool access.
@@ -436,6 +559,45 @@ export const db = {
   query,
   withTransaction,
   getPool: getPostgresPool,
+  rpc: async (fnName: string, args: Record<string, any> = {}) => {
+    try {
+      if (fnName === "resolve_login_identifier") {
+        const loginId = args.p_login_id || args.login_id || args.identifier || "";
+        const res = await query(`SELECT email FROM users WHERE LOWER(email) = LOWER($1) OR UPPER(unique_id) = UPPER($1) OR LOWER(login_identifier) = LOWER($1) OR LOWER(handle) = LOWER($1) LIMIT 1`, [loginId.trim()]);
+        return { data: res.rows[0]?.email || null, error: null };
+      }
+      if (fnName === "can_user_authenticate") {
+        const userId = args.p_user_id || args.user_id || args.userId || "";
+        const res = await query("SELECT status FROM users WHERE id::text = $1 LIMIT 1", [userId]);
+        return { data: res.rows[0]?.status === "ACTIVE", error: null };
+      }
+      if (fnName === "invalidate_all_user_sessions") {
+        const userId = args.p_user_id || args.user_id || args.userId || "";
+        await query("UPDATE users SET session_version = session_version + 1, handle = gen_random_uuid()::text WHERE id::text = $1", [userId]);
+        return { data: true, error: null };
+      }
+      const keys = Object.keys(args);
+      const params = keys.map((k) => args[k]);
+      const placeholders = params.map((_, i) => `$${i + 1}`).join(", ");
+      const sql = `SELECT * FROM ${fnName}(${placeholders})`;
+      const res = await query(sql, params);
+      return { data: res.rows.length === 1 ? res.rows[0][fnName] ?? res.rows[0] : res.rows, error: null };
+    } catch (err: any) { return { data: null, error: { message: err.message, code: err.code } }; }
+  },
+  auth: {
+    admin: authAdmin,
+    getUser: async (token?: string) => {
+      if (!token) return { data: { user: null }, error: { message: "No token provided" } };
+      try {
+        const { verifyToken } = await import("./auth-token");
+        const payload = await verifyToken(token);
+        if (!payload?.sub) return { data: { user: null }, error: { message: "Invalid token" } };
+        const res = await query("SELECT id, unique_id, email, name, role, status FROM users WHERE id = $1 LIMIT 1", [payload.sub]);
+        return { data: { user: res.rows[0] || null }, error: null };
+      } catch (err: any) { return { data: { user: null }, error: { message: err.message } }; }
+    },
+    signOut: async () => ({ error: null }),
+  },
 };
 
 export default db;

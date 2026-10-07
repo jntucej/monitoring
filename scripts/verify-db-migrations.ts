@@ -1,7 +1,7 @@
 const { loadLocalEnv } = require("./lib/env-loader");
 loadLocalEnv();
 
-const { getSupabaseServiceClient } = require("../src/lib/supabaseClient");
+const { getSupabaseServiceClient } = require("../src/lib/dbClient");
 const svc = getSupabaseServiceClient();
 
 async function checkMigrations() {

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDbClient } from "@/lib/db";
+import { withAuthorization } from "@/middleware/authorization";
+import { withRateLimit } from "@/lib/rate-limit";
 
 let feedbackStore: Array<{
   id: string;
@@ -53,7 +55,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET(req: NextRequest) {
+async function handleGet(req: NextRequest) {
   try {
     const { data, error } = await getDbClient().from("feedback").select("*").order("created_at", { ascending: false }).limit(100);
     if (!error && data && data.length > 0) {
@@ -64,3 +66,5 @@ export async function GET(req: NextRequest) {
   }
   return NextResponse.json({ success: true, data: feedbackStore });
 }
+
+export const GET = withRateLimit(withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin"] }));

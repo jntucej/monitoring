@@ -1,21 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
+import { withAuthorization } from "@/middleware/authorization";
+import { withRateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(req: NextRequest) {
+async function handleGet(req: NextRequest) {
   try {
     const supabase = getSupabaseServiceClient();                
-    
-    // Attempt to fetch from attendance_records
     const { data, error } = await supabase
       .from("attendance_records")
       .select("*")
       .order("created_at" as any, { ascending: false });
 
     if (error) {
-      console.warn("Could not fetch attendance_records (might not exist):", error.message);
-      return NextResponse.json({ success: true, data: [], message: "Table might not be initialized." }, { status: 200 });
+      console.warn("Could not fetch attendance_records:", error.message);
+      return NextResponse.json({ success: true, data: [] }, { status: 200 });
     }
 
     return NextResponse.json({ success: true, data });
@@ -24,3 +24,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
+
+export const GET = withRateLimit(
+  withAuthorization(handleGet, {
+    requiredRole: ["admin", "sysadmin", "operator", "faculty", "warden", "supervisor"],
+  }),
+  { keyPrefix: "att_records", maxRequests: 60 }
+);

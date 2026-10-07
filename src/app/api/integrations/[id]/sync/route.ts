@@ -15,7 +15,7 @@ async function handlePost(req: NextRequest) {
     const id = getIdFromPath(req);
     const supabase = getSupabaseServiceClient();
 
-    const recordsSynced = Math.floor(Math.random() * 45) + 5;
+    const { query } = await import('@/lib/postgres'); const logCountRes = await query('SELECT COUNT(*)::int as count FROM movement_logs WHERE timestamp >= NOW() - INTERVAL \'1 day\''); const recordsSynced = logCountRes.rows[0]?.count ?? 0;
     const timestamp = new Date().toISOString();
 
     await supabase

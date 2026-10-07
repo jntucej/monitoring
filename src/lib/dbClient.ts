@@ -1,10 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { db, query } from './postgres';
-
-/**
- * Compatibility bridge layer for self-hosted architecture.
- * Redirects legacy Supabase service client calls to the native PostgreSQL pool adapter.
- */
+import { db, query, authAdmin } from './postgres';
 
 let serviceClient: any = null;
 
@@ -45,7 +40,7 @@ export async function resolveLoginIdentifier(identifier: string): Promise<string
 
 export async function canUserAuthenticate(userId: string): Promise<boolean> {
   try {
-    const res = await query('SELECT status FROM users WHERE id = $1 LIMIT 1', [userId]);
+    const res = await query('SELECT status FROM users WHERE id::text = $1 LIMIT 1', [userId]);
     if (res.rows.length === 0) return false;
     return res.rows[0].status === 'ACTIVE';
   } catch (err) {
@@ -56,7 +51,8 @@ export async function canUserAuthenticate(userId: string): Promise<boolean> {
 
 export async function invalidateAllUserSessions(userId: string): Promise<boolean> {
   try {
-    await query("UPDATE users SET handle = gen_random_uuid()::text WHERE id = $1", [userId]);
+    await query("UPDATE users SET session_version = session_version + 1, handle = gen_random_uuid()::text WHERE id::text = $1", [userId]);
+    await query("UPDATE sessions SET revoked_at = NOW() WHERE user_id::text = $1 OR refresh_hash = $1", [userId]);
     return true;
   } catch (err) {
     console.error('Error in invalidateAllUserSessions:', err);

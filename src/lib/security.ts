@@ -61,9 +61,19 @@ export async function getSecurityStats(): Promise<SecurityStats> {
     console.error("Error loading security settings from DB:", err);
   }
 
+  let failed24h = 0;
+  let activeSessions = 0;
+  try {
+    const { query } = await import("./postgres");
+    const resFail = await query("SELECT COUNT(*)::int as count FROM audit_logs WHERE action = 'LOGIN_FAILED' AND timestamp >= NOW() - INTERVAL '24 hours'");
+    failed24h = resFail.rows[0]?.count ?? 0;
+    const resSess = await query("SELECT COUNT(*)::int as count FROM sessions WHERE revoked_at IS NULL AND expires_at > NOW()");
+    activeSessions = resSess.rows[0]?.count ?? 0;
+  } catch {}
+
   return {
-    failedLogins24h: 3,
-    activeSessions: 14,
+    failedLogins24h: failed24h,
+    activeSessions: activeSessions,
     forced2FA: inMemoryForced2FA,
     ipAllowlistEnabled: true,
     allowedIps: inMemoryAllowedIps,

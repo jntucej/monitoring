@@ -189,6 +189,13 @@ async function handleLogin(req: NextRequest) {
           expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
         });
 
+<<<<<<< Updated upstream
+=======
+    const requiresMfa = ((user.role === "sysadmin" || user.role === "admin") && (await isMfaRequiredForAdmin())) || user.two_factor_enabled;
+    const mfaSecret = user.totp_secret || user.two_factor_secret;
+    if (requiresMfa && mfaSecret) {
+      if (!body.totp_code) {
+>>>>>>> Stashed changes
         return NextResponse.json(
           {
             success: true,
@@ -201,6 +208,7 @@ async function handleLogin(req: NextRequest) {
           { status: 200 }
         );
       }
+<<<<<<< Updated upstream
 
       // Step 2: Validate challenge if provided
       const service = getSupabaseServiceClient();
@@ -257,9 +265,15 @@ async function handleLogin(req: NextRequest) {
           details: `Recovery code used for login. Remaining: ${remaining.length}`,
         });
       } else if (presentedTotp) {
-        const { decryptSecret } = await import("@/lib/mfa-secret");
         const { verifyTOTPCode } = await import("@/lib/totp");
-        const secret = decryptSecret(user.two_factor_secret || "");
+        const rawSecret = user.two_factor_secret || user.totp_secret || "";
+        let secret = rawSecret;
+        try {
+          const { decryptSecret } = await import("@/lib/mfa-secret");
+          secret = decryptSecret(rawSecret);
+        } catch {
+          secret = rawSecret;
+        }
         const totpValid = verifyTOTPCode(secret, presentedTotp);
 
         if (!totpValid) {
