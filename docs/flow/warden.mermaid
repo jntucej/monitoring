@@ -1,0 +1,98 @@
+flowchart TD
+    A[Hostel Warden Login<br/>/login?role=warden] --> B{Auth Check}
+    B -->|Valid| C[Warden Portal: /warden]
+    B -->|Invalid| A
+
+    C --> D[Load Hostel Context<br/>GET /api/warden/hostels]
+    D --> E[Select Hostel Block<br/>Dropdown: Block A, B, C...]
+    E --> F{Warden Dashboard Tabs}
+
+    %% Live Occupancy Flow
+    F -->|Click Occupancy Tab| G1[Hostel Occupancy<br/>/warden/occupancy]
+    G1 --> H1[Load Live Data<br/>GET /api/warden/occupancy]
+    H1 --> I1[Room Grid View<br/>Each Room: Occupants, Status]
+    I1 --> J1[Click Room Card]
+    J1 --> K1[Room Detail Modal<br/>Student Names, In/Out Status]
+    K1 --> L1{View Actions}
+    L1 -->|View Student Profile| M1[Navigate to Student Details]
+    L1 -->|Send Message| M2[Message Modal -> POST /api/messages]
+
+    %% Outing Pass Approvals Flow
+    F -->|Click Passes Tab| G2[Hostel Outing Passes<br/>/warden/passes]
+    G2 --> H2[Load Pending Passes<br/>GET /api/warden/passes/pending]
+    H2 --> I2[Pass Cards<br/>Student Name, Pass Type, Time]
+    I2 --> J2[Click Pass Card]
+    J2 --> K2[Pass Detail Modal]
+    K2 --> L2{Check Guardian Approval}
+    L2 -->|Guardian Approved| M3[Approve Button Enabled]
+    L2 -->|Pending Guardian| M4[Approve Disabled: "Awaiting Guardian"]
+    L2 -->|Guardian Rejected| M5[Reject Automatically]
+    
+    M3 --> N1[Click Approve]
+    N1 --> O1[POST /api/passes/:id/warden-approve]
+    O1 --> P1[Pass Activated -> Student Notified]
+    P1 --> Q1[Refresh List]
+    
+    K2 --> L3{Decision Buttons}
+    L3 -->|Reject| N2[Enter Reason -> POST /api/passes/:id/reject]
+    L3 -->|Request Guardian Call| N3[Initiate Call Request]
+
+    %% Curfew Management Flow
+    F -->|Click Curfew Tab| G3[Curfew Dashboard<br/>/warden/curfew]
+    G3 --> H3[Load Curfew Status<br/>GET /api/warden/curfew/status]
+    H3 --> I3[Curfew Overview<br/>Present: X, In Hostel: Y, Out: Z]
+    I3 --> J3[Click "View Defaulters"]
+    J3 --> K3[Defaulter List<br/>Students Not in Hostel After Curfew]
+    K3 --> L4[Click Student Row]
+    L4 --> M5[Student Detail<br/>Last Known Location, Pass Info]
+    M5 --> N4{Actions}
+    N4 -->|Contact Parent| O2[Send Alert to Parent<br/>POST /api/alerts/curfew-parent]
+    N4 -->|Contact Student| O3[Send Message to Student<br/>POST /api/messages]
+    N4 -->|Mark Exempt| O4[Enter Reason -> POST /api/curfew/exempt]
+    N4 -->|Escalate to Security| O5[POST /api/alerts/escalate]
+
+    G3 --> I4[Curfew Timers Display]
+    I4 --> J4[Real-time Countdown<br/>Time Until Curfew]
+    J4 --> K4{Click "Late Warning"}
+    K4 --> L5[Send Warning to All Late Students<br/>Broadcast Message]
+
+    %% Night Inspection Flow
+    F -->|Click Inspection Tab| G4[Night Inspection<br/>/warden/inspection]
+    G4 --> H4[Start New Inspection]
+    H4 --> I4[Inspection Form<br/>Select Date, Time, Notes]
+    I4 --> J4[Click Start Inspection]
+    J4 --> K5[Room Checklist Grid]
+    K5 --> L6[Check Each Room<br/>Present / Absent / Locked]
+    L6 --> M6{Update Room Status}
+    M6 -->|Present| N5[Mark Checked -> Photo Evidence]
+    M6 -->|Not Responding| N6[Mark No Response -> Alert]
+    M6 -->|Locked Inside| N7[Mark Safe -> Continue]
+    
+    K5 --> O6[Complete Inspection Button]
+    O6 --> P2[POST /api/warden/inspection/complete]
+    P2 --> Q2[Inspection Log Saved]
+    Q2 --> R1[View Past Inspections]
+
+    %% Notifications Flow
+    F -->|Click Alerts Tab| G5[Hostel Alerts<br/>/warden/alerts]
+    G5 --> H5[Load Alerts<br/>GET /api/warden/alerts]
+    H5 --> I5[Alert Cards<br/>Curfew Breaches, Complaints]
+    I5 --> J5[Click Alert -> Resolve]
+
+    %% Reports Flow
+    F -->|Click Reports Tab| G6[Hostel Reports<br/>/warden/reports]
+    G6 --> H6[Select Report Type<br/>Occupancy / Violations / Attendance]
+    H6 --> I6[Configure Filters<br/>Date Range, Hostel Block]
+    I6 --> J6[Generate Report -> GET /api/reports/hostel]
+    J6 --> K7[Preview Report -> Export PDF/Excel]
+
+    %% Settings Flow
+    F -->|Click Settings Tab| G7[Warden Settings<br/>/warden/settings]
+    G7 --> H7[Configure Curfew Times<br/>Weekday / Weekend]
+    H7 --> I7[Save -> PATCH /api/warden/settings]
+
+    %% Logout Flow
+    C --> X[Profile -> Logout]
+    X --> Y[POST /api/auth/logout]
+    Y --> Z[Clear Session]
+    Z --> A

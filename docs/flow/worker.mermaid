@@ -1,0 +1,51 @@
+flowchart TD
+    A[Worker Login<br/>/login?role=worker] --> B{Auth Check}
+    B -->|Valid| C[Worker Portal: /worker]
+    B -->|Invalid| A
+
+    C --> D{Worker Dashboard Tabs}
+
+    %% Digital Work Badge Flow
+    D -->|Click Badge Tab| E1[Digital Badge<br/>/worker/badge]
+    E1 --> F1[Load Badge Data<br/>GET /api/worker/badge]
+    F1 --> G1[Display QR Badge<br/>Worker Photo, ID, Name]
+    G1 --> H1{Action Buttons}
+    H1 -->|Download| I1[GET /api/worker/badge/download]
+    H1 -->|Refresh QR| J1[POST /api/worker/badge/refresh]
+
+    %% Shift Schedule Flow
+    D -->|Click Schedule Tab| E2[Shift Schedule<br/>/worker/schedule]
+    E2 --> F2[Load Current Shift<br/>GET /api/worker/schedule]
+    F2 --> G2[Shift Card<br/>Start Time, End Time, Department]
+    G2 --> H2{View Options}
+    H2 -->|This Week| I2[Display Weekly Calendar]
+    H2 -->|Next Week| J2[Display Upcoming Schedule]
+    H2 -->|History| K2[Past Shift Records]
+
+    %% Gate Access History Flow
+    D -->|Click History Tab| E3[Punch History<br/>/worker/history]
+    E3 --> F3[Load Punch Log<br/>GET /api/worker/history]
+    F3 --> G3[Timeline View<br/>Punch In/Out Records]
+    G3 --> H3[Each Entry: Date, Time, Gate, Direction]
+    H3 --> I3{Filter}
+    I3 -->|Date Range| J3[Date Picker -> Refetch]
+    I3 -->|Export| K3[GET /api/worker/history/export]
+
+    %% Profile & Settings Flow
+    D -->|Click Profile Tab| E4[Worker Profile<br/>/worker/profile]
+    E4 --> F4[Profile Info<br/>Name, Dept, Contractor, Contact]
+    F4 --> G4[Edit Profile Button]
+    G4 --> H4[Form Modal -> PATCH /api/worker/profile]
+
+    %% Notifications Flow
+    C --> X[Bell Icon]
+    X --> Y[Notifications<br/>Shift Changes, Alerts]
+    Y --> Z{Click Notification}
+    Z -->|Shift Changed| A1[Navigate to Schedule Tab]
+    Z -->|Alert| A2[Show Alert Details]
+
+    %% Logout Flow
+    C --> B1[Profile -> Logout]
+    B1 --> C1[POST /api/auth/logout]
+    C1 --> D1[Clear Session]
+    D1 --> A

@@ -1,0 +1,1148 @@
+@import "tailwindcss";
+
+/* ============================================================
+   DESIGN TOKENS — Student Gate Monitoring System
+   Apple-Inspired HIG Design System: Calm, Restrained, Precise
+   ============================================================ */
+
+:root {
+  /* Base Temperatures — DIRECTION 1: Cold Forge */
+  --hue-primary: 213;
+  --hue-secondary: 248;
+  --hue-cyan: 213;
+  --hue-magenta: 248;
+  
+  /* Ambient Orbs */
+  --orb-primary: hsl(213, 48%, 36%);
+  --orb-secondary: hsl(248, 42%, 30%);
+  --orb-cyan: hsl(213, 48%, 36%);
+  --orb-magenta: hsl(248, 42%, 30%);
+
+  /* UI Accent */
+  --accent: hsl(36, 68%, 56%);
+  --accent-dim: hsl(30, 42%, 30%);
+  --accent-cyan: hsl(36, 68%, 56%);
+  --accent-cyan-dim: hsl(30, 42%, 30%);
+
+  /* Alert States (Fully Saturated, Highly Luminous) */
+  --alert-critical: hsl(0, 92%, 50%);   /* Pure Red - Stop/Evacuate */
+  --alert-warning: hsl(45, 100%, 55%);  /* Bright Amber - Caution/Review */
+  --alert-success: hsl(160, 90%, 40%);  /* Deep Teal/Emerald - All Clear */
+
+  /* Typography - Clean Apple SF Pro / Inter font stack */
+  --font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  /* Fluid sizes */
+  --font-size-xs: clamp(0.75rem, 0.7rem + 0.2vw, 0.875rem);
+  --font-size-sm: clamp(0.875rem, 0.8rem + 0.25vw, 1rem);
+  --font-size-base: clamp(1rem, 0.9rem + 0.3vw, 1.125rem);
+  --font-size-md: clamp(1.125rem, 1rem + 0.4vw, 1.25rem);
+  --font-size-lg: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem);
+  --font-size-xl: clamp(1.5rem, 1.3rem + 0.7vw, 2rem);
+  --font-size-2xl: clamp(2rem, 1.6rem + 1vw, 3rem);
+
+  /* Line heights */
+  --line-height-tight: 1.1;
+  --line-height-snug: 1.2;
+  --line-height-normal: 1.5;
+
+  /* Tracking */
+  --tracking-tight: -0.02em;
+  --tracking-normal: -0.01em;
+  --tracking-wide: 0.02em;
+  --tracking-wider: 0.05em;
+
+  /* Spacing Scale (Strict 8px System) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  /* Touch Target Dimensions (Apple HIG Compliant) */
+  --touch-target-min: 48px;
+  --touch-target-operational: 64px;
+
+  /* Radius (Subtle Apple-style rounded rects) */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  /* Motion & Spring Dynamics */
+  --duration-fast: 120ms;
+  --duration-normal: 220ms;
+  --duration-slow: 350ms;
+  --ease-apple: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Fallback Base Tokens (Default Dark High Contrast) */
+  --bg-base: #0a0d13;
+  --bg-surface: #0f172a;
+  --bg-elevated: #1e293b;
+  --text-primary: #eef1f6;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --border: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.24);
+
+  --action-primary: #10b981;
+  --action-danger: #f43f5e;
+  --action-warning: #f59e0b;
+  --action-info: #3b82f6;
+  --action-success: #10b981; /* emerald — "good/true" rows in comparisons */
+  --focus-ring: #10b981;
+
+  /* Study-resource per-unit accents — also defined per-theme below
+     (dark / glass / light). These exist in the base :root so a valid
+     colour is always present even before the theme attribute is applied. */
+  --unit-a: #38bdf8;  /* sky 400 — Unit I */
+  --unit-b: #34d399;  /* emerald 400 — Unit II */
+  --unit-c: #e879f9;  /* fuchsia 400 — Unit III */
+  --unit-a-soft: rgba(56, 189, 248, 0.12);
+  --unit-b-soft: rgba(52, 211, 153, 0.12);
+  --unit-c-soft: rgba(232, 121, 249, 0.12);
+}
+
+/* ===== DARK THEME — Deep High Contrast Developer & Security Aesthetic ===== */
+:root[data-theme="dark"],
+[data-theme="dark"],
+html.dark {
+  --color-canvas: #0a0d13;
+  --glass-bg: rgba(20, 26, 36, 0.52);
+  --orb-cyan: hsl(213, 48%, 36%);
+  --orb-magenta: hsl(248, 42%, 30%);
+  --orb-primary: hsl(213, 48%, 36%);
+  --orb-secondary: hsl(248, 42%, 30%);
+  --rim-top: rgba(255, 255, 255, 0.12);
+  --rim-bottom: rgba(0, 0, 0, 0.55);
+  --text-primary: #eef1f6;
+
+  /* Typography - Technical/Data Heavy */
+  --font-family: ui-monospace, SFMono-Regular, "Roboto Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-size-xs: clamp(0.7rem, 0.65rem + 0.2vw, 0.8rem);
+  --font-size-sm: clamp(0.8rem, 0.75rem + 0.25vw, 0.95rem);
+  --font-size-base: clamp(0.95rem, 0.85rem + 0.3vw, 1.05rem);
+  --font-size-md: clamp(1.05rem, 0.95rem + 0.4vw, 1.2rem);
+  --font-size-lg: clamp(1.2rem, 1.05rem + 0.5vw, 1.4rem);
+  --font-size-xl: clamp(1.4rem, 1.2rem + 0.7vw, 1.8rem);
+  --font-size-2xl: clamp(1.8rem, 1.5rem + 1vw, 2.5rem);
+  --line-height-tight: 1.1;
+  --line-height-snug: 1.3;
+  --line-height-normal: 1.4;
+  --tracking-tight: 0;
+  --tracking-normal: 0.02em;
+  --tracking-wide: 0.04em;
+  --tracking-wider: 0.08em;
+
+  --bg-base: #0a0d13;        /* Deep Obsidian Black */
+  --bg-surface: #0f172a;     /* Slate-900 High Contrast Card Surface */
+  --bg-elevated: #1e293b;    /* Slate-800 High-Visibility Container */
+  --text-primary: #eef1f6;   /* Pure Crisp White Text */
+  --text-secondary: #cbd5e1; /* Slate-300 Readable Subtitle */
+  --text-muted: #94a3b8;     /* Slate-400 Soft Contrast */
+    --border: rgba(255, 255, 255, 0.14); /* Vivid border */
+  --border-strong: rgba(255, 255, 255, 0.28);
+
+  --action-primary: #10b981; /* High-contrast Emerald Green */
+  --action-danger: #f43f5e;  /* Vivid Crimson Red */
+  --action-warning: #f59e0b; /* Bright Amber */
+  --action-info: #3b82f6;    /* Vibrant Royal Blue */
+  --action-success: #10b981; /* emerald — good/true rows */
+  --focus-ring: #10b981;
+
+  /* Study-resource per-unit accents (theme-adaptive — see pdc/ml cheat sheets) */
+  --unit-a: #38bdf8;  /* sky 400 — Unit I */
+  --unit-b: #34d399;  /* emerald 400 — Unit II */
+  --unit-c: #e879f9;  /* fuchsia 400 — Unit III */
+  --unit-a-soft: rgba(56, 189, 248, 0.12);
+  --unit-b-soft: rgba(52, 211, 153, 0.12);
+  --unit-c-soft: rgba(232, 121, 249, 0.12);
+}
+
+/* ===== LIGHT THEME — Crisp Pure White High-Contrast ===== */
+:root[data-theme="light"],
+[data-theme="light"],
+html.light {
+  --color-canvas: #eef1f5;
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --orb-cyan: hsl(213, 48%, 36%);
+  --orb-magenta: hsl(248, 42%, 30%);
+  --orb-primary: hsl(213, 48%, 36%);
+  --orb-secondary: hsl(248, 42%, 30%);
+  --rim-top: rgba(16, 22, 32, 0.08);
+  --rim-bottom: rgba(16, 22, 32, 0.16);
+  --text-primary: #10151d;
+
+  /* Typography - Crisp & Airy */
+  --font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-size-xs: clamp(0.8rem, 0.75rem + 0.2vw, 0.9rem);
+  --font-size-sm: clamp(0.9rem, 0.85rem + 0.25vw, 1.05rem);
+  --font-size-base: clamp(1.05rem, 0.95rem + 0.3vw, 1.2rem);
+  --font-size-md: clamp(1.2rem, 1.05rem + 0.4vw, 1.35rem);
+  --font-size-lg: clamp(1.35rem, 1.2rem + 0.5vw, 1.6rem);
+  --font-size-xl: clamp(1.6rem, 1.4rem + 0.7vw, 2.2rem);
+  --font-size-2xl: clamp(2.2rem, 1.8rem + 1vw, 3.2rem);
+  --line-height-tight: 1.2;
+  --line-height-snug: 1.4;
+  --line-height-normal: 1.6;
+  --tracking-tight: -0.01em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.01em;
+  --tracking-wider: 0.03em;
+
+  --bg-base: #eef1f5;        /* Crisp Light Background */
+  --bg-surface: #ffffff;     /* Pure White Card Surface */
+  --bg-elevated: #f1f5f9;    /* Slate-100 High Contrast Sub-panel */
+  --text-primary: #10151d;   /* Deepest Text for sharp contrast */
+  --text-secondary: #334155; /* Slate-700 Text */
+  --text-muted: #64748b;     /* Slate-500 Text */
+  --border: #cbd5e1;        /* Slate-300 Crisp Border */
+  --border-strong: #94a3b8; /* Slate-400 Strong Border */
+
+  --action-primary: #059669; /* Emerald-600 */
+  --action-danger: #dc2626;  /* Red-600 */
+  --action-warning: #d97706; /* Amber-600 */
+  --action-info: #2563eb;    /* Blue-600 */
+  --action-success: #059669; /* emerald — good/true rows */
+  --focus-ring: #059669;
+
+  /* Study-resource per-unit accents (theme-adaptive) */
+  --unit-a: #0284c7;  /* sky 600 — Unit I */
+  --unit-b: #059669;  /* emerald 600 — Unit II */
+  --unit-c: #d946ef;  /* fuchsia 500 — Unit III */
+  --unit-a-soft: rgba(2, 132, 199, 0.12);
+  --unit-b-soft: rgba(5, 150, 105, 0.12);
+  --unit-c-soft: rgba(217, 70, 239, 0.12);
+}
+
+/* High-contrast badge overrides for Light mode */
+html.light .bg-emerald-500\/10,
+html.light [class*="bg-[var(--action-primary)]/10"] {
+  background-color: rgba(5, 150, 105, 0.15) !important;
+  color: #047857 !important;
+}
+html.light .bg-rose-500\/10,
+html.light [class*="bg-[var(--action-danger)]/10"] {
+  background-color: rgba(220, 38, 38, 0.15) !important;
+  color: #b91c1c !important;
+}
+html.light .bg-amber-500\/10,
+html.light [class*="bg-[var(--action-warning)]/10"] {
+  background-color: rgba(217, 119, 6, 0.15) !important;
+  color: #b45309 !important;
+}
+html.light .bg-blue-500\/10,
+html.light [class*="bg-[var(--action-info)]/10"] {
+  background-color: rgba(37, 99, 235, 0.15) !important;
+  color: #1d4ed8 !important;
+}
+
+/* ===== CINEMATIC GLOSSY LIQUID THEME — Translucent Light Frosted Glassmorphism ===== */
+:root[data-theme="glossy-liquid"],
+:root[data-theme="glass"],
+[data-theme="glossy-liquid"],
+[data-theme="glass"],
+html.glass {
+  --color-canvas: #edf4fe;
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --orb-cyan: hsl(192, 95%, 55%);
+  --orb-magenta: hsl(265, 88%, 66%);
+  --orb-primary: hsl(217, 91%, 60%);
+  --orb-secondary: hsl(187, 92%, 55%);
+  --rim-top: rgba(255, 255, 255, 0.95);
+  --rim-bottom: rgba(0, 50, 120, 0.08);
+  --text-primary: #0f172a;
+
+  /* Typography - Apple HIG Strict bounds */
+  --font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-size-xs: clamp(0.75rem, 0.7rem + 0.2vw, 0.875rem);
+  --font-size-sm: clamp(0.875rem, 0.8rem + 0.25vw, 1rem);
+  --font-size-base: clamp(1rem, 0.9rem + 0.3vw, 1.125rem);
+  --font-size-md: clamp(1.125rem, 1rem + 0.4vw, 1.25rem);
+  --font-size-lg: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem);
+  --font-size-xl: clamp(1.5rem, 1.3rem + 0.7vw, 2rem);
+  --font-size-2xl: clamp(2rem, 1.6rem + 1vw, 3rem);
+  --line-height-tight: 1.1;
+  --line-height-snug: 1.2;
+  --line-height-normal: 1.5;
+  --tracking-tight: -0.02em;
+  --tracking-normal: -0.01em;
+  --tracking-wide: 0.02em;
+  --tracking-wider: 0.05em;
+
+  /* Translucent Liquid Glass Canvas */
+  --bg-base: #edf4fe;
+  --bg-surface: rgba(255, 255, 255, 0.76);
+  --bg-elevated: rgba(255, 255, 255, 0.92);
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --border: rgba(255, 255, 255, 0.85);
+  --border-strong: rgba(255, 255, 255, 0.95);
+
+  --action-primary: #0072ff;
+  --action-danger: #ef4444;
+  --action-warning: #d97706;
+  --action-info: #00c6ff;
+  --action-success: #00c896; /* vivid emerald — good/true rows */
+  --focus-ring: #0072ff;
+
+  /* Study-resource per-unit accents (theme-adaptive) */
+  --unit-a: #00b3ff;  /* vivid sky — Unit I */
+  --unit-b: #00c896;  /* vivid emerald — Unit II */
+  --unit-c: #c084fc;  /* soft purple — Unit III */
+  --unit-a-soft: rgba(0, 179, 255, 0.14);
+  --unit-b-soft: rgba(0, 200, 150, 0.14);
+  --unit-c-soft: rgba(192, 132, 252, 0.14);
+}
+
+/* Dark theme specific text shadow for readability */
+html.dark .glass-panel h1,
+html.dark .glass-panel h2,
+html.dark .glass-panel .metric-number,
+html.dark .glass-panel .stat-value {
+  text-shadow: 0 0 30px rgba(0, 0, 0, 0.85), 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+html.dark .glass-panel p,
+html.dark .glass-panel span,
+html.dark .glass-panel small,
+html.dark .glass-panel time {
+  text-shadow: 0 0 8px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Self-moving Ambient Floating Movement Keyframes */
+@keyframes glossy-self-float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-7px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes glossy-self-float-alt {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+/* Glass Mode Universal Card & Panel Frosted Blur & Tangible Floating Shadow Enhancement */
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  html[data-theme="glass"] [class*="bg-[var(--bg-surface)]"],
+  html[data-theme="glass"] [class*="bg-[var(--bg-elevated)]"],
+  html[data-theme="glossy-liquid"] [class*="bg-[var(--bg-surface)]"],
+  html[data-theme="glossy-liquid"] [class*="bg-[var(--bg-elevated)]"] {
+    backdrop-filter: blur(28px) saturate(210%);
+    -webkit-backdrop-filter: blur(28px) saturate(210%);
+    border: 1.5px solid rgba(255, 255, 255, 0.92) !important;
+    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.65) 100%);
+    box-shadow: 
+      0 26px 54px -12px rgba(0, 114, 255, 0.16),
+      0 12px 24px -8px rgba(31, 38, 135, 0.12),
+      0 2px 6px rgba(0, 0, 0, 0.04),
+      inset 0 1.5px 2px rgba(255, 255, 255, 1),
+      inset 0 -1.5px 2px rgba(0, 114, 255, 0.10);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease, background 0.4s ease;
+    animation: glossy-self-float 8s ease-in-out infinite;
+  }
+
+  html[data-theme="glass"] [class*="bg-[var(--bg-surface)]"]:nth-child(even),
+  html[data-theme="glass"] [class*="bg-[var(--bg-elevated)]"]:nth-child(even) {
+    animation: glossy-self-float-alt 10s ease-in-out infinite 1s;
+  }
+
+  /* Interactive Hover Lift & Edge Light Distortion Sheen Shift + Radiant Underglow */
+  html[data-theme="glass"] [class*="bg-[var(--bg-surface)]"]:hover,
+  html[data-theme="glass"] [class*="bg-[var(--bg-elevated)]"]:hover {
+    transform: translateY(-9px) scale(1.012) !important;
+    box-shadow: 
+      0 0 35px 5px rgba(0, 198, 255, 0.40),
+      0 38px 75px -15px rgba(0, 114, 255, 0.42),
+      0 20px 35px -10px rgba(31, 38, 135, 0.20),
+      0 4px 10px rgba(0, 0, 0, 0.05),
+      inset 0 2px 2.5px rgba(255, 255, 255, 1),
+      inset 0 -2px 3px rgba(0, 198, 255, 0.30) !important;
+    border-color: rgba(255, 255, 255, 1) !important;
+    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%, rgba(255, 255, 255, 0.78) 100%);
+  }
+
+  /* Radiant Hover Underglow for Buttons & Action Pills in Glossy Theme */
+  html[data-theme="glass"] button:hover,
+  html[data-theme="glass"] [role="button"]:hover,
+  html[data-theme="glass"] .btn:hover {
+    box-shadow: 
+      0 0 26px 4px rgba(0, 198, 255, 0.55),
+      0 12px 28px -3px rgba(0, 114, 255, 0.45),
+      inset 0 1.5px 2px rgba(255, 255, 255, 0.95) !important;
+    transform: translateY(-1.5px);
+  }
+
+  /* Radiant Hover Underglow for Links, Tabs, & Nav Badges */
+  html[data-theme="glass"] a:hover,
+  html[data-theme="glass"] .nav-item:hover,
+  html[data-theme="glass"] [role="tab"]:hover {
+    box-shadow: 
+      0 0 22px 3px rgba(0, 198, 255, 0.45),
+      0 8px 22px -2px rgba(0, 114, 255, 0.35) !important;
+  }
+
+  /* Radiant Focus/Hover Underglow for Inputs & Selects */
+  html[data-theme="glass"] input:hover,
+  html[data-theme="glass"] input:focus,
+  html[data-theme="glass"] select:hover,
+  html[data-theme="glass"] select:focus,
+  html[data-theme="glass"] textarea:hover,
+  html[data-theme="glass"] textarea:focus {
+    box-shadow: 
+      0 0 24px 4px rgba(0, 198, 255, 0.50),
+      0 8px 20px rgba(0, 114, 255, 0.30),
+      inset 0 1px 1.5px rgba(255, 255, 255, 0.95) !important;
+    border-color: #00c6ff !important;
+  }
+
+  /* Ultra Glossy Floating Card Surface */
+  html[data-theme="glass"] .glass-floating-surface,
+  html[data-theme="glossy-liquid"] .glass-floating-surface {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0.68) 100%);
+    border: 1.5px solid rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(28px) saturate(210%);
+    -webkit-backdrop-filter: blur(28px) saturate(210%);
+    box-shadow: 0 24px 50px rgba(0, 70, 180, 0.12), inset 0 1.5px 1.5px rgba(255, 255, 255, 1);
+  }
+}
+
+/* Cinematic Motion Keyframes & Utilities */
+@keyframes cinematic-float-glow {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(4vw, 3vh) scale(1.1); }
+  100% { transform: translate(-2vw, -2vh) scale(0.95); }
+}
+
+@keyframes cinematic-shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.cinematic-shimmer-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+/* ============================================================
+   ENHANCEMENT 1: THEME TRANSITION MORPH (Liquid Flow)
+   ============================================================ */
+.glass-panel,
+.theme-transitioning .glass-panel,
+header.glass-header,
+.floating-orb-container {
+  transition: background-color 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+              backdrop-filter 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+              -webkit-backdrop-filter 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* For the main canvas body background */
+body, .canvas-root {
+  transition: background-color 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.cinematic-shimmer-effect::after {
+  content: "";
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0) 100%);
+  transform: translateX(-100%);
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cinematic-shimmer-effect:hover::after {
+    animation: cinematic-shimmer 3s ease-in-out infinite;
+  }
+  .glass-card {
+    will-change: transform, backdrop-filter;
+    transition: backdrop-filter 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  }
+}
+
+/* ===== SEMANTIC HIG STATUS SURFACES ===== */
+.status-entry     { color: var(--action-primary); }
+.status-exit      { color: var(--action-danger); }
+.status-dayout    { color: var(--action-warning); }
+.status-leave     { color: var(--action-info); }
+
+.bg-entry-subtle  { background-color: rgba(16, 185, 129, 0.12); color: var(--action-primary); }
+.bg-exit-subtle   { background-color: rgba(244, 63, 94, 0.12); color: var(--action-danger); }
+.bg-dayout-subtle { background-color: rgba(245, 158, 11, 0.12); color: var(--action-warning); }
+.bg-leave-subtle  { background-color: rgba(59, 130, 246, 0.12); color: var(--action-info); }
+
+/* Numeric Precision Utilities */
+.glass-card {
+  /* Theme-aware card surface — uses CSS variables so all three themes respond */
+  background-color: var(--bg-surface);
+
+  /* Lightweight blur to prevent scroll jank on Android */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  /* GPU Layer Promotion */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.25);
+
+  /* Smooth theme morph transition */
+  transition: background-color 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.3s ease-out;
+}
+
+.glass-card:hover {
+  box-shadow: 0 8px 40px -8px var(--focus-ring);
+  border-color: var(--focus-ring);
+  transform: translateY(-2px);
+}
+
+/* ===== THEME-SPECIFIC .glass-card OVERRIDES =====
+   These ensure every study resource container morphs correctly across all three themes. */
+
+/* Dark theme — deep slate cards */
+html.dark .glass-card,
+:root[data-theme="dark"] .glass-card {
+  background-color: rgba(15, 23, 42, 0.85);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.35);
+}
+html.dark .glass-card:hover,
+:root[data-theme="dark"] .glass-card:hover {
+  box-shadow: 0 0 60px 0px rgba(99, 102, 241, 0.5);
+  border-color: rgba(99, 102, 241, 0.45);
+}
+
+/* Glossy / Glass theme — frosted translucent cards with ambient float */
+html.glass .glass-card,
+:root[data-theme="glass"] .glass-card,
+:root[data-theme="glossy-liquid"] .glass-card {
+  background-color: rgba(255, 255, 255, 0.72);
+  border-color: rgba(255, 255, 255, 0.92);
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.65) 100%);
+  box-shadow: 0 26px 54px -12px rgba(0, 114, 255, 0.16),
+              0 12px 24px -8px rgba(31, 38, 135, 0.12),
+              0 2px 6px rgba(0, 0, 0, 0.04),
+              inset 0 1.5px 2px rgba(255, 255, 255, 1),
+              inset 0 -1.5px 2px rgba(0, 114, 255, 0.10);
+  backdrop-filter: blur(28px) saturate(210%);
+  -webkit-backdrop-filter: blur(28px) saturate(210%);
+}
+html.glass .glass-card:hover,
+:root[data-theme="glass"] .glass-card:hover,
+:root[data-theme="glossy-liquid"] .glass-card:hover {
+  box-shadow: 0 30px 60px -10px rgba(0, 114, 255, 0.22),
+              0 16px 32px -8px rgba(31, 38, 135, 0.18),
+              0 2px 6px rgba(0, 0, 0, 0.04),
+              inset 0 1.5px 2px rgba(255, 255, 255, 1),
+              inset 0 -1.5px 2px rgba(0, 114, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.98);
+  transform: translateY(-4px);
+}
+
+/* Light theme — crisp white cards with subtle shadow */
+html.light .glass-card,
+:root[data-theme="light"] .glass-card {
+  background-color: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.08),
+              0 2px 6px -2px rgba(0, 0, 0, 0.04);
+}
+html.light .glass-card:hover,
+:root[data-theme="light"] .glass-card:hover {
+  box-shadow: 0 8px 30px -6px rgba(0, 0, 0, 0.12),
+              0 4px 10px -4px rgba(0, 0, 0, 0.06);
+  border-color: #94a3b8;
+  transform: translateY(-2px);
+}
+
+/* ============================================================
+   INNER CARD HIGHLIGHT OVERRIDES
+   Fix bg-[var(--action-primary)]/5 type blocks so they
+   don't bleed into white card surfaces in glass / light themes.
+   ============================================================ */
+
+/* Study cheat-sheet inner highlight blocks — fix for glass theme */
+html.glass .glass-card [class*="bg-[var(--action-primary)]/5"],
+html.glass .glass-card [class*="bg-[var(--action-primary)]/10"],
+html.glass .glass-card [class*="bg-[var(--action-success)]/10"],
+html.glass .glass-card [class*="bg-[var(--action-danger)]/10"],
+html.glass .glass-card [class*="bg-[var(--action-warning)]/10"],
+html.glass .glass-card [class*="bg-[var(--action-info)]/10"] {
+  background-color: rgba(0, 114, 255, 0.08) !important;
+}
+html.glass .glass-card [class*="border-[var(--action-primary)]/20"],
+html.glass .glass-card [class*="border-[var(--action-primary)]/40"] {
+  border-color: rgba(0, 114, 255, 0.25) !important;
+}
+
+/* Light theme inner highlight blocks */
+html.light .glass-card [class*="bg-[var(--action-primary)]/5"],
+html.light .glass-card [class*="bg-[var(--action-primary)]/10"],
+html.light .glass-card [class*="bg-[var(--action-success)]/10"],
+html.light .glass-card [class*="bg-[var(--action-danger)]/10"],
+html.light .glass-card [class*="bg-[var(--action-warning)]/10"],
+html.light .glass-card [class*="bg-[var(--action-info)]/10"] {
+  background-color: rgba(5, 150, 105, 0.10) !important;
+}
+html.light .glass-card [class*="border-[var(--action-primary)]/20"],
+html.light .glass-card [class*="border-[var(--action-primary)]/40"] {
+  border-color: rgba(5, 150, 105, 0.30) !important;
+}
+
+/* ===== High-End vs Low-Profile Specific UI Hardware Profiles ===== */
+html[data-device-profile="high-end"] .glass-card {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.4), 0 0 15px 0 rgba(16, 185, 129, 0.1);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html[data-device-profile="high-end"] .glass-card:hover {
+  box-shadow: 0 12px 40px -5px rgba(0, 0, 0, 0.5), 0 0 25px 0 rgba(16, 185, 129, 0.25);
+  border-color: rgba(16, 185, 129, 0.45);
+  transform: translateY(-3px);
+}
+
+html[data-device-profile="low-profile"] .glass-card {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background-color: var(--bg-surface) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Operational Touch Targets */
+.touch-target-primary {
+  min-height: var(--touch-target-operational);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.touch-target-secondary {
+  min-height: var(--touch-target-min);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Safe Area Inset Layout Support */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 16px);
+}
+
+/* Focus Visibility Rules */
+*:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Base Body Setup */
+html {
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+/* ============================================================
+   PHASE 4 — LIQUID GLASS AESTHETIC + APPLE-TIER GLASS NAVIGATION
+   ============================================================ */
+
+/* Mobile Touch / Nav Adjustments */
+@media (max-width: 640px) {
+  .touch-target-primary { min-height: 56px; }
+  .glass-nav-dock { padding-bottom: calc(env(safe-area-inset-bottom, 16px) + 4px) !important; }
+}
+
+:root {
+  --glass-blur: 24px;
+  --glass-saturate: 220%; /* Bump saturation boost for deeper richness */
+  --glass-sheen-color: rgba(255, 255, 255, 0.25);
+  --glass-sheen-start: 0%;
+  --glass-sheen-end: 100%;
+  --rail-width: 220px;
+}
+@media (min-width: 768px) { :root { --rail-width: 240px; } }
+@media (min-width: 1024px){ :root { --rail-width: 260px; } }
+@media (min-width: 1280px){ :root { --rail-width: 280px; } }
+
+@keyframes liquid-sheen {
+  0%   { transform: translateX(-100%) skewX(-12deg); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateX(200%) skewX(-12deg); opacity: 0; }
+}
+@keyframes glass-rail-in {
+  0%   { opacity: 0; transform: translateX(-16px) scaleY(0.97); }
+  100% { opacity: 1; transform: translateX(0) scaleY(1); }
+}
+@keyframes glass-dock-in {
+  0%   { opacity: 0; transform: translateY(16px) scaleY(0.97); }
+  100% { opacity: 1; transform: translateY(0) scaleY(1); }
+}
+
+.liquid-glass {
+  backdrop-filter: saturate(var(--glass-saturate)) blur(var(--glass-blur));
+  -webkit-backdrop-filter: saturate(var(--glass-saturate)) blur(var(--glass-blur));
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
+    0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="dark"] .liquid-glass, html.dark .liquid-glass {
+  background: rgba(10, 15, 26, 0.65);
+  border-color: rgba(16, 185, 129, 0.15);
+}
+[data-theme="glass"] .liquid-glass, html.glass .liquid-glass {
+  background: rgba(24, 27, 33, 0.55);
+  border-color: rgba(255, 255, 255, 0.15); /* Stronger specular outline */
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.15), /* Inner subtle boundary glow */
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.25),
+    0 8px 32px rgba(0, 0, 0, 0.3);
+}
+[data-theme="light"] .liquid-glass, html.light .liquid-glass {
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(255, 255, 255, 0.9);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.8), 0 8px 32px rgba(0, 0, 0, 0.05);
+}
+
+.card-light-shadow { 
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02); 
+}
+
+/* Container query for list components */
+.card-list-wrapper {
+  container-type: inline-size;
+  container-name: card-list;
+}
+@container card-list (min-width: 400px) {
+  .card-list-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-fluid-md, 24px);
+  }
+}
+
+/* Float Animations for Glossy mode */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+:root[data-theme="glass"] .float-animation,
+html.glass .float-animation {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Premium Focus Glow only in Glossy Mode */
+/* ============================================================
+   TYPOGRAPHY SYSTEM — Apple HIG Compliant
+   ============================================================ */
+
+/* Fluid text utilities */
+.text-fluid-xs { font-size: var(--font-size-xs); }
+.text-fluid-sm { font-size: var(--font-size-sm); }
+.text-fluid-base { font-size: var(--font-size-base); }
+.text-fluid-md { font-size: var(--font-size-md); }
+.text-fluid-lg { font-size: var(--font-size-lg); }
+.text-fluid-xl { font-size: var(--font-size-xl); }
+.text-fluid-2xl { font-size: var(--font-size-2xl); }
+
+/* Tracking utilities */
+.tracking-tight { letter-spacing: -0.02em; }
+.tracking-normal { letter-spacing: -0.01em; }
+.tracking-wide { letter-spacing: 0.02em; }
+.tracking-wider { letter-spacing: 0.05em; }
+
+/* Line heights */
+.leading-tight { line-height: 1.1; }
+.leading-snug { line-height: 1.2; }
+.leading-normal { line-height: 1.5; }
+
+/* Glass‑specific text styles (for navigation only) */
+.text-on-glass-primary { color: #ffffff; }
+.text-on-glass-secondary { color: rgba(255, 255, 255, 0.7); }
+.text-on-glass-muted { color: rgba(255, 255, 255, 0.5); }
+
+/* Globals Overrides */
+html {
+  font-family: var(--font-family);
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+h1, h2, h3, h4 {
+  font-weight: 600;
+  line-height: var(--line-height-snug);
+  letter-spacing: var(--tracking-tight);
+}
+
+h1 { font-size: var(--font-size-2xl); }
+h2 { font-size: var(--font-size-xl); }
+h3 { font-size: var(--font-size-lg); }
+h4 { font-size: var(--font-size-md); }
+
+p, li, .text-body {
+  font-weight: 400;
+  line-height: var(--line-height-normal);
+  letter-spacing: var(--tracking-normal);
+}
+
+.small, .caption, .badge {
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.kpi-number {
+  font-size: var(--font-size-2xl);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: var(--tracking-tight);
+  font-variant-numeric: tabular-nums;
+}
+.input-focus {
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+:root[data-theme="glass"] .input-focus:focus-visible,
+html.glass .input-focus:focus-visible {
+  box-shadow: 0 0 0 3px rgba(16, 212, 142, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+
+/* Navigation Layout Offset Utilities */
+:root {
+  --rail-width: 256px;
+  --rail-width-collapsed: 64px;
+
+  /* Strict Z-Index Scale Tokens */
+  --z-base: 10;
+  --z-overlay: 20;
+  --z-sidebar: 30;
+  --z-header: 40;
+  --z-modal: 50;
+}
+
+/* Z-Index Helper Utilities */
+.z-base { z-index: var(--z-base); }
+.z-overlay { z-index: var(--z-overlay); }
+.z-sidebar { z-index: var(--z-sidebar); }
+.z-header { z-index: var(--z-header); }
+.z-modal { z-index: var(--z-modal); }
+
+/* Overscroll containment utility for pull-to-refresh prevention */
+.overscroll-contain {
+  overscroll-behavior: contain;
+}
+
+/* Shimmer Loading Skeleton Keyframes */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 25%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.03) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite linear;
+}
+
+.glass-layout-offset {
+  margin-left: 0;
+}
+@media (min-width: 1024px) {
+  .glass-layout-offset {
+    margin-left: var(--rail-width);
+  }
+}
+
+/* --- BASE MOBILE SAFEGUARDS & OVERFLOW CONTAINMENT --- */
+* {
+  -webkit-tap-highlight-color: transparent; /* Removes default iOS tap flash */
+}
+
+html, body {
+  min-height: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  touch-action: manipulation;
+}
+
+/* Touch targets safeguard for interactive components */
+button, a, [role="button"], .clickable-card {
+  min-height: 44px;
+}
+
+/* For the Theme Toggle pill */
+.theme-toggle-pill button {
+  padding: 0.5rem 0.75rem;
+}
+
+/* --- RESPONSIVE GLASS: Reduce blur & padding on phones --- */
+@media (max-width: 640px) {
+  .glass-panel {
+    backdrop-filter: blur(12px) saturate(180%) !important; /* Half the blur (24px -> 12px) */
+    -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+    padding: 1rem !important; /* Tighter padding for small cards */
+    border-radius: 1rem !important; /* Slightly smaller radius */
+  }
+
+  /* Headers & Metric Numbers (Prevent overflow on small screens) */
+  .glass-panel h1, 
+  .glass-panel .metric-number,
+  .glass-panel .stat-value {
+    font-size: 1.8rem !important; /* Scales down from ~2.5rem on desktop */
+    word-break: break-word;
+  }
+
+  /* Metadata & Timestamps - keep them small but readable */
+  .glass-panel .timestamp,
+  .glass-panel .text-muted {
+    font-size: 0.65rem !important;
+  }
+}
+
+/* --- EXTRA SMALL (Phones < 400px) --- */
+@media (max-width: 400px) {
+  .glass-panel {
+    padding: 0.75rem !important;
+    border-radius: 0.75rem !important;
+  }
+  .glass-panel h1 {
+    font-size: 1.4rem !important;
+  }
+}
+
+/* ============================================================
+   MOBILE UI REDESIGN & TOUCH UTILITIES
+   ============================================================ */
+@layer utilities {
+  .-webkit-overflow-scrolling-touch {
+    -webkit-overflow-scrolling: touch;
+  }
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+  }
+  .active-tap {
+    transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .active-tap:active {
+    transform: scale(0.96);
+  }
+  /* Hide scrollbar for horizontal scroll containers on mobile */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  /* Thin custom scrollbar for vertical lists */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 9999px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+}
+
+/* ============================================================
+   GLOSSY THEME TEXT COLOR FIXES — Override hardcoded dark-mode colors
+   ============================================================ */
+
+/* Primary text colors — force dark text on light backgrounds */
+html.glass [class*="text-white"],
+html.glass [class*="text-slate-100"],
+html.glass [class*="text-slate-200"],
+html.glass [class*="text-slate-300"],
+html.glass [class*="text-gray-100"],
+html.glass [class*="text-gray-200"],
+html.glass [class*="text-gray-300"] {
+  color: var(--text-secondary, #334155) !important;
+}
+
+html.glass [class*="text-slate-400"],
+html.glass [class*="text-gray-400"] {
+  color: var(--text-muted, #64748b) !important;
+}
+
+html.glass [class*="text-slate-500"],
+html.glass [class*="text-gray-500"] {
+  color: var(--text-muted, #64748b) !important;
+}
+
+/* Background overrides — dark backgrounds on glossy must become light */
+html.glass [class*="bg-slate-900"],
+html.glass [class*="bg-slate-800"],
+html.glass [class*="bg-slate-700"],
+html.glass [class*="bg-gray-900"],
+html.glass [class*="bg-gray-800"],
+html.glass [class*="bg-gray-700"] {
+  background-color: var(--bg-surface, rgba(255,255,255,0.76)) !important;
+}
+
+html.glass [class*="bg-slate-950"],
+html.glass [class*="bg-gray-950"] {
+  background-color: var(--bg-base, #edf4fe) !important;
+}
+
+/* Force text on those dark backgrounds to be readable */
+html.glass [class*="bg-slate-900"] *,
+html.glass [class*="bg-slate-800"] *,
+html.glass [class*="bg-slate-700"] *,
+html.glass [class*="bg-gray-900"] *,
+html.glass [class*="bg-gray-800"] *,
+html.glass [class*="bg-gray-700"] *,
+html.glass [class*="bg-slate-950"] *,
+html.glass [class*="bg-gray-950"] * {
+  color: var(--text-primary, #0f172a) !important;
+}
+
+/* Operator/Scanner dark panel overrides */
+html.glass .scanner-panel,
+html.glass [class*="bg-slate-950"],
+html.glass [class*="bg-slate-900"] {
+  background: var(--bg-surface, rgba(255,255,255,0.76)) !important;
+  color: var(--text-primary, #0f172a) !important;
+}
+
+html.glass .scanner-panel *,
+html.glass [class*="bg-slate-950"] *,
+html.glass [class*="bg-slate-900"] * {
+  color: var(--text-primary, #0f172a) !important;
+}
+
+/* Specific component fixes */
+html.glass .bg-gray-800,
+html.glass .bg-gray-900 {
+  background-color: var(--bg-elevated, rgba(255,255,255,0.92)) !important;
+}
+
+html.glass .bg-gray-800 *,
+html.glass .bg-gray-900 * {
+  color: var(--text-primary, #0f172a) !important;
+}
+
+/* Navbar/sidebar dark backgrounds */
+html.glass .sidebar,
+html.glass [class*="bg-slate-900"],
+html.glass [class*="bg-slate-800"] {
+  background: var(--bg-surface, rgba(255,255,255,0.76)) !important;
+}
+
+/* Input fields on glossy */
+html.glass input,
+html.glass textarea,
+html.glass select {
+  background-color: var(--bg-elevated, rgba(255,255,255,0.92)) !important;
+  color: var(--text-primary, #0f172a) !important;
+  border-color: var(--border, rgba(255,255,255,0.85)) !important;
+}
+
+/* Table rows on glossy */
+html.glass table tbody tr {
+  background-color: var(--bg-surface, rgba(255,255,255,0.76)) !important;
+  color: var(--text-primary, #0f172a) !important;
+}
+
+html.glass table tbody tr:hover {
+  background-color: var(--bg-elevated, rgba(255,255,255,0.92)) !important;
+}
+
+/* Modal/dialog dark overrides */
+html.glass [class*="bg-slate-900"],
+html.glass [class*="bg-gray-900"] {
+  background: var(--bg-surface, rgba(255,255,255,0.76)) !important;
+}
+
+/* Badge & tag text */
+html.glass [class*="bg-slate-800"] [class*="text-slate-"],
+html.glass [class*="bg-gray-800"] [class*="text-gray-"] {
+  color: var(--text-secondary, #334155) !important;
+}
+
+/* ===== Login form error feedback animations ===== */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-6px); }
+  20%, 40%, 60%, 80% { transform: translateX(6px); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-shake,
+  .animate-fadeIn {
+    animation: none;
+  }
+}
+

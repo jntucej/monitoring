@@ -1,0 +1,84 @@
+flowchart TD
+    A[Student Presents QR at Gate] --> B[Operator Scanner / Turnstile Reader]
+
+    B --> C[Decode QR Token<br/>Extract: personId, tokenSignature]
+    C --> D[Validate Cryptographic Signature]
+    D --> E{Valid Signature?}
+    E -->|Invalid| F[Reject: "Invalid QR Code"]
+    F --> G[Play Error Sound -> Red Flash]
+    G --> H[Alert Supervisor]
+    H --> I[Return to Scanner]
+
+    E -->|Valid| J[Lookup Person<br/>GET /api/persons/:id]
+    J --> K{Person Found?}
+    K -->|Not Found| L[Reject: "Person Not Registered"]
+    L --> I
+    
+    K -->|Found| M{Student Type Check}
+
+    %% Day Scholar Flow
+    M -->|Day Scholar| N[Check Campus Hours<br/>GET /api/gates/:gateId/schedule]
+    N --> O{Current Time Within Hours?}
+    O -->|Yes: Within Schedule| P[Auto-Determine Direction]
+    P --> Q{Previous Scan State}
+    Q -->|Was Outside| R[Log ENTRY<br/>Status: CAMPUS]
+    Q -->|Was Inside / First Scan| S[Log EXIT<br/>Status: OFF CAMPUS]
+    R --> T[Play Success Chime]
+    S --> T
+    T --> U[Unlock Turnstile]
+    U --> V[Display: "Welcome [Name]" or "Goodbye [Name]"]
+    V --> W[Notify Parent: Entry/Exit Update]
+    W --> X[Return to Scanner]
+
+    O -->|No: Outside Hours| Y[Check Early/Late Pass]
+    Y --> Z{Valid Pass Exists?}
+    Z -->|Yes| P
+    Z -->|No| AA[Reject: "Outside Campus Hours"]
+    AA --> AB[Play Warning Sound]
+    AB --> AC[Display: "Campus Closed - No Pass"]
+    AC --> X
+
+    %% Hosteler OUT Flow
+    M -->|Hosteler OUT| AD{Active Approved Pass?}
+    AD -->|YES: Valid Window| AE[Verify Pass: Start <= Now <= End]
+    AE -->|Pass Valid| AF[Log EXIT<br/>Status: ON_PASS]
+    AF --> AG[Notify Parent via SMS/WhatsApp<br/>"Ward has left campus, Pass: [Type]" ]
+    AG --> AH[Notify Warden<br/>"Student X exited on pass" ]
+    AH --> AI[Start Pass Expiry Timer]
+    AI --> AJ[Allow Exit -> Unlock Turnstile]
+    AJ --> X
+    
+    AD -->|NO PASS| AK[Reject: "No Valid Pass"]
+    AK --> AL[Display: "Get Approval Before Exiting"]
+    AL --> AM[Button: "Request Emergency Pass"]
+    AM --> AN[Navigate to Pass Request Kiosk]
+
+    AD -->|YES: Pass Expired| AO[Reject: "Pass Expired"]
+    AO --> AN
+
+    %% Hosteler IN Flow (Returning from Pass)
+    M -->|Hosteler IN| AP{Check Return Status}
+    AP -->|Returning on Active Pass| AQ[Log ENTRY<br/>Status: HOSTEL]
+    AQ --> AR{Check Curfew}
+    AR -->|On Time| AS[Allow Entry -> Unlock Turnstile]
+    AR -->|Late / Post-Curfew| AT[Log as LATE BREACH]
+    AT --> AU[Alert Warden + Parent<br/>"Curfew Breach: [Name] returned late"]
+    AU --> AS
+    
+    AP -->|Not on Pass (Normal Return)| AV[Log ENTRY<br/>Status: HOSTEL]
+    AV --> AR
+
+    %% Error & Alert Scenarios
+    AW[Blacklisted Student] --> AX[Block Entry/Exit]
+    AX --> AY[Alert Security + Supervisor]
+    AY --> AZ[Log Security Incident]
+
+    BA[Health/Medical Alert] --> BB[Allow with Escort Required]
+    BB --> BC[Notify Medical Station]
+    BC --> X
+
+    %% Post-Scan Processing
+    X --> BD[Update Live Feed]
+    BD --> BE[Refresh Dashboard Stats]
+    BE --> BF{Click "Done" or Auto-Reset}
+    BF --> A

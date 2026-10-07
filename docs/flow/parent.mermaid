@@ -1,0 +1,118 @@
+flowchart TD
+    A[Parent/Guardian Login<br/>/login?role=parent] --> B{Auth Check}
+    B -->|Valid| C[Guardian Portal: /parent]
+    B -->|Invalid| A
+
+    C --> D{Ward Selector}
+    D -->|Multiple Wards| E[Dropdown: Select Ward]
+    E --> F[Set Active Ward Context]
+    D -->|Single Ward| F
+
+    F --> G{Parent Dashboard Tabs}
+
+    %% Live Ward Status Flow
+    G -->|Click Live Status Tab| H1[Load Ward Status<br/>GET /api/parent/ward/:wardId/status]
+    H1 --> I1[Ward Profile Card<br/>Photo, Name, Roll No, Branch]
+    I1 --> J1{Check Ward State}
+    J1 -->|IN CAMPUS| K1[Status Badge: Inside Campus]
+    K1 --> L1[Entry Details<br/>Last Entry Gate, Time]
+    L1 --> M1[Campus Map Pin<br/>Last Known Location]
+    
+    J1 -->|OUT OF CAMPUS| K2[Status Badge: Outside Campus]
+    K2 --> L2[Active Pass Card<br/>Pass Type, Destination, Return Time]
+    L2 --> M2[Timer: Expected Return In X Hours]
+    
+    J1 -->|HOSTEL| K3[Status Badge: In Hostel]
+    K3 --> L3[Hostel Details<br/>Block, Room, Warden Name]
+    L3 --> M3[Curfew Status: Safe / Late Warning]
+
+    %% Pass Management Flow
+    G -->|Click Passes Tab| H2[Load Pass Requests<br/>GET /api/parent/ward/:wardId/passes]
+    H2 --> I2[Pass Cards Grid<br/>Pending, Active, History]
+    I2 --> J2[Filter by Status<br/>Pending Approval / Active / Completed]
+    J2 --> K4{Click Pass Card}
+    
+    K4 -->|Pending Pass| L4[Pass Detail Modal]
+    L4 --> M4[Pass Info<br/>Date, Time, Destination, Reason]
+    M4 --> N1{Guardian Action Buttons}
+    N1 -->|Approve| O1[Confirm Approval Dialog]
+    O1 --> P1[POST /api/passes/:passId/approve]
+    P1 --> Q1[Success Toast: Pass Approved]
+    Q1 --> R1[Notification Sent to Ward]
+    R1 --> H2
+    
+    N1 -->|Reject| O2[Rejection Reason Modal]
+    O2 --> P2[Text Input: Reason for Rejection]
+    P2 --> Q2[POST /api/passes/:passId/reject]
+    Q2 --> R2[Ward Notified: Pass Rejected]
+    R2 --> H2
+    
+    N1 -->|Request Changes| O3[Comment Modal]
+    O3 --> P3[POST /api/passes/:passId/comment]
+    
+    K4 -->|Active Pass| L5[Active Pass QR Code Display]
+    L5 --> M5[Real-time Tracking<br/>If Ward Scanned Out]
+    
+    %% Create Emergency Pass Flow
+    G -->|Click Create Emergency Pass| H3[Emergency Pass Form<br/>/parent/passes/create]
+    H3 --> I3[Fill Form<br/>Reason, Pickup Time, Contact Number]
+    I3 --> J3[Select Pass Type<br/>Medical Emergency / Family Emergency]
+    J3 --> K5[Click Submit Button]
+    K5 --> L6[POST /api/passes/emergency/create]
+    L6 --> M6[Pass Created Instantly<br/>No Additional Approval Needed]
+    M6 --> N2[QR Code Generated]
+    N2 --> O4[SMS/WhatsApp to Ward & Parent]
+    O4 --> H2
+
+    %% Movement History Flow
+    G -->|Click History Tab| H4[Load Movement Log<br/>GET /api/parent/ward/:wardId/history]
+    H4 --> I4[Timeline View<br/>Entry/Exit Records]
+    I4 --> J4[Each Entry Shows<br/>Date, Time, Gate, Direction, Operator]
+    J4 --> K6{Filter Options}
+    K6 -->|Date Range| L7[Date Picker -> Refetch]
+    K6 -->|Gate Filter| L8[Dropdown -> Refetch]
+    K6 -->|Export Report| L9[Click Export Button]
+    L9 --> M7[Select Format<br/>PDF / Excel / CSV]
+    M7 --> N3[GET /api/parent/ward/:wardId/history/export]
+    N3 --> O5[Download File]
+
+    %% Notifications & Alerts Flow
+    G -->|Click Notifications Tab| H5[Load Alerts<br/>GET /api/parent/notifications]
+    H5 --> I5[Notification Cards<br/>Gate Scans, Pass Updates, Alerts]
+    I5 --> J5[Real-time Updates<br/>WebSocket Connection]
+    J5 --> K7{Notification Types}
+    K7 -->|Gate Scan| L10[Ward Entered/Exited Campus<br/>Gate Name, Time, Photo]
+    K7 -->|Pass Approved| L11[Pass Request Approved by Warden/HOD]
+    K7 -->|Curfew Warning| L12[Ward Late / Curfew Breach Alert]
+    K7 -->|Attendance Alert| L13[Ward Absent / Irregular Attendance]
+
+    %% Settings Flow
+    G -->|Click Settings Tab| H6[Parent Settings<br/>/parent/settings]
+    H6 --> I6[Settings Form]
+    I6 --> J6{Settings Sections}
+    J6 -->|Notification Preferences| K8[Toggle Switches]
+    K8 --> L14[SMS Notifications ON/OFF]
+    L14 --> M8[WhatsApp Notifications ON/OFF]
+    M8 --> N4[Push Notifications ON/OFF]
+    N4 --> O6[Email Digest ON/OFF]
+    
+    J6 -->|Emergency Contacts| K9[Add/Edit Contacts]
+    K9 --> L15[Contact Form<br/>Name, Relation, Phone]
+    L15 --> M9[Click Save]
+    M9 --> N5[POST /api/parent/contacts/save]
+    
+    J6 -->|Language & Timezone| K10[Dropdowns]
+    K10 --> L16[Save Preferences]
+    L16 --> M10[PATCH /api/parent/settings]
+
+    %% Multi-Ward Switcher
+    C --> X[Top Nav: Ward Switcher]
+    X --> Y[Dropdown: All Wards List]
+    Y --> Z[Click Ward Name]
+    Z --> F
+
+    %% Logout Flow
+    C --> V1[Profile Menu -> Logout]
+    V1 --> V2[POST /api/auth/logout]
+    V2 --> V3[Clear Session]
+    V3 --> A

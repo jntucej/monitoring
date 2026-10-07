@@ -1,0 +1,12 @@
+{
+  "jira.baseUrl": "https://djsnakeflow99.atlassian.net",
+  "jira.projectKey": "CEJ",
+  "chat.mcp.discovery.enabled": {
+    "claude-desktop": true,
+    "copilot": true,
+    "windsurf": true,
+    "cursor-global": true,
+    "cursor-workspace": true
+  },
+  "chat.mcp.access": "all"
+}

@@ -1,0 +1,72 @@
+flowchart TD
+    A[Visitor Arrives at Campus Gate] --> B{Pass Status Check}
+
+    B -->|Pre-Registered Online| C[Show Visitor QR Code]
+    B -->|Walk-in Visitor| D[Walk-in Registration]
+
+    %% Pre-Registered Flow
+    C --> E[Gate Scanner / Kiosk Scan]
+    E --> F[POST /api/visitors/verify<br/>QR Code Data]
+    F --> G{Validation Result}
+    G -->|Valid Active Pass| H[Display Visitor Info<br/>Name, Host, Purpose]
+    G -->|Expired / Invalid| I[Error: "Invalid Pass"]
+    I --> D[Redirect to Registration Kiosk]
+    
+    H --> J{Host Approval Status}
+    J -->|Already Approved| K[Proceed to Entry]
+    J -->|Pending Approval| L[Send Push to Host<br/>POST /api/visitors/:id/request-approval]
+    L --> M{Wait for Host Response<br/>Timeout: 5 min}
+    M -->|Approved| K
+    M -->|Rejected| N[Display: "Host Declined Visit"]
+    M -->|Timeout| O[Display: "Approval Timeout"]
+
+    K --> P[Log Entry Timestamp<br/>POST /api/activity/visitor-entry]
+    P --> Q[Status: ACTIVE ON CAMPUS]
+    Q --> R[Issue Physical Badge / Print Pass]
+    R --> S[Visitor Proceeds On-Campus]
+
+    %% Walk-in Registration Flow
+    D --> T[Operator / Kiosk Registration Screen<br/>/visitor/register]
+    T --> U[Fill Registration Form]
+    U --> V[Enter: Full Name, Phone, Purpose, Host Name/Dept]
+    V --> W[Capture: Government ID Photo / Upload]
+    W --> X[Click Submit]
+    X --> Y[POST /api/visitors/register]
+    Y --> Z[Generate Temporary Visitor ID]
+
+    Z --> A1[Send Request to Host<br/>Push Notification + SMS]
+    A1 --> B1{Wait for Host Response}
+    B1 -->|Approved| C1[Generate Visitor QR Pass]
+    B1 -->|Rejected| D1[Display: "Visit Not Approved"]
+    B1 -->|Timeout| E1[Display: "No Response - Try Again Later"]
+
+    C1 --> F1[Display QR Code on Screen]
+    F1 --> G1[Print Visitor Badge<br/>Name, Photo, Expiry Time]
+    G1 --> H1[Log Entry -> Proceed to Campus]
+
+    %% Exit Flow
+    S --> I1[Visitor Ready to Exit]
+    I1 --> J1[Re-scan QR Code at Exit Gate]
+    J1 --> K1[POST /api/visitors/:id/exit]
+    K1 --> L1[Log Exit Timestamp]
+    L1 --> M1[Status: VISIT COMPLETED]
+    M1 --> N1[Option: Return Badge / Auto-Dispose]
+    
+    D1 --> O1[Visitor Leaves Campus]
+    E1 --> O1
+
+    %% Host Mobile Approval Flow (Parallel)
+    A1 --> P1[Host Receives Push Notification]
+    P1 --> Q1[Host Opens App -> Visitor Request Screen]
+    Q1 --> R1{View Request Details}
+    R1 --> S1[See: Visitor Name, Photo, Purpose, Time]
+    S1 --> T1{Decision Buttons}
+    T1 -->|Approve| U1[Tap Approve -> POST /api/visitors/:id/approve]
+    T1 -->|Reject| V1[Tap Reject + Reason -> POST /api/visitors/:id/reject]
+    T1 -->|Request More Info| W1[Send Text Message to Visitor Kiosk]
+
+    U1 --> X1[Visitor Notified: "Approved"]
+    X1 --> B1
+    
+    V1 --> Y1[Visitor Notified: "Rejected"]
+    Y1 --> B1
