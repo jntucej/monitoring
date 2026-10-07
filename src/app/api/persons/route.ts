@@ -85,7 +85,7 @@ async function handleGet(req: NextRequest) {
     }
 
     if (q) {
-      if (![, "admin", "sysadmin", "operator"].includes(authRole || "")) {
+      if (!["admin", "sysadmin", "operator"].includes(authRole || "")) {
         return NextResponse.json(
           { success: false, error: { code: "FORBIDDEN", message: "Insufficient permissions to search persons." } },
           { status: 403 }

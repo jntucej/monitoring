@@ -357,10 +357,11 @@ export interface ExitReasonConfig {
 
 export const DEPARTMENT_CODES: Record<string, string> = {
   "01": "CSE",
-  "02": "IT",
-  "03": "ECE",
-  "04": "EEE",
-  "05": "ME",
+  "02": "EEE",
+  "03": "ME",
+  "04": "ECE",
+  "05": "CSE",
+  "12": "IT",
 };
 
 export const DEPARTMENT_CODE_TO_NAME: Record<string, string> = {

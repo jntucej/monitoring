@@ -8,14 +8,22 @@ import type { Pool, PoolClient, QueryResult, QueryResultRow } from "pg";
  */
 
 let poolInstance: Pool | null = null;
+let pgModule: any = null;
 
-export function getPostgresPool(): Pool {
+async function getPgModule() {
+  if (!pgModule) {
+    pgModule = await import("pg");
+  }
+  return pgModule;
+}
+
+export async function getPostgresPool(): Promise<Pool> {
   if (typeof window !== "undefined") {
     throw new Error("PostgreSQL pool cannot be accessed from client-side code");
   }
 
   if (!poolInstance) {
-    const pg = eval('require')("pg");
+    const pg = await getPgModule();
     const PgPool = pg.Pool || pg.default?.Pool;
     const connectionString =
       process.env.DATABASE_URL ||
@@ -53,7 +61,7 @@ export async function query<T extends QueryResultRow = any>(
   text: string,
   params: any[] = []
 ): Promise<QueryResult<T>> {
-  const pool = getPostgresPool();
+  const pool = await getPostgresPool();
   const start = Date.now();
   try {
     const result = await pool.query<T>(text, params);
@@ -77,7 +85,7 @@ export async function withTransaction<T>(
   callback: (client: PoolClient) => Promise<T>,
   options?: { currentUserId?: string }
 ): Promise<T> {
-  const pool = getPostgresPool();
+  const pool = await getPostgresPool();
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
