@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { addAudit, findUserById } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
@@ -16,7 +17,7 @@ async function handleDelete(req: NextRequest) {
     const supabase = getSupabaseServiceClient();
 
     // Revoke user session token handle in database
-    await supabase.from("users").update({ session_version: (user?.session_version || 0) + 1, handle: gen_random_uuid_placeholder }).eq("id", targetUserId);
+    await supabase.from("users").update({ handle: `user_${randomUUID()}` }).eq("id", targetUserId);
 
     // Also delete any active sessions in sessions table if present
     try {

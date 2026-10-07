@@ -70,7 +70,7 @@ test('Issue 18: PostgresQueryBuilder / db provides auth.admin methods', () => {
 });
 
 test('Issue 19: verify-supabase-migrations uses dbClient', () => {
-  const migCheckCode = fs.readFileSync('scripts/verify-supabase-migrations.ts', 'utf8');
+  const migCheckCode = fs.readFileSync('scripts/verify-db-migrations.ts', 'utf8');
   assert(migCheckCode.includes('dbClient'), 'verify-supabase-migrations.ts should require dbClient');
 });
 

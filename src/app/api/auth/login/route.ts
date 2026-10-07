@@ -189,13 +189,6 @@ async function handleLogin(req: NextRequest) {
           expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
         });
 
-<<<<<<< Updated upstream
-=======
-    const requiresMfa = ((user.role === "sysadmin" || user.role === "admin") && (await isMfaRequiredForAdmin())) || user.two_factor_enabled;
-    const mfaSecret = user.totp_secret || user.two_factor_secret;
-    if (requiresMfa && mfaSecret) {
-      if (!body.totp_code) {
->>>>>>> Stashed changes
         return NextResponse.json(
           {
             success: true,
@@ -208,7 +201,6 @@ async function handleLogin(req: NextRequest) {
           { status: 200 }
         );
       }
-<<<<<<< Updated upstream
 
       // Step 2: Validate challenge if provided
       const service = getSupabaseServiceClient();
