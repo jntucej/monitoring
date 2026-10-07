@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { withRateLimit } from "@/lib/rate-limit";
 import { query } from "@/lib/postgres";
 import { signPasswordResetToken, verifyPasswordResetToken, hashPassword } from "@/lib/auth-token";
+import { assertCsrf } from "@/lib/csrf";
 import { sendEmail } from "@/lib/integrations/email";
 
 const SUCCESS_RESPONSE = {
@@ -10,6 +11,8 @@ const SUCCESS_RESPONSE = {
 };
 
 async function handleResetPassword(req: NextRequest) {
+  const csrfError = assertCsrf(req);
+  if (csrfError) return csrfError;
   try {
     const body = await req.json().catch(() => null);
     if (!body || typeof body !== "object") {
@@ -104,7 +107,7 @@ async function handleResetPassword(req: NextRequest) {
       },
       { status: 400 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[Auth:ResetPassword] Error:", error);
     return NextResponse.json(
       {

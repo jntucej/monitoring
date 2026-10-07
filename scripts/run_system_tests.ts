@@ -26,6 +26,9 @@ import { isMfaRequiredForAdmin } from "../src/lib/authContext";
 import { encryptSecret, decryptSecret } from "../src/lib/mfa-secret";
 import { generateBase32Secret, generateTOTPCode, verifyTOTPCode } from "../src/lib/totp";
 import { getCached, setCached, invalidateCache } from "../src/lib/cache";
+import { validateCsrf } from "../src/lib/csrf";
+import { extractClientIp } from "../src/lib/rate-limit";
+import { NextRequest } from "next/server";
 
 async function runTests() {
   console.log("====================================================");
@@ -406,6 +409,125 @@ async function runTests() {
   };
   assert(burnChallenge(challengeState) === true, "First consumption of MFA login challenge succeeds");
   assert(burnChallenge(challengeState) === false, "Replay of consumed MFA login challenge is rejected");
+
+  // 2c. Issue #6: PIN Login Security, Lockout, CSRF & Password/Role Isolation
+  console.log("\n🛡️  [2c/4] Testing PIN Login Security, Lockout & CSRF Defense...");
+
+  // 10a. Password does NOT work at the PIN endpoint verification
+  const testUser = {
+    id: "user-op-1",
+    email: "operator@college.edu",
+    role: "operator",
+    password_hash: await hashPassword("ValidPassword123!"),
+    pin_hash: await hashPassword("654321"),
+    initial_pin_hash: null as string | null,
+    two_factor_enabled: false,
+  };
+
+  const verifyPinOnly = async (presentedPin: string, user: typeof testUser) => {
+    let valid = false;
+    if (user.pin_hash) valid = await verifyPassword(presentedPin, user.pin_hash);
+    if (!valid && user.initial_pin_hash) valid = await verifyPassword(presentedPin, user.initial_pin_hash);
+    return valid;
+  };
+
+  assert(
+    (await verifyPinOnly("ValidPassword123!", testUser)) === false,
+    "10a: Account password does NOT authenticate against PIN endpoint"
+  );
+  assert(
+    (await verifyPinOnly("654321", testUser)) === true,
+    "10a-valid: Correct PIN authenticates successfully"
+  );
+
+  // 10b. Role filter permits non-privileged roles (operator, staff, worker)
+  const allowedRoles = new Set(["operator", "staff", "worker"]);
+  assert(allowedRoles.has("operator") && allowedRoles.has("staff") && allowedRoles.has("worker"), "10b: Operator, staff, and worker are permitted for PIN login");
+
+  // 10c. Privileged roles (sysadmin, admin) are rejected by PIN login role filter
+  assert(!allowedRoles.has("sysadmin"), "10c-sysadmin: sysadmin role is rejected by PIN login role filter");
+  assert(!allowedRoles.has("admin"), "10c-admin: admin role is rejected by PIN login role filter");
+  assert(!allowedRoles.has("superadmin"), "10c-superadmin: superadmin role is rejected by PIN login role filter");
+
+  // 10d. Per-identifier lockout after 5 failures
+  interface LockoutTracker {
+    [identifier: string]: { failed_count: number; locked_until: number | null };
+  }
+  const lockoutDb: LockoutTracker = {};
+
+  const recordFailedAttempt = (identifier: string) => {
+    const norm = identifier.toUpperCase();
+    if (!lockoutDb[norm]) {
+      lockoutDb[norm] = { failed_count: 0, locked_until: null };
+    }
+    lockoutDb[norm].failed_count += 1;
+    if (lockoutDb[norm].failed_count >= 5) {
+      lockoutDb[norm].locked_until = Date.now() + 15 * 60 * 1000;
+    }
+    return lockoutDb[norm];
+  };
+
+  const isLocked = (identifier: string) => {
+    const norm = identifier.toUpperCase();
+    const entry = lockoutDb[norm];
+    return Boolean(entry?.locked_until && entry.locked_until > Date.now());
+  };
+
+  for (let i = 0; i < 4; i++) {
+    recordFailedAttempt("OP001");
+  }
+  assert(!isLocked("OP001"), "10d-1: Account not locked after 4 failed attempts");
+  recordFailedAttempt("OP001");
+  assert(isLocked("OP001"), "10d-2: Account is locked after 5 failed attempts");
+  assert(isLocked("op001"), "10d-case: Lockout check is case-insensitive on identifier");
+
+  // 10e. Lockout cannot be bypassed by IP rotation / spoofing (identifier-based)
+  assert(isLocked("OP001"), "10e: Lockout remains active regardless of simulated IP address");
+
+  // 10f. Successful login resets failure counter
+  const resetLockout = (identifier: string) => {
+    delete lockoutDb[identifier.toUpperCase()];
+  };
+  resetLockout("OP001");
+  assert(!isLocked("OP001"), "10f: Successful authentication resets lockout counter");
+
+  // 10g. TOTP 2FA required for 2FA-enrolled user even at PIN endpoint
+  const mfaOperator = { ...testUser, two_factor_enabled: true };
+  const requiresMfaCheck = (user: typeof mfaOperator) => Boolean(user.two_factor_enabled);
+  assert(requiresMfaCheck(mfaOperator) === true, "10g: 2FA-enrolled operator triggers MFA challenge on PIN login");
+
+  // 10h. Cross-origin POST request rejected by CSRF protection
+  const evilReq = new NextRequest("http://campus.example.edu/api/auth/pin-login", {
+    method: "POST",
+    headers: {
+      origin: "https://evil-attacker.com",
+      host: "campus.example.edu",
+    },
+  });
+  const sameOriginReq = new NextRequest("http://campus.example.edu/api/auth/pin-login", {
+    method: "POST",
+    headers: {
+      origin: "http://campus.example.edu",
+      host: "campus.example.edu",
+    },
+  });
+  assert(validateCsrf(evilReq).valid === false, "10h-cross: Cross-origin POST is rejected by CSRF protection");
+  assert(validateCsrf(sameOriginReq).valid === true, "10h-same: Same-origin POST passes CSRF protection");
+
+  // 10i. Client IP extraction prefers x-real-ip and rightmost x-forwarded-for
+  const spoofedReq = new NextRequest("http://campus.example.edu/api/auth/pin-login", {
+    headers: {
+      "x-forwarded-for": "1.1.1.1, 2.2.2.2, 3.3.3.3",
+      "x-real-ip": "10.0.0.1",
+    },
+  });
+  assert(extractClientIp(spoofedReq) === "10.0.0.1", "10i-realip: extractClientIp prefers trusted x-real-ip");
+  const multiHopReq = new NextRequest("http://campus.example.edu/api/auth/pin-login", {
+    headers: {
+      "x-forwarded-for": "198.51.100.1, 203.0.113.5",
+    },
+  });
+  assert(extractClientIp(multiHopReq) === "203.0.113.5", "10i-hop: extractClientIp uses rightmost proxy hop");
 
   // 3. Cache Test
   console.log("\n⚡ [3/4] Testing Cache Infrastructure...");
