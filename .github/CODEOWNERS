@@ -1,7 +1,0 @@
-# CODEOWNERS — see docs/BRANCHING.md
-# Only users with Write access can be code owners.
-
-*                   @Akarshjadi
-/infra/             @junaidshaik7798-crypto
-/tests/             @Dhanavarshaponnala-dev
-/src/               @MoolaAshwitha21
