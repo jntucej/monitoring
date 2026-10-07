@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/postgres";
 import { verifyRefreshToken, signAccessToken, signRefreshToken } from "@/lib/auth-token";
 import { withRateLimit } from "@/lib/rate-limit";
+import { assertCsrf } from "@/lib/csrf";
 
 async function handleRefresh(req: NextRequest) {
+  const csrfError = assertCsrf(req);
+  if (csrfError) return csrfError;
   try {
     let token = req.cookies.get("refresh_token")?.value || req.cookies.get("refresh-token")?.value;
 
@@ -20,10 +23,10 @@ async function handleRefresh(req: NextRequest) {
 
     if (!token) {
       const body = await req.json().catch(() => null);
-      if (body && typeof body === "object" && (body as any).refresh_token) {
-        token = String((body as any).refresh_token);
-      } else if (body && typeof body === "object" && (body as any).refreshToken) {
-        token = String((body as any).refreshToken);
+      if (body && typeof body === "object" && (body as Record<string, unknown>).refresh_token) {
+        token = String((body as Record<string, unknown>).refresh_token);
+      } else if (body && typeof body === "object" && (body as Record<string, unknown>).refreshToken) {
+        token = String((body as Record<string, unknown>).refreshToken);
       }
     }
 
@@ -116,7 +119,7 @@ async function handleRefresh(req: NextRequest) {
     response.cookies.set("refresh-token", refresh_token, { ...cookieOptions, maxAge: 30 * 24 * 3600 });
 
     return response;
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("[Refresh Route Error]", err);
     return NextResponse.json(
       {

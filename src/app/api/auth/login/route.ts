@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withRateLimit } from "@/lib/rate-limit";
+import { withRateLimit, extractClientIp } from "@/lib/rate-limit";
 import { query } from "@/lib/postgres";
 import { signAccessToken, signRefreshToken, verifyPassword } from "@/lib/auth-token";
 import { isMfaRequiredForAdmin } from "@/lib/authContext";
 import { createEnrollToken } from "@/lib/mfa-enroll";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { addAudit } from "@/lib/db";
+import { assertCsrf } from "@/lib/csrf";
+import type { Role } from "@/lib/types";
 import bcrypt from "bcryptjs";
 
 const GENERIC_FAILURE = {
@@ -17,6 +19,9 @@ const GENERIC_FAILURE = {
 };
 
 async function handleLogin(req: NextRequest) {
+  const csrfError = assertCsrf(req);
+  if (csrfError) return csrfError;
+
   try {
     const body = await req.json().catch(() => null);
     if (!body || typeof body !== "object") {
@@ -66,6 +71,19 @@ async function handleLogin(req: NextRequest) {
 
     const user = userRes.rows[0];
 
+    if (user.locked_until && new Date(user.locked_until) > new Date()) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "LOCKED",
+            message: "Account is temporarily locked due to too many failed attempts. Try again later.",
+          },
+        },
+        { status: 429 }
+      );
+    }
+
     if (user.status !== "ACTIVE") {
       return NextResponse.json(
         {
@@ -83,13 +101,60 @@ async function handleLogin(req: NextRequest) {
     if (user.password_hash) {
       passwordValid = await verifyPassword(rawPassword, user.password_hash);
     }
-    if (!passwordValid && (user.pin_hash || user.initial_pin_hash)) {
-      passwordValid = await verifyPassword(rawPassword, user.pin_hash || user.initial_pin_hash);
-    }
 
     if (!passwordValid) {
+      await query(
+        `UPDATE users
+            SET failed_login_count = failed_login_count + 1,
+                locked_until = CASE
+                  WHEN failed_login_count + 1 >= 5
+                  THEN NOW() + INTERVAL '15 minutes'
+                  ELSE locked_until
+                END
+          WHERE id = $1`,
+        [user.id]
+      );
+
+      const normalizedId = identifier.toUpperCase();
+      await query(
+        `INSERT INTO pin_login_attempts (identifier, failed_count, last_attempt_at)
+         VALUES ($1, 1, NOW())
+         ON CONFLICT (identifier) DO UPDATE
+           SET failed_count = pin_login_attempts.failed_count + 1,
+               last_attempt_at = NOW(),
+               locked_until = CASE
+                 WHEN pin_login_attempts.failed_count + 1 >= 5
+                 THEN NOW() + INTERVAL '15 minutes'
+                 ELSE pin_login_attempts.locked_until
+               END`,
+        [normalizedId]
+      );
+
+      await addAudit({
+        action: "LOGIN_FAILED",
+        userId: user.id,
+        userName: user.name || "User",
+        role: user.role as Role,
+        details: {
+          identifier,
+          ip: extractClientIp(req),
+          userAgent: req.headers.get("user-agent") || "unknown",
+          reason: "invalid_password",
+          endpoint: "/api/auth/login",
+        },
+      });
+
       return NextResponse.json(GENERIC_FAILURE, { status: 401 });
     }
+
+    await query(
+      `UPDATE users SET failed_login_count = 0, locked_until = NULL WHERE id = $1`,
+      [user.id]
+    );
+    await query(
+      `DELETE FROM pin_login_attempts WHERE identifier = $1`,
+      [identifier.toUpperCase()]
+    );
     // ── MFA Verification & Enrollment Enforcement ─────────────────
     const requiresMfa =
       (user.role === "sysadmin" || user.role === "admin") &&

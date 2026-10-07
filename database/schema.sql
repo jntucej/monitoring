@@ -57,6 +57,11 @@ CREATE TABLE IF NOT EXISTS users (
   two_factor_secret TEXT,
   two_factor_enrolled_at TIMESTAMPTZ,
   two_factor_recovery_codes TEXT[],
+  pin_set_by UUID REFERENCES users(id),
+  pin_set_at TIMESTAMPTZ,
+  pin_must_change BOOLEAN NOT NULL DEFAULT FALSE,
+  failed_login_count INTEGER NOT NULL DEFAULT 0,
+  locked_until TIMESTAMPTZ,
 
 
   created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -994,6 +999,30 @@ CREATE TABLE IF NOT EXISTS public.attendance_records (
   synced BOOLEAN DEFAULT false,
   synced_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW(),
+
+-- ============================================================================
+-- PIN LOGIN ATTEMPTS & LOCKOUT TABLE
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.pin_login_attempts (
+  identifier TEXT PRIMARY KEY,
+  failed_count INTEGER NOT NULL DEFAULT 0,
+  locked_until TIMESTAMPTZ,
+  last_attempt_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_pin_login_attempts_locked
+  ON public.pin_login_attempts (locked_until)
+  WHERE locked_until IS NOT NULL;
+
+ALTER TABLE public.pin_login_attempts ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "service_role_all_pin_login_attempts"
+  ON public.pin_login_attempts
+  FOR ALL
+  TO service_role
+  USING (true)
+  WITH CHECK (true);
+
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(person_id, date)
 );

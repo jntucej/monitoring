@@ -2,11 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/postgres";
 import { hashPassword, verifyPassword } from "@/lib/auth-token";
 import { addAudit } from "@/lib/db";
+import { assertCsrf } from "@/lib/csrf";
 import { withRateLimit } from "@/lib/rate-limit";
 import { withAuthorization } from "@/middleware/authorization";
 import type { AuthContext } from "@/lib/authContext";
 
 async function handleChangePassword(req: NextRequest, { auth }: { auth: AuthContext }) {
+  const csrfError = assertCsrf(req);
+  if (csrfError) return csrfError;
   try {
     const userId = auth?.userId || req.headers.get("x-user-id");
     if (!userId) {
@@ -87,7 +90,7 @@ async function handleChangePassword(req: NextRequest, { auth }: { auth: AuthCont
       { success: true, message: "Password updated successfully." },
       { status: 200 }
     );
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("[Change Password Error]", err);
     return NextResponse.json(
       { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to update password." } },

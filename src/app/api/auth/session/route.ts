@@ -20,7 +20,7 @@ async function handleSessionCheck(req: NextRequest) {
       token = req.headers.get("x-session-token") || undefined;
     }
 
-    let refreshToken =
+    const refreshToken =
       req.cookies.get("refresh_token")?.value ||
       req.headers.get("x-refresh-token") ||
       undefined;
@@ -123,7 +123,7 @@ async function handleSessionCheck(req: NextRequest) {
     }
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[Auth:Session] Error:", error);
     return NextResponse.json(
       {
