@@ -89,6 +89,39 @@ async function handlePut(req: NextRequest) {
       );
     }
 
+    // Warden hostel block scoping check
+    if (authRole === "warden" && approverId) {
+      const { getSupabaseServiceClient } = await import("@/lib/dbClient");
+      const service = getSupabaseServiceClient();
+      const { data: approverProfile } = await service
+        .from("users")
+        .select("department, meta")
+        .eq("id", approverId)
+        .maybeSingle();
+
+      const wardenHostel = approverProfile?.meta?.hostel_block || approverProfile?.department;
+      if (wardenHostel && pass.roll) {
+        const { data: studentDetail } = await service
+          .from("student_details")
+          .select("hostel_block")
+          .eq("roll_number", pass.roll)
+          .maybeSingle();
+
+        if (studentDetail?.hostel_block && studentDetail.hostel_block !== wardenHostel) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: {
+                code: "FORBIDDEN_HOSTEL_SCOPE",
+                message: `Warden is assigned to hostel block ${wardenHostel}, but pass belongs to student in ${studentDetail.hostel_block}.`,
+              },
+            },
+            { status: 403 }
+          );
+        }
+      }
+    }
+
     const result =
       action === "approve"
         ? await approvePass(passId, authRole || "warden", comment, approverId)
