@@ -1,23 +1,76 @@
-# Ignore markdown and documentation files
+# Documentation & Markdown
 *.md
 **/*.md
 docs/**
 
-# Ignore logs and temporary files
+# Build artifacts & caches
+.next/**
+out/**
+build/**
+dist/**
+.turbo/**
+.cache/**
+*.tsbuildinfo
+tsconfig*.tsbuildinfo
+next-env.d.ts
+
+# Logs & Debugging
 *.log
+**/*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 dev-server.log
 server.log
-tsconfig.tsbuildinfo
-fix_types.py
 
-# Ignore test reports and outputs
+# Testing & Reports
+coverage/**
 playwright-report/**
 test-results/**
 repomix-output.*
+repomix-output*
 
-# Ignore lock and environment files
-package-lock.json
+# Environment & Secrets
 .env*
+!.env.example
+*.pem
+*.key
+*.cert
+
+# Lock files & dependencies
+node_modules/**
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# System & OS
 .DS_Store
 **/.DS_Store
+Thumbs.db
 
+# IDE & Tooling
+.vscode/**
+.idea/**
+.github/**
+.continue/**
+
+# Media & Binary Assets
+public/**/*.png
+public/**/*.jpg
+public/**/*.jpeg
+public/**/*.ico
+public/**/*.svg
+public/**/*.webp
+*.pdf
+*.zip
+*.tar.gz
+
+# Python bytecode & temporary scripts
+__pycache__/**
+*.pyc
+fix_*.py
+fix_*.js
+scripts/fix_*.py
+scripts/fix_*.js
+scratch/**
+*.txt
