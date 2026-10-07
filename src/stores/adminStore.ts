@@ -1,8 +1,7 @@
 /**
- * Zustand store for the Admin dashboard — KPIs, activity feed, alerts, gate passes.
+ * Zustand store for Admin dashboard KPIs, activity feed, alerts, and gate passes.
  */
 import { create } from "zustand";
-import { dashboard, getAlerts, resolveAlert, getNotifications } from "@/lib/db";
 import type { DashboardData, Alert, Scan } from "@/lib/types";
 
 interface AdminState {
@@ -15,9 +14,9 @@ interface AdminState {
 }
 
 interface AdminActions {
-  loadDashboard: () => void;
-  loadAlerts: () => void;
-  resolveAlert: (alertId: string, userId: string, userName: string) => void;
+  loadDashboard: () => Promise<void>;
+  loadAlerts: () => Promise<void>;
+  resolveAlert: (alertId: string, userId?: string, userName?: string) => Promise<void>;
   recordScan: (scan: Scan) => void;
   setActiveGate: (gateId: string | null) => void;
   refresh: () => void;
@@ -32,19 +31,37 @@ export const useAdminStore = create<AdminState & AdminActions>()((set, get) => (
   loading: false,
 
   loadDashboard: async () => {
-    const data = await dashboard();
-    set({ dashboardData: data, liveActivity: data.activityFeed });
+    try {
+      const res = await fetch("/api/admin/dashboard");
+      const json = await res.json().catch(() => null);
+      if (json?.success && json.data) {
+        set({ dashboardData: json.data, liveActivity: json.data.activityFeed || [] });
+      }
+    } catch (e) {
+      console.error("Failed to load dashboard:", e);
+    }
   },
 
   loadAlerts: async () => {
-    const alerts = await getAlerts(true);
-    set({ alerts });
+    try {
+      const res = await fetch("/api/alerts?resolved=false");
+      const json = await res.json().catch(() => null);
+      if (json?.success && Array.isArray(json.data)) {
+        set({ alerts: json.data });
+      }
+    } catch (e) {
+      console.error("Failed to load alerts:", e);
+    }
   },
 
-  resolveAlert: async (alertId, userId, userName) => {
-    await resolveAlert(alertId, userId);
-    get().loadAlerts();
-    get().loadDashboard();
+  resolveAlert: async (alertId) => {
+    try {
+      await fetch(`/api/alerts/${alertId}`, { method: "PATCH" });
+      get().loadAlerts();
+      get().loadDashboard();
+    } catch (e) {
+      console.error("Failed to resolve alert:", e);
+    }
   },
 
   recordScan: (scan) => {
