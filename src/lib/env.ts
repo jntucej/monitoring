@@ -1,20 +1,19 @@
 /**
- * Centralized Environment Variable Validation for Self-Hosted Architecture
- * Validates required environment variables at runtime and provides fail-safe defaults.
+ * Centralized Environment Configuration & Validation
+ * Provides typed access to required application environment variables.
  */
 
 export interface EnvConfig {
+  isProduction: boolean;
+  isDevelopment: boolean;
+  isTest: boolean;
   databaseUrl?: string;
   redisUrl?: string;
   authJwtSecret?: string;
   mobileTokenSecret?: string;
+  qrTokenSecret?: string;
   mfaEnrollSecret?: string;
   allowedOrigin?: string;
-  appUrl?: string;
-  nodeEnv: string;
-  isProduction: boolean;
-  isDevelopment: boolean;
-  isTest: boolean;
 }
 
 let cachedEnv: EnvConfig | null = null;
@@ -27,41 +26,31 @@ export function getEnv(): EnvConfig {
   const isDevelopment = nodeEnv === "development";
   const isTest = nodeEnv === "test";
 
-  const databaseUrl = process.env.DATABASE_URL;
-  const redisUrl = process.env.REDIS_URL;
-  const authJwtSecret =
-    process.env.AUTH_JWT_SECRET ||
-    process.env.MOBILE_TOKEN_SECRET ||
-    process.env.JWT_SECRET;
-  const mobileTokenSecret = process.env.MOBILE_TOKEN_SECRET || authJwtSecret;
-  const mfaEnrollSecret = process.env.MFA_ENROLL_SECRET || authJwtSecret;
-  const allowedOrigin = process.env.ALLOWED_ORIGIN || "*";
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const databaseUrl =
+    process.env.DATABASE_URL ||
+    (process.env.POSTGRES_DB && process.env.POSTGRES_PASSWORD
+      ? `postgres://${process.env.POSTGRES_USER || "postgres"}:${process.env.POSTGRES_PASSWORD}@${process.env.POSTGRES_HOST || "postgres"}:${process.env.POSTGRES_PORT || "5432"}/${process.env.POSTGRES_DB}`
+      : undefined);
 
-  if (isProduction && !databaseUrl && !process.env.POSTGRES_PASSWORD) {
-    const msg = "[ENV VALIDATION ERROR] Missing required DATABASE_URL or POSTGRES_PASSWORD for PostgreSQL.";
-    console.warn(msg);
-  }
+  const redisUrl = process.env.REDIS_URL;
+  const authJwtSecret = process.env.AUTH_JWT_SECRET;
+  const mobileTokenSecret = process.env.MOBILE_TOKEN_SECRET;
+  const qrTokenSecret = process.env.QR_TOKEN_SECRET;
+  const mfaEnrollSecret = process.env.MFA_ENROLL_SECRET;
+  const allowedOrigin = process.env.ALLOWED_ORIGIN;
 
   cachedEnv = {
+    isProduction,
+    isDevelopment,
+    isTest,
     databaseUrl,
     redisUrl,
     authJwtSecret,
     mobileTokenSecret,
+    qrTokenSecret,
     mfaEnrollSecret,
     allowedOrigin,
-    appUrl,
-    nodeEnv,
-    isProduction,
-    isDevelopment,
-    isTest,
   };
 
   return cachedEnv;
 }
-
-export function resetEnvCache(): void {
-  cachedEnv = null;
-}
-
-export default getEnv;

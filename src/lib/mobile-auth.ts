@@ -1,35 +1,35 @@
 import { SignJWT, jwtVerify } from "jose";
 import { Person } from "@/lib/types";
-import { findPersonByUniqueId } from "@/lib/db";
 import { getEnv } from "@/lib/env";
-
-export interface MobileSession {
-  token: string;
-  person: Person;
-  expiresAt: string;
-}
+import { findPersonByUniqueId } from "@/lib/db";
 
 const MOBILE_TOKEN_TTL_SECONDS = 30 * 24 * 60 * 60; // 30 days
+const DEV_FALLBACK_MOBILE = "dev-only-insecure-mobile-secret-32bytes-min";
 
-/**
- * HMAC signing secret for mobile session tokens.
- */
 function getSigningKey(): Uint8Array {
   const env = getEnv();
-  const secret = env.mobileTokenSecret || (env.isProduction ? null : "default_dev_mobile_token_secret_must_be_32_chars_long");
+  const secret =
+    process.env.MOBILE_TOKEN_SECRET ||
+    env.mobileTokenSecret ||
+    (env.isProduction ? null : DEV_FALLBACK_MOBILE);
   if (!secret || secret.length < 32) {
     throw new Error(
-      "MOBILE_TOKEN_SECRET is not configured (must be >= 32 chars) — set MOBILE_TOKEN_SECRET environment variable"
+      "[mobile-auth] MOBILE_TOKEN_SECRET must be configured (>= 32 chars) in production."
     );
   }
   return new TextEncoder().encode(secret);
 }
 
-/** Issue a signed HS256 JWT bound to a person (30-day expiry). */
-export async function generateMobileToken(personId: string, uniqueId: string): Promise<string> {
+/**
+ * Generate a mobile app JWT token for a person
+ */
+export async function generateMobileToken(
+  personId: string,
+  uniqueId: string
+): Promise<string> {
   const issuedAt = Math.floor(Date.now() / 1000);
 
-  return await new SignJWT({ uniqueId })
+  return await new SignJWT({ uniqueId, token_type: "mobile" })
     .setProtectedHeader({ alg: "HS256", typ: "JWT" })
     .setSubject(personId)
     .setIssuedAt(issuedAt)
@@ -37,23 +37,47 @@ export async function generateMobileToken(personId: string, uniqueId: string): P
     .sign(getSigningKey());
 }
 
-/** Verify signature + expiry, then resolve the person. Returns null if invalid. */
-export async function validateMobileToken(token: string): Promise<Person | null> {
+/**
+ * Verify mobile token signature and claims
+ */
+export async function verifyMobileToken(token: string) {
   try {
     const { payload } = await jwtVerify(token, getSigningKey(), {
       algorithms: ["HS256"],
     });
+    if (payload.token_type !== "mobile" || typeof payload.sub !== "string") {
+      return null;
+    }
+    return payload;
+  } catch {
+    return null;
+  }
+}
 
-    const uniqueId = payload.uniqueId as string | undefined;
-    if (!uniqueId || typeof payload.sub !== "string") return null;
+/**
+ * Validate a mobile token and return the associated Person
+ */
+export async function validateMobileToken(
+  token: string
+): Promise<Person | null> {
+  try {
+    const payload = await verifyMobileToken(token);
+    if (!payload || !payload.sub || typeof payload.uniqueId !== "string") {
+      return null;
+    }
 
-    const person = await findPersonByUniqueId(uniqueId);
-    // Bind the token to its subject: a valid JWT for another person is rejected.
-    if (!person || person.id !== payload.sub) return null;
+    const person = await findPersonByUniqueId(payload.uniqueId);
+    if (!person) {
+      return null;
+    }
+
+    // Verify token belongs to the right person
+    if (person.id !== payload.sub && person.uniqueId !== payload.uniqueId) {
+      return null;
+    }
 
     return person;
-  } catch (error) {
-    console.error("Mobile token validation error:", error);
+  } catch {
     return null;
   }
 }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/postgres";
-import { verifyAuthToken } from "@/lib/auth-token";
+import { verifyAccessToken } from "@/lib/auth-token";
 
 export async function authMiddleware(req: NextRequest) {
   let token: string | undefined;
@@ -21,7 +21,7 @@ export async function authMiddleware(req: NextRequest) {
     );
   }
 
-  const payload = await verifyAuthToken(token);
+  const payload = await verifyAccessToken(token);
   if (!payload || !payload.sub) {
     return NextResponse.json(
       { success: false, error: { code: "INVALID_TOKEN", message: "Invalid or expired token" } },

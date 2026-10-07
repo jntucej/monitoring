@@ -12,7 +12,7 @@
 import { supabase, getSupabaseServiceClient } from './dbClient';
 import { Role, AccountStatus } from './types';
 import { getCached, setCached } from './cache';
-import { verifyAuthToken } from './auth-token';
+import { verifyAccessToken } from './auth-token';
 import { query } from './postgres';
 
 /**
@@ -93,7 +93,7 @@ export async function isMfaRequiredForAdmin(): Promise<boolean> {
 export async function createAuthContext(token: string): Promise<AuthContext> {
   // Validate token using self-hosted JWT verification
   let userId: string | null = null;
-  const payload = await verifyAuthToken(token);
+  const payload = await verifyAccessToken(token);
   if (payload && payload.sub) {
     userId = payload.sub;
   } else {

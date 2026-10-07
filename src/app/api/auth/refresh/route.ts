@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/postgres";
-import { verifyAuthToken, signAccessToken, signRefreshToken } from "@/lib/auth-token";
+import { verifyRefreshToken, signAccessToken, signRefreshToken } from "@/lib/auth-token";
 import { withRateLimit } from "@/lib/rate-limit";
 
 async function handleRefresh(req: NextRequest) {
@@ -37,7 +37,7 @@ async function handleRefresh(req: NextRequest) {
       );
     }
 
-    const payload = await verifyAuthToken(token);
+    const payload = await verifyRefreshToken(token);
     if (!payload || !payload.sub) {
       return NextResponse.json(
         {

@@ -1,25 +1,31 @@
 /**
  * Short-lived enrollment tokens for sysadmin MFA bootstrap.
- * Reuses the repo-standard jose HS256 pattern from mobile-auth.ts.
+ * Reuses repo-standard jose HS256 pattern.
  */
 import { SignJWT, jwtVerify } from "jose";
 import { getEnv } from "@/lib/env";
 
-const ENROLL_TTL_SECONDS = 10 * 60;
+const ENROLL_TTL_SECONDS = 10 * 60; // 10 minutes
+const DEV_FALLBACK_MFA = "dev-only-insecure-mfa-secret-32bytes-min";
 
 function getSigningKey(): Uint8Array {
   const env = getEnv();
-  const secret = env.mfaEnrollSecret || (env.isProduction ? null : "default_dev_mfa_enroll_secret_must_be_32_chars_long");
+  const secret =
+    process.env.MFA_ENROLL_SECRET ||
+    env.mfaEnrollSecret ||
+    (env.isProduction ? null : DEV_FALLBACK_MFA);
   if (!secret || secret.length < 32) {
-    throw new Error("MFA_ENROLL_SECRET (or MOBILE_TOKEN_SECRET fallback) must be configured (>= 32 chars)");
+    throw new Error(
+      "[mfa-enroll] MFA_ENROLL_SECRET must be configured (>= 32 chars) in production."
+    );
   }
   return new TextEncoder().encode(secret);
 }
 
-/** Issue a 10-minute single-purpose JWT permitting 2FA setup for one user id. */
+/** Issue 10-minute single-purpose JWT permitting 2FA setup for one user id. */
 export async function createEnrollToken(userId: string): Promise<string> {
   const issuedAt = Math.floor(Date.now() / 1000);
-  return await new SignJWT({ purpose: "mfa_enroll" })
+  return await new SignJWT({ purpose: "mfa_enroll", token_type: "mfa_enroll" })
     .setProtectedHeader({ alg: "HS256", typ: "JWT" })
     .setSubject(userId)
     .setIssuedAt(issuedAt)
@@ -27,11 +33,18 @@ export async function createEnrollToken(userId: string): Promise<string> {
     .sign(getSigningKey());
 }
 
-/** Verify an enrollment token; returns the target userId or null. */
+/** Verify enrollment token; returns target userId or null. */
 export async function verifyEnrollToken(token: string): Promise<string | null> {
   try {
-    const { payload } = await jwtVerify(token, getSigningKey(), { algorithms: ["HS256"] });
-    if (payload.purpose !== "mfa_enroll" || typeof payload.sub !== "string") return null;
+    const { payload } = await jwtVerify(token, getSigningKey(), {
+      algorithms: ["HS256"],
+    });
+    if (
+      (payload.purpose !== "mfa_enroll" && payload.token_type !== "mfa_enroll") ||
+      typeof payload.sub !== "string"
+    ) {
+      return null;
+    }
     return payload.sub;
   } catch {
     return null;

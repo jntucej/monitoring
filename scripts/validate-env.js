@@ -43,9 +43,13 @@ function validate() {
   }
 
   // Token secret
-  const hasJwt = process.env.AUTH_JWT_SECRET || process.env.MOBILE_TOKEN_SECRET || process.env.JWT_SECRET;
-  if (!hasJwt && isProd) {
-    warnings.push('AUTH_JWT_SECRET / MOBILE_TOKEN_SECRET not set: will use fallback secret (recommended to set in production)');
+  const authSecret = process.env.AUTH_JWT_SECRET;
+  if (!authSecret || authSecret.length < 32) {
+    if (isProd) {
+      errors.push('AUTH_JWT_SECRET is required and must be at least 32 characters in production (e.g. openssl rand -base64 48).');
+    } else {
+      warnings.push('AUTH_JWT_SECRET not set or shorter than 32 chars (using dev fallback).');
+    }
   }
 
   // Cache configuration

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/postgres";
-import { verifyAuthToken, signAccessToken, signRefreshToken } from "@/lib/auth-token";
+import { verifyAccessToken, verifyRefreshToken, signAccessToken, signRefreshToken } from "@/lib/auth-token";
 import { withRateLimit } from "@/lib/rate-limit";
 
 async function handleSessionCheck(req: NextRequest) {
@@ -20,15 +20,18 @@ async function handleSessionCheck(req: NextRequest) {
       token = req.headers.get("x-session-token") || undefined;
     }
 
-    let refreshToken = req.cookies.get("refresh_token")?.value || req.headers.get("x-refresh-token") || undefined;
+    let refreshToken =
+      req.cookies.get("refresh_token")?.value ||
+      req.headers.get("x-refresh-token") ||
+      undefined;
 
-    let payload = token ? await verifyAuthToken(token) : null;
+    let payload = token ? await verifyAccessToken(token) : null;
     let newToken: string | undefined;
     let newRefreshToken: string | undefined;
 
     // If access token is expired/invalid, try refreshing using refresh token
     if (!payload && refreshToken) {
-      const refreshPayload = await verifyAuthToken(refreshToken);
+      const refreshPayload = await verifyRefreshToken(refreshToken);
       if (refreshPayload && refreshPayload.sub) {
         payload = refreshPayload;
         newToken = await signAccessToken({
@@ -48,21 +51,24 @@ async function handleSessionCheck(req: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: { code: "UNAUTHORIZED", message: "Authentication required or session expired." },
+          error: { code: "UNAUTHORIZED", message: "Invalid or missing session." },
         },
         { status: 401 }
       );
     }
 
-    const userRes = await query("SELECT * FROM users WHERE id = $1 LIMIT 1", [payload.sub]);
+    const userRes = await query(
+      "SELECT id, unique_id, email, name, role, status, department_id, photo_url, supervised_gates, assigned_hostel FROM users WHERE id = $1 LIMIT 1",
+      [payload.sub]
+    );
 
     if (userRes.rows.length === 0) {
       return NextResponse.json(
         {
           success: false,
-          error: { code: "USER_NOT_FOUND", message: "User profile not found." },
+          error: { code: "USER_NOT_FOUND", message: "User account not found." },
         },
-        { status: 401 }
+        { status: 404 }
       );
     }
 
@@ -72,66 +78,57 @@ async function handleSessionCheck(req: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: { code: "ACCOUNT_INACTIVE", message: `Account status is ${user.status}.` },
+          error: { code: "ACCOUNT_INACTIVE", message: `User account is ${user.status}.` },
         },
         { status: 403 }
       );
     }
 
-    const responseUser = {
-      id: user.id,
-      uniqueId: user.unique_id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      status: user.status,
-      department: user.department_id,
-      photoUrl: user.photo_url,
-    };
-
-    const finalToken = newToken || token || "";
-    const finalRefreshToken = newRefreshToken || refreshToken || null;
-
-    const response = NextResponse.json(
-      {
-        success: true,
-        data: {
-          token: finalToken,
-          refreshToken: finalRefreshToken,
-          user: responseUser,
-        },
-        user: responseUser,
+    const response = NextResponse.json({
+      success: true,
+      user: {
+        id: user.id,
+        uniqueId: user.unique_id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        status: user.status,
+        departmentId: user.department_id,
+        photoUrl: user.photo_url,
+        supervisedGates: user.supervised_gates,
+        assignedHostel: user.assigned_hostel,
       },
-      { status: 200 }
-    );
+      ...(newToken ? { accessToken: newToken } : {}),
+      ...(newRefreshToken ? { refreshToken: newRefreshToken } : {}),
+    });
 
     if (newToken) {
+      const isProd = process.env.NODE_ENV === "production";
       response.cookies.set("access_token", newToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: isProd,
         sameSite: "lax",
         path: "/",
         maxAge: 3600,
       });
-    }
-
-    if (newRefreshToken) {
-      response.cookies.set("refresh_token", newRefreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 7 * 24 * 3600,
-      });
+      if (newRefreshToken) {
+        response.cookies.set("refresh_token", newRefreshToken, {
+          httpOnly: true,
+          secure: isProd,
+          sameSite: "lax",
+          path: "/",
+          maxAge: 7 * 24 * 3600,
+        });
+      }
     }
 
     return response;
-  } catch (err: any) {
-    console.error("[Session Route Error]", err);
+  } catch (error: any) {
+    console.error("[Auth:Session] Error:", error);
     return NextResponse.json(
       {
         success: false,
-        error: { code: "INTERNAL_ERROR", message: "Failed to verify session." },
+        error: { code: "INTERNAL_ERROR", message: "Failed to validate session." },
       },
       { status: 500 }
     );
@@ -139,7 +136,7 @@ async function handleSessionCheck(req: NextRequest) {
 }
 
 export const GET = withRateLimit(handleSessionCheck, {
-  windowMs: 60 * 1000,
+  keyPrefix: "auth_session",
   maxRequests: 120,
-  keyPrefix: "session_check",
+  windowMs: 60 * 1000,
 });

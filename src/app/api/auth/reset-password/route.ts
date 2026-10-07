@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withRateLimit } from "@/lib/rate-limit";
 import { query } from "@/lib/postgres";
-import { signAccessToken, verifyAuthToken, hashPassword } from "@/lib/auth-token";
+import { signPasswordResetToken, verifyPasswordResetToken, hashPassword } from "@/lib/auth-token";
 import { sendEmail } from "@/lib/integrations/email";
 
 const SUCCESS_RESPONSE = {
   success: true,
-  message: "If that email address exists in our system, a password reset link has been dispatched.",
+  message: "If the email address exists in the system, a password reset link has been dispatched.",
 };
 
 async function handleResetPassword(req: NextRequest) {
@@ -21,7 +21,7 @@ async function handleResetPassword(req: NextRequest) {
 
     const { email, token, newPassword } = body as Record<string, string>;
 
-    // Case 1: Submitting new password with reset token
+    // Case 1: Submitting new password with a reset token
     if (token && newPassword) {
       if (newPassword.length < 6) {
         return NextResponse.json(
@@ -33,76 +33,91 @@ async function handleResetPassword(req: NextRequest) {
         );
       }
 
-      const payload = await verifyAuthToken(token);
+      const payload = await verifyPasswordResetToken(token);
       if (!payload || !payload.sub) {
         return NextResponse.json(
           {
             success: false,
-            error: { code: "INVALID_TOKEN", message: "Password reset token is invalid or has expired." },
+            error: { code: "INVALID_TOKEN", message: "Password reset token is invalid or expired." },
           },
           { status: 400 }
         );
       }
 
-      const newHash = await hashPassword(newPassword);
-      await query("UPDATE users SET password_hash = $1, last_password_change = NOW() WHERE id = $2", [
-        newHash,
-        payload.sub,
-      ]);
+      const passwordHash = await hashPassword(newPassword);
 
-      return NextResponse.json(
-        { success: true, message: "Password has been reset successfully. You may now log in." },
-        { status: 200 }
+      const updateRes = await query(
+        "UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2 RETURNING id, email",
+        [passwordHash, payload.sub]
       );
-    }
 
-    // Case 2: Requesting reset link
-    if (!email || !email.trim()) {
-      return NextResponse.json(
-        { success: false, error: { code: "MISSING_EMAIL", message: "Email is required." } },
-        { status: 400 }
-      );
-    }
-
-    const cleanEmail = email.trim().toLowerCase();
-    const userRes = await query("SELECT id, name, email FROM users WHERE LOWER(email) = $1 AND status = 'ACTIVE' LIMIT 1", [
-      cleanEmail,
-    ]);
-
-    if (userRes.rows.length > 0) {
-      const user = userRes.rows[0];
-      const resetToken = await signAccessToken({
-        sub: user.id,
-        email: user.email,
-        role: "reset_password",
-      });
-
-      const origin = req.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-      const resetUrl = `${origin}/auth/reset-password?token=${encodeURIComponent(resetToken)}`;
-
-      try {
-        await sendEmail({
-          to: user.email,
-          subject: "Gate Monitor — Password Reset Request",
-          body: `Hello ${user.name},\n\nA password reset request was initiated for your account. Please click the link below to set a new password:\n\n${resetUrl}\n\nThis link is valid for 1 hour. If you did not request this, you can ignore this email.`,
-          });
-      } catch (emailErr) {
-        console.warn("Failed to dispatch password reset email:", emailErr);
+      if (updateRes.rowCount === 0) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: { code: "USER_NOT_FOUND", message: "User not found." },
+          },
+          { status: 404 }
+        );
       }
+
+      return NextResponse.json({
+        success: true,
+        message: "Password has been successfully updated. You can now log in.",
+      });
     }
 
-    return NextResponse.json(SUCCESS_RESPONSE, { status: 200 });
-  } catch (err: any) {
-    console.error("[Reset Password Error]", err);
+    // Case 2: Requesting a password reset link via email
+    if (email) {
+      const trimmedEmail = email.trim().toLowerCase();
+      const userRes = await query(
+        "SELECT id, email, name, role FROM users WHERE LOWER(email) = $1 LIMIT 1",
+        [trimmedEmail]
+      );
+
+      if (userRes.rows.length > 0) {
+        const user = userRes.rows[0];
+        const resetToken = await signPasswordResetToken(user.id, user.email);
+
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+        const resetLink = `${appUrl}/reset-password?token=${encodeURIComponent(resetToken)}`;
+
+        try {
+          await sendEmail({
+            to: user.email,
+            subject: "Gate Monitor - Password Reset Request",
+            body: `Hello ${user.name || "User"},\n\nPlease use the following link to reset your password:\n${resetLink}\n\nThis link will expire in 1 hour.\n\nIf you did not request this, please ignore this email.`,
+            html: `<p>Hello ${user.name || "User"},</p><p>Please use the following link to reset your password:</p><p><a href="${resetLink}">Reset Password</a></p><p>This link will expire in 1 hour.</p><p>If you did not request this, please ignore this email.</p>`,
+          });
+        } catch (emailErr) {
+          console.error("[Auth:ResetPassword] Failed to send email:", emailErr);
+        }
+      }
+
+      return NextResponse.json(SUCCESS_RESPONSE);
+    }
+
     return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to process reset request." } },
+      {
+        success: false,
+        error: { code: "INVALID_REQUEST", message: "Provide either email or both token and newPassword." },
+      },
+      { status: 400 }
+    );
+  } catch (error: any) {
+    console.error("[Auth:ResetPassword] Error:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: { code: "INTERNAL_ERROR", message: "Internal server error occurred." },
+      },
       { status: 500 }
     );
   }
 }
 
 export const POST = withRateLimit(handleResetPassword, {
-  windowMs: 15 * 60 * 1000,
+  keyPrefix: "auth_reset_password",
   maxRequests: 5,
-  keyPrefix: "reset_pwd_limit",
+  windowMs: 15 * 60 * 1000,
 });
