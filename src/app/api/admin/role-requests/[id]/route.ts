@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { addAudit, updateUserRole, findUserById } from "@/lib/db";
 import { sendNotification } from "@/lib/notification-service";
@@ -78,7 +79,7 @@ async function handlePatch(req: NextRequest) {
       await updateUserRole(request.target_user_id, request.new_role, actorId);
 
       // Invalidate target user's active session handle
-      await supabase.from("users").update({ session_version: (user?.session_version || 0) + 1, handle: gen_random_uuid_placeholder }).eq("id", request.target_user_id);
+      await supabase.from("users").update({ handle: `user_${randomUUID()}` }).eq("id", request.target_user_id);
     }
 
     // Send notifications

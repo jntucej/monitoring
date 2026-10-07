@@ -110,9 +110,8 @@ async function handlePost(
           expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
         });
       }
-      }
 
-      if (person.status && person.status.toUpperCase() !== "ACTIVE") {
+    if (person.status && person.status.toUpperCase() !== "ACTIVE") {
         return NextResponse.json(
           { success: false, error: { code: "ACCOUNT_INACTIVE", message: `Account is ${person.status}` } },
           { status: 403 }

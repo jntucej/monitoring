@@ -26,14 +26,14 @@ test('Issue 1: PostgresQueryBuilder methods exist and chain correctly', () => {
 });
 
 test('Issue 2: users.role CHECK contains parent, supervisor, hod', () => {
-  const schemaSql = fs.readFileSync('supabase/schema.sql', 'utf8');
+  const schemaSql = fs.readFileSync('database/schema.sql', 'utf8');
   assert(schemaSql.includes("'parent'"), 'users.role CHECK should include parent');
   assert(schemaSql.includes("'supervisor'"), 'users.role CHECK should include supervisor');
   assert(schemaSql.includes("'hod'"), 'users.role CHECK should include hod');
 });
 
 test('Issue 3: 2FA columns exist in schema and login checks both secrets', () => {
-  const schemaSql = fs.readFileSync('supabase/schema.sql', 'utf8');
+  const schemaSql = fs.readFileSync('database/schema.sql', 'utf8');
   assert(schemaSql.includes('two_factor_secret'), 'users table should have two_factor_secret');
   assert(schemaSql.includes('two_factor_enabled'), 'users table should have two_factor_enabled');
   
@@ -43,7 +43,7 @@ test('Issue 3: 2FA columns exist in schema and login checks both secrets', () =>
 });
 
 test('Issue 4: session_version exists and session invalidation increments version', () => {
-  const schemaSql = fs.readFileSync('supabase/schema.sql', 'utf8');
+  const schemaSql = fs.readFileSync('database/schema.sql', 'utf8');
   assert(schemaSql.includes('session_version'), 'users table should have session_version');
 
   const dbClientCode = fs.readFileSync('src/lib/dbClient.ts', 'utf8');
@@ -57,7 +57,7 @@ test('Issue 5: Logout route revokes sessions via refresh_hash or user_id', () =>
 });
 
 test('Issue 6: Security migration grants correct signatures and preserves sysadmin', () => {
-  const migSql = fs.readFileSync('supabase/migrations/20260916000000_security_rls_and_function_hardening.sql', 'utf8');
+  const migSql = fs.readFileSync('database/migrations/20260916000000_security_rls_and_function_hardening.sql', 'utf8');
   assert(migSql.includes('resolve_login_identifier(TEXT)'), 'GRANT should include TEXT argument signature');
   assert(migSql.includes('can_user_authenticate(UUID)'), 'GRANT should include UUID argument signature');
   assert(migSql.includes("'sysadmin'"), 'is_admin function should retain sysadmin');
@@ -82,7 +82,7 @@ test('Issue 9: Occupancy queries campus_occupancy with current_status = IN', () 
 });
 
 test('Issue 10: Reason CHECK includes daily_outing, day_pass, home_out', () => {
-  const schemaSql = fs.readFileSync('supabase/schema.sql', 'utf8');
+  const schemaSql = fs.readFileSync('database/schema.sql', 'utf8');
   assert(schemaSql.includes('daily_outing'), 'Reason CHECK should include daily_outing');
   assert(schemaSql.includes('day_pass'), 'Reason CHECK should include day_pass');
   assert(schemaSql.includes('Daily Outing'), 'Reason CHECK should include Daily Outing');

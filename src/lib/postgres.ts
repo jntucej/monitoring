@@ -128,7 +128,7 @@ export class PostgresQueryBuilder<T = any> {
   private tableName: string;
   private selectColumns: string = "*";
   private rawColumns: string = "*";
-  private embeddedRelations: string[] = [];
+  private embeddedRelations: EmbeddedRelation[] = [];
   private filters: FilterCondition[] = [];
   private orClauses: string[] = [];
   private orderClause?: string;
@@ -155,7 +155,7 @@ export class PostgresQueryBuilder<T = any> {
 
     const relationMatches = columns.match(/([a-zA-Z0-9_]+)\s*\(\*\)/g);
     if (relationMatches) {
-      this.embeddedRelations = relationMatches.map(m => m.replace(/\s*\(\*\)/, "").trim());
+      this.embeddedRelations = relationMatches.map((m) => { const name = m.replace(/\s*\(\*\)/, "").trim(); return { alias: name, targetTable: name, fields: ["*"] }; });
     }
 
     let clean = columns
@@ -589,8 +589,8 @@ export const db = {
     getUser: async (token?: string) => {
       if (!token) return { data: { user: null }, error: { message: "No token provided" } };
       try {
-        const { verifyToken } = await import("./auth-token");
-        const payload = await verifyToken(token);
+        const { verifyAccessToken } = await import("./auth-token");
+        const payload = await verifyAccessToken(token);
         if (!payload?.sub) return { data: { user: null }, error: { message: "Invalid token" } };
         const res = await query("SELECT id, unique_id, email, name, role, status FROM users WHERE id = $1 LIMIT 1", [payload.sub]);
         return { data: { user: res.rows[0] || null }, error: null };
