@@ -7,7 +7,7 @@ loadLocalEnv();
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const DEFAULT_SEED_PIN = process.env.SEED_DEFAULT_PIN || '1234';
+const DEFAULT_SEED_PIN = process.env.SEED_DEFAULT_PIN || crypto.randomBytes(4).toString('hex');
 if (process.env.NODE_ENV === "production" || process.env.VERCEL_ENV === "production") { console.error("Refusing to seed in prod"); process.exit(1); }
 
 if (!url || !key) {
