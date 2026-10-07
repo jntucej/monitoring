@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:15-alpine
+    image: postgres:16-alpine
     container_name: gate_postgres
     restart: always
     env_file: [.env]
@@ -81,22 +81,28 @@ services:
     networks:
       - gate-net
 
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    container_name: gate_cloudflared
+  caddy:
+    image: caddy:2-alpine
+    container_name: gate_caddy
     restart: always
-    env_file: [.env]
-    command: tunnel --no-autoupdate run
-    environment:
-      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
     depends_on:
-      - web
+      web:
+        condition: service_healthy
     networks:
       - gate-net
 
 volumes:
   pgdata:
   redisdata:
+  caddy_data:
+  caddy_config:
 
 networks:
   gate-net:

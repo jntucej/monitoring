@@ -1,5 +1,5 @@
 [Unit]
-Description=Gate Monitor Self-Hosted Application Stack
+Description=Gate Monitor Containerized Application Stack
 Requires=docker.service
 After=docker.service network-online.target
 Wants=network-online.target
@@ -7,10 +7,12 @@ Wants=network-online.target
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-WorkingDirectory=/opt/gate-monitor
-ExecStart=/usr/bin/docker compose -f docker-compose.yml up -d --remove-orphans
-ExecStop=/usr/bin/docker compose -f docker-compose.yml down
+WorkingDirectory=/opt/monitoring/compose
+ExecStart=/usr/bin/docker compose --file /opt/monitoring/compose/docker-compose.yml --env-file /opt/monitoring/env/production.env up -d --remove-orphans
+ExecStop=/usr/bin/docker compose --file /opt/monitoring/compose/docker-compose.yml --env-file /opt/monitoring/env/production.env down
+ExecReload=/usr/bin/docker compose --file /opt/monitoring/compose/docker-compose.yml --env-file /opt/monitoring/env/production.env pull && /usr/bin/docker compose --file /opt/monitoring/compose/docker-compose.yml --env-file /opt/monitoring/env/production.env up -d --remove-orphans
 TimeoutStartSec=300
+TimeoutStopSec=60
 
 [Install]
 WantedBy=multi-user.target
