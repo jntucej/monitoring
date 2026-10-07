@@ -53,6 +53,18 @@ function validate() {
   }
 
   // Cache configuration
+  // MFA posture — must be an explicit, auditable deployment decision in prod
+  // (Issue #5 §4.1: refuse to start with an ambiguous posture).
+  const mfaExplicit = process.env.MFA_REQUIRED_FOR_ADMIN;
+  if (isProd && mfaExplicit !== "true" && mfaExplicit !== "false") {
+    errors.push("MFA_REQUIRED_FOR_ADMIN must be explicitly set to 'true' or 'false' in production. Refusing to start with an ambiguous posture.");
+  }
+
+  const totpKey = process.env.TOTP_ENCRYPTION_KEY;
+  if (isProd && (!totpKey || totpKey.length < 64)) {
+    warnings.push("TOTP_ENCRYPTION_KEY not set or shorter than 64 hex chars in production (2FA setup will fail until set).");
+  }
+
   if (!process.env.REDIS_URL && !process.env.UPSTASH_REDIS_REST_URL) {
     warnings.push('REDIS_URL is not set (cache manager will operate in in-memory mode)');
   }

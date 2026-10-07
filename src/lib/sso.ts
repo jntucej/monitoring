@@ -1,9 +1,12 @@
-/** Single Sign-On (SSO) OIDC Identity Provider Integration Engine
-Uses sso_config database table, persistence with in-memory fallback.
-Includes JWT id_token validation, PKCE code challenge helpers using jose.
-*/
+/**
+ * Single Sign-On (SSO) OIDC Identity Provider Integration Engine
+ * Uses sso_config database table, with persistence and in-memory fallback.
+ * Includes JWT id_token validation, PKCE code challenge helpers using jose.
+ */
 import { query } from "./postgres";
 import * as jose from "jose";
+
+export type SSOProvider = "google" | "azure_ad" | "okta" | (string & {});
 
 export interface SSOConfig {
   providerId: "google" | "azure_ad" | "okta";
@@ -12,11 +15,28 @@ export interface SSOConfig {
   clientSecret?: string;
   issuerUrl: string;
   groupMappings: Record<string, string>;
+  autoApproveSsoUsers?: boolean;
 }
 
-export interface OIDCTokenValidationResult {
+export interface OIDCValidationOptions {
+  provider: SSOProvider;
+  clientId: string;
+  nonce: string;
+  issuerUrl?: string;
+}
+
+export type OIDCClaims = jose.JWTPayload & {
+  sub: string;
+  email?: string;
+  email_verified?: boolean;
+  name?: string;
+  groups?: string[];
+  azp?: string;
+};
+
+export interface OIDCValidationResult {
   valid: boolean;
-  claims?: jose.JWTPayload;
+  claims?: OIDCClaims;
   error?: string;
 }
 
@@ -30,6 +50,7 @@ let inMemorySSOConfig: SSOConfig = {
     "IT-Administrators": "sysadmin",
     "Faculty-Members": "faculty",
   },
+  autoApproveSsoUsers: false,
 };
 
 export async function getSSOConfig(): Promise<SSOConfig> {
@@ -48,6 +69,7 @@ export async function getSSOConfig(): Promise<SSOConfig> {
         clientSecret: data.client_secret || "",
         issuerUrl: data.issuer_url || "",
         groupMappings: data.group_mappings || {},
+        autoApproveSsoUsers: Boolean(data.auto_approve_sso_users),
       };
     }
   } catch (err) {
@@ -57,11 +79,19 @@ export async function getSSOConfig(): Promise<SSOConfig> {
   return inMemorySSOConfig;
 }
 
+export async function assertSsoEnabled(): Promise<SSOConfig> {
+  const c = await getSSOConfig();
+  if (!c.enabled) {
+    throw new Error("SSO_DISABLED");
+  }
+  return c;
+}
+
 export async function updateSSOConfig(config: Partial<SSOConfig>): Promise<SSOConfig> {
   inMemorySSOConfig = { ...inMemorySSOConfig, ...config };
 
   try {
-    const res = await query(
+    await query(
       `INSERT INTO sso_config (id, provider_id, enabled, client_id, client_secret, issuer_url, group_mappings)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
        ON CONFLICT (id) DO UPDATE SET
@@ -87,45 +117,74 @@ export async function updateSSOConfig(config: Partial<SSOConfig>): Promise<SSOCo
 
   return inMemorySSOConfig;
 }
+export function mapExternalGroupToRole(groups: string[]): string | null {
+  const config = inMemorySSOConfig;
+  const mappings = config.groupMappings ?? {};
 
-export function mapExternalGroupToRole(groups: string[]): string {
-  for (const group of groups) {
-    const role = inMemorySSOConfig.groupMappings[group];
-    if (role) {
-      return role;
-    }
+  // Highest-privilege match wins, but only if the group is explicitly mapped.
+  const priority = ["sysadmin", "admin", "warden", "faculty", "staff", "operator", "student"];
+  const granted = new Set<string>();
+  for (const g of groups) {
+    const role = mappings[g];
+    if (role) granted.add(role);
   }
-  return "student";
+  for (const p of priority) {
+    if (granted.has(p)) return p;
+  }
+  return null; // Default DENY, not "student"
 }
 
 export async function validateOIDCIdToken(
   idToken: string,
-  provider: string,
-  clientId: string
-): Promise<OIDCTokenValidationResult> {
-  try {
-    let issuer: string;
-    let jwksUrl: string;
+  opts: OIDCValidationOptions
+): Promise<OIDCValidationResult> {
+  const { provider, clientId, nonce } = opts;
 
-    if (provider === "google") {
+  let issuer: string;
+  let jwksUrl: string;
+
+  switch (provider) {
+    case "google":
       issuer = "https://accounts.google.com";
       jwksUrl = "https://www.googleapis.com/oauth2/v3/certs";
-    } else if (provider === "azure_ad") {
+      break;
+    case "azure_ad":
       issuer = "https://login.microsoftonline.com/common/v2.0";
       jwksUrl = "https://login.microsoftonline.com/common/discovery/v2.0/keys";
-    } else {
-      issuer = inMemorySSOConfig.issuerUrl.replace(/\/$/, "");
+      break;
+    case "okta":
+    default:
+      if (!opts.issuerUrl) {
+        return { valid: false, error: "issuerUrl required for okta/custom provider" };
+      }
+      issuer = opts.issuerUrl.replace(/\/$/, "");
       jwksUrl = `${issuer}/.well-known/jwks.json`;
-    }
+      break;
+  }
 
+  try {
     const jwks = jose.createRemoteJWKSet(new URL(jwksUrl));
     const { payload } = await jose.jwtVerify(idToken, jwks, {
       issuer,
       audience: clientId,
-      algorithms: ["RS256"],
+      algorithms: ["RS256"], // pin algorithm — no "none", no HS256 downgrade
     });
 
-    return { valid: true, claims: payload };
+    // Nonce must match exactly
+    if (payload.nonce !== nonce) {
+      return { valid: false, error: "nonce mismatch" };
+    }
+
+    // azp check: Google requires azp === clientId when aud is an array
+    if (Array.isArray(payload.aud) && (payload as Record<string, unknown>).azp && (payload as Record<string, unknown>).azp !== clientId) {
+      return { valid: false, error: "authorized party mismatch" };
+    }
+
+    if (typeof payload.sub !== "string" || !payload.sub) {
+      return { valid: false, error: "missing sub" };
+    }
+
+    return { valid: true, claims: payload as unknown as OIDCClaims };
   } catch (err) {
     return { valid: false, error: err instanceof Error ? err.message : String(err) };
   }
@@ -134,14 +193,18 @@ export async function validateOIDCIdToken(
 export function getAuthorizationUrl(
   config: SSOConfig,
   redirectUri: string,
-  state: string
+  state: string,
+  nonce?: string,
+  codeChallenge?: string
 ): string {
   const params = new URLSearchParams({
     client_id: config.clientId,
     response_type: "code",
     redirect_uri: redirectUri,
-    scope: "openid profile email",
+    scope: "openid profile email groups",
     state: state,
+    ...(nonce ? { nonce } : {}),
+    ...(codeChallenge ? { code_challenge: codeChallenge, code_challenge_method: "S256" } : {}),
   });
 
   if (config.providerId === "google") {
@@ -149,14 +212,15 @@ export function getAuthorizationUrl(
   } else if (config.providerId === "azure_ad") {
     return `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?${params.toString()}`;
   } else {
-    return `${config.issuerUrl}/oauth2/v1/authorize?${params.toString()}`;
+    return `${config.issuerUrl.replace(/\/$/, "")}/oauth2/v1/authorize?${params.toString()}`;
   }
 }
 
 export async function exchangeOIDCAuthorizationCode(
   code: string,
   provider: string,
-  redirectUri: string
+  redirectUri: string,
+  codeVerifier?: string
 ): Promise<{
   success: boolean;
   idToken?: string;
@@ -172,35 +236,50 @@ export async function exchangeOIDCAuthorizationCode(
     } else if (provider === "azure_ad") {
       tokenEndpoint = "https://login.microsoftonline.com/common/oauth2/v2.0/token";
     } else {
-      tokenEndpoint = `${config.issuerUrl}/oauth2/v1/token`;
+      tokenEndpoint = `${config.issuerUrl.replace(/\/$/, "")}/oauth2/v1/token`;
     }
 
-    const body = new URLSearchParams({
+    const bodyParams: Record<string, string> = {
       grant_type: "authorization_code",
       code: code,
       client_id: config.clientId,
       client_secret: config.clientSecret || "",
       redirect_uri: redirectUri,
-    });
+    };
+    if (codeVerifier) {
+      bodyParams.code_verifier = codeVerifier;
+    }
+
+    const body = new URLSearchParams(bodyParams);
 
     const response = await fetch(tokenEndpoint, {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
       body: body.toString(),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      return { success: false, error: `Token exchange failed: ${errorText}` };
+      return {
+        success: false,
+        error: `Token exchange failed: ${response.status} ${errorText}`,
+      };
     }
 
-    const tokenData = await response.json();
+    const data = await response.json();
     return {
       success: true,
-      idToken: tokenData.id_token,
-      accessToken: tokenData.access_token,
+      idToken: data.id_token,
+      accessToken: data.access_token,
     };
-  } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : String(err) };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    return {
+      success: false,
+      error: `Network or token exchange exception: ${message}`,
+    };
   }
 }
+

@@ -1,151 +1,284 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSSOConfig, mapExternalGroupToRole, validateOIDCIdToken, exchangeOIDCAuthorizationCode } from "@/lib/sso";
+import { randomBytes, createHash } from "crypto";
+import {
+  getSSOConfig,
+  mapExternalGroupToRole,
+  validateOIDCIdToken,
+  exchangeOIDCAuthorizationCode,
+  getAuthorizationUrl,
+  type SSOProvider,
+} from "@/lib/sso";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
+import { signAccessToken, signRefreshToken } from "@/lib/auth-token";
+import { addAudit } from "@/lib/db";
+import type { Role } from "@/lib/types";
 
-/**
- * GET /api/auth/sso — Initiate OIDC Authorization Flow or handle OAuth Callback
- */
+const STATE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+
+function base64url(buf: Buffer): string {
+  return buf.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function pkcePair() {
+  const verifier = base64url(randomBytes(32));
+  const challenge = base64url(createHash("sha256").update(verifier).digest());
+  return { verifier, challenge };
+}
+
 export async function GET(req: NextRequest) {
-  try {
-    const config = await getSSOConfig();
-    const url = new URL(req.url);
-    const code = url.searchParams.get("code");
-    const provider = url.searchParams.get("provider") || config.providerId;
+  const url = new URL(req.url);
+  const code = url.searchParams.get("code");
+  const state = url.searchParams.get("state");
+  const error = url.searchParams.get("error");
 
-    if (!config.enabled) {
-      return NextResponse.json(
-        { success: false, error: { message: "SSO is currently disabled by administrator." } },
-        { status: 400 }
-      );
+  const config = await getSSOConfig();
+  if (!config.enabled) {
+    return NextResponse.redirect(`${url.origin}/login?sso_error=disabled`);
+  }
+
+  // ── Step 1: initiate the flow ──────────────────────────────
+  if (!code) {
+    const nonce = base64url(randomBytes(16));
+    const stateId = base64url(randomBytes(24));
+    const { verifier, challenge } = pkcePair();
+
+    const service = getSupabaseServiceClient();
+    const { error: insertErr } = await service.from("sso_authorization_states").insert({
+      state: stateId,
+      nonce,
+      code_verifier: verifier,
+      provider_id: config.providerId,
+      expires_at: new Date(Date.now() + STATE_TTL_MS).toISOString(),
+    });
+    if (insertErr) {
+      console.error("[sso] failed to persist state:", insertErr);
+      return NextResponse.redirect(`${url.origin}/login?sso_error=state_persist`);
     }
 
     const redirectUri = `${url.origin}/api/auth/sso`;
+    const authUrl = getAuthorizationUrl(config, redirectUri, stateId, nonce, challenge);
+    return NextResponse.redirect(authUrl);
+  }
 
-    // Step 1: Initiate Redirect if no authorization code is present
-    if (!code) {
-      let authUrl = "";
-      if (provider === "google") {
-        authUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${encodeURIComponent(
-          config.clientId
-        )}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=openid%20email%20profile`;
-      } else if (provider === "azure_ad") {
-        authUrl = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${encodeURIComponent(
-          config.clientId
-        )}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=openid%20profile%20email`;
-      } else {
-        const base = config.issuerUrl || "https://sso.college.edu";
-        authUrl = `${base}/v1/authorize?client_id=${encodeURIComponent(
-          config.clientId
-        )}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=openid%20profile%20email`;
-      }
+  // ── Step 2: callback ───────────────────────────────────────
 
-      return NextResponse.redirect(authUrl);
-    }
+  // 2a. IdP-reported error
+  if (error) {
+    return NextResponse.redirect(`${url.origin}/login?sso_error=${encodeURIComponent(error)}`);
+  }
 
-    // Step 2: Code exchange & token validation
-    const exchange = await exchangeOIDCAuthorizationCode(code, provider, redirectUri);
-    let ssoEmail = url.searchParams.get("email") || `sso_${code.substring(0, 8)}@college.edu`;
-    let ssoName = url.searchParams.get("name") || ssoEmail.split("@")[0];
+  // 2b. State must be present and must match an unconsumed, unexpired row
+  if (!state) {
+    return NextResponse.redirect(`${url.origin}/login?sso_error=missing_state`);
+  }
 
-    if (exchange.idToken) {
-      const validation = await validateOIDCIdToken(exchange.idToken, provider, config.clientId);
-      if (validation.valid && validation.claims) {
-        if (typeof validation.claims.email === "string") ssoEmail = validation.claims.email;
-        if (typeof validation.claims.name === "string") ssoName = validation.claims.name;
-      }
-    }
+  const service = getSupabaseServiceClient();
+  const { data: stateRow, error: stateErr } = await service
+    .from("sso_authorization_states")
+    .select("state, nonce, code_verifier, provider_id, expires_at, consumed_at, redirect_to")
+    .eq("state", state)
+    .maybeSingle();
 
-    const userRole = mapExternalGroupToRole(["Campus-Security-Leads"]);
-    const supabase = getSupabaseServiceClient();
-    const { data: existingUser } = await supabase
+  if (stateErr || !stateRow) {
+    return NextResponse.redirect(`${url.origin}/login?sso_error=invalid_state`);
+  }
+  if (stateRow.consumed_at) {
+    return NextResponse.redirect(`${url.origin}/login?sso_error=state_reused`);
+  }
+  if (new Date(stateRow.expires_at).getTime() < Date.now()) {
+    return NextResponse.redirect(`${url.origin}/login?sso_error=state_expired`);
+  }
+
+  // Burn state atomically — prevents replay/race
+  const { data: burned } = await service
+    .from("sso_authorization_states")
+    .update({ consumed_at: new Date().toISOString() })
+    .eq("state", state)
+    .is("consumed_at", null)
+    .select("state");
+
+  if (!burned || (Array.isArray(burned) && burned.length === 0)) {
+    return NextResponse.redirect(`${url.origin}/login?sso_error=state_reused`);
+  }
+  // 2c. Exchange code for tokens (with PKCE verifier)
+  const redirectUri = `${url.origin}/api/auth/sso`;
+  const exchange = await exchangeOIDCAuthorizationCode(
+    code,
+    stateRow.provider_id,
+    redirectUri,
+    stateRow.code_verifier
+  );
+  if (!exchange.success || !exchange.idToken) {
+    await addAudit({
+      action: "SSO_LOGIN_FAILED",
+      userId: "system",
+      userName: "SSO",
+      role: "sysadmin",
+      details: { reason: "token_exchange_failed", provider: stateRow.provider_id },
+    });
+    return NextResponse.redirect(`${url.origin}/login?sso_error=token_exchange`);
+  }
+
+  // 2d. Validate the id_token — fail closed.
+  const validation = await validateOIDCIdToken(exchange.idToken, {
+    provider: stateRow.provider_id as SSOProvider,
+    clientId: config.clientId,
+    nonce: stateRow.nonce,
+    issuerUrl: config.issuerUrl,
+  });
+  if (!validation.valid || !validation.claims) {
+    await addAudit({
+      action: "SSO_LOGIN_FAILED",
+      userId: "system",
+      userName: "SSO",
+      role: "sysadmin",
+      details: { reason: "id_token_invalid", detail: validation.error },
+    });
+    return NextResponse.redirect(`${url.origin}/login?sso_error=invalid_id_token`);
+  }
+
+  const claims = validation.claims;
+
+  // 2e. Email must be present and verified.
+  if (!claims.email || claims.email_verified === false) {
+    return NextResponse.redirect(`${url.origin}/login?sso_error=email_unverified`);
+  }
+  const email = claims.email.toLowerCase();
+
+  // 2f. Resolve role from ACTUAL groups (from the id_token).
+  const groups = Array.isArray(claims.groups) ? claims.groups : [];
+  const role = mapExternalGroupToRole(groups);
+  if (!role) {
+    await addAudit({
+      action: "SSO_LOGIN_DENIED",
+      userId: "system",
+      userName: "SSO",
+      role: "sysadmin",
+      details: { email, groups, reason: "no_role_mapping" },
+    });
+    return NextResponse.redirect(`${url.origin}/login?sso_error=no_access`);
+  }
+
+  // 2g. Look up by (provider, sub) first — stable across email changes.
+  const ssoSubject = claims.sub;
+  let user: { id: string; role: Role; status: string; unique_id?: string; name?: string; email?: string } | null = null;
+
+  const { data: bySubject } = await service
+    .from("users")
+    .select("id, role, status, unique_id, name, email, sso_provider, sso_subject")
+    .eq("sso_provider", stateRow.provider_id)
+    .eq("sso_subject", ssoSubject)
+    .maybeSingle();
+
+  if (bySubject) {
+    user = bySubject;
+  } else {
+    // Fallback: match by email only if the account is not already SSO-bound.
+    const { data: byEmail } = await service
       .from("users")
-      .select("*")
-      .eq("email", ssoEmail)
+      .select("id, role, status, unique_id, name, email, sso_subject, sso_provider")
+      .eq("email", email)
       .maybeSingle();
 
-    let userRecord = existingUser;
-    if (!existingUser) {
-      const { data: newUser } = await supabase
+    if (byEmail && !byEmail.sso_subject) {
+      // Bind the existing local account to this SSO identity.
+      await service
         .from("users")
-        .insert({
-          email: ssoEmail,
-          name: ssoName,
-          role: userRole,
-          status: "ACTIVE",
-          created_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
-      userRecord = newUser;
+        .update({ sso_provider: stateRow.provider_id, sso_subject: ssoSubject })
+        .eq("id", byEmail.id);
+      user = byEmail;
+    } else if (byEmail && byEmail.sso_subject && byEmail.sso_subject !== ssoSubject) {
+      // Same email, different subject — account is bound to a different IdP identity.
+      return NextResponse.redirect(`${url.origin}/login?sso_error=identity_conflict`);
     }
-
-    const sessionToken = exchange.idToken || `sso_token_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-
-    return NextResponse.redirect(
-      `${url.origin}/login?sso_success=true&role=${userRole}&token=${sessionToken}&email=${encodeURIComponent(ssoEmail)}`
-    );
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: { message: error.message } }, { status: 500 });
   }
-}
 
-/**
- * POST /api/auth/sso — Authenticate user with SSO Identity Token or OIDC Claims
- */
-export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json().catch(() => ({}));
-    const { token, provider, idToken } = body;
-    const config = await getSSOConfig();
+  // 2h. JIT provisioning — PENDING (unless autoApproveSsoUsers is enabled).
+  if (!user) {
+    const uniqueId = `SSO-${ssoSubject.slice(0, 12).toUpperCase()}`;
+    const handle = `sso_${base64url(randomBytes(8)).toLowerCase()}`;
+    const jitStatus = config.autoApproveSsoUsers ? "ACTIVE" : "PENDING";
 
-    if (!config.enabled) {
-      return NextResponse.json({ success: false, error: { message: "SSO authentication is disabled" } }, { status: 400 });
-    }
-
-    const rawToken = idToken || token;
-    let email = (body.email || `user_${Date.now()}@sso.local`).toLowerCase().trim();
-    let name = body.name || email.split("@")[0];
-
-    if (rawToken) {
-      const validation = await validateOIDCIdToken(rawToken, provider || config.providerId, config.clientId);
-      if (validation.valid && validation.claims) {
-        if (typeof validation.claims.email === "string") email = validation.claims.email;
-        if (typeof validation.claims.name === "string") name = validation.claims.name;
-      }
-    }
-
-    const groups: string[] = Array.isArray(body.groups) ? body.groups : [];
-    const role = body.role || mapExternalGroupToRole(groups);
-
-    const supabase = getSupabaseServiceClient();
-    const { data: existingUser } = await supabase.from("users").select("*").eq("email", email).maybeSingle();
-
-    let userId = existingUser?.id;
-    let finalRole = existingUser?.role || role;
-
-    if (!existingUser) {
-      const { data: newUser } = await supabase.from("users").insert({
+    const { data: created, error: createErr } = await service
+      .from("users")
+      .insert({
+        id: crypto.randomUUID(),
+        unique_id: uniqueId,
+        handle,
+        name: claims.name || email.split("@")[0],
         email,
-        name,
-        role: finalRole,
-        status: "ACTIVE",
+        role,
+        status: jitStatus,
+        sso_provider: stateRow.provider_id,
+        sso_subject: ssoSubject,
         created_at: new Date().toISOString(),
-      }).select().single();
-      userId = newUser?.id;
+      })
+      .select("id, role, status, unique_id, name, email, sso_provider, sso_subject")
+      .single();
+
+    if (createErr || !created) {
+      console.error("[sso] JIT provision failed:", createErr);
+      return NextResponse.redirect(`${url.origin}/login?sso_error=provision_failed`);
     }
+    user = created;
 
-    const ssoJwt = rawToken || `sso_jwt_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
-
-    return NextResponse.json({
-      success: true,
-      data: {
-        token: ssoJwt,
-        user: { id: userId, email, role: finalRole, provider: provider || config.providerId, ssoAuthenticated: true },
-      },
+    await addAudit({
+      action: "SSO_USER_PROVISIONED",
+      userId: user.id,
+      userName: user.name,
+      role: role as Role,
+      details: { email, provider: stateRow.provider_id, sub: ssoSubject, status: jitStatus },
     });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: { message: error.message } }, { status: 500 });
-  }
-}
 
+    if (jitStatus === "PENDING") {
+      return NextResponse.redirect(`${url.origin}/login?sso_pending=1`);
+    }
+  }
+
+  if (!user) {
+    return NextResponse.redirect(`${url.origin}/login?sso_error=user_resolution_failed`);
+  }
+
+  // 2i. Existing account must be ACTIVE.
+  if (user.status !== "ACTIVE") {
+    return NextResponse.redirect(`${url.origin}/login?sso_error=account_${user.status.toLowerCase()}`);
+  }
+
+  // ── Step 3: issue OUR tokens, not the IdP's ────────────────
+  const access_token = await signAccessToken({
+    sub: user.id,
+    email: user.email,
+    role: user.role,
+    account_status: user.status,
+    name: user.name,
+  });
+  const refresh_token = await signRefreshToken({
+    sub: user.id,
+    email: user.email,
+    role: user.role,
+  });
+
+  await addAudit({
+    action: "SSO_LOGIN_SUCCESS",
+    userId: user.id,
+    userName: user.name,
+    role: (user.role as Role) || "staff",
+    details: { provider: stateRow.provider_id, email },
+  });
+
+  // ── Step 4: set cookies, redirect to clean destination ─────────
+  const dest = stateRow.redirect_to && stateRow.redirect_to.startsWith("/")
+    ? stateRow.redirect_to
+    : "/";
+  const response = NextResponse.redirect(`${url.origin}${dest}`);
+  const cookieOpts = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax" as const,
+    path: "/",
+  };
+  response.cookies.set("access_token", access_token, { ...cookieOpts, maxAge: 3600 });
+  response.cookies.set("refresh_token", refresh_token, { ...cookieOpts, maxAge: 30 * 24 * 3600 });
+  return response;
+}
 

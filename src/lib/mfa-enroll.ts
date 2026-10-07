@@ -26,7 +26,7 @@ function getSigningKey(): Uint8Array {
 export async function createEnrollToken(userId: string): Promise<string> {
   const issuedAt = Math.floor(Date.now() / 1000);
   return await new SignJWT({ purpose: "mfa_enroll", token_type: "mfa_enroll" })
-    .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+    .setProtectedHeader({ alg: "HS256", typ: "JWT", kid: "mfa-v1" })
     .setSubject(userId)
     .setIssuedAt(issuedAt)
     .setExpirationTime(issuedAt + ENROLL_TTL_SECONDS)

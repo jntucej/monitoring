@@ -99,6 +99,10 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
   const [errorMsg, setErrorMsg] = useState("");
   const [isShaking, setIsShaking] = useState(false);
 
+  // Two-leg MFA login: set after password leg succeeds, cleared on completion
+  const [mfaChallenge, setMfaChallenge] = useState<string | null>(null);
+  const [totpCode, setTotpCode] = useState("");
+
   const [showResetModal, setShowResetModal] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [resetMsg, setResetMsg] = useState<string | null>(null);
@@ -164,16 +168,29 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
       triggerShake(formatLoginError(pinResult.code, pinResult.error));
       return;
     } else {
-      const result = await login(identifier, passwordOrPin);
+      const result = await login(
+        identifier,
+        passwordOrPin,
+        mfaChallenge ? { challenge: mfaChallenge, totpCode } : undefined
+      );
 
       // SECURITY: sysadmins must complete TOTP enrollment before they can sign in.
-      if (!result.success && result.code === "MFA_REQUIRED") {
+      if (!result.success && (result.code === "MFA_REQUIRED" || result.mfaEnrollmentRequired)) {
         triggerShake(formatLoginError("MFA_REQUIRED"));
         router.push("/sysadmin/security");
         return;
       }
 
+      // Password leg ok — server issued an MFA challenge, prompt for TOTP
+      if (!result.success && result.mfaRequired && result.mfaChallenge) {
+        setMfaChallenge(result.mfaChallenge);
+        triggerShake("Enter the 6-digit code from your authenticator app.");
+        return;
+      }
+
       if (result.success) {
+        setMfaChallenge(null);
+        setTotpCode("");
         if (rememberMe) {
           localStorage.setItem("gate-monitor-remember", "true");
         }
@@ -273,13 +290,52 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
           </div>
         </div>
 
+        {mfaChallenge && (
+          <div className="space-y-1.5 animate-fadeIn">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-semibold text-sky-400">
+                Authenticator Code (2FA)
+              </label>
+              <button
+                type="button"
+                onClick={() => {
+                  setMfaChallenge(null);
+                  setTotpCode("");
+                }}
+                className="text-[11px] font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+              >
+                Back to Password
+              </button>
+            </div>
+            <div className="relative">
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={6}
+                value={totpCode}
+                onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                placeholder="6-digit code"
+                autoFocus
+                className="w-full pl-10 pr-4 py-3 rounded-xl bg-[var(--bg-base)] border border-sky-500/50 text-sm font-mono tracking-widest text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-sky-400 outline-none transition-all"
+              />
+              <Lock className="w-4 h-4 absolute left-3.5 top-3.5 text-sky-400" />
+            </div>
+          </div>
+        )}
+
         <button
           type="submit"
-          disabled={loading || !loginIdentifier || !passwordOrPin}
+          disabled={loading || !loginIdentifier || !passwordOrPin || (!!mfaChallenge && totpCode.length < 6)}
           className="w-full touch-target-primary rounded-xl bg-[var(--action-primary)] text-white font-bold text-sm hover:opacity-95 transition-all disabled:opacity-40 shadow-md flex items-center justify-center gap-2 py-3 mt-2 active:scale-[0.99]"
         >
           {loading ? (
             <span>Authenticating...</span>
+          ) : mfaChallenge ? (
+            <>
+              <span>Verify Code & Sign In</span>
+              <ArrowRight className="w-4 h-4" />
+            </>
           ) : (
             <>
               <span>Sign In</span>

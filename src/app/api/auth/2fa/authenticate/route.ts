@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyTOTPCode } from "@/lib/totp";
+import { decryptSecret } from "@/lib/mfa-secret";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { addAudit } from "@/lib/db";
 import { withRateLimit } from "@/lib/rate-limit";
-import { withAuthorization } from "@/middleware/authorization";
+import { withAuthorizationPreMfa } from "@/middleware/authorization";
 
 async function handlePost(req: NextRequest) {
   try {
@@ -25,12 +26,13 @@ async function handlePost(req: NextRequest) {
 
     if (!user || !user.two_factor_enabled || !user.two_factor_secret) {
       return NextResponse.json(
-        { success: false, error: { code: "BAD_REQUEST", message: "2FA not enabled for user" } },
+        { success: false, error: { code: "BAD_REQUEST", message: "2FA is not enabled for this user" } },
         { status: 400 }
       );
     }
 
-    const isValid = verifyTOTPCode(user.two_factor_secret, token);
+    const secret = decryptSecret(user.two_factor_secret);
+    const isValid = verifyTOTPCode(secret, String(token).trim());
 
     if (!isValid) {
       await addAudit({
@@ -55,12 +57,13 @@ async function handlePost(req: NextRequest) {
       success: true,
       message: "2FA authentication successful",
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Internal server error";
     return NextResponse.json(
-      { success: false, error: { code: "SERVER_ERROR", message: error.message || "Internal server error" } },
+      { success: false, error: { code: "SERVER_ERROR", message } },
       { status: 500 }
     );
   }
 }
 
-export const POST = withRateLimit(withAuthorization(handlePost), { keyPrefix: "2fa_auth", maxRequests: 10 });
+export const POST = withRateLimit(withAuthorizationPreMfa(handlePost), { keyPrefix: "2fa_auth", maxRequests: 10, windowMs: 60 * 1000 });

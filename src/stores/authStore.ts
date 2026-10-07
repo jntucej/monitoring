@@ -20,7 +20,18 @@ interface AuthState {
 }
 
 interface AuthActions {
-  login: (login: string, password: string) => Promise<{ success: boolean; error?: string; code?: string }>;
+  login: (
+    login: string,
+    password: string,
+    mfa?: { challenge?: string; totpCode?: string }
+  ) => Promise<{
+    success: boolean;
+    error?: string;
+    code?: string;
+    mfaRequired?: boolean;
+    mfaChallenge?: string;
+    mfaEnrollmentRequired?: boolean;
+  }>;
   pinLogin: (employeeId: string, pin: string) => Promise<{ success: boolean; error?: string; code?: string }>;
   logout: () => Promise<void>;
   checkSession: () => Promise<boolean>;
@@ -43,7 +54,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
       setHasHydrated: (hydrated: boolean) => set({ _hasHydrated: hydrated }),
 
-      login: async (login, password) => {
+      login: async (login, password, mfa) => {
         set({ loading: true });
         try {
           // Convert to uppercase for consistency
@@ -51,30 +62,50 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           const response = await fetch("/api/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ login: cleanLogin, password }),
+            body: JSON.stringify({
+              login: cleanLogin,
+              password,
+              mfa_challenge: mfa?.challenge,
+              totp_code: mfa?.totpCode,
+            }),
           });
 
-          if (response.ok) {
-            const result = await response.json();
-            if (result.success && result.data) {
-              const { token, refreshToken, user } = result.data;
-              set({
-                user,
-                token,
-                refreshToken: refreshToken ?? null,
-                role: user.role as Role,
-                authenticated: true,
-                loading: false,
-              });
-              return { success: true };
-            }
+          const result = await response.json().catch(() => null);
+
+          if (response.ok && result?.success && result.data) {
+            const { token, refreshToken, user } = result.data;
+            set({
+              user,
+              token,
+              refreshToken: refreshToken ?? null,
+              role: user.role as Role,
+              authenticated: true,
+              loading: false,
+            });
+            return { success: true };
           }
-          const errBody = await response.json().catch(() => null);
+
+          // Leg 1 of two-leg MFA login: password ok, TOTP required
+          if (response.ok && result?.success && result.mfa_required) {
+            set({ loading: false });
+            return {
+              success: false,
+              mfaRequired: true,
+              mfaChallenge: result.mfa_challenge,
+            };
+          }
+
+          // Admin must enroll 2FA first — no session issued
+          if (response.ok && result?.success && result.mfa_enrollment_required) {
+            set({ loading: false });
+            return { success: false, mfaEnrollmentRequired: true };
+          }
+
           set({ loading: false });
           return {
             success: false,
-            error: errBody?.error?.message || "Invalid credentials",
-            code: errBody?.error?.code,
+            error: result?.error?.message || "Invalid credentials",
+            code: result?.error?.code,
           };
         } catch (error) {
           console.error("Login error:", error);

@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { findPersonByUniqueId, getPersonHistory } from "@/lib/db";
+import bcrypt from "bcryptjs";
+import { findPersonByUniqueId, getPersonHistory, addAudit } from "@/lib/db";
 import { generateMobileToken, validateMobileToken } from "@/lib/mobile-auth";
-import { withRateLimit } from "@/lib/rate-limit";
+import { withRateLimit, checkRateLimit } from "@/lib/rate-limit";
+import { getSupabaseServiceClient } from "@/lib/dbClient";
+import type { Role } from "@/lib/types";
+
+function uniformFailure() {
+  return NextResponse.json(
+    { success: false, error: { code: "INVALID_CREDENTIALS", message: "Invalid credentials" } },
+    { status: 401 }
+  );
+}
 
 async function handlePost(
   req: NextRequest,
@@ -12,29 +22,102 @@ async function handlePost(
 
   // Mobile login route: POST /api/mobile/login
   if (path === "login") {
+    if (process.env.MOBILE_LOGIN_ENABLED === "false") {
+      return NextResponse.json(
+        { success: false, error: { code: "DISABLED", message: "Mobile login is temporarily disabled." } },
+        { status: 503 }
+      );
+    }
+
     try {
-      const body = await req.json();
-      const { uniqueId } = body;
+      const body = await req.json().catch(() => null);
+      const { uniqueId, code, deviceId } = body ?? {};
 
-      if (!uniqueId) {
-        return NextResponse.json({ error: "Missing uniqueId" }, { status: 400 });
+      if (!uniqueId || !code || !deviceId) {
+        // Uniform failure — do NOT leak which field is missing
+        return uniformFailure();
       }
 
-      const person = await findPersonByUniqueId(uniqueId);
+      const formattedUniqueId = String(uniqueId).trim().toUpperCase();
+
+      // Rate-limit per uniqueId, not per IP (§4.1)
+      const identifierKey = `mobile_login_id:${formattedUniqueId}`;
+      const idLimit = await checkRateLimit(identifierKey, { maxRequests: 5, windowMs: 15 * 60 * 1000 });
+      if (idLimit.limited) {
+        return uniformFailure();
+      }
+
+      const person = await findPersonByUniqueId(formattedUniqueId);
       if (!person) {
-        return NextResponse.json({ error: "Person not found" }, { status: 404 });
+        return uniformFailure();
       }
 
-      const token = await generateMobileToken(person.id, person.uniqueId);
+      if (person.status && person.status.toUpperCase() !== "ACTIVE") {
+        return NextResponse.json(
+          { success: false, error: { code: "ACCOUNT_INACTIVE", message: `Account is ${person.status}` } },
+          { status: 403 }
+        );
+      }
+
+      const service = getSupabaseServiceClient();
+      const { data: rows } = await service
+        .from("mobile_enrollment_codes")
+        .select("id, code_hash, expires_at")
+        .eq("user_id", person.id)
+        .is("used_at", null)
+        .gt("expires_at", new Date().toISOString())
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      const row = rows?.[0];
+      if (!row) {
+        return uniformFailure();
+      }
+
+      const ok = await bcrypt.compare(String(code), row.code_hash);
+      if (!ok) {
+        return uniformFailure();
+      }
+
+      // Burn the code atomically
+      const { data: burned, error: burnErr } = await service
+        .from("mobile_enrollment_codes")
+        .update({
+          used_at: new Date().toISOString(),
+          used_device_id: String(deviceId),
+        })
+        .eq("id", row.id)
+        .is("used_at", null)
+        .select("id");
+
+      if (burnErr || !burned || burned.length === 0) {
+        return uniformFailure();
+      }
+
+      const token = await generateMobileToken(person.id, person.uniqueId, String(deviceId));
+
+      await addAudit({
+        action: "MOBILE_LOGIN",
+        userId: person.id,
+        userName: person.fullName,
+        role: (person.personType || "student") as unknown as Role,
+        details: {
+          uniqueId: person.uniqueId,
+          deviceId: String(deviceId),
+          ip: req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown",
+          userAgent: req.headers.get("user-agent") || "unknown",
+        },
+      });
 
       return NextResponse.json({
+        success: true,
         token,
         person,
-        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Mobile login error:", error);
-      return NextResponse.json({ error: "Internal mobile authentication error" }, { status: 500 });
+      return uniformFailure();
     }
   }
 
@@ -60,8 +143,9 @@ export async function GET(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const deviceId = req.headers.get("x-device-id") || undefined;
   const token = authHeader.split(" ")[1];
-  const person = await validateMobileToken(token);
+  const person = await validateMobileToken(token, deviceId);
 
   if (!person) {
     return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });

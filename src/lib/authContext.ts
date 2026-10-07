@@ -56,31 +56,52 @@ export interface AuthContext {
 
   /** The user's active session handle/token for single-session enforcement */
   handle?: string;
+
+  /** Whether the user has 2FA enabled */
+  twoFactorEnabled: boolean;
 }
 
 /**
- * Whether administrators (sysadmin) must have TOTP 2FA enrolled.
+ * Whether administrators (sysadmin/admin) must have TOTP 2FA enrolled.
  * Read from system_config.global_settings.mfaRequiredForAdmin (cached 60s).
  *
- * Upgrade path: fail-closed with a break-glass env override.
- * If config is unavailable, MFA IS required for admins (fail-closed).
+ * Env override MFA_REQUIRED_FOR_ADMIN=true|false always wins (ops break-glass
+ * knob that does not depend on the DB).
+ *
+ * On DB-read failure: FAIL-OPEN (default false) and log loudly. The DB being
+ * unreadable is already an incident; demanding MFA would lock every sysadmin
+ * out with no recovery path (Issue #5). Production deployments must set
+ * MFA_REQUIRED_FOR_ADMIN explicitly (enforced by scripts/validate-env.js).
  */
 export async function isMfaRequiredForAdmin(): Promise<boolean> {
   const cached = await getCached<boolean>("system_config:mfaRequiredForAdmin");
   if (cached !== null) return cached;
+
+  // Env override always wins — allows ops to toggle MFA without touching the DB
+  if (process.env.MFA_REQUIRED_FOR_ADMIN === "false") {
+    await setCached("system_config:mfaRequiredForAdmin", false, 60);
+    return false;
+  }
+  if (process.env.MFA_REQUIRED_FOR_ADMIN === "true") {
+    await setCached("system_config:mfaRequiredForAdmin", true, 60);
+    return true;
+  }
+
   try {
     const service = getSupabaseServiceClient();
-    const { data } = await service
+    const { data, error } = await service
       .from("system_config")
       .select("value")
       .eq("key", "global_settings")
       .maybeSingle();
+    if (error) throw error;
     const required = !!(data?.value as any)?.mfaRequiredForAdmin;
     await setCached("system_config:mfaRequiredForAdmin", required, 60);
     return required;
-  } catch {
-    // FAIL-CLOSED: If config is unavailable, require MFA for admins
-    return true;
+  } catch (err) {
+    // FAIL-OPEN: config unreadable is an operational incident, not a lockout.
+    console.error("[auth] isMfaRequiredForAdmin: config read failed, defaulting to false", err);
+    return false;
   }
 }
 
@@ -118,14 +139,10 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
 
   const profile = userRes.rows[0];
 
-  // SECURITY (optional): sysadmins must have TOTP 2FA enrolled WHEN the
-  // deployment enables it via system_config.global_settings.mfaRequiredForAdmin.
-  // Enforced on EVERY authorized API request — not just login — so enrollment
-  // can't be bypassed by holding a pre-existing access token, and disabling
-  // 2FA kills access immediately.
-  if (profile.role === 'sysadmin' && (await isMfaRequiredForAdmin()) && !profile.two_factor_enabled) {
-    throw new Error('MFA_REQUIRED: administrator accounts must enable two-factor authentication');
-  }
+  // NOTE (Issue #5): the MFA gate was removed from here — it's the wrong layer.
+  // This context creation must never fail on MFA state, otherwise the
+  // enrollment endpoints themselves become unreachable (lockout trap).
+  // Enforcement now lives in `withAuthorization` (middleware) and at login.
 
   // Return the validated context
   return {
@@ -139,7 +156,8 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
     employeeId: profile.unique_id || profile.employee_id,
     isAuthenticated: true,
     isActive: profile.status === 'ACTIVE',
-    handle: profile.handle || undefined
+    handle: profile.handle || undefined,
+    twoFactorEnabled: profile.two_factor_enabled === true
   };
 }
 

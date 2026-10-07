@@ -49,6 +49,14 @@ CREATE TABLE IF NOT EXISTS users (
   initial_pin_hash     TEXT,
   flag_status          TEXT CHECK (flag_status IN ('OVERDUE', 'UNAUTHORIZED_EXIT', 'NO_GATE_PASS', 'SUSPENDED', 'CURFEW_VIOLATION', 'MANUAL_LOCKDOWN')),
   last_password_change TIMESTAMPTZ,
+  sso_provider TEXT,
+  sso_subject TEXT,
+  two_factor_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+  two_factor_secret TEXT,
+  two_factor_enrolled_at TIMESTAMPTZ,
+  two_factor_recovery_codes TEXT[],
+
+
   created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at           TIMESTAMPTZ
 );
@@ -294,6 +302,35 @@ CREATE TABLE IF NOT EXISTS webauthn_credentials (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   last_used_at TIMESTAMPTZ
 );
+CREATE TABLE IF NOT EXISTS mobile_enrollment_codes (
+  id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id        UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  code_hash      TEXT NOT NULL,          -- bcrypt of the 8-char code
+  expires_at     TIMESTAMPTZ NOT NULL,
+  used_at        TIMESTAMPTZ,
+  used_device_id TEXT,
+  created_by     UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_enroll_user_active
+  ON mobile_enrollment_codes (user_id, expires_at)
+  WHERE used_at IS NULL;
+
+
+CREATE TABLE IF NOT EXISTS mfa_login_challenges (
+  id          TEXT PRIMARY KEY,
+  user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  expires_at  TIMESTAMPTZ NOT NULL,
+  used_at     TIMESTAMPTZ,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_mfa_challenges_user
+  ON mfa_login_challenges (user_id, expires_at)
+  WHERE used_at IS NULL;
+
+
 
 CREATE TABLE IF NOT EXISTS alert_rules (
   id TEXT PRIMARY KEY,
@@ -322,6 +359,22 @@ CREATE TABLE IF NOT EXISTS sso_config (
   group_mappings JSONB NOT NULL DEFAULT '{}'::jsonb,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS sso_authorization_states (
+  state         TEXT PRIMARY KEY,
+  nonce         TEXT NOT NULL,
+  code_verifier TEXT,
+  provider_id   TEXT NOT NULL,
+  redirect_to   TEXT,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  expires_at    TIMESTAMPTZ NOT NULL,
+  consumed_at   TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_sso_states_expires
+  ON sso_authorization_states (expires_at)
+  WHERE consumed_at IS NULL;
+
 
 CREATE TABLE IF NOT EXISTS support_tickets (
   id TEXT PRIMARY KEY,

@@ -19,7 +19,7 @@ export function getSigningKey(): Uint8Array {
 
 export async function generateQrToken(roll: string): Promise<string> {
   return await new SignJWT({ roll, purpose: "qr_verification", token_type: "qr" })
-    .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+    .setProtectedHeader({ alg: "HS256", typ: "JWT", kid: "qr-v1" })
     .setExpirationTime("45s")
     .sign(getSigningKey());
 }

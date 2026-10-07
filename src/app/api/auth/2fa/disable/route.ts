@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyTOTPCode } from "@/lib/totp";
+import { decryptSecret } from "@/lib/mfa-secret";
 import { addAudit } from "@/lib/db";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withRateLimit } from "@/lib/rate-limit";
-import { withAuthorization } from "@/middleware/authorization";
+import { withAuthorizationPreMfa } from "@/middleware/authorization";
 
 async function handlePost(req: NextRequest) {
   const actorId = req.headers.get("x-user-id");
@@ -17,7 +18,7 @@ async function handlePost(req: NextRequest) {
   }
 
   try {
-    const { targetUserId, token } = await req.json().catch(() => ({}));
+    const { targetUserId, token, reason } = await req.json().catch(() => ({}));
     const userIdToDisable = targetUserId || actorId;
 
     const isSelf = actorId === userIdToDisable;
@@ -44,11 +45,33 @@ async function handlePost(req: NextRequest) {
       );
     }
 
-    // Self disabling requires valid TOTP token or password verification unless sysadmin override
-    if (isSelf && !isSysAdmin && targetUser.two_factor_enabled) {
-      if (!token || !verifyTOTPCode(targetUser.two_factor_secret || "", token)) {
+    if (!targetUser.two_factor_enabled) {
+      return NextResponse.json(
+        { success: false, error: { code: "ALREADY_DISABLED", message: "2FA is already disabled for this user" } },
+        { status: 400 }
+      );
+    }
+
+    if (isSelf) {
+      // Self-disable always requires a valid TOTP code
+      if (!token) {
         return NextResponse.json(
-          { success: false, error: { code: "INVALID_TOTP", message: "Valid 6-digit TOTP code required to disable 2FA" } },
+          { success: false, error: { code: "INVALID_TOTP", message: "Current 6-digit TOTP code required to disable 2FA" } },
+          { status: 400 }
+        );
+      }
+      const secret = decryptSecret(targetUser.two_factor_secret || "");
+      if (!verifyTOTPCode(secret, String(token).trim())) {
+        return NextResponse.json(
+          { success: false, error: { code: "INVALID_TOTP", message: "Invalid authenticator code" } },
+          { status: 400 }
+        );
+      }
+    } else {
+      // Admin disabling another user's 2FA: require explicit reason
+      if (!reason || typeof reason !== "string" || reason.trim().length < 10) {
+        return NextResponse.json(
+          { success: false, error: { code: "REASON_REQUIRED", message: "A valid reason (min 10 chars) is required for administrator-initiated 2FA removal" } },
           { status: 400 }
         );
       }
@@ -59,6 +82,8 @@ async function handlePost(req: NextRequest) {
       .update({
         two_factor_enabled: false,
         two_factor_secret: null,
+        two_factor_enrolled_at: null,
+        two_factor_recovery_codes: null,
       })
       .eq("id", userIdToDisable);
 
@@ -66,22 +91,25 @@ async function handlePost(req: NextRequest) {
       userId: actorId,
       action: "2FA_DISABLED",
       details: {
-        timestamp: new Date().toISOString(),
         targetUserId: userIdToDisable,
-        isSysAdminOverride: isSysAdmin && !isSelf,
+        disabledBy: isSelf ? "self" : "admin",
+        reason: isSelf ? "User initiated" : reason,
+        timestamp: new Date().toISOString(),
       },
     });
 
     return NextResponse.json({
       success: true,
-      message: "Two-Factor Authentication (2FA) successfully disabled",
+      message: "Two-factor authentication disabled successfully",
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    console.error("2FA disable error:", error);
+    const message = error instanceof Error ? error.message : "Internal server error";
     return NextResponse.json(
-      { success: false, error: { code: "SERVER_ERROR", message: error.message || "Internal server error" } },
+      { success: false, error: { code: "SERVER_ERROR", message } },
       { status: 500 }
     );
   }
 }
 
-export const POST = withRateLimit(withAuthorization(handlePost));
+export const POST = withRateLimit(withAuthorizationPreMfa(handlePost), { keyPrefix: "2fa_disable", maxRequests: 10, windowMs: 60 * 1000 });

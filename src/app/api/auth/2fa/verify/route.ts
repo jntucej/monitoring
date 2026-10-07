@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyTOTPCode } from "@/lib/totp";
-import { findUserById, addAudit } from "@/lib/db";
+import { decryptSecret } from "@/lib/mfa-secret";
+import { addAudit } from "@/lib/db";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withRateLimit } from "@/lib/rate-limit";
-import { withAuthorization } from "@/middleware/authorization";
+import { withAuthorizationPreMfa } from "@/middleware/authorization";
+import { randomBytes } from "crypto";
+import bcrypt from "bcryptjs";
+
+function base64url(buf: Buffer): string {
+  return buf.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
 
 async function handlePost(req: NextRequest) {
   const userId = req.headers.get("x-user-id");
@@ -37,7 +44,15 @@ async function handlePost(req: NextRequest) {
       );
     }
 
-    const isValid = verifyTOTPCode(user.two_factor_secret, token);
+    if (user.two_factor_enabled) {
+      return NextResponse.json(
+        { success: false, error: { code: "ALREADY_ENABLED", message: "2FA is already enabled" } },
+        { status: 400 }
+      );
+    }
+
+    const secret = decryptSecret(user.two_factor_secret);
+    const isValid = verifyTOTPCode(secret, String(token).trim());
 
     if (!isValid) {
       return NextResponse.json(
@@ -46,7 +61,18 @@ async function handlePost(req: NextRequest) {
       );
     }
 
-    await supabase.from("users").update({ two_factor_enabled: true }).eq("id", userId);
+    // Generate 10 recovery codes & bcrypt hashes
+    const recoveryCodes = Array.from({ length: 10 }, () => base64url(randomBytes(8)));
+    const recoveryHashes = await Promise.all(recoveryCodes.map((c) => bcrypt.hash(c, 10)));
+
+    await supabase
+      .from("users")
+      .update({
+        two_factor_enabled: true,
+        two_factor_enrolled_at: new Date().toISOString(),
+        two_factor_recovery_codes: recoveryHashes,
+      })
+      .eq("id", userId);
 
     await addAudit({
       userId,
@@ -56,14 +82,17 @@ async function handlePost(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "Two-Factor Authentication (2FA) successfully enabled",
+      message: "Two-factor authentication enabled successfully",
+      recovery_codes: recoveryCodes,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    console.error("2FA verify error:", error);
+    const message = error instanceof Error ? error.message : "Internal server error";
     return NextResponse.json(
-      { success: false, error: { code: "SERVER_ERROR", message: error.message || "Internal server error" } },
+      { success: false, error: { code: "SERVER_ERROR", message } },
       { status: 500 }
     );
   }
 }
 
-export const POST = withRateLimit(withAuthorization(handlePost));
+export const POST = withRateLimit(withAuthorizationPreMfa(handlePost), { keyPrefix: "2fa_verify", maxRequests: 10, windowMs: 60 * 1000 });
