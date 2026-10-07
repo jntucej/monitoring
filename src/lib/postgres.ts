@@ -278,8 +278,11 @@ export class PostgresQueryBuilder<T = any> {
   }
 
   private buildWhereClause(params: any[]): string {
-    if (this.filters.length === 0) return "";
-    const clauses = this.filters.map((f) => {
+    if (this.filters.length === 0 && this.orClauses.length === 0) return "";
+    const whereParts: string[] = [];
+
+    // Process regular filters (ANDed)
+    for (const f of this.filters) {
       if (f.op === "IN") {
         if (!Array.isArray(f.value) || f.value.length === 0) {
           return "1=0";
@@ -288,15 +291,22 @@ export class PostgresQueryBuilder<T = any> {
           params.push(v);
           return `$${params.length}`;
         });
-        return `${f.column} IN (${placeholders.join(", ")})`;
+        whereParts.push(`${f.column} IN (${placeholders.join(", ")})`);
       }
       if (f.op === "IS") {
-        return `${f.column} IS ${f.value === null ? "NULL" : f.value ? "TRUE" : "FALSE"}`;
+        whereParts.push(`${f.column} IS ${f.value === null ? "NULL" : f.value ? "TRUE" : "FALSE"}`);
       }
       params.push(f.value);
-      return `${f.column} ${f.op} $${params.length}`;
-    });
-    return `WHERE ${clauses.join(" AND ")}`;
+      whereParts.push(`${f.column} ${f.op} $${params.length}`);
+    }
+
+    // Process OR clauses (grouped with parentheses)
+    if (this.orClauses.length > 0) {
+      const orClauses = this.orClauses.map(clause => `(${clause})`).join(" OR ");
+      whereParts.push(orClauses);
+    }
+
+    return `WHERE ${whereParts.join(" AND ")}`;
   }
 
   async execute(): Promise<{ data: any; error: any; count?: number }> {

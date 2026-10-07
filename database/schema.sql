@@ -915,18 +915,34 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO postgres, au
 
 -- Auto-generated schema reconciliation for missing tables
 CREATE TABLE IF NOT EXISTS public.announcements (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  data JSONB,
+  id VARCHAR(100) PRIMARY KEY,
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  priority TEXT DEFAULT 'medium',
+  audience TEXT DEFAULT 'all',
+  scheduled_at TIMESTAMPTZ,
+  expires_at TIMESTAMPTZ,
+  is_published BOOLEAN DEFAULT true,
+  created_by TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+CREATE INDEX IF NOT EXISTS idx_announcements_published ON public.announcements(is_published);
 
 CREATE TABLE IF NOT EXISTS public.attendance_records (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  data JSONB,
+  person_id UUID,
+  date DATE NOT NULL,
+  time_in TIMESTAMPTZ,
+  time_out TIMESTAMPTZ,
+  status TEXT,
+  synced BOOLEAN DEFAULT false,
+  synced_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(person_id, date)
 );
+CREATE INDEX IF NOT EXISTS idx_attendance_records_date ON public.attendance_records(date);
 
 CREATE TABLE IF NOT EXISTS public.config_college_info (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -958,7 +974,7 @@ CREATE TABLE IF NOT EXISTS public.config_navigation (
     href TEXT NOT NULL,
     label TEXT NOT NULL,
     icon_name TEXT,
-    order INTEGER DEFAULT 1,
+    order_num INTEGER DEFAULT 1,
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -993,48 +1009,66 @@ CREATE TABLE IF NOT EXISTS public.data_compliance_logs (
 
 CREATE TABLE IF NOT EXISTS public.departments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT,
-  code TEXT,
-  data JSONB,
+  name TEXT NOT NULL,
+  code TEXT UNIQUE NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS public.feedback (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  data JSONB,
+  theme TEXT NOT NULL,
+  comment TEXT NOT NULL,
+  user_agent TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+CREATE INDEX IF NOT EXISTS idx_feedback_created_at ON public.feedback(created_at DESC);
 
 CREATE TABLE IF NOT EXISTS public.gate_holidays (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  date TEXT,
-  data JSONB,
+  id TEXT PRIMARY KEY,
+  name TEXT,
+  date TEXT NOT NULL,
+  description TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+CREATE INDEX IF NOT EXISTS idx_gate_holidays_date ON public.gate_holidays(date);
 
 CREATE TABLE IF NOT EXISTS public.gate_schedules (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  data JSONB,
+  gate_id UUID REFERENCES gates(id) ON DELETE CASCADE,
+  day_of_week INTEGER NOT NULL,
+  open_time TIME NOT NULL,
+  close_time TIME NOT NULL,
+  is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+CREATE INDEX IF NOT EXISTS idx_gate_schedules_gate_id ON public.gate_schedules(gate_id);
 
 CREATE TABLE IF NOT EXISTS public.integration_configs (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  data JSONB,
+  id VARCHAR(100) PRIMARY KEY,
+  type TEXT NOT NULL,
+  name TEXT NOT NULL,
+  enabled BOOLEAN DEFAULT true,
+  config JSONB DEFAULT '{}'::jsonb,
+  status TEXT DEFAULT 'disconnected',
+  last_sync TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS public.integration_logs (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  data JSONB,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  id VARCHAR(100) PRIMARY KEY,
+  integration_id VARCHAR(100) REFERENCES integration_configs(id) ON DELETE CASCADE,
+  action TEXT,
+  status TEXT,
+  details JSONB,
+  timestamp TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
+CREATE INDEX IF NOT EXISTS idx_integration_logs_integration_id ON public.integration_logs(integration_id);
 
 CREATE TABLE IF NOT EXISTS public.job_runs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -1050,29 +1084,47 @@ CREATE TABLE IF NOT EXISTS public.job_runs (
 
 CREATE TABLE IF NOT EXISTS public.lms_attendance_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  data JSONB,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  course_id TEXT DEFAULT 'default_course',
+  status TEXT,
+  synced_at TIMESTAMPTZ DEFAULT NOW(),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS public.lms_config (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  data JSONB,
+  id VARCHAR(50) PRIMARY KEY DEFAULT 'default',
+  platform TEXT DEFAULT 'moodle',
+  api_url TEXT,
+  wstoken TEXT,
+  api_key_encrypted TEXT,
+  client_id TEXT,
+  client_secret TEXT,
+  sync_schedule TEXT DEFAULT 'daily_02:00',
+  auto_push_attendance BOOLEAN DEFAULT true,
+  last_synced_at TIMESTAMPTZ DEFAULT NOW(),
+  status TEXT DEFAULT 'connected',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS public.lockdown_broadcasts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  data JSONB,
+  data JSONB DEFAULT '{}'::jsonb,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS public.passes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id TEXT,
-  data JSONB,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  student_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  pass_type TEXT,
+  reason TEXT,
+  status TEXT DEFAULT 'pending',
+  valid_from TIMESTAMPTZ,
+  valid_to TIMESTAMPTZ,
+  data JSONB DEFAULT '{}'::jsonb,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -1088,21 +1140,39 @@ CREATE TABLE IF NOT EXISTS public.retention_policies (
 
 CREATE TABLE IF NOT EXISTS public.role_change_requests (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  data JSONB,
+  requester_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  target_user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  requested_role TEXT,
+  new_role TEXT,
+  reason TEXT,
+  status TEXT DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED')),
+  approved_by UUID REFERENCES users(id) ON DELETE SET NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+CREATE INDEX IF NOT EXISTS idx_role_change_requests_status ON public.role_change_requests(status);
 
 CREATE TABLE IF NOT EXISTS public.saved_report_definitions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  data JSONB,
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT,
+  query_json JSONB DEFAULT '{}'::jsonb,
+  schedule_cron TEXT,
+  recipients JSONB DEFAULT '[]'::jsonb,
+  status TEXT DEFAULT 'active',
+  created_by TEXT,
+  last_run TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS public.scans (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  data JSONB,
+  person_id UUID REFERENCES persons(id) ON DELETE CASCADE,
+  gate_id UUID REFERENCES gates(id) ON DELETE SET NULL,
+  direction TEXT CHECK (direction IN ('in', 'out', 'entry', 'exit')),
+  status TEXT,
+  scan_time TIMESTAMPTZ DEFAULT NOW(),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -1121,52 +1191,95 @@ CREATE TABLE IF NOT EXISTS public.scheduled_jobs (
 
 CREATE TABLE IF NOT EXISTS public.security_alerts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  data JSONB,
+  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  gate_id UUID REFERENCES gates(id) ON DELETE SET NULL,
+  severity TEXT CHECK (severity IN ('low', 'medium', 'high', 'critical')),
+  message TEXT,
+  status TEXT DEFAULT 'open',
+  metadata JSONB DEFAULT '{}'::jsonb,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS public.sessions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id TEXT,
-  data JSONB,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  refresh_hash VARCHAR(64) UNIQUE NOT NULL,
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  last_seen_at TIMESTAMPTZ DEFAULT NOW(),
+  ip_address VARCHAR(45),
+  user_agent TEXT,
+  revoked_at TIMESTAMPTZ
 );
-
-CREATE TABLE IF NOT EXISTS public.students (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  data JSONB,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
+CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON public.sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_refresh_hash ON public.sessions(refresh_hash);
+CREATE INDEX IF NOT EXISTS idx_sessions_active_user ON public.sessions (user_id) WHERE revoked_at IS NULL;
 
 CREATE TABLE IF NOT EXISTS public.system_config (
+  key TEXT PRIMARY KEY,
+  data JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.password_reset_tokens (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  data JSONB,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token_hash VARCHAR(64) UNIQUE NOT NULL,
+  expires_at TIMESTAMPTZ NOT NULL,
+  used BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_password_reset_token_hash ON public.password_reset_tokens(token_hash);
+
+CREATE TABLE IF NOT EXISTS public.visitor_pre_registrations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE,
+  phone TEXT,
+  purpose TEXT,
+  visit_date DATE,
+  visit_time TIME,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS public.user_announcement_dismissals (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  data JSONB,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS public.visitor_pre_registrations (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  data JSONB,
+  user_id TEXT NOT NULL,
+  announcement_id VARCHAR(100) NOT NULL,
+  dismissed_at TIMESTAMPTZ DEFAULT NOW(),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS public.webauthn_challenges (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id TEXT,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  challenge TEXT NOT NULL,
   type TEXT,
-  data JSONB,
+  data JSONB DEFAULT '{}'::jsonb,
+  expires_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.sustainability_metrics (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  metric_date DATE NOT NULL DEFAULT CURRENT_DATE,
+  paperless_passes_count INTEGER DEFAULT 0,
+  carbon_saved_kg NUMERIC(10,2) DEFAULT 0.0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.onboarding_progress (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  step TEXT NOT NULL,
+  completed BOOLEAN DEFAULT false,
+  completed_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
