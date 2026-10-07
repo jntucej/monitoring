@@ -64,6 +64,14 @@ export default function OperatorPage() {
   const [operatorSubMode, setOperatorSubMode] = useState<"scan" | "manual" | "entry">("scan");
 
   // Poll for Active Lockdown
+  // Redirect unauthenticated users to operator login
+  useEffect(() => {
+    if (!authenticated) {
+      router.replace(`/login/operator?redirect=/gate/${gateId}`);
+      return;
+    }
+  }, [authenticated, gateId, router]);
+
   useEffect(() => {
     const checkLockdown = async () => {
       try {
