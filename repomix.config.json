@@ -62,6 +62,7 @@
       "*.tar.gz",
       "__pycache__/**",
       "*.pyc",
+      "gate-monitor-migration/**",
       "fix_*.py",
       "fix_*.js",
       "scratch/**"

@@ -65,9 +65,8 @@ public/**/*.webp
 *.zip
 *.tar.gz
 
-# Python bytecode & temporary scripts
-__pycache__/**
-*.pyc
+# Scratch & Migration dumps
+gate-monitor-migration/**
 fix_*.py
 fix_*.js
 scripts/fix_*.py
