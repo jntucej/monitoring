@@ -38,8 +38,7 @@ DECLARE
     'data_compliance_logs','zones','lms_config','sustainability_metrics',
     'alert_rules','system_settings','onboarding_progress','predictions',
     'role_change_requests','integration_configs','integration_logs',
-    'announcements','user_announcement_dismissals','sso_config',
-    'device_user_mappings'
+    'announcements','user_announcement_dismissals','sso_config'
   ];
 BEGIN
   FOREACH t IN ARRAY service_tables LOOP
@@ -87,7 +86,7 @@ DECLARE
     'alert_rules','system_settings','onboarding_progress','predictions',
     'role_change_requests','integration_configs','integration_logs',
     'announcements','user_announcement_dismissals','sso_config',
-    'device_user_mappings','gate_passes','predictions'
+    'gate_passes','predictions'
   ];
 BEGIN
   FOREACH t IN ARRAY auth_tables LOOP
@@ -238,7 +237,6 @@ $function$;
 -- DROP POLICY IF EXISTS auth_all_announcements ON public.announcements;
 -- DROP POLICY IF EXISTS auth_all_user_announcement_dismissals ON public.user_announcement_dismissals;
 -- DROP POLICY IF EXISTS auth_all_sso_config ON public.sso_config;
--- DROP POLICY IF EXISTS auth_all_device_user_mappings ON public.device_user_mappings;
 -- DROP POLICY IF EXISTS auth_all_gate_passes ON public.gate_passes;
 -- DROP POLICY IF EXISTS svc_all_support_tickets ON public.support_tickets;
 -- DROP POLICY IF EXISTS svc_all_support_ticket_comments ON public.support_ticket_comments;
@@ -260,5 +258,4 @@ $function$;
 -- DROP POLICY IF EXISTS svc_all_announcements ON public.announcements;
 -- DROP POLICY IF EXISTS svc_all_user_announcement_dismissals ON public.user_announcement_dismissals;
 -- DROP POLICY IF EXISTS svc_all_sso_config ON public.sso_config;
--- DROP POLICY IF EXISTS svc_all_device_user_mappings ON public.device_user_mappings;
 -- DROP POLICY IF EXISTS svc_all_gate_passes ON public.gate_passes;
