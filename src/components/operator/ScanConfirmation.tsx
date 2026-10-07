@@ -17,6 +17,7 @@ interface ScanConfirmationProps {
   suggestedDirection?: ScanDirection;
   isInline?: boolean;
   /** When true, the thumbprint/biometric step has been completed (or fallback allowed). */
+  thumbprintVerified?: boolean;
 }
 
 type ActionEntry = {
@@ -42,6 +43,7 @@ export function ScanConfirmation({
   onCancel,
   suggestedDirection = "IN",
   isInline = false,
+  thumbprintVerified = true,
 }: ScanConfirmationProps) {
   const { exitReasons } = useCampusConfig();
   const validExitReasons = exitReasons.length > 0 ? exitReasons : [];
@@ -180,8 +182,10 @@ export function ScanConfirmation({
     },
   ];
 
+  const biometricOk = !student.thumbprintHash || thumbprintVerified !== false;
+
   const handleConfirmClick = (direction: ScanDirection, reason?: ExitReason) => {
-    if (!photoVerified || !true) {
+    if (!photoVerified || !biometricOk || isFlagged) {
       return;
     }
     setSelectedDirection(direction);
@@ -195,7 +199,7 @@ export function ScanConfirmation({
         const isSelected = selectedDirection === direction && selectedReason === code;
         const passRequired = direction === "OUT" && requiresApproval && (student.personType === "student" || !student.personType);
         const hasApprovedPass = approvedPasses.some((p) => p.reason === code);
-        const isDisabled = !photoVerified || !true || (passRequired && !hasApprovedPass);
+        const isDisabled = !photoVerified || !biometricOk || isFlagged || (passRequired && !hasApprovedPass);
         return (
           <button
             key={`${direction}-${code}`}

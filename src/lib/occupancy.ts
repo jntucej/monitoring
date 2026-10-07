@@ -112,9 +112,9 @@ export async function getOccupancyHistory(): Promise<Array<{ timestamp: string; 
 
   try {
     const { count: insideCount } = await getDbClient()
-      .from("users")
+      .from("campus_occupancy")
       .select("*", { count: "exact", head: true })
-      .eq("status", "INSIDE");
+      .eq("current_status", "IN");
 
     const currentTotal = insideCount ?? 0;
 

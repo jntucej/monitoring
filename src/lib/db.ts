@@ -683,18 +683,19 @@ export async function getAlerts(resolved?: boolean): Promise<Alert[]> {
   return (data || []).map(mAlert);
 }
 
-export async function getNotifications(recipientType: string, recipientId: string): Promise<Alert[]> {
-  let query = getDbClient().from('alerts').select('*').order('timestamp', { ascending: false });
-
+export async function getNotifications(recipientType: string, recipientId: string): Promise<any[]> {
   const safeType = sanitizePostgrestParam(recipientType);
   const safeId = sanitizePostgrestParam(recipientId);
 
-  if (safeType && safeType !== 'all') {
-    query = query.in('recipient_type', [safeType, 'all']);
-  }
+  let query = getDbClient()
+    .from('notifications')
+    .select('*')
+    .order('created_at', { ascending: false });
 
   if (safeId) {
-    query = query.or(`recipient_id.eq.${safeId},recipient_id.is.null`);
+    query = query.or(`recipient_id.eq.${safeId},recipient_type.eq.all`);
+  } else if (safeType && safeType !== 'all') {
+    query = query.or(`recipient_type.eq.${safeType},recipient_type.eq.all`);
   }
 
   const { data, error } = await query;
@@ -703,7 +704,7 @@ export async function getNotifications(recipientType: string, recipientId: strin
     return [];
   }
 
-  return (data || []).map(mAlert);
+  return data || [];
 }
 
 // NOTE: Session lifecycle is fully owned by Supabase Auth (GoTrue).
@@ -1147,12 +1148,14 @@ export async function createUser(userData: {
 }): Promise<User | null> {
   const db = getDbClient();
   const uniqueId = userData.uniqueId || userData.employeeId || userData.loginIdentifier || userData.email || userData.id;
+  const handle = (userData.loginIdentifier || uniqueId || userData.name || `user_${userData.id.replace(/-/g, '').slice(0, 8)}`).toLowerCase().replace(/[^a-z0-9_]/g, '_');
 
   const { data, error } = await db
     .from('users')
-    .insert({
+    .upsert({
       id: userData.id,
       unique_id: uniqueId,
+      handle,
       name: userData.name,
       role: userData.role,
       email: userData.email || null,
@@ -1165,7 +1168,7 @@ export async function createUser(userData: {
       status: userData.status || 'ACTIVE',
       login_identifier: userData.loginIdentifier || uniqueId,
       initial_pin_hash: userData.initialPinHash || null,
-    })
+    }, { onConflict: 'id' })
     .select()
     .single();
 
@@ -1340,7 +1343,7 @@ export async function getThumbprint(userId: string): Promise<{
 export async function updateAccountStatus(userId: string, newStatus: AccountStatus): Promise<boolean> {
   const db = getDbClient();
   const { data: user } = await db.from('users').select('name, status').eq('id', userId).single();
-  const { error } = await db.from('users').update({ status: newStatus, handle: null }).eq('id', userId);
+  const { error } = await db.from('users').update({ status: newStatus }).eq('id', userId);
   if (error) return false;
 
   await addAudit({
@@ -1372,7 +1375,7 @@ export async function updateUserRole(userId: string, newRole: Role, actorId: str
     return false;
   }
 
-  const { error } = await db.from('users').update({ role: newRole, handle: null }).eq('id', userId);
+  const { error } = await db.from('users').update({ role: newRole }).eq('id', userId);
   if (error) return false;
 
   await addAudit({
@@ -1788,20 +1791,23 @@ export async function addNotification(
   const id = `notif-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
   const timestamp = new Date().toISOString();
 
+  const validRecipientType = (['user', 'role', 'department', 'all'].includes(recipientType) ? recipientType : 'user') as any;
+
   const notifRow = {
     id,
-    recipient_type: recipientType,
-    recipient_id: recipientId,
-    type,
+    type: type || 'system',
+    priority: 'medium',
     title,
     message,
-    severity: 'low',
-    gate_id: gateId || null,
-    timestamp,
-    resolved: false,
+    recipient_id: recipientId || 'all',
+    recipient_type: validRecipientType,
+    channels: ['in_app'],
+    data: gateId ? { gate_id: gateId } : {},
+    read: false,
+    created_at: timestamp,
   };
 
-  const { error } = await getDbClient().from('alerts').insert(notifRow);
+  const { error } = await getDbClient().from('notifications').insert(notifRow);
   if (error) {
     console.error('Error creating notification:', error);
   }

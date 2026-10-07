@@ -371,3 +371,56 @@ export const DEPARTMENT_CODE_TO_NAME: Record<string, string> = {
   "04": "Electrical & Electronics Engineering",
   "05": "Mechanical Engineering",
 };
+
+export interface HeatmapDay {
+  date: string; // YYYY-MM-DD
+  dayLabel: string; // e.g. "Mon, Oct 12"
+  status: "ON_TIME" | "LATE" | "ABSENT" | "WEEKEND" | "INSIDE";
+  inTime?: string | null;
+  outTime?: string | null;
+  hours?: number;
+}
+
+export interface MovementLogEntry {
+  id: string;
+  timestamp: string;
+  direction: "IN" | "OUT";
+  gate: string;
+}
+
+export interface FacultyMemberAttendance {
+  id: string;
+  uniqueId: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  department: string;
+  designation: string;
+  status: "INSIDE" | "OUTSIDE" | "ABSENT";
+  firstInTime: string | null;
+  lastOutTime: string | null;
+  punctualityStatus: "ON_TIME" | "LATE" | "NOT_CHECKED_IN";
+  totalHoursToday: string;
+  gateLocation: string | null;
+  attendanceRate?: number;
+  monthlyStats?: {
+    presentDays: number;
+    lateDays: number;
+    absentDays: number;
+    avgHoursPerDay: number;
+  };
+  attendanceHeatmap?: HeatmapDay[];
+  recentLogs?: MovementLogEntry[];
+}
+
+export interface DepartmentAttendanceSummary {
+  department: string;
+  totalFaculty: number;
+  presentToday: number;
+  currentlyInside: number;
+  onTimeToday: number;
+  lateToday: number;
+  attendanceRate: number;
+  avgHoursToday: string;
+}
+
