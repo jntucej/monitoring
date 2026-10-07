@@ -95,5 +95,5 @@ async function handleVerifyPin(req: NextRequest) {
 export const POST = withRateLimit(handleVerifyPin, {
   keyPrefix: "verify_pin",
   maxRequests: 15,
-  windowSeconds: 60,
+  windowMs: 60 * 1000,
 });

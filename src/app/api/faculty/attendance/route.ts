@@ -4,16 +4,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient, supabase } from "@/lib/dbClient";
 import { getDepartments } from "@/lib/departments";
+import { withAuthorization } from "@/middleware/authorization";
 import type { HeatmapDay, MovementLogEntry, FacultyMemberAttendance, DepartmentAttendanceSummary } from "@/lib/types";
-
-export type { HeatmapDay, MovementLogEntry, FacultyMemberAttendance, DepartmentAttendanceSummary };
-  department: string;
-  totalFaculty: number;
-  presentCount: number;
-  insideCount: number;
-  outsideCount: number;
-  attendanceRate: number;
-}
 
 export const dynamic = "force-dynamic";
 
@@ -28,10 +20,6 @@ function formatTime(isoString: string | null | undefined): string | null {
   }
 }
 
-
-
-
-import { withAuthorization } from "@/middleware/authorization";
 async function handleGet(req: NextRequest) {
   try {
     const depts = await getDepartments();
@@ -276,6 +264,8 @@ async function handleGet(req: NextRequest) {
       ([dept, counts]) => ({
         department: dept,
         totalFaculty: counts.total,
+        presentToday: counts.present,
+        currentlyInside: counts.inside,
         presentCount: counts.present,
         insideCount: counts.inside,
         outsideCount: counts.outside,
