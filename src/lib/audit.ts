@@ -44,6 +44,9 @@ export interface AuditLog {
 // Log an audit event
 export async function logAuditEvent(log: AuditLog): Promise<boolean> {
   try {
+    const isUuid = !!log.userId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(log.userId);
+    const validUserId = isUuid ? log.userId : null;
+    const details = { ...(log.details || {}), ...(!isUuid && log.userId ? { actor_identifier: log.userId } : {}) };
     await query(`
       INSERT INTO audit_logs (
         action, user_id, user_name, user_role, details, 
@@ -53,10 +56,10 @@ export async function logAuditEvent(log: AuditLog): Promise<boolean> {
       )
     `, [
       log.action,
-      log.userId,
+      validUserId,
       log.userName,
       log.userRole,
-      JSON.stringify(log.details),
+      JSON.stringify(details),
       log.ipAddress,
       log.userAgent,
       log.timestamp || new Date().toISOString()
@@ -139,12 +142,12 @@ export async function getAuditLogs(filters: {
   }
 
   try {
-    const [{ rows }] = await Promise.all([
+    const [dataResult, countResult] = await Promise.all([
       query(queryText, params),
       query(countQuery, countParams)
     ]);
     
-    const logs: AuditLog[] = rows.map(row => ({
+    const logs: AuditLog[] = dataResult.rows.map(row => ({
       id: row.id,
       action: row.action,
       userId: row.user_id,
@@ -158,7 +161,7 @@ export async function getAuditLogs(filters: {
     
     return { 
       logs, 
-      total: parseInt(rows[0]?.total || '0', 10) 
+      total: parseInt(countResult.rows[0]?.total || countResult.rows[0]?.count || '0', 10) 
     };
   } catch (error) {
     console.error('Error fetching audit logs:', error);

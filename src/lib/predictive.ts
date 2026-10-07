@@ -50,18 +50,18 @@ export async function generatePredictions(): Promise<PredictionItem[]> {
       hourlyCounts[hour] = (hourlyCounts[hour] || 0) + 1;
     });
 
-    const series = Array.from({ length: 24 }, (_, i) => hourlyCounts[i] || Math.floor(Math.random() * 45) + 10);
+    const series = Array.from({ length: 24 }, (_, i) => hourlyCounts[i] || 0);
     const predictedTraffic = exponentialSmoothing(series, 0.35);
 
     for (let h = 1; h <= 6; h++) {
       const targetTime = new Date(now.getTime() + h * 3600 * 1000).toISOString();
-      const variance = predictedTraffic * 0.15;
+      const variance = Math.max(5, predictedTraffic * 0.15);
       predictions.push({
         type: "traffic",
         target: "main_gate",
-        predicted_value: Math.round(predictedTraffic + (h % 3 === 0 ? 15 : -5)),
+        predicted_value: Math.round(predictedTraffic + (h % 3 === 0 ? 5 : -2)),
         confidence_interval_low: Math.max(0, Math.round(predictedTraffic - variance)),
-        confidence_interval_high: Math.round(predictedTraffic + variance + 20),
+        confidence_interval_high: Math.round(predictedTraffic + variance + 10),
         timestamp: targetTime,
         model_version: modelVersion,
       });

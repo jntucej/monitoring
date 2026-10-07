@@ -153,7 +153,7 @@ BEGIN
     WHERE schemaname = 'public' AND tablename = 'gate_passes' AND policyname = pol_name
   ) THEN
     EXECUTE format(
-      'CREATE POLICY %I ON public.%I FOR SELECT TO authenticated USING (true)',
+      'CREATE POLICY %I ON public.%I FOR SELECT TO authenticated USING (is_operator(auth.uid()) OR is_admin(auth.uid()) OR is_warden(auth.uid()) OR user_id = auth.uid())',
       pol_name, 'gate_passes'
     );
   END IF;
@@ -166,8 +166,8 @@ END $$;
 -- invoked ANON browser client (src/lib/supabaseClient.ts).
 -- therefore MUST remain EXECUTE-able anon.
 
-GRANT EXECUTE ON FUNCTION public.resolve_login_identifier() TO anon;
-GRANT EXECUTE ON FUNCTION public.can_user_authenticate() TO anon;
+GRANT EXECUTE ON FUNCTION public.resolve_login_identifier(TEXT) TO anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.can_user_authenticate(UUID) TO anon, authenticated, service_role;
 
 -- ----------------------------------------------------------------------------
 -- SECTION 8: FUNCTIONS FOR GOVERNING RLS
@@ -180,7 +180,7 @@ CREATE OR REPLACE FUNCTION public.is_admin(p_uid uuid)
 AS $function$
 SELECT EXISTS (
  SELECT 1 FROM public.users
- WHERE id = p_uid AND role IN ('admin', 'super_admin')
+ WHERE id = p_uid AND role IN ('admin', 'sysadmin', 'super_admin')
 )
 $function$;
 

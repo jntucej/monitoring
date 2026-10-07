@@ -1,4 +1,5 @@
 import { getDbClient } from "@/lib/db";
+import { query } from "@/lib/postgres";
 
 export interface SustainabilityMetrics {
   digital_passes_count: number;
@@ -11,7 +12,7 @@ export interface SustainabilityMetrics {
 export async function getSustainabilityMetrics(): Promise<SustainabilityMetrics> {
   try {
     const { count: passCount } = await getDbClient().from("gate_passes").select("*", { count: "exact", head: true });
-    const digitalPasses = passCount || 14850;
+    const digitalPasses = passCount || 0;
     const paperSaved = digitalPasses * 2; // 2 sheets per physical pass
     const carbonSaved = Math.round(paperSaved * 0.005 * 100) / 100; // ~5g CO2 per sheet of paper
     const energy = Math.round(digitalPasses * 0.012 * 100) / 100; // estimated low-power turnstile energy
@@ -26,20 +27,40 @@ export async function getSustainabilityMetrics(): Promise<SustainabilityMetrics>
     };
   } catch {
     return {
-      digital_passes_count: 14850,
-      paper_saved_sheets: 29700,
-      carbon_saved_kg: 148.5,
-      energy_kwh: 178.2,
-      trees_equivalent: 3.56,
+      digital_passes_count: 0,
+      paper_saved_sheets: 0,
+      carbon_saved_kg: 0,
+      energy_kwh: 0,
+      trees_equivalent: 0,
     };
   }
 }
 
 export async function getSustainabilityHistory(): Promise<Array<{ month: string; paper_saved: number; carbon_saved: number }>> {
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"];
-  return months.map((m, idx) => ({
+  try {
+    const res = await query(`
+      SELECT 
+        TO_CHAR(requested_at, 'Mon') as month,
+        COUNT(*)::int * 2 as paper_saved,
+        ROUND((COUNT(*)::numeric * 2 * 0.005), 2) as carbon_saved
+      FROM gate_passes
+      WHERE requested_at >= NOW() - INTERVAL '6 months'
+      GROUP BY TO_CHAR(requested_at, 'Mon'), DATE_TRUNC('month', requested_at)
+      ORDER BY DATE_TRUNC('month', requested_at) ASC
+    `);
+    if (res.rows.length > 0) {
+      return res.rows.map(r => ({
+        month: r.month,
+        paper_saved: Number(r.paper_saved) || 0,
+        carbon_saved: Number(r.carbon_saved) || 0,
+      }));
+    }
+  } catch {}
+
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
+  return months.map((m) => ({
     month: m,
-    paper_saved: (idx + 1) * 3200,
-    carbon_saved: Math.round((idx + 1) * 3200 * 0.005 * 10) / 10,
+    paper_saved: 0,
+    carbon_saved: 0,
   }));
 }

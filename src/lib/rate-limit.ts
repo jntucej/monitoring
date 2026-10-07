@@ -52,7 +52,8 @@ export async function checkRateLimit(
   const effectiveMaxRequests = isDev ? Math.max(maxRequests * 10, 200) : maxRequests;
   const key = `${keyPrefix}:${ip}`;
 
-  if (process.env.NODE_ENV === 'production' && !isDev) {
+  const isEdge = typeof (globalThis as any).EdgeRuntime !== 'undefined' || process.env.NEXT_RUNTIME === 'edge';
+  if (!isEdge && process.env.NODE_ENV === 'production' && !isDev) {
     try {
       const { query } = await import('./postgres');
       const rows = await query(

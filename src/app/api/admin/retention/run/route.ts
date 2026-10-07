@@ -2,14 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { addAudit } from "@/lib/db";
+import { query } from "@/lib/postgres";
 
 async function handlePost(req: NextRequest) {
   try {
     const actorId = req.headers.get("x-user-id") || "sysadmin";
     const supabase = getSupabaseServiceClient();
-
     const timestamp = new Date().toISOString();
-    const recordsPurged = Math.floor(Math.random() * 150) + 12;
+
+    // Execute real SQL retention sweeps
+    let recordsPurged = 0;
+    try {
+      const res1 = await query("DELETE FROM integration_logs WHERE timestamp < NOW() - INTERVAL '30 days'");
+      const res2 = await query("DELETE FROM api_metrics WHERE timestamp < NOW() - INTERVAL '14 days'");
+      recordsPurged = (res1.rowCount || 0) + (res2.rowCount || 0);
+    } catch (e) {
+      console.warn("Retention deletion table sweep:", e);
+    }
 
     await supabase.from("data_compliance_logs").insert({
       id: `cmp-${Date.now()}`,
@@ -41,4 +50,3 @@ async function handlePost(req: NextRequest) {
 }
 
 export const POST = withAuthorization(handlePost, { requiredRole: ["sysadmin"] });
-

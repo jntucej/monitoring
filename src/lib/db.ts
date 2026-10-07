@@ -491,10 +491,9 @@ export async function findGatePasses(filters: {
   status?: string;
   roll?: string;
   parentId?: string;
-    guardianId?: string;
+  guardianId?: string;
   limit?: number;
 }): Promise<GatePass[]> {
-  // Use service client to bypass RLS — access control is enforced at the API layer
   const { getSupabaseServiceClient } = await import('./dbClient');
   const serviceClient = getSupabaseServiceClient();
   let query = serviceClient.from('gate_passes').select('*');
@@ -511,22 +510,32 @@ export async function findGatePasses(filters: {
     }
   }
 
-  if (filters.roll) {
+  const pId = filters.parentId || filters.guardianId;
+  if (pId) {
+    const children = await getParentChildren(pId);
+    const rolls = children.map(c => c.roll).filter(Boolean);
+    if (rolls.length === 0) return [];
+    if (filters.roll) {
+      if (rolls.includes(filters.roll.trim().toUpperCase())) {
+        query = query.eq('roll', filters.roll.trim().toUpperCase());
+      } else {
+        return [];
+      }
+    } else {
+      query = query.in('roll', rolls);
+    }
+  } else if (filters.roll) {
     query = query.eq('roll', filters.roll.trim().toUpperCase());
   }
 
   query = query.order('requested_at', { ascending: false });
-
-  if (filters.limit) {
-    query = query.limit(filters.limit);
-  }
+  if (filters.limit) query = query.limit(filters.limit);
 
   const { data, error } = await query;
   if (error) {
-    console.error('Error finding gate passes:', error);
+    console.error('Error fetching passes:', error);
     return [];
   }
-
   return (data || []).map(mPass);
 }
 

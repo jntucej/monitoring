@@ -10,9 +10,12 @@ async function handlePost(req: NextRequest) {
 
   if (sessionToken) {
     try {
-      await query("DELETE FROM sessions WHERE session_token = $1 OR refresh_token = $1", [sessionToken]);
+      await query(
+        "UPDATE sessions SET revoked_at = NOW() WHERE refresh_hash = $1 OR user_id::text = $1 OR id::text = $1",
+        [sessionToken]
+      );
     } catch {
-      // session table may be optional
+      // Best-effort session table revocation
     }
   }
 

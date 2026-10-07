@@ -67,6 +67,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(`${url.origin}/login?sso_error=${encodeURIComponent(error)}`);
   }
 
+<<<<<<< Updated upstream
   // 2b. State must be present and must match an unconsumed, unexpired row
   if (!state) {
     return NextResponse.redirect(`${url.origin}/login?sso_error=missing_state`);
@@ -175,6 +176,25 @@ export async function GET(req: NextRequest) {
   } else {
     // Fallback: match by email only if the account is not already SSO-bound.
     const { data: byEmail } = await service
+=======
+    // Step 2: Code exchange & token validation
+    const exchange = await exchangeOIDCAuthorizationCode(code, provider, redirectUri);
+    if (!exchange.idToken) {
+      return NextResponse.json({ success: false, error: { message: "OIDC token exchange failed." } }, { status: 401 });
+    }
+
+    const validation = await validateOIDCIdToken(exchange.idToken, provider, config.clientId);
+    if (!validation.valid || !validation.claims?.email) {
+      return NextResponse.json({ success: false, error: { message: "Invalid or expired OIDC ID token." } }, { status: 401 });
+    }
+
+    const ssoEmail = String(validation.claims.email).toLowerCase().trim();
+    const ssoName = String(validation.claims.name || ssoEmail.split("@")[0]);
+
+    const userRole = mapExternalGroupToRole(["Campus-Security-Leads"]);
+    const supabase = getSupabaseServiceClient();
+    const { data: existingUser } = await supabase
+>>>>>>> Stashed changes
       .from("users")
       .select("id, role, status, unique_id, name, email, sso_subject, sso_provider")
       .eq("email", email)
