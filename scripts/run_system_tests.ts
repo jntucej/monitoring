@@ -80,7 +80,7 @@ async function runTests() {
 
   // Test in production mode for strict enforcement
   const origEnv = process.env.NODE_ENV;
-  process.env.NODE_ENV = 'production';
+  (process.env as any).NODE_ENV = 'production';
   const limitConfig = { maxRequests: 2, windowMs: 5000, keyPrefix: 'test_limit' };
   const testIp = '198.51.100.1'; // non-localhost external IP
   const r1 = await checkRateLimit(testIp, limitConfig);
@@ -88,7 +88,7 @@ async function runTests() {
   await checkRateLimit(testIp, limitConfig);
   const r3 = await checkRateLimit(testIp, limitConfig);
   assert(r3.limited === true && r3.remaining === 0, 'Exceeding threshold triggers rate limiting');
-  process.env.NODE_ENV = origEnv;
+  (process.env as any).NODE_ENV = origEnv;
 
   // 4. API Route Handlers Integration Test
   console.log('\n🚪 [4/4] Testing API Route Handlers & Input Sanitization...');
