@@ -16,12 +16,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/postgres";
 import { randomUUID } from "crypto";
-import { Role, AccountStatus } from "@/lib/types";
+import type { Role } from "@/lib/types";
 import {
   requireAuthenticatedUser as requireAuthUser,
   requirePermission as requireAuthPermission,
   validateResourceOperation as validateResourceOp,
-  getGateStudentInfo
+  getGateStudentInfo,
+  isMfaRequiredForAdmin,
+  type AuthContext,
 } from "@/lib/authContext";
 
 /**
@@ -35,16 +37,20 @@ import {
  * @param handler - The API route handler; receives (req, { auth: AuthContext })
  * @param options - Authorization options
  */
+export interface AuthorizationOptions {
+  requiredRole?: Role | Role[];
+  requiredPermission?: string;
+  allowInactive?: boolean;
+  resourceType?: string;
+  resourceIdParam?: string;
+  operation?: string;
+  /** Set false for pre-MFA endpoints (2fa setup/verify/disable) so enrollment stays reachable. Default true. */
+  enforceMfa?: boolean;
+}
+
 export function withAuthorization(
-  handler: (req: NextRequest, context: { auth: any }) => Promise<Response>,
-  options: {
-    requiredRole?: Role | Role[];
-    requiredPermission?: string;
-    allowInactive?: boolean;
-    resourceType?: string;
-    resourceIdParam?: string;
-    operation?: string;
-  } = {}
+  handler: (req: NextRequest, context: { auth: AuthContext }) => Promise<Response>,
+  options: AuthorizationOptions = {}
 ) {
   return async (req: NextRequest) => {
     try {
@@ -90,6 +96,22 @@ export function withAuthorization(
           return NextResponse.json(
             { success: false, error: { code: 'FORBIDDEN', message: 'Insufficient permissions' } },
             { status: 403 }
+          );
+        }
+      }
+
+      // MFA gate: sysadmin/admin must have 2FA enrolled when required.
+      // Per-user enforcement (twoFactorEnabled), not a global on/off.
+      // Skipped when enforceMfa === false (pre-MFA enrollment endpoints).
+      if (options.enforceMfa !== false) {
+        const mfaRequired = await isMfaRequiredForAdmin();
+        if (
+          mfaRequired &&
+          (authContext.role === 'sysadmin' || authContext.role === 'admin') &&
+          !authContext.twoFactorEnabled
+        ) {
+          throw new Error(
+            'MFA_REQUIRED: administrator accounts must enable two-factor authentication'
           );
         }
       }
@@ -178,11 +200,26 @@ export function withAuthorization(
 }
 
 /**
+ * Pre-MFA authorization wrapper: identical to withAuthorization but skips the
+ * MFA gate (enforceMfa: false). ONLY for 2FA enrollment/recovery endpoints
+ * (setup / verify / disable / authenticate) so a sysadmin who has not enrolled
+ * yet — or lost their device — can always reach them (Issue #5 lockout trap).
+ */
+export function withAuthorizationPreMfa(
+  handler: (req: NextRequest, context: { auth: AuthContext }) => Promise<Response>,
+  options: Omit<AuthorizationOptions, "enforceMfa"> = {}
+) {
+  return withAuthorization(handler, { ...options, enforceMfa: false });
+}
+
+export type AuthenticatedRouteHandler = (req: NextRequest, context: { auth: AuthContext }) => Promise<Response>;
+
+/**
  * Higher-order function to combine multiple middleware
  */
 export function combineMiddleware(
-  handler: (req: NextRequest, context?: any) => Promise<Response>,
-  ...middlewares: ((handler: (req: NextRequest, context?: any) => Promise<Response>) => (req: NextRequest) => Promise<Response>)[]
+  handler: AuthenticatedRouteHandler,
+  ...middlewares: ((handler: AuthenticatedRouteHandler) => AuthenticatedRouteHandler)[]
 ) {
   return middlewares.reduceRight(
     (acc, middleware) => middleware(acc),
@@ -194,7 +231,7 @@ export function combineMiddleware(
  * Role-based access control helper
  */
 export function requireRole(requiredRole: Role | Role[]) {
-  return (handler: (req: NextRequest, context?: any) => Promise<Response>) => {
+  return (handler: AuthenticatedRouteHandler) => {
     return withAuthorization(handler, { requiredRole });
   };
 }
@@ -203,7 +240,7 @@ export function requireRole(requiredRole: Role | Role[]) {
  * Permission-based access control helper
  */
 export function requirePermission(requiredPermission: string) {
-  return (handler: (req: NextRequest, context?: any) => Promise<Response>) => {
+  return (handler: AuthenticatedRouteHandler) => {
     return withAuthorization(handler, { requiredPermission });
   };
 }
@@ -211,7 +248,7 @@ export function requirePermission(requiredPermission: string) {
 /**
  * Middleware to validate account status on every request
  */
-export function withAccountStatusValidation(handler: (req: NextRequest, context?: any) => Promise<Response>) {
+export function withAccountStatusValidation(handler: AuthenticatedRouteHandler) {
   return withAuthorization(handler, { allowInactive: false });
 }
 
@@ -223,7 +260,7 @@ export function withResourceValidation(
   resourceIdParam: string,
   operation: string = 'read'
 ) {
-  return (handler: (req: NextRequest, context?: any) => Promise<Response>) => {
+  return (handler: AuthenticatedRouteHandler) => {
     return withAuthorization(handler, { resourceType, resourceIdParam, operation });
   };
 }
@@ -286,7 +323,7 @@ export async function getGateStudent(req: NextRequest, roll: string) {
 export async function logAuditEvent(
   eventType: string,
   userId: string,
-  details: any,
+  details: unknown,
   ipAddress: string | null = null
 ) {
   try {

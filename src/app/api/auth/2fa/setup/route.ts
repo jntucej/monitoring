@@ -3,8 +3,9 @@ import { generateBase32Secret } from "@/lib/totp";
 import { findUserById, addAudit } from "@/lib/db";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withRateLimit } from "@/lib/rate-limit";
-import { withAuthorization } from "@/middleware/authorization";
+import { withAuthorizationPreMfa } from "@/middleware/authorization";
 import { verifyEnrollToken } from "@/lib/mfa-enroll";
+import { encryptSecret } from "@/lib/mfa-secret";
 
 async function handlePost(req: NextRequest) {
   let userId = req.headers.get("x-user-id");
@@ -39,7 +40,7 @@ async function handlePost(req: NextRequest) {
 
     // Store secret temporarily directly in database
     const supabase = getSupabaseServiceClient();
-    await supabase.from("users").update({ two_factor_secret: secret }).eq("id", userId);
+    await supabase.from("users").update({ two_factor_secret: encryptSecret(secret) }).eq("id", userId);
 
     await addAudit({
       userId,
@@ -55,12 +56,13 @@ async function handlePost(req: NextRequest) {
         message: "Scan code or enter secret in authenticator app",
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Internal server error";
     return NextResponse.json(
-      { success: false, error: { code: "SERVER_ERROR", message: error.message || "Internal server error" } },
+      { success: false, error: { code: "SERVER_ERROR", message } },
       { status: 500 }
     );
   }
 }
 
-export const POST = withRateLimit(withAuthorization(handlePost));
+export const POST = withRateLimit(withAuthorizationPreMfa(handlePost), { keyPrefix: "2fa_setup", maxRequests: 10, windowMs: 60 * 1000 });

@@ -19,15 +19,30 @@ function requireSecret(name: string): string {
 }
 
 export function getAuthSigningKey(): Uint8Array {
-  // NOTE: deliberately does NOT fall back to MOBILE_TOKEN_SECRET or JWT_SECRET.
+  // NOTE: deliberately do NOT fall back to MOBILE_TOKEN_SECRET or JWT_SECRET.
   // Each token class must have its own secret.
   return new TextEncoder().encode(requireSecret("AUTH_JWT_SECRET"));
 }
 
 export type TokenType = "access" | "refresh";
+export type TokenPurpose = "password_reset" | "qr_verification" | "mfa_enroll";
 
-export interface AuthTokenClaims extends JWTPayload {
+export interface BaseClaims extends JWTPayload {
   sub: string;
+}
+
+export interface TypedClaims extends BaseClaims {
+  token_type: TokenType;
+  [key: string]: unknown;
+}
+
+export interface PurposedClaims extends BaseClaims {
+  purpose: TokenPurpose | string;
+  email?: string;
+  [key: string]: unknown;
+}
+
+export interface AuthTokenClaims extends BaseClaims {
   id?: string;
   email?: string;
   role: string;
@@ -35,10 +50,11 @@ export interface AuthTokenClaims extends JWTPayload {
   name?: string;
   token_type?: TokenType | string;
   purpose?: string;
+  [key: string]: unknown;
 }
 
 /**
- * Sign Access Token (1 hour default lifespan)
+ * Sign AccessToken (1 hour default lifespan)
  */
 export async function signAccessToken(claims: {
   sub: string;
@@ -46,7 +62,7 @@ export async function signAccessToken(claims: {
   role: string;
   account_status?: string;
   name?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }): Promise<string> {
   const key = getAuthSigningKey();
   const issuedAt = Math.floor(Date.now() / 1000);
@@ -57,7 +73,7 @@ export async function signAccessToken(claims: {
     id: claims.sub,
     token_type: "access",
   })
-    .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+    .setProtectedHeader({ alg: "HS256", typ: "JWT", kid: "auth-v1" })
     .setSubject(claims.sub)
     .setIssuedAt(issuedAt)
     .setExpirationTime(expiry)
@@ -65,13 +81,13 @@ export async function signAccessToken(claims: {
 }
 
 /**
- * Sign Refresh Token (7 days lifespan)
+ * Sign RefreshToken (7 days lifespan)
  */
 export async function signRefreshToken(claims: {
   sub: string;
   email?: string;
   role: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }): Promise<string> {
   const key = getAuthSigningKey();
   const issuedAt = Math.floor(Date.now() / 1000);
@@ -82,7 +98,7 @@ export async function signRefreshToken(claims: {
     id: claims.sub,
     token_type: "refresh",
   })
-    .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+    .setProtectedHeader({ alg: "HS256", typ: "JWT", kid: "auth-v1" })
     .setSubject(claims.sub)
     .setIssuedAt(issuedAt)
     .setExpirationTime(expiry)
@@ -90,7 +106,7 @@ export async function signRefreshToken(claims: {
 }
 
 /**
- * Sign Password Reset Token (1 hour lifespan with dedicated purpose)
+ * Sign Password ResetToken (1 hour lifespan with dedicated purpose)
  */
 export async function signPasswordResetToken(
   userId: string,
@@ -98,7 +114,7 @@ export async function signPasswordResetToken(
 ): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   return await new SignJWT({ purpose: "password_reset", email })
-    .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+    .setProtectedHeader({ alg: "HS256", typ: "JWT", kid: "auth-v1" })
     .setSubject(userId)
     .setIssuedAt(now)
     .setExpirationTime(now + 3600) // 1 hour
@@ -106,53 +122,62 @@ export async function signPasswordResetToken(
 }
 
 /**
- * Internal typed verification helper
+ * The ONE choke-point that touches jwtVerify for auth-secret tokens.
  */
-async function verifyTyped(
+async function verifyWithAuthSecret<T extends BaseClaims>(
   token: string,
-  expected: TokenType
-): Promise<AuthTokenClaims | null> {
+  predicate: (p: JWTPayload) => p is T,
+  expect: string
+): Promise<T | null> {
   try {
     const { payload } = await jwtVerify(token, getAuthSigningKey(), {
       algorithms: ["HS256"],
     });
-    if (payload.token_type !== expected) return null;
     if (typeof payload.sub !== "string") return null;
-    return payload as AuthTokenClaims;
-  } catch {
-    return null;
-  }
-}
-
-export const verifyAccessToken = (t: string) => verifyTyped(t, "access");
-export const verifyRefreshToken = (t: string) => verifyTyped(t, "refresh");
-
-/**
- * Verify dedicated password reset token
- */
-export async function verifyPasswordResetToken(
-  token: string
-): Promise<JWTPayload | null> {
-  try {
-    const { payload } = await jwtVerify(token, getAuthSigningKey(), {
-      algorithms: ["HS256"],
-    });
-    if (payload.purpose !== "password_reset" || typeof payload.sub !== "string") {
+    if (!predicate(payload)) {
+      // Signature was valid but wrong class — this is the interesting case
+      console.warn("[auth] token_class_mismatch", {
+        expected: expect,
+        got_type: (payload as Record<string, unknown>).token_type ?? (payload as Record<string, unknown>).purpose ?? null,
+        sub: payload.sub,
+        // do NOT log the token itself
+      });
       return null;
     }
-    return payload;
+    return payload as T;
   } catch {
-    return null;
+    return null; // bad signature / expired / malformed — noisy but low-signal
   }
 }
 
+export const verifyAccessToken = (t: string) =>
+  verifyWithAuthSecret<AuthTokenClaims>(
+    t,
+    (p): p is AuthTokenClaims => p.token_type === "access",
+    "access"
+  );
+
+export const verifyRefreshToken = (t: string) =>
+  verifyWithAuthSecret<AuthTokenClaims>(
+    t,
+    (p): p is AuthTokenClaims => p.token_type === "refresh",
+    "refresh"
+  );
+
+export const verifyPasswordResetToken = (t: string) =>
+  verifyWithAuthSecret<PurposedClaims>(
+    t,
+    (p): p is PurposedClaims => p.purpose === "password_reset",
+    "password_reset"
+  );
+
 /**
- * Backward compatibility alias for verifyAccessToken
+ * @deprecated Never call this directly. See src/lib/auth-token.ts.
  */
-export async function verifyAuthToken(
-  token: string
-): Promise<AuthTokenClaims | null> {
-  return verifyAccessToken(token);
+export async function verifyAuthToken(): Promise<never> {
+  throw new Error(
+    "verifyAuthToken was removed to prevent token class confusion. Use verifyAccessToken, verifyRefreshToken, or verifyPasswordResetToken."
+  );
 }
 
 /**
