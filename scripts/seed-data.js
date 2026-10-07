@@ -7,8 +7,23 @@ loadLocalEnv();
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const DEFAULT_SEED_PIN = process.env.SEED_DEFAULT_PIN || '1234';
-if (process.env.NODE_ENV === "production" || process.env.VERCEL_ENV === "production") { console.error("Refusing to seed in prod"); process.exit(1); }
+const isDev = process.env.NODE_ENV === "development" || !process.env.NODE_ENV || process.env.NODE_ENV === "test";
+const DEFAULT_SEED_PIN = process.env.SEED_DEFAULT_PIN || (isDev ? '654321' : null);
+
+if (process.env.NODE_ENV === "production" && process.env.ALLOW_PROD_SEED !== "true") {
+  console.error("Refusing to seed in production environment without ALLOW_PROD_SEED=true.");
+  process.exit(1);
+}
+
+if (!DEFAULT_SEED_PIN) {
+  console.error("SEED_DEFAULT_PIN must be set explicitly in non-development environments.");
+  process.exit(1);
+}
+
+if (DEFAULT_SEED_PIN.length < 6) {
+  console.error("SEED_DEFAULT_PIN must be at least 6 digits.");
+  process.exit(1);
+}
 
 if (!url || !key) {
   console.error("Required NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY missing.");
@@ -56,6 +71,9 @@ async function main() {
         status: 'ACTIVE',
         department_id: range.dept,
         initial_pin_hash: pinHash,
+        pin_must_change: true,
+        pin_set_by: null,
+        pin_set_at: null,
       });
 
       employeesToUpsert.push({

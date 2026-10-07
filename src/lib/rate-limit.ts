@@ -24,6 +24,23 @@ export interface RateLimitResult {
   retryAfter?: number;
 }
 
+export function extractClientIp(req: NextRequest): string {
+  // 1. Prefer x-real-ip when set by a trusted reverse proxy (e.g. Caddy, Nginx)
+  const realIp = req.headers.get('x-real-ip')?.trim();
+  if (realIp) return realIp;
+
+  // 2. Otherwise parse x-forwarded-for: rightmost entry is appended by the nearest reverse proxy
+  const xForwardedFor = req.headers.get('x-forwarded-for');
+  if (xForwardedFor) {
+    const ips = xForwardedFor.split(',').map((s) => s.trim()).filter(Boolean);
+    if (ips.length > 0) {
+      return ips[ips.length - 1];
+    }
+  }
+
+  return 'unknown';
+}
+
 export async function checkRateLimit(
   reqOrKey: NextRequest | string,
   config: RateLimitConfig = {}
@@ -36,10 +53,7 @@ export async function checkRateLimit(
   if (typeof reqOrKey === 'string') {
     ip = reqOrKey;
   } else {
-    ip =
-      reqOrKey.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
-      reqOrKey.headers.get('x-real-ip') ||
-      'unknown';
+    ip = extractClientIp(reqOrKey);
   }
 
   const isDev =
@@ -115,11 +129,11 @@ export function rateLimit(keyOrReq: string | NextRequest, pointsOrConfig?: numbe
   return (req: NextRequest) => checkRateLimit(req, config);
 }
 
-export function withRateLimit(
-  handler: (req: NextRequest, ...args: any[]) => Promise<Response>,
+export function withRateLimit<TArgs extends unknown[] = unknown[]>(
+  handler: (req: NextRequest, ...args: TArgs) => Promise<Response>,
   config: RateLimitConfig = {}
 ) {
-  return async (req: NextRequest, ...args: any[]) => {
+  return async (req: NextRequest, ...args: TArgs) => {
     const result = await checkRateLimit(req, config);
     if (result.limited) {
       return NextResponse.json(
