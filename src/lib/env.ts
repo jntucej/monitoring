@@ -15,10 +15,6 @@ export interface EnvConfig {
   isProduction: boolean;
   isDevelopment: boolean;
   isTest: boolean;
-  // Deprecated backward-compatibility aliases
-  supabaseUrl?: string;
-  supabaseAnonKey?: string;
-  supabaseServiceRoleKey?: string;
 }
 
 let cachedEnv: EnvConfig | null = null;
@@ -59,9 +55,6 @@ export function getEnv(): EnvConfig {
     isProduction,
     isDevelopment,
     isTest,
-    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-    supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
-    supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || "",
   };
 
   return cachedEnv;

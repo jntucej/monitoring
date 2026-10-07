@@ -59,9 +59,9 @@ END $$;
 -- ----------------------------------------------------------------------------
 -- SECTION 3: ROLE HELPERS accept zero-arg (cached) form
 -- ----------------------------------------------------------------------------
--- PROBLEM 46 policies evaluate auth.uid() per row. Wrapping in
--- (SELECT auth.uid()) lets planner evaluate once (InitPlan).
--- Policies call is_admin(auth.uid()) which reads public.users
+-- PROBLEM 46 policies evaluate current_setting('app.current_user_id', true)::uuid per row. Wrapping in
+-- (SELECT current_setting('app.current_user_id', true)::uuid) lets planner evaluate once (InitPlan).
+-- Policies call is_admin(current_setting('app.current_user_id', true)::uuid) which reads public.users
 -- per row.
 -- FIX Add 0-arg overloads policies read is_admin_self() uid
 -- resolved inside function, cache uid once per query.
@@ -70,7 +70,7 @@ CREATE OR REPLACE FUNCTION public.is_admin_self()
  RETURNS boolean
  LANGUAGE sql
  STABLE
-AS $function$SELECT public.is_admin((SELECT auth.uid()))$function$;
+AS $function$SELECT public.is_admin((SELECT current_setting('app.current_user_id', true)::uuid))$function$;
 
 -- ----------------------------------------------------------------------------
 -- SECTION 4: AUTHENTICATED POLICIES WITH CACHED HELPERS

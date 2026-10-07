@@ -238,7 +238,7 @@ CREATE TABLE IF NOT EXISTS notification_email_queue (
 CREATE TABLE IF NOT EXISTS audit_logs (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   action     VARCHAR(50) NOT NULL,
-  user_id    UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  user_id    UUID REFERENCES public.users(id) ON DELETE SET NULL,
   user_name  VARCHAR(100),
   user_role  VARCHAR(50),
   details    JSONB DEFAULT '{}'::jsonb,
@@ -277,7 +277,7 @@ CREATE TABLE IF NOT EXISTS backups (
   size         BIGINT NOT NULL,
   table_count  INTEGER NOT NULL,
   record_count INTEGER NOT NULL,
-  created_by   UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  created_by   UUID REFERENCES public.users(id) ON DELETE SET NULL,
   status       VARCHAR(20) NOT NULL CHECK (status IN ('pending','completed','failed')),
   error        TEXT
 );
@@ -445,17 +445,17 @@ RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
 AS $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM users WHERE id = p_user_id) THEN RETURN FALSE; END IF;
   IF NOT EXISTS (SELECT 1 FROM users WHERE id = p_user_id AND status = 'ACTIVE') THEN RETURN FALSE; END IF;
-  IF NOT EXISTS (SELECT 1 FROM auth.users WHERE id = p_user_id) THEN RETURN FALSE; END IF;
+  IF NOT EXISTS (SELECT 1 FROM public.users WHERE id = p_user_id) THEN RETURN FALSE; END IF;
   RETURN TRUE;
 END; $$;
 
 CREATE OR REPLACE FUNCTION invalidate_all_user_sessions(p_user_id UUID)
 RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 BEGIN
-  UPDATE public.users 
+  UPDATE public.users
   SET handle = NULL, updated_at = NOW()
   WHERE id = p_user_id;
-  
+
   RETURN FOUND;
 END;
 $$;
@@ -528,7 +528,7 @@ CREATE OR REPLACE FUNCTION create_user_with_auth(
   p_status TEXT, p_login_identifier TEXT
 ) RETURNS UUID LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
 AS $$ DECLARE v_caller_role TEXT; v_user_id UUID; BEGIN
-  SELECT role INTO v_caller_role FROM users WHERE id = auth.uid();
+  SELECT role INTO v_caller_role FROM users WHERE id = current_setting('app.current_user_id', true)::uuid;
   IF v_caller_role IS NULL OR v_caller_role != 'sysadmin' THEN
     RAISE EXCEPTION 'FORBIDDEN: Only system administrators can create users';
   END IF;
@@ -548,11 +548,11 @@ END; $$;
 CREATE OR REPLACE FUNCTION delete_user_with_auth(p_user_id UUID)
 RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
 AS $$ DECLARE v_caller_role TEXT; BEGIN
-  SELECT role INTO v_caller_role FROM users WHERE id = auth.uid();
+  SELECT role INTO v_caller_role FROM users WHERE id = current_setting('app.current_user_id', true)::uuid;
   IF v_caller_role IS NULL OR v_caller_role != 'sysadmin' THEN
     RAISE EXCEPTION 'FORBIDDEN: Only system administrators can delete users';
   END IF;
-  IF p_user_id = auth.uid() THEN RAISE EXCEPTION 'FORBIDDEN: Cannot delete own account'; END IF;
+  IF p_user_id = current_setting('app.current_user_id', true)::uuid THEN RAISE EXCEPTION 'FORBIDDEN: Cannot delete own account'; END IF;
   DELETE FROM users WHERE id = p_user_id; RETURN TRUE;
 EXCEPTION WHEN OTHERS THEN RETURN FALSE; END; $$;
 
@@ -648,11 +648,11 @@ AS $$ BEGIN
       jsonb_build_object('user_id', NEW.id,'role', NEW.role));
   ELSIF TG_OP = 'UPDATE' THEN
     IF NEW.role IS DISTINCT FROM OLD.role THEN
-      PERFORM audit_log_entry('ROLE_CHANGED', auth.uid(), NULL, NULL,
+      PERFORM audit_log_entry('ROLE_CHANGED', current_setting('app.current_user_id', true)::uuid, NULL, NULL,
         jsonb_build_object('user_id', NEW.id,'old_role', OLD.role,'new_role', NEW.role));
     END IF;
     IF NEW.status IS DISTINCT FROM OLD.status THEN
-      PERFORM audit_log_entry('ACCOUNT_STATUS_CHANGED', auth.uid(), NULL, NULL,
+      PERFORM audit_log_entry('ACCOUNT_STATUS_CHANGED', current_setting('app.current_user_id', true)::uuid, NULL, NULL,
         jsonb_build_object('user_id', NEW.id,'old_status', OLD.status,'new_status', NEW.status));
     END IF;
   END IF;
@@ -670,45 +670,15 @@ END; $$;
 
 -- Automatic Auth User Sync Trigger (creates public.users profile when auth.users is created)
 CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
-BEGIN
-  INSERT INTO public.users (
-    id,
-    unique_id,
-    name,
-    email,
-    role,
-    status,
-    auth_provider,
-    created_at,
-    updated_at
-  )
-  VALUES (
-    NEW.id,
-    COALESCE(NEW.raw_user_meta_data->>'unique_id', NEW.email),
-    COALESCE(NEW.raw_user_meta_data->>'name', SPLIT_PART(NEW.email, '@', 1)),
-    NEW.email,
-    COALESCE(NEW.raw_user_meta_data->>'role', 'student'),
-    'ACTIVE',
-    'email',
-    NOW(),
-    NOW()
-  )
-  ON CONFLICT (id) DO UPDATE SET
-    email = EXCLUDED.email,
-    updated_at = NOW();
-
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
+AS $$ BEGIN
+  -- ponytail: no-op on self-hosted; user creation is handled by the API layer
   RETURN NEW;
 END; $$;
-
 -- ============================================================================
 -- SECTION 5: TRIGGERS
 -- ============================================================================
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
-
+-- Supabase auth-sync trigger removed; user creation handled by API layer.
 CREATE TRIGGER trg_occupancy_on_movement
   AFTER INSERT ON movement_logs FOR EACH ROW EXECUTE FUNCTION update_campus_occupancy_on_movement();
 CREATE TRIGGER trg_daily_stats_on_movement
@@ -750,95 +720,95 @@ ALTER TABLE system_alerts             ENABLE ROW LEVEL SECURITY;
 ALTER TABLE backups                   ENABLE ROW LEVEL SECURITY;
 
 -- 6.1 USERS (self + admin scope)
-CREATE POLICY users_select_own   ON users FOR SELECT TO authenticated USING (id = auth.uid());
-CREATE POLICY users_select_admin ON users FOR SELECT TO authenticated USING (is_admin(auth.uid()));
-CREATE POLICY users_update_own   ON users FOR UPDATE TO authenticated USING (id = auth.uid()) WITH CHECK (id = auth.uid());
-CREATE POLICY users_update_admin ON users FOR UPDATE TO authenticated USING (is_admin(auth.uid())) WITH CHECK (is_admin(auth.uid()));
-CREATE POLICY users_update_roles ON users FOR UPDATE TO authenticated USING (is_sysadmin(auth.uid())) WITH CHECK (is_sysadmin(auth.uid()));
+CREATE POLICY users_select_own   ON users FOR SELECT TO authenticated USING (id = current_setting('app.current_user_id', true)::uuid);
+CREATE POLICY users_select_admin ON users FOR SELECT TO authenticated USING (is_admin(current_setting('app.current_user_id', true)::uuid));
+CREATE POLICY users_update_own   ON users FOR UPDATE TO authenticated USING (id = current_setting('app.current_user_id', true)::uuid) WITH CHECK (id = current_setting('app.current_user_id', true)::uuid);
+CREATE POLICY users_update_admin ON users FOR UPDATE TO authenticated USING (is_admin(current_setting('app.current_user_id', true)::uuid)) WITH CHECK (is_admin(current_setting('app.current_user_id', true)::uuid));
+CREATE POLICY users_update_roles ON users FOR UPDATE TO authenticated USING (is_sysadmin(current_setting('app.current_user_id', true)::uuid)) WITH CHECK (is_sysadmin(current_setting('app.current_user_id', true)::uuid));
 
 -- 6.2 GATES (broad authenticated read of active gates; admin manages; service all)
 CREATE POLICY gates_select_active ON gates FOR SELECT TO authenticated USING (is_active = TRUE);
-CREATE POLICY gates_select_admin  ON gates FOR SELECT TO authenticated USING (is_admin(auth.uid()));
+CREATE POLICY gates_select_admin  ON gates FOR SELECT TO authenticated USING (is_admin(current_setting('app.current_user_id', true)::uuid));
 CREATE POLICY gates_all_service   ON gates FOR ALL TO service_role USING (true) WITH CHECK (true);
 -- 6.3 STUDENT DETAILS (broad read; warden scoped; admin manage)
 CREATE POLICY sdetails_select_auth    ON student_details FOR SELECT TO authenticated USING (true);
-CREATE POLICY sdetails_select_owner   ON student_details FOR SELECT TO authenticated USING (user_id = auth.uid());
+CREATE POLICY sdetails_select_owner   ON student_details FOR SELECT TO authenticated USING (user_id = current_setting('app.current_user_id', true)::uuid);
 CREATE POLICY sdetails_select_warden  ON student_details FOR SELECT TO authenticated
-  USING (is_warden(auth.uid()) AND hostel_block = get_warden_hostel(auth.uid()));
+  USING (is_warden(current_setting('app.current_user_id', true)::uuid) AND hostel_block = get_warden_hostel(current_setting('app.current_user_id', true)::uuid));
 CREATE POLICY sdetails_manage_admin   ON student_details FOR ALL TO authenticated
-  USING (is_admin(auth.uid())) WITH CHECK (is_admin(auth.uid()));
+  USING (is_admin(current_setting('app.current_user_id', true)::uuid)) WITH CHECK (is_admin(current_setting('app.current_user_id', true)::uuid));
 
 -- 6.4 EMPLOYEE DETAILS (broad read; admin manage)
 CREATE POLICY edetails_select_auth    ON employee_details FOR SELECT TO authenticated USING (true);
-CREATE POLICY edetails_select_owner   ON employee_details FOR SELECT TO authenticated USING (user_id = auth.uid());
+CREATE POLICY edetails_select_owner   ON employee_details FOR SELECT TO authenticated USING (user_id = current_setting('app.current_user_id', true)::uuid);
 CREATE POLICY edetails_manage_admin   ON employee_details FOR ALL TO authenticated
-  USING (is_admin(auth.uid())) WITH CHECK (is_admin(auth.uid()));
+  USING (is_admin(current_setting('app.current_user_id', true)::uuid)) WITH CHECK (is_admin(current_setting('app.current_user_id', true)::uuid));
 
 -- 6.5 MOVEMENT LOGS (operator scope = own gate; admin broad; self = own trail; insert by operator/admin/warden)
 CREATE POLICY mlog_select_operator ON movement_logs FOR SELECT TO authenticated
-  USING (is_operator(auth.uid()) AND gate_id = (SELECT gate_id FROM users WHERE id = auth.uid()));
+  USING (is_operator(current_setting('app.current_user_id', true)::uuid) AND gate_id = (SELECT gate_id FROM users WHERE id = current_setting('app.current_user_id', true)::uuid));
 CREATE POLICY mlog_select_staff  ON movement_logs FOR SELECT TO authenticated
-  USING (is_admin(auth.uid()) OR is_warden(auth.uid()));
-CREATE POLICY mlog_select_own    ON movement_logs FOR SELECT TO authenticated USING (user_id = auth.uid());
-CREATE POLICY mlog_insert_staff  ON movement_logs FOR INSERT TO authenticated
-  WITH CHECK (is_operator(auth.uid()) OR is_admin(auth.uid()) OR is_warden(auth.uid()));
+  USING (is_admin(current_setting('app.current_user_id', true)::uuid) OR is_warden(current_setting('app.current_user_id', true)::uuid));
+CREATE POLICY mlog_select_own    ON movement_logs FOR SELECT TO authenticated USING (user_id = current_setting('app.current_user_id', true)::uuid);
+CREATE POLICY mlog_insert_staff  ON movement_logs FOR INSERT INTO TO authenticated
+  WITH CHECK (is_operator(current_setting('app.current_user_id', true)::uuid) OR is_admin(current_setting('app.current_user_id', true)::uuid) OR is_warden(current_setting('app.current_user_id', true)::uuid));
 
 -- 6.5b DAILY STATS (operator own gate; staff broad; admin read all; service writes/backfills)
 CREATE POLICY dstats_select_operator ON daily_stats FOR SELECT TO authenticated
-  USING (is_operator(auth.uid()) AND gate_id = (SELECT gate_id FROM users WHERE id = auth.uid()));
+  USING (is_operator(current_setting('app.current_user_id', true)::uuid) AND gate_id = (SELECT gate_id FROM users WHERE id = current_setting('app.current_user_id', true)::uuid));
 CREATE POLICY dstats_select_staff ON daily_stats FOR SELECT TO authenticated
-  USING (is_admin(auth.uid()) OR is_warden(auth.uid()));
+  USING (is_admin(current_setting('app.current_user_id', true)::uuid) OR is_warden(current_setting('app.current_user_id', true)::uuid));
 CREATE POLICY dstats_select_own   ON daily_stats FOR SELECT TO authenticated USING (true);
 CREATE POLICY dstats_all_service ON daily_stats FOR ALL TO service_role USING (true) WITH CHECK (true);
 
 -- 6.6 CAMPUS OCCUPANCY (operator own gate; staff broad; self)
 CREATE POLICY occ_select_operator ON campus_occupancy FOR SELECT TO authenticated
-  USING (is_operator(auth.uid()) AND last_gate_id = (SELECT gate_id FROM users WHERE id = auth.uid()));
+  USING (is_operator(current_setting('app.current_user_id', true)::uuid) AND last_gate_id = (SELECT gate_id FROM users WHERE id = current_setting('app.current_user_id', true)::uuid));
 CREATE POLICY occ_select_staff   ON campus_occupancy FOR SELECT TO authenticated
-  USING (is_admin(auth.uid()) OR is_warden(auth.uid()));
-CREATE POLICY occ_select_own     ON campus_occupancy FOR SELECT TO authenticated USING (user_id = auth.uid());
+  USING (is_admin(current_setting('app.current_user_id', true)::uuid) OR is_warden(current_setting('app.current_user_id', true)::uuid));
+CREATE POLICY occ_select_own     ON campus_occupancy FOR SELECT TO authenticated USING (user_id = current_setting('app.current_user_id', true)::uuid);
 
 -- 6.7 VISITOR LOGS (broad authenticated; inserts by operators/admin)
 CREATE POLICY vlogs_select_auth ON visitor_logs FOR SELECT TO authenticated USING (true);
-CREATE POLICY vlogs_insert_auth ON visitor_logs FOR INSERT TO authenticated
-  WITH CHECK (is_operator(auth.uid()) OR is_admin(auth.uid()));
+CREATE POLICY vlogs_insert_auth ON visitor_logs FOR INSERT INTO TO authenticated
+  WITH CHECK (is_operator(current_setting('app.current_user_id', true)::uuid) OR is_admin(current_setting('app.current_user_id', true)::uuid));
 CREATE POLICY vlogs_update_auth ON visitor_logs FOR UPDATE TO authenticated
-  USING (is_operator(auth.uid()) OR is_admin(auth.uid()));
+  USING (is_operator(current_setting('app.current_user_id', true)::uuid) OR is_admin(current_setting('app.current_user_id', true)::uuid));
 
 -- 6.8 GATE PASSES (owner + guardian of wards + staff approvers)
 CREATE POLICY passes_select_own ON gate_passes FOR SELECT TO authenticated
-  USING (user_id = auth.uid() OR user_id = ANY(get_guardian_wards(auth.uid())));
+  USING (user_id = current_setting('app.current_user_id', true)::uuid OR user_id = ANY(get_guardian_wards(current_setting('app.current_user_id', true)::uuid)));
 CREATE POLICY passes_select_staff ON gate_passes FOR SELECT TO authenticated
-  USING (is_admin(auth.uid()) OR is_warden(auth.uid()));
-CREATE POLICY passes_insert_own ON gate_passes FOR INSERT TO authenticated WITH CHECK (
-  user_id = auth.uid() OR user_id = ANY(get_guardian_wards(auth.uid())) OR is_admin(auth.uid()));
+  USING (is_admin(current_setting('app.current_user_id', true)::uuid) OR is_warden(current_setting('app.current_user_id', true)::uuid));
+CREATE POLICY passes_insert_own ON gate_passes FOR INSERT INTO TO authenticated WITH CHECK (
+  user_id = current_setting('app.current_user_id', true)::uuid OR user_id = ANY(get_guardian_wards(current_setting('app.current_user_id', true)::uuid)) OR is_admin(current_setting('app.current_user_id', true)::uuid));
 CREATE POLICY passes_update_approvers ON gate_passes FOR UPDATE TO authenticated USING (
-  is_admin(auth.uid()) OR is_warden(auth.uid()))
-  WITH CHECK (is_admin(auth.uid()) OR is_warden(auth.uid()));
+  is_admin(current_setting('app.current_user_id', true)::uuid) OR is_warden(current_setting('app.current_user_id', true)::uuid))
+  WITH CHECK (is_admin(current_setting('app.current_user_id', true)::uuid) OR is_warden(current_setting('app.current_user_id', true)::uuid));
 
 -- 6.9 ALERTS (admin; operators own gate)
-CREATE POLICY alerts_select_admin ON alerts FOR SELECT TO authenticated USING (is_admin(auth.uid()));
+CREATE POLICY alerts_select_admin ON alerts FOR SELECT TO authenticated USING (is_admin(current_setting('app.current_user_id', true)::uuid));
 
 CREATE POLICY alerts_select_op   ON alerts FOR SELECT TO authenticated
-  USING (is_operator(auth.uid()) AND (gate_id = (SELECT gate_id FROM users WHERE id = auth.uid()) OR gate_id IS NULL));
-CREATE POLICY alerts_resolve_admin ON alerts FOR UPDATE TO authenticated USING (is_admin(auth.uid())) WITH CHECK (is_admin(auth.uid()));
+  USING (is_operator(current_setting('app.current_user_id', true)::uuid) AND (gate_id = (SELECT gate_id FROM users WHERE id = current_setting('app.current_user_id', true)::uuid) OR gate_id IS NULL));
+CREATE POLICY alerts_resolve_admin ON alerts FOR UPDATE TO authenticated USING (is_admin(current_setting('app.current_user_id', true)::uuid)) WITH CHECK (is_admin(current_setting('app.current_user_id', true)::uuid));
 
 -- 6.10 AUDIT LOGS (READ = sysadmin only)
-CREATE POLICY audit_select_sysadmin ON audit_logs FOR SELECT TO authenticated USING (is_sysadmin(auth.uid()));
+CREATE POLICY audit_select_sysadmin ON audit_logs FOR SELECT TO authenticated USING (is_sysadmin(current_setting('app.current_user_id', true)::uuid));
 
 -- 6.11 MONITORING + BACKUPS (admin only)
-CREATE POLICY metrics_select_admin  ON api_metrics FOR SELECT TO authenticated USING (is_admin(auth.uid()));
-CREATE POLICY sysalerts_all_admin   ON system_alerts FOR ALL TO authenticated USING (is_admin(auth.uid())) WITH CHECK (is_admin(auth.uid()));
-CREATE POLICY backups_all_admin     ON backups FOR ALL TO authenticated USING (is_admin(auth.uid())) WITH CHECK (is_admin(auth.uid()));
+CREATE POLICY metrics_select_admin  ON api_metrics FOR SELECT TO authenticated USING (is_admin(current_setting('app.current_user_id', true)::uuid));
+CREATE POLICY sysalerts_all_admin   ON system_alerts FOR ALL TO authenticated USING (is_admin(current_setting('app.current_user_id', true)::uuid)) WITH CHECK (is_admin(current_setting('app.current_user_id', true)::uuid));
+CREATE POLICY backups_all_admin     ON backups FOR ALL TO authenticated USING (is_admin(current_setting('app.current_user_id', true)::uuid)) WITH CHECK (is_admin(current_setting('app.current_user_id', true)::uuid));
 
 -- 6.12 NOTIFICATIONS
 CREATE POLICY notif_select_own ON notifications FOR SELECT TO authenticated
-  USING (recipient_id = auth.uid()::TEXT OR recipient_type = 'all');
+  USING (recipient_id = current_setting('app.current_user_id', true)::uuid::TEXT OR recipient_type = 'all');
 CREATE POLICY notif_update_own ON notifications FOR UPDATE TO authenticated
-  USING (recipient_id = auth.uid()::TEXT) WITH CHECK (recipient_id = auth.uid()::TEXT);
-CREATE POLICY prefs_select_own ON notification_preferences FOR SELECT TO authenticated USING (user_id = auth.uid()::TEXT);
+  USING (recipient_id = current_setting('app.current_user_id', true)::uuid::TEXT) WITH CHECK (recipient_id = current_setting('app.current_user_id', true)::uuid::TEXT);
+CREATE POLICY prefs_select_own ON notification_preferences FOR SELECT TO authenticated USING (user_id = current_setting('app.current_user_id', true)::uuid::TEXT);
 CREATE POLICY prefs_update_own ON notification_preferences FOR UPDATE TO authenticated
-  USING (user_id = auth.uid()::TEXT) WITH CHECK (user_id = auth.uid()::TEXT);
+  USING (user_id = current_setting('app.current_user_id', true)::uuid::TEXT) WITH CHECK (user_id = current_setting('app.current_user_id', true)::uuid::TEXT);
 CREATE POLICY queues_service ON notification_push_queue FOR ALL TO service_role USING (true) WITH CHECK (true);
 CREATE POLICY smsq_service   ON notification_sms_queue FOR ALL TO service_role USING (true) WITH CHECK (true);
 CREATE POLICY emailq_service ON notification_email_queue FOR ALL TO service_role USING (true) WITH CHECK (true);
