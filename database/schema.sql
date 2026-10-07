@@ -43,8 +43,6 @@ CREATE TABLE IF NOT EXISTS users (
   auth_provider        TEXT NOT NULL DEFAULT 'email',
   login_identifier     TEXT UNIQUE,
   pin_hash             TEXT,
-  two_factor_secret    TEXT,
-  two_factor_enabled   BOOLEAN DEFAULT FALSE,
   totp_secret          TEXT,
   session_version      INTEGER NOT NULL DEFAULT 0,
   password_hash TEXT,
@@ -999,6 +997,10 @@ CREATE TABLE IF NOT EXISTS public.attendance_records (
   synced BOOLEAN DEFAULT false,
   synced_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(person_id, date)
+);
+CREATE INDEX IF NOT EXISTS idx_attendance_records_date ON public.attendance_records(date);
 
 -- ============================================================================
 -- PIN LOGIN ATTEMPTS & LOCKOUT TABLE
@@ -1022,11 +1024,6 @@ CREATE POLICY "service_role_all_pin_login_attempts"
   TO service_role
   USING (true)
   WITH CHECK (true);
-
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(person_id, date)
-);
-CREATE INDEX IF NOT EXISTS idx_attendance_records_date ON public.attendance_records(date);
 
 CREATE TABLE IF NOT EXISTS public.config_college_info (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -1252,7 +1249,7 @@ CREATE TABLE IF NOT EXISTS public.saved_report_definitions (
 
 CREATE TABLE IF NOT EXISTS public.scans (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  person_id UUID REFERENCES persons(id) ON DELETE CASCADE,
+  person_id UUID REFERENCES users(id) ON DELETE CASCADE,
   gate_id UUID REFERENCES gates(id) ON DELETE SET NULL,
   direction TEXT CHECK (direction IN ('in', 'out', 'entry', 'exit')),
   status TEXT,
@@ -1371,44 +1368,48 @@ CREATE TABLE IF NOT EXISTS public.onboarding_progress (
 UPDATE movement_logs SET reason = 'Regular' WHERE reason IS NULL;
 ALTER TABLE movement_logs ALTER COLUMN reason SET NOT NULL;
 
--- 2. Ensure users.handle is UNIQUE NOT NULL
--- Clean existing data first
-UPDATE users SET handle = 'user_' || id::text WHERE handle IS NULL;
-ALTER TABLE users ALTER COLUMN handle SET NOT NULL;
--- Add UNIQUE constraint
-ALTER TABLE users ADD CONSTRAINT unique_handle UNIQUE (handle);
+-- 2. Ensure users.handle is UNIQUE
+UPDATE users SET handle = 'user_' || REPLACE(id::text, '-', '') WHERE handle IS NULL;
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'unique_handle'
+  ) THEN
+    ALTER TABLE users ADD CONSTRAINT unique_handle UNIQUE (handle);
+  END IF;
+END $$;
 
 -- 3. Alerts FK: Ensure user_unique_id corresponds to users.unique_id
 UPDATE alerts SET user_unique_id = NULL WHERE user_unique_id IS NOT NULL AND user_unique_id NOT IN (SELECT unique_id FROM users);
 ALTER TABLE alerts ADD CONSTRAINT fk_alerts_user_unique_id FOREIGN KEY (user_unique_id) REFERENCES users(unique_id) ON DELETE SET NULL;
 
--- 4. Compatibility view students over persons + student_details
+-- 4. Compatibility view students over users + student_details
 CREATE OR REPLACE VIEW students AS
 SELECT
-  p.id                          AS id,
-  p.unique_id                   AS roll,
-  p.full_name                   AS name,
-  p.department                  AS department,
+  u.id                          AS id,
+  u.unique_id                   AS roll,
+  u.name                        AS name,
+  u.department_id               AS department,
   COALESCE(sd.year, 1)          AS year,
   COALESCE(sd.section, 'A')     AS section,
   COALESCE(sd.batch, '')        AS batch,
-  p.photo_url                   AS photo,
-  p.email                       AS email,
-  p.phone                       AS phone,
+  u.photo_url                   AS photo,
+  u.email                       AS email,
+  u.phone                       AS phone,
   NULL::TEXT                    AS parent_name,
   NULL::TEXT                    AS parent_phone,
-  sd.parent_id                  AS parent_id,
-  p.qr_code                     AS qr_code,
-  p.id_valid_until              AS id_valid_until,
-  p.status                      AS status,
+  sd.guardian_id                AS parent_id,
+  u.qr_code                     AS qr_code,
+  NULL::TIMESTAMPTZ             AS id_valid_until,
+  u.status                      AS status,
   sd.student_type               AS student_type,
   sd.gender                     AS gender,
   sd.hostel_block               AS hostel_block,
   sd.room_number                AS room_number,
   sd.hostel_curfew_time         AS hostel_curfew_time,
   sd.warden_id                  AS warden_id
-FROM persons p
-LEFT JOIN student_details sd ON sd.person_id = p.id
-WHERE p.person_type = 'student';
+FROM users u
+LEFT JOIN student_details sd ON sd.user_id = u.id
+WHERE u.role = 'student';
 
 

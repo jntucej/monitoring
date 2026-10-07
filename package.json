@@ -9,9 +9,9 @@
     "start": "next start",
     "worker": "node worker/index.mjs",
     "start:worker": "node worker/index.mjs",
+    "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
-    "lint": "eslint src",
-    "typecheck": "tsc --noEmit"
+    "lint": "eslint src"
   },
   "dependencies": {
     "@remotion/player": "^4.0.518",
@@ -25,13 +25,11 @@
     "crypto-js": "^4.2.0",
     "date-fns": "^4.4.0",
     "framer-motion": "^13.1.0",
-    "ioredis": "^6.0.0",
     "jose": "^6.2.9",
     "jsqr": "^1.4.0",
     "lucide-react": "^1.31.0",
     "next": "16.3.1",
     "node-cron": "^4.6.0",
-    "pg": "^8.23.1",
     "qrcode": "^1.5.4",
     "qrcode.react": "^4.2.0",
     "rate-limiter-flexible": "^11.2.0",
@@ -48,10 +46,8 @@
   "devDependencies": {
     "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
-    "@types/ioredis": "^4.28.10",
     "@types/node": "^20",
     "@types/node-cron": "^3.0.11",
-    "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

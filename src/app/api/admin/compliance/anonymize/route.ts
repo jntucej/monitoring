@@ -20,7 +20,8 @@ async function handlePost(req: NextRequest) {
         name: `[ANONYMIZED_${hash}]`,
         email: `anonymized_${hash}@gdpr.disabled`,
         phone: "[ANONYMIZED]",
-        identifier: `anon-${hash}`,
+        unique_id: `ANON-${hash.toUpperCase()}`,
+        login_identifier: `anon_${hash}`,
       })
       .eq("id", userId);
 

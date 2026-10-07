@@ -35,12 +35,29 @@ function FilterSelect({ label, value, options, onChange }: { label: string; valu
   );
 }
 
+const COLOR_CLASSES: Record<string, { bg: string; border: string; text: string; bgSoft: string }> = {
+  emerald: { bg: "bg-emerald-500/10", border: "border-emerald-500/20", text: "text-emerald-400", bgSoft: "bg-emerald-500/5" },
+  blue: { bg: "bg-blue-500/10", border: "border-blue-500/20", text: "text-blue-400", bgSoft: "bg-blue-500/5" },
+  amber: { bg: "bg-amber-500/10", border: "border-amber-500/20", text: "text-amber-400", bgSoft: "bg-amber-500/5" },
+  rose: { bg: "bg-rose-500/10", border: "border-rose-500/20", text: "text-rose-400", bgSoft: "bg-rose-500/5" },
+  purple: { bg: "bg-purple-500/10", border: "border-purple-500/20", text: "text-purple-400", bgSoft: "bg-purple-500/5" },
+  indigo: { bg: "bg-indigo-500/10", border: "border-indigo-500/20", text: "text-indigo-400", bgSoft: "bg-indigo-500/5" },
+  cyan: { bg: "bg-cyan-500/10", border: "border-cyan-500/20", text: "text-cyan-400", bgSoft: "bg-cyan-500/5" },
+  pink: { bg: "bg-pink-500/10", border: "border-pink-500/20", text: "text-pink-400", bgSoft: "bg-pink-500/5" },
+  teal: { bg: "bg-teal-500/10", border: "border-teal-500/20", text: "text-teal-400", bgSoft: "bg-teal-500/5" },
+  violet: { bg: "bg-violet-500/10", border: "border-violet-500/20", text: "text-violet-400", bgSoft: "bg-violet-500/5" },
+  orange: { bg: "bg-orange-500/10", border: "border-orange-500/20", text: "text-orange-400", bgSoft: "bg-orange-500/5" },
+};
+
 function StatPill({ label, value, icon, color }: { label: string; value: string | number; icon: React.ReactNode; color: string }) {
+  const c = COLOR_CLASSES[color] || COLOR_CLASSES.emerald;
   return (
-    <div className={`flex items-center gap-2 px-3 py-2 rounded-xl bg-${color}-500/10 border border-${color}-500/20`}>
-      <span className={`text-${color}-400`}>{icon}</span>
-      <div><div className={`text-lg font-black text-${color}-400`}>{value}</div>
-        <div className="text-[9px] text-[var(--text-muted)] uppercase tracking-wide">{label}</div></div>
+    <div className={`flex items-center gap-2 px-3 py-2 rounded-xl ${c.bg} border ${c.border}`}>
+      <span className={c.text}>{icon}</span>
+      <div>
+        <div className={`text-lg font-black ${c.text}`}>{value}</div>
+        <div className="text-[9px] text-[var(--text-muted)] uppercase tracking-wide">{label}</div>
+      </div>
     </div>
   );
 }
@@ -181,10 +198,11 @@ export function StudentInfographics() {
           <h3 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">Department Overview</h3>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
             {byDepartment.map((d) => {
-              const accent = d.color.replace("bg-", "");
+              const accent = d.color.replace("bg-", "").replace("-500", "");
+              const c = COLOR_CLASSES[accent] || COLOR_CLASSES.blue;
               return (
-                <div key={d.code} className={`p-3 rounded-xl border border-${accent}-500/20 bg-${accent}-500/5`}>
-                  <div className={`text-2xl font-black text-${accent}-400`}>{d.count}</div>
+                <div key={d.code} className={`p-3 rounded-xl border ${c.border} ${c.bgSoft}`}>
+                  <div className={`text-2xl font-black ${c.text}`}>{d.count}</div>
                   <div className="text-xs font-semibold text-[var(--text-primary)]">{d.code}</div>
                   <div className="text-[10px] text-[var(--text-muted)]">{total > 0 ? Math.round((d.count / total) * 100) : 0}% of students</div>
                 </div>

@@ -122,6 +122,8 @@ interface EmbeddedRelation {
   alias: string;
   targetTable: string;
   fields: string[];
+  inner?: boolean;
+  nested?: EmbeddedRelation[];
 }
 
 export class PostgresQueryBuilder<T = any> {
@@ -130,7 +132,7 @@ export class PostgresQueryBuilder<T = any> {
   private rawColumns: string = "*";
   private embeddedRelations: EmbeddedRelation[] = [];
   private filters: FilterCondition[] = [];
-  private orClauses: string[] = [];
+  private orClauses: Array<{ filter: string; foreignTable?: string }> = [];
   private orderClause?: string;
   private limitCount?: number;
   private offsetCount?: number;
@@ -153,20 +155,82 @@ export class PostgresQueryBuilder<T = any> {
       this.headOnly = true;
     }
 
-    const relationMatches = columns.match(/([a-zA-Z0-9_]+)\s*\(\*\)/g);
-    if (relationMatches) {
-      this.embeddedRelations = relationMatches.map((m) => { const name = m.replace(/\s*\(\*\)/, "").trim(); return { alias: name, targetTable: name, fields: ["*"] }; });
-    }
+    this.embeddedRelations = this.parseSelectRelations(columns);
 
     let clean = columns
-      .replace(/[a-zA-Z0-9_]+:[a-zA-Z0-9_!]+\s*\([^)]*\)/g, "")
-      .replace(/[a-zA-Z0-9_]+\s*\([^)]*\)/g, "")
+      .replace(/[a-zA-Z0-9_]+:[a-zA-Z0-9_!]+\([^)]*(?:\([^)]*\))*[^)]*\)/g, "")
+      .replace(/[a-zA-Z0-9_!]+\([^)]*(?:\([^)]*\))*[^)]*\)/g, "")
       .replace(/,\s*,/g, ",")
       .replace(/^,\s*|\s*,$/g, "")
       .trim();
 
     this.selectColumns = clean.length > 0 ? clean : "*";
     return this;
+  }
+
+  private parseSelectRelations(cols: string): EmbeddedRelation[] {
+    const relations: EmbeddedRelation[] = [];
+    let depth = 0;
+    let currentRelStart = -1;
+    let header = "";
+    
+    for (let i = 0; i < cols.length; i++) {
+      const char = cols[i];
+      if (char === '(') {
+        if (depth === 0) {
+          const prefix = cols.slice(0, i);
+          const lastComma = prefix.lastIndexOf(',');
+          header = prefix.slice(lastComma + 1).trim();
+          currentRelStart = i + 1;
+        }
+        depth++;
+      } else if (char === ')') {
+        depth--;
+        if (depth === 0 && currentRelStart !== -1) {
+          const innerContent = cols.slice(currentRelStart, i);
+          let alias = "";
+          let targetTable = header;
+          let isInner = false;
+          
+          if (header.includes(':')) {
+            const parts = header.split(':');
+            alias = parts[0].trim();
+            targetTable = parts[1].trim();
+          }
+          if (targetTable.includes('!')) {
+            const parts = targetTable.split('!');
+            targetTable = parts[0].trim();
+            if (parts.some(p => p.toLowerCase() === 'inner')) {
+              isInner = true;
+            }
+          }
+          if (!alias) {
+            alias = targetTable;
+          }
+
+          const nested = this.parseSelectRelations(innerContent);
+          const cleanSub = innerContent
+            .replace(/[a-zA-Z0-9_]+:[a-zA-Z0-9_!]+\([^)]*\)/g, "")
+            .replace(/[a-zA-Z0-9_!]+\([^)]*\)/g, "")
+            .split(',')
+            .map(s => s.trim())
+            .filter(Boolean);
+
+          relations.push({
+            alias,
+            targetTable,
+            fields: cleanSub.length > 0 ? cleanSub : ["*"],
+            inner: isInner,
+            nested,
+          });
+
+          currentRelStart = -1;
+          header = "";
+        }
+      }
+    }
+
+    return relations;
   }
 
   eq(column: string, value: any) {
@@ -233,8 +297,8 @@ export class PostgresQueryBuilder<T = any> {
     return this;
   }
 
-  or(filterString: string) {
-    this.orClauses.push(filterString);
+  or(filterString: string, options?: { foreignTable?: string }) {
+    this.orClauses.push({ filter: filterString, foreignTable: options?.foreignTable });
     return this;
   }
 
@@ -283,9 +347,10 @@ export class PostgresQueryBuilder<T = any> {
     return this;
   }
 
-  private parsePostgrestOrClause(clauseStr: string, params: any[]): string[] {
+  private parsePostgrestOrClause(clauseStr: string, params: any[], foreignTable?: string): string[] {
     const tokens = clauseStr.split(/,(?![^()]*\))/).map((t) => t.trim()).filter(Boolean);
     const sqlParts: string[] = [];
+    const prefix = foreignTable ? `${foreignTable}.` : "";
     for (const token of tokens) {
       const match = token.match(/^([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)\.(.*)$/);
       if (match) {
@@ -293,17 +358,18 @@ export class PostgresQueryBuilder<T = any> {
         let cleanVal: any = val;
         if (cleanVal.startsWith('"') && cleanVal.endsWith('"')) cleanVal = cleanVal.slice(1, -1);
         else if (cleanVal.startsWith("'") && cleanVal.endsWith("'")) cleanVal = cleanVal.slice(1, -1);
+        const colRef = `${prefix}${col}`;
         switch (op.toLowerCase()) {
-          case "eq": params.push(cleanVal); sqlParts.push(`${col} = $${params.length}`); break;
-          case "neq": params.push(cleanVal); sqlParts.push(`${col} != $${params.length}`); break;
-          case "ilike": params.push(cleanVal); sqlParts.push(`${col} ILIKE $${params.length}`); break;
-          case "like": params.push(cleanVal); sqlParts.push(`${col} LIKE $${params.length}`); break;
-          case "gt": params.push(cleanVal); sqlParts.push(`${col} > $${params.length}`); break;
-          case "gte": params.push(cleanVal); sqlParts.push(`${col} >= $${params.length}`); break;
-          case "lt": params.push(cleanVal); sqlParts.push(`${col} < $${params.length}`); break;
-          case "lte": params.push(cleanVal); sqlParts.push(`${col} <= $${params.length}`); break;
-          case "is": if (cleanVal === "null") sqlParts.push(`${col} IS NULL`); else if (cleanVal === "true") sqlParts.push(`${col} IS TRUE`); else if (cleanVal === "false") sqlParts.push(`${col} IS FALSE`); break;
-          default: params.push(cleanVal); sqlParts.push(`${col} = $${params.length}`); break;
+          case "eq": params.push(cleanVal); sqlParts.push(`${colRef} = $${params.length}`); break;
+          case "neq": params.push(cleanVal); sqlParts.push(`${colRef} != $${params.length}`); break;
+          case "ilike": params.push(cleanVal); sqlParts.push(`${colRef} ILIKE $${params.length}`); break;
+          case "like": params.push(cleanVal); sqlParts.push(`${colRef} LIKE $${params.length}`); break;
+          case "gt": params.push(cleanVal); sqlParts.push(`${colRef} > $${params.length}`); break;
+          case "gte": params.push(cleanVal); sqlParts.push(`${colRef} >= $${params.length}`); break;
+          case "lt": params.push(cleanVal); sqlParts.push(`${colRef} < $${params.length}`); break;
+          case "lte": params.push(cleanVal); sqlParts.push(`${colRef} <= $${params.length}`); break;
+          case "is": if (cleanVal === "null") sqlParts.push(`${colRef} IS NULL`); else if (cleanVal === "true") sqlParts.push(`${colRef} IS TRUE`); else if (cleanVal === "false") sqlParts.push(`${colRef} IS FALSE`); break;
+          default: params.push(cleanVal); sqlParts.push(`${colRef} = $${params.length}`); break;
         }
       } else if (/^[a-zA-Z0-9_.]+\s*(=|!=|>|<|>=|<=|ILIKE|LIKE|IS)\s*.+$/i.test(token)) {
         sqlParts.push(token);
@@ -338,9 +404,19 @@ export class PostgresQueryBuilder<T = any> {
       whereParts.push(`${f.column} ${f.op} $${params.length}`);
     }
     if (this.orClauses.length > 0) {
-      for (const rawOr of this.orClauses) {
-        const parsed = this.parsePostgrestOrClause(rawOr, params);
-        if (parsed.length > 0) whereParts.push(`(${parsed.join(" OR ")})`);
+      for (const orObj of this.orClauses) {
+        if (orObj.foreignTable) {
+          const parsed = this.parsePostgrestOrClause(orObj.filter, params, orObj.foreignTable);
+          if (parsed.length > 0) {
+            let joinCol = `${this.tableName}.${orObj.foreignTable.replace(/s$/, "")}_id`;
+            if (this.tableName === "movement_logs" && orObj.foreignTable === "users") joinCol = "movement_logs.user_id";
+            else if (this.tableName === "gate_passes" && orObj.foreignTable === "users") joinCol = "gate_passes.user_id";
+            whereParts.push(`${joinCol} IN (SELECT id FROM ${orObj.foreignTable} WHERE ${parsed.join(" OR ")})`);
+          }
+        } else {
+          const parsed = this.parsePostgrestOrClause(orObj.filter, params);
+          if (parsed.length > 0) whereParts.push(`(${parsed.join(" OR ")})`);
+        }
       }
     }
     return whereParts.length > 0 ? `WHERE ${whereParts.join(" AND ")}` : "";
@@ -350,19 +426,34 @@ export class PostgresQueryBuilder<T = any> {
     let baseCols = this.selectColumns;
     if (baseCols === "*" && this.embeddedRelations.length > 0) baseCols = `${this.tableName}.*`;
     if (this.embeddedRelations.length === 0) return baseCols;
+    
+    const buildRelationSubquery = (rel: EmbeddedRelation, parentTable: string): string => {
+      const { alias, targetTable, fields, nested } = rel;
+      let joinCondition = "";
+      if (parentTable === "movement_logs" && targetTable === "users") joinCondition = `users.id = ${parentTable}.user_id`;
+      else if (parentTable === "movement_logs" && targetTable === "gates") joinCondition = `gates.id = ${parentTable}.gate_id`;
+      else if (parentTable === "gate_passes" && targetTable === "users") joinCondition = `users.id = ${parentTable}.user_id`;
+      else if (parentTable === "student_details" && targetTable === "users") joinCondition = `users.id = ${parentTable}.user_id`;
+      else if (parentTable === "users" && targetTable === "student_details") joinCondition = `student_details.user_id = ${parentTable}.id`;
+      else if (parentTable === "users" && targetTable === "employee_details") joinCondition = `employee_details.user_id = ${parentTable}.id`;
+      else joinCondition = `${targetTable}.id = ${parentTable}.${targetTable.replace(/s$/, "")}_id`;
+
+      const selectColsList = fields.includes("*") ? `${targetTable}.*` : fields.map((f) => `${targetTable}."${f}"`).join(", ");
+      
+      const nestedSubqueries: string[] = [];
+      if (nested && nested.length > 0) {
+        for (const n of nested) {
+          nestedSubqueries.push(buildRelationSubquery(n, targetTable));
+        }
+      }
+      
+      const allSelected = nestedSubqueries.length > 0 ? `${selectColsList}, ${nestedSubqueries.join(", ")}` : selectColsList;
+      return `(SELECT row_to_json(rel_sub) FROM (SELECT ${allSelected} FROM ${targetTable} WHERE ${joinCondition} LIMIT 1) rel_sub) AS "${alias}"`;
+    };
+
     const relationSubqueries: string[] = [];
     for (const rel of this.embeddedRelations) {
-      const { alias, targetTable, fields } = rel;
-      let joinCondition = "";
-      if (this.tableName === "movement_logs" && targetTable === "users") joinCondition = `users.id = ${this.tableName}.user_id`;
-      else if (this.tableName === "movement_logs" && targetTable === "gates") joinCondition = `gates.id = ${this.tableName}.gate_id`;
-      else if (this.tableName === "gate_passes" && targetTable === "users") joinCondition = `users.id = ${this.tableName}.user_id`;
-      else if (this.tableName === "student_details" && targetTable === "users") joinCondition = `users.id = ${this.tableName}.user_id`;
-      else if (this.tableName === "users" && targetTable === "student_details") joinCondition = `student_details.user_id = ${this.tableName}.id`;
-      else if (this.tableName === "users" && targetTable === "employee_details") joinCondition = `employee_details.user_id = ${this.tableName}.id`;
-      else joinCondition = `${targetTable}.id = ${this.tableName}.${targetTable.replace(/s$/, "")}_id`;
-      const selectFields = fields.includes("*") ? "*" : fields.map((f) => `"${f}"`).join(", ");
-      relationSubqueries.push(`(SELECT row_to_json(rel_sub) FROM (SELECT ${selectFields} FROM ${targetTable} WHERE ${joinCondition} LIMIT 1) rel_sub) AS "${alias}"`);
+      relationSubqueries.push(buildRelationSubquery(rel, this.tableName));
     }
     return `${baseCols}, ${relationSubqueries.join(", ")}`;
   }
@@ -513,10 +604,21 @@ export const authAdmin = {
     const role = attributes.role || attributes.user_metadata?.role || "student";
     const passwordHash = attributes.password ? await bcrypt.hash(attributes.password, 10) : null;
     const uniqueId = attributes.user_metadata?.unique_id || email.split("@")[0].toUpperCase();
+    const handle = (uniqueId || name || `user_${id.replace(/-/g, "").slice(0, 8)}`).toLowerCase().replace(/[^a-z0-9_]/g, "_");
     try {
-      const res = await query(`INSERT INTO users (id, unique_id, email, name, role, status, password_hash, created_at) VALUES ($1, $2, $3, $4, $5, 'ACTIVE', $6, NOW()) ON CONFLICT (email) DO UPDATE SET name = EXCLUDED.name, role = EXCLUDED.role, password_hash = COALESCE(EXCLUDED.password_hash, users.password_hash) RETURNING id, unique_id, email, name, role, status, created_at`, [id, uniqueId, email, name, role, passwordHash]);
-      const user = res.rows[0] || { id, email, name, role };
-      return { data: { user: { id: user.id, email: user.email, user_metadata: { ...attributes.user_metadata, name: user.name, role: user.role } } }, error: null };
+      const res = await query(
+        `INSERT INTO users (id, unique_id, handle, email, name, role, status, password_hash, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, 'ACTIVE', $7, NOW())
+         ON CONFLICT (email) DO UPDATE SET
+           name = EXCLUDED.name,
+           role = EXCLUDED.role,
+           handle = COALESCE(users.handle, EXCLUDED.handle),
+           password_hash = COALESCE(EXCLUDED.password_hash, users.password_hash)
+         RETURNING id, unique_id, handle, email, name, role, status, created_at`,
+        [id, uniqueId, handle, email, name, role, passwordHash]
+      );
+      const user = res.rows[0] || { id, email, name, role, handle, unique_id: uniqueId };
+      return { data: { user: { id: user.id, email: user.email, user_metadata: { ...attributes.user_metadata, name: user.name, role: user.role, handle: user.handle } } }, error: null };
     } catch (err: any) {
       return { data: null, error: { message: err.message, code: err.code } };
     }
@@ -551,6 +653,15 @@ export const authAdmin = {
   },
 };
 
+const ALLOWED_RPC_FUNCTIONS = new Set([
+  "resolve_login_identifier",
+  "can_user_authenticate",
+  "invalidate_all_user_sessions",
+  "get_current_occupancy",
+  "verify_pin",
+  "validate_gate_pass"
+]);
+
 /**
  * Self-Hosted DB client providing fluent query interface and direct pool access.
  */
@@ -575,6 +686,9 @@ export const db = {
         const userId = args.p_user_id || args.user_id || args.userId || "";
         await query("UPDATE users SET session_version = session_version + 1, handle = gen_random_uuid()::text WHERE id::text = $1", [userId]);
         return { data: true, error: null };
+      }
+      if (!ALLOWED_RPC_FUNCTIONS.has(fnName)) {
+        return { data: null, error: { message: `Function ${fnName} is not permitted for RPC execution`, code: "FORBIDDEN_RPC" } };
       }
       const keys = Object.keys(args);
       const params = keys.map((k) => args[k]);

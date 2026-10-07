@@ -166,33 +166,37 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
         return;
       }
 
-      let verifyData: any = null;
+      let verified = false;
 
       for (const empId of candidates) {
-        const verifyRes = await fetch("/api/auth/pin-login", {
+        const verifyHeaders: Record<string, string> = { "Content-Type": "application/json" };
+        if (authStore.token) verifyHeaders["Authorization"] = `Bearer ${authStore.token}`;
+        if (user?.currentSessionToken) verifyHeaders["X-Session-Token"] = user.currentSessionToken;
+
+        const verifyRes = await fetch("/api/auth/verify-pin", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ employeeId: empId, pin, verifyOnly: true }),
+          headers: verifyHeaders,
+          body: JSON.stringify({ employeeId: empId, pin }),
         });
         const json = await verifyRes.json();
-        if (json.success) {
-          verifyData = json;
+        if (json.success && json.verified) {
+          verified = true;
           break;
         }
       }
 
-      if (!verifyData || !verifyData.success) {
+      if (!verified) {
         addToast({
           title: "PIN Verification Failed",
-          message: "Invalid admin PIN. Please try again.",
+          message: "Invalid operator/admin PIN. Please try again.",
           variant: "error",
         });
         setSubmitting(false);
         return;
       }
 
-      // Get the authenticated admin ID from the token
-      const token = verifyData.data.token;
+      // Use the existing authenticated session token
+      const sessionToken = authStore.token || authStore.user?.currentSessionToken || "";
 
       // Get client GPS geolocation & system tag
       const geo = await getClientLocation();
@@ -210,14 +214,15 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
       }
 
       // Now submit the manual scan
+      const scanHeaders: Record<string, string> = { "Content-Type": "application/json" };
+      if (authStore.token) scanHeaders["Authorization"] = `Bearer ${authStore.token}`;
+      if (user?.currentSessionToken) scanHeaders["X-Session-Token"] = user.currentSessionToken;
+
       const scanRes = await fetch("/api/gate/scan", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: scanHeaders,
         body: JSON.stringify({
-          roll: student.roll,
+          roll: student.uniqueId || student.roll,
           direction: direction,
           reason: direction === "OUT" ? reason : undefined,
           gateId: gateId,

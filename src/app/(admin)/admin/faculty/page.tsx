@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Users, AlertCircle } from "lucide-react";
 import { FacultyTracking } from "@/components/admin/FacultyTracking";
-import { FacultyMemberAttendance, DepartmentAttendanceSummary } from "@/app/api/faculty/attendance/route";
+import { FacultyMemberAttendance, DepartmentAttendanceSummary } from "@/lib/types";
 import { getAuthHeaders } from "@/lib/utils";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh"
 import { CampusStatusBar } from "@/components/admin/CampusStatusBar";
