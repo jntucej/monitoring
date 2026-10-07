@@ -1,4 +1,11 @@
 import cron from 'node-cron';
+import { spawn } from 'child_process';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 console.log('[Worker] Starting background worker supervisor...');
 
@@ -32,7 +39,42 @@ cron.schedule('0 4 * * 0', async () => {
   }
 });
 
+function startSyncBridge() {
+  const bridgePath = path.resolve(__dirname, '../scripts/sync-bridge/index.ts');
+  if (!fs.existsSync(bridgePath)) {
+    console.log('[Worker] sync-bridge script not found at', bridgePath, '- skipping bridge spawn.');
+    return;
+  }
+
+  if (process.env.ENABLE_SYNC_BRIDGE === 'false') {
+    console.log('[Worker] ENABLE_SYNC_BRIDGE=false - sync-bridge disabled.');
+    return;
+  }
+
+  console.log(`[Worker] Spawning sync-bridge script: ${bridgePath}`);
+
+  const child = spawn('npx', ['tsx', bridgePath], {
+    stdio: 'inherit',
+    env: process.env,
+  });
+
+  child.on('exit', (code, signal) => {
+    console.warn(`[Worker] sync-bridge exited with code ${code}, signal ${signal}. Restarting in 5s...`);
+    setTimeout(startSyncBridge, 5000);
+  });
+
+  child.on('error', (err) => {
+    console.error('[Worker] sync-bridge spawn error:', err);
+    setTimeout(startSyncBridge, 5000);
+  });
+}
+
+if (process.env.ENABLE_SYNC_BRIDGE === 'true') {
+  startSyncBridge();
+}
+
 process.on('SIGTERM', () => {
   console.log('[Worker] Received SIGTERM, shutting down worker gracefully.');
   process.exit(0);
 });
+
