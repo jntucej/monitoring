@@ -230,15 +230,15 @@ export function NotificationBell() {
                             {n.title}
                           </h4>
                           <span className="text-[10px] text-[var(--text-muted)] shrink-0">
-                            {getTimeAgo(n.created_at)}
+                            {getTimeAgo(n.createdAt || (n as any).created_at)}
                           </span>
                         </div>
                         <p className="text-xs text-[var(--text-muted)] mt-1 line-clamp-2 leading-relaxed">
                           {n.message}
                         </p>
-                        {n.action_url && (
+                        {(n as any).action_url && (
                           <a
-                            href={n.action_url}
+                            href={(n as any).action_url}
                             className="inline-flex items-center gap-1 text-[11px] text-sky-400 hover:text-sky-300 mt-2 font-medium"
                           >
                             View details

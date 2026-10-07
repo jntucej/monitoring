@@ -146,8 +146,8 @@ export async function getAggregateMetrics(timeRange: string) {
   }
 
   const totalRequests = data.length;
-  const totalResponseTime = data.reduce((sum, m) => sum + m.response_time, 0);
-  const errors = data.filter(m => m.status_code >= 400);
+  const totalResponseTime = data.reduce((sum: number, m: any) => sum + (m.response_time || 0), 0);
+  const errors = data.filter((m: any) => m.status_code >= 400);
 
   const statusCodes: Record<number, number> = {};
   const endpoints: Record<string, { count: number; avgTime: number }> = {};

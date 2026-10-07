@@ -38,7 +38,7 @@ async function handleGet(req: NextRequest) {
     }
 
     const staffUsers = users || [];
-    const userIds = staffUsers.map((u) => u.id);
+    const userIds = staffUsers.map((u: any) => u.id);
 
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
@@ -53,18 +53,18 @@ async function handleGet(req: NextRequest) {
         .order("timestamp", { ascending: true });
 
       if (logData) {
-        logData.forEach((log) => {
+        logData.forEach((log: any) => {
           if (!logsByUser[log.user_id]) logsByUser[log.user_id] = [];
           logsByUser[log.user_id].push(log);
         });
       }
     }
 
-    const records = staffUsers.map((u) => {
+    const records = staffUsers.map((u: any) => {
       const uLogs = logsByUser[u.id] || [];
       const emp = Array.isArray(u.employee_details) ? u.employee_details[0] || {} : u.employee_details || {};
       
-      const firstInLog = uLogs.find((l) => l.direction === "IN");
+      const firstInLog = uLogs.find((l: any) => l.direction === "IN");
       const latestLogToday = uLogs.length > 0 ? uLogs[uLogs.length - 1] : null;
 
       let status: "INSIDE" | "OUTSIDE" | "ABSENT" = "ABSENT";
@@ -102,10 +102,10 @@ async function handleGet(req: NextRequest) {
     });
 
     const totalStaff = records.length;
-    const presentToday = records.filter((r) => r.status !== "ABSENT").length;
-    const currentlyInside = records.filter((r) => r.status === "INSIDE").length;
-    const currentlyOutside = records.filter((r) => r.status === "OUTSIDE").length;
-    const warningCount = records.filter((r) => !!r.flagStatus).length;
+    const presentToday = records.filter((r: any) => r.status !== "ABSENT").length;
+    const currentlyInside = records.filter((r: any) => r.status === "INSIDE").length;
+    const currentlyOutside = records.filter((r: any) => r.status === "OUTSIDE").length;
+    const warningCount = records.filter((r: any) => !!r.flagStatus).length;
     const overallAttendanceRate = Math.round((presentToday / (totalStaff || 1)) * 100);
 
     return NextResponse.json({

@@ -102,7 +102,7 @@ async function handleGet(req: NextRequest) {
 
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const userIds = facultyUsers.map((u) => u.id);
+    const userIds = facultyUsers.map((u: any) => u.id);
 
     let logsByUser: Record<string, any[]> = {};
     if (userIds.length > 0) {
@@ -116,7 +116,7 @@ async function handleGet(req: NextRequest) {
       if (logErr) {
         console.warn("Error fetching faculty movement logs:", logErr);
       } else if (logData) {
-        logData.forEach((log) => {
+        logData.forEach((log: any) => {
           if (!logsByUser[log.user_id]) logsByUser[log.user_id] = [];
           logsByUser[log.user_id].push(log);
         });
@@ -126,14 +126,14 @@ async function handleGet(req: NextRequest) {
     const todayStr = new Date().toISOString().slice(0, 10);
     const now = new Date();
 
-    const records: FacultyMemberAttendance[] = facultyUsers.map((u) => {
+    const records: FacultyMemberAttendance[] = facultyUsers.map((u: any) => {
       const emp = u.employee_details || {};
       const rawDept = emp.department_id || u.department_id || "CSE";
       const department = deptCodeToShortName[rawDept] || rawDept || "CSE";
       const uLogs = logsByUser[u.id] || [];
 
       // Filter today's movement logs
-      const todayLogs = uLogs.filter((l) => l.timestamp.startsWith(todayStr));
+      const todayLogs = uLogs.filter((l: any) => l.timestamp.startsWith(todayStr));
       const firstInLog = todayLogs.find((l) => l.direction === "IN");
       const lastOutLog = [...todayLogs].reverse().find((l) => l.direction === "OUT");
       const latestLogToday = todayLogs[todayLogs.length - 1];

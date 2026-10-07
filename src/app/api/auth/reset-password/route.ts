@@ -85,8 +85,7 @@ async function handleResetPassword(req: NextRequest) {
           to: user.email,
           subject: "Gate Monitor — Password Reset Request",
           body: `Hello ${user.name},\n\nA password reset request was initiated for your account. Please click the link below to set a new password:\n\n${resetUrl}\n\nThis link is valid for 1 hour. If you did not request this, you can ignore this email.`,
-          metadata: { userId: user.id, type: "password_reset" },
-        });
+          });
       } catch (emailErr) {
         console.warn("Failed to dispatch password reset email:", emailErr);
       }

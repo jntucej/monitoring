@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/postgres";
 import { verifyAuthToken, signAccessToken, signRefreshToken } from "@/lib/auth-token";
+import { withRateLimit } from "@/lib/rate-limit";
 
-export async function POST(req: NextRequest) {
+async function handleRefresh(req: NextRequest) {
   try {
-    let token = req.cookies.get("refresh_token")?.value;
+    let token = req.cookies.get("refresh_token")?.value || req.cookies.get("refresh-token")?.value;
 
     if (!token) {
       const authHeader = req.headers.get("authorization");
@@ -19,8 +20,10 @@ export async function POST(req: NextRequest) {
 
     if (!token) {
       const body = await req.json().catch(() => null);
-      if (body && typeof body === "object" && body.refresh_token) {
-        token = String(body.refresh_token);
+      if (body && typeof body === "object" && (body as any).refresh_token) {
+        token = String((body as any).refresh_token);
+      } else if (body && typeof body === "object" && (body as any).refreshToken) {
+        token = String((body as any).refreshToken);
       }
     }
 
@@ -75,6 +78,13 @@ export async function POST(req: NextRequest) {
       role: user.role,
     });
 
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax" as const,
+      path: "/",
+    };
+
     const response = NextResponse.json(
       {
         success: true,
@@ -100,21 +110,10 @@ export async function POST(req: NextRequest) {
       { status: 200 }
     );
 
-    response.cookies.set("access_token", access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 3600,
-    });
-
-    response.cookies.set("refresh_token", refresh_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 7 * 24 * 3600,
-    });
+    response.cookies.set("access_token", access_token, { ...cookieOptions, maxAge: 3600 });
+    response.cookies.set("session-token", access_token, { ...cookieOptions, maxAge: 3600 });
+    response.cookies.set("refresh_token", refresh_token, { ...cookieOptions, maxAge: 30 * 24 * 3600 });
+    response.cookies.set("refresh-token", refresh_token, { ...cookieOptions, maxAge: 30 * 24 * 3600 });
 
     return response;
   } catch (err: any) {
@@ -128,3 +127,9 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export const POST = withRateLimit(handleRefresh, {
+  windowMs: 60 * 1000,
+  maxRequests: 30,
+  keyPrefix: "refresh_limit",
+});

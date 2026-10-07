@@ -10,7 +10,8 @@
     "worker": "node worker/index.mjs",
     "start:worker": "node worker/index.mjs",
     "test:e2e": "playwright test",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@remotion/player": "^4.0.518",

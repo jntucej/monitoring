@@ -26,8 +26,8 @@ async function handleLogin(req: NextRequest) {
     }
 
     const { login, email, password } = body as Record<string, unknown>;
-    const rawIdentifier = (login || email || "") as string;
-    const rawPassword = (password || "") as string;
+    const rawIdentifier = ((login || email || "") as string);
+    const rawPassword = ((password || "") as string);
 
     if (!rawIdentifier.trim() || !rawPassword) {
       return NextResponse.json(
@@ -44,7 +44,6 @@ async function handleLogin(req: NextRequest) {
 
     const identifier = rawIdentifier.trim();
 
-    // Query active user by email, unique_id, login_identifier, or handle
     const userRes = await query(
       `SELECT * FROM users 
        WHERE (
@@ -63,7 +62,6 @@ async function handleLogin(req: NextRequest) {
 
     const user = userRes.rows[0];
 
-    // Check account status
     if (user.status !== "ACTIVE") {
       return NextResponse.json(
         {
@@ -77,19 +75,13 @@ async function handleLogin(req: NextRequest) {
       );
     }
 
-    // Verify password against password_hash or pin_hash/initial_pin_hash
     let passwordValid = false;
     if (user.password_hash) {
       passwordValid = await verifyPassword(rawPassword, user.password_hash);
     }
     if (!passwordValid && (user.pin_hash || user.initial_pin_hash)) {
-      passwordValid = await verifyPassword(
-        rawPassword,
-        user.pin_hash || user.initial_pin_hash
-      );
+      passwordValid = await verifyPassword(rawPassword, user.pin_hash || user.initial_pin_hash);
     }
-
-    // Fallback for initial dev/demo accounts if password hash is plain text during migration
     if (!passwordValid && user.password_hash === rawPassword) {
       passwordValid = true;
     }
@@ -98,8 +90,7 @@ async function handleLogin(req: NextRequest) {
       return NextResponse.json(GENERIC_FAILURE, { status: 401 });
     }
 
-    // Check if MFA is required for admin/sysadmin
-    const requiresMfa = isMfaRequiredForAdmin(user.role);
+    const requiresMfa = (user.role === "sysadmin" || user.role === "admin") && (await isMfaRequiredForAdmin());
     if (requiresMfa && user.totp_secret && !body.totp_code) {
       return NextResponse.json(
         {
@@ -112,7 +103,6 @@ async function handleLogin(req: NextRequest) {
       );
     }
 
-    // Generate JWT access and refresh tokens
     const access_token = await signAccessToken({
       sub: user.id,
       email: user.email,
@@ -126,6 +116,13 @@ async function handleLogin(req: NextRequest) {
       email: user.email,
       role: user.role,
     });
+
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax" as const,
+      path: "/",
+    };
 
     const response = NextResponse.json(
       {
@@ -152,22 +149,10 @@ async function handleLogin(req: NextRequest) {
       { status: 200 }
     );
 
-    // Set secure HTTP-only cookies
-    response.cookies.set("access_token", access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 3600,
-    });
-
-    response.cookies.set("refresh_token", refresh_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 7 * 24 * 3600,
-    });
+    response.cookies.set("access_token", access_token, { ...cookieOptions, maxAge: 3600 });
+    response.cookies.set("session-token", access_token, { ...cookieOptions, maxAge: 3600 });
+    response.cookies.set("refresh_token", refresh_token, { ...cookieOptions, maxAge: 30 * 24 * 3600 });
+    response.cookies.set("refresh-token", refresh_token, { ...cookieOptions, maxAge: 30 * 24 * 3600 });
 
     return response;
   } catch (err: any) {

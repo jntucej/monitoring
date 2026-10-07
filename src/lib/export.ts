@@ -103,10 +103,10 @@ export async function exportRangeReport(filters: ExportFilters | string, toDate?
   ]);
 
   const rawScans = scansRes.data || [];
-  const userMap = new Map((usersRes.data || []).map((u) => [u.id, u]));
+  const userMap = new Map((usersRes.data || []).map((u: any) => [u.id, u]));
 
-  let items = rawScans.map((scan) => {
-    const user = userMap.get(scan.user_id);
+  let items = rawScans.map((scan: any) => {
+    const user = userMap.get(scan.user_id) as any;
     const deptCodeMap: Record<string, string> = {
       "02": "EEE", "03": "ME", "04": "ECE", "05": "CSE", "12": "IT"
     };

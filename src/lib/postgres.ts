@@ -1,4 +1,4 @@
-import { Pool, PoolClient, QueryResult, QueryResultRow } from "pg";
+import type { Pool, PoolClient, QueryResult, QueryResultRow } from "pg";
 
 /**
  * PostgreSQL Connection Pool for Self-Hosted Architecture.
@@ -10,7 +10,13 @@ import { Pool, PoolClient, QueryResult, QueryResultRow } from "pg";
 let poolInstance: Pool | null = null;
 
 export function getPostgresPool(): Pool {
+  if (typeof window !== "undefined") {
+    throw new Error("PostgreSQL pool cannot be accessed from client-side code");
+  }
+
   if (!poolInstance) {
+    const pg = eval('require')("pg");
+    const PgPool = pg.Pool || pg.default?.Pool;
     const connectionString =
       process.env.DATABASE_URL ||
       `postgres://${process.env.POSTGRES_USER || "postgres"}:${encodeURIComponent(
@@ -19,7 +25,7 @@ export function getPostgresPool(): Pool {
         process.env.POSTGRES_DB || "gate_monitor"
       }`;
 
-    poolInstance = new Pool({
+    const instance = new PgPool({
       connectionString,
       max: parseInt(process.env.PG_MAX_POOL_SIZE || "20", 10),
       idleTimeoutMillis: 30000,
@@ -28,14 +34,16 @@ export function getPostgresPool(): Pool {
         process.env.PG_SSL === "true"
           ? { rejectUnauthorized: process.env.PG_SSL_REJECT_UNAUTHORIZED !== "false" }
           : undefined,
-    });
+    }) as Pool;
 
-    poolInstance.on("error", (err) => {
+    instance.on("error", (err: any) => {
       console.error("[PostgreSQL Pool Error]", err);
     });
+
+    poolInstance = instance;
   }
 
-  return poolInstance;
+  return poolInstance!;
 }
 
 /**

@@ -8,7 +8,7 @@ import type { AuthContext } from "@/lib/authContext";
 
 async function handleChangePassword(req: NextRequest, { auth }: { auth: AuthContext }) {
   try {
-    const userId = auth?.user?.id;
+    const userId = auth?.userId || req.headers.get("x-user-id");
     if (!userId) {
       return NextResponse.json(
         { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required." } },
@@ -50,7 +50,6 @@ async function handleChangePassword(req: NextRequest, { auth }: { auth: AuthCont
 
     const user = userRes.rows[0];
 
-    // Verify current password
     let valid = false;
     if (user.password_hash) {
       valid = await verifyPassword(currentPassword, user.password_hash);
@@ -77,9 +76,10 @@ async function handleChangePassword(req: NextRequest, { auth }: { auth: AuthCont
     ]);
 
     try {
-      await addAudit("PASSWORD_CHANGE", userId, {
+      await addAudit({
+        action: "PASSWORD_CHANGE",
         userId,
-        timestamp: new Date().toISOString(),
+        details: { userId, email: user.email },
       });
     } catch (auditErr) {
       console.warn("Failed to write audit log for password change:", auditErr);

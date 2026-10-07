@@ -1,4 +1,4 @@
-import { getDbClient } from "@/lib/db";
+import { query } from "@/lib/postgres";
 
 export type AuditAction =
   | 'LOGIN'
@@ -44,23 +44,23 @@ export interface AuditLog {
 // Log an audit event
 export async function logAuditEvent(log: AuditLog): Promise<boolean> {
   try {
-    const { error } = await getDbClient()
-      .from('audit_logs')
-      .insert({
-        action: log.action,
-        user_id: log.userId,
-        user_name: log.userName,
-        user_role: log.userRole,
-        details: log.details,
-        ip_address: log.ipAddress,
-        user_agent: log.userAgent,
-        timestamp: log.timestamp || new Date().toISOString(),
-      });
-
-    if (error) {
-      console.error('Error logging audit event:', error);
-      return false;
-    }
+    await query(`
+      INSERT INTO audit_logs (
+        action, user_id, user_name, user_role, details, 
+        ip_address, user_agent, timestamp
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8
+      )
+    `, [
+      log.action,
+      log.userId,
+      log.userName,
+      log.userRole,
+      JSON.stringify(log.details),
+      log.ipAddress,
+      log.userAgent,
+      log.timestamp || new Date().toISOString()
+    ]);
     return true;
   } catch (error) {
     console.error('Error in logAuditEvent:', error);
@@ -77,43 +77,93 @@ export async function getAuditLogs(filters: {
   limit?: number;
   offset?: number;
 }): Promise<{ logs: AuditLog[]; total: number }> {
-  let query = getDbClient()
-    .from('audit_logs')
-    .select('*', { count: 'exact' })
-    .order('timestamp', { ascending: false });
-
+  let queryText = `
+    SELECT * FROM audit_logs 
+    WHERE 1=1
+  `;
+  const params: any[] = [];
+  
   if (filters.userId) {
-    query = query.eq('user_id', filters.userId);
+    queryText += ` AND user_id = $${params.length + 1}`;
+    params.push(filters.userId);
   }
 
   if (filters.action) {
-    query = query.eq('action', filters.action);
+    queryText += ` AND action = $${params.length + 1}`;
+    params.push(filters.action);
   }
 
   if (filters.from) {
-    query = query.gte('timestamp', filters.from);
+    queryText += ` AND timestamp >= $${params.length + 1}`;
+    params.push(filters.from);
   }
 
   if (filters.to) {
-    query = query.lte('timestamp', filters.to);
+    queryText += ` AND timestamp <= $${params.length + 1}`;
+    params.push(filters.to);
   }
 
+  queryText += ` ORDER BY timestamp DESC `;
+  
   const limit = filters.limit || 50;
   const offset = filters.offset || 0;
+  
+  queryText += ` LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+  params.push(limit);
+  params.push(offset);
 
-  query = query.range(offset, offset + limit - 1);
+  let countQuery = `
+    SELECT COUNT(*) as total FROM audit_logs 
+    WHERE 1=1
+  `;
+  const countParams: any[] = [];
+  
+  if (filters.userId) {
+    countQuery += ` AND user_id = $${countParams.length + 1}`;
+    countParams.push(filters.userId);
+  }
 
-  const { data, error, count } = await query;
+  if (filters.action) {
+    countQuery += ` AND action = $${countParams.length + 1}`;
+    countParams.push(filters.action);
+  }
 
-  if (error) {
+  if (filters.from) {
+    countQuery += ` AND timestamp >= $${countParams.length + 1}`;
+    countParams.push(filters.from);
+  }
+
+  if (filters.to) {
+    countQuery += ` AND timestamp <= $${countParams.length + 1}`;
+    countParams.push(filters.to);
+  }
+
+  try {
+    const [{ rows }] = await Promise.all([
+      query(queryText, params),
+      query(countQuery, countParams)
+    ]);
+    
+    const logs: AuditLog[] = rows.map(row => ({
+      id: row.id,
+      action: row.action,
+      userId: row.user_id,
+      userName: row.user_name,
+      userRole: row.user_role,
+      details: typeof row.details === 'string' ? JSON.parse(row.details) : row.details,
+      ipAddress: row.ip_address,
+      userAgent: row.user_agent,
+      timestamp: row.timestamp
+    }));
+    
+    return { 
+      logs, 
+      total: parseInt(rows[0]?.total || '0', 10) 
+    };
+  } catch (error) {
     console.error('Error fetching audit logs:', error);
     return { logs: [], total: 0 };
   }
-
-  return { 
-    logs: data || [], 
-    total: count || 0 
-  };
 }
 
 // Helper function to create audit context from request

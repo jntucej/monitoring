@@ -2,7 +2,7 @@
 Uses sso_config database table, persistence with in-memory fallback.
 Includes JWT id_token validation, PKCE code challenge helpers using jose.
 */
-import { getSupabaseServiceClient } from "./dbClient";
+import { query } from "./postgres";
 import * as jose from "jose";
 
 export interface SSOConfig {
@@ -34,14 +34,13 @@ let inMemorySSOConfig: SSOConfig = {
 
 export async function getSSOConfig(): Promise<SSOConfig> {
   try {
-    const supabase = getSupabaseServiceClient();
-    const { data } = await supabase
-      .from("sso_config")
-      .select("*")
-      .eq("id", "default")
-      .single();
+    const res = await query(
+      `SELECT * FROM sso_config WHERE id = $1`,
+      ["default"]
+    );
 
-    if (data) {
+    if (res.rows && res.rows[0]) {
+      const data = res.rows[0];
       inMemorySSOConfig = {
         providerId: data.provider_id || "google",
         enabled: Boolean(data.enabled),
@@ -62,18 +61,25 @@ export async function updateSSOConfig(config: Partial<SSOConfig>): Promise<SSOCo
   inMemorySSOConfig = { ...inMemorySSOConfig, ...config };
 
   try {
-    const supabase = getSupabaseServiceClient();
-    await supabase.from("sso_config").upsert(
-      {
-        id: "default",
-        provider_id: inMemorySSOConfig.providerId,
-        enabled: inMemorySSOConfig.enabled,
-        client_id: inMemorySSOConfig.clientId,
-        client_secret: inMemorySSOConfig.clientSecret,
-        issuer_url: inMemorySSOConfig.issuerUrl,
-        group_mappings: inMemorySSOConfig.groupMappings,
-      },
-      { onConflict: "id" }
+    const res = await query(
+      `INSERT INTO sso_config (id, provider_id, enabled, client_id, client_secret, issuer_url, group_mappings)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       ON CONFLICT (id) DO UPDATE SET
+         provider_id = $2,
+         enabled = $3,
+         client_id = $4,
+         client_secret = $5,
+         issuer_url = $6,
+         group_mappings = $7`,
+      [
+        "default",
+        inMemorySSOConfig.providerId,
+        inMemorySSOConfig.enabled,
+        inMemorySSOConfig.clientId,
+        inMemorySSOConfig.clientSecret,
+        inMemorySSOConfig.issuerUrl,
+        inMemorySSOConfig.groupMappings,
+      ]
     );
   } catch (err) {
     console.warn("Failed to persist SSO config to database, in-memory only", err);

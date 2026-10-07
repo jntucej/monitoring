@@ -123,8 +123,8 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
 
     const gateStatuses = gates || [];
     health.components.gateways.total = gateStatuses.length;
-    health.components.gateways.online = gateStatuses.filter(g => g.is_active).length;
-    health.components.gateways.offline = gateStatuses.filter(g => !g.is_active).length;
+    health.components.gateways.online = gateStatuses.filter((g: any) => g.is_active).length;
+    health.components.gateways.offline = gateStatuses.filter((g: any) => !g.is_active).length;
 
     if (health.components.gateways.offline > 0) {
       health.components.gateways.status = 'degraded';
@@ -156,7 +156,7 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
       .order('timestamp', { ascending: false })
       .limit(10);
 
-    health.recentAlerts = (alerts || []).map(a => ({
+    health.recentAlerts = (alerts || []).map((a: any) => ({
       id: a.id,
       severity: a.severity,
       message: a.message,
@@ -182,7 +182,7 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
       .gte('timestamp', oneMinuteAgo);
 
     if (metrics && metrics.length > 0) {
-      const avg = metrics.reduce((sum, m) => sum + m.response_time, 0) / metrics.length;
+      const avg = metrics.reduce((sum: number, m: any) => sum + (m.response_time || 0), 0) / metrics.length;
       health.metrics.avgResponseTime = avg;
     }
 

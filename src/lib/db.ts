@@ -1436,7 +1436,7 @@ export async function personsInside(): Promise<Person[]> {
     .eq('current_status', 'IN');
 
   if (error || !data) return [];
-  return data.map(d => mPerson(d.users));
+  return data.map((d: any) => mPerson(d.users));
 }
 
 export const studentsInside = personsInside;
@@ -1896,15 +1896,15 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
     ME: { in: 0, out: 0 },
   };
 
-  todayScans.forEach((scan: Scan) => {
+  todayScans.forEach((s: any) => {
     // mScan() returns the department as a full name (or a raw code) — map it
     // back to the DEPARTMENTS code so it matches the deptCounts keys.
-    const deptCode = scan.department
-      ? DEPARTMENTS.find((d) => d.code === scan.department || d.name === scan.department)?.code
+    const deptCode = s.department
+      ? DEPARTMENTS.find((d) => d.code === s.department || d.name === s.department)?.code
       : undefined;
     if (deptCode && deptCounts[deptCode]) {
-      if (scan.direction === "IN") deptCounts[deptCode].in++;
-      else deptCounts[deptCode].out++;
+      if (s.direction === "IN") deptCounts[deptCode].in++;
+      else if (deptCounts[deptCode]) deptCounts[deptCode].out++;
     }
   });
 
@@ -1967,8 +1967,8 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
     });
   }
 
-  todayScans.forEach((s: Scan) => {
-    const type = s.personType || "student";
+  todayScans.forEach((s: any) => {
+    const type = (s.personType || "student") as PersonType;
     if (personTypeBreakdown[type]) {
       if (s.direction === "IN") personTypeBreakdown[type].inToday++;
       else personTypeBreakdown[type].outToday++;
@@ -2116,8 +2116,8 @@ export async function statsToday(gateId?: string): Promise<{
     entries = row.entries;
     exits = row.exits;
   } else {
-    entries = todayScans.filter((s) => s.direction === 'IN').length;
-    exits = todayScans.filter((s) => s.direction === 'OUT').length;
+    entries = todayScans.filter((s: any) => s.direction === 'IN').length;
+    exits = todayScans.filter((s: any) => s.direction === 'OUT').length;
   }
   const lastScan = todayScans.length > 0 ? todayScans[0] : null;
 
@@ -2130,14 +2130,15 @@ export async function statsToday(gateId?: string): Promise<{
     parent: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
   };
 
-  allPersons.forEach(p => {
-    if (personTypeBreakdown[p.personType]) {
-      personTypeBreakdown[p.personType].total++;
+  allPersons.forEach((p: any) => {
+    const pType = p.personType as PersonType;
+    if (personTypeBreakdown[pType]) {
+      personTypeBreakdown[pType].total++;
     }
   });
 
-  todayScans.forEach(s => {
-    const type = s.personType || "student";
+  todayScans.forEach((s: any) => {
+    const type = (s.personType || "student") as PersonType;
     if (personTypeBreakdown[type]) {
       if (s.direction === "IN") personTypeBreakdown[type].inToday++;
       else personTypeBreakdown[type].outToday++;
@@ -2145,11 +2146,11 @@ export async function statsToday(gateId?: string): Promise<{
   });
 
   const personMap = new Map<string, any>();
-  allPersons.forEach(p => {
+  allPersons.forEach((p: any) => {
     if (p.uniqueId) personMap.set(p.uniqueId.toUpperCase(), p);
   });
 
-  const filteredRecentScans = todayScans.filter((scan) => {
+  const filteredRecentScans = todayScans.filter((scan: any) => {
     const person = personMap.get(scan.roll?.toUpperCase() || scan.uniqueId?.toUpperCase());
     if (!person) return false;
 
@@ -2257,7 +2258,7 @@ export async function getLinkedPersons(parentId: string): Promise<Person[]> {
     .eq('guardian_id', parentId);
 
   if (error || !data) return [];
-  return data.map(d => mPerson(d.users));
+  return data.map((d: any) => mPerson(d.users));
 }
 
 export const getParentChildren = getLinkedPersons;

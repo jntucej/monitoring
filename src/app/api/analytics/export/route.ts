@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withAuthAndStatus } from "@/middleware/auth";
 import { withAuthorization } from "@/middleware/authorization";
 import { exportRangeReport } from "@/lib/export";
 
@@ -51,6 +50,4 @@ async function handleGet(req: NextRequest) {
   }
 }
 
-export const GET = withAuthAndStatus(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin"] })
-);
+export const GET = withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin"] });
