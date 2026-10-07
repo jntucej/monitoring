@@ -177,7 +177,6 @@ function mUser(r: any): User {
     phone: r.phone,
     role: r.role,
     gateId: r.gate_id || undefined,
-    pin: r.pin,
     parentId: r.guardian_id || undefined, guardianId: r.guardian_id || undefined,
     supervisedGates: r.supervised_gates || undefined,
     assignedHostel: r.assigned_hostel || undefined,
@@ -1225,16 +1224,19 @@ export async function findUserById(id: string): Promise<User | null> {
   return null;
 }
 
-export async function findUserByLogin(login: string): Promise<User | null> {
+export async function findUserByEmail(email: string): Promise<User | null> {
   const { data, error } = await supabase
     .from('users')
     .select('*, employee_details(*)')
-    .or(`employee_id.eq.${login.trim()},email.eq.${login.trim()},name.eq.${login.trim()}`)
-    .eq('status', 'ACTIVE')
+    .eq('email', email.trim().toLowerCase())
     .maybeSingle();
 
   if (error || !data) return null;
   return mUser(data);
+}
+
+export async function findUserByLogin(login: string): Promise<User | null> {
+  return findUserByEmail(login);
 }
 
 // NOTE: `verifyLogin` was REMOVED. Password verification belongs exclusively

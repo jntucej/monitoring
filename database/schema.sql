@@ -1185,3 +1185,33 @@ ALTER TABLE users ADD CONSTRAINT unique_handle UNIQUE (handle);
 UPDATE alerts SET user_unique_id = NULL WHERE user_unique_id IS NOT NULL AND user_unique_id NOT IN (SELECT unique_id FROM users);
 ALTER TABLE alerts ADD CONSTRAINT fk_alerts_user_unique_id FOREIGN KEY (user_unique_id) REFERENCES users(unique_id) ON DELETE SET NULL;
 
+-- 4. Compatibility view students over persons + student_details
+CREATE OR REPLACE VIEW students AS
+SELECT
+  p.id                          AS id,
+  p.unique_id                   AS roll,
+  p.full_name                   AS name,
+  p.department                  AS department,
+  COALESCE(sd.year, 1)          AS year,
+  COALESCE(sd.section, 'A')     AS section,
+  COALESCE(sd.batch, '')        AS batch,
+  p.photo_url                   AS photo,
+  p.email                       AS email,
+  p.phone                       AS phone,
+  NULL::TEXT                    AS parent_name,
+  NULL::TEXT                    AS parent_phone,
+  sd.parent_id                  AS parent_id,
+  p.qr_code                     AS qr_code,
+  p.id_valid_until              AS id_valid_until,
+  p.status                      AS status,
+  sd.student_type               AS student_type,
+  sd.gender                     AS gender,
+  sd.hostel_block               AS hostel_block,
+  sd.room_number                AS room_number,
+  sd.hostel_curfew_time         AS hostel_curfew_time,
+  sd.warden_id                  AS warden_id
+FROM persons p
+LEFT JOIN student_details sd ON sd.person_id = p.id
+WHERE p.person_type = 'student';
+
+
