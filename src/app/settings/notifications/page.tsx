@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuthStore } from "@/stores/authStore";
-import { getNotificationPreferences, updateNotificationPreferences } from "@/lib/notification-service";
+
 import { NotificationPreferences } from "@/lib/notification-types";
 import { Bell, Smartphone, Mail, AppWindow, Save, CheckCircle2, Clock } from "lucide-react";
 
@@ -36,7 +36,7 @@ export default function NotificationSettingsPage() {
     async function load() {
       if (!user?.id) return;
       setLoading(true);
-      const data = await getNotificationPreferences(user.id);
+      const res = await fetch("/api/notifications/preferences"); const json = await res.json().catch(() => null); const data = json?.data;
       if (data) {
         setPrefs(data);
       }
@@ -69,7 +69,7 @@ export default function NotificationSettingsPage() {
     if (!user?.id) return;
     setSaving(true);
     setSavedSuccess(false);
-    const success = await updateNotificationPreferences(user.id, prefs);
+    const res = await fetch("/api/notifications/preferences", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(prefs) }); const json = await res.json().catch(() => null); const success = Boolean(json?.success);
     setSaving(false);
     if (success) {
       setSavedSuccess(true);

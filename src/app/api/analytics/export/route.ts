@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
-import { exportRangeReport } from "@/lib/export";
+import { exportRangeReport } from "@/lib/server-export";
 
 async function handleGet(req: NextRequest) {
   try {
