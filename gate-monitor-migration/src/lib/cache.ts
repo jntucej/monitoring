@@ -1,7 +1,8 @@
 // Cache management for self-hosted PostgreSQL
-// Replaces the in-memory cache with a PostgreSQL-backed cache for production
+// Uses PostgreSQL as the backing store for cached data
 
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { PoolClient } from 'pg';
+import { getPool, query } from './db';
 import { getEnv } from './env';
 
 /**
@@ -18,66 +19,96 @@ interface CacheEntry<T> {
  * Provides TTL-based caching with PostgreSQL as the backing store
  */
 class PostgresCache {
-  constructor(private db: SupabaseClient) {
-    this.db = db;
-  }
-  
+  constructor(private pool: any) {}
+
   /**
    * Get cached value by key
    */
   async get<T>(key: string): Promise<T | null> {
-    const result = await this.db.from('cache_table').select('value', 'expires_at').eq('key', key).first();
-    if (!result) return null;
-    
-    const entry = result[0];
-    if (Date.now() > entry.expiresAt) {
-      // Expired - remove from cache
-      await this.db.from('cache_table').delete().eq('key', key).where('expires_at', '>=', entry.expiresAt).where('key', key);
+    try {
+      const { rows } = await this.pool.query(
+        'SELECT value, expires_at FROM cache_table WHERE key = $1',
+        [key]
+      );
+      if (!rows[0]) return null;
+
+      const entry = rows[0];
+      if (Date.now() > entry.expires_at) {
+        // Expired - remove from cache
+        await this.pool.query('DELETE FROM cache_table WHERE key = $1', [key]);
+        return null;
+      }
+
+      return entry.value;
+    } catch {
       return null;
     }
-    
-    return entry.value;
   }
-  
+
   /**
    * Set value in cache with TTL
    */
-  async set<T>(key: string, value: T, ttlSeconds: number): Promise<void> {
+  async set<T>(key: string, value: T, ttlSeconds: number = 300): Promise<void> {
     const expiresAt = Date.now() + (ttlSeconds * 1000);
-    await this.db.from('cache_table').insert({ key, value, expiresAt }).onConflict('key').ignore();
+    try {
+      await this.pool.query(
+        'INSERT INTO cache_table (key, value, expires_at) VALUES ($1, $2, $3) ON CONFLICT (key) DO UPDATE SET value = $2, expires_at = $3',
+        [key, value, expiresAt]
+      );
+    } catch (e) {
+      console.error('[Cache] Set error:', e);
+    }
   }
-  
+
   /**
    * Delete all entries with a prefix
    */
   async invalidatePattern(prefix: string): Promise<number> {
-    const result = await this.db.from('cache_table').delete().eq('key', '*' + prefix).where('expires_at', '>=', new Date()).where('key', '*' + prefix).count();
-    return result;
+    try {
+      const { rowCount } = await this.pool.query(
+        'DELETE FROM cache_table WHERE key LIKE $1',
+        [`%${prefix}%`]
+      );
+      return rowCount || 0;
+    } catch {
+      return 0;
+    }
   }
-  
+
   /**
    * Clear entire cache
    */
   async clear(): Promise<void> {
-    await this.db.from('cache_table').delete().where('expires_at', '>=', new Date());
+    try {
+      await this.pool.query('DELETE FROM cache_table WHERE expires_at > NOW()');
+    } catch (e) {
+      console.error('[Cache] Clear error:', e);
+    }
   }
 }
 
 // Global cache instance
-const cache = new PostgresCache(getSupabaseServiceClient());
+let cacheInstance: PostgresCache | null = null;
 
-export async function getCached<T>(key: string): Promise<T | null> {
-  return cache.get<T>(key);
+function getCache(): PostgresCache {
+  if (!cacheInstance) {
+    cacheInstance = new PostgresCache(getPool());
+  }
+  return cacheInstance;
 }
 
-export async function setCached<T>(key: string, value: T, ttlSeconds: number = 300): Promise<void> {
-  await cache.set<T>(key, value, ttlSeconds);
+export async function getCached<T>(key: string): Promise<T | null> {
+  return getCache().get<T>(key);
+}
+
+export async function setCached<T>(key: string, value: T, ttlSeconds?: number): Promise<void> {
+  await getCache().set<T>(key, value, ttlSeconds);
 }
 
 export async function invalidateCache(prefix: string): Promise<number> {
-  return cache.invalidatePattern(prefix);
+  return getCache().invalidatePattern(prefix);
 }
 
 export async function clearCache(): Promise<void> {
-  await cache.clear();
+  await getCache().clear();
 }

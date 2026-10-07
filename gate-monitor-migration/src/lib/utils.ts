@@ -1,8 +1,9 @@
 // Shared utilities for the migration project
 // Contains common helpers used across the application
 
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { getEnv } from './env';
+import { PoolClient } from 'pg';
+import { getEnv, query } from './env';
+import { getPool } from './db';
 
 /**
  * Format ISO date string for display
@@ -22,7 +23,7 @@ export function formatDateTime(isoString: string): string {
  */
 export function sanitizeInput(input: string): string {
   if (!input) return '';
-  return input.replace(/[\"<>\]|\\|/]/g, '');
+  return input.replace(/["<>|\\]/g, '');
 }
 
 /**
@@ -42,19 +43,25 @@ export function logMessage(message: string, level = 'info'): void {
 }
 
 /**
- * Fetch user info from database
+ * Fetch user from PostgreSQL database
  */
 export async function fetchUser(userId: string): Promise<any> {
-  const db = createClient(getEnv().supabaseUrl, getEnv().supabaseAnonKey);
-  const user = await db.from('users').eq('id', userId).first();
-  return user || null;
+  try {
+    const result = await query('SELECT id, name, email, role, status FROM users WHERE id = $1', [userId]);
+    return result.rows[0] || null;
+  } catch {
+    return null;
+  }
 }
 
 /**
  * Check if user is active
  */
 export async function isUserActive(userId: string): Promise<boolean> {
-  const db = createClient(getEnv().supabaseUrl, getEnv().supabaseAnonKey);
-  const user = await db.from('users').eq('id', userId).first();
-  return !!user?.is_active || !!user?.status;
+  try {
+    const result = await query('SELECT status FROM users WHERE id = $1', [userId]);
+    return !!result.rows[0]?.status === 'ACTIVE';
+  } catch {
+    return false;
+  }
 }

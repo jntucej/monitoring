@@ -3,17 +3,18 @@
 
 import { SignJWT, jwtVerify } from 'jose';
 import { getEnv } from './env';
+import { getUserById } from './auth';
 
 /**
  * QR token generation for guest verification
  */
 export async function generateQrToken(roll: string): Promise<string> {
   const signingKey = getSigningKey();
-  
+
   if (!signingKey) {
     throw new Error('JWT signing key not available');
   }
-  
+
   return await new SignJWT({
     payload: {
       roll,
@@ -29,42 +30,31 @@ export async function generateQrToken(roll: string): Promise<string> {
  */
 export async function validateQrToken(token: string): Promise<string | null> {
   const signingKey = getSigningKey();
-  
+
   if (!signingKey) {
     return null;
   }
-  
+
   try {
     const { payload } = await jwtVerify(token, signingKey, {
       algorithms: ['HS256'],
     });
-    
+
     if (!payload?.roll) return null;
-    
+
     const user = await getUserById(payload.roll);
     if (!user) return null;
-    
+
     return user;
   } catch {
     return null;
   }
 }
 
-/**
- * Get signing key from environment
- */
 function getSigningKey(): Uint8Array {
-  const secret = getEnv().mobileTokenSecret;
+  const secret = getEnv().jwtSecret;
   if (!secret || secret.length < 32) {
-    throw new Error('Mobile token secret not available');
-  }
-  return new TextEncoder().encode(secret);
-}
-
-export function getSigningKey(): Uint8Array {
-  const secret = getEnv().mobileTokenSecret;
-  if (!secret || secret.length < 32) {
-    throw new Error('Mobile token secret not available');
+    throw new Error('JWT signing key not available');
   }
   return new TextEncoder().encode(secret);
 }

@@ -1,72 +1,64 @@
-// Database migration helper for transitioning from Supabase to self-hosted PostgreSQL
-// This file serves as the new database abstraction layer after migrating away from Supabase
+// Database layer for self-hosted PostgreSQL (replaces Supabase)
+// Uses the 'pg' library directly for PostgreSQL connectivity
 
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { Pool, PoolClient } from 'pg';
 import { getEnv } from './env';
 
-/**
- * Database migration helper for transitioning from Supabase to self-hosted PostgreSQL
- * 
- * This module abstracts the database layer to allow seamless switching between
- * Supabase (development) and self-hosted PostgreSQL (production).
- */
+let pool: Pool | null = null;
 
-export interface MigrationState {
-  currentProvider: 'supabase' | 'postgres';
-  version: number;
-  timestamp: string;
-}
+export function getPool(): Pool {
+  if (pool) return pool;
 
-export function getMigrationState(): MigrationState {
   const env = getEnv();
-  return {
-    currentProvider: env.isProduction ? 'postgres' : 'supabase',
-    version: 1,
-    timestamp: new Date().toISOString(),
-  };
+
+  pool = new Pool({
+    connectionString: env.postgresUrl,
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 10000,
+  });
+
+  pool.on('error', (err) => {
+    console.error('[DB] Unexpected pool error:', err);
+  });
+
+  return pool;
 }
 
-export async function initializeDatabase(provider: 'supabase' | 'postgres') {
-  if (provider === 'supabase') {
-    // Supabase development client (kept for local development)
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    
-    if (!supabaseUrl || !supabaseAnonKey) {
-      throw new Error('Supabase environment variables (NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY) are required for Supabase provider');
-    }
-    
-    const client = createClient(supabaseUrl, supabaseAnonKey);
-    return client;
-  } else {
-    // Self-hosted PostgreSQL provider (production)
-    const postgresUrl = process.env.POSTGRES_DB;
-    const postgresUser = process.env.POSTGRES_USER;
-    const postgresPassword = process.env.POSTGRES_PASSWORD;
-    
-    if (!postgresUrl || !postgresUser || !postgresPassword) {
-      throw new Error('PostgreSQL environment variables (POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD) are required for PostgreSQL provider');
-    }
-    
-    const client = createClient(postgresUrl, {
-      username: postgresUser,
-      password: postgresPassword,
-    });
-    return client;
+export async function query(sql: string, params: any[] = []): Promise<any> {
+  const p = getPool();
+  const client = await p.connect();
+  try {
+    const result = await client.query(sql, params);
+    return result;
+  } finally {
+    client.release();
   }
 }
 
-export async function migrateTableStructure() {
-  // Placeholder for actual migration logic
-  // After migration, this would run Alembic/PgAdmin migrations to convert
-  // Supabase schema (which uses PostgreSQL under the hood) to the new PostgreSQL schema
-  console.log('[Migration] Database structure migrated to self-hosted PostgreSQL');
-  return { success: true };
+export async function withTransaction<T>(fn: (client: PoolClient) => Promise<T>): Promise<T> {
+  const p = getPool();
+  const client = await p.connect();
+  try {
+    await client.query('BEGIN');
+    const result = await fn(client);
+    await client.query('COMMIT');
+    return result;
+  } catch (e) {
+    await client.query('ROLLBACK');
+    throw e;
+  } finally {
+    client.release();
+  }
 }
 
-export async function runMigrations() {
-  // Run database migrations (e.g., Alembic, Flyway, or raw SQL)
-  // This is a placeholder for the actual migration execution
-  console.log('[Migration] Running database migrations...');
-  return { status: 'pending' };
+export async function testConnection(): Promise<boolean> {
+  try {
+    const p = getPool();
+    const result = await p.query('SELECT 1 as connected');
+    return !!result.rows[0]?.connected;
+  } catch (e) {
+    console.error('[DB] Connection test failed:', e);
+    return false;
+  }
 }
