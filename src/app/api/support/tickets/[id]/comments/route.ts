@@ -12,12 +12,19 @@ async function handleGet(req: NextRequest) {
   try {
     const id = getIdFromPath(req);
     const supabase = getSupabaseServiceClient();
+    const actorRole = req.headers.get("x-user-role");
 
-    const { data: comments, error } = await supabase
+    let query = supabase
       .from("support_ticket_comments")
       .select("*")
       .eq("ticket_id", id)
       .order("created_at", { ascending: true });
+
+    if (actorRole !== "admin" && actorRole !== "sysadmin") {
+      query = query.eq("is_internal", false);
+    }
+
+    const { data: comments, error } = await query;
 
     if (error) return NextResponse.json({ success: true, data: [] });
     return NextResponse.json({ success: true, data: comments || [] });
@@ -33,19 +40,25 @@ async function handlePost(req: NextRequest) {
     const actorRole = req.headers.get("x-user-role") || "student";
     const { comment, isInternal = false } = await req.json();
 
-    if (!comment) {
+    if (!comment || typeof comment !== "string" || !comment.trim()) {
       return NextResponse.json({ success: false, error: { code: "BAD_REQUEST", message: "Comment content required" } }, { status: 400 });
     }
 
+    const canPostInternal = actorRole === "admin" || actorRole === "sysadmin";
+    const effectiveIsInternal = canPostInternal ? Boolean(isInternal) : false;
+
     const supabase = getSupabaseServiceClient();
+    const { data: userProfile } = await supabase.from("users").select("name").eq("id", actorId).maybeSingle();
+    const userName = userProfile?.name || actorId;
+
     const row = {
       id: `cm-` + Date.now(),
       ticket_id: id,
       user_id: actorId,
-      user_name: actorId,
+      user_name: userName,
       user_role: actorRole,
-      comment,
-      is_internal: isInternal,
+      comment: comment.trim(),
+      is_internal: effectiveIsInternal,
       created_at: new Date().toISOString(),
     };
 

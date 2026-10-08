@@ -26,6 +26,14 @@ async function handlePost(req: NextRequest) {
       );
     }
 
+    // Guard: operators cannot register or clear thumbprints for sysadmin/admin accounts
+    if (actorRole === "operator" && (targetUser.role === "admin" || targetUser.role === "sysadmin")) {
+      return NextResponse.json(
+        { success: false, error: { code: "FORBIDDEN", message: "Operators cannot modify biometric records of administrators" } },
+        { status: 403 }
+      );
+    }
+
     if (clear) {
       const ok = await clearThumbprint(userId);
       if (!ok) {

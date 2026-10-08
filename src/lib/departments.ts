@@ -11,12 +11,12 @@ export interface DepartmentInfo {
 }
 
 const FALLBACK_DEPARTMENTS: DepartmentInfo[] = [
-  { code: "CSE",   numericCode: "01", shortName: "CSE",   name: "Computer Science & Engineering",          hod: "Dr. K. Sridhar" },
+  { code: "CIVIL", numericCode: "01", shortName: "CIVIL", name: "Civil Engineering",                       hod: "Dr. A. Kumar" },
   { code: "EEE",   numericCode: "02", shortName: "EEE",   name: "Electrical & Electronics Engineering",    hod: "Dr. K. Ramesh" },
   { code: "ME",    numericCode: "03", shortName: "ME",    name: "Mechanical Engineering",                  hod: "Dr. R. Mahesh" },
   { code: "ECE",   numericCode: "04", shortName: "ECE",   name: "Electronics & Communication Engineering", hod: "Dr. M. Srinivas" },
+  { code: "CSE",   numericCode: "05", shortName: "CSE",   name: "Computer Science & Engineering",          hod: "Dr. K. Sridhar" },
   { code: "IT",    numericCode: "12", shortName: "IT",    name: "Information Technology",                  hod: "Dr. P. Sreedhar" },
-  { code: "CIVIL", numericCode: "06", shortName: "CIVIL", name: "Civil Engineering",                       hod: "Dr. A. Kumar" },
 ];
 
 const CACHE_KEY = "departments:all";

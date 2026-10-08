@@ -15,8 +15,8 @@ export default async function backfillDailyStats() {
           DATE(m.timestamp) as log_date,
           m.gate_id,
           COALESCE(g.name, m.gate_id::text) as gate_name,
-          COUNT(*) FILTER (WHERE m.direction = 'entry') as total_entries,
-          COUNT(*) FILTER (WHERE m.direction = 'exit') as total_exits,
+          COUNT(*) FILTER (WHERE UPPER(m.direction) IN ('IN', 'ENTRY')) as total_entries,
+          COUNT(*) FILTER (WHERE UPPER(m.direction) IN ('OUT', 'EXIT')) as total_exits,
           EXTRACT(HOUR FROM m.timestamp)::integer as hr,
           COUNT(*) as hr_count
         FROM movement_logs m

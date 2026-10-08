@@ -37,7 +37,17 @@ export function validateCsrf(req: NextRequest): CsrfValidationResult {
       const originHost = originUrl.host.toLowerCase();
       const targetHost = host.toLowerCase();
 
-      if (originHost !== targetHost) {
+      const allowedOriginEnv = process.env.ALLOWED_ORIGIN;
+      let allowedHost: string | null = null;
+      if (allowedOriginEnv && allowedOriginEnv !== "*") {
+        try {
+          allowedHost = new URL(allowedOriginEnv).host.toLowerCase();
+        } catch {
+          allowedHost = allowedOriginEnv.toLowerCase();
+        }
+      }
+
+      if (originHost !== targetHost && (!allowedHost || originHost !== allowedHost)) {
         return {
           valid: false,
           error: `Cross-origin request rejected: origin '${originHost}' does not match host '${targetHost}'.`,
@@ -70,3 +80,4 @@ export function assertCsrf(req: NextRequest): NextResponse | null {
   }
   return null;
 }
+

@@ -1,5 +1,3 @@
-export {};
-
 const { loadLocalEnv } = require("./lib/env-loader");
 loadLocalEnv();
 

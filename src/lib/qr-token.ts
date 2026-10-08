@@ -17,10 +17,11 @@ export function getSigningKey(): Uint8Array {
   return new TextEncoder().encode(secret);
 }
 
-export async function generateQrToken(roll: string): Promise<string> {
+export async function generateQrToken(roll: string, expiresIn?: string): Promise<string> {
+  const ttl = expiresIn || process.env.QR_TOKEN_EXPIRATION || "90s";
   return await new SignJWT({ roll, purpose: "qr_verification", token_type: "qr" })
     .setProtectedHeader({ alg: "HS256", typ: "JWT", kid: "qr-v1" })
-    .setExpirationTime("45s")
+    .setExpirationTime(ttl)
     .sign(getSigningKey());
 }
 

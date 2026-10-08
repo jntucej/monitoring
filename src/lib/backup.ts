@@ -61,6 +61,27 @@ export async function createDatabaseBackup(
 
       let processedData = data || [];
 
+      // Always redact sensitive credential and biometric material from backups
+      if (table === 'users' || table === 'persons') {
+        const SENSITIVE_FIELDS = [
+          'password_hash',
+          'pin',
+          'pin_hash',
+          'initial_pin_hash',
+          'two_factor_secret',
+          'two_factor_recovery_codes',
+          'thumbprint_hash',
+          'face_encoding',
+        ];
+        processedData = processedData.map(person => {
+          const clean = { ...person };
+          for (const field of SENSITIVE_FIELDS) {
+            delete clean[field];
+          }
+          return clean;
+        });
+      }
+
       // Anonymize if requested
       if (options.anonymize && (table === 'users' || table === 'persons')) {
         processedData = processedData.map(person => ({

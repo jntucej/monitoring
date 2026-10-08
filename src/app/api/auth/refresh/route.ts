@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 import { query } from "@/lib/postgres";
 import { verifyRefreshToken, signAccessToken, signRefreshToken } from "@/lib/auth-token";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -67,6 +68,28 @@ async function handleRefresh(req: NextRequest) {
 
     const user = userRes.rows[0];
 
+    // Refresh token rotation and reuse detection
+    const oldTokenHash = crypto.createHash("sha256").update(token).digest("hex");
+    const existingSession = await query(
+      "SELECT id, revoked_at FROM sessions WHERE refresh_hash = $1 LIMIT 1",
+      [oldTokenHash]
+    ).catch(() => ({ rows: [] }));
+
+    if (existingSession.rows.length > 0 && existingSession.rows[0].revoked_at) {
+      // Reuse of revoked refresh token detected: revoke all user sessions
+      await query("UPDATE sessions SET revoked_at = NOW() WHERE user_id = $1", [payload.sub]).catch(() => {});
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: "TOKEN_REVOKED", message: "Refresh token has been revoked." },
+        },
+        { status: 401 }
+      );
+    }
+
+    // Revoke old session token
+    await query("UPDATE sessions SET revoked_at = NOW() WHERE refresh_hash = $1", [oldTokenHash]).catch(() => {});
+
     const access_token = await signAccessToken({
       sub: user.id,
       email: user.email,
@@ -81,6 +104,13 @@ async function handleRefresh(req: NextRequest) {
       email: user.email,
       role: user.role,
     });
+
+    // Record new rotated session
+    const newTokenHash = crypto.createHash("sha256").update(refresh_token).digest("hex");
+    await query(
+      "INSERT INTO sessions (id, user_id, refresh_hash, expires_at, created_at) VALUES ($1, $2, $3, NOW() + INTERVAL '30 days', NOW())",
+      [crypto.randomUUID(), user.id, newTokenHash]
+    ).catch(() => {});
 
     const cookieOptions = {
       httpOnly: true,

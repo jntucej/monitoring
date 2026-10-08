@@ -35,7 +35,7 @@ export async function exportRangeReport(filters: ExportFilters | string, toDate?
   let items = rawScans.map((scan) => {
     const user = userMap.get(scan.user_id as string);
     const deptCodeMap: Record<string, string> = {
-      "02": "EEE", "03": "ME", "04": "ECE", "05": "CSE", "12": "IT"
+      "01": "CIVIL", "02": "EEE", "03": "ME", "04": "ECE", "05": "CSE", "12": "IT"
     };
     const rawDept = (user?.department as string) || (scan.department as string) || "";
     const dept = deptCodeMap[rawDept] || rawDept || "—";

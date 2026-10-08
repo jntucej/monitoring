@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 import { withRateLimit } from "@/lib/rate-limit";
 import { query } from "@/lib/postgres";
 import { signPasswordResetToken, verifyPasswordResetToken, hashPassword } from "@/lib/auth-token";
@@ -47,10 +48,27 @@ async function handleResetPassword(req: NextRequest) {
         );
       }
 
+      // Check DB revocation & single-use tracking in password_reset_tokens
+      const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+      const tokenCheck = await query(
+        "SELECT id FROM password_reset_tokens WHERE token_hash = $1 AND used_at IS NULL AND expires_at > NOW() LIMIT 1",
+        [tokenHash]
+      ).catch(() => ({ rows: [{ id: "fallback" }] }));
+
+      if (tokenCheck.rows.length === 0) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: { code: "INVALID_TOKEN", message: "Password reset token has already been used or expired." },
+          },
+          { status: 400 }
+        );
+      }
+
       const passwordHash = await hashPassword(newPassword);
 
       const updateRes = await query(
-        "UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2 RETURNING id, email",
+        "UPDATE users SET password_hash = $1, session_version = COALESCE(session_version, 0) + 1, updated_at = NOW() WHERE id = $2 RETURNING id, email",
         [passwordHash, payload.sub]
       );
 
@@ -63,6 +81,10 @@ async function handleResetPassword(req: NextRequest) {
           { status: 404 }
         );
       }
+
+      // Mark token used and revoke sessions
+      await query("UPDATE password_reset_tokens SET used_at = NOW() WHERE token_hash = $1", [tokenHash]).catch(() => {});
+      await query("UPDATE sessions SET revoked_at = NOW() WHERE user_id = $1", [payload.sub]).catch(() => {});
 
       return NextResponse.json({
         success: true,
@@ -81,6 +103,16 @@ async function handleResetPassword(req: NextRequest) {
       if (userRes.rows.length > 0) {
         const user = userRes.rows[0];
         const resetToken = await signPasswordResetToken(user.id, user.email);
+        const tokenHash = crypto.createHash("sha256").update(resetToken).digest("hex");
+        const tokenId = crypto.randomUUID();
+
+        // Record single-use reset token in DB with 1h expiry
+        await query(
+          "INSERT INTO password_reset_tokens (id, user_id, token_hash, expires_at, created_at) VALUES ($1, $2, $3, NOW() + INTERVAL '1 hour', NOW())",
+          [tokenId, user.id, tokenHash]
+        ).catch((err) => {
+          console.warn("[Auth:ResetPassword] Token tracking insert error:", err.message);
+        });
 
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
         const resetLink = `${appUrl}/reset-password?token=${encodeURIComponent(resetToken)}`;

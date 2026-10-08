@@ -31,9 +31,9 @@ export default async function cleanupExpiredPasses() {
     // 3. Invalidate expired user sessions
     const sessionRes = await query(
       `UPDATE sessions 
-       SET is_revoked = TRUE 
+       SET revoked_at = NOW() 
        WHERE expires_at < NOW() 
-         AND is_revoked = FALSE`
+         AND revoked_at IS NULL`
     );
     console.log(`[Worker Job] Revoked ${sessionRes.rowCount || 0} expired user sessions.`);
 
@@ -47,7 +47,7 @@ export default async function cleanupExpiredPasses() {
     // 5. Delete expired password reset tokens
     const tokenRes = await query(
       `DELETE FROM password_reset_tokens 
-       WHERE expires_at < NOW() OR used = TRUE`
+       WHERE expires_at < NOW() OR used_at IS NOT NULL`
     );
     console.log(`[Worker Job] Purged ${tokenRes.rowCount || 0} stale password reset tokens.`);
 

@@ -63,6 +63,12 @@ async function handlePost(req: NextRequest) {
         continue;
       }
 
+      // SECURITY GUARD: Only sysadmin can create or promote users to sysadmin
+      if (role === "sysadmin" && actorRole !== "sysadmin") {
+        results.push({ email, success: false, error: "Only system administrators can create or promote users to sysadmin" });
+        continue;
+      }
+
       // Check if user exists by email
       const { data: existingProfiles } = await service
         .from("users")

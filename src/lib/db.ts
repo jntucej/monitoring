@@ -32,7 +32,7 @@ import type {
 
 export function sanitizePostgrestParam(val: string | null | undefined): string {
   if (!val || typeof val !== "string") return "";
-  return val.replace(/[^a-zA-Z0-9_\-\.\@]/g, "").trim();
+  return val.replace(/[^a-zA-Z0-9_\-\.\@\s',]/g, "").trim();
 }
 
 export async function resolveAlert(alertId: string, userId: string): Promise<boolean> {
@@ -1391,13 +1391,15 @@ export async function updateAccountStatus(userId: string, newStatus: AccountStat
   return true;
 }
 
+export const SYSTEM_ACTOR = "system";
+
 export async function updateUserRole(userId: string, newRole: Role, actorId: string): Promise<boolean> {
   const db = getDbClient();
   const { data: user } = await db.from('users').select('name, role').eq('id', userId).single();
   const { data: actor } = await db.from('users').select('name, role').eq('id', actorId).maybeSingle();
 
   // SECURITY GUARD: Only sysadmin (or system processes) can assign sysadmin role
-  if (newRole === 'sysadmin' && actorId !== 'system' && actor?.role !== 'sysadmin') {
+  if (newRole === 'sysadmin' && actorId !== SYSTEM_ACTOR && actor?.role !== 'sysadmin') {
     console.error(`Forbidden role escalation attempt: actor ${actorId} (${actor?.role}) tried to grant sysadmin to ${userId}`);
     return false;
   }
