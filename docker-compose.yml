@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: supabase/postgres:17.11.0.004
+    image: supabase/postgres:17.6.1.136
     container_name: gate_postgres
     restart: always
     env_file: [.env]
