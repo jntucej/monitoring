@@ -333,6 +333,9 @@ export async function verifyLatestBackup(): Promise<BackupVerificationResult> {
   };
 
   inMemoryVerifications.unshift(result);
+  if (inMemoryVerifications.length > 100) {
+    inMemoryVerifications.length = 100;
+  }
   return result;
 }
 

@@ -109,20 +109,23 @@ export function todayISO(): string {
 }
 
 export function getAuthHeaders(): Record<string, string> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
   if (typeof window === "undefined") {
-    return {};
+    return headers;
   }
   
   try {
     const raw = sessionStorage.getItem("gate-monitor-auth") ?? localStorage.getItem("gate-monitor-auth");
-    if (!raw) return {};
+    if (!raw) return headers;
     
     const parsed = JSON.parse(raw);
     const state = parsed?.state || {};
     const token = state.token;
     const sessionToken = state.user?.currentSessionToken || state.user?.handle;
     
-    const headers: Record<string, string> = {};
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
@@ -132,6 +135,6 @@ export function getAuthHeaders(): Record<string, string> {
     
     return headers;
   } catch (e) {
-    return {};
+    return headers;
   }
 }

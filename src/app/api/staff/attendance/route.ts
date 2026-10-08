@@ -125,4 +125,6 @@ async function handleGet(req: NextRequest) {
     return NextResponse.json({ success: false, error: "Failed to load staff metrics" }, { status: 500 });
   }
 }
-export const GET = withAuthorization(handleGet);
+export const GET = withAuthorization(handleGet, {
+  requiredRole: ["admin", "sysadmin", "hod", "faculty", "warden", "supervisor"],
+});

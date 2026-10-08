@@ -139,6 +139,16 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
 
   const profile = userRes.rows[0];
 
+  // Invalidate JWT tokens if session_version has been incremented
+  if (
+    payload &&
+    typeof (payload as any).session_version === 'number' &&
+    typeof profile.session_version === 'number' &&
+    (payload as any).session_version !== profile.session_version
+  ) {
+    throw new Error('UNAUTHORIZED: Session invalidated');
+  }
+
   // NOTE (Issue #5): the MFA gate was removed from here — it's the wrong layer.
   // This context creation must never fail on MFA state, otherwise the
   // enrollment endpoints themselves become unreachable (lockout trap).

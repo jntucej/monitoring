@@ -20,8 +20,12 @@ function formatTime(isoString: string | null | undefined): string | null {
   }
 }
 
-async function handleGet(req: NextRequest) {
+async function handleGet(req: NextRequest, context: { auth: any }) {
   try {
+    const authRole = context?.auth?.role;
+    const isAdmin = ["admin", "sysadmin"].includes(authRole);
+    const callerDept = context?.auth?.departmentId || context?.auth?.department;
+
     const depts = await getDepartments();
     const deptCodeToShortName: Record<string, string> = {};
     depts.forEach((d) => {
@@ -36,10 +40,16 @@ async function handleGet(req: NextRequest) {
       // Fallback to anon client if service role key is not available
     }
 
-    const { data: users, error: usersErr } = await service
+    let usersQuery = service
       .from("users")
       .select("*, employee_details(*)")
       .in("role", ["faculty", "staff"]);
+
+    if (!isAdmin && callerDept) {
+      usersQuery = usersQuery.eq("department_id", callerDept);
+    }
+
+    const { data: users, error: usersErr } = await usersQuery;
 
     if (usersErr) {
       console.error("Supabase query error fetching faculty users:", usersErr);
@@ -295,4 +305,6 @@ async function handleGet(req: NextRequest) {
     );
   }
 }
-export const GET = withAuthorization(handleGet);
+export const GET = withAuthorization(handleGet, {
+  requiredRole: ["admin", "sysadmin", "hod", "faculty", "warden"],
+});

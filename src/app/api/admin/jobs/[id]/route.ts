@@ -24,10 +24,25 @@ async function handlePatch(req: NextRequest) {
 
     const supabase = getSupabaseServiceClient();
 
-    await supabase
+    const { data: updated, error: updateErr } = await supabase
       .from("scheduled_jobs")
       .update({ enabled })
-      .eq("id", jobId);
+      .eq("id", jobId)
+      .select();
+
+    if (updateErr) {
+      return NextResponse.json(
+        { success: false, error: { code: "SERVER_ERROR", message: updateErr.message } },
+        { status: 500 }
+      );
+    }
+
+    if (!updated || updated.length === 0) {
+      return NextResponse.json(
+        { success: false, error: { code: "NOT_FOUND", message: `Job '${jobId}' not found` } },
+        { status: 404 }
+      );
+    }
 
     await addAudit({
       userId: actorId,

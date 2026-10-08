@@ -94,7 +94,7 @@ export async function validateStudentExitFlow(
     .from("gate_passes")
     .select("*")
     .eq("roll", normalizedRoll)
-    .eq("status", "APPROVED")
+    .in("final_status", ["APPROVED", "APPROVED_PARENT", "APPROVED_ADMIN"])
     .order("created_at", { ascending: false });
 
   if (error) {

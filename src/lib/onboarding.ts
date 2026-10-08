@@ -2,6 +2,8 @@
  * Onboarding & Training Progress Tracker
  */
 
+import { getSupabaseServiceClient } from "./dbClient";
+
 export interface OnboardingStep {
   id: string;
   title: string;
@@ -31,6 +33,18 @@ const ROLE_STEPS: Record<string, OnboardingStep[]> = {
 let inMemoryProgress = new Map<string, Set<string>>();
 
 export async function getUserCompletedSteps(userId: string): Promise<string[]> {
+  try {
+    const supabase = getSupabaseServiceClient();
+    const { data } = await supabase
+      .from("onboarding_progress")
+      .select("step_id")
+      .eq("user_id", userId);
+    if (data && data.length > 0) {
+      return data.map((d: any) => d.step_id);
+    }
+  } catch {
+    // fallback to in-memory
+  }
   const set = inMemoryProgress.get(userId);
   return set ? Array.from(set) : [];
 }
@@ -42,6 +56,15 @@ export async function markStepCompleted(userId: string, stepId: string): Promise
     inMemoryProgress.set(userId, set);
   }
   set.add(stepId);
+
+  try {
+    const supabase = getSupabaseServiceClient();
+    await supabase
+      .from("onboarding_progress")
+      .upsert({ user_id: userId, step_id: stepId, completed_at: new Date().toISOString() }, { onConflict: "user_id,step_id" });
+  } catch {
+    // fallback to in-memory
+  }
 }
 
 export async function getNextRecommendedStep(userId: string, role: string): Promise<OnboardingStep | null> {
