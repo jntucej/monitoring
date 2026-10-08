@@ -1349,6 +1349,15 @@ export async function getThumbprint(userId: string): Promise<{
   };
 }
 
+/**
+ * Verify a user's thumbprint against the stored bcrypt hash.
+ */
+export async function verifyThumbprint(userId: string, signature: string): Promise<boolean> {
+  const tp = await getThumbprint(userId);
+  if (!tp || !tp.hash) return false;
+  return bcrypt.compare(signature, tp.hash);
+}
+
 export async function updateAccountStatus(userId: string, newStatus: AccountStatus): Promise<boolean> {
   const db = getDbClient();
   const { data: user } = await db.from('users').select('name, status').eq('id', userId).single();
