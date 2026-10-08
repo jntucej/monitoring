@@ -156,9 +156,18 @@ export async function restoreDatabaseBackup(
 
     try {
       const sampleRecord = records.length > 0 ? records[0] : null;
-      const pkColumn = sampleRecord
-        ? (sampleRecord.id !== undefined ? 'id' : Object.keys(sampleRecord)[0] ?? 'id')
-        : 'id';
+      const TABLE_PK_MAP: Record<string, string> = {
+        config_exit_reasons: 'code',
+        departments: 'id',
+        gates: 'id',
+        users: 'id',
+        student_details: 'user_id',
+        employee_details: 'user_id',
+        device_user_mappings: 'id',
+        gate_holidays: 'id',
+        system_config: 'id',
+      };
+      const pkColumn = TABLE_PK_MAP[table] || (sampleRecord && sampleRecord.id !== undefined ? 'id' : Object.keys(sampleRecord || {})[0] || 'id');
 
       if (options.truncate) {
         // Safe table truncation without relying on hardcoded UUIDs

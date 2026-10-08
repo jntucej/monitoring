@@ -90,11 +90,19 @@ async function handlePost(req: NextRequest) {
 
   try {
     const { userId, requestedRole, reason } = await req.json().catch(() => ({}));
+    const ALL_ROLES: Role[] = ["operator", "admin", "sysadmin", "supervisor", "guardian", "parent", "hod", "student", "warden", "faculty", "staff", "worker", "visitor"];
 
-    if (!userId || !requestedRole) {
+    if (!userId || !requestedRole || !ALL_ROLES.includes(requestedRole as Role)) {
       return NextResponse.json(
-        { success: false, error: { code: "BAD_REQUEST", message: "userId and requestedRole required" } },
+        { success: false, error: { code: "BAD_REQUEST", message: `Valid requestedRole required. Must be one of: ${ALL_ROLES.join(', ')}` } },
         { status: 400 }
+      );
+    }
+
+    if (requestedRole === "sysadmin" && actorRole !== "sysadmin") {
+      return NextResponse.json(
+        { success: false, error: { code: "FORBIDDEN", message: "Only sysadmins can request or assign the sysadmin role" } },
+        { status: 403 }
       );
     }
 

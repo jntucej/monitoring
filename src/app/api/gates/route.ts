@@ -17,15 +17,19 @@ async function handlePost(req: NextRequest) {
   try {
     const body = await req.json();
     const service = getSupabaseServiceClient();
+    const insertPayload: Record<string, any> = {
+      name: body.name,
+      location: body.location,
+      type: body.type,
+      is_active: body.isActive ?? true,
+    };
+    if (body.id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.id)) {
+      insertPayload.id = body.id;
+    }
+
     const { data, error } = await service
       .from('gates')
-      .insert({
-        id: body.id || `gate-${Date.now()}`,
-        name: body.name,
-        location: body.location,
-        type: body.type,
-        is_active: body.isActive,
-      })
+      .insert(insertPayload)
       .select()
       .single();
 

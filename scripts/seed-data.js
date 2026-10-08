@@ -8,7 +8,7 @@ loadLocalEnv();
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const isDev = process.env.NODE_ENV === "development" || !process.env.NODE_ENV || process.env.NODE_ENV === "test";
-const DEFAULT_SEED_PIN = process.env.SEED_DEFAULT_PIN || (isDev ? crypto.randomBytes(4).toString('hex') : null);
+const DEFAULT_SEED_PIN = process.env.SEED_DEFAULT_PIN || (isDev ? String(crypto.randomInt(100000, 999999)) : null);
 
 if ((process.env.NODE_ENV === "production" || process.env.VERCEL_ENV === "production") && process.env.ALLOW_PROD_SEED !== "true") {
   console.error("Refusing to seed in production environment without ALLOW_PROD_SEED=true.");

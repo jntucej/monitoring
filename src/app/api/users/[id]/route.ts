@@ -5,7 +5,7 @@ import type { Role, AccountStatus } from "@/lib/types";
 import type { FlagStatus } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
 
-const VALID_ROLES: Role[] = ["operator", "admin", "sysadmin", "parent", "student", "warden", "faculty", "staff"];
+const VALID_ROLES: Role[] = ["operator", "admin", "sysadmin", "supervisor", "guardian", "parent", "hod", "student", "warden", "faculty", "staff", "worker", "visitor"];
 const VALID_STATUSES: AccountStatus[] = ["ACTIVE", "LOCKED", "SUSPENDED", "DISABLED", "DEPROVISIONED"];
 const VALID_FLAGS: Array<FlagStatus> = ["OVERDUE", "UNAUTHORIZED_EXIT", "NO_GATE_PASS", "SUSPENDED", "CURFEW_VIOLATION", "MANUAL_LOCKDOWN"]; // null handled separately in setUserFlag
 
@@ -59,13 +59,14 @@ async function handlePatch(req: NextRequest) {
     const supabase = getSupabaseServiceClient();
 
     if (body && typeof body === "object") {
-      const updates: Record<string, any> = {};
-
       if (body.role && VALID_ROLES.includes(body.role as Role)) {
-        updates.role = body.role;
+        await updateUserRole(id, body.role as Role, actorId);
       }
-      if (body.account_status && VALID_STATUSES.includes(body.account_status as AccountStatus)) {
-        updates.status = body.account_status || body.status;
+      if (body.status || body.account_status) {
+        const targetStatus = (body.status || body.account_status) as AccountStatus;
+        if (VALID_STATUSES.includes(targetStatus)) {
+          await updateAccountStatus(id, targetStatus);
+        }
       }
       if (body.flags && Array.isArray(body.flags)) {
         for (const flag of body.flags) {
@@ -75,20 +76,11 @@ async function handlePatch(req: NextRequest) {
         }
       }
 
-      if (Object.keys(updates).length > 0) {
-        const { error } = await supabase.from("users").update(updates).eq("id", id);
-        if (error) {
-          return NextResponse.json(
-            { success: false, error: { code: "SERVER_ERROR", message: error.message } },
-            { status: 500 }
-          );
-        }
-        await addAudit({
-          userId: actorId,
-          action: "USER_UPDATED",
-          details: { timestamp: new Date().toISOString(), targetId: id, updates },
-        });
-      }
+      await addAudit({
+        userId: actorId,
+        action: "USER_UPDATED",
+        details: { timestamp: new Date().toISOString(), targetId: id, updates: body },
+      });
     }
 
     return NextResponse.json({ success: true, message: "User updated successfully" });
@@ -130,7 +122,7 @@ async function handleDelete(req: NextRequest) {
     }
 
     const supabase = getSupabaseServiceClient();
-    const { error } = await supabase.from("users").update({ account_status: "DEPROVISIONED" }).eq("id", id);
+    const { error } = await supabase.from("users").update({ status: "DEPROVISIONED" }).eq("id", id);
     if (error) {
       return NextResponse.json(
         { success: false, error: { code: "SERVER_ERROR", message: error.message } },

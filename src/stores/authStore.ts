@@ -268,10 +268,11 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         // Clear storage and hard-redirect to login if not already on login page
         if (typeof window !== "undefined") {
           try {
+            sessionStorage.removeItem("gate-monitor-auth");
             localStorage.removeItem("gate-monitor-token");
             localStorage.removeItem("gate-monitor-auth");
             localStorage.removeItem("gate-monitor-role");
-            localStorage.clear();
+            localStorage.removeItem("gate-monitor-user");
           } catch (e) {
             console.error("Error clearing storage on logout:", e);
           }

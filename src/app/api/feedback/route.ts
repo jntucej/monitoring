@@ -11,7 +11,7 @@ let feedbackStore: Array<{
   timestamp: string;
 }> = [];
 
-export async function POST(req: NextRequest) {
+async function handlePost(req: NextRequest) {
   try {
     const body = await req.json();
     const { theme, comment } = body;
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     }
 
     feedbackStore.unshift(feedback);
-    if (feedbackStore.length > 1000) feedbackStore.length = 1000;
+    if (feedbackStore.length > 50) feedbackStore.length = 50;
 
     return NextResponse.json({ success: true, data: feedback });
   } catch (error) {
@@ -67,4 +67,5 @@ async function handleGet(req: NextRequest) {
   return NextResponse.json({ success: true, data: feedbackStore });
 }
 
-export const GET = withRateLimit(withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin"] }));
+export const POST = withRateLimit(handlePost, { keyPrefix: "feedback_post", maxRequests: 10, windowMs: 60 * 1000 });
+export const GET = withRateLimit(withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin"] }), { keyPrefix: "feedback_get", maxRequests: 30 });

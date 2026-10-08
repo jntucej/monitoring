@@ -141,6 +141,8 @@ export function mPerson(r: any): Person {
     createdAt: r.created_at || undefined,
     updatedAt: r.updated_at || undefined,
     flagStatus: r.flag_status ?? null,
+    thumbprintHash: r.thumbprint_hash || r.thumbprintHash || undefined,
+    thumbprintVerifiedAt: r.thumbprint_verified_at || r.thumbprintVerifiedAt || undefined,
     studentDetails,
     employeeDetails,
     // Backwards-compatibility aliases
@@ -1612,7 +1614,7 @@ export async function addScan(input: {
     "home_out": "Home Out",
     "daily_outing": "Daily Outing",
   };
-  const scanReason = input.reason ? (dbScanReasonMap[input.reason] || input.reason) : null;
+  const scanReason = input.reason ? (dbScanReasonMap[input.reason] || input.reason) : "Regular";
 
   const scanRow = {
     id,
@@ -1760,7 +1762,7 @@ export async function addAudit(entry: {
     action: entry.action,
     user_id: targetUserId,
     user_name: entry.userName || "System User",
-    user_role: entry.role || "sysadmin",
+    user_role: entry.role || null,
     details: detailsStr,
     timestamp,
   };
@@ -1791,7 +1793,7 @@ export async function addNotification(
   const id = `notif-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
   const timestamp = new Date().toISOString();
 
-  const validRecipientType = (['user', 'role', 'department', 'all'].includes(recipientType) ? recipientType : 'user') as any;
+  const validRecipientType = (['user', 'role', 'department', 'parent', 'guardian', 'all'].includes(recipientType) ? recipientType : 'user') as any;
 
   const notifRow = {
     id,
@@ -1906,23 +1908,25 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
     };
   });
 
-  const deptCounts: Record<string, { in: number; out: number }> = {
-    CSE: { in: 0, out: 0 },
-    IT: { in: 0, out: 0 },
-    ECE: { in: 0, out: 0 },
-    EEE: { in: 0, out: 0 },
-    ME: { in: 0, out: 0 },
-  };
+  const deptCounts: Record<string, { in: number; out: number; name?: string }> = {};
+  DEPARTMENTS.forEach((d) => {
+    deptCounts[d.code] = { in: 0, out: 0, name: d.name };
+  });
 
   todayScans.forEach((s: any) => {
     // mScan() returns the department as a full name (or a raw code) — map it
     // back to the DEPARTMENTS code so it matches the deptCounts keys.
-    const deptCode = s.department
-      ? DEPARTMENTS.find((d) => d.code === s.department || d.name === s.department)?.code
+    const deptMatch = s.department
+      ? DEPARTMENTS.find((d) => d.code === s.department || d.name === s.department)
       : undefined;
-    if (deptCode && deptCounts[deptCode]) {
+    const deptCode = deptMatch?.code || (s.department ? String(s.department).trim().toUpperCase() : undefined);
+    const deptName = deptMatch?.name || s.department || "Other";
+    if (deptCode) {
+      if (!deptCounts[deptCode]) {
+        deptCounts[deptCode] = { in: 0, out: 0, name: deptName };
+      }
       if (s.direction === "IN") deptCounts[deptCode].in++;
-      else if (deptCounts[deptCode]) deptCounts[deptCode].out++;
+      else deptCounts[deptCode].out++;
     }
   });
 
@@ -1931,14 +1935,13 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
     0
   );
 
-  const deptBreakdown = DEPARTMENTS.map((dept) => {
-    const counts = deptCounts[dept.code] || { in: 0, out: 0 };
+  const deptBreakdown = Object.entries(deptCounts).map(([code, counts]) => {
     const total = counts.in + counts.out;
     const pct = totalDeptScans > 0 ? Math.round((total / totalDeptScans) * 100) : 0;
 
     return {
-      dept: dept.name,
-      deptCode: dept.code,
+      dept: counts.name || code,
+      deptCode: code,
       in: counts.in,
       out: counts.out,
       pct,

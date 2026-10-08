@@ -14,16 +14,14 @@ function extractToken(req: NextRequest): string | null {
 
 async function handleGet(req: NextRequest) {
   try {
-    const token = extractToken(req);
-    if (!token) {
+    const authRole = req.headers.get("x-user-role");
+    const authUserId = req.headers.get("x-user-id");
+    if (!authRole || !authUserId) {
       return NextResponse.json(
         { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required" } },
         { status: 401 }
       );
     }
-
-    const authRole = req.headers.get("x-user-role");
-    const authUserId = req.headers.get("x-user-id");
     const params = req.nextUrl.searchParams;
     const uniqueId = params.get("uniqueId") || params.get("roll");
     const q = params.get("q");
@@ -134,24 +132,9 @@ async function handlePost(req: NextRequest) {
     }
 
     const cleanEmail = email?.trim().toLowerCase() || `${uniqueId.trim().toLowerCase()}@jntuhcej.ac.in`;
-    const tempPassword = randomBytes(16).toString("hex") + "Aa1!";
     const service = getSupabaseServiceClient();
+    const id = crypto.randomUUID();
 
-    const { data: authData, error: authErr } = await service.auth.admin.createUser({
-      email: cleanEmail,
-      password: tempPassword,
-      email_confirm: true,
-      user_metadata: { name: String(fullName).trim(), role: personType, unique_id: uniqueId.trim().toUpperCase() },
-    });
-
-    if (authErr || !authData?.user?.id) {
-      return NextResponse.json(
-        { success: false, error: { code: "AUTH_ERROR", message: authErr?.message || "Failed to create authentication account" } },
-        { status: 500 }
-      );
-    }
-
-    const id = authData.user.id;
     const userRow = {
       id,
       unique_id: uniqueId.trim().toUpperCase(),
@@ -167,7 +150,6 @@ async function handlePost(req: NextRequest) {
 
     const { data: newUser, error } = await service.from("users").insert(userRow).select().single();
     if (error || !newUser) {
-      await service.auth.admin.deleteUser(id).catch(() => {});
       return NextResponse.json(
         { success: false, error: { code: "DB_ERROR", message: error?.message || "Database insert failed" } },
         { status: 500 }

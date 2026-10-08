@@ -134,10 +134,11 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
   };
 
   const handlePinConfirm = async () => {
-    if (pin.length !== 4) {
+    const cleanPin = pin.trim();
+    if (!/^\d{4,8}$/.test(cleanPin)) {
       addToast({
         title: "Invalid PIN",
-        message: "Please enter a valid 4-digit admin PIN.",
+        message: "Please enter a valid 4-8 digit operator PIN.",
         variant: "error",
       });
       return;
@@ -145,18 +146,12 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
 
     setSubmitting(true);
     try {
-      // Get current user info to try PIN verification with their ID first, then fallbacks
-      const currentUser = useUIStore.getState(); // or auth store
       const authStore = (await import("@/stores/authStore")).useAuthStore.getState();
       const user = authStore.user;
 
-      const candidates = [
-        user?.employeeId,
-        user?.uniqueId,
-        user?.email,
-      ].filter((val): val is string => Boolean(val && val.trim()));
+      const identifier = user?.uniqueId || user?.employeeId || user?.email || user?.id;
 
-      if (candidates.length === 0) {
+      if (!identifier) {
         addToast({
           title: "Configuration Error",
           message: "No user identifier found for PIN verification.",
@@ -166,24 +161,17 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
         return;
       }
 
-      let verified = false;
+      const verifyHeaders: Record<string, string> = { "Content-Type": "application/json" };
+      if (authStore.token) verifyHeaders["Authorization"] = `Bearer ${authStore.token}`;
+      if (user?.currentSessionToken) verifyHeaders["X-Session-Token"] = user.currentSessionToken;
 
-      for (const empId of candidates) {
-        const verifyHeaders: Record<string, string> = { "Content-Type": "application/json" };
-        if (authStore.token) verifyHeaders["Authorization"] = `Bearer ${authStore.token}`;
-        if (user?.currentSessionToken) verifyHeaders["X-Session-Token"] = user.currentSessionToken;
-
-        const verifyRes = await fetch("/api/auth/verify-pin", {
-          method: "POST",
-          headers: verifyHeaders,
-          body: JSON.stringify({ employeeId: empId, pin }),
-        });
-        const json = await verifyRes.json();
-        if (json.success && json.verified) {
-          verified = true;
-          break;
-        }
-      }
+      const verifyRes = await fetch("/api/auth/verify-pin", {
+        method: "POST",
+        headers: verifyHeaders,
+        body: JSON.stringify({ identifier, pin: cleanPin }),
+      });
+      const json = await verifyRes.json();
+      const verified = Boolean(json.success && json.verified);
 
       if (!verified) {
         addToast({
