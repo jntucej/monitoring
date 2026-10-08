@@ -27,22 +27,32 @@ export function verifyCsrf(req: NextRequest): NextResponse | null {
   }
 
   const origin = req.headers.get("origin");
-  const host = req.headers.get("host");
+  const host = req.headers.get("x-forwarded-host") || req.headers.get("host");
 
   if (origin && host) {
     try {
-      const originHost = new URL(origin).host;
-      const allowedOriginEnv = process.env.ALLOWED_ORIGIN;
-      let allowedHost: string | null = null;
+      const originHost = new URL(origin).host.toLowerCase();
+      const targetHost = host.toLowerCase();
+      const allowedOriginEnv = process.env.ALLOWED_ORIGIN || process.env.ALLOWED_ORIGINS;
+      let allowedHosts: string[] = [];
       if (allowedOriginEnv && allowedOriginEnv !== "*") {
-        try {
-          allowedHost = new URL(allowedOriginEnv).host;
-        } catch {
-          allowedHost = allowedOriginEnv;
-        }
+        allowedHosts = allowedOriginEnv
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+          .map((o) => {
+            try {
+              return new URL(o).host.toLowerCase();
+            } catch {
+              return o.toLowerCase();
+            }
+          });
       }
 
-      const isMatch = originHost === host || (allowedHost && originHost === allowedHost);
+      const isMatch =
+        originHost === targetHost ||
+        allowedOriginEnv === "*" ||
+        allowedHosts.includes(originHost);
       if (!isMatch) {
         return NextResponse.json(
           {
