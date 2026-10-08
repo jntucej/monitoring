@@ -1550,6 +1550,16 @@ export async function addScan(input: {
     throw new Error(`Access Denied: Account status is ${person.status}. Gate access denied.`);
   }
 
+  // Enforce server-side student exit gate-pass requirements
+  const isStudent = person.role === "student" || person.personType === "student" || !!person.studentDetails;
+  if (isStudent && input.direction === "OUT") {
+    const { validateStudentExitFlow } = await import("./student-exit-flow");
+    const flowResult = await validateStudentExitFlow(uniqueId, input.direction, input.reason);
+    if (!flowResult.allowed) {
+      throw new Error(flowResult.error || `Exit denied: Approved gate pass required for ${input.reason || "student exit"}`);
+    }
+  }
+
   let client = supabase;
   try {
     const { getSupabaseServiceClient } = await import('./dbClient');
@@ -1563,18 +1573,28 @@ export async function addScan(input: {
       "Day Out": "day_pass",
       "Home Out": "home_out",
       "Daily Outing": "daily_outing",
+      "daily_outing": "daily_outing",
+      "home_in": "home_in",
+      "regular": "regular",
+      "Regular": "regular",
+      "Day Pass": "day_pass",
     };
-    const normReason = reasonAliasMap[input.reason] || input.reason;
-    const { data: validReason, error: rErr } = await client
+    const normReason = reasonAliasMap[input.reason] || input.reason.toLowerCase().trim().replace(/\s+/g, '_');
+    const searchCodes = Array.from(new Set([input.reason, normReason].filter(Boolean)));
+    const { data: validReasons, error: rErr } = await client
         .from('config_exit_reasons')
         .select('code')
-        .in('code', [input.reason, normReason, 'day_pass', 'home_out', 'daily_outing'])
-        .maybeSingle();
+        .in('code', searchCodes)
+        .limit(1);
     
-    if (!validReason && (!rErr || (rErr.code !== '42P01' && rErr.code !== 'PGRST205'))) {
-      // If table is missing or doesn't match, allow standard pass reasons (day_pass, home_out, daily_outing)
-      const allowedStandard = ['day_pass', 'home_out', 'daily_outing', 'Day Out', 'Home Out', 'Day Pass', 'Daily Outing'];
-      if (!allowedStandard.includes(input.reason)) {
+    const matchedReason = validReasons && validReasons.length > 0 ? validReasons[0] : null;
+    const allowedStandard = [
+      'day_pass', 'home_out', 'daily_outing', 'home_in', 'regular',
+      'Day Out', 'Home Out', 'Day Pass', 'Daily Outing', 'Regular', 'Emergency', 'emergency'
+    ];
+
+    if (!matchedReason && !allowedStandard.map(s => s.toLowerCase()).includes(input.reason.toLowerCase()) && !allowedStandard.includes(normReason)) {
+      if (!rErr || (rErr.code !== '42P01' && rErr.code !== 'PGRST205')) {
         throw new Error(`Invalid exit reason: ${input.reason}`);
       }
     }

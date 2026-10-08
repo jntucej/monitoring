@@ -73,7 +73,7 @@ export default function AdminStudentsPage() {
 
   const toggleFlag = useCallback((student: Student) => {
     const cur = (student as any).flagStatus ?? null;
-    const next = cur === "suspicious" ? null : "suspicious";
+    const next = cur ? null : "MANUAL_LOCKDOWN";
     setStudents(prev => prev.map(s => s.id === student.id ? { ...s, flagStatus: next } as any : s));
     patchUser(student.id, { flagStatus: next });
   }, [patchUser]);

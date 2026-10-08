@@ -75,6 +75,19 @@ async function handlePatch(req: NextRequest) {
           }
         }
       }
+      if (body.flagStatus !== undefined || body.flag_status !== undefined) {
+        const rawFlag = body.flagStatus !== undefined ? body.flagStatus : body.flag_status;
+        if (rawFlag === null || rawFlag === "" || rawFlag === "NONE") {
+          await setUserFlag(id, null, actorId);
+        } else if (typeof rawFlag === "string") {
+          const upper = rawFlag.toUpperCase() as FlagStatus;
+          if (VALID_FLAGS.includes(upper)) {
+            await setUserFlag(id, upper, actorId);
+          } else if (rawFlag === "suspicious" || rawFlag === "FLAGGED") {
+            await setUserFlag(id, "MANUAL_LOCKDOWN", actorId);
+          }
+        }
+      }
 
       await addAudit({
         userId: actorId,

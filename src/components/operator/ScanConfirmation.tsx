@@ -65,14 +65,14 @@ export function ScanConfirmation({
   const [approvedPasses, setApprovedPasses] = useState<any[]>([]);
   const [loadingPasses, setLoadingPasses] = useState(false);
   const [isFlagged, setIsFlagged] = useState(
-    student.status === "SUSPENDED" || student.flagStatus === "suspicious"
+    student.status === "SUSPENDED" || !!student.flagStatus
   );
   const [flaggingLoading, setFlaggingLoading] = useState(false);
 
   const handleToggleFlagAccount = async () => {
     if (flaggingLoading) return;
     const nextStatus = isFlagged ? "ACTIVE" : "SUSPENDED";
-    const nextFlagStatus = isFlagged ? null : "suspicious";
+    const nextFlagStatus = isFlagged ? null : "MANUAL_LOCKDOWN";
     setFlaggingLoading(true);
     try {
       const authStore = useAuthStore.getState();

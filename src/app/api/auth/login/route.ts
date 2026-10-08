@@ -157,8 +157,8 @@ async function handleLogin(req: NextRequest) {
     );
     // ── MFA Verification & Enrollment Enforcement ─────────────────
     const requiresMfa =
-      (user.role === "sysadmin" || user.role === "admin") &&
-      (await isMfaRequiredForAdmin());
+      Boolean(user.two_factor_enabled) ||
+      ((user.role === "sysadmin" || user.role === "admin") && (await isMfaRequiredForAdmin()));
 
     if (requiresMfa) {
       if (!user.two_factor_enabled) {
