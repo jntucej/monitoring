@@ -293,6 +293,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         setItem: () => {},
         removeItem: () => {},
       })),
+      skipHydration: true,
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },

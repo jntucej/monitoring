@@ -165,7 +165,44 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
         redirectAfterLogin(authStore.role);
         return;
       }
-      triggerShake(formatLoginError(pinResult.code, pinResult.error));
+
+      // Fallback: If numeric input wasn't a valid PIN, attempt standard password login
+      // (e.g. numeric passwords, admin/sysadmin roles, or multi-factor challenges)
+      const fallbackResult = await login(
+        identifier,
+        passwordOrPin,
+        mfaChallenge ? { challenge: mfaChallenge, totpCode } : undefined
+      );
+
+      if (fallbackResult.success) {
+        setMfaChallenge(null);
+        setTotpCode("");
+        if (rememberMe) {
+          localStorage.setItem("gate-monitor-remember", "true");
+        }
+        addToast({
+          title: "Access Granted",
+          message: `Authenticated successfully.`,
+          variant: "success",
+        });
+        const authStore = useAuthStore.getState();
+        redirectAfterLogin(authStore.role);
+        return;
+      }
+
+      if (fallbackResult.code === "MFA_REQUIRED" || fallbackResult.mfaEnrollmentRequired) {
+        triggerShake(formatLoginError("MFA_REQUIRED"));
+        router.push("/sysadmin/security");
+        return;
+      }
+
+      if (fallbackResult.mfaRequired && fallbackResult.mfaChallenge) {
+        setMfaChallenge(fallbackResult.mfaChallenge);
+        triggerShake("Enter the 6-digit code from your authenticator app.");
+        return;
+      }
+
+      triggerShake(formatLoginError(fallbackResult.code || pinResult.code, fallbackResult.error || pinResult.error));
       return;
     } else {
       const result = await login(
