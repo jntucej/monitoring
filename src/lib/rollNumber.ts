@@ -279,7 +279,7 @@ export function getStudentYearFromRoll(roll: string | null | undefined, now: Dat
   if (!decoded) return null;
   const currentYear = now.getFullYear();
   const yearOfStudy = currentYear - decoded.admissionYear + 1;
-  return yearOfStudy > 0 ? yearOfStudy : 1;
+  return yearOfStudy > 0 ? yearOfStudy : null;
 }
 
 /**

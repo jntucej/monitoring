@@ -173,6 +173,7 @@ export default function AdminAnalyticsPage() {
           </span>
           {(filters.department !== "all" || filters.personType !== "all" || filters.direction !== "all" || filters.search || filters.sortBy !== "newest") && (
             <button
+              type="button"
               onClick={() => setFilters({ department: "all", personType: "all", direction: "all", search: "", sortBy: "newest" })}
               className="text-xs text-blue-500 hover:underline font-medium"
             >

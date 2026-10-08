@@ -261,7 +261,6 @@ export function UserManagement() {
               className="block w-full rounded-md border-gray-700 bg-gray-800 text-white sm:text-sm p-2"
             >
               <option value="admin">Admin</option>
-              <option value="admin">Admin</option>
               <option value="operator">Operator</option>
               <option value="parent">Parent</option>
               <option value="student">Student</option>

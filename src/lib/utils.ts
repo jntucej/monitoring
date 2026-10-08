@@ -124,7 +124,7 @@ export function getAuthHeaders(): Record<string, string> {
     const parsed = JSON.parse(raw);
     const state = parsed?.state || {};
     const token = state.token;
-    const sessionToken = state.user?.currentSessionToken || state.user?.handle;
+    const sessionToken = state.user?.currentSessionToken;
     
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
