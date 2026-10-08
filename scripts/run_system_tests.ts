@@ -12,6 +12,8 @@ import {
 } from "../src/lib/auth-token";
 import { decodeProtectedHeader, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
+import { randomInt, randomBytes } from "crypto";
+import { assertLength, LIMITS } from "../src/lib/validation";
 import { generateMobileToken, verifyMobileToken, validateMobileToken } from "../src/lib/mobile-auth";
 import { generateQrToken, validateQrToken } from "../src/lib/qr-token";
 import { createEnrollToken, verifyEnrollToken } from "../src/lib/mfa-enroll";
@@ -192,7 +194,7 @@ async function runTests() {
   const generateMockEnrollmentCode = () => {
     let out = "";
     for (let i = 0; i < 8; i++) {
-      out += alphabet[Math.floor(Math.random() * alphabet.length)];
+      out += alphabet[randomInt(alphabet.length)];
     }
     return out;
   };
@@ -394,7 +396,7 @@ async function runTests() {
   assert(verifyTOTPCode(decryptedSecret, "999999" === currentOtp ? "000000" : "999999") === false, "Reject invalid TOTP code");
 
   // Recovery codes generation & consumption
-  const recoveryCodes = Array.from({ length: 10 }, () => Math.random().toString(36).substring(2, 10));
+  const recoveryCodes = Array.from({ length: 10 }, () => randomBytes(4).toString("hex"));
   const recoveryHashes = await Promise.all(recoveryCodes.map((c) => bcrypt.hash(c, 10)));
   assert(recoveryCodes.length === 10, "Generate 10 recovery codes");
   assert(bcrypt.compareSync(recoveryCodes[0], recoveryHashes[0]), "Recovery code matches bcrypt hash");
@@ -538,6 +540,23 @@ async function runTests() {
 
   await invalidateCache("test:college_setting:*");
   assert((await getCached(testKey)) === null, "Pattern-based cache invalidation cleans matching keys");
+
+  // 4. Input Validation & Security Hardening (Level 1 & 2 fixes)
+  console.log("\n🛡️  [4/4] Testing Input Validation & Security Hardening...");
+  // L2-06 assertLength tests
+  assert(assertLength("Valid text", 50, "test") === "Valid text", "assertLength accepts valid string within limit");
+  let threwEmpty = false;
+  try { assertLength("   ", 50, "test"); } catch { threwEmpty = true; }
+  assert(threwEmpty, "assertLength rejects whitespace-only string");
+  let threwExceeded = false;
+  try { assertLength("A".repeat(5001), LIMITS.FEEDBACK_COMMENT, "feedback"); } catch { threwExceeded = true; }
+  assert(threwExceeded, "assertLength rejects string exceeding FEEDBACK_COMMENT limit");
+
+  // L1-02 MFA fail-closed behavior test
+  delete process.env.MFA_REQUIRED_FOR_ADMIN;
+  invalidateCache("system_config:mfaRequiredForAdmin");
+  const failClosedResult = await isMfaRequiredForAdmin();
+  assert(failClosedResult === true, "isMfaRequiredForAdmin fails closed (true) when DB unreadable and no override");
 
   // Summary
   console.log("\n====================================================");

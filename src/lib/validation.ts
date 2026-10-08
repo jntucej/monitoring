@@ -35,3 +35,23 @@ export function validatePassRequestPayload(body: any): ValidationResult<Record<s
   }
   return { valid: true, data: body };
 }
+
+export const LIMITS = {
+  FEEDBACK_COMMENT: 5000,
+  FEEDBACK_THEME: 200,
+  TICKET_SUBJECT: 200,
+  TICKET_DESCRIPTION: 5000,
+  TICKET_COMMENT: 3000,
+  ANNOUNCEMENT_TITLE: 200,
+  ANNOUNCEMENT_MESSAGE: 5000,
+  USER_NAME: 200,
+} as const;
+
+export function assertLength(value: unknown, max: number, field: string): string {
+  if (typeof value !== "string") throw new Error(`${field} must be a string`);
+  const trimmed = value.trim();
+  if (!trimmed) throw new Error(`${field} cannot be empty`);
+  if (trimmed.length > max) throw new Error(`${field} exceeds ${max} characters`);
+  return trimmed;
+}
+

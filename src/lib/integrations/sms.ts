@@ -1,3 +1,4 @@
+import { randomBytes } from "crypto";
 import { SMSMessage } from "@/lib/integration-types";
 import { getDbClient } from "@/lib/db";
 
@@ -17,7 +18,7 @@ export async function sendSMS(params: {
   from?: string;
 }): Promise<SMSMessage | null> {
   try {
-    const messageId = `sms_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    const messageId = `sms_${Date.now()}_${randomBytes(4).toString("hex")}`;
 
     // Store in queue first
     const { error: queueError } = await getDbClient()

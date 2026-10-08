@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDbClient } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
+import { assertLength, LIMITS } from "@/lib/validation";
 
 let feedbackStore: Array<{
   id: string;
@@ -14,10 +15,14 @@ let feedbackStore: Array<{
 async function handlePost(req: NextRequest) {
   try {
     const body = await req.json();
-    const { theme, comment } = body;
-    if (!theme || !comment) {
+    let theme: string;
+    let comment: string;
+    try {
+      theme = assertLength(body?.theme, LIMITS.FEEDBACK_THEME, "theme");
+      comment = assertLength(body?.comment, LIMITS.FEEDBACK_COMMENT, "comment");
+    } catch (valErr: any) {
       return NextResponse.json(
-        { success: false, error: "Missing theme or comment" },
+        { success: false, error: valErr.message || "Missing or invalid theme or comment" },
         { status: 400 }
       );
     }

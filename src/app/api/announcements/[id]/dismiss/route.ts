@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomBytes } from "crypto";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 
@@ -15,7 +16,7 @@ async function handlePost(req: NextRequest) {
     const supabase = getSupabaseServiceClient();
 
     const dismissalRow = {
-      id: `dis-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      id: `dis-${Date.now()}-${randomBytes(4).toString("hex")}`,
       announcement_id: id,
       user_id: actorId,
       dismissed_at: new Date().toISOString(),

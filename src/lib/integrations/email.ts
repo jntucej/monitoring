@@ -1,3 +1,4 @@
+import { randomBytes } from "crypto";
 import { EmailMessage } from "@/lib/integration-types";
 import { getDbClient } from "@/lib/db";
 
@@ -20,7 +21,7 @@ export async function sendEmail(params: {
   fromName?: string;
 }): Promise<EmailMessage | null> {
   try {
-    const messageId = `email_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    const messageId = `email_${Date.now()}_${randomBytes(4).toString("hex")}`;
     const to = Array.isArray(params.to) ? params.to.join(", ") : params.to;
 
     // Store in queue first

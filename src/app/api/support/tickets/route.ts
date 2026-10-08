@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomInt } from "crypto";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
+import { assertLength, LIMITS } from "@/lib/validation";
 
 async function handleGet(req: NextRequest) {
   try {
@@ -28,15 +30,20 @@ async function handlePost(req: NextRequest) {
     const actorId = req.headers.get("x-user-id") || "user";
     const actorRole = req.headers.get("x-user-role") || "student";
     const body = await req.json();
-    const { category = "system_issue", priority = "medium", subject, description } = body;
+    const { category = "system_issue", priority = "medium" } = body;
 
-    if (!subject || !description) {
-      return NextResponse.json({ success: false, error: { code: "BAD_REQUEST", message: "Subject and description are required" } }, { status: 400 });
+    let validSubject: string;
+    let validDescription: string;
+    try {
+      validSubject = assertLength(body?.subject, LIMITS.TICKET_SUBJECT, "Subject");
+      validDescription = assertLength(body?.description, LIMITS.TICKET_DESCRIPTION, "Description");
+    } catch (valErr: any) {
+      return NextResponse.json({ success: false, error: { code: "BAD_REQUEST", message: valErr.message || "Subject and description are required" } }, { status: 400 });
     }
 
     const supabase = getSupabaseServiceClient();
     const ticketId = `tck-${Date.now()}`;
-    const ticketNumber = `TCK-${Math.floor(1000 + Math.random() * 9000)}`;
+    const ticketNumber = `TCK-${randomInt(1000, 10000)}`;
 
     const row = {
       id: ticketId,
@@ -46,8 +53,8 @@ async function handlePost(req: NextRequest) {
       user_role: actorRole,
       category,
       priority,
-      subject,
-      description,
+      subject: validSubject,
+      description: validDescription,
       status: "open",
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),

@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomInt } from "crypto";
 import { withAuthorization } from "@/middleware/authorization";
 
 async function handlePost(req: NextRequest) {
   try {
     const { id, config } = await req.json();
-    const responseTime = Math.floor(Math.random() * 80) + 20;
+    const responseTime = randomInt(20, 100);
 
     return NextResponse.json({
       success: true,

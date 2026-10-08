@@ -69,7 +69,8 @@ async function handlePatch(req: NextRequest, { auth }: { auth: AuthContext }) {
       correctionReason,
       adminId,
       profile.name,
-      adminRole || "admin" 
+      adminRole || "admin",
+      auth.gateId
     );
 
     if (!corrected) {

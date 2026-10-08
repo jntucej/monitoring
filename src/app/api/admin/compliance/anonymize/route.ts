@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomBytes } from "crypto";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { addAudit } from "@/lib/db";
@@ -12,7 +13,7 @@ async function handlePost(req: NextRequest) {
     }
 
     const supabase = getSupabaseServiceClient();
-    const hash = Math.random().toString(36).substring(2, 10);
+    const hash = randomBytes(4).toString("hex");
 
     await supabase
       .from("users")
