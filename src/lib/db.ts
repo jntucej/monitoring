@@ -644,13 +644,30 @@ export async function getAllGatesLive(): Promise<Gate[]> {
   const { data: persistentGates } = await client.from('gates').select('*');
   if (!persistentGates || persistentGates.length === 0) return [];
 
-  // Fetch online operators (status ACTIVE and session handle IS NOT NULL)
-  const { data: onlineOperators } = await client
-    .from('users')
-    .select('id, gate_id, supervised_gates, role')
-    .eq('status', 'ACTIVE')
-    .not('handle', 'is', null)
-    .in('role', ['operator', 'admin', 'sysadmin']);
+  // Active operators = operators who have a non-revoked, non-expired session
+  const { data: activeSessions } = await client
+    .from('sessions')
+    .select('user_id')
+    .is('revoked_at', null)
+    .gt('expires_at', new Date().toISOString());
+
+  const activeUserIds = new Set((activeSessions || []).map((s: any) => s.user_id));
+
+  let onlineOperatorGateIds = new Set<string>();
+  if (activeUserIds.size > 0) {
+    const { data: onlineOperators } = await client
+      .from('users')
+      .select('id, gate_id, supervised_gates')
+      .in('id', Array.from(activeUserIds))
+      .eq('role', 'operator'); // only operators, not admin/sysadmin
+
+    for (const op of onlineOperators || []) {
+      if (op.gate_id) onlineOperatorGateIds.add(op.gate_id);
+      if (Array.isArray(op.supervised_gates)) {
+        for (const sg of op.supervised_gates) onlineOperatorGateIds.add(sg);
+      }
+    }
+  }
 
   // Fetch recent scans (within last 15 minutes)
   const fifteenMinsAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
@@ -660,20 +677,10 @@ export async function getAllGatesLive(): Promise<Gate[]> {
     .gte('timestamp', fifteenMinsAgo);
 
   const activeGateIdsFromScans = new Set((recentScans || []).map((s: any) => s.gate_id));
-  const activeGateIdsFromOperators = new Set<string>();
-
-  if (onlineOperators) {
-    for (const op of onlineOperators) {
-      if (op.gate_id) activeGateIdsFromOperators.add(op.gate_id);
-      if (Array.isArray(op.supervised_gates)) {
-        for (const sg of op.supervised_gates) activeGateIdsFromOperators.add(sg);
-      }
-    }
-  }
 
   return persistentGates.map((g: any) => {
     const isConfiguredActive = g.is_active !== false;
-    const hasOnlineOperator = activeGateIdsFromOperators.has(g.id);
+    const hasOnlineOperator = onlineOperatorGateIds.has(g.id);
     const hasRecentScan = activeGateIdsFromScans.has(g.id);
 
     // Gate is ONLINE if it is configured active AND has an online operator or recent scan activity
@@ -1723,7 +1730,9 @@ export async function addScan(input: {
     );
   }
 
-  return { scan: mScan(data), duplicate: false };
+  // Re-attach user record because PostgresQueryBuilder doesn't hydrate relations on simple insert
+  const personRecord = await findPersonByUniqueId(uniqueId);
+  return { scan: mScan({ ...data, users: personRecord || person }), duplicate: false };
 }
 
 export async function getAllLogs(f?: {
@@ -2122,6 +2131,11 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
 // DAILY GATE STATS (per-day table that resets each new day at midnight)
 // --------------------------------------------------------------------------- *
 
+function getIstDateString(d: Date = new Date()): string {
+  // en-CA format is YYYY-MM-DD
+  return d.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+}
+
 /**
  * Read per-day gate stats from the `daily_stats` table.
  *
@@ -2129,7 +2143,7 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
  * scan after local midnight creates a fresh row — today's entries/exits start
  * at zero while all historical days remain recorded.
  *
- * @param date YYYY-MM-DD; defaults to today (UTC day, matching the table rows)
+ * @param date YYYY-MM-DD; defaults to today (Asia/Kolkata day, matching the table rows)
  * @param gateId optional gate UUID to scope; omitted = all gates summary
  */
 export async function getDailyStats(date?: string, gateId?: string): Promise<DailyGateStats | DailyGateStats[] | null> {
@@ -2139,7 +2153,7 @@ export async function getDailyStats(date?: string, gateId?: string): Promise<Dai
     client = getSupabaseServiceClient();
   } catch { /* fallback to anon client */ }
 
-  const day = date || new Date().toISOString().slice(0, 10);
+  const day = date || getIstDateString();
 
   let query = client
     .from('daily_stats')
@@ -2174,11 +2188,9 @@ export async function statsToday(gateId?: string): Promise<{
   recentScans: Scan[];
   personTypeBreakdown: Record<PersonType, PersonTypeStats>;
 }> {
-  // Use a single UTC day boundary for both the daily_stats lookup and the
-  // movement_logs fallback so the counters stay perfectly in sync with the
-  // analytics routes (which also use UTC day boundaries).
-  const day = new Date().toISOString().slice(0, 10);
-  const dayStartUTC = `${day}T00:00:00.000Z`;
+  // Use Asia/Kolkata day boundary matching schema triggers
+  const day = getIstDateString();
+  const dayStartUTC = `${day}T00:00:00+05:30`;
 
   // Read scan history from movement_logs (the active table writes go to).
   // The legacy "gate_logs" table is not written to anymore, so reading from
