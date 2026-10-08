@@ -87,7 +87,8 @@ export function StudentList() {
             const branch = decoded?.departmentFullName ?? dept ?? "—";
             const colorClass =
               (dept && DEPT_COLORS[dept]) ?? "bg-slate-500/20 text-slate-400";
-            const isOnCampus = student.status === "INSIDE" || student.status === "ON_CAMPUS";
+            const sAny = student as any;
+            const isOnCampus = sAny.campusStatus === "IN" || sAny.movementStatus === "IN" || student.status === "INSIDE" || student.status === "ON_CAMPUS" || student.status === "IN" || (Boolean(sAny.checkedInAt) && !Boolean(sAny.checkedOutAt));
             const isWarning = student.flagStatus || student.status === "SUSPENDED";
 
             return (

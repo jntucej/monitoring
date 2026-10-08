@@ -3,7 +3,9 @@ services:
     image: postgres:15-alpine
     container_name: gate_postgres
     restart: always
-    env_file: [.env]
+    env_file:
+      - path: .env
+        required: false
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-gate_monitor}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
@@ -23,7 +25,9 @@ services:
     image: redis:7-alpine
     container_name: gate_redis
     restart: always
-    env_file: [.env]
+    env_file:
+      - path: .env
+        required: false
     command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
     volumes:
       - redisdata:/data
@@ -42,7 +46,9 @@ services:
       target: runner
     container_name: gate_web
     restart: always
-    env_file: [.env]
+    env_file:
+      - path: .env
+        required: false
     environment:
       - NODE_ENV=production
       - PORT=3000
@@ -69,7 +75,9 @@ services:
       target: worker
     container_name: gate_worker
     restart: always
-    env_file: [.env]
+    env_file:
+      - path: .env
+        required: false
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-gate_monitor}
