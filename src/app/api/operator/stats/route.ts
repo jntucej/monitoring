@@ -55,8 +55,8 @@ async function handleGet(req: NextRequest) {
     const userId = req.headers.get("x-user-id") || "";
     const user = await findUserById(userId);
     const gateId = user?.gateId || undefined;
-    const day = new Date().toISOString().slice(0, 10);
-    const dayStartUTC = `${day}T00:00:00.000Z`;
+    const day = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+    const dayStartUTC = `${day}T00:00:00+05:30`;
 
     // ---- 1. All of today's movement logs (gate-scoped when known) ----------
     let logsQuery = service
