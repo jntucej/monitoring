@@ -162,11 +162,11 @@ export async function GET(req: NextRequest) {
 
   // 2g. Look up by (provider, sub) first — stable across email changes.
   const ssoSubject = claims.sub;
-  let user: { id: string; role: Role; status: string; unique_id?: string; name?: string; email?: string } | null = null;
+  let user: { id: string; role: Role; status: string; unique_id?: string; name?: string; email?: string; two_factor_enabled?: boolean } | null = null;
 
   const { data: bySubject } = await service
     .from("users")
-    .select("id, role, status, unique_id, name, email, sso_provider, sso_subject")
+    .select("id, role, status, unique_id, name, email, sso_provider, sso_subject, two_factor_enabled")
     .eq("sso_provider", stateRow.provider_id)
     .eq("sso_subject", ssoSubject)
     .maybeSingle();
@@ -177,7 +177,7 @@ export async function GET(req: NextRequest) {
     // Fallback: match by email only if the account is not already SSO-bound.
     const { data: byEmail } = await service
       .from("users")
-      .select("id, role, status, unique_id, name, email, sso_subject, sso_provider")
+      .select("id, role, status, unique_id, name, email, sso_subject, sso_provider, two_factor_enabled")
       .eq("email", email)
       .maybeSingle();
 
@@ -246,8 +246,9 @@ export async function GET(req: NextRequest) {
   }
 
   // Enforce MFA for privileged roles if 2FA is enrolled
-  const mfaRequired = isMfaRequiredForAdmin(user.role as Role);
-  if (mfaRequired && user.two_factor_enabled) {
+  const isPrivileged = user.role === "admin" || user.role === "sysadmin";
+  const mfaRequired = await isMfaRequiredForAdmin();
+  if (isPrivileged && mfaRequired && user.two_factor_enabled) {
     const challengeId = crypto.randomUUID();
     await service.from("mfa_login_challenges").insert({
       id: challengeId,
