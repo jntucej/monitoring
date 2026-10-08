@@ -26,7 +26,7 @@ export async function exportRangeReport(filters: ExportFilters | string, toDate?
       .order("timestamp", { ascending: false }),
     getDbClient()
       .from("users")
-      .select("id, unique_id, name, role, department"),
+      .select("id, unique_id, name, role, department_id"),
   ]);
 
   const rawScans = (scansRes.data as Record<string, unknown>[]) || [];
@@ -37,7 +37,7 @@ export async function exportRangeReport(filters: ExportFilters | string, toDate?
     const deptCodeMap: Record<string, string> = {
       "01": "CIVIL", "02": "EEE", "03": "ME", "04": "ECE", "05": "CSE", "12": "IT"
     };
-    const rawDept = (user?.department as string) || (scan.department as string) || "";
+    const rawDept = (user?.department_id as string) || (user?.department as string) || (scan.department as string) || "";
     const dept = deptCodeMap[rawDept] || rawDept || "—";
 
     return {

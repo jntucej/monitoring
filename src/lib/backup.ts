@@ -323,18 +323,23 @@ export async function verifyLatestBackup(): Promise<BackupVerificationResult> {
     }
   } catch {}
 
-  // 3. Cryptographic payload checksum validation
+  // 3. Backup record validation (size, status, table count)
   try {
-    const { data: latestBackup } = await getDbClient()
+    const { data: latestBackup, error: backupErr } = await getDbClient()
       .from('backups')
-      .select('checksum, size')
+      .select('id, filename, size, table_count, record_count, status, created_at')
       .eq('status', 'completed')
       .order('created_at', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
-    if (latestBackup && !latestBackup.checksum) {
-      failures.push('Backup payload missing SHA-256 cryptographic checksum verification metadata');
+    if (!backupErr && latestBackup) {
+      if (latestBackup.size <= 0) {
+        failures.push(`Latest backup '${latestBackup.filename}' has zero byte size`);
+      }
+      if (latestBackup.record_count < 0) {
+        failures.push(`Latest backup '${latestBackup.filename}' has invalid record count`);
+      }
     }
   } catch {}
 

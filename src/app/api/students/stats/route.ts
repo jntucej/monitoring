@@ -51,15 +51,32 @@ async function handleGet(req: NextRequest) {
     const users = usersRes.data || [];
     const detailsMap = new Map((detailsRes.data || []).map((sd: any) => [sd.user_id, sd]));
 
+    const deptCodeMap: Record<string, string> = {
+      "01": "CIVIL",
+      "02": "EEE",
+      "03": "ME",
+      "04": "ECE",
+      "05": "CSE",
+      "12": "IT",
+    };
+
     // Join and apply filters in memory
     const joinedStudents = users.map((u: any) => {
       const sd = detailsMap.get(u.id) || {};
+      const roll = sd.roll || u.unique_id || "";
+      let rawDept = u.department_id || "";
+      if (!rawDept && roll.length >= 8) {
+        const code = roll.substring(6, 8).toUpperCase();
+        rawDept = deptCodeMap[code] || code;
+      }
+      const department = deptCodeMap[rawDept] || rawDept || "CSE";
+
       return {
         ...u,
         student_details: sd,
         gender: sd.gender || "male",
         year: sd.year || 1,
-        department: u.department_id || sd.department || "CSE",
+        department,
         student_type: sd.student_type || "DM",
       };
     }).filter((s: any) => {
