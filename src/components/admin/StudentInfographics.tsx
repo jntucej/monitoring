@@ -23,13 +23,45 @@ const FILTER_OPTIONS: Record<FilterKeys, string[]> = {
   type: ["ALL", "HM", "HF", "DM", "DF"],
 };
 
-function FilterSelect({ label, value, options, onChange }: { label: string; value: string; options: string[]; onChange: (v: string) => void }) {
+const YEAR_LABELS: Record<string, string> = {
+  "1": "1st Year",
+  "2": "2nd Year",
+  "3": "3rd Year",
+  "4": "4th Year",
+};
+
+function getFilterOptionLabel(filterKey: string, opt: string, label: string): string {
+  if (opt === "ALL") return "All " + label + "s";
+  if (filterKey === "year" && YEAR_LABELS[opt]) return YEAR_LABELS[opt];
+  return opt;
+}
+
+function FilterSelect({
+  filterKey,
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  filterKey?: FilterKeys;
+  label: string;
+  value: string;
+  options: string[];
+  onChange: (v: string) => void;
+}) {
   return (
     <div className="space-y-1.5">
       <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">{label}</label>
-      <select value={value} onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] text-[var(--text-primary)] text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
-        {options.map((opt) => <option key={opt} value={opt}>{opt === "ALL" ? "All " + label + "s" : opt}</option>)}
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] text-[var(--text-primary)] text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+      >
+        {options.map((opt) => (
+          <option key={opt} value={opt}>
+            {getFilterOptionLabel(filterKey || "", opt, label)}
+          </option>
+        ))}
       </select>
     </div>
   );
@@ -127,20 +159,21 @@ export function StudentInfographics() {
       {showFilters && (
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-            <FilterSelect label="Department" value={filters.department} options={FILTER_OPTIONS.department} onChange={(v) => setFilter("department", v)} />
-            <FilterSelect label="Year" value={filters.year} options={FILTER_OPTIONS.year} onChange={(v) => setFilter("year", v)} />
-            <FilterSelect label="Status" value={filters.status} options={FILTER_OPTIONS.status} onChange={(v) => setFilter("status", v)} />
-            <FilterSelect label="Gender" value={filters.gender} options={FILTER_OPTIONS.gender} onChange={(v) => setFilter("gender", v)} />
-            <FilterSelect label="Type" value={filters.type} options={FILTER_OPTIONS.type} onChange={(v) => setFilter("type", v)} />
+            <FilterSelect filterKey="department" label="Department" value={filters.department} options={FILTER_OPTIONS.department} onChange={(v) => setFilter("department", v)} />
+            <FilterSelect filterKey="year" label="Year" value={filters.year} options={FILTER_OPTIONS.year} onChange={(v) => setFilter("year", v)} />
+            <FilterSelect filterKey="status" label="Status" value={filters.status} options={FILTER_OPTIONS.status} onChange={(v) => setFilter("status", v)} />
+            <FilterSelect filterKey="gender" label="Gender" value={filters.gender} options={FILTER_OPTIONS.gender} onChange={(v) => setFilter("gender", v)} />
+            <FilterSelect filterKey="type" label="Type" value={filters.type} options={FILTER_OPTIONS.type} onChange={(v) => setFilter("type", v)} />
           </div>
           {hasFilters && (
             <div className="mt-3 flex flex-wrap gap-2">
               {Object.entries(filters).map(([key, value]) => {
                 if (value === "ALL") return null;
+                const displayLabel = key === "year" && YEAR_LABELS[value] ? YEAR_LABELS[value] : (FILTER_OPTIONS[key as FilterKeys]?.find((o) => o === value) || value);
                 return (
                   <button key={key} onClick={() => setFilter(key as FilterKeys, "ALL")}
                     className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold hover:bg-emerald-500/20 transition-all">
-                    {FILTER_OPTIONS[key as FilterKeys]?.find((o) => o === value) || value}<X className="w-3 h-3" />
+                    {displayLabel}<X className="w-3 h-3" />
                   </button>
                 );
               })}

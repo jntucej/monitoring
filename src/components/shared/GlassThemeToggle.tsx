@@ -14,6 +14,8 @@ export interface GlassThemeToggleProps {
   className?: string;
 }
 
+const FEEDBACK_THEME_STORAGE_KEY = "gate_monitor_theme_feedback_last";
+
 export function GlassThemeToggle({ className = "" }: GlassThemeToggleProps) {
   const store = useUIStore();
   const { isLiveStream, toggleLiveStream, triggerLiveRefresh } = useGlass();
@@ -34,10 +36,16 @@ export function GlassThemeToggle({ className = "" }: GlassThemeToggleProps) {
       }, 300);
     }
     store.setTheme(newTheme);
-    const last = localStorage.getItem("lastFeedbackTheme");
-    if (last !== newTheme) {
-      setLastTheme(newTheme);
-      localStorage.setItem("lastFeedbackTheme", newTheme);
+    try {
+      if (typeof window !== "undefined") {
+        const last = localStorage.getItem(FEEDBACK_THEME_STORAGE_KEY);
+        if (last !== newTheme) {
+          setLastTheme(newTheme);
+          localStorage.setItem(FEEDBACK_THEME_STORAGE_KEY, newTheme);
+        }
+      }
+    } catch {
+      // Ignore storage restrictions if running in iframe / restricted mode
     }
   };
 
