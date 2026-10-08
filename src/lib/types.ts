@@ -109,6 +109,7 @@ export interface Person {
   uniqueId: string;
   fullName: string;
   personType: PersonType;
+  role?: Role | string;
   department?: string;
   designation?: string;
   email?: string;
