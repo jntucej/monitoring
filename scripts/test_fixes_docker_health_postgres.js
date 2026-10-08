@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
 
-console.log('🧪 Running Validation Tests for Postgres 15, 127.0.0.1 DB Host, and Health Checks...\n');
+console.log('🧪 Running Validation Tests for Postgres 17, 127.0.0.1 DB Host, and Health Checks...\n');
 
 let passed = 0;
 let total = 0;
@@ -18,7 +18,7 @@ function test(name, fn) {
   }
 }
 
-test('Fix 1: docker-compose files use postgres:15-alpine', () => {
+test('Fix 1: docker-compose files use Postgres 17 image (supabase/postgres:17.6.1.136)', () => {
   const files = [
     'docker-compose.yml',
     'docker-compose.base.yml'
@@ -26,8 +26,7 @@ test('Fix 1: docker-compose files use postgres:15-alpine', () => {
   for (const f of files) {
     if (fs.existsSync(f)) {
       const content = fs.readFileSync(f, 'utf8');
-      assert(content.includes('image: postgres:15-alpine'), `${f} must use postgres:15-alpine`);
-      assert(!content.includes('image: postgres:16-alpine'), `${f} must not use postgres:16-alpine`);
+      assert(content.includes('supabase/postgres:17') || content.includes('postgres:17'), `${f} must use Postgres 17`);
     }
   }
 });
