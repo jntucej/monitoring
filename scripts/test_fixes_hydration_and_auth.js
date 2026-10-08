@@ -74,11 +74,40 @@ test('PIN login allows faculty role', () => {
   assert(pinRoute.includes('"faculty"'), 'pin-login route must include faculty in ALLOWED_PIN_ROLES');
 });
 
-// 7. LoginForm numeric fallback
-test('LoginForm falls back from PIN login to password login on failure', () => {
+// 7. LoginForm explicit mode tab switch & routing
+test('LoginForm provides explicit mode switch between Password and Security PIN', () => {
   const loginForm = readFile('src/components/shared/LoginForm.tsx');
-  assert(loginForm.includes('const isPurePin = /^\\d{4,8}$/.test(passwordOrPin);'), 'LoginForm checks for pure numeric credential');
-  assert(loginForm.includes('const fallbackResult = await login('), 'LoginForm falls back to standard login if pinLogin is unsuccessful');
+  assert(loginForm.includes('const [loginMode, setLoginMode] = useState<"password" | "pin">("password");'), 'LoginForm declares loginMode state with password default');
+  assert(loginForm.includes('onClick={() => setLoginMode("password")}'), 'LoginForm has Password mode switch button');
+  assert(loginForm.includes('onClick={() => setLoginMode("pin")}'), 'LoginForm has Security PIN mode switch button');
+  assert(loginForm.includes('if (loginMode === "pin") {'), 'LoginForm routes to pinLogin when loginMode is pin');
+  assert(loginForm.includes('const result = await login('), 'LoginForm executes standard login for password mode');
+});
+
+// 8. CSRF multi-origin support
+test('CSRF handlers support comma-separated multi-origin configuration and forwarded hosts', () => {
+  const csrfLib = readFile('src/lib/csrf.ts');
+  assert(csrfLib.includes('process.env.ALLOWED_ORIGIN || process.env.ALLOWED_ORIGINS'), 'csrf.ts checks ALLOWED_ORIGIN and ALLOWED_ORIGINS');
+  assert(csrfLib.includes('.split(",")'), 'csrf.ts parses comma-separated allowed origins');
+  assert(csrfLib.includes('req.headers.get("x-forwarded-host") || req.headers.get("host")'), 'csrf.ts resolves forwarded host');
+
+  const csrfMiddleware = readFile('src/middleware/csrf.ts');
+  assert(csrfMiddleware.includes('.split(",")'), 'middleware csrf.ts parses comma-separated allowed origins');
+  assert(csrfMiddleware.includes('req.headers.get("x-forwarded-host") || req.headers.get("host")'), 'middleware csrf.ts resolves forwarded host');
+});
+
+// 9. Postgres schema columns
+test('Database and Supabase schemas define password_hash and initial_pin_hash columns', () => {
+  const dbSchema = readFile('database/schema.sql');
+  assert(dbSchema.includes('password_hash TEXT'), 'database/schema.sql must contain password_hash TEXT');
+  assert(dbSchema.includes('initial_pin_hash'), 'database/schema.sql must contain initial_pin_hash');
+
+  const supabaseSchemaPath = path.resolve(process.cwd(), 'supabase/schema.sql');
+  if (fs.existsSync(supabaseSchemaPath)) {
+    const supabaseSchema = readFile('supabase/schema.sql');
+    assert(supabaseSchema.includes('password_hash TEXT'), 'supabase/schema.sql must contain password_hash TEXT');
+    assert(supabaseSchema.includes('initial_pin_hash'), 'supabase/schema.sql must contain initial_pin_hash');
+  }
 });
 
 console.log(`\n🎉 Test Results: ${passed}/${total} passed!`);
