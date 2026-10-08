@@ -2402,7 +2402,7 @@ export type FlagStatus = 'OVERDUE' | 'UNAUTHORIZED_EXIT' | 'NO_GATE_PASS' | 'SUS
  * Set or clear an admin advisory flag on a user.
  * Does NOT affect users.status — purely a gate-alert signal.
  */
-export async function setUserFlag(userId: string, flag: FlagStatus, actorId: string): Promise<boolean> {
+export async function setUserFlag(userId: string, flag: FlagStatus | null, actorId: string): Promise<boolean> {
   const { getSupabaseServiceClient } = await import('./dbClient');
   const service = getSupabaseServiceClient();
   const { data: user } = await service.from('users').select('name').eq('id', userId).single();
