@@ -200,3 +200,17 @@ export async function verifyPassword(
     return false;
   }
 }
+
+if (typeof process !== "undefined" && process.env.NODE_ENV === "production") {
+  const required = ["AUTH_JWT_SECRET", "MOBILE_TOKEN_SECRET", "QR_TOKEN_SECRET", "MFA_ENROLL_SECRET"];
+  for (const name of required) {
+    const v = process.env[name];
+    if (!v || v.length < 32) {
+      console.error(`[auth-token:FATAL] ${name} missing or <32 chars — the app will reject all tokens.`);
+    }
+  }
+  const totpKey = process.env.TOTP_ENCRYPTION_KEY;
+  if (!totpKey || totpKey.length < 64) {
+    console.error("[auth-token:FATAL] TOTP_ENCRYPTION_KEY missing or not 64 hex chars.");
+  }
+}

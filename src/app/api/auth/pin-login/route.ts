@@ -19,7 +19,7 @@ const INVALID_CREDENTIALS = {
   },
 };
 
-const ALLOWED_PIN_ROLES: Role[] = ["operator", "staff", "worker"];
+const ALLOWED_PIN_ROLES: Role[] = ["operator", "staff", "worker", "faculty"];
 
 async function handlePinLogin(req: NextRequest) {
   // 1. CSRF Protection: check Origin against Host for state-changing POST

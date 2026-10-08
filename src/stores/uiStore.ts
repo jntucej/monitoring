@@ -64,6 +64,8 @@ export const useUIStore = create<UIState & UIActions>()(
             document.documentElement.classList.add("light");
           }
           localStorage.setItem("gate-monitor-theme", theme);
+          // Persist to cookie so the server can render the right theme next request
+          document.cookie = `gate-monitor-theme=${theme}; path=/; max-age=31536000; SameSite=Lax`;
         }
         set({ theme });
       },

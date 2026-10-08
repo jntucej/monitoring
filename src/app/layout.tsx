@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ClientProviders } from "./ClientProviders";
 import { getDbClient } from "@/lib/db";
+import { getServerTheme } from "@/lib/theme-cookie";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -36,24 +37,27 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const theme = await getServerTheme();
+
   return (
-    <html lang="en" data-theme="dark" data-scroll-behavior="smooth" suppressHydrationWarning className={`${inter.variable} min-h-full antialiased dark`}>
+    <html
+      lang="en"
+      data-theme={theme}
+      data-scroll-behavior="smooth"
+      className={`${inter.variable} min-h-full antialiased ${theme}`}
+      suppressHydrationWarning
+    >
       <body className="min-h-full flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] font-[var(--font-family)]">
-        {/* Restore saved theme before first paint — supports dark, light, and glossy glass themes */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem("gate-monitor-theme");if(t==="light"||t==="dark"||t==="glass"){document.documentElement.setAttribute("data-theme",t);document.documentElement.classList.remove("dark","light","glass");document.documentElement.classList.add(t);}else{document.documentElement.setAttribute("data-theme","dark");document.documentElement.classList.add("dark");localStorage.setItem("gate-monitor-theme","dark");}}catch(e){document.documentElement.setAttribute("data-theme","dark");document.documentElement.classList.add("dark");}`,
-          }}
-        />
         <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
   );
 }
+
 
 
