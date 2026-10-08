@@ -38,6 +38,40 @@ export interface StudentDetails {
   wardenId?: string;
 }
 
+export type StaffCategory =
+  | "teaching_faculty"
+  | "assistant_professor"
+  | "associate_professor"
+  | "professor"
+  | "hod"
+  | "lab_assistant"
+  | "office_staff"
+  | "support_staff"
+  | "security"
+  | "maintenance"
+  | "canteen"
+  | "driver"
+  | "other";
+
+export const STAFF_REGISTER_A: StaffCategory[] = [
+  "teaching_faculty",
+  "assistant_professor",
+  "associate_professor",
+  "professor",
+  "hod",
+];
+
+export const STAFF_REGISTER_B: StaffCategory[] = [
+  "lab_assistant",
+  "office_staff",
+  "support_staff",
+  "security",
+  "maintenance",
+  "canteen",
+  "driver",
+  "other",
+];
+
 export interface EmployeeDetails {
   personId: string;
   employeeId: string;
@@ -45,6 +79,7 @@ export interface EmployeeDetails {
   joiningDate?: string;
   isHod?: boolean;
   departmentId?: string;
+  staffCategory?: StaffCategory;
 }
 
 export interface VisitorLog {
@@ -147,7 +182,14 @@ export interface User {
   thumbprintVerifiedAt?: string;
 }
 
-export type ExitReason = "Home Out" | "Day Out" | "Leave" | "Regular";
+export type ExitReason =
+  | "Regular" | "Leave" | "Outing" | "Emergency"          // legacy
+  | "Home Out" | "Day Out"                                 // legacy labels
+  | "Daily Outing" | "Day Pass" | "Home In"                // new labels
+  | "daily_outing" | "home_in" | "home_out" | "day_pass";  // canonical codes
+
+/** Canonical exit-reason codes the config table is keyed on. */
+export type ReasonCode = "daily_outing" | "home_in" | "home_out" | "day_pass";
 
 // ---- Operator dashboard: category breakdown & outing tracking -------------
 export type PersonCategoryKey =
