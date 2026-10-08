@@ -147,7 +147,7 @@ export async function getAuditLogs(filters: {
       query(countQuery, countParams)
     ]);
     
-    const logs: AuditLog[] = dataResult.rows.map(row => ({
+    const logs: AuditLog[] = dataResult.rows.map((row: any) => ({
       id: row.id,
       action: row.action,
       userId: row.user_id,

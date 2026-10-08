@@ -49,7 +49,7 @@ export async function getSustainabilityHistory(): Promise<Array<{ month: string;
       ORDER BY DATE_TRUNC('month', requested_at) ASC
     `);
     if (res.rows.length > 0) {
-      return res.rows.map(r => ({
+      return res.rows.map((r: any) => ({
         month: r.month,
         paper_saved: Number(r.paper_saved) || 0,
         carbon_saved: Number(r.carbon_saved) || 0,

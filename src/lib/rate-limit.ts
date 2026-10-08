@@ -25,6 +25,9 @@ export interface RateLimitResult {
 }
 
 export function extractClientIp(req: NextRequest): string {
+  const realIp = req.headers.get('x-real-ip')?.trim();
+  if (realIp) return realIp;
+
   const xForwardedFor = req.headers.get('x-forwarded-for');
   if (xForwardedFor) {
     const ips = xForwardedFor.split(',').map((s) => s.trim()).filter(Boolean);
@@ -32,9 +35,6 @@ export function extractClientIp(req: NextRequest): string {
       return ips[ips.length - 1];
     }
   }
-
-  const realIp = req.headers.get('x-real-ip')?.trim();
-  if (realIp) return realIp;
 
   return 'unknown';
 }
