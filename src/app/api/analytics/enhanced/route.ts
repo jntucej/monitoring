@@ -12,7 +12,7 @@ async function handleGet(req: NextRequest) {
 
     const { data: logs } = await service
       .from('movement_logs')
-      .select('*')
+      .select('id, user_id, gate_id, direction, reason, timestamp, users:users(id, role, department_id)')
       .gte('timestamp', todayStart.toISOString());
 
     const movementLogs = logs || [];
@@ -40,9 +40,10 @@ async function handleGet(req: NextRequest) {
     movementLogs.forEach((scan: any) => {
       const date = new Date(scan.timestamp);
       const hr = date.getHours();
-      const type = scan.person_type || scan.personType || "student";
-      const dept = scan.department;
-      const dir = scan.direction || "IN";
+      const user = scan.users || {};
+      const type = scan.person_type || scan.personType || user.role || "student";
+      const dept = scan.department || user.department_id;
+      const dir = (scan.direction || "IN").toUpperCase();
 
       if (hourlyCounts[hr]) {
         hourlyCounts[hr].total++;
@@ -51,7 +52,7 @@ async function handleGet(req: NextRequest) {
       }
 
       if (dept && deptMap[dept]) {
-        if (dir === "IN") deptMap[dept].entries++;
+        if (dir === "IN" || dir === "ENTRY") deptMap[dept].entries++;
         else deptMap[dept].exits++;
       }
 

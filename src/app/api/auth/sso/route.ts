@@ -11,6 +11,7 @@ import {
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { signAccessToken, signRefreshToken } from "@/lib/auth-token";
 import { addAudit } from "@/lib/db";
+import { isMfaRequiredForAdmin } from "@/lib/authContext";
 import type { Role } from "@/lib/types";
 
 const STATE_TTL_MS = 10 * 60 * 1000; // 10 minutes
@@ -242,6 +243,37 @@ export async function GET(req: NextRequest) {
   // 2i. Existing account must be ACTIVE.
   if (user.status !== "ACTIVE") {
     return NextResponse.redirect(`${url.origin}/login?sso_error=account_${user.status.toLowerCase()}`);
+  }
+
+  // Enforce MFA for privileged roles if 2FA is enrolled
+  const mfaRequired = isMfaRequiredForAdmin(user.role as Role);
+  if (mfaRequired && user.two_factor_enabled) {
+    const challengeId = crypto.randomUUID();
+    await service.from("mfa_login_challenges").insert({
+      id: challengeId,
+      user_id: user.id,
+      expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+    });
+
+    const challengeToken = await signAccessToken({
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      account_status: user.status,
+      name: user.name,
+      mfa_pending: true,
+      challenge_id: challengeId,
+    });
+
+    const response = NextResponse.redirect(`${url.origin}/auth/mfa-challenge?challenge=${challengeId}`);
+    response.cookies.set("mfa_challenge_token", challengeToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 300,
+    });
+    return response;
   }
 
   // ── Step 3: issue OUR tokens, not the IdP's ────────────────

@@ -21,8 +21,9 @@ async function handleGet(req: NextRequest) {
     } else if (resolvedParam === "false") {
       data = data.filter((a) => !a.resolved);
     }
-    if (severity) {
-      data = data.filter((a) => a.severity === severity);
+    const ALLOWED_SEVERITIES = ["low", "medium", "high", "critical", "info", "warning"];
+    if (severity && ALLOWED_SEVERITIES.includes(severity.toLowerCase())) {
+      data = data.filter((a) => a.severity?.toLowerCase() === severity.toLowerCase());
     }
 
     return NextResponse.json({ success: true, data });
@@ -36,6 +37,6 @@ async function handleGet(req: NextRequest) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ['admin', 'sysadmin'] }),
+  withAuthorization(handleGet, { requiredRole: ['admin', 'sysadmin', 'supervisor', 'warden'] }),
   { keyPrefix: 'alerts_list', maxRequests: 60 }
 );

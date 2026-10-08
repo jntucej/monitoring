@@ -107,7 +107,7 @@ async function handlePost(req: NextRequest) {
       numeric_code: numericCode || null,
     };
 
-    const { data, error } = await supabase.from("departments").upsert([payload]).select().single();
+    const { data, error } = await supabase.from("departments").upsert([payload], { onConflict: "code" }).select().single();
     if (error && error.code !== "42P01") throw error;
 
     if (hodUserId) {

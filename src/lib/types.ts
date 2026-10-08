@@ -403,7 +403,7 @@ export interface ExitReasonConfig {
 }
 
 export const DEPARTMENT_CODES: Record<string, string> = {
-  "01": "CSE",
+  "01": "CIVIL",
   "02": "EEE",
   "03": "ME",
   "04": "ECE",
@@ -412,11 +412,12 @@ export const DEPARTMENT_CODES: Record<string, string> = {
 };
 
 export const DEPARTMENT_CODE_TO_NAME: Record<string, string> = {
-  "01": "Computer Science & Engineering",
-  "02": "Information Technology",
-  "03": "Electronics & Communication Engineering",
-  "04": "Electrical & Electronics Engineering",
-  "05": "Mechanical Engineering",
+  "01": "Civil Engineering",
+  "02": "Electrical & Electronics Engineering",
+  "03": "Mechanical Engineering",
+  "04": "Electronics & Communication Engineering",
+  "05": "Computer Science & Engineering",
+  "12": "Information Technology",
 };
 
 export interface HeatmapDay {

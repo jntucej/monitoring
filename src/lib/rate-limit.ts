@@ -64,7 +64,7 @@ export async function checkRateLimit(
     try {
       const { query } = await import('./postgres');
       const rows = await query(
-        `SELECT COUNT(*) as count FROM api_metrics WHERE endpoint = $1 AND timestamp >= $2`,
+        `SELECT COUNT(*) as count FROM api_metrics WHERE path = $1 AND timestamp >= $2`,
         [key, new Date(Date.now() - windowMs).toISOString()]
       );
 
@@ -74,8 +74,8 @@ export async function checkRateLimit(
       const resetTime = new Date(Date.now() + windowMs);
 
       void query(
-        `INSERT INTO api_metrics (endpoint, response_time, status_code, timestamp) VALUES ($1, $2, $3, $4)`,
-        [key, 0, limited ? 429 : 200, new Date().toISOString()]
+        `INSERT INTO api_metrics (path, method, response_time, status_code, timestamp) VALUES ($1, $2, $3, $4, $5)`,
+        [key, 'LIMITER', 0, limited ? 429 : 200, new Date().toISOString()]
       ).catch(() => {});
 
       return {

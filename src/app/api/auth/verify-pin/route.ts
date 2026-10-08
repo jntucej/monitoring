@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/postgres";
 import { withRateLimit } from "@/lib/rate-limit";
-import { verifyPassword } from "@/lib/auth-token";
+import { verifyPassword, verifyAccessToken } from "@/lib/auth-token";
+import { assertCsrf } from "@/lib/csrf";
 
 const INVALID_PIN = {
   success: false,
@@ -10,6 +11,9 @@ const INVALID_PIN = {
 };
 
 async function handleVerifyPin(req: NextRequest) {
+  const csrfError = assertCsrf(req);
+  if (csrfError) return csrfError;
+
   try {
     const body = await req.json().catch(() => null);
     if (!body || typeof body !== "object") {
@@ -19,9 +23,30 @@ async function handleVerifyPin(req: NextRequest) {
       );
     }
 
+    let callerId = req.headers.get("x-user-id");
+    let callerRole = req.headers.get("x-user-role");
+
+    if (!callerId) {
+      const authHeader = req.headers.get("authorization");
+      const bearerToken = authHeader?.startsWith("Bearer ") ? authHeader.slice(7).trim() : req.headers.get("x-session-token");
+      if (bearerToken) {
+        const payload = await verifyAccessToken(bearerToken);
+        if (payload?.sub) {
+          callerId = payload.sub;
+          callerRole = payload.role;
+        }
+      }
+    }
+
+    if (!callerId) {
+      return NextResponse.json(
+        { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required to verify PIN." } },
+        { status: 401 }
+      );
+    }
+
     const { employeeId, login, identifier, pin } = body as Record<string, unknown>;
-    const authUserId = req.headers.get("x-user-id");
-    const rawId = (employeeId || login || identifier || authUserId || "") as string;
+    const rawId = (employeeId || login || identifier || callerId || "") as string;
     const rawPin = (pin || "") as string;
 
     if (!rawId.trim() || !rawPin.trim()) {
@@ -57,6 +82,14 @@ async function handleVerifyPin(req: NextRequest) {
     }
 
     const user = userRes.rows[0];
+
+    const isPrivileged = callerRole === "operator" || callerRole === "admin" || callerRole === "sysadmin" || callerRole === "supervisor";
+    if (!isPrivileged && callerId !== user.id) {
+      return NextResponse.json(
+        { success: false, error: { code: "FORBIDDEN", message: "Cannot verify PIN for another user." } },
+        { status: 403 }
+      );
+    }
 
     // Verify PIN against pin_hash or initial_pin_hash (never password_hash)
     let pinValid = false;
