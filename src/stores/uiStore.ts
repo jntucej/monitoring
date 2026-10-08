@@ -73,25 +73,41 @@ export const useUIStore = create<UIState & UIActions>()(
       toggleSidebarCollapse: () => set((state) => ({ isSidebarCollapsed: !state.isSidebarCollapsed })),
       setSidebarCollapsed: (collapsed) => set({ isSidebarCollapsed: collapsed }),
 
-      success: (message, title) =>
+      success: (message, title) => {
+        const id = `s-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+        const duration = 4000;
         set((state) => ({
-          toasts: [...state.toasts, { id: `s-${Date.now()}`, message, title, variant: "success" }],
-        })),
+          toasts: [...state.toasts, { id, message, title, variant: "success", duration }],
+        }));
+        setTimeout(() => set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) })), duration);
+      },
 
-      error: (message, title) =>
+      error: (message, title) => {
+        const id = `e-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+        const duration = 5000;
         set((state) => ({
-          toasts: [...state.toasts, { id: `e-${Date.now()}`, message, title, variant: "error" }],
-        })),
+          toasts: [...state.toasts, { id, message, title, variant: "error", duration }],
+        }));
+        setTimeout(() => set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) })), duration);
+      },
 
-      info: (message, title) =>
+      info: (message, title) => {
+        const id = `i-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+        const duration = 4000;
         set((state) => ({
-          toasts: [...state.toasts, { id: `i-${Date.now()}`, message, title, variant: "info" }],
-        })),
+          toasts: [...state.toasts, { id, message, title, variant: "info", duration }],
+        }));
+        setTimeout(() => set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) })), duration);
+      },
 
-      warning: (message, title) =>
+      warning: (message, title) => {
+        const id = `w-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+        const duration = 4500;
         set((state) => ({
-          toasts: [...state.toasts, { id: `w-${Date.now()}`, message, title, variant: "warning" }],
-        })),
+          toasts: [...state.toasts, { id, message, title, variant: "warning", duration }],
+        }));
+        setTimeout(() => set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) })), duration);
+      },
     }),
     {
       name: "gate-monitor-ui-storage",

@@ -53,9 +53,11 @@ function startSyncBridge() {
 
   console.log(`[Worker] Spawning sync-bridge script: ${bridgePath}`);
 
-  const child = spawn('npx', ['tsx', bridgePath], {
+  const isWin = process.platform === 'win32';
+  const child = spawn(isWin ? 'npx.cmd' : 'npx', ['tsx', bridgePath], {
     stdio: 'inherit',
     env: process.env,
+    shell: isWin,
   });
 
   child.on('exit', (code, signal) => {

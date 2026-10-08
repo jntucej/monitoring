@@ -43,6 +43,18 @@ export async function sendEmail(params: {
     }
 
     if (EMAIL_CONFIG.enabled) {
+      if (!EMAIL_CONFIG.apiKey) {
+        console.warn("[EMAIL] EMAIL_ENABLED=true but EMAIL_API_KEY is not configured.");
+        await getDbClient()
+          .from("notification_email_queue")
+          .update({
+            status: "failed",
+            error: "EMAIL_API_KEY is missing in environment",
+          })
+          .eq("id", messageId);
+        return null;
+      }
+
       try {
         // Production email sending logic using SendGrid or standard SMTP
         await getDbClient()

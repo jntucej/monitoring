@@ -13,55 +13,81 @@ export async function syncEmployeesFromHR(): Promise<{
   const errors: string[] = [];
 
   try {
-    // Mock HR system employee data
-    const mockEmployees: HREmployee[] = [
-      {
-        employeeId: "FAC-001",
-        fullName: "Dr. S. Sharma",
-        email: "s.sharma@campus.edu",
-        phone: "+919876543210",
-        department: "CSE",
-        designation: "Professor",
-        isHod: true,
-        joiningDate: "2015-06-01",
-        status: "active",
-      },
-      {
-        employeeId: "FAC-002",
-        fullName: "Dr. P. Reddy",
-        email: "p.reddy@campus.edu",
-        phone: "+919876543211",
-        department: "CSE",
-        designation: "Associate Professor",
-        isHod: false,
-        joiningDate: "2018-08-15",
-        status: "active",
-      },
-      {
-        employeeId: "STF-001",
-        fullName: "R. Kumar",
-        email: "r.kumar@campus.edu",
-        phone: "+919876543212",
-        department: "Admin",
-        designation: "Administrative Officer",
-        isHod: false,
-        joiningDate: "2010-01-01",
-        status: "active",
-      },
-    ];
+    const supabase = getDbClient();
+    let employeesToSync: HREmployee[] = [];
 
-    for (const emp of mockEmployees) {
+    // Check if external HRMS endpoint is configured
+    const hrmsEndpoint = process.env.HRMS_API_ENDPOINT;
+    const hrmsApiKey = process.env.HRMS_API_KEY;
+
+    if (hrmsEndpoint) {
       try {
-        // Check if person already exists
-        const { data: existing } = await getDbClient()
+        const hrmsRes = await fetch(hrmsEndpoint, {
+          headers: {
+            "Content-Type": "application/json",
+            ...(hrmsApiKey ? { Authorization: `Bearer ${hrmsApiKey}` } : {}),
+          },
+        });
+        if (hrmsRes.ok) {
+          const resData = await hrmsRes.json();
+          employeesToSync = Array.isArray(resData) ? resData : resData.data || [];
+        } else {
+          errors.push(`HRMS API responded with status ${hrmsRes.status}`);
+        }
+      } catch (hrmsErr: any) {
+        errors.push(`Failed to reach HRMS endpoint: ${hrmsErr.message}`);
+      }
+    }
+
+    // Default sample employee feed for local / test environments
+    if (employeesToSync.length === 0 && (process.env.HRMS_ENABLE_MOCK === "true" || !hrmsEndpoint)) {
+      employeesToSync = [
+        {
+          employeeId: "FAC-001",
+          fullName: "Dr. S. Sharma",
+          email: "s.sharma@campus.edu",
+          phone: "+919876543210",
+          department: "CSE",
+          designation: "Professor",
+          isHod: true,
+          joiningDate: "2015-06-01",
+          status: "active",
+        },
+        {
+          employeeId: "FAC-002",
+          fullName: "Dr. P. Reddy",
+          email: "p.reddy@campus.edu",
+          phone: "+919876543211",
+          department: "CSE",
+          designation: "Associate Professor",
+          isHod: false,
+          joiningDate: "2018-08-15",
+          status: "active",
+        },
+        {
+          employeeId: "STF-001",
+          fullName: "R. Kumar",
+          email: "r.kumar@campus.edu",
+          phone: "+919876543212",
+          department: "Admin",
+          designation: "Administrative Officer",
+          isHod: false,
+          joiningDate: "2010-01-01",
+          status: "active",
+        },
+      ];
+    }
+
+    for (const emp of employeesToSync) {
+      try {
+        const { data: existing } = await supabase
           .from("users")
           .select("id, name, department_id, status")
           .eq("unique_id", emp.employeeId)
           .maybeSingle();
 
         if (existing) {
-          // Update existing person
-          const { error } = await getDbClient()
+          const { error } = await supabase
             .from("users")
             .update({
               name: emp.fullName,
@@ -79,8 +105,7 @@ export async function syncEmployeesFromHR(): Promise<{
             updated++;
           }
 
-          // Update employee details
-          await getDbClient()
+          await supabase
             .from("employee_details")
             .upsert(
               {
@@ -94,8 +119,7 @@ export async function syncEmployeesFromHR(): Promise<{
               { onConflict: "user_id" }
             );
         } else {
-          // Create new person
-          const { data: person, error: personError } = await getDbClient()
+          const { data: person, error: personError } = await supabase
             .from("users")
             .insert({
               id: crypto.randomUUID(),
@@ -117,8 +141,7 @@ export async function syncEmployeesFromHR(): Promise<{
             continue;
           }
 
-          // Create employee details
-          await getDbClient().from("employee_details").insert({
+          await supabase.from("employee_details").insert({
             user_id: person.id,
             employee_id: emp.employeeId,
             designation: emp.designation,
@@ -134,9 +157,19 @@ export async function syncEmployeesFromHR(): Promise<{
       }
     }
 
+    try {
+      await supabase.from("integration_logs").insert({
+        integration_name: "HRMS Sync",
+        status: errors.length === 0 ? "success" : added + updated > 0 ? "partial_error" : "failed",
+        details: `Added: ${added}, Updated: ${updated}, Errors: ${errors.length}`,
+        timestamp: new Date().toISOString(),
+      });
+    } catch {}
+
     return { success: errors.length === 0, added, updated, errors };
   } catch (error: any) {
     console.error("Error syncing employees:", error);
     return { success: false, added: 0, updated: 0, errors: [error.message || "Sync failed"] };
   }
 }
+
