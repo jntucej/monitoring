@@ -1,0 +1,11 @@
+# Infra + env files need an owner sign-off before merging to main.
+# Requires the `require_code_owner_review` flag on the main ruleset.
+docker-compose.yml @jntucej
+Dockerfile @jntucej
+Caddyfile @jntucej
+scripts/03-deploy.sh @jntucej
+scripts/verify-deploy.sh @jntucej
+scripts/verify-prep.sh @jntucej
+scripts/verify-base.sh @jntucej
+.env.example @jntucej
+.github/workflows/ @jntucej
