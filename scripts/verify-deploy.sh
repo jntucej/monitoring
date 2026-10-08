@@ -28,10 +28,20 @@ docker compose --env-file "${ENV_FILE}" exec -T redis redis-cli ping || {
 }
 echo "✅ Redis is responding to ping."
 
-echo "==> 4. Verifying Web App Health Endpoint..."
-curl -s -f http://127.0.0.1:3000/api/health >/dev/null 2>&1 || {
-  echo "⚠️ Web container health check endpoint warming up."
-}
+echo "==> 4. Verifying Web App Health..."
+for i in $(seq 1 30); do
+  STATUS=$(docker inspect --format='{{.State.Health.Status}}' gate_web 2>/dev/null || echo "unknown")
+  if [ "${STATUS}" = "healthy" ]; then
+    echo "✅ Web container is healthy."
+    break
+  fi
+  echo "Waiting for gate_web to be healthy (attempt ${i}/30, status: ${STATUS})..."
+  sleep 10
+  if [ "${i}" = "30" ]; then
+    echo "❌ Web container failed to become healthy."
+    exit 1
+  fi
+done
 
 echo "================================================================="
 echo "✅ POST-DEPLOYMENT VERIFICATION COMPLETE"
