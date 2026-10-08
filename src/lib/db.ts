@@ -1883,6 +1883,14 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
   let todayScansBuilder: any = db.from('movement_logs')
     .select('*, users:users!movement_logs_user_id_fkey!inner(unique_id, name, role, department_id, student_details:student_details!student_details_user_id_fkey(year))')
     .gte('timestamp', todayStart.toISOString());
+  let todayInCountBuilder: any = db.from('movement_logs')
+    .select('id', { count: 'exact', head: true })
+    .gte('timestamp', todayStart.toISOString())
+    .eq('direction', 'IN');
+  let todayOutCountBuilder: any = db.from('movement_logs')
+    .select('id', { count: 'exact', head: true })
+    .gte('timestamp', todayStart.toISOString())
+    .eq('direction', 'OUT');
   let yesterdayInBuilder: any = db.from('movement_logs')
     .select('id', { count: 'exact', head: true })
     .gte('timestamp', yesterdayStart.toISOString())
@@ -1895,6 +1903,8 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
     .eq('direction', 'OUT');
   if (gateId) {
     todayScansBuilder = todayScansBuilder.eq('gate_id', gateId);
+    todayInCountBuilder = todayInCountBuilder.eq('gate_id', gateId);
+    todayOutCountBuilder = todayOutCountBuilder.eq('gate_id', gateId);
     yesterdayInBuilder = yesterdayInBuilder.eq('gate_id', gateId);
     yesterdayOutBuilder = yesterdayOutBuilder.eq('gate_id', gateId);
   }
@@ -1902,6 +1912,8 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
   const [
     onCampusCount,
     todayScansRes,
+    todayInRes,
+    todayOutRes,
     yesterdayInRes,
     yesterdayOutRes,
     activeAlertsRes,
@@ -1912,6 +1924,8 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
     todayScansBuilder
       .order('timestamp', { ascending: false })
       .limit(2000),
+    todayInCountBuilder,
+    todayOutCountBuilder,
     yesterdayInBuilder,
     yesterdayOutBuilder,
     db.from('alerts')
@@ -1926,8 +1940,9 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
   const todayScans = (todayScansRes.data || []).map(mScan);
   const activeAlerts = (activeAlertsRes.data || []).map(mAlert);
 
-  const todayIn = todayScans.filter((s: Scan) => s.direction === "IN").length;
-  const todayOut = todayScans.filter((s: Scan) => s.direction === "OUT").length;
+  const todayIn = typeof todayInRes?.count === 'number' ? todayInRes.count : todayScans.filter((s: Scan) => s.direction === "IN").length;
+  const todayOut = typeof todayOutRes?.count === 'number' ? todayOutRes.count : todayScans.filter((s: Scan) => s.direction === "OUT").length;
+  const totalScans = todayIn + todayOut;
 
   const yesterdayIn = yesterdayInRes.count || 0;
   const yesterdayOut = yesterdayOutRes.count || 0;
@@ -1996,7 +2011,10 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
   });
 
   // Calculate person type breakdown
-  const personTypes: PersonType[] = ["student", "faculty", "staff", "worker", "visitor", "parent"];
+  const personTypes: PersonType[] = [
+    "student", "faculty", "staff", "worker", "visitor", "parent",
+    "guardian", "hod", "warden", "operator", "admin", "sysadmin"
+  ];
   const personTypeBreakdown: Record<PersonType, PersonTypeStats> = {
     student: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
     faculty: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
@@ -2004,6 +2022,12 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
     worker: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
     visitor: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
     parent: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
+    guardian: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
+    hod: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
+    warden: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
+    operator: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
+    admin: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
+    sysadmin: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
   };
 
   const userRoles = userRolesRes.data || [];
@@ -2071,11 +2095,11 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
     onCampus: onCampusCount,
     todayIn,
     todayOut,
-    totalScans: todayScans.length,
+    totalScans,
     activeAlerts: activeAlerts.length,
     trendOnCampus: calcTrend(onCampusCount, yesterdayIn - yesterdayOut),
     trendOut: calcTrend(todayOut, yesterdayOut),
-    trendScans: calcTrend(todayScans.length, yesterdayIn + yesterdayOut),
+    trendScans: calcTrend(totalScans, yesterdayIn + yesterdayOut),
     locations,
     activityFeed: todayScans.slice(0, 20),
     deptBreakdown,
@@ -2196,6 +2220,12 @@ export async function statsToday(gateId?: string): Promise<{
     worker: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
     visitor: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
     parent: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
+    guardian: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
+    hod: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
+    warden: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
+    operator: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
+    admin: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
+    sysadmin: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
   };
 
   allPersons.forEach((p: any) => {

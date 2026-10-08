@@ -33,19 +33,20 @@ async function handleGet(req: NextRequest) {
   try {
     const supabase = getSupabaseServiceClient();
     const { data, error } = await supabase
-      .from("campus_settings")
-      .select("value")
+      .from("system_config")
+      .select("*")
       .eq("key", "student_rules")
       .maybeSingle();
 
-    if (error || !data?.value) {
+    const rawVal = data?.value ?? data?.data;
+    if (error || !rawVal) {
       return NextResponse.json({
         success: true,
         data: DEFAULT_STUDENT_RULES,
       });
     }
 
-    const rules = typeof data.value === "string" ? JSON.parse(data.value) : data.value;
+    const rules = typeof rawVal === "string" ? JSON.parse(rawVal) : rawVal;
     return NextResponse.json({
       success: true,
       data: { ...DEFAULT_STUDENT_RULES, ...rules },
@@ -66,10 +67,11 @@ async function handlePost(req: NextRequest, context?: { auth?: AuthContext }) {
     const supabase = getSupabaseServiceClient();
 
     const { error } = await supabase
-      .from("campus_settings")
+      .from("system_config")
       .upsert({
         key: "student_rules",
-        value: JSON.stringify(body),
+        value: body,
+        data: body,
         updated_at: new Date().toISOString(),
       }, { onConflict: "key" });
 

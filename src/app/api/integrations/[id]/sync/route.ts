@@ -27,9 +27,12 @@ async function handlePost(req: NextRequest) {
     await supabase.from("integration_logs").insert({
       id: logId,
       integration_id: id,
-      type: id.replace("int-", ""),
+      action: "SYNC",
       status: "success",
-      records_synced: recordsSynced,
+      details: {
+        type: id.replace("int-", ""),
+        records_synced: recordsSynced,
+      },
       timestamp,
     });
 

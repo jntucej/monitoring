@@ -62,14 +62,17 @@ export async function getSSOConfig(): Promise<SSOConfig> {
 
     if (res.rows && res.rows[0]) {
       const data = res.rows[0];
+      const parsedGroups = typeof data.group_mappings === 'string'
+        ? JSON.parse(data.group_mappings)
+        : (data.group_mappings || {});
       inMemorySSOConfig = {
+        ...inMemorySSOConfig,
         providerId: data.provider_id || "google",
         enabled: Boolean(data.enabled),
         clientId: data.client_id || "",
-        clientSecret: data.client_secret || "",
         issuerUrl: data.issuer_url || "",
-        groupMappings: data.group_mappings || {},
-        autoApproveSsoUsers: Boolean(data.auto_approve_sso_users),
+        groupMappings: parsedGroups,
+        clientSecret: process.env.SSO_CLIENT_SECRET || inMemorySSOConfig.clientSecret || "",
       };
     }
   } catch (err) {
@@ -92,23 +95,22 @@ export async function updateSSOConfig(config: Partial<SSOConfig>): Promise<SSOCo
 
   try {
     await query(
-      `INSERT INTO sso_config (id, provider_id, enabled, client_id, client_secret, issuer_url, group_mappings)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `INSERT INTO sso_config (id, provider_id, enabled, client_id, issuer_url, group_mappings, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, NOW())
        ON CONFLICT (id) DO UPDATE SET
          provider_id = $2,
          enabled = $3,
          client_id = $4,
-         client_secret = $5,
-         issuer_url = $6,
-         group_mappings = $7`,
+         issuer_url = $5,
+         group_mappings = $6,
+         updated_at = NOW()`,
       [
         "default",
         inMemorySSOConfig.providerId,
         inMemorySSOConfig.enabled,
         inMemorySSOConfig.clientId,
-        inMemorySSOConfig.clientSecret,
         inMemorySSOConfig.issuerUrl,
-        inMemorySSOConfig.groupMappings,
+        typeof inMemorySSOConfig.groupMappings === 'object' ? JSON.stringify(inMemorySSOConfig.groupMappings) : (inMemorySSOConfig.groupMappings || '{}'),
       ]
     );
   } catch (err) {

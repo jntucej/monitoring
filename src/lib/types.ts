@@ -18,7 +18,19 @@ export type Role =
 
 export type AccountStatus = "ACTIVE" | "LOCKED" | "SUSPENDED" | "DISABLED" | "DEPROVISIONED";
 
-export type PersonType = "student" | "faculty" | "staff" | "worker" | "visitor" | "parent";
+export type PersonType =
+  | "student"
+  | "faculty"
+  | "staff"
+  | "worker"
+  | "visitor"
+  | "parent"
+  | "guardian"
+  | "hod"
+  | "warden"
+  | "operator"
+  | "admin"
+  | "sysadmin";
 
 export interface StudentDetails {
   personId: string;
