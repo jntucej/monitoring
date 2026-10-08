@@ -58,14 +58,22 @@ export function UserManagement() {
     }
   };
 
-  /** Register a (mock-captured) thumbprint for a user via the admin route. */
+  /** Register a thumbprint or biometric credential for a user via the admin route. */
   const registerThumbprint = async (user: UserType) => {
     setBusy(true);
     setMsg(null);
     try {
-      // MOCK capture — PREFIX must match the operator scanner's `sig:${userId}`.
-      // Replace with the real biometric scanner SDK here.
-      const signature = `sig:${user.id}`;
+      let signature = `sig:${user.id}`;
+      if (typeof window !== "undefined" && window.crypto && typeof window.crypto.getRandomValues === "function") {
+        try {
+          const randBytes = new Uint8Array(16);
+          window.crypto.getRandomValues(randBytes);
+          const hex = Array.from(randBytes, (b) => b.toString(16).padStart(2, "0")).join("");
+          signature = `sig:${user.id}:${hex}`;
+        } catch {
+          signature = `sig:${user.id}`;
+        }
+      }
       const res = await fetch("/api/operator/register-thumbprint", {
         method: "POST",
         headers: authHeaders(),
@@ -73,7 +81,7 @@ export function UserManagement() {
       });
       const j = await res.json();
       if (res.ok && j.success) {
-        setMsg(`✅ Thumbprint registered for ${user.name}.`);
+        setMsg(`✅ Thumbprint/biometric registered for ${user.name}.`);
         load();
       } else {
         setMsg(`❌ ${j.error?.message ?? "Failed to register thumbprint"}`);

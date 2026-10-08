@@ -37,6 +37,18 @@ export async function sendSMS(params: {
     }
 
     if (SMS_CONFIG.enabled) {
+      if (!SMS_CONFIG.apiKey) {
+        console.warn("[SMS] SMS_ENABLED=true but SMS_API_KEY is not configured.");
+        await getDbClient()
+          .from("notification_sms_queue")
+          .update({
+            status: "failed",
+            error: "SMS_API_KEY is missing in environment",
+          })
+          .eq("id", messageId);
+        return null;
+      }
+
       try {
         // Actual Twilio/provider integration logic goes here
         await getDbClient()
