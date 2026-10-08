@@ -37,7 +37,10 @@ export const useUIStore = create<UIState & UIActions>()(
       isSidebarCollapsed: false,
 
       addToast: (toast) => {
-        const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+        const randomSuffix = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+          ? crypto.randomUUID().slice(0, 8)
+          : `${Date.now()}`;
+        const id = `toast-${Date.now()}-${randomSuffix}`;
         const duration = toast.duration ?? 4000;
         const newToast: ToastData = { ...toast, id, duration };
         set((state) => ({ toasts: [...state.toasts, newToast] }));

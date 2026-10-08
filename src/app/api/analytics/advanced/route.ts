@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomInt } from "crypto";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 
@@ -27,7 +28,7 @@ async function handleGet(req: NextRequest) {
       });
     } else {
       const hours = ["08:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00"];
-      hours.forEach((h) => { seriesMap[h] = Math.floor(Math.random() * 80) + 20; });
+      hours.forEach((h) => { seriesMap[h] = randomInt(20, 100); });
     }
 
     const timeSeries = Object.entries(seriesMap).map(([time, count]) => ({ time, count }));

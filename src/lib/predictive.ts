@@ -1,3 +1,4 @@
+import { randomBytes } from "crypto";
 import { getDbClient } from "@/lib/db";
 import { publishAlert } from "@/lib/alerting";
 
@@ -148,7 +149,7 @@ export async function detectAnomalies(): Promise<AnomalyEvent[]> {
     if (Math.abs(zScore) >= 2.0) {
       const severity = Math.abs(zScore) > 3.0 ? "critical" : "high";
       const anomaly: AnomalyEvent = {
-        id: `anom_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        id: `anom_${Date.now()}_${randomBytes(4).toString("hex")}`,
         metric: check.metric,
         actual_value: check.actual,
         expected_value: check.expected,

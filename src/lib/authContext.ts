@@ -68,10 +68,9 @@ export interface AuthContext {
  * Env override MFA_REQUIRED_FOR_ADMIN=true|false always wins (ops break-glass
  * knob that does not depend on the DB).
  *
- * On DB-read failure: FAIL-OPEN (default false) and log loudly. The DB being
- * unreadable is already an incident; demanding MFA would lock every sysadmin
- * out with no recovery path (Issue #5). Production deployments must set
- * MFA_REQUIRED_FOR_ADMIN explicitly (enforced by scripts/validate-env.js).
+ * On DB-read failure: FAIL-CLOSED (default true) and log loudly.
+ * If MFA configuration cannot be verified, access requires MFA for safety.
+ * Operations can override via MFA_REQUIRED_FOR_ADMIN environment variable.
  */
 export async function isMfaRequiredForAdmin(): Promise<boolean> {
   const cached = await getCached<boolean>("system_config:mfaRequiredForAdmin");
@@ -99,9 +98,10 @@ export async function isMfaRequiredForAdmin(): Promise<boolean> {
     await setCached("system_config:mfaRequiredForAdmin", required, 60);
     return required;
   } catch (err) {
-    // FAIL-OPEN: config unreadable is an operational incident, not a lockout.
-    console.error("[auth] isMfaRequiredForAdmin: config read failed, defaulting to false", err);
-    return false;
+    // FAIL CLOSED: assume MFA is required when we cannot verify.
+    console.error("[auth] MFA config unreadable — failing closed (MFA required)", err);
+    // Do NOT cache — allow retry on next request.
+    return true;
   }
 }
 

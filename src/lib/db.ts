@@ -1,7 +1,7 @@
 /* eslint-disable */
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { supabase as browserClient, invalidateAllUserSessions, getSupabaseServiceClient } from './dbClient';
-import { randomUUID } from "crypto";
+import { randomUUID, randomInt, randomBytes } from "crypto";
 import bcrypt from 'bcryptjs';
 import { db, query, withTransaction, getPostgresPool } from "./postgres";
 
@@ -567,7 +567,8 @@ export async function correctScan(
   reason: string,
   userId: string,
   userName: string,
-  role: string
+  role: string,
+  gateId?: string
 ): Promise<Scan | null> {
   const { data: origScan, error: origErr } = await supabase
     .from('movement_logs')
@@ -580,13 +581,21 @@ export async function correctScan(
     return null;
   }
 
+  // Enforce operator gate scope (L2-05)
+  const isAdmin = role === "admin" || role === "sysadmin";
+  const isSameGateOperator = role === "operator" && gateId && origScan.gate_id === gateId;
+  if (!isAdmin && role === "operator" && !isSameGateOperator) {
+    console.warn('Forbidden: Operator is not authorized to correct scans at another gate:', { userId, gateId, scanGateId: origScan.gate_id });
+    return null;
+  }
+
   const originalTime = new Date(origScan.timestamp).getTime();
   if (Date.now() - originalTime > 60 * 60 * 1000) {
     console.warn('Scan is outside 1-hour correction window:', originalScanId);
     return null;
   }
 
-  const newId = `scan-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
+  const newId = randomUUID();
 
   const correctionRow = {
     id: newId,
@@ -943,7 +952,7 @@ export async function createVisitor(data: {
   visitorPurpose?: string;
 }): Promise<Person | null> {
   const id = randomUUID();
-  const visitorId = `VIS-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+  const visitorId = `VIS-${new Date().getFullYear()}-${randomInt(1000, 10000)}`;
 
   const userRow = {
     id,
@@ -1761,7 +1770,7 @@ export async function addAudit(entry: {
   details: string | Record<string, any>;
   gateId?: string;
 }) {
-  const id = `audit-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
+  const id = `audit-${Date.now()}-${randomBytes(4).toString("hex")}`;
   const timestamp = new Date().toISOString();
   const detailsStr = typeof entry.details === "string" ? entry.details : JSON.stringify(entry.details);
 
@@ -1806,7 +1815,7 @@ export async function addNotification(
   message: string,
   gateId?: string
 ) {
-  const id = `notif-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
+  const id = `notif-${Date.now()}-${randomBytes(4).toString("hex")}`;
   const timestamp = new Date().toISOString();
 
   const validRecipientType = (['user', 'role', 'department', 'parent', 'guardian', 'all'].includes(recipientType) ? recipientType : 'user') as any;

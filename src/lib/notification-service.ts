@@ -1,3 +1,4 @@
+import { randomBytes } from "crypto";
 import { getDbClient } from "@/lib/db";
 import { 
   Notification, 
@@ -169,7 +170,7 @@ export async function sendNotification(
       message = message.replace(new RegExp(`{{${key}}}`, 'g'), String(value));
     }
 
-    const notifId = `notif_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    const notifId = `notif_${Date.now()}_${randomBytes(4).toString("hex")}`;
     const newNotifObj: Notification = {
       id: notifId,
       type,

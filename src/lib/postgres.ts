@@ -372,7 +372,22 @@ export class PostgresQueryBuilder<T = any> {
           default: params.push(cleanVal); sqlParts.push(`${colRef} = $${params.length}`); break;
         }
       } else if (/^[a-zA-Z0-9_.]+\s*(=|!=|>|<|>=|<=|ILIKE|LIKE|IS)\s*.+$/i.test(token)) {
-        sqlParts.push(token);
+        const parts = token.match(/^([a-zA-Z0-9_.]+)\s*(=|!=|>|<|>=|<=|ILIKE|LIKE|IS)\s*(.+)$/i);
+        if (parts) {
+          const [, colRef, op, val] = parts;
+          let cleanVal: any = val.trim();
+          if (cleanVal.startsWith('"') && cleanVal.endsWith('"')) cleanVal = cleanVal.slice(1, -1);
+          else if (cleanVal.startsWith("'") && cleanVal.endsWith("'")) cleanVal = cleanVal.slice(1, -1);
+          if (op.toUpperCase() === "IS") {
+            if (cleanVal === "null") sqlParts.push(`${colRef} IS NULL`);
+            else if (cleanVal === "true") sqlParts.push(`${colRef} IS TRUE`);
+            else if (cleanVal === "false") sqlParts.push(`${colRef} IS FALSE`);
+            else { params.push(cleanVal); sqlParts.push(`${colRef} IS $${params.length}`); }
+          } else {
+            params.push(cleanVal);
+            sqlParts.push(`${colRef} ${op.toUpperCase()} $${params.length}`);
+          }
+        }
       }
     }
     return sqlParts;
