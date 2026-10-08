@@ -71,7 +71,6 @@ async function handleGet(req: NextRequest) {
       { status: 500 }
     );
   }
-  }
 }
 
 export const GET = withRateLimit(
