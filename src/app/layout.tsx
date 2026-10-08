@@ -15,15 +15,15 @@ export async function generateMetadata(): Promise<Metadata> {
   
   try {
     const dbClient = getDbClient();
-    const { data } = await dbClient
+    const { data, error } = await dbClient
       .from('config_college_info')
       .select('name, short_name')
       .limit(1)
       .maybeSingle();
 
-    if (data) {
+    if (data && !error && data.short_name) {
       siteName = `${data.short_name} Gate Monitor`;
-      description = `Student Gate Monitoring System — ${data.name}`;
+      description = `Student Gate Monitoring System — ${data.name || siteName}`;
     }
   } catch (err) {
     // silently fallback

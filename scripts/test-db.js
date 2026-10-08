@@ -32,7 +32,7 @@ async function testDatabase() {
     process.env.DATABASE_URL ||
     `postgres://${process.env.POSTGRES_USER || "postgres"}:${encodeURIComponent(
       process.env.POSTGRES_PASSWORD || "postgres"
-    )}@${process.env.POSTGRES_HOST || "localhost"}:${process.env.POSTGRES_PORT || "5432"}/${
+    )}@${process.env.POSTGRES_HOST || "127.0.0.1"}:${process.env.POSTGRES_PORT || "5432"}/${
       process.env.POSTGRES_DB || "gate_monitor"
     }`;
 

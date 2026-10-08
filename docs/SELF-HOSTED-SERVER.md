@@ -173,10 +173,11 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/health"]
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3000/api/health"]
       interval: 10s
       timeout: 5s
-      retries: 3
+      retries: 5
+      start_period: 30s
     networks:
       - gate-net
 
@@ -344,7 +345,7 @@ docker compose up -d
 docker compose ps
 
 # Health check inside network
-docker compose exec web wget -qO- http://localhost:3000/api/health
+docker compose exec web wget -qO- http://127.0.0.1:3000/api/health
 ```
 
 ### Admin Seeding

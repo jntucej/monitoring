@@ -29,7 +29,7 @@ docker compose --env-file "${ENV_FILE}" exec -T redis redis-cli ping || {
 echo "✅ Redis is responding to ping."
 
 echo "==> 4. Verifying Web App Health Endpoint..."
-curl -s -f http://localhost:3000/api/health >/dev/null 2>&1 || {
+curl -s -f http://127.0.0.1:3000/api/health >/dev/null 2>&1 || {
   echo "⚠️ Web container health check endpoint warming up."
 }
 
