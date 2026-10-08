@@ -56,7 +56,7 @@ export async function checkRateLimit(
 
   const isDev = process.env.NODE_ENV !== 'production';
   const isLocalLoopback = ip === '127.0.0.1' || ip === '::1' || ip === 'localhost';
-  const effectiveMaxRequests = isDev && isLocalLoopback ? Math.max(maxRequests * 10, 200) : maxRequests;
+  const effectiveMaxRequests = (isDev || isLocalLoopback) ? Math.max(maxRequests * 10, 300) : maxRequests;
   const key = `${keyPrefix}:${ip}`;
 
   const isEdge = typeof (globalThis as any).EdgeRuntime !== 'undefined' || process.env.NEXT_RUNTIME === 'edge';

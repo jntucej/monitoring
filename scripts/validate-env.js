@@ -42,7 +42,7 @@ function validate() {
     if (isProd) {
       errors.push('Missing required database configuration: Set DATABASE_URL or (POSTGRES_DB and POSTGRES_PASSWORD)');
     } else {
-      warnings.push('DATABASE_URL is not set (will default to postgres://postgres:postgres@localhost:5432/gate_monitor)');
+      warnings.push('DATABASE_URL is not set (will default to postgres://postgres:postgres@127.0.0.1:5432/gate_monitor)');
     }
   }
 

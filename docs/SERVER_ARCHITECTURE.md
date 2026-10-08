@@ -39,7 +39,7 @@ INTERNET / CAMPUS CLIENTS (Port 80 / 443)
 | **Caddy** | `gate_caddy` | `caddy:2-alpine` | TLS termination, reverse proxy, SSE buffering disable | 80, 443 (Host) |
 | **Web** | `gate_web` | `gate-web:latest` | Next.js 16 standalone SSR and API engine | 3000 |
 | **Worker** | `gate_worker` | `gate-worker:latest` | Scheduled cron jobs (backfill, pass cleanup, log rotation) | N/A |
-| **Postgres** | `gate_postgres` | `postgres:16-alpine` | Primary transactional relational database | 5432 (Internal) |
+| **Postgres** | `gate_postgres` | `postgres:15-alpine` | Primary transactional relational database | 5432 (Internal) |
 | **Redis** | `gate_redis` | `redis:7-alpine` | In-memory cache, token bucket rate limiting | 6379 (Internal) |
 
 ## 4. Host Directory Layout (`/opt/monitoring`)

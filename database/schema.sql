@@ -1053,6 +1053,11 @@ CREATE TABLE IF NOT EXISTS public.config_college_info (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Seed default college configuration if empty
+INSERT INTO public.config_college_info (name, short_name, address, email)
+SELECT 'JNTU College of Engineering Jagtial', 'JNTUCEJ', 'Nachupally, Kondagattu, Jagtial, Telangana 505501', 'principaljntucej@gmail.com'
+WHERE NOT EXISTS (SELECT 1 FROM public.config_college_info);
+
 CREATE TABLE IF NOT EXISTS public.config_exit_reasons (
     code TEXT PRIMARY KEY,
     name TEXT NOT NULL,
