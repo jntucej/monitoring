@@ -342,3 +342,4 @@ export async function logAuditEvent(
     console.error('Error logging audit event:', err);
   }
 }
+export default withAuthorization;

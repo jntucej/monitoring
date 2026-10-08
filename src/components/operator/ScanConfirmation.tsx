@@ -30,11 +30,20 @@ type ActionEntry = {
   parentNotification: boolean | string;
 };
 
-const reasonIcons: Record<ExitReason, React.ElementType> = {
+const reasonIcons: Record<string, React.ElementType> = {
   "Regular": Briefcase,
   "Home Out": Home,
   "Day Out": Sun,
   "Leave": Clock,
+  "Daily Outing": Briefcase,
+  "Day Pass": Sun,
+  "Home In": Home,
+  "daily_outing": Briefcase,
+  "home_in": Home,
+  "home_out": Home,
+  "day_pass": Sun,
+  "Outing": Briefcase,
+  "Emergency": Clock,
 };
 
 export function ScanConfirmation({
