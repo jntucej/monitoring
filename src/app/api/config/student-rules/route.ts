@@ -3,7 +3,7 @@ import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withRateLimit } from "@/lib/rate-limit";
 import { withAuthorization } from "@/middleware/authorization";
 import { addAudit } from "@/lib/db";
-import type { Role } from "@/lib/types";
+import type { AuthContext } from "@/lib/authContext";
 
 const DEFAULT_STUDENT_RULES = {
   curfew: {
@@ -59,8 +59,9 @@ async function handleGet(req: NextRequest) {
   }
 }
 
-async function handlePost(req: NextRequest, user?: { sub: string; role: Role; name?: string }) {
+async function handlePost(req: NextRequest, context?: { auth?: AuthContext }) {
   try {
+    const auth = context?.auth;
     const body = await req.json();
     const supabase = getSupabaseServiceClient();
 
@@ -79,12 +80,12 @@ async function handlePost(req: NextRequest, user?: { sub: string; role: Role; na
       );
     }
 
-    if (user) {
+    if (auth) {
       await addAudit({
         action: "UPDATE_STUDENT_RULES",
-        userId: user.sub,
-        userName: user.name || "Admin",
-        role: user.role,
+        userId: auth.userId,
+        userName: auth.loginIdentifier || "Admin",
+        role: auth.role,
         details: "Campus student entry/exit rules and curfew policies updated",
       });
     }
@@ -102,6 +103,6 @@ async function handlePost(req: NextRequest, user?: { sub: string; role: Role; na
   }
 }
 
-export const GET = withRateLimit(handleGet, { limit: 100, windowMs: 60_000 });
+export const GET = withRateLimit(handleGet, { maxRequests: 100, windowMs: 60_000 });
 export const POST = withAuthorization(handlePost, { requiredRole: ["admin", "sysadmin"] });
 export const PUT = withAuthorization(handlePost, { requiredRole: ["admin", "sysadmin"] });
