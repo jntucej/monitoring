@@ -28,6 +28,10 @@ loadEnvFile(path.join(rootDir, '.env'));
 
 function validate() {
   console.log('🔍 Running Pre-Deploy Environment Validation...');
+  if (process.env.SKIP_ENV_VALIDATION === '1' || process.env.SKIP_ENV_VALIDATION === 'true') {
+    console.log('⚡ SKIP_ENV_VALIDATION is enabled — skipping build-time environment variable assertions.\n');
+    return;
+  }
   const isProd = process.env.NODE_ENV === 'production';
   const errors = [];
   const warnings = [];
