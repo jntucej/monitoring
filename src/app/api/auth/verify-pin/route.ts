@@ -58,16 +58,13 @@ async function handleVerifyPin(req: NextRequest) {
 
     const user = userRes.rows[0];
 
-    // Verify PIN against pin_hash, initial_pin_hash, or password_hash
+    // Verify PIN against pin_hash or initial_pin_hash (never password_hash)
     let pinValid = false;
     if (user.pin_hash) {
       pinValid = await verifyPassword(cleanPin, user.pin_hash);
     }
     if (!pinValid && user.initial_pin_hash) {
       pinValid = await verifyPassword(cleanPin, user.initial_pin_hash);
-    }
-    if (!pinValid && user.password_hash) {
-      pinValid = await verifyPassword(cleanPin, user.password_hash);
     }
 
     if (!pinValid) {

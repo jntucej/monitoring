@@ -2,6 +2,7 @@ import { getDbClient } from "@/lib/db";
 import { getCached, setCached } from "./cache";
 
 export interface DepartmentInfo {
+  id?: string;
   code: string;
   numericCode?: string;
   shortName: string;
@@ -37,6 +38,7 @@ export async function getDepartments(): Promise<DepartmentInfo[]> {
     }
 
     const depts: DepartmentInfo[] = data.map((row: any) => ({
+      id: row.id,
       code: row.code,
       numericCode: row.numeric_code || row.numericCode || undefined,
       shortName: row.short_name || row.shortName || row.code,

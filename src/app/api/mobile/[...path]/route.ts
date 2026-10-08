@@ -88,6 +88,32 @@ async function handlePost(
           return uniformFailure();
         }
 
+        const { isMfaRequiredForAdmin } = await import("@/lib/authContext");
+        const requiresMfa =
+          (user.role === "sysadmin" || user.role === "admin" || user.two_factor_enabled) &&
+          (user.two_factor_enabled || (await isMfaRequiredForAdmin()));
+
+        if (requiresMfa) {
+          const presentedTotp = body.totp_code ? String(body.totp_code).trim() : null;
+          if (!presentedTotp) {
+            return NextResponse.json(
+              {
+                success: false,
+                mfa_required: true,
+                message: "Two-factor authentication code required for this account.",
+              },
+              { status: 403 }
+            );
+          }
+          const { verifyTOTPCode } = await import("@/lib/totp");
+          const { decryptSecret } = await import("@/lib/mfa-secret");
+          const secret = user.two_factor_secret ? decryptSecret(user.two_factor_secret) : null;
+          const totpOk = secret && verifyTOTPCode(secret, presentedTotp);
+          if (!totpOk) {
+            return uniformFailure();
+          }
+        }
+
         const targetDeviceId = String(deviceId || "mobile-device");
         const token = await generateMobileToken(person.id, person.uniqueId, targetDeviceId);
 

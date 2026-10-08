@@ -43,29 +43,43 @@ async function handleGet(req: NextRequest) {
     const genderFilter = req.nextUrl.searchParams.get("gender");
     const typeFilter = req.nextUrl.searchParams.get("type");
 
-    // Total students with optional filters
-    let query = svc.from("users").select("id, role, status, flag_status, student_details!student_details_user_id_fkey!inner(gender)", { count: "exact" }).eq("role", "student");
-    if (statusFilter && statusFilter !== "ALL") query = query.eq("status", statusFilter);
-    if (genderFilter && genderFilter !== "ALL") query = query.eq("student_details.gender", genderFilter);
-    const { data: allStudents, error: studentsErr } = await query;
-    if (studentsErr) throw studentsErr;
+    const [usersRes, detailsRes] = await Promise.all([
+      svc.from("users").select("id, role, status, flag_status, department_id").eq("role", "student"),
+      svc.from("student_details").select("user_id, roll, year, section, batch, student_type, gender, hostel_block, room_number"),
+    ]);
 
-    const total = allStudents?.length || 0;
-    const active = allStudents?.filter((s: any) => s.status === "ACTIVE").length || 0;
-    const suspended = allStudents?.filter((s: any) => s.status === "SUSPENDED").length || 0;
-    const flagged = allStudents?.filter((s: any) => s.flag_status === "suspicious").length || 0;
+    const users = usersRes.data || [];
+    const detailsMap = new Map((detailsRes.data || []).map((sd: any) => [sd.user_id, sd]));
+
+    // Join and apply filters in memory
+    const joinedStudents = users.map((u: any) => {
+      const sd = detailsMap.get(u.id) || {};
+      return {
+        ...u,
+        student_details: sd,
+        gender: sd.gender || "male",
+        year: sd.year || 1,
+        department: u.department_id || sd.department || "CSE",
+        student_type: sd.student_type || "DM",
+      };
+    }).filter((s: any) => {
+      if (statusFilter && statusFilter !== "ALL" && s.status !== statusFilter) return false;
+      if (genderFilter && genderFilter !== "ALL" && String(s.gender).toLowerCase() !== genderFilter.toLowerCase()) return false;
+      if (deptFilter && deptFilter !== "ALL" && s.department !== deptFilter) return false;
+      if (yearFilter && yearFilter !== "ALL" && String(s.year) !== String(yearFilter)) return false;
+      if (typeFilter && typeFilter !== "ALL" && s.student_type !== typeFilter) return false;
+      return true;
+    });
+
+    const total = joinedStudents.length;
+    const active = joinedStudents.filter((s: any) => s.status === "ACTIVE").length;
+    const suspended = joinedStudents.filter((s: any) => s.status === "SUSPENDED").length;
+    const flagged = joinedStudents.filter((s: any) => s.flag_status === "suspicious" || s.flag_status === "FLAGGED").length;
 
     // Department breakdown
-    let deptQuery = svc.from("users").select(`
-        id,
-        student_details!student_details_user_id_fkey!inner(department)
-      `).eq("role", "student");
-    if (deptFilter && deptFilter !== "ALL") deptQuery = deptQuery.eq("student_details.department", deptFilter);
-    const { data: deptData } = await deptQuery;
-
     const deptCounts: Record<string, number> = {};
-    (deptData || []).forEach((u: any) => {
-      const dept = u.student_details?.department || "UNKNOWN";
+    joinedStudents.forEach((s: any) => {
+      const dept = s.department || "UNKNOWN";
       deptCounts[dept] = (deptCounts[dept] || 0) + 1;
     });
 
@@ -79,50 +93,36 @@ async function handleGet(req: NextRequest) {
       .sort((a, b) => b.count - a.count);
 
     // Student type breakdown (HM/HF/DM/DF)
-    let typeQuery = svc.from("users").select("id, student_details!student_details_user_id_fkey!inner(student_type)").eq("role", "student");
-    if (typeFilter && typeFilter !== "ALL") typeQuery = typeQuery.eq("student_type", typeFilter);
-    const { data: typeData } = await typeQuery;
-
     const typeCounts: Record<string, number> = {};
-    (typeData || []).forEach((u: any) => {
-      const t = u.student_details?.student_type || "DM";
+    joinedStudents.forEach((s: any) => {
+      const t = s.student_type || "DM";
       typeCounts[t] = (typeCounts[t] || 0) + 1;
     });
 
-    const byType = Object.entries(typeCounts)
-      .map(([type, count]) => ({
-        type,
-        label: TYPE_LABELS[type]?.label || type,
-        count,
-        color: TYPE_LABELS[type]?.color || "bg-slate-500",
-      }));
+    const byType = Object.entries(typeCounts).map(([type, count]) => ({
+      type,
+      label: TYPE_LABELS[type]?.label || type,
+      count,
+      color: TYPE_LABELS[type]?.color || "bg-slate-500",
+    }));
 
     // Gender breakdown
-    let genderQuery = svc.from("users").select("id, student_details!student_details_user_id_fkey!inner(gender)").eq("role", "student");
-    if (genderFilter && genderFilter !== "ALL") genderQuery = genderQuery.eq("gender", genderFilter);
-    const { data: genderData } = await genderQuery;
-
     const genderCounts: Record<string, number> = {};
-    (genderData || []).forEach((u: any) => {
-      const g = (u.student_details?.gender || "male").toLowerCase();
+    joinedStudents.forEach((s: any) => {
+      const g = (s.gender || "male").toLowerCase();
       genderCounts[g] = (genderCounts[g] || 0) + 1;
     });
 
-    const byGender = Object.entries(genderCounts)
-      .map(([gender, count]) => ({
-        gender: gender.charAt(0).toUpperCase() + gender.slice(1),
-        count,
-        color: gender === "male" ? "bg-blue-500" : "bg-pink-500",
-      }));
+    const byGender = Object.entries(genderCounts).map(([gender, count]) => ({
+      gender: gender.charAt(0).toUpperCase() + gender.slice(1),
+      count,
+      color: gender === "male" ? "bg-blue-500" : "bg-pink-500",
+    }));
 
     // Year breakdown
-    let yearQuery = svc.from("users").select("id, student_details!student_details_user_id_fkey!inner(year)").eq("role", "student");
-    if (yearFilter && yearFilter !== "ALL") yearQuery = yearQuery.eq("student_details.year", yearFilter);
-    const { data: yearData } = await yearQuery;
-
     const yearCounts: Record<string, number> = {};
-    (yearData || []).forEach((u: any) => {
-      const year = u.student_details?.year || "1";
+    joinedStudents.forEach((s: any) => {
+      const year = s.year || "1";
       yearCounts[String(year)] = (yearCounts[String(year)] || 0) + 1;
     });
 
@@ -134,13 +134,12 @@ async function handleGet(req: NextRequest) {
       }))
       .sort((a, b) => parseInt(a.year) - parseInt(b.year));
 
-    // Today's movement stats from movement_logs (not filtered by department/year etc, just role)
+    // Today's movement stats from movement_logs
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
     const { data: todayLogs } = await svc
       .from("movement_logs")
-      .select("direction, person_type")
-      .eq("person_type", "student")
+      .select("direction")
       .gte("timestamp", todayStart.toISOString());
 
     let onCampusToday = 0;

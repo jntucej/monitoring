@@ -634,16 +634,20 @@ END; $$;
 -- 4.5b DAILY GATE STATS ENGINE (per-day rollup; a new date row = automatic midnight reset)
 CREATE OR REPLACE FUNCTION update_daily_stats_on_movement()
 RETURNS TRIGGER LANGUAGE plpgsql SET search_path = public
-AS $$ DECLARE v_date DATE; BEGIN
+AS $$ DECLARE v_date DATE; v_code TEXT; BEGIN
   -- Day boundary follows the movement's recorded timestamp (UTC day), matching the
   -- analytics routes. A movement after local midnight creates a brand-new (date, gate)
   -- row, so today's counters start from zero automatically.
   v_date := (NEW.timestamp AT TIME ZONE 'UTC')::date;
+  SELECT gate_code INTO v_code FROM gates WHERE id = NEW.gate_id;
+  IF v_code IS NULL THEN
+    v_code := NEW.gate_name;
+  END IF;
   INSERT INTO daily_stats (date, gate_id, gate_code, entries, exits, updated_at)
   VALUES (
     v_date,
     NEW.gate_id,
-    NEW.gate_name,
+    v_code,
     CASE WHEN NEW.direction = 'IN'  THEN 1 ELSE 0 END,
     CASE WHEN NEW.direction = 'OUT' THEN 1 ELSE 0 END,
     NOW()
@@ -1028,6 +1032,7 @@ CREATE POLICY "service_role_all_pin_login_attempts"
 CREATE TABLE IF NOT EXISTS public.config_college_info (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT,
+    short_name TEXT,
     address TEXT,
     phone TEXT,
     email TEXT,
@@ -1092,6 +1097,8 @@ CREATE TABLE IF NOT EXISTS public.departments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   code TEXT UNIQUE NOT NULL,
+  numeric_code TEXT UNIQUE,
+  short_name TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );

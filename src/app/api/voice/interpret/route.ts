@@ -4,7 +4,6 @@ import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 
 async function handlePost(req: NextRequest) {
-  const authRole = req.headers.get("x-user-role");
   try {
     const { text } = await req.json();
     if (!text || typeof text !== "string") {

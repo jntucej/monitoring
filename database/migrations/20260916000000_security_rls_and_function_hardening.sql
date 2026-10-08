@@ -180,7 +180,7 @@ CREATE OR REPLACE FUNCTION public.is_admin(p_uid uuid)
 AS $function$
 SELECT EXISTS (
  SELECT 1 FROM public.users
- WHERE id = p_uid AND role IN ('admin', 'sysadmin', 'super_admin')
+ WHERE id = p_uid AND role IN ('admin', 'sysadmin')
 )
 $function$;
 

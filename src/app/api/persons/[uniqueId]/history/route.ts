@@ -6,9 +6,8 @@ import { withRateLimit } from "@/lib/rate-limit";
 import type { AuthContext } from "@/lib/authContext";
 
 function getUniqueId(req: NextRequest): string {
-  return decodeURIComponent(
-    new URL(req.url).pathname.split("/").filter(Boolean)[3] || ""
-  );
+  const segments = new URL(req.url).pathname.split("/").filter(Boolean);
+  return decodeURIComponent(segments[segments.length - 2] || "");
 }
 
 async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {

@@ -326,7 +326,7 @@ export function UserManagement() {
               </div>
               <div className="flex items-center gap-2 flex-wrap">
                 {/* Thumbprint (biometric) registration status + actions */}
-                {false ? (
+                {Boolean(user.thumbprintHash || user.thumbprintVerifiedAt || (user as any).thumbprint_hash || (user as any).thumbprint_verified_at) ? (
                   <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 flex items-center gap-1">
                     <ShieldCheck className="w-3 h-3" /> Biometric ✓
                   </span>
@@ -341,9 +341,9 @@ export function UserManagement() {
                   className="text-xs font-semibold px-3 py-1 rounded-full bg-sky-500/10 text-sky-300 border border-sky-500/20 hover:bg-sky-500/20 disabled:opacity-50 flex items-center gap-1"
                 >
                   <Fingerprint className="w-3 h-3" />
-                  {false ? "Re-register" : "Register"}
+                  {Boolean(user.thumbprintHash || user.thumbprintVerifiedAt || (user as any).thumbprint_hash || (user as any).thumbprint_verified_at) ? "Re-register" : "Register"}
                 </button>
-                {false && (
+                {Boolean(user.thumbprintHash || user.thumbprintVerifiedAt || (user as any).thumbprint_hash || (user as any).thumbprint_verified_at) && (
                   <button
                     onClick={() => clearThumbprint(user)}
                     disabled={busy}
