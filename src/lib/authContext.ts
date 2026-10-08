@@ -505,7 +505,7 @@ export async function getGateStudentInfo(token: string, roll: string) {
   // 1. Query users table with student_details
   const { data: userRecord } = await supabase
     .from('users')
-    .select('*, student_details(*)')
+    .select('*')
     .or(`unique_id.eq.${formattedId},id.eq.${formattedId}`)
     .maybeSingle();
 
@@ -513,7 +513,12 @@ export async function getGateStudentInfo(token: string, roll: string) {
     if (userRecord.status && userRecord.status.toLowerCase() !== 'active') {
       throw new Error('INACTIVE_STUDENT: User account is not active');
     }
-    const sDetails = userRecord.student_details || {};
+    const { data: sDetailsData } = await supabase
+      .from('student_details')
+      .select('*')
+      .eq('user_id', userRecord.id)
+      .maybeSingle();
+    const sDetails = sDetailsData || {};
     return {
       id: userRecord.id,
       roll: userRecord.unique_id,
@@ -521,7 +526,7 @@ export async function getGateStudentInfo(token: string, roll: string) {
       name: userRecord.name,
       fullName: userRecord.name,
       personType: userRecord.role || 'student',
-      department: sDetails.department_id,
+      department: sDetails.department_id || userRecord.department_id,
       year: sDetails.year,
       section: sDetails.section,
       photo: userRecord.photo_url,

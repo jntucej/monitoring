@@ -8,6 +8,30 @@ interface RateLimitStore {
 }
 
 const store: RateLimitStore = {};
+const MAX_STORE_ENTRIES = 5000;
+let lastPruneTime = 0;
+const PRUNE_INTERVAL_MS = 30 * 1000; // prune every 30s
+
+function pruneStore(now: number) {
+  if (now - lastPruneTime < PRUNE_INTERVAL_MS && Object.keys(store).length < MAX_STORE_ENTRIES) {
+    return;
+  }
+  lastPruneTime = now;
+  const keys = Object.keys(store);
+  for (const k of keys) {
+    if (store[k] && store[k].resetTime < now) {
+      delete store[k];
+    }
+  }
+  const remainingKeys = Object.keys(store);
+  if (remainingKeys.length > MAX_STORE_ENTRIES) {
+    remainingKeys
+      .sort((a, b) => (store[a]?.resetTime || 0) - (store[b]?.resetTime || 0))
+      .slice(0, remainingKeys.length - MAX_STORE_ENTRIES)
+      .forEach((k) => delete store[k]);
+  }
+}
+
 const DEFAULT_WINDOW = 60 * 1000;
 const DEFAULT_MAX_REQUESTS = 100;
 
@@ -90,6 +114,7 @@ export async function checkRateLimit(
   }
 
   const now = Date.now();
+  pruneStore(now);
   if (store[key] && store[key].resetTime < now) {
     delete store[key];
   }

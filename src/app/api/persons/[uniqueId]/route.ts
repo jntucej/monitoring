@@ -23,12 +23,22 @@ async function handleGet(req: NextRequest) {
         const service = getSupabaseServiceClient();
         const { data: userCheck } = await service
           .from("users")
-          .select("id, unique_id, student_details!student_details_user_id_fkey(guardian_id)")
+          .select("id, unique_id")
           .eq("unique_id", uniqueId)
           .maybeSingle();
 
         const isSelf = userCheck?.id === authUserId;
-        const isChildOfGuardian = userCheck?.student_details && (userCheck.student_details as any).guardian_id === authUserId;
+        let isChildOfGuardian = false;
+        if (userCheck) {
+          const { data: sDetails } = await service
+            .from("student_details")
+            .select("guardian_id")
+            .eq("user_id", userCheck.id)
+            .maybeSingle();
+          if (sDetails && sDetails.guardian_id === authUserId) {
+            isChildOfGuardian = true;
+          }
+        }
 
         if (!isSelf && !isChildOfGuardian) {
           return NextResponse.json(

@@ -64,6 +64,7 @@ export async function resolveAlert(alertId: string, userId: string): Promise<boo
 }
 
 export const DEPARTMENTS: Department[] = [
+  { code: "CIVIL", name: "Civil Engineering", hod: "Dr. A. Kumar" },
   { code: "CSE", name: "Computer Science & Engineering", hod: "Dr. K. Sridhar" },
   { code: "IT",  name: "Information Technology",        hod: "Dr. P. Sreedhar" },
   { code: "ECE", name: "Electronics & Communication Engineering", hod: "Dr. M. Srinivas" },
@@ -115,6 +116,7 @@ export function mPerson(r: any): Person {
     personType,
     department: (() => {
       const deptCodeMap: Record<string, string> = {
+        "01": "CIVIL",
         "02": "EEE",
         "03": "ME",
         "04": "ECE",
@@ -202,6 +204,7 @@ function mScan(r: any): Scan {
   const personType = user?.role || r.person_type || "student";
   const department = (() => {
     const deptCodeMap: Record<string, string> = {
+      "01": "CIVIL",
       "02": "EEE",
       "03": "ME",
       "04": "ECE",
@@ -673,15 +676,17 @@ export async function getAllGatesLive(): Promise<Gate[]> {
     const hasOnlineOperator = activeGateIdsFromOperators.has(g.id);
     const hasRecentScan = activeGateIdsFromScans.has(g.id);
 
-    // Gate is ONLINE only if it is configured active AND has an online operator or recent scan activity
+    // Gate is ONLINE if it is configured active AND has an online operator or recent scan activity
     const isOnline = isConfiguredActive && (hasOnlineOperator || hasRecentScan);
 
     return {
       id: g.id,
+      gateCode: g.gate_code,
       name: g.name,
       location: g.location,
       type: g.type,
-      isActive: isOnline,
+      isActive: isConfiguredActive,
+      isOnline: isOnline,
     };
   });
 }
@@ -710,10 +715,20 @@ export async function getNotifications(recipientType: string, recipientId: strin
     .select('*')
     .order('created_at', { ascending: false });
 
+  const orClauses: string[] = [];
   if (safeId) {
-    query = query.or(`recipient_id.eq.${safeId},recipient_type.eq.all`);
-  } else if (safeType && safeType !== 'all') {
-    query = query.or(`recipient_type.eq.${safeType},recipient_type.eq.all`);
+    orClauses.push(`recipient_id.eq.${safeId}`);
+  }
+  if (safeType && safeType !== 'all') {
+    orClauses.push(`recipient_id.eq.${safeType}`);
+    orClauses.push(`recipient_type.eq.${safeType}`);
+  }
+  orClauses.push('recipient_id.eq.all');
+  orClauses.push('recipient_type.eq.all');
+
+  const uniqueOrClauses = Array.from(new Set(orClauses));
+  if (uniqueOrClauses.length > 0) {
+    query = query.or(uniqueOrClauses.join(','));
   }
 
   const { data, error } = await query;
@@ -749,42 +764,30 @@ export async function findPersonByUniqueId(uniqueId: string): Promise<Person | n
 
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(formattedId);
 
-  // Tier 1: Query users table with auto-resolved relationships
+  // Tier 1: Query users table and merge details
   try {
+    let userData: any = null;
     if (isUuid) {
-      const { data: userData } = await client.from('users').select('*, student_details!student_details_user_id_fkey(*), employee_details(*)').eq('id', formattedId).maybeSingle();
-      if (userData) return mPerson(userData);
+      const { data } = await client.from('users').select('*').eq('id', formattedId).maybeSingle();
+      userData = data;
     }
-    const { data: userData, error: uErr } = await client.from('users').select('*, student_details!student_details_user_id_fkey(*), employee_details(*)').eq('unique_id', formattedId).maybeSingle();
-    if (!uErr && userData) {
-      return mPerson(userData);
+    if (!userData) {
+      const { data } = await client.from('users').select('*').eq('unique_id', formattedId).maybeSingle();
+      userData = data;
     }
-  } catch (err) {
-    console.warn('[db] findPersonByUniqueId Tier 1 error:', err);
-  }
-
-  // Tier 2: Query simple users table without joins (if explicit join failed)
-  try {
-    if (isUuid) {
-      const { data: simpleUser } = await client.from('users').select('*').eq('id', formattedId).maybeSingle();
-      if (simpleUser) {
-        const { data: sDet } = await client.from('student_details').select('*').eq('user_id', simpleUser.id).maybeSingle();
-        const { data: eDet } = await client.from('employee_details').select('*').eq('user_id', simpleUser.id).maybeSingle();
-        return mPerson({ ...simpleUser, student_details: sDet || undefined, employee_details: eDet || undefined });
-      }
-    }
-    const { data: simpleUser } = await client.from('users').select('*').eq('unique_id', formattedId).maybeSingle();
-    if (simpleUser) {
-      const { data: sDet } = await client.from('student_details').select('*').eq('user_id', simpleUser.id).maybeSingle();
-      const { data: eDet } = await client.from('employee_details').select('*').eq('user_id', simpleUser.id).maybeSingle();
+    if (userData) {
+      const [sDet, eDet] = await Promise.all([
+        client.from('student_details').select('*').eq('user_id', userData.id).maybeSingle(),
+        client.from('employee_details').select('*').eq('user_id', userData.id).maybeSingle(),
+      ]);
       return mPerson({
-        ...simpleUser,
-        student_details: sDet || undefined,
-        employee_details: eDet || undefined,
+        ...userData,
+        student_details: sDet.data || undefined,
+        employee_details: eDet.data || undefined,
       });
     }
   } catch (err) {
-    console.warn('[db] findPersonByUniqueId Tier 2 error:', err);
+    console.warn('[db] findPersonByUniqueId Tier 1 error:', err);
   }
 
   // Tier 3: Query student_details by roll number directly
@@ -830,11 +833,19 @@ export async function findPersonByUniqueId(uniqueId: string): Promise<Person | n
     if (altId && altId !== formattedId) {
       const { data: altUser } = await client
         .from('users')
-        .select('*, student_details!student_details_user_id_fkey(*), employee_details(*)')
+        .select('*')
         .eq('unique_id', altId)
         .maybeSingle();
       if (altUser) {
-        return mPerson(altUser);
+        const [sDet, eDet] = await Promise.all([
+          client.from('student_details').select('*').eq('user_id', altUser.id).maybeSingle(),
+          client.from('employee_details').select('*').eq('user_id', altUser.id).maybeSingle(),
+        ]);
+        return mPerson({
+          ...altUser,
+          student_details: sDet.data || undefined,
+          employee_details: eDet.data || undefined,
+        });
       }
 
       const { data: altEmp } = await client
@@ -1056,16 +1067,14 @@ export async function findGateById(id: string): Promise<Gate | null> {
                    (query === "3" || query === "gate-3" ? (code === "gate-03" || code === "back" || code === "gate-3" || code === "3") : false);
           });
           if (match) {
-            return { id: match.id, name: match.name, location: match.location, type: match.type, isActive: !!match.is_active };
-          }
-          const first = result.data[0];
-          if (first) {
-            return { id: first.id, name: first.name, location: first.location, type: first.type, isActive: !!first.is_active };
+            return { id: match.id, gateCode: match.gate_code || match.gateCode, name: match.name, location: match.location, type: match.type, isActive: match.is_active !== undefined ? !!match.is_active : !!match.isActive };
           }
         }
       }
+      return null;
     } catch (err) {
       console.warn("findGateById client fetch error:", err);
+      return null;
     }
   }
 
@@ -1075,7 +1084,7 @@ export async function findGateById(id: string): Promise<Gate | null> {
   if (isUuid) {
     const { data, error } = await client.from('gates').select('*').eq('id', id).maybeSingle();
     if (!error && data) {
-      return { id: data.id, name: data.name, location: data.location, type: data.type, isActive: !!data.is_active };
+      return { id: data.id, gateCode: data.gate_code, name: data.name, location: data.location, type: data.type, isActive: data.is_active !== false };
     }
   }
 
@@ -1094,12 +1103,11 @@ export async function findGateById(id: string): Promise<Gate | null> {
              (query === "3" || query === "gate-3" ? (code === "gate-03" || code === "back" || code === "gate-3" || code === "3") : false);
     });
     if (match) {
-      return { id: match.id, name: match.name, location: match.location, type: match.type, isActive: !!match.is_active };
+      return { id: match.id, gateCode: match.gate_code, name: match.name, location: match.location, type: match.type, isActive: match.is_active !== false };
     }
-    return { id: allData[0].id, name: allData[0].name, location: allData[0].location, type: allData[0].type, isActive: !!allData[0].is_active };
   }
 
-  return { id: id || "gate-1", name: "Main Gate", location: "Main Entrance", type: "main", isActive: true };
+  return null;
 }
 
 export async function findAllGates(): Promise<Gate[]> {
@@ -2350,13 +2358,24 @@ export async function getPersonHistory(uniqueId: string, limit: number = 20): Pr
 export const getStudentHistory = getPersonHistory;
 
 export async function getLinkedPersons(parentId: string): Promise<Person[]> {
-  const { data, error } = await supabase
+  const db = getDbClient();
+  const { data: sDetails, error: sErr } = await db
     .from('student_details')
-    .select('user_id, users!student_details_user_id_fkey(*)')
+    .select('*')
     .eq('guardian_id', parentId);
 
-  if (error || !data) return [];
-  return data.map((d: any) => mPerson(d.users));
+  if (sErr || !sDetails || sDetails.length === 0) return [];
+  const userIds = sDetails.map((d: any) => d.user_id).filter(Boolean);
+  if (userIds.length === 0) return [];
+
+  const { data: users, error: uErr } = await db
+    .from('users')
+    .select('*')
+    .in('id', userIds);
+
+  if (uErr || !users) return [];
+  const sMap = new Map((sDetails || []).map((s: any) => [s.user_id, s]));
+  return users.map((u: any) => mPerson({ ...u, student_details: sMap.get(u.id) }));
 }
 
 export const getParentChildren = getLinkedPersons;

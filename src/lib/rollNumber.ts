@@ -114,6 +114,7 @@ export const ENTRY_MODE_CODES: Record<string, EntryModeInfo> = {
  * Reference: user-provided decoding model.
  */
 export const ROLL_DEPT_CODES: Record<string, { short: string; full: string }> = {
+  "01": { short: "CIVIL", full: "Civil Engineering" },
   "02": { short: "EEE", full: "Electrical & Electronics Engineering" },
   "03": { short: "ME",  full: "Mechanical Engineering" },
   "04": { short: "ECE", full: "Electronics & Communication Engineering" },
