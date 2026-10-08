@@ -270,7 +270,7 @@ function mAlert(r: any): Alert {
     title: r.title,
     message: r.message,
     gateId: r.gate_id,
-    studentRoll: r.student_roll,
+    studentRoll: r.user_unique_id || r.student_roll || '',
     timestamp: r.timestamp,
     resolved: !!r.resolved,
   };
@@ -463,7 +463,7 @@ export async function createGatePass(passData: {
     requested_at: new Date().toISOString(),
     guardian_status: parentStatus,
     admin_status: 'PENDING',
-    final_status: 'PENDING',
+    final_status: passData.isParentRequest ? 'APPROVED_PARENT' : 'PENDING',
     qr_code: qrCode,
   };
 
@@ -501,14 +501,15 @@ export async function findGatePasses(filters: {
   let query = serviceClient.from('gate_passes').select('*');
 
   if (filters.status) {
-    if (filters.status === 'APPROVED') {
+    const rawStatus = filters.status.trim().toUpperCase();
+    if (rawStatus === 'APPROVED') {
       query = query.eq('final_status', 'APPROVED');
-    } else if (filters.status === 'PENDING') {
+    } else if (rawStatus === 'PENDING') {
       query = query.in('final_status', ['PENDING', 'APPROVED_PARENT', 'APPROVED_ADMIN']);
-    } else if (filters.status === 'REJECTED') {
+    } else if (rawStatus === 'REJECTED') {
       query = query.eq('final_status', 'REJECTED');
     } else {
-      query = query.eq('final_status', filters.status);
+      query = query.eq('final_status', rawStatus);
     }
   }
 
@@ -576,6 +577,12 @@ export async function correctScan(
 
   if (origErr || !origScan) {
     console.error('Original scan not found for correction:', origErr);
+    return null;
+  }
+
+  const originalTime = new Date(origScan.timestamp).getTime();
+  if (Date.now() - originalTime > 60 * 60 * 1000) {
+    console.warn('Scan is outside 1-hour correction window:', originalScanId);
     return null;
   }
 

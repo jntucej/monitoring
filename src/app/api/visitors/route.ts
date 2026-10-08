@@ -12,7 +12,7 @@ async function handleGet(req: NextRequest) {
 
     const { data, error } = await service
       .from("visitor_logs")
-      .select("*, person:person_id(*), host:host_person_id(*)")
+      .select("*, person:user_id(*), host:host_user_id(*)")
       .eq("status", status)
       .order("check_in_at", { ascending: false });
 

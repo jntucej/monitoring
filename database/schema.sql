@@ -101,7 +101,7 @@ CREATE TABLE IF NOT EXISTS movement_logs (
   id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id          UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   direction        TEXT NOT NULL CHECK (direction IN ('IN','OUT')),
-  reason           TEXT CHECK (reason IN ('Home Out','Day Out','Leave','Regular','Outing','Emergency','daily_outing','day_pass','home_out','Daily Outing','Day Pass','Special Leave','Weekend Outing')),
+  reason           TEXT CHECK (reason IN ('Home Out','Day Out','Leave','Regular','Outing','Emergency','daily_outing','day_pass','home_out','Daily Outing','Day Pass','Special Leave','Weekend Outing','Home In','home_in')),
   gate_id          UUID NOT NULL REFERENCES gates(id) ON DELETE CASCADE,
   gate_name        TEXT NOT NULL,
   operator_id      UUID REFERENCES users(id) ON DELETE SET NULL,
@@ -638,7 +638,7 @@ AS $$ DECLARE v_date DATE; v_code TEXT; BEGIN
   -- Day boundary follows the movement's recorded timestamp (UTC day), matching the
   -- analytics routes. A movement after local midnight creates a brand-new (date, gate)
   -- row, so today's counters start from zero automatically.
-  v_date := (NEW.timestamp AT TIME ZONE 'UTC')::date;
+  v_date := (NEW.timestamp AT TIME ZONE 'Asia/Kolkata')::date;
   SELECT gate_code INTO v_code FROM gates WHERE id = NEW.gate_id;
   IF v_code IS NULL THEN
     v_code := NEW.gate_name;
@@ -963,20 +963,22 @@ COMMENT ON COLUMN student_details.student_type IS 'HM=Hostel Male|HF=Hostel Fema
 -- SECTION 10: PERMISSIONS
 -- ============================================================================
 GRANT USAGE ON SCHEMA public TO postgres, authenticated, service_role;
-GRANT ALL ON ALL TABLES IN SCHEMA public TO postgres, authenticated, service_role;
-GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO postgres, authenticated, service_role;
-GRANT ALL ON ALL FUNCTIONS IN SCHEMA public TO postgres, authenticated, service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO postgres, authenticated, service_role;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO postgres, authenticated, service_role;
 
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO postgres, authenticated, service_role;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO postgres, authenticated, service_role;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO postgres, authenticated, service_role;
+REVOKE ALL ON ALL FUNCTIONS IN SCHEMA public FROM PUBLIC, anon;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO postgres, authenticated, service_role;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO postgres, authenticated, service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO postgres, authenticated, service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT EXECUTE ON FUNCTIONS TO postgres, authenticated, service_role;
 
 -- ============================================================================
 -- END OF CONSOLIDATED UNIFIED SCHEMA
 -- ============================================================================
 
 -- Auto-generated schema reconciliation for missing tables
-CREATE TABLE IF NOT EXISTS public.announcements (
+CREATE TABLE IF NOT EXISTS public.announcements (\
   id VARCHAR(100) PRIMARY KEY,
   title TEXT NOT NULL,
   message TEXT NOT NULL,
@@ -991,20 +993,27 @@ CREATE TABLE IF NOT EXISTS public.announcements (
 );
 CREATE INDEX IF NOT EXISTS idx_announcements_published ON public.announcements(is_published);
 
-CREATE TABLE IF NOT EXISTS public.attendance_records (
+CREATE TABLE IF NOT EXISTS public.attendance_records (\
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   person_id UUID,
-  date DATE NOT NULL,
+  date DATE,
   time_in TIMESTAMPTZ,
   time_out TIMESTAMPTZ,
   status TEXT,
   synced BOOLEAN DEFAULT false,
   synced_at TIMESTAMPTZ,
+  device_serial TEXT,
+  direction TEXT,
+  timestamp_utc TIMESTAMPTZ,
+  timestamp_local TEXT,
+  dedupe_key TEXT UNIQUE,
+  verify_mode_details JSONB,
+  meta JSONB,
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(person_id, date)
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_attendance_records_date ON public.attendance_records(date);
+CREATE INDEX IF NOT EXISTS idx_attendance_dedupe ON public.attendance_records(dedupe_key);
 
 -- ============================================================================
 -- PIN LOGIN ATTEMPTS & LOCKOUT TABLE

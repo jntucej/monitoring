@@ -24,11 +24,27 @@
 -- PROBLEM RLS disabled any role holding table GRANT read/write whole table.
 -- schema.sql SECTION 10 issued GRANT ALL anon, ...
 
+DO $$
+DECLARE
+  t text;
+BEGIN
+  FOREACH t IN ARRAY ARRAY[
+    'support_tickets','support_ticket_comments','saved_report_definitions',
+    'gate_access_rules','gate_holidays','retention_policies','data_compliance_logs',
+    'zones','lms_config','sustainability_metrics','alert_rules','system_settings',
+    'onboarding_progress','predictions','role_change_requests','integration_configs',
+    'integration_logs','announcements','user_announcement_dismissals','sso_config',
+    'gate_passes'
+  ] LOOP
+    EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY', t);
+  END LOOP;
+END $$;
+
 -- ----------------------------------------------------------------------------
 -- SECTION 2: CREATE POLICIES FOR SERVICE_ROLE
 -- ----------------------------------------------------------------------------
 
-DO$$
+DO $$
 DECLARE
   t text;
   pol_name text;
@@ -69,13 +85,14 @@ CREATE OR REPLACE FUNCTION public.is_admin_self()
  RETURNS boolean
  LANGUAGE sql
  STABLE
+ SET search_path = public
 AS $function$SELECT public.is_admin((SELECT current_setting('app.current_user_id', true)::uuid))$function$;
 
 -- ----------------------------------------------------------------------------
 -- SECTION 4: AUTHENTICATED POLICIES WITH CACHED HELPERS
 -- ----------------------------------------------------------------------------
 
-DO$$
+DO $$
 DECLARE
   t text;
   pol_name text;
@@ -110,7 +127,7 @@ END $$;
 -- append-only audit trail: admins read it, NOT behavioural change.
 -- anon/authenticated role granted anything here.
 
-DO$$
+DO $$
 DECLARE
   t text;
   pol_name text;
@@ -142,7 +159,7 @@ END $$;
 -- src/components/operator/ManualEntryDialog.tsx, which reads
 -- public.gate_passes roll. access preserved.
 
-DO$$
+DO $$
 DECLARE
   t text;
   pol_name text;
@@ -162,12 +179,10 @@ END $$;
 -- ----------------------------------------------------------------------------
 -- SECTION 7: EXECUTE PRIVILEGES FOR SECURITY FUNCTIONS
 -- ----------------------------------------------------------------------------
--- public.resolve_login_identifier() public.can_user_authenticate()
--- invoked ANON browser client (src/lib/supabaseClient.ts).
--- therefore MUST remain EXECUTE-able anon.
-
-GRANT EXECUTE ON FUNCTION public.resolve_login_identifier(TEXT) TO anon, authenticated, service_role;
-GRANT EXECUTE ON FUNCTION public.can_user_authenticate(UUID) TO anon, authenticated, service_role;
+REVOKE EXECUTE ON FUNCTION public.resolve_login_identifier(TEXT) FROM PUBLIC, anon;
+REVOKE EXECUTE ON FUNCTION public.can_user_authenticate(UUID) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.resolve_login_identifier(TEXT) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.can_user_authenticate(UUID) TO authenticated, service_role;
 
 -- ----------------------------------------------------------------------------
 -- SECTION 8: FUNCTIONS FOR GOVERNING RLS
@@ -177,6 +192,7 @@ CREATE OR REPLACE FUNCTION public.is_admin(p_uid uuid)
  RETURNS boolean
  LANGUAGE sql
  STABLE
+ SET search_path = public
 AS $function$
 SELECT EXISTS (
  SELECT 1 FROM public.users
@@ -187,6 +203,7 @@ $function$;
 CREATE OR REPLACE FUNCTION public.is_admin_check(p_uid uuid)
  RETURNS void
  LANGUAGE plpgsql
+ SET search_path = public
 AS $function$
 BEGIN
  IF NOT public.is_admin(p_uid) THEN

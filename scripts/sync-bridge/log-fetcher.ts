@@ -171,12 +171,12 @@ export function createTcpLogFetcher(opts: {
 
         socket.on('timeout', () => {
           console.warn(`[log-fetcher] TCP 4370 connection to ${opts.host}:${opts.port} timed out after ${timeoutMs}ms.`);
-          finish(process.env.NODE_ENV === 'production' ? [] : fakeTcpLogs());
+          finish(process.env.USE_FAKE_DEVICE_LOGS === 'true' ? fakeTcpLogs() : []);
         });
 
         socket.on('error', (err) => {
           console.warn(`[log-fetcher] TCP 4370 socket error on ${opts.host}:${opts.port} (${err.message}). Using resilient fallback.`);
-          finish(process.env.NODE_ENV === 'production' ? [] : fakeTcpLogs());
+          finish(process.env.USE_FAKE_DEVICE_LOGS === 'true' ? fakeTcpLogs() : []);
         });
 
         socket.on('close', () => {

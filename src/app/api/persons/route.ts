@@ -131,6 +131,16 @@ async function handlePost(req: NextRequest) {
       );
     }
 
+    if (email && typeof email === "string" && email.trim().length > 0) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email.trim())) {
+        return NextResponse.json(
+          { success: false, error: { code: "BAD_REQUEST", message: "Invalid email address format." } },
+          { status: 400 }
+        );
+      }
+    }
+
     const cleanEmail = email?.trim().toLowerCase() || `${uniqueId.trim().toLowerCase()}@jntuhcej.ac.in`;
     const service = getSupabaseServiceClient();
     const id = crypto.randomUUID();

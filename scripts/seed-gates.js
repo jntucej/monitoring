@@ -27,15 +27,6 @@ async function seedGates() {
     { gate_code: "BACK", name: "Back Gate", location: "Back Side", type: "BACK", is_active: true },
   ];
 
-  console.log("Cleaning up old duplicates...");
-  const { data: allGates } = await supabase.from('gates').select('id, gate_code');
-  for (const g of allGates || []) {
-    if (['GATE-01', 'GATE-02', 'GATE-03'].includes(g.gate_code)) {
-      await supabase.from('gates').delete().eq('id', g.id);
-      console.log("  Deleted: " + g.gate_code);
-    }
-  }
-
   console.log("Seeding 3 gates...");
   for (const g of gates) {
     const { error } = await supabase.from('gates').upsert(g, { onConflict: 'gate_code' });

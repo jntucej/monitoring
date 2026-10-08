@@ -62,7 +62,7 @@ export async function createAlertRule(rule: Omit<AlertRule, "id" | "createdAt">)
 
   try {
     const supabase = getSupabaseServiceClient();
-    await supabase.from("alert_rules").insert({
+    const { error } = await supabase.from("alert_rules").insert({
       id: newRule.id,
       name: newRule.name,
       metric: newRule.metric,
@@ -73,6 +73,9 @@ export async function createAlertRule(rule: Omit<AlertRule, "id" | "createdAt">)
       enabled: newRule.enabled,
       created_at: newRule.createdAt,
     });
+    if (error) {
+      console.error("Error creating alert rule in DB:", error);
+    }
   } catch (err) {
     console.error("Error creating alert rule in DB:", err);
   }

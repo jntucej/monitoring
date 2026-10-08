@@ -20,6 +20,13 @@ ALTER TABLE public.config_exit_reasons
   ADD COLUMN IF NOT EXISTS max_duration_hours NUMERIC,
   ADD COLUMN IF NOT EXISTS applicable_to TEXT[] NOT NULL DEFAULT ARRAY['student'];
 
+ALTER TABLE public.config_exit_reasons
+  DROP CONSTRAINT IF EXISTS config_exit_reasons_applicable_to_check;
+
+ALTER TABLE public.config_exit_reasons
+  ADD CONSTRAINT config_exit_reasons_applicable_to_check
+  CHECK (applicable_to <@ ARRAY['student','faculty','staff','worker','visitor']::TEXT[]);
+
 -- 2. Seed / Upsert canonical exit reasons
 INSERT INTO public.config_exit_reasons (
   code,
@@ -50,6 +57,17 @@ ON CONFLICT (code) DO UPDATE SET
 -- 3. Add staff_category column to employee_details if not exists
 ALTER TABLE public.employee_details
   ADD COLUMN IF NOT EXISTS staff_category VARCHAR(50);
+
+ALTER TABLE public.employee_details
+  DROP CONSTRAINT IF EXISTS employee_details_staff_category_check;
+
+ALTER TABLE public.employee_details
+  ADD CONSTRAINT employee_details_staff_category_check
+  CHECK (staff_category IS NULL OR staff_category IN (
+    'teaching_faculty','assistant_professor','associate_professor','professor','hod',
+    'lab_assistant','office_staff','support_staff','security','maintenance',
+    'canteen','driver','other'
+  ));
 
 -- 4. Widen movement_logs reason check constraint
 ALTER TABLE public.movement_logs

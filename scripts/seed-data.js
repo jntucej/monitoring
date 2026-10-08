@@ -72,8 +72,8 @@ async function main() {
         department_id: range.dept,
         initial_pin_hash: pinHash,
         pin_must_change: true,
-        pin_set_by: null,
-        pin_set_at: null,
+        pin_set_by: userId,
+        pin_set_at: new Date().toISOString(),
       });
 
       employeesToUpsert.push({

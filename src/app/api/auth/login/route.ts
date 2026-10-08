@@ -202,24 +202,29 @@ async function handleLogin(req: NextRequest) {
         );
       }
 
-      // Step 2: Validate challenge if provided
-      const service = getSupabaseServiceClient();
-      if (mfa_challenge) {
-        const { data: burned } = await service
-          .from("mfa_login_challenges")
-          .update({ used_at: new Date().toISOString() })
-          .eq("id", String(mfa_challenge))
-          .eq("user_id", user.id)
-          .is("used_at", null)
-          .gt("expires_at", new Date().toISOString())
-          .select("id");
+      // Step 2: Validate challenge
+      if (!mfa_challenge) {
+        return NextResponse.json(
+          { success: false, error: { code: "MFA_CHALLENGE_REQUIRED", message: "MFA challenge required." } },
+          { status: 400 }
+        );
+      }
 
-        if (!burned || (Array.isArray(burned) && burned.length === 0)) {
-          return NextResponse.json(
-            { success: false, error: { code: "INVALID_CHALLENGE", message: "MFA challenge expired or invalid." } },
-            { status: 400 }
-          );
-        }
+      const service = getSupabaseServiceClient();
+      const { data: burned } = await service
+        .from("mfa_login_challenges")
+        .update({ used_at: new Date().toISOString() })
+        .eq("id", String(mfa_challenge))
+        .eq("user_id", user.id)
+        .is("used_at", null)
+        .gt("expires_at", new Date().toISOString())
+        .select("id");
+
+      if (!burned || (Array.isArray(burned) && burned.length === 0)) {
+        return NextResponse.json(
+          { success: false, error: { code: "INVALID_CHALLENGE", message: "MFA challenge expired or invalid." } },
+          { status: 400 }
+        );
       }
 
       if (presentedRecovery) {
@@ -294,6 +299,7 @@ async function handleLogin(req: NextRequest) {
       role: user.role,
       account_status: user.status,
       name: user.name,
+      session_version: user.session_version ?? 0,
     });
 
     const refresh_token = await signRefreshToken({

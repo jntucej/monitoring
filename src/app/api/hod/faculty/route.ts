@@ -6,13 +6,20 @@ import { withRateLimit } from "@/lib/rate-limit";
 async function handleGet(req: NextRequest, context: { auth: any }) {
   try {
     const searchParams = new URL(req.url).searchParams;
-    const isHod = context.auth?.isHod;
-    const hodDeptId = context.auth?.departmentId;
+    const authRole = context.auth?.role;
+    const isAdmin = ["admin", "sysadmin"].includes(authRole);
+    const callerDeptId = context.auth?.departmentId || context.auth?.department;
 
     let departmentId = searchParams.get("departmentId");
 
-    if (isHod && hodDeptId) {
-      departmentId = hodDeptId;
+    if (!isAdmin) {
+      if (!callerDeptId) {
+        return NextResponse.json(
+          { success: false, error: "Department not configured for caller." },
+          { status: 403 }
+        );
+      }
+      departmentId = callerDeptId;
     }
 
     let query = getDbClient()

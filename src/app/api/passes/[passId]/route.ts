@@ -31,9 +31,20 @@ async function handleGet(req: NextRequest) {
     // Authorization: enforce ownership when caller is not an admin
     const isAdmin = ["admin", "sysadmin"].includes(authRole || "");
     if (!isAdmin) {
+      const { getSupabaseServiceClient } = await import("@/lib/dbClient");
+      const service = getSupabaseServiceClient();
+      const { data: callerUser } = await service
+        .from("users")
+        .select("unique_id")
+        .eq("id", authUserId || "")
+        .maybeSingle();
+
+      const userUniqueId = callerUser?.unique_id;
       const isOwner =
-        (authRole === "student" && pass.roll === authUserId) ||
-        (authRole === "parent" && pass.requestedById === authUserId);
+        (authRole === "student" && Boolean(userUniqueId && pass.roll === userUniqueId)) ||
+        (authRole === "parent" && pass.requestedById === authUserId) ||
+        authRole === "warden";
+
       if (!isOwner) {
         return NextResponse.json(
           { success: false, error: { code: "FORBIDDEN", message: "You do not have permission to view this pass." } },

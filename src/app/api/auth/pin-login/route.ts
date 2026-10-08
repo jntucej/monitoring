@@ -275,6 +275,7 @@ async function handlePinLogin(req: NextRequest) {
       role: user.role,
       account_status: user.status,
       name: user.name,
+      session_version: user.session_version ?? 0,
     });
 
     const refresh_token = await signRefreshToken({

@@ -25,11 +25,6 @@ export interface RateLimitResult {
 }
 
 export function extractClientIp(req: NextRequest): string {
-  // 1. Prefer x-real-ip when set by a trusted reverse proxy (e.g. Caddy, Nginx)
-  const realIp = req.headers.get('x-real-ip')?.trim();
-  if (realIp) return realIp;
-
-  // 2. Otherwise parse x-forwarded-for: rightmost entry is appended by the nearest reverse proxy
   const xForwardedFor = req.headers.get('x-forwarded-for');
   if (xForwardedFor) {
     const ips = xForwardedFor.split(',').map((s) => s.trim()).filter(Boolean);
@@ -37,6 +32,9 @@ export function extractClientIp(req: NextRequest): string {
       return ips[ips.length - 1];
     }
   }
+
+  const realIp = req.headers.get('x-real-ip')?.trim();
+  if (realIp) return realIp;
 
   return 'unknown';
 }
@@ -56,14 +54,9 @@ export async function checkRateLimit(
     ip = extractClientIp(reqOrKey);
   }
 
-  const isDev =
-    process.env.NODE_ENV !== 'production' ||
-    ip === '127.0.0.1' ||
-    ip === '::1' ||
-    ip === 'unknown' ||
-    ip === 'localhost';
-
-  const effectiveMaxRequests = isDev ? Math.max(maxRequests * 10, 200) : maxRequests;
+  const isDev = process.env.NODE_ENV !== 'production';
+  const isLocalLoopback = ip === '127.0.0.1' || ip === '::1' || ip === 'localhost';
+  const effectiveMaxRequests = isDev && isLocalLoopback ? Math.max(maxRequests * 10, 200) : maxRequests;
   const key = `${keyPrefix}:${ip}`;
 
   const isEdge = typeof (globalThis as any).EdgeRuntime !== 'undefined' || process.env.NEXT_RUNTIME === 'edge';
@@ -121,10 +114,19 @@ export async function checkRateLimit(
   return { limited: false, remaining: effectiveMaxRequests - store[key].count, resetTime };
 }
 
+export function rateLimitByKey(key: string, opts?: RateLimitConfig): Promise<RateLimitResult> {
+  return checkRateLimit(key, opts);
+}
+
+export function rateLimitMiddleware(config?: RateLimitConfig) {
+  return (req: NextRequest) => checkRateLimit(req, config);
+}
+
 export function rateLimit(keyOrReq: string | NextRequest, pointsOrConfig?: number | RateLimitConfig) {
   if (typeof keyOrReq === 'string') {
-    const points = (pointsOrConfig as number) || 5;
-    return checkRateLimit(keyOrReq, { maxRequests: points, windowMs: 60 * 1000 });
+    const points = typeof pointsOrConfig === 'number' ? pointsOrConfig : pointsOrConfig?.maxRequests || 5;
+    const windowMs = typeof pointsOrConfig === 'object' ? pointsOrConfig?.windowMs : 60 * 1000;
+    return checkRateLimit(keyOrReq, { maxRequests: points, windowMs });
   }
   const config = (keyOrReq as unknown as RateLimitConfig) || {};
   return (req: NextRequest) => checkRateLimit(req, config);
