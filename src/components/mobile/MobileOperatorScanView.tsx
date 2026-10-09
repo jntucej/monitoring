@@ -172,6 +172,22 @@ export function MobileOperatorScanView() {
     return () => stopCamera();
   }, [stopCamera]);
 
+  // ponytail: kill camera + decode loop when the tab is hidden (battery, iOS
+  // privacy indicator, Android dead-stream-on-return). pagehide covers iOS tab
+  // suspension. Unlike the desktop Scanner we don't auto-restart — this view is
+  // user-launched via "Launch Camera Scanner", so the operator taps it again.
+  useEffect(() => {
+    const onVis = () => {
+      if (document.hidden) stopCamera();
+    };
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("pagehide", onVis);
+    return () => {
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("pagehide", onVis);
+    };
+  }, [stopCamera]);
+
   return (
     <div className="flex flex-col h-[calc(100dvh-4rem)] max-w-lg mx-auto bg-slate-950 text-white relative overflow-hidden select-none">
       {/* Top Header & Today's Gate Stats */}
