@@ -40,17 +40,18 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
 
   useEffect(() => {
     if (typeof window === "undefined" || !window.visualViewport) return;
+    // ponytail: capture vv — window.visualViewport can be null at cleanup
+    // (SPA nav / iOS restore), and `?.` would then leak the listeners.
+    const vv = window.visualViewport;
     const updateHeight = () => {
-      if (window.visualViewport) {
-        setViewportHeight(window.visualViewport.height);
-      }
+      setViewportHeight(vv.height);
     };
     updateHeight();
-    window.visualViewport.addEventListener("resize", updateHeight);
-    window.visualViewport.addEventListener("scroll", updateHeight);
+    vv.addEventListener("resize", updateHeight);
+    vv.addEventListener("scroll", updateHeight);
     return () => {
-      window.visualViewport?.removeEventListener("resize", updateHeight);
-      window.visualViewport?.removeEventListener("scroll", updateHeight);
+      vv.removeEventListener("resize", updateHeight);
+      vv.removeEventListener("scroll", updateHeight);
     };
   }, []);
 

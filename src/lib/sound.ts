@@ -1,15 +1,38 @@
 /**
  * Web Audio API Sound Synthesizer for Gate Operator Desk
+ *
+ * ponytail: one shared AudioContext, lazily created. Browsers cap concurrent
+ * contexts (~6) — a fresh `new AudioContext()` per beep goes silent after a
+ * few scans. Shared ctx also survives suspend/resume across gestures.
  */
+let sharedCtx: AudioContext | null = null;
+
+function getAudioCtx(): AudioContext | null {
+  if (typeof window === "undefined") return null;
+  const AudioCtx =
+    window.AudioContext ||
+    (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!AudioCtx) return null;
+  if (!sharedCtx) {
+    try {
+      sharedCtx = new AudioCtx();
+    } catch {
+      return null;
+    }
+  }
+  // Contexts created before a user gesture start suspended; resume on use.
+  if (sharedCtx.state === "suspended") {
+    sharedCtx.resume().catch(() => {});
+  }
+  return sharedCtx;
+}
 
 export function playAudioFeedback(type: "success" | "warning" | "error"): void {
   if (typeof window === "undefined") return;
 
   try {
-    const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    if (!AudioCtx) return;
-
-    const ctx = new AudioCtx();
+    const ctx = getAudioCtx();
+    if (!ctx) return;
     const now = ctx.currentTime;
 
     if (type === "success") {
