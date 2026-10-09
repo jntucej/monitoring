@@ -33,10 +33,9 @@ type ActionEntry = {
 const reasonIcons: Record<string, React.ElementType> = {
   "Regular": Briefcase,
   "Home Out": Home,
-  "Day Out": Sun,
+  "Day Pass": Sun,
   "Leave": Clock,
   "Daily Outing": Briefcase,
-  "Day Pass": Sun,
   "Home In": Home,
   "daily_outing": Briefcase,
   "home_in": Home,

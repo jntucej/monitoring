@@ -1,4 +1,6 @@
 import { query } from "@/lib/postgres";
+import { addAudit } from "@/lib/db";
+import type { Role } from "@/lib/types";
 
 export type AuditAction =
   | 'LOGIN'

@@ -48,7 +48,7 @@ export function getDirectionLabel(direction: ScanDirection): string {
 export function getReasonColor(reason?: ExitReason): string {
   switch (reason) {
     case "Home Out": return "var(--action-danger)";
-    case "Day Out": return "var(--action-warning)";
+    case "Day Pass": return "var(--action-warning)";
     case "Leave": return "var(--action-info)";
     default: return "var(--action-danger)";
   }
@@ -57,7 +57,7 @@ export function getReasonColor(reason?: ExitReason): string {
 export function getReasonIcon(reason?: ExitReason): string {
   switch (reason) {
     case "Home Out": return "🏠";
-    case "Day Out": return "☀️";
+    case "Day Pass": return "☀️";
     case "Leave": return "📝";
     default: return "🚶";
   }

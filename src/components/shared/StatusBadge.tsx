@@ -31,7 +31,7 @@ export function StatusBadge({ direction, reason, className, size = "md" }: Statu
 
   const bgColor = isEntry
     ? "bg-[var(--action-primary)]/10"
-    : reason === "Day Out"
+    : reason === "Day Pass"
     ? "bg-[var(--action-warning)]/10"
     : reason === "Leave"
     ? "bg-[var(--action-info)]/10"
@@ -39,7 +39,7 @@ export function StatusBadge({ direction, reason, className, size = "md" }: Statu
 
   const textColor = isEntry
     ? "text-[var(--action-primary)]"
-    : reason === "Day Out"
+    : reason === "Day Pass"
     ? "text-[var(--action-warning)]"
     : reason === "Leave"
     ? "text-[var(--action-info)]"
@@ -47,13 +47,13 @@ export function StatusBadge({ direction, reason, className, size = "md" }: Statu
 
   const dotColor = isEntry
     ? "bg-[var(--action-primary)]"
-    : reason === "Day Out"
+    : reason === "Day Pass"
     ? "bg-[var(--action-warning)]"
     : reason === "Leave"
     ? "bg-[var(--action-info)]"
     : "bg-[var(--action-danger)]";
 
-  const icon = isEntry ? "⬇" : reason === "Home Out" ? "🏠" : reason === "Day Out" ? "☀️" : reason === "Leave" ? "📝" : "🚶";
+  const icon = isEntry ? "⬇" : reason === "Home Out" ? "🏠" : reason === "Day Pass" ? "☀️" : reason === "Leave" ? "📝" : "🚶";
   const label = isEntry ? "ENTRY" : reason ? reason.toUpperCase() : "EXIT";
 
   return (

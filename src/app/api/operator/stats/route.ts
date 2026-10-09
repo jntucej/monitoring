@@ -39,7 +39,7 @@ function categorize(role: string | undefined, studentType: string | undefined): 
  *  - breakdown: inside-now / in-today / out-today per person category
  *    (hostellers, dayscholars, faculty & staff, authorities, visitors)
  *  - outing: people currently out on a no-permission short outing
- *    (last OUT reason "Day Out"), with elapsed time vs the allowed limit.
+ *    (last OUT reason "day_pass" / "Day Pass"), with elapsed time vs the allowed limit.
  */
 async function handleGet(req: NextRequest) {
   try {
@@ -134,7 +134,7 @@ async function handleGet(req: NextRequest) {
       if (o.current_status !== "OUT") return;
       const last = lastByUser.get(o.user_id);
       if (!last || last.direction !== "OUT") return;
-      if ((last.reason || "").toLowerCase() !== "day out") return; // only no-permission outings
+      if ((last.reason || "").toLowerCase() !== "day pass" && (last.reason || "").toLowerCase() !== "day_pass") return; // only no-permission outings
       const minutesGone = Math.max(0, Math.floor((Date.now() - new Date(last.timestamp).getTime()) / 60000));
       outing.push({
         userId: o.user_id,

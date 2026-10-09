@@ -477,7 +477,7 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
                         Campus Exit Reason
                       </label>
                       <div className="grid grid-cols-2 gap-2">
-                        {["Home Out", "Day Out", "Leave", "Regular"].map((r) => {
+                        {["Home Out", "Day Pass", "Leave", "Regular"].map((r) => {
                           const config = validExitReasons.find((c) => c.code === r);
                           const requiresApproval = config?.requiresApproval ?? false;
                           const passRequired = requiresApproval && (student.personType === "student" || !student.personType);
