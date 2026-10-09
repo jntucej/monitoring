@@ -160,8 +160,9 @@ export class PostgresQueryBuilder<T = any> {
     let clean = columns
       .replace(/[a-zA-Z0-9_]+:[a-zA-Z0-9_!]+\([^)]*(?:\([^)]*\))*[^)]*\)/g, "")
       .replace(/[a-zA-Z0-9_!]+\([^)]*(?:\([^)]*\))*[^)]*\)/g, "")
-      .replace(/,\s*,/g, ",")
-      .replace(/^,\s*|\s*,$/g, "")
+      .replace(/,\s*,+/g, ",")
+      .trim()
+      .replace(/^,+|,+$/g, "")
       .trim();
 
     this.selectColumns = clean.length > 0 ? clean : "*";
@@ -510,7 +511,8 @@ export class PostgresQueryBuilder<T = any> {
     for (const rel of this.embeddedRelations) {
       relationSubqueries.push(buildRelationSubquery(rel, this.tableName));
     }
-    return `${baseCols}, ${relationSubqueries.join(", ")}`;
+    const cleanBase = baseCols.replace(/,+$/, "").trim();
+    return relationSubqueries.length > 0 ? `${cleanBase}, ${relationSubqueries.join(", ")}` : cleanBase;
   }
 
   insert(rows: Record<string, any> | Record<string, any>[]) {
