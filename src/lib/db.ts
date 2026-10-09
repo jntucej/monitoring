@@ -1661,6 +1661,20 @@ export async function addScan(input: {
       const isDup = !!res.is_duplicate;
       return { scan: mScan({ ...logData, users: person }), duplicate: isDup };
     }
+    // ponytail: silent fallthrough here hides a broken RPC (missing fn, type
+    // drift) and the slow path skips FOR UPDATE dedup — log + audit so the
+    // drift query in the runbook catches it before occupancy diverges.
+    if (rpcErr) {
+      console.error("[addScan] process_gate_scan RPC failed — falling back:", rpcErr);
+      await addAudit({
+        action: "SCAN_RPC_FALLBACK",
+        userId: op.id,
+        userName: op.name,
+        role: op.role as Role,
+        details: `RPC fallback: ${rpcErr.message}`,
+        gateId: gate.id,
+      });
+    }
   } catch { /* fallback to standard query path if RPC is missing */ }
 
   const duplicate = await isDuplicate(uniqueId, input.direction);

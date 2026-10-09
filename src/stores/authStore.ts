@@ -9,6 +9,31 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import { useCallback, useSyncExternalStore } from "react";
 import type { User, Role } from "@/lib/types";
 
+// ponytail: one normalizer at the store boundary — servers mix snake_case
+// (login, pin-login) and camelCase (session, refresh). Accept both, store
+// canonical User so consumers (gateId, departmentId, uniqueId) never see undefined.
+function toUser(raw: any): User {
+  return {
+    id: String(raw?.id ?? ""),
+    uniqueId: raw?.uniqueId ?? raw?.unique_id,
+    handle: raw?.handle,
+    currentSessionToken: raw?.currentSessionToken ?? raw?.current_session_token,
+    name: raw?.name ?? raw?.fullName ?? "",
+    role: raw?.role as Role,
+    gateId: raw?.gateId ?? raw?.gate_id,
+    employeeId: raw?.employeeId ?? raw?.employee_id,
+    email: raw?.email,
+    phone: raw?.phone,
+    supervisedGates: raw?.supervisedGates ?? raw?.supervised_gates,
+    assignedHostel: raw?.assignedHostel ?? raw?.assigned_hostel,
+    isHod: raw?.isHod ?? raw?.is_hod,
+    departmentId: raw?.departmentId ?? raw?.department_id ?? raw?.department,
+    photoUrl: raw?.photoUrl ?? raw?.photo_url,
+    avatarUrl: raw?.avatarUrl ?? raw?.avatar_url,
+    status: raw?.status,
+  } as User;
+}
+
 interface AuthState {
   user: User | null;
   token: string | null;
@@ -31,6 +56,7 @@ interface AuthActions {
     mfaRequired?: boolean;
     mfaChallenge?: string;
     mfaEnrollmentRequired?: boolean;
+    enrollToken?: string;
   }>;
   pinLogin: (employeeId: string, pin: string) => Promise<{ success: boolean; error?: string; code?: string }>;
   logout: () => Promise<void>;
@@ -73,7 +99,8 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           const result = await response.json().catch(() => null);
 
           if (response.ok && result?.success && result.data) {
-            const { token, refreshToken, user } = result.data;
+            const { token, refreshToken, user: rawUser } = result.data;
+            const user = toUser(rawUser);
             set({
               user,
               token,
@@ -98,7 +125,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           // Admin must enroll 2FA first — no session issued
           if (response.ok && result?.success && result.mfa_enrollment_required) {
             set({ loading: false });
-            return { success: false, mfaEnrollmentRequired: true };
+            return { success: false, mfaEnrollmentRequired: true, enrollToken: result.enroll_token as string | undefined };
           }
 
           set({ loading: false });
@@ -128,7 +155,8 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           const result = await response.json().catch(() => null);
 
           if (response.ok && result?.success && result?.data) {
-            const { token, refreshToken, user } = result.data;
+            const { token, refreshToken, user: rawUser } = result.data;
+            const user = toUser(rawUser);
             set({
               user,
               token,
@@ -172,8 +200,14 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           const res = await fetch("/api/auth/session", { method: "GET", headers });
           const result = await res.json().catch(() => null);
 
-          if (res.ok && result?.success && result?.data) {
-            const { token: newToken, refreshToken: newRefreshToken, user: updatedUser } = result.data;
+          // ponytail: session route returns top-level { user, accessToken,
+          // refreshToken } (no data wrapper) — accept both shapes so token
+          // rotation + role/status updates actually reach the store.
+          const payload = result?.data ?? result;
+          if (res.ok && result?.success && payload?.user) {
+            const newToken = payload.token ?? result?.accessToken;
+            const newRefreshToken = payload.refreshToken ?? result?.refreshToken;
+            const updatedUser = toUser(payload.user);
             const current = get();
             const userChanged = JSON.stringify(current.user) !== JSON.stringify(updatedUser);
             const tokenChanged = (newToken && newToken !== current.token) || (newRefreshToken && newRefreshToken !== current.refreshToken);

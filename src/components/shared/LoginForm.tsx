@@ -164,8 +164,8 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
           message: `Authenticated via Security PIN.`,
           variant: "success",
         });
-        const authStore = useAuthStore.getState();
-        redirectAfterLogin(authStore.role);
+        // ponytail: no redirect here — the hasHydrated+authenticated effect
+        // below routes once persist has settled (avoids AuthGuard race).
         return;
       }
 
@@ -181,9 +181,19 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
     );
 
     // SECURITY: sysadmins must complete TOTP enrollment before they can sign in.
-    if (!result.success && (result.code === "MFA_REQUIRED" || result.mfaEnrollmentRequired)) {
+    // ponytail: no redirect here — user has no session yet so AuthGuard would
+    // bounce /sysadmin/security back to /login (infinite loop). Show inline
+    // step instead; POST /api/auth/2fa/setup accepts x-mfa-enroll-token.
+    if (!result.success && result.mfaEnrollmentRequired) {
+      triggerShake(
+        result.enrollToken
+          ? "MFA enrollment required. Your enroll token was issued — complete setup via POST /api/auth/2fa/setup with header x-mfa-enroll-token, then log in again."
+          : formatLoginError("MFA_REQUIRED")
+      );
+      return;
+    }
+    if (!result.success && result.code === "MFA_REQUIRED") {
       triggerShake(formatLoginError("MFA_REQUIRED"));
-      router.push("/sysadmin/security");
       return;
     }
 
@@ -205,8 +215,9 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
         message: `Authenticated successfully.`,
         variant: "success",
       });
-      const authStore = useAuthStore.getState();
-      redirectAfterLogin(authStore.role);
+      // ponytail: no redirect here — the hasHydrated+authenticated effect
+      // above routes once persist has settled (avoids AuthGuard race).
+      return;
     } else {
       triggerShake(formatLoginError(result.code, result.error));
     }
@@ -248,7 +259,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
             <input
               type="text"
               value={loginIdentifier}
-              onChange={(e) => setLoginIdentifier(e.target.value)}
+              onChange={(e) => { setLoginIdentifier(e.target.value); if (errorMsg) setErrorMsg(""); }}
               placeholder="Enter ID"
               className="w-full pl-10 pr-4 py-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-sm font-semibold text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none transition-all"
             />
@@ -301,7 +312,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
             <input
               type={showPassword ? "text" : "password"}
               value={passwordOrPin}
-              onChange={(e) => setPasswordOrPin(e.target.value)}
+              onChange={(e) => { setPasswordOrPin(e.target.value); if (errorMsg) setErrorMsg(""); }}
               placeholder={loginMode === "pin" ? "4-8 digit PIN" : "Enter password"}
               className="w-full pl-10 pr-12 py-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none transition-all"
             />

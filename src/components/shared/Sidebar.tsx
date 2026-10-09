@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import * as Icons from "lucide-react";
 import { Menu, X, ChevronLeft, ChevronRight, LogOut, ShieldCheck } from "lucide-react";
@@ -15,22 +15,21 @@ import type { Role, User } from "@/lib/types";
 const iconMap: Record<string, any> = Icons;
 
 // Helper to determine active link
-function isItemActive(pathname: string | null, href: string): boolean {
+// ponytail: takes searchParams as an arg (subscribed via useSearchParams in
+// Sidebar) — usePathname strips ?tab=, and window.location.search doesn't
+// re-render the layout on query-only nav, so the highlight went stale.
+function isItemActive(pathname: string | null, href: string, searchParams: URLSearchParams | null): boolean {
   if (!pathname) return false;
   if (href === pathname) return true;
   if (href.includes("?")) {
     const [basePath, query] = href.split("?");
     if (pathname !== basePath) return false;
-    if (typeof window !== "undefined") {
-      const currentQuery = window.location.search;
-      const hrefParam = new URLSearchParams(query).get("tab");
-      const currentParam = new URLSearchParams(currentQuery).get("tab");
-      return hrefParam === currentParam;
-    }
-    return true;
+    const hrefParam = new URLSearchParams(query).get("tab");
+    const currentParam = searchParams?.get("tab");
+    return hrefParam === currentParam;
   }
   if (href !== "/" && href.length > 2 && pathname.startsWith(href) && !href.includes("?")) {
-    if (typeof window !== "undefined" && window.location.search.includes("tab=")) {
+    if (searchParams?.has("tab")) {
       return false;
     }
     return true;
@@ -40,6 +39,7 @@ function isItemActive(pathname: string | null, href: string): boolean {
 interface DesktopSidebarProps {
   processedNav: NavGroup[];
   pathname: string | null;
+  searchParams: URLSearchParams | null;
   currentRole: Role;
   user: User | null;
   logout: () => void;
@@ -71,6 +71,7 @@ const getPriorityItems = (role: Role, items: NavItem[]): NavItem[] => {
 function DesktopSidebar({
   processedNav,
   pathname,
+  searchParams,
   currentRole,
   user,
   logout,
@@ -127,7 +128,7 @@ function DesktopSidebar({
             )}
             <div className="space-y-1">
               {group.items.map((item) => {
-                const active = isItemActive(pathname, item.href);
+                const active = isItemActive(pathname, item.href, searchParams);
                 const Icon = (item.icon && iconMap[item.icon]) || Icons.HelpCircle;
 
                 return isSidebarCollapsed ? (
@@ -211,6 +212,7 @@ interface MobileDrawerProps {
   setMobileSidebarOpen: (open: boolean) => void;
   processedNav: NavGroup[];
   pathname: string | null;
+  searchParams: URLSearchParams | null;
   currentRole: Role;
   user: User | null;
   logout: () => void;
@@ -222,6 +224,7 @@ function MobileDrawer({
   setMobileSidebarOpen,
   processedNav,
   pathname,
+  searchParams,
   currentRole,
   user,
   logout,
@@ -276,7 +279,7 @@ function MobileDrawer({
                   </p>
                   <div className="space-y-1">
                     {group.items.map((item) => {
-                      const active = isItemActive(pathname, item.href);
+                      const active = isItemActive(pathname, item.href, searchParams);
                       const Icon = (item.icon && iconMap[item.icon]) || Icons.HelpCircle;
 
                       return (
@@ -343,9 +346,10 @@ interface MobileBottomBarProps {
   toggleMobileSidebar: () => void;
   bottomTabs: NavItem[];
   pathname: string | null;
+  searchParams: URLSearchParams | null;
 }
 
-function MobileBottomBar({ toggleMobileSidebar, bottomTabs, pathname }: MobileBottomBarProps) {
+function MobileBottomBar({ toggleMobileSidebar, bottomTabs, pathname, searchParams }: MobileBottomBarProps) {
   return (
     <nav
       aria-label="Mobile navigation bar"
@@ -367,7 +371,7 @@ function MobileBottomBar({ toggleMobileSidebar, bottomTabs, pathname }: MobileBo
 
         {/* Dynamic tabs */}
         {bottomTabs.slice(0, 4).map((item) => {
-          const active = isItemActive(pathname, item.href);
+          const active = isItemActive(pathname, item.href, searchParams);
           const Icon = (item.icon && iconMap[item.icon]) || Icons.HelpCircle;
 
           return (
@@ -396,7 +400,19 @@ function MobileBottomBar({ toggleMobileSidebar, bottomTabs, pathname }: MobileBo
 }
 
 export function Sidebar() {
+  return (
+    <Suspense fallback={null}>
+      <SidebarInner />
+    </Suspense>
+  );
+}
+
+function SidebarInner() {
   const pathname = usePathname();
+  // ponytail: subscribes to ?tab= so isItemActive re-evaluates on query-only
+  // nav (usePathname strips search; window.location.search doesn't re-render).
+  // Next requires Suspense above for useSearchParams — see Sidebar wrapper.
+  const searchParams = useSearchParams();
   const { role: storeRole, user, logout } = useAuthStore();
   const {
     isMobileSidebarOpen,
@@ -466,6 +482,7 @@ export function Sidebar() {
       <DesktopSidebar
         processedNav={processedNav}
         pathname={pathname}
+        searchParams={searchParams}
         currentRole={currentRole}
         user={user}
         logout={logout}
@@ -478,6 +495,7 @@ export function Sidebar() {
         setMobileSidebarOpen={setMobileSidebarOpen}
         processedNav={processedNav}
         pathname={pathname}
+        searchParams={searchParams}
         currentRole={currentRole}
         user={user}
         logout={logout}
@@ -486,6 +504,7 @@ export function Sidebar() {
         toggleMobileSidebar={toggleMobileSidebar}
         bottomTabs={bottomTabs}
         pathname={pathname}
+        searchParams={searchParams}
       />
     </>
   );

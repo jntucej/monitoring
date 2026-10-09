@@ -77,7 +77,7 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
             className={
               isStandaloneSysadmin
                 ? "flex-1 w-full"
-                : "flex-1 p-3 sm:p-5 md:p-6 pb-24 lg:pb-6 max-w-7xl mx-auto w-full"
+                : "flex-1 p-3 sm:p-5 md:p-6 pb-24 md:pb-6 max-w-7xl mx-auto w-full"
             }
           >
             <GlassDeviceFallback />

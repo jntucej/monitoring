@@ -90,11 +90,11 @@ export async function isMfaRequiredForAdmin(): Promise<boolean> {
     const service = getSupabaseServiceClient();
     const { data, error } = await service
       .from("system_config")
-      .select("value")
+      .select("data")
       .eq("key", "global_settings")
       .maybeSingle();
     if (error) throw error;
-    const required = !!(data?.value as any)?.mfaRequiredForAdmin;
+    const required = !!((data?.data ?? (data as any)?.value) as any)?.mfaRequiredForAdmin;
     await setCached("system_config:mfaRequiredForAdmin", required, 60);
     return required;
   } catch (err) {
