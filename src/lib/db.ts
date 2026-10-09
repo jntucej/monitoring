@@ -89,7 +89,6 @@ export function mPerson(r: any): Person {
     personId: r.student_details.person_id || r.id,
     roll: r.student_details.roll || uniqueId,
     year: r.student_details.year,
-    year: s.studentDetails?.year ?? getStudentYearFromRoll(uniqueId) ?? undefined,
     section: r.student_details.section,
     batch: r.student_details.batch,
     parentId: r.student_details.guardian_id, guardianId: r.student_details.guardian_id,
@@ -458,10 +457,6 @@ export async function createGatePass(passData: {
     roll: person.uniqueId,
     requester_name: personName,
     department: person.department || '',
-    if (row) {
-      entries = Math.max(row.entries, todayScans.filter((s: any) => s.direction === 'IN').length);
-      exits = Math.max(row.exits, todayScans.filter((s: any) => s.direction === 'OUT').length);
-    } else {
     reason: dbReason,
     from_datetime: passData.from,
     to_datetime: passData.to,
@@ -1163,15 +1158,6 @@ export async function findAllUsers(): Promise<User[]> {
  * secondary PINs are stored bcrypt-hashed in `initial_pin_hash`.
  */
 export async function createUser(userData: {
-    // Check for roll collision
-    if (userData.role === 'student') {
-        const { data: existing } = await db.from('student_details')
-            .select('user_id').eq('roll', uniqueId).maybeSingle();
-        if (existing && existing.user_id !== userData.id) {
-            throw new Error(`Roll number/Unique ID ${uniqueId} already assigned to another user.`);
-        }
-    }
-
   id: string;
   name: string;
   role: Role;
@@ -1196,6 +1182,15 @@ export async function createUser(userData: {
   const db = getDbClient();
   const uniqueId = userData.uniqueId || userData.employeeId || userData.loginIdentifier || userData.email || userData.id;
   const handle = (userData.loginIdentifier || uniqueId || userData.name || `user_${userData.id.replace(/-/g, '').slice(0, 8)}`).toLowerCase().replace(/[^a-z0-9_]/g, '_');
+
+  // Check for roll collision
+  if (userData.role === 'student') {
+    const { data: existing } = await db.from('student_details')
+      .select('user_id').eq('roll', uniqueId).maybeSingle();
+    if (existing && existing.user_id !== userData.id) {
+      throw new Error(`Roll number/Unique ID ${uniqueId} already assigned to another user.`);
+    }
+  }
 
   const { data, error } = await db
     .from('users')
