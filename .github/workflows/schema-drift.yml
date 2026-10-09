@@ -1,0 +1,51 @@
+name: Weekly Schema Drift Detection
+
+on:
+  schedule:
+    # Every Monday at 06:00 UTC
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  check-drift:
+    name: Compare Production vs Migration Replay
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # NOTE: PROD_SCHEMA_READER_URL must be configured as a repository secret.
+      # Use database/ops/create_schema_reader_role.sql to provision the least-privilege role.
+      # Format: postgres://schema_reader:<password>@<host>:<port>/gate_monitor
+      - name: Check Schema Drift
+        id: drift_check
+        env:
+          PROD_DATABASE_URL: ${{ secrets.PROD_SCHEMA_READER_URL }}
+        run: |
+          if [ -z "$PROD_DATABASE_URL" ]; then
+            echo "Skipping drift check: PROD_SCHEMA_READER_URL secret is not set."
+            exit 0
+          fi
+          output=$(bash scripts/check-schema-drift.sh 2>&1) || exit_code=$?
+          echo "drift_output<<EOF" >> $GITHUB_ENV
+          echo "$output" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+          if [ "${exit_code:-0}" -ne 0 ]; then
+            echo "DRIFT_DETECTED=true" >> $GITHUB_ENV
+          fi
+
+      - name: Create Issue on Drift
+        if: env.DRIFT_DETECTED == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = `### ⚠️ Schema Drift Detected\n\nThe weekly schema drift job detected discrepancies between production and repository migrations:\n\n\`\`\`text\n${process.env.drift_output}\n\`\`\`\n\nPlease investigate drifted database objects.`;
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Schema drift detected between production and migrations',
+              body: body
+            });

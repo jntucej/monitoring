@@ -1,0 +1,21 @@
+name: Migration Replay Check
+
+on:
+  pull_request:
+    paths:
+      - 'database/migrations/**'
+      - 'supabase/migrations/**'
+      - 'scripts/migrate.ts'
+      - 'scripts/check-migrations.sh'
+  workflow_dispatch:
+
+jobs:
+  check-migrations:
+    name: Verify Migration Replay
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run migration replay check
+        run: bash scripts/check-migrations.sh
