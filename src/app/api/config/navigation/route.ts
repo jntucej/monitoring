@@ -38,7 +38,7 @@ async function handleGet(req: NextRequest) {
         label: item.label,
         icon: item.icon_name,
         badge: item.badge,
-        order: item.order,
+        order: item.order_num ?? item.order,
       });
     });
 
@@ -73,7 +73,7 @@ async function handlePost(req: NextRequest) {
       label,
       icon_name: icon || 'Link',
       badge: badge || null,
-      order: Number(order || 1),
+      order_num: Number(order || 1),
       is_active: true,
     };
 
