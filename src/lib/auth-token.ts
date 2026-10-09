@@ -1,22 +1,6 @@
 import { SignJWT, jwtVerify, JWTPayload } from "jose";
 import bcrypt from "bcryptjs";
-
-const DEV_FALLBACK = "dev-only-insecure-secret-change-me-32bytes-min";
-
-function requireSecret(name: string): string {
-  const value = process.env[name];
-  if (!value || value.length < 32) {
-    if (process.env.NODE_ENV === "production") {
-      // Fail closed: never sign/verify with a guessable secret in prod.
-      throw new Error(
-        `[auth-token] ${name} is missing or shorter than 32 chars. Refusing to process tokens. Set ${name} in the deployment environment.`
-      );
-    }
-    console.warn(`[auth-token] ${name} not set; using INSECURE dev fallback.`);
-    return DEV_FALLBACK;
-  }
-  return value;
-}
+import { requireSecret } from "@/lib/env";
 
 export function getAuthSigningKey(): Uint8Array {
   // NOTE: deliberately do NOT fall back to MOBILE_TOKEN_SECRET or JWT_SECRET.
@@ -201,16 +185,4 @@ export async function verifyPassword(
   }
 }
 
-if (typeof process !== "undefined" && process.env.NODE_ENV === "production") {
-  const required = ["AUTH_JWT_SECRET", "MOBILE_TOKEN_SECRET", "QR_TOKEN_SECRET", "MFA_ENROLL_SECRET"];
-  for (const name of required) {
-    const v = process.env[name];
-    if (!v || v.length < 32) {
-      console.error(`[auth-token:FATAL] ${name} missing or <32 chars — the app will reject all tokens.`);
-    }
-  }
-  const totpKey = process.env.TOTP_ENCRYPTION_KEY;
-  if (!totpKey || totpKey.length < 64) {
-    console.error("[auth-token:FATAL] TOTP_ENCRYPTION_KEY missing or not 64 hex chars.");
-  }
-}
+

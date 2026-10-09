@@ -39,11 +39,11 @@ async function handlePinLogin(req: NextRequest) {
     const rawId = ((employeeId || login || identifier || "") as string);
     const rawPin = ((pin || "") as string);
 
-    if (!rawId.trim() || !rawPin.trim()) {
+    if (!rawId.trim() || !rawPin.trim() || !/^\d{4,8}$/.test(rawPin.trim())) {
       return NextResponse.json(
         {
           success: false,
-          error: { code: "MISSING_FIELDS", message: "Both identifier and PIN are required." },
+          error: { code: "INVALID_PIN", message: "Identifier and valid 4-8 digit PIN are required." },
         },
         { status: 400 }
       );

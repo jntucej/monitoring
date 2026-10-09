@@ -1,20 +1,8 @@
 import { SignJWT, jwtVerify } from "jose";
-import { getEnv } from "@/lib/env";
-
-const DEV_FALLBACK_QR = "dev-only-insecure-qr-secret-32bytes-min";
+import { requireSecret } from "@/lib/env";
 
 export function getSigningKey(): Uint8Array {
-  const env = getEnv();
-  const secret =
-    process.env.QR_TOKEN_SECRET ||
-    env.qrTokenSecret ||
-    (env.isProduction ? null : DEV_FALLBACK_QR);
-  if (!secret || secret.length < 32) {
-    throw new Error(
-      "[qr-token] QR_TOKEN_SECRET must be configured (>= 32 chars) in production."
-    );
-  }
-  return new TextEncoder().encode(secret);
+  return new TextEncoder().encode(requireSecret("QR_TOKEN_SECRET"));
 }
 
 export async function generateQrToken(roll: string, expiresIn?: string): Promise<string> {

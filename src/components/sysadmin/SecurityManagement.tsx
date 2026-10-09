@@ -62,7 +62,16 @@ export function SecurityManagement() {
     }
   };
 
-  if (loading) return <div className="p-6 text-sm text-[var(--text-secondary)]">Loading...</div>;
+  if (loading) return (
+    <div className="flex items-center gap-2 p-6 text-sm text-[var(--text-secondary)]">
+      <RefreshCw className="w-4 h-4 animate-spin" /> Loading...
+    </div>
+  );
+  if (!stats) return (
+    <div className="p-6 text-rose-400 text-sm">
+      Failed to load. <button onClick={fetchStats} className="underline">Retry</button>
+    </div>
+  );
 
   return (
     <div className="space-y-6">

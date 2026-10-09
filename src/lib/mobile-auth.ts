@@ -1,24 +1,12 @@
 import { SignJWT, jwtVerify, JWTPayload } from "jose";
 import { Person } from "@/lib/types";
-import { getEnv } from "@/lib/env";
+import { requireSecret } from "@/lib/env";
 import { findPersonByUniqueId } from "@/lib/db";
 
 const MOBILE_TOKEN_TTL_SECONDS = 24 * 60 * 60; // 24 hours (Guide §4.3)
-const DEV_FALLBACK_MOBILE = "dev-only-insecure-mobile-secret-32bytes-min";
 
 function getSigningKey(): Uint8Array {
-  const env = getEnv();
-  const secret =
-    process.env.MOBILE_TOKEN_SECRET ||
-    env.mobileTokenSecret ||
-    (env.isProduction ? null : DEV_FALLBACK_MOBILE);
-
-  if (!secret || secret.length < 32) {
-    throw new Error(
-      "[mobile-auth] MOBILE_TOKEN_SECRET must be configured (>= 32 chars) in production."
-    );
-  }
-  return new TextEncoder().encode(secret);
+  return new TextEncoder().encode(requireSecret("MOBILE_TOKEN_SECRET"));
 }
 
 export interface MobileTokenClaims extends JWTPayload {

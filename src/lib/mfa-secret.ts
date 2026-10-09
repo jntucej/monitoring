@@ -1,18 +1,10 @@
 import crypto from "crypto";
+import { requireSecret } from "@/lib/env";
 
 const ALGO = "aes-256-gcm";
 
 function getKey(): Buffer {
-  const raw = process.env.TOTP_ENCRYPTION_KEY;
-  if (!raw || raw.length < 64) {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error(
-        "TOTP_ENCRYPTION_KEY missing or too short (must be 32 bytes hex, >= 64 chars in production)"
-      );
-    }
-    return crypto.createHash("sha256").update("dev-insecure-totp-key-change-me").digest();
-  }
-  return Buffer.from(raw, "hex");
+  return Buffer.from(requireSecret("TOTP_ENCRYPTION_KEY", 64), "hex");
 }
 
 export function encryptSecret(plaintext: string): string {

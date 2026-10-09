@@ -16,6 +16,27 @@ export interface EnvConfig {
   allowedOrigin?: string;
 }
 
+const DEV_FALLBACKS: Record<string, string> = {
+  AUTH_JWT_SECRET: "dev-only-insecure-secret-change-me-32bytes-min",
+  MOBILE_TOKEN_SECRET: "dev-only-insecure-mobile-secret-32bytes-min",
+  QR_TOKEN_SECRET: "dev-only-insecure-qr-secret-32bytes-min",
+  MFA_ENROLL_SECRET: "dev-only-insecure-mfa-secret-32bytes-min",
+  TOTP_ENCRYPTION_KEY: "dev-insecure-totp-key-change-me-0000000000000000000000000000000000000000",
+};
+
+export function requireSecret(name: string, minLen = 32): string {
+  const v = process.env[name];
+  if (!v || v.length < minLen) {
+    const env = process.env.NODE_ENV;
+    if (env && env !== "development" && env !== "test") {
+      throw new Error(`[env] ${name} missing or < ${minLen} chars. Refusing to start in ${env}.`);
+    }
+    console.warn(`[env] ${name} not set; using INSECURE dev fallback.`);
+    return DEV_FALLBACKS[name] || "dev-fallback-insecure-key-change-me!";
+  }
+  return v;
+}
+
 let cachedEnv: EnvConfig | null = null;
 
 export function getEnv(): EnvConfig {

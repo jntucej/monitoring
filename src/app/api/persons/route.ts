@@ -122,7 +122,7 @@ async function handlePost(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { uniqueId, fullName, personType, department, designation, email, phone } = body || {};
+    const { uniqueId, fullName, personType, department, designation, email, phone, metadata } = body || {};
 
     if (!uniqueId || !fullName || !personType) {
       return NextResponse.json(
@@ -156,6 +156,7 @@ async function handlePost(req: NextRequest) {
       department_id: department || null,
       status: "ACTIVE",
       login_identifier: uniqueId.trim().toUpperCase(),
+      metadata: metadata || {},
     };
 
     const { data: newUser, error } = await service.from("users").insert(userRow).select().single();

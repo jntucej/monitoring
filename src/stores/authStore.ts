@@ -328,7 +328,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         // Clear storage and hard-redirect to login if not already on login page
         if (typeof window !== "undefined") {
           try {
-            sessionStorage.removeItem("gate-monitor-auth");
+            localStorage.removeItem("gate-monitor-auth");
             localStorage.removeItem("gate-monitor-token");
             localStorage.removeItem("gate-monitor-auth");
             localStorage.removeItem("gate-monitor-role");
@@ -348,7 +348,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
     }),
     {
       name: "gate-monitor-auth",
-      storage: createJSONStorage(() => (typeof window !== "undefined" ? sessionStorage : {
+      storage: createJSONStorage(() => (typeof window !== "undefined" ? localStorage : {
         getItem: () => null,
         setItem: () => {},
         removeItem: () => {},

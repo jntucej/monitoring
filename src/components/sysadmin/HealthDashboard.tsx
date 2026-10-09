@@ -234,7 +234,7 @@ export function HealthDashboard() {
             <h3 className="font-bold text-sm text-[var(--text-primary)] flex items-center gap-2 group-hover:text-emerald-400 transition-colors">
               <Shield className="w-4 h-4 text-emerald-400" /> Subsystems
             </h3>
-            {getStatusBadge(health?.components.services.status)}
+            {getStatusBadge((health?.components.services.auth?.status === "degraded" ? "degraded" : health?.components.services.status) as any)}
           </div>
           <div className="space-y-2 text-xs">
             <div className="flex justify-between">
