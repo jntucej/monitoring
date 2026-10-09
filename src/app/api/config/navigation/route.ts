@@ -15,7 +15,7 @@ async function handleGet(req: NextRequest) {
       .from('config_navigation')
       .select('*')
       .eq('is_active', true)
-      .order('"order"', { ascending: true });
+      .order('order_num', { ascending: true });
 
     if (roleCode) {
       query = query.eq('role_code', roleCode);
