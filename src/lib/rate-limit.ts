@@ -1,210 +1,90 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { RateLimiterRedis, RateLimiterMemory } from 'rate-limiter-flexible';
+import Redis from 'ioredis';
 
-interface RateLimitStore {
-  [key: string]: {
-    count: number;
-    resetTime: number;
-  };
+let redisClient: Redis | null = null;
+if (process.env.REDIS_URL && typeof window === 'undefined') {
+  redisClient = new Redis(process.env.REDIS_URL, {
+    enableOfflineQueue: false,
+    maxRetriesPerRequest: 1,
+  });
+  redisClient.on('error', (err) => {
+    console.warn('[RateLimiter] Redis connection error, will fallback to memory if not connected.', err.message);
+  });
 }
 
-const store: RateLimitStore = {};
-const MAX_STORE_ENTRIES = 5000;
-let lastPruneTime = 0;
-const PRUNE_INTERVAL_MS = 30 * 1000; // prune every 30s
+const limitersCache = new Map<string, RateLimiterRedis | RateLimiterMemory>();
 
-function pruneStore(now: number) {
-  if (now - lastPruneTime < PRUNE_INTERVAL_MS && Object.keys(store).length < MAX_STORE_ENTRIES) {
-    return;
-  }
-  lastPruneTime = now;
-  const keys = Object.keys(store);
-  for (const k of keys) {
-    if (store[k] && store[k].resetTime < now) {
-      delete store[k];
+function getLimiter(keyPrefix: string, maxRequests: number, windowMs: number) {
+  const duration = Math.ceil(windowMs / 1000);
+  const cacheKey = `${keyPrefix}:${maxRequests}:${duration}`;
+  let limiter = limitersCache.get(cacheKey);
+  
+  if (!limiter) {
+    if (redisClient && redisClient.status === 'ready') {
+      limiter = new RateLimiterRedis({
+        storeClient: redisClient,
+        keyPrefix: `rl_${keyPrefix}`,
+        points: maxRequests,
+        duration: duration,
+      });
+    } else {
+      limiter = new RateLimiterMemory({
+        keyPrefix: `rl_${keyPrefix}`,
+        points: maxRequests,
+        duration: duration,
+      });
     }
+    limitersCache.set(cacheKey, limiter);
   }
-  const remainingKeys = Object.keys(store);
-  if (remainingKeys.length > MAX_STORE_ENTRIES) {
-    remainingKeys
-      .sort((a, b) => (store[a]?.resetTime || 0) - (store[b]?.resetTime || 0))
-      .slice(0, remainingKeys.length - MAX_STORE_ENTRIES)
-      .forEach((k) => delete store[k]);
-  }
-}
-
-const DEFAULT_WINDOW = 60 * 1000;
-const DEFAULT_MAX_REQUESTS = 100;
-
-export interface RateLimitConfig {
-  windowMs?: number;
-  maxRequests?: number;
-  keyPrefix?: string;
-}
-
-export interface RateLimitResult {
-  limited: boolean;
-  remaining: number;
-  resetTime: Date;
-  retryAfter?: number;
+  return limiter;
 }
 
 export function extractClientIp(req: NextRequest): string {
-  const realIp = req.headers.get('x-real-ip')?.trim();
-  if (realIp) return realIp;
-
-  const xForwardedFor = req.headers.get('x-forwarded-for');
-  if (xForwardedFor) {
-    const ips = xForwardedFor.split(',').map((s) => s.trim()).filter(Boolean);
-    if (ips.length > 0) {
-      return ips[ips.length - 1];
-    }
-  }
-
-  return 'unknown';
+  return (
+    req.headers.get("cf-connecting-ip") ??
+    req.headers.get("x-real-ip") ??
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+    "127.0.0.1"
+  );
 }
 
-export async function checkRateLimit(
-  reqOrKey: NextRequest | string,
-  config: RateLimitConfig = {}
-): Promise<RateLimitResult> {
-  const windowMs = config.windowMs || DEFAULT_WINDOW;
-  const maxRequests = config.maxRequests || DEFAULT_MAX_REQUESTS;
-  const keyPrefix = config.keyPrefix || 'rate_limit';
-
-  let ip = 'global';
-  if (typeof reqOrKey === 'string') {
-    ip = reqOrKey;
-  } else {
-    ip = extractClientIp(reqOrKey);
-  }
-
-  const isDev = process.env.NODE_ENV !== 'production';
-  const isLocalLoopback = ip === '127.0.0.1' || ip === '::1' || ip === 'localhost';
-  const effectiveMaxRequests = (isDev || isLocalLoopback) ? Math.max(maxRequests * 10, 300) : maxRequests;
-  const key = `${keyPrefix}:${ip}`;
-
-  const isEdge = typeof (globalThis as any).EdgeRuntime !== 'undefined' || process.env.NEXT_RUNTIME === 'edge';
-  if (!isEdge && process.env.NODE_ENV === 'production' && !isDev) {
-    try {
-      const { query } = await import('./postgres');
-      const rows = await query(
-        `SELECT COUNT(*) as count FROM api_metrics WHERE path = $1 AND timestamp >= $2`,
-        [key, new Date(Date.now() - windowMs).toISOString()]
-      );
-
-      const currentCount = parseInt(rows.rows?.[0]?.count || '0', 10);
-      const limited = currentCount >= effectiveMaxRequests;
-      const remaining = Math.max(0, effectiveMaxRequests - currentCount);
-      const resetTime = new Date(Date.now() + windowMs);
-
-      void query(
-        `INSERT INTO api_metrics (path, method, response_time, status_code, timestamp) VALUES ($1, $2, $3, $4, $5)`,
-        [key, 'LIMITER', 0, limited ? 429 : 200, new Date().toISOString()]
-      ).catch(() => {});
-
-      return {
-        limited,
-        remaining,
-        resetTime,
-        retryAfter: limited ? Math.ceil(windowMs / 1000) : 0,
-      };
-    } catch (err) {
-      console.warn('[rate-limit] PostgreSQL rate limiter fallback:', err);
-    }
-  }
-
-  const now = Date.now();
-  pruneStore(now);
-  if (store[key] && store[key].resetTime < now) {
-    delete store[key];
-  }
-
-  if (!store[key]) {
-    store[key] = { count: 1, resetTime: now + windowMs };
-    return {
-      limited: false,
-      remaining: effectiveMaxRequests - 1,
-      resetTime: new Date(store[key].resetTime),
-    };
-  }
-
-  store[key].count++;
-  const resetTime = new Date(store[key].resetTime);
-
-  if (store[key].count > effectiveMaxRequests) {
-    const retryAfter = Math.ceil((store[key].resetTime - now) / 1000);
-    return { limited: true, remaining: 0, resetTime, retryAfter };
-  }
-
-  return { limited: false, remaining: effectiveMaxRequests - store[key].count, resetTime };
-}
-
-export function rateLimitByKey(key: string, opts?: RateLimitConfig): Promise<RateLimitResult> {
-  return checkRateLimit(key, opts);
-}
-
-export function rateLimitMiddleware(config?: RateLimitConfig) {
-  return (req: NextRequest) => checkRateLimit(req, config);
-}
-
-export function rateLimit(keyOrReq: string | NextRequest, pointsOrConfig?: number | RateLimitConfig) {
-  if (typeof keyOrReq === 'string') {
-    const points = typeof pointsOrConfig === 'number' ? pointsOrConfig : pointsOrConfig?.maxRequests || 5;
-    const windowMs = typeof pointsOrConfig === 'object' ? pointsOrConfig?.windowMs : 60 * 1000;
-    return checkRateLimit(keyOrReq, { maxRequests: points, windowMs });
-  }
-  const config = (keyOrReq as unknown as RateLimitConfig) || {};
-  return (req: NextRequest) => checkRateLimit(req, config);
-}
-
-export function withRateLimit<TArgs extends unknown[] = unknown[]>(
-  handler: (req: NextRequest, ...args: TArgs) => Promise<Response>,
-  config: RateLimitConfig = {}
+export function withRateLimit(
+  handler: (req: NextRequest, ...args: any[]) => Promise<NextResponse>,
+  options: {
+    windowMs?: number;
+    maxRequests?: number;
+    keyPrefix?: string;
+  } = {}
 ) {
-  return async (req: NextRequest, ...args: TArgs) => {
-    const result = await checkRateLimit(req, config);
-    if (result.limited) {
+  const { windowMs = 60 * 1000, maxRequests = 100, keyPrefix = "global" } = options;
+
+  return async function (req: NextRequest, ...args: any[]) {
+    const ip = extractClientIp(req);
+    const limiter = getLimiter(keyPrefix, maxRequests, windowMs);
+
+    try {
+      await limiter.consume(ip);
+      return await handler(req, ...args);
+    } catch (rejectRes: any) {
+      const retrySecs = rejectRes?.msBeforeNext ? Math.ceil(rejectRes.msBeforeNext / 1000) : Math.ceil(windowMs / 1000);
+      
       return NextResponse.json(
         {
           success: false,
           error: {
-            code: 'RATE_LIMIT_EXCEEDED',
-            message: 'Too many requests. Please try again later.',
-            resetAt: result.resetTime.toISOString(),
+            code: "RATE_LIMITED",
+            message: `Too many requests. Please try again after ${retrySecs} seconds.`,
           },
         },
-        {
+        { 
           status: 429,
           headers: {
-            'Retry-After': (result.retryAfter || 60).toString(),
-            'X-RateLimit-Limit': (config.maxRequests || DEFAULT_MAX_REQUESTS).toString(),
-            'X-RateLimit-Remaining': '0',
-            'X-RateLimit-Reset': result.resetTime.toISOString(),
-          },
+            "Retry-After": String(retrySecs),
+            "X-RateLimit-Limit": String(maxRequests),
+          }
         }
       );
     }
-    const response = await handler(req, ...args);
-    response.headers.set('X-RateLimit-Limit', (config.maxRequests || DEFAULT_MAX_REQUESTS).toString());
-    response.headers.set('X-RateLimit-Remaining', result.remaining.toString());
-    response.headers.set('X-RateLimit-Reset', result.resetTime.toISOString());
-    return response;
   };
 }
-
-export const rateLimits = {
-  auth: (handler: (req: NextRequest) => Promise<Response>) =>
-    withRateLimit(handler, { maxRequests: 5, windowMs: 60 * 1000, keyPrefix: 'auth' }),
-  scan: (handler: (req: NextRequest) => Promise<Response>) =>
-    withRateLimit(handler, { maxRequests: 30, windowMs: 60 * 1000, keyPrefix: 'scan' }),
-  read: (handler: (req: NextRequest) => Promise<Response>) =>
-    withRateLimit(handler, { maxRequests: 60, windowMs: 60 * 1000, keyPrefix: 'read' }),
-  admin: (handler: (req: NextRequest) => Promise<Response>) =>
-    withRateLimit(handler, { maxRequests: 120, windowMs: 60 * 1000, keyPrefix: 'admin' }),
-  sms: (handler: (req: NextRequest) => Promise<Response>) =>
-    withRateLimit(handler, { maxRequests: 3, windowMs: 60 * 1000, keyPrefix: 'sms' }),
-  export: (handler: (req: NextRequest) => Promise<Response>) =>
-    withRateLimit(handler, { maxRequests: 10, windowMs: 60 * 1000, keyPrefix: 'export' }),
-};
-
-export default rateLimit;

@@ -1965,7 +1965,7 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
       .order('timestamp', { ascending: false })
       .limit(50),
     getAllGatesLive(),
-    db.from('users').select('role').limit(5000),
+    query<{ role: PersonType; count: string }>('SELECT role, COUNT(id) as count FROM users GROUP BY role'),
   ]);
 
   const todayScans = (todayScansRes.data || []).map(mScan);
@@ -2061,11 +2061,11 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
     sysadmin: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
   };
 
-  const userRoles = userRolesRes.data || [];
-  userRoles.forEach((u: any) => {
+  const userRoles = userRolesRes.rows || [];
+  userRoles.forEach((u) => {
     const role = (u.role || 'student') as PersonType;
     if (personTypeBreakdown[role]) {
-      personTypeBreakdown[role].total++;
+      personTypeBreakdown[role].total += parseInt(u.count, 10) || 0;
     }
   });
 

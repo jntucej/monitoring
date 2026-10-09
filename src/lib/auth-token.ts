@@ -1,19 +1,13 @@
 import { SignJWT, jwtVerify, JWTPayload } from "jose";
 import bcrypt from "bcryptjs";
 
-const DEV_FALLBACK = "dev-only-insecure-secret-change-me-32bytes-min";
-
 function requireSecret(name: string): string {
   const value = process.env[name];
   if (!value || value.length < 32) {
-    if (process.env.NODE_ENV === "production") {
-      // Fail closed: never sign/verify with a guessable secret in prod.
-      throw new Error(
-        `[auth-token] ${name} is missing or shorter than 32 chars. Refusing to process tokens. Set ${name} in the deployment environment.`
-      );
-    }
-    console.warn(`[auth-token] ${name} not set; using INSECURE dev fallback.`);
-    return DEV_FALLBACK;
+    // Fail Fast: never sign/verify with a guessable secret in any environment.
+    throw new Error(
+      `[auth-token] ${name} is missing or shorter than 32 chars. Refusing to process tokens. Set ${name} in the deployment environment.`
+    );
   }
   return value;
 }
