@@ -29,7 +29,7 @@ export function useLiveRefresh(
     if (!enabled) return;
     refetchRef.current();
     didInitialRun.current = true;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [enabled]);
 
   // Fire once when transitioning from Paused → Live.

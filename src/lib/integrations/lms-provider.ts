@@ -42,7 +42,7 @@ export class MoodleProvider implements LMSProvider {
 
   async syncRosters(config: LMSConfig): Promise<SyncResult> {
     const errors: string[] = [];
-    let syncedUsers = 0;
+    const syncedUsers = 0;
     let syncedCourses = 0;
 
     if (config.api_url && config.api_url.startsWith("http")) {
@@ -114,7 +114,7 @@ export class CanvasProvider implements LMSProvider {
 
   async syncRosters(config: LMSConfig): Promise<SyncResult> {
     const errors: string[] = [];
-    let syncedUsers = 0;
+    const syncedUsers = 0;
     let syncedCourses = 0;
 
     if (config.api_url && config.api_url.startsWith("http")) {
@@ -187,7 +187,7 @@ export class BlackboardProvider implements LMSProvider {
 
   async syncRosters(config: LMSConfig): Promise<SyncResult> {
     const errors: string[] = [];
-    let syncedUsers = 0;
+    const syncedUsers = 0;
     let syncedCourses = 0;
 
     if (config.api_url && config.api_url.startsWith("http")) {
@@ -262,7 +262,7 @@ export class SakaiProvider implements LMSProvider {
 
   async syncRosters(config: LMSConfig): Promise<SyncResult> {
     const errors: string[] = [];
-    let syncedUsers = 0;
+    const syncedUsers = 0;
     let syncedCourses = 0;
 
     if (config.api_url && config.api_url.startsWith("http")) {

@@ -1,0 +1,175 @@
+<testsuites id="" name="" tests="15" failures="2" skipped="0" errors="2" time="42.968188">
+<testsuite name="app.spec.ts" timestamp="2026-10-09T06:57:06.677Z" hostname="chromium" tests="3" failures="0" skipped="0" time="33.053" errors="1">
+<testcase name="App Sanity &amp; Navigation Tests › Health check / public landing responds successfully" classname="app.spec.ts" time="30.259">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\..\test-results\app-App-Sanity-Navigation--01b25-nding-responds-successfully-chromium\test-failed-1.png]]
+
+[[ATTACHMENT|..\..\test-results\app-App-Sanity-Navigation--01b25-nding-responds-successfully-chromium\video.webm]]
+
+[[ATTACHMENT|..\..\test-results\app-App-Sanity-Navigation--01b25-nding-responds-successfully-chromium\error-context.md]]
+]]>
+</system-out>
+<error message="Test timeout of 30000ms exceeded." type="Error">
+<![CDATA[  [chromium] › app.spec.ts:4:7 › App Sanity & Navigation Tests › Health check / public landing responds successfully 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.goto: Test timeout of 30000ms exceeded.
+    Call log:
+      - navigating to "http://localhost:3000/login", waiting until "load"
+
+
+      3 | test.describe('App Sanity & Navigation Tests', () => {
+      4 |   test('Health check / public landing responds successfully', async ({ page }) => {
+    > 5 |     const response = await page.goto('/login');
+        |                                 ^
+      6 |     expect(response?.status()).toBeLessThan(500);
+      7 |     await expect(page).toHaveTitle(/Monitoring|Gate|Campus|Login/i);
+      8 |   });
+        at C:\Users\mashw\.cline\data\workspaces\chat\monitoring\tests\app.spec.ts:5:33
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\test-results\app-App-Sanity-Navigation--01b25-nding-responds-successfully-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\test-results\app-App-Sanity-Navigation--01b25-nding-responds-successfully-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\test-results\app-App-Sanity-Navigation--01b25-nding-responds-successfully-chromium\error-context.md
+]]>
+</error>
+</testcase>
+<testcase name="App Sanity &amp; Navigation Tests › Public routes block unauthorized API access" classname="app.spec.ts" time="1.447">
+</testcase>
+<testcase name="App Sanity &amp; Navigation Tests › Public gate scan endpoint requires valid payload and authentication" classname="app.spec.ts" time="1.347">
+</testcase>
+</testsuite>
+<testsuite name="face-verification.spec.ts" timestamp="2026-10-09T06:57:06.677Z" hostname="chromium" tests="3" failures="0" skipped="0" time="33.085" errors="1">
+<testcase name="Face ID Verification &amp; Biometric Fallback Workflows › Face verification API rejects empty feature vectors" classname="face-verification.spec.ts" time="1.606">
+</testcase>
+<testcase name="Face ID Verification &amp; Biometric Fallback Workflows › Anti-spoofing flags reject suspicious biometric attempts" classname="face-verification.spec.ts" time="1.461">
+</testcase>
+<testcase name="Face ID Verification &amp; Biometric Fallback Workflows › Fallback PIN validation requires valid roll number and numeric PIN" classname="face-verification.spec.ts" time="30.018">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\..\test-results\face-verification-Face-ID--e40c2-roll-number-and-numeric-PIN-chromium\error-context.md]]
+]]>
+</system-out>
+<error message="Test timeout of 30000ms exceeded." type="Error">
+<![CDATA[  [chromium] › face-verification.spec.ts:35:7 › Face ID Verification & Biometric Fallback Workflows › Fallback PIN validation requires valid roll number and numeric PIN 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: apiRequestContext.post: Request context disposed.
+    Call log:
+      - → POST http://localhost:3000/api/gate/verify-pin
+        - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.7922.34 Safari/537.36
+        - accept: */*
+        - accept-encoding: gzip,deflate,br
+        - x-user-role: operator
+        - x-user-id: operator-test-id
+        - content-type: application/json
+        - content-length: 40
+      - ← 404 Not Found
+        - cache-control: no-cache, must-revalidate
+        - vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+        - x-powered-by: Next.js
+        - content-type: text/html; charset=utf-8
+        - content-encoding: gzip
+        - date: Fri, 09 Oct 2026 06:57:09 GMT
+        - connection: keep-alive
+        - keep-alive: timeout=5
+        - transfer-encoding: chunked
+
+
+      34 |
+      35 |   test('Fallback PIN validation requires valid roll number and numeric PIN', async ({ request }) => {
+    > 36 |     const response = await request.post('/api/gate/verify-pin', {
+         |                                    ^
+      37 |       headers: {
+      38 |         'x-user-role': 'operator',
+      39 |         'x-user-id': 'operator-test-id',
+        at C:\Users\mashw\.cline\data\workspaces\chat\monitoring\tests\face-verification.spec.ts:36:36
+
+    Error Context: ..\test-results\face-verification-Face-ID--e40c2-roll-number-and-numeric-PIN-chromium\error-context.md
+]]>
+</error>
+</testcase>
+</testsuite>
+<testsuite name="pass-approval.spec.ts" timestamp="2026-10-09T06:57:06.677Z" hostname="chromium" tests="3" failures="0" skipped="0" time="5.959" errors="0">
+<testcase name="Gate Pass Approval Workflow › Pass creation validates required date range and reason" classname="pass-approval.spec.ts" time="1.361">
+</testcase>
+<testcase name="Gate Pass Approval Workflow › Pass rejection requires non-empty comment" classname="pass-approval.spec.ts" time="2.928">
+</testcase>
+<testcase name="Gate Pass Approval Workflow › Non-authorized roles cannot approve passes" classname="pass-approval.spec.ts" time="1.67">
+</testcase>
+</testsuite>
+<testsuite name="scan-workflow.spec.ts" timestamp="2026-10-09T06:57:06.677Z" hostname="chromium" tests="3" failures="0" skipped="0" time="1.602" errors="0">
+<testcase name="Gate Scan Workflow &amp; Verification › Scan endpoint rejects empty or malformed roll numbers" classname="scan-workflow.spec.ts" time="0.436">
+</testcase>
+<testcase name="Gate Scan Workflow &amp; Verification › Scan endpoint validates direction parameter" classname="scan-workflow.spec.ts" time="0.385">
+</testcase>
+<testcase name="Gate Scan Workflow &amp; Verification › Thumbprint verification requires valid signature payload" classname="scan-workflow.spec.ts" time="0.781">
+</testcase>
+</testsuite>
+<testsuite name="session-invalidation.spec.ts" timestamp="2026-10-09T06:57:06.677Z" hostname="chromium" tests="3" failures="2" skipped="0" time="4.183" errors="0">
+<testcase name="Session Management &amp; Token Invalidation › Rejects invalid session tokens with 401 Unauthorized" classname="session-invalidation.spec.ts" time="1.891">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\..\test-results\session-invalidation-Sessi-61d39-okens-with-401-Unauthorized-chromium\error-context.md]]
+]]>
+</system-out>
+<failure message="expect(received).toContain(expected) // indexOf" type="expect.toContain">
+<![CDATA[  [chromium] › session-invalidation.spec.ts:4:7 › Session Management & Token Invalidation › Rejects invalid session tokens with 401 Unauthorized 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected value: 405
+    Received array: [401, 403]
+
+      10 |     });
+      11 |
+    > 12 |     expect([401, 403]).toContain(response.status());
+         |                        ^
+      13 |     const data = await response.json().catch(() => ({}));
+      14 |     expect(data.success).toBe(false);
+      15 |   });
+        at C:\Users\mashw\.cline\data\workspaces\chat\monitoring\tests\session-invalidation.spec.ts:12:24
+
+    Error Context: ..\test-results\session-invalidation-Sessi-61d39-okens-with-401-Unauthorized-chromium\error-context.md
+]]>
+</failure>
+</testcase>
+<testcase name="Session Management &amp; Token Invalidation › Rejects malformed user role updates" classname="session-invalidation.spec.ts" time="1.662">
+</testcase>
+<testcase name="Session Management &amp; Token Invalidation › Rate limiting headers are returned on API endpoints" classname="session-invalidation.spec.ts" time="0.63">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\..\test-results\session-invalidation-Sessi-e1d02-e-returned-on-API-endpoints-chromium\error-context.md]]
+]]>
+</system-out>
+<failure message="expect(received).toContain(expected) // indexOf" type="expect.toContain">
+<![CDATA[  [chromium] › session-invalidation.spec.ts:31:7 › Session Management & Token Invalidation › Rate limiting headers are returned on API endpoints 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected substring: "application/json"
+    Received string:    "text/html"
+
+      32 |     const response = await request.get('/api/docs');
+      33 |     if (response.status() === 200) {
+    > 34 |       expect(response.headers()['content-type']).toContain('application/json');
+         |                                                  ^
+      35 |     }
+      36 |   });
+      37 | });
+        at C:\Users\mashw\.cline\data\workspaces\chat\monitoring\tests\session-invalidation.spec.ts:34:50
+
+    Error Context: ..\test-results\session-invalidation-Sessi-e1d02-e-returned-on-API-endpoints-chromium\error-context.md
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>

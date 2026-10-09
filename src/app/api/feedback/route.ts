@@ -4,7 +4,7 @@ import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { assertLength, LIMITS } from "@/lib/validation";
 
-let feedbackStore: Array<{
+const feedbackStore: Array<{
   id: string;
   theme: string;
   comment: string;

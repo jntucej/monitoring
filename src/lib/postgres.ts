@@ -157,7 +157,7 @@ export class PostgresQueryBuilder<T = any> {
 
     this.embeddedRelations = this.parseSelectRelations(columns);
 
-    let clean = columns
+    const clean = columns
       .replace(/[a-zA-Z0-9_]+:[a-zA-Z0-9_!]+\([^)]*(?:\([^)]*\))*[^)]*\)/g, "")
       .replace(/[a-zA-Z0-9_!]+\([^)]*(?:\([^)]*\))*[^)]*\)/g, "")
       .replace(/,\s*,/g, ",")

@@ -105,7 +105,7 @@ export async function getAPIMetrics(filters: {
 // Get aggregate metrics
 export async function getAggregateMetrics(timeRange: string) {
   const now = new Date();
-  let from = new Date();
+  const from = new Date();
 
   switch (timeRange) {
     case '1h':
