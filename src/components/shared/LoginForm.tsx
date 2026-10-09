@@ -181,9 +181,19 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
     );
 
     // SECURITY: sysadmins must complete TOTP enrollment before they can sign in.
-    if (!result.success && (result.code === "MFA_REQUIRED" || result.mfaEnrollmentRequired)) {
+    // ponytail: no redirect here — user has no session yet so AuthGuard would
+    // bounce /sysadmin/security back to /login (infinite loop). Show inline
+    // step instead; POST /api/auth/2fa/setup accepts x-mfa-enroll-token.
+    if (!result.success && result.mfaEnrollmentRequired) {
+      triggerShake(
+        result.enrollToken
+          ? "MFA enrollment required. Your enroll token was issued — complete setup via POST /api/auth/2fa/setup with header x-mfa-enroll-token, then log in again."
+          : formatLoginError("MFA_REQUIRED")
+      );
+      return;
+    }
+    if (!result.success && result.code === "MFA_REQUIRED") {
       triggerShake(formatLoginError("MFA_REQUIRED"));
-      router.push("/sysadmin/security");
       return;
     }
 

@@ -31,6 +31,7 @@ interface AuthActions {
     mfaRequired?: boolean;
     mfaChallenge?: string;
     mfaEnrollmentRequired?: boolean;
+    enrollToken?: string;
   }>;
   pinLogin: (employeeId: string, pin: string) => Promise<{ success: boolean; error?: string; code?: string }>;
   logout: () => Promise<void>;
@@ -98,7 +99,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           // Admin must enroll 2FA first — no session issued
           if (response.ok && result?.success && result.mfa_enrollment_required) {
             set({ loading: false });
-            return { success: false, mfaEnrollmentRequired: true };
+            return { success: false, mfaEnrollmentRequired: true, enrollToken: result.enroll_token as string | undefined };
           }
 
           set({ loading: false });
