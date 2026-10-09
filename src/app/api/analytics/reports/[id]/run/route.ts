@@ -27,24 +27,28 @@ async function handlePost(req: NextRequest) {
       .maybeSingle();
 
     // Query real scans/movement records to generate accurate CSV output
+    // Bug 132: query the real scan table (movement_logs). The legacy `scans` table has a
+    // different shape (person_id/status/scan_time, no timestamp/user_id/person_type/role/
+    // verification_status), so selecting those columns errored and every report was NO_DATA.
     const { data: scans } = await supabase
-      .from("scans")
-      .select("id, timestamp, gate_id, direction, user_id, person_type, role, verification_status")
+      .from("movement_logs")
+      .select("id, timestamp, gate_id, gate_name, direction, reason, is_manual")
       .order("timestamp", { ascending: false })
       .limit(100);
 
-    const rows: string[] = ["Timestamp,ScanID,GateID,PersonType,Direction,Status"];
+    // Honest CSV: only columns movement_logs actually has (no fabricated PersonType/Role).
+    const rows: string[] = ["Timestamp,ScanID,GateID,Direction,Reason,Manual"];
     if (scans && scans.length > 0) {
       for (const s of scans) {
         const time = s.timestamp || now;
-        const gate = s.gate_id || "Main Gate";
-        const pType = s.person_type || s.role || "Student";
+        const gate = s.gate_name || s.gate_id || "Unknown Gate";
         const dir = s.direction || "IN";
-        const status = s.verification_status || "VERIFIED";
-        rows.push(`"${time}","${s.id}","${gate}","${pType}","${dir}","${status}"`);
+        const reason = s.reason || "-";
+        const manual = s.is_manual ? "Y" : "N";
+        rows.push(`"${time}","${s.id}","${gate}","${dir}","${reason}","${manual}"`);
       }
     } else {
-      rows.push(`"${now}","N/A","Main Gate","Student","IN","NO_DATA"`);
+      rows.push(`"${now}","N/A","N/A","N/A","NO_DATA","N/A"`);
     }
 
     const csvContent = rows.join("\n");
