@@ -58,7 +58,7 @@ interface AuthActions {
     mfaEnrollmentRequired?: boolean;
     enrollToken?: string;
   }>;
-  pinLogin: (employeeId: string, pin: string) => Promise<{ success: boolean; error?: string; code?: string }>;
+  pinLogin: (employeeId: string, pin: string, mfa?: { challenge?: string; totpCode?: string }) => Promise<{ success: boolean; error?: string; code?: string; mfaRequired?: boolean; mfaChallenge?: string; mfaEnrollmentRequired?: boolean; enrollToken?: string }>;
   logout: () => Promise<void>;
   checkSession: () => Promise<boolean>;
   setRole: (role: Role) => void;
@@ -142,14 +142,19 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         return { success: false, error: "Invalid credentials" };
       },
 
-      pinLogin: async (employeeId, pin) => {
+      pinLogin: async (employeeId, pin, mfa) => {
         set({ loading: true });
         try {
           const cleanEmployeeId = employeeId.trim().toUpperCase();
           const response = await fetch("/api/auth/pin-login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ employeeId: cleanEmployeeId, pin }),
+            body: JSON.stringify({
+              employeeId: cleanEmployeeId,
+              pin,
+              mfa_challenge: mfa?.challenge,
+              totp_code: mfa?.totpCode,
+            }),
           });
 
           const result = await response.json().catch(() => null);
@@ -166,6 +171,27 @@ export const useAuthStore = create<AuthState & AuthActions>()(
               loading: false,
             });
             return { success: true };
+          }
+
+          // Leg 1 of two-leg MFA login: PIN ok, TOTP required.
+          // ponytail: mirror the password leg so the challenge actually reaches
+          // the UI — without this the MFA response was dropped (Bug 103).
+          if (response.ok && result?.success && result.mfa_required) {
+            set({ loading: false });
+            return {
+              success: false,
+              mfaRequired: true,
+              mfaChallenge: result.mfa_challenge,
+            };
+          }
+
+          if (response.ok && result?.success && result.mfa_enrollment_required) {
+            set({ loading: false });
+            return {
+              success: false,
+              mfaEnrollmentRequired: true,
+              enrollToken: result.enroll_token as string | undefined,
+            };
           }
 
           set({ loading: false });

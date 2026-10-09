@@ -68,10 +68,14 @@ async function handleChangePassword(req: NextRequest, { auth }: { auth: AuthCont
 
     const newHash = await hashPassword(newPassword);
 
-    await query("UPDATE users SET password_hash = $1, last_password_change = NOW() WHERE id = $2", [
-      newHash,
-      userId,
-    ]);
+    // Bug 104: changing a password must invalidate every existing session —
+    // otherwise a compromised token keeps working for up to its TTL. Mirror the
+    // proven /api/auth/reset-password pattern (bump session_version + revoke rows).
+    await query(
+      "UPDATE users SET password_hash = $1, session_version = COALESCE(session_version, 0) + 1, last_password_change = NOW() WHERE id = $2",
+      [newHash, userId]
+    );
+    await query("UPDATE sessions SET revoked_at = NOW() WHERE user_id = $1", [userId]).catch(() => {});
 
     try {
       await addAudit({
