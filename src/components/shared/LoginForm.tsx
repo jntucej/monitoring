@@ -154,7 +154,11 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
     }
 
     if (loginMode === "pin") {
-      const pinResult = await pinLogin(identifier, passwordOrPin);
+      const pinResult = await pinLogin(
+        identifier,
+        passwordOrPin,
+        mfaChallenge ? { challenge: mfaChallenge, totpCode } : undefined
+      );
       if (pinResult.success) {
         if (rememberMe) {
           localStorage.setItem("gate-monitor-remember", "true");
@@ -166,6 +170,22 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
         });
         // ponytail: no redirect here — the hasHydrated+authenticated effect
         // below routes once persist has settled (avoids AuthGuard race).
+        return;
+      }
+
+      // PIN ok but 2FA enrolled — surface the challenge like the password leg (Bug 103).
+      if (pinResult.mfaRequired && pinResult.mfaChallenge) {
+        setMfaChallenge(pinResult.mfaChallenge);
+        triggerShake("Enter the 6-digit code from your authenticator app.");
+        return;
+      }
+
+      if (pinResult.mfaEnrollmentRequired) {
+        triggerShake(
+          pinResult.enrollToken
+            ? "MFA enrollment required. Your enroll token was issued — complete setup via POST /api/auth/2fa/setup with header x-mfa-enroll-token, then log in again."
+            : formatLoginError("MFA_REQUIRED")
+        );
         return;
       }
 

@@ -51,10 +51,13 @@ export function generateTOTPCode(secretBase32: string, timeStepWindow = 0): stri
 export function verifyTOTPCode(secretBase32: string, token: string): boolean {
   if (!token || token.length !== 6) return false;
 
-  // Check windows -1, 0, +1 for slight time drift tolerance
+  const tokenBuf = Buffer.from(token, "utf8");
+  // Check windows -1, 0, +1 for slight time drift tolerance.
+  // Bug 107/125: guard length before timingSafeEqual — it THROWS on mismatched
+  // buffer lengths, which would 500 the MFA leg if code length ever changes.
   for (let window = -1; window <= 1; window++) {
-    const expected = generateTOTPCode(secretBase32, window);
-    if (crypto.timingSafeEqual(Buffer.from(token), Buffer.from(expected))) {
+    const expectedBuf = Buffer.from(generateTOTPCode(secretBase32, window), "utf8");
+    if (tokenBuf.length === expectedBuf.length && crypto.timingSafeEqual(tokenBuf, expectedBuf)) {
       return true;
     }
   }
