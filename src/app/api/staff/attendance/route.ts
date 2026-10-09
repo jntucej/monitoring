@@ -11,7 +11,7 @@ function formatTime(isoString: string | null | undefined): string | null {
   try {
     const d = new Date(isoString);
     if (isNaN(d.getTime())) return null;
-    return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
+    return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true, timeZone: "Asia/Kolkata" });
   } catch {
     return null;
   }

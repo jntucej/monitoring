@@ -14,7 +14,7 @@ export function ChildStatus() {
     const load = async () => {
       try {
         // Get parent ID from auth (demo)
-        const authRaw = localStorage.getItem("gate-monitor-auth");
+        const authRaw = sessionStorage.getItem("gate-monitor-auth");
         const auth = authRaw ? JSON.parse(authRaw) : null;
         const parentId = auth?.user?.parentId ?? auth?.user?.id ?? "pa-1";
 
