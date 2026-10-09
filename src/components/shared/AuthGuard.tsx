@@ -17,10 +17,20 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   const hasHydrated = useHasHydrated();
   const { user, authenticated, checkSession } = useAuthStore();
   const [isChecking, setIsChecking] = useState(true);
+  const [timedOut, setTimedOut] = useState(false);
 
   const userId = user?.id;
   const userRole = user?.role;
   const gateId = user?.gateId;
+
+  useEffect(() => {
+    // ponytail: fail-closed escape hatch — if persist hydration never
+    // settles (blocked storage), the final render gate below redirects to
+    // /login instead of spinning forever. 8s ceiling; normal path hydrates
+    // in ms, so this only fires when storage is actually broken.
+    const t = setTimeout(() => { setIsChecking(false); setTimedOut(true); }, 8000);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     // Wait until store has hydrated from localStorage/sessionStorage
@@ -73,6 +83,19 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
 
     return () => clearInterval(interval);
   }, [hasHydrated, authenticated, userId, checkSession]);
+
+  // ponytail: timedOut flunks hydration — fail closed to /login rather than
+  // spinning. First effect already routed unauthenticated users; this covers
+  // the stuck-hydration path.
+  if (timedOut && !hasHydrated) {
+    router.replace("/login");
+    return (
+      <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[var(--bg-base)] text-[var(--text-primary)]">
+        <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4" />
+        <p className="text-xs font-semibold text-[var(--text-muted)]">Verifying security credentials...</p>
+      </div>
+    );
+  }
 
   if (!hasHydrated || isChecking || !authenticated || !user) {
     return (

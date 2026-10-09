@@ -164,8 +164,8 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
           message: `Authenticated via Security PIN.`,
           variant: "success",
         });
-        const authStore = useAuthStore.getState();
-        redirectAfterLogin(authStore.role);
+        // ponytail: no redirect here — the hasHydrated+authenticated effect
+        // below routes once persist has settled (avoids AuthGuard race).
         return;
       }
 
@@ -215,8 +215,9 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
         message: `Authenticated successfully.`,
         variant: "success",
       });
-      const authStore = useAuthStore.getState();
-      redirectAfterLogin(authStore.role);
+      // ponytail: no redirect here — the hasHydrated+authenticated effect
+      // above routes once persist has settled (avoids AuthGuard race).
+      return;
     } else {
       triggerShake(formatLoginError(result.code, result.error));
     }
@@ -258,7 +259,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
             <input
               type="text"
               value={loginIdentifier}
-              onChange={(e) => setLoginIdentifier(e.target.value)}
+              onChange={(e) => { setLoginIdentifier(e.target.value); if (errorMsg) setErrorMsg(""); }}
               placeholder="Enter ID"
               className="w-full pl-10 pr-4 py-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-sm font-semibold text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none transition-all"
             />
@@ -311,7 +312,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
             <input
               type={showPassword ? "text" : "password"}
               value={passwordOrPin}
-              onChange={(e) => setPasswordOrPin(e.target.value)}
+              onChange={(e) => { setPasswordOrPin(e.target.value); if (errorMsg) setErrorMsg(""); }}
               placeholder={loginMode === "pin" ? "4-8 digit PIN" : "Enter password"}
               className="w-full pl-10 pr-12 py-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none transition-all"
             />
