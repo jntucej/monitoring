@@ -65,14 +65,14 @@ export function ScanConfirmation({
   const [approvedPasses, setApprovedPasses] = useState<any[]>([]);
   const [loadingPasses, setLoadingPasses] = useState(false);
   const [isFlagged, setIsFlagged] = useState(
-    student.status === "SUSPENDED" || student.flagStatus === "suspicious"
+    student.status === "SUSPENDED" || !!student.flagStatus
   );
   const [flaggingLoading, setFlaggingLoading] = useState(false);
 
   const handleToggleFlagAccount = async () => {
     if (flaggingLoading) return;
     const nextStatus = isFlagged ? "ACTIVE" : "SUSPENDED";
-    const nextFlagStatus = isFlagged ? null : "suspicious";
+    const nextFlagStatus = isFlagged ? null : "MANUAL_LOCKDOWN";
     setFlaggingLoading(true);
     try {
       const authStore = useAuthStore.getState();
@@ -202,12 +202,25 @@ export function ScanConfirmation({
     onConfirm(direction, reason);
   };
 
+  const normalizeReason = (r?: string) => {
+    if (!r) return "";
+    const s = r.trim().toLowerCase().replace(/[\s_-]+/g, "");
+    if (s === "dayout" || s === "daypass") return "dayout";
+    if (s === "homeout" || s === "homepass") return "homeout";
+    return s;
+  };
+
   const renderActionButtons = (actions: ActionEntry[]) => (
     <div className={cn("grid gap-2", actions.length > 2 ? "grid-cols-3" : "grid-cols-2")}>
       {actions.map(({ code, name, icon: Icon, direction, requiresApproval }) => {
         const isSelected = selectedDirection === direction && selectedReason === code;
-        const passRequired = direction === "OUT" && requiresApproval && (student.personType === "student" || !student.personType);
-        const hasApprovedPass = approvedPasses.some((p) => p.reason === code);
+        const passRequired = direction === "OUT" && requiresApproval;
+        const hasApprovedPass = approvedPasses.some((p) => {
+          if (!p.reason) return false;
+          if (p.reason === code || p.reason === name) return true;
+          if (p.reason.toLowerCase() === code.toLowerCase() || p.reason.toLowerCase() === name.toLowerCase()) return true;
+          return normalizeReason(p.reason) === normalizeReason(code) || normalizeReason(p.reason) === normalizeReason(name);
+        });
         const isDisabled = !photoVerified || !biometricOk || isFlagged || (passRequired && !hasApprovedPass);
         return (
           <button

@@ -39,12 +39,29 @@ export async function GET(req: NextRequest) {
 
       executed.push(report.id);
 
-      if (report.email_recipient) {
-        await sendEmail({
-          to: report.email_recipient,
-          subject: `[Automated Report] ${report.title || "Campus Access Report"}`,
-          body: `Your scheduled report "${report.title || "Report"}" was generated successfully at ${now}.\n\nView details in Gate Monitor Admin Panel.`,
-        });
+      const reportTitle = report.name || report.title || "Campus Access Report";
+      const rawRecipients = report.recipients || report.email_recipient;
+      let recipients: string[] = [];
+      try {
+        if (Array.isArray(rawRecipients)) {
+          recipients = rawRecipients;
+        } else if (typeof rawRecipients === "string") {
+          recipients = rawRecipients.trim().startsWith("[")
+            ? JSON.parse(rawRecipients)
+            : [rawRecipients];
+        }
+      } catch {
+        recipients = typeof rawRecipients === "string" ? [rawRecipients] : [];
+      }
+
+      for (const to of recipients) {
+        if (to && typeof to === "string" && to.includes("@")) {
+          await sendEmail({
+            to: to.trim(),
+            subject: `[Automated Report] ${reportTitle}`,
+            body: `Your scheduled report "${reportTitle}" was generated successfully at ${now}.\n\nView details in Gate Monitor Admin Panel.`,
+          });
+        }
       }
     }
 

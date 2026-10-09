@@ -64,6 +64,7 @@ export async function resolveAlert(alertId: string, userId: string): Promise<boo
 }
 
 export const DEPARTMENTS: Department[] = [
+  { code: "CIVIL", name: "Civil Engineering", hod: "Dr. A. Kumar" },
   { code: "CSE", name: "Computer Science & Engineering", hod: "Dr. K. Sridhar" },
   { code: "IT",  name: "Information Technology",        hod: "Dr. P. Sreedhar" },
   { code: "ECE", name: "Electronics & Communication Engineering", hod: "Dr. M. Srinivas" },
@@ -115,6 +116,7 @@ export function mPerson(r: any): Person {
     personType,
     department: (() => {
       const deptCodeMap: Record<string, string> = {
+        "01": "CIVIL",
         "02": "EEE",
         "03": "ME",
         "04": "ECE",
@@ -202,6 +204,7 @@ function mScan(r: any): Scan {
   const personType = user?.role || r.person_type || "student";
   const department = (() => {
     const deptCodeMap: Record<string, string> = {
+      "01": "CIVIL",
       "02": "EEE",
       "03": "ME",
       "04": "ECE",
@@ -641,13 +644,30 @@ export async function getAllGatesLive(): Promise<Gate[]> {
   const { data: persistentGates } = await client.from('gates').select('*');
   if (!persistentGates || persistentGates.length === 0) return [];
 
-  // Fetch online operators (status ACTIVE and session handle IS NOT NULL)
-  const { data: onlineOperators } = await client
-    .from('users')
-    .select('id, gate_id, supervised_gates, role')
-    .eq('status', 'ACTIVE')
-    .not('handle', 'is', null)
-    .in('role', ['operator', 'admin', 'sysadmin']);
+  // Active operators = operators who have a non-revoked, non-expired session
+  const { data: activeSessions } = await client
+    .from('sessions')
+    .select('user_id')
+    .is('revoked_at', null)
+    .gt('expires_at', new Date().toISOString());
+
+  const activeUserIds = new Set((activeSessions || []).map((s: any) => s.user_id));
+
+  let onlineOperatorGateIds = new Set<string>();
+  if (activeUserIds.size > 0) {
+    const { data: onlineOperators } = await client
+      .from('users')
+      .select('id, gate_id, supervised_gates')
+      .in('id', Array.from(activeUserIds))
+      .eq('role', 'operator'); // only operators, not admin/sysadmin
+
+    for (const op of onlineOperators || []) {
+      if (op.gate_id) onlineOperatorGateIds.add(op.gate_id);
+      if (Array.isArray(op.supervised_gates)) {
+        for (const sg of op.supervised_gates) onlineOperatorGateIds.add(sg);
+      }
+    }
+  }
 
   // Fetch recent scans (within last 15 minutes)
   const fifteenMinsAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
@@ -657,31 +677,23 @@ export async function getAllGatesLive(): Promise<Gate[]> {
     .gte('timestamp', fifteenMinsAgo);
 
   const activeGateIdsFromScans = new Set((recentScans || []).map((s: any) => s.gate_id));
-  const activeGateIdsFromOperators = new Set<string>();
-
-  if (onlineOperators) {
-    for (const op of onlineOperators) {
-      if (op.gate_id) activeGateIdsFromOperators.add(op.gate_id);
-      if (Array.isArray(op.supervised_gates)) {
-        for (const sg of op.supervised_gates) activeGateIdsFromOperators.add(sg);
-      }
-    }
-  }
 
   return persistentGates.map((g: any) => {
     const isConfiguredActive = g.is_active !== false;
-    const hasOnlineOperator = activeGateIdsFromOperators.has(g.id);
+    const hasOnlineOperator = onlineOperatorGateIds.has(g.id);
     const hasRecentScan = activeGateIdsFromScans.has(g.id);
 
-    // Gate is ONLINE only if it is configured active AND has an online operator or recent scan activity
+    // Gate is ONLINE if it is configured active AND has an online operator or recent scan activity
     const isOnline = isConfiguredActive && (hasOnlineOperator || hasRecentScan);
 
     return {
       id: g.id,
+      gateCode: g.gate_code,
       name: g.name,
       location: g.location,
       type: g.type,
-      isActive: isOnline,
+      isActive: isConfiguredActive,
+      isOnline: isOnline,
     };
   });
 }
@@ -710,10 +722,20 @@ export async function getNotifications(recipientType: string, recipientId: strin
     .select('*')
     .order('created_at', { ascending: false });
 
+  const orClauses: string[] = [];
   if (safeId) {
-    query = query.or(`recipient_id.eq.${safeId},recipient_type.eq.all`);
-  } else if (safeType && safeType !== 'all') {
-    query = query.or(`recipient_type.eq.${safeType},recipient_type.eq.all`);
+    orClauses.push(`recipient_id.eq.${safeId}`);
+  }
+  if (safeType && safeType !== 'all') {
+    orClauses.push(`recipient_id.eq.${safeType}`);
+    orClauses.push(`recipient_type.eq.${safeType}`);
+  }
+  orClauses.push('recipient_id.eq.all');
+  orClauses.push('recipient_type.eq.all');
+
+  const uniqueOrClauses = Array.from(new Set(orClauses));
+  if (uniqueOrClauses.length > 0) {
+    query = query.or(uniqueOrClauses.join(','));
   }
 
   const { data, error } = await query;
@@ -749,42 +771,30 @@ export async function findPersonByUniqueId(uniqueId: string): Promise<Person | n
 
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(formattedId);
 
-  // Tier 1: Query users table with auto-resolved relationships
+  // Tier 1: Query users table and merge details
   try {
+    let userData: any = null;
     if (isUuid) {
-      const { data: userData } = await client.from('users').select('*, student_details!student_details_user_id_fkey(*), employee_details(*)').eq('id', formattedId).maybeSingle();
-      if (userData) return mPerson(userData);
+      const { data } = await client.from('users').select('*').eq('id', formattedId).maybeSingle();
+      userData = data;
     }
-    const { data: userData, error: uErr } = await client.from('users').select('*, student_details!student_details_user_id_fkey(*), employee_details(*)').eq('unique_id', formattedId).maybeSingle();
-    if (!uErr && userData) {
-      return mPerson(userData);
+    if (!userData) {
+      const { data } = await client.from('users').select('*').eq('unique_id', formattedId).maybeSingle();
+      userData = data;
     }
-  } catch (err) {
-    console.warn('[db] findPersonByUniqueId Tier 1 error:', err);
-  }
-
-  // Tier 2: Query simple users table without joins (if explicit join failed)
-  try {
-    if (isUuid) {
-      const { data: simpleUser } = await client.from('users').select('*').eq('id', formattedId).maybeSingle();
-      if (simpleUser) {
-        const { data: sDet } = await client.from('student_details').select('*').eq('user_id', simpleUser.id).maybeSingle();
-        const { data: eDet } = await client.from('employee_details').select('*').eq('user_id', simpleUser.id).maybeSingle();
-        return mPerson({ ...simpleUser, student_details: sDet || undefined, employee_details: eDet || undefined });
-      }
-    }
-    const { data: simpleUser } = await client.from('users').select('*').eq('unique_id', formattedId).maybeSingle();
-    if (simpleUser) {
-      const { data: sDet } = await client.from('student_details').select('*').eq('user_id', simpleUser.id).maybeSingle();
-      const { data: eDet } = await client.from('employee_details').select('*').eq('user_id', simpleUser.id).maybeSingle();
+    if (userData) {
+      const [sDet, eDet] = await Promise.all([
+        client.from('student_details').select('*').eq('user_id', userData.id).maybeSingle(),
+        client.from('employee_details').select('*').eq('user_id', userData.id).maybeSingle(),
+      ]);
       return mPerson({
-        ...simpleUser,
-        student_details: sDet || undefined,
-        employee_details: eDet || undefined,
+        ...userData,
+        student_details: sDet.data || undefined,
+        employee_details: eDet.data || undefined,
       });
     }
   } catch (err) {
-    console.warn('[db] findPersonByUniqueId Tier 2 error:', err);
+    console.warn('[db] findPersonByUniqueId Tier 1 error:', err);
   }
 
   // Tier 3: Query student_details by roll number directly
@@ -830,11 +840,19 @@ export async function findPersonByUniqueId(uniqueId: string): Promise<Person | n
     if (altId && altId !== formattedId) {
       const { data: altUser } = await client
         .from('users')
-        .select('*, student_details!student_details_user_id_fkey(*), employee_details(*)')
+        .select('*')
         .eq('unique_id', altId)
         .maybeSingle();
       if (altUser) {
-        return mPerson(altUser);
+        const [sDet, eDet] = await Promise.all([
+          client.from('student_details').select('*').eq('user_id', altUser.id).maybeSingle(),
+          client.from('employee_details').select('*').eq('user_id', altUser.id).maybeSingle(),
+        ]);
+        return mPerson({
+          ...altUser,
+          student_details: sDet.data || undefined,
+          employee_details: eDet.data || undefined,
+        });
       }
 
       const { data: altEmp } = await client
@@ -1056,16 +1074,14 @@ export async function findGateById(id: string): Promise<Gate | null> {
                    (query === "3" || query === "gate-3" ? (code === "gate-03" || code === "back" || code === "gate-3" || code === "3") : false);
           });
           if (match) {
-            return { id: match.id, name: match.name, location: match.location, type: match.type, isActive: !!match.is_active };
-          }
-          const first = result.data[0];
-          if (first) {
-            return { id: first.id, name: first.name, location: first.location, type: first.type, isActive: !!first.is_active };
+            return { id: match.id, gateCode: match.gate_code || match.gateCode, name: match.name, location: match.location, type: match.type, isActive: match.is_active !== undefined ? !!match.is_active : !!match.isActive };
           }
         }
       }
+      return null;
     } catch (err) {
       console.warn("findGateById client fetch error:", err);
+      return null;
     }
   }
 
@@ -1075,7 +1091,7 @@ export async function findGateById(id: string): Promise<Gate | null> {
   if (isUuid) {
     const { data, error } = await client.from('gates').select('*').eq('id', id).maybeSingle();
     if (!error && data) {
-      return { id: data.id, name: data.name, location: data.location, type: data.type, isActive: !!data.is_active };
+      return { id: data.id, gateCode: data.gate_code, name: data.name, location: data.location, type: data.type, isActive: data.is_active !== false };
     }
   }
 
@@ -1094,12 +1110,11 @@ export async function findGateById(id: string): Promise<Gate | null> {
              (query === "3" || query === "gate-3" ? (code === "gate-03" || code === "back" || code === "gate-3" || code === "3") : false);
     });
     if (match) {
-      return { id: match.id, name: match.name, location: match.location, type: match.type, isActive: !!match.is_active };
+      return { id: match.id, gateCode: match.gate_code, name: match.name, location: match.location, type: match.type, isActive: match.is_active !== false };
     }
-    return { id: allData[0].id, name: allData[0].name, location: allData[0].location, type: allData[0].type, isActive: !!allData[0].is_active };
   }
 
-  return { id: id || "gate-1", name: "Main Gate", location: "Main Entrance", type: "main", isActive: true };
+  return null;
 }
 
 export async function findAllGates(): Promise<Gate[]> {
@@ -1550,6 +1565,16 @@ export async function addScan(input: {
     throw new Error(`Access Denied: Account status is ${person.status}. Gate access denied.`);
   }
 
+  // Enforce server-side student exit gate-pass requirements
+  const isStudent = person.role === "student" || person.personType === "student" || !!person.studentDetails;
+  if (isStudent && input.direction === "OUT") {
+    const { validateStudentExitFlow } = await import("./student-exit-flow");
+    const flowResult = await validateStudentExitFlow(uniqueId, input.direction, input.reason);
+    if (!flowResult.allowed) {
+      throw new Error(flowResult.error || `Exit denied: Approved gate pass required for ${input.reason || "student exit"}`);
+    }
+  }
+
   let client = supabase;
   try {
     const { getSupabaseServiceClient } = await import('./dbClient');
@@ -1563,18 +1588,28 @@ export async function addScan(input: {
       "Day Out": "day_pass",
       "Home Out": "home_out",
       "Daily Outing": "daily_outing",
+      "daily_outing": "daily_outing",
+      "home_in": "home_in",
+      "regular": "regular",
+      "Regular": "regular",
+      "Day Pass": "day_pass",
     };
-    const normReason = reasonAliasMap[input.reason] || input.reason;
-    const { data: validReason, error: rErr } = await client
+    const normReason = reasonAliasMap[input.reason] || input.reason.toLowerCase().trim().replace(/\s+/g, '_');
+    const searchCodes = Array.from(new Set([input.reason, normReason].filter(Boolean)));
+    const { data: validReasons, error: rErr } = await client
         .from('config_exit_reasons')
         .select('code')
-        .in('code', [input.reason, normReason, 'day_pass', 'home_out', 'daily_outing'])
-        .maybeSingle();
+        .in('code', searchCodes)
+        .limit(1);
     
-    if (!validReason && (!rErr || (rErr.code !== '42P01' && rErr.code !== 'PGRST205'))) {
-      // If table is missing or doesn't match, allow standard pass reasons (day_pass, home_out, daily_outing)
-      const allowedStandard = ['day_pass', 'home_out', 'daily_outing', 'Day Out', 'Home Out', 'Day Pass', 'Daily Outing'];
-      if (!allowedStandard.includes(input.reason)) {
+    const matchedReason = validReasons && validReasons.length > 0 ? validReasons[0] : null;
+    const allowedStandard = [
+      'day_pass', 'home_out', 'daily_outing', 'home_in', 'regular',
+      'Day Out', 'Home Out', 'Day Pass', 'Daily Outing', 'Regular', 'Emergency', 'emergency'
+    ];
+
+    if (!matchedReason && !allowedStandard.map(s => s.toLowerCase()).includes(input.reason.toLowerCase()) && !allowedStandard.includes(normReason)) {
+      if (!rErr || (rErr.code !== '42P01' && rErr.code !== 'PGRST205')) {
         throw new Error(`Invalid exit reason: ${input.reason}`);
       }
     }
@@ -1625,6 +1660,20 @@ export async function addScan(input: {
       const logData = res.inserted_log;
       const isDup = !!res.is_duplicate;
       return { scan: mScan({ ...logData, users: person }), duplicate: isDup };
+    }
+    // ponytail: silent fallthrough here hides a broken RPC (missing fn, type
+    // drift) and the slow path skips FOR UPDATE dedup — log + audit so the
+    // drift query in the runbook catches it before occupancy diverges.
+    if (rpcErr) {
+      console.error("[addScan] process_gate_scan RPC failed — falling back:", rpcErr);
+      await addAudit({
+        action: "SCAN_RPC_FALLBACK",
+        userId: op.id,
+        userName: op.name,
+        role: op.role as Role,
+        details: `RPC fallback: ${rpcErr.message}`,
+        gateId: gate.id,
+      });
     }
   } catch { /* fallback to standard query path if RPC is missing */ }
 
@@ -1695,7 +1744,9 @@ export async function addScan(input: {
     );
   }
 
-  return { scan: mScan(data), duplicate: false };
+  // Re-attach user record because PostgresQueryBuilder doesn't hydrate relations on simple insert
+  const personRecord = await findPersonByUniqueId(uniqueId);
+  return { scan: mScan({ ...data, users: personRecord || person }), duplicate: false };
 }
 
 export async function getAllLogs(f?: {
@@ -1863,6 +1914,14 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
   let todayScansBuilder: any = db.from('movement_logs')
     .select('*, users:users!movement_logs_user_id_fkey!inner(unique_id, name, role, department_id, student_details:student_details!student_details_user_id_fkey(year))')
     .gte('timestamp', todayStart.toISOString());
+  let todayInCountBuilder: any = db.from('movement_logs')
+    .select('id', { count: 'exact', head: true })
+    .gte('timestamp', todayStart.toISOString())
+    .eq('direction', 'IN');
+  let todayOutCountBuilder: any = db.from('movement_logs')
+    .select('id', { count: 'exact', head: true })
+    .gte('timestamp', todayStart.toISOString())
+    .eq('direction', 'OUT');
   let yesterdayInBuilder: any = db.from('movement_logs')
     .select('id', { count: 'exact', head: true })
     .gte('timestamp', yesterdayStart.toISOString())
@@ -1875,6 +1934,8 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
     .eq('direction', 'OUT');
   if (gateId) {
     todayScansBuilder = todayScansBuilder.eq('gate_id', gateId);
+    todayInCountBuilder = todayInCountBuilder.eq('gate_id', gateId);
+    todayOutCountBuilder = todayOutCountBuilder.eq('gate_id', gateId);
     yesterdayInBuilder = yesterdayInBuilder.eq('gate_id', gateId);
     yesterdayOutBuilder = yesterdayOutBuilder.eq('gate_id', gateId);
   }
@@ -1882,6 +1943,8 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
   const [
     onCampusCount,
     todayScansRes,
+    todayInRes,
+    todayOutRes,
     yesterdayInRes,
     yesterdayOutRes,
     activeAlertsRes,
@@ -1892,6 +1955,8 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
     todayScansBuilder
       .order('timestamp', { ascending: false })
       .limit(2000),
+    todayInCountBuilder,
+    todayOutCountBuilder,
     yesterdayInBuilder,
     yesterdayOutBuilder,
     db.from('alerts')
@@ -1906,8 +1971,9 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
   const todayScans = (todayScansRes.data || []).map(mScan);
   const activeAlerts = (activeAlertsRes.data || []).map(mAlert);
 
-  const todayIn = todayScans.filter((s: Scan) => s.direction === "IN").length;
-  const todayOut = todayScans.filter((s: Scan) => s.direction === "OUT").length;
+  const todayIn = typeof todayInRes?.count === 'number' ? todayInRes.count : todayScans.filter((s: Scan) => s.direction === "IN").length;
+  const todayOut = typeof todayOutRes?.count === 'number' ? todayOutRes.count : todayScans.filter((s: Scan) => s.direction === "OUT").length;
+  const totalScans = todayIn + todayOut;
 
   const yesterdayIn = yesterdayInRes.count || 0;
   const yesterdayOut = yesterdayOutRes.count || 0;
@@ -1976,7 +2042,10 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
   });
 
   // Calculate person type breakdown
-  const personTypes: PersonType[] = ["student", "faculty", "staff", "worker", "visitor", "parent"];
+  const personTypes: PersonType[] = [
+    "student", "faculty", "staff", "worker", "visitor", "parent",
+    "guardian", "hod", "warden", "operator", "admin", "sysadmin"
+  ];
   const personTypeBreakdown: Record<PersonType, PersonTypeStats> = {
     student: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
     faculty: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
@@ -1984,6 +2053,12 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
     worker: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
     visitor: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
     parent: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
+    guardian: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
+    hod: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
+    warden: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
+    operator: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
+    admin: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
+    sysadmin: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
   };
 
   const userRoles = userRolesRes.data || [];
@@ -2051,11 +2126,11 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
     onCampus: onCampusCount,
     todayIn,
     todayOut,
-    totalScans: todayScans.length,
+    totalScans,
     activeAlerts: activeAlerts.length,
     trendOnCampus: calcTrend(onCampusCount, yesterdayIn - yesterdayOut),
     trendOut: calcTrend(todayOut, yesterdayOut),
-    trendScans: calcTrend(todayScans.length, yesterdayIn + yesterdayOut),
+    trendScans: calcTrend(totalScans, yesterdayIn + yesterdayOut),
     locations,
     activityFeed: todayScans.slice(0, 20),
     deptBreakdown,
@@ -2070,6 +2145,11 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
 // DAILY GATE STATS (per-day table that resets each new day at midnight)
 // --------------------------------------------------------------------------- *
 
+function getIstDateString(d: Date = new Date()): string {
+  // en-CA format is YYYY-MM-DD
+  return d.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+}
+
 /**
  * Read per-day gate stats from the `daily_stats` table.
  *
@@ -2077,7 +2157,7 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
  * scan after local midnight creates a fresh row — today's entries/exits start
  * at zero while all historical days remain recorded.
  *
- * @param date YYYY-MM-DD; defaults to today (UTC day, matching the table rows)
+ * @param date YYYY-MM-DD; defaults to today (Asia/Kolkata day, matching the table rows)
  * @param gateId optional gate UUID to scope; omitted = all gates summary
  */
 export async function getDailyStats(date?: string, gateId?: string): Promise<DailyGateStats | DailyGateStats[] | null> {
@@ -2087,7 +2167,7 @@ export async function getDailyStats(date?: string, gateId?: string): Promise<Dai
     client = getSupabaseServiceClient();
   } catch { /* fallback to anon client */ }
 
-  const day = date || new Date().toISOString().slice(0, 10);
+  const day = date || getIstDateString();
 
   let query = client
     .from('daily_stats')
@@ -2122,11 +2202,9 @@ export async function statsToday(gateId?: string): Promise<{
   recentScans: Scan[];
   personTypeBreakdown: Record<PersonType, PersonTypeStats>;
 }> {
-  // Use a single UTC day boundary for both the daily_stats lookup and the
-  // movement_logs fallback so the counters stay perfectly in sync with the
-  // analytics routes (which also use UTC day boundaries).
-  const day = new Date().toISOString().slice(0, 10);
-  const dayStartUTC = `${day}T00:00:00.000Z`;
+  // Use Asia/Kolkata day boundary matching schema triggers
+  const day = getIstDateString();
+  const dayStartUTC = `${day}T00:00:00+05:30`;
 
   // Read scan history from movement_logs (the active table writes go to).
   // The legacy "gate_logs" table is not written to anymore, so reading from
@@ -2176,6 +2254,12 @@ export async function statsToday(gateId?: string): Promise<{
     worker: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
     visitor: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
     parent: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
+    guardian: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
+    hod: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
+    warden: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
+    operator: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
+    admin: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
+    sysadmin: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
   };
 
   allPersons.forEach((p: any) => {
@@ -2300,13 +2384,24 @@ export async function getPersonHistory(uniqueId: string, limit: number = 20): Pr
 export const getStudentHistory = getPersonHistory;
 
 export async function getLinkedPersons(parentId: string): Promise<Person[]> {
-  const { data, error } = await supabase
+  const db = getDbClient();
+  const { data: sDetails, error: sErr } = await db
     .from('student_details')
-    .select('user_id, users!student_details_user_id_fkey(*)')
+    .select('*')
     .eq('guardian_id', parentId);
 
-  if (error || !data) return [];
-  return data.map((d: any) => mPerson(d.users));
+  if (sErr || !sDetails || sDetails.length === 0) return [];
+  const userIds = sDetails.map((d: any) => d.user_id).filter(Boolean);
+  if (userIds.length === 0) return [];
+
+  const { data: users, error: uErr } = await db
+    .from('users')
+    .select('*')
+    .in('id', userIds);
+
+  if (uErr || !users) return [];
+  const sMap = new Map((sDetails || []).map((s: any) => [s.user_id, s]));
+  return users.map((u: any) => mPerson({ ...u, student_details: sMap.get(u.id) }));
 }
 
 export const getParentChildren = getLinkedPersons;
@@ -2321,7 +2416,7 @@ export type FlagStatus = 'OVERDUE' | 'UNAUTHORIZED_EXIT' | 'NO_GATE_PASS' | 'SUS
  * Set or clear an admin advisory flag on a user.
  * Does NOT affect users.status — purely a gate-alert signal.
  */
-export async function setUserFlag(userId: string, flag: FlagStatus, actorId: string): Promise<boolean> {
+export async function setUserFlag(userId: string, flag: FlagStatus | null, actorId: string): Promise<boolean> {
   const { getSupabaseServiceClient } = await import('./dbClient');
   const service = getSupabaseServiceClient();
   const { data: user } = await service.from('users').select('name').eq('id', userId).single();

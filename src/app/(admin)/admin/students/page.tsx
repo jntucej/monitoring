@@ -73,7 +73,7 @@ export default function AdminStudentsPage() {
 
   const toggleFlag = useCallback((student: Student) => {
     const cur = (student as any).flagStatus ?? null;
-    const next = cur === "suspicious" ? null : "suspicious";
+    const next = cur ? null : "MANUAL_LOCKDOWN";
     setStudents(prev => prev.map(s => s.id === student.id ? { ...s, flagStatus: next } as any : s));
     patchUser(student.id, { flagStatus: next });
   }, [patchUser]);
@@ -169,10 +169,11 @@ export default function AdminStudentsPage() {
                   {query ? "No matches" : "No students registered yet"}
                 </td></tr>
               ) : filteredStudents.map(student => {
-                const decoded = parseRollNumber(student.roll);
+                const roll = student.roll || student.uniqueId || "";
+                const decoded = roll ? parseRollNumber(roll) : null;
                 const branch = decoded?.departmentFullName ?? student.department ?? "—";
                 // Try to get year from roll number first, then fall back to database year
-                const yearFromRoll = getStudentYearFromRoll(student.roll);
+                const yearFromRoll = roll ? getStudentYearFromRoll(roll) : null;
                 const year = yearFromRoll ?? student.year ?? "—";
                 const isSuspended = student.status === "SUSPENDED";
                 const isFlagged = !!(student as any).flagStatus;
@@ -187,7 +188,7 @@ export default function AdminStudentsPage() {
                         <span className="font-medium">{student.name}</span>
                       </div>
                     </td>
-                    <td className="p-4 font-mono text-[var(--text-muted)]">{student.roll}</td>
+                    <td className="p-4 font-mono text-[var(--text-muted)]">{student.roll || student.uniqueId || "—"}</td>
                     <td className="p-4">{branch}</td>
                     <td className="p-4">{year}</td>
                     <td className="p-4">

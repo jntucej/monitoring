@@ -39,9 +39,9 @@ export default async function auditLogRotation() {
 
     // 4. Record rotation completion into audit trail
     await query(
-      `INSERT INTO audit_logs (id, action, user_id, user_name, role, details, timestamp)
-       VALUES (gen_random_uuid(), 'AUDIT_LOG_ROTATION_COMPLETED', NULL, 'Background Worker', 'sysadmin', $1, NOW())`,
-      [`Rotated logs: ${auditRes.rowCount || 0} audit entries, ${intRes.rowCount || 0} integration logs, ${alertRes.rowCount || 0} alerts.`]
+      `INSERT INTO audit_logs (id, action, user_id, user_name, user_role, details, timestamp)
+       VALUES (gen_random_uuid(), 'AUDIT_LOG_ROTATION_COMPLETED', NULL, 'Background Worker', 'sysadmin', $1::jsonb, NOW())`,
+      [JSON.stringify({ message: `Rotated logs: ${auditRes.rowCount || 0} audit entries, ${intRes.rowCount || 0} integration logs, ${alertRes.rowCount || 0} alerts.` })]
     );
 
     console.log('[Worker Job] Audit log rotation completed successfully.');

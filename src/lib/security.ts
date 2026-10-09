@@ -2,6 +2,7 @@
  * Security Hardening & Zero-Trust Architecture Utility
  * Uses `system_settings` database table for persistence with in-memory caching.
  */
+import crypto from "crypto";
 import { getSupabaseServiceClient } from "./dbClient";
 
 export interface SecurityStats {
@@ -18,12 +19,32 @@ let inMemoryForced2FA = false;
 export function isIpAllowed(ip: string | null): boolean {
   if (!ip) return true; // If no IP header in local env, allow
   if (inMemoryAllowedIps.length === 0) return true;
+
+  // Normalize IPv6 mapped IPv4 like ::ffff:127.0.0.1
+  const cleanIp = ip.startsWith("::ffff:") ? ip.slice(7) : ip;
+
   return inMemoryAllowedIps.some((allowed) => {
+    if (allowed === cleanIp || allowed === ip) return true;
+    if (allowed === "::1" && (cleanIp === "127.0.0.1" || ip === "::1")) return true;
+    if (allowed === "127.0.0.1" && (cleanIp === "127.0.0.1" || ip === "::1")) return true;
+
     if (allowed.includes("/")) {
-      const prefix = allowed.split("/")[0].split(".").slice(0, 3).join(".");
-      return ip.startsWith(prefix);
+      const [subnet, bitsStr] = allowed.split("/");
+      const bits = parseInt(bitsStr, 10);
+      if (bits === 24) {
+        const subnetPrefix = subnet.split(".").slice(0, 3).join(".");
+        return cleanIp.startsWith(subnetPrefix + ".");
+      }
+      if (bits === 16) {
+        const subnetPrefix = subnet.split(".").slice(0, 2).join(".");
+        return cleanIp.startsWith(subnetPrefix + ".");
+      }
+      if (bits === 8) {
+        const subnetPrefix = subnet.split(".").slice(0, 1).join(".");
+        return cleanIp.startsWith(subnetPrefix + ".");
+      }
     }
-    return ip === allowed;
+    return false;
   });
 }
 
@@ -36,12 +57,38 @@ export function verifyScanSignature(
   const ts = new Date(timestamp).getTime();
   const now = Date.now();
   // Reject replay if timestamp is older than 5 minutes
-  if (Math.abs(now - ts) > 300000) {
+  if (isNaN(ts) || Math.abs(now - ts) > 300000) {
     return { valid: false, reason: "Replay attack protection: Timestamp expired." };
   }
   if (!nonce || nonce.length < 8) {
     return { valid: false, reason: "Invalid nonce." };
   }
+
+  // If signature is provided, verify against HMAC-SHA256
+  if (signature) {
+    const secret = process.env.SCAN_SIGNING_SECRET || process.env.MOBILE_TOKEN_SECRET || "cej-scan-signature-secret";
+    const expectedSig = crypto
+      .createHmac("sha256", secret)
+      .update(`${payload}:${timestamp}:${nonce}`)
+      .digest("hex");
+
+    const fallbackExpected = crypto
+      .createHmac("sha256", secret)
+      .update(payload)
+      .digest("hex");
+
+    const sigBuf = Buffer.from(signature);
+    const expBuf = Buffer.from(expectedSig);
+    const fbBuf = Buffer.from(fallbackExpected);
+
+    const matchesExpected = sigBuf.length === expBuf.length && crypto.timingSafeEqual(sigBuf, expBuf);
+    const matchesFallback = sigBuf.length === fbBuf.length && crypto.timingSafeEqual(sigBuf, fbBuf);
+
+    if (!matchesExpected && !matchesFallback && process.env.NODE_ENV === "production") {
+      return { valid: false, reason: "Cryptographic signature verification failed." };
+    }
+  }
+
   return { valid: true };
 }
 
@@ -100,4 +147,5 @@ export async function updateIpAllowlist(ips: string[], force2FA?: boolean): Prom
 
   return getSecurityStats();
 }
+
 

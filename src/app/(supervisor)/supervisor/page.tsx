@@ -65,9 +65,7 @@ export default function SupervisorDashboardPage() {
   const [passTypeFilter, setPassTypeFilter] = useState<string>("ALL");
   const [rosterViewMode, setRosterViewMode] = useState<"list" | "heatmap">("list");
   const [selectedFloor, setSelectedFloor] = useState<number>(1);
-  const [studentStrikes, setStudentStrikes] = useState<Record<string, number>>({
-    "1": 2, // mock existing strike for demo student
-  });
+  const [studentStrikes, setStudentStrikes] = useState<Record<string, number>>({});
 
   useEffect(() => {
     const tabParam = searchParams.get("tab");

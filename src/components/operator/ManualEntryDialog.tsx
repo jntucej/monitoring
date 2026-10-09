@@ -40,17 +40,18 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
 
   useEffect(() => {
     if (typeof window === "undefined" || !window.visualViewport) return;
+    // ponytail: capture vv — window.visualViewport can be null at cleanup
+    // (SPA nav / iOS restore), and `?.` would then leak the listeners.
+    const vv = window.visualViewport;
     const updateHeight = () => {
-      if (window.visualViewport) {
-        setViewportHeight(window.visualViewport.height);
-      }
+      setViewportHeight(vv.height);
     };
     updateHeight();
-    window.visualViewport.addEventListener("resize", updateHeight);
-    window.visualViewport.addEventListener("scroll", updateHeight);
+    vv.addEventListener("resize", updateHeight);
+    vv.addEventListener("scroll", updateHeight);
     return () => {
-      window.visualViewport?.removeEventListener("resize", updateHeight);
-      window.visualViewport?.removeEventListener("scroll", updateHeight);
+      vv.removeEventListener("resize", updateHeight);
+      vv.removeEventListener("scroll", updateHeight);
     };
   }, []);
 
@@ -480,7 +481,19 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
                           const config = validExitReasons.find((c) => c.code === r);
                           const requiresApproval = config?.requiresApproval ?? false;
                           const passRequired = requiresApproval && (student.personType === "student" || !student.personType);
-                          const hasApprovedPass = approvedPasses.some((p) => p.reason === r);
+                          const hasApprovedPass = approvedPasses.some((p) => {
+                            if (!p.reason) return false;
+                            if (p.reason === r) return true;
+                            if (p.reason.toLowerCase() === r.toLowerCase()) return true;
+                            const normalizeReason = (s?: string) => {
+                              if (!s) return "";
+                              const str = s.trim().toLowerCase().replace(/[\s_-]+/g, "");
+                              if (str === "dayout" || str === "daypass") return "dayout";
+                              if (str === "homeout" || str === "homepass") return "homeout";
+                              return str;
+                            };
+                            return normalizeReason(p.reason) === normalizeReason(r);
+                          });
                           const isDisabled = passRequired && !hasApprovedPass;
 
                           return (
@@ -524,9 +537,9 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
                   <div className="relative">
                     <input
                       type={showPin ? "text" : "password"}
-                      maxLength={4}
+                      maxLength={8}
                       value={pin}
-                      onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                      onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 8))}
                       placeholder="••••"
                       className="w-full py-3 px-4 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-center font-mono font-bold text-xl text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
                     />
@@ -544,7 +557,7 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
                     </button>
                   </div>
                   <p className="text-xs text-[var(--text-muted)]">
-                    Enter 4-digit admin PIN to authorize this manual entry.
+                    Enter 4–8 digit admin PIN to authorize this manual entry.
                   </p>
                 </div>
 
@@ -554,7 +567,7 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
                   </Button>
                   <Button
                     onClick={handlePinConfirm}
-                    disabled={submitting || pin.length !== 4}
+                    disabled={submitting || pin.length < 4 || pin.length > 8}
                     loading={submitting}
                     className="flex-1 rounded-xl font-bold"
                   >

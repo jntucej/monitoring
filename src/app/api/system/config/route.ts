@@ -27,7 +27,7 @@ async function handleGet(_req: NextRequest) {
     const service = getSupabaseServiceClient();
 
     // Expecting schema:
-    // system_config(key text primary key, value jsonb, updated_at timestamptz)
+    // system_config(key text primary key, data jsonb, updated_at timestamptz)
     const { data, error } = await service
       .from("system_config")
       .select("*")
@@ -43,7 +43,7 @@ async function handleGet(_req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: toConfig(data?.value),
+      data: toConfig((data as any)?.data ?? (data as any)?.value),
     });
   } catch (_err) {
     return NextResponse.json({ success: true, data: defaultConfig });
@@ -73,7 +73,7 @@ async function handlePatch(req: NextRequest) {
     }
 
     const mergedValue = {
-      ...(toConfig(existing?.value) as any),
+      ...(toConfig((existing as any)?.data ?? (existing as any)?.value) as any),
       ...(body || {}),
       updatedAt: new Date().toISOString(),
     };
@@ -85,7 +85,7 @@ async function handlePatch(req: NextRequest) {
       .upsert(
         {
           key: "global_settings",
-          value: mergedValue,
+          data: mergedValue,
           updated_at: nowIso,
         },
         { onConflict: "key" }
@@ -108,7 +108,7 @@ async function handlePatch(req: NextRequest) {
       await invalidateCache("system_config:*");
     }
 
-    return NextResponse.json({ success: true, data: toConfig(upserted?.value) });
+    return NextResponse.json({ success: true, data: toConfig((upserted as any)?.data ?? (upserted as any)?.value) });
   } catch (err: any) {
     return NextResponse.json(
       {

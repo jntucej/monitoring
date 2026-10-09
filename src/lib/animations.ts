@@ -20,6 +20,8 @@ export const fadeIn: Variants = {
 export const scaleIn: Variants = {
   hidden: { scale: 0.92, opacity: 0 },
   visible: { scale: 1, opacity: 1, transition: { type: "spring", stiffness: 300, damping: 20 } },
+  // ponytail: exit variant so AnimatePresence can play FeedbackModal's close.
+  exit: { scale: 0.92, opacity: 0, transition: { duration: 0.15 } },
 };
 
 export const slideInLeft: Variants = {

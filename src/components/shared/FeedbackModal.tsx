@@ -26,13 +26,19 @@ export function FeedbackModal({ theme, onClose, onSubmit }: FeedbackModalProps) 
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <motion.div
+        key="feedback-backdrop"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      >
         <motion.div
           variants={scaleIn}
           initial="hidden"
           animate="visible"
-          exit="hidden"
-          className="w-full max-w-md bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 shadow-2xl"
+          exit="exit"
+          className="w-full max-w-md max-h-[90dvh] overflow-y-auto bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 shadow-2xl"
         >
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-[var(--text-primary)]">Theme Feedback</h3>
@@ -70,7 +76,7 @@ export function FeedbackModal({ theme, onClose, onSubmit }: FeedbackModalProps) 
             </div>
           </form>
         </motion.div>
-      </div>
+      </motion.div>
     </AnimatePresence>
   );
 }

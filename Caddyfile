@@ -6,14 +6,14 @@
     }
 }
 
-{$PUBLIC_URL:gate.example.com} {
-    tls admin@example.com
-
+# Behind Cloudflare Tunnel, edge TLS terminates at Cloudflare and traffic
+# arrives here as plain HTTP — so no `tls` directive and no HSTS (which would
+# force browsers into an HTTPS loop against a plain-HTTP origin).
+:80 {
     header {
         X-Frame-Options "DENY"
         X-Content-Type-Options "nosniff"
         Referrer-Policy "strict-origin-when-cross-origin"
-        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
     }
 
     reverse_proxy web:3000 {

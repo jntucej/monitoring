@@ -10,7 +10,7 @@
     "worker": "node worker/index.mjs",
     "start:worker": "node worker/index.mjs",
     "typecheck": "tsc --noEmit",
-    "test:unit": "npx --yes tsx scripts/run_system_tests.ts && node scripts/test_fixes_1_to_10.js && node scripts/test_fixes_11_to_20.js && node scripts/test_fixes_21_to_45.js",
+    "test:unit": "npx --yes tsx scripts/run_system_tests.ts && node scripts/test_fixes_1_to_10.js && node scripts/test_fixes_11_to_20.js && node scripts/test_fixes_21_to_45.js && node scripts/test_additional_remediations.js",
     "test": "npm run test:unit && npm run test:e2e",
     "test:e2e": "playwright test",
     "lint": "eslint src"

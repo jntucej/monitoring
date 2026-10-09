@@ -29,7 +29,7 @@ export async function getPostgresPool(): Promise<Pool> {
       process.env.DATABASE_URL ||
       `postgres://${process.env.POSTGRES_USER || "postgres"}:${encodeURIComponent(
         process.env.POSTGRES_PASSWORD || "postgres"
-      )}@${process.env.POSTGRES_HOST || "localhost"}:${process.env.POSTGRES_PORT || "5432"}/${
+      )}@${process.env.POSTGRES_HOST || "127.0.0.1"}:${process.env.POSTGRES_PORT || "5432"}/${
         process.env.POSTGRES_DB || "gate_monitor"
       }`;
 
@@ -393,11 +393,49 @@ export class PostgresQueryBuilder<T = any> {
     return sqlParts;
   }
 
+  private static FK_MAP: Record<string, Record<string, string>> = {
+    movement_logs: {
+      users: "user_id",
+      gates: "gate_id",
+    },
+    gate_passes: {
+      users: "user_id",
+    },
+    visitor_logs: {
+      users: "user_id",      // visitor
+      host: "host_user_id",  // host (alias)
+    },
+    sessions: {
+      users: "user_id",
+    },
+    student_details: { users: "user_id" },
+    employee_details: { users: "user_id" },
+  };
+
   private buildWhereClause(params: any[]): string {
     if (this.filters.length === 0 && this.orClauses.length === 0) return "";
     const whereParts: string[] = [];
     for (const f of this.filters) {
       if (f.rawClause) { whereParts.push(f.rawClause); continue; }
+
+      // Detect "foreignTable.column" filters and rewrite as subquery
+      if (f.column.includes(".")) {
+        const [ft, col] = f.column.split(".");
+        const fk = PostgresQueryBuilder.FK_MAP[this.tableName]?.[ft];
+        if (!fk) {
+          // Fallback: treat as raw and hope the join exists
+          params.push(f.value);
+          whereParts.push(`${f.column} ${f.op} $${params.length}`);
+          continue;
+        }
+        params.push(f.value);
+        const placeholder = `$${params.length}`;
+        whereParts.push(
+          `${this.tableName}.${fk} IN (SELECT id FROM ${ft} WHERE ${col} ${f.op} ${placeholder})`
+        );
+        continue;
+      }
+
       if (f.op === "IN") {
         if (!Array.isArray(f.value) || f.value.length === 0) {
           whereParts.push("1=0");
@@ -423,10 +461,12 @@ export class PostgresQueryBuilder<T = any> {
         if (orObj.foreignTable) {
           const parsed = this.parsePostgrestOrClause(orObj.filter, params, orObj.foreignTable);
           if (parsed.length > 0) {
-            let joinCol = `${this.tableName}.${orObj.foreignTable.replace(/s$/, "")}_id`;
-            if (this.tableName === "movement_logs" && orObj.foreignTable === "users") joinCol = "movement_logs.user_id";
-            else if (this.tableName === "gate_passes" && orObj.foreignTable === "users") joinCol = "gate_passes.user_id";
-            whereParts.push(`${joinCol} IN (SELECT id FROM ${orObj.foreignTable} WHERE ${parsed.join(" OR ")})`);
+            const fk = PostgresQueryBuilder.FK_MAP[this.tableName]?.[orObj.foreignTable];
+            if (fk) {
+              whereParts.push(
+                `${this.tableName}.${fk} IN (SELECT id FROM ${orObj.foreignTable} WHERE ${parsed.join(" OR ")})`
+              );
+            }
           }
         } else {
           const parsed = this.parsePostgrestOrClause(orObj.filter, params);
@@ -674,7 +714,8 @@ const ALLOWED_RPC_FUNCTIONS = new Set([
   "invalidate_all_user_sessions",
   "get_current_occupancy",
   "verify_pin",
-  "validate_gate_pass"
+  "validate_gate_pass",
+  "process_gate_scan"
 ]);
 
 /**
@@ -701,6 +742,21 @@ export const db = {
         const userId = args.p_user_id || args.user_id || args.userId || "";
         await query("UPDATE users SET session_version = session_version + 1, handle = gen_random_uuid()::text WHERE id::text = $1", [userId]);
         return { data: true, error: null };
+      }
+      if (fnName === "process_gate_scan") {
+        const res = await query(
+          `SELECT * FROM process_gate_scan(
+             $1::uuid, $2::uuid, $3::varchar, $4::varchar,
+             $5::uuid, $6::varchar, $7::uuid, $8::varchar,
+             $9::timestamptz, $10::boolean, $11::int
+           )`,
+          [
+            args.p_scan_id, args.p_user_id, args.p_direction, args.p_reason,
+            args.p_gate_id, args.p_gate_name, args.p_operator_id, args.p_operator_name,
+            args.p_timestamp, args.p_is_manual, args.p_dup_window_minutes ?? 5,
+          ]
+        );
+        return { data: res.rows, error: null };
       }
       if (!ALLOWED_RPC_FUNCTIONS.has(fnName)) {
         return { data: null, error: { message: `Function ${fnName} is not permitted for RPC execution`, code: "FORBIDDEN_RPC" } };

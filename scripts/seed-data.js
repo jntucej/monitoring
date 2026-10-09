@@ -70,9 +70,10 @@ async function main() {
         email: `${staffId.toLowerCase()}@college.edu`,
         status: 'ACTIVE',
         department_id: range.dept,
+        password_hash: pinHash,
         initial_pin_hash: pinHash,
         pin_must_change: true,
-        pin_set_by: userId,
+        pin_set_by: null,
         pin_set_at: new Date().toISOString(),
       });
 

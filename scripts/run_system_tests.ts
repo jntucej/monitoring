@@ -113,10 +113,15 @@ async function runTests() {
 
   // D4. Cross-Token Rejection & Mismatch Logging
   let mismatchWarnLogged = false;
+  let loggedTokenString = false;
   const originalWarn = console.warn;
   console.warn = (...args: any[]) => {
     if (args[0] === "[auth] token_class_mismatch") {
       mismatchWarnLogged = true;
+      const loggedPayload = JSON.stringify(args);
+      if (loggedPayload.includes(refreshToken) || loggedPayload.includes(accessToken)) {
+        loggedTokenString = true;
+      }
     }
     originalWarn(...args);
   };
@@ -125,6 +130,7 @@ async function runTests() {
   console.warn = originalWarn;
   assert(crossRefreshAsAccess === null, "D4a: verifyAccessToken rejects refresh token");
   assert(mismatchWarnLogged, "D4a-log: console.warn logged [auth] token_class_mismatch");
+  assert(!loggedTokenString, "D4a-token-hygiene: token string is never leaked into console warning");
 
   const crossAccessAsRefresh = await verifyRefreshToken(accessToken);
   assert(crossAccessAsRefresh === null, "D4b: verifyRefreshToken rejects access token");

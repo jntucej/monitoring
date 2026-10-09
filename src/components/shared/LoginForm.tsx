@@ -95,6 +95,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
 
   const [loginIdentifier, setLoginIdentifier] = useState("");
   const [passwordOrPin, setPasswordOrPin] = useState("");
+  const [loginMode, setLoginMode] = useState<"password" | "pin">("password");
   const [rememberMe, setRememberMe] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [isShaking, setIsShaking] = useState(false);
@@ -144,13 +145,15 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
       return;
     }
     if (!passwordOrPin) {
-      triggerShake("Please enter your Password or Security PIN.");
+      triggerShake(
+        loginMode === "pin"
+          ? "Please enter your Security PIN."
+          : "Please enter your Password."
+      );
       return;
     }
 
-    const isPurePin = /^\d{4,8}$/.test(passwordOrPin);
-
-    if (isPurePin) {
+    if (loginMode === "pin") {
       const pinResult = await pinLogin(identifier, passwordOrPin);
       if (pinResult.success) {
         if (rememberMe) {
@@ -161,51 +164,62 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
           message: `Authenticated via Security PIN.`,
           variant: "success",
         });
-        const authStore = useAuthStore.getState();
-        redirectAfterLogin(authStore.role);
+        // ponytail: no redirect here — the hasHydrated+authenticated effect
+        // below routes once persist has settled (avoids AuthGuard race).
         return;
       }
+
       triggerShake(formatLoginError(pinResult.code, pinResult.error));
       return;
-    } else {
-      const result = await login(
-        identifier,
-        passwordOrPin,
-        mfaChallenge ? { challenge: mfaChallenge, totpCode } : undefined
+    }
+
+    // Password path
+    const result = await login(
+      identifier,
+      passwordOrPin,
+      mfaChallenge ? { challenge: mfaChallenge, totpCode } : undefined
+    );
+
+    // SECURITY: sysadmins must complete TOTP enrollment before they can sign in.
+    // ponytail: no redirect here — user has no session yet so AuthGuard would
+    // bounce /sysadmin/security back to /login (infinite loop). Show inline
+    // step instead; POST /api/auth/2fa/setup accepts x-mfa-enroll-token.
+    if (!result.success && result.mfaEnrollmentRequired) {
+      triggerShake(
+        result.enrollToken
+          ? "MFA enrollment required. Your enroll token was issued — complete setup via POST /api/auth/2fa/setup with header x-mfa-enroll-token, then log in again."
+          : formatLoginError("MFA_REQUIRED")
       );
-
-      // SECURITY: sysadmins must complete TOTP enrollment before they can sign in.
-      if (!result.success && (result.code === "MFA_REQUIRED" || result.mfaEnrollmentRequired)) {
-        triggerShake(formatLoginError("MFA_REQUIRED"));
-        router.push("/sysadmin/security");
-        return;
-      }
-
-      // Password leg ok — server issued an MFA challenge, prompt for TOTP
-      if (!result.success && result.mfaRequired && result.mfaChallenge) {
-        setMfaChallenge(result.mfaChallenge);
-        triggerShake("Enter the 6-digit code from your authenticator app.");
-        return;
-      }
-
-      if (result.success) {
-        setMfaChallenge(null);
-        setTotpCode("");
-        if (rememberMe) {
-          localStorage.setItem("gate-monitor-remember", "true");
-        }
-        addToast({
-          title: "Access Granted",
-          message: `Authenticated successfully.`,
-          variant: "success",
-        });
-        const authStore = useAuthStore.getState();
-        redirectAfterLogin(authStore.role);
-        return;
-      }
-
-      triggerShake(formatLoginError(result.code, result.error));
       return;
+    }
+    if (!result.success && result.code === "MFA_REQUIRED") {
+      triggerShake(formatLoginError("MFA_REQUIRED"));
+      return;
+    }
+
+    // Password leg ok — server issued an MFA challenge, prompt for TOTP
+    if (!result.success && result.mfaRequired && result.mfaChallenge) {
+      setMfaChallenge(result.mfaChallenge);
+      triggerShake("Enter the 6-digit code from your authenticator app.");
+      return;
+    }
+
+    if (result.success) {
+      setMfaChallenge(null);
+      setTotpCode("");
+      if (rememberMe) {
+        localStorage.setItem("gate-monitor-remember", "true");
+      }
+      addToast({
+        title: "Access Granted",
+        message: `Authenticated successfully.`,
+        variant: "success",
+      });
+      // ponytail: no redirect here — the hasHydrated+authenticated effect
+      // above routes once persist has settled (avoids AuthGuard race).
+      return;
+    } else {
+      triggerShake(formatLoginError(result.code, result.error));
     }
   };
 
@@ -245,7 +259,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
             <input
               type="text"
               value={loginIdentifier}
-              onChange={(e) => setLoginIdentifier(e.target.value)}
+              onChange={(e) => { setLoginIdentifier(e.target.value); if (errorMsg) setErrorMsg(""); }}
               placeholder="Enter ID"
               className="w-full pl-10 pr-4 py-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-sm font-semibold text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none transition-all"
             />
@@ -256,22 +270,50 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <label className="block text-xs font-semibold text-[var(--text-secondary)]">
-              Password or Security PIN
+              {loginMode === "pin" ? "Security PIN" : "Password"}
             </label>
+            {loginMode === "password" && (
+              <button
+                type="button"
+                onClick={() => setShowResetModal(true)}
+                className="text-[11px] font-semibold text-sky-400 hover:underline"
+              >
+                Forgot Password?
+              </button>
+            )}
+          </div>
+
+          <div className="flex gap-2 mb-2">
             <button
               type="button"
-              onClick={() => setShowResetModal(true)}
-              className="text-[11px] font-semibold text-sky-400 hover:underline"
+              onClick={() => setLoginMode("password")}
+              className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                loginMode === "password"
+                  ? "bg-[var(--action-primary)] text-white shadow-xs"
+                  : "bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+              }`}
             >
-              Forgot Password?
+              Password
+            </button>
+            <button
+              type="button"
+              onClick={() => setLoginMode("pin")}
+              className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                loginMode === "pin"
+                  ? "bg-[var(--action-primary)] text-white shadow-xs"
+                  : "bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+              }`}
+            >
+              Security PIN
             </button>
           </div>
+
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
               value={passwordOrPin}
-              onChange={(e) => setPasswordOrPin(e.target.value)}
-              placeholder="password or PIN"
+              onChange={(e) => { setPasswordOrPin(e.target.value); if (errorMsg) setErrorMsg(""); }}
+              placeholder={loginMode === "pin" ? "4-8 digit PIN" : "Enter password"}
               className="w-full pl-10 pr-12 py-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none transition-all"
             />
             <Lock className="w-4 h-4 absolute left-3.5 top-3.5 text-[var(--text-muted)]" />

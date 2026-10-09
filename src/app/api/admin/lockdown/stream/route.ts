@@ -42,17 +42,22 @@ async function handleGet(req: NextRequest) {
       // Initial state push
       await sendEvent();
 
-      // Poll interval for push stream
+      // Poll interval for push stream & heartbeat ping
       const interval = setInterval(sendEvent, 2000);
+      const pingInterval = setInterval(() => {
+        try { controller.enqueue(encoder.encode(`: ping\n\n`)); } catch {}
+      }, 15000);
 
       // Auto-terminate after 45s so serverless function closes gracefully
       const timeout = setTimeout(() => {
         clearInterval(interval);
+        clearInterval(pingInterval);
         try { controller.close(); } catch {}
       }, 45000);
 
       req.signal.addEventListener("abort", () => {
         clearInterval(interval);
+        clearInterval(pingInterval);
         clearTimeout(timeout);
         try {
           controller.close();

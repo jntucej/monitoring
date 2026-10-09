@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
+import { addAudit } from "@/lib/db";
+import type { AuthContext } from "@/lib/authContext";
 
 async function handleGet() {
   try {
@@ -11,16 +13,8 @@ async function handleGet() {
       .order("name");
 
     if (error) {
-      return NextResponse.json({
-        success: true,
-        data: [
-          { id: "int-hr", type: "hr_sync", name: "HR System Sync (Workday/SAP)", enabled: true, config: { endpoint: "https://hr.college.edu/api/sync" }, status: "connected", lastSync: new Date().toISOString() },
-          { id: "int-sis", type: "sis_sync", name: "SIS Student Portal Sync", enabled: true, config: { endpoint: "https://sis.college.edu/api/v1/students" }, status: "connected", lastSync: new Date().toISOString() },
-          { id: "int-email", type: "email", name: "SMTP / SendGrid Gateway", enabled: true, config: { provider: "sendgrid", fromEmail: "notifications@gate.college.edu" }, status: "connected", lastSync: new Date().toISOString() },
-          { id: "int-sms", type: "sms", name: "Twilio / SMS Gateway", enabled: true, config: { provider: "twilio", senderId: "GATEMN" }, status: "connected", lastSync: new Date().toISOString() },
-          { id: "int-bio", type: "attendance", name: "Biometric Turnstile Controller", enabled: true, config: { mode: "realtime", turnstiles: 4 }, status: "connected", lastSync: new Date().toISOString() },
-        ],
-      });
+      // Return empty configuration list when table is empty or unpopulated
+      return NextResponse.json({ success: true, data: [] });
     }
 
     return NextResponse.json({ success: true, data: configs || [] });
@@ -29,5 +23,62 @@ async function handleGet() {
   }
 }
 
+async function handlePost(req: NextRequest, context?: { auth?: AuthContext }) {
+  try {
+    const auth = context?.auth;
+    const body = await req.json();
+    const supabase = getSupabaseServiceClient();
+
+    if (!body.type || !body.name) {
+      return NextResponse.json(
+        { success: false, error: { code: "VALIDATION_ERROR", message: "type and name are required" } },
+        { status: 400 }
+      );
+    }
+
+    const { data, error } = await supabase
+      .from("integration_configs")
+      .upsert({
+        id: body.id || `int-${body.type}-${Date.now()}`,
+        type: body.type,
+        name: body.name,
+        enabled: body.enabled ?? true,
+        config: body.config || {},
+        status: body.status || "configured",
+        last_sync: body.lastSync || null,
+        updated_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+
+    if (error) {
+      return NextResponse.json(
+        { success: false, error: { code: "DB_ERROR", message: error.message } },
+        { status: 500 }
+      );
+    }
+
+    if (auth) {
+      await addAudit({
+        action: "UPDATE_INTEGRATION_CONFIG",
+        userId: auth.userId,
+        userName: auth.loginIdentifier || "Admin",
+        role: auth.role,
+        details: `Updated integration config: ${body.name} (${body.type})`,
+      });
+    }
+
+    return NextResponse.json({ success: true, data });
+  } catch (error: any) {
+    return NextResponse.json(
+      { success: false, error: { code: "SERVER_ERROR", message: error.message } },
+      { status: 500 }
+    );
+  }
+}
+
 export const GET = withAuthorization(handleGet, { requiredRole: ["sysadmin", "admin"] });
+export const POST = withAuthorization(handlePost, { requiredRole: ["sysadmin", "admin"] });
+export const PUT = withAuthorization(handlePost, { requiredRole: ["sysadmin", "admin"] });
+
 

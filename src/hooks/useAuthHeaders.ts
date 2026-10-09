@@ -16,7 +16,7 @@ export function useAuthHeaders(): Record<string, string> {
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
-  const sessionToken = user?.currentSessionToken || user?.handle;
+  const sessionToken = user?.currentSessionToken;
   if (sessionToken) {
     headers["X-Session-Token"] = sessionToken;
   }

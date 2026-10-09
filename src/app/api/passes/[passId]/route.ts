@@ -106,16 +106,16 @@ async function handlePut(req: NextRequest) {
       const service = getSupabaseServiceClient();
       const { data: approverProfile } = await service
         .from("users")
-        .select("department, meta")
+        .select("assigned_hostel, department_id")
         .eq("id", approverId)
         .maybeSingle();
 
-      const wardenHostel = approverProfile?.meta?.hostel_block || approverProfile?.department;
+      const wardenHostel = approverProfile?.assigned_hostel;
       if (wardenHostel && pass.roll) {
         const { data: studentDetail } = await service
           .from("student_details")
           .select("hostel_block")
-          .eq("roll_number", pass.roll)
+          .eq("roll", pass.roll)
           .maybeSingle();
 
         if (studentDetail?.hostel_block && studentDetail.hostel_block !== wardenHostel) {

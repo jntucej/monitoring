@@ -28,6 +28,10 @@ loadEnvFile(path.join(rootDir, '.env'));
 
 function validate() {
   console.log('🔍 Running Pre-Deploy Environment Validation...');
+  if (process.env.SKIP_ENV_VALIDATION === '1' || process.env.SKIP_ENV_VALIDATION === 'true') {
+    console.log('⚡ SKIP_ENV_VALIDATION is enabled — skipping build-time environment variable assertions.\n');
+    return;
+  }
   const isProd = process.env.NODE_ENV === 'production';
   const errors = [];
   const warnings = [];
@@ -38,9 +42,22 @@ function validate() {
     if (isProd) {
       errors.push('Missing required database configuration: Set DATABASE_URL or (POSTGRES_DB and POSTGRES_PASSWORD)');
     } else {
-      warnings.push('DATABASE_URL is not set (will default to postgres://postgres:postgres@localhost:5432/gate_monitor)');
+      warnings.push('DATABASE_URL is not set (will default to postgres://postgres:postgres@127.0.0.1:5432/gate_monitor)');
     }
   }
+
+  const isPlaceholder = (val) => {
+    if (!val || typeof val !== 'string') return false;
+    const lower = val.toLowerCase();
+    return (
+      lower.includes('change_me') ||
+      lower.includes('changeme') ||
+      lower.includes('placeholder') ||
+      lower.includes('your_') ||
+      lower.includes('example') ||
+      lower.startsWith('change_me_to_')
+    );
+  };
 
   // Token secret
   const authSecret = process.env.AUTH_JWT_SECRET;
@@ -50,6 +67,23 @@ function validate() {
     } else {
       warnings.push('AUTH_JWT_SECRET not set or shorter than 32 chars (using dev fallback).');
     }
+  } else if (isProd && isPlaceholder(authSecret)) {
+    errors.push('AUTH_JWT_SECRET contains an unconfigured placeholder value. You must generate a secure cryptographically random secret.');
+  }
+
+  const mobileSecret = process.env.MOBILE_TOKEN_SECRET;
+  if (isProd && mobileSecret && isPlaceholder(mobileSecret)) {
+    errors.push('MOBILE_TOKEN_SECRET contains an unconfigured placeholder value.');
+  }
+
+  const qrSecret = process.env.QR_TOKEN_SECRET;
+  if (isProd && qrSecret && isPlaceholder(qrSecret)) {
+    errors.push('QR_TOKEN_SECRET contains an unconfigured placeholder value.');
+  }
+
+  const mfaSecret = process.env.MFA_ENROLL_SECRET;
+  if (isProd && mfaSecret && isPlaceholder(mfaSecret)) {
+    errors.push('MFA_ENROLL_SECRET contains an unconfigured placeholder value.');
   }
 
   // Cache configuration

@@ -100,9 +100,14 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
 
   // Check environment variables health
   try {
+    const isSelfHosted = !!(
+      process.env.DATABASE_URL ||
+      (process.env.POSTGRES_DB && process.env.POSTGRES_PASSWORD) ||
+      process.env.POSTGRES_HOST
+    );
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    if (!supabaseUrl || !anonKey) {
+    if (!isSelfHosted && (!supabaseUrl || !anonKey)) {
       health.components.env = {
         status: 'unhealthy',
         error: 'Missing required environment variables',
@@ -117,7 +122,8 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
 
   // Check gateways
   try {
-    const { data: gates } = await supabase
+    const dbClient = getClient();
+    const { data: gates } = await dbClient
       .from('gates')
       .select('is_active');
 
@@ -137,8 +143,7 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
 
   // Get active users (checking active sessions via users handle)
   try {
-    const { count: activeCount } = await supabase
-      .from('users')
+    const { count: activeCount } = await getClient().from('users')
       .select('id', { count: 'exact', head: true })
       .not('handle', 'is', null);
 
@@ -150,8 +155,7 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
 
   // Get recent alerts
   try {
-    const { data: alerts } = await supabase
-      .from('alerts')
+    const { data: alerts } = await getClient().from('alerts')
       .select('*')
       .order('timestamp', { ascending: false })
       .limit(10);
@@ -169,15 +173,13 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
   // Performance metrics
   try {
     const oneMinuteAgo = new Date(Date.now() - 60 * 1000).toISOString();
-    const { count: requests } = await supabase
-      .from('api_metrics')
+    const { count: requests } = await getClient().from('api_metrics')
       .select('*', { count: 'exact', head: true })
       .gte('timestamp', oneMinuteAgo);
 
     health.metrics.requestsPerMinute = requests || 0;
 
-    const { data: metrics } = await supabase
-      .from('api_metrics')
+    const { data: metrics } = await getClient().from('api_metrics')
       .select('response_time')
       .gte('timestamp', oneMinuteAgo);
 
@@ -186,8 +188,7 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
       health.metrics.avgResponseTime = avg;
     }
 
-    const { count: errors } = await supabase
-      .from('api_metrics')
+    const { count: errors } = await getClient().from('api_metrics')
       .select('*', { count: 'exact', head: true })
       .gte('timestamp', oneMinuteAgo)
       .eq('status_code', '500');
@@ -214,8 +215,7 @@ export async function createSystemAlert(
   details?: Record<string, any>
 ): Promise<boolean> {
   try {
-    const { error } = await supabase
-      .from('system_alerts')
+    const { error } = await getClient().from('system_alerts')
       .insert({
         severity,
         message,
@@ -238,8 +238,7 @@ export async function createSystemAlert(
 // Resolve system alert
 export async function resolveSystemAlert(alertId: string): Promise<boolean> {
   try {
-    const { error } = await supabase
-      .from('system_alerts')
+    const { error } = await getClient().from('system_alerts')
       .update({
         resolved: true,
         resolved_at: new Date().toISOString(),

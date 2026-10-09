@@ -37,10 +37,13 @@ export async function getUserCompletedSteps(userId: string): Promise<string[]> {
     const supabase = getSupabaseServiceClient();
     const { data } = await supabase
       .from("onboarding_progress")
-      .select("step_id")
+      .select("step, completed")
       .eq("user_id", userId);
     if (data && data.length > 0) {
-      return data.map((d: any) => d.step_id);
+      return data
+        .filter((d: any) => d.completed !== false)
+        .map((d: any) => d.step || (d as any).step_id)
+        .filter(Boolean);
     }
   } catch {
     // fallback to in-memory
@@ -59,9 +62,32 @@ export async function markStepCompleted(userId: string, stepId: string): Promise
 
   try {
     const supabase = getSupabaseServiceClient();
-    await supabase
+    const { data: existing } = await supabase
       .from("onboarding_progress")
-      .upsert({ user_id: userId, step_id: stepId, completed_at: new Date().toISOString() }, { onConflict: "user_id,step_id" });
+      .select("id")
+      .eq("user_id", userId)
+      .eq("step", stepId)
+      .maybeSingle();
+
+    if (existing?.id) {
+      await supabase
+        .from("onboarding_progress")
+        .update({
+          completed: true,
+          completed_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", existing.id);
+    } else {
+      await supabase
+        .from("onboarding_progress")
+        .insert({
+          user_id: userId,
+          step: stepId,
+          completed: true,
+          completed_at: new Date().toISOString(),
+        });
+    }
   } catch {
     // fallback to in-memory
   }

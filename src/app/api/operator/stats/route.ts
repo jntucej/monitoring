@@ -54,9 +54,18 @@ async function handleGet(req: NextRequest) {
 
     const userId = req.headers.get("x-user-id") || "";
     const user = await findUserById(userId);
+    // ponytail: fail closed for operators only — unassigned operator must not
+    // get campus-wide logs. Admin/sysadmin legitimately have no gate.
+    const requesterRole = req.headers.get("x-user-role") || user?.role;
+    if (requesterRole === "operator" && !user?.gateId) {
+      return NextResponse.json(
+        { success: false, error: { code: "NOT_ASSIGNED", message: "No gate assigned to this operator account. Contact an administrator." } },
+        { status: 403 }
+      );
+    }
     const gateId = user?.gateId || undefined;
-    const day = new Date().toISOString().slice(0, 10);
-    const dayStartUTC = `${day}T00:00:00.000Z`;
+    const day = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+    const dayStartUTC = `${day}T00:00:00+05:30`;
 
     // ---- 1. All of today's movement logs (gate-scoped when known) ----------
     let logsQuery = service

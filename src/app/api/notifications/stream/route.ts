@@ -2,10 +2,23 @@ import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { getNotifications } from "@/lib/db";
 
-// ponytail: SSE streams limit lifetime to 45s so serverless containers close gracefully before hard function timeouts. EventSource client automatically reconnects.
+// SSE stream: securely streams user notifications with ping keepalive and session IDOR guards
 async function handleGet(req: NextRequest) {
-  const userId = req.nextUrl.searchParams.get("userId") || req.headers.get("x-user-id");
-  const role = req.nextUrl.searchParams.get("role") || req.headers.get("x-user-role") || "user";
+  const callerId = req.headers.get("x-user-id");
+  const callerRole = req.headers.get("x-user-role") || "user";
+  const requestedUserId = req.nextUrl.searchParams.get("userId");
+
+  // Prevent SSE IDOR: non-admins can only subscribe to their own notification stream
+  let userId = callerId || requestedUserId;
+  if (requestedUserId && requestedUserId !== callerId) {
+    if (callerRole === "admin" || callerRole === "sysadmin") {
+      userId = requestedUserId;
+    } else {
+      userId = callerId || requestedUserId;
+    }
+  }
+
+  const role = req.nextUrl.searchParams.get("role") || callerRole;
   const encoder = new TextEncoder();
 
   if (!userId) {
@@ -20,6 +33,12 @@ async function handleGet(req: NextRequest) {
       const sendEvent = (data: any) => {
         try {
           controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
+        } catch {}
+      };
+
+      const sendPing = () => {
+        try {
+          controller.enqueue(encoder.encode(`: ping\n\n`));
         } catch {}
       };
 
@@ -39,15 +58,18 @@ async function handleGet(req: NextRequest) {
 
       await checkAndSend();
       const interval = setInterval(checkAndSend, 4000);
+      const pingInterval = setInterval(sendPing, 15000);
 
       // Auto-terminate after 45 seconds to stay within serverless function limits
       const timeout = setTimeout(() => {
         clearInterval(interval);
+        clearInterval(pingInterval);
         try { controller.close(); } catch {}
       }, 45000);
 
       req.signal.addEventListener("abort", () => {
         clearInterval(interval);
+        clearInterval(pingInterval);
         clearTimeout(timeout);
         try { controller.close(); } catch {}
       });
@@ -64,3 +86,4 @@ async function handleGet(req: NextRequest) {
 }
 
 export const GET = withAuthorization(handleGet);
+

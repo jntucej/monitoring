@@ -1,0 +1,74 @@
+name: Infrastructure Guardrail
+
+# Crash-test dummy for infra changes: validates compose syntax and boots the
+# stack in an isolated runner. Red check = do not merge/deploy.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docker-compose.yml'
+      - 'scripts/*.sh'
+      - 'Dockerfile'
+      - 'Caddyfile'
+      - '.github/CODEOWNERS'
+      - '.github/workflows/infrastructure-guardrail.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'docker-compose.yml'
+      - 'scripts/*.sh'
+      - 'Dockerfile'
+      - 'Caddyfile'
+      - '.github/CODEOWNERS'
+      - '.github/workflows/infrastructure-guardrail.yml'
+
+jobs:
+  test-docker-deployment:
+    name: Test Docker Compose Boot
+    runs-on: ubuntu-latest
+    env:
+      # ponytail: CI-only dummy secrets so `config`/`up` don't fail on required vars.
+      POSTGRES_PASSWORD: ci_dummy_postgres_password_123
+      REDIS_PASSWORD: ci_dummy_redis_password_123
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Validate docker-compose syntax
+        run: docker compose config --quiet && echo "compose syntax OK"
+
+      - name: Shell-check deploy scripts
+        run: bash -n scripts/03-deploy.sh && bash -n scripts/verify-deploy.sh && echo "scripts OK"
+
+      - name: Test Container Boot Sequence
+        run: docker compose up -d --build postgres redis
+
+      - name: Wait for Health Checks
+        run: |
+          echo "Waiting for containers to report healthy..."
+          for i in $(seq 1 12); do
+            STATUS=$(docker inspect --format='{{.State.Health.Status}}' gate_postgres 2>/dev/null || echo "unknown")
+            [ "$STATUS" = "healthy" ] && echo "postgres healthy" && break
+            echo "attempt $i/12: postgres=$STATUS"
+            sleep 10
+          done
+          docker inspect --format='{{.State.Health.Status}}' gate_postgres | grep -q healthy
+
+      - name: Check Container Status
+        if: always()
+        run: |
+          docker compose ps
+          CRASHED=$(docker ps -a --filter "status=exited" --format "{{.Names}}")
+          if [ -n "$CRASHED" ]; then
+            echo "GUARDRAIL ALERT: crashed on boot: $CRASHED"
+            docker compose logs
+            exit 1
+          fi
+          echo "All booted containers healthy."
+
+      - name: Teardown
+        if: always()
+        run: docker compose down -v

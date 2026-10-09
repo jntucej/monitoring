@@ -50,10 +50,19 @@ async function handleResetPassword(req: NextRequest) {
 
       // Check DB revocation & single-use tracking in password_reset_tokens
       const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
-      const tokenCheck = await query(
-        "SELECT id FROM password_reset_tokens WHERE token_hash = $1 AND used_at IS NULL AND expires_at > NOW() LIMIT 1",
-        [tokenHash]
-      ).catch(() => ({ rows: [{ id: "fallback" }] }));
+      let tokenCheck;
+      try {
+        tokenCheck = await query(
+          "SELECT id FROM password_reset_tokens WHERE token_hash = $1 AND used_at IS NULL AND expires_at > NOW() LIMIT 1",
+          [tokenHash]
+        );
+      } catch (err: any) {
+        console.error("[Auth:ResetPassword] token table lookup failed:", err.message);
+        return NextResponse.json(
+          { success: false, error: { code: "SERVER_ERROR", message: "Password reset is temporarily unavailable." } },
+          { status: 500 }
+        );
+      }
 
       if (tokenCheck.rows.length === 0) {
         return NextResponse.json(
@@ -107,25 +116,31 @@ async function handleResetPassword(req: NextRequest) {
         const tokenId = crypto.randomUUID();
 
         // Record single-use reset token in DB with 1h expiry
-        await query(
-          "INSERT INTO password_reset_tokens (id, user_id, token_hash, expires_at, created_at) VALUES ($1, $2, $3, NOW() + INTERVAL '1 hour', NOW())",
-          [tokenId, user.id, tokenHash]
-        ).catch((err) => {
-          console.warn("[Auth:ResetPassword] Token tracking insert error:", err.message);
-        });
-
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-        const resetLink = `${appUrl}/reset-password?token=${encodeURIComponent(resetToken)}`;
-
+        let tokenPersisted = true;
         try {
-          await sendEmail({
-            to: user.email,
-            subject: "Gate Monitor - Password Reset Request",
-            body: `Hello ${user.name || "User"},\n\nPlease use the following link to reset your password:\n${resetLink}\n\nThis link will expire in 1 hour.\n\nIf you did not request this, please ignore this email.`,
-            html: `<p>Hello ${user.name || "User"},</p><p>Please use the following link to reset your password:</p><p><a href="${resetLink}">Reset Password</a></p><p>This link will expire in 1 hour.</p><p>If you did not request this, please ignore this email.</p>`,
-          });
-        } catch (emailErr) {
-          console.error("[Auth:ResetPassword] Failed to send email:", emailErr);
+          await query(
+            "INSERT INTO password_reset_tokens (id, user_id, token_hash, expires_at, created_at) VALUES ($1, $2, $3, NOW() + INTERVAL '1 hour', NOW())",
+            [tokenId, user.id, tokenHash]
+          );
+        } catch (err: any) {
+          console.error("[Auth:ResetPassword] cannot persist token:", err.message);
+          tokenPersisted = false;
+        }
+
+        if (tokenPersisted) {
+          const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+          const resetLink = `${appUrl}/reset-password?token=${encodeURIComponent(resetToken)}`;
+
+          try {
+            await sendEmail({
+              to: user.email,
+              subject: "Gate Monitor - Password Reset Request",
+              body: `Hello ${user.name || "User"},\n\nPlease use the following link to reset your password:\n${resetLink}\n\nThis link will expire in 1 hour.\n\nIf you did not request this, please ignore this email.`,
+              html: `<p>Hello ${user.name || "User"},</p><p>Please use the following link to reset your password:</p><p><a href="${resetLink}">Reset Password</a></p><p>This link will expire in 1 hour.</p><p>If you did not request this, please ignore this email.</p>`,
+            });
+          } catch (emailErr) {
+            console.error("[Auth:ResetPassword] Failed to send email:", emailErr);
+          }
         }
       }
 

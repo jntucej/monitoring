@@ -39,6 +39,26 @@ cron.schedule('0 4 * * 0', async () => {
   }
 });
 
+let bridgeRestartAttempts = 0;
+const INITIAL_RESTART_DELAY_MS = 5000;
+const MAX_RESTART_DELAY_MS = 60000;
+let restartTimeout = null;
+let activeBridgeChild = null;
+
+function scheduleBridgeRestart(reason) {
+  if (restartTimeout) return;
+  bridgeRestartAttempts++;
+  const delay = Math.min(
+    INITIAL_RESTART_DELAY_MS * Math.pow(2, Math.max(0, bridgeRestartAttempts - 1)),
+    MAX_RESTART_DELAY_MS
+  );
+  console.warn(`[Worker] sync-bridge ${reason}. Restarting in ${Math.round(delay / 1000)}s (attempt ${bridgeRestartAttempts})...`);
+  restartTimeout = setTimeout(() => {
+    restartTimeout = null;
+    startSyncBridge();
+  }, delay);
+}
+
 function startSyncBridge() {
   const bridgePath = path.resolve(__dirname, '../scripts/sync-bridge/index.ts');
   if (!fs.existsSync(bridgePath)) {
@@ -53,19 +73,30 @@ function startSyncBridge() {
 
   console.log(`[Worker] Spawning sync-bridge script: ${bridgePath}`);
 
-  const child = spawn('npx', ['tsx', bridgePath], {
+  const isWin = process.platform === 'win32';
+  const child = spawn(isWin ? 'npx.cmd' : 'npx', ['tsx', bridgePath], {
     stdio: 'inherit',
     env: process.env,
+    shell: isWin,
   });
+  activeBridgeChild = child;
+
+  // Reset backoff counter if child process runs cleanly for >= 30 seconds
+  const stableRunTimer = setTimeout(() => {
+    bridgeRestartAttempts = 0;
+  }, 30000);
 
   child.on('exit', (code, signal) => {
-    console.warn(`[Worker] sync-bridge exited with code ${code}, signal ${signal}. Restarting in 5s...`);
-    setTimeout(startSyncBridge, 5000);
+    clearTimeout(stableRunTimer);
+    activeBridgeChild = null;
+    scheduleBridgeRestart(`exited with code ${code}, signal ${signal}`);
   });
 
   child.on('error', (err) => {
+    clearTimeout(stableRunTimer);
+    activeBridgeChild = null;
     console.error('[Worker] sync-bridge spawn error:', err);
-    setTimeout(startSyncBridge, 5000);
+    scheduleBridgeRestart(`spawn error: ${err?.message || err}`);
   });
 }
 
@@ -75,6 +106,10 @@ if (process.env.ENABLE_SYNC_BRIDGE === 'true') {
 
 process.on('SIGTERM', () => {
   console.log('[Worker] Received SIGTERM, shutting down worker gracefully.');
+  if (restartTimeout) clearTimeout(restartTimeout);
+  if (activeBridgeChild) {
+    try { activeBridgeChild.kill('SIGTERM'); } catch { /* ignore */ }
+  }
   process.exit(0);
 });
 

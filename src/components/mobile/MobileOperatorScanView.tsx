@@ -15,6 +15,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import jsQR from "jsqr";
+import { playAudioFeedback } from "@/lib/sound";
 import { useOperatorStore } from "@/stores/operatorStore";
 import { useToast } from "@/components/ui/toast";
 
@@ -47,21 +48,9 @@ export function MobileOperatorScanView() {
 
   const playBeep = useCallback((type: "success" | "error") => {
     if (!soundEnabled) return;
-    try {
-      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = type === "success" ? "sine" : "sawtooth";
-      osc.frequency.setValueAtTime(type === "success" ? 880 : 300, ctx.currentTime);
-      gain.gain.setValueAtTime(0.3, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + (type === "success" ? 0.15 : 0.3));
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + (type === "success" ? 0.15 : 0.3));
-    } catch {}
+    // ponytail: shared AudioContext via lib — per-call `new AudioContext()`
+    // leaks contexts (browser cap ~6) and silences later scans.
+    playAudioFeedback(type === "success" ? "success" : "error");
   }, [soundEnabled]);
 
   const triggerHaptic = useCallback((pattern: number[]) => {
@@ -181,6 +170,22 @@ export function MobileOperatorScanView() {
 
   useEffect(() => {
     return () => stopCamera();
+  }, [stopCamera]);
+
+  // ponytail: kill camera + decode loop when the tab is hidden (battery, iOS
+  // privacy indicator, Android dead-stream-on-return). pagehide covers iOS tab
+  // suspension. Unlike the desktop Scanner we don't auto-restart — this view is
+  // user-launched via "Launch Camera Scanner", so the operator taps it again.
+  useEffect(() => {
+    const onVis = () => {
+      if (document.hidden) stopCamera();
+    };
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("pagehide", onVis);
+    return () => {
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("pagehide", onVis);
+    };
   }, [stopCamera]);
 
   return (

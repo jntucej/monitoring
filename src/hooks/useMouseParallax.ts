@@ -26,6 +26,9 @@ export const useMouseParallax = (factor: number = 0.02, damping: number = 20, st
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    // ponytail: no parallax on touch — iOS/Android synthesize mousemove from
+    // touch (hover emulation), which janks scroll via the orb springs.
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches === false) return;
     const handleMouseMove = (e: MouseEvent) => {
       const centerX = window.innerWidth / 2;
       const centerY = window.innerHeight / 2;
