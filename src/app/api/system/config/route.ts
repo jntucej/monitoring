@@ -3,6 +3,7 @@ import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { invalidateCache } from "@/lib/cache";
+import { log, getRequestId } from "@/lib/log";
 
 const defaultConfig = {
   notificationsEnabled: true,
@@ -22,7 +23,7 @@ function toConfig(value: any) {
   return { ...defaultConfig, ...value };
 }
 
-async function handleGet(_req: NextRequest) {
+async function handleGetInner(_req: NextRequest) {
   try {
     const service = getSupabaseServiceClient();
 
@@ -50,7 +51,7 @@ async function handleGet(_req: NextRequest) {
   }
 }
 
-async function handlePatch(req: NextRequest) {
+async function handlePatchInner(req: NextRequest) {
   try {
     const body = await req.json();
     const service = getSupabaseServiceClient();
@@ -66,7 +67,7 @@ async function handlePatch(req: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: { code: "DB_READ_ERROR", message: readError.message },
+          error: { code: "DB_READ_ERROR", message: readError.message, requestId: getRequestId(req) },
         },
         { status: 500 }
       );
@@ -97,7 +98,7 @@ async function handlePatch(req: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: { code: "DB_ERROR", message: upsertError.message },
+          error: { code: "DB_ERROR", message: upsertError.message, requestId: getRequestId(req) },
         },
         { status: 500 }
       );
@@ -113,12 +114,16 @@ async function handlePatch(req: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: { code: "INTERNAL_ERROR", message: err?.message ?? "Unknown error" },
+        error: { code: "INTERNAL_ERROR", message: err?.message ?? "Unknown error", requestId: getRequestId(req) },
       },
       { status: 500 }
     );
   }
 }
+
+// Structured observability: auto-log the request lifecycle with the correlation ID.
+const handleGet = log.wrap("/api/system/config:GET", handleGetInner);
+const handlePatch = log.wrap("/api/system/config:PATCH", handlePatchInner);
 
 export const GET = withRateLimit(
   withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin"] }),
