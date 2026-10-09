@@ -7,24 +7,41 @@ import { verifyCsrf } from './middleware/csrf';
  * by authenticated API handlers, never by mutable client cookies or headers.
  */
 export async function middleware(req: NextRequest) {
+  const requestId = req.headers.get('x-request-id') || crypto.randomUUID();
   const { pathname } = req.nextUrl;
 
-  if (!pathname.startsWith('/api')) return NextResponse.next();
+  if (!pathname.startsWith('/api')) {
+    const res = NextResponse.next();
+    res.headers.set('x-request-id', requestId);
+    return res;
+  }
 
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
     || req.headers.get('x-real-ip')
     || 'unknown';
   const limitResult = await rateLimit(`api_global:${ip}`, 300) as { limited: boolean };
   if (limitResult.limited) {
-    return NextResponse.json(
-      { success: false, error: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many requests. Please try again later.' } },
+    const res = NextResponse.json(
+      { success: false, error: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many requests. Please try again later.', requestId } },
       { status: 429 },
     );
+    res.headers.set('x-request-id', requestId);
+    return res;
   }
 
   const csrfError = verifyCsrf(req);
-  if (csrfError) return csrfError;
-  return NextResponse.next();
+  if (csrfError) {
+    csrfError.headers.set('x-request-id', requestId);
+    return csrfError;
+  }
+
+  // Forward the correlation ID to the handler via request headers (the only way a
+  // route can read a value set here) and echo it on the response for the client.
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set('x-request-id', requestId);
+  const res = NextResponse.next({ request: { headers: requestHeaders } });
+  res.headers.set('x-request-id', requestId);
+  return res;
 }
 
 export const proxy = middleware;

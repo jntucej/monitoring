@@ -6,6 +6,7 @@ import { isMfaRequiredForAdmin } from "@/lib/authContext";
 import { createEnrollToken } from "@/lib/mfa-enroll";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { addAudit } from "@/lib/db";
+import { log, getRequestId } from "@/lib/log";
 import { assertCsrf } from "@/lib/csrf";
 import type { Role } from "@/lib/types";
 import bcrypt from "bcryptjs";
@@ -18,7 +19,7 @@ const GENERIC_FAILURE = {
   },
 };
 
-async function handleLogin(req: NextRequest) {
+async function handleLoginInner(req: NextRequest) {
   const csrfError = assertCsrf(req);
   if (csrfError) return csrfError;
 
@@ -141,6 +142,7 @@ async function handleLogin(req: NextRequest) {
           userAgent: req.headers.get("user-agent") || "unknown",
           reason: "invalid_password",
           endpoint: "/api/auth/login",
+          request_id: getRequestId(req),
         },
       });
 
@@ -344,19 +346,29 @@ async function handleLogin(req: NextRequest) {
 
     return response;
   } catch (error: unknown) {
-    console.error("Login processing error:", error);
+    const requestId = getRequestId(req);
+    log.error({
+      msg: "login.error",
+      route: "/api/auth/login",
+      requestId,
+      err: error instanceof Error ? { name: error.name, message: error.message, stack: error.stack } : String(error),
+    });
     return NextResponse.json(
       {
         success: false,
         error: {
           code: "INTERNAL_ERROR",
           message: "Internal server error during authentication.",
+          requestId,
         },
       },
       { status: 500 }
     );
   }
 }
+
+// Structured observability: auto-log the request lifecycle and attach the correlation ID.
+const handleLogin = log.wrap("/api/auth/login", handleLoginInner);
 
 export const POST = withRateLimit(handleLogin, {
   keyPrefix: "login",
