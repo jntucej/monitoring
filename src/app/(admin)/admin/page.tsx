@@ -305,7 +305,7 @@ export default function AdminDashboardPage() {
   const recentAlerts = (data?.alerts ?? []).filter(a => !a.resolved).slice(0, 5);
 
   // Active gates summary (all gates, sorted by scan count)
-  const activeGates = (data?.locations ?? [])
+  const activeGates = [...(data?.locations ?? [])]
     .sort((a, b) => b.currentScanCount - a.currentScanCount);
 
   // Department breakdown

@@ -38,7 +38,8 @@ export function checkTimeBasedAccess(
   customRule?: Partial<AccessRule>
 ): AccessCheckResult {
   if (personType !== "worker") {
-    // Other person types (student, faculty, staff, parent, visitor) have their own specific gate rules
+    // TODO: Implement student curfew rules here, or document how they are handled.
+    // For now, allow entry by default for non-worker roles.
     return { allowed: true };
   }
 

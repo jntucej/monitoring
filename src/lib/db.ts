@@ -94,8 +94,8 @@ export function mPerson(r: any): Person {
     batch: r.student_details.batch,
     parentId: r.student_details.guardian_id, guardianId: r.student_details.guardian_id,
     studentType: r.student_details.student_type,
-    hostelBlock: r.student_details.hostel_block,
-    roomNumber: r.student_details.room_number,
+    hostelBlock: r.student_details.hostelBlock || r.student_details.hostel_block,
+    roomNumber: r.student_details.roomNumber || r.student_details.room_number,
     hostelCurfewTime: r.student_details.hostel_curfew_time,
     gender: r.student_details.gender,
     wardenId: r.student_details.warden_id,
@@ -1842,7 +1842,7 @@ export async function addAudit(entry: {
 }) {
   const id = `audit-${Date.now()}-${randomBytes(4).toString("hex")}`;
   const timestamp = new Date().toISOString();
-  const detailsStr = typeof entry.details === "string" ? entry.details : JSON.stringify(entry.details);
+  const details = entry.details;
 
   const { getSupabaseServiceClient } = await import('./dbClient');
   const serviceClient = getSupabaseServiceClient();
@@ -1853,12 +1853,12 @@ export async function addAudit(entry: {
     if (userExists) targetUserId = entry.userId;
   }
 
-    const auditRow = {
+  const auditRow = {
     action: entry.action,
     user_id: targetUserId,
     user_name: entry.userName || "System User",
     user_role: entry.role || null,
-    details: detailsStr,
+    details: details,
     timestamp,
   };
 
