@@ -14,6 +14,13 @@ export function getDefaultRouteForRole(role: Role | string, gateId?: string): st
     staff: "/staff",
     worker: "/worker",
     visitor: "/visitor",
+    caretaker: "/hostel/permissions",
+    deputy_warden: "/hostel/permissions",
+    hostel_manager: "/hostel/permissions",
+    principal: "/principal/permissions",
+    vice_principal: "/exam/permissions",
+    oie: "/exam/permissions",
+    exam_branch: "/exam/permissions",
   };
   return routes[role] || "/login";
 }

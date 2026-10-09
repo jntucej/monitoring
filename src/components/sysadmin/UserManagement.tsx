@@ -16,7 +16,8 @@ export function UserManagement() {
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<"admin" | "operator" | "parent" | "student">("operator");
+  const [hostelScope, setHostelScope] = useState("");
+  const [role, setRole] = useState<string>("operator");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
@@ -152,13 +153,14 @@ export function UserManagement() {
       const res = await fetch("/api/users", {
         method: "POST",
         headers: authHeaders(),
-        body: JSON.stringify({ name, email, role, gateId: role === "operator" ? gateId || undefined : undefined, isActive: true }),
+        body: JSON.stringify({ name, email, role, gateId: role === "operator" ? gateId || undefined : undefined, hostelScope: ["caretaker", "deputy_warden", "hostel_manager", "warden"].includes(role) ? hostelScope || undefined : undefined, isActive: true }),
       });
       const j = await res.json();
       if (res.ok && j.success) {
         setMsg("✅ User added.");
         setName("");
         setEmail("");
+        setHostelScope("");
         setShowForm(false);
         load();
       } else {
@@ -264,6 +266,21 @@ export function UserManagement() {
               <option value="operator">Operator</option>
               <option value="parent">Parent</option>
               <option value="student">Student</option>
+                <option value="warden">Warden</option>
+                <option value="faculty">Faculty</option>
+                <option value="staff">Staff</option>
+                <option value="sysadmin">System Administrator</option>
+                <optgroup label="Hostel">
+                  <option value="caretaker">Caretaker</option>
+                  <option value="deputy_warden">Deputy Warden</option>
+                  <option value="hostel_manager">Hostel Manager</option>
+                </optgroup>
+                <optgroup label="Academic">
+                  <option value="principal">Principal</option>
+                  <option value="vice_principal">Vice Principal</option>
+                  <option value="oie">OIE</option>
+                  <option value="exam_branch">Exam Branch</option>
+                </optgroup>
             </select>
           </div>
           {role === "operator" && (
@@ -373,7 +390,7 @@ export function UserManagement() {
                   onChange={(e) => changeRole(user, e.target.value)}
                   className="text-xs rounded-full bg-sky-500/10 text-sky-300 px-2 py-1 border border-sky-500/20"
                 >
-                  {["operator", "admin", "student", "parent", "warden"].map((r) => (
+                  {["operator", "admin", "student", "parent", "warden", "faculty", "staff", "sysadmin", "caretaker", "deputy_warden", "hostel_manager", "principal", "vice_principal", "oie", "exam_branch"].map((r) => (
                     <option key={r} value={r}>{r}</option>
                   ))}
                 </select>
