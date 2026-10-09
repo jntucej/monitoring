@@ -30,6 +30,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       {
         groupLabel: "Approvals & Reports",
         items: [
+          { href: "/hod/permissions", label: "HOD Approvals", icon: "CheckSquare", badge: "PENDING" },
           { href: "/hod?tab=approvals", label: "Outpass Approvals", icon: "CheckSquare", badge: "PENDING" },
           { href: "/admin/reports", label: "Branch Reports", icon: "FileSpreadsheet" },
         ],
@@ -45,6 +46,78 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
   }
 
   switch (roleCode) {
+    case "caretaker":
+    case "deputy_warden":
+    case "hostel_manager":
+      return [
+        {
+          groupLabel: "Hostel Permissions",
+          items: [
+            { href: "/hostel/permissions", label: "Pending Approvals", icon: "ClipboardList", badge: "PENDING" },
+            { href: "/permissions", label: "My Tickets", icon: "FileText" },
+          ],
+        },
+        {
+          groupLabel: "General",
+          items: [
+            { href: "/profile", label: "My Profile", icon: "User" },
+            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+          ],
+        },
+      ];
+
+    case "principal":
+      return [
+        {
+          groupLabel: "Principal Desk",
+          items: [
+            { href: "/principal/permissions", label: "Warden / Principal Approvals", icon: "CheckSquare", badge: "PENDING" },
+          ],
+        },
+        {
+          groupLabel: "General",
+          items: [
+            { href: "/profile", label: "My Profile", icon: "User" },
+            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+          ],
+        },
+      ];
+
+    case "vice_principal":
+      return [
+        {
+          groupLabel: "Vice Principal Desk",
+          items: [
+            { href: "/exam/permissions", label: "VP Approvals", icon: "CheckSquare", badge: "PENDING" },
+          ],
+        },
+        {
+          groupLabel: "General",
+          items: [
+            { href: "/profile", label: "My Profile", icon: "User" },
+            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+          ],
+        },
+      ];
+
+    case "oie":
+    case "exam_branch":
+      return [
+        {
+          groupLabel: "Exam Branch",
+          items: [
+            { href: "/exam/permissions", label: "Exam Documents", icon: "FileText", badge: "PENDING" },
+          ],
+        },
+        {
+          groupLabel: "General",
+          items: [
+            { href: "/profile", label: "My Profile", icon: "User" },
+            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+          ],
+        },
+      ];
+
     case "sysadmin":
       return [
         {

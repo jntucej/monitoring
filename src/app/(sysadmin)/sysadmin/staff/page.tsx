@@ -36,12 +36,12 @@ export default function SysAdminStaffPage() {
 
   const [createForm, setCreateForm] = useState({
     employeeId: "", name: "", email: "", phone: "",
-    role: "faculty", department: "CSE", designation: "Assistant Professor", customMetaJson: "{}",
+    role: "faculty", department: "CSE", designation: "Assistant Professor", hostelScope: "", customMetaJson: "{}",
   });
 
   const [editForm, setEditForm] = useState({
     name: "", email: "", phone: "", role: "faculty",
-    department: "", designation: "", customMetaJson: "{}",
+    department: "", designation: "", hostelScope: "", customMetaJson: "{}",
     newPassword: "", newPin: "",
   });
 
@@ -84,14 +84,16 @@ export default function SysAdminStaffPage() {
           uniqueId: createForm.employeeId, fullName: createForm.name,
           personType: createForm.role, email: createForm.email || undefined,
           phone: createForm.phone || undefined, department: createForm.department || undefined,
-          designation: createForm.designation || undefined, metadata: parsedMeta,
+          designation: createForm.designation || undefined,
+          metadata: { ...parsedMeta, ...(createForm.hostelScope ? { hostel_scope: createForm.hostelScope } : {}) },
+          hostelScope: createForm.hostelScope || undefined,
         }),
       });
       const json = await res.json();
       if (res.ok) {
         addToast({ variant: "success", title: "Created", message: `${createForm.name} added.` });
         setShowCreateModal(false);
-        setCreateForm({ employeeId: "", name: "", email: "", phone: "", role: "faculty", department: "CSE", designation: "Assistant Professor", customMetaJson: "{}" });
+        setCreateForm({ employeeId: "", name: "", email: "", phone: "", role: "faculty", department: "CSE", designation: "Assistant Professor", hostelScope: "", customMetaJson: "{}" });
         loadStaff();
       } else {
         addToast({ variant: "error", title: "Error", message: json.error?.message || "Failed to create." });
@@ -117,7 +119,9 @@ export default function SysAdminStaffPage() {
           name: editForm.name, email: editForm.email || undefined,
           phone: editForm.phone || undefined, role: editForm.role,
           department: editForm.department || undefined,
-          designation: editForm.designation || undefined, metadata: parsedMeta,
+          designation: editForm.designation || undefined,
+          metadata: { ...parsedMeta, ...(editForm.hostelScope ? { hostel_scope: editForm.hostelScope } : {}) },
+          hostelScope: editForm.hostelScope || undefined,
           password: editForm.newPassword || undefined,
           pin: editForm.newPin || undefined,
         }),
@@ -161,6 +165,7 @@ export default function SysAdminStaffPage() {
     setEditForm({
       name: s.name, email: s.email, phone: s.phone || "", role: s.role,
       department: s.department || "", designation: s.designation || "",
+      hostelScope: (s.metadata as any)?.hostel_scope || (s as any).hostel_scope || (s as any).hostelScope || "",
       customMetaJson: s.metadata ? JSON.stringify(s.metadata, null, 2) : "{}",
       newPassword: "", newPin: "",
     });
@@ -186,6 +191,13 @@ export default function SysAdminStaffPage() {
       operator: "bg-entry-subtle border-emerald-500/30",
       staff: "bg-[var(--bg-elevated)] text-[var(--text-secondary)] border-[var(--border)]",
       worker: "bg-purple-500/20 text-purple-300 border-purple-500/30",
+      caretaker: "bg-teal-500/20 text-teal-300 border-teal-500/30",
+      deputy_warden: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
+      hostel_manager: "bg-indigo-500/20 text-indigo-300 border-indigo-500/30",
+      principal: "bg-rose-500/20 text-rose-300 border-rose-500/30",
+      vice_principal: "bg-pink-500/20 text-pink-300 border-pink-500/30",
+      oie: "bg-violet-500/20 text-violet-300 border-violet-500/30",
+      exam_branch: "bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30",
     };
     return c[role] || "bg-[var(--bg-elevated)] text-[var(--text-secondary)] border-[var(--border)]";
   };
@@ -221,6 +233,17 @@ export default function SysAdminStaffPage() {
               <option value="sysadmin">SysAdmin</option><option value="admin">Admin</option>
               <option value="faculty">Faculty</option><option value="operator">Operator</option>
               <option value="staff">Staff</option><option value="worker">Worker</option>
+              <optgroup label="Hostel">
+                <option value="caretaker">Caretaker</option>
+                <option value="deputy_warden">Deputy Warden</option>
+                <option value="hostel_manager">Hostel Manager</option>
+              </optgroup>
+              <optgroup label="Academic">
+                <option value="principal">Principal</option>
+                <option value="vice_principal">Vice Principal</option>
+                <option value="oie">OIE</option>
+                <option value="exam_branch">Exam Branch</option>
+              </optgroup>
             </select>
             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg px-3 py-2 text-xs text-[var(--text-secondary)]">
               <option value="ALL">All Status</option><option value="ACTIVE">Active</option><option value="SUSPENDED">Suspended</option>
@@ -307,10 +330,22 @@ export default function SysAdminStaffPage() {
                   <div>
                     <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Role</label>
                     <select value={createForm.role} onChange={(e) => setCreateForm({ ...createForm, role: e.target.value })} className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border-strong)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--action-primary)]">
-                      <option value="faculty">Faculty</option><option value="operator">Operator</option>
-                      <option value="staff">Staff</option><option value="worker">Worker</option>
-                      <option value="admin">Admin</option><option value="sysadmin">SysAdmin</option>
-                    </select>
+                  <option value="faculty">Faculty</option><option value="operator">Operator</option>
+                  <option value="staff">Staff</option><option value="worker">Worker</option>
+                  <option value="admin">Admin</option><option value="sysadmin">SysAdmin</option>
+                  <option value="warden">Warden</option>
+                  <optgroup label="Hostel">
+                    <option value="caretaker">Caretaker</option>
+                    <option value="deputy_warden">Deputy Warden</option>
+                    <option value="hostel_manager">Hostel Manager</option>
+                  </optgroup>
+                  <optgroup label="Academic">
+                    <option value="principal">Principal</option>
+                    <option value="vice_principal">Vice Principal</option>
+                    <option value="oie">OIE</option>
+                    <option value="exam_branch">Exam Branch</option>
+                  </optgroup>
+                </select>
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Department</label>
@@ -321,6 +356,18 @@ export default function SysAdminStaffPage() {
                     <input type="text" value={createForm.designation} onChange={(e) => setCreateForm({ ...createForm, designation: e.target.value })} className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border-strong)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--action-primary)]" />
                   </div>
                 </div>
+            {["caretaker", "deputy_warden", "hostel_manager", "warden"].includes(createForm.role) && (
+              <div>
+                <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Hostel Scope</label>
+                <input
+                  type="text"
+                  placeholder="e.g. MH-1, LH-2, or ALL"
+                  value={createForm.hostelScope}
+                  onChange={(e) => setCreateForm({ ...createForm, hostelScope: e.target.value })}
+                  className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border-strong)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--action-primary)]"
+                />
+              </div>
+            )}
                 <div>
                   <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Custom Metadata (JSON)</label>
                   <textarea rows={3} value={createForm.customMetaJson} onChange={(e) => setCreateForm({ ...createForm, customMetaJson: e.target.value })} className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border-strong)] rounded-xl text-xs font-mono text-[var(--text-secondary)] focus:outline-none focus:border-[var(--action-primary)]" />
@@ -362,10 +409,22 @@ export default function SysAdminStaffPage() {
                   <div>
                     <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Role</label>
                     <select value={editForm.role} onChange={(e) => setEditForm({ ...editForm, role: e.target.value })} className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border-strong)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--action-primary)]">
-                      <option value="faculty">Faculty</option><option value="operator">Operator</option>
-                      <option value="staff">Staff</option><option value="worker">Worker</option>
-                      <option value="admin">Admin</option><option value="sysadmin">SysAdmin</option>
-                    </select>
+                  <option value="faculty">Faculty</option><option value="operator">Operator</option>
+                  <option value="staff">Staff</option><option value="worker">Worker</option>
+                  <option value="admin">Admin</option><option value="sysadmin">SysAdmin</option>
+                  <option value="warden">Warden</option>
+                  <optgroup label="Hostel">
+                    <option value="caretaker">Caretaker</option>
+                    <option value="deputy_warden">Deputy Warden</option>
+                    <option value="hostel_manager">Hostel Manager</option>
+                  </optgroup>
+                  <optgroup label="Academic">
+                    <option value="principal">Principal</option>
+                    <option value="vice_principal">Vice Principal</option>
+                    <option value="oie">OIE</option>
+                    <option value="exam_branch">Exam Branch</option>
+                  </optgroup>
+                </select>
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Department</label>
@@ -376,6 +435,18 @@ export default function SysAdminStaffPage() {
                   <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Designation</label>
                   <input type="text" value={editForm.designation} onChange={(e) => setEditForm({ ...editForm, designation: e.target.value })} className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border-strong)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--action-primary)]" />
                 </div>
+            {["caretaker", "deputy_warden", "hostel_manager", "warden"].includes(editForm.role) && (
+              <div>
+                <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Hostel Scope</label>
+                <input
+                  type="text"
+                  placeholder="e.g. MH-1, LH-2, or ALL"
+                  value={editForm.hostelScope}
+                  onChange={(e) => setEditForm({ ...editForm, hostelScope: e.target.value })}
+                  className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border-strong)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--action-primary)]"
+                />
+              </div>
+            )}
                 <div className="grid grid-cols-2 gap-3 p-3 bg-[var(--bg-elevated)]/60 border border-[var(--border-strong)] rounded-xl">
                   <div>
                     <label className="text-xs font-semibold text-amber-400 block mb-1">Reset Password (Optional)</label>
