@@ -84,6 +84,12 @@ export function getInitials(name: string): string {
     .toUpperCase();
 }
 
+export function getAvatarPlaceholder(name: string): string {
+  const initials = getInitials(name) || "??";
+  return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><circle cx='20' cy='20' r='20' fill='%231e293b'/><text x='50%' y='55%' text-anchor='middle' font-size='16' fill='%2394a3b8'>${initials}</text></svg>`;
+}
+
+
 export function getAvatarColor(name: string): string {
   const colors = [
     "bg-emerald-500/20 text-emerald-400",

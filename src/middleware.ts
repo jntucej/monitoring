@@ -44,8 +44,6 @@ export async function middleware(req: NextRequest) {
   return res;
 }
 
-export const proxy = middleware;
-
 export const config = {
   matcher: ['/api/:path*'],
 };

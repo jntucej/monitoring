@@ -4,6 +4,8 @@ import { QrCode, Loader2 } from "lucide-react";
 import { QRCode } from "react-qrcode-logo";
 import { parseRollNumber } from "@/lib/rollNumber";
 import type { Person } from "@/lib/types";
+import { getAvatarPlaceholder } from "@/lib/utils";
+
 import { PersonBadge } from "@/components/shared/PersonBadge";
 
 interface PersonIdCardProps {
@@ -67,7 +69,7 @@ export function PersonIdCard({ person: initialPerson, type }: PersonIdCardProps 
 
   const uniqueId = person.uniqueId || person.roll;
   const decoded = person.personType === "student" && uniqueId ? parseRollNumber(uniqueId) : null;
-  const photoSrc = person.photoUrl || person.photo || "/avatar-placeholder.png";
+  const photoSrc = person.photoUrl || person.photo || getAvatarPlaceholder(person.fullName || person.name || "??");
 
   return (
     <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-8 flex flex-col items-center">

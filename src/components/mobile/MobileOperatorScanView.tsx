@@ -18,6 +18,8 @@ import jsQR from "jsqr";
 import { playAudioFeedback } from "@/lib/sound";
 import { useOperatorStore } from "@/stores/operatorStore";
 import { useToast } from "@/components/ui/toast";
+import { getAvatarPlaceholder } from "@/lib/utils";
+
 
 export function MobileOperatorScanView() {
   const {
@@ -327,7 +329,7 @@ export function MobileOperatorScanView() {
             <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto" />
             <div className="flex items-center gap-4">
               <img
-                src={currentStudent.photo || "/avatar-placeholder.png"}
+                src={currentStudent.photo || getAvatarPlaceholder(currentStudent.name || "??")}
                 alt={currentStudent.name}
                 className="w-16 h-16 rounded-2xl object-cover border-2 border-emerald-400"
               />
