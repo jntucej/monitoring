@@ -13,6 +13,8 @@
     "test:unit": "npx --yes tsx scripts/run_system_tests.ts && node scripts/test_fixes_1_to_10.js && node scripts/test_fixes_11_to_20.js && node scripts/test_fixes_21_to_45.js && node scripts/test_additional_remediations.js",
     "test": "npm run test:unit && npm run test:e2e",
     "test:e2e": "playwright test",
+    "test:e2e:smoke": "playwright test tests/login-success.spec.ts",
+    "test:e2e:smoke": "SMOKE_USER=admin SMOKE_PASS=123456 playwright test tests/login-success.spec.ts",
     "lint": "eslint src"
   },
   "dependencies": {

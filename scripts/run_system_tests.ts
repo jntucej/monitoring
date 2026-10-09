@@ -504,23 +504,32 @@ async function runTests() {
   const requiresMfaCheck = (user: typeof mfaOperator) => Boolean(user.two_factor_enabled);
   assert(requiresMfaCheck(mfaOperator) === true, "10g: 2FA-enrolled operator triggers MFA challenge on PIN login");
 
-  // 10h. Cross-origin POST request rejected by CSRF protection
-  const evilReq = new NextRequest("http://campus.example.edu/api/auth/pin-login", {
-    method: "POST",
-    headers: {
-      origin: "https://evil-attacker.com",
-      host: "campus.example.edu",
-    },
-  });
-  const sameOriginReq = new NextRequest("http://campus.example.edu/api/auth/pin-login", {
-    method: "POST",
-    headers: {
-      origin: "http://campus.example.edu",
-      host: "campus.example.edu",
-    },
-  });
-  assert(validateCsrf(evilReq).valid === false, "10h-cross: Cross-origin POST is rejected by CSRF protection");
-  assert(validateCsrf(sameOriginReq).valid === true, "10h-same: Same-origin POST passes CSRF protection");
+    // 10h. Cross-origin POST request rejected by CSRF protection
+    const origAllowedOrigin = process.env.ALLOWED_ORIGIN;
+    const origAllowedOrigins = process.env.ALLOWED_ORIGINS;
+    try {
+      delete process.env.ALLOWED_ORIGIN;
+      delete process.env.ALLOWED_ORIGINS;
+      const evilReq = new NextRequest("http://campus.example.edu/api/auth/pin-login", {
+        method: "POST",
+        headers: {
+          origin: "https://evil-attacker.com",
+          host: "campus.example.edu",
+        },
+      });
+      const sameOriginReq = new NextRequest("http://campus.example.edu/api/auth/pin-login", {
+        method: "POST",
+        headers: {
+          origin: "http://campus.example.edu",
+          host: "campus.example.edu",
+        },
+      });
+      assert(validateCsrf(evilReq).valid === false, "10h-cross: Cross-origin POST rejected by CSRF protection");
+      assert(validateCsrf(sameOriginReq).valid === true, "10h-same: Same-origin POST passes CSRF protection");
+    } finally {
+      if (origAllowedOrigin !== undefined) process.env.ALLOWED_ORIGIN = origAllowedOrigin;
+      if (origAllowedOrigins !== undefined) process.env.ALLOWED_ORIGINS = origAllowedOrigins;
+    }
 
   // 10i. Client IP extraction prefers x-real-ip and rightmost x-forwarded-for
   const spoofedReq = new NextRequest("http://campus.example.edu/api/auth/pin-login", {

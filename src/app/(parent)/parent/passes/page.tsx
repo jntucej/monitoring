@@ -29,7 +29,7 @@ export default function ParentPassesPage() {
 
   const load = async () => {
     try {
-      const authRaw = localStorage.getItem("gate-monitor-auth");
+      const authRaw = sessionStorage.getItem("gate-monitor-auth");
       const auth = authRaw ? JSON.parse(authRaw) : null;
       const parentId = auth?.user?.parentId ?? auth?.user?.id ?? "pa-1";
       const res = await fetch(`/api/passes?parentId=${parentId}`, { 

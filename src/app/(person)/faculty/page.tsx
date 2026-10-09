@@ -19,7 +19,7 @@ export default function FacultyDashboardPage() {
     let cancelled = false;
     const loadFaculty = async () => {
       try {
-        const authRaw = localStorage.getItem("gate-monitor-auth");
+        const authRaw = sessionStorage.getItem("gate-monitor-auth");
         const auth = authRaw ? JSON.parse(authRaw) : null;
         const uniqueId = auth?.state?.user?.uniqueId ?? auth?.state?.user?.roll ?? auth?.user?.uniqueId ?? auth?.user?.roll;
         if (!uniqueId) {
@@ -53,7 +53,7 @@ export default function FacultyDashboardPage() {
     };
   }, []);
 
-  const authRaw = typeof window !== "undefined" ? localStorage.getItem("gate-monitor-auth") : null;
+  const authRaw = typeof window !== "undefined" ? sessionStorage.getItem("gate-monitor-auth") : null;
   const authUser = authRaw ? JSON.parse(authRaw)?.state?.user || JSON.parse(authRaw)?.user : null;
   const isHod = Boolean(authUser?.isHod || authUser?.role === "hod" || person?.employeeDetails?.isHod);
 

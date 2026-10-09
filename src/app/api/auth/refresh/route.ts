@@ -68,12 +68,27 @@ async function handleRefresh(req: NextRequest) {
 
     const user = userRes.rows[0];
 
-    // Refresh token rotation and reuse detection
+    // Refresh token rotation and reuse detection.
+    // FAIL CLOSED: if we cannot read the sessions table, we must NOT mint new
+    // tokens — an attacker exploiting a DB blip (pool exhaustion, timeout)
+    // would otherwise get a fresh pair for an already-revoked token.
     const oldTokenHash = crypto.createHash("sha256").update(token).digest("hex");
-    const existingSession = await query(
-      "SELECT id, revoked_at FROM sessions WHERE refresh_hash = $1 LIMIT 1",
-      [oldTokenHash]
-    ).catch(() => ({ rows: [] }));
+    let existingSession: { rows: Array<{ id: string; revoked_at: string | null }> };
+    try {
+      existingSession = await query(
+        "SELECT id, revoked_at FROM sessions WHERE refresh_hash = $1 LIMIT 1",
+        [oldTokenHash]
+      );
+    } catch (err) {
+      console.error("[refresh] reuse-detection query failed:", err);
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: "SERVER_ERROR", message: "Session validation unavailable. Try again." },
+        },
+        { status: 503 }
+      );
+    }
 
     if (existingSession.rows.length > 0 && existingSession.rows[0].revoked_at) {
       // Reuse of revoked refresh token detected: revoke all user sessions
