@@ -27,7 +27,11 @@ async function handlePatch(req: NextRequest) {
       .single();
 
     if (error) {
-      return NextResponse.json({ success: true, data: { id, ...updateData } });
+      console.error("Integration config update failed:", error);
+      return NextResponse.json(
+        { success: false, error: { code: "UPDATE_FAILED", message: error.message } },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({ success: true, data });
