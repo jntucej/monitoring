@@ -1,4 +1,18 @@
 
+-- ============================================================================
+-- REFERENCE ONLY — NOT AUTHORITATIVE
+--
+-- This file is a human-readable snapshot. It is NOT executed by the migration
+-- runner. The authoritative source of schema changes is database/migrations/
+-- (and supabase/migrations/, applied in ASCII filename order).
+--
+-- If this file disagrees with the migrations or the live database, the
+-- migrations and the live database win.
+--
+-- When adding new schema, always add a migration file. Update this file
+-- separately only if you want the reference to stay current.
+-- ============================================================================
+
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -448,12 +462,17 @@ CREATE TABLE IF NOT EXISTS zones (
 -- ============================================================================
 
 -- 4.1 ROLE HELPERS (avoid RLS recursion)
-CREATE OR REPLACE FUNCTION is_admin(user_id UUID)
-RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
-AS $$ DECLARE r TEXT; BEGIN
-  SELECT role INTO r FROM users WHERE id = user_id;
-  RETURN r IN ('admin','sysadmin');
-EXCEPTION WHEN OTHERS THEN RETURN FALSE; END; $$;
+CREATE OR REPLACE FUNCTION public.is_admin(p_uid uuid)
+ RETURNS boolean
+ LANGUAGE sql
+ STABLE
+ SET search_path = public
+AS $function$
+SELECT EXISTS (
+ SELECT 1 FROM public.users
+ WHERE id = p_uid AND role IN ('admin', 'sysadmin')
+)
+$function$;
 
 CREATE OR REPLACE FUNCTION is_sysadmin(user_id UUID)
 RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
@@ -1318,12 +1337,9 @@ CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON public.sessions(user_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_refresh_hash ON public.sessions(refresh_hash);
 CREATE INDEX IF NOT EXISTS idx_sessions_active_user ON public.sessions (user_id) WHERE revoked_at IS NULL;
 
-CREATE TABLE IF NOT EXISTS public.system_config (
-  key TEXT PRIMARY KEY,
-  data JSONB NOT NULL DEFAULT '{}'::jsonb,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+CREATE OR REPLACE VIEW public.system_config AS
+SELECT id AS key, value, value AS data, updated_at
+FROM public.system_settings;
 
 CREATE TABLE IF NOT EXISTS public.password_reset_tokens (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
