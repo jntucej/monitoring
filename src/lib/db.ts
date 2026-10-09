@@ -1744,8 +1744,11 @@ export async function addScan(input: {
     );
   }
 
-  // Re-attach user record because PostgresQueryBuilder doesn't hydrate relations on simple insert
-  const personRecord = await findPersonByUniqueId(uniqueId);
+  // Re-attach user record because PostgresQueryBuilder doesn't hydrate relations on simple insert.
+  // Bug 123: reuse the `person` fetched at the top of addScan — the insert above
+  // only writes to movement_logs, never to the person, so a second 5-tier lookup
+  // was pure duplicated DB load on every gate scan.
+  const personRecord = person;
   return { scan: mScan({ ...data, users: personRecord || person }), duplicate: false };
 }
 

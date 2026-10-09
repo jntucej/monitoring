@@ -16,8 +16,21 @@ async function handleDelete(req: NextRequest) {
   try {
     const supabase = getSupabaseServiceClient();
 
-    // Revoke user session token handle in database
-    await supabase.from("users").update({ handle: `user_${randomUUID()}` }).eq("id", targetUserId);
+    // Bug 126: createAuthContext checks session_version, NOT handle — rotating
+    // handle alone never invalidated live JWTs, so "Force Logout" was a no-op.
+    // Bump session_version so every existing token is rejected on next request.
+    const { data: cur } = await supabase
+      .from("users")
+      .select("session_version")
+      .eq("id", targetUserId)
+      .maybeSingle();
+    await supabase
+      .from("users")
+      .update({
+        handle: `user_${randomUUID()}`,
+        session_version: (cur?.session_version ?? 0) + 1,
+      })
+      .eq("id", targetUserId);
 
     // Also delete any active sessions in sessions table if present
     try {
