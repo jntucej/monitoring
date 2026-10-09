@@ -94,9 +94,14 @@ services:
     image: caddy:2-alpine
     container_name: gate_caddy
     restart: always
+    # Bind to loopback only: this origin sits behind a Cloudflare Tunnel, so the
+    # only thing that needs to reach Caddy is the local cloudflared connector.
+    # Publishing on 0.0.0.0 would let anyone bypass Cloudflare (and its WAF) by
+    # hitting the server's public IP directly. Container-to-container traffic on
+    # gate-net (caddy <-> web) is unaffected by this host-port binding.
     ports:
-      - "80:80"
-      - "443:443"
+      - "127.0.0.1:80:80"
+      - "127.0.0.1:443:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
