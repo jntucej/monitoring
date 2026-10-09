@@ -73,7 +73,7 @@ export default function StudentPassesPage() {
 
   const getStudentRoll = (): string | null => {
     if (typeof window === "undefined") return null;
-    const authRaw = localStorage.getItem("gate-monitor-auth");
+    const authRaw = sessionStorage.getItem("gate-monitor-auth");
     if (!authRaw) return null;
     try {
       const auth = JSON.parse(authRaw);

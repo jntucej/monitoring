@@ -24,7 +24,7 @@ export default function StudentDashboardPage() {
   useEffect(() => {
     const fetchStudentStats = async () => {
       try {
-        const authRaw = typeof window !== "undefined" ? localStorage.getItem("gate-monitor-auth") : null;
+        const authRaw = typeof window !== "undefined" ? sessionStorage.getItem("gate-monitor-auth") : null;
         const auth = authRaw ? JSON.parse(authRaw) : null;
         const roll = auth?.state?.user?.uniqueId ?? auth?.state?.user?.roll ?? auth?.user?.uniqueId ?? auth?.user?.roll;
         if (!roll) return;

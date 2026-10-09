@@ -18,7 +18,7 @@ export default function StaffDashboardPage() {
     let cancelled = false;
     const loadStaff = async () => {
       try {
-        const authRaw = localStorage.getItem("gate-monitor-auth");
+        const authRaw = sessionStorage.getItem("gate-monitor-auth");
         const auth = authRaw ? JSON.parse(authRaw) : null;
         const uniqueId = auth?.state?.user?.uniqueId ?? auth?.state?.user?.roll ?? auth?.user?.uniqueId ?? auth?.user?.roll;
         if (!uniqueId) {

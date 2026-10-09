@@ -13,7 +13,7 @@ export function ChildActivity() {
     let cancelled = false;
     const load = async () => {
       try {
-        const authRaw = localStorage.getItem("gate-monitor-auth");
+        const authRaw = sessionStorage.getItem("gate-monitor-auth");
         const auth = authRaw ? JSON.parse(authRaw) : null;
         const parentId = auth?.state?.user?.id ?? auth?.user?.id;
         if (!parentId) {

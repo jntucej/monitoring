@@ -23,7 +23,7 @@ export function DigitalIdCard() {
     let cancelled = false;
     const load = async () => {
       try {
-        const authRaw = localStorage.getItem("gate-monitor-auth");
+        const authRaw = sessionStorage.getItem("gate-monitor-auth");
         const auth = authRaw ? JSON.parse(authRaw) : null;
         const roll = auth?.state?.user?.uniqueId ?? auth?.state?.user?.roll ?? auth?.state?.user?.studentRoll ?? auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll;
         if (!roll) {

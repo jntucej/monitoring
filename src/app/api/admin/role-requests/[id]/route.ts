@@ -48,7 +48,7 @@ async function handlePatch(req: NextRequest) {
     }
 
     // Security check: Only sysadmin can approve promotion to sysadmin
-    if (status === "APPROVED" && request.new_role === "sysadmin" && actorRole !== "sysadmin") {
+    if (status === "APPROVED" && request.requested_role === "sysadmin" && actorRole !== "sysadmin") {
       return NextResponse.json(
         { success: false, error: { code: "FORBIDDEN", message: "Only a sysadmin can approve promotion to sysadmin" } },
         { status: 403 }
@@ -76,7 +76,13 @@ async function handlePatch(req: NextRequest) {
 
     // If APPROVED, update user role & invalidate active user sessions
     if (status === "APPROVED") {
-      await updateUserRole(request.target_user_id, request.new_role, actorId);
+      const roleUpdated = await updateUserRole(request.target_user_id, request.requested_role, actorId);
+      if (!roleUpdated) {
+        return NextResponse.json(
+          { success: false, error: { code: "ROLE_UPDATE_FAILED", message: "Failed to apply role change." } },
+          { status: 500 }
+        );
+      }
 
       // Invalidate target user's active session handle
       await supabase.from("users").update({ handle: `user_${randomUUID()}` }).eq("id", request.target_user_id);
@@ -87,14 +93,14 @@ async function handlePatch(req: NextRequest) {
       await sendNotification(status === "APPROVED" ? "pass_approved" : "pass_rejected", request.target_user_id, "person", {
         title: `Role Request ${status}`,
         message: status === "APPROVED"
-          ? `Your role promotion request to '${request.new_role}' has been APPROVED.`
-          : `Your role promotion request to '${request.new_role}' has been REJECTED.`,
+          ? `Your role promotion request to '${request.requested_role}' has been APPROVED.`
+          : `Your role promotion request to '${request.requested_role}' has been REJECTED.`,
       });
 
       if (request.requester_id !== request.target_user_id) {
         await sendNotification(status === "APPROVED" ? "pass_approved" : "pass_rejected", request.requester_id, "person", {
           title: `Role Request ${status}`,
-          message: `The promotion request for target user to '${request.new_role}' was ${status.toLowerCase()}.`,
+          message: `The promotion request for target user to '${request.requested_role}' was ${status.toLowerCase()}.`,
         });
       }
     } catch { /* notification best effort */ }
@@ -102,7 +108,7 @@ async function handlePatch(req: NextRequest) {
     await addAudit({
       userId: actorId,
       action: `ROLE_REQUEST_${status}`,
-      details: { requestId: id, targetUserId: request.target_user_id, newRole: request.new_role },
+      details: { requestId: id, targetUserId: request.target_user_id, newRole: request.requested_role },
     });
 
     return NextResponse.json({

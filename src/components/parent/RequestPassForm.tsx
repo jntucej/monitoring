@@ -26,7 +26,7 @@ export function RequestPassForm() {
     setSuccess(null);
     try {
       // Look up the parent's first child
-      const authRaw = localStorage.getItem("gate-monitor-auth");
+      const authRaw = sessionStorage.getItem("gate-monitor-auth");
       const auth = authRaw ? JSON.parse(authRaw) : null;
       const parentId = auth?.user?.parentId ?? auth?.user?.id ?? "pa-1";
       const res = await fetch(`/api/students?parentId=${parentId}`, { 
