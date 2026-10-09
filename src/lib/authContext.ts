@@ -45,6 +45,9 @@ export interface AuthContext {
   /** The user's gate ID (for operators) */
   gateId?: string;
 
+  /** The user's department ID (for HOD/faculty/warden scoping) */
+  departmentId?: string;
+
   /** The user's employee ID (for staff) */
   employeeId?: string;
 
@@ -163,6 +166,7 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
     email: profile.email,
     loginIdentifier: profile.unique_id || profile.login_identifier,
     gateId: profile.gate_id,
+    departmentId: profile.department_id ?? undefined,
     employeeId: profile.unique_id || profile.employee_id,
     isAuthenticated: true,
     isActive: profile.status === 'ACTIVE',
