@@ -122,7 +122,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
     await addAudit({
       action: "DEPARTMENT_UPSERT",
       userId: auth.userId,
-      userName: auth.name,
+      userName: auth.email || "SysAdmin",
       role: auth.role,
       details: `Saved department '${code}' (${name}).`,
     });

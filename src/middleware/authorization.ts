@@ -22,9 +22,10 @@ import {
   requirePermission as requireAuthPermission,
   validateResourceOperation as validateResourceOp,
   getGateStudentInfo,
-  isMfaRequiredForAdmin,
+  isMfaRequiredForAdmin as isMfaRequiredForPrivileged,
   type AuthContext,
 } from "@/lib/authContext";
+import { isPrivileged } from "@/lib/roles";
 
 /**
  * Authorization middleware that validates:
