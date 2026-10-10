@@ -128,7 +128,14 @@ async function handlePost(req: NextRequest) {
     const authOperatorId = req.headers.get("x-user-id")
     const authRole = req.headers.get("x-user-role")
 
-    const roll = body.roll || body.personId;
+    let roll = body.roll || body.personId;
+    if (typeof roll === "string" && roll.trim().startsWith("{") && roll.trim().endsWith("}")) {
+      try {
+        const parsed = JSON.parse(roll.trim());
+        roll = parsed.uniqueId || parsed.unique_id || parsed.roll || parsed.id || parsed.personId || roll;
+      } catch {}
+    }
+
     const rawDir = body.direction || body.scanType;
     let direction: ScanDirection = "IN";
     if (rawDir) {
@@ -154,7 +161,8 @@ async function handlePost(req: NextRequest) {
     const cleanRoll = roll.trim().toUpperCase();
     const isUuidLike = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanRoll);
     const isEmployeeIdLike = /^[A-Z0-9_-]{3,24}$/i.test(cleanRoll);
-    if (!validateRollNumber(cleanRoll) && !isUuidLike && !isEmployeeIdLike) {
+    const isVisitorIdLike = /^(VIS|VISITOR|V)[-_][A-Z0-9_-]{2,28}$/i.test(cleanRoll);
+    if (!validateRollNumber(cleanRoll) && !isUuidLike && !isEmployeeIdLike && !isVisitorIdLike) {
       return NextResponse.json(
         { success: false, error: { code: "INVALID_ID", message: "Invalid identifier format" } },
         { status: 400 }
