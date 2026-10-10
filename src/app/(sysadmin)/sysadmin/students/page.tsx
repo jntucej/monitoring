@@ -355,10 +355,7 @@ export default function SysAdminStudentsPage() {
                       No students found.
                       {students.length === 0 && !search && !loadError && (
                         <div className="mt-2 text-xs text-slate-600 max-w-md mx-auto">
-                          DB has rows but this list is empty? The server may be falling back to the
-                          anon client (RLS silently returns 0 rows). Verify
-                          <code className="mx-1 px-1 py-0.5 rounded bg-slate-800 text-emerald-400">SUPABASE_SERVICE_ROLE_KEY</code>
-                          is set in the deployment environment, then redeploy.
+                          No active students found in the database.
                         </div>
                       )}
                     </td>
