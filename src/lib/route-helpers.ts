@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { ALL_ROLES, getDefaultRouteForRole as originalGet } from "@/server/policy/routes";
 
 export { ALL_ROLES };
@@ -20,3 +21,6 @@ export function getDefaultRouteForRole(role: string, gateId?: string): string {
   return originalGet(role, gateId);
 }
 
+=======
+export { getDefaultRouteForRole } from "@/server/policy/routes";
+>>>>>>> 8048a8899ce098b5882a8ec0fd422ec2f3ac58f4

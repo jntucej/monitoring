@@ -16,6 +16,8 @@ import { verifyAccessToken } from './auth-token';
 import { query } from './postgres';
 import { ROLES, isPrivileged, isSuperAdmin } from './roles';
 
+export { isMfaRequiredForPrivileged as isMfaRequiredForAdmin };
+
 // ── Issue #382: user-level cache (not context-level) ──────────────────────
 // Never cache the full AuthContext keyed by token — that would honour stale
 // sessions after a password change for the full TTL. Instead, cache only the
@@ -57,7 +59,7 @@ async function getUserRowCached(userId: string): Promise<CachedUserRow | null> {
     `SELECT id, role, status, email, session_version, unique_id,
             login_identifier, gate_id, department_id, employee_id,
             two_factor_enabled, handle
-     FROM public.users WHERE id = $1 LIMIT 1`,
+     FROM public.users WHERE id = $1 AND deleted_at IS NULL LIMIT 1`,
     [userId],
   );
   if (res.rows.length === 0) return null;
@@ -173,7 +175,7 @@ export async function isMfaRequiredForPrivileged(): Promise<boolean> {
   }
 }
 
-export const isMfaRequiredForAdmin = isMfaRequiredForPrivileged;
+// export const isMfaRequiredForAdmin = isMfaRequiredForPrivileged;
 
 /**
  * Create an authenticated context from a Supabase session token

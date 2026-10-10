@@ -1,10 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from './lib/rate-limit';
-import { verifyCsrf } from './middleware/csrf';
+import { validateCsrf } from './lib/csrf';
 
 export async function proxy(req: NextRequest) {
   const requestId = req.headers.get('x-request-id') || crypto.randomUUID();
   const { pathname } = req.nextUrl;
+
+  const BYPASS_PATHS = ['/api/health', '/metrics', '/api/metrics'];
+  if (BYPASS_PATHS.some(p => pathname.startsWith(p))) return NextResponse.next();
+
+  const SCRAPER_IPS = (process.env.SCRAPER_IPS ?? '').split(',').filter(Boolean);
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    || req.headers.get('x-real-ip')
+    || 'unknown';
+
+  if (SCRAPER_IPS.includes(ip)) return NextResponse.next();
 
   if (!pathname.startsWith('/api')) {
     const res = NextResponse.next();
@@ -12,9 +22,6 @@ export async function proxy(req: NextRequest) {
     return res;
   }
 
-  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-    || req.headers.get('x-real-ip')
-    || 'unknown';
   const limitResult = await rateLimit(`api_global:${ip}`, 300) as { limited: boolean };
   if (limitResult.limited) {
     const res = NextResponse.json(
@@ -25,10 +32,14 @@ export async function proxy(req: NextRequest) {
     return res;
   }
 
-  const csrfError = verifyCsrf(req);
-  if (csrfError) {
-    csrfError.headers.set('x-request-id', requestId);
-    return csrfError;
+  const csrfResult = validateCsrf(req);
+  if (!csrfResult.valid) {
+    const res = NextResponse.json(
+      { success: false, error: { code: 'FORBIDDEN', message: csrfResult.error || 'CSRF validation failed.' } },
+      { status: 403 }
+    );
+    res.headers.set('x-request-id', requestId);
+    return res;
   }
 
   const requestHeaders = new Headers(req.headers);
