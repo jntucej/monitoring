@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Activity, Clock, Database, Sparkles, Layout, ArrowUpRight } from "lucide-react";
+import { Activity, Clock, Database, Sparkles, Layout, ArrowUpRight, Server } from "lucide-react";
 
 export default function SystemHubPage() {
   return (
@@ -91,6 +91,22 @@ export default function SystemHubPage() {
           <div>
             <h3 className="font-semibold text-sm text-[var(--text-primary)]">Navigation Menu Editor</h3>
             <p className="text-xs text-[var(--text-secondary)] mt-0.5">Customize role menus & sidebar hierarchies</p>
+          </div>
+        </Link>
+
+        <Link
+          href="/sysadmin/infrastructure"
+          className="p-5 rounded-xl bg-[var(--surface-default)] border border-[var(--border-subtle)] hover:border-[var(--primary)] transition group shadow-sm flex flex-col justify-between h-40"
+        >
+          <div className="flex items-start justify-between">
+            <div className="p-3 rounded-lg bg-rose-500/10 text-rose-500">
+              <Server className="w-5 h-5" />
+            </div>
+            <ArrowUpRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--primary)] transition" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-sm text-[var(--text-primary)]">Infrastructure Monitoring</h3>
+            <p className="text-xs text-[var(--text-secondary)] mt-0.5">Docker fleet, CPU/memory, container telemetry</p>
           </div>
         </Link>
       </div>
