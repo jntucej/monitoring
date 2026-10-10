@@ -36,7 +36,13 @@ BEGIN
     'integration_logs','announcements','user_announcement_dismissals','sso_config',
     'gate_passes'
   ] LOOP
-    EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY', t);
+    BEGIN
+      IF to_regclass(format('public.%I', t)) IS NOT NULL THEN
+        EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY', t);
+      END IF;
+    EXCEPTION WHEN undefined_table THEN
+      -- ignore if table not created yet
+    END;
   END LOOP;
 END $$;
 
@@ -59,15 +65,21 @@ DECLARE
 BEGIN
   FOREACH t IN ARRAY service_tables LOOP
     pol_name := 'svc_all_' || t;
-    IF NOT EXISTS (
-      SELECT 1 FROM pg_policies
-      WHERE schemaname = 'public' AND tablename = t AND policyname = pol_name
-    ) THEN
-      EXECUTE format(
-        'CREATE POLICY %I ON public.%I FOR ALL TO service_role USING (true) WITH CHECK (true)',
-        pol_name, t
-      );
-    END IF;
+    BEGIN
+      IF to_regclass(format('public.%I', t)) IS NOT NULL THEN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_policies
+          WHERE schemaname = 'public' AND tablename = t AND policyname = pol_name
+        ) THEN
+          EXECUTE format(
+            'CREATE POLICY %I ON public.%I FOR ALL TO service_role USING (true) WITH CHECK (true)',
+            pol_name, t
+          );
+        END IF;
+      END IF;
+    EXCEPTION WHEN undefined_table THEN
+      -- ignore if table not created yet
+    END;
   END LOOP;
 END $$;
 
@@ -103,20 +115,26 @@ DECLARE
     'alert_rules','system_settings','onboarding_progress',
     'role_change_requests','integration_configs','integration_logs',
     'announcements','user_announcement_dismissals','sso_config',
-    'gate_passes','predictions'
+    'gate_passes'
   ];
 BEGIN
   FOREACH t IN ARRAY auth_tables LOOP
     pol_name := 'auth_all_' || t;
-    IF NOT EXISTS (
-      SELECT 1 FROM pg_policies
-      WHERE schemaname = 'public' AND tablename = t AND policyname = pol_name
-    ) THEN
-      EXECUTE format(
-        'CREATE POLICY %I ON public.%I FOR ALL TO authenticated USING (public.is_admin_self()) WITH CHECK (public.is_admin_self())',
-        pol_name, t
-      );
-    END IF;
+    BEGIN
+      IF to_regclass(format('public.%I', t)) IS NOT NULL THEN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_policies
+          WHERE schemaname = 'public' AND tablename = t AND policyname = pol_name
+        ) THEN
+          EXECUTE format(
+            'CREATE POLICY %I ON public.%I FOR ALL TO authenticated USING (public.is_admin_self()) WITH CHECK (public.is_admin_self())',
+            pol_name, t
+          );
+        END IF;
+      END IF;
+    EXCEPTION WHEN undefined_table THEN
+      -- ignore if table not created yet
+    END;
   END LOOP;
 END $$;
 
@@ -140,15 +158,21 @@ DECLARE
 BEGIN
   FOREACH t IN ARRAY admin_tables LOOP
     pol_name := 'admin_read_' || t;
-    IF NOT EXISTS (
-      SELECT 1 FROM pg_policies
-      WHERE schemaname = 'public' AND tablename = t AND policyname = pol_name
-    ) THEN
-      EXECUTE format(
-        'CREATE POLICY %I ON public.%I FOR SELECT TO admin USING (public.is_admin_self())',
-        pol_name, t
-      );
-    END IF;
+    BEGIN
+      IF to_regclass(format('public.%I', t)) IS NOT NULL THEN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_policies
+          WHERE schemaname = 'public' AND tablename = t AND policyname = pol_name
+        ) THEN
+          EXECUTE format(
+            'CREATE POLICY %I ON public.%I FOR SELECT TO admin USING (public.is_admin_self())',
+            pol_name, t
+          );
+        END IF;
+      END IF;
+    EXCEPTION WHEN undefined_table THEN
+      -- ignore if table not created yet
+    END;
   END LOOP;
 END $$;
 
