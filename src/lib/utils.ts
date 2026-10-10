@@ -114,14 +114,19 @@ export function todayISO(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+import { fetchWithTimeout } from "./fetch-with-timeout";
+
+export async function authFetch(url: string, init: RequestInit = {}, timeoutMs = 15_000): Promise<Response> {
+  return fetchWithTimeout(url, {
+    ...init,
+    headers: { ...getAuthHeaders(), ...(init.headers ?? {}) },
+  }, timeoutMs);
+}
+
 export function getAuthHeaders(): Record<string, string> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
-
-  if (typeof window === "undefined") {
-    return headers;
-  }
   
   try {
     const raw = sessionStorage.getItem("gate-monitor-auth") ?? localStorage.getItem("gate-monitor-auth");
