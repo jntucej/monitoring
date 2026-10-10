@@ -6,6 +6,8 @@ import { findPersonByUniqueId } from "@/lib/db";
 import { getCached, setCached } from './cache';
 
 const MOBILE_TOKEN_TTL_SECONDS = 24 * 60 * 60; // 24 hours
+const MOBILE_AUDIENCE = 'gate-mobile';
+const MOBILE_ISSUER = 'gate-monitor';
 
 let cachedKey: Uint8Array | null = null;
 let cachedKeySource = '';
@@ -54,7 +56,7 @@ export async function generateMobileToken(
     .setSubject(personId)
     .setIssuedAt(issuedAt)
     .setExpirationTime(issuedAt + MOBILE_TOKEN_TTL_SECONDS)
-    .sign(getSigningKey());
+    .setIssuer(MOBILE_ISSUER).setAudience(MOBILE_AUDIENCE).sign(getSigningKey());
 }
 
 /**
