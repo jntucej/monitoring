@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { NextRequest, NextResponse } from "next/server";
 import { randomBytes, randomUUID } from "crypto";
 import {

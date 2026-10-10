@@ -1,122 +1,106 @@
 import { query } from "@/lib/postgres";
-import type { Role, WorkflowType } from "@/lib/types";
+import type { WorkflowType } from "@/lib/types";
+export type { WorkflowType };
 
-export const WORKFLOW_STAGES: Record<WorkflowType, readonly string[]> = {
+export const WORKFLOW_STAGES: Record<WorkflowType, string[]> = {
   hostel: ["caretaker", "deputy_warden", "hostel_manager", "warden_or_principal", "main_gate", "completed"],
   exam: ["faculty", "hod", "oie", "vice_principal", "principal", "completed"],
   memo: ["faculty", "hod", "oie", "vice_principal", "principal", "completed"],
   staff_leave: ["hod", "vice_principal", "principal", "completed"],
-} as const;
-
-export const ROLE_STAGE_PERMISSIONS: Record<string, readonly string[]> = {
-  caretaker: ["caretaker"],
-  deputy_warden: ["deputy_warden"],
-  hostel_manager: ["hostel_manager"],
-  warden: ["warden_or_principal"],
-  principal: ["warden_or_principal", "principal"],
-  exam_branch: ["exam_branch"],
-  operator: ["main_gate"],
-  faculty: ["faculty"],
-  hod: ["hod"],
-  oie: ["oie"],
-  vice_principal: ["vice_principal"],
-  sysadmin: ["*"],
-  admin: ["*"],
-};
-
-const SEQ_MAP: Record<WorkflowType, { seq: string; prefix: string }> = {
-  hostel: { seq: "public.hostel_ticket_seq", prefix: "HST" },
-  exam: { seq: "public.exam_ticket_seq", prefix: "EXM" },
-  memo: { seq: "public.memo_ticket_seq", prefix: "MEM" },
-  staff_leave: { seq: "public.staff_leave_ticket_seq", prefix: "STF" },
 };
 
 /**
- * Generates a per-workflow formatted ticket number using database sequences.
- * Example: HST-1001, EXM-1001, MEM-1001, STF-1001.
- */
-export async function generateTicketNumber(workflowType: WorkflowType): Promise<string> {
-  const cfg = SEQ_MAP[workflowType] || { seq: "public.hostel_ticket_seq", prefix: "HST" };
-  try {
-    const res = await query<{ nextval: string | number }>(`SELECT nextval('${cfg.seq}') AS nextval;`);
-    const val = res.rows[0]?.nextval;
-    if (val !== undefined && val !== null) {
-      return `${cfg.prefix}-${val}`;
-    }
-  } catch (err) {
-    console.error(`[generateTicketNumber] Sequence fetch failed for ${workflowType}:`, err);
-  }
-  const fallback = Math.floor(1000 + Math.random() * 9000);
-  return `${cfg.prefix}-${fallback}`;
-}
-
-/**
- * Resolves the starting stage for a given workflow.
+ * Returns the first stage for a new request.
  */
 export function resolveInitialStage(workflowType: WorkflowType): string {
-  return WORKFLOW_STAGES[workflowType]?.[0] || "caretaker";
+  return WORKFLOW_STAGES[workflowType][0];
 }
 
 /**
- * Resolves the subsequent stage in the workflow chain.
+ * Returns the next stage name based on the approval chains.
  */
 export function resolveNextStage(workflowType: WorkflowType, currentStage: string): string | null {
   const chain = WORKFLOW_STAGES[workflowType];
-  if (!chain) return null;
-  const currentIndex = chain.indexOf(currentStage);
-  if (currentIndex === -1 || currentIndex >= chain.length - 1) {
-    return null;
+  const idx = chain.indexOf(currentStage);
+  if (idx === -1 || idx === chain.length - 1) {
+    return null; // completed or invalid
   }
-  return chain[currentIndex + 1];
+  return chain[idx + 1];
 }
 
 /**
- * Determines whether a user with a given role can approve/act at the specified stage.
+ * Uses the per-workflow Postgres sequences created in Step 1, formats them as HST-1001, EXM-1001, MEM-1001, STF-1001.
  */
-export function canApproveAtStage(
-  role: Role | string,
-  _workflowType: WorkflowType,
-  currentStage: string
-): boolean {
-  if (role === "sysadmin" || role === "admin") return true;
-  const allowedStages = ROLE_STAGE_PERMISSIONS[role];
-  if (!allowedStages) return false;
-  if (allowedStages.includes("*")) return true;
-  return allowedStages.includes(currentStage);
+export async function generateTicketNumber(workflowType: WorkflowType): Promise<string> {
+  const map: Record<WorkflowType, { seq: string; prefix: string }> = {
+    hostel: { seq: "public.hostel_ticket_seq", prefix: "HST" },
+    exam: { seq: "public.exam_ticket_seq", prefix: "EXM" },
+    memo: { seq: "public.memo_ticket_seq", prefix: "MEM" },
+    staff_leave: { seq: "public.staff_leave_ticket_seq", prefix: "STF" },
+  };
+  const { seq, prefix } = map[workflowType];
+  
+  const result = await query<{ nextval: string }>(`SELECT nextval('${seq}')`);
+  const nextVal = (result.rows && result.rows.length > 0) ? result.rows[0].nextval : null;
+  if (!nextVal) {
+    throw new Error(`Failed to generate ticket number for ${workflowType}`);
+  }
+  
+  return `${prefix}-${nextVal}`;
+}
+
+/**
+ * Validates that a user's role is allowed to act at that stage.
+ */
+export function canApproveAtStage(role: string, workflowType: WorkflowType, currentStage: string): boolean {
+  if (role === "admin" || role === "sysadmin") return true;
+
+  const roleMap: Record<string, string> = {
+    caretaker: "caretaker",
+    deputy_warden: "deputy_warden",
+    hostel_manager: "hostel_manager",
+    warden: "warden_or_principal",
+    principal: "warden_or_principal",
+    operator: "main_gate",
+    faculty: "faculty",
+    hod: "hod",
+    oie: "oie",
+    vice_principal: "vice_principal",
+  };
+
+  if (role === "principal") {
+    // Principal overrides other roles in certain chains but follows warden_or_principal
+    if (currentStage === "principal" || currentStage === "warden_or_principal") return true;
+  }
+
+  return roleMap[role] === currentStage;
 }
 
 export interface StageHistoryEntry {
-  actorId: string;
-  actorName: string;
-  actorRole: string;
+  stage: string;
+  actor_id: string;
   action: string;
-  fromStage?: string;
-  toStage?: string;
-  comment?: string | null;
+  comment?: string;
   timestamp: string;
 }
 
 /**
- * Appends an entry to the stage history array immutably.
+ * Returns a new history array with the appended entry (do not mutate input).
  */
 export function appendStageHistory(
-  existing: unknown[] | null | undefined,
-  actor: { id: string; name: string; role: string },
+  existing: StageHistoryEntry[] | unknown,
+  actor: string,
   action: string,
-  comment?: string | null,
-  stageChange?: { from?: string; to?: string }
+  comment?: string
 ): StageHistoryEntry[] {
-  const history: StageHistoryEntry[] = Array.isArray(existing) ? [...(existing as StageHistoryEntry[])] : [];
-  const entry: StageHistoryEntry = {
-    actorId: actor.id,
-    actorName: actor.name,
-    actorRole: actor.role,
+  const rawArray = (Array.isArray(existing) ? existing : []) as StageHistoryEntry[];
+  const currentStage = rawArray.length > 0 ? rawArray[rawArray.length - 1].stage : "initial";
+  const newEntry: StageHistoryEntry = {
+    stage: currentStage,
+    actor_id: actor,
     action,
-    ...(stageChange?.from ? { fromStage: stageChange.from } : {}),
-    ...(stageChange?.to ? { toStage: stageChange.to } : {}),
-    comment: comment ?? null,
+    comment,
     timestamp: new Date().toISOString(),
   };
-  history.push(entry);
-  return history;
+  return [...rawArray, newEntry];
 }
