@@ -10,9 +10,9 @@ async function postHandler(req: NextRequest, context: any) {
   const { auth: { userId, role } } = context;
   const db = getSupabaseServiceClient();
   const body = await req.json();
-  const { workflowType, studentUserId, hostelScope, reason, ...rest } = body;
+  const { workflowType, studentUserId, hostelScope, ...rest } = body;
 
-  if (!workflowType || !reason) return NextResponse.json({ success: false, error: "Missing fields" }, { status: 400 });
+  if (!workflowType) return NextResponse.json({ success: false, error: "Missing fields" }, { status: 400 });
 
   let targetUserId = userId;
   if (role === "parent" || role === "guardian") {
@@ -28,9 +28,9 @@ async function postHandler(req: NextRequest, context: any) {
   const ticketNumber = await generateTicketNumber(workflowType as WorkflowType);
   const initialStage = resolveInitialStage(workflowType as WorkflowType);
 
-  const { data: request, error: createError } = await db.from("permissions").insert({
+  const { data: request, error: createError } = await db.from("permission_requests").insert({
     ticket_number: ticketNumber, workflow_type: workflowType,
-    user_id: targetUserId, hostel_scope: hostelScope, reason, ...rest,
+    student_user_id: targetUserId, hostel_scope: hostelScope, ...rest,
     current_stage: initialStage, status: "PENDING", stage_history: []
   }).select().single();
 
@@ -52,27 +52,27 @@ async function getHandler(req: NextRequest, context: any) {
   const hscope = searchParams.get("hostelScope");
   const status = searchParams.get("status");
 
-  let query = db.from("permissions").select("*", { count: "exact" });
+  let query = db.from("permission_requests").select("*", { count: "exact" });
   if (type) query = query.eq("workflow_type", type);
   if (status) query = query.eq("status", status);
 
   if (role === "student") {
-    query = query.eq("user_id", userId);
+    query = query.eq("student_user_id", userId);
   } else if (["parent", "guardian"].includes(role)) {
     const children = await getLinkedPersons(userId);
     const childIds = children.map((c: any) => c.child_id);
     if (!childIds.length) return NextResponse.json({ success: true, data: [], total: 0 });
     if (sid) {
-      if (childIds.includes(sid)) query = query.eq("user_id", sid);
+      if (childIds.includes(sid)) query = query.eq("student_user_id", sid);
       else return NextResponse.json({ success: false, error: "Not your child" }, { status: 403 });
-    } else query = query.in("user_id", childIds);
+    } else query = query.in("student_user_id", childIds);
   } else if (["caretaker", "deputy_warden", "hostel_manager", "faculty", "hod", "oie", "vice_principal"].includes(role)) {
     query = query.eq("current_stage", role);
     if (hscope) query = query.eq("hostel_scope", hscope);
   } else if (["warden", "principal"].includes(role)) {
     query = query.eq("workflow_type", "hostel").eq("current_stage", "warden_or_principal");
   } else if (["admin", "sysadmin"].includes(role)) {
-    if (sid) query = query.eq("user_id", sid);
+    if (sid) query = query.eq("student_user_id", sid);
   } else if (role === "operator") {
     query = query.eq("current_stage", "main_gate");
   } else {

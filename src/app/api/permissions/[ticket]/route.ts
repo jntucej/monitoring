@@ -10,7 +10,7 @@ async function getHandler(req: NextRequest, context: any) {
   const ticket = context.params?.ticket;
   const db = getSupabaseServiceClient();
 
-  const { data, error } = await db.from("permissions").select("*").eq("ticket_number", ticket).single();
+  const { data, error } = await db.from("permission_requests").select("*").eq("ticket_number", ticket).single();
   if (error || !data) return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
 
   return NextResponse.json({ success: true, data });
@@ -25,7 +25,7 @@ async function patchHandler(req: NextRequest, context: any) {
 
   if (!action) return NextResponse.json({ success: false, error: "Missing action" }, { status: 400 });
 
-  const { data: request, error: fetchErr } = await db.from("permissions").select("*").eq("ticket_number", ticket).single();
+  const { data: request, error: fetchErr } = await db.from("permission_requests").select("*").eq("ticket_number", ticket).single();
   if (fetchErr || !request) return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
 
   if (request.status !== "PENDING" && request.status !== "ESCALATED") {
@@ -60,7 +60,7 @@ async function patchHandler(req: NextRequest, context: any) {
 
   const newHistory = appendStageHistory(stage_history, userId, action, comment);
 
-  const { data: updated, error: updateErr } = await db.from("permissions").update({
+  const { data: updated, error: updateErr } = await db.from("permission_requests").update({
     current_stage: newStage,
     status: newStatus,
     stage_history: newHistory,
