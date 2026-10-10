@@ -311,16 +311,27 @@ export function Scanner({
 
   // ponytail: kill camera + decode loop when tab hidden (battery, privacy
   // indicator, dead-stream-on-return). pagehide covers iOS tab suspension.
+  // Issue #384: also handle freeze/resume (Chrome/Android screen lock) and
+  // visibilitychange for iOS screen-lock (power button). The original code
+  // only listened to visibilitychange + pagehide, missing the screen-lock case
+  // where the camera stream stays open draining battery.
   useEffect(() => {
     if (!isOpen) return;
     const onHidden = () => stopCamera();
     const onVisible = () => { if (isOpen) startCamera(); };
     const onVis = () => (document.hidden ? onHidden() : onVisible());
+    // freeze fires on Chrome/Android screen lock; resume fires on unlock
+    const onFreeze = () => stopCamera();
+    const onResume = () => { if (isOpen) startCamera(); };
     document.addEventListener("visibilitychange", onVis);
     window.addEventListener("pagehide", onHidden);
+    document.addEventListener("freeze", onFreeze as EventListener);
+    document.addEventListener("resume", onResume as EventListener);
     return () => {
       document.removeEventListener("visibilitychange", onVis);
       window.removeEventListener("pagehide", onHidden);
+      document.removeEventListener("freeze", onFreeze as EventListener);
+      document.removeEventListener("resume", onResume as EventListener);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);

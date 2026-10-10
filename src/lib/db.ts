@@ -545,15 +545,36 @@ export async function findGatePasses(filters: {
   return (data || []).map(mPass);
 }
 
-export async function correctionCandidates(): Promise<Scan[]> {
-  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-  const { data, error } = await supabase
+// Issue #392: correctionCandidates previously queried all scans from the
+// last hour with a fixed limit of 20. On a busy campus that's still a
+// potential full-scan query. Now accepts explicit filters and enforces a
+// hard max so callers can scope to a gate, user, or date window.
+export async function correctionCandidates(opts: {
+  from?: string;
+  to?: string;
+  gateId?: string;
+  userId?: string;
+  limit?: number;
+} = {}): Promise<Scan[]> {
+  const HARD_MAX = 500;
+  const limit = Math.min(opts.limit ?? 50, HARD_MAX);
+  // Default window: last hour (corrections typically happen shortly after the scan)
+  const to = opts.to ?? new Date().toISOString();
+  const from = opts.from ?? new Date(Date.now() - 60 * 60 * 1000).toISOString();
+
+  let q = supabase
     .from('movement_logs')
     .select('*, users:users!movement_logs_user_id_fkey!inner(name, role, unique_id, department_id, student_details:student_details!student_details_user_id_fkey(year))')
-    .gte('timestamp', oneHourAgo)
+    .gte('timestamp', from)
+    .lte('timestamp', to)
     .eq('is_correction', false)
     .order('timestamp', { ascending: false })
-    .limit(20);
+    .limit(limit);
+
+  if (opts.gateId) q = (q as any).eq('gate_id', opts.gateId);
+  if (opts.userId) q = (q as any).eq('user_id', opts.userId);
+
+  const { data, error } = await q;
 
   if (error) {
     console.error('Error fetching correction candidates:', error);
@@ -2411,25 +2432,52 @@ export async function getPersonHistory(uniqueId: string, limit: number = 20): Pr
 
 export const getStudentHistory = getPersonHistory;
 
-export async function getLinkedPersons(parentId: string): Promise<Person[]> {
+export async function getLinkedPersons(
+  userId: string,
+  // Issue #388: support reverse lookup — find guardians of a student, not
+  // just children of a guardian. Callers must pass a direction explicitly.
+  direction: 'children_of' | 'guardians_of' = 'children_of',
+): Promise<Person[]> {
   const db = getDbClient();
-  const { data: sDetails, error: sErr } = await db
+
+  if (direction === 'children_of') {
+    // Original: return students whose guardian_id === userId
+    const { data: sDetails, error: sErr } = await db
+      .from('student_details')
+      .select('*')
+      .eq('guardian_id', userId);
+
+    if (sErr || !sDetails || sDetails.length === 0) return [];
+    const userIds = sDetails.map((d: any) => d.user_id).filter(Boolean);
+    if (userIds.length === 0) return [];
+
+    const { data: users, error: uErr } = await db
+      .from('users')
+      .select('*')
+      .in('id', userIds);
+
+    if (uErr || !users) return [];
+    const sMap = new Map((sDetails || []).map((s: any) => [s.user_id, s]));
+    return users.map((u: any) => mPerson({ ...u, student_details: sMap.get(u.id) }));
+  }
+
+  // direction === 'guardians_of': return users whose id is the guardian of userId's student record
+  const { data: sDetail, error: sdErr } = await db
     .from('student_details')
-    .select('*')
-    .eq('guardian_id', parentId);
+    .select('guardian_id')
+    .eq('user_id', userId)
+    .maybeSingle();
 
-  if (sErr || !sDetails || sDetails.length === 0) return [];
-  const userIds = sDetails.map((d: any) => d.user_id).filter(Boolean);
-  if (userIds.length === 0) return [];
+  if (sdErr || !sDetail?.guardian_id) return [];
 
-  const { data: users, error: uErr } = await db
+  const { data: guardian, error: gErr } = await db
     .from('users')
     .select('*')
-    .in('id', userIds);
+    .eq('id', sDetail.guardian_id)
+    .maybeSingle();
 
-  if (uErr || !users) return [];
-  const sMap = new Map((sDetails || []).map((s: any) => [s.user_id, s]));
-  return users.map((u: any) => mPerson({ ...u, student_details: sMap.get(u.id) }));
+  if (gErr || !guardian) return [];
+  return [mPerson(guardian)];
 }
 
 export const getParentChildren = getLinkedPersons;
