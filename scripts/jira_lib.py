@@ -219,7 +219,7 @@ def load_roles_schema(roles_schema_path):
                     if len(parts) < len(header):
                         parts += [""] * (len(header) - len(parts))
                     row = dict(zip(header, parts))
-                    csv_name = row.get("role") or row.get("csv name") or ""
+                    csv_name = row.get("csv name") or row.get("csv_name") or row.get("jiraname") or row.get("jira name") or row.get("name") or row.get("role") or ""
                     if not csv_name:
                         continue
                     team[csv_name] = {

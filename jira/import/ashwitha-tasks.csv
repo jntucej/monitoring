@@ -1,0 +1,2 @@
+Project key,Project name,Project type,Issue key,Summary,Description,Issue Type,Priority,Component Area,Security Sensitive,Architecture Blocker,QA Required,CR ID,Assignee,Assignee ID
+GATE,Gate Monitor,software,CR-03,Implement attendance API endpoints,Build REST endpoints for attendance,Task,P1,Backend,Yes,No,Yes,CR-03,Ashwitha,712020:15669266-bf45-44f9-b682-e91570a97e1e

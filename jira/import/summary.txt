@@ -1,0 +1,15 @@
+Project: Gate Monitor (GATE)
+Total tasks: 5
+
+Per team:
+  Backend-import.csv: 1
+  DevOps-import.csv: 1
+  Frontend-import.csv: 1
+  QA-import.csv: 1
+  Security-import.csv: 1
+
+Per person:
+  akarsh-tasks.csv: 2
+  ashwitha-tasks.csv: 1
+  dhanavarsha-tasks.csv: 1
+  junaid-tasks.csv: 1

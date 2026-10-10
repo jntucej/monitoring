@@ -24,7 +24,11 @@ import sys
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
-CONFIG_PATH = os.path.join(ROOT, "jira", "config", "automation.json")
+CONFIG_PATH = (
+    os.path.join(ROOT, "config", "automation.json")
+    if os.path.exists(os.path.join(ROOT, "config", "automation.json"))
+    else os.path.join(ROOT, "jira", "config", "automation.json")
+)
 
 # The complete field scope for automation CSVs. Never extend from the schema.
 APPROVED_FIELDS = ["Summary", "Description", "Issue Type", "Priority", "Status", "Labels"]

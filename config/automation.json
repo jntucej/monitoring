@@ -1,12 +1,23 @@
 {
   "project": {
     "name": "Gate Monitor",
-    "key": "GITM"
+    "key": "GATE",
+    "type": "software"
+  },
+  "generation": {
+    "create_only_if_missing": true,
+    "overwrite_existing": false
   },
   "paths": {
     "config_dir": "config",
-    "data_dir": "data/jira",
+    "issues": "data",
+    "data_dir": "data",
     "roles_schema": "team/roles_schema.csv",
-    "jira_import_dir": "jira/import"
+    "jira_schema": "config/jira/jira-schema.json",
+    "jira_import_dir": "jira/import",
+    "automation": "jira/import"
+  },
+  "files": {
+    "issue_pattern": "*.csv"
   }
 }
