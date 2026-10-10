@@ -886,7 +886,7 @@ export async function findAllPersons(type?: PersonType): Promise<Person[]> {
   // ponytail: two plain queries + JS merge avoids PostgREST embed ambiguity
   // (student_details has 2 FKs to users: user_id + guardian_id), which makes
   // embedded selects fail depending on constraint naming.
-  let query = db.from('users').select('*');
+  let query = db.from('users').select('*').not('status', 'in', '("DEPROVISIONED","SUSPENDED")');
   if (type) {
     query = query.eq('role', type);
   }
@@ -927,7 +927,7 @@ export async function searchPersons(q: string, type?: PersonType): Promise<Perso
   const safeQ = sanitizePostgrestParam(q);
   const searchTerm = `%${safeQ.toLowerCase()}%`;
   const db = getDbClient();
-  let query = db.from('users').select('*');
+  let query = db.from('users').select('*').not('status', 'in', '("DEPROVISIONED","SUSPENDED")');
 
   if (type) {
     query = query.eq('role', type);
