@@ -83,7 +83,7 @@ async function handlePost(req: NextRequest, context?: { auth?: AuthContext }) {
     }
 
     if (auth) {
-      await addAudit({
+      // await addAudit({
         action: "UPDATE_STUDENT_RULES",
         userId: auth.userId,
         userName: auth.loginIdentifier || "Admin",

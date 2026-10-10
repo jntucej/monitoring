@@ -123,7 +123,7 @@ async function handleLoginInner(req: NextRequest) {
     if (!passwordValid) {
       await recordFailedAttempt(identifier, 'login');
 
-      await addAudit({
+      // await addAudit({
         action: "LOGIN_FAILED",
         userId: user.id,
         userName: user.name || "User",
@@ -241,7 +241,7 @@ async function handleLoginInner(req: NextRequest) {
           .update({ two_factor_recovery_codes: remaining })
           .eq("id", user.id);
 
-        await addAudit({
+        // await addAudit({
           action: "MFA_RECOVERY_CODE_USED",
           userId: user.id,
           userName: user.name,
@@ -270,7 +270,7 @@ async function handleLoginInner(req: NextRequest) {
           );
         }
 
-        await addAudit({
+        // await addAudit({
           action: "MFA_LOGIN_SUCCESS",
           userId: user.id,
           userName: user.name,

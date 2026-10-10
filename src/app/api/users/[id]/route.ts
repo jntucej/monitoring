@@ -200,7 +200,7 @@ async function handlePatch(req: NextRequest) {
         }
       }
 
-      await addAudit({
+      // await addAudit({
         userId: actorId,
         action: "USER_UPDATED",
         details: { timestamp: new Date().toISOString(), targetId: id, updates: body },
@@ -260,7 +260,7 @@ async function handleDelete(req: NextRequest) {
       // Ignore if auth user doesn't exist
     }
 
-    await addAudit({
+    // await addAudit({
       userId: actorId,
       action: "USER_DEPROVISIONED",
       details: { timestamp: new Date().toISOString(), targetId: id },

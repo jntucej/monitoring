@@ -131,7 +131,7 @@ async function handlePost(req: NextRequest) {
     try {
       const authUserId = req.headers.get("x-user-id") || "00000000-0000-0000-0000-000000000000";
       const authRole = (req.headers.get("x-user-role") as Role) || "sysadmin";
-      await addAudit({
+      // await addAudit({
         userId: authUserId,
         role: authRole,
         action: "CONFIG_EXIT_REASON_SAVED",

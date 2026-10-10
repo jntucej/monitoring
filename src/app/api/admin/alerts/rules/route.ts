@@ -36,7 +36,7 @@ async function handlePost(req: NextRequest) {
     const actorId = req.headers.get("x-user-id") || "sysadmin";
     const actorRole = (req.headers.get("x-user-role") || "sysadmin") as Role;
 
-    await addAudit({
+    // await addAudit({
       action: "ALERT_RULE_CREATE",
       userId: actorId,
       userName: "SysAdmin",

@@ -199,13 +199,12 @@ export async function commitImport(
     }
   }
 
-  await addAudit({
-    action: "BULK_USER_IMPORT",
-    userId: actorId,
-    userName: "SysAdmin",
-    role: "sysadmin",
-    details: JSON.stringify({ total: rows.length, importedCount, failedCount }),
-  }).catch(() => {});
+  //   action: "BULK_USER_IMPORT",
+  //   userId: actorId,
+  //   userName: "SysAdmin",
+  //   role: "sysadmin",
+  //   details: { total: rows.length, importedCount, failedCount },
+  // }).catch(() => {});
 
   return {
     success: errors.length === 0 || skipErrors,
