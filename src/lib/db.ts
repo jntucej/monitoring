@@ -2018,7 +2018,21 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
   ]);
 
   const todayScans = (todayScansRes.data || []).map(mScan);
-  const activeAlerts = (activeAlertsRes.data || []).map(mAlert);
+  const SEVERITY_WEIGHT: Record<AlertSeverity, number> = {
+    critical: 4,
+    high: 3,
+    medium: 2,
+    low: 1,
+  };
+
+  const activeAlerts = (activeAlertsRes.data || [])
+    .map(mAlert)
+    .sort((a, b) => {
+      const sevDiff = SEVERITY_WEIGHT[b.severity] - SEVERITY_WEIGHT[a.severity];
+      if (sevDiff !== 0) return sevDiff;
+      return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+    })
+    .slice(0, 20);
 
   const todayIn = typeof todayInRes?.count === 'number' ? todayInRes.count : todayScans.filter((s: Scan) => s.direction === "IN").length;
   const todayOut = typeof todayOutRes?.count === 'number' ? todayOutRes.count : todayScans.filter((s: Scan) => s.direction === "OUT").length;
