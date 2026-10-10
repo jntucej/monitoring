@@ -186,21 +186,26 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
     throw new Error('UNAUTHORIZED: Invalid or expired token');
   }
 
-  // Get user profile from PostgreSQL users table
-  const userRes = await query('SELECT * FROM users WHERE id = $1 LIMIT 1', [userId]);
-  if (userRes.rows.length === 0) {
+  // Issue #382: use the short-TTL user row cache. The session_version check
+  // below is ALWAYS performed — we compare the token's embedded version
+  // against the (possibly freshly-fetched) DB value so a password change
+  // is caught within at most USER_ROW_TTL_MS (30 s).
+  const profile = await getUserRowCached(userId);
+  if (!profile) {
     throw new Error('UNAUTHORIZED: User profile not found');
   }
 
-  const profile = userRes.rows[0];
-
-  // Invalidate JWT tokens if session_version has been incremented
+  // Invalidate JWT tokens if session_version has been incremented.
+  // This is the critical check — it must compare the token's version
+  // to the live (or recently cached) DB version.
   if (
     payload &&
     typeof (payload as any).session_version === 'number' &&
     typeof profile.session_version === 'number' &&
     (payload as any).session_version !== profile.session_version
   ) {
+    // Evict the cache so the next request re-fetches the DB row.
+    invalidateAuthCache(userId);
     throw new Error('UNAUTHORIZED: Session invalidated');
   }
 
@@ -216,14 +221,14 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
     role: profile.role as Role,
     status: profile.status as AccountStatus,
     email: profile.email,
-    loginIdentifier: profile.unique_id || profile.login_identifier,
-    gateId: profile.gate_id,
+    loginIdentifier: profile.unique_id || profile.login_identifier || undefined,
+    gateId: profile.gate_id ?? undefined,
     departmentId: profile.department_id ?? undefined,
-    employeeId: profile.unique_id || profile.employee_id,
+    employeeId: profile.unique_id || profile.employee_id || undefined,
     isAuthenticated: true,
     isActive: profile.status === 'ACTIVE',
     handle: profile.handle || undefined,
-    twoFactorEnabled: profile.two_factor_enabled === true
+    twoFactorEnabled: profile.two_factor_enabled === true,
   };
 }
 

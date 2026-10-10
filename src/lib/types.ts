@@ -404,6 +404,7 @@ export interface ApiResponse<T> {
   data?: T;
   message?: string;
   error?: string;
+  code?: string;
 }
 
 export interface ExitReasonConfig {
@@ -464,7 +465,10 @@ export interface FacultyMemberAttendance {
   firstInTime: string | null;
   lastOutTime: string | null;
   punctualityStatus: "ON_TIME" | "LATE" | "NOT_CHECKED_IN";
-  totalHoursToday: string;
+  // Issue #396: store minutes as a number — format at the view layer.
+  // The old string (e.g. "5h 30m") can't be sorted or summed.
+  totalMinutesToday?: number;
+  totalHoursToday?: string;
   gateLocation: string | null;
   attendanceRate?: number;
   monthlyStats?: {
@@ -485,6 +489,8 @@ export interface DepartmentAttendanceSummary {
   onTimeToday?: number;
   lateToday?: number;
   attendanceRate: number;
+  // Issue #396: minutes as number (was avgHoursToday: string)
+  avgMinutesToday?: number;
   avgHoursToday?: string;
   presentCount?: number;
   insideCount?: number;

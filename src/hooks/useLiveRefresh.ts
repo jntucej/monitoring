@@ -44,10 +44,38 @@ export function useLiveRefresh(
   }, [isLiveStream, enabled]);
 
   // Poll interval gated on live state.
+  // Issue #387: stop polling on auth failure (401/UNAUTHORIZED). Without this,
+  // an expired session causes an infinite loop of 401 responses spamming the
+  // server until navigation completes. A stopped flag breaks the cycle.
   useEffect(() => {
     if (!enabled || !intervalMs || !isLiveStream) return;
-    const id = setInterval(() => refetchRef.current(), intervalMs);
-    return () => clearInterval(id);
+    let stopped = false;
+
+    const schedule = () => {
+      if (stopped) return;
+      const id = setInterval(async () => {
+        if (stopped) {
+          clearInterval(id);
+          return;
+        }
+        try {
+          await refetchRef.current();
+        } catch (err) {
+          const msg = String(err);
+          if (msg.includes('UNAUTHORIZED') || msg.includes('401') || msg.includes('SESSION')) {
+            stopped = true;
+            clearInterval(id);
+          }
+        }
+      }, intervalMs);
+      return id;
+    };
+
+    const id = schedule();
+    return () => {
+      stopped = true;
+      if (id) clearInterval(id);
+    };
   }, [intervalMs, enabled, isLiveStream]);
 
   const refreshNow = useCallback(() => {

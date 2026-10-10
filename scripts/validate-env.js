@@ -82,8 +82,8 @@ function validate() {
   }
 
   const mfaSecret = process.env.MFA_ENROLL_SECRET;
-  if (isProd && mfaSecret && isPlaceholder(mfaSecret)) {
-    errors.push('MFA_ENROLL_SECRET contains an unconfigured placeholder value.');
+  if (isProd && (!mfaSecret || isPlaceholder(mfaSecret))) {
+    errors.push('MFA_ENROLL_SECRET is required to be set and secure in production (sysadmin break-glass mechanism).');
   }
 
   // Cache configuration

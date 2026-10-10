@@ -118,12 +118,14 @@ async function handleGet(req: NextRequest, context: { auth: any }) {
 
       // Calculate total hours worked today
       let totalHoursToday = "0 hrs";
+      let totalMinutesToday = 0;
       if (firstInLog) {
         const startTime = new Date(firstInLog.timestamp).getTime();
         const endTime = lastOutLog ? new Date(lastOutLog.timestamp).getTime() : now.getTime();
         const diffMs = Math.max(0, endTime - startTime);
         const hrs = (diffMs / (1000 * 60 * 60)).toFixed(1);
         totalHoursToday = `${hrs} hrs`;
+        totalMinutesToday = Math.round(diffMs / (1000 * 60));
       }
 
       // Format times & gate location
@@ -238,6 +240,7 @@ async function handleGet(req: NextRequest, context: { auth: any }) {
         lastOutTime,
         punctualityStatus,
         totalHoursToday,
+        totalMinutesToday,
         gateLocation,
         attendanceRate,
         monthlyStats: {
@@ -260,27 +263,41 @@ async function handleGet(req: NextRequest, context: { auth: any }) {
     const overallAttendanceRate = Math.round((presentToday / (totalFaculty || 1)) * 100);
 
     const deptMap: Record<string, { total: number; present: number; inside: number; outside: number }> = {};
+    const deptHoursMap: Record<string, number[]> = {};
     records.forEach((r) => {
       if (!deptMap[r.department]) {
         deptMap[r.department] = { total: 0, present: 0, inside: 0, outside: 0 };
+        deptHoursMap[r.department] = [];
       }
       deptMap[r.department].total += 1;
-      if (r.status !== "ABSENT") deptMap[r.department].present += 1;
+      if (r.status !== "ABSENT") {
+        deptMap[r.department].present += 1;
+        if (typeof r.totalMinutesToday === "number") {
+          deptHoursMap[r.department].push(r.totalMinutesToday);
+        }
+      }
       if (r.status === "INSIDE") deptMap[r.department].inside += 1;
       if (r.status === "OUTSIDE") deptMap[r.department].outside += 1;
     });
 
     const departmentSummaries: DepartmentAttendanceSummary[] = Object.entries(deptMap).map(
-      ([dept, counts]) => ({
-        department: dept,
-        totalFaculty: counts.total,
-        presentToday: counts.present,
-        currentlyInside: counts.inside,
-        presentCount: counts.present,
-        insideCount: counts.inside,
-        outsideCount: counts.outside,
-        attendanceRate: Math.round((counts.present / (counts.total || 1)) * 100),
-      })
+      ([dept, counts]) => {
+        const minsList = deptHoursMap[dept] || [];
+        const avgMins = minsList.length > 0 ? Math.round(minsList.reduce((a, b) => a + b, 0) / minsList.length) : 0;
+        const avgHrsStr = `${(avgMins / 60).toFixed(1)} hrs`;
+        return {
+          department: dept,
+          totalFaculty: counts.total,
+          presentToday: counts.present,
+          currentlyInside: counts.inside,
+          presentCount: counts.present,
+          insideCount: counts.inside,
+          outsideCount: counts.outside,
+          attendanceRate: Math.round((counts.present / (counts.total || 1)) * 100),
+          avgMinutesToday: avgMins,
+          avgHoursToday: avgHrsStr,
+        };
+      }
     );
 
     return NextResponse.json({
