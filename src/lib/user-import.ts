@@ -126,13 +126,17 @@ export async function validateImport(csvInput: string | ImportRow[]): Promise<Va
     }
 
     const rowObj: ImportRow = {
-      name,
-      email,
-      role,
-      uniqueId: uniqueId || email.split("@")[0],
-      roll: r.roll || uniqueId,
-      employeeId: r.employeeId || uniqueId,
-      phone: r.phone ? r.phone.trim() : undefined,
+ name,
+ email,
+ role,
+ uniqueId: uniqueId || email.split("@")[0],
+ roll: r.roll || r["H.T NO."] || uniqueId,
+ course: r.course || r["COURSE"] || undefined,
+ fatherName: r.fatherName || r["FATHER NAME"] || undefined,
+ dob: r.dob || r["DOB"] || undefined,
+ landlineNumber: r.landlineNumber || r["LAND LINE 0R PARENT NUMBER"] || undefined,
+ employeeId: r.employeeId || uniqueId,
+ phone: r.phone || r["PHONE NUMBER"] || undefined,
       department: r.department || r.departmentId || undefined,
       departmentId: r.departmentId || r.department || undefined,
       designation: r.designation || undefined,
@@ -212,6 +216,7 @@ export async function commitImport(
           email: row.email,
           role: row.role,
           unique_id: row.uniqueId || row.roll || row.employeeId || row.email.split("@")[0],
+          dob: row.dob || null,
           phone: row.phone || null,
           department_id: row.departmentId || row.department || null,
           status: row.status || "ACTIVE",
@@ -237,6 +242,9 @@ export async function commitImport(
           hostel_block: row.hostelBlock || null,
           room_number: row.roomNumber || null,
           gender: row.gender || null,
+          course: row.course || null,
+          father_name: row.fatherName || null,
+          landline_number: row.landlineNumber || null,
         };
         await supabase.from("student_details").upsert(studentData, { onConflict: "user_id" });
       }
