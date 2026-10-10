@@ -1,4 +1,4 @@
-import NextRequest, { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { checkSystemHealth } from "@/lib/health";
 import { withRateLimit } from "@/lib/rate-limit";
 
@@ -13,7 +13,7 @@ async function handleGet(_req: NextRequest) {
 
   // Bug 135: endpoint public (no auth). Raw Postgres/env error strings leak
   // table/column/constraint names / connection details. Replace generic messages;
-  // keep non-sensitive status, latency, operators for monitoring/get signal.
+  // keep non-sensitive status, latency, operators monitoring/get signal.
   const sanitize = (h: typeof health): typeof h => ({
     status: h.status,
     timestamp: h.timestamp,
