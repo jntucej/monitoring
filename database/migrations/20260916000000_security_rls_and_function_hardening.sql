@@ -32,7 +32,7 @@ BEGIN
     'support_tickets','support_ticket_comments','saved_report_definitions',
     'gate_access_rules','gate_holidays','retention_policies','data_compliance_logs',
     'zones','lms_config','sustainability_metrics','alert_rules','system_settings',
-    'onboarding_progress','predictions','role_change_requests','integration_configs',
+    'onboarding_progress','role_change_requests','integration_configs',
     'integration_logs','announcements','user_announcement_dismissals','sso_config',
     'gate_passes'
   ] LOOP
@@ -58,7 +58,7 @@ DECLARE
     'support_tickets','support_ticket_comments','saved_report_definitions',
     'gate_access_rules','gate_holidays','retention_policies',
     'data_compliance_logs','zones','lms_config','sustainability_metrics',
-    'alert_rules','system_settings','onboarding_progress','predictions',
+    'alert_rules','system_settings','onboarding_progress',
     'role_change_requests','integration_configs','integration_logs',
     'announcements','user_announcement_dismissals','sso_config'
   ];
@@ -112,7 +112,7 @@ DECLARE
     'support_tickets','support_ticket_comments','saved_report_definitions',
     'gate_access_rules','gate_holidays','retention_policies',
     'data_compliance_logs','zones','lms_config','sustainability_metrics',
-    'alert_rules','system_settings','onboarding_progress','predictions',
+    'alert_rules','system_settings','onboarding_progress',
     'role_change_requests','integration_configs','integration_logs',
     'announcements','user_announcement_dismissals','sso_config',
     'gate_passes'
@@ -151,7 +151,7 @@ DECLARE
   pol_name text;
   admin_tables text[] := ARRAY[
     'data_compliance_logs','zones','lms_config','sustainability_metrics',
-    'alert_rules','system_settings','onboarding_progress','predictions',
+    'alert_rules','system_settings','onboarding_progress',
     'role_change_requests','integration_configs','integration_logs',
     'announcements','user_announcement_dismissals','sso_config'
   ];
