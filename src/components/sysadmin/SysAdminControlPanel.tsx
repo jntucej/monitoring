@@ -25,15 +25,8 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { GovernanceModules } from "./SysAdminGovernanceModules";
+import { HealthDashboard } from "./HealthDashboard";
 import { getAuthHeaders } from "@/lib/utils";
-
-interface QuickHealth {
-  status?: "healthy" | "degraded" | "unhealthy";
-  services?: Record<
-    string,
-    { status: "healthy" | "degraded" | "unhealthy"; latency?: number }
-  >;
-}
 
 interface AuditLog {
   id: string;
@@ -45,8 +38,6 @@ interface AuditLog {
 }
 
 export function SysAdminControlPanel() {
-  const [health, setHealth] = useState<QuickHealth | null>(null);
-  const [healthLoading, setHealthLoading] = useState(true);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [auditCount, setAuditCount] = useState<number | null>(null);
   const [sessionCount, setSessionCount] = useState<number | null>(null);
@@ -56,13 +47,6 @@ export function SysAdminControlPanel() {
     setIsSyncing(true);
     try {
       const headers = getAuthHeaders();
-
-      // Fetch System Health
-      const healthRes = await fetch("/api/health", { cache: "no-store" }).catch(() => null);
-      if (healthRes && healthRes.ok) {
-        const healthData = await healthRes.json();
-        setHealth(healthData);
-      }
 
       // Fetch Recent Audit Logs & Count
       const auditRes = await fetch("/api/admin/audit?limit=8&offset=0", {
@@ -89,7 +73,6 @@ export function SysAdminControlPanel() {
         }
       }
     } finally {
-      setHealthLoading(false);
       setIsSyncing(false);
     }
   }, []);
@@ -123,37 +106,8 @@ export function SysAdminControlPanel() {
         </button>
       </div>
 
-      {/* Live System Infrastructure Telemetry Strip */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <MetricCard
-          label="Auth & Gateway"
-          icon={Shield}
-          value={healthLoading ? "—" : health?.status === "healthy" ? "Healthy" : "Degraded"}
-          ok={health?.status === "healthy"}
-          subText="JWT / MFA Layer"
-        />
-        <MetricCard
-          label="Database Cluster"
-          icon={Database}
-          value={healthLoading ? "—" : "Connected"}
-          ok={health?.status !== "unhealthy"}
-          subText="Supabase PostgreSQL"
-        />
-        <MetricCard
-          label="Audit Telemetry"
-          icon={ShieldAlert}
-          value={auditCount != null ? String(auditCount) : "—"}
-          ok={auditCount != null}
-          subText="Total System Events"
-        />
-        <MetricCard
-          label="Active User Sessions"
-          icon={Users}
-          value={sessionCount != null ? String(sessionCount) : "Live"}
-          ok={sessionCount != null}
-          subText="Revocable Session Handles"
-        />
-      </div>
+      {/* System Health & Telemetry Dashboard */}
+      <HealthDashboard />
 
       {/* Governance Control Modules */}
       <GovernanceModules />
@@ -224,35 +178,6 @@ export function SysAdminControlPanel() {
             </tbody>
           </table>
         </div>
-      </div>
-    </div>
-  );
-}
-
-function MetricCard({
-  label,
-  icon: Icon,
-  value,
-  ok,
-  subText,
-}: {
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
-  value: string;
-  ok: boolean;
-  subText: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 flex flex-col justify-between shadow-md">
-      <div className="flex items-center justify-between text-[var(--text-muted)]">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">{label}</span>
-        <div className={`p-1.5 rounded-lg ${ok ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"}`}>
-          <Icon className="w-4 h-4" />
-        </div>
-      </div>
-      <div className="mt-3">
-        <p className={`text-xl font-bold tracking-tight ${ok ? "text-[var(--text-primary)]" : "text-rose-400"}`}>{value}</p>
-        <p className="text-[10px] text-[var(--text-muted)] font-mono mt-0.5">{subText}</p>
       </div>
     </div>
   );

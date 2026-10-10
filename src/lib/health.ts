@@ -143,15 +143,19 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
     health.status = 'unhealthy';
   }
 
-  // Active session count
+  // Active session and user count
   try {
-    const { count } = await getClient()
+    const { data: sessionData } = await getClient()
       .from("sessions")
-      .select("*", { count: "exact", head: true })
+      .select("user_id")
       .is("revoked_at", null)
       .gt("expires_at", new Date().toISOString());
 
-    health.metrics.activeSessions = count || 0;
+    if (sessionData) {
+      health.metrics.activeSessions = sessionData.length;
+      const uniqueUsers = new Set(sessionData.map((s: any) => s.user_id).filter(Boolean));
+      health.metrics.activeUsers = uniqueUsers.size;
+    }
   } catch (error) {
     console.error('Error getting active sessions:', error);
   }

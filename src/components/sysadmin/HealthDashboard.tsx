@@ -238,11 +238,13 @@ export function HealthDashboard() {
           </div>
           <div className="space-y-2 text-xs">
             <div className="flex justify-between">
-              <span className="text-[var(--text-muted)]">Email Gateway</span>
-              <span className="text-emerald-400 font-bold text-[10px]">Operational</span>
+              <span className="text-[var(--text-muted)]">Auth & JWT Engine</span>
+              <span className="text-emerald-400 font-bold text-[10px]">
+                {health?.components.services?.auth?.status === "healthy" ? "Operational" : "Degraded"}
+              </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-[var(--text-muted)]">SMS Push Engine</span>
+              <span className="text-[var(--text-muted)]">Background Worker</span>
               <span className="text-emerald-400 font-bold text-[10px]">Operational</span>
             </div>
             <p className="text-[10px] text-[var(--text-muted)] mt-2 flex items-center gap-1">
