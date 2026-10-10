@@ -16,9 +16,13 @@ async function handleGet(req: NextRequest) {
 
     const { data: logs } = await query;
 
+    const dataPoints = logs ? logs.length : 0;
+    const confidence: "low" | "medium" | "high" =
+      dataPoints < 7 ? "low" : dataPoints < 30 ? "medium" : "high";
+
     const seriesMap: Record<string, number> = {};
 
-    if (logs && logs.length > 0) {
+    if (logs && logs.length >= 7) {
       logs.forEach((log) => {
         const d = new Date(log.timestamp || log.scanned_at || Date.now());
         const key = timeGrouping === "hourly"
@@ -36,6 +40,9 @@ async function handleGet(req: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
+        confidence,
+        dataPoints,
+        reason: confidence === "low" ? `Insufficient history (${dataPoints} samples). At least 7 required.` : undefined,
         summary: {
           totalScans: logs?.length || 450,
           peakHour: "10:00 AM",

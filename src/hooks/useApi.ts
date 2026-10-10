@@ -32,7 +32,30 @@ export function useApi() {
       headers["X-Session-Token"] = sessionToken;
     }
 
-    const res = await fetch(input, { ...init, headers });
+    let res: Response | null = null;
+    let attempts = 0;
+    const maxAttempts = 3;
+
+    while (attempts < maxAttempts) {
+      attempts++;
+      try {
+        res = await fetch(input, { ...init, headers });
+        if (res.status >= 500 && attempts < maxAttempts) {
+          const backoff = 500 * Math.pow(2, attempts - 1) + Math.random() * 200;
+          await new Promise((r) => setTimeout(r, backoff));
+          continue;
+        }
+        break;
+      } catch (err) {
+        if (attempts >= maxAttempts) throw err;
+        const backoff = 500 * Math.pow(2, attempts - 1) + Math.random() * 200;
+        await new Promise((r) => setTimeout(r, backoff));
+      }
+    }
+
+    if (!res) {
+      return { success: false, error: "Network error" };
+    }
 
     // Handle authentication/authorization
     if (res.status === 401) {
@@ -41,6 +64,11 @@ export function useApi() {
         window.location.href = "/login";
       }
       throw new Error("UNAUTHORIZED");
+    }
+
+    // Handle 304 Not Modified explicitly (Issue #558)
+    if (res.status === 304) {
+      return { success: true, data: undefined };
     }
 
     const contentType = res.headers.get("content-type") ?? "";
