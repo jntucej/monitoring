@@ -898,15 +898,34 @@ export async function findAllPersons(type?: PersonType): Promise<Person[]> {
   }
   if (data.length === 0) return [];
 
-  // Fetch auxiliary details for these users and merge
+  // Helper to chunk queries
+async function fetchByIds<T>(db: any, table: string, ids: string[]): Promise<any[]> {
+  const CHUNK = 200;
+  const out: any[] = [];
+  for (let i = 0; i < ids.length; i += CHUNK) {
+    const slice = ids.slice(i, i + CHUNK);
+    const { data, error } = await db.from(table).select('*').in('user_id', slice);
+    if (error) throw error;
+    if (data) out.push(...data);
+  }
+  return out;
+}
+
+export async function findAllPersons(type?: PersonType): Promise<Person[]> {
+  const db = getDbClient();
+  let query = db.from('users').select('*').eq('status', 'ACTIVE');
+  if (type) query = query.eq('role', type);
+  const { data, error } = await query;
+  if (error || !data || data.length === 0) return [];
+
   const ids = data.map((u: any) => u.id);
   const [studentRows, employeeRows] = await Promise.all([
-    db.from('student_details').select('*').in('user_id', ids),
-    db.from('employee_details').select('*').in('user_id', ids),
+    fetchByIds(db, 'student_details', ids),
+    fetchByIds(db, 'employee_details', ids),
   ]);
 
-  const studentMap = new Map((studentRows.data || []).map((s: any) => [s.user_id, s]));
-  const employeeMap = new Map((employeeRows.data || []).map((e: any) => [e.user_id, e]));
+  const studentMap = new Map((studentRows || []).map((s: any) => [s.user_id, s]));
+  const employeeMap = new Map((employeeRows || []).map((e: any) => [e.user_id, e]));
 
   return data.map((u: any) => {
     const studentData = studentMap.get(u.id);

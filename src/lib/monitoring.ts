@@ -40,8 +40,8 @@ export async function promQueryRange(query: string, start: string, end: string, 
   return monFetch(`${PROM_URL}/api/v1/query_range?${params.toString()}`);
 }
 
-export async function lokiQueryRange(query: string, start: string, end: string, limit = 200) {
-  const capped = Math.min(Math.max(1, limit), 500);
+export async function lokiQueryRange(query: string, start: string, end: string, limit = 5000) {
+  const capped = Math.min(Math.max(1, limit), 5000);
   const params = new URLSearchParams({ query, start, end, limit: String(capped) });
   return monFetch(`${LOKI_URL}/loki/api/v1/query_range?${params.toString()}`);
 }

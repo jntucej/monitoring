@@ -14,6 +14,7 @@ export const ROLE_STAGE_PERMISSIONS: Record<string, readonly string[]> = {
   hostel_manager: ["hostel_manager"],
   warden: ["warden_or_principal"],
   principal: ["warden_or_principal", "principal"],
+  exam_branch: ["exam_branch"],
   operator: ["main_gate"],
   faculty: ["faculty"],
   hod: ["hod"],
