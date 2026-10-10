@@ -30,12 +30,15 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useNavigation() {
+export function useViewNavigation() {
   const context = useContext(NavigationContext);
   if (context === undefined) {
-    throw new Error("useNavigation must be used within a NavigationProvider");
+    throw new Error("useViewNavigation must be used within a NavigationProvider");
   }
   return context;
 }
+
+/** @deprecated Use useViewNavigation — this name collides with the nav-items hook. */
+export const useNavigation = useViewNavigation;
 
 export default NavigationProvider;
