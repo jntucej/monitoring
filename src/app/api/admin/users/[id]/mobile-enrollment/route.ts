@@ -65,7 +65,7 @@ async function handlePost(req: NextRequest, context: { auth: AuthContext }) {
     );
   }
 
-  // await addAudit({
+  await addAudit({
     action: "MOBILE_ENROLLMENT_CODE_ISSUED",
     userId: actorId || "system",
     userName: context?.auth?.email || "Admin",

@@ -64,7 +64,7 @@ async function handlePost(req: NextRequest) {
         expectedChecksum: typeof checksum === "string" && checksum.trim() !== "" ? checksum : undefined,
       });
 
-      // await addAudit({
+      await addAudit({
         action: "BACKUP_RESTORED",
         userId: actorId,
         userName: "Admin",
@@ -88,7 +88,7 @@ async function handlePost(req: NextRequest) {
       );
     }
 
-    // await addAudit({
+    await addAudit({
       action: "BACKUP_CREATED",
       userId: actorId,
       userName: "Admin",

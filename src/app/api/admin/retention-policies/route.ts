@@ -42,7 +42,7 @@ async function handlePatch(req: NextRequest) {
 
     const { data } = await supabase.from("retention_policies").update(updateFields).eq("id", id).select("*").single();
 
-    // await addAudit({
+    await addAudit({
       action: "RETENTION_POLICY_UPDATED",
       userId: actorId,
       userName: "SysAdmin",

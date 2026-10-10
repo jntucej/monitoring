@@ -36,11 +36,7 @@ async function handleGet(req: NextRequest) {
       }).length;
       const lastLog = gateLogs.sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
 
-      const assignedOp = operators[idx % (operators.length || 1)] || {
-        id: `op-00${idx + 1}`,
-        name: idx === 0 ? "K. Srinivas (Operator)" : idx === 1 ? "M. Ramesh (Operator)" : "P. Anjaneyulu",
-        unique_id: `OP-10${idx + 1}`,
-      };
+      const assignedOp = operators[idx % (operators.length || 1)] || { id: "none", name: "Unassigned", unique_id: "N/A" };
 
       return {
         id: gate.id,
@@ -51,15 +47,15 @@ async function handleGet(req: NextRequest) {
         currentOperator: {
           id: assignedOp.id,
           name: assignedOp.name,
-          employeeId: assignedOp.unique_id || (assignedOp as any).employeeId || `OP-10${idx + 1}`,
-          workingHours: "06:00 AM - 02:00 PM",
+          employeeId: assignedOp.unique_id || (assignedOp as any).employeeId || "N/A",
+          workingHours: "Unassigned",
         },
         lastScanTime: lastLog ? lastLog.timestamp : null,
         totalScansToday: gateLogs.length,
         entriesToday,
         exitsToday,
         lastActive: lastLog ? "Just now" : "No activity today",
-        uptime: gate.isActive ? 99.8 : 85.0,
+        uptime: gate.isActive ? 100 : 0,
       };
     });
 

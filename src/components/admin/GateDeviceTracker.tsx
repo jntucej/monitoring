@@ -92,13 +92,13 @@ export function GateDeviceTracker({ devices, onRefresh }: GateDeviceTrackerProps
                     Current Operator
                   </span>
                   <span className="font-mono text-[10px] font-bold text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded">
-                    {device.currentOperator.employeeId || "OP-ASSIGNED"}
+                    {device.currentOperator.employeeId || "N/A"}
                   </span>
                 </div>
                 <div className="text-xs font-bold text-[var(--text-primary)]">{device.currentOperator.name}</div>
                 <div className="text-[10px] text-[var(--text-muted)] flex items-center gap-1">
                   <Clock className="w-3 h-3 text-[var(--text-muted)]" />
-                  Shift: {device.currentOperator.workingHours || "06:00 AM - 02:00 PM"}
+                  Shift: {device.currentOperator.workingHours || "N/A"}
                 </div>
               </div>
 
