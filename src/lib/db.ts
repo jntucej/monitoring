@@ -919,7 +919,12 @@ export async function findAllPersons(type?: PersonType): Promise<Person[]> {
   let query = db.from('users').select('*').eq('status', 'ACTIVE');
   if (type) query = query.eq('role', type);
   const { data, error } = await query;
-  if (error || !data || data.length === 0) return [];
+
+  if (error) {
+    console.error('[findAllPersons] users query failed:', error, { type });
+    return [];
+  }
+  if (!data || data.length === 0) return [];
 
   const ids = data.map((u: any) => u.id);
   const [studentRows, employeeRows] = await Promise.all([
@@ -1874,7 +1879,13 @@ export async function addAudit(entry: {
 }) {
   const id = `audit-${Date.now()}-${randomBytes(4).toString("hex")}`;
   const timestamp = new Date().toISOString();
-  const details = entry.details;
+  // Ensure details is always an object for JSONB
+  let detailObject: any = entry.details;
+  if (typeof entry.details === 'string') {
+    detailObject = { message: entry.details };
+  } else if (typeof entry.details !== 'object' || entry.details === null) {
+      detailObject = { value: entry.details };
+  }
 
   const { getSupabaseServiceClient } = await import('./dbClient');
   const serviceClient = getSupabaseServiceClient();
@@ -1890,13 +1901,12 @@ export async function addAudit(entry: {
     user_id: targetUserId,
     user_name: entry.userName || "System User",
     user_role: entry.role || null,
-    details: details,
+    details: detailObject, // Pass as object directly to Supabase driver
     timestamp,
   };
 
   let { error } = await serviceClient.from('audit_logs').insert(auditRow);
   if (error && error.code === 'PGRST204') {
-    // Schema drift safety net: drop any unknown columns and retry.
     delete (auditRow as any).user_role;
     const retry = await serviceClient.from('audit_logs').insert(auditRow);
     error = retry.error;
