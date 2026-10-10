@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { findStudentByRoll, getStudentHistory, getStudentStatus } from "@/lib/db";
+import { findStudentByRoll, getStudentHistory, getStudentStatus, addAudit } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
 import { addAudit } from "@/lib/db";
 import type { AuthContext } from "@/lib/authContext";
@@ -191,14 +191,53 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
     const { error: delErr } = await supabase.from("users").delete().eq("id", user.id);
     if (delErr) return NextResponse.json({ error: delErr.message }, { status: 500 });
 
+    const supabase = getSupabaseServiceClient();
+
+    // Check historical data (passes / movement logs)
+    const { count: passCount } = await supabase
+      .from("gate_passes")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", student.id);
+
+    const { count: logCount } = await supabase
+      .from("movement_logs")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", student.id);
+
+    if ((passCount ?? 0) > 0 || (logCount ?? 0) > 0) {
+      await supabase
+        .from("users")
+        .update({ status: "DEPROVISIONED", updated_at: new Date().toISOString() })
+        .eq("id", student.id);
+
+      await addAudit({
+        action: "USER_DEACTIVATED",
+        userId: auth?.userId || "sysadmin",
+        userName: auth?.email || "SysAdmin",
+        role: authRole,
+        details: { target_user_id: student.id, roll, reason: "has historical data" },
+      });
+
+      return NextResponse.json({
+        success: true,
+        mode: "soft_delete",
+        message: `Deactivated student ${roll} (preserved ${passCount} passes, ${logCount} movements)`,
+      });
+    }
+
+    // Hard delete if no history
+    const { error } = await supabase.from("users").delete().eq("id", student.id);
+    if (error) throw error;
+
     await addAudit({
       action: "USER_DELETED",
-      userId: auth.userId,
-      role: auth.role as Role,
-      details: { target_user_id: user.id, roll, mode: "hard_delete" },
+      userId: auth?.userId || "sysadmin",
+      userName: auth?.email || "SysAdmin",
+      role: authRole,
+      details: { target_user_id: student.id, roll },
     });
 
-    return NextResponse.json({ success: true, mode: "hard_delete" });
+    return NextResponse.json({ success: true, mode: "hard_delete", message: `Student ${roll} permanently deleted` });
   } catch (error: any) {
     return NextResponse.json(
       { success: false, error: { code: "SERVER_ERROR", message: error.message || "Failed to delete student" } },
