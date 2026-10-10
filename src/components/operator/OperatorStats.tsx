@@ -24,7 +24,7 @@ export function OperatorStats({ entries, exits, onCampus, gateId }: OperatorStat
       value: entries,
       color: "text-[var(--action-primary)]",
       glow: "shadow-emerald-500/10",
-      href: gateId ? `/gate/${gateId}?tab=history` : "/admin/reports",
+      href: `/gate/${gateId || 'active'}?tab=history`,
     },
     {
       id: "EXITS",
@@ -33,7 +33,7 @@ export function OperatorStats({ entries, exits, onCampus, gateId }: OperatorStat
       value: exits,
       color: "text-[var(--action-danger)]",
       glow: "shadow-red-500/10",
-      href: gateId ? `/gate/${gateId}?tab=history` : "/admin/attendance",
+      href: `/gate/${gateId || 'active'}?tab=history`,
     },
     {
       id: "ON CAMPUS",
@@ -42,7 +42,7 @@ export function OperatorStats({ entries, exits, onCampus, gateId }: OperatorStat
       value: onCampus,
       color: "text-[var(--focus-ring)]",
       glow: "shadow-sky-500/10",
-      href: gateId ? `/gate/${gateId}?tab=stats` : "/admin/occupancy",
+      href: `/gate/${gateId || 'active'}?tab=stats`,
     },
   ];
 
