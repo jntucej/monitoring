@@ -31,6 +31,10 @@ async function handleGet(req: NextRequest) {
         latency: h.components.database.latency,
         ...(h.components.database.error ? { error: "Database unavailable" } : {}),
       },
+      redis: {
+        status: (h.components as any).redis?.status ?? "healthy",
+        ...((h.components as any).redis?.error ? { error: "Redis unavailable" } : {}),
+      },
       gateways: {
         status: h.components.gateways.status,
         online: h.components.gateways.online,
