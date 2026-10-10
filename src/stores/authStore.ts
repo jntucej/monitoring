@@ -84,7 +84,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       setHasHydrated: (hydrated: boolean) => set({ _hasHydrated: hydrated }),
 
       login: async (login, password, mfa) => {
-        set({ loading: true });
+        set({ loading: true, mfaPending: false, mfaChallenge: null });
         try {
           // Convert to uppercase for consistency
           const cleanLogin = login.trim().toUpperCase();

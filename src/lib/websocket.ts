@@ -189,6 +189,10 @@ export class GateMonitorWS {
   }
 
   private startMockMode(): void {
+    if (process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_ALLOW_MOCK_WS !== "true") {
+      console.error("[ws] Mock WebSocket mode blocked in production environment.");
+      return;
+    }
     if (this.mockGenerator) {
       this.mockGenerator.stop();
     }
@@ -197,7 +201,11 @@ export class GateMonitorWS {
     this.mockGenerator = new MockDataGenerator(
       (traffic) => this.trafficListeners.forEach((fn) => fn(traffic)),
       (statusData) => this.statusListeners.forEach((fn) => fn(statusData)),
-      (alertData) => this.alertListeners.forEach((fn) => fn(alertData))
+      (alertData) => {
+        // Tag mock alert and skip critical escalation in production
+        const taggedAlert = { ...alertData, isMock: true };
+        this.alertListeners.forEach((fn) => fn(taggedAlert));
+      }
     );
     this.mockGenerator.start();
   }
