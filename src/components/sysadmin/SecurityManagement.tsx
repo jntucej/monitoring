@@ -29,10 +29,10 @@ export function SecurityManagement() {
       const headers = getAuthHeaders();
       const res = await fetch("/api/admin/security/stats", { headers });
       const result = await res.json();
-      if (result.success) {
+      if (result.success && result.data) {
         setStats(result.data);
-        setIpInput(result.data.allowedIps.join(", "));
-        setForce2FA(result.data.forced2FA);
+        setIpInput((result.data.allowedIps || []).join(", "));
+        setForce2FA(Boolean(result.data.forced2FA));
       }
     } catch {
       addToast({ variant: "error", title: "Error", message: "Failed to load stats" });

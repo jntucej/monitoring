@@ -107,9 +107,9 @@ CREATE OR REPLACE FUNCTION public.update_daily_stats_on_movement()
  LANGUAGE plpgsql
  SET search_path TO 'public'
 AS $function$ DECLARE v_date DATE; v_code TEXT; BEGIN
-  -- Day boundary follows the movement's recorded timestamp (UTC day), matching the
-  -- analytics routes. A movement after local midnight creates a brand-new (date, gate)
-  -- row, so today's counters start from zero automatically.
+  -- Day boundary follows the movement's recorded timestamp in Asia/Kolkata,
+  -- matching analytics routes. A movement after local midnight creates a new
+  -- (date, gate) row, so today's counters reset to zero.
   v_date := (NEW.timestamp AT TIME ZONE 'Asia/Kolkata')::date;
   SELECT gate_code INTO v_code FROM gates WHERE id = NEW.gate_id;
   IF v_code IS NULL THEN
@@ -131,4 +131,3 @@ AS $function$ DECLARE v_date DATE; v_code TEXT; BEGIN
       updated_at = NOW();
   RETURN NEW;
 END; $function$;
-
