@@ -37,9 +37,11 @@ BEGIN
     'gate_passes'
   ] LOOP
     BEGIN
-      EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY', t);
+      IF to_regclass(format('public.%I', t)) IS NOT NULL THEN
+        EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY', t);
+      END IF;
     EXCEPTION WHEN undefined_table THEN
-      -- table might be created in a later migration, ignore during replay check
+      -- ignore if table not created yet
     END;
   END LOOP;
 END $$;
@@ -64,14 +66,16 @@ BEGIN
   FOREACH t IN ARRAY service_tables LOOP
     pol_name := 'svc_all_' || t;
     BEGIN
-      IF NOT EXISTS (
-        SELECT 1 FROM pg_policies
-        WHERE schemaname = 'public' AND tablename = t AND policyname = pol_name
-      ) THEN
-        EXECUTE format(
-          'CREATE POLICY %I ON public.%I FOR ALL TO service_role USING (true) WITH CHECK (true)',
-          pol_name, t
-        );
+      IF to_regclass(format('public.%I', t)) IS NOT NULL THEN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_policies
+          WHERE schemaname = 'public' AND tablename = t AND policyname = pol_name
+        ) THEN
+          EXECUTE format(
+            'CREATE POLICY %I ON public.%I FOR ALL TO service_role USING (true) WITH CHECK (true)',
+            pol_name, t
+          );
+        END IF;
       END IF;
     EXCEPTION WHEN undefined_table THEN
       -- ignore if table not created yet
@@ -117,14 +121,16 @@ BEGIN
   FOREACH t IN ARRAY auth_tables LOOP
     pol_name := 'auth_all_' || t;
     BEGIN
-      IF NOT EXISTS (
-        SELECT 1 FROM pg_policies
-        WHERE schemaname = 'public' AND tablename = t AND policyname = pol_name
-      ) THEN
-        EXECUTE format(
-          'CREATE POLICY %I ON public.%I FOR ALL TO authenticated USING (public.is_admin_self()) WITH CHECK (public.is_admin_self())',
-          pol_name, t
-        );
+      IF to_regclass(format('public.%I', t)) IS NOT NULL THEN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_policies
+          WHERE schemaname = 'public' AND tablename = t AND policyname = pol_name
+        ) THEN
+          EXECUTE format(
+            'CREATE POLICY %I ON public.%I FOR ALL TO authenticated USING (public.is_admin_self()) WITH CHECK (public.is_admin_self())',
+            pol_name, t
+          );
+        END IF;
       END IF;
     EXCEPTION WHEN undefined_table THEN
       -- ignore if table not created yet
