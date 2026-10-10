@@ -5,14 +5,8 @@ import { useGlass } from "@/context/GlassContext";
 
 /**
  * useLiveRefresh — connect a page's data refetch to the global Live Data toggle.
- *
- * When the Live Data header pill is toggled from Paused → Live, `refetch()` is
- * fired once so pages that were frozen show fresh data immediately. While Live,
- * an optional `intervalMs` polling loop stays active; while Paused it is
- * suspended so no unnecessary requests hit the server.
- *
- * This lets operators use the single global Live button instead of per-page
- * "Refresh" buttons — the button now actually drives all subscribing pages.
+ * 
+ * Includes initial delay with jitter to prevent request bursts on mount.
  */
 export function useLiveRefresh(
   refetch: () => Promise<unknown> | void,
@@ -24,15 +18,12 @@ export function useLiveRefresh(
   refetchRef.current = refetch;
   const didInitialRun = useRef(false);
 
-  // Re-run on first mount to populate data.
   useEffect(() => {
     if (!enabled) return;
     refetchRef.current();
     didInitialRun.current = true;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled]);
 
-  // Fire once when transitioning from Paused → Live.
   const prevLive = useRef(isLiveStream);
   useEffect(() => {
     if (!enabled) return;
@@ -43,38 +34,36 @@ export function useLiveRefresh(
     }
   }, [isLiveStream, enabled]);
 
-  // Poll interval gated on live state.
-  // Issue #387: stop polling on auth failure (401/UNAUTHORIZED). Without this,
-  // an expired session causes an infinite loop of 401 responses spamming the
-  // server until navigation completes. A stopped flag breaks the cycle.
   useEffect(() => {
     if (!enabled || !intervalMs || !isLiveStream) return;
     let stopped = false;
+    let timer: ReturnType<typeof setTimeout>;
 
-    const schedule = () => {
+    const baseMs = intervalMs;
+    const schedule = (delayMs: number) => {
       if (stopped) return;
-      const id = setInterval(async () => {
-        if (stopped) {
-          clearInterval(id);
-          return;
-        }
+      timer = setTimeout(async () => {
+        if (stopped) return;
         try {
           await refetchRef.current();
         } catch (err) {
           const msg = String(err);
           if (msg.includes('UNAUTHORIZED') || msg.includes('401') || msg.includes('SESSION')) {
             stopped = true;
-            clearInterval(id);
+            return;
           }
         }
-      }, intervalMs);
-      return id;
+        const jitter = baseMs * 0.1 * (Math.random() * 2 - 1);
+        schedule(baseMs + jitter);
+      }, delayMs);
     };
 
-    const id = schedule();
+    const initialDelay = 500 + Math.random() * 2500;
+    schedule(initialDelay);
+
     return () => {
       stopped = true;
-      if (id) clearInterval(id);
+      clearTimeout(timer);
     };
   }, [intervalMs, enabled, isLiveStream]);
 
