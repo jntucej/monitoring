@@ -138,8 +138,8 @@ export function HealthDashboard() {
             <span>Active Users</span>
             <Users className="w-4 h-4 text-sky-400" />
           </div>
-          <p className="text-2xl font-black text-[var(--text-primary)]">{health?.metrics.activeUsers ?? "-"}</p>
-          <p className="text-[10px] text-[var(--text-muted)]">{health?.metrics.activeSessions ?? 0} active sessions</p>
+          <p className="text-2xl font-black text-[var(--text-primary)]">{health?.metrics?.activeUsers ?? "-"}</p>
+          <p className="text-[10px] text-[var(--text-muted)]">{health?.metrics?.activeSessions ?? 0} active sessions</p>
         </div>
 
         <div className="bg-[var(--bg-surface)] border border-[var(--border)] p-4 rounded-xl space-y-1">
@@ -147,7 +147,7 @@ export function HealthDashboard() {
             <span>Requests / Min</span>
             <Zap className="w-4 h-4 text-amber-400" />
           </div>
-          <p className="text-2xl font-black text-[var(--text-primary)]">{health?.metrics.requestsPerMinute ?? "-"}</p>
+          <p className="text-2xl font-black text-[var(--text-primary)]">{health?.metrics?.requestsPerMinute ?? "-"}</p>
           <p className="text-[10px] text-[var(--text-muted)]">Live API throughput</p>
         </div>
 
@@ -157,7 +157,7 @@ export function HealthDashboard() {
             <Clock className="w-4 h-4 text-emerald-400" />
           </div>
           <p className="text-2xl font-black text-[var(--text-primary)]">
-            {health?.metrics.avgResponseTime ? `${Math.round(health.metrics.avgResponseTime)} ms` : "< 25 ms"}
+            {health?.metrics?.avgResponseTime ? `${Math.round(health.metrics.avgResponseTime)} ms` : "< 25 ms"}
           </p>
           <p className="text-[10px] text-emerald-400 font-medium">Optimal response speed</p>
         </div>
@@ -168,7 +168,7 @@ export function HealthDashboard() {
             <AlertTriangle className="w-4 h-4 text-rose-400" />
           </div>
           <p className="text-2xl font-black text-[var(--text-primary)]">
-            {health?.metrics.errorRate !== undefined ? `${(health.metrics.errorRate * 100).toFixed(2)}%` : "0.00%"}
+            {health?.metrics?.errorRate !== undefined ? `${(health.metrics.errorRate * 100).toFixed(2)}%` : "0.00%"}
           </p>
           <p className="text-[10px] text-[var(--text-muted)]">Threshold: &lt; 5.00%</p>
         </div>
@@ -183,14 +183,14 @@ export function HealthDashboard() {
             <h3 className="font-bold text-sm text-[var(--text-primary)] flex items-center gap-2 group-hover:text-sky-400 transition-colors">
               <Database className="w-4 h-4 text-sky-400" /> Database
             </h3>
-            {getStatusBadge(health?.components.database.status)}
+            {getStatusBadge(health?.components?.database?.status)}
           </div>
           <div className="space-y-2 text-xs">
             <div className="flex justify-between">
               <span className="text-[var(--text-muted)]">Latency</span>
-              <span className="font-mono text-[var(--text-primary)] font-medium">{health?.components.database.latency ?? 0} ms</span>
+              <span className="font-mono text-[var(--text-primary)] font-medium">{health?.components?.database?.latency ?? 0} ms</span>
             </div>
-            {health?.components.database.error && (
+            {health?.components?.database?.error && (
               <div className="p-2.5 rounded bg-rose-500/10 border border-rose-500/20 text-rose-300 font-mono text-[10px]">
                 {health.components.database.error}
               </div>
@@ -209,16 +209,16 @@ export function HealthDashboard() {
             <h3 className="font-bold text-sm text-[var(--text-primary)] flex items-center gap-2 group-hover:text-purple-400 transition-colors">
               <Server className="w-4 h-4 text-purple-400" /> Gate Turnstiles
             </h3>
-            {getStatusBadge(health?.components.gateways.status)}
+            {getStatusBadge(health?.components?.gateways?.status)}
           </div>
           <div className="space-y-2 text-xs">
             <div className="flex justify-between">
               <span className="text-[var(--text-muted)]">Online</span>
-              <span className="font-mono text-emerald-400 font-bold">{health?.components.gateways.online ?? 0}</span>
+              <span className="font-mono text-emerald-400 font-bold">{health?.components?.gateways?.online ?? 0}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-[var(--text-muted)]">Total Gates</span>
-              <span className="font-mono text-[var(--text-primary)] font-bold">{health?.components.gateways.total ?? 0}</span>
+              <span className="font-mono text-[var(--text-primary)] font-bold">{health?.components?.gateways?.total ?? 0}</span>
             </div>
             <p className="text-[10px] text-[var(--text-muted)] mt-2 flex items-center gap-1">
               Click to manage gate hardware →
@@ -234,13 +234,13 @@ export function HealthDashboard() {
             <h3 className="font-bold text-sm text-[var(--text-primary)] flex items-center gap-2 group-hover:text-emerald-400 transition-colors">
               <Shield className="w-4 h-4 text-emerald-400" /> Subsystems
             </h3>
-            {getStatusBadge((health?.components.services.auth?.status === "degraded" ? "degraded" : health?.components.services.status) as any)}
+            {getStatusBadge((health?.components?.services?.auth?.status === "degraded" ? "degraded" : health?.components?.services?.status) as any)}
           </div>
           <div className="space-y-2 text-xs">
             <div className="flex justify-between">
               <span className="text-[var(--text-muted)]">Auth & JWT Engine</span>
               <span className="text-emerald-400 font-bold text-[10px]">
-                {health?.components.services?.auth?.status === "healthy" ? "Operational" : "Degraded"}
+                {health?.components?.services?.auth?.status === "healthy" ? "Operational" : "Degraded"}
               </span>
             </div>
             <div className="flex justify-between">
@@ -274,7 +274,7 @@ export function HealthDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
-                {health.recentAlerts.map((alert) => (
+                {(health?.recentAlerts || []).map((alert) => (
                   <tr key={alert.id} className="hover:bg-[var(--bg-elevated)]/50 transition-colors">
                     <td className="py-2.5">{getSeverityBadge(alert.severity)}</td>
                     <td className="py-2.5 font-medium text-[var(--text-primary)]">{alert.message}</td>

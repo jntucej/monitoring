@@ -7,6 +7,7 @@ import {
   Database,
   Shield,
   Server,
+  User,
   Users,
   Lock,
   ShieldAlert,
