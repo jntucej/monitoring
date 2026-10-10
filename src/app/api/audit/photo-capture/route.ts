@@ -32,7 +32,7 @@ async function handlePost(
     );
   }
 
-  // await addAudit({
+  await addAudit({
     action: "PHOTO_CAPTURED",
     userId: auth.userId,
     userName: auth.email,

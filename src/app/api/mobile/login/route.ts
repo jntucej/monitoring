@@ -81,7 +81,7 @@ export async function handlePost(req: NextRequest) {
       const targetDeviceId = String(deviceId || "mobile-device");
       const token = await generateMobileToken(person.id, person.uniqueId, targetDeviceId);
 
-      // await addAudit({
+      await addAudit({
         action: "MOBILE_LOGIN",
         userId: person.id,
         userName: person.fullName,
@@ -124,7 +124,7 @@ export async function handlePost(req: NextRequest) {
 
     const token = await generateMobileToken(person.id, person.uniqueId, String(deviceId));
 
-    // await addAudit({
+    await addAudit({
       action: "MOBILE_LOGIN",
       userId: person.id,
       userName: person.fullName,

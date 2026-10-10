@@ -39,7 +39,7 @@ async function handlePost(req: NextRequest) {
     const actorId = req.headers.get("x-user-id") || "admin";
     const actorRole = (req.headers.get("x-user-role") || "sysadmin") as Role;
 
-    // await addAudit({
+    await addAudit({
       action: "INTEGRATION_SYNC",
       userId: actorId,
       userName: "Admin",
