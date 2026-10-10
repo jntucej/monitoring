@@ -1,5 +1,5 @@
 // src/lib/user-import.ts
-import { getSupabaseServiceClient } from "@/lib/supabaseClient";
+import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { Role } from "@/lib/types";
 import { addAudit } from "@/lib/db";
 import bcrypt from "bcryptjs";

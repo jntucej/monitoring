@@ -1,6 +1,6 @@
 // src/app/api/profile/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseServiceClient } from "@/lib/supabaseClient";
+import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { addAudit } from "@/lib/db";
 import { verifyCsrf } from "@/middleware/csrf";
