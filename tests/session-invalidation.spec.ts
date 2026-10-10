@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Session Management & Token Invalidation', () => {
   test('Rejects invalid session tokens with 401 Unauthorized', async ({ request }) => {
-    const response = await request.get('/api/users/profile', {
+    const response = await request.get('/api/profile', {
       headers: {
         'x-session-token': 'invalid-session-token-12345',
         'Authorization': 'Bearer invalid-token',
