@@ -17,6 +17,7 @@ export function GovernanceModules() {
           bgColor="bg-sky-500/10"
           borderColor="hover:border-sky-500/40"
           links={[
+            { label: "SysAdmin Profile & Credentials", href: "/sysadmin/profile" },
             { label: "Manage Students Roster", href: "/sysadmin/students" },
             { label: "Manage Staff Roster", href: "/sysadmin/staff" },
             { label: "Roles & Permissions", href: "/sysadmin/roles" },

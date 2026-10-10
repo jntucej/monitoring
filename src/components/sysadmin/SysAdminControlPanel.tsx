@@ -96,14 +96,23 @@ export function SysAdminControlPanel() {
             Dedicated infrastructure, security governance, SSO/LDAP integrations & telemetry console.
           </p>
         </div>
-        <button
-          onClick={fetchTelemetry}
-          disabled={isSyncing}
-          className="px-3.5 py-1.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-all flex items-center gap-2 self-start sm:self-auto"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 text-rose-400 ${isSyncing ? "animate-spin" : ""}`} />
-          {isSyncing ? "Refreshing..." : "Sync Telemetry"}
-        </button>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <Link
+            href="/sysadmin/profile"
+            className="px-3.5 py-1.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-all flex items-center gap-1.5"
+          >
+            <User className="w-3.5 h-3.5 text-sky-400" />
+            SysAdmin Profile
+          </Link>
+          <button
+            onClick={fetchTelemetry}
+            disabled={isSyncing}
+            className="px-3.5 py-1.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-all flex items-center gap-2"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-rose-400 ${isSyncing ? "animate-spin" : ""}`} />
+            {isSyncing ? "Refreshing..." : "Sync Telemetry"}
+          </button>
+        </div>
       </div>
 
       {/* System Health & Telemetry Dashboard */}
