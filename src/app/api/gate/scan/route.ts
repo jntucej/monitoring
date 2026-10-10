@@ -261,7 +261,7 @@ async function handlePost(req: NextRequest) {
 }
 
 export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["operator"] }),
+  withAuthorization(handlePost, { requiredRole: ["operator", "admin", "sysadmin", "supervisor"] }),
   { keyPrefix: "gate_scan", maxRequests: 60 }
 )
 

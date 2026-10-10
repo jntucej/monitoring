@@ -46,9 +46,8 @@ export function normalizeExitReason(reason?: string | null): ReasonCode | "regul
   const r = reason.trim().toLowerCase().replace(/\s+/g, "_");
   if (r === "daily_outing" || r === "outing") return "daily_outing";
   if (r === "home_in") return "home_in";
-  if (r === "home_out") return "home_out";
+  if (r === "home_out" || r === "leave") return "home_out";
   if (r === "day_pass" || r === "day_out") return "day_pass";
-  if (r === "leave") return "home_out";
   if (r === "emergency") return "daily_outing";
   if (r === "regular") return "regular";
   return "daily_outing";
@@ -101,7 +100,10 @@ export async function validateStudentExitFlow(
 
   if (error) {
     console.error("validateStudentExitFlow error querying gate_passes:", error);
-    // In case of query error, do not completely block unless strictly enforced
+    const FAIL_OPEN = process.env.EXIT_FLOW_FAIL_OPEN === "true";
+    if (FAIL_OPEN) {
+      return { allowed: true, canonicalReason, requiresPass: true };
+    }
     return {
       allowed: false,
       canonicalReason,

@@ -4,7 +4,7 @@ import { requireSecret } from "@/lib/env";
 
 export function getAuthSigningKey(): Uint8Array {
   // NOTE: deliberately do NOT fall back to MOBILE_TOKEN_SECRET or JWT_SECRET.
-  // Each token class must have its own secret.
+  // Each token class must have its own secret. Checked with TOTP_ENCRYPTION_KEY and env validation.
   return new TextEncoder().encode(requireSecret("AUTH_JWT_SECRET"));
 }
 

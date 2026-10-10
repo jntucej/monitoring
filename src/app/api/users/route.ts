@@ -13,7 +13,8 @@ import type { Role } from "@/lib/types";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
-import { isMfaRequiredForAdmin } from "@/lib/authContext";
+import { ROLES } from "@/lib/roles";
+import { isMfaRequiredForPrivileged } from "@/lib/authContext";
 
 // Roles assignable via this API. Intersection of src/lib/types.ts `Role`
 // and the CHECK constraint on public.users.role in consolidated_clean_schema.sql.
@@ -338,7 +339,7 @@ async function handlePatch(req: NextRequest) {
       // hasn't enrolled would be locked out of login AND every API route
       // (enrollment itself needs an authenticated session). Block the
       // promotion until they enroll, instead of stranding them.
-      if (role === 'sysadmin' && (await isMfaRequiredForAdmin())) {
+      if (role === ROLES.SYSADMIN && (await isMfaRequiredForPrivileged())) {
         const service = getSupabaseServiceClient();
         const { data: targetMfa } = await service
           .from("users")

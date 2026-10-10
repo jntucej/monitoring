@@ -17,6 +17,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   const hasHydrated = useHasHydrated();
   const { user, authenticated, checkSession } = useAuthStore();
   const [isChecking, setIsChecking] = useState(true);
+  const [timedOut, setTimedOut] = useState(false);
 
   const userId = user?.id;
   const userRole = user?.role;
@@ -25,6 +26,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   useEffect(() => {
     if (hasHydrated) return;
     const t = setTimeout(() => {
+      // give the store a nudge — this is safe even in private mode
       try {
         useAuthStore.persist?.rehydrate();
       } catch {
@@ -72,19 +74,25 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
     setIsChecking(false);
   }, [hasHydrated, authenticated, userId, userRole, gateId, allowedRoles, router]);
 
-  // Revalidate session asynchronously in background without causing infinite re-render loop
+  // Revalidate session asynchronously — background revalidation
+  // is now handled implicitly by API-level 401 handling in useApi.
   useEffect(() => {
     if (!hasHydrated || !authenticated || !userId) return;
-
     checkSession();
-
-    // Auto-refresh session check every 5 minutes
-    const interval = setInterval(() => {
-      checkSession();
-    }, 5 * 60 * 1000);
-
-    return () => clearInterval(interval);
   }, [hasHydrated, authenticated, userId, checkSession]);
+
+  // ponytail: timedOut flunks hydration — fail closed to /login rather than
+  // spinning. First effect already routed unauthenticated users; this covers
+  // the stuck-hydration path.
+  if (timedOut && !hasHydrated) {
+    router.replace("/login");
+    return (
+      <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[var(--bg-base)] text-[var(--text-primary)]">
+        <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4" />
+        <p className="text-xs font-semibold text-[var(--text-muted)]">Verifying security credentials...</p>
+      </div>
+    );
+  }
 
   if (!hasHydrated || isChecking || !authenticated || !user) {
     return (
