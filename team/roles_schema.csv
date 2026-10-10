@@ -1,5 +1,5 @@
-role,jiraName
-Frontend Developer,Akarsh
-Backend Developer,Bhavana
-QA,Charan
-DevOps,Raghav
+CSV Name,Jira Display Name,Jira Account ID,Role
+Akarsh,Akarsh,712020:16a67b9d-d582-46a5-af1e-970b5490a0f3,Frontend Developer
+Ashwitha,Moola Ashwitha,712020:15669266-bf45-44f9-b682-e91570a97e1e,Fullstack Developer
+Junaid,Djengo,712020:ed627590-0379-4530-9e33-3461ca83db0c,Infrastructure & Security
+Dhanavarsha,Dhanavarsha Ponnala,712020:70c9a8e5-066f-4717-89d0-6073d0190dc5,QA Lead

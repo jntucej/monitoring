@@ -1,0 +1,2 @@
+Project key,Project name,Project type,Issue key,Summary,Description,Issue Type,Priority,Component Area,Security Sensitive,Architecture Blocker,QA Required,CR ID,Assignee,Assignee ID
+GATE,Gate Monitor,software,CR-04,Write test cases for attendance module,Cover dashboard flows with tests,Task,P2,QA,No,No,Yes,CR-04,Dhanavarsha,712020:70c9a8e5-066f-4717-89d0-6073d0190dc5

@@ -53,7 +53,7 @@ async function handleResetPassword(req: NextRequest) {
       let tokenCheck;
       try {
         tokenCheck = await query(
-          "SELECT id FROM password_reset_tokens WHERE token_hash = $1 AND used IS NOT TRUE AND expires_at > NOW() LIMIT 1",
+          "SELECT id FROM password_reset_tokens WHERE token_hash = $1 AND used_at IS NULL AND expires_at > NOW() LIMIT 1",
           [tokenHash]
         );
       } catch (err: any) {
@@ -92,9 +92,10 @@ async function handleResetPassword(req: NextRequest) {
       }
 
       // Mark token used and revoke sessions
-      // Bug 130: live schema (schema.sql) uses `used BOOLEAN`, not `used_at`. The old
-      // `SET used_at = NOW()` referenced a column that doesn't exist and threw (swallowed).
-      await query("UPDATE password_reset_tokens SET used = TRUE WHERE token_hash = $1", [tokenHash]).catch(() => {});
+      await query(
+        "UPDATE password_reset_tokens SET used_at = NOW() WHERE token_hash = $1 AND used_at IS NULL",
+        [tokenHash]
+      ).catch(() => {});
       await query("UPDATE sessions SET revoked_at = NOW() WHERE user_id = $1", [payload.sub]).catch(() => {});
 
       return NextResponse.json({

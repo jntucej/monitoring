@@ -86,3 +86,9 @@ create_missing_tables.js
 dumpScanner.js
 test_merge.ts
 test-del.js
+
+# Committed artifacts that should not be tracked
+qa-evidence/
+*.bak.*
+docker-compose.yml.bak*
+users.json

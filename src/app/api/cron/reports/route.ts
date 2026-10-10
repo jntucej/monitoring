@@ -7,14 +7,17 @@ import { sendEmail } from "@/lib/integrations/email";
  * GET /api/cron/reports — Cron runner for scheduled report generation
  */
 export async function GET(req: NextRequest) {
-  const authHeader = req.headers.get("authorization");
   const cronSecret = process.env.CRON_SECRET;
 
   if (!cronSecret) {
     return NextResponse.json({ success: false, error: { message: "CRON_SECRET is not configured on server" } }, { status: 503 });
   }
 
-  if (authHeader !== `Bearer ${cronSecret}`) {
+  const authHeader = req.headers.get("authorization");
+  const secretHeader = req.headers.get("x-cron-secret");
+  const bearerToken = authHeader?.startsWith("Bearer ") ? authHeader.slice(7).trim() : null;
+
+  if (secretHeader !== cronSecret && bearerToken !== cronSecret) {
     return NextResponse.json({ success: false, error: { message: "Unauthorized cron request" } }, { status: 401 });
   }
 

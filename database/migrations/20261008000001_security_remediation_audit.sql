@@ -35,11 +35,15 @@ CREATE POLICY "service_role_all_pwd_reset_tokens"
 
 -- 2. Predictions Type & Timestamp Performance Index
 CREATE TABLE IF NOT EXISTS predictions (
-  id          TEXT PRIMARY KEY,
-  type        TEXT NOT NULL,
-  prediction  JSONB NOT NULL DEFAULT '{}'::jsonb,
-  timestamp   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  id                       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  type                     VARCHAR(50) NOT NULL,
+  target                   VARCHAR(100) NOT NULL,
+  predicted_value          DOUBLE PRECISION NOT NULL,
+  confidence_interval_low  DOUBLE PRECISION NOT NULL,
+  confidence_interval_high DOUBLE PRECISION NOT NULL,
+  timestamp                TIMESTAMPTZ NOT NULL,
+  model_version            VARCHAR(20) DEFAULT 'v1.0-arima',
+  created_at               TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS idx_predictions_type_timestamp

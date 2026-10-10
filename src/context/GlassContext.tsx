@@ -184,10 +184,13 @@ export function GlassProvider({
       }, 10000);
     });
 
-    const unsubConn = ws.onConnectionChange((connected) => {
+    const unsubConn = ws.onConnectionChange((connected, isMockFallback) => {
       setWsConnected(connected);
       setWsReconnecting(!connected && !isMock);
       if (connected) setWsError(null);
+      if (isMockFallback || isMock) {
+        setIsLiveStream(false);
+      }
     });
 
     ws.connect();

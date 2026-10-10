@@ -48,7 +48,8 @@ export function normalizeExitReason(reason?: string | null): ReasonCode | "regul
   if (r === "home_in") return "home_in";
   if (r === "home_out") return "home_out";
   if (r === "day_pass" || r === "day_out") return "day_pass";
-  if (r === "emergency" || r === "leave") return "daily_outing";
+  if (r === "leave") return "home_out";
+  if (r === "emergency") return "daily_outing";
   if (r === "regular") return "regular";
   return "daily_outing";
 }

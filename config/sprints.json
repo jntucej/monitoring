@@ -1,0 +1,16 @@
+{
+  "sprints": [
+    {
+      "name": "Sprint 1",
+      "state": "active"
+    },
+    {
+      "name": "Sprint 2",
+      "state": "future"
+    },
+    {
+      "name": "Sprint 3",
+      "state": "future"
+    }
+  ]
+}

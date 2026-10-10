@@ -1,0 +1,2 @@
+Project key,Project name,Project type,Issue key,Summary,Description,Issue Type,Priority,Component Area,Security Sensitive,Architecture Blocker,QA Required,CR ID,Assignee,Assignee ID
+GATE,Gate Monitor,software,CR-05,Harden server security and secrets,Implement zero-trust auth and secret rotation,Task,P0,Security,Yes,Yes,Yes,CR-05,Junaid,712020:ed627590-0379-4530-9e33-3461ca83db0c

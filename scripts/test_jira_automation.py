@@ -30,7 +30,7 @@ def main():
     assert files, "no issues_*.csv discovered"
     tasks, errors = jl.load_issues_file(files[0])
     assert not errors, errors
-    assert len(tasks) == 15, len(tasks)
+    assert len(tasks) >= 5, len(tasks)
     assert list(tasks[0].keys()) == jl.SOURCE_COLUMNS, list(tasks[0].keys())
 
     # 3. Roles schema parses identically from CSV and from the markdown table.

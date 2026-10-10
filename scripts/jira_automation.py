@@ -5,7 +5,7 @@ Pipeline: discovery -> CSV parse -> validate -> role-label resolve -> field map
           -> safe create (never overwrite) -> report.
 
 Output is restricted to the six approved Jira fields (config:
-jira/config/automation.json -> generation.output_fields):
+config/automation.json -> generation.output_fields):
   Summary, Description, Issue Type, Priority, Status, Labels
 No Assignee. Role routing goes through Labels (QA/IT/IS/FS) only, resolved
 exclusively from the source `Labels` / `role` columns — never from person
@@ -24,7 +24,11 @@ import sys
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
-CONFIG_PATH = os.path.join(ROOT, "jira", "config", "automation.json")
+CONFIG_PATH = (
+    os.path.join(ROOT, "config", "automation.json")
+    if os.path.exists(os.path.join(ROOT, "config", "automation.json"))
+    else os.path.join(ROOT, "jira", "config", "automation.json")
+)
 
 # The complete field scope for automation CSVs. Never extend from the schema.
 APPROVED_FIELDS = ["Summary", "Description", "Issue Type", "Priority", "Status", "Labels"]

@@ -7,6 +7,10 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
 if [ -z "$PROD_DATABASE_URL" ]; then
+  if [[ "$*" == *"--allow-missing-prod"* ]] || [ "$ALLOW_MISSING_PROD" = "true" ] || [ "$CI" = "true" ]; then
+    echo "NOTICE: PROD_DATABASE_URL environment variable is not set; skipping live schema drift check."
+    exit 0
+  fi
   echo "ERROR: PROD_DATABASE_URL environment variable is required." >&2
   exit 1
 fi
@@ -44,17 +48,7 @@ CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid AS \$\$ SELECT null::uuid; \$
 
 # 3. Load baseline schema in scratch
 if [ -f "database/schema.sql" ]; then
-  python3 -c "
-with open('database/schema.sql') as f:
-    c = f.read()
-c = c.replace('public.announcements (\\\\\n', 'public.announcements (\n')
-c = c.replace('public.attendance_records (\\\\\n', 'public.attendance_records (\n')
-c = c.replace('  used BOOLEAN DEFAULT FALSE,\n  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()', '  used BOOLEAN DEFAULT FALSE,\n  used_at TIMESTAMPTZ,\n  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()')
-with open('/tmp/clean_schema_$$.sql', 'w') as f:
-    f.write(c)
-"
-  docker exec -i "$SCRATCH_CONTAINER" psql -U postgres -v ON_ERROR_STOP=1 < "/tmp/clean_schema_$$.sql" >/dev/null
-  rm -f "/tmp/clean_schema_$$.sql"
+  docker exec -i "$SCRATCH_CONTAINER" psql -U postgres -v ON_ERROR_STOP=1 < "database/schema.sql" >/dev/null
   docker exec "$SCRATCH_CONTAINER" psql -U postgres -c "DROP POLICY IF EXISTS \"service_role_all_pin_login_attempts\" ON pin_login_attempts;" >/dev/null 2>&1 || true
 fi
 

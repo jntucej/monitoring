@@ -69,17 +69,7 @@ CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid AS \$\$ SELECT null::uuid; \$
 # 4. Load baseline schema if present
 if [ -f "database/schema.sql" ]; then
   echo "Loading baseline schema..."
-  python3 -c "
-with open('database/schema.sql') as f:
-    c = f.read()
-c = c.replace('public.announcements (\\\\\n', 'public.announcements (\n')
-c = c.replace('public.attendance_records (\\\\\n', 'public.attendance_records (\n')
-c = c.replace('  used BOOLEAN DEFAULT FALSE,\n  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()', '  used BOOLEAN DEFAULT FALSE,\n  used_at TIMESTAMPTZ,\n  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()')
-with open('/tmp/clean_schema_$$.sql', 'w') as f:
-    f.write(c)
-"
-  docker exec -i "$CONTAINER_NAME" psql -U postgres -v ON_ERROR_STOP=1 < "/tmp/clean_schema_$$.sql" >/dev/null
-  rm -f "/tmp/clean_schema_$$.sql"
+  docker exec -i "$CONTAINER_NAME" psql -U postgres -v ON_ERROR_STOP=1 < "database/schema.sql" >/dev/null
   docker exec "$CONTAINER_NAME" psql -U postgres -c "DROP POLICY IF EXISTS \"service_role_all_pin_login_attempts\" ON pin_login_attempts;" >/dev/null 2>&1 || true
 fi
 

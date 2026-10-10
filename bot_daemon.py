@@ -7,7 +7,10 @@ import time
 from pathlib import Path
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
-AUTHORIZED_CHAT_ID = int(os.environ.get("TELEGRAM_CHAT_ID", "1926342151"))
+_auth_chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+if not _auth_chat_id:
+    raise SystemExit("TELEGRAM_CHAT_ID environment variable is required")
+AUTHORIZED_CHAT_ID = int(_auth_chat_id)
 BASE_DIR = Path("/root/monitoring")
 
 def tg_send(msg: str, chat_id: int = AUTHORIZED_CHAT_ID) -> None:
@@ -95,7 +98,7 @@ def main():
                 if not msg: continue
                 chat = msg.get("chat", {}).get("id")
                 text = msg.get("text", "").strip()
-                if str(chat) != "1926342151": continue
+                if str(chat) != str(AUTHORIZED_CHAT_ID): continue
                 if text.startswith("/"):
                     tg_send(handle(text[1:]), chat)
         except Exception:

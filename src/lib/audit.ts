@@ -26,6 +26,7 @@ export type AuditAction =
   | 'GATE_ONLINE'
   | 'SMART_SCHEDULE_APPLIED'
   | 'CRON_REPORTS_EXECUTED'
+  | 'PIN_CHANGED'
   | 'BACK_GATE_GEO_MISMATCH';
 
 

@@ -1,0 +1,7 @@
+[
+  { "id": "customfield_10107", "name": "CR ID" },
+  { "id": "customfield_10109", "name": "Component Area" },
+  { "id": "customfield_10110", "name": "Security Sensitive" },
+  { "id": "customfield_10111", "name": "Architecture Blocker" },
+  { "id": "customfield_10112", "name": "QA Required" }
+]

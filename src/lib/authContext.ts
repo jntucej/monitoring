@@ -266,9 +266,9 @@ export async function validateStudentAccess(token: string, studentId: string): P
   // Check if the user is a parent accessing their child
   if (context.role === 'parent') {
     const { data: student, error: studentError } = await supabase
-      .from('students')
+      .from('student_details')
       .select('guardian_id')
-      .eq('id', studentId)
+      .eq('user_id', studentId)
       .single();
 
     if (studentError || !student) {
@@ -413,9 +413,10 @@ async function validatePassOperation(
   // Students can access their own passes
   if (context.role === 'student') {
     const { data: student, error: studentError } = await supabase
-      .from('students')
+      .from('users')
       .select('id')
       .eq('id', context.userId)
+      .eq('role', 'student')
       .single();
 
     if (studentError || !student) {
@@ -432,9 +433,9 @@ async function validatePassOperation(
   // Parents can access their children's passes
   if (context.role === 'parent') {
     const { data: student, error: studentError } = await supabase
-      .from('students')
-      .select('id, guardian_id')
-      .eq('id', pass.student_id)
+      .from('student_details')
+      .select('user_id, guardian_id')
+      .eq('user_id', pass.student_id)
       .single();
 
     if (studentError || !student) {
@@ -539,33 +540,5 @@ export async function getGateStudentInfo(token: string, roll: string) {
     };
   }
 
-  // 2. Fallback legacy students table
-  const { data: student, error: studentError } = await supabase
-    .from('students')
-    .select('id, roll, name, department, year, section, photo, status, hostel_block, room_number')
-    .eq('roll', formattedId)
-    .maybeSingle();
-
-  if (studentError || !student) {
-    throw new Error('NOT_FOUND: Student/Person not found');
-  }
-
-  if (student.status && student.status.toUpperCase() !== 'ACTIVE') {
-    throw new Error('INACTIVE_STUDENT: Student account is not active');
-  }
-
-  return {
-    id: student.id,
-    roll: student.roll,
-    uniqueId: student.roll,
-    name: student.name,
-    fullName: student.name,
-    personType: 'student',
-    department: student.department,
-    year: student.year,
-    section: student.section,
-    photo: student.photo,
-    hostelBlock: student.hostel_block,
-    roomNumber: student.room_number
-  };
+  throw new Error('NOT_FOUND: Student/Person not found');
 }
