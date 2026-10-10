@@ -5,10 +5,7 @@ import { Upload, FileSpreadsheet, Download, Loader2, ShieldAlert } from "lucide-
 import { getAuthHeaders } from "@/lib/utils";
 import { CsvValidationPreview } from "./CsvValidationPreview";
 
-const SAMPLE_CSV = `email,name,role,unique_id,employee_id,department,designation,phone,gate_code,hostel_block,room_number,is_hosteller,guardian_email
-prof.smith@college.edu,Dr. Alan Smith,faculty,EMP001,EMP001,CSE,Professor,+919876543210,,,,,
-john.doe@college.edu,John Doe,student,22JJ1A0501,,CSE,,+919876543211,,HOSTEL-A,101,true,guardian@example.com
-guard.mike@college.edu,Mike Guard,operator,,,,+919876543213,GATE_MAIN,,,,`;
+const SAMPLE_CSV = `email,name,role,unique_id,course,father_name,dob,phone,landline_number,hostel_block,room_number\njohn.doe@college.edu,John Doe,student,22JJ1A0501,CSE,Robert Doe,2005-01-01,+919****3211,040-123456,HOSTEL-A,101`;
 
 export function CsvBulkImporter() {
   const [csvText, setCsvText] = useState("");
