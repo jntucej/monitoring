@@ -19,7 +19,7 @@ import { getClientLocation, getClientSysTag } from "@/lib/geo";
  * server route (which runs with the service client) for today's counts.
  * Falls back to the local `statsToday()` only if the request itself fails.
  */
-async function fetchTodayStats(gateId?: string): Promise<{
+async function fetchTodayStats(gateId?: string, signal?: AbortSignal): Promise<{
   entries: number;
   exits: number;
   onCampus: number;
@@ -40,7 +40,7 @@ async function fetchTodayStats(gateId?: string): Promise<{
     if (sessionToken) headers["X-Session-Token"] = sessionToken;
 
     const url = gateId ? `/api/operator/stats?gateId=${encodeURIComponent(gateId)}` : "/api/operator/stats";
-    const res = await fetch(url, { headers, cache: "no-store" });
+    const res = await fetch(url, { headers, cache: "no-store", signal });
     if (!res.ok) return null;
     const result = await res.json();
     if (!result?.success || !result?.data) return null;
@@ -94,13 +94,15 @@ interface OperatorState {
   setDirection: (direction: ScanDirection) => void;
   setReason: (reason: ExitReason) => void;
   
-  confirmScan: (addToast: (toast: Omit<ToastData, "id">) => void, overrideDirection?: ScanDirection, overrideReason?: ExitReason | string) => void;
+  confirmScan: (addToast: (toast: Omit<ToastData, "id">) => void, overrideDirection?: ScanDirection, overrideReason?: ExitReason | string) => Promise<void>;
     cancelScan: () => void;
   reset: () => void;
   loadStats: () => void;
   setGate: (gateId: string) => void;
   _fetchTodayStats: () => Promise<{ entries: number; exits: number; onCampus: number; recentScans: Scan[]; breakdown: CategoryBreakdown | null; outing: OutingEntry[] | null }>;
 }
+
+let activeStatsFetchCtrl: AbortController | null = null;
 
 const EMPTY_BREAKDOWN: CategoryBreakdown = {
   hostellers: { inside: 0, inToday: 0, outToday: 0 },
@@ -261,7 +263,7 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
     const operatorId = useAuthStore.getState().user?.id || "op-1";
 
     // Async execution with GPS geolocation & sysTag telemetry with strict 5s timeout
-    (async () => {
+    return (async () => {
       const geo = await getClientLocation();
       const sysTag = getClientSysTag();
       const authStore = useAuthStore.getState();
