@@ -369,9 +369,9 @@ export default function SysAdminStudentsPage() {
                     <td colSpan={6} className="px-4 py-12 text-center text-slate-500">
                       No students found.
                       {students.length === 0 && !search && !loadError && (
-                        <div className="mt-2 text-xs text-slate-600 max-w-md mx-auto">
-                          No active students found in the database.
-                        </div>
+                                        <div className="mt-2 text-xs text-slate-600 max-w-md mx-auto">
+                  The server may be falling back to the anon client (RLS silently returns 0 rows). Verify <code className="mx-1 px-1 py-0.5 rounded bg-slate-800 text-emerald-400">SUPABASE_SERVICE_ROLE_KEY</code> is set in the deployment environment.
+                </div>
                       )}
                     </td>
                   </tr>
