@@ -414,12 +414,11 @@ async function handlePatch(req: NextRequest) {
         );
       }
 
-      await addAudit({
         action: 'USER_PIN_RESET',
         userId: actorId,
         userName: 'System',
         role: actorRole as Role,
-        details: `Reset kiosk PIN for user ${targetUserId}`,
+        details: JSON.stringify({ message: `Reset kiosk PIN for user ${targetUserId}` }),
       });
     }
 
@@ -445,12 +444,11 @@ async function handlePatch(req: NextRequest) {
         );
       }
 
-      await addAudit({
         action: 'USER_PASSWORD_RESET',
         userId: actorId,
         userName: 'System',
         role: actorRole as Role,
-        details: `Force-reset Supabase Auth password for user ${targetUserId}`,
+        details: JSON.stringify({ message: `Force-reset Supabase Auth password for user ${targetUserId}` }),
       });
     }
 

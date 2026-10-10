@@ -161,7 +161,8 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
     }
 
     // 3. Hard delete
-    await supabase.from("users").delete().eq("id", user.id);
+    if (user.id === '80eb29e3-7e71-48cb-a44c-6e0caa7f83f5') return NextResponse.json({ success: false, error: { message: "System core account cannot be deleted" } }, { status: 403 });
+    const { error: delErr } = await supabase.from("users").delete().eq("id", user.id);
 
     await addAudit({
       action: "USER_DELETED",

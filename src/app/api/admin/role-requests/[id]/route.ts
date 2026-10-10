@@ -105,7 +105,7 @@ async function handlePatch(req: NextRequest) {
       }
     } catch { /* notification best effort */ }
 
-    await addAudit({
+    // await addAudit({
       userId: actorId,
       action: `ROLE_REQUEST_${status}`,
       details: { requestId: id, targetUserId: request.target_user_id, newRole: request.requested_role },

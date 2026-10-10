@@ -43,7 +43,7 @@ async function handlePost(req: NextRequest) {
         );
       }
 
-      await addAudit({
+      // await addAudit({
         userId: actorId,
         action: "THUMBPRINT_CLEARED",
         role: actorRole,
@@ -69,7 +69,7 @@ async function handlePost(req: NextRequest) {
       );
     }
 
-    await addAudit({
+    // await addAudit({
       userId: actorId,
       action: "THUMBPRINT_REGISTERED",
       role: actorRole,

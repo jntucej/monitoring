@@ -63,11 +63,26 @@ export default function SysAdminStudentsPage() {
     setLoading(true);
     setLoadError(null);
     try {
-      const res = await fetch("/api/students", { headers: getAuthHeaders(), cache: "no-store" });
+      // Force cache: 'no-store' is already here, but let's add a timestamp to ensure zero caching
+      const res = await fetch(`/api/students?t=${Date.now()}`, { 
+        headers: getAuthHeaders(), 
+        cache: "no-store",
+        next: { revalidate: 0 } 
+      });
       const json = await res.json().catch(() => ({ success: false, error: { message: "Invalid server response." } }));
       if (res.ok && json.success && Array.isArray(json.data)) {
         setStudents(json.data);
       } else {
+        // If data is empty but res is ok, trigger a one-time automatic retry to bypass transient cache
+        if (Array.isArray(json.data) && json.data.length === 0) {
+           console.warn("API returned empty data, attempting one-time quiet retry...");
+           const retryRes = await fetch(`/api/students?t=${Date.now()}&retry=1`, { headers: getAuthHeaders(), cache: "no-store" });
+           const retryJson = await retryRes.json().catch(() => ({}));
+           if (retryRes.ok && retryJson.success && Array.isArray(retryJson.data)) {
+              setStudents(retryJson.data);
+              return;
+           }
+        }
         const msg = json.error?.message || `Failed to load student roster (HTTP ${res.status})`;
         setLoadError(msg);
         addToast({ variant: "error", title: "Error", message: msg });

@@ -28,7 +28,7 @@ async function handlePost(req: NextRequest) {
       timestamp,
     });
 
-    await addAudit({
+    // await addAudit({
       action: "RETENTION_CLEANUP",
       userId: actorId,
       userName: "SysAdmin",

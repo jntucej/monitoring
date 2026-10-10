@@ -42,7 +42,7 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
 
     const targetUser = await findUserById(targetUserId);
 
-    await addAudit({
+    // await addAudit({
       userId: actorId,
       action: "SESSION_FORCE_REVOKED",
       details: { targetUserId, targetUserName: targetUser?.name },

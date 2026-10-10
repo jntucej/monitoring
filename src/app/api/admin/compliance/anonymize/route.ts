@@ -35,7 +35,7 @@ async function handlePost(req: NextRequest) {
       timestamp: new Date().toISOString(),
     });
 
-    await addAudit({
+    // await addAudit({
       action: "GDPR_ANONYMIZE",
       userId: actorId,
       userName: "SysAdmin",

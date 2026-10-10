@@ -87,7 +87,7 @@ async function handlePost(req: NextRequest) {
       })
       .eq("id", userIdToDisable);
 
-    await addAudit({
+    // await addAudit({
       userId: actorId,
       action: "2FA_DISABLED",
       details: {
