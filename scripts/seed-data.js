@@ -67,7 +67,7 @@ function genUUID(seed) {
 
 async function main() {
   console.log('🌱 Seeding initial campus database records...');
-  const pinHash = bcrypt.hashSync(DEFAULT_SEED_PIN, 10);
+  const pinHash = bcrypt.hashSync(DEFAULT_SEED_PIN, 12);
 
   const STAFF_RANGES = [
     { start: 1, end: 20, type: 'faculty', designation: 'Regular Faculty', dept: 'CSE' },

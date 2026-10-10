@@ -134,7 +134,7 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
     const cleanRoll = roll.trim().toUpperCase();
     if (!cleanRoll) return;
 
-    set({ state: "detecting", error: null,   });
+    set({ state: "detecting", error: null, photoVerificationDone: false, currentStudent: null });
 
     const authStore = useAuthStore.getState();
     const token = authStore.token;
@@ -439,6 +439,19 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
   setGate: async (gateId) => {
     if (!gateId) {
       set({ gate: null, gateId: null });
+      return;
+    }
+    const user = useAuthStore.getState().user;
+    if (user?.role === "operator" && user.gateId && user.gateId !== gateId) {
+      useUIStore.getState().addToast({
+        variant: "error",
+        title: "Gate Restricted",
+        message: "You are not assigned to this gate.",
+      });
+      set({
+        gate: { id: user.gateId, name: user.gateId, location: "Assigned Gate", type: "ENTRY_EXIT" as const, isActive: true },
+        gateId: user.gateId,
+      });
       return;
     }
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(gateId);
