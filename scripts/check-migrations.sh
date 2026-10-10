@@ -11,7 +11,7 @@ declare -A SEEN_VERSIONS
 declare -A MIGRATION_FILES
 
 shopt -s nullglob
-FILES=(database/migrations/*.sql supabase/migrations/*.sql)
+FILES=(database/migrations/*.sql)
 shopt -u nullglob
 
 if [ ${#FILES[@]} -eq 0 ]; then

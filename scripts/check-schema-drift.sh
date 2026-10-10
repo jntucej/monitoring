@@ -54,7 +54,7 @@ fi
 
 # 4. Replay all migrations in scratch
 shopt -s nullglob
-FILES=(database/migrations/*.sql supabase/migrations/*.sql)
+FILES=(database/migrations/*.sql)
 shopt -u nullglob
 
 declare -A MIGRATION_FILES
