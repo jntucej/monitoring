@@ -206,7 +206,10 @@ async function handlePost(
     }
   }
 
-  return NextResponse.json({ error: "Endpoint not found" }, { status: 404 });
+  return NextResponse.json(
+    { success: false, error: { code: "NOT_FOUND", message: `Unknown mobile action: ${path}` } },
+    { status: 404 }
+  );
 }
 
 export const POST = withRateLimit(handlePost, {

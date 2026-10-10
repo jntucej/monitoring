@@ -24,7 +24,12 @@ const DEV_FALLBACKS: Record<string, string> = {
   TOTP_ENCRYPTION_KEY: "dev-insecure-totp-key-change-me-0000000000000000000000000000000000000000",
 };
 
+const secretCache = new Map<string, string>();
+
 export function requireSecret(name: string, minLen = 32): string {
+  const cached = secretCache.get(name);
+  if (cached) return cached;
+
   const v = process.env[name];
   if (!v || v.length < minLen) {
     const env = process.env.NODE_ENV;
@@ -32,8 +37,11 @@ export function requireSecret(name: string, minLen = 32): string {
       throw new Error(`[env] ${name} missing or < ${minLen} chars. Refusing to start in ${env}.`);
     }
     console.warn(`[env] ${name} not set; using INSECURE dev fallback.`);
-    return DEV_FALLBACKS[name] || "dev-fallback-insecure-key-change-me!";
+    const fallback = DEV_FALLBACKS[name] || "dev-fallback-insecure-key-change-me!";
+    secretCache.set(name, fallback);
+    return fallback;
   }
+  secretCache.set(name, v);
   return v;
 }
 

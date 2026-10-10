@@ -214,6 +214,15 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
   // enrollment endpoints themselves become unreachable (lockout trap).
   // Enforcement now lives in `withAuthorization` (middleware) and at login.
 
+  // Issue #541: Log role drift if token payload role differs from DB role
+  if (payload && payload.role && payload.role !== profile.role) {
+    console.warn("[auth] JWT role drift detected — utilizing authoritative DB role", {
+      userId: profile.id,
+      jwtRole: payload.role,
+      dbRole: profile.role,
+    });
+  }
+
   // Return the validated context
   return {
     authUserId: userId || profile.id,
