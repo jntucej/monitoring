@@ -4,7 +4,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { getDepartments, createDepartment, deleteDepartment, updateDepartment } from "@/lib/departments";
-import { invalidateCache } from "@/lib/cache";
 import { withAuthorization } from "@/middleware/authorization";
 import { addAudit } from "@/lib/db";
 import { Role } from '@/lib/types';
