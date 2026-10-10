@@ -1,1 +1,1 @@
-export { getDefaultRouteForRole, ALL_ROLES } from "@/server/policy/routes";
+export { getDefaultRouteForRole } from "@/server/policy/routes";
