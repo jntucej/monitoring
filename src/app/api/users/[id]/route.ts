@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { findUserById, updateUserRole, updateAccountStatus, setUserFlag, addAudit } from "@/lib/db";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
+import { hashPassword } from "@/lib/auth-token";
+import { query } from "@/lib/postgres";
 import type { Role, AccountStatus } from "@/lib/types";
 import type { FlagStatus } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
@@ -69,9 +71,61 @@ async function handlePatch(req: NextRequest) {
       if (body.uniqueId !== undefined) profileUpdates.unique_id = body.uniqueId;
       if (body.loginIdentifier !== undefined) profileUpdates.login_identifier = body.loginIdentifier;
 
+      // Password update
+      if (body.password) {
+        if (typeof body.password !== "string" || body.password.length < 6) {
+          return NextResponse.json(
+            { success: false, error: { message: "Password must be at least 6 characters" } },
+            { status: 400 }
+          );
+        }
+        profileUpdates.password_hash = await hashPassword(body.password);
+        profileUpdates.last_password_change = new Date().toISOString();
+        profileUpdates.failed_login_count = 0;
+        profileUpdates.locked_until = null;
+      }
+
+      // Security PIN update
+      if (body.pin) {
+        if (typeof body.pin !== "string" || !/^\d{4,8}$/.test(body.pin.trim())) {
+          return NextResponse.json(
+            { success: false, error: { message: "Security PIN must be 4-8 digits" } },
+            { status: 400 }
+          );
+        }
+        profileUpdates.pin_hash = await hashPassword(body.pin.trim());
+        profileUpdates.pin_must_change = false;
+        profileUpdates.pin_set_at = new Date().toISOString();
+        if (actorId) profileUpdates.pin_set_by = actorId;
+      }
+
+      // Explicit unlock or status recovery
+      if (body.unlock || (body.status === "ACTIVE" && target.status !== "ACTIVE")) {
+        profileUpdates.failed_login_count = 0;
+        profileUpdates.locked_until = null;
+      }
+
       if (Object.keys(profileUpdates).length > 0) {
         const { error } = await supabase.from("users").update(profileUpdates).eq("id", id);
         if (error) return NextResponse.json({ success: false, error: { message: error.message } }, { status: 400 });
+      }
+
+      // Clear rate-limiting pin login attempts if password/pin updated or unlocked
+      if (body.password || body.unlock || body.pin) {
+        const idents = Array.from(new Set([
+          target.uniqueId,
+          target.email,
+          target.identifier,
+          profileUpdates.unique_id,
+          profileUpdates.email,
+        ].filter(Boolean)));
+
+        for (const ident of idents) {
+          await query(
+            `DELETE FROM pin_login_attempts WHERE UPPER(identifier) = UPPER($1)`,
+            [ident]
+          );
+        }
       }
 
       // 2. Student details
