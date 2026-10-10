@@ -16,7 +16,7 @@ if [ -z "$PROD_DATABASE_URL" ]; then
 fi
 
 SCRATCH_CONTAINER="scratch_drift_check_$$"
-POSTGRES_IMAGE="${POSTGRES_TEST_IMAGE:-postgres:17-alpine}"
+POSTGRES_IMAGE="${POSTGRES_TEST_IMAGE:-postgres:17}"
 
 cleanup() {
   echo "Cleaning up scratch container $SCRATCH_CONTAINER..."
@@ -54,7 +54,7 @@ fi
 
 # 4. Replay all migrations in scratch
 shopt -s nullglob
-FILES=(database/migrations/*.sql supabase/migrations/*.sql)
+FILES=(database/migrations/*.sql)
 shopt -u nullglob
 
 declare -A MIGRATION_FILES

@@ -19,13 +19,21 @@ export function validateCsrf(req: NextRequest): CsrfValidationResult {
     return { valid: true };
   }
 
-  // Check Sec-Fetch-Site if provided by modern browsers
+  // Check Sec-Fetch-Site if provided by modern browsers.
+  // Issue #390: narrow from accepting 'same-site' to only 'same-origin' | 'none'.
+  // 'same-site' permits requests from other subdomains (e.g. evil.college.edu).
+  // 'same-origin' means same scheme + host + port — the correct check for state-
+  // changing requests. 'none' covers direct user navigations.
   const secFetchSite = req.headers.get("sec-fetch-site");
-  if (secFetchSite === "cross-site") {
-    return {
-      valid: false,
-      error: "Cross-site request blocked by CSRF protection.",
-    };
+  if (secFetchSite) {
+    if (!['same-origin', 'none'].includes(secFetchSite)) {
+      return {
+        valid: false,
+        error: `Cross-site request blocked: Sec-Fetch-Site '${secFetchSite}' is not allowed.`,
+      };
+    }
+    // Sec-Fetch-Site is authoritative on modern browsers — no need to check Origin
+    return { valid: true };
   }
 
   const origin = req.headers.get("origin");

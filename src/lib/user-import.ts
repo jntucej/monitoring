@@ -100,10 +100,16 @@ export async function validateImport(csvInput: string | ImportRow[]): Promise<Va
   for (let i = 0; i < rawRows.length; i++) {
     const r = rawRows[i];
     const rowNum = i + 1;
-    const name = (r.name || r.fullName || "").trim();
-    const email = (r.email || "").trim().toLowerCase();
+    const name = (r.name || r["NAME OF THE STUDENT"] || "").trim();
+    const email = (r.email || r["EMAIL ID"] || "").trim().toLowerCase();
     const role = (r.role || "student").trim().toLowerCase() as Role;
-    const uniqueId = (r.uniqueId || r.roll || r.employeeId || "").trim();
+    const uniqueId = (r.uniqueId || r["H.T NO."] || r.roll || r.employeeId || "").trim();
+    const course = r.course || r["COURSE"] || undefined;
+    const fatherName = r.fatherName || r["FATHER NAME"] || undefined;
+    const dob = r.dob || r["DOB"] || undefined;
+    const landlineNumber = r.landlineNumber || r["LAND LINE 0R PARENT NUMBER"] || undefined;
+    const phone = r.phone || r["PHONE NUMBER"] || undefined;
+    const gender = r.gender || r["GENDER"] || undefined;
 
     if (!name) {
       errors.push({ row: rowNum, field: "name", message: "Name is required" });
@@ -130,14 +136,15 @@ export async function validateImport(csvInput: string | ImportRow[]): Promise<Va
       name,
       email,
       role,
-      uniqueId: uniqueId || email.split("@")[0],
-      roll: r.roll || r["H.T NO."] || uniqueId,
-      course: r.course || r["COURSE"] || undefined,
-      fatherName: r.fatherName || r["FATHER NAME"] || undefined,
-      dob: r.dob || r["DOB"] || undefined,
-      landlineNumber: r.landlineNumber || r["LAND LINE 0R PARENT NUMBER"] || undefined,
+      uniqueId,
+      roll: uniqueId,
+      course,
+      fatherName,
+      dob,
+      landlineNumber,
       employeeId: r.employeeId || uniqueId,
-      phone: r.phone || r["PHONE NUMBER"] || undefined,
+      phone,
+      gender,
       department: r.department || r.departmentId || undefined,
       departmentId: r.departmentId || r.department || undefined,
       designation: r.designation || undefined,
@@ -147,7 +154,6 @@ export async function validateImport(csvInput: string | ImportRow[]): Promise<Va
       hostelBlock: r.hostelBlock || r.assignedHostel || undefined,
       roomNumber: r.roomNumber || r.hostelRoom || undefined,
       status: r.status || "ACTIVE",
-      gender: r.gender || undefined,
     };
 
     validRows.push(rowObj);
@@ -198,7 +204,7 @@ export async function commitImport(
     userId: actorId,
     userName: "SysAdmin",
     role: "sysadmin",
-    details: { total: rows.length, importedCount, failedCount },
+    details: JSON.stringify({ total: rows.length, importedCount, failedCount }),
   }).catch(() => {});
 
   return {

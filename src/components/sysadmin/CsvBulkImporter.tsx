@@ -5,7 +5,7 @@ import { Upload, FileSpreadsheet, Download, Loader2, ShieldAlert } from "lucide-
 import { getAuthHeaders } from "@/lib/utils";
 import { CsvValidationPreview } from "./CsvValidationPreview";
 
-const SAMPLE_CSV = `email,name,role,unique_id,course,father_name,dob,phone,landline_number,hostel_block,room_number\njohn.doe@college.edu,John Doe,student,22JJ1A0501,CSE,Robert Doe,2005-01-01,+919****3211,040-123456,HOSTEL-A,101`;
+const SAMPLE_CSV = `NAME OF THE STUDENT,EMAIL ID,role,H.T NO.,COURSE,FATHER NAME,DOB,PHONE NUMBER,LAND LINE 0R PARENT NUMBER,GENDER\nJohn Doe,john.doe@college.edu,student,22JJ1A0501,CSE,Robert Doe,2005-01-01,+919****3211,040-123456,Male`;
 
 export function CsvBulkImporter() {
   const [csvText, setCsvText] = useState("");

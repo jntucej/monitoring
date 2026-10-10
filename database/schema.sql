@@ -137,7 +137,7 @@ CREATE TABLE IF NOT EXISTS campus_occupancy (
 --     so counters naturally reset to 0 each new day, while historical days persist)
 CREATE TABLE IF NOT EXISTS daily_stats (
   date           DATE NOT NULL,
-  gate_id        UUID REFERENCES gates(id) ON DELETE CASCADE,
+  gate_id        UUID NOT NULL REFERENCES gates(id) ON DELETE CASCADE,
   gate_code      TEXT,
   entries        BIGINT NOT NULL DEFAULT 0,
   exits          BIGINT NOT NULL DEFAULT 0,
@@ -434,8 +434,19 @@ CREATE TABLE IF NOT EXISTS gate_access_rules (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- predictions: defined in database/migrations/20261008000001_security_remediation_audit.sql
--- Do not redefine here.
+CREATE TABLE IF NOT EXISTS public.predictions (
+  id                       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  type                     VARCHAR(50) NOT NULL,
+  target                   VARCHAR(100) NOT NULL,
+  predicted_value          DOUBLE PRECISION NOT NULL,
+  confidence_interval_low  DOUBLE PRECISION NOT NULL,
+  confidence_interval_high DOUBLE PRECISION NOT NULL,
+  timestamp                TIMESTAMPTZ NOT NULL,
+  model_version            VARCHAR(20) DEFAULT 'v1.0-arima',
+  created_at               TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_predictions_type_timestamp
+  ON public.predictions (type, timestamp DESC);
 
 CREATE TABLE IF NOT EXISTS zones (
   id VARCHAR(50) PRIMARY KEY,

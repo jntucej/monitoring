@@ -1,3 +1,29 @@
+import readline from 'readline/promises';
+
+const ALLOWED_ENV = ['development', 'test', 'local'];
+
+if (!ALLOWED_ENV.includes(process.env.NODE_ENV ?? 'development')) {
+  console.error(
+    `FATAL: seed-data.js refuses to run with NODE_ENV=${process.env.NODE_ENV}.\n` +
+    `This script is for development only. If you really need to seed production,\n` +
+    `write a dedicated production-bootstrap script with explicit parameters.`,
+  );
+  process.exit(1);
+}
+
+// Extra safety: require an explicit confirmation flag
+if (process.argv[2] !== '--yes') {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  const answer = await rl.question(
+    'This will insert test users. Type "I understand" to proceed: ',
+  );
+  rl.close();
+  if (answer.trim() !== 'I understand') {
+    console.log('Aborted.');
+    process.exit(0);
+  }
+}
+
 const { createClient } = require('@supabase/supabase-js');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
@@ -10,10 +36,7 @@ const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const isDev = process.env.NODE_ENV === "development" || !process.env.NODE_ENV || process.env.NODE_ENV === "test";
 const DEFAULT_SEED_PIN = process.env.SEED_DEFAULT_PIN || (isDev ? String(crypto.randomInt(100000, 999999)) : null);
 
-if ((process.env.NODE_ENV === "production" || process.env.VERCEL_ENV === "production") && process.env.ALLOW_PROD_SEED !== "true") {
-  console.error("Refusing to seed in production environment without ALLOW_PROD_SEED=true.");
-  process.exit(1);
-}
+// Redundant guard removed, replaced by ALLOWED_ENV check above
 
 if (!DEFAULT_SEED_PIN) {
   console.error("SEED_DEFAULT_PIN must be set explicitly in non-development environments.");
@@ -44,7 +67,7 @@ function genUUID(seed) {
 
 async function main() {
   console.log('🌱 Seeding initial campus database records...');
-  const pinHash = bcrypt.hashSync(DEFAULT_SEED_PIN, 10);
+  const pinHash = bcrypt.hashSync(DEFAULT_SEED_PIN, 12);
 
   const STAFF_RANGES = [
     { start: 1, end: 20, type: 'faculty', designation: 'Regular Faculty', dept: 'CSE' },

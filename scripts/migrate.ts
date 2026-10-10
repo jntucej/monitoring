@@ -75,7 +75,6 @@ async function setupDatabaseConnection() {
 
 const DIRS = [
   "database/migrations",
-  "supabase/migrations",
 ];
 
 const DRY = process.argv.includes("--dry-run");
