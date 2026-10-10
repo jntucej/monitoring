@@ -11,6 +11,7 @@ import { log, getRequestId } from "@/lib/log";
 import { assertCsrf } from "@/lib/csrf";
 import type { Role } from "@/lib/types";
 import bcrypt from "bcryptjs";
+import { checkLockout, recordFailedAttempt, clearLockout } from "@/lib/login-lockout";
 
 const GENERIC_FAILURE = {
   success: false,
@@ -73,6 +74,21 @@ async function handleLoginInner(req: NextRequest) {
 
     const user = userRes.rows[0];
 
+    // Check global lockout
+    const lockout = await checkLockout(identifier);
+    if (lockout.locked) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "LOCKED",
+            message: `Too many failed attempts. Try again after ${lockout.until?.toLocaleTimeString()}.`,
+          },
+        },
+        { status: 429 }
+      );
+    }
+
     if (user.locked_until && new Date(user.locked_until) > new Date()) {
       return NextResponse.json(
         {
@@ -105,32 +121,7 @@ async function handleLoginInner(req: NextRequest) {
     }
 
     if (!passwordValid) {
-      await query(
-        `UPDATE users
-            SET failed_login_count = failed_login_count + 1,
-                locked_until = CASE
-                  WHEN failed_login_count + 1 >= 5
-                  THEN NOW() + INTERVAL '15 minutes'
-                  ELSE locked_until
-                END
-          WHERE id = $1`,
-        [user.id]
-      );
-
-      const normalizedId = identifier.toUpperCase();
-      await query(
-        `INSERT INTO pin_login_attempts (identifier, failed_count, last_attempt_at)
-         VALUES ($1, 1, NOW())
-         ON CONFLICT (identifier) DO UPDATE
-           SET failed_count = pin_login_attempts.failed_count + 1,
-               last_attempt_at = NOW(),
-               locked_until = CASE
-                 WHEN pin_login_attempts.failed_count + 1 >= 5
-                 THEN NOW() + INTERVAL '15 minutes'
-                 ELSE pin_login_attempts.locked_until
-               END`,
-        [normalizedId]
-      );
+      await recordFailedAttempt(identifier, 'login');
 
       await addAudit({
         action: "LOGIN_FAILED",
@@ -150,14 +141,7 @@ async function handleLoginInner(req: NextRequest) {
       return NextResponse.json(GENERIC_FAILURE, { status: 401 });
     }
 
-    await query(
-      `UPDATE users SET failed_login_count = 0, locked_until = NULL WHERE id = $1`,
-      [user.id]
-    );
-    await query(
-      `DELETE FROM pin_login_attempts WHERE identifier = $1`,
-      [identifier.toUpperCase()]
-    );
+    await clearLockout(identifier);
     // ── MFA Verification & Enrollment Enforcement ─────────────────
     const requiresMfa =
       Boolean(user.two_factor_enabled) ||
