@@ -17,8 +17,19 @@ export interface NavGroup {
 }
 
 export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean, dept?: string): NavGroup[] {
+  const accountGroup: NavGroup = {
+    groupLabel: "Account",
+    items: [
+      { href: "/profile", label: "My Profile", icon: "User" },
+      { href: "/settings/notifications", label: "Notifications", icon: "Bell" },
+      { href: "/help", label: "Help", icon: "BookOpen" },
+    ],
+  };
+
+  let groups: NavGroup[] = [];
+
   if (isHod || roleCode === "hod") {
-    return [
+    groups = [
       {
         groupLabel: "Department Workspace",
         items: [
@@ -49,7 +60,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
     case "caretaker":
     case "deputy_warden":
     case "hostel_manager":
-      return [
+      groups = [
         {
           groupLabel: "Hostel Permissions",
           items: [
@@ -67,7 +78,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       ];
 
     case "principal":
-      return [
+      groups = [
         {
           groupLabel: "Principal Desk",
           items: [
@@ -84,7 +95,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       ];
 
     case "vice_principal":
-      return [
+      groups = [
         {
           groupLabel: "Vice Principal Desk",
           items: [
@@ -102,7 +113,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
 
     case "oie":
     case "exam_branch":
-      return [
+      groups = [
         {
           groupLabel: "Exam Branch",
           items: [
@@ -119,7 +130,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       ];
 
     case "sysadmin":
-      return [
+      groups = [
         {
           groupLabel: "System Governance",
           items: [
@@ -166,7 +177,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       ];
 
     case "admin":
-      return [
+      groups = [
         {
           groupLabel: "Executive Command",
           items: [
@@ -219,7 +230,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       ];
 
     case "operator":
-      return [
+      groups = [
         {
           groupLabel: "Gate Operations Desk",
           items: [
@@ -245,7 +256,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
 
     case "supervisor":
     case "warden":
-      return [
+      groups = [
         {
           groupLabel: "Supervisor & Warden Desk",
           items: [
@@ -272,7 +283,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       ];
 
     case "faculty":
-      return [
+      groups = [
         {
           groupLabel: "Faculty Portal",
           items: [
@@ -290,7 +301,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       ];
 
     case "staff":
-      return [
+      groups = [
         {
           groupLabel: "Staff Portal",
           items: [
@@ -308,7 +319,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       ];
 
     case "worker":
-      return [
+      groups = [
         {
           groupLabel: "Worker Portal",
           items: [
@@ -325,7 +336,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       ];
 
     case "student":
-      return [
+      groups = [
         {
           groupLabel: "My Digital Desk",
           items: [
@@ -346,7 +357,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
 
     case "parent":
     case "guardian":
-      return [
+      groups = [
         {
           groupLabel: "Guardian Portal",
           items: [
@@ -365,7 +376,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       ];
 
     default:
-      return [
+      groups = [
         {
           groupLabel: "Campus Portal",
           items: [
@@ -376,6 +387,11 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         },
       ];
   }
+
+  // Filter out any existing "General" group that overlaps with Account group (to avoid duplicates)
+  const filteredGroups = groups.filter(g => g.groupLabel !== "General" && g.groupLabel !== "General & Information" && g.groupLabel !== "General & Support");
+
+  return [...filteredGroups, accountGroup];
 }
 
 export function useNavigation(roleCode?: string) {
