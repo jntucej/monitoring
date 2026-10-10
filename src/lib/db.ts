@@ -908,13 +908,15 @@ export async function findAllPersons(type?: PersonType): Promise<Person[]> {
   const studentMap = new Map((studentRows.data || []).map((s: any) => [s.user_id, s]));
   const employeeMap = new Map((employeeRows.data || []).map((e: any) => [e.user_id, e]));
 
-  return data.map((u: any) =>
-    mPerson({
+  return data.map((u: any) => {
+    const studentData = studentMap.get(u.id);
+    const employeeData = employeeMap.get(u.id);
+    return mPerson({
       ...u,
-      student_details: studentMap.get(u.id),
-      employee_details: employeeMap.get(u.id),
-    })
-  );
+      student_details: studentData || null,
+      employee_details: employeeData || null,
+    });
+  });
 }
 
 export const findAllStudents = () => findAllPersons('student');
@@ -951,13 +953,15 @@ export async function searchPersons(q: string, type?: PersonType): Promise<Perso
   const studentMap = new Map((studentRows.data || []).map((s: any) => [s.user_id, s]));
   const employeeMap = new Map((employeeRows.data || []).map((e: any) => [e.user_id, e]));
 
-  return data.map((u: any) =>
-    mPerson({
+  return data.map((u: any) => {
+    const studentData = studentMap.get(u.id);
+    const employeeData = employeeMap.get(u.id);
+    return mPerson({
       ...u,
-      student_details: studentMap.get(u.id),
-      employee_details: employeeMap.get(u.id),
-    })
-  );
+      student_details: studentData || null,
+      employee_details: employeeData || null,
+    });
+  });
 }
 
 export const searchStudents = (q: string) => searchPersons(q, 'student');
@@ -1241,7 +1245,7 @@ export async function createUser(userData: {
         user_id: userData.id,
         roll: studentRoll,
         guardian_id: userData.guardianId || userData.parentId || null,
-        department_id: userData.departmentId || null,
+        // Removed department_id mapping as column does not exist
         room_number: userData.hostelRoom || userData.assignedHostel || null,
       }, { onConflict: 'user_id' });
     } catch (sErr) {
@@ -1254,7 +1258,7 @@ export async function createUser(userData: {
     userId: 'system',
     userName: 'System',
     role: 'sysadmin',
-    details: `Created new user ${userData.id} with role ${userData.role}`,
+    details: JSON.stringify({ message: `Created new user ${userData.id} with role student` }),
   });
 
   return data ? mUser(data) : null;
