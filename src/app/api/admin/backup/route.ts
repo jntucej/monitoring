@@ -107,11 +107,11 @@ async function handlePost(req: NextRequest) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin"] }),
+  withAuthorization(handleGet, { requiredRole: ["sysadmin"] }),
   { keyPrefix: "admin_backup_get", maxRequests: 30 }
 );
 
 export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["admin", "sysadmin"] }),
+  withAuthorization(handlePost, { requiredRole: ["sysadmin"] }),
   { keyPrefix: "admin_backup_post", maxRequests: 10 }
 );

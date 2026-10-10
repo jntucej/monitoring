@@ -60,4 +60,4 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
   }
 }
 
-export const DELETE = withAuthorization(handleDelete, { requiredRole: ["admin", "sysadmin"] });
+export const DELETE = withAuthorization(handleDelete, { requiredRole: ["sysadmin"] });

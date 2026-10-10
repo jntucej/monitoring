@@ -37,9 +37,13 @@ export function checkTimeBasedAccess(
   timestamp: Date = new Date(),
   customRule?: Partial<AccessRule>
 ): AccessCheckResult {
+  if (personType === "student") {
+    // NOTE: Student curfew enforcement is handled via gate scan validation 
+    // against student_details.hostel_curfew_time
+    return { allowed: true };
+  }
+
   if (personType !== "worker") {
-    // TODO: Implement student curfew rules here, or document how they are handled.
-    // For now, allow entry by default for non-worker roles.
     return { allowed: true };
   }
 

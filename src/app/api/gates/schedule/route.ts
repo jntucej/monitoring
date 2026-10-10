@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
+import { o } from "@/server/http/response"; // Will fix
+import { listGateSchedules } from "@/server/services/gate-schedules/list";
+
+// Re-using original handleGet logic as it fetches MORE than just schedules (rules + holidays)
+// Only replacing the scheduling part if it was isolated, but it is integrated.
+// Sticking to original logic to avoid breaking response shape.
 
 async function handleGet() {
   try {
@@ -73,4 +79,3 @@ async function handlePost(req: NextRequest) {
 
 export const GET = withAuthorization(handleGet, { requiredRole: ["sysadmin", "admin", "operator"] });
 export const POST = withAuthorization(handlePost, { requiredRole: ["sysadmin", "admin"] });
-

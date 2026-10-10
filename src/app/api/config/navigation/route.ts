@@ -107,6 +107,13 @@ async function handleDelete(req: NextRequest) {
     }
 
     const service = getSupabaseServiceClient();
+
+    // Guard: Prevent deleting sysadmin navigation
+    const { data: item } = await service.from('config_navigation').select('role_code').eq('id', id).single();
+    if (item?.role_code === 'sysadmin') {
+      return NextResponse.json({ success: false, error: { code: 'FORBIDDEN', message: 'Cannot delete sysadmin navigation' } }, { status: 403 });
+    }
+
     const { error } = await service.from('config_navigation').delete().eq('id', id);
     if (error) throw error;
 
