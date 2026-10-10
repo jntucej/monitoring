@@ -267,8 +267,12 @@ export function GlassProvider({
     }
 
     let animationFrameId: number;
+    let stableCount = 0;
+    let lastTier: string | null = null;
 
     const measureFps = () => {
+      if (document.visibilityState === "hidden") return;
+
       frameCountRef.current += 1;
       const now = performance.now();
       const delta = now - lastFpsCheckRef.current;
@@ -279,14 +283,22 @@ export function GlassProvider({
         const targetTier: PerformanceTier =
           fps >= 55 ? "splusplus" : fps >= 30 ? "performance" : fps >= 15 ? "legacy" : "emergency";
 
-        // ONLY trigger React re-render when tier actually changes
-        if (performanceTierRef.current !== targetTier) {
+        if (performanceTierRef.current === targetTier) {
+          stableCount++;
+        } else {
+          stableCount = 0;
           performanceTierRef.current = targetTier;
           setPerformanceTierState(targetTier);
         }
 
         frameCountRef.current = 0;
         lastFpsCheckRef.current = now;
+
+        // Stop after 5 stable samples (~10s) to conserve battery
+        if (stableCount >= 5) {
+          cancelAnimationFrame(animationFrameId);
+          return;
+        }
       }
 
       animationFrameId = requestAnimationFrame(measureFps);
@@ -294,8 +306,22 @@ export function GlassProvider({
 
     animationFrameId = requestAnimationFrame(measureFps);
 
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        cancelAnimationFrame(animationFrameId);
+      } else {
+        stableCount = 0;
+        frameCountRef.current = 0;
+        lastFpsCheckRef.current = performance.now();
+        animationFrameId = requestAnimationFrame(measureFps);
+      }
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
     return () => {
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, [prefersReducedMotion, setPerformanceTier]);
 

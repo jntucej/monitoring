@@ -3,15 +3,16 @@ import { randomUUID } from "crypto";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { addAudit, findUserById } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
+import type { AuthContext } from "@/lib/authContext";
 
 function getIdFromPath(req: NextRequest): string {
   const segments = new URL(req.url).pathname.split("/").filter(Boolean);
   return decodeURIComponent(segments[segments.length - 1]);
 }
 
-async function handleDelete(req: NextRequest) {
+async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
   const targetUserId = getIdFromPath(req);
-  const actorId = req.headers.get("x-user-id") || "";
+  const actorId = auth.userId;
 
   try {
     const supabase = getSupabaseServiceClient();

@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 date > /var/log/monitoring-heartbeat.log
 cd /root/monitoring
-export $(grep -v '^#' .env | xargs)
+while IFS='=' read -r key value; do
+  [[ "$key" =~ ^#.*$ || -z "$key" ]] && continue
+  value="${value%\"}"
+  value="${value#\"}"
+  export "$key=$value"
+done < .env
 
 send_telegram() {
     curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \

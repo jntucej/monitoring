@@ -29,7 +29,10 @@ import urllib.request
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 AUTOMATION_DIR = os.path.join(ROOT, "jira", "automation")
 STATE_FILE = os.path.join(AUTOMATION_DIR, "cej-import-state.json")
-PROJECT_KEY = "CEJ"
+# Load project key from config
+with open(os.path.join(ROOT, 'config', 'automation.json'), 'r') as f:
+    config = json.load(f)
+    PROJECT_KEY = config['project']['key']
 
 # Label -> (assignee accountId, display name) from jira/schema/jira-team.md.
 ROLE_TO_ACCOUNT = {

@@ -70,7 +70,7 @@ export function ScanConfirmation({
   const [flaggingLoading, setFlaggingLoading] = useState(false);
 
   const handleToggleFlagAccount = async () => {
-    if (flaggingLoading) return;
+    if (flaggingLoading || !student?.id) return;
     const nextStatus = isFlagged ? "ACTIVE" : "SUSPENDED";
     const nextFlagStatus = isFlagged ? null : "MANUAL_LOCKDOWN";
     setFlaggingLoading(true);

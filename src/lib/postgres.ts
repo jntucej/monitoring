@@ -38,14 +38,19 @@ export async function getPostgresPool(): Promise<Pool> {
       max: parseInt(process.env.PG_MAX_POOL_SIZE || "20", 10),
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 5000,
+      statement_timeout: 30000,
+      query_timeout: 30000,
       ssl:
         process.env.PG_SSL === "true"
           ? { rejectUnauthorized: process.env.PG_SSL_REJECT_UNAUTHORIZED !== "false" }
           : undefined,
     }) as Pool;
 
-    instance.on("error", (err: any) => {
-      console.error("[PostgreSQL Pool Error]", err);
+    instance.on("error", (err: any, client: any) => {
+      console.error("[PostgreSQL Pool Error]", {
+        err,
+        client: client ? "idle" : "unknown",
+      });
     });
 
     poolInstance = instance;

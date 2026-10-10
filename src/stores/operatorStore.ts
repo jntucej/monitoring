@@ -89,7 +89,7 @@ interface OperatorState {
   gate: Gate | null;
   gateId: string | null;
 
-  // Actions
+  _scanGeneration: number;
   startScan: (roll: string) => void;
   setDirection: (direction: ScanDirection) => void;
   setReason: (reason: ExitReason) => void;
@@ -128,6 +128,7 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
   outing: [],
   gate: null,
   gateId: null,
+  _scanGeneration: 0,
 
   startScan: async (roll) => {
     const cleanRoll = roll.trim().toUpperCase();
@@ -236,7 +237,8 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
     const { currentStudent } = get();
     if (!currentStudent) return;
 
-    // Strict 100% Online-Only Check
+    const gen = get()._scanGeneration + 1;
+    set({ _scanGeneration: gen });
     if (typeof navigator !== "undefined" && !navigator.onLine) {
       playAudioFeedback("error");
       addToast({
@@ -322,6 +324,7 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
         return result;
       })
       .then((result) => {
+        if (get()._scanGeneration !== gen) return;
         if (!result) return;
         if (result?.duplicate) {
           playAudioFeedback("warning");
