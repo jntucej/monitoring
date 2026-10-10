@@ -110,6 +110,7 @@ export async function isMfaRequiredForPrivileged(): Promise<boolean> {
 }
 
 export const isMfaRequiredForAdmin = isMfaRequiredForPrivileged;
+
 /**
  * Create an authenticated context from a Supabase session token
  *
@@ -122,14 +123,6 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
   const payload = await verifyAccessToken(token);
   if (payload && payload.sub) {
     userId = payload.sub;
-  } else {
-    // Fallback attempt with Supabase auth for backwards compatibility if needed
-    try {
-      const { data: { user } } = await supabase.auth.getUser(token);
-      if (user) userId = user.id;
-    } catch {
-      // ignore fallback error
-    }
   }
 
   if (!userId) {

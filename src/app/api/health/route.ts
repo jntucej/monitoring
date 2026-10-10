@@ -14,48 +14,21 @@ async function handleGet(_req: NextRequest) {
   // Bug 135: this endpoint is public (no auth). Raw Postgres/env error strings can leak
   // table/column/constraint names and connection details. Replace with generic messages;
   // keep the non-sensitive status + latency so operators/monitoring still get the signal.
-  const sanitize = (h: typeof health) => ({
-    status: h.status,
-    timestamp: h.timestamp,
-    uptime: h.uptime,
-    components: {
-      database: {
-        status: h.components.database.status,
-        latency: h.components.database.latency,
-        ...(h.components.database.error ? { error: "Database unavailable" } : {}),
-      },
-      ...(h.components.redis ? {
-        redis: {
-          status: h.components.redis.status,
-          latency: h.components.redis.latency,
-          ...(h.components.redis.error ? { error: "Redis unavailable" } : {}),
-        },
-      } : {}),
-      gateways: {
-        status: h.components.gateways.status,
-        online: h.components.gateways.online,
-        offline: h.components.gateways.offline,
-        total: h.components.gateways.total,
-      },
-      services: {
-        status: h.components.services.status,
-        auth: {
-          status: h.components.services.auth?.status || "healthy",
-        },
-        worker: {
-          status: h.components.services.worker?.status || "healthy",
-        },
-      },
-      ...(h.components.env ? {
-        env: {
-          status: h.components.env.status,
-          ...(h.components.env.error ? { error: "Environment misconfigured" } : {}),
-        },
-      } : {}),
-    },
-    metrics: h.metrics,
-    recentAlerts: h.recentAlerts,
-  });
+  const sanitize = (h: typeof health) => {
+    const clone = JSON.parse(JSON.stringify(h));
+    if (clone.components) {
+      if (clone.components.database && clone.components.database.error) {
+        clone.components.database.error = "Database unavailable";
+      }
+      if (clone.components.redis && clone.components.redis.error) {
+        clone.components.redis.error = "Redis unavailable";
+      }
+      if (clone.components.env && clone.components.env.error) {
+        clone.components.env.error = "Environment misconfigured";
+      }
+    }
+    return clone;
+  };
 
   return NextResponse.json(sanitize(health), { status: statusCodes[health.status] || 200 });
 }

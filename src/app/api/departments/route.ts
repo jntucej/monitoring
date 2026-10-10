@@ -7,7 +7,8 @@ import { getDepartments, createDepartment, deleteDepartment, updateDepartment } 
 import { invalidateCache } from "@/lib/cache";
 import { withAuthorization } from "@/middleware/authorization";
 import { addAudit } from "@/lib/db";
-import { Role } from "@/lib/types";
+import { Role } from '@/lib/types';
+import type { AuthContext } from '@/lib/authContext';
 
 async function handleGet() {
   const supabase = getSupabaseServiceClient();
@@ -121,7 +122,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
     await addAudit({
       action: "DEPARTMENT_UPSERT",
       userId: auth.userId,
-      userName: auth.name,
+      userName: auth.email || "SysAdmin",
       role: auth.role,
       details: `Saved department '${code}' (${name}).`,
     });
@@ -146,9 +147,10 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
       userId: auth.userId,
       userName: auth.email,
       role: auth.role,
-      details: `Deleted department ${code}`,
+      details: `Deleted department '${code}'.`,
     });
-    return NextResponse.json({ success: true, message: `Deleted department ${code}` });
+
+    return NextResponse.json({ success: true, message: `Deleted department ${code}` }, { headers: { "Cache-Control": "no-store" } });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 400 });
   }

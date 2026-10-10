@@ -10,13 +10,13 @@ async function handlePost(req: NextRequest, context: { auth: AuthContext }) {
     let rows = body.rows;
     if (!rows && body.csv) {
       const val = await validateImport(body.csv);
-      rows = val.rows;
+      rows = val.validRows;
     }
     if (!rows || !Array.isArray(rows)) {
       return NextResponse.json({ success: false, error: { message: "Invalid rows array" } }, { status: 400 });
     }
     const result = await commitImport(rows, context.auth.userId, body.skipErrors !== false);
-    return NextResponse.json({ success: true, data: result, ...result });
+    return NextResponse.json({ success: true, data: result });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: { message: error.message || "Commit failed" } }, { status: 500 });
   }
