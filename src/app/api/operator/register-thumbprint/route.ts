@@ -43,12 +43,12 @@ async function handlePost(req: NextRequest) {
         );
       }
 
-      /* await addAudit({
+      await addAudit({
         userId: actorId,
         action: "THUMBPRINT_CLEARED",
         role: actorRole,
         details: { targetUserId: userId, targetName: targetUser.name },
-      }); */
+      });
 
       return NextResponse.json({ success: true, message: "Thumbprint cleared successfully" });
     }
@@ -69,12 +69,12 @@ async function handlePost(req: NextRequest) {
       );
     }
 
-    /* await addAudit({
+    await addAudit({
       userId: actorId,
       action: "THUMBPRINT_REGISTERED",
       role: actorRole,
       details: { targetUserId: userId, targetName: targetUser.name },
-    }); */
+    });
 
     return NextResponse.json({ success: true, message: "Thumbprint registered successfully" });
   } catch (error: any) {

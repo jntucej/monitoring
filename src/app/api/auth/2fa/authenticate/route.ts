@@ -35,11 +35,11 @@ async function handlePost(req: NextRequest) {
     const isValid = verifyTOTPCode(secret, String(token).trim());
 
     if (!isValid) {
-      /* await addAudit({
+      await addAudit({
         userId,
         action: "2FA_AUTHENTICATION_FAILED",
         details: { timestamp: new Date().toISOString() },
-      }); */
+      });
 
       return NextResponse.json(
         { success: false, error: { code: "INVALID_TOTP", message: "Invalid 2FA code" } },
@@ -47,11 +47,11 @@ async function handlePost(req: NextRequest) {
       );
     }
 
-    /* await addAudit({
+    await addAudit({
       userId,
       action: "2FA_AUTHENTICATION_SUCCESS",
       details: { timestamp: new Date().toISOString() },
-    }); */
+    });
 
     return NextResponse.json({
       success: true,

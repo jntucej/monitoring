@@ -64,13 +64,13 @@ async function handlePost(req: NextRequest) {
         expectedChecksum: typeof checksum === "string" && checksum.trim() !== "" ? checksum : undefined,
       });
 
-      /* await addAudit({
+      await addAudit({
         action: "BACKUP_RESTORED",
         userId: actorId,
         userName: "Admin",
         role: actorRole as Role,
         details: `Restored tables: ${result.restoredTables.join(", ")}; Errors: ${result.errors.length}`,
-      }); */
+      });
 
       return NextResponse.json({ success: result.success, data: result });
     }
@@ -88,13 +88,13 @@ async function handlePost(req: NextRequest) {
       );
     }
 
-    /* await addAudit({
+    await addAudit({
       action: "BACKUP_CREATED",
       userId: actorId,
       userName: "Admin",
       role: actorRole as Role,
       details: `Created backup file ${result.metadata?.filename} with ${result.metadata?.recordCount} records`,
-    }); */
+    });
 
     return NextResponse.json({ success: true, data: result.metadata, dump: result.data });
   } catch (error) {

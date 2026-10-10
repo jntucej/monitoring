@@ -135,7 +135,7 @@ async function handlePinLogin(req: NextRequest) {
         );
       }
 
-      /* await addAudit({
+      await addAudit({
         action: "PIN_LOGIN_FAILED",
         userId: user?.id || "system",
         userName: user?.name || "System",
@@ -147,7 +147,7 @@ async function handlePinLogin(req: NextRequest) {
           reason: !user ? "user_not_found_or_not_permitted" : "invalid_pin",
           endpoint: "/api/auth/pin-login",
         },
-      }); */
+      });
 
       return NextResponse.json(INVALID_CREDENTIALS, { status: 401 });
     }
@@ -234,7 +234,7 @@ async function handlePinLogin(req: NextRequest) {
       const secret = decryptSecret(user.two_factor_secret);
       const validTotp = verifyTOTPCode(secret, presentedTotp);
       if (!validTotp) {
-        /* await addAudit({
+        await addAudit({
           action: "PIN_LOGIN_FAILED",
           userId: user.id,
           userName: user.name,
@@ -245,7 +245,7 @@ async function handlePinLogin(req: NextRequest) {
             reason: "invalid_mfa_code",
             endpoint: "/api/auth/pin-login",
           },
-        }); */
+        });
         return NextResponse.json(
           { success: false, error: { code: "INVALID_MFA_CODE", message: "Invalid two-factor authentication code." } },
           { status: 401 }
@@ -269,7 +269,7 @@ async function handlePinLogin(req: NextRequest) {
     });
 
     // 9. Audit Success
-    /* await addAudit({
+    await addAudit({
       action: "PIN_LOGIN_SUCCESS",
       userId: user.id,
       userName: user.name,
@@ -280,7 +280,7 @@ async function handlePinLogin(req: NextRequest) {
         userAgent: req.headers.get("user-agent") || "unknown",
         endpoint: "/api/auth/pin-login",
       },
-    }); */
+    });
 
     const response = NextResponse.json(
       {

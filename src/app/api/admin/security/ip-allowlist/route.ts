@@ -17,13 +17,13 @@ async function handlePost(req: NextRequest) {
     const actorId = req.headers.get("x-user-id") || "sysadmin";
     const actorRole = (req.headers.get("x-user-role") || "sysadmin") as Role;
 
-    /* await addAudit({
+    await addAudit({
       action: "SECURITY_SETTINGS_UPDATE",
       userId: actorId,
       userName: "SysAdmin",
       role: actorRole,
       details: `Updated security policies: IP allowlist [${updated.allowedIps.join(", ")}], Forced 2FA: ${updated.forced2FA}`,
-    }); */
+    });
 
     return NextResponse.json({ success: true, data: updated });
   } catch (error: any) {

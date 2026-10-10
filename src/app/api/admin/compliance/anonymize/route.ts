@@ -35,13 +35,13 @@ async function handlePost(req: NextRequest) {
       timestamp: new Date().toISOString(),
     });
 
-    /* await addAudit({
+    await addAudit({
       action: "GDPR_ANONYMIZE",
       userId: actorId,
       userName: "SysAdmin",
       role: "sysadmin",
       details: `Anonymized user account ${userId} per GDPR right to be forgotten.`,
-    }); */
+    });
 
     return NextResponse.json({ success: true, data: { userId, anonymized: true } });
   } catch (error: any) {

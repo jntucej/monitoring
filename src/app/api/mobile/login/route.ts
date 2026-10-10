@@ -81,13 +81,13 @@ export async function handlePost(req: NextRequest) {
       const targetDeviceId = String(deviceId || "mobile-device");
       const token = await generateMobileToken(person.id, person.uniqueId, targetDeviceId);
 
-      /* await addAudit({
+      await addAudit({
         action: "MOBILE_LOGIN",
         userId: person.id,
         userName: person.fullName,
         role: (person.personType || "student") as unknown as Role,
         details: { uniqueId: person.uniqueId, deviceId: targetDeviceId, method: password ? "password" : "pin" },
-      }); */
+      });
 
       return NextResponse.json({
         success: true,
@@ -124,7 +124,7 @@ export async function handlePost(req: NextRequest) {
 
     const token = await generateMobileToken(person.id, person.uniqueId, String(deviceId));
 
-    /* await addAudit({
+    await addAudit({
       action: "MOBILE_LOGIN",
       userId: person.id,
       userName: person.fullName,
@@ -135,7 +135,7 @@ export async function handlePost(req: NextRequest) {
         ip: req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown",
         userAgent: req.headers.get("user-agent") || "unknown",
       },
-    }); */
+    });
 
     return NextResponse.json({
       success: true,

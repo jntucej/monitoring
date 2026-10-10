@@ -55,11 +55,11 @@ async function handlePost(req: NextRequest) {
 
       await supabase.from("scheduled_jobs").update({ last_run: endTime }).eq("id", jobId);
 
-      /* await addAudit({
+      await addAudit({
         userId: actorId,
         action: "JOB_TRIGGERED_MANUALLY",
         details: { jobId, runId: run.id, recordsAffected: result.recordsAffected, summary: result.details },
-      }); */
+      });
 
       return NextResponse.json({
         success: true,

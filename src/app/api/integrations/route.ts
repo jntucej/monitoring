@@ -59,13 +59,13 @@ async function handlePost(req: NextRequest, context?: { auth?: AuthContext }) {
     }
 
     if (auth) {
-      /* await addAudit({
+      await addAudit({
         action: "UPDATE_INTEGRATION_CONFIG",
         userId: auth.userId,
         userName: auth.loginIdentifier || "Admin",
         role: auth.role,
         details: `Updated integration config: ${body.name} (${body.type})`,
-      }); */
+      });
     }
 
     return NextResponse.json({ success: true, data });

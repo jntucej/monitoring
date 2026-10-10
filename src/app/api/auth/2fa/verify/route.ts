@@ -74,11 +74,11 @@ async function handlePost(req: NextRequest) {
       })
       .eq("id", userId);
 
-    /* await addAudit({
+    await addAudit({
       userId,
       action: "2FA_ENABLED",
       details: { timestamp: new Date().toISOString() },
-    }); */
+    });
 
     return NextResponse.json({
       success: true,

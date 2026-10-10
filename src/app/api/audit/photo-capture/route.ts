@@ -32,7 +32,7 @@ async function handlePost(
     );
   }
 
-  /* await addAudit({
+  await addAudit({
     action: "PHOTO_CAPTURED",
     userId: auth.userId,
     userName: auth.email,
@@ -47,7 +47,7 @@ async function handlePost(
       // The photo is NOT stored — this record is the audit trail only.
       retention: "not_stored",
     },
-  }); */
+  });
 
   return NextResponse.json({ success: true });
 }

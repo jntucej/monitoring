@@ -135,11 +135,11 @@ async function handlePost(req: NextRequest) {
       );
     }
 
-    /* await addAudit({
+    await addAudit({
       userId: actorId,
       action: "ROLE_REQUEST_CREATED",
       details: { timestamp: new Date().toISOString(), targetId: userId, requestedRole },
-    }); */
+    });
 
     return NextResponse.json({ success: true, data: request });
   } catch (error: any) {

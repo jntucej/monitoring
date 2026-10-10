@@ -123,7 +123,7 @@ async function handleLoginInner(req: NextRequest) {
     if (!passwordValid) {
       await recordFailedAttempt(identifier, 'login');
 
-      /* await addAudit({
+      await addAudit({
         action: "LOGIN_FAILED",
         userId: user.id,
         userName: user.name || "User",
@@ -136,7 +136,7 @@ async function handleLoginInner(req: NextRequest) {
           endpoint: "/api/auth/login",
           request_id: getRequestId(req),
         },
-      }); */
+      });
 
       return NextResponse.json(GENERIC_FAILURE, { status: 401 });
     }
@@ -241,13 +241,13 @@ async function handleLoginInner(req: NextRequest) {
           .update({ two_factor_recovery_codes: remaining })
           .eq("id", user.id);
 
-        /* await addAudit({
+        await addAudit({
           action: "MFA_RECOVERY_CODE_USED",
           userId: user.id,
           userName: user.name,
           role: user.role,
           details: `Recovery code used for login. Remaining: ${remaining.length}`,
-        }); */
+        });
       } else if (presentedTotp) {
         const { verifyTOTPCode } = await import("@/lib/totp");
         const rawSecret = user.two_factor_secret || user.totp_secret || "";
@@ -270,13 +270,13 @@ async function handleLoginInner(req: NextRequest) {
           );
         }
 
-        /* await addAudit({
+        await addAudit({
           action: "MFA_LOGIN_SUCCESS",
           userId: user.id,
           userName: user.name,
           role: user.role,
           details: "2FA TOTP code verified successfully",
-        }); */
+        });
       }
     }
 
@@ -328,13 +328,6 @@ async function handleLoginInner(req: NextRequest) {
       maxAge: 7 * 24 * 3600,
       path: "/",
     });
-
-    // Create a session record for this user
-    const ip = extractClientIp(req);
-    await query(
-      "INSERT INTO sessions (id, user_id, refresh_hash, expires_at, created_at, ip_address, user_agent) VALUES ($1, $2, $3, NOW() + INTERVAL '30 days', NOW(), $4, $5)",
-      [crypto.randomUUID(), user.id, crypto.randomUUID(), ip || 'unknown', req.headers.get('user-agent') || 'unknown']
-    ).catch(() => {});
 
     return response;
   } catch (error: unknown) {

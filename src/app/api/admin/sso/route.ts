@@ -20,13 +20,13 @@ async function handlePatch(req: NextRequest) {
     const actorId = req.headers.get("x-user-id") || "sysadmin";
     const actorRole = (req.headers.get("x-user-role") || "sysadmin") as Role;
 
-    /* await addAudit({
+    await addAudit({
       action: "SSO_CONFIG_UPDATE",
       userId: actorId,
       userName: "SysAdmin",
       role: actorRole,
       details: `Updated SSO/OIDC config for provider '${updated.providerId}'. Enabled: ${updated.enabled}`,
-    }); */
+    });
 
     return NextResponse.json({ success: true, data: updated });
   } catch (error: any) {

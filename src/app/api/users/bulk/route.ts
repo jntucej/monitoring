@@ -150,12 +150,13 @@ async function handlePost(req: NextRequest) {
     const successCount = results.filter((r) => r.success).length;
 
 
-    //   action: "USER_CREATED",
-    //   userId: actorId,
-    //   userName: "Admin",
-    //   role: actorRole as Role,
-    //   details: JSON.stringify({ message: `Processed bulk import/update for ${usersList.length} items (${successCount} succeeded)` }),
-    // });
+    await addAudit({
+  action: "USER_CREATED",
+    userId: actorId,
+    userName: "Admin",
+    role: actorRole as Role,
+    details: JSON.stringify({ message: `Processed bulk import/update for ${usersList.length} items (${successCount} succeeded)` }),
+    });
 
 
     return NextResponse.json({

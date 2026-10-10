@@ -83,13 +83,13 @@ async function handlePost(req: NextRequest, context?: { auth?: AuthContext }) {
     }
 
     if (auth) {
-      /* await addAudit({
+      await addAudit({
         action: "UPDATE_STUDENT_RULES",
         userId: auth.userId,
         userName: auth.loginIdentifier || "Admin",
         role: auth.role,
         details: "Campus student entry/exit rules and curfew policies updated",
-      }); */
+      });
     }
 
     return NextResponse.json({
