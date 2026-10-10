@@ -13,6 +13,17 @@ export const useMouseParallax = (factor: number = 0.02, damping: number = 20, st
   const springX = useSpring(x, { damping, stiffness });
   const springY = useSpring(y, { damping, stiffness });
   const [isDesktop, setIsDesktop] = useState(false);
+  // Issue #399: respect prefers-reduced-motion (WCAG 2.2 §2.3.3).
+  // Users who set "reduce motion" in their OS must never see the parallax effect.
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setReducedMotion(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   useEffect(() => {
     const checkDesktop = () => {
@@ -26,6 +37,8 @@ export const useMouseParallax = (factor: number = 0.02, damping: number = 20, st
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    // Disable parallax when reduced-motion is requested or on touch devices
+    if (reducedMotion) return;
     // ponytail: no parallax on touch — iOS/Android synthesize mousemove from
     // touch (hover emulation), which janks scroll via the orb springs.
     if (window.matchMedia('(hover: hover) and (pointer: fine)').matches === false) return;
@@ -37,9 +50,9 @@ export const useMouseParallax = (factor: number = 0.02, damping: number = 20, st
     };
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [x, y, factor]);
+  }, [x, y, factor, reducedMotion]);
 
-  return { x: springX, y: springY, isDesktop };
+  return { x: springX, y: springY, isDesktop: isDesktop && !reducedMotion };
 };
 
 export default useMouseParallax;
