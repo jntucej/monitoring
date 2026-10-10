@@ -100,14 +100,14 @@ export function withAuthorization(
         }
       }
 
-      // MFA gate: sysadmin/admin must have 2FA enrolled when required.
+      // MFA gate: admin must have 2FA enrolled when required.
       // Per-user enforcement (twoFactorEnabled), not a global on/off.
       // Skipped when enforceMfa === false (pre-MFA enrollment endpoints).
       if (options.enforceMfa !== false) {
-        const mfaRequired = await isMfaRequiredForAdmin();
+        const mfaRequired = await isMfaRequiredForPrivileged();
         if (
           mfaRequired &&
-          (authContext.role === 'sysadmin' || authContext.role === 'admin') &&
+          isPrivileged(authContext.role) &&
           !authContext.twoFactorEnabled
         ) {
           throw new Error(
