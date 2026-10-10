@@ -703,7 +703,7 @@ export const authAdmin = {
     }
   },
   async deleteUser(userId: string) {
-    try { await query("DELETE FROM users WHERE id = $1", [userId]); return { data: null, error: null }; } catch (err: any) { return { data: null, error: { message: err.message, code: err.code } }; }
+    try { await query("UPDATE users SET deleted_at = NOW() WHERE id = $1", [userId]); return { data: null, error: null }; } catch (err: any) { return { data: null, error: { message: err.message, code: err.code } }; }
   },
   async updateUserById(userId: string, attributes: { password?: string; email?: string; user_metadata?: Record<string, any>; app_metadata?: Record<string, any>; }) {
     try {
