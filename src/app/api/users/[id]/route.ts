@@ -183,12 +183,19 @@ async function handleDelete(req: NextRequest) {
     }
 
     const supabase = getSupabaseServiceClient();
-    const { error } = await supabase.from("users").update({ account_status: "DEPROVISIONED" }).eq("id", id);
+    const { error } = await supabase.from("users").update({ account_status: "DEPROVISIONED", status: "DEPROVISIONED" }).eq("id", id);
     if (error) {
       return NextResponse.json(
         { success: false, error: { code: "SERVER_ERROR", message: error.message } },
         { status: 500 }
       );
+    }
+
+    // Also remove / deprovision from Supabase Auth if applicable
+    try {
+      await supabase.auth.admin.deleteUser(id);
+    } catch {
+      // Ignore if auth user doesn't exist in Supabase Auth
     }
 
     await addAudit({

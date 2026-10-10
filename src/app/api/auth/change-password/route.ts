@@ -6,7 +6,7 @@ import { query, verifyPassword, updatePasswordHash } from "@/lib/db-postgres";
 import { logAuditEvent } from "@/lib/audit";
 
 async function handlePost(req: NextRequest, { auth }: { auth: any }) {
-  const userId = auth?.user?.id || req.headers.get("x-user-id");
+  const userId = auth?.userId || auth?.user?.id || req.headers.get("x-user-id");
   if (!userId) {
     return NextResponse.json(
       { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required" } },
@@ -43,6 +43,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: any }) {
     // Hash new password and update in database
     const hashedPassword = await (await import("bcryptjs")).default.hash(newPassword, 12);
     await updatePasswordHash(userId, hashedPassword);
+    await query(`UPDATE users SET last_password_change = NOW(), updated_at = NOW() WHERE id = $1`, [userId]).catch(() => {});
 
     await logAuditEvent({
       action: "PASSWORD_CHANGED",

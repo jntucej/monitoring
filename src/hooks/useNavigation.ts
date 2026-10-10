@@ -37,7 +37,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       {
         groupLabel: "General & Support",
         items: [
-          { href: "/person", label: "My Profile", icon: "User" },
+          { href: "/profile", label: "My Profile", icon: "User" },
           { href: "/about", label: "About Campus", icon: "HelpCircle" },
         ],
       },
@@ -163,6 +163,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "General",
           items: [
+            { href: "/profile", label: "My Profile", icon: "User" },
             { href: "/about", label: "About Campus", icon: "HelpCircle" },
           ],
         },
@@ -208,7 +209,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "General",
           items: [
-            { href: "/person?tab=profile", label: "My Profile", icon: "User" },
+            { href: "/profile", label: "My Profile", icon: "User" },
             { href: "/about", label: "About Campus", icon: "HelpCircle" },
           ],
         },
@@ -226,7 +227,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "General",
           items: [
-            { href: "/person?tab=profile", label: "My Profile", icon: "User" },
+            { href: "/profile", label: "My Profile", icon: "User" },
             { href: "/about", label: "About Campus", icon: "HelpCircle" },
           ],
         },
@@ -263,7 +264,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           groupLabel: "General & Support",
           items: [
             { href: "/support", label: "Help & Support", icon: "LifeBuoy" },
-            { href: "/person", label: "My Profile", icon: "User" },
+            { href: "/profile", label: "My Profile", icon: "User" },
             { href: "/about", label: "About Campus", icon: "HelpCircle" },
           ],
         },
@@ -295,6 +296,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           groupLabel: "Campus Portal",
           items: [
             { href: "/admin", label: "Dashboard", icon: "LayoutDashboard" },
+            { href: "/profile", label: "My Profile", icon: "User" },
             { href: "/about", label: "About Campus", icon: "HelpCircle" },
           ],
         },

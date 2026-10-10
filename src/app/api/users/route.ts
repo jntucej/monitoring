@@ -220,6 +220,34 @@ async function handlePost(req: NextRequest) {
       );
     }
 
+    // Insert student_details if role is student
+    if (role === "student") {
+      await service.from("student_details").upsert({
+        user_id: user.id || authUserId,
+        roll: body.roll || effectiveUniqueId || body.uniqueId || (user as any).unique_id || String(email).split("@")[0],
+        year: body.year ?? 1,
+        section: body.section ?? "A",
+        batch: body.batch ?? "",
+        hostel_block: body.hostelBlock ?? effectiveHostel ?? null,
+        room_number: body.roomNumber ?? body.hostelRoom ?? null,
+        student_type: body.studentType ?? null,
+        gender: body.gender ?? null,
+        guardian_id: body.guardianId ?? parentId ?? null,
+      }, { onConflict: "user_id" });
+    }
+
+    // Insert employee_details if role is staff/faculty/operator/admin/sysadmin/worker
+    if (["faculty", "staff", "operator", "admin", "sysadmin", "worker"].includes(role)) {
+      await service.from("employee_details").upsert({
+        user_id: user.id || authUserId,
+        employee_id: employeeId || effectiveUniqueId || (user as any).unique_id || String(email).split("@")[0],
+        designation: body.designation || (role === "faculty" ? "Assistant Professor" : role),
+        department_id: effectiveDept || null,
+        is_hod: !!isHod,
+        staff_category: body.staffCategory || role,
+      }, { onConflict: "user_id" });
+    }
+
     return NextResponse.json({
       success: true,
       data: user,

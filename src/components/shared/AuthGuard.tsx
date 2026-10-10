@@ -23,6 +23,18 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   const gateId = user?.gateId;
 
   useEffect(() => {
+    if (hasHydrated) return;
+    const t = setTimeout(() => {
+      try {
+        useAuthStore.persist?.rehydrate();
+      } catch {
+        useAuthStore.getState().setHasHydrated(true);
+      }
+    }, 3000);
+    return () => clearTimeout(t);
+  }, [hasHydrated]);
+
+  useEffect(() => {
     // Wait until store has hydrated from localStorage/sessionStorage
     if (!hasHydrated) return;
 

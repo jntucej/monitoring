@@ -1,0 +1,280 @@
+// src/lib/user-import.ts
+import { getSupabaseServiceClient } from "@/lib/supabaseClient";
+import { Role } from "@/lib/types";
+import { addAudit } from "@/lib/db";
+import bcrypt from "bcryptjs";
+
+const VALID_ROLES: Role[] = ["operator", "admin", "sysadmin", "parent", "student", "warden", "faculty", "staff", "worker"];
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export interface ImportRow {
+  name: string;
+  email: string;
+  role: Role;
+  uniqueId?: string;
+  roll?: string;
+  employeeId?: string;
+  phone?: string;
+  department?: string;
+  departmentId?: string;
+  designation?: string;
+  year?: number;
+  section?: string;
+  batch?: string;
+  hostelBlock?: string;
+  roomNumber?: string;
+  status?: string;
+  gender?: string;
+  [key: string]: any;
+}
+
+export interface ValidationError {
+  row: number;
+  field?: string;
+  message: string;
+}
+
+export interface ValidationResult {
+  valid: boolean;
+  totalRows: number;
+  validRows: ImportRow[];
+  errors: ValidationError[];
+  summary: {
+    total: number;
+    valid: number;
+    invalid: number;
+  };
+}
+
+export interface CommitResult {
+  success: boolean;
+  importedCount: number;
+  failedCount: number;
+  errors: Array<{ row: number; error: string }>;
+}
+
+export async function parseCsv(csvText: string): Promise<Record<string, string>[]> {
+  const lines = csvText.split(/\r?\n/).filter((l) => l.trim().length > 0);
+  if (lines.length < 2) return [];
+
+  const headers = lines[0].split(",").map((h) => h.trim().replace(/^["']|["']$/g, ""));
+  const records: Record<string, string>[] = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const rawLine = lines[i];
+    // Basic CSV splitting handling simple quotes
+    const values: string[] = [];
+    let insideQuote = false;
+    let currentVal = "";
+
+    for (let c = 0; c < rawLine.length; c++) {
+      const char = rawLine[c];
+      if (char === '"' || char === "'") {
+        insideQuote = !insideQuote;
+      } else if (char === "," && !insideQuote) {
+        values.push(currentVal.trim().replace(/^["']|["']$/g, ""));
+        currentVal = "";
+      } else {
+        currentVal += char;
+      }
+    }
+    values.push(currentVal.trim().replace(/^["']|["']$/g, ""));
+
+    const obj: Record<string, string> = {};
+    headers.forEach((h, idx) => {
+      obj[h] = values[idx] || "";
+    });
+    records.push(obj);
+  }
+
+  return records;
+}
+
+export async function validateImport(csvInput: string | ImportRow[]): Promise<ValidationResult> {
+  const rawRows: Record<string, string>[] = typeof csvInput === "string" ? await parseCsv(csvInput) : (csvInput as any);
+  const errors: ValidationError[] = [];
+  const validRows: ImportRow[] = [];
+  const seenEmails = new Set<string>();
+
+  for (let i = 0; i < rawRows.length; i++) {
+    const r = rawRows[i];
+    const rowNum = i + 1;
+    const name = (r.name || r.fullName || "").trim();
+    const email = (r.email || "").trim().toLowerCase();
+    const role = (r.role || "student").trim().toLowerCase() as Role;
+    const uniqueId = (r.uniqueId || r.roll || r.employeeId || "").trim();
+
+    if (!name) {
+      errors.push({ row: rowNum, field: "name", message: "Name is required" });
+      continue;
+    }
+
+    if (!email || !EMAIL_REGEX.test(email)) {
+      errors.push({ row: rowNum, field: "email", message: "Valid email is required" });
+      continue;
+    }
+
+    if (seenEmails.has(email)) {
+      errors.push({ row: rowNum, field: "email", message: `Duplicate email ${email} in file` });
+      continue;
+    }
+    seenEmails.add(email);
+
+    if (!VALID_ROLES.includes(role)) {
+      errors.push({ row: rowNum, field: "role", message: `Invalid role: ${role}` });
+      continue;
+    }
+
+    const rowObj: ImportRow = {
+      name,
+      email,
+      role,
+      uniqueId: uniqueId || email.split("@")[0],
+      roll: r.roll || uniqueId,
+      employeeId: r.employeeId || uniqueId,
+      phone: r.phone ? r.phone.trim() : undefined,
+      department: r.department || r.departmentId || undefined,
+      departmentId: r.departmentId || r.department || undefined,
+      designation: r.designation || undefined,
+      year: r.year ? parseInt(r.year, 10) : undefined,
+      section: r.section || undefined,
+      batch: r.batch || undefined,
+      hostelBlock: r.hostelBlock || r.assignedHostel || undefined,
+      roomNumber: r.roomNumber || r.hostelRoom || undefined,
+      status: r.status || "ACTIVE",
+      gender: r.gender || undefined,
+    };
+
+    validRows.push(rowObj);
+  }
+
+  return {
+    valid: errors.length === 0,
+    totalRows: rawRows.length,
+    validRows,
+    errors,
+    summary: {
+      total: rawRows.length,
+      valid: validRows.length,
+      invalid: errors.length,
+    },
+  };
+}
+
+export async function commitImport(
+  rows: ImportRow[],
+  actorId: string,
+  skipErrors: boolean = true
+): Promise<CommitResult> {
+  const supabase = getSupabaseServiceClient();
+  let importedCount = 0;
+  let failedCount = 0;
+  const errors: Array<{ row: number; error: string }> = [];
+
+  const defaultSalt = await bcrypt.genSalt(10);
+  const defaultPwHash = await bcrypt.hash("Welcome@123", defaultSalt);
+  const defaultPinHash = await bcrypt.hash("1234", defaultSalt);
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const rowNum = i + 1;
+
+    try {
+      // 1. Check if user already exists
+      const { data: existing } = await supabase
+        .from("users")
+        .select("id, role")
+        .eq("email", row.email)
+        .maybeSingle();
+
+      let targetUserId: string;
+
+      if (existing) {
+        targetUserId = existing.id;
+        const updates: Record<string, any> = {
+          name: row.name,
+          role: row.role,
+          phone: row.phone || null,
+          department_id: row.departmentId || row.department || null,
+          status: row.status || "ACTIVE",
+          updated_at: new Date().toISOString(),
+        };
+        if (row.uniqueId) updates.unique_id = row.uniqueId;
+
+        const { error: updErr } = await supabase.from("users").update(updates).eq("id", targetUserId);
+        if (updErr) throw new Error(updErr.message);
+      } else {
+        const newId = crypto.randomUUID();
+        targetUserId = newId;
+        const insertUser = {
+          id: newId,
+          name: row.name,
+          email: row.email,
+          role: row.role,
+          unique_id: row.uniqueId || row.roll || row.employeeId || row.email.split("@")[0],
+          phone: row.phone || null,
+          department_id: row.departmentId || row.department || null,
+          status: row.status || "ACTIVE",
+          password_hash: defaultPwHash,
+          pin_hash: defaultPinHash,
+          initial_pin_hash: defaultPinHash,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+
+        const { error: insErr } = await supabase.from("users").insert(insertUser);
+        if (insErr) throw new Error(insErr.message);
+      }
+
+      // 2. Student details
+      if (row.role === "student") {
+        const studentData = {
+          user_id: targetUserId,
+          roll: row.roll || row.uniqueId || row.email.split("@")[0],
+          year: row.year || 1,
+          section: row.section || "A",
+          batch: row.batch || "",
+          hostel_block: row.hostelBlock || null,
+          room_number: row.roomNumber || null,
+          gender: row.gender || null,
+        };
+        await supabase.from("student_details").upsert(studentData, { onConflict: "user_id" });
+      }
+
+      // 3. Employee details
+      if (["faculty", "staff", "operator", "admin", "sysadmin", "worker"].includes(row.role)) {
+        const employeeData = {
+          user_id: targetUserId,
+          employee_id: row.employeeId || row.uniqueId || row.email.split("@")[0],
+          designation: row.designation || (row.role === "faculty" ? "Assistant Professor" : row.role),
+          department_id: row.departmentId || row.department || null,
+          staff_category: row.role,
+        };
+        await supabase.from("employee_details").upsert(employeeData, { onConflict: "user_id" });
+      }
+
+      importedCount++;
+    } catch (err: any) {
+      failedCount++;
+      errors.push({ row: rowNum, error: err.message || "Failed to process row" });
+      if (!skipErrors) {
+        break;
+      }
+    }
+  }
+
+  await addAudit({
+    action: "BULK_USER_IMPORT",
+    userId: actorId,
+    userName: "SysAdmin",
+    role: "sysadmin",
+    details: { total: rows.length, importedCount, failedCount },
+  }).catch(() => {});
+
+  return {
+    success: errors.length === 0 || skipErrors,
+    importedCount,
+    failedCount,
+    errors,
+  };
+}
