@@ -434,17 +434,8 @@ CREATE TABLE IF NOT EXISTS gate_access_rules (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS predictions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  type VARCHAR(50) NOT NULL,
-  target VARCHAR(100) NOT NULL,
-  predicted_value DOUBLE PRECISION NOT NULL,
-  confidence_interval_low DOUBLE PRECISION NOT NULL,
-  confidence_interval_high DOUBLE PRECISION NOT NULL,
-  timestamp TIMESTAMPTZ NOT NULL,
-  model_version VARCHAR(20) DEFAULT 'v1.0-arima',
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
+-- predictions: defined in database/migrations/20261008000001_security_remediation_audit.sql
+-- Do not redefine here.
 
 CREATE TABLE IF NOT EXISTS zones (
   id VARCHAR(50) PRIMARY KEY,
