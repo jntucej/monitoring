@@ -11,26 +11,23 @@ async function handleGet(_req: NextRequest) {
     unhealthy: 503,
   };
 
-  // Bug 135: this endpoint is public (no auth). Raw Postgres/env error strings can leak
-  // table/column/constraint names and connection details. Replace with generic messages;
-  // keep the non-sensitive status + latency so operators/monitoring still get the signal.
+  // Bug 135: endpointpublic (no auth). Raw Postgres/env error strings leak
+  // table/column/constraint names connection details. Replace generic messages;
+  // keep non-sensitive status latency operators/monitoring get signal.
   const sanitize = (h: typeof health) => {
     const clone = JSON.parse(JSON.stringify(h));
     if (clone.components) {
-      if (clone.components.database && clone.components.database.error) {
-        clone.components.database.error = "Database unavailable";
+      for (const key of ["database", "redis"] as const) {
+        const c = clone.components[key];
+        if (c && c.error) c.error = `${key} unavailable`;
       }
-      if (clone.components.redis && clone.components.redis.error) {
-        clone.components.redis.error = "Redis unavailable";
-      }
-      if (clone.components.env && clone.components.env.error) {
-        clone.components.env.error = "Environment misconfigured";
-      }
+      if (clone.components.env?.error) clone.components.env.error = "Environment misconfigured";
     }
     return clone;
   };
 
-  return NextResponse.json(sanitize(health), { status: statusCodes[health.status] || 200 });
+  const sanitized = sanitize(health);
+  return NextResponse.json(sanitized, { status: statusCodes[health.status] ?? 200 });
 }
 
 export const GET = withRateLimit(handleGet, { keyPrefix: "health_check", maxRequests: 60 });
