@@ -15,13 +15,13 @@ function getRoll(req: NextRequest): string {
   return decodeURIComponent(segments[segments.length - 2]);
 }
 
-async function handleGet(req: NextRequest) {
+async function handleGet(req: NextRequest, { auth }: { auth?: any } = {}) {
   try {
     const roll = getRoll(req);
-    const authUserId = req.headers.get("x-user-id");
-    const authRole = req.headers.get("x-user-role");
+    const authUserId = auth?.userId || req.headers.get("x-user-id");
+    const authRole = auth?.role || req.headers.get("x-user-role");
 
-    // Authorization Check
+    // Authorization Check: Admins and SysAdmins can view any student history
     const isAllowedRole = ["admin", "sysadmin"].includes(authRole || "");
 
     if (!isAllowedRole) {

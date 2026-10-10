@@ -59,6 +59,63 @@ async function handlePatch(req: NextRequest) {
     const supabase = getSupabaseServiceClient();
 
     if (body && typeof body === "object") {
+      // 1. Basic profile fields
+      const profileUpdates: Record<string, any> = {};
+      if (body.name !== undefined) profileUpdates.name = body.name;
+      if (body.email !== undefined) profileUpdates.email = body.email;
+      if (body.phone !== undefined) profileUpdates.phone = body.phone;
+      if (body.department !== undefined) profileUpdates.department_id = body.department;
+      if (body.photoUrl !== undefined) profileUpdates.photo_url = body.photoUrl;
+      if (body.uniqueId !== undefined) profileUpdates.unique_id = body.uniqueId;
+      if (body.loginIdentifier !== undefined) profileUpdates.login_identifier = body.loginIdentifier;
+
+      if (Object.keys(profileUpdates).length > 0) {
+        const { error } = await supabase.from("users").update(profileUpdates).eq("id", id);
+        if (error) return NextResponse.json({ success: false, error: { message: error.message } }, { status: 400 });
+      }
+
+      // 2. Student details
+      if (body.studentDetails || body.roll || body.year || body.hostelRoom) {
+        const sd = body.studentDetails ?? body;
+        const studentUpdates: Record<string, any> = {};
+        if (sd.roll !== undefined) studentUpdates.roll = sd.roll;
+        if (sd.year !== undefined) studentUpdates.year = sd.year;
+        if (sd.section !== undefined) studentUpdates.section = sd.section;
+        if (sd.batch !== undefined) studentUpdates.batch = sd.batch;
+        if (sd.hostelBlock !== undefined) studentUpdates.hostel_block = sd.hostelBlock;
+        if (sd.hostelRoom !== undefined) studentUpdates.room_number = sd.hostelRoom;
+        if (sd.roomNumber !== undefined) studentUpdates.room_number = sd.roomNumber;
+        if (sd.guardianId !== undefined) studentUpdates.guardian_id = sd.guardianId;
+        if (sd.studentType !== undefined) studentUpdates.student_type = sd.studentType;
+        if (sd.gender !== undefined) studentUpdates.gender = sd.gender;
+        if (sd.wardenId !== undefined) studentUpdates.warden_id = sd.wardenId;
+
+        if (Object.keys(studentUpdates).length > 0) {
+          const { error } = await supabase
+            .from("student_details")
+            .upsert({ user_id: id, ...studentUpdates }, { onConflict: "user_id" });
+          if (error) return NextResponse.json({ success: false, error: { message: error.message } }, { status: 400 });
+        }
+      }
+
+      // 3. Employee details
+      if (body.employeeDetails || body.designation || body.staffCategory) {
+        const ed = body.employeeDetails ?? body;
+        const empUpdates: Record<string, any> = {};
+        if (ed.employeeId !== undefined) empUpdates.employee_id = ed.employeeId;
+        if (ed.designation !== undefined) empUpdates.designation = ed.designation;
+        if (ed.departmentId !== undefined) empUpdates.department_id = ed.departmentId;
+        if (ed.isHod !== undefined) empUpdates.is_hod = ed.isHod;
+        if (ed.staffCategory !== undefined) empUpdates.staff_category = ed.staffCategory;
+
+        if (Object.keys(empUpdates).length > 0) {
+          const { error } = await supabase
+            .from("employee_details")
+            .upsert({ user_id: id, ...empUpdates }, { onConflict: "user_id" });
+          if (error) return NextResponse.json({ success: false, error: { message: error.message } }, { status: 400 });
+        }
+      }
+
       if (body.role && VALID_ROLES.includes(body.role as Role)) {
         await updateUserRole(id, body.role as Role, actorId);
       }
@@ -141,6 +198,12 @@ async function handleDelete(req: NextRequest) {
         { success: false, error: { code: "SERVER_ERROR", message: error.message } },
         { status: 500 }
       );
+    }
+
+    try {
+      await supabase.auth.admin.deleteUser(id);
+    } catch {
+      // Ignore if auth user doesn't exist
     }
 
     await addAudit({

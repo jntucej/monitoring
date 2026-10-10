@@ -70,8 +70,8 @@ async function handleGet(req: NextRequest) {
         return NextResponse.json({ success: true, data: minimal });
       }
 
-      // Admin, sysadmin: full record
-      if (["admin", "sysadmin"].includes(authRole || "")) {
+      // Admin, sysadmin, warden, supervisor, hod: full record
+      if (["admin", "sysadmin", "warden", "supervisor", "hod"].includes(authRole || "")) {
         const student = await findStudentByRoll(roll);
         if (!student) {
           return NextResponse.json(
@@ -90,8 +90,8 @@ async function handleGet(req: NextRequest) {
     }
 
     if (q) {
-      // Searching for students is limited to administrative roles
-      if (!["admin", "sysadmin"].includes(authRole || "")) {
+      // Searching for students is permitted for administrative and oversight roles
+      if (!["admin", "sysadmin", "warden", "supervisor", "hod", "faculty"].includes(authRole || "")) {
         return NextResponse.json(
           { success: false, error: { code: "FORBIDDEN", message: "Insufficient permissions to search students." } },
           { status: 403 }
@@ -112,8 +112,8 @@ async function handleGet(req: NextRequest) {
       return NextResponse.json({ success: true, data: sanitized });
     }
 
-    // Listing all students is highly restricted to admin/sysadmin
-    if (!["admin", "sysadmin"].includes(authRole || "")) {
+    // Listing all students for administrative and oversight roles
+    if (!["admin", "sysadmin", "warden", "supervisor", "hod"].includes(authRole || "")) {
       return NextResponse.json(
         { success: false, error: { code: "FORBIDDEN", message: "You do not have permission to list all students." } },
         { status: 403 }
@@ -160,6 +160,6 @@ async function handleGet(req: NextRequest) {
 // Apply authentication, authorization, and rate limiting to ALL operations
 // Parent role added so parents can fetch their own children's basic info
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["operator", "admin", "sysadmin", "parent"] }),
+  withAuthorization(handleGet, { requiredRole: ["operator", "admin", "sysadmin", "parent", "warden", "supervisor", "hod", "faculty"] }),
   { keyPrefix: "students_get", maxRequests: 100 }
 );

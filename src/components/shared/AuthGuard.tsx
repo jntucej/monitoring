@@ -24,13 +24,17 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   const gateId = user?.gateId;
 
   useEffect(() => {
-    // ponytail: fail-closed escape hatch — if persist hydration never
-    // settles (blocked storage), the final render gate below redirects to
-    // /login instead of spinning forever. 8s ceiling; normal path hydrates
-    // in ms, so this only fires when storage is actually broken.
-    const t = setTimeout(() => { setIsChecking(false); setTimedOut(true); }, 8000);
+    if (hasHydrated) return;
+    const t = setTimeout(() => {
+      // give the store a nudge — this is safe even in private mode
+      try {
+        useAuthStore.persist?.rehydrate();
+      } catch {
+        useAuthStore.getState().setHasHydrated(true);
+      }
+    }, 3000);
     return () => clearTimeout(t);
-  }, []);
+  }, [hasHydrated]);
 
   useEffect(() => {
     // Wait until store has hydrated from localStorage/sessionStorage

@@ -133,12 +133,16 @@ export default function SysAdminStudentsPage() {
         addToast({ variant: "error", title: "Invalid JSON", message: "Custom metadata must be valid JSON." });
         setBusy(false); return;
       }
-      const res = await fetch(`/api/users/${editingStudent.id}`, {
+      const targetEndpoint = (editingStudent.roll || editingStudent.uniqueId)
+        ? `/api/students/${encodeURIComponent(editingStudent.roll || editingStudent.uniqueId || "")}`
+        : `/api/users/${editingStudent.id}`;
+      const res = await fetch(targetEndpoint, {
         method: "PATCH",
         headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({
           name: editForm.name || undefined, email: editForm.email || undefined,
           phone: editForm.phone || undefined, department: editForm.branch || undefined,
+          hostelRoom: editForm.hostelRoom || undefined, isHosteller: editForm.isHosteller,
           password: editForm.newPassword || undefined,
           pin: editForm.newPin || undefined,
           metadata: { ...parsedMeta, hostelRoom: editForm.hostelRoom, isHosteller: editForm.isHosteller },
@@ -161,7 +165,10 @@ export default function SysAdminStudentsPage() {
     const newStatus = s.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE";
     if (!confirm(`Set ${s.name} to ${newStatus}?`)) return;
     try {
-      const res = await fetch(`/api/users/${s.id}`, {
+      const targetEndpoint = (s.roll || s.uniqueId)
+        ? `/api/students/${encodeURIComponent(s.roll || s.uniqueId || "")}`
+        : `/api/users/${s.id}`;
+      const res = await fetch(targetEndpoint, {
         method: "PATCH",
         headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
@@ -181,7 +188,10 @@ export default function SysAdminStudentsPage() {
   const handleDeleteStudent = async (s: StudentRecord) => {
     if (!confirm(`Delete student ${s.name} (${s.roll || s.uniqueId})? This cannot be undone.`)) return;
     try {
-      const res = await fetch(`/api/users/${s.id}`, { method: "DELETE", headers: getAuthHeaders() });
+      const targetEndpoint = (s.roll || s.uniqueId)
+        ? `/api/students/${encodeURIComponent(s.roll || s.uniqueId || "")}`
+        : `/api/users/${s.id}`;
+      const res = await fetch(targetEndpoint, { method: "DELETE", headers: getAuthHeaders() });
       if (res.ok) {
         addToast({ variant: "success", title: "Deleted", message: `${s.name} removed.` });
         loadStudents();

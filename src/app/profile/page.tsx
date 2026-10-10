@@ -1,371 +1,600 @@
+// src/app/profile/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
-import { User, Shield, Bell, Lock, KeyRound, Camera, Smartphone, Mail, Save } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { getAuthHeaders } from "@/lib/utils";
+import {
+  User as UserIcon,
+  Mail,
+  Phone,
+  Shield,
+  KeyRound,
+  Lock,
+  Save,
+  Loader2,
+  CheckCircle2,
+  Fingerprint,
+  Bell,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 
+/* ------------------------------------------------------------------ *
+ *  Types
+ * ------------------------------------------------------------------ */
+interface Profile {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  role: string;
+  status: string;
+  uniqueId: string | null;
+  photoUrl: string | null;
+  departmentId: string | null;
+  twoFactorEnabled: boolean;
+  studentDetails?: { roll?: string; year?: number; section?: string; hostel_block?: string; room_number?: string } | null;
+  employeeDetails?: { employee_id?: string; designation?: string; department_id?: string } | null;
+}
+
+type Tab = "personal" | "security" | "appearance";
+
+/* ------------------------------------------------------------------ *
+ *  Helpers
+ * ------------------------------------------------------------------ */
+function authHeaders(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  const utilHeaders = getAuthHeaders();
+  if (Object.keys(utilHeaders).length > 0) return utilHeaders;
+
+  const token =
+    localStorage.getItem("auth-token") ||
+    sessionStorage.getItem("auth-token") ||
+    (() => {
+      try {
+        const raw = localStorage.getItem("gate-monitor-auth") || localStorage.getItem("auth-store");
+        return raw ? JSON.parse(raw)?.state?.token : null;
+      } catch {
+        return null;
+      }
+    })();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+function roleLabel(role: string): string {
+  const map: Record<string, string> = {
+    sysadmin: "System Administrator",
+    admin: "Administrator",
+    operator: "Gate Operator",
+    student: "Student",
+    faculty: "Faculty",
+    staff: "Staff",
+    worker: "Worker",
+    visitor: "Visitor",
+    parent: "Parent",
+    guardian: "Guardian",
+    warden: "Warden",
+    hod: "Head of Department",
+    supervisor: "Supervisor",
+  };
+  return map[role] || role;
+}
+
+/* ------------------------------------------------------------------ *
+ *  Page
+ * ------------------------------------------------------------------ */
 export default function ProfilePage() {
-  const { user, token } = useAuthStore();
-  const currentSessionToken = user?.currentSessionToken || token;
-  const { addToast } = useUIStore();
+  return (
+    <AuthGuard>
+      <ProfileDashboard />
+    </AuthGuard>
+  );
+}
 
-  const [activeTab, setActiveTab] = useState<"personal" | "security" | "notifications">("personal");
-  const [loading, setLoading] = useState(false);
+function ProfileDashboard() {
+  const addToast = useUIStore((s) => s.success);
+  const addError = useUIStore((s) => s.error);
+  const setUser = useAuthStore((s) => s.setUser);
 
-  // Personal state
-  const [name, setName] = useState(user?.name || "");
-  const [phone, setPhone] = useState(user?.phone || "");
-  const [photoUrl, setPhotoUrl] = useState(user?.photoUrl || user?.avatarUrl || "");
+  const [tab, setTab] = useState<Tab>("personal");
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [savingName, setSavingName] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [savingPin, setSavingPin] = useState(false);
 
-  // Password state
+  // Personal form
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+
+  // Password form
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [showPw, setShowPw] = useState(false);
 
-  // Notification state
-  const [emailNotifs, setEmailNotifs] = useState(true);
-  const [smsNotifs, setSmsNotifs] = useState(true);
-  const [quietHoursStart, setQuietHoursStart] = useState("22:00");
-  const [quietHoursEnd, setQuietHoursEnd] = useState("06:00");
+  // PIN form
+  const [currentPin, setCurrentPin] = useState("");
+  const [newPin, setNewPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
 
-  useEffect(() => {
-    if (user) {
-      setName(user.name || "");
-      setPhone(user.phone || "");
-      setPhotoUrl(user.photoUrl || user.avatarUrl || "");
-    }
-  }, [user]);
-
-  const handleSavePersonal = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
+  /* -------------------- Load profile -------------------- */
+  const load = useCallback(async () => {
     setLoading(true);
     try {
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-        "X-User-Id": user.id,
-        "X-User-Role": user.role,
-      };
-      if (currentSessionToken) headers["X-Session-Token"] = currentSessionToken;
-
-      const res = await fetch(`/api/users/${user.id}`, {
-        method: "PATCH",
-        headers,
-        body: JSON.stringify({ name, phone, photoUrl }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.error?.message || "Failed to update profile");
-
-      addToast({ title: "Success", message: "Profile updated successfully", variant: "success" });
-    } catch (err: any) {
-      addToast({ title: "Update Failed", message: err.message, variant: "error" });
+      const res = await fetch("/api/profile", { headers: authHeaders() });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || "Failed to load profile");
+      }
+      setProfile(json.data);
+      setName(json.data.name ?? "");
+      setPhone(json.data.phone ?? "");
+    } catch (e: any) {
+      addError(e.message || "Failed to load profile");
     } finally {
       setLoading(false);
     }
+  }, [addError]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  /* -------------------- Save name/phone -------------------- */
+  const saveName = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!profile) return;
+    setSavingName(true);
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { ...authHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ name, phone }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.error || "Update failed");
+
+      setProfile({ ...profile, name, phone });
+      // Keep the auth store in sync so the sidebar/header update immediately
+      const current = useAuthStore.getState().user;
+      if (current) setUser({ ...current, name });
+      addToast("Profile updated");
+    } catch (e: any) {
+      addError(e.message || "Update failed");
+    } finally {
+      setSavingName(false);
+    }
   };
-  const handleChangePassword = async (e: React.FormEvent) => {
+
+  /* -------------------- Change password -------------------- */
+  const changePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      addToast({ title: "Validation Error", message: "Passwords do not match", variant: "error" });
+      addError("New passwords do not match");
       return;
     }
-    if (newPassword.length < 6) {
-      addToast({ title: "Validation Error", message: "Password must be at least 6 characters", variant: "error" });
+    if (newPassword.length < 8) {
+      addError("Password must be at least 8 characters");
       return;
     }
-
-    setPasswordLoading(true);
+    setSavingPassword(true);
     try {
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-        "X-User-Id": user?.id || "",
-        "X-User-Role": user?.role || "",
-      };
-      if (currentSessionToken) headers["X-Session-Token"] = currentSessionToken;
-
       const res = await fetch("/api/auth/change-password", {
         method: "POST",
-        headers,
+        headers: { ...authHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({ currentPassword, newPassword }),
       });
-      const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.error?.message || "Failed to change password");
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.error?.message || json.error || "Password change failed");
 
-      addToast({ title: "Success", message: "Password updated successfully", variant: "success" });
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-    } catch (err: any) {
-      addToast({ title: "Failed", message: err.message, variant: "error" });
+      addToast("Password changed — you will be signed out on other devices");
+    } catch (e: any) {
+      addError(e.message || "Password change failed");
     } finally {
-      setPasswordLoading(false);
+      setSavingPassword(false);
     }
   };
 
-  const handleSaveNotifications = async (e: React.FormEvent) => {
+  /* -------------------- Change PIN -------------------- */
+  const changePin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
-    setLoading(true);
+    if (newPin !== confirmPin) {
+      addError("New PINs do not match");
+      return;
+    }
+    if (!/^\d{4,8}$/.test(newPin)) {
+      addError("PIN must be 4–8 digits");
+      return;
+    }
+    setSavingPin(true);
     try {
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-        "X-User-Id": user.id,
-        "X-User-Role": user.role,
-      };
-      if (currentSessionToken) headers["X-Session-Token"] = currentSessionToken;
-
-      const res = await fetch(`/api/users/${user.id}`, {
-        method: "PATCH",
-        headers,
-        body: JSON.stringify({
-          notificationPreferences: {
-            email: emailNotifs,
-            sms: smsNotifs,
-            quietHours: { start: quietHoursStart, end: quietHoursEnd },
-          },
-        }),
+      const res = await fetch("/api/auth/pin-change", {
+        method: "POST",
+        headers: { ...authHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPin, newPin }),
       });
-      const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.error?.message || "Failed to save preferences");
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.error?.message || json.error || "PIN change failed");
 
-      addToast({ title: "Success", message: "Notification preferences saved", variant: "success" });
-    } catch (err: any) {
-      addToast({ title: "Error", message: err.message, variant: "error" });
+      setCurrentPin("");
+      setNewPin("");
+      setConfirmPin("");
+      addToast("PIN updated");
+    } catch (e: any) {
+      addError(e.message || "PIN change failed");
     } finally {
-      setLoading(false);
+      setSavingPin(false);
     }
   };
+
+  /* -------------------- Render -------------------- */
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="animate-spin w-8 h-8 text-[var(--action-primary)]" />
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="max-w-2xl mx-auto mt-16 glass-card p-8 text-center">
+        <p className="text-[var(--text-secondary)]">Could not load profile.</p>
+        <Button className="mt-4" onClick={load}>Retry</Button>
+      </div>
+    );
+  }
+
+  const initials = profile.name
+    .split(" ")
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   return (
-    <AuthGuard allowedRoles={["student", "faculty", "staff", "warden", "operator", "admin", "sysadmin", "parent", "guardian", "worker"]}>
-      <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
-        <div className="bg-[var(--bg-surface)] border border-[var(--border)] p-6 rounded-2xl flex flex-col sm:flex-row items-center gap-5">
-          <div className="relative">
-            <div className="w-20 h-20 rounded-full bg-sky-500/20 border-2 border-sky-500/40 flex items-center justify-center overflow-hidden text-2xl font-black text-sky-300">
-              {photoUrl ? (
-                <img src={photoUrl} alt={user?.name || "Avatar"} className="w-full h-full object-cover" />
-              ) : (
-                user?.name?.slice(0, 2).toUpperCase() || "ME"
+    <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+      {/* Header card */}
+      <div className="glass-card p-6 flex items-center gap-5">
+        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-2xl font-bold">
+          {initials || <UserIcon className="w-8 h-8" />}
+        </div>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-2xl font-bold text-[var(--text-primary)] truncate">
+            {profile.name}
+          </h1>
+          <p className="text-sm text-[var(--text-secondary)] truncate">
+            {profile.email}
+          </p>
+          <div className="flex flex-wrap gap-2 mt-2">
+            <Badge variant="success">{roleLabel(profile.role)}</Badge>
+            <Badge variant={profile.status === "ACTIVE" ? "success" : "error"}>
+              {profile.status}
+            </Badge>
+            {profile.twoFactorEnabled && (
+              <Badge variant="success">
+                <Shield className="w-3 h-3 mr-1" /> 2FA On
+              </Badge>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-2 border-b border-[var(--border)]">
+        {([
+          { id: "personal", label: "Personal", icon: UserIcon },
+          { id: "security", label: "Security", icon: Lock },
+          { id: "appearance", label: "Notifications", icon: Bell },
+        ] as const).map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id as Tab)}
+            className={`px-4 py-3 text-sm font-medium flex items-center gap-2 border-b-2 transition-colors ${
+              tab === t.id
+                ? "border-[var(--action-primary)] text-[var(--action-primary)]"
+                : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+            }`}
+          >
+            <t.icon className="w-4 h-4" /> {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ---------------- Personal tab ---------------- */}
+      {tab === "personal" && (
+        <form onSubmit={saveName} className="glass-card p-6 space-y-5">
+          <h2 className="text-lg font-semibold text-[var(--text-primary)]">
+            Personal details
+          </h2>
+
+          <div>
+            <label className="block text-sm mb-1 text-[var(--text-secondary)]">
+              Full name
+            </label>
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Your full name"
+              required
+              minLength={2}
+              maxLength={100}
+            />
+            <p className="text-xs text-[var(--text-muted)] mt-1">
+              This is the name shown on gate passes, logs and the campus dashboard.
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm mb-1 text-[var(--text-secondary)]">
+              Email
+            </label>
+            <Input value={profile.email} disabled />
+            <p className="text-xs text-[var(--text-muted)] mt-1">
+              Email changes require administrator approval.
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm mb-1 text-[var(--text-secondary)]">
+              Phone
+            </label>
+            <Input
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+91 98765 43210"
+              type="tel"
+            />
+          </div>
+
+          {profile.uniqueId && (
+            <div>
+              <label className="block text-sm mb-1 text-[var(--text-secondary)]">
+                {profile.role === "student" ? "Roll number" : "Employee ID"}
+              </label>
+              <Input value={profile.uniqueId} disabled />
+            </div>
+          )}
+
+          {profile.studentDetails && (
+            <div className="grid grid-cols-2 gap-4">
+              {profile.studentDetails.year != null && (
+                <div>
+                  <label className="block text-sm mb-1 text-[var(--text-secondary)]">Year</label>
+                  <Input value={String(profile.studentDetails.year)} disabled />
+                </div>
+              )}
+              {profile.studentDetails.hostel_block && (
+                <div>
+                  <label className="block text-sm mb-1 text-[var(--text-secondary)]">Hostel</label>
+                  <Input value={profile.studentDetails.hostel_block} disabled />
+                </div>
               )}
             </div>
-            <div className="absolute bottom-0 right-0 p-1.5 rounded-full bg-sky-600 text-white shadow-md">
-              <Camera className="w-3.5 h-3.5" />
-            </div>
-          </div>
-          <div className="text-center sm:text-left space-y-1">
-            <h1 className="text-2xl font-bold text-white">{user?.name || "User Profile"}</h1>
-            <p className="text-xs text-[var(--text-muted)] font-mono">{user?.identifier || user?.email || user?.id}</p>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-sky-500/10 text-sky-400 border border-sky-500/20">
-              <Shield className="w-3 h-3" /> Role: {user?.role}
-            </div>
-          </div>
-        </div>
+          )}
 
-        {/* Tabs Bar */}
-        <div className="flex border-b border-[var(--border)] gap-6">
-          <button
-            onClick={() => setActiveTab("personal")}
-            className={`pb-3 text-xs font-bold transition-all flex items-center gap-2 border-b-2 ${
-              activeTab === "personal"
-                ? "border-sky-500 text-sky-400"
-                : "border-transparent text-[var(--text-muted)] hover:text-white"
-            }`}
-          >
-            <User className="w-4 h-4" /> Personal Details
-          </button>
-          <button
-            onClick={() => setActiveTab("security")}
-            className={`pb-3 text-xs font-bold transition-all flex items-center gap-2 border-b-2 ${
-              activeTab === "security"
-                ? "border-sky-500 text-sky-400"
-                : "border-transparent text-[var(--text-muted)] hover:text-white"
-            }`}
-          >
-            <Lock className="w-4 h-4" /> Security
-          </button>
-          <button
-            onClick={() => setActiveTab("notifications")}
-            className={`pb-3 text-xs font-bold transition-all flex items-center gap-2 border-b-2 ${
-              activeTab === "notifications"
-                ? "border-sky-500 text-sky-400"
-                : "border-transparent text-[var(--text-muted)] hover:text-white"
-            }`}
-          >
-            <Bell className="w-4 h-4" /> Notifications
-          </button>
-        </div>
+          {profile.employeeDetails && (
+            <div className="grid grid-cols-2 gap-4">
+              {profile.employeeDetails.designation && (
+                <div>
+                  <label className="block text-sm mb-1 text-[var(--text-secondary)]">Designation</label>
+                  <Input value={profile.employeeDetails.designation} disabled />
+                </div>
+              )}
+              {profile.employeeDetails.employee_id && (
+                <div>
+                  <label className="block text-sm mb-1 text-[var(--text-secondary)]">Employee ID</label>
+                  <Input value={profile.employeeDetails.employee_id} disabled />
+                </div>
+              )}
+            </div>
+          )}
 
-        {/* Personal Details */}
-        {activeTab === "personal" && (
-          <form onSubmit={handleSavePersonal} className="bg-[var(--bg-surface)] border border-[var(--border)] p-6 rounded-2xl space-y-4">
-            <h2 className="text-sm font-bold text-white flex items-center gap-2">
-              <User className="w-4 h-4 text-sky-400" /> Basic Information
+          <div className="flex justify-end pt-2">
+            <Button type="submit" disabled={savingName}>
+              {savingName ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving…</>
+              ) : (
+                <><Save className="w-4 h-4 mr-2" /> Save changes</>
+              )}
+            </Button>
+          </div>
+        </form>
+      )}
+
+      {/* ---------------- Security tab ---------------- */}
+      {tab === "security" && (
+        <div className="space-y-6">
+          {/* Password */}
+          <form onSubmit={changePassword} className="glass-card p-6 space-y-5">
+            <h2 className="text-lg font-semibold text-[var(--text-primary)] flex items-center gap-2">
+              <KeyRound className="w-5 h-5" /> Change password
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div className="space-y-1">
-                <label className="text-[var(--text-muted)] font-medium">Full Name</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-sky-500"
-                  required
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[var(--text-muted)] font-medium">Phone Number</label>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+91 9876543210"
-                  className="w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-sky-500"
-                />
-              </div>
-              <div className="sm:col-span-2 space-y-1">
-                <label className="text-[var(--text-muted)] font-medium">Profile Photo URL</label>
-                <input
-                  type="url"
-                  value={photoUrl}
-                  onChange={(e) => setPhotoUrl(e.target.value)}
-                  placeholder="https://example.com/avatar.jpg"
-                  className="w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-sky-500"
-                />
-              </div>
+
+            <div>
+              <label className="block text-sm mb-1 text-[var(--text-secondary)]">
+                Current password
+              </label>
+              <Input
+                type={showPw ? "text" : "password"}
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+              />
             </div>
-            <div className="pt-2 flex justify-end">
-              <button
-                type="submit"
-                disabled={loading}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold transition-all disabled:opacity-50 shadow-md"
-              >
-                <Save className="w-4 h-4" /> Save Profile Details
-              </button>
+
+            <div>
+              <label className="block text-sm mb-1 text-[var(--text-secondary)]">
+                New password
+              </label>
+              <Input
+                type={showPw ? "text" : "password"}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                required
+                minLength={8}
+                autoComplete="new-password"
+              />
+              <p className="text-xs text-[var(--text-muted)] mt-1">
+                Minimum 8 characters. All other sessions will be signed out.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm mb-1 text-[var(--text-secondary)]">
+                Confirm new password
+              </label>
+              <Input
+                type={showPw ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                autoComplete="new-password"
+              />
+            </div>
+
+            <label className="flex items-center gap-2 text-sm text-[var(--text-secondary)] cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={showPw}
+                onChange={(e) => setShowPw(e.target.checked)}
+                className="rounded"
+              />
+              {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              Show passwords
+            </label>
+
+            <div className="flex justify-end">
+              <Button type="submit" disabled={savingPassword}>
+                {savingPassword ? (
+                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Updating…</>
+                ) : (
+                  <><Lock className="w-4 h-4 mr-2" /> Change password</>
+                )}
+              </Button>
             </div>
           </form>
-        )}
-        {activeTab === "security" && (
-          <form onSubmit={handleChangePassword} className="bg-[var(--bg-surface)] border border-[var(--border)] p-6 rounded-2xl space-y-4">
-            <h2 className="text-sm font-bold text-white flex items-center gap-2">
-              <KeyRound className="w-4 h-4 text-sky-400" /> Change Account Password
-            </h2>
-            <div className="space-y-3 text-xs max-w-md">
-              <div className="space-y-1">
-                <label className="text-[var(--text-muted)] font-medium">Current Password</label>
-                <input
+
+          {/* PIN — operators, workers, staff */}
+          {["operator", "worker", "staff", "faculty", "admin", "sysadmin"].includes(profile.role) && (
+            <form onSubmit={changePin} className="glass-card p-6 space-y-5">
+              <h2 className="text-lg font-semibold text-[var(--text-primary)] flex items-center gap-2">
+                <Fingerprint className="w-5 h-5" /> Change gate PIN
+              </h2>
+
+              <div>
+                <label className="block text-sm mb-1 text-[var(--text-secondary)]">
+                  Current PIN
+                </label>
+                <Input
                   type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-sky-500"
-                  required
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[var(--text-muted)] font-medium">New Password</label>
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-sky-500"
-                  required
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[var(--text-muted)] font-medium">Confirm New Password</label>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-sky-500"
-                  required
-                />
-              </div>
-            </div>
-            <div className="pt-2 flex justify-end">
-              <button
-                type="submit"
-                disabled={passwordLoading}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold transition-all disabled:opacity-50 shadow-md"
-              >
-                <Lock className="w-4 h-4" /> {passwordLoading ? "Updating..." : "Update Password"}
-              </button>
-            </div>
-          </form>
-        )}
-        {activeTab === "notifications" && (
-          <form onSubmit={handleSaveNotifications} className="bg-[var(--bg-surface)] border border-[var(--border)] p-6 rounded-2xl space-y-6">
-            <h2 className="text-sm font-bold text-white flex items-center gap-2">
-              <Bell className="w-4 h-4 text-sky-400" /> Preferences
-            </h2>
-            <div className="space-y-4 text-xs">
-              <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)]">
-                <div className="flex items-center gap-3">
-                  <Mail className="w-4 h-4 text-sky-400" />
-                  <div>
-                    <p className="font-bold text-white">Email Notifications</p>
-                    <p className="text-[10px] text-[var(--text-muted)]">Receive gate pass alerts and approvals via email</p>
-                  </div>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={emailNotifs}
-                  onChange={(e) => setEmailNotifs(e.target.checked)}
-                  className="w-4 h-4 accent-sky-500"
+                  inputMode="numeric"
+                  pattern="\d*"
+                  value={currentPin}
+                  onChange={(e) => setCurrentPin(e.target.value.replace(/\D/g, ""))}
+                  maxLength={8}
                 />
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)]">
-                <div className="flex items-center gap-3">
-                  <Smartphone className="w-4 h-4 text-purple-400" />
-                  <div>
-                    <p className="font-bold text-white">SMS Gate Alerts</p>
-                    <p className="text-[10px] text-[var(--text-muted)]">Send SMS notifications for gate entries & exits</p>
-                  </div>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={smsNotifs}
-                  onChange={(e) => setSmsNotifs(e.target.checked)}
-                  className="w-4 h-4 accent-sky-500"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 pt-2">
-                <div className="space-y-1">
-                  <label className="text-[var(--text-muted)] font-medium">Quiet Hours Start</label>
-                  <input
-                    type="time"
-                    value={quietHoursStart}
-                    onChange={(e) => setQuietHoursStart(e.target.value)}
-                    className="w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-sky-500"
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm mb-1 text-[var(--text-secondary)]">
+                    New PIN
+                  </label>
+                  <Input
+                    type="password"
+                    inputMode="numeric"
+                    pattern="\d*"
+                    value={newPin}
+                    onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ""))}
+                    maxLength={8}
+                    required
                   />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[var(--text-muted)] font-medium">Quiet Hours End</label>
-                  <input
-                    type="time"
-                    value={quietHoursEnd}
-                    onChange={(e) => setQuietHoursEnd(e.target.value)}
-                    className="w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-sky-500"
+                <div>
+                  <label className="block text-sm mb-1 text-[var(--text-secondary)]">
+                    Confirm PIN
+                  </label>
+                  <Input
+                    type="password"
+                    inputMode="numeric"
+                    pattern="\d*"
+                    value={confirmPin}
+                    onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ""))}
+                    maxLength={8}
+                    required
                   />
                 </div>
               </div>
-            </div>
-            <div className="pt-2 flex justify-end">
-              <button
-                type="submit"
-                disabled={loading}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold transition-all disabled:opacity-50 shadow-md"
+
+              <p className="text-xs text-[var(--text-muted)]">
+                4–8 digits. Used for kiosk/gate login, not for web sign-in.
+              </p>
+
+              <div className="flex justify-end">
+                <Button type="submit" disabled={savingPin}>
+                  {savingPin ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Updating…</>
+                  ) : (
+                    <><CheckCircle2 className="w-4 h-4 mr-2" /> Update PIN</>
+                  )}
+                </Button>
+              </div>
+            </form>
+          )}
+
+          {/* 2FA */}
+          <div className="glass-card p-6 space-y-3">
+            <h2 className="text-lg font-semibold text-[var(--text-primary)] flex items-center gap-2">
+              <Shield className="w-5 h-5" /> Two-factor authentication
+            </h2>
+            <p className="text-sm text-[var(--text-secondary)]">
+              {profile.twoFactorEnabled
+                ? "2FA is enabled on this account. You will be asked for a TOTP code at sign-in."
+                : "2FA is not enabled. System administrators are required to enable it."}
+            </p>
+            <div className="flex justify-end">
+              <a
+                href="/sysadmin/security"
+                className="text-sm text-[var(--action-primary)] hover:underline"
               >
-                <Save className="w-4 h-4" /> Save Preferences
-              </button>
+                Manage 2FA →
+              </a>
             </div>
-          </form>
-        )}
-      </div>
-    </AuthGuard>
+          </div>
+        </div>
+      )}
+
+      {/* ---------------- Notifications tab ---------------- */}
+      {tab === "appearance" && (
+        <div className="glass-card p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-[var(--text-primary)] flex items-center gap-2">
+            <Bell className="w-5 h-5" /> Notification preferences
+          </h2>
+          <p className="text-sm text-[var(--text-secondary)]">
+            Choose how you receive gate passes, visitor arrivals and emergency alerts.
+          </p>
+          <div className="flex justify-end">
+            <a
+              href="/settings/notifications"
+              className="text-sm text-[var(--action-primary)] hover:underline"
+            >
+              Open notification settings →
+            </a>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
