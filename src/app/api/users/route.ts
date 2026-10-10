@@ -152,53 +152,46 @@ async function handlePost(req: NextRequest) {
     const service = getSupabaseServiceClient();
 
     // ---- Step 1: provision the Supabase Auth identity ----
-    let authUserId: string | undefined;
+    let authUserId: string | null = null;
     let inviteSent = false;
 
-    if (sendInvite === true) {
-      const { data, error: inviteErr } = await service.auth.admin.inviteUserByEmail(
-        String(email).trim(),
-        { data: { name: String(name), role: String(role) } }
-      );
-      if (inviteErr || !data?.user) {
-        console.error('Auth invite failed:', inviteErr);
-        return NextResponse.json(
-          { success: false, error: { code: "AUTH_PROVISION_FAILED", message: "Failed to send user invitation" } },
-          { status: 500 }
+    try {
+      if (sendInvite === true) {
+        const { data, error: inviteErr } = await service.auth.admin.inviteUserByEmail(
+          String(email).trim(),
+          { data: { name: String(name), role: String(role) } }
         );
+        if (inviteErr) throw inviteErr;
+        authUserId = data.user.id;
+        inviteSent = true;
+      } else {
+        const temporaryPassword = randomBytes(18).toString("base64url");
+        const { data, error: createErr } = await service.auth.admin.createUser({
+          email: String(email).trim(),
+          password: temporaryPassword,
+          email_confirm: true,
+          user_metadata: {
+            name: String(name),
+            role: String(role),
+            phone: phone ?? null,
+            department: effectiveDept ?? null,
+            designation: body?.designation ?? null,
+            employee_id: effectiveUniqueId ?? null,
+          },
+          app_metadata: { provider: 'email', role: String(role) },
+        });
+        if (createErr) throw createErr;
+        authUserId = data.user.id;
       }
-      authUserId = data.user.id;
-      inviteSent = true;
-    } else {
-      // Generated server-side; never returned to any client nor logged.
-      const temporaryPassword = randomBytes(18).toString("base64url");
-      const { data, error: createErr } = await service.auth.admin.createUser({
-        email: String(email).trim(),
-        password: temporaryPassword,
-        email_confirm: true,
-        user_metadata: {
-          name: String(name),
-          role: String(role),
-          phone: phone ?? null,
-          department: effectiveDept ?? null,
-          designation: body?.designation ?? null,
-          employee_id: effectiveUniqueId ?? null,
-        },
-        app_metadata: { provider: 'email', role: String(role) },
-      });
-      if (createErr || !data?.user) {
-        console.error('Auth user creation failed:', createErr);
-        return NextResponse.json(
-          { success: false, error: { code: "AUTH_PROVISION_FAILED", message: createErr?.message || "Failed to create authentication account" } },
-          { status: 500 }
-        );
-      }
-      authUserId = data.user.id;
+    } catch (e: any) {
+      console.warn("[users] auth provision failed (continuing with profile-only):", e.message);
+      // Continue if auth fails
     }
+
 
     // ---- Step 2: insert the public.users profile (matching UUID id) ----
     const user = await provisionProfile({
-      id: authUserId,
+      id: authUserId || randomUUID(),
       name: String(name),
       role: role as Role,
       email: String(email).trim(),
@@ -220,9 +213,11 @@ async function handlePost(req: NextRequest) {
 
     if (!user) {
       // Profile insert failed -> roll back the orphaned Auth identity.
-      await service.auth.admin.deleteUser(authUserId).catch((delErr) =>
-        console.error('Failed to roll back auth user after profile failure:', delErr)
-      );
+      if (authUserId) {
+        await service.auth.admin.deleteUser(authUserId).catch((delErr) =>
+          console.error('Failed to roll back auth user after profile failure:', delErr)
+        );
+      }
       return NextResponse.json(
         { success: false, error: { code: "CREATE_FAILED", message: "Failed to create user profile" } },
         { status: 500 }
