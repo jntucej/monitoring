@@ -20,6 +20,7 @@ function toUser(raw: any): User {
     currentSessionToken: raw?.currentSessionToken ?? raw?.current_session_token,
     name: raw?.name ?? raw?.fullName ?? "",
     role: raw?.role as Role,
+    roles: raw?.roles ?? (raw?.role ? [raw.role] : []),
     gateId: raw?.gateId ?? raw?.gate_id,
     employeeId: raw?.employeeId ?? raw?.employee_id,
     email: raw?.email,
