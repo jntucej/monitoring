@@ -674,15 +674,20 @@ export class PostgresQueryBuilder<T = any> {
 }
 
 export const authAdmin = {
-  async createUser(attributes: { email: string; password?: string; user_metadata?: Record<string, any>; app_metadata?: Record<string, any>; email_confirm?: boolean; phone?: string; role?: string; }) {
+  async createUser(attributes: { email: string; password?: string; user_metadata?: Record<string, any> | null; app_metadata?: Record<string, any> | null; email_confirm?: boolean; phone?: string; role?: string; [key: string]: unknown; }) {
+    const safeAttributes = {
+      ...attributes,
+      user_metadata: attributes.user_metadata ?? {},
+      app_metadata: attributes.app_metadata ?? {},
+    };
     const crypto = await import("crypto");
     const bcrypt = await import("bcryptjs");
     const id = crypto.randomUUID();
-    const email = attributes.email.toLowerCase().trim();
-    const name = attributes.user_metadata?.name || attributes.user_metadata?.full_name || email.split("@")[0];
-    const role = attributes.role || attributes.user_metadata?.role || "student";
-    const passwordHash = attributes.password ? await bcrypt.hash(attributes.password, 10) : null;
-    const uniqueId = attributes.user_metadata?.unique_id || email.split("@")[0].toUpperCase();
+    const email = safeAttributes.email.toLowerCase().trim();
+    const name = safeAttributes.user_metadata?.name || safeAttributes.user_metadata?.full_name || email.split("@")[0];
+    const role = safeAttributes.role || safeAttributes.user_metadata?.role || "student";
+    const passwordHash = safeAttributes.password ? await bcrypt.hash(safeAttributes.password, 10) : null;
+    const uniqueId = safeAttributes.user_metadata?.unique_id || email.split("@")[0].toUpperCase();
     const handle = (uniqueId || name || `user_${id.replace(/-/g, "").slice(0, 8)}`).toLowerCase().replace(/[^a-z0-9_]/g, "_");
     try {
       const res = await query(
@@ -697,7 +702,7 @@ export const authAdmin = {
         [id, uniqueId, handle, email, name, role, passwordHash]
       );
       const user = res.rows[0] || { id, email, name, role, handle, unique_id: uniqueId };
-      return { data: { user: { id: user.id, email: user.email, user_metadata: { ...attributes.user_metadata, name: user.name, role: user.role, handle: user.handle } } }, error: null };
+      return { data: { user: { id: user.id, email: user.email, user_metadata: { ...safeAttributes.user_metadata, name: user.name, role: user.role, handle: user.handle } } }, error: null };
     } catch (err: any) {
       return { data: null, error: { message: err.message, code: err.code } };
     }
