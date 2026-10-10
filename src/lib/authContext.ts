@@ -109,6 +109,8 @@ export async function isMfaRequiredForPrivileged(): Promise<boolean> {
   }
 }
 
+export const isMfaRequiredForAdmin = isMfaRequiredForPrivileged;
+
 /**
  * Create an authenticated context from a Supabase session token
  *
