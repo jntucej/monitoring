@@ -4,6 +4,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { getDepartments } from "@/lib/departments";
+import { invalidateCache } from "@/lib/cache";
 import { withAuthorization } from "@/middleware/authorization";
 import { addAudit } from "@/lib/db";
 import { Role } from "@/lib/types";
@@ -127,6 +128,8 @@ async function handlePost(req: NextRequest) {
       details: `Saved department '${code}' (${name}).`,
     });
 
+    await invalidateCache("departments:*");
+
     return NextResponse.json({ success: true, data: data || payload });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 500 });
@@ -144,6 +147,8 @@ async function handleDelete(req: NextRequest) {
 
     const { error } = await supabase.from("departments").delete().eq("code", code);
     if (error && error.code !== "42P01") throw error;
+
+    await invalidateCache("departments:*");
 
     return NextResponse.json({ success: true, message: `Deleted department ${code}` });
   } catch (error: any) {
