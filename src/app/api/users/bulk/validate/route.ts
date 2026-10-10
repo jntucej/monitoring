@@ -6,7 +6,7 @@ import { validateImport } from "@/lib/user-import";
 async function handlePost(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
-    const csv = body.csv || body.content || body.rows;
+    const csv = body.csv || body.csvText || body.content || body.rows || "";
     if (!csv) {
       return NextResponse.json({ success: false, error: { message: "No CSV content supplied" } }, { status: 400 });
     }

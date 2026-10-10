@@ -22,6 +22,21 @@ async function handlePost(req: NextRequest) {
 
   try {
     const body = await req.json().catch(() => null);
+
+    // Support CsvBulkImporter two-phase actions
+    if (body?.action === "validate") {
+      const { validateImport } = await import("@/lib/user-import");
+      const result = await validateImport(body.csvText || "");
+      return NextResponse.json({ success: true, data: result });
+    }
+
+    if (body?.action === "commit") {
+      const { validateImport, commitImport } = await import("@/lib/user-import");
+      const validation = await validateImport(body.csvText || "");
+      const commitRes = await commitImport(validation.rows, actorId, body.skipErrors !== false);
+      return NextResponse.json({ success: true, data: commitRes });
+    }
+
     const usersList = Array.isArray(body?.users) ? body.users : Array.isArray(body) ? body : null;
 
     if (!usersList || usersList.length === 0) {
