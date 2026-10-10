@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
+import { withAuthorization } from "@/middleware/authorization";
 
-export async function GET() {
+async function handleGet() {
   const openApiSpec = {
     openapi: "3.0.0",
     info: {
@@ -65,3 +66,5 @@ export async function GET() {
     headers: { "Content-Type": "text/html" },
   });
 }
+
+export const GET = withAuthorization(handleGet, { requiredRole: "sysadmin" });
