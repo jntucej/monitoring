@@ -23,7 +23,7 @@ export default function DepartmentsManagementPage() {
   const fetchDepts = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/departments", { headers: getAuthHeaders() });
+      const res = await fetch(`/api/departments?t=${Date.now()}`, { headers: getAuthHeaders() });
       const json = await res.json();
       if (json.success) setDepartments(json.data || []);
     } catch {
