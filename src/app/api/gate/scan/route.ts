@@ -68,7 +68,7 @@ async function verifyBackGateLocation(
   if (distance > targetCoords.allowedRadiusMeters) {
     return {
       allowed: false,
-      error: `Geo-location mismatch: Operator is ${Math.round(distance)}m away from Back Gate. Must be within ${BACK_GATE_COORDS.allowedRadiusMeters}m.`,
+      error: `Geo-location mismatch: Operator is ${Math.round(distance)}m away from Back Gate. Must be within ${targetCoords.allowedRadiusMeters}m.`,
     };
   }
 
