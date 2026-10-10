@@ -908,13 +908,15 @@ export async function findAllPersons(type?: PersonType): Promise<Person[]> {
   const studentMap = new Map((studentRows.data || []).map((s: any) => [s.user_id, s]));
   const employeeMap = new Map((employeeRows.data || []).map((e: any) => [e.user_id, e]));
 
-  return data.map((u: any) =>
-    mPerson({
+  return data.map((u: any) => {
+    const studentData = studentMap.get(u.id);
+    const employeeData = employeeMap.get(u.id);
+    return mPerson({
       ...u,
-      student_details: studentMap.get(u.id),
-      employee_details: employeeMap.get(u.id),
-    })
-  );
+      student_details: studentData || null,
+      employee_details: employeeData || null,
+    });
+  });
 }
 
 export const findAllStudents = () => findAllPersons('student');
@@ -951,13 +953,15 @@ export async function searchPersons(q: string, type?: PersonType): Promise<Perso
   const studentMap = new Map((studentRows.data || []).map((s: any) => [s.user_id, s]));
   const employeeMap = new Map((employeeRows.data || []).map((e: any) => [e.user_id, e]));
 
-  return data.map((u: any) =>
-    mPerson({
+  return data.map((u: any) => {
+    const studentData = studentMap.get(u.id);
+    const employeeData = employeeMap.get(u.id);
+    return mPerson({
       ...u,
-      student_details: studentMap.get(u.id),
-      employee_details: employeeMap.get(u.id),
-    })
-  );
+      student_details: studentData || null,
+      employee_details: employeeData || null,
+    });
+  });
 }
 
 export const searchStudents = (q: string) => searchPersons(q, 'student');
