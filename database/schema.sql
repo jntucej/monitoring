@@ -1,16 +1,13 @@
 
 -- ============================================================================
--- REFERENCE ONLY — NOT AUTHORITATIVE
+-- CI BASELINE — NOT FOR NEW SCHEMA
 --
--- This file is a human-readable snapshot. It is NOT executed by the migration
--- runner. The authoritative source of schema changes is database/migrations/
--- (and supabase/migrations/, applied in ASCII filename order).
+-- This file is loaded by scripts/check-migrations.sh and
+-- scripts/check-schema-drift.sh as the baseline BEFORE replaying migrations.
+-- It MUST stay compatible with all migrations in database/migrations/.
 --
--- If this file disagrees with the migrations or the live database, the
--- migrations and the live database win.
---
--- When adding new schema, always add a migration file. Update this file
--- separately only if you want the reference to stay current.
+-- For NEW schema changes: always add a migration file. Never edit this file
+-- without verifying CI still passes.
 -- ============================================================================
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
@@ -437,17 +434,8 @@ CREATE TABLE IF NOT EXISTS gate_access_rules (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS predictions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  type VARCHAR(50) NOT NULL,
-  target VARCHAR(100) NOT NULL,
-  predicted_value DOUBLE PRECISION NOT NULL,
-  confidence_interval_low DOUBLE PRECISION NOT NULL,
-  confidence_interval_high DOUBLE PRECISION NOT NULL,
-  timestamp TIMESTAMPTZ NOT NULL,
-  model_version VARCHAR(20) DEFAULT 'v1.0-arima',
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
+-- predictions: defined in database/migrations/20261008000001_security_remediation_audit.sql
+-- Do not redefine here.
 
 CREATE TABLE IF NOT EXISTS zones (
   id VARCHAR(50) PRIMARY KEY,
