@@ -1,2 +1,2 @@
 Project key,Project name,Project type,Issue key,Summary,Description,Issue Type,Priority,Component Area,Security Sensitive,Architecture Blocker,QA Required,CR ID,Assignee,Assignee ID
-GATE,Gate Monitor,software,CR-01,Set up project repository and CI pipeline,Initialize repo with CI pipeline,Task,P1,DevOps,No,No,Yes,CR-01,Akarsh,712020:16a67b9d-d582-46a5-af1e-970b5490a0f3
+GATE,Gate Monitor,software,CR-01,Set up project repository and CI pipeline,Initialize repo with CI pipeline,Task,P1,DevOps,Yes,No,Yes,CR-01,Akarsh,712020:16a67b9d-d582-46a5-af1e-970b5490a0f3

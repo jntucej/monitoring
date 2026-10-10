@@ -1,5 +1,5 @@
 CR ID,Summary,Description,Priority,Component Area,Security Sensitive,Architecture Blocker,QA Required,Primary Owner
-CR-01,Set up project repository and CI pipeline,Initialize repo with CI pipeline,P1,DevOps,No,No,Yes,Akarsh
+CR-01,Set up project repository and CI pipeline,Initialize repo with CI pipeline,P1,DevOps,Yes,No,Yes,Akarsh
 CR-02,Design attendance dashboard UI,Design mockups for the dashboard,P2,Frontend,No,No,Yes,Akarsh
 CR-03,Implement attendance API endpoints,Build REST endpoints for attendance,P1,Backend,Yes,No,Yes,Ashwitha
 CR-04,Write test cases for attendance module,Cover dashboard flows with tests,P2,QA,No,No,Yes,Dhanavarsha

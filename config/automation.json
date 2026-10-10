@@ -6,7 +6,15 @@
   },
   "generation": {
     "create_only_if_missing": true,
-    "overwrite_existing": false
+    "overwrite_existing": false,
+    "output_fields": [
+      "Summary",
+      "Description",
+      "Issue Type",
+      "Priority",
+      "Status",
+      "Labels"
+    ]
   },
   "paths": {
     "config_dir": "config",
