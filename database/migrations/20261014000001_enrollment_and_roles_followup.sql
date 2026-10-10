@@ -1,7 +1,7 @@
 -- ============================================================================
--- Migration: Enrollment + Multi-Role follow-up
--- Purpose: (1) widen audit_logs.action for new event names
---          (2) backfill onboarded_at on existing users
+-- Migration: Enrollment & Multi-Role follow-up
+-- Purpose: (1) widen audit_logs.action new event names
+--          (2) backfill onboarded_at existing users
 --          (3) rename stale RLS policy after table rename
 -- ============================================================================
 
@@ -17,51 +17,23 @@ ALTER TABLE public.audit_logs
     'GATE_PASS_APPROVED', 'GATE_PASS_REJECTED', 'GATE_PASS_UPDATED',
     'SCAN_CREATED', 'GATE_SCAN_RECORDED', 'SCAN_CORRECTED',
     'VISITOR_CHECK_IN', 'VISITOR_CHECK_OUT',
-    'USER_CREATED', 'USER_UPDATED', 'USER_DELETED', 'USER_DEACTIVATED',
-    'ROLE_CHANGED', 'PERMISSION_CHANGED',
-    'SYSTEM_CONFIG_CHANGED', 'DATA_EXPORTED',
-    'BACKUP_CREATED', 'BACKUP_RESTORED',
-    'EMERGENCY_BROADCAST', 'GATE_OFFLINE', 'GATE_ONLINE',
-    'SMART_SCHEDULE_APPLIED', 'CRON_REPORTS_EXECUTED',
-    'PIN_CHANGED', 'SESSION_FORCE_REVOKED', 'SESSION_VERSION_BUMP',
-    'BACK_GATE_GEO_MISMATCH', 'REFRESH_REVOKED_TOKEN_USED',
-    'THUMBPRINT_REGISTERED', 'THUMBPRINT_CLEARED',
+    'USER_CRE    'USER_CRE    'USER_CRE    'USER_CRE    'USER_CRE    'USER_CRE    'USER_CR, 'PERM    'USER_CRE    'USER_CRE    'USER_CRE    'USER_CRE    'USER_CRE    'USER_CREAT    'USER_CRE    'USER_CRE    'USER_CRE    'USST    'USER_CRE    'USER_CRE    'USER_CRE    'USER_CRE _AP    'USER_CRE    'USER_CRE    'USER_CRE    'USEED', '    'USER_CRE    'USER_CRE    'USER_CRE    'USER_CRE   CK_G    'USER_CRE    'USER_CRE    'USER_CRE    'USER_CRE    'USER_CRE    'USER_CRE'THUMBPRINT_CLEARED',
     'MFA_ENROLL_REPLAY_BLOCKED', 'EMERGENCY_MFA_TOKEN_GENERATED',
     'MFA_RECOVERY_CODES_REGENERATED', 'MFA_OVERRIDE_ACTIVE',
     'FILE_UPLOADED', 'BULK_STUDENT_UPDATE', 'BATCH_PROMOTION',
-    'ALERT_RESOLVE_DENIED', 'ALERT_RESOLVED',
-    'HOD_CROSS_DEPT_ATTEMPT', 'SUPPORT_TICKET_UPDATED',
-    'RETENTION_RUN', 'PREDICTIONS_RETRAINED',
-    'GATE_PASS_BULK_APPROVED', 'ADMIN_STREAM_OTHER_USER',
-    'MFA_REQUIRED_FOR_ADMIN_CHANGED', 'ROLE_REGISTRY_CHANGED',
-    'ENROLLMENT_CODE_ISSUED',
-    'ENROLLMENT_CODE_REDEEMED',
-    'ENROLLMENT_CODE_REJECTED',
-    'USER_ONBOARDED',
-    'ROLE_GRANTED',
-    'ROLE_REVOKED',
-    'MOBILE_ENROLLMENT_CODE_ISSUED',
-    'BOOTSTRAP_LOCKOUT'
-  ));
-
--- 2. Backfill onboarded_at on existing users ----------------------------------
+    'ALERT_RESOLVE_DENIED', 'ALE    'ALERTD',
+    'HOD_CROSS_DEPT_ATTEMPT', 'SUPPORT_TICKET_    'HOD_CROSS_DEPT_ATTEMPT', 'SUPPORT_TICKET_    'HOD_CROSS_DEPT_ATTS_BULK    'HOD_CROSS_DEPT_ATTEMPT', 'SUPPORT_TICKET_    'HOD_CROSS_DEMIN_CHANGED', 'ENROLLMENT_CODE_ISSUED', 'ENROLLMENT_CODE_USED', 'R    'HOD_CROSS_DEPT_ATTEMPT', 'SUPPORT_TI. Backfill onboarded_at ----------------------------------------------------
 ALTER TABLE public.users ADD COLUMN IF NOT EXISTS onboarded_at TIMESTAMPTZ;
-UPDATE public.users
-   SET onboarded_at = COALESCE(created_at, NOW())
- WHERE onboarded_at IS NULL
-   AND (password_hash IS NOT NULL OR initial_pin_hash IS NOT NULL);
+UPDATE public.users SET onboarded_at = created_at WHERE onboarded_at IS NULL AND status = 'ACTIVE';
 
--- 3. Rename stale RLS policy if the table was renamed -------------------------
+-- 3. Rename stale RLS policy --------------------------------------------------
 DO $$
 BEGIN
-  IF EXISTS (
-    SELECT 1 FROM pg_policies
-    WHERE schemaname = 'public'
-      AND tablename  = 'enrollment_codes'
-      AND policyname = 'service_role_all_mobile_enrollment_codes'
-  ) THEN
-    ALTER POLICY "service_role_all_mobile_enrollment_codes"
-      ON public.enrollment_codes RENAME TO "service_role_all_enrollment_codes";
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='enrollment_codes' AND policyname='service_role_all_mobile_enrollment_codes') THEN
+    DROP POLICY "service_role_all_mobile_enrollment_codes" ON public.enrollment_codes;
+  END IF;
+  IF NOT EXISTS (S  IF NOT EXISTS (S  IF NOT EXISTS (S  IF NOTublic' AND tablenam  IF NOT EXISTS (S  IF NOT EXISTS (S  IF NOT_role_all_enrollment_codes') THEN
+    CREATE POLICY "service_role_all_enrollment_codes" ON public.enrollment_codes FOR ALL TO service_role USING (true) WITH CHECK (true);
   END IF;
 END $$;
 

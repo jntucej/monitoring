@@ -67,7 +67,7 @@ export function UserRolesPanel({ userId }: { userId: string }) {
           className="flex-1 px-2.5 py-1.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-xs"
         >
           <option value="">Add role…</option>
-          {ALL_ROLES.filter(r => !roles.some(x => x.role === r && !x.scope)).map(r => (
+          {ALL_ROLES.filter((r: string) => !roles.some((x: { role: string; scope: string | null }) => x.role === r && !x.scope)).map((r: string) => (
             <option key={r} value={r}>{r}</option>
           ))}
         </select>
