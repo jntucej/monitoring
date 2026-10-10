@@ -44,7 +44,7 @@ async function handlePatch(req: NextRequest) {
       );
     }
 
-    // await addAudit({
+    await addAudit({
       userId: actorId,
       action: enabled ? "JOB_ENABLED" : "JOB_DISABLED",
       details: { jobId, enabled },

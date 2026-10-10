@@ -42,7 +42,7 @@ async function handlePost(req: NextRequest) {
     const supabase = getSupabaseServiceClient();
     await supabase.from("users").update({ two_factor_secret: encryptSecret(secret) }).eq("id", userId);
 
-    // await addAudit({
+    await addAudit({
       userId,
       action: "2FA_SETUP_INITIATED",
       details: { timestamp: new Date().toISOString() },

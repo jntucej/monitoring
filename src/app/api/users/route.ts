@@ -414,6 +414,7 @@ async function handlePatch(req: NextRequest) {
         );
       }
 
+await addAudit({
         action: 'USER_PIN_RESET',
         userId: actorId,
         userName: 'System',
@@ -444,6 +445,7 @@ async function handlePatch(req: NextRequest) {
         );
       }
 
+await addAudit({
         action: 'USER_PASSWORD_RESET',
         userId: actorId,
         userName: 'System',

@@ -110,7 +110,7 @@ export async function GET(req: NextRequest) {
     stateRow.code_verifier
   );
   if (!exchange.success || !exchange.idToken) {
-    // await addAudit({
+    await addAudit({
       action: "SSO_LOGIN_FAILED",
       userId: "system",
       userName: "SSO",
@@ -128,7 +128,7 @@ export async function GET(req: NextRequest) {
     issuerUrl: config.issuerUrl,
   });
   if (!validation.valid || !validation.claims) {
-    // await addAudit({
+    await addAudit({
       action: "SSO_LOGIN_FAILED",
       userId: "system",
       userName: "SSO",
@@ -150,7 +150,7 @@ export async function GET(req: NextRequest) {
   const groups = Array.isArray(claims.groups) ? claims.groups : [];
   const role = mapExternalGroupToRole(groups);
   if (!role) {
-    // await addAudit({
+    await addAudit({
       action: "SSO_LOGIN_DENIED",
       userId: "system",
       userName: "SSO",
@@ -223,7 +223,7 @@ export async function GET(req: NextRequest) {
     }
     user = created;
 
-    // await addAudit({
+    await addAudit({
       action: "SSO_USER_PROVISIONED",
       userId: user.id,
       userName: user.name,
@@ -291,7 +291,7 @@ export async function GET(req: NextRequest) {
     role: user.role,
   });
 
-  // await addAudit({
+  await addAudit({
     action: "SSO_LOGIN_SUCCESS",
     userId: user.id,
     userName: user.name,

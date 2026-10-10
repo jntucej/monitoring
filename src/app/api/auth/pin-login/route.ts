@@ -135,7 +135,7 @@ async function handlePinLogin(req: NextRequest) {
         );
       }
 
-      // await addAudit({
+      await addAudit({
         action: "PIN_LOGIN_FAILED",
         userId: user?.id || "system",
         userName: user?.name || "System",
@@ -234,7 +234,7 @@ async function handlePinLogin(req: NextRequest) {
       const secret = decryptSecret(user.two_factor_secret);
       const validTotp = verifyTOTPCode(secret, presentedTotp);
       if (!validTotp) {
-        // await addAudit({
+        await addAudit({
           action: "PIN_LOGIN_FAILED",
           userId: user.id,
           userName: user.name,
@@ -269,7 +269,7 @@ async function handlePinLogin(req: NextRequest) {
     });
 
     // 9. Audit Success
-    // await addAudit({
+    await addAudit({
       action: "PIN_LOGIN_SUCCESS",
       userId: user.id,
       userName: user.name,
