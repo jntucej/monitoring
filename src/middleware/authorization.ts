@@ -96,7 +96,9 @@ export function withAuthorization(
           ? options.requiredRole
           : [options.requiredRole];
 
-        if (!requiredRoles.includes(authContext.role)) {
+        const userRoles = authContext.roles ?? [authContext.role];
+    const hasRole = requiredRoles.some(r => userRoles.includes(r));
+    if (!hasRole) {
           return NextResponse.json(
             { success: false, error: { code: 'FORBIDDEN', message: 'Insufficient permissions' } },
             { status: 403 }

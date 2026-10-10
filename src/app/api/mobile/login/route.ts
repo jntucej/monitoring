@@ -99,7 +99,7 @@ export async function handlePost(req: NextRequest) {
 
     const service = getSupabaseServiceClient();
     const { data: rows } = await service
-      .from("mobile_enrollment_codes")
+      .from("enrollment_codes")
       .select("id, code_hash, expires_at")
       .eq("user_id", person.id)
       .is("used_at", null)
@@ -114,7 +114,7 @@ export async function handlePost(req: NextRequest) {
     if (!ok) return uniformFailure();
 
     const { data: burned, error: burnErr } = await service
-      .from("mobile_enrollment_codes")
+      .from("enrollment_codes")
       .update({ used_at: new Date().toISOString(), used_device_id: String(deviceId) })
       .eq("id", row.id)
       .is("used_at", null)

@@ -29,6 +29,10 @@ const USER_ROW_TTL_MS = 30_000;
 interface CachedUserRow {
   id: string;
   role: Role;
+
+  /** Multi-roles of the user */
+  roles?: Role[];
+
   status: AccountStatus;
   email: string;
   session_version: number;
@@ -90,6 +94,9 @@ export interface AuthContext {
 
   /** The user's role from public.users table */
   role: Role;
+
+  /** Multi-roles of the user */
+  roles?: Role[];
 
   /** The user's account status from public.users table */
   status: AccountStatus;
@@ -224,10 +231,19 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
   }
 
   // Return the validated context
+  
+  const rolesRes = await query<{ role: string }>(
+    "SELECT role FROM user_roles WHERE user_id = $1",
+    [profile.id]
+  );
+  const roles = rolesRes.rows.map(r => r.role as Role);
+  if (!roles.includes(profile.role as Role)) roles.push(profile.role as Role);
+
   return {
     authUserId: userId || profile.id,
     userId: profile.id,
     role: profile.role as Role,
+    roles,
     status: profile.status as AccountStatus,
     email: profile.email,
     loginIdentifier: profile.unique_id || profile.login_identifier || undefined,

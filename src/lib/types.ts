@@ -158,6 +158,7 @@ export interface User {
   currentSessionToken?: string;
   name: string;
   role: Role;
+  roles?: Role[];
   gateId?: string;
   employeeId?: string;
   email?: string;
