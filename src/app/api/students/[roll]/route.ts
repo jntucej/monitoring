@@ -132,7 +132,7 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
 
     // 2. Check for historical data
     const [{ count: passCount }, { count: logCount }] = await Promise.all([
-      supabase.from("gate_passes").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+      supabase.from("gate_passes").select("id", { count: "exact", head: true }).or(`requested_by_id.eq.${user.id},guardian_approver_id.eq.${user.id},admin_approver_id.eq.${user.id}`),
       supabase.from("movement_logs").select("id", { count: "exact", head: true }).eq("user_id", user.id),
     ]);
 
