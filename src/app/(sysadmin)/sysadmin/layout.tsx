@@ -24,6 +24,7 @@ import {
   GraduationCap,
   Briefcase,
   LogOut,
+  Server,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
@@ -42,6 +43,7 @@ const NAV = [
       { href: "/sysadmin/promotions", label: "Role Promotions", icon: Users },
       { href: "/sysadmin/sessions", label: "Active Sessions", icon: Lock },
       { href: "/sysadmin/health", label: "System Health", icon: Activity },
+      { href: "/sysadmin/infrastructure", label: "Infrastructure Monitoring", icon: Server },
     ],
   },
   {
