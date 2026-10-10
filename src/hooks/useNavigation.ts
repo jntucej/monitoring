@@ -22,6 +22,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
     items: [
       { href: "/profile", label: "My Profile", icon: "User" },
       { href: "/settings/notifications", label: "Notifications", icon: "Bell" },
+      { href: "/settings", label: "Settings", icon: "Settings" },
       { href: "/help", label: "Help", icon: "BookOpen" },
     ],
   };

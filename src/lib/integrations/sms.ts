@@ -1,6 +1,7 @@
 import { randomBytes } from "crypto";
 import { SMSMessage } from "@/lib/integration-types";
 import { getDbClient } from "@/lib/db";
+import { AppError } from "@/server/http/errors";
 
 // Configuration
 const SMS_CONFIG = {
@@ -38,6 +39,9 @@ export async function sendSMS(params: {
 
     if (SMS_CONFIG.enabled) {
       if (!SMS_CONFIG.apiKey) {
+        if (process.env.NODE_ENV === "production") {
+          throw new AppError("SMS_NOT_CONFIGURED", "SMS service is not configured in production environment", 500);
+        }
         console.warn("[SMS] SMS_ENABLED=true but SMS_API_KEY is not configured.");
         await getDbClient()
           .from("notification_sms_queue")
