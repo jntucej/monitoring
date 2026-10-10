@@ -2,7 +2,7 @@ const isDockerBuild = process.env.DOCKER_BUILD === 'true';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: isDockerBuild ? 'standalone' : undefined,
+  output: 'standalone',
   reactStrictMode: true,
   experimental: {
     serverActions: { bodySizeLimit: '2mb' }
