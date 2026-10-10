@@ -16,9 +16,11 @@ import {
 } from "lucide-react";
 import { SystemHealth } from "@/lib/health";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
+import { useGlass } from "@/context/GlassContext";
 
 export function HealthDashboard() {
   const router = useRouter();
+  const { isLiveStream } = useGlass();
   const [health, setHealth] = useState<SystemHealth | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,11 +53,12 @@ export function HealthDashboard() {
         if (intervalRef.current) clearInterval(intervalRef.current);
       } else {
         fetchHealth();
-        intervalRef.current = setInterval(() => fetchHealth(), 30000);
+        // Faster polling when live stream is enabled (5s instead of 30s)
+        intervalRef.current = setInterval(() => fetchHealth(), isLiveStream ? 5000 : 30000);
       }
     };
 
-    intervalRef.current = setInterval(() => fetchHealth(), 30000);
+    intervalRef.current = setInterval(() => fetchHealth(), isLiveStream ? 5000 : 30000);
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
@@ -120,7 +123,7 @@ export function HealthDashboard() {
           </div>
           <p className="text-xs text-[var(--text-muted)] flex items-center gap-2">
             <Clock className="w-3.5 h-3.5 text-gray-400" />
-            {lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString()}` : "Fetching..."} (Auto-refreshes every 30s)
+            {lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString()}` : "Fetching..."} (Auto-refreshes every {isLiveStream ? '5' : '30'}s)
           </p>
         </div>
       </div>
@@ -157,9 +160,11 @@ export function HealthDashboard() {
             <Clock className="w-4 h-4 text-emerald-400" />
           </div>
           <p className="text-2xl font-black text-[var(--text-primary)]">
-            {health?.metrics?.avgResponseTime ? `${Math.round(health.metrics.avgResponseTime)} ms` : "< 25 ms"}
+            {health?.metrics?.avgResponseTime !== undefined ? `${Math.round(health.metrics.avgResponseTime)} ms` : "—"}
           </p>
-          <p className="text-[10px] text-emerald-400 font-medium">Optimal response speed</p>
+          <p className="text-[10px] text-[var(--text-muted)]">
+            {health?.metrics?.avgResponseTime ? (health.metrics.avgResponseTime < 50 ? "Optimal" : health.metrics.avgResponseTime < 200 ? "Acceptable" : "Elevated") : "Capturing data..."}
+          </p>
         </div>
 
         <div className="bg-[var(--bg-surface)] border border-[var(--border)] p-4 rounded-xl space-y-1">
