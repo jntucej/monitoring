@@ -63,6 +63,7 @@ export function GovernanceModules() {
             { label: "Exit Reasons Desk", href: "/sysadmin/exit-reasons" },
             { label: "Dynamic Navigation Editor", href: "/sysadmin/navigation" },
             { label: "System Health Diagnostics", href: "/sysadmin/health" },
+            { label: "Infrastructure Monitoring", href: "/sysadmin/infrastructure" },
           ]}
         />
       </div>

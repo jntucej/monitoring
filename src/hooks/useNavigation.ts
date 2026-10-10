@@ -132,6 +132,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
             { href: "/sysadmin/promotions", label: "Role Promotions", icon: "UserCheck" },
             { href: "/sysadmin/sessions", label: "Active Sessions", icon: "Users" },
             { href: "/sysadmin/health", label: "System Health", icon: "Activity" },
+            { href: "/sysadmin/infrastructure", label: "Infrastructure Monitoring", icon: "Server" },
           ],
         },
         {
