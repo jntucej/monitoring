@@ -1,5 +1,6 @@
 import { getDbClient } from "@/lib/db";
-import { getCached, setCached, invalidateCache } from "./cache";
+import { revalidateTag } from 'next/cache';
+import { CACHE_TAGS } from './cache-tags';
 
 export interface DepartmentInfo {
   id?: string;
@@ -21,28 +22,15 @@ function mapRow(row: any): DepartmentInfo {
   };
 }
 
-const CACHE_KEY = "departments:all";
-const CACHE_TTL_SECONDS = 300; // 5 minutes
-
 export async function getDepartments(): Promise<DepartmentInfo[]> {
   try {
-    const cached = await getCached<DepartmentInfo[]>(CACHE_KEY);
-    if (cached && Array.isArray(cached) && cached.length > 0) {
-      return cached;
-    }
-
     const { data, error } = await getDbClient()
       .from("departments")
       .select("*")
       .order("code");
 
     if (error) throw error;
-    
-    // DB is the ONLY source of truth. Ignore static fallback if DB exists.
-    const depts: DepartmentInfo[] = (data || []).map(mapRow);
-
-    await setCached(CACHE_KEY, depts, CACHE_TTL_SECONDS);
-    return depts;
+    return (data || []).map(mapRow);
   } catch (error) {
     console.error("[Departments Service] Failed to fetch departments:", error);
     return [];
@@ -60,7 +48,7 @@ export async function createDepartment(input: {
     short_name: input.shortName ?? input.code.toUpperCase(),
   }).select().single();
   if (error) throw new Error(error.message);
-  await invalidateCache("departments:*");
+  (revalidateTag as any)(CACHE_TAGS.departments);
   return mapRow(data);
 }
 
@@ -80,14 +68,13 @@ export async function updateDepartment(
     .select()
     .single();
   if (error) throw new Error(error.message);
-  await invalidateCache("departments:*");
+  (revalidateTag as any)(CACHE_TAGS.departments);
   return mapRow(data);
 }
 
 export async function deleteDepartment(code: string): Promise<void> {
   const svc = getDbClient();
 
-  // Refuse if still referenced
   const { count } = await svc.from("users")
     .select("id", { count: "exact", head: true })
     .eq("department_id", code);
@@ -101,7 +88,7 @@ export async function deleteDepartment(code: string): Promise<void> {
   if (error) throw new Error(error.message);
   if (!deleted) throw new Error(`Department ${code} not found`);
 
-  await invalidateCache("departments:*");
+  (revalidateTag as any)(CACHE_TAGS.departments);
 }
 
 export async function getDepartmentByCode(code: string): Promise<DepartmentInfo | null> {

@@ -22,7 +22,7 @@ import {
   requirePermission as requireAuthPermission,
   validateResourceOperation as validateResourceOp,
   getGateStudentInfo,
-  isMfaRequiredForAdmin as isMfaRequiredForPrivileged,
+  isMfaRequiredForPrivileged,
   type AuthContext,
 } from "@/lib/authContext";
 import { isPrivileged } from "@/lib/roles";
