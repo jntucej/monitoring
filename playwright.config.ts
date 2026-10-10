@@ -11,7 +11,6 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: [
     ['list'],
-    ['junit', { outputFile: 'qa-evidence/reports/results.xml' }],
     ['html', { open: 'never' }],
   ],
   use: {

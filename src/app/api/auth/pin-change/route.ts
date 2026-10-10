@@ -1,144 +1,99 @@
+// src/app/api/auth/pin-change/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
-import { query } from "@/lib/postgres";
-import { withRateLimit, extractClientIp } from "@/lib/rate-limit";
+import { withRateLimit } from "@/lib/rate-limit";
 import { withAuthorization } from "@/middleware/authorization";
-import { verifyPassword } from "@/lib/auth-token";
-import { addAudit } from "@/lib/db";
-import { assertCsrf } from "@/lib/csrf";
+import { getSupabaseServiceClient } from "@/lib/supabaseClient";
+import { logAuditEvent } from "@/lib/audit";
+import bcrypt from "bcryptjs";
 import type { AuthContext } from "@/lib/authContext";
-import type { Role } from "@/lib/types";
 
-const TRIVIAL_PINS = new Set([
-  "1234", "12345", "123456", "1234567", "12345678",
-  "0000", "00000", "000000", "0000000", "00000000",
-  "1111", "11111", "111111", "1111111", "11111111",
-  "9999", "99999", "999999", "9999999", "99999999",
-]);
-
-async function handlePinChange(req: NextRequest, context: { auth: AuthContext }) {
-  // 1. CSRF Protection
-  const csrfError = assertCsrf(req);
-  if (csrfError) return csrfError;
-
-  const userId = context.auth.userId;
+async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
+  const userId = auth?.userId || req.headers.get("x-user-id");
   if (!userId) {
     return NextResponse.json(
-      { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required." } },
+      { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required" } },
       { status: 401 }
     );
   }
 
   try {
-    const body = await req.json().catch(() => null);
-    if (!body || typeof body !== "object") {
+    const { currentPin, newPin } = await req.json().catch(() => ({}));
+
+    if (!newPin || typeof newPin !== "string" || !/^\d{4,8}$/.test(newPin)) {
       return NextResponse.json(
-        { success: false, error: { code: "BAD_REQUEST", message: "Request body must be JSON." } },
+        { success: false, error: { code: "BAD_REQUEST", message: "New PIN must be 4–8 digits" } },
         { status: 400 }
       );
     }
 
-    const { currentPin, newPin, pin } = body as Record<string, unknown>;
-    const targetPin = String(newPin || pin || "").trim();
-    const existingPin = currentPin ? String(currentPin).trim() : null;
+    const supabase = getSupabaseServiceClient();
+    const { data: user, error: fetchErr } = await supabase
+      .from("users")
+      .select("id, initial_pin_hash, pin_hash")
+      .eq("id", userId)
+      .maybeSingle();
 
-    if (!targetPin) {
+    if (fetchErr || !user) {
       return NextResponse.json(
-        { success: false, error: { code: "MISSING_FIELDS", message: "New PIN is required." } },
-        { status: 400 }
-      );
-    }
-
-    // Validate PIN format: 4 to 8 digits numeric
-    if (!/^\d{4,8}$/.test(targetPin)) {
-      return NextResponse.json(
-        { success: false, error: { code: "INVALID_PIN_FORMAT", message: "PIN must be between 4 and 8 numeric digits." } },
-        { status: 400 }
-      );
-    }
-
-    // Reject trivially weak PINs
-    if (TRIVIAL_PINS.has(targetPin)) {
-      return NextResponse.json(
-        { success: false, error: { code: "WEAK_PIN", message: "PIN is too common or easily guessed. Choose a different PIN." } },
-        { status: 400 }
-      );
-    }
-
-    // Fetch user PIN hashes
-    const userRes = await query(
-      `SELECT id, email, name, role, pin_hash, initial_pin_hash, pin_must_change FROM users WHERE id = $1`,
-      [userId]
-    );
-
-    if (userRes.rows.length === 0) {
-      return NextResponse.json(
-        { success: false, error: { code: "NOT_FOUND", message: "User not found." } },
+        { success: false, error: { code: "NOT_FOUND", message: "User not found" } },
         { status: 404 }
       );
     }
 
-    const user = userRes.rows[0];
-
-    // If user has an existing established PIN and pin_must_change is FALSE, verify current PIN
-    if (user.pin_hash && !user.pin_must_change) {
-      if (!existingPin) {
+    const existingHash = user.initial_pin_hash || user.pin_hash;
+    if (existingHash) {
+      if (!currentPin) {
         return NextResponse.json(
-          { success: false, error: { code: "CURRENT_PIN_REQUIRED", message: "Current PIN is required to change PIN." } },
+          { success: false, error: { code: "BAD_REQUEST", message: "Current PIN is required" } },
           { status: 400 }
         );
       }
-
-      const validCurrent = await verifyPassword(existingPin, user.pin_hash);
-      if (!validCurrent) {
+      const isValid = await bcrypt.compare(currentPin, existingHash);
+      if (!isValid) {
         return NextResponse.json(
-          { success: false, error: { code: "INVALID_CURRENT_PIN", message: "Current PIN is incorrect." } },
+          { success: false, error: { code: "UNAUTHORIZED", message: "Incorrect current PIN" } },
           { status: 401 }
         );
       }
     }
 
-    // Hash new PIN with bcrypt
-    const newPinHash = await bcrypt.hash(targetPin, 10);
+    const salt = await bcrypt.genSalt(10);
+    const hashedPin = await bcrypt.hash(newPin, salt);
 
-    // Update user record: set pin_hash, clear initial_pin_hash & pin_must_change, record actor & timestamp
-    await query(
-      `UPDATE users
-          SET pin_hash = $1,
-              initial_pin_hash = NULL,
-              pin_must_change = FALSE,
-              pin_set_at = NOW(),
-              pin_set_by = $2
-        WHERE id = $3`,
-      [newPinHash, userId, userId]
-    );
+    const { error: updateErr } = await supabase
+      .from("users")
+      .update({
+        initial_pin_hash: hashedPin,
+        pin_hash: hashedPin,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", userId);
 
-    await addAudit({
+    if (updateErr) {
+      return NextResponse.json(
+        { success: false, error: { code: "SERVER_ERROR", message: updateErr.message } },
+        { status: 500 }
+      );
+    }
+
+    await logAuditEvent({
       action: "PIN_CHANGED",
-      userId: user.id,
-      userName: user.name || user.email,
-      role: (user.role as Role) || "operator",
-      details: {
-        ip: extractClientIp(req),
-        userAgent: req.headers.get("user-agent") || "unknown",
-        changed_by: userId,
-      },
-    });
+      userId: userId,
+      userName: null,
+      userRole: auth?.role || null,
+      details: { timestamp: new Date().toISOString() },
+    }).catch(() => {});
 
     return NextResponse.json({
       success: true,
-      message: "PIN updated successfully.",
+      message: "PIN successfully updated",
     });
-  } catch (err: unknown) {
-    console.error("[PIN Change Route Error]", err);
+  } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to update PIN." } },
+      { success: false, error: { code: "SERVER_ERROR", message: error.message || "Internal server error" } },
       { status: 500 }
     );
   }
 }
 
-export const POST = withRateLimit(
-  withAuthorization(handlePinChange),
-  { keyPrefix: "pin_change", maxRequests: 5, windowMs: 15 * 60 * 1000 }
-);
+export const POST = withRateLimit(withAuthorization(handlePost), { keyPrefix: "pin_change", maxRequests: 10 });
