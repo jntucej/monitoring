@@ -100,10 +100,10 @@ export async function validateImport(csvInput: string | ImportRow[]): Promise<Va
   for (let i = 0; i < rawRows.length; i++) {
     const r = rawRows[i];
     const rowNum = i + 1;
-    const name = (r.name || r.fullName || "").trim();
-    const email = (r.email || "").trim().toLowerCase();
+    const name = (r.name || r["NAME OF THE STUDENT"] || "").trim();
+    const email = (r.email || r["EMAIL ID"] || "").trim().toLowerCase();
     const role = (r.role || "student").trim().toLowerCase() as Role;
-    const uniqueId = (r.uniqueId || r.roll || r.employeeId || "").trim();
+    const uniqueId = (r.uniqueId || r["H.T NO."] || r.roll || r.employeeId || "").trim();
 
     if (!name) {
       errors.push({ row: rowNum, field: "name", message: "Name is required" });
