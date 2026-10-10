@@ -73,5 +73,16 @@ export function getEnv(): EnvConfig {
     allowedOrigin,
   };
 
+  // Critical Boot Check
+  const REQUIRED_SECRETS = ['QR_TOKEN_SECRET', 'AUTH_JWT_SECRET', 'MOBILE_TOKEN_SECRET', 'MFA_ENROLL_SECRET'];
+  if (process.env.NODE_ENV === 'production') {
+    for (const key of REQUIRED_SECRETS) {
+      const v = process.env[key];
+      if (!v || v.length < 32) {
+        throw new Error(`FATAL: ${key} must be set to >=32 chars in production`);
+      }
+    }
+  }
+
   return cachedEnv;
 }
