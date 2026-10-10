@@ -154,7 +154,7 @@ async function handlePost(req: NextRequest) {
       userId: actorId,
       userName: "Admin",
       role: actorRole as Role,
-      details: `Processed bulk import/update for ${usersList.length} items (${successCount} succeeded)`,
+      details: JSON.stringify({ message: `Processed bulk import/update for ${usersList.length} items (${successCount} succeeded)` }),
     });
 
     return NextResponse.json({

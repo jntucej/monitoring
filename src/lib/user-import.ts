@@ -204,7 +204,7 @@ export async function commitImport(
     userId: actorId,
     userName: "SysAdmin",
     role: "sysadmin",
-    details: { total: rows.length, importedCount, failedCount },
+    details: JSON.stringify({ total: rows.length, importedCount, failedCount }),
   }).catch(() => {});
 
   return {
