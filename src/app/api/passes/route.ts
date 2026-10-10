@@ -4,6 +4,7 @@ import { supabase, getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { validatePassRequestPayload } from "@/lib/validation";
+import { checkIdempotency, storeIdempotency } from "@/lib/idempotency";
 import type { AuthContext } from "@/lib/authContext";
 import type { Student } from "@/lib/types";
 
@@ -76,6 +77,12 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
     const requestedById = auth.userId;
     const authRole = auth.role;
     const authUserId = auth.userId;
+
+    const idempotencyKey = req.headers.get("idempotency-key") || req.headers.get("x-idempotency-key");
+    const cached = await checkIdempotency(idempotencyKey, auth.userId, "/api/passes");
+    if (cached.cached) {
+      return NextResponse.json(cached.responseBody, { status: cached.statusCode || 200 });
+    }
 
     const body = await req.json().catch(() => null);
     const validation = validatePassRequestPayload(body);
@@ -154,7 +161,11 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
       );
     }
 
-    return NextResponse.json({ success: true, data: pass });
+    const payload = { success: true, data: pass };
+    if (idempotencyKey) {
+      await storeIdempotency(idempotencyKey, auth.userId, "/api/passes", payload, 200);
+    }
+    return NextResponse.json(payload);
   } catch (error) {
     console.error("Error creating pass:", error);
     return NextResponse.json(

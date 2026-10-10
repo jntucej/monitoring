@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { findAllStudents, searchStudents, getParentChildren } from "@/lib/db";
-import withAuthorization from "@/middleware/authorization";
+import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 
 async function handleGet(req: NextRequest) {

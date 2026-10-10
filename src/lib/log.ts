@@ -7,9 +7,34 @@ interface LogFields {
   [key: string]: unknown;
 }
 
+const SENSITIVE_KEYS = new Set([
+  "password",
+  "pin",
+  "token",
+  "secret",
+  "authorization",
+  "cookie",
+  "password_hash",
+  "pin_hash",
+  "rawpassword",
+  "currentpassword",
+  "newpassword",
+]);
+
+export function redactSensitive(obj: unknown): unknown {
+  if (Array.isArray(obj)) return obj.map(redactSensitive);
+  if (typeof obj !== "object" || obj === null) return obj;
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(obj)) {
+    out[k] = SENSITIVE_KEYS.has(k.toLowerCase()) ? "[REDACTED]" : redactSensitive(v);
+  }
+  return out;
+}
+
 /** Single-line structured JSON log so `docker logs ... | jq` can filter/group. */
 function emit(level: Level, fields: LogFields) {
-  const line = JSON.stringify({ ts: new Date().toISOString(), level, ...fields });
+  const sanitized = redactSensitive(fields) as LogFields;
+  const line = JSON.stringify({ ts: new Date().toISOString(), level, ...sanitized });
   if (level === "error") process.stderr.write(line + "\n");
   else process.stdout.write(line + "\n");
 }
