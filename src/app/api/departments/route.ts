@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
+import { withTransaction } from "@/lib/postgres";
 import { getDepartments, createDepartment, deleteDepartment, updateDepartment } from "@/lib/departments";
 import { withAuthorization } from "@/middleware/authorization";
 import { addAudit } from "@/lib/db";
@@ -112,10 +113,23 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
         await createDepartment({ code, name, numericCode, shortName });
     }
 
-    // Reassign HOD
+    // Atomic HOD reassignment
     if (hodUserId) {
-      await svc.from("employee_details").update({ is_hod: false }).eq("department_id", code);
-      await svc.from("employee_details").update({ is_hod: true, department_id: code }).eq("user_id", hodUserId);
+      await withTransaction(async (db) => {
+        // Clear previous HOD
+        await db.query(`
+          UPDATE public.employee_details ed
+          SET is_hod = FALSE
+          FROM public.users u
+          WHERE ed.user_id = u.id AND u.department_id = $1 AND ed.is_hod = TRUE
+        `, [code]);
+        // Set new HOD
+        await db.query(`
+          UPDATE public.employee_details
+          SET is_hod = TRUE, department_id = $1
+          WHERE user_id = $2
+        `, [code, hodUserId]);
+      }, { currentUserId: auth.userId });
     }
 
     await addAudit({

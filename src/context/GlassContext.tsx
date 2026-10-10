@@ -115,11 +115,13 @@ export function GlassProvider({
     const now = Date.now();
     const active = activeAlerts.filter((a) => now - a.timestamp < ALERT_AUTO_CLEAR_MS);
 
-    const hasCritical = active.some((a) => CRITICAL_ALERT_TYPES.has(a.type) || a.severity === 'critical');
-    if (hasCritical) return 'critical';
+    const hasCritical = active.some(
+      (a) => ((a as any).type && CRITICAL_ALERT_TYPES.has((a as any).type)) || a.severity === "critical"
+    );
+    if (hasCritical) return "critical";
 
-    const hasElevated = active.some((a) => a.severity === 'warning' || a.severity === 'high');
-    if (hasElevated) return 'elevated';
+    const hasElevated = active.some((a) => a.severity === "warning" || (a as any).severity === "high");
+    if (hasElevated) return "elevated";
 
     return 'secure';
   }, [activeAlerts]);
