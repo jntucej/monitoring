@@ -158,15 +158,21 @@ DECLARE
 BEGIN
   FOREACH t IN ARRAY admin_tables LOOP
     pol_name := 'admin_read_' || t;
-    IF NOT EXISTS (
-      SELECT 1 FROM pg_policies
-      WHERE schemaname = 'public' AND tablename = t AND policyname = pol_name
-    ) THEN
-      EXECUTE format(
-        'CREATE POLICY %I ON public.%I FOR SELECT TO admin USING (public.is_admin_self())',
-        pol_name, t
-      );
-    END IF;
+    BEGIN
+      IF to_regclass(format('public.%I', t)) IS NOT NULL THEN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_policies
+          WHERE schemaname = 'public' AND tablename = t AND policyname = pol_name
+        ) THEN
+          EXECUTE format(
+            'CREATE POLICY %I ON public.%I FOR SELECT TO admin USING (public.is_admin_self())',
+            pol_name, t
+          );
+        END IF;
+      END IF;
+    EXCEPTION WHEN undefined_table THEN
+      -- ignore if table not created yet
+    END;
   END LOOP;
 END $$;
 
