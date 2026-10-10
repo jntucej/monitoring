@@ -36,7 +36,7 @@ echo "✓ Verified ${#SEEN_VERSIONS[@]} unique migration version prefixes"
 
 # 2. Start scratch Postgres container
 CONTAINER_NAME="scratch_check_migs_$$"
-POSTGRES_IMAGE="${POSTGRES_TEST_IMAGE:-postgres:17-alpine}"
+POSTGRES_IMAGE="${POSTGRES_TEST_IMAGE:-postgres:17}"
 
 cleanup() {
   echo "Cleaning up scratch container $CONTAINER_NAME..."

@@ -16,7 +16,7 @@ if [ -z "$PROD_DATABASE_URL" ]; then
 fi
 
 SCRATCH_CONTAINER="scratch_drift_check_$$"
-POSTGRES_IMAGE="${POSTGRES_TEST_IMAGE:-postgres:17-alpine}"
+POSTGRES_IMAGE="${POSTGRES_TEST_IMAGE:-postgres:17}"
 
 cleanup() {
   echo "Cleaning up scratch container $SCRATCH_CONTAINER..."
