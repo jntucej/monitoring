@@ -270,7 +270,8 @@ export async function logAuditEvent(
         userId,
         typeof details === "object" ? JSON.stringify(details) : details,
         ipAddress || null,
-      ]
+      ],
+      { currentUserId: userId }
     );
   } catch (err) {
     console.error('Error logging audit event:', err);
