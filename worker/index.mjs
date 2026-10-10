@@ -72,6 +72,19 @@ cron.schedule('0 2 * * *', async () => {
   }
 });
 
+cron.schedule('*/30 * * * *', async () => {
+  console.log('[Worker] Running scheduled job: dispatch_notifications');
+  try {
+    const job = await import('./jobs/dispatch_notifications.js');
+    if (job.default) await job.default();
+    HEALTH_STATE.lastJobAt = Date.now();
+    HEALTH_STATE.lastJobName = 'dispatch_notifications';
+    HEALTH_STATE.jobsProcessed++;
+  } catch (err) {
+    console.error('[Worker] dispatch_notifications failed:', err);
+  }
+});
+
 cron.schedule('0 3 * * *', async () => {
   console.log('[Worker] Running scheduled job: cleanup_expired_passes');
   try {
