@@ -10,6 +10,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED 1
 ENV SKIP_ENV_VALIDATION 1
+ENV DOCKER_BUILD=true
 RUN npm run build
 
 FROM node:20-alpine AS runner

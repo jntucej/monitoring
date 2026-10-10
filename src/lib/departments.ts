@@ -23,12 +23,6 @@ function mapRow(row: any): DepartmentInfo {
 }
 
 export async function getDepartments(): Promise<DepartmentInfo[]> {
-  'use cache';
-  import('next/cache').then(({ cacheTag, cacheLife }) => {
-    cacheTag(CACHE_TAGS.departments);
-    cacheLife({ revalidate: 300, stale: 60 });
-  });
-
   try {
     const { data, error } = await getDbClient()
       .from("departments")
@@ -54,7 +48,7 @@ export async function createDepartment(input: {
     short_name: input.shortName ?? input.code.toUpperCase(),
   }).select().single();
   if (error) throw new Error(error.message);
-  revalidateTag(CACHE_TAGS.departments);
+  (revalidateTag as any)(CACHE_TAGS.departments);
   return mapRow(data);
 }
 
@@ -74,7 +68,7 @@ export async function updateDepartment(
     .select()
     .single();
   if (error) throw new Error(error.message);
-  revalidateTag(CACHE_TAGS.departments);
+  (revalidateTag as any)(CACHE_TAGS.departments);
   return mapRow(data);
 }
 
@@ -94,7 +88,7 @@ export async function deleteDepartment(code: string): Promise<void> {
   if (error) throw new Error(error.message);
   if (!deleted) throw new Error(`Department ${code} not found`);
 
-  revalidateTag(CACHE_TAGS.departments);
+  (revalidateTag as any)(CACHE_TAGS.departments);
 }
 
 export async function getDepartmentByCode(code: string): Promise<DepartmentInfo | null> {
