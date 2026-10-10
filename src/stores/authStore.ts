@@ -41,6 +41,9 @@ interface AuthState {
   role: Role | null;
   authenticated: boolean;
   loading: boolean;
+  mfaChallenge?: any;
+  mfaPending?: boolean;
+  enrollToken?: string | null;
   _hasHydrated: boolean;
 }
 
