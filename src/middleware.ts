@@ -22,9 +22,6 @@ export async function middleware(req: NextRequest) {
     return res;
   }
 
-  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-    || req.headers.get('x-real-ip')
-    || 'unknown';
   const limitResult = await rateLimit(`api_global:${ip}`, 300) as { limited: boolean };
   if (limitResult.limited) {
     const res = NextResponse.json(
