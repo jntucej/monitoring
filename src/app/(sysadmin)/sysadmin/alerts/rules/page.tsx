@@ -65,7 +65,7 @@ export default function AlertRulesPage() {
     try {
       const res = await fetch("/api/admin/alerts/rules", { headers: getHeaders() });
       const json = await res.json();
-      if (res.ok && json.success) {
+      if (res.ok && json.success && json.data) {
         setRules(json.data.rules || []);
         setHistory(json.data.history || []);
       }
