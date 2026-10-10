@@ -53,7 +53,8 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - DATABASE_URL=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-gate_monitor}
+      - NEXT_TELEMETRY_DISABLED=1
+      - DATABASE_URL=postgres://${POSTGRES_USER:***@postgres:5432/${POSTGRES_DB:-gate_monitor}
       - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
       - MONITORING_PROM_URL=${MONITORING_PROM_URL:-}
       - MONITORING_LOKI_URL=${MONITORING_LOKI_URL:-}
@@ -72,6 +73,7 @@ services:
     read_only: true
     tmpfs:
       - /tmp
+      - /app/.next/cache
     cap_drop: [ALL]
     security_opt:
       - no-new-privileges:true
@@ -91,8 +93,7 @@ services:
         required: false
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-gate_monitor}
-      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - DATABASE_URL=postgres://${POSTGRES_USER:***@postgres:5432/${POSTGRES_DB:-gate_monitor}
       - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
     depends_on:
       postgres:

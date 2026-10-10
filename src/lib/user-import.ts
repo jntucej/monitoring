@@ -219,10 +219,13 @@ async function processSingleRow(
   rowNum: number,
   supabase: any,
   actorId: string,
-  pwHash: string,
-  pinHash: string
+  _pwHash: string,
+  _pinHash: string
 ): Promise<{ row: number; error: string | null }> {
   try {
+    const salt = await bcrypt.genSalt(10);
+    const pwHash = await bcrypt.hash(crypto.randomBytes(16).toString("hex") + "Welcome@123", salt);
+    const pinHash = await bcrypt.hash(Math.floor(1000 + Math.random() * 9000).toString(), salt);
     const { data: existing } = await supabase
       .from("users")
       .select("id, role")
