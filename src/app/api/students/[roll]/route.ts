@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { findStudentByRoll, getStudentHistory, getStudentStatus, addAudit } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
-import { addAudit } from "@/lib/db";
 import type { AuthContext } from "@/lib/authContext";
 import type { Role } from "@/lib/types";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -144,8 +143,8 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
       .eq("role", "student")
       .maybeSingle();
 
-    if (userErr) return NextResponse.json({ error: userErr.message }, { status: 500 });
-    if (!user) return NextResponse.json({ error: "NOT_FOUND" }, { status: 404 });
+    if (userErr) return NextResponse.json({ success: false, error: { code: "DB_ERROR", message: userErr.message } }, { status: 500 });
+    if (!user) return NextResponse.json({ success: false, error: { code: "NOT_FOUND", message: `Student with roll ${roll} not found` } }, { status: 404 });
 
     // 2. Check for historical data
     const [{ count: passCount }, { count: logCount }] = await Promise.all([
@@ -165,11 +164,12 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
         })
         .eq("id", user.id);
 
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      if (error) return NextResponse.json({ success: false, error: { code: "DB_ERROR", message: error.message } }, { status: 500 });
 
       await addAudit({
         action: "USER_DEACTIVATED",
         userId: auth.userId,
+        userName: auth.email || "SysAdmin",
         role: auth.role as Role,
         details: {
           target_user_id: user.id,
@@ -189,52 +189,14 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
 
     // 3. No history → hard delete (cascade removes student_details)
     const { error: delErr } = await supabase.from("users").delete().eq("id", user.id);
-    if (delErr) return NextResponse.json({ error: delErr.message }, { status: 500 });
-
-    const supabase = getSupabaseServiceClient();
-
-    // Check historical data (passes / movement logs)
-    const { count: passCount } = await supabase
-      .from("gate_passes")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", student.id);
-
-    const { count: logCount } = await supabase
-      .from("movement_logs")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", student.id);
-
-    if ((passCount ?? 0) > 0 || (logCount ?? 0) > 0) {
-      await supabase
-        .from("users")
-        .update({ status: "DEPROVISIONED", updated_at: new Date().toISOString() })
-        .eq("id", student.id);
-
-      await addAudit({
-        action: "USER_DEACTIVATED",
-        userId: auth?.userId || "sysadmin",
-        userName: auth?.email || "SysAdmin",
-        role: authRole,
-        details: { target_user_id: student.id, roll, reason: "has historical data" },
-      });
-
-      return NextResponse.json({
-        success: true,
-        mode: "soft_delete",
-        message: `Deactivated student ${roll} (preserved ${passCount} passes, ${logCount} movements)`,
-      });
-    }
-
-    // Hard delete if no history
-    const { error } = await supabase.from("users").delete().eq("id", student.id);
-    if (error) throw error;
+    if (delErr) return NextResponse.json({ success: false, error: { code: "DB_ERROR", message: delErr.message } }, { status: 500 });
 
     await addAudit({
       action: "USER_DELETED",
-      userId: auth?.userId || "sysadmin",
-      userName: auth?.email || "SysAdmin",
-      role: authRole,
-      details: { target_user_id: student.id, roll },
+      userId: auth.userId,
+      userName: auth.email || "SysAdmin",
+      role: auth.role as Role,
+      details: { target_user_id: user.id, roll, mode: "hard_delete" },
     });
 
     return NextResponse.json({ success: true, mode: "hard_delete", message: `Student ${roll} permanently deleted` });

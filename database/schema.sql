@@ -137,7 +137,7 @@ CREATE TABLE IF NOT EXISTS campus_occupancy (
 --     so counters naturally reset to 0 each new day, while historical days persist)
 CREATE TABLE IF NOT EXISTS daily_stats (
   date           DATE NOT NULL,
-  gate_id        UUID NOT NULL REFERENCES gates(id) ON DELETE CASCADE,
+  gate_id        UUID REFERENCES gates(id) ON DELETE CASCADE,
   gate_code      TEXT,
   entries        BIGINT NOT NULL DEFAULT 0,
   exits          BIGINT NOT NULL DEFAULT 0,
