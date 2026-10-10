@@ -6,8 +6,9 @@ import {
   canApproveAtStage,
   resolveNextStage,
   appendStageHistory,
+  getScopedTicket,
 } from "@/lib/permission-workflow";
-import { addAudit, addNotification, getParentChildren } from "@/lib/db";
+import { addAudit, addNotification } from "@/lib/db";
 import type { WorkflowType } from "@/lib/types";
 
 function getTicketFromReq(req: NextRequest): string {
@@ -27,72 +28,25 @@ async function handleGet(req: NextRequest): Promise<Response> {
     );
   }
 
-  const supabase = getSupabaseServiceClient();
-  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(ticketParam);
+  // Visibility scoping (student/parent/approver rules) now lives in one place —
+  // shared with the upload / document / sign routes (Step 7).
+  const scope = await getScopedTicket(ticketParam, authUserId, authUserRole);
 
-  let q = supabase
-    .from("permission_requests")
-    .select(
-      `
-      *,
-      student:student_user_id (
-        id,
-        name,
-        email,
-        phone,
-        role,
-        student_details (
-          roll,
-          year,
-          section,
-          hostel_block,
-          room_number,
-          gender
-        )
-      ),
-      document_signatures (
-        id,
-        signed_by,
-        signed_at,
-        signature_hash
-      )
-    `
-    );
-
-  if (isUuid) {
-    q = q.or("id.eq." + ticketParam + ",ticket_number.eq." + ticketParam);
-  } else {
-    q = q.eq("ticket_number", ticketParam);
-  }
-
-  const { data: request, error } = await q.single();
-
-  if (error || !request) {
+  if ("notFound" in scope && scope.notFound) {
     return NextResponse.json(
       { success: false, error: { code: "NOT_FOUND", message: "Permission request not found" } },
       { status: 404 }
     );
   }
 
-  if (authUserRole === "student" && request.student_user_id !== authUserId) {
+  if ("forbidden" in scope && scope.forbidden) {
     return NextResponse.json(
       { success: false, error: { code: "FORBIDDEN", message: "Access denied" } },
       { status: 403 }
     );
   }
 
-  if (authUserRole === "parent" || authUserRole === "guardian") {
-    const children = await getParentChildren(authUserId);
-    const isChild = (children || []).some((c: { id?: string }) => c.id === request.student_user_id);
-    if (!isChild) {
-      return NextResponse.json(
-        { success: false, error: { code: "FORBIDDEN", message: "Access denied" } },
-        { status: 403 }
-      );
-    }
-  }
-
-  return NextResponse.json({ success: true, data: request });
+  return NextResponse.json({ success: true, data: scope.request });
 }
 async function handlePatch(req: NextRequest): Promise<Response> {
   const ticketParam = getTicketFromReq(req);

@@ -5,7 +5,7 @@ import { useUIStore } from "@/stores/uiStore";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, ShieldAlert, Lock, Globe, KeyRound } from "lucide-react";
+import { ShieldCheck, ShieldAlert, Lock, Globe, KeyRound, RefreshCw } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
 
 interface SecurityStats {

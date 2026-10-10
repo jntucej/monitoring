@@ -24,6 +24,8 @@ import {
   GraduationCap,
   Briefcase,
   LogOut,
+  MessageSquarePlus,
+  Cpu,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
@@ -59,6 +61,9 @@ const NAV = [
       { href: "/sysadmin/security", label: "Zero-Trust Security", icon: ShieldCheck },
       { href: "/sysadmin/compliance", label: "Compliance & Retention", icon: Landmark },
       { href: "/sysadmin/exit-reasons", label: "Exit Reasons", icon: DoorOpen },
+      { href: "/sysadmin/reasons", label: "Custom Reasons", icon: MessageSquarePlus },
+      { href: "/sysadmin/devices", label: "Device Verification", icon: Cpu },
+
       { href: "/sysadmin/alerts/rules", label: "Alert Rules", icon: Bell },
       { href: "/sysadmin/navigation", label: "Navigation Editor", icon: Layout },
     ],

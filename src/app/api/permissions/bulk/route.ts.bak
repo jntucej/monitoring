@@ -1,0 +1,209 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getSupabaseServiceClient } from "@/lib/dbClient";
+import { withAuthorization } from "@/middleware/authorization";
+import { withRateLimit } from "@/lib/rate-limit";
+import { validateAndApplyAction, appendStageHistory, type Actor, type TicketRow, type BulkResult } from "@/lib/bulk-permission";
+import { addAudit, addNotification } from "@/lib/db";
+
+const BULK_MAX_TICKETS = 100;
+
+function getBulkActor(req: NextRequest): Actor {
+  const authUserId = req.headers.get("x-user-id") || "";
+  const authUserRole = req.headers.get("x-user-role") || "";
+  const authUserEmail = req.headers.get("x-user-email") || "";
+  const actorName = authUserEmail || authUserId || "Approver";
+  return { id: authUserId, name: actorName, role: authUserRole as Actor["role"] };
+}
+
+function isTicketId(ticket: unknown): ticket is string {
+  return typeof ticket === "string" && ticket.trim().length > 0;
+}
+
+function validateBulkBody(body: unknown): { ok: boolean; error?: { code: string; message: string } } {
+  if (!body || typeof body !== "object") {
+    return { ok: false, error: { code: "BAD_REQUEST", message: "Request body is required" } };
+  }
+  const parsed = body as { tickets?: unknown; action?: unknown; comment?: unknown };
+  const tickets = Array.isArray(parsed.tickets) ? parsed.tickets : [];
+  const action = typeof parsed.action === "string" ? parsed.action : undefined;
+  const comment = typeof parsed.comment === "string" ? parsed.comment : undefined;
+
+  if (tickets.length === 0) {
+    return { ok: false, error: { code: "BAD_REQUEST", message: "tickets must be a non-empty array" } };
+  }
+  if (tickets.length > BULK_MAX_TICKETS) {
+    return {
+      ok: false,
+      error: { code: "BAD_REQUEST", message: `tickets must not exceed ${BULK_MAX_TICKETS} items` },
+    };
+  }
+  if (!tickets.every(isTicketId)) {
+    return { ok: false, error: { code: "BAD_REQUEST", message: "tickets must be non-empty strings" } };
+  }
+  if (!["approve", "reject", "forward"].includes(action)) {
+    return {
+      ok: false,
+      error: { code: "BAD_REQUEST", message: "action must be 'approve', 'reject', or 'forward'" },
+    };
+  }
+  if ((action === "reject" || action === "forward") && (!comment || comment.length < 3)) {
+    return {
+      ok: false,
+      error: { code: "BAD_REQUEST", message: `comment is required for ${action} (min 3 chars)` },
+    };
+  }
+  return { ok: true };
+
+export async function handleBulkPost(req: NextRequest): Promise<Response> {
+  const actor = getBulkActor(req);
+  let body: unknown = null;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json(
+      { success: false, error: { code: "BAD_REQUEST", message: "Invalid JSON body" } },
+      { status: 400 },
+    );
+  }
+
+  const validation = validateBulkBody(body);
+  if (!validation.ok) {
+    return NextResponse.json(
+      { success: false, error: validation.error },
+      { status: 400 },
+    );
+  }
+
+  const parsed = body as { tickets: string[]; action: string; comment?: string };
+  const tickets = parsed.tickets;
+  const action = parsed.action;
+  const comment = parsed.comment ?? undefined;
+
+  const supabase = getSupabaseServiceClient();
+
+  // Load all ticket rows in a single query (avoid N+1).
+  const q = supabase
+    .from("permission_requests")
+    .select("id, ticket_number, workflow_type, student_user_id, current_stage, status, hostel_scope, stage_history, updated_at, created_at")
+    .in("ticket_number", tickets);
+
+  const { data: rows, error: fetchErr } = await q;
+
+  if (fetchErr) {
+    console.error("[Permission Bulk API] fetch error:", fetchErr);
+    return NextResponse.json(
+      { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to fetch tickets" } },
+      { status: 500 },
+    );
+  }
+
+  // Index rows by ticket number for O(1) lookup.
+  const rowByTicket = new Map<string, TicketRow>();
+  (rows || []).forEach((r: Partial<TicketRow>) => {
+    if (r.ticket_number) {
+      rowByTicket.set(r.ticket_number, r as TicketRow);
+    }
+  });
+
+  const results: BulkResult[] = [];
+  const summary = { ok: 0, not_found: 0, forbidden: 0, not_pending: 0, error: 0 };
+
+  for (const ticket of tickets) {
+    const row = rowByTicket.get(ticket);
+    const result: BulkResult = { ticket };
+
+    if (!row) {
+      summary.not_found++;
+      result.status = "not_found";
+      results.push(result);
+      continue;
+    }
+
+    // Step 3: role may be allowed at the current stage (the per-ticket stage
+    // check re-uses the shared `validateAndApplyAction` helper).
+    const actor: Actor = { id: actor.id, name: actor.name, role: actor.role };
+    const validation = await validateAndApplyAction({
+      role: actor.role,
+      workflowType: row.workflow_type as WorkflowType,
+      currentStage: row.current_stage,
+      hostelScope: row.hostel_scope,
+      actor,
+      comment,
+      targetStage: undefined,
+      ticketRow: row,
+    });
+
+    if (!validation.ok) {
+      if (validation.conflict) {
+        summary.forbidden++; // or `not_pending` depending on the reason
+        result.status = "forbidden";
+        if (validation.error) result.error = validation.error.message;
+      } else {
+        summary.error++;
+        result.status = "error";
+        if (validation.error) result.error = validation.error.message;
+      }
+      results.push(result);
+      continue;
+    }
+
+    // Apply the update to the DB.
+    const { updatedRow, nextStage, nextStatus, updateFields, history } = validation.applied!;
+    const { data: updated, error: updateErr } = await supabase
+      .from("permission_requests")
+      .update(updateFields)
+      .eq("id", updatedRow.id)
+      .select()
+      .single();
+
+    if (updateErr) {
+      console.error("[Permission Bulk API] update error for", ticket, updateErr);
+      summary.error++;
+      result.status = "error";
+      result.error = updateErr.message;
+      results.push(result);
+      continue;
+    }
+
+    // Audit + notification.
+    const auditAction = `PERMISSION_BULK_${action.toUpperCase()}`;
+    await addAudit({
+      action: auditAction,
+      userId: actor.id,
+      details: {
+        ticketNumber: updatedRow.ticket_number,
+        action,
+        fromStage: updatedRow.current_stage,
+        toStage: nextStage,
+        status: nextStatus,
+        comment,
+      },
+    }).catch((err) => console.error("[Permission Bulk API] addAudit error:", err));
+
+    await addNotification(
+      "user",
+      updatedRow.student_user_id,
+      "permission",
+      `Bulk ${action.charAt(0).toUpperCase() + action.slice(1)} — ${updatedRow.ticket_number}`,
+      `${action.charAt(0).toUpperCase() + action.slice(1)}d (Stage: ${nextStage}, Status: ${nextStatus})`,
+    ).catch((err) => console.error("[Permission Bulk API] addNotification error:", err));
+
+    summary.ok++;
+    result.status = "ok";
+    result.newStage = nextStage;
+    results.push(result);
+  }
+
+  return NextResponse.json({
+    success: true,
+    data: {
+      results,
+      summary,
+    },
+  });
+}
+
+export const POST = withRateLimit(
+  withAuthorization(handleBulkPost, { requiredRole: ["admin", "sysadmin", "warden", "principal", "vice_principal", "hod", "hostel_manager"] }),
+  { keyPrefix: "permission_bulk", maxRequests: 60 },
+);

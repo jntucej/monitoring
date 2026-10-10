@@ -15,7 +15,8 @@
     "test:e2e": "playwright test",
     "test:e2e:smoke": "playwright test tests/login-success.spec.ts",
     "test:e2e:smoke:auth": "SMOKE_USER=admin SMOKE_PASS=123456 playwright test tests/login-success.spec.ts",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "verify:permission-workflow": "npx tsx scripts/verify-permission-workflow.ts"
   },
   "dependencies": {
     "@remotion/player": "^4.0.518",

@@ -14,7 +14,30 @@ export type Role =
   | "faculty"
   | "staff"
   | "worker"
-  | "visitor";
+  | "visitor"
+  | "caretaker"
+  | "deputy_warden"
+  | "hostel_manager"
+  | "principal"
+  | "vice_principal"
+  | "oie"
+  | "exam_branch";
+
+export type WorkflowType = "hostel" | "exam" | "memo" | "staff_leave";
+
+export type PermissionStatus =
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "cancelled"
+  | "expired"
+  | "completed"
+  | "PENDING"
+  | "APPROVED"
+  | "REJECTED"
+  | "CANCELLED"
+  | "COMPLETED"
+  | "EXPIRED";
 
 export type AccountStatus = "ACTIVE" | "LOCKED" | "SUSPENDED" | "DISABLED" | "DEPROVISIONED";
 
