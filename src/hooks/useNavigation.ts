@@ -158,6 +158,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "General & Information",
           items: [
+            { href: "/sysadmin/profile", label: "SysAdmin Profile", icon: "UserCog" },
             { href: "/profile", label: "My Profile", icon: "User" },
             { href: "/about", label: "About Campus", icon: "HelpCircle" },
           ],
