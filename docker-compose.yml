@@ -54,6 +54,10 @@ services:
       - PORT=3000
       - DATABASE_URL=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-gate_monitor}
       - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - MONITORING_PROM_URL=http://mon_prometheus:9090
+      - MONITORING_LOKI_URL=http://mon_loki:3100
+      - MONITORING_GRAFANA_URL=http://100.122.7.62:3001
+      - NEXT_PUBLIC_MONITORING_GRAFANA_URL=http://100.122.7.62:3001
     depends_on:
       postgres:
         condition: service_healthy
