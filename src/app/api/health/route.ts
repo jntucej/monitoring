@@ -11,9 +11,9 @@ async function handleGet(_req: NextRequest) {
     unhealthy: 503,
   };
 
-  // Bug 135: this endpoint is public (no auth). Raw Postgres/env error strings can leak
-  // table/column/constraint names and connection details. Replace with generic messages;
-  // keep the non-sensitive status + latency so operators/monitoring still get the signal.
+  // Bug 135: endpointpublic (no auth). Raw Postgres/env error strings leak
+  // table/column/constraint names connection details. Replace generic messages;
+  // keep non-sensitive status latency operators/monitoring get signal.
   const sanitize = (h: typeof health) => {
     const clone = JSON.parse(JSON.stringify(h));
     if (clone.components) {
@@ -26,7 +26,8 @@ async function handleGet(_req: NextRequest) {
     return clone;
   };
 
-  return NextResponse.json(sanitize(health), { status: statusCodes[health.status] || 200 });
+  const sanitized = sanitize(health);
+  return NextResponse.json(sanitized, { status: statusCodes[health.status] ?? 200 });
 }
 
 export const GET = withRateLimit(handleGet, { keyPrefix: "health_check", maxRequests: 60 });
