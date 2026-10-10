@@ -35,6 +35,10 @@ export function useApi() {
       if (typeof window !== "undefined") {
         window.location.href = "/login";
       }
+    } else if (res.status === 403 && data?.error?.code === "MFA_REQUIRED") {
+      if (typeof window !== "undefined") {
+        window.location.href = "/sysadmin/security";
+      }
     }
 
     return data as ApiResponse<T>;

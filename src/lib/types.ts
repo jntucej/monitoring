@@ -1,27 +1,9 @@
+import type { Role } from "./roles";
+
 export type UUID = string & { readonly __brand: unique symbol };
 export type RollNumber = string & { readonly __brand: unique symbol };
 
-export type Role =
-  | "operator"
-  | "admin"
-  | "sysadmin"
-  | "supervisor"
-  | "guardian" // unified role for parents/guardians of wards
-  | "parent" // @deprecated legacy alias kept for schema/code coherence
-  | "hod"
-  | "student"
-  | "warden"
-  | "faculty"
-  | "staff"
-  | "worker"
-  | "visitor"
-  | "caretaker"
-  | "deputy_warden"
-  | "hostel_manager"
-  | "principal"
-  | "vice_principal"
-  | "oie"
-  | "exam_branch";
+export { Role };
 
 export type AccountStatus = "ACTIVE" | "LOCKED" | "SUSPENDED" | "DISABLED" | "DEPROVISIONED";
 
