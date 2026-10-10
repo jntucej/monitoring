@@ -2,10 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from './lib/rate-limit';
 import { verifyCsrf } from './middleware/csrf';
 
-/**
- * Edge middleware protects API-wide controls only. Page authorization is enforced
- * by authenticated API handlers, never by mutable client cookies or headers.
- */
 export async function middleware(req: NextRequest) {
   const requestId = req.headers.get('x-request-id') || crypto.randomUUID();
   const { pathname } = req.nextUrl;
@@ -35,8 +31,6 @@ export async function middleware(req: NextRequest) {
     return csrfError;
   }
 
-  // Forward the correlation ID to the handler via request headers (the only way a
-  // route can read a value set here) and echo it on the response for the client.
   const requestHeaders = new Headers(req.headers);
   requestHeaders.set('x-request-id', requestId);
   const res = NextResponse.next({ request: { headers: requestHeaders } });

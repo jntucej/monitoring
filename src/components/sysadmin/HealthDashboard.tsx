@@ -160,9 +160,11 @@ export function HealthDashboard() {
             <Clock className="w-4 h-4 text-emerald-400" />
           </div>
           <p className="text-2xl font-black text-[var(--text-primary)]">
-            {health?.metrics?.avgResponseTime ? `${Math.round(health.metrics.avgResponseTime)} ms` : "< 25 ms"}
+            {health?.metrics?.avgResponseTime !== undefined ? `${Math.round(health.metrics.avgResponseTime)} ms` : "—"}
           </p>
-          <p className="text-[10px] text-emerald-400 font-medium">Optimal response speed</p>
+          <p className="text-[10px] text-[var(--text-muted)]">
+            {health?.metrics?.avgResponseTime ? (health.metrics.avgResponseTime < 50 ? "Optimal" : health.metrics.avgResponseTime < 200 ? "Acceptable" : "Elevated") : "Capturing data..."}
+          </p>
         </div>
 
         <div className="bg-[var(--bg-surface)] border border-[var(--border)] p-4 rounded-xl space-y-1">

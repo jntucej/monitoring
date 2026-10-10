@@ -1,15 +1,16 @@
 import { supabase, getSupabaseServiceClient } from './dbClient';
 import { getAuthSigningKey } from './auth-token';
 import { encryptSecret, decryptSecret } from './mfa-secret';
+import { query } from './postgres';
 
 export interface SystemHealth {
   status: 'healthy' | 'degraded' | 'unhealthy';
   timestamp: string;
-  uptime: number; // seconds
+  uptime: number;
   components: {
     database: {
       status: 'healthy' | 'degraded' | 'unhealthy';
-      latency: number; // milliseconds
+      latency: number;
       error?: string;
     };
     redis?: {
@@ -55,7 +56,6 @@ function getClient() {
   }
 }
 
-// Check system health
 export async function checkSystemHealth(): Promise<SystemHealth> {
   const startTime = Date.now();
   const health: SystemHealth = {
@@ -145,13 +145,16 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
 
   // Active session and user count
   try {
-    const { data: sessionData } = await getClient()
+    const dbClient = getClient();
+    const { data: sessionData, error: sessionError } = await dbClient
       .from("sessions")
       .select("user_id")
       .is("revoked_at", null)
       .gt("expires_at", new Date().toISOString());
 
-    if (sessionData) {
+    if (sessionError) {
+      console.error('Error fetching sessions:', sessionError);
+    } else if (sessionData) {
       health.metrics.activeSessions = sessionData.length;
       const uniqueUsers = new Set(sessionData.map((s: any) => s.user_id).filter(Boolean));
       health.metrics.activeUsers = uniqueUsers.size;
@@ -177,31 +180,40 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
     console.error('Error getting recent alerts:', error);
   }
 
-  // Performance metrics
+  // Performance metrics using direct SQL for accuracy
   try {
     const oneMinuteAgo = new Date(Date.now() - 60 * 1000).toISOString();
-    const { count: requests } = await getClient().from('api_metrics')
-      .select('*', { count: 'exact', head: true })
-      .gte('timestamp', oneMinuteAgo);
+    
+    // Count all requests in last minute
+    const totalResult = await query(
+      `SELECT COUNT(*) as count FROM api_metrics WHERE timestamp >= $1`,
+      [oneMinuteAgo]
+    );
+    health.metrics.requestsPerMinute = parseInt(totalResult.rows?.[0]?.count || '0', 10);
 
-    health.metrics.requestsPerMinute = requests || 0;
-
-    const { data: metrics } = await getClient().from('api_metrics')
-      .select('response_time')
-      .gte('timestamp', oneMinuteAgo);
-
-    if (metrics && metrics.length > 0) {
-      const avg = metrics.reduce((sum: number, m: any) => sum + (m.response_time || 0), 0) / metrics.length;
-      health.metrics.avgResponseTime = avg;
+    // Calculate average response time (only non-zero values)
+    const avgResult = await query(
+      `SELECT AVG(response_time) as avg_time, COUNT(*) as cnt 
+       FROM api_metrics 
+       WHERE timestamp >= $1 AND response_time > 0`,
+      [oneMinuteAgo]
+    );
+    
+    const avgRow = avgResult.rows?.[0];
+    if (avgRow && parseInt(avgRow.cnt) > 0) {
+      health.metrics.avgResponseTime = Math.round(parseFloat(avgRow.avg_time || '0'));
     }
 
-    const { count: errors } = await getClient().from('api_metrics')
-      .select('*', { count: 'exact', head: true })
-      .gte('timestamp', oneMinuteAgo)
-      .eq('status_code', '500');
-
+    // Calculate error rate (5xx errors)
+    const errorResult = await query(
+      `SELECT COUNT(*) as count FROM api_metrics 
+       WHERE timestamp >= $1 AND status_code >= 500`,
+      [oneMinuteAgo]
+    );
+    
+    const errors = parseInt(errorResult.rows?.[0]?.count || '0', 10);
     const errorRate = health.metrics.requestsPerMinute > 0 
-      ? (errors || 0) / health.metrics.requestsPerMinute 
+      ? errors / health.metrics.requestsPerMinute 
       : 0;
     health.metrics.errorRate = errorRate;
 
@@ -212,8 +224,7 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
     console.error('Error getting performance metrics:', error);
   }
 
-  // Auth-path readiness: catches the failures that make login 500 before any user does.
-  // ponytail: 2 extra lightweight queries per health check; fine at monitor cadence.
+  // Auth-path readiness
   try {
     const svc = getClient();
 
@@ -253,52 +264,4 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
   }
 
   return health;
-}
-
-// Create system alert
-export async function createSystemAlert(
-  severity: 'info' | 'warning' | 'critical',
-  message: string,
-  details?: Record<string, any>
-): Promise<boolean> {
-  try {
-    const { error } = await getClient().from('system_alerts')
-      .insert({
-        severity,
-        message,
-        details: details || {},
-        resolved: false,
-        created_at: new Date().toISOString(),
-      });
-
-    if (error) {
-      console.error('Error creating system alert:', error);
-      return false;
-    }
-    return true;
-  } catch (error) {
-    console.error('Error in createSystemAlert:', error);
-    return false;
-  }
-}
-
-// Resolve system alert
-export async function resolveSystemAlert(alertId: string): Promise<boolean> {
-  try {
-    const { error } = await getClient().from('system_alerts')
-      .update({
-        resolved: true,
-        resolved_at: new Date().toISOString(),
-      })
-      .eq('id', alertId);
-
-    if (error) {
-      console.error('Error resolving system alert:', error);
-      return false;
-    }
-    return true;
-  } catch (error) {
-    console.error('Error in resolveSystemAlert:', error);
-    return false;
-  }
 }

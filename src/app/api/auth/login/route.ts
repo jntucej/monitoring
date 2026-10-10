@@ -329,6 +329,12 @@ async function handleLoginInner(req: NextRequest) {
       path: "/",
     });
 
+    // Create a session record for this user
+    await query(
+      "INSERT INTO sessions (id, user_id, refresh_hash, expires_at, created_at, ip_address, user_agent) VALUES ($1, $2, $3, NOW() + INTERVAL '30 days', NOW(), $4, $5)",
+      [crypto.randomUUID(), user.id, crypto.randomUUID(), ip || 'unknown', req.headers.get('user-agent') || 'unknown']
+    ).catch(() => {});
+
     return response;
   } catch (error: unknown) {
     const requestId = getRequestId(req);
