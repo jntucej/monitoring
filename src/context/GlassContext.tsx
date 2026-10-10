@@ -109,16 +109,21 @@ export function GlassProvider({
   const [activeAlerts, setActiveAlerts] = useState<AlertPayload[]>([]);
 
   // --- SECURITY POSTURE — derived from live telemetry signals ---
+  const ALERT_AUTO_CLEAR_MS = 10000;
+  const CRITICAL_ALERT_TYPES = new Set(['LOCKDOWN', 'UNAUTHORIZED_EXIT', 'GATE_OFFLINE']);
   const securityMode: SecurityMode = useMemo(() => {
-    const hasCriticalAlert = activeAlerts.some((a) => a.severity === "critical");
-    if (hasCriticalAlert) {
-      return "critical";
-    }
-    const hasWarningAlert = activeAlerts.some((a) => a.severity === "warning");
-    if (hasWarningAlert) {
-      return "elevated";
-    }
-    return "secure";
+    const now = Date.now();
+    const active = activeAlerts.filter((a) => now - a.timestamp < ALERT_AUTO_CLEAR_MS);
+
+    const hasCritical = active.some(
+      (a) => ((a as any).type && CRITICAL_ALERT_TYPES.has((a as any).type)) || a.severity === "critical"
+    );
+    if (hasCritical) return "critical";
+
+    const hasElevated = active.some((a) => a.severity === "warning" || (a as any).severity === "high");
+    if (hasElevated) return "elevated";
+
+    return 'secure';
   }, [activeAlerts]);
 
   // --- WEBSOCKET REAL-TIME STATE ---

@@ -1,48 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
-import { findStudentByRoll, getStudentHistory, getStudentStatus, addAudit } from "@/lib/db";
+import { findStudentByRoll, getStudentHistory, getStudentStatus } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
-import type { AuthContext } from "@/lib/authContext";
-import type { Role } from "@/lib/types";
 import { withRateLimit } from "@/lib/rate-limit";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
+import { addAudit } from "@/lib/db";
+import type { AuthContext } from "@/lib/authContext";
+import type { Role } from "@/lib/types";
 
-/**
- * Extract the [roll] dynamic segment from the request URL.
- * This avoids needing Next.js route context which doesn't propagate
- * through our middleware wrappers.
- */
 function getRoll(req: NextRequest): string {
-  const segments = new URL(req.url).pathname.split("/").filter(Boolean);
-  // URL pattern: /api/students/:roll
+  const segments = new URL(req.url).pathname.split("/");
   return decodeURIComponent(segments[segments.length - 1]);
 }
 
-async function handleGet(req: NextRequest, { auth }: { auth?: any } = {}) {
+async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   try {
     const roll = getRoll(req);
-    const authUserId = auth?.userId || req.headers.get("x-user-id");
-    const authRole = auth?.role || req.headers.get("x-user-role");
-
     // Authorization Check: Admins and SysAdmins can view any student record
-    const isAllowedRole = ["admin", "sysadmin"].includes(authRole || "");
+    const isAllowedRole = ["admin", "sysadmin"].includes(auth.role || "");
 
     if (!isAllowedRole) {
-      if (authRole === "student") {
-        // Student must be accessing their own record.
-        const service = getSupabaseServiceClient();
-        const { data: profile, error } = await service
-          .from("users")
-          .select("unique_id")
-          .eq("id", authUserId)
-          .maybeSingle();
-        if (error || !profile || profile.unique_id !== roll) {
+      if (auth.role === "student") {
+        if (auth.loginIdentifier !== roll) {
           return NextResponse.json(
             { success: false, error: { code: "FORBIDDEN", message: "You can only view your own student record." } },
             { status: 403 }
           );
         }
       } else {
-        // Other roles like operator, parent are forbidden.
         return NextResponse.json(
           { success: false, error: { code: "FORBIDDEN", message: "Insufficient permissions to view student details." } },
           { status: 403 }
@@ -79,11 +63,10 @@ async function handleGet(req: NextRequest, { auth }: { auth?: any } = {}) {
   }
 }
 
-async function handlePatch(req: NextRequest, { auth }: { auth?: any } = {}) {
+async function handlePatch(req: NextRequest, { auth }: { auth: AuthContext }) {
   try {
     const roll = getRoll(req);
-    const authRole = auth?.role || req.headers.get("x-user-role");
-    if (!["admin", "sysadmin"].includes(authRole || "")) {
+    if (!["admin", "sysadmin"].includes(auth.role || "")) {
       return NextResponse.json({ success: false, error: { code: "FORBIDDEN", message: "Admin access required" } }, { status: 403 });
     }
 
@@ -134,8 +117,9 @@ async function handlePatch(req: NextRequest, { auth }: { auth?: any } = {}) {
 async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
   try {
     const roll = getRoll(req);
-    // 1. Locate the student
     const supabase = getSupabaseServiceClient();
+
+    // 1. Locate the student
     const { data: user, error: userErr } = await supabase
       .from("users")
       .select("id, name, email, status")
@@ -143,8 +127,8 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
       .eq("role", "student")
       .maybeSingle();
 
-    if (userErr) return NextResponse.json({ success: false, error: { code: "DB_ERROR", message: userErr.message } }, { status: 500 });
-    if (!user) return NextResponse.json({ success: false, error: { code: "NOT_FOUND", message: `Student with roll ${roll} not found` } }, { status: 404 });
+    if (userErr) return NextResponse.json({ error: userErr.message }, { status: 500 });
+    if (!user) return NextResponse.json({ error: "NOT_FOUND" }, { status: 404 });
 
     // 2. Check for historical data
     const [{ count: passCount }, { count: logCount }] = await Promise.all([
@@ -155,29 +139,18 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
     const hasHistory = (passCount ?? 0) > 0 || (logCount ?? 0) > 0;
 
     if (hasHistory) {
-      // Soft delete — preserve audit trail and movement history
-      const { error } = await supabase
+      // Soft delete
+      await supabase
         .from("users")
-        .update({
-          status: "DEPROVISIONED",
-          updated_at: new Date().toISOString(),
-        })
+        .update({ status: "DEPROVISIONED", updated_at: new Date().toISOString() })
         .eq("id", user.id);
-
-      if (error) return NextResponse.json({ success: false, error: { code: "DB_ERROR", message: error.message } }, { status: 500 });
 
       await addAudit({
         action: "USER_DEACTIVATED",
         userId: auth.userId,
-        userName: auth.email || "SysAdmin",
         role: auth.role as Role,
-        details: {
-          target_user_id: user.id,
-          roll,
-          mode: "soft_delete",
-          passes: passCount,
-          movements: logCount,
-        },
+        details: { target_user_id: user.id, roll, mode: "soft_delete", passes: passCount, movements: logCount },
+        userName: auth.email
       });
 
       return NextResponse.json({
@@ -187,31 +160,23 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
       });
     }
 
-    // 3. No history → hard delete (cascade removes student_details)
-    const { error: delErr } = await supabase.from("users").delete().eq("id", user.id);
-    if (delErr) return NextResponse.json({ success: false, error: { code: "DB_ERROR", message: delErr.message } }, { status: 500 });
+    // 3. Hard delete
+    await supabase.from("users").delete().eq("id", user.id);
 
     await addAudit({
       action: "USER_DELETED",
       userId: auth.userId,
-      userName: auth.email || "SysAdmin",
       role: auth.role as Role,
       details: { target_user_id: user.id, roll, mode: "hard_delete" },
+      userName: auth.email
     });
 
-    return NextResponse.json({ success: true, mode: "hard_delete", message: `Student ${roll} permanently deleted` });
+    return NextResponse.json({ success: true, mode: "hard_delete" });
   } catch (error: any) {
-    return NextResponse.json(
-      { success: false, error: { code: "SERVER_ERROR", message: error.message || "Failed to delete student" } },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message || "Failed to delete" } }, { status: 500 });
   }
 }
 
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "student"] }),
-  { keyPrefix: "student_details", maxRequests: 100 }
-);
-
+export const GET = withRateLimit(withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "student"] }), { keyPrefix: "student_details", maxRequests: 100 });
 export const PATCH = withAuthorization(handlePatch, { requiredRole: ["admin", "sysadmin"] });
 export const DELETE = withAuthorization(handleDelete, { requiredRole: ["sysadmin"] });

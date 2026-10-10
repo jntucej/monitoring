@@ -341,13 +341,23 @@ export interface Gate {
   isActive: boolean;
 }
 
+// Issue #398: include the PersonType in the stats object so consumers get
+// type safety when iterating Object.entries(personTypeBreakdown). The type
+// field duplicates the Record key but enables typed destructuring without
+// a manual cast.
 export interface PersonTypeStats {
+  type?: PersonType; // optional for back-compat with existing callers
   total: number;
   onCampus: number;
   inToday: number;
   outToday: number;
   attendanceRate?: number;
 }
+
+// Keyed breakdown with each value carrying its own type tag
+export type PersonTypeBreakdown = {
+  [K in PersonType]: PersonTypeStats & { type: K };
+};
 
 export interface CampusStatusCardConfig {
   type: PersonType;
@@ -394,6 +404,7 @@ export interface ApiResponse<T> {
   data?: T;
   message?: string;
   error?: string;
+  code?: string;
 }
 
 export interface ExitReasonConfig {
@@ -454,7 +465,10 @@ export interface FacultyMemberAttendance {
   firstInTime: string | null;
   lastOutTime: string | null;
   punctualityStatus: "ON_TIME" | "LATE" | "NOT_CHECKED_IN";
-  totalHoursToday: string;
+  // Issue #396: store minutes as a number — format at the view layer.
+  // The old string (e.g. "5h 30m") can't be sorted or summed.
+  totalMinutesToday?: number;
+  totalHoursToday?: string;
   gateLocation: string | null;
   attendanceRate?: number;
   monthlyStats?: {
@@ -475,6 +489,8 @@ export interface DepartmentAttendanceSummary {
   onTimeToday?: number;
   lateToday?: number;
   attendanceRate: number;
+  // Issue #396: minutes as number (was avgHoursToday: string)
+  avgMinutesToday?: number;
   avgHoursToday?: string;
   presentCount?: number;
   insideCount?: number;

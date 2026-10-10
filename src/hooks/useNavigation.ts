@@ -395,7 +395,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
   return [...filteredGroups, accountGroup];
 }
 
-export function useNavigation(roleCode?: string) {
+export function useNavItems(roleCode?: string) {
   const [navigation, setNavigation] = useState<NavGroup[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -453,3 +453,6 @@ export function useNavigation(roleCode?: string) {
 
   return { navigation, loading };
 }
+
+/** @deprecated Use useNavItems — this name collides with the view-navigation hook. */
+export const useNavigation = useNavItems;

@@ -137,6 +137,10 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Issue #394: if MFA is pending, Enter must submit the TOTP form, not the
+    // password form. The TOTP input is now in a separate <form> so this guard
+    // is a fallback — if somehow the outer form fires during MFA, abort.
+    if (mfaChallenge) return;
     setErrorMsg("");
 
     const identifier = loginIdentifier.trim().toUpperCase(); // Convert to uppercase for consistency
@@ -353,7 +357,16 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
         </div>
 
         {mfaChallenge && (
-          <div className="space-y-1.5 animate-fadeIn">
+          // Issue #394: separate form so Enter on the TOTP input submits the
+          // MFA leg and never triggers the outer password form. The outer form
+          // now aborts in handleFormSubmit when mfaChallenge is set.
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleFormSubmit(e); // mfaChallenge is included in the login call
+            }}
+            className="space-y-1.5 animate-fadeIn"
+          >
             <div className="flex items-center justify-between">
               <label className="block text-xs font-semibold text-sky-400">
                 Authenticator Code (2FA)
@@ -379,17 +392,26 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
                 onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                 placeholder="6-digit code"
                 autoFocus
+                autoComplete="one-time-code"
                 className="w-full pl-10 pr-4 py-3 rounded-xl bg-[var(--bg-base)] border border-sky-500/50 text-sm font-mono tracking-widest text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-sky-400 outline-none transition-all"
               />
               <Lock className="w-4 h-4 absolute left-3.5 top-3.5 text-sky-400" />
             </div>
-          </div>
+            <button
+              type="submit"
+              disabled={loading || totpCode.length < 6}
+              className="w-full touch-target-primary rounded-xl bg-sky-600 text-white font-bold text-sm hover:opacity-95 transition-all disabled:opacity-40 shadow-md flex items-center justify-center gap-2 py-3 mt-2 active:scale-[0.99]"
+            >
+              {loading ? <span>Verifying...</span> : <><span>Verify Code &amp; Sign In</span><ArrowRight className="w-4 h-4" /></>}
+            </button>
+          </form>
         )}
 
         <button
           type="submit"
           disabled={loading || !loginIdentifier || !passwordOrPin || (!!mfaChallenge && totpCode.length < 6)}
-          className="w-full touch-target-primary rounded-xl bg-[var(--action-primary)] text-white font-bold text-sm hover:opacity-95 transition-all disabled:opacity-40 shadow-md flex items-center justify-center gap-2 py-3 mt-2 active:scale-[0.99]"
+          // Issue #394: hide when MFA form is active — it has its own submit button
+          className={`w-full touch-target-primary rounded-xl bg-[var(--action-primary)] text-white font-bold text-sm hover:opacity-95 transition-all disabled:opacity-40 shadow-md flex items-center justify-center gap-2 py-3 mt-2 active:scale-[0.99] ${mfaChallenge ? 'hidden' : ''}`}
         >
           {loading ? (
             <span>Authenticating...</span>

@@ -9,6 +9,17 @@ const __dirname = path.dirname(__filename);
 
 console.log('[Worker] Starting background worker supervisor...');
 
+
+cron.schedule('*/15 * * * *', async () => {
+  console.log('[Worker] Running scheduled job: cleanup_ephemeral');
+  try {
+    const job = await import('./jobs/cleanup_ephemeral.js');
+    if (job.default) await job.default();
+  } catch (err) {
+    console.error('[Worker] cleanup_ephemeral failed:', err);
+  }
+});
+
 cron.schedule('0 2 * * *', async () => {
   console.log('[Worker] Running scheduled job: backfill_daily_stats');
   try {

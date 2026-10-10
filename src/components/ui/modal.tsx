@@ -50,7 +50,7 @@ const Modal = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className={cn(
+            role="dialog" aria-modal="true" aria-labelledby={title ? "modal-title" : undefined} className={cn(
               "relative bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl shadow-xl w-full mx-4 max-h-[90dvh] overflow-y-auto overscroll-contain",
               sizeClasses[size]
             )}
@@ -67,7 +67,7 @@ const Modal = ({
             )}
             {title && (
               <div className="px-6 py-4 border-b border-[var(--border)]">
-                <h2 className="text-xl font-semibold">{title}</h2>
+                <h2 id="modal-title" className="text-xl font-semibold">{title}</h2>
               </div>
             )}
             <div className={cn("p-6", !title && "p-6")}>{children}</div>

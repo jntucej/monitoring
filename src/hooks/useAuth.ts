@@ -1,36 +1,44 @@
-/**
- * useAuth hook — wraps the auth store for convenient access in React components.
- * Handles auto-login with seeded credentials for demo mode.
- */
 "use client";
 
 import { useCallback } from "react";
+import { useAuthStore, useHasHydrated } from "@/stores/authStore";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/stores/authStore";
 import type { Role } from "@/lib/types";
 
 export function useAuth() {
-  const { user, token, role, authenticated, loading, login, pinLogin, logout } = useAuthStore();
+  // Subscribe via selectors so this hook re-renders when the store changes
+  const user = useAuthStore((s) => s.user);
+  const token = useAuthStore((s) => s.token);
+  const role = useAuthStore((s) => s.role);
+  const authenticated = useAuthStore((s) => s.authenticated);
+  const loading = useAuthStore((s) => s.loading);
+  const hydrated = useHasHydrated();
+
+  const login = useAuthStore((s) => s.login);
+  const pinLogin = useAuthStore((s) => s.pinLogin);
+  const logout = useAuthStore((s) => s.logout);
   const router = useRouter();
 
   const requireAuth = useCallback((allowedRoles?: Role[]) => {
+    if (!hydrated) return false;
     if (!authenticated) {
-      router.push("/login");
+      router.replace("/login");
       return false;
     }
-    if (allowedRoles && !allowedRoles.includes(role as Role)) {
-      router.push("/");
+    if (allowedRoles && (!role || !allowedRoles.includes(role))) {
+      router.replace("/");
       return false;
     }
     return true;
-  }, [authenticated, role, router]);
+  }, [hydrated, authenticated, role, router]);
 
   return {
     user,
     token,
     role,
     authenticated,
-    loading,
+    loading: loading || !hydrated,
+    hydrated,
     login,
     pinLogin,
     logout,

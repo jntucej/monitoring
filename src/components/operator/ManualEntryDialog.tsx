@@ -39,19 +39,31 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
   const [viewportHeight, setViewportHeight] = useState<number | null>(null);
 
   useEffect(() => {
-    if (typeof window === "undefined" || !window.visualViewport) return;
-    // ponytail: capture vv — window.visualViewport can be null at cleanup
-    // (SPA nav / iOS restore), and `?.` would then leak the listeners.
-    const vv = window.visualViewport;
-    const updateHeight = () => {
-      setViewportHeight(vv.height);
+    if (typeof window === "undefined") return;
+    // Issue #389: never cache window.visualViewport — capture it fresh on
+    // each read. The object can become null during SPA navigation / iOS
+    // restore, and re-reading ensures removeEventListener targets the
+    // same live reference that addEventListener was called on.
+    const update = () => {
+      const vv = window.visualViewport;
+      if (vv) setViewportHeight(vv.height);
     };
-    updateHeight();
-    vv.addEventListener("resize", updateHeight);
-    vv.addEventListener("scroll", updateHeight);
+
+    const vv = window.visualViewport;
+    if (vv) {
+      vv.addEventListener("resize", update);
+      vv.addEventListener("scroll", update);
+      update();
+    }
+    window.addEventListener("resize", update);
+
     return () => {
-      vv.removeEventListener("resize", updateHeight);
-      vv.removeEventListener("scroll", updateHeight);
+      const vvCleanup = window.visualViewport;
+      if (vvCleanup) {
+        vvCleanup.removeEventListener("resize", update);
+        vvCleanup.removeEventListener("scroll", update);
+      }
+      window.removeEventListener("resize", update);
     };
   }, []);
 
@@ -61,11 +73,17 @@ export function ManualEntryDialog({ isOpen, onClose, gateId }: ManualEntryDialog
       return;
     }
     const fetchApprovedPasses = async () => {
+      // Issue #393: scope to the specific student and a ±24h time window.
+      // The original fetch had no time filter, causing thousands of approved
+      // passes to be sent on a busy day. Hard-limit to 10 most recent.
       const rollNum = student.uniqueId || student.roll || student.id;
       if (!rollNum) return;
       setLoadingPasses(true);
       try {
-        const res = await fetch(`/api/passes?roll=${encodeURIComponent(rollNum)}`);
+        const from = new Date(Date.now() - 2 * 3600_000).toISOString();
+        const to = new Date(Date.now() + 24 * 3600_000).toISOString();
+        const url = `/api/passes?roll=${encodeURIComponent(rollNum)}&status=APPROVED&limit=10&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`;
+        const res = await fetch(url);
         if (res.ok) {
           const json = await res.json();
           const rawList = Array.isArray(json.data) ? json.data : Array.isArray(json) ? json : [];

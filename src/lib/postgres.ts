@@ -132,6 +132,23 @@ interface EmbeddedRelation {
 }
 
 export class PostgresQueryBuilder<T = any> {
+  private static fkCache = new Map<string, any[]>();
+  
+  private static async loadForeignKeys(table: string): Promise<any[]> {
+    if (this.fkCache.has(table)) return this.fkCache.get(table)!;
+    
+    // Using global query function (assumed accessible in scope)
+    const { rows } = await query(`
+      SELECT kcu.column_name AS from_column, ccu.table_name AS to_table, ccu.column_name, tc.constraint_name
+      FROM information_schema.table_constraints tc
+      JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
+      JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = tc.constraint_name
+      WHERE tc.constraint_type = 'FOREIGN KEY' AND tc.table_name = $1
+    `, [table]);
+    this.fkCache.set(table, rows);
+    return rows;
+  }
+
   private tableName: string;
   private selectColumns: string = "*";
   private rawColumns: string = "*";
@@ -517,7 +534,7 @@ export class PostgresQueryBuilder<T = any> {
       relationSubqueries.push(buildRelationSubquery(rel, this.tableName));
     }
     const cleanBase = baseCols.replace(/,+$/, "").trim();
-    return relationSubqueries.length > 0 ? `${cleanBase}, ${relationSubqueries.join(", ")}` : cleanBase;
+    return cleanBase;
   }
 
   insert(rows: Record<string, any> | Record<string, any>[]) {

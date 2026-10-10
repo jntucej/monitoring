@@ -35,12 +35,22 @@ CREATE INDEX IF NOT EXISTS idx_pin_login_attempts_locked
   ON pin_login_attempts (locked_until)
   WHERE locked_until IS NOT NULL;
 
--- 4. Enable RLS on pin_login_attempts
+-- 4. Enable RLS on pin_login_attempts (idempotent — schema.sql also enables it)
 ALTER TABLE pin_login_attempts ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "service_role_all_pin_login_attempts"
-  ON pin_login_attempts
-  FOR ALL
-  TO service_role
-  USING (true)
-  WITH CHECK (true);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename  = 'pin_login_attempts'
+      AND policyname = 'service_role_all_pin_login_attempts'
+  ) THEN
+    CREATE POLICY "service_role_all_pin_login_attempts"
+      ON pin_login_attempts
+      FOR ALL
+      TO service_role
+      USING (true)
+      WITH CHECK (true);
+  END IF;
+END $$;

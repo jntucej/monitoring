@@ -46,9 +46,9 @@ async function handlePost(req: NextRequest) {
       );
     }
 
-    if (usersList.length > 500) {
+    if (usersList.length > 20000) {
       return NextResponse.json(
-        { success: false, error: { code: "PAYLOAD_TOO_LARGE", message: "Bulk import capped at 500 users per request" } },
+        { success: false, error: { code: "PAYLOAD_TOO_LARGE", message: "Bulk import capped at 20000 users per request" } },
         { status: 400 }
       );
     }
@@ -154,7 +154,7 @@ async function handlePost(req: NextRequest) {
       userId: actorId,
       userName: "Admin",
       role: actorRole as Role,
-      details: `Processed bulk import/update for ${usersList.length} items (${successCount} succeeded)`,
+      details: JSON.stringify({ message: `Processed bulk import/update for ${usersList.length} items (${successCount} succeeded)` }),
     });
 
     return NextResponse.json({

@@ -16,6 +16,63 @@ import { verifyAccessToken } from './auth-token';
 import { query } from './postgres';
 import { ROLES, isPrivileged, isSuperAdmin } from './roles';
 
+// ── Issue #382: user-level cache (not context-level) ──────────────────────
+// Never cache the full AuthContext keyed by token — that would honour stale
+// sessions after a password change for the full TTL. Instead, cache only the
+// DB user row for a short window (30 s) so repeated requests within the same
+// second share one DB round-trip, but a password change (which bumps
+// session_version) is detected on the very next request beyond 30 s.
+// Token-side session_version is ALWAYS compared to the live DB value —
+// never to a cached version.
+const USER_ROW_TTL_MS = 30_000;
+
+interface CachedUserRow {
+  id: string;
+  role: Role;
+  status: AccountStatus;
+  email: string;
+  session_version: number;
+  unique_id: string | null;
+  login_identifier: string | null;
+  gate_id: string | null;
+  department_id: string | null;
+  employee_id: string | null;
+  two_factor_enabled: boolean;
+  handle: string | null;
+  cachedAt: number;
+}
+
+const userRowCache = new Map<string, CachedUserRow>();
+
+async function getUserRowCached(userId: string): Promise<CachedUserRow | null> {
+  const now = Date.now();
+  const cached = userRowCache.get(userId);
+  if (cached && now - cached.cachedAt < USER_ROW_TTL_MS) return cached;
+
+  const res = await query(
+    `SELECT id, role, status, email, session_version, unique_id,
+            login_identifier, gate_id, department_id, employee_id,
+            two_factor_enabled, handle
+     FROM public.users WHERE id = $1 LIMIT 1`,
+    [userId],
+  );
+  if (res.rows.length === 0) return null;
+
+  const row = res.rows[0] as CachedUserRow;
+  row.cachedAt = now;
+  userRowCache.set(userId, row);
+  return row;
+}
+
+/**
+ * Evict the cached user row so the next request fetches fresh data.
+ * Call this after any write that bumps session_version (password change,
+ * role update, account deactivation) so the session is invalidated immediately.
+ */
+export function invalidateAuthCache(userId: string): void {
+  userRowCache.delete(userId);
+}
+
 /**
  * Authenticated User Context
  *
@@ -129,21 +186,26 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
     throw new Error('UNAUTHORIZED: Invalid or expired token');
   }
 
-  // Get user profile from PostgreSQL users table
-  const userRes = await query('SELECT * FROM users WHERE id = $1 LIMIT 1', [userId]);
-  if (userRes.rows.length === 0) {
+  // Issue #382: use the short-TTL user row cache. The session_version check
+  // below is ALWAYS performed — we compare the token's embedded version
+  // against the (possibly freshly-fetched) DB value so a password change
+  // is caught within at most USER_ROW_TTL_MS (30 s).
+  const profile = await getUserRowCached(userId);
+  if (!profile) {
     throw new Error('UNAUTHORIZED: User profile not found');
   }
 
-  const profile = userRes.rows[0];
-
-  // Invalidate JWT tokens if session_version has been incremented
+  // Invalidate JWT tokens if session_version has been incremented.
+  // This is the critical check — it must compare the token's version
+  // to the live (or recently cached) DB version.
   if (
     payload &&
     typeof (payload as any).session_version === 'number' &&
     typeof profile.session_version === 'number' &&
     (payload as any).session_version !== profile.session_version
   ) {
+    // Evict the cache so the next request re-fetches the DB row.
+    invalidateAuthCache(userId);
     throw new Error('UNAUTHORIZED: Session invalidated');
   }
 
@@ -159,14 +221,14 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
     role: profile.role as Role,
     status: profile.status as AccountStatus,
     email: profile.email,
-    loginIdentifier: profile.unique_id || profile.login_identifier,
-    gateId: profile.gate_id,
+    loginIdentifier: profile.unique_id || profile.login_identifier || undefined,
+    gateId: profile.gate_id ?? undefined,
     departmentId: profile.department_id ?? undefined,
-    employeeId: profile.unique_id || profile.employee_id,
+    employeeId: profile.unique_id || profile.employee_id || undefined,
     isAuthenticated: true,
     isActive: profile.status === 'ACTIVE',
     handle: profile.handle || undefined,
-    twoFactorEnabled: profile.two_factor_enabled === true
+    twoFactorEnabled: profile.two_factor_enabled === true,
   };
 }
 

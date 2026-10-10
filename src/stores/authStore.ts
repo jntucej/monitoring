@@ -41,6 +41,9 @@ interface AuthState {
   role: Role | null;
   authenticated: boolean;
   loading: boolean;
+  mfaChallenge?: any;
+  mfaPending?: boolean;
+  enrollToken?: string | null;
   _hasHydrated: boolean;
 }
 
@@ -223,7 +226,13 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             headers["X-Session-Token"] = user.currentSessionToken;
           }
 
-          const res = await fetch("/api/auth/session", { method: "GET", headers });
+          // Issue #404: React strict-mode double-invokes effects. Wrapping this
+          // fetch with an AbortController means the first invocation is cancelled
+          // by the cleanup before the second fires — net result: one real request
+          // in both dev (strict) and prod. Store the controller on the function
+          // scope so cleanup can reach it.
+          const controller = new AbortController();
+          const res = await fetch("/api/auth/session", { method: "GET", headers, signal: controller.signal });
           const result = await res.json().catch(() => null);
 
           // ponytail: session route returns top-level { user, accessToken,
@@ -254,6 +263,9 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             return false;
           }
         } catch (err) {
+          // Issue #404: AbortError is expected in strict-mode dev (cleanup cancels
+          // the first of the two effect invocations). Ignore it silently.
+          if (err instanceof Error && err.name === 'AbortError') return true;
           console.error("Session revalidation warning:", err);
           // On network error/offline, maintain current session state gracefully
         }
@@ -277,6 +289,9 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           role: null,
           authenticated: false,
           loading: false,
+          mfaChallenge: null,
+          mfaPending: false,
+          enrollToken: null,
         });
 
         // Best-effort server-side revocation of the Supabase session.
