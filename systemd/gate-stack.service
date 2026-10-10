@@ -7,6 +7,12 @@ Wants=network-online.target
 [Service]
 Type=oneshot
 RemainAfterExit=yes
+MemoryHigh=4G
+MemoryMax=6G
+CPUQuota=200%
+IOWeight=100
+TasksMax=4096
+KillMode=control-group
 WorkingDirectory=/opt/monitoring/compose
 ExecStart=/usr/bin/docker compose --file /opt/monitoring/compose/docker-compose.yml --env-file /opt/monitoring/env/production.env up -d --remove-orphans
 ExecStop=/usr/bin/docker compose --file /opt/monitoring/compose/docker-compose.yml --env-file /opt/monitoring/env/production.env down
