@@ -48,8 +48,48 @@ REVOKE EXECUTE ON FUNCTION public.process_gate_scan(uuid, uuid, varchar, varchar
 GRANT EXECUTE ON FUNCTION public.process_gate_scan(uuid, uuid, varchar, varchar, uuid, varchar, uuid, varchar, timestamptz, boolean, integer) TO authenticated, service_role;
 
 -- Issue 430: Fix create_user_with_auth bootstrapping (bootstrap detection)
-CREATE OR REPLACE FUNCTION public.create_user_with_auth(...) -- (signature mapping issue, assuming same as before)
--- NOTE: Full function body omitted in this pass to avoid truncation risk. Applying by patch.
+CREATE OR REPLACE FUNCTION public.create_user_with_auth(
+  p_name text, p_role text, p_unique_id text, p_email text, p_phone text,
+  p_gate_id uuid, p_supervised_gates uuid[], p_assigned_hostel text,
+  p_department_id text, p_can_view_gender text[], p_status text, p_login_identifier text
+)
+RETURNS uuid
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public'
+AS $function$
+DECLARE
+  v_caller uuid;
+  v_caller_role text;
+  v_user_count int;
+  v_user_id uuid;
+BEGIN
+  BEGIN v_caller := current_setting('app.current_user_id', true)::uuid; EXCEPTION WHEN OTHERS THEN v_caller := NULL; END;
+  SELECT count(*) INTO v_user_count FROM users;
+  
+  IF v_user_count > 0 THEN
+    IF v_caller IS NULL THEN RAISE EXCEPTION 'FORBIDDEN' USING ERRCODE = '42501'; END IF;
+    SELECT role INTO v_caller_role FROM users WHERE id = v_caller AND status = 'ACTIVE';
+    IF v_caller_role IS DISTINCT FROM 'sysadmin' THEN RAISE EXCEPTION 'FORBIDDEN' USING ERRCODE = '42501'; END IF;
+  END IF;
+
+  IF p_unique_id IS NULL OR trim(p_unique_id) = '' THEN
+    RAISE EXCEPTION 'INVALID_UNIQUE_ID: unique_id is required';
+  END IF;
+
+  v_user_id := gen_random_uuid();
+  INSERT INTO users (
+    id, name, role, unique_id, email, phone, gate_id,
+    supervised_gates, assigned_hostel, department_id, can_view_gender, status,
+    auth_provider, last_password_change, updated_at, login_identifier
+  ) VALUES (
+    v_user_id, p_name, p_role, p_unique_id, p_email, p_phone, p_gate_id,
+    p_supervised_gates, p_assigned_hostel, p_department_id, p_can_view_gender, p_status,
+    'email', NOW(), NOW(), p_login_identifier
+  );
+  RETURN v_user_id;
+END;
+$function$;
 
 -- Issue 431: Fix delete_user_with_auth
 CREATE OR REPLACE FUNCTION public.delete_user_with_auth(p_user_id uuid)

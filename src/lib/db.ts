@@ -880,25 +880,7 @@ export async function findByQr(payload: string): Promise<Person | null> {
   return findPersonByUniqueId(payload.trim().toUpperCase().replace(/\s+/g, ""));
 }
 
-export async function findAllPersons(type?: PersonType): Promise<Person[]> {
-  const db = getDbClient();
-
-  // ponytail: two plain queries + JS merge avoids PostgREST embed ambiguity
-  // (student_details has 2 FKs to users: user_id + guardian_id), which makes
-  // embedded selects fail depending on constraint naming.
-  let query = db.from('users').select('*').not('status', 'in', '("DEPROVISIONED","SUSPENDED")');
-  if (type) {
-    query = query.eq('role', type);
-  }
-  const { data, error } = await query;
-
-  if (error || !data) {
-    console.error('findAllPersons users query error:', error);
-    return [];
-  }
-  if (data.length === 0) return [];
-
-  // Helper to chunk queries
+// Helper to chunk queries
 async function fetchByIds<T>(db: any, table: string, ids: string[]): Promise<any[]> {
   const CHUNK = 200;
   const out: any[] = [];
