@@ -181,8 +181,8 @@ END $$;
 -- ----------------------------------------------------------------------------
 REVOKE EXECUTE ON FUNCTION public.resolve_login_identifier(TEXT) FROM PUBLIC, anon;
 REVOKE EXECUTE ON FUNCTION public.can_user_authenticate(UUID) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.resolve_login_identifier(TEXT) TO authenticated, service_role;
-GRANT EXECUTE ON FUNCTION public.can_user_authenticate(UUID) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.resolve_login_identifier(TEXT) TO authenticated, service_role, anon;
+GRANT EXECUTE ON FUNCTION public.can_user_authenticate(UUID) TO authenticated, service_role, anon;
 
 -- ----------------------------------------------------------------------------
 -- SECTION 8: FUNCTIONS FOR GOVERNING RLS
