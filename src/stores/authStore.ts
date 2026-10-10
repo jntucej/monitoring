@@ -286,6 +286,9 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           role: null,
           authenticated: false,
           loading: false,
+          mfaChallenge: null,
+          mfaPending: false,
+          enrollToken: null,
         });
 
         // Best-effort server-side revocation of the Supabase session.
