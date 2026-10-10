@@ -517,7 +517,7 @@ export class PostgresQueryBuilder<T = any> {
       relationSubqueries.push(buildRelationSubquery(rel, this.tableName));
     }
     const cleanBase = baseCols.replace(/,+$/, "").trim();
-    return relationSubqueries.length > 0 ? `${cleanBase}, ${relationSubqueries.join(", ")}` : cleanBase;
+    return cleanBase;
   }
 
   insert(rows: Record<string, any> | Record<string, any>[]) {

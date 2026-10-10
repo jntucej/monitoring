@@ -105,6 +105,37 @@ test('Worker Supervisor: uses cross-platform spawn flags for sync-bridge runner'
   assert(workerCode.includes('audit_log_rotation'), 'Worker must schedule audit log rotation');
 });
 
+// 11. Public /api/health error sanitization (Bug 135)
+// Regression guard: a deep-clone-then-redact sanitizer silently re-exposed raw
+// error strings (jwt_secret / totp_encryption / system_config_readable) on an
+// unauthenticated endpoint. Assert allowlist-of-fields, not redact-in-place.
+test('Health endpoint: allowlists components and never echoes raw error strings', () => {
+  const code = fs.readFileSync('src/app/api/health/route.ts', 'utf8');
+
+  assert(
+    !code.includes('JSON.parse(JSON.stringify('),
+    'Health route must not deep-clone-then-redact; raw error fields stay reachable'
+  );
+  assert(
+    code.includes('"Database unavailable"') &&
+      code.includes('"Redis unavailable"') &&
+      code.includes('"Environment misconfigured"'),
+    'Health route must substitute generic messages for database/redis/env errors'
+  );
+  for (const secretField of ['jwt_secret', 'totp_encryption', 'system_config_readable']) {
+    assert(
+      !code.includes(secretField),
+      'Health route must never reference ' + secretField + ' (raw error strings leak onto a public endpoint)'
+    );
+  }
+  // The leak vector still exists upstream, so the route stays responsible.
+  const healthLib = fs.readFileSync('src/lib/health.ts', 'utf8');
+  assert(
+    healthLib.includes('jwt_secret') && healthLib.includes('totp_encryption'),
+    'health.ts still populates secret-bearing fields; the route must strip them'
+  );
+});
+
 console.log(`\n🎉 Additional Remediations Results: ${passed}/${total} passed!`);
 if (passed === total) {
   process.exit(0);
