@@ -17,7 +17,7 @@ export function getDefaultRouteForRole(role: Role | string, gateId?: string): st
     caretaker: "/hostel/permissions",
     deputy_warden: "/hostel/permissions",
     hostel_manager: "/hostel/permissions",
-    principal: "/principal/permissions",
+    principal: "/principal",
     vice_principal: "/exam/permissions",
     oie: "/exam/permissions",
     exam_branch: "/exam/permissions",

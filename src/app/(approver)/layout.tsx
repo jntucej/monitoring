@@ -2,6 +2,7 @@
 
 import React from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { SafeAreaAppShell } from "@/components/shared/SafeAreaAppShell";
 import type { Role } from "@/lib/types";
 
 const ALLOWED_APPROVER_ROLES: Role[] = [
@@ -26,7 +27,9 @@ export default function ApproverLayout({
 }) {
   return (
     <AuthGuard allowedRoles={ALLOWED_APPROVER_ROLES}>
-      {children}
+      <SafeAreaAppShell>
+        {children}
+      </SafeAreaAppShell>
     </AuthGuard>
   );
 }
