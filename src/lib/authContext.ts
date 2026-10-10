@@ -16,6 +16,8 @@ import { verifyAccessToken } from './auth-token';
 import { query } from './postgres';
 import { ROLES, isPrivileged, isSuperAdmin } from './roles';
 
+export { isMfaRequiredForPrivileged as isMfaRequiredForAdmin };
+
 // ── Issue #382: user-level cache (not context-level) ──────────────────────
 // Never cache the full AuthContext keyed by token — that would honour stale
 // sessions after a password change for the full TTL. Instead, cache only the
