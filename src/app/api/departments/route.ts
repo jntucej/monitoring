@@ -4,7 +4,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { getDepartments, createDepartment, deleteDepartment, updateDepartment } from "@/lib/departments";
-import { invalidateCache } from "@/lib/cache";
 import { withAuthorization } from "@/middleware/authorization";
 import { addAudit } from "@/lib/db";
 import { Role } from '@/lib/types';
@@ -142,9 +141,6 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
 
   try {
     await deleteDepartment(code);
-    await invalidateCache("departments:all");
-    await invalidateCache("departments:*");
-
     await addAudit({
       action: "DEPARTMENT_DELETED",
     userId: auth.userId,
@@ -157,7 +153,7 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
     { headers: { "Cache-Control": "no-store" } }
   );
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 500 });
+    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 400 });
   }
 }
 
