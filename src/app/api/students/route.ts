@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { findAllStudents, searchStudents, findStudentByRoll, getParentChildren } from "@/lib/db";
+import { findAllStudents, searchStudents, findStudentByRoll, getParentChildren, searchStudents as searchStudentsLib } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
-import { withRateLimit } from "@/lib/rate-limit";
-import { getGateStudentInfo } from "@/lib/authContext";
+import { withRateLimit, rateLimitByKey } from "@/lib/rate-limit";
+import { getGateStudentInfo, type AuthContext } from "@/lib/authContext";
 import type { Student } from "@/lib/types";
 
 /**
@@ -14,147 +14,70 @@ function extractToken(req: NextRequest): string | null {
   return authHeader.slice(7);
 }
 
-async function handleGet(req: NextRequest) {
-  try {
-    const token = extractToken(req);
-    if (!token) {
-      return NextResponse.json(
-        { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required" } },
-        { status: 401 }
-      );
+const PRIVILEGED_ROLES = ["sysadmin", "admin", "warden", "supervisor", "hod"] as const;
+const FULL_PII_ROLES = ["sysadmin", "admin"] as const;
+
+function stripStudentPII(s: Student) {
+  return {
+    id: s.id,
+    roll: s.roll,
+    name: s.name,
+    department: s.department,
+    year: s.year,
+    section: s.section,
+    status: s.status,
+  };
+}
+
+async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
+  const url = new URL(req.url);
+  const search = url.searchParams.get("q");
+  const parentId = url.searchParams.get("guardianId") ?? url.searchParams.get("parentId");
+
+  // ── Path 1: Parent fetching their own children ──
+  if (parentId) {
+    const scopedParentId =
+      auth.role === "parent" || auth.role === "guardian"
+        ? auth.userId
+        : parentId;
+
+    if (!scopedParentId) {
+      return NextResponse.json({ error: "MISSING_PARENT" }, { status: 400 });
     }
-
-    const authRole = req.headers.get("x-user-role");
-    const authUserId = req.headers.get("x-user-id");
-    const params = req.nextUrl.searchParams;
-    const roll = params.get("roll");
-    const q = params.get("q");
-    let parentId = params.get("guardianId") || params.get("parentId");
-
-    // Force parentId to be the user's own ID if client role is parent or guardian to prevent tampering
-    if (authRole === "parent" || authRole === "guardian") {
-      parentId = authUserId;
-    }
-
-    // If parentId is provided, return students for that parent
-    if (parentId) {
-      // Only the parent themselves or an admin can access this
-      if (authRole !== "admin" && authRole !== "sysadmin" && authUserId !== parentId) {
-        return NextResponse.json(
-          { success: false, error: { code: "FORBIDDEN", message: "You can only access your own children." } },
-          { status: 403 }
-        );
-      }
-
-      const children = await getParentChildren(parentId);
-      // Sanitize: remove sensitive fields for parents
-      const sanitized = children.map((s: Student) => ({
-        id: s.id,
-        roll: s.roll,
-        name: s.name,
-        department: s.department,
-        year: s.year,
-        section: s.section,
-        photo: s.photo,
-        status: s.status,
-        hostelBlock: s.hostelBlock,
-        roomNumber: s.roomNumber,
-      }));
-      return NextResponse.json({ success: true, data: sanitized });
-    }
-
-    if (roll) {
-      // Operator: only receive minimal PII-free fields for gate verification
-      if (authRole === "operator") {
-        const minimal = await getGateStudentInfo(token, roll);
-        return NextResponse.json({ success: true, data: minimal });
-      }
-
-      // Admin, sysadmin, warden, supervisor, hod: full record
-      if (["admin", "sysadmin", "warden", "supervisor", "hod"].includes(authRole || "")) {
-        const student = await findStudentByRoll(roll);
-        if (!student) {
-          return NextResponse.json(
-            { success: false, error: { code: "NOT_FOUND", message: "Student not found" } },
-            { status: 404 }
-          );
-        }
-        return NextResponse.json({ success: true, data: student });
-      }
-
-      // Everyone else (student, parent): cannot look up arbitrary students
-      return NextResponse.json(
-        { success: false, error: { code: "FORBIDDEN", message: "Insufficient permissions to look up students." } },
-        { status: 403 }
-      );
-    }
-
-    if (q) {
-      // Searching for students is permitted for administrative and oversight roles
-      if (!["admin", "sysadmin", "warden", "supervisor", "hod", "faculty"].includes(authRole || "")) {
-        return NextResponse.json(
-          { success: false, error: { code: "FORBIDDEN", message: "Insufficient permissions to search students." } },
-          { status: 403 }
-        );
-      }
-      const data = await searchStudents(q);
-      // For search results, strip PII fields that should not be exposed
-      const sanitized = data.map((s: Student) => ({
-        id: s.id,
-        roll: s.roll,
-        name: s.name,
-        department: s.department,
-        year: s.year,
-        section: s.section,
-        photo: s.photo,
-        status: s.status,
-      }));
-      return NextResponse.json({ success: true, data: sanitized });
-    }
-
-    // Listing all students for administrative and oversight roles
-    if (!["admin", "sysadmin", "warden", "supervisor", "hod"].includes(authRole || "")) {
-      return NextResponse.json(
-        { success: false, error: { code: "FORBIDDEN", message: "You do not have permission to list all students." } },
-        { status: 403 }
-      );
-    }
-
-    const data = await findAllStudents();
-    // Return full administrative fields for admin/sysadmin
-    const sanitized = data.map((s: any) => ({
-      id: s.id,
-      uniqueId: s.uniqueId || s.roll || "",
-      roll: s.roll || s.uniqueId || "",
-      name: s.fullName || s.name || s.roll || s.uniqueId || "Student",
-      email: s.email || "",
-      phone: s.phone || "",
-      department: s.department || s.departmentId || "",
-      year: s.studentDetails?.year || s.year || "",
-      section: s.studentDetails?.section || s.section || "",
-      batch: s.studentDetails?.batch || s.batch || "",
-      photo: s.photoUrl || s.photo || "",
-      status: (s.status || "ACTIVE").toUpperCase(),
-      hostelRoom: s.studentDetails?.roomNumber || s.hostelRoom || "",
-      isHosteller: !!(s.studentDetails?.roomNumber || s.isHosteller),
-      createdAt: s.createdAt || "",
-      studentDetails: s.studentDetails,
-      flagStatus: s.flagStatus ?? null,
-    }));
-    return NextResponse.json({ success: true, data: sanitized });
-  } catch (error: unknown) {
-    if (error instanceof Error && (error.message.includes("NOT_FOUND") || error.message.includes("FORBIDDEN") || error.message.includes("INACTIVE"))) {
-      return NextResponse.json(
-        { success: false, error: { code: "FORBIDDEN", message: error.message } },
-        { status: 403 }
-      );
-    }
-    console.error("Error fetching student data:", error);
-    return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to load students" } },
-      { status: 500 }
-    );
+    const children = await getParentChildren(scopedParentId);
+    return NextResponse.json({ success: true, data: children });
   }
+
+  // ── Path 2: Everyone else — must be privileged ──
+  if (!PRIVILEGED_ROLES.includes(auth.role as any)) {
+    return NextResponse.json({ success: false, error: { code: "FORBIDDEN", message: "Forbidden" } }, { status: 403 });
+  }
+
+  // ── Path 3: Search with rate limit ──
+  if (search) {
+    const rl = await rateLimitByKey(`student-search:${auth.userId}`, {
+      windowMs: 60000,
+      maxRequests: 30,
+    });
+    if (rl.limited) {
+      return NextResponse.json({ success: false, error: { code: "RATE_LIMITED", message: "Too many requests" } }, { status: 429 });
+    }
+
+    const students = await searchStudents(search);
+    const fullPii = FULL_PII_ROLES.includes(auth.role as any);
+    return NextResponse.json({
+      success: true,
+      data: fullPii ? students : students.map(stripStudentPII),
+    });
+  }
+
+  // ── Path 4: List all ──
+  const students = await findAllStudents();
+  const fullPii = FULL_PII_ROLES.includes(auth.role as any);
+  return NextResponse.json({
+    success: true,
+    data: fullPii ? students : students.map(stripStudentPII),
+  });
 }
 
 // Apply authentication, authorization, and rate limiting to ALL operations
