@@ -3,6 +3,8 @@ import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { Role } from "@/lib/types";
 import { addAudit } from "@/lib/db";
 import bcrypt from "bcryptjs";
+import pLimit from "p-limit";
+import crypto from "crypto";
 
 const VALID_ROLES: Role[] = ["operator", "admin", "sysadmin", "parent", "student", "warden", "faculty", "staff", "worker"];
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -25,6 +27,10 @@ export interface ImportRow {
   roomNumber?: string;
   status?: string;
   gender?: string;
+  course?: string;
+  fatherName?: string;
+  dob?: string;
+  landlineNumber?: string;
   [key: string]: any;
 }
 
@@ -39,11 +45,7 @@ export interface ValidationResult {
   totalRows: number;
   validRows: ImportRow[];
   errors: ValidationError[];
-  summary: {
-    total: number;
-    valid: number;
-    invalid: number;
-  };
+  summary: { total: number; valid: number; invalid: number; };
 }
 
 export interface CommitResult {
@@ -57,12 +59,11 @@ export async function parseCsv(csvText: string): Promise<Record<string, string>[
   const lines = csvText.split(/\r?\n/).filter((l) => l.trim().length > 0);
   if (lines.length < 2) return [];
 
-  const headers = lines[0].split(",").map((h) => h.trim().replace(/^["']|["']$/g, ""));
+  const headers = lines[0].split(",").map((h) => h.trim().replace(/^[\"']|[\"']$/g, ""));
   const records: Record<string, string>[] = [];
 
   for (let i = 1; i < lines.length; i++) {
     const rawLine = lines[i];
-    // Basic CSV splitting handling simple quotes
     const values: string[] = [];
     let insideQuote = false;
     let currentVal = "";
@@ -72,13 +73,13 @@ export async function parseCsv(csvText: string): Promise<Record<string, string>[
       if (char === '"' || char === "'") {
         insideQuote = !insideQuote;
       } else if (char === "," && !insideQuote) {
-        values.push(currentVal.trim().replace(/^["']|["']$/g, ""));
+        values.push(currentVal.trim().replace(/^[\"']|[\"']$/g, ""));
         currentVal = "";
       } else {
         currentVal += char;
       }
     }
-    values.push(currentVal.trim().replace(/^["']|["']$/g, ""));
+    values.push(currentVal.trim().replace(/^[\"']|[\"']$/g, ""));
 
     const obj: Record<string, string> = {};
     headers.forEach((h, idx) => {
@@ -130,9 +131,13 @@ export async function validateImport(csvInput: string | ImportRow[]): Promise<Va
       email,
       role,
       uniqueId: uniqueId || email.split("@")[0],
-      roll: r.roll || uniqueId,
+      roll: r.roll || r["H.T NO."] || uniqueId,
+      course: r.course || r["COURSE"] || undefined,
+      fatherName: r.fatherName || r["FATHER NAME"] || undefined,
+      dob: r.dob || r["DOB"] || undefined,
+      landlineNumber: r.landlineNumber || r["LAND LINE 0R PARENT NUMBER"] || undefined,
       employeeId: r.employeeId || uniqueId,
-      phone: r.phone ? r.phone.trim() : undefined,
+      phone: r.phone || r["PHONE NUMBER"] || undefined,
       department: r.department || r.departmentId || undefined,
       departmentId: r.departmentId || r.department || undefined,
       designation: r.designation || undefined,
@@ -167,99 +172,24 @@ export async function commitImport(
   skipErrors: boolean = true
 ): Promise<CommitResult> {
   const supabase = getSupabaseServiceClient();
-  let importedCount = 0;
-  let failedCount = 0;
-  const errors: Array<{ row: number; error: string }> = [];
-
   const defaultSalt = await bcrypt.genSalt(10);
   const defaultPwHash = await bcrypt.hash("Welcome@123", defaultSalt);
   const defaultPinHash = await bcrypt.hash("1234", defaultSalt);
 
-  for (let i = 0; i < rows.length; i++) {
-    const row = rows[i];
-    const rowNum = i + 1;
+  const limit = pLimit(5);
+  const tasks = rows.map((row, i) => limit(() => processSingleRow(row, i + 1, supabase, actorId, defaultPwHash, defaultPinHash)));
+  const rowResults = await Promise.all(tasks);
 
-    try {
-      // 1. Check if user already exists
-      const { data: existing } = await supabase
-        .from("users")
-        .select("id, role")
-        .eq("email", row.email)
-        .maybeSingle();
+  let importedCount = 0;
+  let failedCount = 0;
+  const errors: Array<{ row: number; error: string }> = [];
 
-      let targetUserId: string;
-
-      if (existing) {
-        targetUserId = existing.id;
-        const updates: Record<string, any> = {
-          name: row.name,
-          role: row.role,
-          phone: row.phone || null,
-          department_id: row.departmentId || row.department || null,
-          status: row.status || "ACTIVE",
-          updated_at: new Date().toISOString(),
-        };
-        if (row.uniqueId) updates.unique_id = row.uniqueId;
-
-        const { error: updErr } = await supabase.from("users").update(updates).eq("id", targetUserId);
-        if (updErr) throw new Error(updErr.message);
-      } else {
-        const newId = crypto.randomUUID();
-        targetUserId = newId;
-        const insertUser = {
-          id: newId,
-          name: row.name,
-          email: row.email,
-          role: row.role,
-          unique_id: row.uniqueId || row.roll || row.employeeId || row.email.split("@")[0],
-          phone: row.phone || null,
-          department_id: row.departmentId || row.department || null,
-          status: row.status || "ACTIVE",
-          password_hash: defaultPwHash,
-          pin_hash: defaultPinHash,
-          initial_pin_hash: defaultPinHash,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
-
-        const { error: insErr } = await supabase.from("users").insert(insertUser);
-        if (insErr) throw new Error(insErr.message);
-      }
-
-      // 2. Student details
-      if (row.role === "student") {
-        const studentData = {
-          user_id: targetUserId,
-          roll: row.roll || row.uniqueId || row.email.split("@")[0],
-          year: row.year || 1,
-          section: row.section || "A",
-          batch: row.batch || "",
-          hostel_block: row.hostelBlock || null,
-          room_number: row.roomNumber || null,
-          gender: row.gender || null,
-        };
-        await supabase.from("student_details").upsert(studentData, { onConflict: "user_id" });
-      }
-
-      // 3. Employee details
-      if (["faculty", "staff", "operator", "admin", "sysadmin", "worker"].includes(row.role)) {
-        const employeeData = {
-          user_id: targetUserId,
-          employee_id: row.employeeId || row.uniqueId || row.email.split("@")[0],
-          designation: row.designation || (row.role === "faculty" ? "Assistant Professor" : row.role),
-          department_id: row.departmentId || row.department || null,
-          staff_category: row.role,
-        };
-        await supabase.from("employee_details").upsert(employeeData, { onConflict: "user_id" });
-      }
-
-      importedCount++;
-    } catch (err: any) {
+  for (const res of rowResults) {
+    if (res.error) {
       failedCount++;
-      errors.push({ row: rowNum, error: err.message || "Failed to process row" });
-      if (!skipErrors) {
-        break;
-      }
+      errors.push({ row: res.row, error: res.error });
+    } else {
+      importedCount++;
     }
   }
 
@@ -277,4 +207,94 @@ export async function commitImport(
     failedCount,
     errors,
   };
+}
+
+async function processSingleRow(
+  row: ImportRow,
+  rowNum: number,
+  supabase: any,
+  actorId: string,
+  pwHash: string,
+  pinHash: string
+): Promise<{ row: number; error: string | null }> {
+  try {
+    const { data: existing } = await supabase
+      .from("users")
+      .select("id, role")
+      .eq("email", row.email)
+      .maybeSingle();
+
+    let targetUserId: string;
+
+    if (existing) {
+      targetUserId = existing.id;
+      const updates: Record<string, any> = {
+        name: row.name,
+        role: row.role,
+        phone: row.phone || null,
+        department_id: row.departmentId || row.department || null,
+        status: row.status || "ACTIVE",
+        updated_at: new Date().toISOString(),
+      };
+      if (row.uniqueId) updates.unique_id = row.uniqueId;
+      if (row.dob) updates.dob = row.dob;
+
+      const { error: updErr } = await supabase.from("users").update(updates).eq("id", targetUserId);
+      if (updErr) throw new Error(updErr.message);
+    } else {
+      const newId = crypto.randomUUID();
+      targetUserId = newId;
+      const insertUser = {
+        id: newId,
+        name: row.name,
+        email: row.email,
+        role: row.role,
+        unique_id: row.uniqueId || row.roll || row.employeeId || row.email.split("@")[0],
+        dob: row.dob || null,
+        phone: row.phone || null,
+        department_id: row.departmentId || row.department || null,
+        status: row.status || "ACTIVE",
+        password_hash: pwHash,
+        pin_hash: pinHash,
+        initial_pin_hash: pinHash,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      const { error: insErr } = await supabase.from("users").insert(insertUser);
+      if (insErr) throw new Error(insErr.message);
+    }
+
+    if (row.role === "student") {
+      const studentData = {
+        user_id: targetUserId,
+        roll: row.roll || row.uniqueId || row.email.split("@")[0],
+        year: row.year || 1,
+        section: row.section || "A",
+        batch: row.batch || "",
+        hostel_block: row.hostelBlock || null,
+        room_number: row.roomNumber || null,
+        gender: row.gender || null,
+        course: row.course || null,
+        father_name: row.fatherName || null,
+        landline_number: row.landlineNumber || null,
+      };
+      await supabase.from("student_details").upsert(studentData, { onConflict: "user_id" });
+    }
+
+    if (["faculty", "staff", "operator", "admin", "sysadmin", "worker"].includes(row.role)) {
+      const employeeData = {
+        user_id: targetUserId,
+        employee_id: row.employeeId || row.uniqueId || row.email.split("@")[0],
+        designation: row.designation || (row.role === "faculty" ? "Assistant Professor" : row.role),
+        department_id: row.departmentId || row.department || null,
+        staff_category: row.role,
+      };
+      await supabase.from("employee_details").upsert(employeeData, { onConflict: "user_id" });
+    }
+
+    return { row: rowNum, error: null };
+  } catch (err: any) {
+    return { row: rowNum, error: err.message || "Failed to process row" };
+  }
 }
