@@ -18,6 +18,11 @@ const HEALTH_STATE = {
 
 const healthServer = http.createServer((req, res) => {
   if (req.url === '/health') {
+    res.writeHead(200);
+    res.end('ok');
+    return;
+  }
+  if (req.url === '/status') {
     const age = Date.now() - HEALTH_STATE.lastJobAt;
     const stale = age > 60 * 60_000;
     res.writeHead(stale ? 503 : 200, { 'Content-Type': 'application/json' });

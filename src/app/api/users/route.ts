@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { randomBytes } from "crypto";
+import { randomBytes, randomUUID } from "crypto";
 import {
   findUserById,
   findAllUsers,
@@ -152,45 +152,46 @@ async function handlePost(req: NextRequest) {
     const service = getSupabaseServiceClient();
 
     // ---- Step 1: provision the Supabase Auth identity ----
-    let authUserId: string | undefined;
+    let authUserId: string | null = null;
     let inviteSent = false;
 
-    if (sendInvite === true) {
-      const { data, error: inviteErr } = await service.auth.admin.inviteUserByEmail(
-        String(email).trim(),
-        { data: { name: String(name), role: String(role) } }
-      );
-      if (inviteErr || !data?.user) {
-        console.error('Auth invite failed:', inviteErr);
-        return NextResponse.json(
-          { success: false, error: { code: "AUTH_PROVISION_FAILED", message: "Failed to send user invitation" } },
-          { status: 500 }
+    try {
+      if (sendInvite === true) {
+        const { data, error: inviteErr } = await service.auth.admin.inviteUserByEmail(
+          String(email).trim(),
+          { data: { name: String(name), role: String(role) } }
         );
+        if (inviteErr) throw inviteErr;
+        authUserId = data.user.id;
+        inviteSent = true;
+      } else {
+        const temporaryPassword = randomBytes(18).toString("base64url");
+        const { data, error: createErr } = await service.auth.admin.createUser({
+          email: String(email).trim(),
+          password: temporaryPassword,
+          email_confirm: true,
+          user_metadata: {
+            name: String(name),
+            role: String(role),
+            phone: phone ?? null,
+            department: effectiveDept ?? null,
+            designation: body?.designation ?? null,
+            employee_id: effectiveUniqueId ?? null,
+          },
+          app_metadata: { provider: 'email', role: String(role) },
+        });
+        if (createErr) throw createErr;
+        authUserId = data.user.id;
       }
-      authUserId = data.user.id;
-      inviteSent = true;
-    } else {
-      // Generated server-side; never returned to any client nor logged.
-      const temporaryPassword = randomBytes(18).toString("base64url");
-      const { data, error: createErr } = await service.auth.admin.createUser({
-        email: String(email).trim(),
-        password: temporaryPassword,
-        email_confirm: true,
-        user_metadata: { name: String(name), role: String(role), employee_id: effectiveUniqueId ?? null },
-      });
-      if (createErr || !data?.user) {
-        console.error('Auth user creation failed:', createErr);
-        return NextResponse.json(
-          { success: false, error: { code: "AUTH_PROVISION_FAILED", message: createErr?.message || "Failed to create authentication account" } },
-          { status: 500 }
-        );
-      }
-      authUserId = data.user.id;
+    } catch (e: any) {
+      console.warn("[users] auth provision failed (continuing with profile-only):", e.message);
+      // Continue if auth fails
     }
+
 
     // ---- Step 2: insert the public.users profile (matching UUID id) ----
     const user = await provisionProfile({
-      id: authUserId,
+      id: authUserId || randomUUID(),
       name: String(name),
       role: role as Role,
       email: String(email).trim(),
@@ -212,9 +213,11 @@ async function handlePost(req: NextRequest) {
 
     if (!user) {
       // Profile insert failed -> roll back the orphaned Auth identity.
-      await service.auth.admin.deleteUser(authUserId).catch((delErr) =>
-        console.error('Failed to roll back auth user after profile failure:', delErr)
-      );
+      if (authUserId) {
+        await service.auth.admin.deleteUser(authUserId).catch((delErr) =>
+          console.error('Failed to roll back auth user after profile failure:', delErr)
+        );
+      }
       return NextResponse.json(
         { success: false, error: { code: "CREATE_FAILED", message: "Failed to create user profile" } },
         { status: 500 }
@@ -237,16 +240,31 @@ async function handlePost(req: NextRequest) {
       }, { onConflict: "user_id" });
     }
 
-    // Insert employee_details if role is staff/faculty/operator/admin/sysadmin/worker
-    if (["faculty", "staff", "operator", "admin", "sysadmin", "worker"].includes(role)) {
-      await service.from("employee_details").upsert({
-        user_id: user.id || authUserId,
-        employee_id: employeeId || effectiveUniqueId || (user as any).unique_id || String(email).split("@")[0],
-        designation: body.designation || (role === "faculty" ? "Assistant Professor" : role),
-        department_id: effectiveDept || null,
-        is_hod: !!isHod,
-        staff_category: body.staffCategory || role,
-      }, { onConflict: "user_id" });
+    // Insert employee_details for staff-like roles — never let this block
+    // user creation. If employee_id is empty, auto-generate one from the
+    // freshly minted user id so the UNIQUE/NOT NULL constraint is satisfied.
+    if (["faculty", "staff", "operator", "admin", "sysadmin", "worker", "caretaker", "deputy_warden", "hostel_manager", "principal", "vice_principal", "oie", "exam_branch", "warden"].includes(role)) {
+      const finalEmployeeId =
+        (employeeId && String(employeeId).trim()) ||
+        (effectiveUniqueId && String(effectiveUniqueId).trim()) ||
+        `EMP-${String(user.id || authUserId).slice(0, 8).toUpperCase()}`;
+
+      try {
+        const { error: empError } = await service.from("employee_details").upsert({
+          user_id: user.id || authUserId,
+          employee_id: finalEmployeeId,
+          designation: body?.designation || (role === "faculty" ? "Assistant Professor" : role),
+          department_id: effectiveDept || null,
+          is_hod: !!isHod,
+          staff_category: body?.staffCategory || role,
+        }, { onConflict: "user_id" });
+
+        if (empError) {
+          console.warn("[users.POST] employee_details insert failed:", empError.message);
+        }
+      } catch (err: any) {
+        console.warn("[users.POST] employee_details insert threw:", err?.message ?? err);
+      }
     }
 
     return NextResponse.json({

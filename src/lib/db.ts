@@ -1251,16 +1251,24 @@ export async function createUser(userData: {
   }
 
   // Insert/upsert auxiliary employee_details if applicable
-  if (userData.employeeId || userData.isHod || ['faculty', 'staff', 'worker', 'operator', 'admin', 'sysadmin'].includes(userData.role)) {
+  if (['faculty', 'staff', 'worker', 'operator', 'admin', 'sysadmin', 'caretaker', 'deputy_warden', 'hostel_manager', 'principal', 'vice_principal', 'oie', 'exam_branch', 'warden'].includes(userData.role) || userData.employeeId || userData.isHod) {
+    const finalEmployeeId =
+      (userData.employeeId && userData.employeeId.trim()) ||
+      (uniqueId && String(uniqueId).trim()) ||
+      `EMP-${userData.id.slice(0, 8).toUpperCase()}`;
+
     try {
-      await db.from('employee_details').upsert({
+      const { error } = await db.from('employee_details').upsert({
         user_id: userData.id,
-        employee_id: (userData.employeeId || uniqueId).trim().toUpperCase(),
+        employee_id: finalEmployeeId,
         is_hod: userData.isHod || false,
         department_id: userData.departmentId || null,
+        staff_category: (userData as any).staffCategory || userData.role,
       }, { onConflict: 'user_id' });
-    } catch (eErr) {
-      console.warn('Non-fatal employee_details upsert error:', eErr);
+
+      if (error) console.warn('[createUser] employee_details failed:', error.message);
+    } catch (err: any) {
+      console.warn('[createUser] employee_details threw:', err?.message ?? err);
     }
   }
 

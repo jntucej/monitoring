@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from './lib/rate-limit';
-import { verifyCsrf } from './middleware/csrf';
+import { validateCsrf } from './lib/csrf';
 
 export async function middleware(req: NextRequest) {
   const requestId = req.headers.get('x-request-id') || crypto.randomUUID();
@@ -25,10 +25,14 @@ export async function middleware(req: NextRequest) {
     return res;
   }
 
-  const csrfError = verifyCsrf(req);
-  if (csrfError) {
-    csrfError.headers.set('x-request-id', requestId);
-    return csrfError;
+  const csrfResult = validateCsrf(req);
+  if (!csrfResult.valid) {
+    const res = NextResponse.json(
+      { success: false, error: { code: 'FORBIDDEN', message: csrfResult.error || 'CSRF validation failed.' } },
+      { status: 403 }
+    );
+    res.headers.set('x-request-id', requestId);
+    return res;
   }
 
   const requestHeaders = new Headers(req.headers);

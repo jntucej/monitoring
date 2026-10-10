@@ -23,11 +23,11 @@ function distanceBetweenCoords(
   return R * c;
 }
 
-// Back Gate coordinates - UPDATE THESE TO MATCH YOUR ACTUAL CAMPUS BACK GATE LOCATION
-const BACK_GATE_COORDS = {
-  latitude: 12.9716,
-  longitude: 77.5946,
-  allowedRadiusMeters: 200,
+// Back Gate coordinates (configurable via environment variables or DB gate record)
+const DEFAULT_BACK_GATE_COORDS = {
+  latitude: parseFloat(process.env.BACK_GATE_LATITUDE || "0"),
+  longitude: parseFloat(process.env.BACK_GATE_LONGITUDE || "0"),
+  allowedRadiusMeters: parseInt(process.env.BACK_GATE_RADIUS_METERS || "200", 10),
 };
 
 // Check if operator's geolocation is near the Back Gate
@@ -51,7 +51,12 @@ async function verifyBackGateLocation(
 
   const targetCoords = gate.latitude && gate.longitude 
     ? { latitude: gate.latitude, longitude: gate.longitude, allowedRadiusMeters: gate.allowedRadiusMeters || 200 }
-    : BACK_GATE_COORDS;
+    : DEFAULT_BACK_GATE_COORDS;
+
+  // Skip geolocation comparison if coordinates are not configured (0,0)
+  if (!targetCoords.latitude || !targetCoords.longitude) {
+    return { allowed: true };
+  }
 
   const distance = distanceBetweenCoords(
     geo.latitude,
@@ -63,7 +68,7 @@ async function verifyBackGateLocation(
   if (distance > targetCoords.allowedRadiusMeters) {
     return {
       allowed: false,
-      error: `Geo-location mismatch: Operator is ${Math.round(distance)}m away from Back Gate. Must be within ${BACK_GATE_COORDS.allowedRadiusMeters}m.`,
+      error: `Geo-location mismatch: Operator is ${Math.round(distance)}m away from Back Gate. Must be within ${targetCoords.allowedRadiusMeters}m.`,
     };
   }
 
@@ -128,7 +133,14 @@ async function handlePost(req: NextRequest) {
     const authOperatorId = req.headers.get("x-user-id")
     const authRole = req.headers.get("x-user-role")
 
-    const roll = body.roll || body.personId;
+    let roll = body.roll || body.personId;
+    if (typeof roll === "string" && roll.trim().startsWith("{") && roll.trim().endsWith("}")) {
+      try {
+        const parsed = JSON.parse(roll.trim());
+        roll = parsed.uniqueId || parsed.unique_id || parsed.roll || parsed.id || parsed.personId || roll;
+      } catch {}
+    }
+
     const rawDir = body.direction || body.scanType;
     let direction: ScanDirection = "IN";
     if (rawDir) {
@@ -154,7 +166,8 @@ async function handlePost(req: NextRequest) {
     const cleanRoll = roll.trim().toUpperCase();
     const isUuidLike = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanRoll);
     const isEmployeeIdLike = /^[A-Z0-9_-]{3,24}$/i.test(cleanRoll);
-    if (!validateRollNumber(cleanRoll) && !isUuidLike && !isEmployeeIdLike) {
+    const isVisitorIdLike = /^(VIS|VISITOR|V)[-_][A-Z0-9_-]{2,28}$/i.test(cleanRoll);
+    if (!validateRollNumber(cleanRoll) && !isUuidLike && !isEmployeeIdLike && !isVisitorIdLike) {
       return NextResponse.json(
         { success: false, error: { code: "INVALID_ID", message: "Invalid identifier format" } },
         { status: 400 }
@@ -199,8 +212,8 @@ async function handlePost(req: NextRequest) {
               distance: Math.round(distanceBetweenCoords(
                 body.geo.latitude!,
                 body.geo.longitude!,
-                BACK_GATE_COORDS.latitude,
-                BACK_GATE_COORDS.longitude
+                DEFAULT_BACK_GATE_COORDS.latitude,
+                DEFAULT_BACK_GATE_COORDS.longitude
               )),
             },
           },

@@ -62,4 +62,4 @@ async function handlePatch(req: NextRequest) {
   }
 }
 
-export const PATCH = withAuthorization(handlePatch, { requiredRole: ["admin", "sysadmin"] });
+export const PATCH = withAuthorization(handlePatch, { requiredRole: ["sysadmin"] });

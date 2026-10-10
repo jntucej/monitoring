@@ -57,7 +57,7 @@ async function getUserRowCached(userId: string): Promise<CachedUserRow | null> {
     `SELECT id, role, status, email, session_version, unique_id,
             login_identifier, gate_id, department_id, employee_id,
             two_factor_enabled, handle
-     FROM public.users WHERE id = $1 LIMIT 1`,
+     FROM public.users WHERE id = $1 AND deleted_at IS NULL LIMIT 1`,
     [userId],
   );
   if (res.rows.length === 0) return null;

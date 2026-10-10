@@ -246,7 +246,33 @@ async function handleDelete(req: NextRequest) {
     }
 
     const supabase = getSupabaseServiceClient();
-    const { error } = await supabase.from("users").update({ status: "DEPROVISIONED" }).eq("id", id);
+
+    // Check for historical data (passes, movements)
+    const [{ count: passCount }, { count: logCount }] = await Promise.all([
+      supabase.from("gate_passes").select("id", { count: "exact", head: true }).or(`requested_by_id.eq.${id},guardian_approver_id.eq.${id},admin_approver_id.eq.${id}`),
+      supabase.from("movement_logs").select("id", { count: "exact", head: true }).eq("user_id", id),
+    ]);
+
+    const hasHistory = (passCount ?? 0) > 0 || (logCount ?? 0) > 0;
+
+    if (hasHistory) {
+      await supabase
+        .from("users")
+        .update({ status: "DEPROVISIONED", updated_at: new Date().toISOString() })
+        .eq("id", id);
+
+      await supabase.from("sessions").update({ revoked_at: new Date().toISOString() }).eq("user_id", id).is("revoked_at", null);
+
+      await addAudit({
+        userId: actorId,
+        action: "USER_DEACTIVATED",
+        details: { targetId: id, mode: "soft_delete", passes: passCount, movements: logCount },
+      });
+
+      return NextResponse.json({ success: true, mode: "soft_delete", message: `Staff member deactivated (has ${passCount} passes and ${logCount} movements).` });
+    }
+
+    const { error } = await supabase.from("users").delete().eq("id", id);
     if (error) {
       return NextResponse.json(
         { success: false, error: { code: "SERVER_ERROR", message: error.message } },
@@ -262,11 +288,11 @@ async function handleDelete(req: NextRequest) {
 
     await addAudit({
       userId: actorId,
-      action: "USER_DEPROVISIONED",
-      details: { timestamp: new Date().toISOString(), targetId: id },
+      action: "USER_DELETED",
+      details: { timestamp: new Date().toISOString(), targetId: id, mode: "hard_delete" },
     });
 
-    return NextResponse.json({ success: true, message: "User deprovisioned" });
+    return NextResponse.json({ success: true, message: "User deleted successfully" });
   } catch (error: any) {
     return NextResponse.json(
       { success: false, error: { code: "SERVER_ERROR", message: error.message || "Internal server error" } },
