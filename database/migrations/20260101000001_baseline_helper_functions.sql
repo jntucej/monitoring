@@ -63,7 +63,7 @@ CREATE OR REPLACE FUNCTION public.invalidate_all_user_sessions(p_user_id uuid)
 AS $function$
 BEGIN
   UPDATE public.users
-  SET handle = NULL, updated_at = NOW()
+  SET session_version = session_version + 1, updated_at = NOW()
   WHERE id = p_user_id;
 
   RETURN FOUND;

@@ -6,6 +6,7 @@ import { GlassProvider } from "@/context/GlassContext";
 import { NavigationProvider } from "@/context/NavigationContext";
 import { ToastProvider } from "@/components/ui/toast";
 import { SafeAreaAppShell } from "@/components/shared/SafeAreaAppShell";
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -20,13 +21,15 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <GlassProvider initialDark={true}>
-      <NavigationProvider>
-        <ToastProvider>
-          <SafeAreaAppShell>{children}</SafeAreaAppShell>
-        </ToastProvider>
-      </NavigationProvider>
-    </GlassProvider>
+    <ErrorBoundary>
+      <GlassProvider initialDark={true}>
+        <NavigationProvider>
+          <ToastProvider>
+            <SafeAreaAppShell>{children}</SafeAreaAppShell>
+          </ToastProvider>
+        </NavigationProvider>
+      </GlassProvider>
+    </ErrorBoundary>
   );
 }
 

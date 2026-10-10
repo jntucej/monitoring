@@ -100,7 +100,10 @@ export async function validateStudentExitFlow(
 
   if (error) {
     console.error("validateStudentExitFlow error querying gate_passes:", error);
-    // In case of query error, do not completely block unless strictly enforced
+    const FAIL_OPEN = process.env.EXIT_FLOW_FAIL_OPEN === "true";
+    if (FAIL_OPEN) {
+      return { allowed: true, canonicalReason, requiresPass: true };
+    }
     return {
       allowed: false,
       canonicalReason,

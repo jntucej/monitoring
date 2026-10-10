@@ -161,9 +161,25 @@ export default function SysAdminStudentsPage() {
     } finally { setBusy(false); }
   };
 
-  const handleToggleStatus = async (s: StudentRecord) => {
-    const newStatus = s.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE";
-    if (!confirm(`Set ${s.name} to ${newStatus}?`)) return;
+  const STATUS_OPTIONS = [
+    { value: "ACTIVE",        label: "Active" },
+    { value: "LOCKED",        label: "Locked" },
+    { value: "SUSPENDED",     label: "Suspended" },
+    { value: "DISABLED",      label: "Disabled" },
+    { value: "DEPROVISIONED", label: "Deprovisioned" },
+  ] as const;
+
+  const handleSetStatus = async (s: StudentRecord, newStatus: string) => {
+    // Destructive transitions require a reason
+    let reason = "";
+    if (newStatus === "DEPROVISIONED" || newStatus === "DISABLED") {
+      reason = window.prompt(`Reason for setting ${newStatus}?`) ?? "";
+      if (reason.trim().length < 5) {
+        addToast({ variant: "warning", message: "Reason required (min 5 chars)" });
+        return;
+      }
+    }
+
     try {
       const targetEndpoint = (s.roll || s.uniqueId)
         ? `/api/students/${encodeURIComponent(s.roll || s.uniqueId || "")}`
@@ -171,14 +187,15 @@ export default function SysAdminStudentsPage() {
       const res = await fetch(targetEndpoint, {
         method: "PATCH",
         headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: newStatus, reason }),
       });
+
       if (res.ok) {
         addToast({ variant: "success", title: "Status Updated", message: `${s.name} is now ${newStatus}.` });
         loadStudents();
       } else {
-        const json = await res.json();
-        addToast({ variant: "error", title: "Error", message: json.error?.message || "Failed to update status." });
+        const json = await res.json().catch(() => ({}));
+        addToast({ variant: "error", title: "Error", message: json.error?.message ?? "Failed to update status." });
       }
     } catch {
       addToast({ variant: "error", title: "Error", message: "Network error." });
@@ -192,12 +209,18 @@ export default function SysAdminStudentsPage() {
         ? `/api/students/${encodeURIComponent(s.roll || s.uniqueId || "")}`
         : `/api/users/${s.id}`;
       const res = await fetch(targetEndpoint, { method: "DELETE", headers: getAuthHeaders() });
+      const data = await res.json();
+      
       if (res.ok) {
-        addToast({ variant: "success", title: "Deleted", message: `${s.name} removed.` });
+        addToast({
+          variant: "success",
+          message: data.mode === "soft_delete"
+            ? data.message ?? "Account deactivated (history preserved)"
+            : "Student permanently deleted",
+        });
         loadStudents();
       } else {
-        const json = await res.json();
-        addToast({ variant: "error", title: "Error", message: json.error?.message || "Failed to delete." });
+        addToast({ variant: "error", title: "Error", message: data.error ?? "Failed to delete." });
       }
     } catch {
       addToast({ variant: "error", title: "Error", message: "Network error." });
@@ -347,11 +370,20 @@ export default function SysAdminStudentsPage() {
                       <td className="px-4 py-3 font-medium text-white">{s.name}</td>
                       <td className="px-4 py-3 text-slate-300 text-xs">{s.department || "—"}</td>
                       <td className="px-4 py-3 text-slate-300 text-xs">{s.year || "—"}</td>
-                      <td className="px-4 py-3"><span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${s.status === "ACTIVE" ? "bg-emerald-500/20 text-emerald-300" : "bg-red-500/20 text-red-300"}`}>{s.status}</span></td>
+                      <td className="px-4 py-3">
+                        <select
+                          value={s.status}
+                          onChange={(e) => handleSetStatus(s, e.target.value)}
+                          className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-2 py-1 text-xs"
+                        >
+                          {STATUS_OPTIONS.map((o) => (
+                            <option key={o.value} value={o.value}>{o.label}</option>
+                          ))}
+                        </select>
+                      </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <button onClick={() => openEditModal(s)} className="p-1.5 rounded-lg hover:bg-slate-700 text-blue-400" title="Edit"><Edit className="w-3.5 h-3.5" /></button>
-                          <button onClick={() => handleToggleStatus(s)} className="p-1.5 rounded-lg hover:bg-slate-700" title={s.status === "ACTIVE" ? "Suspend" : "Activate"}>{s.status === "ACTIVE" ? <Ban className="w-3.5 h-3.5 text-amber-400" /> : <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}</button>
                           <button onClick={() => handleDeleteStudent(s)} className="p-1.5 rounded-lg hover:bg-slate-700 text-red-400" title="Delete"><Trash2 className="w-3.5 h-3.5" /></button>
                         </div>
                       </td>

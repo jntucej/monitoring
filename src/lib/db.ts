@@ -886,7 +886,7 @@ export async function findAllPersons(type?: PersonType): Promise<Person[]> {
   // ponytail: two plain queries + JS merge avoids PostgREST embed ambiguity
   // (student_details has 2 FKs to users: user_id + guardian_id), which makes
   // embedded selects fail depending on constraint naming.
-  let query = db.from('users').select('*');
+  let query = db.from('users').select('*').not('status', 'in', '("DEPROVISIONED","SUSPENDED")');
   if (type) {
     query = query.eq('role', type);
   }
@@ -908,13 +908,15 @@ export async function findAllPersons(type?: PersonType): Promise<Person[]> {
   const studentMap = new Map((studentRows.data || []).map((s: any) => [s.user_id, s]));
   const employeeMap = new Map((employeeRows.data || []).map((e: any) => [e.user_id, e]));
 
-  return data.map((u: any) =>
-    mPerson({
+  return data.map((u: any) => {
+    const studentData = studentMap.get(u.id);
+    const employeeData = employeeMap.get(u.id);
+    return mPerson({
       ...u,
-      student_details: studentMap.get(u.id),
-      employee_details: employeeMap.get(u.id),
-    })
-  );
+      student_details: studentData || null,
+      employee_details: employeeData || null,
+    });
+  });
 }
 
 export const findAllStudents = () => findAllPersons('student');
@@ -927,7 +929,7 @@ export async function searchPersons(q: string, type?: PersonType): Promise<Perso
   const safeQ = sanitizePostgrestParam(q);
   const searchTerm = `%${safeQ.toLowerCase()}%`;
   const db = getDbClient();
-  let query = db.from('users').select('*');
+  let query = db.from('users').select('*').not('status', 'in', '("DEPROVISIONED","SUSPENDED")');
 
   if (type) {
     query = query.eq('role', type);
@@ -951,13 +953,15 @@ export async function searchPersons(q: string, type?: PersonType): Promise<Perso
   const studentMap = new Map((studentRows.data || []).map((s: any) => [s.user_id, s]));
   const employeeMap = new Map((employeeRows.data || []).map((e: any) => [e.user_id, e]));
 
-  return data.map((u: any) =>
-    mPerson({
+  return data.map((u: any) => {
+    const studentData = studentMap.get(u.id);
+    const employeeData = employeeMap.get(u.id);
+    return mPerson({
       ...u,
-      student_details: studentMap.get(u.id),
-      employee_details: employeeMap.get(u.id),
-    })
-  );
+      student_details: studentData || null,
+      employee_details: employeeData || null,
+    });
+  });
 }
 
 export const searchStudents = (q: string) => searchPersons(q, 'student');
@@ -1241,7 +1245,7 @@ export async function createUser(userData: {
         user_id: userData.id,
         roll: studentRoll,
         guardian_id: userData.guardianId || userData.parentId || null,
-        department_id: userData.departmentId || null,
+        // Removed department_id mapping as column does not exist
         room_number: userData.hostelRoom || userData.assignedHostel || null,
       }, { onConflict: 'user_id' });
     } catch (sErr) {
@@ -1254,7 +1258,7 @@ export async function createUser(userData: {
     userId: 'system',
     userName: 'System',
     role: 'sysadmin',
-    details: `Created new user ${userData.id} with role ${userData.role}`,
+    details: JSON.stringify({ message: `Created new user ${userData.id} with role student` }),
   });
 
   return data ? mUser(data) : null;
@@ -1300,9 +1304,13 @@ export async function findUserByLogin(login: string): Promise<User | null> {
 
 /** Verify an operator PIN against the bcrypt-hashed `initial_pin_hash`. */
 export async function verifyPin(userId: string, pin: string): Promise<boolean> {
-  const { data, error } = await getDbClient().from('users').select('initial_pin_hash').eq('id', userId).single();
-  if (error || !data || !data.initial_pin_hash) return false;
-  return await bcrypt.compare(pin, data.initial_pin_hash);
+  const { rows } = await query<{ pin_hash: string|null; initial_pin_hash: string|null }>(
+    `SELECT pin_hash, initial_pin_hash FROM users WHERE id = $1 AND status = 'ACTIVE'`,
+    [userId]
+  );
+  const hashes = [rows[0]?.pin_hash, rows[0]?.initial_pin_hash].filter(Boolean) as string[];
+  for (const h of hashes) if (await bcrypt.compare(pin, h)) return true;
+  return false;
 }
 
 export async function hashPin(pin: string): Promise<string> {

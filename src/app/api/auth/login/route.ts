@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { withRateLimit, extractClientIp } from "@/lib/rate-limit";
 import { query } from "@/lib/postgres";
 import { signAccessToken, signRefreshToken, verifyPassword } from "@/lib/auth-token";
-import { isMfaRequiredForAdmin } from "@/lib/authContext";
+import { isMfaRequiredForPrivileged } from "@/lib/authContext";
+import { ROLES } from "@/lib/roles";
 import { createEnrollToken } from "@/lib/mfa-enroll";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { addAudit } from "@/lib/db";
@@ -160,7 +161,7 @@ async function handleLoginInner(req: NextRequest) {
     // ── MFA Verification & Enrollment Enforcement ─────────────────
     const requiresMfa =
       Boolean(user.two_factor_enabled) ||
-      ((user.role === "sysadmin" || user.role === "admin") && (await isMfaRequiredForAdmin()));
+      ((user.role === ROLES.SYSADMIN || user.role === ROLES.ADMIN) && (await isMfaRequiredForPrivileged()));
 
     if (requiresMfa) {
       if (!user.two_factor_enabled) {
