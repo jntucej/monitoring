@@ -134,7 +134,6 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
 }
 
 async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
-  const supabase = getSupabaseServiceClient();
   const { searchParams } = new URL(req.url);
   const code = searchParams.get("code");
   if (!code) {
@@ -142,21 +141,21 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
   }
 
   try {
-    const { error } = await supabase.from("departments").delete().eq("code", code);
-    if (error && error.code !== "42P01") throw error;
-
+    await deleteDepartment(code);
     await invalidateCache("departments:all");
     await invalidateCache("departments:*");
 
     await addAudit({
       action: "DEPARTMENT_DELETED",
-      userId: auth.userId,
-      userName: auth.email,
-      role: auth.role,
-      details: `Deleted department '${code}'.`,
-    });
-
-    return NextResponse.json({ success: true, message: `Deleted department ${code}` }, { headers: { "Cache-Control": "no-store" } });
+    userId: auth.userId,
+    userName: auth.email,
+    role: auth.role,
+    details: `Deleted department '${code}'.`,
+  });
+  return NextResponse.json(
+    { success: true, message: `Deleted department ${code}` },
+    { headers: { "Cache-Control": "no-store" } }
+  );
   } catch (error: any) {
     return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 500 });
   }
