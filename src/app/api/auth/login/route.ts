@@ -69,6 +69,10 @@ async function handleLoginInner(req: NextRequest) {
     );
 
     if (userRes.rows.length === 0) {
+      // BB1: Protect against account enumeration timing attacks via constant-time compare
+      const DUMMY_HASH = "$2b$10$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvalidinvalid";
+      await verifyPassword(rawPassword, DUMMY_HASH);
+      await recordFailedAttempt(identifier, "login");
       return NextResponse.json(GENERIC_FAILURE, { status: 401 });
     }
 

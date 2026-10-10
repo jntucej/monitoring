@@ -23,11 +23,11 @@ function distanceBetweenCoords(
   return R * c;
 }
 
-// Back Gate coordinates - UPDATE THESE TO MATCH YOUR ACTUAL CAMPUS BACK GATE LOCATION
-const BACK_GATE_COORDS = {
-  latitude: 12.9716,
-  longitude: 77.5946,
-  allowedRadiusMeters: 200,
+// Back Gate coordinates (configurable via environment variables or DB gate record)
+const DEFAULT_BACK_GATE_COORDS = {
+  latitude: parseFloat(process.env.BACK_GATE_LATITUDE || "0"),
+  longitude: parseFloat(process.env.BACK_GATE_LONGITUDE || "0"),
+  allowedRadiusMeters: parseInt(process.env.BACK_GATE_RADIUS_METERS || "200", 10),
 };
 
 // Check if operator's geolocation is near the Back Gate
@@ -51,7 +51,12 @@ async function verifyBackGateLocation(
 
   const targetCoords = gate.latitude && gate.longitude 
     ? { latitude: gate.latitude, longitude: gate.longitude, allowedRadiusMeters: gate.allowedRadiusMeters || 200 }
-    : BACK_GATE_COORDS;
+    : DEFAULT_BACK_GATE_COORDS;
+
+  // Skip geolocation comparison if coordinates are not configured (0,0)
+  if (!targetCoords.latitude || !targetCoords.longitude) {
+    return { allowed: true };
+  }
 
   const distance = distanceBetweenCoords(
     geo.latitude,
@@ -207,8 +212,8 @@ async function handlePost(req: NextRequest) {
               distance: Math.round(distanceBetweenCoords(
                 body.geo.latitude!,
                 body.geo.longitude!,
-                BACK_GATE_COORDS.latitude,
-                BACK_GATE_COORDS.longitude
+                DEFAULT_BACK_GATE_COORDS.latitude,
+                DEFAULT_BACK_GATE_COORDS.longitude
               )),
             },
           },
