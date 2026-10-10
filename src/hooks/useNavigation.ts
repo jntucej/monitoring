@@ -82,7 +82,8 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "Principal Desk",
           items: [
-            { href: "/principal/permissions", label: "Warden / Principal Approvals", icon: "CheckSquare", badge: "PENDING" },
+            { href: "/principal", label: "Dashboard", icon: "LayoutDashboard" },
+            { href: "/principal/permissions", label: "Permissions", icon: "ShieldCheck" },
           ],
         },
         {
@@ -93,6 +94,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
       ];
+      break;
 
     case "vice_principal":
       groups = [
