@@ -1,14 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
-import { withAuthorization } from "@/middleware/authorization";
-import { getOccupancyHistory } from "@/lib/occupancy";
+import { withRoute } from "@/middleware/authorization";
+import { getOccupancyHistory } from "@/server/services/occupancy/history";
+import { ok } from "@/server/http/response";
 
-async function handleGet(req: NextRequest) {
-  try {
-    const data = await getOccupancyHistory();
-    return NextResponse.json({ success: true, data });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-  }
-}
-
-export const GET = withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin"] });
+export const GET = withRoute(async (req) => {
+  const hours = req.nextUrl.searchParams.get("hours");
+  const history = await getOccupancyHistory(hours ? Number(hours) : undefined);
+  return ok(history);
+}, { requiredRole: ["admin", "sysadmin"] });

@@ -9,18 +9,19 @@ export function getDefaultRouteForRole(role: Role | string, gateId?: string): st
     guardian: "/parent",
     parent: "/parent",
     student: "/student",
-    warden: "/supervisor",
     faculty: "/faculty",
     staff: "/staff",
     worker: "/worker",
     visitor: "/visitor",
-    caretaker: "/hostel/permissions",
-    deputy_warden: "/hostel/permissions",
-    hostel_manager: "/hostel/permissions",
     principal: "/principal",
-    vice_principal: "/exam/permissions",
-    oie: "/exam/permissions",
-    exam_branch: "/exam/permissions",
+    vice_principal: "/vice-principal",
+    exam_branch: "/exam",
+    hostel_manager: "/hostel-manager",
+    deputy_warden: "/hostel-manager",
+    caretaker: "/hostel-manager",
+    warden: "/warden",
+    hod: "/hod",
+    oie: "/forbidden"
   };
   return routes[role] || "/login";
 }

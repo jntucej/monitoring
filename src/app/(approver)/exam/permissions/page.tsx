@@ -36,7 +36,8 @@ export default function ExamPermissionsPage() {
         <PermissionList
           key="oie-queue"
           workflowType="exam"
-          stageFilter="oie"
+          currentStage="oie"
+          fetchUrl="/api/permissions?workflow_type=exam&stage=oie&status=PENDING"
           title="OIE Queue"
           subtitle="Officer in Examination approval queue"
         />
@@ -44,7 +45,8 @@ export default function ExamPermissionsPage() {
         <PermissionList
           key="vp-queue"
           workflowType="exam"
-          stageFilter="vice_principal"
+          currentStage="vice_principal"
+          fetchUrl="/api/permissions?workflow_type=exam&stage=vice_principal&status=PENDING"
           title="Vice Principal Queue"
           subtitle="Vice Principal examination review queue"
         />

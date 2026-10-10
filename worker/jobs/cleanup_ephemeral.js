@@ -19,24 +19,8 @@ export default async function cleanupEphemeral() {
     }
   };
 
-  // 1. login_attempts — remove entries not locked and older than 24h
-  await safeRun('login_attempts', `
-    DELETE FROM public.login_attempts
-    WHERE locked_until IS NULL
-      AND last_attempt_at < NOW() - INTERVAL '24 hours'
-  `);
 
-  // 2. sso_authorization_states — 15 min TTL by design
-  await safeRun('sso_states', `
-    DELETE FROM public.sso_authorization_states
-    WHERE expires_at < NOW() - INTERVAL '1 hour'
-  `);
-
-  // 3. mfa_login_challenges — 5 min TTL
-  await safeRun('mfa_challenges', `
-    DELETE FROM public.mfa_login_challenges
-    WHERE expires_at < NOW() - INTERVAL '1 hour'
-  `);
+  // Removed by SysAdmin Audit: login_attempts, sso_authorization_states, mfa_login_challenges tables are dropped.
 
   // 4. webauthn_challenges — 2 min TTL
   await safeRun('webauthn_challenges', `
