@@ -1245,7 +1245,7 @@ export async function createUser(userData: {
         user_id: userData.id,
         roll: studentRoll,
         guardian_id: userData.guardianId || userData.parentId || null,
-        department_id: userData.departmentId || null,
+        // Removed department_id mapping as column does not exist
         room_number: userData.hostelRoom || userData.assignedHostel || null,
       }, { onConflict: 'user_id' });
     } catch (sErr) {
@@ -1258,7 +1258,7 @@ export async function createUser(userData: {
     userId: 'system',
     userName: 'System',
     role: 'sysadmin',
-    details: `Created new user ${userData.id} with role ${userData.role}`,
+    details: JSON.stringify({ message: `Created new user ${userData.id} with role student` }),
   });
 
   return data ? mUser(data) : null;
