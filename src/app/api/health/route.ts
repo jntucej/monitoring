@@ -61,7 +61,7 @@ async function handleGet(_req: NextRequest) {
     recentAlerts: h.recentAlerts,
   });
 
-  return NextResponse.json(sanitize(health), { status: statusCodes[health.status] });
+  return NextResponse.json(sanitize(health), { status: (statusCodes as Record<string, number>)[health.status] ?? 200 });
 }
 
 export const GET = withRateLimit(handleGet, { keyPrefix: "health_check", maxRequests: 60 });

@@ -20,14 +20,7 @@ export function RecentScans({ scans, onSelect }: RecentScansProps) {
     if (filter === "IN") return scan.direction === "IN";
     if (filter === "OUT") return scan.direction === "OUT";
     if (filter === "FLAGGED") {
-      const s = scan as any;
-      return (
-        s.status === "FLAGGED" ||
-        s.flagged ||
-        scan.reason?.toLowerCase().includes("flag") ||
-        scan.reason?.toLowerCase().includes("late") ||
-        scan.reason?.toLowerCase().includes("curfew")
-      );
+      return scan.isCorrection === true || scan.isManual === true;
     }
     return true;
   });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Lock,
   UserCheck,
@@ -43,6 +43,7 @@ function formatLoginError(code?: string, defaultMsg?: string): string {
 
 export function LoginForm({ title, subtitle }: LoginFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const hasHydrated = useHasHydrated();
   const { user, authenticated, login, pinLogin, loading } = useAuthStore();
   const { addToast } = useUIStore();
@@ -52,6 +53,11 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
   // Reuses the shared route helper (ponytail: don't duplicate the 60-line switch).
   const redirectAfterLogin = useCallback(
     (role: Role | null) => {
+      const override = searchParams?.get("redirect");
+      if (override && override.startsWith("/")) {
+        router.push(override);
+        return;
+      }
       if (!role) {
         router.push("/");
         return;
@@ -84,7 +90,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
       }
       router.push(getDefaultRouteForRole(role));
     },
-    [router]
+    [router, searchParams]
   );
 
   useEffect(() => {
