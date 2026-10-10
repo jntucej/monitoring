@@ -27,6 +27,43 @@ import {
 } from "@/lib/authContext";
 import { isPrivileged } from "@/lib/roles";
 
+// ── Issue #381: read body exactly once per request ─────────────────────────
+// req.clone().json() consumes the stream buffer. On large bodies (e.g. 5 MB
+// CSV uploads) a second clone exhausts the buffer and the handler sees an
+// empty body. Cache the parsed JSON on the request object via a Symbol so
+// every layer (middleware + handler) reads the same in-memory value.
+const BODY_CACHE_KEY = Symbol("gate.body-cache");
+
+interface RequestWithBodyCache {
+  [BODY_CACHE_KEY]?: { parsed: unknown };
+}
+
+async function readBodyOnce(req: NextRequest): Promise<unknown> {
+  const reqWithCache = req as unknown as RequestWithBodyCache;
+  if (reqWithCache[BODY_CACHE_KEY]) return reqWithCache[BODY_CACHE_KEY]!.parsed;
+
+  let parsed: unknown = null;
+  try {
+    const raw = await req.text();
+    parsed = raw ? JSON.parse(raw) : null;
+  } catch {
+    parsed = null;
+  }
+  reqWithCache[BODY_CACHE_KEY] = { parsed };
+  return parsed;
+}
+
+/**
+ * Read the request body exactly once. Middleware may have already consumed
+ * it — this returns the same parsed object either way. Use this in handlers
+ * instead of req.json() whenever the route is wrapped by withAuthorization.
+ */
+export async function getRequestBody<T = Record<string, unknown>>(
+  req: NextRequest,
+): Promise<T | null> {
+  return (await readBodyOnce(req)) as T | null;
+}
+
 /**
  * Authorization middleware that validates:
  * - Token validity using Supabase Auth (single validation per request)
@@ -123,8 +160,8 @@ export function withAuthorization(
       }
 
       // Validate resource access if specified.
-      // Body inspection is limited to body-bearing methods and uses a clone,
-      // so GET requests are untouched and handlers can still call req.json().
+      // Issue #381: never call req.clone() — use readBodyOnce so the body
+      // is cached and both middleware and the handler see the same data.
       if (options.resourceType && options.resourceIdParam) {
         let resourceId: string | undefined;
 
@@ -132,9 +169,9 @@ export function withAuthorization(
           resourceId = req.nextUrl.searchParams.get(options.resourceIdParam) || undefined;
         } else if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
           try {
-            const body = await req.clone().json();
+            const body = await readBodyOnce(req) as Record<string, unknown> | null;
             if (body && typeof body === 'object' && options.resourceIdParam in body) {
-              resourceId = body[options.resourceIdParam];
+              resourceId = body[options.resourceIdParam] as string;
             }
           } catch {
             // Ignore body parsing errors

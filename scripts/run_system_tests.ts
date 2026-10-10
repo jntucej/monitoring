@@ -14,7 +14,7 @@ import { decodeProtectedHeader, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
 import { randomInt, randomBytes } from "crypto";
 import { assertLength, LIMITS } from "../src/lib/validation";
-import { generateMobileToken, verifyMobileToken, validateMobileToken } from "../src/lib/mobile-auth";
+import { generateMobileToken, verifyMobileToken, validateMobileToken } from "../src/lib/mobile-auth"; import { hashDeviceId } from "../src/lib/mobile-auth";
 import { generateQrToken, validateQrToken } from "../src/lib/qr-token";
 import { createEnrollToken, verifyEnrollToken } from "../src/lib/mfa-enroll";
 import {
@@ -176,7 +176,7 @@ async function runTests() {
     verifiedMobile !== null &&
       verifiedMobile.sub === testClaims.sub &&
       verifiedMobile.token_type === "mobile" &&
-      verifiedMobile.device_id === "device-ios-987" &&
+      verifiedMobile.device_id === hashDeviceId("device-ios-987") &&
       verifiedMobile.uniqueId === "STU2024001",
     "D6a: Verify mobile token with token_type=mobile and bound device_id"
   );
@@ -230,12 +230,12 @@ async function runTests() {
   assert(burnCode() === false, "Subsequent reuse of burned enrollment code is rejected (single-use)");
 
   // D7. QR Token isolation
-  const qrToken = await generateQrToken("STU2024001");
+  const qrToken = await generateQrToken("STU2024001", "user-id-123");
   const qrHeader = decodeProtectedHeader(qrToken);
   assert(qrHeader.kid === "qr-v1", "D7-kid: QR token has kid=qr-v1 protected header");
 
   const verifiedQrRoll = await validateQrToken(qrToken);
-  assert(verifiedQrRoll === "STU2024001", "D7a: Validate QR verification token");
+  assert(verifiedQrRoll?.roll === "STU2024001", "D7a: Validate QR verification token");
   const qrAsAccess = await verifyAccessToken(qrToken);
   assert(qrAsAccess === null, "D7b: verifyAccessToken rejects QR token");
 

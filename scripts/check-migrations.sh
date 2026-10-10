@@ -11,7 +11,7 @@ declare -A SEEN_VERSIONS
 declare -A MIGRATION_FILES
 
 shopt -s nullglob
-FILES=(database/migrations/*.sql supabase/migrations/*.sql)
+FILES=(database/migrations/*.sql)
 shopt -u nullglob
 
 if [ ${#FILES[@]} -eq 0 ]; then
@@ -36,7 +36,7 @@ echo "✓ Verified ${#SEEN_VERSIONS[@]} unique migration version prefixes"
 
 # 2. Start scratch Postgres container
 CONTAINER_NAME="scratch_check_migs_$$"
-POSTGRES_IMAGE="${POSTGRES_TEST_IMAGE:-postgres:17-alpine}"
+POSTGRES_IMAGE="${POSTGRES_TEST_IMAGE:-postgres:17}"
 
 cleanup() {
   echo "Cleaning up scratch container $CONTAINER_NAME..."
@@ -70,7 +70,8 @@ CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid AS \$\$ SELECT null::uuid; \$
 if [ -f "database/schema.sql" ]; then
   echo "Loading baseline schema..."
   docker exec -i "$CONTAINER_NAME" psql -U postgres -v ON_ERROR_STOP=1 < "database/schema.sql" >/dev/null
-  docker exec "$CONTAINER_NAME" psql -U postgres -c "DROP POLICY IF EXISTS \"service_role_all_pin_login_attempts\" ON pin_login_attempts;" >/dev/null 2>&1 || true
+  # Remove manual DROP POLICY hack since migration is now idempotent
+# docker exec "$CONTAINER_NAME" psql -U postgres -c "DROP POLICY IF EXISTS \"service_role_all_pin_login_attempts\" ON pin_login_attempts;" >/dev/null 2>&1 || true
 fi
 
 # 5. Initialize schema_migrations tracking table

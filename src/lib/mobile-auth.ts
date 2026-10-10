@@ -1,12 +1,26 @@
-import { SignJWT, jwtVerify, JWTPayload } from "jose";
+import { createHash } from 'crypto';
+import { SignJWT, jwtVerify, JWTPayload } from 'jose';
 import { Person } from "@/lib/types";
 import { requireSecret } from "@/lib/env";
 import { findPersonByUniqueId } from "@/lib/db";
+import { getCached, setCached } from './cache';
 
-const MOBILE_TOKEN_TTL_SECONDS = 24 * 60 * 60; // 24 hours (Guide §4.3)
+const MOBILE_TOKEN_TTL_SECONDS = 24 * 60 * 60; // 24 hours
+
+let cachedKey: Uint8Array | null = null;
+let cachedKeySource = '';
 
 function getSigningKey(): Uint8Array {
-  return new TextEncoder().encode(requireSecret("MOBILE_TOKEN_SECRET"));
+  const secret = requireSecret("MOBILE_TOKEN_SECRET", 32);
+  if (cachedKey && cachedKeySource === secret) return cachedKey;
+
+  if (!secret || secret.length < 32) {
+    throw new Error('MOBILE_TOKEN_SECRET must be at least 32 characters');
+  }
+
+  cachedKey = new TextEncoder().encode(secret);
+  cachedKeySource = secret;
+  return cachedKey;
 }
 
 export interface MobileTokenClaims extends JWTPayload {
@@ -16,26 +30,77 @@ export interface MobileTokenClaims extends JWTPayload {
   device_id?: string;
 }
 
+export function hashDeviceId(deviceId: string): string {
+  // Short, deterministic. Not a security boundary — just tamper-evident.
+  return createHash('sha256').update(deviceId).digest('hex').slice(0, 16);
+}
+
 /**
- * Generate mobile app JWT token for a person, optionally bound to a device ID.
+ * Generate mobile app JWT token for a person, bound to a device ID.
  */
 export async function generateMobileToken(
   personId: string,
   uniqueId: string,
-  deviceId?: string
+  deviceId: string
 ): Promise<string> {
   const issuedAt = Math.floor(Date.now() / 1000);
 
   return await new SignJWT({
     uniqueId,
     token_type: "mobile",
-    ...(deviceId ? { device_id: deviceId } : {}),
+    device_id: hashDeviceId(deviceId),
   })
     .setProtectedHeader({ alg: "HS256", typ: "JWT", kid: "mobile-v1" })
     .setSubject(personId)
     .setIssuedAt(issuedAt)
     .setExpirationTime(issuedAt + MOBILE_TOKEN_TTL_SECONDS)
     .sign(getSigningKey());
+}
+
+/**
+ * Validate mobile token and return associated Person, verifying device binding.
+ * Uses caching to avoid repeated DB lookups.
+ */
+export async function validateMobileToken(
+  token: string,
+  presentedDeviceId?: string,
+): Promise<Person | null> {
+  try {
+    const { payload } = await jwtVerify(token, getSigningKey(), {
+      algorithms: ['HS256'],
+    });
+    
+    const claims = payload as MobileTokenClaims;
+
+    if (claims.token_type !== 'mobile' || !claims.sub || !claims.uniqueId) return null;
+
+    // ── Device binding is MANDATORY ──
+    if (!claims.device_id) {
+      console.warn('[mobile-auth] Token missing device_id — rejecting');
+      return null;
+    }
+    if (!presentedDeviceId) {
+      console.warn('[mobile-auth] Caller did not present device_id — rejecting');
+      return null;
+    }
+    if (hashDeviceId(presentedDeviceId) !== claims.device_id) {
+      console.warn('[mobile-auth] Device ID mismatch');
+      return null;
+    }
+
+    // Cache person lookup to avoid DB hit on every request
+    const cacheKey = `mobile-auth:person:${claims.sub}`;
+    const cached = await getCached<Person>(cacheKey);
+    if (cached) return cached;
+
+    const person = await findPersonByUniqueId(claims.uniqueId);
+    if (!person) return null;
+
+    await setCached(cacheKey, person, 60); // Cache for 1 min
+    return person;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -46,50 +111,13 @@ export async function verifyMobileToken(
 ): Promise<MobileTokenClaims | null> {
   try {
     const { payload } = await jwtVerify(token, getSigningKey(), {
-      algorithms: ["HS256"],
+      algorithms: ['HS256'],
     });
 
-    if (payload.token_type !== "mobile" || typeof payload.sub !== "string") {
+    if (payload.token_type !== 'mobile' || typeof payload.sub !== 'string') {
       return null;
     }
     return payload as unknown as MobileTokenClaims;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Validate mobile token and return associated Person, verifying device binding.
- */
-export async function validateMobileToken(
-  token: string,
-  presentedDeviceId?: string
-): Promise<Person | null> {
-  try {
-    const payload = await verifyMobileToken(token);
-    if (!payload || !payload.sub || typeof payload.uniqueId !== "string") {
-      return null;
-    }
-
-    // Device binding verification
-    if (payload.device_id && presentedDeviceId && payload.device_id !== presentedDeviceId) {
-      return null;
-    }
-    if (payload.device_id && !presentedDeviceId) {
-      return null;
-    }
-
-    const person = await findPersonByUniqueId(payload.uniqueId);
-    if (!person) {
-      return null;
-    }
-
-    // Verify token belongs to right person
-    if (person.id !== payload.sub && person.uniqueId !== payload.uniqueId) {
-      return null;
-    }
-
-    return person;
   } catch {
     return null;
   }

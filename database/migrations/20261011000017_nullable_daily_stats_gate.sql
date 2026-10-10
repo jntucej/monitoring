@@ -4,6 +4,6 @@
 -- for any movements with a null gate_id, daily_stats.gate_id remains NOT NULL as part of the PK.
 DO $$
 BEGIN
-  -- No-op / safe check
+  -- Safe no-op check
   NULL;
 END $$;

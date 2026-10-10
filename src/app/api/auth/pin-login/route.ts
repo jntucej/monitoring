@@ -9,6 +9,7 @@ import { decryptSecret } from "@/lib/mfa-secret";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { addAudit } from "@/lib/db";
 import { assertCsrf } from "@/lib/csrf";
+import { checkLockout, recordFailedAttempt, clearLockout } from "@/lib/login-lockout";
 import type { Role } from "@/lib/types";
 
 const INVALID_CREDENTIALS = {
@@ -53,19 +54,15 @@ async function handlePinLogin(req: NextRequest) {
     const cleanPin = rawPin.trim();
     const normalizedId = cleanId.toUpperCase();
 
-    // 2. Check per-identifier lockout
-    const { rows: lockRows } = await query(
-      `SELECT failed_count, locked_until FROM pin_login_attempts WHERE identifier = $1`,
-      [normalizedId]
-    );
-    const lock = lockRows[0];
-    if (lock?.locked_until && new Date(lock.locked_until) > new Date()) {
+    // 2. Check global lockout using unified service
+    const lockout = await checkLockout(normalizedId);
+    if (lockout.locked) {
       return NextResponse.json(
         {
           success: false,
           error: {
             code: "LOCKED",
-            message: "Too many failed attempts. Try again later.",
+            message: `Too many failed attempts. Try again after ${lockout.until?.toLocaleTimeString()}.`,
           },
         },
         { status: 429 }
@@ -121,20 +118,7 @@ async function handlePinLogin(req: NextRequest) {
 
     // 5. Handle Failure
     if (!user || !pinValid) {
-      // Increment failure count in pin_login_attempts table
-      await query(
-        `INSERT INTO pin_login_attempts (identifier, failed_count, last_attempt_at)
-         VALUES ($1, 1, NOW())
-         ON CONFLICT (identifier) DO UPDATE
-           SET failed_count = pin_login_attempts.failed_count + 1,
-               last_attempt_at = NOW(),
-               locked_until = CASE
-                 WHEN pin_login_attempts.failed_count + 1 >= 5
-                 THEN NOW() + INTERVAL '15 minutes'
-                 ELSE pin_login_attempts.locked_until
-               END`,
-        [normalizedId]
-      );
+      await recordFailedAttempt(normalizedId, 'pin-login');
 
       // Increment per-user account failed login count if user exists
       if (user) {
@@ -169,7 +153,7 @@ async function handlePinLogin(req: NextRequest) {
     }
 
     // 6. Handle Success: Clear lockout counters
-    await query(`DELETE FROM pin_login_attempts WHERE identifier = $1`, [normalizedId]);
+    await clearLockout(normalizedId);
     await query(
       `UPDATE users SET failed_login_count = 0, locked_until = NULL WHERE id = $1`,
       [user.id]

@@ -21,7 +21,7 @@ async function handleGet(req: NextRequest) {
       );
     }
 
-    const qrToken = await generateQrToken(user.studentDetails.roll);
+    const qrToken = await generateQrToken(user.studentDetails.roll, user.id);
     return NextResponse.json({ success: true, data: { qrToken } });
   } catch (err) {
     return NextResponse.json(

@@ -7,6 +7,12 @@
 import { useAuthStore } from "@/stores/authStore";
 import type { ApiResponse } from "@/lib/types";
 
+function parseFilename(disposition: string | null): string {
+  if (!disposition) return 'download';
+  const match = disposition.match(/filename="?([^"]+)"?/);
+  return match?.[1] ?? 'download';
+}
+
 export function useApi() {
   const { token, logout } = useAuthStore();
 
@@ -27,21 +33,45 @@ export function useApi() {
     }
 
     const res = await fetch(input, { ...init, headers });
-    const data = await res.json();
 
-    // If session expired or unauthorized on device check, force logout and redirect to login page
-    if (res.status === 401 && data?.error?.code === "SESSION_EXPIRED") {
+    // Handle authentication/authorization
+    if (res.status === 401) {
       logout();
       if (typeof window !== "undefined") {
         window.location.href = "/login";
       }
-    } else if (res.status === 403 && data?.error?.code === "MFA_REQUIRED") {
-      if (typeof window !== "undefined") {
-        window.location.href = "/sysadmin/security";
-      }
+      throw new Error("UNAUTHORIZED");
     }
 
-    return data as ApiResponse<T>;
+    const contentType = res.headers.get("content-type") ?? "";
+
+    if (contentType.includes("application/json")) {
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        return {
+          success: false,
+          error: data?.error?.message ?? `HTTP ${res.status}`,
+          code: data?.error?.code,
+        };
+      }
+      return { success: true, data: data as T };
+    }
+
+    if (contentType.includes("text/csv")) {
+      const blob = await res.blob();
+      return {
+        success: res.ok,
+        data: { blob, filename: parseFilename(res.headers.get("content-disposition")) } as any,
+      };
+    }
+
+    if (!res.ok) {
+        return { success: false, error: `HTTP ${res.status}` };
+    }
+
+    // Fallback: return raw text
+    const text = await res.text();
+    return { success: true, data: text as any };
   };
 
   const get = (url: string) => request(url, { method: "GET" });

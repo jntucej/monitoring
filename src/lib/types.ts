@@ -341,13 +341,23 @@ export interface Gate {
   isActive: boolean;
 }
 
+// Issue #398: include the PersonType in the stats object so consumers get
+// type safety when iterating Object.entries(personTypeBreakdown). The type
+// field duplicates the Record key but enables typed destructuring without
+// a manual cast.
 export interface PersonTypeStats {
+  type?: PersonType; // optional for back-compat with existing callers
   total: number;
   onCampus: number;
   inToday: number;
   outToday: number;
   attendanceRate?: number;
 }
+
+// Keyed breakdown with each value carrying its own type tag
+export type PersonTypeBreakdown = {
+  [K in PersonType]: PersonTypeStats & { type: K };
+};
 
 export interface CampusStatusCardConfig {
   type: PersonType;

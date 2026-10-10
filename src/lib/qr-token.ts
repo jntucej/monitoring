@@ -1,29 +1,71 @@
-import { SignJWT, jwtVerify } from "jose";
-import { requireSecret } from "@/lib/env";
+import { SignJWT, jwtVerify, type JWTPayload } from 'jose';
+import { requireSecret } from '@/lib/env';
+
+let cachedKey: Uint8Array | null = null;
+let cachedKeySource = '';
 
 export function getSigningKey(): Uint8Array {
-  return new TextEncoder().encode(requireSecret("QR_TOKEN_SECRET"));
+  const secret = requireSecret('QR_TOKEN_SECRET', 32);
+  if (cachedKey && cachedKeySource === secret) return cachedKey;
+
+  if (!secret || secret.length < 32) {
+    throw new Error(
+      'QR_TOKEN_SECRET must be at least 32 characters. ' +
+      'Generate with: openssl rand -hex 32',
+    );
+  }
+
+  cachedKey = new TextEncoder().encode(secret);
+  cachedKeySource = secret;
+  return cachedKey;
 }
 
-export async function generateQrToken(roll: string, expiresIn?: string): Promise<string> {
-  const ttl = expiresIn || process.env.QR_TOKEN_EXPIRATION || "90s";
-  return await new SignJWT({ roll, purpose: "qr_verification", token_type: "qr" })
-    .setProtectedHeader({ alg: "HS256", typ: "JWT", kid: "qr-v1" })
-    .setExpirationTime(ttl)
+export interface QrTokenClaims extends JWTPayload {
+  sub: string;        // user id
+  roll: string;
+  purpose: 'qr_verification';
+}
+
+export async function generateQrToken(
+  roll: string,
+  userId: string,
+  ttlSeconds = 300,   // 5 minutes
+): Promise<string> {
+  const now = Math.floor(Date.now() / 1000);
+  return new SignJWT({
+    sub: userId,
+    roll: roll.toUpperCase().trim(),
+    purpose: 'qr_verification',
+  })
+    .setProtectedHeader({ alg: "HS256", kid: "qr-v1" })
+    .setIssuedAt(now)
+    .setExpirationTime(now + ttlSeconds)
+    .setIssuer('gate-monitor')
+    .setAudience('gate-scanner')
     .sign(getSigningKey());
 }
 
-export async function validateQrToken(token: string): Promise<string | null> {
+export async function validateQrToken(token: string): Promise<QrTokenClaims | null> {
   try {
     const { payload } = await jwtVerify(token, getSigningKey(), {
-      algorithms: ["HS256"],
+      issuer: 'gate-monitor',
+      audience: 'gate-scanner',
+      algorithms: ['HS256'],
     });
-    if (payload.purpose === "qr_verification" && typeof payload.roll === "string") {
-      return payload.roll;
+
+    if (payload.purpose !== 'qr_verification') {
+      console.warn('[qr-token] Wrong purpose:', payload.purpose);
+      return null;
     }
-    return null;
-  } catch {
-    // Validation failed (expired, invalid signature, etc.)
+    if (typeof payload.sub !== 'string' || typeof payload.roll !== 'string') {
+      return null;
+    }
+    return payload as QrTokenClaims;
+  } catch (err) {
+    // Log class of failure without leaking the token
+    const name = (err as Error).name;
+    if (name === 'JWTExpired') console.warn('[qr-token] Expired token used');
+    else if (name === 'JWSSignatureVerificationFailed') console.warn('[qr-token] Signature failed');
     return null;
   }
 }

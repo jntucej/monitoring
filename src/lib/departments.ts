@@ -1,6 +1,14 @@
 import { getDbClient } from "@/lib/db";
+import { getCached, setCached } from "./cache";
 import { revalidateTag } from 'next/cache';
 import { CACHE_TAGS } from './cache-tags';
+
+const CACHE_VERSION = 2;
+const CACHE_TTL_SECONDS = 300;
+
+async function getCacheKey(suffix: string): Promise<string> {
+  return `departments:v${CACHE_VERSION}:${suffix}`;
+}
 
 export interface DepartmentInfo {
   id?: string;
@@ -23,6 +31,10 @@ function mapRow(row: any): DepartmentInfo {
 }
 
 export async function getDepartments(): Promise<DepartmentInfo[]> {
+  const key = await getCacheKey('all');
+  const cached = await getCached<DepartmentInfo[]>(key);
+  if (cached) return cached;
+
   try {
     const { data, error } = await getDbClient()
       .from("departments")
@@ -30,7 +42,9 @@ export async function getDepartments(): Promise<DepartmentInfo[]> {
       .order("code");
 
     if (error) throw error;
-    return (data || []).map(mapRow);
+    const departments = (data || []).map(mapRow);
+    await setCached(key, departments, CACHE_TTL_SECONDS);
+    return departments;
   } catch (error) {
     console.error("[Departments Service] Failed to fetch departments:", error);
     return [];

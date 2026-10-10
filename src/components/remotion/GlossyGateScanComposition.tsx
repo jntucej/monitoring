@@ -1,6 +1,7 @@
 "use client";
 
-import { useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { useCurrentFrame, useVideoConfig, interpolate, AbsoluteFill } from 'remotion';
+import { COMPOSITION_DURATIONS } from './durations';
 
 export interface GlossyGateScanCompositionProps {
   status?: "entry" | "exit" | "idle" | "warning";
@@ -12,11 +13,25 @@ export const GlossyGateScanComposition: React.FC<GlossyGateScanCompositionProps>
   primaryColor = "#10b981",
 }) => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const { fps, durationInFrames } = useVideoConfig();
 
-  // Continuous sweeping light pulse ring
-  const pulseScale = interpolate(frame % 90, [0, 45, 90], [1, 1.25, 1], {
-    extrapolateRight: "clamp",
+  // Bail out early if duration is absurd
+  if (durationInFrames < 30 || durationInFrames > 600) {
+    console.error(`GlossyGateScanComposition requires durationInFrames in [30, 600], got ${durationInFrames}`);
+  }
+
+  const duration = durationInFrames ?? COMPOSITION_DURATIONS.scanEntry;
+
+  const sweep = interpolate(
+    frame,
+    [0, duration - 1],
+    [0, 100],
+    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+  );
+
+  const pulseScale = interpolate(Math.sin((frame / fps) * Math.PI * 2), [-1, 1], [0.8, 1.2], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp"
   });
   const pulseOpacity = interpolate(frame % 90, [0, 45, 90], [0.6, 0.1, 0.6]);
 
