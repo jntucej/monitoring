@@ -21,6 +21,16 @@ async function handleGet(req: NextRequest) {
     const action = (searchParams.get("action") as AuditAction) || undefined;
     const from = searchParams.get("from") || undefined;
     const to = searchParams.get("to") || undefined;
+    const searchRaw = searchParams.get("search") || undefined;
+    const search = searchRaw ? searchRaw.trim() : undefined;
+
+    if (search !== undefined && search.length > 0 && search.length < 3) {
+      return NextResponse.json(
+        { success: false, error: { code: "BAD_REQUEST", message: "Search query must be at least 3 characters" } },
+        { status: 400 }
+      );
+    }
+
     const limit = searchParams.get("limit") ? parseInt(searchParams.get("limit")!, 10) : 50;
     const offset = searchParams.get("offset") ? parseInt(searchParams.get("offset")!, 10) : 0;
 
@@ -29,6 +39,7 @@ async function handleGet(req: NextRequest) {
       action,
       from,
       to,
+      search,
       limit,
       offset,
     });

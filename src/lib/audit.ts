@@ -79,6 +79,7 @@ export async function getAuditLogs(filters: {
   action?: AuditAction;
   from?: string;
   to?: string;
+  search?: string;
   limit?: number;
   offset?: number;
 }): Promise<{ logs: AuditLog[]; total: number }> {
@@ -106,6 +107,18 @@ export async function getAuditLogs(filters: {
   if (filters.to) {
     queryText += ` AND timestamp <= $${params.length + 1}`;
     params.push(filters.to);
+  }
+
+  if (filters.search) {
+    const search = filters.search.trim();
+    if (search.length >= 8) {
+      queryText += ` AND (details_text_tsv @@ websearch_to_tsquery('english', $${params.length + 1}) OR action ILIKE $${params.length + 2} OR user_name ILIKE $${params.length + 2})`;
+      params.push(search);
+      params.push(`%${search}%`);
+    } else if (search.length >= 3) {
+      queryText += ` AND (details::text ILIKE $${params.length + 1} OR action ILIKE $${params.length + 1} OR user_name ILIKE $${params.length + 1})`;
+      params.push(`%${search}%`);
+    }
   }
 
   queryText += ` ORDER BY timestamp DESC `;
@@ -141,6 +154,18 @@ export async function getAuditLogs(filters: {
   if (filters.to) {
     countQuery += ` AND timestamp <= $${countParams.length + 1}`;
     countParams.push(filters.to);
+  }
+
+  if (filters.search) {
+    const search = filters.search.trim();
+    if (search.length >= 8) {
+      countQuery += ` AND (details_text_tsv @@ websearch_to_tsquery('english', $${countParams.length + 1}) OR action ILIKE $${countParams.length + 2} OR user_name ILIKE $${countParams.length + 2})`;
+      countParams.push(search);
+      countParams.push(`%${search}%`);
+    } else if (search.length >= 3) {
+      countQuery += ` AND (details::text ILIKE $${countParams.length + 1} OR action ILIKE $${countParams.length + 1} OR user_name ILIKE $${countParams.length + 1})`;
+      countParams.push(`%${search}%`);
+    }
   }
 
   try {
