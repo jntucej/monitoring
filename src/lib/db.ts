@@ -886,7 +886,7 @@ export async function findAllPersons(type?: PersonType): Promise<Person[]> {
   // ponytail: two plain queries + JS merge avoids PostgREST embed ambiguity
   // (student_details has 2 FKs to users: user_id + guardian_id), which makes
   // embedded selects fail depending on constraint naming.
-  let query = db.from('users').select('*');
+  let query = db.from('users').select('*').not('status', 'in', '("DEPROVISIONED","SUSPENDED")');
   if (type) {
     query = query.eq('role', type);
   }
@@ -927,7 +927,7 @@ export async function searchPersons(q: string, type?: PersonType): Promise<Perso
   const safeQ = sanitizePostgrestParam(q);
   const searchTerm = `%${safeQ.toLowerCase()}%`;
   const db = getDbClient();
-  let query = db.from('users').select('*');
+  let query = db.from('users').select('*').not('status', 'in', '("DEPROVISIONED","SUSPENDED")');
 
   if (type) {
     query = query.eq('role', type);
@@ -1300,9 +1300,13 @@ export async function findUserByLogin(login: string): Promise<User | null> {
 
 /** Verify an operator PIN against the bcrypt-hashed `initial_pin_hash`. */
 export async function verifyPin(userId: string, pin: string): Promise<boolean> {
-  const { data, error } = await getDbClient().from('users').select('initial_pin_hash').eq('id', userId).single();
-  if (error || !data || !data.initial_pin_hash) return false;
-  return await bcrypt.compare(pin, data.initial_pin_hash);
+  const { rows } = await query<{ pin_hash: string|null; initial_pin_hash: string|null }>(
+    `SELECT pin_hash, initial_pin_hash FROM users WHERE id = $1 AND status = 'ACTIVE'`,
+    [userId]
+  );
+  const hashes = [rows[0]?.pin_hash, rows[0]?.initial_pin_hash].filter(Boolean) as string[];
+  for (const h of hashes) if (await bcrypt.compare(pin, h)) return true;
+  return false;
 }
 
 export async function hashPin(pin: string): Promise<string> {

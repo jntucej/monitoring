@@ -530,7 +530,7 @@ CREATE OR REPLACE FUNCTION invalidate_all_user_sessions(p_user_id UUID)
 RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 BEGIN
   UPDATE public.users
-  SET handle = NULL, updated_at = NOW()
+  SET session_version = session_version + 1, updated_at = NOW()
   WHERE id = p_user_id;
 
   RETURN FOUND;
@@ -874,8 +874,11 @@ CREATE POLICY alerts_select_op   ON alerts FOR SELECT TO authenticated
   USING (is_operator(current_setting('app.current_user_id', true)::uuid) AND (gate_id = (SELECT gate_id FROM users WHERE id = current_setting('app.current_user_id', true)::uuid) OR gate_id IS NULL));
 CREATE POLICY alerts_resolve_admin ON alerts FOR UPDATE TO authenticated USING (is_admin(current_setting('app.current_user_id', true)::uuid)) WITH CHECK (is_admin(current_setting('app.current_user_id', true)::uuid));
 
--- 6.10 AUDIT LOGS (READ = sysadmin only)
-CREATE POLICY audit_select_sysadmin ON audit_logs FOR SELECT TO authenticated USING (is_sysadmin(current_setting('app.current_user_id', true)::uuid));
+-- 6.10 AUDIT LOGS (READ = sysadmin/admin)
+CREATE POLICY audit_select_sysadmin ON audit_logs FOR SELECT TO authenticated
+  USING (is_sysadmin(current_setting('app.current_user_id', true)::uuid));
+CREATE POLICY audit_select_admin ON audit_logs FOR SELECT TO authenticated
+  USING (is_admin(current_setting('app.current_user_id', true)::uuid));
 
 -- 6.11 MONITORING + BACKUPS (admin only)
 CREATE POLICY metrics_select_admin  ON api_metrics FOR SELECT TO authenticated USING (is_admin(current_setting('app.current_user_id', true)::uuid));

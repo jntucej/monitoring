@@ -147,18 +147,17 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
 
     await addAudit({
       action: "DEPARTMENT_DELETED",
-      userId: auth?.userId || "sysadmin",
-      userName: auth?.email || "SysAdmin",
-      role: (auth?.role || "sysadmin") as Role,
-      details: `Deleted department '${code}'`,
-    });
-
-    return NextResponse.json(
-      { success: true, message: `Deleted department ${code}` },
-      { headers: { "Cache-Control": "no-store" } }
-    );
+    userId: auth.userId,
+    userName: auth.email,
+    role: auth.role,
+    details: `Deleted department '${code}'.`,
+  });
+  return NextResponse.json(
+    { success: true, message: `Deleted department ${code}` },
+    { headers: { "Cache-Control": "no-store" } }
+  );
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 400 });
+    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 500 });
   }
 }
 
