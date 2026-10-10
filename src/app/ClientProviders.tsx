@@ -9,9 +9,13 @@ import { SafeAreaAppShell } from "@/components/shared/SafeAreaAppShell";
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    const store = useAuthStore.persist;
-    if (store && typeof store.hasHydrated === "function" && !store.hasHydrated()) {
-      try { store.rehydrate(); } catch { /* ignore */ }
+    const persist = useAuthStore.persist;
+    if (!persist.hasHydrated()) {
+      try {
+        persist.rehydrate();
+      } catch {
+        useAuthStore.getState().setHasHydrated(true);
+      }
     }
   }, []);
 
