@@ -176,7 +176,15 @@ async function handlePost(req: NextRequest) {
         email: String(email).trim(),
         password: temporaryPassword,
         email_confirm: true,
-        user_metadata: { name: String(name), role: String(role), employee_id: effectiveUniqueId ?? null },
+        user_metadata: {
+          name: String(name),
+          role: String(role),
+          phone: phone ?? null,
+          department: effectiveDept ?? null,
+          designation: body?.designation ?? null,
+          employee_id: effectiveUniqueId ?? null,
+        },
+        app_metadata: { provider: 'email', role: String(role) },
       });
       if (createErr || !data?.user) {
         console.error('Auth user creation failed:', createErr);
@@ -237,16 +245,31 @@ async function handlePost(req: NextRequest) {
       }, { onConflict: "user_id" });
     }
 
-    // Insert employee_details if role is staff/faculty/operator/admin/sysadmin/worker
-    if (["faculty", "staff", "operator", "admin", "sysadmin", "worker"].includes(role)) {
-      await service.from("employee_details").upsert({
-        user_id: user.id || authUserId,
-        employee_id: employeeId || effectiveUniqueId || (user as any).unique_id || String(email).split("@")[0],
-        designation: body.designation || (role === "faculty" ? "Assistant Professor" : role),
-        department_id: effectiveDept || null,
-        is_hod: !!isHod,
-        staff_category: body.staffCategory || role,
-      }, { onConflict: "user_id" });
+    // Insert employee_details for staff-like roles — never let this block
+    // user creation. If employee_id is empty, auto-generate one from the
+    // freshly minted user id so the UNIQUE/NOT NULL constraint is satisfied.
+    if (["faculty", "staff", "operator", "admin", "sysadmin", "worker", "caretaker", "deputy_warden", "hostel_manager", "principal", "vice_principal", "oie", "exam_branch", "warden"].includes(role)) {
+      const finalEmployeeId =
+        (employeeId && String(employeeId).trim()) ||
+        (effectiveUniqueId && String(effectiveUniqueId).trim()) ||
+        `EMP-${String(user.id || authUserId).slice(0, 8).toUpperCase()}`;
+
+      try {
+        const { error: empError } = await service.from("employee_details").upsert({
+          user_id: user.id || authUserId,
+          employee_id: finalEmployeeId,
+          designation: body?.designation || (role === "faculty" ? "Assistant Professor" : role),
+          department_id: effectiveDept || null,
+          is_hod: !!isHod,
+          staff_category: body?.staffCategory || role,
+        }, { onConflict: "user_id" });
+
+        if (empError) {
+          console.warn("[users.POST] employee_details insert failed:", empError.message);
+        }
+      } catch (err: any) {
+        console.warn("[users.POST] employee_details insert threw:", err?.message ?? err);
+      }
     }
 
     return NextResponse.json({

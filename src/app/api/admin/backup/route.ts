@@ -112,6 +112,6 @@ export const GET = withRateLimit(
 );
 
 export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "admin_backup_post", maxRequests: 10 }
+  withAuthorization(handlePost, { requiredRole: ["sysadmin"] }),
+  { keyPrefix: "admin_backup_post", maxRequests: 20, windowMs: 60 * 1000 }
 );

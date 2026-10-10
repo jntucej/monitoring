@@ -70,8 +70,8 @@ export default function SysAdminStaffPage() {
 
   const handleCreateStaff = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!createForm.employeeId.trim() || !createForm.name.trim()) {
-      addToast({ variant: "error", title: "Validation", message: "Employee ID and name are required." });
+    if (!createForm.name.trim()) {
+      addToast({ variant: "error", title: "Validation", message: "Name is required." });
       return;
     }
     setBusy(true);
@@ -81,28 +81,31 @@ export default function SysAdminStaffPage() {
         addToast({ variant: "error", title: "Invalid JSON", message: "Custom metadata must be valid JSON." });
         setBusy(false); return;
       }
-      const res = await fetch("/api/persons", {
+      const res = await fetch("/api/users", {
         method: "POST",
         headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({
-          uniqueId: createForm.employeeId, fullName: createForm.name,
-          personType: createForm.role, email: createForm.email || undefined,
-          phone: createForm.phone || undefined, department: createForm.department || undefined,
-          designation: createForm.designation || undefined,
+          employeeId: createForm.employeeId?.trim() || null,
+          name: createForm.name.trim(),
+          email: createForm.email?.trim() || undefined,
+          phone: createForm.phone?.trim() || null,
+          role: createForm.role,
+          departmentId: createForm.department || null,
+          designation: createForm.designation || null,
+          hostelScope: createForm.hostelScope || null,
           metadata: { ...parsedMeta, ...(createForm.hostelScope ? { hostel_scope: createForm.hostelScope } : {}) },
-          hostelScope: createForm.hostelScope || undefined,
         }),
       });
-      const json = await res.json();
-      if (res.ok) {
+      const json = await res.json().catch(() => ({}));
+      if (res.ok && json.success) {
         addToast({ variant: "success", title: "Created", message: `${createForm.name} added.` });
         setShowCreateModal(false);
         setCreateForm({ employeeId: "", name: "", email: "", phone: "", role: "faculty", department: "CSE", designation: "Assistant Professor", hostelScope: "", customMetaJson: "{}" });
         loadStaff();
       } else {
-        addToast({ variant: "error", title: "Error", message: json.error?.message || "Failed to create." });
+        addToast({ variant: "error", title: "Error", message: json.error?.message || json.message || `Failed to create staff (${res.status})` });
       }
-    } catch { addToast({ variant: "error", title: "Error", message: "Network error." }); }
+    } catch (err: any) { addToast({ variant: "error", title: "Error", message: err?.message || "Network error." }); }
     finally { setBusy(false); }
   };
 
@@ -321,8 +324,8 @@ export default function SysAdminStaffPage() {
               <form onSubmit={handleCreateStaff} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Employee ID *</label>
-                    <input type="text" required value={createForm.employeeId} onChange={(e) => setCreateForm({ ...createForm, employeeId: e.target.value })} className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border-strong)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--action-primary)]" placeholder="EMP-001" />
+                    <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Employee ID <span className="font-normal text-[var(--text-muted)]">(optional — auto-generated if blank)</span></label>
+                    <input type="text" value={createForm.employeeId} onChange={(e) => setCreateForm({ ...createForm, employeeId: e.target.value })} className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border-strong)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--action-primary)]" placeholder="EMP-001 (leave blank to auto-generate)" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Full Name *</label>

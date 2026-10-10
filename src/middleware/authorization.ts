@@ -8,9 +8,6 @@
  * route handlers. Handlers downstream MUST read identity only from these
  * headers — they are always overwritten here from server-validated data,
  * so client-supplied values can never spoof identity.
- *
- * NOTE: Routes no longer need to wrap this in `withAuthAndStatus`; doing so
- * would duplicate the Supabase round-trips per request.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -26,43 +23,7 @@ import {
   type AuthContext,
 } from "@/lib/authContext";
 import { isPrivileged } from "@/lib/roles";
-
-// ── Issue #381: read body exactly once per request ─────────────────────────
-// req.clone().json() consumes the stream buffer. On large bodies (e.g. 5 MB
-// CSV uploads) a second clone exhausts the buffer and the handler sees an
-// empty body. Cache the parsed JSON on the request object via a Symbol so
-// every layer (middleware + handler) reads the same in-memory value.
-const BODY_CACHE_KEY = Symbol("gate.body-cache");
-
-interface RequestWithBodyCache {
-  [BODY_CACHE_KEY]?: { parsed: unknown };
-}
-
-async function readBodyOnce(req: NextRequest): Promise<unknown> {
-  const reqWithCache = req as unknown as RequestWithBodyCache;
-  if (reqWithCache[BODY_CACHE_KEY]) return reqWithCache[BODY_CACHE_KEY]!.parsed;
-
-  let parsed: unknown = null;
-  try {
-    const raw = await req.text();
-    parsed = raw ? JSON.parse(raw) : null;
-  } catch {
-    parsed = null;
-  }
-  reqWithCache[BODY_CACHE_KEY] = { parsed };
-  return parsed;
-}
-
-/**
- * Read the request body exactly once. Middleware may have already consumed
- * it — this returns the same parsed object either way. Use this in handlers
- * instead of req.json() whenever the route is wrapped by withAuthorization.
- */
-export async function getRequestBody<T = Record<string, unknown>>(
-  req: NextRequest,
-): Promise<T | null> {
-  return (await readBodyOnce(req)) as T | null;
-}
+import { getRequestBody, setupBodyCaching } from "@/lib/body-cache";
 
 /**
  * Authorization middleware that validates:
@@ -92,6 +53,11 @@ export function withAuthorization(
 ) {
   return async (req: NextRequest) => {
     try {
+      // Body Caching: fix for Issue #56
+      // Avoid req.clone() by caching the body once and passing hash as header
+      const { req: cachedReq } = await setupBodyCaching(req);
+      req = cachedReq;
+
       // Extract token from authorization header, cookies, or session header
       const authHeader = req.headers.get('authorization');
       let token: string | undefined;
@@ -141,8 +107,6 @@ export function withAuthorization(
       }
 
       // MFA gate: admin must have 2FA enrolled when required.
-      // Per-user enforcement (twoFactorEnabled), not a global on/off.
-      // Skipped when enforceMfa === false (pre-MFA enrollment endpoints).
       if (options.enforceMfa !== false) {
         const mfaRequired = await isMfaRequiredForPrivileged();
         if (
@@ -162,8 +126,6 @@ export function withAuthorization(
       }
 
       // Validate resource access if specified.
-      // Issue #381: never call req.clone() — use readBodyOnce so the body
-      // is cached and both middleware and the handler see the same data.
       if (options.resourceType && options.resourceIdParam) {
         let resourceId: string | undefined;
 
@@ -171,7 +133,7 @@ export function withAuthorization(
           resourceId = req.nextUrl.searchParams.get(options.resourceIdParam) || undefined;
         } else if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
           try {
-            const body = await readBodyOnce(req) as Record<string, unknown> | null;
+            const body = await getRequestBody<Record<string, unknown>>(req);
             if (body && typeof body === 'object' && options.resourceIdParam in body) {
               resourceId = body[options.resourceIdParam] as string;
             }
@@ -242,8 +204,6 @@ export function withAuthorization(
 /**
  * Pre-MFA authorization wrapper: identical to withAuthorization but skips the
  * MFA gate (enforceMfa: false). ONLY for 2FA enrollment/recovery endpoints
- * (setup / verify / disable / authenticate) so a sysadmin who has not enrolled
- * yet — or lost their device — can always reach them (Issue #5 lockout trap).
  */
 export function withAuthorizationPreMfa(
   handler: (req: NextRequest, context: { auth: AuthContext }) => Promise<Response>,
@@ -267,42 +227,20 @@ export function combineMiddleware(
   );
 }
 
-/**
- * Role-based access control helper
- */
 export function requireRole(requiredRole: Role | Role[]) {
   return (handler: AuthenticatedRouteHandler) => {
     return withAuthorization(handler, { requiredRole });
   };
 }
 
-/**
- * Permission-based access control helper
- */
 export function requirePermission(requiredPermission: string) {
   return (handler: AuthenticatedRouteHandler) => {
     return withAuthorization(handler, { requiredPermission });
   };
 }
 
-/**
- * Middleware to validate account status on every request
- */
 export function withAccountStatusValidation(handler: AuthenticatedRouteHandler) {
   return withAuthorization(handler, { allowInactive: false });
-}
-
-/**
- * Middleware to validate resource access
- */
-export function withResourceValidation(
-  resourceType: string,
-  resourceIdParam: string,
-  operation: string = 'read'
-) {
-  return (handler: AuthenticatedRouteHandler) => {
-    return withAuthorization(handler, { resourceType, resourceIdParam, operation });
-  };
 }
 
 /**
@@ -318,48 +256,6 @@ export async function getAuthenticatedUser(req: NextRequest) {
   return await requireAuthUser(token);
 }
 
-/**
- * Helper function to validate student access
- */
-export async function validateStudent(req: NextRequest, studentId: string) {
-  const authHeader = req.headers.get('authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
-    throw new Error('UNAUTHORIZED: Authentication required');
-  }
-
-  const token = authHeader.slice(7);
-  return await validateResourceOp(token, 'student', studentId, 'read');
-}
-
-/**
- * Helper function to validate gate access
- */
-export async function validateGate(req: NextRequest, gateId: string) {
-  const authHeader = req.headers.get('authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
-    throw new Error('UNAUTHORIZED: Authentication required');
-  }
-
-  const token = authHeader.slice(7);
-  return await validateResourceOp(token, 'gate', gateId, 'read');
-}
-
-/**
- * Helper function to get gate student information
- */
-export async function getGateStudent(req: NextRequest, roll: string) {
-  const authHeader = req.headers.get('authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
-    throw new Error('UNAUTHORIZED: Authentication required');
-  }
-
-  const token = authHeader.slice(7);
-  return await getGateStudentInfo(token, roll);
-}
-
-/**
- * Audit logging helper
- */
 export async function logAuditEvent(
   eventType: string,
   userId: string,
@@ -376,7 +272,8 @@ export async function logAuditEvent(
         userId,
         typeof details === "object" ? JSON.stringify(details) : details,
         ipAddress || null,
-      ]
+      ],
+      { currentUserId: userId }
     );
   } catch (err) {
     console.error('Error logging audit event:', err);

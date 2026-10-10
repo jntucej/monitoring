@@ -107,6 +107,29 @@ async function handleDelete(req: NextRequest) {
     }
 
     const service = getSupabaseServiceClient();
+
+    // Guard: sysadmin cannot delete the last nav item for sysadmin role
+    const { data: targetItem } = await service
+      .from('config_navigation')
+      .select('role_code')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (targetItem?.role_code === 'sysadmin') {
+      const { count } = await service
+        .from('config_navigation')
+        .select('*', { count: 'exact', head: true })
+        .eq('role_code', 'sysadmin')
+        .eq('is_active', true);
+
+      if ((count ?? 0) <= 1) {
+        return NextResponse.json(
+          { success: false, error: { code: 'FORBIDDEN', message: 'Cannot delete the last remaining navigation item for sysadmin role.' } },
+          { status: 400 }
+        );
+      }
+    }
+
     const { error } = await service.from('config_navigation').delete().eq('id', id);
     if (error) throw error;
 

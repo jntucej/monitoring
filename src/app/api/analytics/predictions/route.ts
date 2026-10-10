@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
-import { getPredictions, detectAnomalies } from "@/lib/predictive";
+import { getPredictions, detectAnomalies } from "@/server/services/analytics/predictions";
 
 async function handleGet(req: NextRequest) {
   try {
