@@ -156,9 +156,9 @@ export default function SupervisorDashboardPage() {
 
   const handleBulkAction = async (action: "approve" | "reject") => {
     if (selectedPasses.length === 0) return;
-    for (const passId of selectedPasses) {
-      await handlePassAction(passId, action, action === "approve" ? "Bulk Approved by Warden" : "Bulk Rejected by Warden");
-    }
+    await Promise.all(selectedPasses.map(passId => 
+      handlePassAction(passId, action, action === "approve" ? "Bulk Approved by Warden" : "Bulk Rejected by Warden")
+    ));
     setSelectedPasses([]);
   };
 

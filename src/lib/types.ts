@@ -350,13 +350,16 @@ export interface Department {
 
 export type DepartmentCode = string;
 
-export interface Gate {
+  export interface Gate {
   id: string;
   gateCode?: string;
   name: string;
   location: string;
   type: string;
   isActive: boolean;
+  latitude?: number;
+  longitude?: number;
+  allowedRadiusMeters?: number;
 }
 
 export interface PersonTypeStats {
