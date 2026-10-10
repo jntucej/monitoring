@@ -60,23 +60,27 @@ export async function generateScheduleSuggestions(): Promise<ScheduleSuggestion[
 }
 
 export async function applyScheduleSuggestion(suggestionId: string): Promise<boolean> {
-  // Apply rule update to gate schedule database table
-  try {
-    const suggestions = await generateScheduleSuggestions();
-    const target = suggestions.find((s) => s.id === suggestionId);
-    if (target && target.suggested_action.gate_id) {
-      await getDbClient().from("gate_access_rules").insert({
-      id: `rule-auto-${Date.now()}`,
-      gate_id: target.suggested_action.gate_id,
-      rule_name: "Automated AI Suggestion: " + target.title,
-      start_time: target.suggested_action.new_open_time || "08:00",
-      end_time: target.suggested_action.new_close_time || "21:00",
-      action: "allow",
-      priority: 10,
-      is_active: true,
-      created_at: new Date().toISOString()
-    });
-    }
-  } catch {}
+  // Apply rule update in the gate schedule database table
+  const target = (await generateScheduleSuggestions()).find((s) => s.id === suggestionId);
+  if (!target) return false;
+
+  // operator_shifts suggestions carry no gate hours, so there is no access rule to write.
+  const { gate_id, new_open_time, new_close_time } = target.suggested_action;
+  if (!gate_id || !new_open_time || !new_close_time) return false;
+
+  const { error } = await getDbClient().from("gate_access_rules").insert({
+    id: `rule-auto-${Date.now()}`,
+    gate_id,
+    rule_name: "Automated Suggestion: " + target.title,
+    start_time: new_open_time,
+    end_time: new_close_time,
+    action: "allow",
+    priority: 10,
+    is_active: true,
+    created_at: new Date().toISOString(),
+  });
+
+  // Surface insert failures: a swallowed error reports success with nothing written.
+  if (error) throw new Error(error.message);
   return true;
 }

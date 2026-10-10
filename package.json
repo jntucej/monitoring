@@ -5,7 +5,7 @@
   "scripts": {
     "prebuild": "node scripts/validate-env.js",
     "dev": "next dev",
-    "build": "next build",
+    "build": "NODE_ENV=production next build",
     "start": "next start",
     "worker": "node worker/index.mjs",
     "start:worker": "node worker/index.mjs",

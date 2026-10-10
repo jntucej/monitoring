@@ -60,6 +60,7 @@ export default function SupervisorDashboardPage() {
 
   // New Feature States
   const [isLockdown, setIsLockdown] = useState(false);
+  const [lockdownBusy, setLockdownBusy] = useState(false);
   const [selectedPasses, setSelectedPasses] = useState<string[]>([]);
   const [verifiedParents, setVerifiedParents] = useState<Record<string, boolean>>({});
   const [passTypeFilter, setPassTypeFilter] = useState<string>("ALL");
@@ -69,8 +70,27 @@ export default function SupervisorDashboardPage() {
 
   useEffect(() => {
     const tabParam = searchParams.get("tab");
-    if (tabParam) setActiveTab(tabParam);
+    setActiveTab(tabParam || "overview");
   }, [searchParams]);
+
+  // Lockdown is global shared state -- it can be raised/lifted by an admin or a
+  // different session, so mirror the DB rather than trusting local component state.
+  const syncLockdown = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/lockdown", { headers: getAuthHeaders(), cache: "no-store" });
+      if (!res.ok) return;
+      const json = await res.json();
+      setIsLockdown(!!json.data);
+    } catch {
+      /* keep last known state on transient network failure */
+    }
+  }, []);
+
+  useEffect(() => {
+    syncLockdown();
+    const id = setInterval(syncLockdown, 10_000);
+    return () => clearInterval(id);
+  }, [syncLockdown]);
 
   const loadData = useCallback(async () => {
     setRefreshing(true);
@@ -81,22 +101,30 @@ export default function SupervisorDashboardPage() {
         fetch("/api/students", { headers: getAuthHeaders(), cache: "no-store" }),
         fetch("/api/alerts?resolved=false", { headers: getAuthHeaders(), cache: "no-store" }),
       ]);
-      const [passesJson, studentsJson, alertsJson] = await Promise.all([
-        passesRes.json(),
-        studentsRes.json(),
-        alertsRes.json(),
+
+      // Never fabricate: only read a body from a response that actually succeeded,
+      // and surface partial failure instead of silently rendering an empty dashboard.
+      const readJson = async (r: Response) => (r.ok ? ((await r.json())?.data ?? []) : []);
+      const [loadedPasses, loadedStudents, loadedAlerts] = await Promise.all([
+        readJson(passesRes),
+        readJson(studentsRes),
+        readJson(alertsRes),
       ]);
 
-      const loadedPasses = Array.isArray(passesJson.data) ? passesJson.data : [];
-      const loadedStudents = Array.isArray(studentsJson.data) ? studentsJson.data : [];
-      const loadedAlerts = Array.isArray(alertsJson.data) ? alertsJson.data : [];
+      const failed: string[] = [];
+      if (!passesRes.ok) failed.push("passes");
+      if (!studentsRes.ok) failed.push("students");
+      if (!alertsRes.ok) failed.push("alerts");
+      if (failed.length === 3) throw new Error("All telemetry sources unavailable");
+      if (failed.length) setError(`Could not load: ${failed.join(", ")}`);
 
-      setPasses(loadedPasses);
-      setStudents(loadedStudents);
-      setAlerts(loadedAlerts);
+      const safe = <T,>(v: T): T[] => (Array.isArray(v) ? v : []);
+      setPasses(safe(loadedPasses));
+      setStudents(safe(loadedStudents));
+      setAlerts(safe(loadedAlerts));
 
-      const total = loadedStudents.length || 288;
-      const inside = loadedStudents.filter((s: WardenStudent) => s.status === "ACTIVE" || !s.checkedOutAt).length || 245;
+      const total = loadedStudents.length;
+      const inside = loadedStudents.filter((s: WardenStudent) => s.status === "ACTIVE" || !s.checkedOutAt).length;
       setStats({
         totalWards: total,
         onCampus: inside,
@@ -156,9 +184,9 @@ export default function SupervisorDashboardPage() {
 
   const handleBulkAction = async (action: "approve" | "reject") => {
     if (selectedPasses.length === 0) return;
-    for (const passId of selectedPasses) {
-      await handlePassAction(passId, action, action === "approve" ? "Bulk Approved by Warden" : "Bulk Rejected by Warden");
-    }
+    await Promise.all(selectedPasses.map(passId => 
+      handlePassAction(passId, action, action === "approve" ? "Bulk Approved by Warden" : "Bulk Rejected by Warden")
+    ));
     setSelectedPasses([]);
   };
 
@@ -166,37 +194,41 @@ export default function SupervisorDashboardPage() {
     setSelectedPasses((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
   };
 
-  const handleAddStrike = async (studentId: string) => {
-    const newCount = (studentStrikes[studentId] || 0) + 1;
-    setStudentStrikes((prev) => ({ ...prev, [studentId]: newCount }));
-    try {
-      await fetch("/api/admin/audit", {
-        method: "POST",
-        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
-        body: JSON.stringify({
-          eventType: "CURFEW_STRIKE_ADDED",
-          details: { studentId, strikeCount: newCount },
-        }),
-      });
-    } catch {
-      // non-blocking log
-    }
+  const handleAddStrike = (studentId: string) => {
+    // ponytail: session-local only -- database/schema.sql has no curfew_strikes
+    // table, so there is nowhere to persist this. Keep it in memory and surface
+    // that it is NOT saved, rather than POSTing to a route that cannot work.
+    // Upgrade path: add the table + an insert helper in lib/db.ts.
+    setStudentStrikes((prev) => ({ ...prev, [studentId]: (prev[studentId] || 0) + 1 }));
   };
 
   const handleToggleLockdown = async () => {
+    if (lockdownBusy) return;
     const nextState = !isLockdown;
+    setLockdownBusy(true);
+    setError(null);
     try {
-      const res = await fetch("/api/admin/lockdown", {
-        method: "POST",
-        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
-        body: JSON.stringify({ scopes: ["students", "all"], reason: nextState ? "Supervisor Emergency Lockdown" : "Lockdown Lifted" }),
-      });
+      const res = nextState
+        ? await fetch("/api/admin/lockdown", {
+            method: "POST",
+            headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+            // API contract: non-empty scopes[] + message (it reads `message`, NOT `reason`)
+            body: JSON.stringify({ scopes: ["all"], message: "Supervisor Emergency Lockdown" }),
+          })
+        : await fetch("/api/admin/lockdown", {
+            method: "DELETE",
+            headers: getAuthHeaders(),
+          });
       const json = await res.json();
-      if (json.success) {
-        setIsLockdown(nextState);
+      if (!res.ok || !json.success) {
+        setError(json.error?.message || "Lockdown update failed");
+        return;
       }
-    } catch {
       setIsLockdown(nextState);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Lockdown update failed");
+    } finally {
+      setLockdownBusy(false);
     }
   };
 
@@ -259,7 +291,8 @@ export default function SupervisorDashboardPage() {
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={handleToggleLockdown}
-              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border ${
+              disabled={lockdownBusy}
+              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border disabled:opacity-50 ${
                 isLockdown
                   ? "bg-rose-500 text-white border-rose-600 animate-pulse shadow-lg shadow-rose-500/30"
                   : "bg-rose-500/10 text-rose-400 border-rose-500/20 hover:bg-rose-500/20"
@@ -309,7 +342,7 @@ export default function SupervisorDashboardPage() {
               <p className="text-xs font-normal text-rose-300 mt-0.5">All student outpasses & exit scan authorizations are temporarily suspended by Warden Command.</p>
             </div>
           </div>
-          <button onClick={() => setIsLockdown(false)} className="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs rounded-xl font-bold shrink-0">
+          <button onClick={handleToggleLockdown} disabled={lockdownBusy} className="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white text-xs rounded-xl font-bold shrink-0">
             Deactivate
           </button>
         </div>

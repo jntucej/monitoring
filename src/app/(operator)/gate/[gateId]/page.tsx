@@ -27,6 +27,7 @@ export default function OperatorPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   
+  const lastRollRef = useRef<string>("");
   const { college } = useCollegeInfo();
   const gateIdParam = params?.gateId;
   const isSpecialPath = gateIdParam === "history" || gateIdParam === "manual";
@@ -73,6 +74,7 @@ export default function OperatorPage() {
   }, [authenticated, gateId, router]);
 
   useEffect(() => {
+    if (!authenticated) return;
     const checkLockdown = async () => {
       try {
         const res = await fetch("/api/admin/lockdown");
@@ -87,7 +89,7 @@ export default function OperatorPage() {
     checkLockdown();
     const interval = setInterval(checkLockdown, 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [authenticated]);
   
   // Redirect special routing path shortcuts (/gate/history & /gate/manual) to operators dynamic gate path
   useEffect(() => {
@@ -171,7 +173,7 @@ export default function OperatorPage() {
     if ((state === "confirming" || state === "success" || state === "error") && searchParams?.get("tab")) {
       const url = new URL(window.location.href);
       url.searchParams.delete("tab");
-      window.history.pushState({}, "");
+      window.history.replaceState({}, "", url.toString());
     }
   }, [state, searchParams]);
   // Auto-reset & Tap Anywhere to ready next scan when state === "success"
@@ -253,7 +255,8 @@ export default function OperatorPage() {
         // use raw
       }
     }
-    startScan(rollCandidate);
+    lastRollRef.current = rollCandidate;
+      startScan(rollCandidate);
   };
 
   const showWebAuthn = false;
@@ -275,7 +278,7 @@ export default function OperatorPage() {
               <h2 className="text-lg font-bold text-[var(--text-primary)]">Gate Flow Analytics</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <OperatorStats
+              <OperatorStats gateId={gateId}
                 entries={todaysStats?.entries ?? 0}
                 exits={todaysStats?.exits ?? 0}
                 onCampus={todaysStats?.onCampus ?? 0}
@@ -406,7 +409,8 @@ export default function OperatorPage() {
                             return;
                           }
                           if (manualRollInput.trim()) {
-                            startScan(manualRollInput.trim().toUpperCase());
+                            lastRollRef.current = manualRollInput.trim().toUpperCase();
+      startScan(lastRollRef.current);
                           }
                         }}
                         className="space-y-3"
@@ -484,11 +488,7 @@ export default function OperatorPage() {
                         <button
                           id="retry-btn"
                           onClick={() => {
-                            if (currentStudent) {
-                              confirmScan(addToast);
-                            } else {
-                              reset();
-                            }
+                            if (currentStudent) { confirmScan(addToast); } else if (lastRollRef.current) { startScan(lastRollRef.current); } else { reset(); }
                           }}
                           className="px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs hover:bg-emerald-400 transition-colors active:scale-[0.98] flex items-center gap-1.5"
                         >
@@ -516,7 +516,7 @@ export default function OperatorPage() {
                   {state === "confirming" && currentStudent && (
                     <ScanConfirmation
                       student={currentStudent}
-                      onConfirm={(dir, reason) => confirmScan(addToast, dir, reason)}
+                      onConfirm={async (dir, reason) => await confirmScan(addToast, dir, reason)}
                       onCancel={cancelScan}
                       isInline={true}
                     />
@@ -616,7 +616,8 @@ export default function OperatorPage() {
                 return;
               }
               if ((cmd.action === "SCAN" || cmd.action === "ENTRY" || cmd.action === "MANUAL_ENTRY") && cmd.roll_number) {
-                startScan(cmd.roll_number);
+                lastRollRef.current = cmd.roll_number;
+          startScan(cmd.roll_number);
                 setOperatorSubMode("manual");
                 setManualRollInput(cmd.roll_number);
               } else if (cmd.action === "EXIT") {

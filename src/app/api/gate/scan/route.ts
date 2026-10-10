@@ -49,14 +49,18 @@ async function verifyBackGateLocation(
     };
   }
 
+  const targetCoords = gate.latitude && gate.longitude 
+    ? { latitude: gate.latitude, longitude: gate.longitude, allowedRadiusMeters: gate.allowedRadiusMeters || 200 }
+    : BACK_GATE_COORDS;
+
   const distance = distanceBetweenCoords(
     geo.latitude,
     geo.longitude,
-    BACK_GATE_COORDS.latitude,
-    BACK_GATE_COORDS.longitude
+    targetCoords.latitude,
+    targetCoords.longitude
   );
 
-  if (distance > BACK_GATE_COORDS.allowedRadiusMeters) {
+  if (distance > targetCoords.allowedRadiusMeters) {
     return {
       allowed: false,
       error: `Geo-location mismatch: Operator is ${Math.round(distance)}m away from Back Gate. Must be within ${BACK_GATE_COORDS.allowedRadiusMeters}m.`,
@@ -103,7 +107,7 @@ async function handlePost(req: NextRequest) {
     // CSRF Protection: Verify Host matches Origin for state-changing requests
     const origin = req.headers.get("origin");
     const host = req.headers.get("host");
-    if (origin && host) {
+    if (process.env.NODE_ENV !== "development" && origin && host) {
       try {
         const originUrl = new URL(origin);
         if (originUrl.host !== host) {

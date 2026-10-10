@@ -12,7 +12,7 @@ import { useCampusConfig } from "@/hooks/useCampusConfig";
 
 interface ScanConfirmationProps {
   student: Student;
-  onConfirm: (direction: ScanDirection, reason?: ExitReason) => void;
+  onConfirm: (direction: ScanDirection, reason?: ExitReason) => void | Promise<void>;
   onCancel: () => void;
   suggestedDirection?: ScanDirection;
   isInline?: boolean;
@@ -193,13 +193,13 @@ export function ScanConfirmation({
 
   const biometricOk = !student.thumbprintHash || thumbprintVerified !== false;
 
-  const handleConfirmClick = (direction: ScanDirection, reason?: ExitReason) => {
+  const handleConfirmClick = async (direction: ScanDirection, reason?: ExitReason) => {
     if (!photoVerified || !biometricOk || isFlagged) {
       return;
     }
     setSelectedDirection(direction);
     setSelectedReason(reason || null);
-    onConfirm(direction, reason);
+    await onConfirm(direction, reason);
   };
 
   const normalizeReason = (r?: string) => {

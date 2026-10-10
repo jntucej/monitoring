@@ -35,7 +35,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         items: [
           { href: "/hod", label: "HOD Dashboard", icon: "LayoutDashboard", badge: dept || "HOD" },
           { href: "/admin/faculty", label: "Department Faculty", icon: "UserCheck" },
-          { href: "/admin/students", label: "Branch Students", icon: "GraduationCap" },
+          { href: "/supervisor?tab=curfew", label: "Branch Students", icon: "GraduationCap" },
         ],
       },
       {
@@ -184,13 +184,13 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           items: [
             { href: "/admin", label: "Campus Dashboard", icon: "LayoutDashboard", badge: "LIVE" },
             { href: "/admin/overview", label: "Overview", icon: "Info" },
-            { href: "/admin/alerts", label: "Security Alerts", icon: "ShieldAlert", badge: "SECURE" },
+            { href: "/supervisor?tab=alerts", label: "Security Alerts", icon: "ShieldAlert", badge: "SECURE" },
           ],
         },
         {
           groupLabel: "Institutional Rosters",
           items: [
-            { href: "/admin/students", label: "Student Master Roster", icon: "GraduationCap" },
+            { href: "/supervisor?tab=curfew", label: "Student Master Roster", icon: "GraduationCap" },
             { href: "/admin/faculty", label: "Faculty Attendance", icon: "UserCheck" },
             { href: "/admin/staff", label: "Staff Oversight", icon: "Briefcase" },
             { href: "/admin/workers", label: "Worker Shift Tracker", icon: "HardHat" },
@@ -243,7 +243,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "Security & Radar",
           items: [
-            { href: "/admin/alerts", label: "Security Radar", icon: "ShieldAlert", badge: "WRN" },
+            { href: "/supervisor?tab=alerts", label: "Security Radar", icon: "ShieldAlert", badge: "WRN" },
           ],
         },
         {
@@ -270,8 +270,8 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "Campus Radar & Directory",
           items: [
-            { href: "/admin/alerts", label: "Security Radar", icon: "ShieldAlert", badge: "ALERTS" },
-            { href: "/admin/students", label: "Students Roster", icon: "GraduationCap" },
+            { href: "/supervisor?tab=alerts", label: "Security Radar", icon: "ShieldAlert", badge: "ALERTS" },
+            { href: "/supervisor?tab=curfew", label: "Students Roster", icon: "GraduationCap" },
           ],
         },
         {

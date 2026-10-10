@@ -54,12 +54,12 @@ async function handleDelete(req: NextRequest) {
   return NextResponse.json({ success: true, data: null });
 }
 
-const adminOnly = { requiredRole: ["admin", "sysadmin"] as Role[] };
+const adminOnly = { requiredRole: ["admin", "sysadmin", "warden", "supervisor"] as Role[] };
 const rl = { keyPrefix: "lockdown", maxRequests: 20 };
 
 // Operators can also poll GET to check active state
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "operator"] }),
+  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "operator", "warden", "supervisor"] }),
   { keyPrefix: "lockdown_get", maxRequests: 120 }
 );
 export const POST   = withRateLimit(withAuthorization(handlePost,   adminOnly), rl);

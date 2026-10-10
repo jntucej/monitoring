@@ -3,9 +3,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { withRateLimit } from "@/lib/rate-limit";
 import { withAuthorization } from "@/middleware/authorization";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
-import { logAuditEvent } from "@/lib/audit";
+import { assertCsrf } from "@/lib/csrf";
 import bcrypt from "bcryptjs";
 import type { AuthContext } from "@/lib/authContext";
+import { addAudit } from "@/lib/db";
 
 async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   const userId = auth?.userId || req.headers.get("x-user-id");
@@ -15,6 +16,10 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
       { status: 401 }
     );
   }
+
+
+  const csrf = assertCsrf(req);
+  if (csrf) return csrf;
 
   try {
     const { currentPin, newPin } = await req.json().catch(() => ({}));
@@ -76,11 +81,11 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
       );
     }
 
-    await logAuditEvent({
+    await addAudit({
       action: "PIN_CHANGED",
       userId: userId,
       userName: user.name || "User",
-      userRole: auth?.role || "user",
+      role: auth?.role || "user",
       details: { timestamp: new Date().toISOString() },
     }).catch(() => {});
 
