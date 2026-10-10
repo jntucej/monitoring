@@ -86,7 +86,7 @@ async function handleGet() {
 
     const results = Array.from(departmentsMap.values());
 
-    return NextResponse.json({ success: true, data: results });
+    return NextResponse.json({ success: true, data: results }, { headers: { "Cache-Control": "no-store" } });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
@@ -130,7 +130,7 @@ async function handlePost(req: NextRequest) {
 
     await invalidateCache("departments:*");
 
-    return NextResponse.json({ success: true, data: data || payload });
+    return NextResponse.json({ success: true, data: data || payload }, { headers: { "Cache-Control": "no-store" } });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 500 });
   }
@@ -150,7 +150,7 @@ async function handleDelete(req: NextRequest) {
 
     await invalidateCache("departments:*");
 
-    return NextResponse.json({ success: true, message: `Deleted department ${code}` });
+    return NextResponse.json({ success: true, message: `Deleted department ${code}` }, { headers: { "Cache-Control": "no-store" } });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 500 });
   }
