@@ -1,6 +1,6 @@
-import NextRequest, NextResponse "next/server";
-import checkSystemHealth "@/lib/health";
-import withRateLimit "@/lib/rate-limit";
+import { NextRequest, NextResponse } from "next/server";
+import { checkSystemHealth } from "@/lib/health";
+import { withRateLimit } from "@/lib/rate-limit";
 
 async function handleGet(_req: NextRequest) {
   const health = await checkSystemHealth();
@@ -30,7 +30,7 @@ async function handleGet(_req: NextRequest) {
 
   // Include key health metrics from the sanitized response
   const response: any = {
-    status: statusCodes[sanitized.status] ?? 200,
+    status: (statusCodes as Record<string, number>)[sanitized.status] ?? 200,
     timestamp: sanitized.timestamp,
     uptime: sanitized.uptime,
   };
@@ -94,7 +94,7 @@ async function handleGet(_req: NextRequest) {
     response.recentAlerts = sanitized.recentAlerts;
   }
 
-  return NextResponse.json(response, { status: statusCodes[sanitized.status] ?? 200 });
+  return NextResponse.json(response, { status: (statusCodes as Record<string, number>)[sanitized.status] ?? 200 });
 }
 
 export const GET = withRateLimit(handleGet, { keyPrefix: "health_check", maxRequests: 60 });
