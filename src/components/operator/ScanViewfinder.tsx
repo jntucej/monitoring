@@ -26,11 +26,11 @@ export function ScanViewfinder({
         </div>
         <div className="max-w-md space-y-1.5">
           <h3 className="text-base font-bold text-[var(--text-primary)]">
-            QR Code Gate Scanner
-          </h3>
+          QR / Barcode Gate Scanner
+        </h3>
           <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-            Launch camera scanner to scan dynamic student ID cards or gate passes for instant verification.
-          </p>
+          Scan student ID QR codes, employee badges, or 1D barcodes (Code 128, Code 39, EAN) for instant verification.
+        </p>
         </div>
       </div>
 

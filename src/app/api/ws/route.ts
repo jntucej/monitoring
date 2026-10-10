@@ -116,9 +116,3 @@ export async function GET(req: NextRequest) {
   });
 }
 
-// Next.js 15+ WebSocket support via export const config
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};

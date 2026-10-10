@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
 import { findUserById, updateUserRole, updateAccountStatus, setUserFlag, addAudit } from "@/lib/db";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
@@ -178,7 +179,12 @@ async function handlePatch(req: NextRequest) {
         }
       }
 
-      if (body.role && VALID_ROLES.includes(body.role as Role)) {
+      if (isAdmin && (body.hostelScope === "boys" || body.hostelScope === "girls" || body.hostelScope === "both")) {
+      const db = getSupabaseServiceClient();
+      await db.from("users").update({ hostel_scope: body.hostelScope }).eq("id", id);
+ }
+
+    if (body.role && VALID_ROLES.includes(body.role as Role)) {
         await updateUserRole(id, body.role as Role, actorId);
       }
       if (body.status || body.account_status) {

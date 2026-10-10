@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from './lib/rate-limit';
 import { validateCsrf } from './lib/csrf';
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const requestId = req.headers.get('x-request-id') || crypto.randomUUID();
   const { pathname } = req.nextUrl;
 

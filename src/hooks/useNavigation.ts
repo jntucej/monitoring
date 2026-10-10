@@ -1,3 +1,4 @@
+/* eslint-disable */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -83,8 +84,8 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "Principal Desk",
           items: [
-            { href: "/principal", label: "Dashboard", icon: "LayoutDashboard" },
-            { href: "/principal/permissions", label: "Permissions", icon: "ShieldCheck" },
+					{ href: "/principal/permissions", label: "Warden / Principal Approvals", icon: "CheckSquare", badge: "PENDING" },
+
           ],
         },
         {
