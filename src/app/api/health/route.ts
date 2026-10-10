@@ -33,6 +33,7 @@ async function handleGet(req: NextRequest) {
       },
       redis: {
         status: (h.components as any).redis?.status ?? "healthy",
+        latency: (h.components as any).redis?.latency ?? 0,
         ...((h.components as any).redis?.error ? { error: "Redis unavailable" } : {}),
       },
       gateways: {

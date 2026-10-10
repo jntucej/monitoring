@@ -1,6 +1,6 @@
 import { getSupabaseServiceClient as getDbClient } from "@/lib/dbClient";
-import { detectAnomalies } from "@/predictions/findAnomalies";
-import { AnomalyEvent } from "@/policy/anomalies";
+import { detectAnomaliesRepository as detectAnomalies } from "@/server/repositories/predictions/findAnomalies";
+import { AnomalyEvent } from "@/server/policy/anomalies";
 
 export interface PredictionItem {
   id?: string;
