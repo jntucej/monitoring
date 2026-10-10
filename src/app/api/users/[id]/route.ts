@@ -200,11 +200,11 @@ async function handlePatch(req: NextRequest) {
         }
       }
 
-      // await addAudit({
+      /* await addAudit({
         userId: actorId,
         action: "USER_UPDATED",
         details: { timestamp: new Date().toISOString(), targetId: id, updates: body },
-      });
+      }); */
     }
 
     return NextResponse.json({ success: true, message: "User updated successfully" });
@@ -260,11 +260,11 @@ async function handleDelete(req: NextRequest) {
       // Ignore if auth user doesn't exist
     }
 
-    // await addAudit({
+    /* await addAudit({
       userId: actorId,
       action: "USER_DEPROVISIONED",
       details: { timestamp: new Date().toISOString(), targetId: id },
-    });
+    }); */
 
     return NextResponse.json({ success: true, message: "User deprovisioned" });
   } catch (error: any) {

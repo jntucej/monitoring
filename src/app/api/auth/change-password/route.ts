@@ -78,11 +78,11 @@ async function handleChangePassword(req: NextRequest, { auth }: { auth: AuthCont
     await query("UPDATE sessions SET revoked_at = NOW() WHERE user_id = $1", [userId]).catch(() => {});
 
     try {
-      // await addAudit({
+      /* await addAudit({
         action: "PASSWORD_CHANGE",
         userId,
         details: { userId, email: user.email },
-      });
+      }); */
     } catch (auditErr) {
       console.warn("Failed to write audit log for password change:", auditErr);
     }

@@ -110,13 +110,13 @@ export async function GET(req: NextRequest) {
     stateRow.code_verifier
   );
   if (!exchange.success || !exchange.idToken) {
-    // await addAudit({
+    /* await addAudit({
       action: "SSO_LOGIN_FAILED",
       userId: "system",
       userName: "SSO",
       role: "sysadmin",
       details: { reason: "token_exchange_failed", provider: stateRow.provider_id },
-    });
+    }); */
     return NextResponse.redirect(`${url.origin}/login?sso_error=token_exchange`);
   }
 
@@ -128,13 +128,13 @@ export async function GET(req: NextRequest) {
     issuerUrl: config.issuerUrl,
   });
   if (!validation.valid || !validation.claims) {
-    // await addAudit({
+    /* await addAudit({
       action: "SSO_LOGIN_FAILED",
       userId: "system",
       userName: "SSO",
       role: "sysadmin",
       details: { reason: "id_token_invalid", detail: validation.error },
-    });
+    }); */
     return NextResponse.redirect(`${url.origin}/login?sso_error=invalid_id_token`);
   }
 
@@ -150,13 +150,13 @@ export async function GET(req: NextRequest) {
   const groups = Array.isArray(claims.groups) ? claims.groups : [];
   const role = mapExternalGroupToRole(groups);
   if (!role) {
-    // await addAudit({
+    /* await addAudit({
       action: "SSO_LOGIN_DENIED",
       userId: "system",
       userName: "SSO",
       role: "sysadmin",
       details: { email, groups, reason: "no_role_mapping" },
-    });
+    }); */
     return NextResponse.redirect(`${url.origin}/login?sso_error=no_access`);
   }
 
@@ -223,13 +223,13 @@ export async function GET(req: NextRequest) {
     }
     user = created;
 
-    // await addAudit({
+    /* await addAudit({
       action: "SSO_USER_PROVISIONED",
       userId: user.id,
       userName: user.name,
       role: role as Role,
       details: { email, provider: stateRow.provider_id, sub: ssoSubject, status: jitStatus },
-    });
+    }); */
 
     if (jitStatus === "PENDING") {
       return NextResponse.redirect(`${url.origin}/login?sso_pending=1`);
@@ -291,13 +291,13 @@ export async function GET(req: NextRequest) {
     role: user.role,
   });
 
-  // await addAudit({
+  /* await addAudit({
     action: "SSO_LOGIN_SUCCESS",
     userId: user.id,
     userName: user.name,
     role: (user.role as Role) || "staff",
     details: { provider: stateRow.provider_id, email },
-  });
+  }); */
 
   // ── Step 4: set cookies, redirect to clean destination ─────────
   const dest = stateRow.redirect_to && stateRow.redirect_to.startsWith("/")

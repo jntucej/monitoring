@@ -36,13 +36,13 @@ async function handlePost(req: NextRequest) {
     const actorId = req.headers.get("x-user-id") || "sysadmin";
     const actorRole = (req.headers.get("x-user-role") || "sysadmin") as Role;
 
-    // await addAudit({
+    /* await addAudit({
       action: "ALERT_RULE_CREATE",
       userId: actorId,
       userName: "SysAdmin",
       role: actorRole,
       details: `Created operational alert rule '${name}' for metric '${metric}'.`,
-    });
+    }); */
 
     return NextResponse.json({ success: true, data: created });
   } catch (error: any) {

@@ -10,13 +10,13 @@ async function handlePost(req: NextRequest) {
     const actorId = req.headers.get("x-user-id") || "sysadmin";
     const actorRole = (req.headers.get("x-user-role") || "sysadmin") as Role;
 
-    // await addAudit({
+    /* await addAudit({
       action: "LDAP_SYNC",
       userId: actorId,
       userName: "SysAdmin",
       role: actorRole,
       details: `Triggered Active Directory sync. Users processed: ${result.usersProcessed}, Created: ${result.usersCreated}, Updated: ${result.usersUpdated}`,
-    });
+    }); */
 
     return NextResponse.json({ success: true, data: result });
   } catch (error: any) {

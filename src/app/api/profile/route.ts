@@ -101,13 +101,13 @@ async function handlePatch(req: NextRequest, context: { auth: AuthContext }) {
     return NextResponse.json({ success: false, error: error.message }, { status: 400 });
   }
 
-  // await addAudit({
+  /* await addAudit({
     action: "USER_UPDATED",
     userId: context.auth.userId,
     userName: updates.name ?? context.auth.email,
     role: context.auth.role,
     details: { selfUpdate: true, fields: Object.keys(updates) },
-  });
+  }); */
 
   return NextResponse.json({ success: true, data: updates });
 }

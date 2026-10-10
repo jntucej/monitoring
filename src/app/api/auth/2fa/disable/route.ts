@@ -87,7 +87,7 @@ async function handlePost(req: NextRequest) {
       })
       .eq("id", userIdToDisable);
 
-    // await addAudit({
+    /* await addAudit({
       userId: actorId,
       action: "2FA_DISABLED",
       details: {
@@ -96,7 +96,7 @@ async function handlePost(req: NextRequest) {
         reason: isSelf ? "User initiated" : reason,
         timestamp: new Date().toISOString(),
       },
-    });
+    }); */
 
     return NextResponse.json({
       success: true,

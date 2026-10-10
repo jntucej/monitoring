@@ -65,13 +65,13 @@ async function handlePost(req: NextRequest, context: { auth: AuthContext }) {
     );
   }
 
-  // await addAudit({
+  /* await addAudit({
     action: "MOBILE_ENROLLMENT_CODE_ISSUED",
     userId: actorId || "system",
     userName: context?.auth?.email || "Admin",
     role: actorRole,
     details: `Issued mobile enrollment code for user ${userId}; expires ${expires_at}`,
-  });
+  }); */
 
   // Returned exactly once. The admin reads it out / hands it over.
   return NextResponse.json({

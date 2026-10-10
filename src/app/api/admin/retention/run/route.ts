@@ -28,13 +28,13 @@ async function handlePost(req: NextRequest) {
       timestamp,
     });
 
-    // await addAudit({
+    /* await addAudit({
       action: "RETENTION_CLEANUP",
       userId: actorId,
       userName: "SysAdmin",
       role: "sysadmin",
       details: `Manual retention cleanup executed. Records purged: ${recordsPurged}.`,
-    });
+    }); */
 
     return NextResponse.json({
       success: true,
