@@ -235,7 +235,7 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
   // Clears only the error field, leaving other state intact
   clearError: () => set({ error: null }),
 
-  confirmScan: (addToast, overrideDirection, overrideReason) => {
+  confirmScan: async (addToast, overrideDirection, overrideReason) => {
     const { currentStudent } = get();
     if (!currentStudent) return;
 
