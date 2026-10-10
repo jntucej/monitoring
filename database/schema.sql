@@ -530,7 +530,7 @@ CREATE OR REPLACE FUNCTION invalidate_all_user_sessions(p_user_id UUID)
 RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 BEGIN
   UPDATE public.users
-  SET handle = NULL, updated_at = NOW()
+  SET session_version = session_version + 1, updated_at = NOW()
   WHERE id = p_user_id;
 
   RETURN FOUND;
