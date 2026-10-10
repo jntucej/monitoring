@@ -49,6 +49,14 @@ async function handlePatch(req: NextRequest) {
     }
 
     const body = await req.json().catch(() => null);
+    const { role, status, pin, password, flagStatus, flag_status, flags } = body || {};
+
+    if ((flagStatus !== undefined || flag_status !== undefined || flags !== undefined) && !["admin", "sysadmin", "warden"].includes(actorRole)) {
+      return NextResponse.json(
+        { success: false, error: { code: "FORBIDDEN", message: "Only administrators and wardens can flag or suspend accounts" } },
+        { status: 403 }
+      );
+    }
 
     // Admins cannot modify sysadmin accounts unless self
     if (!isSelf && actorRole === "admin" && (target.role === "sysadmin" || (body as any)?.role === "sysadmin")) {
