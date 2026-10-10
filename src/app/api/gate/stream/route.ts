@@ -1,3 +1,10 @@
+/**
+ * Server-Sent Events endpoint for real-time gate monitoring.
+ * This replaces the WebSocket at /ws since WS isn't supported by Next.js serverless.
+ * 
+ * GET /api/gate/stream — Real-time SSE endpoint for gate status updates.
+ */
+
 import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { getDbClient } from "@/lib/db";
@@ -5,15 +12,6 @@ import { getDbClient } from "@/lib/db";
 export const dynamic = "force-dynamic";
 export const maxDuration = 45; // ponytail: limit lifetime to 45s for serverless execution
 
-/**
- * GET /api/gate/stream — Real-time SSE endpoint for gate status updates.
- * 
- * Emits events:
- * - { event: "connected" }       Initial connection acknowledgment
- * - { event: "heartbeat" }       Periodic keepalive (every 15s)
- * - { event: "gate_status" }     Updated gate statuses (every 3s)
- * - { event: "traffic" }         Overall traffic count (every 3s)
- */
 async function handleGet(req: NextRequest) {
   const encoder = new TextEncoder();
 
@@ -34,15 +32,8 @@ async function handleGet(req: NextRequest) {
         } catch {}
       };
 
-      // Fetch all gates with their current status
-      const fetchGateStatuses = async (): Promise<Array<{ 
-        gateId: string; 
-        status: string; 
-        name: string; 
-        location: string; 
-        isOnline: boolean; 
-        recentScans: number 
-      }>> => {
+      // Fetch current gate statuses from database
+      const fetchGateData = async () => {
         try {
           const client = getDbClient();
           
@@ -52,7 +43,7 @@ async function handleGet(req: NextRequest) {
             .select('id, gate_code, name, location, type, is_active');
           
           if (!gates || gates.length === 0) {
-            return [];
+            return null;
           }
 
           // Get recent scans (last 5 minutes) per gate
@@ -68,20 +59,23 @@ async function handleGet(req: NextRequest) {
             scanCounts[scan.gate_id] = (scanCounts[scan.gate_id] || 0) + 1;
           }
 
-          // Determine gate status based on recent activity
           const activeGateIds = new Set(Object.keys(scanCounts));
           
-          return gates.map(g => ({
-            gateId: g.id,
-            status: activeGateIds.has(g.id) ? "active" : "idle",
-            name: g.name,
-            location: g.location,
-            isOnline: g.is_active && activeGateIds.has(g.id),
-            recentScans: scanCounts[g.id] || 0,
-          }));
+          return {
+            gates: gates.map(g => ({
+              gateId: g.id,
+              status: activeGateIds.has(g.id) ? "active" : "idle",
+              name: g.name,
+              location: g.location,
+              isOnline: g.is_active && activeGateIds.has(g.id),
+              recentScans: scanCounts[g.id] || 0,
+            })),
+            totalActive: gates.filter(g => activeGateIds.has(g.id)).length,
+            totalScans: Object.values(scanCounts).reduce((a, b) => a + b, 0),
+          };
         } catch (err) {
-          console.error('[gate/stream] Error fetching gate statuses:', err);
-          return [];
+          console.error('[gate/stream] Error:', err);
+          return null;
         }
       };
 
@@ -90,23 +84,24 @@ async function handleGet(req: NextRequest) {
         event: "connected", 
         timestamp: new Date().toISOString(),
         message: "Gate EventStream active" 
-      });
+      }, "connected");
 
       let lastPayload = "";
+      
       const checkAndSend = async () => {
         try {
-          const statuses = await fetchGateStatuses();
-          const payload = JSON.stringify({ 
-            type: "gate_status",
-            gates: statuses,
-            totalActive: statuses.filter(g => g.status === "active").length,
-            totalScans: statuses.reduce((sum, g) => sum + g.recentScans, 0),
-            timestamp: new Date().toISOString()
-          });
-          
-          if (payload !== lastPayload) {
-            lastPayload = payload;
-            sendEvent(JSON.parse(payload));
+          const data = await fetchGateData();
+          if (data) {
+            const payload = JSON.stringify({ 
+              type: "gate_status",
+              ...data,
+              timestamp: new Date().toISOString()
+            });
+            
+            if (payload !== lastPayload) {
+              lastPayload = payload;
+              sendEvent(JSON.parse(payload), "gate_status");
+            }
           }
         } catch {
           // ignore stream fetch errors
@@ -143,6 +138,7 @@ async function handleGet(req: NextRequest) {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache, no-transform",
       Connection: "keep-alive",
+      "X-Accel-Buffering": "no", // Disable nginx buffering
     },
   });
 }

@@ -93,6 +93,11 @@ export class GateMonitorWS {
       this.socket.close();
       this.socket = null;
     }
+    // Close SSE fallback if active
+    if ((this as any)._sseSource) {
+      (this as any)._sseSource.close();
+      (this as any)._sseSource = null;
+    }
     if (this.mockGenerator) {
       this.mockGenerator.stop();
       this.mockGenerator = null;
@@ -212,8 +217,8 @@ export class GateMonitorWS {
 
   private scheduleReconnect(): void {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      // Fallback gracefully to mock data generator if real WS connection attempts fail
-      this.setMockMode(true);
+      // Fallback gracefully to SSE stream when WebSocket fails
+      this.connectSSEFallback();
       return;
     }
 
@@ -226,6 +231,38 @@ export class GateMonitorWS {
     this.reconnectTimer = setTimeout(() => {
       this.connect();
     }, delay);
+  }
+
+  /** Fallback to Server-Sent Events when WebSocket is unavailable */
+  private connectSSEFallback(): void {
+    if (this.mockMode) return; // Don't fallback if mock mode is forced
+    
+    const sseUrl = this.url.replace(/^ws:\/\//i, 'http://').replace(/^wss:\/\//i, 'https://');
+    const eventSource = new EventSource(sseUrl);
+    
+    eventSource.onopen = () => {
+      this.isConnected = true;
+      this.isMockFallback = true;
+      this.notifyConnectionChange(true, true);
+    };
+    
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        this.handleIncomingMessage(data);
+      } catch {
+        // Ignore invalid payload
+      }
+    };
+    
+    eventSource.onerror = () => {
+      this.isConnected = false;
+      eventSource.close();
+      this.notifyConnectionChange(false);
+    };
+    
+    // Store reference for cleanup
+    (this as any)._sseSource = eventSource;
   }
 
   private notifyConnectionChange(connected: boolean, isMock?: boolean): void {
