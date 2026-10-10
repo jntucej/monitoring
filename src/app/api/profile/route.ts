@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { addAudit } from "@/lib/db";
-import { verifyCsrf } from "@/middleware/csrf";
+import { assertCsrf } from "@/lib/csrf";
 import type { AuthContext } from "@/lib/authContext";
 
 /* ------------------------------------------------------------------ *
@@ -28,6 +28,9 @@ async function handleGet(_req: NextRequest, context: { auth: AuthContext }) {
     return NextResponse.json({ success: false, error: "Profile not found" }, { status: 404 });
   }
 
+  const rawStudent = (user as any).student_details;
+  const rawEmployee = (user as any).employee_details;
+
   return NextResponse.json({
     success: true,
     data: {
@@ -36,15 +39,15 @@ async function handleGet(_req: NextRequest, context: { auth: AuthContext }) {
       email: user.email,
       phone: user.phone,
       role: user.role,
-      status: user.status || user.account_status || "ACTIVE",
+      status: user.status || (user as any).account_status || "ACTIVE",
       uniqueId: user.unique_id,
       photoUrl: user.photo_url,
       departmentId: user.department_id,
       loginIdentifier: user.login_identifier,
       twoFactorEnabled: !!user.two_factor_enabled,
       createdAt: user.created_at,
-      studentDetails: Array.isArray(user.student_details) ? user.student_details[0] : user.student_details,
-      employeeDetails: Array.isArray(user.employee_details) ? user.employee_details[0] : user.employee_details,
+      studentDetails: Array.isArray(rawStudent) ? rawStudent[0] : rawStudent,
+      employeeDetails: Array.isArray(rawEmployee) ? rawEmployee[0] : rawEmployee,
     },
   });
 }
@@ -55,7 +58,7 @@ async function handleGet(_req: NextRequest, context: { auth: AuthContext }) {
  *  password, pin. Those go through their own hardened endpoints.
  * ------------------------------------------------------------------ */
 async function handlePatch(req: NextRequest, context: { auth: AuthContext }) {
-  const csrf = verifyCsrf(req);
+  const csrf = assertCsrf(req);
   if (csrf) return csrf;
 
   const body = await req.json().catch(() => ({}));
