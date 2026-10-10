@@ -63,7 +63,7 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
       return NextResponse.json({ success: false, error: { code: "RATE_LIMITED", message: "Too many requests" } }, { status: 429 });
     }
 
-    const students = await searchStudents(search);
+    const students = await searchStudentsLib(search);
     const fullPii = FULL_PII_ROLES.includes(auth.role as any);
     return NextResponse.json({
       success: true,

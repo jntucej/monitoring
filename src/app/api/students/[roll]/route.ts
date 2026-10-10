@@ -3,6 +3,7 @@ import { findStudentByRoll, getStudentHistory, getStudentStatus } from "@/lib/db
 import { withAuthorization } from "@/middleware/authorization";
 import { addAudit } from "@/lib/db";
 import type { AuthContext } from "@/lib/authContext";
+import type { Role } from "@/lib/types";
 import { withRateLimit } from "@/lib/rate-limit";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 
@@ -169,8 +170,7 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
       await addAudit({
         action: "USER_DEACTIVATED",
         userId: auth.userId,
-        // @ts-expect-error - AuthContext structure vs AuditEntry expected role type 
-        role: auth.role,
+        role: auth.role as Role,
         details: {
           target_user_id: user.id,
           roll,
@@ -194,8 +194,7 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
     await addAudit({
       action: "USER_DELETED",
       userId: auth.userId,
-      // @ts-expect-error - AuthContext structure vs AuditEntry expected role type
-      role: auth.role,
+      role: auth.role as Role,
       details: { target_user_id: user.id, roll, mode: "hard_delete" },
     });
 
