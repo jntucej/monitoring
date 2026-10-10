@@ -165,7 +165,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ['admin', 'sysadmin', 'operator', 'parent', 'student', 'warden'] }),
+  withAuthorization(handleGet, { requiredRole: ['admin', 'sysadmin', 'operator', 'parent', 'student', 'warden', 'supervisor'] }),
   { keyPrefix: 'passes_list', maxRequests: 100 }
 );
 

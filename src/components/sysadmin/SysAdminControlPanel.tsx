@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   Activity,
   Database,
+  User,
   Shield,
   Server,
   Users,

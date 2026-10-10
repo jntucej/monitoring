@@ -6,11 +6,7 @@ export const metadata: Metadata = {
   description: "Login to the Gate Monitoring System",
 };
 
-/**
- * Role-specific login routes are deprecated.
- * All users now share a single unified login form at /login.
- * This redirect preserves backward compatibility for bookmarks/links.
- */
-export default function RoleLoginRedirect() {
-  redirect("/login");
+export default function RoleLoginRedirect({ searchParams }: { searchParams: { redirect?: string } }) {
+  const r = searchParams?.redirect;
+  redirect(r ? `/login?redirect=${encodeURIComponent(r)}` : "/login");
 }

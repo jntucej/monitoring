@@ -53,7 +53,9 @@ export function SmartSchedulingAssistant() {
       if (result.success) {
         addToast({ variant: "success", title: "Applied", message: result.message });
         setSuggestions((prev) => prev.filter((s) => s.id !== id));
-      }
+      } else {
+    addToast({ variant: "error", title: "Not applied", message: result.error || "Failed to apply recommendation" });
+  }
     } catch {
       addToast({ variant: "error", title: "Error", message: "Failed to apply recommendation" });
     } finally {
