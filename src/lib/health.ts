@@ -119,7 +119,7 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
     );
     const avgRow = avgResult.rows?.[0];
     if (avgRow && parseInt(avgRow.cnt) > 0) {
-      health.metrics.avgResponseTime = Math.round(parseFloat(avgRow.avg_time || '0'));
+      health.metrics.avgResponseTime = Math.round(parseFloat(avgRow.avg_time || "0"));
       console.log(`[health] avgResponseTime from DB: ${health.metrics.avgResponseTime}ms (${avgRow.cnt} records)`);
     } else {
       console.log('[health] No non-zero response time records found in last minute');
