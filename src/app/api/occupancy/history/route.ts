@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
-import { getOccupancyHistory } from "@/lib/occupancy";
+import { getOccupancyHistory } from "@/server/services/occupancy/occupancy";
 
 async function handleGet(req: NextRequest) {
   try {

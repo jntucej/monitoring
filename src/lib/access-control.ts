@@ -37,9 +37,24 @@ export function checkTimeBasedAccess(
   timestamp: Date = new Date(),
   customRule?: Partial<AccessRule>
 ): AccessCheckResult {
+  if (personType === "student") {
+    const currentHour = timestamp.getHours();
+    const currentMinute = timestamp.getMinutes();
+    const currentTotalMinutes = currentHour * 60 + currentMinute;
+    const curfewStartMinutes = 21 * 60 + 30; // 21:30
+    const curfewEndMinutes = 6 * 60; // 06:00
+
+    if (currentTotalMinutes >= curfewStartMinutes || currentTotalMinutes < curfewEndMinutes) {
+      return {
+        allowed: false,
+        reason: "Student curfew restriction in effect (21:30 - 06:00)",
+        ruleSummary: "Curfew 21:30 - 06:00",
+      };
+    }
+    return { allowed: true, ruleSummary: "Standard Student Access" };
+  }
+
   if (personType !== "worker") {
-    // TODO: Implement student curfew rules here, or document how they are handled.
-    // For now, allow entry by default for non-worker roles.
     return { allowed: true };
   }
 
