@@ -1,5 +1,6 @@
 import { getDbClient } from "@/lib/db";
-import { getCached, setCached } from "./cache";
+import { revalidateTag } from 'next/cache';
+import { CACHE_TAGS } from './cache-tags';
 
 export interface DepartmentInfo {
   id?: string;
@@ -10,48 +11,84 @@ export interface DepartmentInfo {
   hod?: string;
 }
 
-const FALLBACK_DEPARTMENTS: DepartmentInfo[] = [
-  { code: "CIVIL", numericCode: "01", shortName: "CIVIL", name: "Civil Engineering",                       hod: "Dr. A. Kumar" },
-  { code: "EEE",   numericCode: "02", shortName: "EEE",   name: "Electrical & Electronics Engineering",    hod: "Dr. K. Ramesh" },
-  { code: "ME",    numericCode: "03", shortName: "ME",    name: "Mechanical Engineering",                  hod: "Dr. R. Mahesh" },
-  { code: "ECE",   numericCode: "04", shortName: "ECE",   name: "Electronics & Communication Engineering", hod: "Dr. M. Srinivas" },
-  { code: "CSE",   numericCode: "05", shortName: "CSE",   name: "Computer Science & Engineering",          hod: "Dr. K. Sridhar" },
-  { code: "IT",    numericCode: "12", shortName: "IT",    name: "Information Technology",                  hod: "Dr. P. Sreedhar" },
-];
-
-const CACHE_KEY = "departments:all";
-const CACHE_TTL_SECONDS = 300; // 5 minutes
+function mapRow(row: any): DepartmentInfo {
+  return {
+    id: row.id,
+    code: row.code,
+    numericCode: row.numeric_code || row.numericCode || undefined,
+    shortName: row.short_name || row.shortName || row.code,
+    name: row.name || row.full_name || row.code,
+    hod: row.hod || "Not Assigned",
+  };
+}
 
 export async function getDepartments(): Promise<DepartmentInfo[]> {
   try {
-    const cached = await getCached<DepartmentInfo[]>(CACHE_KEY);
-    if (cached && Array.isArray(cached) && cached.length > 0) {
-      return cached;
-    }
-
     const { data, error } = await getDbClient()
       .from("departments")
-      .select("*");
+      .select("*")
+      .order("code");
 
-    if (error || !data || data.length === 0) {
-      return FALLBACK_DEPARTMENTS;
-    }
-
-    const depts: DepartmentInfo[] = data.map((row: any) => ({
-      id: row.id,
-      code: row.code,
-      numericCode: row.numeric_code || row.numericCode || undefined,
-      shortName: row.short_name || row.shortName || row.code,
-      name: row.name || row.full_name || row.code,
-      hod: row.hod || "Not Assigned",
-    }));
-
-    await setCached(CACHE_KEY, depts, CACHE_TTL_SECONDS);
-    return depts;
+    if (error) throw error;
+    return (data || []).map(mapRow);
   } catch (error) {
     console.error("[Departments Service] Failed to fetch departments:", error);
-    return FALLBACK_DEPARTMENTS;
+    return [];
   }
+}
+
+export async function createDepartment(input: {
+  code: string; name: string; numericCode?: string; shortName?: string;
+}): Promise<DepartmentInfo> {
+  const svc = getDbClient();
+  const { data, error } = await svc.from("departments").insert({
+    code: input.code.toUpperCase(),
+    name: input.name,
+    numeric_code: input.numericCode ?? null,
+    short_name: input.shortName ?? input.code.toUpperCase(),
+  }).select().single();
+  if (error) throw new Error(error.message);
+  (revalidateTag as any)(CACHE_TAGS.departments);
+  return mapRow(data);
+}
+
+export async function updateDepartment(
+  code: string,
+  patch: Partial<{ name: string; numericCode: string; shortName: string }>
+): Promise<DepartmentInfo> {
+  const svc = getDbClient();
+  const { data, error } = await svc.from("departments")
+    .update({
+      ...(patch.name        !== undefined && { name: patch.name }),
+      ...(patch.numericCode !== undefined && { numeric_code: patch.numericCode }),
+      ...(patch.shortName   !== undefined && { short_name: patch.shortName }),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("code", code)
+    .select()
+    .single();
+  if (error) throw new Error(error.message);
+  (revalidateTag as any)(CACHE_TAGS.departments);
+  return mapRow(data);
+}
+
+export async function deleteDepartment(code: string): Promise<void> {
+  const svc = getDbClient();
+
+  const { count } = await svc.from("users")
+    .select("id", { count: "exact", head: true })
+    .eq("department_id", code);
+  if ((count ?? 0) > 0) {
+    throw new Error(`Cannot delete ${code}: ${count} user(s) still assigned.`);
+  }
+
+  const { error, count: deleted } = await svc.from("departments")
+    .delete({ count: "exact" })
+    .eq("code", code);
+  if (error) throw new Error(error.message);
+  if (!deleted) throw new Error(`Department ${code} not found`);
+
+  (revalidateTag as any)(CACHE_TAGS.departments);
 }
 
 export async function getDepartmentByCode(code: string): Promise<DepartmentInfo | null> {

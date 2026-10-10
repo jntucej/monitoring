@@ -6,12 +6,19 @@ import sys
 import time
 from pathlib import Path
 
-TELEGRAM_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 _auth_chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+
+if not TELEGRAM_TOKEN:
+    raise SystemExit("FATAL: TELEGRAM_BOT_TOKEN must be set")
 if not _auth_chat_id:
-    raise SystemExit("TELEGRAM_CHAT_ID environment variable is required")
+    raise SystemExit("FATAL: TELEGRAM_CHAT_ID must be set")
+
 AUTHORIZED_CHAT_ID = int(_auth_chat_id)
 BASE_DIR = Path("/root/monitoring")
+
+# Explicit command allowlist
+ALLOWED_COMMANDS = {"help", "status", "status", "log", "restart", "health", "deploylog", "deploystatus", "checkstatus", "stats", "tail", "ps", "updates"}
 
 def tg_send(msg: str, chat_id: int = AUTHORIZED_CHAT_ID) -> None:
     if not TELEGRAM_TOKEN: return
@@ -27,10 +34,21 @@ def run(cmd: list) -> str:
     except Exception as e:
         return f"Error: {e}"
 
-def handle(cmd: str):
-    c = cmd.strip().split()[0].lower() if cmd.strip() else "help"
-    if c == "deploylog":
-        import subprocess
+def handle(cmd: str, chat_id: int) -> str:
+    # Defense in depth: re-verify authorization inside handle()
+    if chat_id != AUTHORIZED_CHAT_ID:
+        print(f"[SECURITY] Unauthorized command from chat {chat_id}: {cmd!r}")
+        return "Unauthorized."
+
+    parts = cmd.strip().split()
+    if not parts:
+        return "No command provided."
+    verb = parts[0].lower()
+
+    if verb not in ALLOWED_COMMANDS:
+        return f"Unknown command: {verb}"
+
+    if verb == "deploylog":
         try:
             out = subprocess.run(["tail", "-n", "30", "/var/log/monitoring-deploy.log"], capture_output=True, text=True, timeout=5).stdout
             if not out.strip(): return "Log is empty."
@@ -38,35 +56,31 @@ def handle(cmd: str):
         except Exception as e:
             return f"Error reading log: {e}"
 
-    if c == "deploystatus":
+    if verb == "deploystatus":
         try:
-            # Check last update time
             last_run = subprocess.check_output(["stat", "-c", "%y", "/var/log/monitoring-deploy.log"], text=True).strip()
-            # Check if cron exists
             cron_check = subprocess.run(["crontab", "-l"], capture_output=True, text=True).stdout
             is_scheduled = "auto-check.sh" in cron_check
-            
             return f"🤖 *Auto-Deploy Status*\n\n• *Scheduled:* {'✅ Yes' if is_scheduled else '❌ No'}\n• *Last Activity:* `{last_run}`"
         except Exception as e:
             return f"Error checking status: {e}"
 
-    if c == "checkstatus":
-        import os, datetime
+    if verb == "checkstatus":
         try:
             mtime = os.path.getmtime("/var/log/monitoring-heartbeat.log")
-            last_check = datetime.datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S')
+            last_check = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(mtime))
             return f"✅ Auto-deploy cron is running.\n🕒 Last check: {last_check}"
         except:
             return "❌ Heartbeat file not found."
 
-    if c == "stats":
+    if verb == "stats":
         return run(["uptime"]) + "\n\n" + run(["free", "-h"])
-    elif c == "tail":
-        svc = cmd.split()[1] if len(cmd.split())>1 else "gate-web"
+    elif verb == "tail":
+        svc = parts[1] if len(parts)>1 else "gate-web"
         return run(["docker", "compose", "-f", str(BASE_DIR/"docker-compose.yml"), "logs", "--tail=20", svc])
-    elif c == "ps":
+    elif verb == "ps":
         return run(["docker", "compose", "-f", str(BASE_DIR/"docker-compose.yml"), "ps"])
-    elif c == "updates":
+    elif verb == "updates":
         return run(["git", "-C", str(BASE_DIR), "fetch"]) + "\n" + run(["git", "-C", str(BASE_DIR), "status"])
     else:
         return """🤖 *Gate Monitor - Bot Commands*
@@ -98,9 +112,10 @@ def main():
                 if not msg: continue
                 chat = msg.get("chat", {}).get("id")
                 text = msg.get("text", "").strip()
-                if str(chat) != str(AUTHORIZED_CHAT_ID): continue
-                if text.startswith("/"):
-                    tg_send(handle(text[1:]), chat)
+                if not text or not text.startswith("/"): continue
+                
+                response = handle(text[1:], chat)
+                tg_send(response, chat)
         except Exception:
             time.sleep(5)
 

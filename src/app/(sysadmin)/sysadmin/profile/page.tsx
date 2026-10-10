@@ -121,7 +121,7 @@ function SysAdminProfileDashboard() {
           setProfile({
             id: authUser.id,
             name: authUser.name,
-            email: authUser.email,
+            email: authUser.email || "",
             phone: authUser.phone || null,
             role: "sysadmin",
             status: "ACTIVE",

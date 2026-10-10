@@ -74,18 +74,11 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
     setIsChecking(false);
   }, [hasHydrated, authenticated, userId, userRole, gateId, allowedRoles, router]);
 
-  // Revalidate session asynchronously in background without causing infinite re-render loop
+  // Revalidate session asynchronously — background revalidation
+  // is now handled implicitly by API-level 401 handling in useApi.
   useEffect(() => {
     if (!hasHydrated || !authenticated || !userId) return;
-
     checkSession();
-
-    // Auto-refresh session check every 5 minutes
-    const interval = setInterval(() => {
-      checkSession();
-    }, 5 * 60 * 1000);
-
-    return () => clearInterval(interval);
   }, [hasHydrated, authenticated, userId, checkSession]);
 
   // ponytail: timedOut flunks hydration — fail closed to /login rather than

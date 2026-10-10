@@ -14,6 +14,7 @@ import { Role, AccountStatus } from './types';
 import { getCached, setCached } from './cache';
 import { verifyAccessToken } from './auth-token';
 import { query } from './postgres';
+import { ROLES, isPrivileged, isSuperAdmin } from './roles';
 
 /**
  * Authenticated User Context
@@ -75,8 +76,8 @@ export interface AuthContext {
  * If MFA configuration cannot be verified, access requires MFA for safety.
  * Operations can override via MFA_REQUIRED_FOR_ADMIN environment variable.
  */
-export async function isMfaRequiredForAdmin(): Promise<boolean> {
-  const cached = await getCached<boolean>("system_config:mfaRequiredForAdmin");
+export async function isMfaRequiredForPrivileged(): Promise<boolean> {
+  const cached = await getCached<boolean>("system_config:mfaRequiredForPrivileged");
   if (cached !== null) return cached;
 
   // Env override always wins — allows ops to toggle MFA without touching the DB
@@ -108,6 +109,8 @@ export async function isMfaRequiredForAdmin(): Promise<boolean> {
   }
 }
 
+export const isMfaRequiredForAdmin = isMfaRequiredForPrivileged;
+
 /**
  * Create an authenticated context from a Supabase session token
  *
@@ -120,14 +123,6 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
   const payload = await verifyAccessToken(token);
   if (payload && payload.sub) {
     userId = payload.sub;
-  } else {
-    // Fallback attempt with Supabase auth for backwards compatibility if needed
-    try {
-      const { data: { user } } = await supabase.auth.getUser(token);
-      if (user) userId = user.id;
-    } catch {
-      // ignore fallback error
-    }
   }
 
   if (!userId) {
