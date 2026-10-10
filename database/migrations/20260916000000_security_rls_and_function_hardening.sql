@@ -36,7 +36,12 @@ BEGIN
     'integration_logs','announcements','user_announcement_dismissals','sso_config',
     'gate_passes'
   ] LOOP
-    EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY', t);
+    IF EXISTS (
+      SELECT 1 FROM information_schema.tables 
+      WHERE table_schema = 'public' AND table_name = t
+    ) THEN
+      EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY', t);
+    END IF;
   END LOOP;
 END $$;
 
@@ -58,15 +63,20 @@ DECLARE
   ];
 BEGIN
   FOREACH t IN ARRAY service_tables LOOP
-    pol_name := 'svc_all_' || t;
-    IF NOT EXISTS (
-      SELECT 1 FROM pg_policies
-      WHERE schemaname = 'public' AND tablename = t AND policyname = pol_name
+    IF EXISTS (
+      SELECT 1 FROM information_schema.tables 
+      WHERE table_schema = 'public' AND table_name = t
     ) THEN
-      EXECUTE format(
-        'CREATE POLICY %I ON public.%I FOR ALL TO service_role USING (true) WITH CHECK (true)',
-        pol_name, t
-      );
+      pol_name := 'svc_all_' || t;
+      IF NOT EXISTS (
+        SELECT 1 FROM pg_policies
+        WHERE schemaname = 'public' AND tablename = t AND policyname = pol_name
+      ) THEN
+        EXECUTE format(
+          'CREATE POLICY %I ON public.%I FOR ALL TO service_role USING (true) WITH CHECK (true)',
+          pol_name, t
+        );
+      END IF;
     END IF;
   END LOOP;
 END $$;
@@ -107,15 +117,20 @@ DECLARE
   ];
 BEGIN
   FOREACH t IN ARRAY auth_tables LOOP
-    pol_name := 'auth_all_' || t;
-    IF NOT EXISTS (
-      SELECT 1 FROM pg_policies
-      WHERE schemaname = 'public' AND tablename = t AND policyname = pol_name
+    IF EXISTS (
+      SELECT 1 FROM information_schema.tables 
+      WHERE table_schema = 'public' AND table_name = t
     ) THEN
-      EXECUTE format(
-        'CREATE POLICY %I ON public.%I FOR ALL TO authenticated USING (public.is_admin_self()) WITH CHECK (public.is_admin_self())',
-        pol_name, t
-      );
+      pol_name := 'auth_all_' || t;
+      IF NOT EXISTS (
+        SELECT 1 FROM pg_policies
+        WHERE schemaname = 'public' AND tablename = t AND policyname = pol_name
+      ) THEN
+        EXECUTE format(
+          'CREATE POLICY %I ON public.%I FOR ALL TO authenticated USING (public.is_admin_self()) WITH CHECK (public.is_admin_self())',
+          pol_name, t
+        );
+      END IF;
     END IF;
   END LOOP;
 END $$;
@@ -139,15 +154,20 @@ DECLARE
   ];
 BEGIN
   FOREACH t IN ARRAY admin_tables LOOP
-    pol_name := 'admin_read_' || t;
-    IF NOT EXISTS (
-      SELECT 1 FROM pg_policies
-      WHERE schemaname = 'public' AND tablename = t AND policyname = pol_name
+    IF EXISTS (
+      SELECT 1 FROM information_schema.tables 
+      WHERE table_schema = 'public' AND table_name = t
     ) THEN
-      EXECUTE format(
-        'CREATE POLICY %I ON public.%I FOR SELECT TO admin USING (public.is_admin_self())',
-        pol_name, t
-      );
+      pol_name := 'admin_read_' || t;
+      IF NOT EXISTS (
+        SELECT 1 FROM pg_policies
+        WHERE schemaname = 'public' AND tablename = t AND policyname = pol_name
+      ) THEN
+        EXECUTE format(
+          'CREATE POLICY %I ON public.%I FOR SELECT TO admin USING (public.is_admin_self())',
+          pol_name, t
+        );
+      END IF;
     END IF;
   END LOOP;
 END $$;
