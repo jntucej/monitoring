@@ -3,9 +3,40 @@ import { spawn } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+import http from 'http';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const HEALTH_PORT = parseInt(process.env.WORKER_HEALTH_PORT ?? '3001', 10);
+const HEALTH_STATE = {
+  startedAt: Date.now(),
+  lastJobAt: Date.now(),
+  lastJobName: 'supervisor_init',
+  jobsProcessed: 0,
+};
+
+const healthServer = http.createServer((req, res) => {
+  if (req.url === '/health') {
+    const age = Date.now() - HEALTH_STATE.lastJobAt;
+    const stale = age > 60 * 60_000;
+    res.writeHead(stale ? 503 : 200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      status: stale ? 'stale' : 'healthy',
+      uptime: Math.round((Date.now() - HEALTH_STATE.startedAt) / 1000),
+      lastJob: HEALTH_STATE.lastJobName,
+      lastJobAt: new Date(HEALTH_STATE.lastJobAt).toISOString(),
+      jobsProcessed: HEALTH_STATE.jobsProcessed,
+    }));
+    return;
+  }
+  res.writeHead(404);
+  res.end();
+});
+
+healthServer.listen(HEALTH_PORT, '0.0.0.0', () => {
+  console.log(`[Worker] Health check HTTP server listening on 0.0.0.0:${HEALTH_PORT}`);
+});
 
 console.log('[Worker] Starting background worker supervisor...');
 
@@ -15,6 +46,9 @@ cron.schedule('*/15 * * * *', async () => {
   try {
     const job = await import('./jobs/cleanup_ephemeral.js');
     if (job.default) await job.default();
+    HEALTH_STATE.lastJobAt = Date.now();
+    HEALTH_STATE.lastJobName = 'cleanup_ephemeral';
+    HEALTH_STATE.jobsProcessed++;
   } catch (err) {
     console.error('[Worker] cleanup_ephemeral failed:', err);
   }
@@ -25,6 +59,9 @@ cron.schedule('0 2 * * *', async () => {
   try {
     const job = await import('./jobs/backfill_daily_stats.js');
     if (job.default) await job.default();
+    HEALTH_STATE.lastJobAt = Date.now();
+    HEALTH_STATE.lastJobName = 'backfill_daily_stats';
+    HEALTH_STATE.jobsProcessed++;
   } catch (err) {
     console.error('[Worker] backfill_daily_stats failed:', err);
   }

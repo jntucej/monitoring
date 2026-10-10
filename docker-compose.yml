@@ -3,6 +3,7 @@ services:
     image: supabase/postgres:17.6.1.136
     container_name: gate_postgres
     restart: always
+    cpu_shares: 1024
     env_file:
       - path: .env
         required: false
@@ -24,6 +25,7 @@ services:
     image: redis:7-alpine
     container_name: gate_redis
     restart: always
+    cpu_shares: 768
     env_file:
       - path: .env
         required: false
@@ -77,18 +79,24 @@ services:
       target: worker
     container_name: gate_worker
     restart: always
+    cpu_shares: 256
     env_file:
       - path: .env
         required: false
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-gate_monitor}
+      - DATABASE_URL=postgres://${POSTGRES_USER:***@postgres:5432/${POSTGRES_DB:-gate_monitor}
       - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O- http://127.0.0.1:3001/health > /dev/null"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
     networks:
       - gate-net
 

@@ -11,90 +11,57 @@ async function handleGet(_req: NextRequest) {
     unhealthy: 503,
   };
 
-  // Bug 135: endpointpublic (no auth). Raw Postgres/env error strings leak
-  // table/column/constraint names connection details. Replace generic messages;
-  // keep non-sensitive status latency operators/monitoring get signal.
-  const sanitize = (h: typeof health) => {
-    const clone = JSON.parse(JSON.stringify(h));
-    if (clone.components) {
-      for (const key of ["database", "redis"] as const) {
-        const c = clone.components[key];
-        if (c && c.error) c.error = `${key} unavailable`;
-      }
-      if (clone.components.env?.error) clone.components.env.error = "Environment misconfigured";
-    }
-    return clone;
-  };
+  // Bug 135: endpoint public (no auth). Raw Postgres/env error strings leak
+  // table/column/constraint names / connection details. Replace generic messages;
+  // keep non-sensitive status, latency, operators monitoring/get signal.
+  const sanitize = (h: typeof health): typeof h => ({
+    status: h.status,
+    timestamp: h.timestamp,
+    uptime: h.uptime,
+    components: {
+      database: {
+        status: h.components.database.status,
+        latency: h.components.database.latency,
+        ...(h.components.database.error ? { error: "Database unavailable" } : {}),
+      },
+      ...(h.components.redis
+        ? {
+            redis: {
+              status: h.components.redis.status,
+              latency: h.components.redis.latency,
+              ...(h.components.redis.error ? { error: "Redis unavailable" } : {}),
+            },
+          }
+        : {}),
+      gateways: {
+        status: h.components.gateways.status,
+        online: h.components.gateways.online,
+        offline: h.components.gateways.offline,
+        total: h.components.gateways.total,
+      },
+      services: {
+        status: h.components.services.status,
+        auth: {
+          status: h.components.services.auth?.status ?? "healthy",
+        },
+        worker: {
+          status: h.components.services.worker?.status ?? "healthy",
+        },
+      },
+      ...(h.components.env
+        ? {
+            env: {
+              status: h.components.env.status,
+              ...(h.components.env.error ? { error: "Environment misconfigured" } : {}),
+            },
+          }
+        : {}),
+    },
+    metrics: h.metrics,
+    recentAlerts: h.recentAlerts,
+  });
 
-  const sanitized = sanitize(health);
-
-  // Include key health metrics from the sanitized response
-  const response: any = {
-    status: (statusCodes as Record<string, number>)[sanitized.status] ?? 200,
-    timestamp: sanitized.timestamp,
-    uptime: sanitized.uptime,
-  };
-
-  // Include database info if available
-  if (sanitized.components?.database) {
-    response.database = {
-      status: sanitized.components.database.status,
-      latency: sanitized.components.database.latency,
-    };
-    if (sanitized.components.database.error) {
-      response.database.error = sanitized.components.database.error;
-    }
-  }
-
-  // Include redis info if available
-  if (sanitized.components?.redis) {
-    response.redis = {
-      status: sanitized.components.redis.status,
-      latency: sanitized.components.redis.latency,
-    };
-    if (sanitized.components.redis.error) {
-      response.redis.error = sanitized.components.redis.error;
-    }
-  }
-
-  // Include gateways info if available
-  if (sanitized.components?.gateways) {
-    response.gateways = {
-      status: sanitized.components.gateways.status,
-      online: sanitized.components.gateways.online,
-      offline: sanitized.components.gateways.offline,
-      total: sanitized.components.gateways.total,
-    };
-  }
-
-  // Include services info if available
-  if (sanitized.components?.services) {
-    response.services = {
-      status: sanitized.components.services.status,
-      auth: sanitized.components.services.auth?.status,
-      worker: sanitized.components.services.worker?.status,
-    };
-  }
-
-  // Include env info if available
-  if (sanitized.components?.env) {
-    response.env = {
-      status: sanitized.components.env.status,
-    };
-    if (sanitized.components.env.error) {
-      response.env.error = sanitized.components.env.error;
-    }
-  }
-
-  // Include metrics and recent alerts from original response
-  if (sanitized.metrics) {
-    response.metrics = sanitized.metrics;
-  }
-  if (sanitized.recentAlerts) {
-    response.recentAlerts = sanitized.recentAlerts;
-  }
-
-  return NextResponse.json(response, { status: (statusCodes as Record<string, number>)[sanitized.status] ?? 200 });
+  return NextResponse.json(sanitize(health), { status: (statusCodes as Record<string, number>)[health.status] ?? 200 });
 }
 
 export const GET = withRateLimit(handleGet, { keyPrefix: "health_check", maxRequests: 60 });
