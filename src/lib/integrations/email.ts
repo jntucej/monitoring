@@ -1,6 +1,7 @@
 import { randomBytes } from "crypto";
 import { EmailMessage } from "@/lib/integration-types";
 import { getDbClient } from "@/lib/db";
+import { AppError } from "@/server/http/errors";
 
 // Configuration
 const EMAIL_CONFIG = {
@@ -44,6 +45,9 @@ export async function sendEmail(params: {
 
     if (EMAIL_CONFIG.enabled) {
       if (!EMAIL_CONFIG.apiKey) {
+        if (process.env.NODE_ENV === "production") {
+          throw new AppError("EMAIL_NOT_CONFIGURED", "Email service is not configured in production environment", 500);
+        }
         console.warn("[EMAIL] EMAIL_ENABLED=true but EMAIL_API_KEY is not configured.");
         await getDbClient()
           .from("notification_email_queue")
