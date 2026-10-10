@@ -416,7 +416,24 @@ export class PostgresQueryBuilder<T = any> {
     return sqlParts;
   }
 
-
+  private static FK_MAP: Record<string, Record<string, string>> = {
+    movement_logs: {
+      users: "user_id",
+      gates: "gate_id",
+    },
+    gate_passes: {
+      users: "user_id",
+    },
+    visitor_logs: {
+      users: "user_id",      // visitor
+      host: "host_user_id",  // host (alias)
+    },
+    sessions: {
+      users: "user_id",
+    },
+    student_details: { users: "user_id" },
+    employee_details: { users: "user_id" },
+  };
 
   private buildWhereClause(params: any[]): string {
     if (this.filters.length === 0 && this.orClauses.length === 0) return "";
