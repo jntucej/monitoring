@@ -997,7 +997,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT EXECUTE ON FUNCTIONS TO postgres
 -- ============================================================================
 
 -- Auto-generated schema reconciliation for missing tables
-CREATE TABLE IF NOT EXISTS public.announcements (\
+CREATE TABLE IF NOT EXISTS public.announcements (
   id VARCHAR(100) PRIMARY KEY,
   title TEXT NOT NULL,
   message TEXT NOT NULL,
@@ -1012,7 +1012,7 @@ CREATE TABLE IF NOT EXISTS public.announcements (\
 );
 CREATE INDEX IF NOT EXISTS idx_announcements_published ON public.announcements(is_published);
 
-CREATE TABLE IF NOT EXISTS public.attendance_records (\
+CREATE TABLE IF NOT EXISTS public.attendance_records (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   person_id UUID,
   date DATE,
@@ -1346,7 +1346,7 @@ CREATE TABLE IF NOT EXISTS public.password_reset_tokens (
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   token_hash VARCHAR(64) UNIQUE NOT NULL,
   expires_at TIMESTAMPTZ NOT NULL,
-  used BOOLEAN DEFAULT FALSE,
+  used_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_password_reset_token_hash ON public.password_reset_tokens(token_hash);
@@ -1401,25 +1401,6 @@ CREATE TABLE IF NOT EXISTS public.onboarding_progress (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
--- 1. Fix movement_logs.reason NULL values
-UPDATE movement_logs SET reason = 'Regular' WHERE reason IS NULL;
-ALTER TABLE movement_logs ALTER COLUMN reason SET NOT NULL;
-
--- 2. Ensure users.handle is UNIQUE
-UPDATE users SET handle = 'user_' || REPLACE(id::text, '-', '') WHERE handle IS NULL;
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint WHERE conname = 'unique_handle'
-  ) THEN
-    ALTER TABLE users ADD CONSTRAINT unique_handle UNIQUE (handle);
-  END IF;
-END $$;
-
--- 3. Alerts FK: Ensure user_unique_id corresponds to users.unique_id
-UPDATE alerts SET user_unique_id = NULL WHERE user_unique_id IS NOT NULL AND user_unique_id NOT IN (SELECT unique_id FROM users);
-ALTER TABLE alerts ADD CONSTRAINT fk_alerts_user_unique_id FOREIGN KEY (user_unique_id) REFERENCES users(unique_id) ON DELETE SET NULL;
-
 -- 4. Compatibility view students over users + student_details
 CREATE OR REPLACE VIEW students AS
 SELECT

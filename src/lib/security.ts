@@ -96,13 +96,15 @@ export async function getSecurityStats(): Promise<SecurityStats> {
   try {
     const supabase = getSupabaseServiceClient();
     const { data } = await supabase.from("system_settings").select("value").eq("id", "security_ip_allowlist").single();
-    if (data?.value) {
+    if (data?.value && typeof data.value === "object" && !Array.isArray(data.value)) {
       if (Array.isArray(data.value.allowed_ips)) {
         inMemoryAllowedIps = data.value.allowed_ips;
       }
       if (typeof data.value.forced_2fa === "boolean") {
         inMemoryForced2FA = data.value.forced_2fa;
       }
+    } else if (data?.value !== undefined && data?.value !== null) {
+      console.error("[security] system_settings 'security_ip_allowlist' has unexpected shape:", typeof data.value);
     }
   } catch (err) {
     console.error("Error loading security settings from DB:", err);

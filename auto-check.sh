@@ -26,6 +26,17 @@ if [ "$LOCAL" != "$REMOTE" ]; then
     SHORT_HASH=$(git log -1 --format="%h" origin/main)
     AUTHOR=$(git log -1 --format="%an" origin/main)
     COMMIT_MSG=$(git log -1 --format="%s" origin/main)
+
+    if [ ! -f /root/monitoring/.approve-deploy ]; then
+        send_telegram "⏸ *Auto-Deploy Held*
+New code detected on origin/main.
+• *Commit:* \`#${SHORT_HASH}\` (${AUTHOR})
+• *Message:* ${COMMIT_MSG}
+
+Create \`/root/monitoring/.approve-deploy\` to proceed with deployment."
+        echo "[$(date)] Update detected ($REMOTE). Held awaiting .approve-deploy." >> /var/log/monitoring-deploy.log
+        exit 0
+    fi
     
     send_telegram "⚙️ *Auto-Deploy Triggered*
 📥 Pulling new code from GitHub...

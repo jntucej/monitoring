@@ -15,12 +15,11 @@ test.describe('Session Management & Token Invalidation', () => {
   });
 
   test('Rejects malformed user role updates', async ({ request }) => {
-    const response = await request.patch('/api/users/role', {
+    const response = await request.patch('/api/users/non-existent-user-id', {
       headers: {
         'Content-Type': 'application/json',
       },
       data: {
-        userId: 'non-existent-user-id',
         role: 'invalid_role_type',
       },
     });

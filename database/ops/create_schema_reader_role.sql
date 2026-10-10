@@ -10,9 +10,11 @@
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'schema_reader') THEN
-    CREATE ROLE schema_reader LOGIN PASSWORD 'change-me';
+    CREATE ROLE schema_reader LOGIN;
   END IF;
 END $$;
+-- Set password via: psql -v reader_password='...' -f this_file.sql
+ALTER ROLE schema_reader PASSWORD :'reader_password';
 
 GRANT USAGE ON SCHEMA public TO schema_reader;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO schema_reader;

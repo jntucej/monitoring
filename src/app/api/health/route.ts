@@ -14,14 +14,16 @@ async function handleGet(_req: NextRequest) {
   // Bug 135: this endpoint is public (no auth). Raw Postgres/env error strings can leak
   // table/column/constraint names and connection details. Replace with generic messages;
   // keep the non-sensitive status + latency so operators/monitoring still get the signal.
-  const sanitize = (h: typeof health) => {
-    for (const key of ["database", "redis"] as const) {
-      const c = h.components[key];
-      if (c && c.error) c.error = `${key} unavailable`;
-    }
-    if (h.components.env?.error) h.components.env.error = "Environment misconfigured";
-    return h;
-  };
+  const sanitize = (h: typeof health) => ({
+    status: h.status,
+    timestamp: h.timestamp,
+    components: Object.fromEntries(
+      Object.entries(h.components).map(([k, v]) => [
+        k,
+        { status: v.status, latency: v.latency },
+      ])
+    ),
+  });
 
   return NextResponse.json(sanitize(health), { status: statusCodes[health.status] || 200 });
 }

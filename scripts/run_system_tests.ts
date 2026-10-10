@@ -32,6 +32,12 @@ import { validateCsrf } from "../src/lib/csrf";
 import { extractClientIp } from "../src/lib/rate-limit";
 import { NextRequest } from "next/server";
 
+process.env.AUTH_JWT_SECRET = process.env.AUTH_JWT_SECRET || "test_jwt_secret_at_least_32_characters_long_for_tests";
+process.env.MOBILE_TOKEN_SECRET = process.env.MOBILE_TOKEN_SECRET || "test_mobile_token_secret_at_least_32_chars_long";
+process.env.QR_TOKEN_SECRET = process.env.QR_TOKEN_SECRET || "test_qr_token_secret_at_least_32_characters_long";
+process.env.MFA_ENROLL_SECRET = process.env.MFA_ENROLL_SECRET || "test_mfa_enroll_secret_at_least_32_chars_long";
+process.env.TOTP_ENCRYPTION_KEY = process.env.TOTP_ENCRYPTION_KEY || "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+
 async function runTests() {
   console.log("====================================================");
   console.log("🧪 RUNNING GATE MONITOR CORE SYSTEM TEST SUITE");
@@ -68,7 +74,7 @@ async function runTests() {
     assert(threw, "D1: Missing AUTH_JWT_SECRET fails closed in production");
   } finally {
     (process.env as any).NODE_ENV = origEnv;
-    if (origSecret) process.env.AUTH_JWT_SECRET = origSecret;
+    process.env.AUTH_JWT_SECRET = origSecret || "test_jwt_secret_at_least_32_characters_long_for_tests";
   }
 
   // D2. Access Token signing & verification

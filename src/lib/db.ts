@@ -1684,7 +1684,17 @@ export async function addScan(input: {
         gateId: gate.id,
       });
     }
-  } catch { /* fallback to standard query path if RPC is missing */ }
+  } catch (err: any) {
+    console.error("[addScan] process_gate_scan RPC failed, falling back:", err);
+    await addAudit({
+      action: "GATE_OFFLINE",
+      userId: op.id,
+      userName: op.name,
+      role: (op.role || "operator") as Role,
+      details: `RPC fallback: ${String(err?.message || err)}`,
+      gateId: gate.id,
+    }).catch(() => {});
+  }
 
   const duplicate = await isDuplicate(uniqueId, input.direction);
   if (duplicate) {

@@ -5,7 +5,7 @@ Pipeline: discovery -> CSV parse -> validate -> role-label resolve -> field map
           -> safe create (never overwrite) -> report.
 
 Output is restricted to the six approved Jira fields (config:
-jira/config/automation.json -> generation.output_fields):
+config/automation.json -> generation.output_fields):
   Summary, Description, Issue Type, Priority, Status, Labels
 No Assignee. Role routing goes through Labels (QA/IT/IS/FS) only, resolved
 exclusively from the source `Labels` / `role` columns — never from person

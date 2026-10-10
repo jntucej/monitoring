@@ -22,7 +22,7 @@ import csv
 import json
 import sys
 
-DEFAULT_CONFIG_PATH = "jira/config/automation.json"
+DEFAULT_CONFIG_PATH = "config/automation.json"
 
 # Source issues_*.csv layout (authored by the team).
 SOURCE_COLUMNS = [

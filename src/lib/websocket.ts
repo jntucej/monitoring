@@ -219,7 +219,8 @@ export class GateMonitorWS {
     }, delay);
   }
 
-  private notifyConnectionChange(connected: boolean): void {
-    this.connectionListeners.forEach((fn) => fn(connected));
+  private notifyConnectionChange(connected: boolean, isMock?: boolean): void {
+    const isMockData = isMock !== undefined ? isMock : (this.mockMode || this.isMockFallback);
+    this.connectionListeners.forEach((fn) => fn(connected, isMockData));
   }
 }

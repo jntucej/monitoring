@@ -49,10 +49,10 @@ export function CsvBulkImporter() {
     setValidationResult(null);
     setCommitResult(null);
     try {
-      const res = await fetch("/api/users/bulk", {
+      const res = await fetch("/api/users/bulk/validate", {
         method: "POST",
         headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "validate", csvText })
+        body: JSON.stringify({ csvText })
       });
       const json = await res.json();
       if (!res.ok || !json.success) setErrorMsg(json.error?.message || "Validation failed");
@@ -69,10 +69,10 @@ export function CsvBulkImporter() {
     setCommitting(true);
     setErrorMsg(null);
     try {
-      const res = await fetch("/api/users/bulk", {
+      const res = await fetch("/api/users/bulk/commit", {
         method: "POST",
         headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "commit", csvText, skipErrors })
+        body: JSON.stringify({ csvText, skipErrors })
       });
       const json = await res.json();
       if (!res.ok || !json.success) setErrorMsg(json.error?.message || "Import failed");

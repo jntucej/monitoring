@@ -13,7 +13,8 @@ let lastPruneTime = 0;
 const PRUNE_INTERVAL_MS = 30 * 1000; // prune every 30s
 
 function pruneStore(now: number) {
-  if (now - lastPruneTime < PRUNE_INTERVAL_MS && Object.keys(store).length < MAX_STORE_ENTRIES) {
+  const storeSize = Object.keys(store).length;
+  if (now - lastPruneTime < PRUNE_INTERVAL_MS && storeSize < MAX_STORE_ENTRIES) {
     return;
   }
   lastPruneTime = now;

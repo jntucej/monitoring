@@ -1,4 +1,4 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { db, query, authAdmin } from './postgres';
 
 let serviceClient: any = null;
@@ -13,7 +13,9 @@ export function getSupabaseServiceClient(): SupabaseClient {
 }
 
 export function getReadOnlyClient(): SupabaseClient {
-  return getSupabaseServiceClient();
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'anon-key-read-only';
+  return createClient(url, anonKey);
 }
 
 export function createEphemeralSupabaseClient(): SupabaseClient {
