@@ -6,6 +6,16 @@ export async function middleware(req: NextRequest) {
   const requestId = req.headers.get('x-request-id') || crypto.randomUUID();
   const { pathname } = req.nextUrl;
 
+  const BYPASS_PATHS = ['/api/health', '/metrics', '/api/metrics'];
+  if (BYPASS_PATHS.some(p => pathname.startsWith(p))) return NextResponse.next();
+
+  const SCRAPER_IPS = (process.env.SCRAPER_IPS ?? '').split(',').filter(Boolean);
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    || req.headers.get('x-real-ip')
+    || 'unknown';
+
+  if (SCRAPER_IPS.includes(ip)) return NextResponse.next();
+
   if (!pathname.startsWith('/api')) {
     const res = NextResponse.next();
     res.headers.set('x-request-id', requestId);
