@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withRateLimit } from "@/lib/rate-limit";
 import { withAuthorization } from "@/middleware/authorization";
-import { getSupabaseServiceClient } from "@/lib/supabaseClient";
+import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { logAuditEvent } from "@/lib/audit";
 import bcrypt from "bcryptjs";
 import type { AuthContext } from "@/lib/authContext";
@@ -29,7 +29,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
     const supabase = getSupabaseServiceClient();
     const { data: user, error: fetchErr } = await supabase
       .from("users")
-      .select("id, initial_pin_hash, pin_hash")
+      .select("id, name, initial_pin_hash, pin_hash")
       .eq("id", userId)
       .maybeSingle();
 
@@ -79,8 +79,8 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
     await logAuditEvent({
       action: "PIN_CHANGED",
       userId: userId,
-      userName: null,
-      userRole: auth?.role || null,
+      userName: user.name || "User",
+      userRole: auth?.role || "user",
       details: { timestamp: new Date().toISOString() },
     }).catch(() => {});
 

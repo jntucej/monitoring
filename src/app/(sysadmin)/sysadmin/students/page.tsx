@@ -133,13 +133,13 @@ export default function SysAdminStudentsPage() {
         addToast({ variant: "error", title: "Invalid JSON", message: "Custom metadata must be valid JSON." });
         setBusy(false); return;
       }
-      const res = await fetch(`/api/students/${encodeURIComponent(editingStudent.roll)}`, {
+      const studentId = editingStudent.roll || editingStudent.uniqueId || "";
+      const res = await fetch(`/api/students/${encodeURIComponent(studentId)}`, {
               method: "PATCH",
               headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
               body: JSON.stringify({
                 name: editForm.name || undefined, email: editForm.email || undefined,
                 phone: editForm.phone || undefined, department: editForm.branch || undefined,
-                year: editForm.year || undefined, section: editForm.section || undefined,
                 hostelRoom: editForm.hostelRoom || undefined, isHosteller: editForm.isHosteller || undefined,
                 metadata: { ...parsedMeta, hostelRoom: editForm.hostelRoom, isHosteller: editForm.isHosteller },
               }),
@@ -161,7 +161,8 @@ export default function SysAdminStudentsPage() {
       const newStatus = s.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE";
       if (!confirm(`Set ${s.name} to ${newStatus}?`)) return;
       try {
-        const res = await fetch(`/api/students/${encodeURIComponent(s.roll)}`, {
+        const studentId = s.roll || s.uniqueId || "";
+        const res = await fetch(`/api/students/${encodeURIComponent(studentId)}`, {
           method: "PATCH",
           headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
           body: JSON.stringify({ status: newStatus }),
@@ -181,7 +182,8 @@ export default function SysAdminStudentsPage() {
   const handleDeleteStudent = async (s: StudentRecord) => {
     if (!confirm(`Delete student ${s.name} (${s.roll || s.uniqueId})? This cannot be undone.`)) return;
     try {
-      const res = await fetch(`/api/students/${encodeURIComponent(s.roll)}`, { method: "DELETE", headers: getAuthHeaders() });
+      const studentId = s.roll || s.uniqueId || "";
+      const res = await fetch(`/api/students/${encodeURIComponent(studentId)}`, { method: "DELETE", headers: getAuthHeaders() });
       if (res.ok) {
         addToast({ variant: "success", title: "Deleted", message: `${s.name} removed.` });
         loadStudents();

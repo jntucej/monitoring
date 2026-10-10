@@ -11,7 +11,7 @@ async function handlePost(req: NextRequest, context: { auth: AuthContext }) {
       return NextResponse.json({ success: false, error: { message: "Invalid rows array" } }, { status: 400 });
     }
     const result = await commitImport(rows, context.auth.userId, skipErrors !== false);
-    return NextResponse.json({ success: true, data: result, ...result });
+    return NextResponse.json({ success: true, data: result });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: { message: error.message || "Commit failed" } }, { status: 500 });
   }

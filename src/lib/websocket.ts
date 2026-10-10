@@ -4,7 +4,7 @@ import { MockDataGenerator, GateStatusChangePayload, AlertPayload } from "./mock
 type TrafficCallback = (traffic: number) => void;
 type StatusCallback = (data: GateStatusChangePayload) => void;
 type AlertCallback = (data: AlertPayload) => void;
-type ConnectionCallback = (connected: boolean) => void;
+type ConnectionCallback = (connected: boolean, isMock?: boolean) => void;
 
 export type WSEvent = "traffic" | "status" | "alert" | "connection";
 
@@ -14,6 +14,7 @@ export class GateMonitorWS {
   private mockGenerator: MockDataGenerator | null = null;
   public isConnected: boolean = false;
   public mockMode: boolean;
+  public isMockFallback: boolean = false;
 
   private trafficListeners: Set<TrafficCallback> = new Set();
   private statusListeners: Set<StatusCallback> = new Set();

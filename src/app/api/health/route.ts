@@ -18,9 +18,9 @@ async function handleGet(_req: NextRequest) {
     status: h.status,
     timestamp: h.timestamp,
     components: Object.fromEntries(
-      Object.entries(h.components).map(([k, v]) => [
+      Object.entries(h.components).map(([k, v]: [string, any]) => [
         k,
-        { status: v.status, latency: v.latency },
+        { status: v?.status, ...(v?.latency !== undefined ? { latency: v.latency } : {}) },
       ])
     ),
   });

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { findUserById, updateUserRole, updateAccountStatus, setUserFlag, addAudit } from "@/lib/db";
-import { getSupabaseServiceClient } from "@/lib/supabaseClient";
+import { getSupabaseServiceClient } from "@/lib/dbClient";
 import type { Role, AccountStatus } from "@/lib/types";
 import type { FlagStatus } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
@@ -115,11 +115,15 @@ async function handlePatch(req: NextRequest) {
           }
         }
 
+        const updates: Record<string, any> = {};
         if (body.role && VALID_ROLES.includes(body.role as Role)) {
           updates.role = body.role;
         }
         if (body.account_status && VALID_STATUSES.includes(body.account_status as AccountStatus)) {
           updates.account_status = body.account_status;
+        }
+        if (body.status && VALID_STATUSES.includes(body.status as AccountStatus)) {
+          updates.status = body.status;
         }
         if (body.flags && Array.isArray(body.flags)) {
           for (const flag of body.flags) {
@@ -139,6 +143,8 @@ async function handlePatch(req: NextRequest) {
           }
           await addAudit({
             userId: actorId,
+            userName: "Admin",
+            role: (actorRole || "admin") as Role,
             action: "USER_UPDATED",
             details: { timestamp: new Date().toISOString(), targetId: id, updates },
           });
