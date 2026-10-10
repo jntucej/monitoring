@@ -148,7 +148,19 @@ async function handleDelete(req: NextRequest) {
     const { error } = await supabase.from("departments").delete().eq("code", code);
     if (error && error.code !== "42P01") throw error;
 
+    await invalidateCache("departments:all");
     await invalidateCache("departments:*");
+
+    const actorId = req.headers.get("x-user-id") || "sysadmin";
+    const actorRole = (req.headers.get("x-user-role") || "sysadmin") as Role;
+
+    await addAudit({
+      action: "DEPARTMENT_DELETED",
+      userId: actorId,
+      userName: "SysAdmin",
+      role: actorRole,
+      details: `Deleted department '${code}'.`,
+    });
 
     return NextResponse.json({ success: true, message: `Deleted department ${code}` }, { headers: { "Cache-Control": "no-store" } });
   } catch (error: any) {
