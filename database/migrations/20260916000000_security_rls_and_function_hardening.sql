@@ -185,8 +185,15 @@ GRANT EXECUTE ON FUNCTION public.resolve_login_identifier(TEXT) TO authenticated
 GRANT EXECUTE ON FUNCTION public.can_user_authenticate(UUID) TO authenticated, service_role, anon;
 
 -- ----------------------------------------------------------------------------
--- SECTION 8: FUNCTIONS FOR GOVERNING RLS
+-- ADDED: COMPATIBILITY WRAPPER FOR auth.uid() ON SELF-HOSTED DB
 -- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid
+LANGUAGE sql STABLE AS $$
+  SELECT COALESCE(
+    current_setting('app.current_user_id', true)::uuid,
+    current_setting('request.jwt.claim.sub', true)::uuid
+  )
+$$;
 
 CREATE OR REPLACE FUNCTION public.is_admin(p_uid uuid)
  RETURNS boolean
