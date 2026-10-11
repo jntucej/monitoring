@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
-import { getCurrentOccupancy } from "@/server/services/occupancy/occupancy";
+import { getCurrentOccupancy } from "@/server/services/occupancy/current";
 import { getPredictions } from "@/server/services/analytics/predictions";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 

@@ -103,7 +103,8 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "Vice Principal Desk",
           items: [
-            { href: "/exam/permissions", label: "VP Approvals", icon: "CheckSquare", badge: "PENDING" },
+            { href: "/vice-principal", label: "Dashboard", icon: "LayoutDashboard" },
+            { href: "/exam/permissions", label: "Approvals", icon: "CheckSquare" },
           ],
         },
         {
@@ -114,6 +115,48 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
       ];
+      break;
+
+    case "exam_branch":
+      groups = [
+        {
+          groupLabel: "Exam Branch",
+          items: [
+            { href: "/exam", label: "Dashboard", icon: "LayoutDashboard" },
+            { href: "/exam/permissions", label: "Exam Approvals", icon: "CheckSquare" },
+          ],
+        },
+        {
+          groupLabel: "General",
+          items: [
+            { href: "/profile", label: "My Profile", icon: "User" },
+            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+          ],
+        },
+      ];
+      break;
+
+    case "hostel_manager":
+    case "deputy_warden":
+    case "caretaker":
+    case "warden":
+      groups = [
+        {
+          groupLabel: "Hostel Desk",
+          items: [
+            { href: "/warden", label: "Hostel Dashboard", icon: "LayoutDashboard" },
+            { href: "/hostel/permissions", label: "Pass Approvals", icon: "CheckSquare" },
+          ],
+        },
+        {
+          groupLabel: "General",
+          items: [
+            { href: "/profile", label: "My Profile", icon: "User" },
+            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+          ],
+        },
+      ];
+      break;
 
     case "oie":
     case "exam_branch":

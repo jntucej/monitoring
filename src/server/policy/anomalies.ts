@@ -1,5 +1,3 @@
-import { randomBytes } from "crypto";
-
 export interface AnomalyEvent {
   id: string;
   metric: string;
@@ -16,16 +14,17 @@ export function classifyAnomaly(
   actual: number,
   expected: number,
   stdDev: number,
-  timestamp: string = new Date().toISOString()
+  timestamp: string,
 ): AnomalyEvent | null {
   const zScore = Math.round(((actual - expected) / stdDev) * 100) / 100;
-  if (Math.abs(zScore) < 2.0) {
-    return null;
-  }
+  const abs = Math.abs(zScore);
 
-  const severity: "high" | "critical" = Math.abs(zScore) > 3.0 ? "critical" : "high";
+  if (abs < 2.0) return null;
+
+  const severity = abs > 3.0 ? "critical" : "high";
+
   return {
-    id: `anom_${Date.now()}_${randomBytes(4).toString("hex")}`,
+    id: `anom_${Date.now()}_${Math.random().toString(16).slice(2, 6)}`,
     metric,
     actual_value: actual,
     expected_value: expected,

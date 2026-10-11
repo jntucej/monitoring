@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
-import { getCurrentOccupancy } from "@/server/services/occupancy/occupancy";
+import { getCurrentOccupancy } from "@/server/services/occupancy/current";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 45; // ponytail: limit lifetime to 45s for serverless execution
