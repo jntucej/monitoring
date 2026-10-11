@@ -7,6 +7,8 @@ import { NavigationProvider } from "@/context/NavigationContext";
 import { ToastProvider } from "@/components/ui/toast";
 import { SafeAreaAppShell } from "@/components/shared/SafeAreaAppShell";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
+import { Suspense } from "react";
+import { LoadingStates } from "@/components/shared/LoadingStates";
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -22,13 +24,15 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
 
   return (
     <ErrorBoundary>
-      <GlassProvider initialDark={true}>
+      <Suspense fallback={<LoadingStates />}>
+        <GlassProvider initialDark={true}>
         <NavigationProvider>
           <ToastProvider>
             <SafeAreaAppShell>{children}</SafeAreaAppShell>
           </ToastProvider>
         </NavigationProvider>
       </GlassProvider>
+      </Suspense>
     </ErrorBoundary>
   );
 }
