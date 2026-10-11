@@ -34,9 +34,9 @@ services:
       - redisdata:/data
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-ci_dummy_redis_password_123}", "ping"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 3
     networks:
       - gate-net
 
