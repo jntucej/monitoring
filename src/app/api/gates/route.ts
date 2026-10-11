@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
+import { getAllGatesLive } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
-import { listGates } from "@/server/services/gates/list";
-import { ok } from "@/server/http/response";
 
-async function handleGet() {
-  const result = await listGates();
-  return ok(result);
+async function handleGet(req: NextRequest) {
+  try {
+    const data = await getAllGatesLive();
+    return NextResponse.json({ success: true, data });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: 'Failed to fetch gates' }, { status: 500 });
+  }
 }
 
 async function handlePost(req: NextRequest) {
@@ -25,18 +28,18 @@ async function handlePost(req: NextRequest) {
     }
 
     const { data, error } = await service
-      .from("gates")
+      .from('gates')
       .insert(insertPayload)
       .select()
       .single();
 
     if (error) {
-      return NextResponse.json({ success: false, error: "Failed to create gate" }, { status: 500 });
+      return NextResponse.json({ success: false, error: 'Failed to create gate' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }
 

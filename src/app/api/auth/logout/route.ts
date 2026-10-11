@@ -10,20 +10,11 @@ async function handlePost(req: NextRequest) {
 
   if (sessionToken) {
     try {
-      const res = await query(
-        `UPDATE sessions SET revoked_at = NOW() 
-         WHERE refresh_hash = $1 OR user_id::text = $1 OR id::text = $1
-         RETURNING user_id`,
+      await query(
+        "UPDATE sessions SET revoked_at = NOW() WHERE refresh_hash = $1 OR user_id::text = $1 OR id::text = $1",
         [sessionToken]
       );
-      if (res.rows.length > 0) {
-        const userId = res.rows[0].user_id;
-        await query(
-           "UPDATE users SET session_version = session_version + 1 WHERE id = $1",
-           [userId]
-        );
-      }
-    } catch (e) {
+    } catch {
       // Best-effort session table revocation
     }
   }
