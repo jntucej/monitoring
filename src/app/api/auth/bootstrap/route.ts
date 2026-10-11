@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
+import { hash, compare, genSalt } from "@/server/lib/crypto";
 import { withRateLimit, checkRateLimit } from "@/lib/rate-limit";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { hashPassword } from "@/lib/auth-token";
@@ -76,7 +76,7 @@ async function handlePost(req: NextRequest) {
   const row = rows?.[0];
   if (!row) return await rejectAudit(user);
 
-  const ok = await bcrypt.compare(String(code).trim().toUpperCase(), row.code_hash);
+  const ok = await compare(String(code).trim().toUpperCase(), row.code_hash);
   if (!ok) return await rejectAudit(user);
 
   const { data: burned } = await svc
@@ -88,7 +88,7 @@ async function handlePost(req: NextRequest) {
   if (!burned || burned.length === 0) return await rejectAudit(user);
 
   const pwHash = await hashPassword(newPassword);
-  const pinHash = await bcrypt.hash(newPin, 10);
+  const pinHash = await hash(newPin, 10);
 
   await query(
     `UPDATE users

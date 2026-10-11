@@ -1,17 +1,7 @@
--- database/migrations/20261015000000_audit_password_changed.sql
--- Adds PASSWORD_CHANGED to the audit_logs.action allow-list so self-service
--- password changes can be audited without violating the CHECK constraint.
-BEGIN;
-
+-- Extend audit_logs action allowlist with AUTHORIZATION_DENIED and PASSWORD_CHANGED
 DO $$
 BEGIN
-  IF EXISTS (
-    SELECT 1 FROM pg_constraint
-    WHERE conname = 'audit_logs_action_known'
-      AND conrelid = 'public.audit_logs'::regclass
-  ) THEN
-    ALTER TABLE public.audit_logs DROP CONSTRAINT audit_logs_action_known;
-  END IF;
+  ALTER TABLE public.audit_logs DROP CONSTRAINT IF EXISTS audit_logs_action_known;
 END $$;
 
 ALTER TABLE public.audit_logs
@@ -41,7 +31,6 @@ ALTER TABLE public.audit_logs
     'GATE_PASS_BULK_APPROVED', 'ADMIN_STREAM_OTHER_USER',
     'MFA_REQUIRED_FOR_ADMIN_CHANGED', 'ROLE_REGISTRY_CHANGED',
     'PHOTO_CAPTURED', 'PHOTO_CAPTURE_CONSENT_DENIED',
-    'MANUAL_ENTRY_AUTHORIZED', 'MANUAL_ENTRY_DENIED'
+    'MANUAL_ENTRY_AUTHORIZED', 'MANUAL_ENTRY_DENIED',
+    'AUTHORIZATION_DENIED'
   ));
-
-COMMIT;

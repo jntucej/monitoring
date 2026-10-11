@@ -6,7 +6,7 @@ import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withRateLimit } from "@/lib/rate-limit";
 import { withAuthorizationPreMfa } from "@/middleware/authorization";
 import { randomBytes } from "crypto";
-import bcrypt from "bcryptjs";
+import { hash, compare, genSalt } from "@/server/lib/crypto";
 
 function base64url(buf: Buffer): string {
   return buf.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
@@ -63,7 +63,7 @@ async function handlePost(req: NextRequest) {
 
     // Generate 10 recovery codes & bcrypt hashes
     const recoveryCodes = Array.from({ length: 10 }, () => base64url(randomBytes(8)));
-    const recoveryHashes = await Promise.all(recoveryCodes.map((c) => bcrypt.hash(c, 10)));
+    const recoveryHashes = await Promise.all(recoveryCodes.map((c) => hash(c, 10)));
 
     await supabase
       .from("users")

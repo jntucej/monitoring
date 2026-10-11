@@ -1,27 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-import { checkSystemHealth } from "@/lib/health";
-import { query } from "@/lib/postgres";
+import { NextRequest } from "next/server";
+import { getHealth } from "@/server/services/health/check";
+import { withRateLimit } from "@/lib/rate-limit";
+import { ok } from "@/server/http/response";
 
-async function handleGet(req: NextRequest) {
-  const startTime = Date.now();
-  const health = await checkSystemHealth();
-  const duration = Math.round(Date.now() - startTime);
-
-  // Log this request's actual response time
-  try {
-    const result = await query(
-      `INSERT INTO api_metrics (path, method, response_time, status_code, timestamp)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING id`,
-      ['/api/health', 'GET', duration, 200, new Date().toISOString()]
-    );
-    console.log(`[health] metric inserted: ${duration}ms, id=${result.rows?.[0]?.id}`);
-  } catch (e) {
-    console.error('[health] metric insert FAILED:', e);
-  }
-
-  const statusCodes = { healthy: 200, degraded: 200, unhealthy: 503 };
-  const sanitize = (h: typeof health): typeof h => ({
+function sanitizeHealth(h: any) {
+  return {
     status: h.status,
     timestamp: h.timestamp,
     uptime: h.uptime,
@@ -31,11 +14,15 @@ async function handleGet(req: NextRequest) {
         latency: h.components.database.latency,
         ...(h.components.database.error ? { error: "Database unavailable" } : {}),
       },
-      redis: {
-        status: (h.components as any).redis?.status ?? "healthy",
-        latency: (h.components as any).redis?.latency ?? 0,
-        ...((h.components as any).redis?.error ? { error: "Redis unavailable" } : {}),
-      },
+      ...(h.components.redis
+        ? {
+            redis: {
+              status: h.components.redis.status,
+              latency: h.components.redis.latency,
+              ...(h.components.redis.error ? { error: "Redis unavailable" } : {}),
+            },
+          }
+        : {}),
       gateways: {
         status: h.components.gateways.status,
         online: h.components.gateways.online,
@@ -44,21 +31,38 @@ async function handleGet(req: NextRequest) {
       },
       services: {
         status: h.components.services.status,
-        auth: { status: h.components.services.auth?.status ?? "healthy" },
-        worker: { status: h.components.services.worker?.status ?? "healthy" },
+        auth: {
+          status: h.components.services.auth?.status ?? "healthy",
+        },
+        worker: {
+          status: h.components.services.worker?.status ?? "healthy",
+        },
       },
-      ...(h.components.env ? {
-        env: { status: h.components.env.status, ...(h.components.env.error ? { error: "Environment misconfigured" } : {}) },
-      } : {}),
+      ...(h.components.env
+        ? {
+            env: {
+              status: h.components.env.status,
+              ...(h.components.env.error ? { error: "Environment misconfigured" } : {}),
+            },
+          }
+        : {}),
     },
     metrics: h.metrics,
     recentAlerts: h.recentAlerts,
-  });
-
-  return NextResponse.json(sanitize(health), {
-    status: (statusCodes as Record<string, number>)[health.status] ?? 200,
-    headers: { 'X-Response-Time': `${duration}ms` },
-  });
+  };
 }
 
-export const GET = handleGet;
+async function handleGet(_req: NextRequest) {
+  const health = await getHealth();
+  const sanitized = sanitizeHealth(health);
+
+  const statusCodes: Record<string, number> = {
+    healthy: 200,
+    degraded: 200,
+    unhealthy: 503,
+  };
+
+  return ok(sanitized, statusCodes[health.status] ?? 200);
+}
+
+export const GET = withRateLimit(handleGet, { keyPrefix: "health_check", maxRequests: 60 });
