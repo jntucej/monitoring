@@ -26,7 +26,13 @@ async function handlePut(req: NextRequest, context: { auth: AuthContext }) {
     return NextResponse.json({ success: false, error: { message: "Invalid JSON body" } }, { status: 400 });
   }
 
-  const success = await updateNotificationPreferences(userId, body as Partial<NotificationPreferences>);
+  const allowedFields = {
+    channels: body.channels,
+    types: body.types,
+    quietHours: body.quietHours,
+  };
+
+  const success = await updateNotificationPreferences(userId, allowedFields);
   return NextResponse.json({ success });
 }
 

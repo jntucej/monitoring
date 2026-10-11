@@ -52,12 +52,12 @@ async function handleGet(req: NextRequest) {
 
     // Check database size
     const dbSizeResult = await query(`SELECT pg_size_pretty(pg_database_size('gate_monitor')) as size`);
-    const databaseSize = dbSizeResult[0]?.size || 'N/A';
+    const databaseSize = dbSizeResult.rows[0]?.size || 'N/A';
 
     // Check backup frequency
     const backupCheck = await query(
       `SELECT COUNT(*) as count FROM schema_migrations WHERE applied_at > NOW() - INTERVAL '1 hour'`
-    ) as any[];
+    );
 
     return NextResponse.json({
       success: true,

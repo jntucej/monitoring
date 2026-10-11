@@ -36,6 +36,7 @@ export async function getPostgresPool(): Promise<Pool> {
       connectionTimeoutMillis: 5000,
       statement_timeout: 30000,
       query_timeout: 30000,
+      idle_in_transaction_session_timeout: 10000,
       ssl:
         process.env.PG_SSL === "true"
           ? { rejectUnauthorized: process.env.PG_SSL_REJECT_UNAUTHORIZED !== "false" }

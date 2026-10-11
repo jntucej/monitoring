@@ -32,3 +32,11 @@ export function CardSkeleton({ height = "h-32" }: { height?: string }) {
     </div>
   );
 }
+
+export function LoadingStates() {
+  return (
+    <div className="flex items-center justify-center p-8 text-[var(--text-muted)] text-sm">
+      Loading…
+    </div>
+  );
+}

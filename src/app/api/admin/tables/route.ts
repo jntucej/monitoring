@@ -22,7 +22,7 @@ async function handleGet(req: NextRequest) {
        ORDER BY table_name`
     );
 
-    const tableNames = tables.map((row: any) => row.table_name);
+    const tableNames = tables.rows.map((row: any) => row.table_name);
     return NextResponse.json({ success: true, data: tableNames });
   } catch (error) {
     console.error("Error fetching tables:", error);
