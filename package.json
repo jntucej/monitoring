@@ -19,7 +19,8 @@
     "lint": "eslint src",
     "kb:ingest": "node scripts/ingest-kb.mjs",
     "kb:ingest:warden": "node scripts/ingest-kb.mjs --dir docs/kb/warden --role warden,admin,sysadmin",
-    "verify:permission-workflow": "npx tsx scripts/verify-permission-workflow.ts"
+    "verify:permission-workflow": "npx tsx scripts/verify-permission-workflow.ts",
+    "scaffold:panel": "node scripts/scaffold-panel.mjs"
   },
   "dependencies": {
     "@remotion/player": "^4.0.518",
