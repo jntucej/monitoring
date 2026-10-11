@@ -9,6 +9,7 @@ import {
   createUser as provisionProfile,
   hashPin,
   addAudit,
+  generateUceJUniqueId,
 } from "@/lib/db";
 import type { Role } from "@/lib/types";
 import { withAuthorization } from "@/middleware/authorization";
@@ -113,8 +114,17 @@ async function handlePost(req: NextRequest) {
     const effectiveDept = departmentId || department;
     const effectiveHostel = assignedHostel || hostelRoom;
 
+    // For non-staff roles (student/parent/guardian/visitor/worker), when no
+    // explicit unique_id/employee_id was provided, auto-generate a ucej-NNNN
+    // id (e.g. ucej-s-0001). Staff roles keep their existing convention.
+    let resolvedUniqueId: string | undefined = effectiveUniqueId;
+    const ucejRoles = ["student", "parent", "guardian", "visitor", "worker"];
+    if (ucejRoles.includes(role) && !resolvedUniqueId) {
+      resolvedUniqueId = await generateUceJUniqueId(role);
+    }
+
     const rawEmail = body?.email;
-    const email = rawEmail || (effectiveUniqueId ? `${effectiveUniqueId.trim().toLowerCase()}@jntuhcej.ac.in` : undefined);
+    const email = rawEmail || (resolvedUniqueId ? `${resolvedUniqueId.trim().toLowerCase()}@jntuhcej.ac.in` : undefined);
 
     if (!name || !email || !role) {
       return NextResponse.json(
@@ -189,7 +199,7 @@ async function handlePost(req: NextRequest) {
             phone: phone ?? null,
             department: effectiveDept ?? null,
             designation: body?.designation ?? null,
-            employee_id: effectiveUniqueId ?? null,
+            employee_id: resolvedUniqueId ?? null,
           },
           app_metadata: { provider: 'email', role: String(role) },
         });
@@ -209,7 +219,7 @@ async function handlePost(req: NextRequest) {
       role: role as Role,
       email: String(email).trim(),
       employeeId: employeeId || undefined,
-      uniqueId: effectiveUniqueId || undefined,
+      uniqueId: resolvedUniqueId || undefined,
       phone: phone || undefined,
       gateId: gateId || undefined,
       parentId: parentId || guardianId || undefined, guardianId: guardianId || parentId || undefined,
@@ -220,7 +230,7 @@ async function handlePost(req: NextRequest) {
       departmentId: effectiveDept || undefined,
       canViewGender: canViewGender || undefined,
       status,
-      loginIdentifier: loginIdentifier || effectiveUniqueId || String(email).trim(),
+      loginIdentifier: loginIdentifier || resolvedUniqueId || String(email).trim(),
       initialPinHash: pin ? await hashPin(pin) : undefined,
     });
 
@@ -241,7 +251,7 @@ async function handlePost(req: NextRequest) {
     if (role === "student") {
       await service.from("student_details").upsert({
         user_id: user.id || authUserId,
-        roll: body.roll || effectiveUniqueId || body.uniqueId || (user as any).unique_id || String(email).split("@")[0],
+        roll: body.roll || resolvedUniqueId || body.uniqueId || (user as any).unique_id || String(email).split("@")[0],
         year: body.year ?? 1,
         section: body.section ?? "A",
         batch: body.batch ?? "",
@@ -259,7 +269,7 @@ async function handlePost(req: NextRequest) {
     if (["faculty", "staff", "operator", "admin", "sysadmin", "worker", "caretaker", "deputy_warden", "hostel_manager", "principal", "vice_principal", "oie", "exam_branch", "warden"].includes(role)) {
       const finalEmployeeId =
         (employeeId && String(employeeId).trim()) ||
-        (effectiveUniqueId && String(effectiveUniqueId).trim()) ||
+        (resolvedUniqueId && String(resolvedUniqueId).trim()) ||
         `EMP-${String(user.id || authUserId).slice(0, 8).toUpperCase()}`;
 
       try {
@@ -283,7 +293,8 @@ async function handlePost(req: NextRequest) {
     return NextResponse.json({
       success: true,
       data: user,
-      meta: { authProvider: 'supabase', inviteSent },
+      uniqueId: resolvedUniqueId ?? (user as any).unique_id ?? null,
+      meta: { authProvider: 'supabase', inviteSent, uniqueIdGenerated: ucejRoles.includes(role) && !effectiveUniqueId },
     });
   } catch (error) {
     console.error('Error creating user:', error);

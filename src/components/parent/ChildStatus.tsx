@@ -16,7 +16,7 @@ export function ChildStatus() {
         // Get parent ID from auth (demo)
         const authRaw = sessionStorage.getItem("gate-monitor-auth");
         const auth = authRaw ? JSON.parse(authRaw) : null;
-        const parentId = auth?.user?.parentId ?? auth?.user?.id ?? "pa-1";
+        const parentId = auth?.state?.user?.id ?? auth?.user?.id ?? "pa-1";
 
         const res = await fetch(`/api/students?parentId=${parentId}`, { headers: getAuthHeaders(), cache: "no-store" });
         const json = await res.json();

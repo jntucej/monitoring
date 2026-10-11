@@ -1184,6 +1184,46 @@ export async function findAllUsers(): Promise<User[]> {
 }
 
 /**
+ * Role → auto-increment unique_id prefix for non-staff roles.
+ * Pattern: `ucej-{prefix}-{NNNN}` where NNNN = (max existing NNNN for that
+ * prefix) + 1, zero-padded to 4 digits. See docs/unique-id-pattern.md.
+ */
+const UCEJ_ROLE_PREFIXES: Record<string, string> = {
+  student: "s",
+  parent: "p",
+  guardian: "g",
+  visitor: "v",
+  worker: "w",
+};
+
+/**
+ * Auto-generate a ucej-NNNN unique_id for non-staff roles when no explicit
+ * uniqueId/employeeId was supplied. Scans the users table for the highest
+ * existing numeric suffix matching the role's prefix and increments it.
+ * Falls back to 0001 when no existing values exist.
+ */
+export async function generateUceJUniqueId(role: string): Promise<string> {
+  const prefix = UCEJ_ROLE_PREFIXES[role];
+  if (!prefix) throw new Error(`No ucej prefix for role "${role}"`);
+  const prefixStr = `ucej-${prefix}-`;
+  try {
+    const client = getDbClient();
+    const { data } = await client.from("users")
+      .select("unique_id")
+      .like("unique_id", `${prefixStr}%`);
+    let max = 0;
+    for (const row of data ?? []) {
+      const num = parseInt(String(row.unique_id).slice(prefixStr.length), 10);
+      if (!Number.isNaN(num) && num > max) max = num;
+    }
+    return `${prefixStr}${String(max + 1).padStart(4, "0")}`;
+  } catch (e) {
+    console.warn("[generateUceJUniqueId] fallback to 0001:", e);
+    return `${prefixStr}0001`;
+  }
+}
+
+/**
  * Insert a user profile into public.users.
  *
  * IMPORTANT: `id` MUST be the UUID of an ALREADY-PROVISIONED Supabase Auth
@@ -2516,6 +2556,166 @@ export async function getLinkedPersons(
 }
 
 export const getParentChildren = getLinkedPersons;
+
+/* ------------------------------------------------------------------ *
+ *  PARENT (GUARDIAN) MANAGEMENT
+ * ------------------------------------------------------------------ */
+
+export interface ParentListing {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  uniqueId: string | null;
+  status: string;
+  children: Array<{ id: string; roll: string; name: string; status: string }>;
+}
+
+export interface ParentListingFilters {
+  q?: string;
+  role?: string;
+  includeUnlinked?: boolean;
+}
+
+/**
+ * List parent/guardian users with their linked students
+ * (student_details.guardian_id = parent user id).
+ */
+export async function listParents(filters: ParentListingFilters = {}): Promise<ParentListing[]> {
+  const svc = getSupabaseServiceClient();
+  const role = filters.role || "guardian";
+
+  const { data: parentRows, error: pErr } = await svc
+    .from("users")
+    .select("id, name, email, phone, unique_id, status, role")
+    .eq("role", role);
+
+  if (pErr || !parentRows || parentRows.length === 0) return [];
+
+  // Bulk-load every student_details row that points at these parents.
+  const { data: guardLinks, error: gErr } = await svc
+    .from("student_details")
+    .select("user_id, roll, guardian_id")
+    .in("guardian_id", parentRows.map((r: any) => r.id));
+
+  if (gErr || !guardLinks) return [];
+
+  const { data: students } = await svc
+    .from("users")
+    .select("id, name, status")
+    .in(
+      "id",
+      guardLinks.map((g: any) => g.user_id)
+    );
+
+  const studentMap = new Map<string, any>((students || []).map((s: any) => [s.id, s]));
+  const byParent = new Map<string, Array<{ id: string; roll: string; name: string; status: string }>>();
+  for (const link of guardLinks) {
+    const s = studentMap.get(link.user_id);
+    if (!s) continue;
+    const arr = byParent.get(link.user_id) || [];
+    arr.push({ id: s.id, roll: link.roll || s.unique_id || s.id, name: s.name, status: s.status });
+    byParent.set(link.user_id, arr);
+  }
+
+  const needle = (filters.q || "").trim().toLowerCase();
+  return parentRows
+    .map((r: any): ParentListing => ({
+      id: r.id,
+      name: r.name || "—",
+      email: r.email || "—",
+      phone: r.phone || null,
+      uniqueId: r.unique_id || null,
+      status: r.status || "ACTIVE",
+      children: byParent.get(r.id) || [],
+    }))
+    .filter((p) => {
+      if (needle) {
+        const hay = `${p.name} ${p.email} ${p.uniqueId || ""} ${p.phone || ""} ${p.children.map((c) => c.name).join(" ")}`.toLowerCase();
+        if (!hay.includes(needle)) return false;
+      }
+      if (!filters.includeUnlinked && p.children.length === 0) return false;
+      return true;
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/**
+ * Link a parent/guardian user to a student: sets
+ * student_details.guardian_id = parentUserId on the student's row.
+ * Pass parentUserId = null/'' to unlink.
+ */
+export async function linkParentToStudent(
+  studentUserId: string,
+  parentUserId: string | null,
+  actorId?: string,
+): Promise<{ ok: boolean; guardianId: string | null }> {
+  const svc = getSupabaseServiceClient();
+  // Ensure a student_details row exists for the student (roll = their unique_id).
+  const { data: stu } = await svc
+    .from("users")
+    .select("id, unique_id")
+    .eq("id", studentUserId)
+    .maybeSingle();
+  if (!stu) throw new Error("Student user not found");
+
+  const { data: existing } = await svc
+    .from("student_details")
+    .select("user_id")
+    .eq("user_id", studentUserId)
+    .maybeSingle();
+
+  if (existing) {
+    await svc
+      .from("student_details")
+      .update({ guardian_id: parentUserId })
+      .eq("user_id", studentUserId);
+  } else {
+    await svc
+      .from("student_details")
+      .insert({
+        user_id: studentUserId,
+        roll: stu.unique_id || null,
+        guardian_id: parentUserId,
+      });
+  }
+
+  await addAudit({
+    action: "GUARDIAN_LINK_UPDATED",
+    userId: actorId || "system",
+    userName: "SysAdmin",
+    role: "sysadmin",
+    details: parentUserId
+      ? `Linked guardian ${parentUserId} to student ${studentUserId}`
+      : `Unlinked guardian for student ${studentUserId}`,
+  });
+
+  return { ok: true, guardianId: parentUserId };
+}
+
+/**
+ * Fetch the student_details.guardian_id for one student user id.
+ */
+export async function getStudentGuardianLink(studentUserId: string): Promise<string | null> {
+  const svc = getSupabaseServiceClient();
+  const { data } = await svc
+    .from("student_details")
+    .select("guardian_id")
+    .eq("user_id", studentUserId)
+    .maybeSingle();
+  return data?.guardian_id ?? null;
+}
+
+/**
+ * Bulk parent listing used by the Parents page — pairs each parent with
+ * their linked children so the UI can render the table in one round trip.
+ */
+export async function getParentsWithChildren(
+  role: string = "guardian",
+): Promise<Array<ParentListing & { linkedStudents: Array<{ id: string; roll: string; name: string; status: string }> }>> {
+  const parents = await listParents({ role });
+  return parents.map((p) => ({ ...p, linkedStudents: p.children }));
+}
 
 /* ------------------------------------------------------------------ *
  *  STUDENT FLAGS

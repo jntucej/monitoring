@@ -39,6 +39,7 @@ const NAV = [
     items: [
       { href: "/sysadmin", label: "System Overview", icon: LayoutDashboard },
       { href: "/sysadmin/students", label: "Manage Students", icon: GraduationCap },
+      { href: "/sysadmin/parents", label: "Parents & Guardians", icon: Users },
       { href: "/sysadmin/access-keys", label: "Access Keys", icon: KeyRound },
       { href: "/sysadmin/staff", label: "Manage Staff", icon: Briefcase },
       { href: "/sysadmin/roles", label: "Roles & Permissions", icon: UserCheck },

@@ -46,6 +46,7 @@ export const PAGE_META: Record<string, { title: string; description?: string }> 
   "/sysadmin/sso": { title: "SSO Configuration", description: "Single sign-on and OIDC setup" },
   "/sysadmin/staff": { title: "Staff", description: "Staff accounts and oversight" },
   "/sysadmin/students": { title: "Students", description: "Student accounts and lifecycle" },
+  "/sysadmin/parents": { title: "Parents & Guardians", description: "Parent accounts and guardian links" },
   "/sysadmin/system": { title: "System", description: "System configuration and monitoring" },
   "/gate/[gateId]": { title: "Gate Terminal", description: "Gate scanner desk and operations" },
   "/faculty": { title: "Faculty Dashboard", description: "Faculty attendance and approvals" },
