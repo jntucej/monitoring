@@ -33,7 +33,7 @@ async function handlePost(req: NextRequest) {
     const supabase = getSupabaseServiceClient();
     const { data: targetUser } = await supabase
       .from("users")
-      .select("id, two_factor_enabled")
+      .select("id, role, two_factor_enabled")
       .eq("id", targetUserId)
       .maybeSingle();
 
@@ -41,6 +41,14 @@ async function handlePost(req: NextRequest) {
       return NextResponse.json(
         { success: false, error: { code: "NOT_FOUND", message: "User not found" } },
         { status: 404 }
+      );
+    }
+
+    const actorRole = req.headers.get("x-user-role");
+    if (targetUser.role === "sysadmin" && actorRole !== "sysadmin") {
+      return NextResponse.json(
+        { success: false, error: { code: "FORBIDDEN", message: "Only sysadmin can disable 2FA for a sysadmin account" } },
+        { status: 403 }
       );
     }
 
