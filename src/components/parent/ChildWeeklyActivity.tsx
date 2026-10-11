@@ -71,8 +71,6 @@ export function ChildWeeklyActivity() {
             isToday: i === 0,
           });
         }
-        const dayIndex = new Map(days.map((d, idx) => [d.date, idx]));
-
         const results = await Promise.all(
           kids.map(async (k) => {
             const roll = k.uniqueId || k.roll || "";

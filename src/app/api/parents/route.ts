@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   listParents,
   linkParentToStudent,
+  generateUceJUniqueId,
+  addAudit,
 } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
+import { getSupabaseServiceClient } from "@/lib/dbClient";
+import type { Role } from "@/lib/types";
 
 /**
  * GET /api/parents
@@ -37,16 +41,18 @@ async function handleGet(req: NextRequest) {
  *   email?: string,
  *   phone?: string,
  *   role: "guardian" | "parent" (default "guardian"),
- *   uniqueId?: string  (auto ucej-p-NNNN when omitted),
- *   studentId?: string  // link a parent to a specific student by user id,
- *   parentUserId?: string // parent to link to a student (used with studentId)
+ *   uniqueId?: string,   // auto ucej-p-NNNN when omitted
+ *   studentId?: string,  // link the new parent to this student immediately
  * }
  *
- * Creates the parent user (if needed) and links them to a student.
- * Returns the created/linked parent info plus the auto-generated password
- * (shown once in a modal).
+ * Provisions a Supabase Auth identity + public.users profile row for a
+ * parent/guardian, auto-generates ucej-p-NNNN, and returns the one-time
+ * initial password (the only place it ever appears). Optionally links the
+ * new parent to a student in one call.
  */
 async function handlePost(req: NextRequest) {
+  const actorId = req.headers.get("x-user-id") || "system";
+  const actorRole = req.headers.get("x-user-role") as Role || "sysadmin";
   try {
     const body = await req.json().catch(() => ({}));
     const {
@@ -56,43 +62,42 @@ async function handlePost(req: NextRequest) {
       role = "guardian",
       uniqueId,
       studentId,
-      parentUserId,
-      password,
     } = body;
 
-    if (!name || typeof name !== "string") {
+    if (!name || typeof name !== "string" || !name.trim()) {
       return NextResponse.json(
         { success: false, error: { code: "MISSING_NAME", message: "Parent name is required" } },
         { status: 400 }
       );
     }
 
-    // Generate password if not supplied
-    let generatedPassword: string | null = null;
-    if (password && typeof password === "string" && password.length >= 8) {
-      // use supplied password
-    } else {
-      generatedPassword = Array.from({ length: 12 }, () =>
-        "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789"[
-          Math.floor(Math.random() * 57)
-        ]
-      ).join("");
+    if (role !== "guardian" && role !== "parent") {
+      return NextResponse.json(
+        { success: false, error: { code: "INVALID_ROLE", message: "role must be 'guardian' or 'parent'" } },
+        { status: 400 }
+      );
     }
 
-    // Use Supabase Admin API via the service client for auth user creation.
-    const { getSupabaseServiceClient } = await import("@/lib/dbClient");
+    // One-time initial password — generated here and returned only in this response.
+    const generatedPassword = Array.from({ length: 12 }, () =>
+      "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789"[
+        Math.floor(Math.random() * 57)
+      ]
+    ).join("");
+
     const service = getSupabaseServiceClient();
 
-    // Build the auth user
     const effectiveEmail =
       (email && String(email).trim()) ||
-      `${String(name).trim().toLowerCase().replace(/[^a-z0-9]/g, ".")}@jntuhcej.ac.in`;
+      `${String(name).trim().toLowerCase().replace(/[^a-z0-9]+/g, ".")}@jntuhcej.ac.in`;
 
+    // ---- Step 1: Supabase Auth identity ----
     const { data: authUser, error: authErr } = await service.auth.admin.createUser({
       email: effectiveEmail,
-      password: password && typeof password === "string" ? password : generatedPassword!,
+      password: generatedPassword,
       email_confirm: true,
-      user_metadata: { name: String(name).trim(), role: String(role) },
+      user_metadata: { name: String(name).trim(), role },
+      app_metadata: { provider: "email", role },
     });
 
     if (authErr || !authUser?.user?.id) {
@@ -108,29 +113,25 @@ async function handlePost(req: NextRequest) {
 
     const userId = authUser.user.id;
 
-    // Resolve uniqueId — auto ucej-p-NNNN when omitted
-    let effectiveUniqueId = uniqueId || undefined;
-    if (!effectiveUniqueId) {
-      const { generateUceJUniqueId } = await import("@/lib/db");
-      effectiveUniqueId = await generateUceJUniqueId("parent");
-    }
+    // ---- Step 2: public.users profile (auto ucej-p-NNNN when no uniqueId) ----
+    const effectiveUniqueId =
+      (uniqueId && String(uniqueId).trim()) || (await generateUceJUniqueId("parent"));
 
-    // Insert public.users profile
-    const { error: profileErr } = await service.from("users").insert({
-      id: userId,
-      name: String(name).trim(),
-      email: effectiveEmail,
-      phone: phone || null,
-      role: String(role),
-      unique_id: effectiveUniqueId,
-      login_identifier: effectiveUniqueId,
-      status: "ACTIVE",
-      initial_pin_hash: null,
-    });
+    const { error: profileErr } = await service
+      .from("users")
+      .insert({
+        id: userId,
+        name: String(name).trim(),
+        email: effectiveEmail,
+        phone: phone ? String(phone).trim() : null,
+        role,
+        unique_id: effectiveUniqueId,
+        login_identifier: effectiveUniqueId,
+        status: "ACTIVE",
+      });
 
     if (profileErr) {
       console.error("Parent profile insert failed:", profileErr);
-      // Roll back auth user
       await service.auth.admin.deleteUser(userId).catch(() => {});
       return NextResponse.json(
         { success: false, error: { code: "PROFILE_CREATE_FAILED", message: profileErr.message } },
@@ -138,37 +139,35 @@ async function handlePost(req: NextRequest) {
       );
     }
 
-    // Link to a student if requested
+    // ---- Step 3: optional student link ----
     let linkedStudent: { id: string; roll: string; name: string } | null = null;
-    if (studentId && typeof studentId === "string") {
+    if (studentId && typeof studentId === "string" && studentId.trim()) {
       const { data: stu } = await service
         .from("users")
         .select("id, name, unique_id")
-        .eq("id", studentId)
+        .eq("id", studentId.trim())
         .maybeSingle();
       if (stu) {
-        await linkParentToStudent(stu.id, userId, "sysadmin");
+        await linkParentToStudent(stu.id, userId, actorId);
         linkedStudent = { id: stu.id, roll: stu.unique_id || stu.id, name: stu.name };
-      }
-    } else if (parentUserId) {
-      // parentUserId is already created (this path is for the "pick existing parent" flow)
-      // In practice, the linkParentToStudent call happens after the POST creates the user.
-      // If parentUserId is provided alongside studentId, use it instead.
-      const { data: stu } = await service
-        .from("users")
-        .select("id, name, unique_id")
-        .eq("id", studentId)
-        .maybeSingle();
-      if (stu && parentUserId) {
-        await linkParentToStudent(stu.id, parentUserId, "sysadmin");
-        linkedStudent = { id: stu.id, roll: stu.unique_id || stu.id, name: stu.name };
+      } else {
+        return NextResponse.json(
+          {
+            success: false,
+            error: { code: "STUDENT_NOT_FOUND", message: `Student ${studentId} not found; parent was created but not linked` },
+          },
+          { status: 404 }
+        );
       }
     }
 
-    // If the caller just wanted to link an EXISTING parent to a student without creating a new one
-    if (parentUserId && studentId && !authErr) {
-      // The user was just created above; no need to re-link.
-    }
+    await addAudit({
+      action: "PARENT_CREATED",
+      userId: actorId,
+      userName: "SysAdmin",
+      role: actorRole,
+      details: `Created parent ${effectiveUniqueId} (${name})${linkedStudent ? ` linked to student ${linkedStudent.id}` : ""}`,
+    });
 
     return NextResponse.json({
       success: true,
@@ -176,14 +175,14 @@ async function handlePost(req: NextRequest) {
         id: userId,
         name: String(name).trim(),
         email: effectiveEmail,
-        phone: phone || null,
+        phone: phone ? String(phone).trim() : null,
         uniqueId: effectiveUniqueId,
-        role: String(role),
-        password: password && typeof password === "string" ? null : generatedPassword,
+        role,
+        password: generatedPassword,
         linkedStudent,
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating parent:", error);
     return NextResponse.json(
       { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to create parent" } },
