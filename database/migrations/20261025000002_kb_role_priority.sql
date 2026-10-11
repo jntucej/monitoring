@@ -9,7 +9,7 @@ ALTER TABLE public.kb_documents
 -- Populate from the roles array (best-effort).
 UPDATE public.kb_documents d
    SET min_level = COALESCE((
-     SELECT MIN(r.level)
+     SELECT MIN(t.level)
        FROM unnest(d.roles) r(role)
        JOIN (VALUES
          ('sysadmin',100),('principal',90),('vice_principal',85),('admin',80),
