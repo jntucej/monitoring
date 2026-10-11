@@ -54,7 +54,7 @@ async function handleGet(req: NextRequest) {
     const deptCodeMap: Record<string, string> = {
       "01": "CIVIL",
       "02": "EEE",
-      "03": "ME",
+      "03": "MECH",
       "04": "ECE",
       "05": "CSE",
       "12": "IT",
