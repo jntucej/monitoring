@@ -81,6 +81,7 @@ export function getRoleTier(role: string): number {
     warden: 60,
     caretaker: 55,
     hod: 50,
+  exam_superintendent: 50,
     staff: 45,
     worker: 40,
     student: 30,

@@ -21,6 +21,7 @@ export const ALL_ROLES: Role[] = [
   "hostel_manager",
   "deputy_warden",
   "caretaker",
+  "exam_superintendent",
 ];
 
 export function getDefaultRouteForRole(role: Role | string, gateId?: string): string {
@@ -45,6 +46,7 @@ export function getDefaultRouteForRole(role: Role | string, gateId?: string): st
     oie: "/exam/permissions",
     exam_branch: "/exam/permissions",
     hod: "/hod",
+    exam_superintendent: "/exam/superintendent",
   };
   return routes[role] || "/login";
 }
