@@ -18,6 +18,41 @@
 -- therefore MUST remain EXECUTE-able anon see SECTION 8.
 -- ============================================================================
 
+-- ============================================================================
+-- PRE-REQUISITE FUNCTIONS FOR POLICIES (must exist before CREATE POLICY)
+-- ============================================================================
+CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid
+LANGUAGE sql STABLE AS $$
+  SELECT COALESCE(
+    current_setting('app.current_user_id', true)::uuid,
+    current_setting('request.jwt.claim.sub', true)::uuid
+  )
+$$;
+
+CREATE OR REPLACE FUNCTION public.is_admin(p_uid uuid)
+ RETURNS boolean
+ LANGUAGE sql
+ STABLE
+ SET search_path = public
+AS $function$
+SELECT EXISTS (
+ SELECT 1 FROM public.users
+ WHERE id = p_uid AND role IN ('admin', 'sysadmin')
+)
+$function$;
+
+CREATE OR REPLACE FUNCTION public.is_admin_check(p_uid uuid)
+ RETURNS void
+ LANGUAGE plpgsql
+ SET search_path = public
+AS $function$
+BEGIN
+ IF NOT public.is_admin(p_uid) THEN
+    RAISE EXCEPTION 'admin only';
+  END IF;
+END
+$function$;
+
 -- ----------------------------------------------------------------------------
 -- SECTION 1: ENABLE RLS ALL ADVISOR-FLAGGED TABLES
 -- ----------------------------------------------------------------------------

@@ -33,5 +33,5 @@ async function handlePost(req: NextRequest) {
   }
 }
 
-export const GET = withAuthorization(handleGet, { requiredRole: ["sysadmin", "admin"] });
+export const GET = withAuthorization(handleGet, { requiredRole: ["sysadmin"] });
 export const POST = withAuthorization(handlePost, { requiredRole: ["sysadmin"] });
