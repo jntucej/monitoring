@@ -57,14 +57,8 @@ export async function getCurrentOccupancy(): Promise<{ total: number; capacity: 
     }
 
     if (baseZones.length === 0) {
-      baseZones = [
-        { id: "zone_academic_north", name: "Academic Block North (CSE/ECE)", type: "academic", capacity: 800 },
-        { id: "zone_academic_south", name: "Academic Block South (ME/CE)", type: "academic", capacity: 600 },
-        { id: "zone_hostel_boys", name: "Boys Hostel Complex", type: "hostel", capacity: 1000 },
-        { id: "zone_hostel_girls", name: "Girls Hostel Complex", type: "hostel", capacity: 800 },
-        { id: "zone_admin_central", name: "Administrative Block & Library", type: "admin", capacity: 300 },
-        { id: "zone_sports_complex", name: "Sports & Recreation Hub", type: "sports", capacity: 400 },
-      ];
+      // No zones defined - return empty, dashboard will show "No zones configured"
+      baseZones = [];
     }
 
     const resultZones: ZoneOccupancy[] = baseZones.map((z: any) => {
