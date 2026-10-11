@@ -20,7 +20,7 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
     let roll = params.get("roll") || undefined;
     let parentId = params.get("parentId") || undefined;
 
-    // Authorization: Non-admins *** only query their own data.
+    // Authorization: non-admin roles may only query their own data.
     const isAdmin = ADMIN_ROLES.includes(authRole);
 
     if (!isAdmin) {

@@ -1,7 +1,52 @@
 import { NextRequest, NextResponse } from "next/server";
 import { findAllStudents, searchStudents, getParentChildren } from "@/lib/db";
+import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
+import { mPerson } from "@/lib/db";
+import type { Person, Student } from "@/lib/types";
+
+const HOSTEL_CODES = ["CSE", "IT", "ECE", "EEE", "ME"];
+const WARDEN_ROLES = ["warden", "supervisor"];
+
+/**
+ * Warden/supervisor scoped roster query, via the Postgres service client:
+ *   ?scope=active&hostel=CSE  -> students not checked out, optional hostel block
+ *   ?scope=active             -> all students not checked out
+ *   (hostel without scope is rejected — wardens only get scoped listings)
+ */
+async function findWardenScopedStudents(scope: string | null, hostel: string | null): Promise<Student[]> {
+  const service = getSupabaseServiceClient();
+  let query = service
+    .from("users")
+    .select("*")
+    .eq("role", "student")
+    .eq("status", "ACTIVE");
+  if (hostel && HOSTEL_CODES.includes(hostel.toUpperCase())) {
+    query = query.eq("department", hostel.toUpperCase());
+  }
+  if (scope === "active") {
+    query = query.or(`checked_out_at.is.null,checked_out_at.eq.`);
+  }
+  const { data, error } = await query;
+  if (error) throw error;
+  if (!data || data.length === 0) return [];
+
+  const ids = data.map((u: any) => u.id);
+  const { data: studentRows } = await service
+    .from("student_details")
+    .select("*")
+    .in("user_id", ids);
+
+  const studentMap = new Map((studentRows || []).map((s: any) => [s.user_id, s]));
+  return data.map((u: any) =>
+    mPerson({
+      ...u,
+      student_details: studentMap.get(u.id) || null,
+      employee_details: null,
+    })
+  );
+}
 
 async function handleGet(req: NextRequest) {
   try {
@@ -17,6 +62,8 @@ async function handleGet(req: NextRequest) {
     const params = req.nextUrl.searchParams;
     const q = params.get("q");
     const parentId = params.get("parentId");
+    const scope = params.get("scope");
+    const hostel = params.get("hostel");
 
     // Parents can only list their own children
     if (parentId) {
@@ -30,6 +77,12 @@ async function handleGet(req: NextRequest) {
       return NextResponse.json({ success: true, data: children });
     }
 
+    // Warden/supervisor: scoped query (active roster, optional hostel block)
+    if (WARDEN_ROLES.includes(authRole)) {
+      const data = await findWardenScopedStudents(scope, hostel);
+      return NextResponse.json({ success: true, data });
+    }
+
     // Only admins/sysadmins may list the full roster
     if (authRole !== "admin" && authRole !== "sysadmin") {
       return NextResponse.json(
@@ -38,8 +91,8 @@ async function handleGet(req: NextRequest) {
       );
     }
 
-    const data = q ? await searchStudents(q) : await findAllStudents();
-    return NextResponse.json({ success: true, data });
+    const result: Person[] = q ? await searchStudents(q) : await findAllStudents();
+    return NextResponse.json({ success: true, data: result });
   } catch (error) {
     console.error("Error fetching students:", error);
     return NextResponse.json(
@@ -50,6 +103,8 @@ async function handleGet(req: NextRequest) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "parent", "guardian"] }),
+  withAuthorization(handleGet, {
+    requiredRole: ["admin", "sysadmin", "parent", "guardian", "warden", "supervisor"],
+  }),
   { keyPrefix: "students_list", maxRequests: 100 }
 );

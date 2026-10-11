@@ -2598,19 +2598,21 @@ export async function listParents(filters: ParentListingFilters = {}): Promise<P
     .select("user_id, roll, guardian_id")
     .in("guardian_id", parentRows.map((r: any) => r.id));
 
-  if (gErr || !guardLinks) return [];
+  if (gErr) return [];
 
-  const { data: students } = await svc
-    .from("users")
-    .select("id, name, status")
-    .in(
-      "id",
-      guardLinks.map((g: any) => g.user_id)
-    );
+  const linkedStudentIds = (guardLinks || []).map((g: any) => g.user_id).filter(Boolean);
+  let studentMap: Map<string, any> = new Map();
+  if (linkedStudentIds.length > 0) {
+    const { data: students } = await svc
+      .from("users")
+      .select("id, name, status, unique_id")
+      .in("id", linkedStudentIds);
 
-  const studentMap = new Map<string, any>((students || []).map((s: any) => [s.id, s]));
+    studentMap = new Map<string, any>((students || []).map((s: any) => [s.id, s]));
+  }
+
   const byParent = new Map<string, Array<{ id: string; roll: string; name: string; status: string }>>();
-  for (const link of guardLinks) {
+  for (const link of guardLinks || []) {
     const s = studentMap.get(link.user_id);
     if (!s) continue;
     const arr = byParent.get(link.user_id) || [];

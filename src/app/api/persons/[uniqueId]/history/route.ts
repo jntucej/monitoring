@@ -41,7 +41,10 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
     }
 
     const history = await getPersonHistory(uniqueId);
-    return NextResponse.json({ success: true, data: { history } });
+    const limitParam = req.nextUrl.searchParams.get("limit");
+    const limit = limitParam ? Math.min(parseInt(limitParam, 10) || 20, 200) : 20;
+    const trimmed = history.slice(0, limit);
+    return NextResponse.json({ success: true, data: { history: trimmed } });
   } catch (err) {
     console.error("Persons history error:", err);
     return NextResponse.json(
@@ -53,7 +56,7 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
 
 export const GET = withRateLimit(
   withAuthorization(handleGet, {
-    requiredRole: ["admin", "sysadmin", "operator", "student", "faculty", "staff", "worker", "parent", "warden", "supervisor"],
+    requiredRole: ["admin", "sysadmin", "operator", "student", "faculty", "staff", "worker", "parent", "guardian", "warden", "supervisor"],
   }),
   { keyPrefix: "person_history", maxRequests: 60 }
 );
