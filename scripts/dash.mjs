@@ -78,9 +78,9 @@ export default function ${pascal(name)}Error({
         </div>
         <h2 className="text-lg font-semibold text-[var(--text-primary)]">Something went wrong</h2>
         <p className="text-sm text-[var(--text-secondary)]">
-          ${error.message || "An unexpected error occurred in this workspace."}
-        </p>
-        ${error.digest ? `<p className="text-xs text-[var(--text-muted)] font-mono">ref: ${error.digest}</p>` : ""}
+                  {error.message || "An unexpected error occurred in this workspace."}
+                </p>
+                {error.digest ? <p className="text-xs text-[var(--text-muted)] font-mono">ref: {error.digest}</p> : ""}
         <button
           type="button"
           onClick={reset}
