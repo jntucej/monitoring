@@ -26,7 +26,7 @@ export const ALL_ROLES: Role[] = [
 
 export function getDefaultRouteForRole(role: Role | string, gateId?: string): string {
   const routes: Record<string, string> = {
-    operator: `/gate/${gateId || "1"}`,
+    operator: gateId ? `/gate/${gateId}` : "/operator",
     admin: "/admin",
     sysadmin: "/sysadmin",
     supervisor: "/supervisor",

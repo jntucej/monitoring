@@ -1,9 +1,10 @@
 "use client";
 
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { useEffect, useState } from "react";
-import { Users, Shield, GraduationCap, Briefcase, RefreshCw, UserCheck, Grid } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Users, Shield, GraduationCap, Briefcase, UserCheck, Grid, Search, ArrowRight } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
+import Link from "next/link";
 
 interface UserProfile {
   id: string;
@@ -30,16 +31,22 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [loadingDepts, setLoadingDepts] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"roles" | "heatmap">("heatmap");
+  const [activeTab, setActiveTab] = useState<"roles" | "heatmap">("roles");
+  const [query, setQuery] = useState("");
+  const [searching, setSearching] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
 
-  const loadUsers = async () => {
+  const loadUsers = async (q = "") => {
     setLoading(true);
+    setSearching(!!q.trim());
     setError(null);
     try {
-      const res = await fetch("/api/users", { headers: getAuthHeaders(), cache: "no-store" });
+      const url = q.trim() ? `/api/users?q=${encodeURIComponent(q.trim())}` : "/api/users";
+      const res = await fetch(url, { headers: getAuthHeaders(), cache: "no-store" });
       const json = await res.json();
       if (json.success && Array.isArray(json.data)) {
         setUsers(json.data);
+        setHasSearched(!!q.trim());
       } else {
         const msg = typeof json.error === "string" ? json.error : json.error?.message || "Failed to load user roles";
         setError(msg);
@@ -75,6 +82,21 @@ export default function AdminUsersPage() {
     loadDepartments();
   }, []);
 
+  const handleSearch = (value: string) => {
+    setQuery(value);
+    if (value.trim()) loadUsers(value);
+    else loadUsers();
+  };
+
+  const totalStudentCount = useMemo(
+    () => departments.reduce((acc, curr) => acc + (curr.totalStudents || 0), 0),
+    [departments]
+  );
+
+  const studentAccounts = useMemo(() => users.filter((u) => u.role?.toLowerCase() === "student"), [users]);
+  const nonStudentAccounts = useMemo(() => users.filter((u) => u.role?.toLowerCase() !== "student"), [users]);
+  const shownAccounts = hasSearched ? users : nonStudentAccounts;
+
   const getHeatmapColor = (count: number) => {
     if (count > 100) return "bg-blue-600 text-white font-bold";
     if (count > 70) return "bg-blue-500/80 text-white font-semibold";
@@ -89,10 +111,10 @@ export default function AdminUsersPage() {
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Users className="w-6 h-6 text-purple-400" />
-            Branch Access Levels & Strength Heatmaps
+            Roles & Branch Heatmaps
           </h1>
           <p className="text-[var(--text-muted)]">
-            HOD oversight, branch student & faculty density heatmaps, role permissions
+            Staff & admin account directory, HOD oversight, branch student & faculty density heatmaps
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -114,7 +136,7 @@ export default function AdminUsersPage() {
                 <GraduationCap className="w-3.5 h-3.5 text-blue-400" /> Students Enrolled
               </div>
               <div className="text-2xl font-bold text-[var(--text-primary)]">
-                {loadingDepts ? "..." : departments.reduce((acc, curr) => acc + (curr.totalStudents || 0), 0)}
+                {loadingDepts ? "..." : totalStudentCount}
               </div>
             </div>
             <div className="bg-[var(--bg-surface)] p-4 rounded-xl border border-[var(--border)]">
@@ -208,46 +230,112 @@ export default function AdminUsersPage() {
           </div>
         </div>
       ) : (
-        <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] overflow-hidden">
-          <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
-            <h3 className="font-semibold flex items-center gap-2">
-              <UserCheck className="w-5 h-5 text-purple-400" />
-              Active System Users & Access Levels
-            </h3>
-            <span className="text-xs text-[var(--text-muted)]">{users.length} accounts</span>
-          </div>
+        <div className="space-y-4">
+          {!hasSearched && (
+            <div className="bg-[var(--bg-surface)] p-4 rounded-xl border border-[var(--border)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-blue-500/15 text-blue-400 flex items-center justify-center">
+                  <GraduationCap className="w-4.5 h-4.5" />
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-[var(--text-primary)]">
+                    {loadingDepts ? "..." : totalStudentCount.toLocaleString()} students on roster
+                  </div>
+                  <div className="text-xs text-[var(--text-muted)]">
+                    Student accounts are hidden from this view — the full roster lives at /admin/students
+                  </div>
+                </div>
+              </div>
+              <Link
+                href="/admin/students"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)] hover:bg-white/5 transition"
+              >
+                Open student roster
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          )}
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm min-w-[700px]">
-              <thead>
-                <tr className="border-b border-[var(--border)] text-left text-[var(--text-muted)] bg-white/5">
-                  <th className="p-4 font-medium">User Profile</th>
-                  <th className="p-4 font-medium">Assigned Role</th>
-                  <th className="p-4 font-medium">Department</th>
-                  <th className="p-4 font-medium">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--border)]">
-                {loading ? (
-                  <tr><td colSpan={4} className="p-8 text-center text-[var(--text-muted)]">Loading users…</td></tr>
-                ) : users.length === 0 ? (
-                  <tr><td colSpan={4} className="p-8 text-center text-[var(--text-muted)]">No users found</td></tr>
-                ) : (
-                  users.map((u) => (
-                    <tr key={u.id} className="hover:bg-white/5">
-                      <td className="p-4 font-medium">{u.name || u.email}</td>
-                      <td className="p-4 uppercase text-xs font-semibold text-purple-400">{u.role}</td>
-                      <td className="p-4 text-xs text-[var(--text-muted)]">{u.department || "All Campus"}</td>
-                      <td className="p-4">
-                        <span className="px-2 py-0.5 rounded-full text-xs bg-emerald-500/10 text-emerald-400 font-medium">
-                          {u.status || "ACTIVE"}
-                        </span>
-                      </td>
-                    </tr>
-                  ))
+          <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] overflow-hidden">
+            <div className="p-4 border-b border-[var(--border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <h3 className="font-semibold flex items-center gap-2">
+                <UserCheck className="w-5 h-5 text-purple-400" />
+                {hasSearched ? "Search Results" : "Staff & Admin Accounts"}
+              </h3>
+              <div className="relative w-full sm:w-72">
+                <Search className="w-4 h-4 text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  placeholder="Search name, roll, email, or role…"
+                  className="w-full bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg pl-9 pr-9 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                />
+                {(query || searching) && (
+                  <button
+                    onClick={() => {
+                      setQuery("");
+                      setHasSearched(false);
+                      loadUsers();
+                    }}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] text-xs font-bold"
+                    title="Clear search"
+                  >
+                    ✕
+                  </button>
                 )}
-              </tbody>
-            </table>
+              </div>
+            </div>
+
+            {hasSearched && !searching && (
+              <div className="px-4 py-2 text-xs text-[var(--text-muted)] bg-white/5">
+                {users.length} account{users.length === 1 ? "" : "s"} matching “{query}”
+              </div>
+            )}
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm min-w-[700px]">
+                <thead>
+                  <tr className="border-b border-[var(--border)] text-left text-[var(--text-muted)] bg-white/5">
+                    <th className="p-4 font-medium">User Profile</th>
+                    <th className="p-4 font-medium">Assigned Role</th>
+                    <th className="p-4 font-medium">Department</th>
+                    <th className="p-4 font-medium">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--border)]">
+                  {error ? (
+                    <tr><td colSpan={4} className="p-8 text-center text-red-400">{error}</td></tr>
+                  ) : searching ? (
+                    <tr><td colSpan={4} className="p-8 text-center text-[var(--text-muted)]">Searching…</td></tr>
+                  ) : hasSearched && users.length === 0 ? (
+                    <tr><td colSpan={4} className="p-8 text-center text-[var(--text-muted)]">No accounts match “{query}”</td></tr>
+                  ) : loading && !hasSearched ? (
+                    <tr><td colSpan={4} className="p-8 text-center text-[var(--text-muted)]">Loading users…</td></tr>
+                  ) : !hasSearched && shownAccounts.length === 0 ? (
+                    <tr><td colSpan={4} className="p-8 text-center text-[var(--text-muted)]">No non-student accounts found</td></tr>
+                  ) : (
+                    shownAccounts.map((u) => (
+                      <tr key={u.id} className="hover:bg-white/5">
+                        <td className="p-4 font-medium">
+                          {u.name || u.email}
+                          {u.email && u.name && u.email !== u.name && (
+                            <span className="block text-xs text-[var(--text-muted)]">{u.email}</span>
+                          )}
+                        </td>
+                        <td className="p-4 uppercase text-xs font-semibold text-purple-400">{u.role}</td>
+                        <td className="p-4 text-xs text-[var(--text-muted)]">{u.department || "All Campus"}</td>
+                        <td className="p-4">
+                          <span className="px-2 py-0.5 rounded-full text-xs bg-emerald-500/10 text-emerald-400 font-medium">
+                            {u.status || "ACTIVE"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}

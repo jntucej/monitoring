@@ -49,6 +49,7 @@ interface GlassState {
   setGateStatus: (gateId: string, status: GateStatus) => void;
   wsConnected: boolean;
   wsReconnecting: boolean;
+  wsTransportExhausted: boolean;
   wsError: string | null;
   lastAlertGateId: string | null;
   cards: GateCardState[];
@@ -105,6 +106,7 @@ export function GlassProvider({
   const [cards, setCards] = useState<GateCardState[]>(INITIAL_CARDS);
   const [wsConnected, setWsConnected] = useState<boolean>(false);
   const [wsReconnecting, setWsReconnecting] = useState<boolean>(false);
+  const [wsTransportExhausted, setWsTransportExhausted] = useState<boolean>(false);
   const [wsError, setWsError] = useState<string | null>(null);
   const [activeAlerts, setActiveAlerts] = useState<AlertPayload[]>([]);
 
@@ -153,7 +155,13 @@ export function GlassProvider({
 
   useEffect(() => {
     const isMock = process.env.NEXT_PUBLIC_WS_MOCK === "true";
-    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8080";
+    // No dedicated WS host in this deployment — point the transport at the
+    // app origin so the SSE fallback reaches /api/gate/stream (same-origin).
+    const defaultUrl =
+      typeof window !== "undefined"
+        ? `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}/api/gate/stream`
+        : "ws://localhost:3000/api/gate/stream";
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || defaultUrl;
 
     if (wsRef.current) {
       wsRef.current.disconnect();
@@ -189,9 +197,12 @@ export function GlassProvider({
       }, 10000);
     });
 
-    const unsubConn = ws.onConnectionChange((connected, isMockFallback) => {
+  const unsubConn = ws.onConnectionChange((connected, isMockFallback, exhausted) => {
       setWsConnected(connected);
-      setWsReconnecting(!connected && !isMock);
+      // Perpetual "Reconnecting" was the bug: once both the WebSocket and the
+      // SSE fallback are down, stop claiming we're reconnecting — show Offline.
+      setWsReconnecting(!connected && !exhausted && !isMock);
+      if (exhausted) setWsTransportExhausted(true);
       if (connected) setWsError(null);
       if (isMockFallback || isMock) {
         setIsLiveStream(false);
@@ -373,6 +384,7 @@ export function GlassProvider({
         setGateStatus,
         wsConnected,
         wsReconnecting,
+        wsTransportExhausted,
         wsError,
         lastAlertGateId,
         cards,

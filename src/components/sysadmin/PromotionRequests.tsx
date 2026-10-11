@@ -32,9 +32,23 @@ export function PromotionRequests() {
   // New Request Modal
   const [showModal, setShowModal] = useState(false);
   const [targetUserId, setTargetUserId] = useState("");
+  const [targetUser, setTargetUser] = useState<{ id: string; name: string; role: string; uniqueId?: string } | null>(null);
+  const [userQuery, setUserQuery] = useState("");
+  const [userResults, setUserResults] = useState<Array<{ id: string; name: string; role: string; uniqueId?: string }>>([]);
   const [newRole, setNewRole] = useState("admin");
   const [reason, setReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // Name/roll/email search — replaces the raw UUID entry box.
+  const searchUsers = useCallback(async (q: string) => {
+    setUserQuery(q);
+    if (q.trim().length < 2) { setUserResults([]); return; }
+    try {
+      const res = await fetch(`/api/users?q=${encodeURIComponent(q.trim())}`, { headers: getAuthHeaders(), cache: "no-store" });
+      const json = await res.json();
+      setUserResults(Array.isArray(json?.data) ? json.data.slice(0, 8) : []);
+    } catch { setUserResults([]); }
+  }, []);
 
   const fetchRequests = useCallback(async () => {
     setLoading(true);
@@ -112,6 +126,8 @@ export function PromotionRequests() {
       addToast({ title: "Submitted", message: "Promotion request submitted for approval", variant: "success" });
       setShowModal(false);
       setTargetUserId("");
+      setTargetUser(null);
+      setUserQuery("");
       setReason("");
       fetchRequests();
     } catch (err: any) {
@@ -253,15 +269,38 @@ export function PromotionRequests() {
             </h3>
             <div className="space-y-3 text-xs">
               <div className="space-y-1">
-                <label className="text-[var(--text-muted)] font-medium">Target User ID (UUID)</label>
+                <label className="text-[var(--text-muted)] font-medium">Find person (search by name, roll or email)</label>
                 <input
                   type="text"
-                  value={targetUserId}
-                  onChange={(e) => setTargetUserId(e.target.value)}
-                  placeholder="e.g. 550e8400-e29b-41d4-a716-446655440000"
-                  className="w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-sky-500"
-                  required
+                  value={userQuery}
+                  onChange={(e) => searchUsers(e.target.value)}
+                  placeholder="Type a name, roll number or email…"
+                  className="w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-sky-500"
                 />
+                {userQuery.trim().length >= 2 && userResults.length === 0 && (
+                  <p className="text-[10px] text-[var(--text-muted)]">No matching people found.</p>
+                )}
+                {userResults.length > 0 && (
+                  <div className="border border-[var(--border)] rounded-xl overflow-hidden divide-y divide-[var(--border)] max-h-40 overflow-y-auto">
+                    {userResults.map((u) => (
+                      <button
+                        key={u.id}
+                        type="button"
+                        onClick={() => { setTargetUser(u as any); setTargetUserId(u.id); setUserQuery(""); setUserResults([]); }}
+                        className="w-full text-left px-3 py-2 text-xs hover:bg-[var(--bg-elevated)] transition-colors"
+                      >
+                        <span className="font-semibold text-white">{u.name}</span>
+                        <span className="text-[var(--text-muted)] ml-2">({u.role}{u.uniqueId ? ` · ${u.uniqueId}` : ""})</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {targetUser && (
+                  <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-sky-500/10 border border-sky-500/30 text-xs">
+                    <span className="text-sky-300 font-semibold">{targetUser.name} → {newRole}</span>
+                    <button type="button" onClick={() => { setTargetUser(null); setTargetUserId(""); }} className="text-slate-400 hover:text-white">✕</button>
+                  </div>
+                )}
               </div>
               <div className="space-y-1">
                 <label className="text-[var(--text-muted)] font-medium">Target Role</label>

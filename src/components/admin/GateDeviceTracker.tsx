@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Cpu, Activity, User, Clock, ArrowDownLeft, ArrowUpRight, Wifi } from "lucide-react";
+import { Cpu, Activity, Clock, ArrowDownLeft, ArrowUpRight, Wifi, User } from "lucide-react";
 
 export interface GateDevice {
   id: string;
@@ -9,12 +9,8 @@ export interface GateDevice {
   location: string;
   gateCode?: string;
   status: "online" | "offline" | "maintenance";
-  currentOperator: {
-    id: string;
-    name: string;
-    employeeId?: string;
-    workingHours?: string;
-  };
+  /** Operator actually assigned to this gate (users.gate_id). Empty when unassigned. */
+  assignedOperators: Array<{ id: string; name: string; email: string; role: string }>;
   lastScanTime: string;
   totalScansToday: number;
   entriesToday: number;
@@ -84,22 +80,29 @@ export function GateDeviceTracker({ devices, onRefresh }: GateDeviceTrackerProps
                 </span>
               </div>
 
-              {/* Active Operator */}
+              {/* Assigned operators (from users.gate_id) */}
               <div className="rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] p-3 space-y-1.5">
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-[var(--text-muted)] font-medium flex items-center gap-1">
-                    <User className="w-3.5 h-3.5 text-blue-400" />
-                    Current Operator
-                  </span>
-                  <span className="font-mono text-[10px] font-bold text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded">
-                    {device.currentOperator.employeeId || "N/A"}
-                  </span>
+                <div className="flex items-center gap-1 text-[11px] text-[var(--text-muted)] font-medium">
+                  <User className="w-3.5 h-3.5 text-blue-400" />
+                  Assigned Operator{device.assignedOperators.length !== 1 ? "s" : ""}
                 </div>
-                <div className="text-xs font-bold text-[var(--text-primary)]">{device.currentOperator.name}</div>
-                <div className="text-[10px] text-[var(--text-muted)] flex items-center gap-1">
-                  <Clock className="w-3 h-3 text-[var(--text-muted)]" />
-                  Shift: {device.currentOperator.workingHours || "N/A"}
-                </div>
+                {device.assignedOperators.length === 0 ? (
+                  <div className="text-xs text-[var(--text-muted)]">
+                    Not assigned yet —{" "}
+                    <a href="/sysadmin/gates" className="text-blue-400 underline font-medium">
+                      assign now
+                    </a>
+                  </div>
+                ) : (
+                  device.assignedOperators.map((op) => (
+                    <div key={op.id} className="text-xs font-bold text-[var(--text-primary)]">
+                      {op.name || op.email}
+                      <span className="ml-1.5 text-[10px] font-mono text-[10px] font-bold text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded">
+                        {op.role}
+                      </span>
+                    </div>
+                  ))
+                )}
               </div>
 
               {/* Counters */}

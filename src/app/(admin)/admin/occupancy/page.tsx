@@ -17,7 +17,7 @@ export default function OccupancyPage() {
             activeTab === "heatmap" ? "border-emerald-500 text-emerald-400" : "border-transparent text-[var(--text-secondary)]"
           }`}
         >
-          Density Heatmap & Stream
+          Live Presence Matrix
         </button>
         <button
           onClick={() => setActiveTab("digital-twin")}

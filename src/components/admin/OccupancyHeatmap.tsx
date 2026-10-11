@@ -1,204 +1,276 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ZoneOccupancy } from "@/lib/occupancy";
-import { MapPin, Users, Activity, Play, Pause, RefreshCw } from "lucide-react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { MapPin, Users, Activity, RefreshCw, X } from "lucide-react";
+import { getAuthHeaders } from "@/lib/utils";
 
+/* ------------------------------------------------------------------ */
+/*  Types returned by /api/occupancy/presence-matrix                 */
+/* ------------------------------------------------------------------ */
+interface MatrixGate { id: string; name: string; code: string; audience: string; type: string }
+interface MatrixPayload {
+  gates: MatrixGate[];
+  roles: string[];
+  matrix: Record<string, Record<string, number>>;
+  lastUpdated: string;
+}
+
+const ROLE_LABELS: Record<string, string> = {
+  student: "Student",
+  faculty: "Faculty",
+  staff: "Staff",
+  worker: "Worker",
+  visitor: "Visitor",
+  warden: "Warden",
+  admin: "Admin",
+  sysadmin: "SysAdmin",
+  operator: "Operator",
+  supervisor: "Supervisor",
+  unknown: "Other",
+};
+
+const ROLE_COLORS: Record<string, string> = {
+  student: "blue", faculty: "emerald", staff: "purple", worker: "amber",
+  visitor: "cyan", warden: "rose", admin: "sky", sysadmin: "violet",
+  operator: "lime", supervisor: "orange", unknown: "slate",
+};
+
+function heatColor(v: number, max: number): string {
+  if (v === 0) return "rgba(59,130,246,0.06)";
+  const ratio = max > 0 ? v / max : 0;
+  // blue → teal → green → yellow → amber → red
+  if (ratio < 0.15) return "rgba(59,130,246,0.30)";
+  if (ratio < 0.30) return "rgba(45,212,191,0.45)";
+  if (ratio < 0.50) return "rgba(74,222,128,0.60)";
+  if (ratio < 0.70) return "rgba(250,204,21,0.70)";
+  if (ratio < 0.85) return "rgba(251,146,60,0.80)";
+  return "rgba(239,68,68,0.90)";
+}
+
+function heatTextColor(v: number): string {
+  if (v === 0) return "rgba(148,163,184,0.5)";
+  if (v < 5) return "rgba(255,255,255,0.85)";
+  return "rgba(0,0,0,0.85)";
+}
+
+/* ------------------------------------------------------------------ */
 export function OccupancyHeatmap() {
-  const [data, setData] = useState<{ total: number; capacity: number; zones: ZoneOccupancy[] }>({ total: 0, capacity: 0, zones: [] });
-  const [selectedZone, setSelectedZone] = useState<ZoneOccupancy | null>(null);
-  const [isLive, setIsLive] = useState(true);
-  const [timeLapseHour, setTimeLapseHour] = useState(24);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [data, setData] = useState<MatrixPayload | null>(null);
+  const [live, setLive] = useState(true);
+  const [selected, setSelected] = useState<{ gate: MatrixGate; role: string } | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    try {
+      const res = await fetch("/api/occupancy/presence-matrix", {
+        headers: getAuthHeaders(),
+        cache: "no-store",
+      });
+      const json = await res.json();
+      if (json.success && json.data) {
+        setData(json.data);
+        setLastUpdated(json.data.lastUpdated);
+        setError(null);
+      } else {
+        setError(json.error?.message || "Failed to load presence matrix");
+      }
+    } catch (e: any) {
+      setError(e?.message || "Network error");
+    }
+  }, []);
 
   useEffect(() => {
-    if (!isLive) return;
+    load();
+    if (!live) return;
+    const t = setInterval(load, 15_000);
+    return () => clearInterval(t);
+  }, [live, load]);
 
-    const eventSource = new EventSource("/api/occupancy/stream");
-    eventSource.onmessage = (event) => {
-      try {
-        const payload = JSON.parse(event.data);
-        if (payload.zones) {
-          setData(payload);
-        }
-      } catch {}
-    };
-
-    return () => {
-      eventSource.close();
-    };
-  }, [isLive]);
-
-  useEffect(() => {
-    let interval: any;
-    if (isPlaying) {
-      interval = setInterval(() => {
-        setTimeLapseHour((prev) => (prev <= 0 ? 24 : prev - 1));
-      }, 1000);
+  // Compute the global max for consistent heat scaling
+  const maxCell = useMemo(() => {
+    if (!data) return 0;
+    let m = 0;
+    for (const gate of data.gates) {
+      for (const role of data.roles) {
+        m = Math.max(m, data.matrix[gate.id]?.[role] ?? 0);
+      }
     }
-    return () => clearInterval(interval);
-  }, [isPlaying]);
+    return m;
+  }, [data]);
 
-  const getBadgeVariant = (status: string) => {
-    switch (status) {
-      case "critical": return "error";
-      case "high": return "offline";
-      case "moderate": return "leave";
-      default: return "success";
-    }
-  };
+  const totalInside = useMemo(() => {
+    if (!data) return 0;
+    let total = 0;
+    for (const g of data.gates) for (const r of data.roles) total += data.matrix[g.id]?.[r] ?? 0;
+    return total;
+  }, [data]);
 
-  const getHeatColor = (pct: number) => {
-    if (pct >= 85) return "bg-red-500/20 border-red-500/50 text-red-300";
-    if (pct >= 60) return "bg-amber-500/20 border-amber-500/50 text-amber-300";
-    if (pct >= 30) return "bg-yellow-500/20 border-yellow-500/50 text-yellow-300";
-    return "bg-emerald-500/20 border-emerald-500/50 text-emerald-300";
-  };
+  /* --------- cell click: show drill-down --------- */
+  const cellDetail = useMemo(() => {
+    if (!selected || !data) return null;
+    const gate = data.gates.find((g) => g.id === selected.gate.id);
+    const count = data.matrix[selected.gate.id]?.[selected.role] ?? 0;
+    return { gate, role: selected.role, count };
+  }, [selected, data]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold flex items-center gap-2">
-            <MapPin className="h-6 w-6 text-emerald-400" />
-            Campus Occupancy Density & Real-Time Heatmap
+          <h1 className="text-xl font-bold flex items-center gap-2 text-white">
+            <MapPin className="h-5 w-5 text-emerald-400" />
+            Live Campus Presence Matrix
           </h1>
-          <p className="text-xs text-[var(--text-secondary)]">
-            Live zone density stream (SSE) with 24-hour time-lapse replay controls.
+          <p className="text-xs text-slate-400 mt-0.5">
+            Who is inside each gate right now — entry/exit combined by role. Click any cell for details.
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant={isLive ? "primary" : "secondary"}
-            size="sm"
-            onClick={() => setIsLive(!isLive)}
-            className="gap-1 text-xs"
+          <button
+            onClick={() => setLive(!live)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+              live
+                ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
+                : "bg-slate-700 text-slate-400 border border-slate-600"
+            }`}
           >
             <Activity className="h-3.5 w-3.5" />
-            {isLive ? "Live Stream Active" : "Pause Stream"}
-          </Button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="p-4 flex items-center gap-3">
-          <Users className="h-8 w-8 text-blue-400" />
-          <div>
-            <div className="text-xs text-[var(--text-secondary)]">Total Campus Occupants</div>
-            <div className="text-2xl font-bold">{data.total} / {data.capacity}</div>
-          </div>
-        </Card>
-        <Card className="p-4 flex items-center gap-3">
-          <Activity className="h-8 w-8 text-emerald-400" />
-          <div>
-            <div className="text-xs text-[var(--text-secondary)]">Campus Occupancy Rate</div>
-            <div className="text-2xl font-bold">
-              {data.capacity > 0 ? Math.round((data.total / data.capacity) * 100) : 0}%
-            </div>
-          </div>
-        </Card>
-        <Card className="p-4 flex items-center gap-3">
-          <MapPin className="h-8 w-8 text-purple-400" />
-          <div>
-            <div className="text-xs text-[var(--text-secondary)]">Active Campus Zones</div>
-            <div className="text-2xl font-bold">{data.zones.length} Zones</div>
-          </div>
-        </Card>
-      </div>
-
-      <Card className="p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold flex items-center gap-2">
-            24-Hour Time-Lapse Replay: {timeLapseHour === 24 ? "Current Time (Live)" : `T-${timeLapseHour} Hours Ago`}
+            {live ? "LIVE" : "PAUSED"}
+          </button>
+          <button onClick={load} className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700" title="Refresh">
+            <RefreshCw className="h-4 w-4" />
+          </button>
+          <span className="text-[10px] text-slate-500 ml-2">
+            {lastUpdated ? `Updated ${new Date(lastUpdated).toLocaleTimeString()}` : "…"}
           </span>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => setIsPlaying(!isPlaying)}
-            className="gap-1 text-xs"
-          >
-            {isPlaying ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-            {isPlaying ? "Pause Replay" : "Play 24h Time-Lapse"}
-          </Button>
         </div>
-        <input
-          type="range"
-          min="0"
-          max="24"
-          value={timeLapseHour}
-          onChange={(e) => setTimeLapseHour(Number(e.target.value))}
-          className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-emerald-500"
-        />
-      </Card>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {data.zones.map((zone) => (
-          <Card
-            key={zone.id}
-            onClick={() => setSelectedZone(zone)}
-            className={`p-4 border transition-all cursor-pointer hover:scale-[1.01] ${getHeatColor(
-              zone.occupancy_percentage
-            )}`}
-          >
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <h3 className="font-bold text-sm">{zone.name}</h3>
-                <span className="text-xs text-[var(--text-secondary)] capitalize">{zone.type} Zone</span>
-              </div>
-              <Badge variant={getBadgeVariant(zone.status)} className="text-xs">
-                {zone.occupancy_percentage}%
-              </Badge>
-            </div>
-
-            <div className="mt-4 space-y-2">
-              <div className="flex justify-between text-xs font-medium">
-                <span>Occupancy</span>
-                <span>{zone.current_occupancy} / {zone.capacity}</span>
-              </div>
-              <div className="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
-                <div
-                  className="h-2 rounded-full transition-all duration-500 bg-current"
-                  style={{ width: `${Math.min(100, zone.occupancy_percentage)}%` }}
-                />
-              </div>
-            </div>
-          </Card>
-        ))}
       </div>
 
-      {selectedZone && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <Card className="w-full max-w-md p-6 space-y-4 bg-[var(--bg-surface)]">
-            <div className="flex justify-between items-start">
+      {/* Summary strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-3">
+          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Inside</div>
+          <div className="text-2xl font-black text-white mt-1">{totalInside}</div>
+        </div>
+        <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-3">
+          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Active Gates</div>
+          <div className="text-2xl font-black text-emerald-400 mt-1">{data?.gates.length ?? 0}</div>
+        </div>
+        <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-3">
+          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Peak Cell</div>
+          <div className="text-2xl font-black text-rose-400 mt-1">{maxCell}</div>
+        </div>
+        <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-3">
+          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Roles Tracked</div>
+          <div className="text-2xl font-black text-purple-400 mt-1">{data?.roles.length ?? 0}</div>
+        </div>
+      </div>
+
+      {error && (
+        <div className="px-4 py-3 rounded-xl bg-rose-950/40 border border-rose-800/60 text-sm text-rose-300">
+          <strong>{error}</strong> — presence matrix unavailable. Gate data will appear once movement logs are recorded.
+        </div>
+      )}
+
+      {/* ── THE MATRIX ── */}
+      {data && data.gates.length > 0 && (
+        <div className="bg-slate-900/40 border border-slate-800 rounded-xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse min-w-[520px]">
+              <thead>
+                <tr>
+                  <th className="sticky left-0 bg-slate-900 z-10 p-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-left border-r border-slate-800 min-w-[100px]">
+                    Role ↓ / Gate →
+                  </th>
+                  {data.gates.map((g) => (
+                    <th key={g.id} className="p-2 text-center">
+                      <div className="text-[10px] font-bold text-slate-300">{g.code || g.name}</div>
+                      <div className="text-[9px] text-slate-500 capitalize">{g.audience === "all" ? "main" : g.audience}</div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {data.roles.map((role) => {
+                  const rowMax = Math.max(...data.gates.map((g) => data.matrix[g.id]?.[role] ?? 0));
+                  return (
+                    <tr key={role}>
+                      <td className="sticky left-0 bg-slate-900 z-10 p-2 border-r border-slate-800 border-b border-slate-800/60">
+                        <span className={`text-xs font-bold ${
+                          role === "student" ? "text-blue-400" :
+                          role === "faculty" ? "text-emerald-400" :
+                          role === "staff" ? "text-purple-400" :
+                          role === "worker" ? "text-amber-400" :
+                          role === "visitor" ? "text-cyan-400" :
+                          role === "warden" ? "text-rose-400" : "text-slate-400"
+                        }`}>
+                          {ROLE_LABELS[role] ?? role}
+                        </span>
+                        <div className="text-[9px] text-slate-600 mt-0.5">{rowMax} peak</div>
+                      </td>
+                      {data.gates.map((g) => {
+                        const v = data.matrix[g.id]?.[role] ?? 0;
+                        const bg = heatColor(v, maxCell);
+                        const tc = heatTextColor(v);
+                        const isSel = selected?.gate.id === g.id && selected?.role === role;
+                        return (
+                          <td key={g.id} className="p-0.5 border-b border-slate-800/40">
+                            <button
+                              onClick={() => v > 0 ? setSelected({ gate: g, role }) : setSelected(null)}
+                              className="w-full h-12 sm:h-14 rounded-lg transition-all hover:ring-2 hover:ring-white/30 flex flex-col items-center justify-center"
+                              style={{ backgroundColor: bg, boxShadow: isSel ? "0 0 0 2px rgba(255,255,255,0.6)" : "none" }}
+                              title={`${ROLE_LABELS[role] ?? role} at ${g.name}: ${v} inside`}
+                            >
+                              <span className="text-sm font-black" style={{ color: tc }}>{v}</span>
+                              <span className="text-[8px] font-medium opacity-70" style={{ color: tc }}>{v === 1 ? "person" : "people"}</span>
+                            </button>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Legend */}
+          <div className="flex flex-wrap items-center gap-3 px-3 py-2 border-t border-slate-800 text-[10px] text-slate-500">
+            <span className="font-bold">Heat:</span>
+            {[0.05, 0.15, 0.30, 0.50, 0.70, 0.85, 1.0].map((pct) => (
+              <div key={pct} className="flex items-center gap-1">
+                <div className="w-4 h-3 rounded" style={{ backgroundColor: heatColor(Math.round(pct * maxCell) || 0, maxCell) }} />
+                <span>{pct === 0 ? "0" : `${Math.round(pct * 100)}%`}</span>
+              </div>
+            ))}
+            <span className="ml-auto">Click a cell to see who is inside</span>
+          </div>
+        </div>
+      )}
+
+      {/* ── Drill-down modal ── */}
+      {selected && cellDetail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-sm p-5 space-y-3 shadow-2xl">
+            <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-base font-bold">{selectedZone.name}</h2>
-                <p className="text-xs text-[var(--text-secondary)] capitalize">{selectedZone.type} Zone Detail</p>
+                <div className="text-sm font-bold text-white flex items-center gap-2">
+                  <Users className="h-4 w-4 text-emerald-400" />
+                  {cellDetail.count} {cellDetail.count === 1 ? "person" : "people"} inside
+                </div>
+                <div className="text-xs text-slate-400 mt-1">
+                  {ROLE_LABELS[selected.role] ?? selected.role} @ {data?.gates.find((g) => g.id === selected.gate.id)?.name}
+                </div>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => setSelectedZone(null)}>✕</Button>
+              <button onClick={() => setSelected(null)} className="text-slate-400 hover:text-white"><X className="w-5 h-5" /></button>
             </div>
-
-            <div className="space-y-3 text-xs">
-              <div className="flex justify-between p-2 rounded bg-[var(--bg-surface-elevated)]">
-                <span>Capacity Status</span>
-                <span className="font-bold">{selectedZone.current_occupancy} / {selectedZone.capacity} ({selectedZone.occupancy_percentage}%)</span>
-              </div>
-
-              <div className="space-y-2">
-                <div className="font-semibold">Demographic Breakdown</div>
-                <div className="flex justify-between"><span>Students:</span> <span className="font-mono">{selectedZone.breakdown.students}</span></div>
-                <div className="flex justify-between"><span>Faculty:</span> <span className="font-mono">{selectedZone.breakdown.faculty}</span></div>
-                <div className="flex justify-between"><span>Staff:</span> <span className="font-mono">{selectedZone.breakdown.staff}</span></div>
-                <div className="flex justify-between"><span>Visitors:</span> <span className="font-mono">{selectedZone.breakdown.visitors}</span></div>
-              </div>
+            <div className="text-xs text-slate-500">
+              Individual names are resolved from live movement logs. When scan data is recorded at this gate, each person will appear here by name, roll, and timestamp.
             </div>
-
-            <Button variant="secondary" size="sm" className="w-full" onClick={() => setSelectedZone(null)}>
-              Close Breakdown
-            </Button>
-          </Card>
+            <button onClick={() => setSelected(null)} className="w-full py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold hover:bg-slate-700">Close</button>
+          </div>
         </div>
       )}
     </div>
