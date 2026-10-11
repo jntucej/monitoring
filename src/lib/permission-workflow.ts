@@ -5,11 +5,11 @@ import { getParentChildren } from "@/lib/db";
 export type { WorkflowType };
 
 export const ROLE_STAGE_PERMISSIONS: Record<string, readonly string[]> = {
-  caretaker: ["caretaker"],
-  deputy_warden: ["deputy_warden"],
-  hostel_manager: ["hostel_manager"],
-  warden: ["warden_or_principal"],
-  principal: ["warden_or_principal", "principal"],
+  caretaker: ["caretaker", "hostel_biometric"],
+  deputy_warden: ["deputy_warden", "hostel_biometric"],
+  hostel_manager: ["hostel_manager", "hostel_biometric"],
+  warden: ["warden_or_principal", "hostel_biometric"],
+  principal: ["warden_or_principal", "principal", "hostel_biometric"],
   operator: ["main_gate"],
   faculty: ["faculty"],
   hod: ["hod"],
@@ -21,7 +21,7 @@ export const ROLE_STAGE_PERMISSIONS: Record<string, readonly string[]> = {
 
 
 export const WORKFLOW_STAGES: Record<WorkflowType, string[]> = {
-  hostel: ["caretaker", "deputy_warden", "hostel_manager", "warden_or_principal", "main_gate", "completed"],
+  hostel: ["caretaker", "deputy_warden", "hostel_manager", "warden_or_principal", "hostel_biometric", "main_gate", "completed"],
   exam: ["faculty", "hod", "oie", "vice_principal", "principal", "completed"],
   memo: ["faculty", "hod", "oie", "vice_principal", "principal", "completed"],
   staff_leave: ["hod", "vice_principal", "principal", "completed"],
@@ -72,6 +72,10 @@ export async function generateTicketNumber(workflowType: WorkflowType): Promise<
  */
 export function canApproveAtStage(role: string, workflowType: WorkflowType, currentStage: string): boolean {
   if (role === "admin" || role === "sysadmin") return true;
+
+  if (currentStage === "hostel_biometric") {
+    return ["caretaker", "deputy_warden", "hostel_manager", "warden", "principal"].includes(role);
+  }
 
   const roleMap: Record<string, string> = {
     caretaker: "caretaker",

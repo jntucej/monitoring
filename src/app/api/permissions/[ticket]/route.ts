@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
-import withAuthorization from "@/middleware/authorization";
+import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import {
   canApproveAtStage,
@@ -9,7 +9,7 @@ import {
   getScopedTicket,
 } from "@/lib/permission-workflow";
 import { addAudit, addNotification } from "@/lib/db";
-import type { WorkflowType } from "@/lib/types";
+import type { WorkflowType, Role } from "@/lib/types";
 
 function getTicketFromReq(req: NextRequest): string {
   const segments = new URL(req.url).pathname.split("/").filter(Boolean);
@@ -28,8 +28,6 @@ async function handleGet(req: NextRequest): Promise<Response> {
     );
   }
 
-  // Visibility scoping (student/parent/approver rules) now lives in one place —
-  // shared with the upload / document / sign routes (Step 7).
   const scope = await getScopedTicket(ticketParam, authUserId, authUserRole);
 
   if ("notFound" in scope && scope.notFound) {
@@ -48,6 +46,7 @@ async function handleGet(req: NextRequest): Promise<Response> {
 
   return NextResponse.json({ success: true, data: scope.request });
 }
+
 async function handlePatch(req: NextRequest): Promise<Response> {
   const ticketParam = getTicketFromReq(req);
   const authUserId = req.headers.get("x-user-id") || "";
@@ -78,6 +77,7 @@ async function handlePatch(req: NextRequest): Promise<Response> {
     targetStage?: string;
   };
 
+  const normalizedAction = (action || "").toUpperCase();
   const validActions = [
     "APPROVE",
     "REJECT",
@@ -88,15 +88,16 @@ async function handlePatch(req: NextRequest): Promise<Response> {
     "SIGN",
     "BIOMETRIC_HOSTEL",
     "BIOMETRIC_GATE",
+    "CANCEL",
   ];
 
-  if (!action || !validActions.includes(action)) {
+  if (!action || !validActions.includes(normalizedAction)) {
     return NextResponse.json(
       {
         success: false,
         error: {
           code: "BAD_REQUEST",
-          message: "Invalid action. Must be one of: " + validActions.join(", "),
+          message: `Invalid action. Must be one of: ${validActions.join(", ")}`,
         },
       },
       { status: 400 }
@@ -108,7 +109,7 @@ async function handlePatch(req: NextRequest): Promise<Response> {
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(ticketParam);
   let q = supabase.from("permission_requests").select("*");
   if (isUuid) {
-    q = q.or("id.eq." + ticketParam + ",ticket_number.eq." + ticketParam);
+    q = q.or(`id.eq.${ticketParam},ticket_number.eq.${ticketParam}`);
   } else {
     q = q.eq("ticket_number", ticketParam);
   }
@@ -122,38 +123,58 @@ async function handlePatch(req: NextRequest): Promise<Response> {
     );
   }
 
-  if (request.status === "REJECTED" || request.status === "COMPLETED") {
-    return NextResponse.json(
-      { success: false, error: { code: "BAD_REQUEST", message: "Cannot modify a request with status " + request.status } },
-      { status: 400 }
-    );
-  }
+  if (normalizedAction === "CANCEL") {
+    const isOwner =
+      authUserId === request.requester_user_id ||
+      authUserId === request.student_user_id ||
+      ["admin", "sysadmin"].includes(authUserRole);
+    if (!isOwner) {
+      return NextResponse.json(
+        { success: false, error: { code: "FORBIDDEN", message: "Only the requester or student may cancel this request" } },
+        { status: 403 }
+      );
+    }
+    if (request.status !== "PENDING") {
+      return NextResponse.json(
+        { success: false, error: { code: "BAD_REQUEST", message: `Cannot cancel request with status ${request.status}. Only PENDING requests can be cancelled.` } },
+        { status: 400 }
+      );
+    }
+  } else {
+    if (request.status === "REJECTED" || request.status === "COMPLETED" || request.status === "CANCELLED") {
+      return NextResponse.json(
+        { success: false, error: { code: "BAD_REQUEST", message: `Cannot modify request with status ${request.status}` } },
+        { status: 400 }
+      );
+    }
 
-  const isAllowed = canApproveAtStage(authUserRole, request.workflow_type as WorkflowType, request.current_stage);
-  if (!isAllowed) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: {
-          code: "FORBIDDEN",
-          message: "Role " + authUserRole + " is not authorized to act on stage " + request.current_stage,
+    const isAllowed = canApproveAtStage(authUserRole, request.workflow_type as WorkflowType, request.current_stage);
+    if (!isAllowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "FORBIDDEN",
+            message: `Role ${authUserRole} is not authorized to act at stage ${request.current_stage}`,
+          },
         },
-      },
-      { status: 403 }
-    );
-  }
-  if (request.workflow_type === "hostel" && ["caretaker", "deputy_warden"].includes(authUserRole)) {
-    const { data: userData } = await supabase
-      .from("users")
-      .select("hostel_scope")
-      .eq("id", authUserId)
-      .single();
-    if (userData?.hostel_scope && ["boys", "girls"].includes(userData.hostel_scope)) {
-      if (request.hostel_scope && request.hostel_scope !== userData.hostel_scope) {
-        return NextResponse.json(
-          { success: false, error: { code: "FORBIDDEN", message: "Cannot act on " + request.hostel_scope + " hostel request" } },
-          { status: 403 }
-        );
+        { status: 403 }
+      );
+    }
+
+    if (request.workflow_type === "hostel" && ["caretaker", "deputy_warden"].includes(authUserRole)) {
+      const { data: userData } = await supabase
+        .from("users")
+        .select("hostel_scope")
+        .eq("id", authUserId)
+        .single();
+      if (userData?.hostel_scope && ["boys", "girls"].includes(userData.hostel_scope)) {
+        if (request.hostel_scope && request.hostel_scope !== userData.hostel_scope) {
+          return NextResponse.json(
+            { success: false, error: { code: "FORBIDDEN", message: `Cannot act on ${request.hostel_scope} hostel request` } },
+            { status: 403 }
+          );
+        }
       }
     }
   }
@@ -170,7 +191,10 @@ async function handlePatch(req: NextRequest): Promise<Response> {
   let nextStatus = request.status;
   const updateFields: Record<string, unknown> = {};
 
-  if (action === "APPROVE" || action === "FORWARD") {
+  if (normalizedAction === "CANCEL") {
+    nextStage = "cancelled";
+    nextStatus = "CANCELLED";
+  } else if (normalizedAction === "APPROVE" || normalizedAction === "FORWARD") {
     const resolvedNext = targetStage || resolveNextStage(request.workflow_type as WorkflowType, request.current_stage);
     if (!resolvedNext || resolvedNext === "completed") {
       nextStage = "completed";
@@ -179,23 +203,23 @@ async function handlePatch(req: NextRequest): Promise<Response> {
       nextStage = resolvedNext;
       nextStatus = "PENDING";
     }
-  } else if (action === "REJECT") {
+  } else if (normalizedAction === "REJECT") {
     nextStatus = "REJECTED";
-  } else if (action === "ESCALATE") {
+  } else if (normalizedAction === "ESCALATE") {
     nextStatus = "ESCALATED";
     if (targetStage) nextStage = targetStage;
-  } else if (action === "COMPLETE") {
+  } else if (normalizedAction === "COMPLETE") {
     nextStage = "completed";
     nextStatus = "COMPLETED";
-  } else if (action === "BIOMETRIC_HOSTEL") {
+  } else if (normalizedAction === "BIOMETRIC_HOSTEL") {
     updateFields.biometric_hostel_at = new Date().toISOString();
-  } else if (action === "BIOMETRIC_GATE") {
+  } else if (normalizedAction === "BIOMETRIC_GATE") {
     updateFields.biometric_gate_at = new Date().toISOString();
     if (request.current_stage === "main_gate") {
       nextStage = "completed";
       nextStatus = "COMPLETED";
     }
-  } else if (action === "SIGN") {
+  } else if (normalizedAction === "SIGN") {
     if (!digitalSignature) {
       return NextResponse.json(
         { success: false, error: { code: "BAD_REQUEST", message: "digitalSignature payload is required for SIGN action" } },
@@ -210,10 +234,11 @@ async function handlePatch(req: NextRequest): Promise<Response> {
     });
   }
 
+
   const updatedHistory = appendStageHistory(
     request.stage_history,
     { id: authUserId, name: actorName, role: authUserRole },
-    action,
+    normalizedAction,
     comment,
     { from: request.current_stage, to: nextStage }
   );
@@ -236,12 +261,24 @@ async function handlePatch(req: NextRequest): Promise<Response> {
     );
   }
 
+  const auditAction =
+    normalizedAction === "CANCEL" ? "PERMISSION_REQUEST_CANCELLED" :
+    normalizedAction === "APPROVE" ? "PERMISSION_REQUEST_APPROVED" :
+    normalizedAction === "REJECT" ? "PERMISSION_REQUEST_REJECTED" :
+    normalizedAction === "FORWARD" ? "PERMISSION_REQUEST_FORWARDED" :
+    normalizedAction === "ESCALATE" ? "PERMISSION_REQUEST_ESCALATED" :
+    normalizedAction === "COMPLETE" ? "PERMISSION_REQUEST_COMPLETED" :
+    normalizedAction === "SIGN" ? "PERMISSION_DOCUMENT_SIGNED" :
+    normalizedAction.startsWith("BIOMETRIC_") ? "PERMISSION_BIOMETRIC_VERIFIED" :
+    `PERMISSION_REQUEST_${normalizedAction}`;
+
   addAudit({
-    action: "PERMISSION_REQUEST_" + action,
+    action: auditAction as any,
     userId: authUserId,
+    role: authUserRole as Role,
     details: {
       ticketNumber: request.ticket_number,
-      action,
+      action: normalizedAction,
       fromStage: request.current_stage,
       toStage: nextStage,
       status: nextStatus,
@@ -253,8 +290,8 @@ async function handlePatch(req: NextRequest): Promise<Response> {
     "user",
     request.student_user_id,
     "permission",
-    "Permission Request " + request.ticket_number + " Updated",
-    "Your request " + request.ticket_number + " was marked as " + action + " (Status: " + nextStatus + ", Stage: " + nextStage + ")"
+    `Permission Request ${request.ticket_number} Updated`,
+    `Your request ${request.ticket_number} was marked ${normalizedAction} (Status: ${nextStatus}, Stage: ${nextStage})`
   ).catch((err) => console.error("[Permission Ticket API] addNotification error:", err));
 
   return NextResponse.json({ success: true, data: updated });
@@ -269,3 +306,9 @@ export const PATCH = withRateLimit(withAuthorization(handlePatch), {
   keyPrefix: "permission_ticket_patch",
   maxRequests: 60,
 });
+
+export const POST = withRateLimit(withAuthorization(handlePatch), {
+  keyPrefix: "permission_ticket_post",
+  maxRequests: 60,
+});
+

@@ -66,6 +66,15 @@ interface ScanError {
   code?: string;
 }
 
+export interface TodayStatsResult {
+  entries: number;
+  exits: number;
+  onCampus: number;
+  recentScans: Scan[];
+  breakdown: CategoryBreakdown | null;
+  outing: OutingEntry[] | null;
+}
+
 interface OperatorState {
   // Current scan flow
   state: ScanState;
@@ -92,14 +101,15 @@ interface OperatorState {
   _scanGeneration: number;
   startScan: (roll: string) => void;
   setDirection: (direction: ScanDirection) => void;
-  setReason: (reason: ExitReason) => void;
+  setReason: (reason: ExitReason | null) => void;
+  clearError: () => void;
   
   confirmScan: (addToast: (toast: Omit<ToastData, "id">) => void, overrideDirection?: ScanDirection, overrideReason?: ExitReason | string) => Promise<void>;
     cancelScan: () => void;
   reset: () => void;
   loadStats: () => void;
   setGate: (gateId: string) => void;
-  _fetchTodayStats: () => Promise<{ entries: number; exits: number; onCampus: number; recentScans: Scan[]; breakdown: CategoryBreakdown | null; outing: OutingEntry[] | null }>;
+  _fetchTodayStats: () => Promise<TodayStatsResult>;
 }
 
 let activeStatsFetchCtrl: AbortController | null = null;
@@ -406,7 +416,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
   // Fetch today's stats. Prefer the server route /api/operator/stats (server
   // runs with the service client, which the browser's anon client cannot use
   // due to RLS); fall back to the local statsToday() if the request fails.
-  _fetchTodayStats: async (): Promise<{ entries: number; exits: number; onCampus: number; recentScans: Scan[]; breakdown: CategoryBreakdown | null; outing: OutingEntry[] | null }> => {
+  _fetchTodayStats: async (): Promise<TodayStatsResult> => {
     const serverStats = await fetchTodayStats(get().gateId || undefined);
     if (serverStats) return serverStats;
     return {

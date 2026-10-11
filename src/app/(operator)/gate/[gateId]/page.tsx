@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { normalizeScannedPayload } from "@/lib/barcode";
 import { motion } from "framer-motion";
@@ -23,7 +23,7 @@ import type { Scan as ScanRecord } from "@/lib/types";
 import { useCollegeInfo } from "@/hooks/useCollegeInfo";
 import { useUIStore } from "@/stores/uiStore";
 
-export default function OperatorPage() {
+function OperatorPageInner() {
   const params = useParams<{ gateId: string }>();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -487,6 +487,7 @@ export default function OperatorPage() {
                           }}
                           className="px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs hover:bg-emerald-400 transition-colors active:scale-[0.98] flex items-center gap-1.5"
                         >
+
                           <RefreshCw className="w-3.5 h-3.5" /> Retry
                         </button>
                         <button
@@ -645,5 +646,13 @@ export default function OperatorPage() {
       {/* WebAuthn / Passkey Biometric confirmation step after the ID scan */}
       
     </div>
+  );
+}
+
+export default function OperatorPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-sm text-[var(--text-muted)]">Loading…</div>}>
+      <OperatorPageInner />
+    </Suspense>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   ShieldCheck,
@@ -40,7 +40,7 @@ interface WardenStudent {
   checkedOutAt?: string;
 }
 
-export default function SupervisorDashboardPage() {
+function SupervisorDashboardInner() {
   const searchParams = useSearchParams();
   const initialTab = searchParams.get("tab") || "overview";
   const [activeTab, setActiveTab] = useState<string>(initialTab);
@@ -462,6 +462,8 @@ export default function SupervisorDashboardPage() {
       {/* Approvals Tab */}
       {activeTab === "approvals" && (
         <div className="space-y-4">
+
+
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <h2 className="text-lg font-bold text-[var(--text-primary)]">
               <span className="sm:hidden">📋</span><span className="hidden sm:inline">📋 Outpass Approvals</span>
@@ -633,5 +635,13 @@ export default function SupervisorDashboardPage() {
       )}
       </div>
     </div>
+  );
+}
+
+export default function SupervisorDashboardPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-sm text-[var(--text-muted)]">Loading…</div>}>
+      <SupervisorDashboardInner />
+    </Suspense>
   );
 }

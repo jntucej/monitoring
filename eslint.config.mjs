@@ -9,6 +9,7 @@ const eslintConfig = defineConfig([
     rules: {
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-unused-vars": "error",
+      "@next/next/no-img-element": "off",
       "react-hooks/set-state-in-effect": "error",
       "react-hooks/purity": "error",
       "react-hooks/refs": "error",

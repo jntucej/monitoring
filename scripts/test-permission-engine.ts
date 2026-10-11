@@ -26,7 +26,7 @@ assert.throws(
 );
 
 const r3 = applyPermissionAction(
-  baseReq({ current_stage: "warden_or_principal", biometric_hostel_at: null }),
+  baseReq({ current_stage: "hostel_biometric", biometric_hostel_at: null }),
   { ...actor, role: "warden" },
   { action: "APPROVE" },
 );

@@ -78,6 +78,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
       ];
+      break;
 
     case "principal":
       groups = [
@@ -114,6 +115,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
       ];
+      break;
 
     case "oie":
     case "exam_branch":
@@ -132,6 +134,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
       ];
+      break;
 
     case "sysadmin":
       groups = [
@@ -183,6 +186,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
       ];
+      break;
 
     case "admin":
       groups = [
@@ -236,6 +240,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
       ];
+      break;
 
     case "operator":
       groups = [
@@ -261,6 +266,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
       ];
+      break;
 
     case "supervisor":
     case "warden":
@@ -289,12 +295,14 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
       ];
+      break;
 
     case "faculty":
       groups = [
         {
           groupLabel: "Faculty Portal",
           items: [
+            { href: "/faculty/permissions", label: "Student Permissions", icon: "CheckSquare", badge: "PENDING" },
             { href: "/admin/faculty", label: "Faculty Attendance Desk", icon: "UserCheck", badge: "MY DEPT" },
             { href: "/person", label: "Digital Gate Pass", icon: "QrCode" },
           ],
@@ -307,6 +315,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
       ];
+      break;
 
     case "staff":
       groups = [
@@ -325,6 +334,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
       ];
+      break;
 
     case "worker":
       groups = [
@@ -342,6 +352,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
       ];
+      break;
 
     case "student":
       groups = [
@@ -363,6 +374,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
       ];
+      break;
 
     case "parent":
     case "guardian":
@@ -383,6 +395,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
       ];
+      break;
 
     default:
       groups = [

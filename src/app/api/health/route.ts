@@ -7,17 +7,19 @@ async function handleGet(req: NextRequest) {
   const health = await checkSystemHealth();
   const duration = Math.round(Date.now() - startTime);
 
-  // Log this request's actual response time
-  try {
-    const result = await query(
-      `INSERT INTO api_metrics (path, method, response_time, status_code, timestamp)
+  // Log this request's actual response time if DB is reachable
+  if (health.components.database.status !== 'unhealthy') {
+    try {
+      const result = await query(
+        `INSERT INTO api_metrics (path, method, response_time, status_code, timestamp)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING id`,
-      ['/api/health', 'GET', duration, 200, new Date().toISOString()]
-    );
-    console.log(`[health] metric inserted: ${duration}ms, id=${result.rows?.[0]?.id}`);
-  } catch (e) {
-    console.error('[health] metric insert FAILED:', e);
+        ['/api/health', 'GET', duration, 200, new Date().toISOString()]
+      );
+      console.log(`[health] metric inserted: ${duration}ms, id=${result.rows?.[0]?.id}`);
+    } catch (e) {
+      console.error('[health] metric insert FAILED:', e);
+    }
   }
 
   const statusCodes = { healthy: 200, degraded: 200, unhealthy: 503 };
