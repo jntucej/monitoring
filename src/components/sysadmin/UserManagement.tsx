@@ -17,6 +17,7 @@ export function UserManagement() {
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [customUniqueId, setCustomUniqueId] = useState("");
   const [hostelScope, setHostelScope] = useState("");
   const [role, setRole] = useState<string>("operator");
   const [busy, setBusy] = useState(false);
@@ -154,13 +155,15 @@ export function UserManagement() {
       const res = await fetch("/api/users", {
         method: "POST",
         headers: authHeaders(),
-        body: JSON.stringify({ name, email, role, gateId: role === "operator" ? gateId || undefined : undefined, hostelScope: ["caretaker", "deputy_warden", "hostel_manager", "warden"].includes(role) ? hostelScope || undefined : undefined, isActive: true }),
+        body: JSON.stringify({ name, email, role, uniqueId: customUniqueId.trim() || undefined, gateId: role === "operator" ? gateId || undefined : undefined, hostelScope: ["caretaker", "deputy_warden", "hostel_manager", "warden"].includes(role) ? hostelScope || undefined : undefined, isActive: true }),
       });
       const j = await res.json();
       if (res.ok && j.success) {
-        setMsg("✅ User added.");
+        const assignedId = j.uniqueId ?? j.data?.uniqueId ?? j.data?.unique_id;
+        setMsg(`✅ User added${assignedId ? ` with ID ${assignedId}` : ""}.`);
         setName("");
         setEmail("");
+        setCustomUniqueId("");
         setHostelScope("");
         setShowForm(false);
         load();
@@ -284,6 +287,20 @@ export function UserManagement() {
                 </optgroup>
             </select>
           </div>
+          {["student", "parent", "guardian", "visitor", "worker"].includes(role) && (
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Custom Unique ID <span className="text-xs text-gray-500">(optional — auto-generated if blank, e.g. ucej-s-0001)</span>
+              </label>
+              <input
+                type="text"
+                value={customUniqueId}
+                onChange={(e) => setCustomUniqueId(e.target.value)}
+                placeholder={`auto: ucej-${role === "student" ? "s" : role === "parent" ? "p" : role === "guardian" ? "g" : role === "visitor" ? "v" : "w"}-NNNN`}
+                className="block w-full rounded-md border-gray-700 bg-gray-800 text-white sm:text-sm p-2"
+              />
+            </div>
+          )}
           {role === "operator" && (
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">

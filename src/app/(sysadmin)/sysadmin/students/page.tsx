@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
+import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { EnrollmentCodeModal } from "@/components/sysadmin/EnrollmentCodeModal";
 import { UserRolesPanel } from "@/components/sysadmin/UserRolesPanel";
 import {
   GraduationCap, Search, RefreshCw, UserPlus, Edit, Trash2,
   Ban, CheckCircle2, X, Upload, Phone, Mail, SlidersHorizontal, Lock, KeyRound,
+  Link as LinkIcon, Loader2,
 } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
@@ -57,8 +59,58 @@ export default function SysAdminStudentsPage() {
   const [enrollmentModalUser, setEnrollmentModalUser] = useState<{id: string, name: string} | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
+  // Link Parent modal state
+  const [linkStudent, setLinkStudent] = useState<StudentRecord | null>(null);
+  const [parents, setParents] = useState<Array<{ id: string; name: string; uniqueId?: string | null }>>([]);
+  const [selectedParentId, setSelectedParentId] = useState("");
+  const [linkBusy, setLinkBusy] = useState(false);
+
+  const loadParents = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/parents?role=guardian&includeUnlinked=true`, {
+        headers: getAuthHeaders(),
+        cache: "no-store",
+      });
+      const json = await res.json().catch(() => ({ success: false, data: [] }));
+      const list = Array.isArray(json.data) ? json.data : [];
+      setParents(list.map((p: any) => ({ id: p.id, name: p.name, uniqueId: p.uniqueId ?? null })));
+    } catch {
+      setParents([]);
+    }
+  }, []);
+
+  const openLinkParentModal = useCallback((s: StudentRecord) => {
+    setLinkStudent(s);
+    setSelectedParentId("");
+    loadParents();
+  }, [loadParents]);
+
+  const handleLinkParent = async () => {
+    if (!linkStudent || !selectedParentId) return;
+    setLinkBusy(true);
+    try {
+      const res = await fetch("/api/parents/link", {
+        method: "POST",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ studentId: linkStudent.id, parentUserId: selectedParentId }),
+      });
+      const json = await res.json().catch(() => ({ success: false }));
+      if (res.ok && json.success) {
+        addToast({ variant: "success", title: "Linked", message: `Guardian linked to ${linkStudent.name}.` });
+        setLinkStudent(null);
+        setSelectedParentId("");
+      } else {
+        addToast({ variant: "error", title: "Error", message: json.error?.message || "Failed to link guardian." });
+      }
+    } catch {
+      addToast({ variant: "error", title: "Network error", message: "Could not link guardian." });
+    } finally {
+      setLinkBusy(false);
+    }
+  };
+
   const [createForm, setCreateForm] = useState({
-    roll: "", name: "", email: "", phone: "", branch: "", customMetaJson: "{}",
+    roll: "", name: "", email: "", phone: "", branch: "", customMetaJson: "{}", customUniqueId: "",
   });
 
   const [editForm, setEditForm] = useState({
@@ -106,14 +158,16 @@ export default function SysAdminStudentsPage() {
 
   const handleCreateStudent = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!createForm.roll.trim() || !createForm.name.trim()) {
-      addToast({ variant: "error", title: "Validation", message: "Roll and name are required." });
+    if (!createForm.name.trim()) {
+      addToast({ variant: "error", title: "Validation", message: "Name is required." });
       return;
     }
     // Branch: auto-derive from roll when the user left it blank.
-    const branch = createForm.branch.trim() || getDepartmentFromRoll(createForm.roll) || "";
-    if (branch && !createForm.branch.trim()) {
-      addToast({ variant: "info", title: "Branch Auto-Set", message: `Branch auto-detected as ${branch} from roll number.` });
+    const customUniqueId = createForm.customUniqueId.trim();
+    const effRoll = customUniqueId || createForm.roll.trim();
+    const branch = createForm.branch.trim() || getDepartmentFromRoll(effRoll) || "";
+    if (branch && !createForm.branch.trim() && effRoll) {
+      addToast({ variant: "info", title: "Branch Auto-Set", message: `Branch auto-detected as ${branch} from unique ID.` });
     }
     setBusy(true);
     try {
@@ -122,12 +176,13 @@ export default function SysAdminStudentsPage() {
         addToast({ variant: "error", title: "Invalid JSON", message: "Custom metadata must be valid JSON." });
         setBusy(false); return;
       }
-      const studentEmail = createForm.email.trim() || `${createForm.roll.trim().toLowerCase()}@jntuhcej.ac.in`;
+      const finalUniqueId = customUniqueId || createForm.roll.trim();
+      const studentEmail = createForm.email.trim() || (finalUniqueId ? `${finalUniqueId.toLowerCase()}@jntuhcej.ac.in` : undefined);
       const res = await fetch("/api/users", {
         method: "POST",
         headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({
-          uniqueId: createForm.roll, name: createForm.name, role: "student",
+          uniqueId: finalUniqueId || undefined, name: createForm.name, role: "student",
           email: studentEmail, phone: createForm.phone || undefined,
           department: branch || undefined,
           departmentId: branch || undefined,
@@ -136,9 +191,10 @@ export default function SysAdminStudentsPage() {
       });
       const json = await res.json().catch(() => ({ success: false, error: { message: "Invalid server response." } }));
       if (res.ok && json.success) {
-        addToast({ variant: "success", title: "Created", message: `Student ${createForm.name} added.` });
+        const assignedId = json.uniqueId ?? json.data?.uniqueId ?? json.data?.unique_id ?? null;
+        addToast({ variant: "success", title: "Created", message: `Student ${createForm.name} added${assignedId ? ` with ID ${assignedId}` : ""}${assignedId && json.meta?.uniqueIdGenerated ? " (auto-generated)" : ""}.` });
         setShowCreateModal(false);
-        setCreateForm({ roll: "", name: "", email: "", phone: "", branch: "", customMetaJson: "{}" });
+        setCreateForm({ roll: "", name: "", email: "", phone: "", branch: "", customMetaJson: "{}", customUniqueId: "" });
         loadStudents();
       } else {
         addToast({ variant: "error", title: "Error", message: json.error?.message || "Failed to create student." });
@@ -668,6 +724,7 @@ export default function SysAdminStudentsPage() {
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <button onClick={() => setEnrollmentModalUser({ id: s.id, name: s.name })} className="p-1.5 rounded-lg hover:bg-slate-700 text-emerald-400" title="Enrollment Code"><KeyRound className="w-3.5 h-3.5" /></button>
+                          <button onClick={() => openLinkParentModal(s)} className="p-1.5 rounded-lg hover:bg-slate-700 text-violet-400" title="Link Parent"><LinkIcon className="w-3.5 h-3.5" /></button>
                           <button onClick={() => handleResetPassword(s)} className="p-1.5 rounded-lg hover:bg-slate-700 text-amber-400" title="Reset Password"><Lock className="w-3.5 h-3.5" /></button>
                           <button onClick={() => openEditModal(s)} className="p-1.5 rounded-lg hover:bg-slate-700 text-blue-400" title="Edit"><Edit className="w-3.5 h-3.5" /></button>
                           <button onClick={() => handleDeleteStudent(s)} className="p-1.5 rounded-lg hover:bg-slate-700 text-red-400" title="Delete"><Trash2 className="w-3.5 h-3.5" /></button>
@@ -701,8 +758,12 @@ export default function SysAdminStudentsPage() {
               <form onSubmit={handleCreateStudent} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-semibold text-slate-400 block mb-1">Roll Number *</label>
-                    <input type="text" required value={createForm.roll} onChange={(e) => setCreateForm({ ...createForm, roll: e.target.value })} className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="22CS101" />
+                    <label className="text-xs font-semibold text-slate-400 block mb-1">Roll Number <span className="text-slate-500 font-normal">(legacy — optional if Custom Unique ID set)</span></label>
+                    <input type="text" value={createForm.roll} onChange={(e) => setCreateForm({ ...createForm, roll: e.target.value })} className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="22CS101" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-400 block mb-1">Custom Unique ID <span className="text-slate-500 font-normal">(optional — auto ucej-s-NNNN if blank)</span></label>
+                    <input type="text" value={createForm.customUniqueId} onChange={(e) => setCreateForm({ ...createForm, customUniqueId: e.target.value })} className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="e.g. ucej-s-0042 (overrides auto)" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-slate-400 block mb-1">Full Name *</label>
@@ -787,6 +848,53 @@ export default function SysAdminStudentsPage() {
                   <button type="submit" disabled={busy} className="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-500 disabled:opacity-50">{busy ? "Saving..." : "Update Student"}</button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Link Parent Modal */}
+        {linkStudent && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+            <div className="bg-[#0d1220] border border-slate-800 rounded-2xl w-full max-w-sm shadow-2xl">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
+                <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                  <LinkIcon className="w-4 h-4 text-violet-400" />
+                  Link Guardian — {linkStudent.roll || linkStudent.uniqueId || linkStudent.name}
+                </h2>
+                <button onClick={() => setLinkStudent(null)} className="p-1 rounded-lg hover:bg-slate-800 text-slate-400"><X className="w-4 h-4" /></button>
+              </div>
+              <div className="p-5 space-y-4">
+                <p className="text-xs text-slate-400">
+                  Link a guardian to <strong className="text-white">{linkStudent.name}</strong>.
+                  No guardians yet? Create one from the <Link href="/sysadmin/parents" className="text-violet-400 hover:text-violet-300">Parents &amp; Guardians</Link> page.
+                </p>
+                <div>
+                  <label className="text-xs font-semibold text-slate-400 block mb-1">Guardian</label>
+                  <select
+                    value={selectedParentId}
+                    onChange={(e) => setSelectedParentId(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-violet-500"
+                  >
+                    <option value="">Select guardian…</option>
+                    {parents.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} {p.uniqueId ? `(${p.uniqueId})` : ""}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <button onClick={() => setLinkStudent(null)} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700">Cancel</button>
+                  <button
+                    onClick={handleLinkParent}
+                    disabled={linkBusy || !selectedParentId}
+                    className="px-4 py-2 rounded-xl bg-violet-600 text-white text-xs font-semibold hover:bg-violet-500 disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {linkBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <LinkIcon className="w-3.5 h-3.5" />}
+                    Link
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}
