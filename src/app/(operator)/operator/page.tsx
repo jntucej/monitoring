@@ -5,6 +5,7 @@ import { GuardedPage } from "@/components/shared/GuardedPage";
 import { ConditionalAlert } from "@/components/shared/ConditionalAlert";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { useAuthStore } from "@/stores/authStore";
@@ -66,7 +67,8 @@ function OperatorDashboardInner() {
         />
       </WidgetBoundary>
 
-      {/* TODO: role-specific widgets. Wrap each in its own WidgetBoundary. */}
+      {/* Contact the developer (all roles) */}
+      <DevContactStrip />
     </div>
   );
 }
