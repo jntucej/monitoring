@@ -107,7 +107,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
   const [isShaking, setIsShaking] = useState(false);
 
   // Two-leg MFA login: set after password leg succeeds, cleared on completion
-  const [mfaChallenge, setMfaChallenge] = useState<string | null>(null);
+  const [mfaChallenge, setMfaChallenge] = useState<any | null>(null);
   const [totpCode, setTotpCode] = useState("");
 
   const [showResetModal, setShowResetModal] = useState(false);

@@ -19,23 +19,23 @@ async function handleGet(req: NextRequest) {
   try {
     // Get database size
     const dbSizeResult = await query(`SELECT pg_size_pretty(pg_database_size('gate_monitor')) as size`);
-    const databaseSize = dbSizeResult[0]?.size || 'N/A';
+    const databaseSize = dbSizeResult.rows[0]?.size || 'N/A';
 
     // Get total backups count (from the backup table if exists, or estimate)
     const tables = await query(
       `SELECT table_name FROM information_schema.tables 
        WHERE table_schema = 'public'`
-    ) as any[];
+    );
     
-    const totalTables = tables.length;
+    const totalTables = tables.rows.length;
 
     // Get latest migration timestamp as proxy for latest activity
     const latestMigration = await query(
       `SELECT applied_at FROM schema_migrations ORDER BY applied_at DESC LIMIT 1`
-    ) as any[];
+    );
     
-    const latestBackup = latestMigration[0]?.applied_at 
-      ? new Date(latestMigration[0].applied_at).toLocaleString() 
+    const latestBackup = latestMigration.rows[0]?.applied_at 
+      ? new Date(latestMigration.rows[0].applied_at).toLocaleString() 
       : null;
 
     // Disk usage - read from /proc/diskstats or use df

@@ -156,6 +156,14 @@ export async function publishAlert(alert: {
   severity: string;
   message: string;
 }): Promise<void> {
+  // Deduplication check: suppress duplicate active alerts for the same rule within recent window
+  const recentThreshold = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+  const existingActive = inMemoryAlerts.find(
+    (a) => a.ruleId === alert.rule_id && a.status === "active" && a.triggeredAt > recentThreshold
+  );
+  if (existingActive) {
+    return; // Suppress duplicate notification flood
+  }
   const alertItem: AlertHistory = {
     id: `alert-${Date.now()}`,
     ruleId: alert.rule_id,
