@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Upload, X, CheckCircle2, AlertTriangle, FileText } from "lucide-react";
+import {
+  Upload, X, CheckCircle2, AlertTriangle, FileText, Loader2, ScrollText,
+} from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
 
 interface BulkUserImportModalProps {
@@ -9,62 +11,51 @@ interface BulkUserImportModalProps {
   onSuccess: () => void;
 }
 
+interface PreviewError {
+  row: number;
+  field?: string;
+  message: string;
+}
+
+interface PreviewSummary {
+  total: number;
+  valid: number;
+  invalid: number;
+}
+
+// The exact sheet layout used by the college. H.T NO. (roll) is the only
+// field that drives year / batch / branch / course — everything else is just
+// captured from the sheet; year is calculated, never typed.
+const TEMPLATE_CSV =
+  "COURSE,H.T NO.,NAME OF THE STUDENT,FATHER NAME,GENDER,PHONE NUMBER,DOB,EMAIL ID,LAND LINE 0R PARENT NUMBER\n" +
+  "CSE,25JJ1A0501,AADITH KUMAR,PRAKASH RAO,male,9876543210,12-05-2005,aadith.k@jntuhcej.ac.in,9440123456\n" +
+  "CSE,24JJ5A0512,RAVI TEJA,SREENIVAS,female,9812345678,01-09-2003,ravi.tej@jntuhcej.ac.in,9440123457\n";
+
+const TEMPLATE_HINTS: Array<[string, string]> = [
+  ["H.T NO.", "The only required student field — yyJJVVBBNN. Year, batch and branch are calculated from it (1A = regular, 5A = lateral)."],
+  ["EMAIL ID", "Required. Missing or invalid email = row is reported and skipped."],
+  ["COURSE", "Optional — if blank, it is filled from the branch code in the H.T NO. (05 CSE, 12 IT, 04 ECE, 02 EEE, 03 MECH)."],
+  ["GENDER", "male / female (M, F also accepted)."],
+  ["DOB", "DD-MM-YYYY or YYYY-MM-DD."],
+  ["Other columns", "Father name, phone, landline/parent number — all optional."],
+];
+
 export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalProps) {
-  const [jsonText, setJsonText] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [csvText, setCsvText] = useState("");
+  const [busy, setBusy] = useState<"idle" | "validate" | "commit">("idle");
   const [resultMsg, setResultMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [preview, setPreview] = useState<{
+    summary: PreviewSummary;
+    errors: PreviewError[];
+    rows: unknown[];
+  } | null>(null);
 
-  const parseCSV = (csv: string) => {
-    const lines = csv.split(/\r?\n/).filter((l) => l.trim().length > 0);
-    if (lines.length < 2) return [];
-    const headers = lines[0].split(",").map((h) => h.trim().replace(/^["']|["']$/g, ""));
-    const records = [];
-
-    for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(",").map((v) => v.trim().replace(/^["']|["']$/g, ""));
-      const obj: Record<string, string> = {};
-      headers.forEach((h, idx) => {
-        obj[h] = values[idx] || "";
-      });
-      records.push(obj);
-    }
-    return records;
-  };
-  const downloadSampleTemplate = (format: "csv" | "json" = "csv") => {
-    if (format === "json") {
-      const sample = [
-        {
-          name: "John Doe",
-          email: "john.doe@college.edu",
-          role: "operator",
-          status: "ACTIVE",
-          employeeId: "EMP1001",
-          phone: "+15550192",
-          gateId: "1"
-        },
-        {
-          name: "Alice Smith",
-          email: "alice.smith@college.edu",
-          role: "student",
-          status: "ACTIVE",
-          phone: "+15550193",
-          assignedHostel: "Hostel A"
-        }
-      ];
-      setJsonText(JSON.stringify(sample, null, 2));
-      return;
-    }
-
-    const csvContent =
-      "name,email,role,status,employeeId,phone,gateId,assignedHostel\n" +
-      "John Doe,john.doe@college.edu,operator,ACTIVE,EMP1001,+15550192,1,\n" +
-      "Alice Smith,alice.smith@college.edu,student,ACTIVE,,+15550193,,Hostel A\n";
-
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const downloadTemplate = () => {
+    const blob = new Blob([TEMPLATE_CSV], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", "bulk_user_import_template.csv");
+    link.setAttribute("download", "student_import_template.csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -73,105 +64,143 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = (event) => {
       const content = event.target?.result as string;
-      if (file.name.endsWith(".csv")) {
-        const parsed = parseCSV(content);
-        setJsonText(JSON.stringify(parsed, null, 2));
-      } else {
-        setJsonText(content);
-      }
+      setCsvText(content);
+      setPreview(null);
+      setResultMsg(null);
     };
     reader.readAsText(file);
   };
 
-  const handleImport = async () => {
-    setBusy(true);
-    setResultMsg(null);
+  const runValidate = async (): Promise<unknown[] | null> => {
+    const res = await fetch("/api/users/bulk/validate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+      body: JSON.stringify({ csv: csvText }),
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) {
+      setResultMsg({ type: "error", text: json.error?.message || "Validation request failed." });
+      return null;
+    }
+    const data = json.data ?? json;
+    setPreview({
+      summary: data.summary ?? { total: data.totalRows ?? 0, valid: data.validRows?.length ?? 0, invalid: data.errors?.length ?? 0 },
+      errors: data.errors ?? [],
+      rows: data.validRows ?? [],
+    });
+    return data.validRows;
+  };
 
+  const handleImport = async () => {
+    setBusy("validate");
+    setResultMsg(null);
     try {
-      let usersList;
-      try {
-        usersList = JSON.parse(jsonText);
-      } catch {
-        setResultMsg({ type: "error", text: "Invalid JSON or CSV format. Ensure text is valid JSON or upload a CSV." });
-        setBusy(false);
+      const validRows = await runValidate();
+      if (validRows === null) {
+        // Validation itself failed (shown in resultMsg) — abort commit.
+        setBusy("idle");
         return;
       }
-
-      const res = await fetch("/api/users/bulk", {
+      setBusy("commit");
+      const res = await fetch("/api/users/bulk/commit", {
         method: "POST",
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ users: usersList }),
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify({ rows: validRows, skipErrors: true }),
       });
       const json = await res.json();
-
       if (res.ok && json.success) {
+        const d = json.data ?? json;
+        const errs: string[] = (d.errors ?? []).map((x: any) => `row ${x.row}: ${x.error}`).slice(0, 5);
         setResultMsg({
           type: "success",
-          text: `Bulk import completed! Succeeded: ${json.succeeded}, Failed: ${json.failed}`,
+          text: `Import complete — ${d.importedCount} imported, ${d.failedCount} failed.` +
+            (errs.length ? ` ${errs.join(" • ")}` : ""),
         });
         setTimeout(() => {
           onSuccess();
-        }, 1500);
+        }, 2500);
       } else {
-        setResultMsg({ type: "error", text: json.error?.message || "Bulk import failed." });
+        setResultMsg({ type: "error", text: json.error?.message || "Commit failed." });
       }
     } catch (err: any) {
       setResultMsg({ type: "error", text: err.message || "Network error during bulk import" });
     } finally {
-      setBusy(false);
+      setBusy("idle");
     }
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
-      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl">
+      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 max-w-2xl w-full space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center border-b border-[var(--border)] pb-3">
           <h3 className="font-bold text-lg text-white flex items-center gap-2">
-            <Upload className="w-5 h-5 text-sky-400" /> Bulk User Import
+            <Upload className="w-5 h-5 text-sky-400" /> Bulk Student Import
           </h3>
           <button onClick={onClose} className="p-1 text-[var(--text-muted)] hover:text-white">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <p className="text-xs text-[var(--text-muted)]">
-          Upload a CSV file or paste JSON array containing user objects with columns: <code>name, email, role</code> (optional: <code>employeeId, phone</code>).
-        </p>
+        <div className="text-xs text-[var(--text-muted)] space-y-1">
+          <p>
+            Upload the college sheet (<code>COURSE, H.T NO., NAME, FATHER NAME, GENDER, PHONE, DOB, EMAIL, LAND LINE</code>).
+            Year, batch and branch are <b>calculated from the H.T NO.</b> — nothing is typed by hand.
+          </p>
+        </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <label className="cursor-pointer px-3 py-1.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-xs font-semibold hover:bg-[var(--bg-base)] flex items-center gap-2">
-            <FileText className="w-4 h-4 text-sky-400" /> Choose CSV / JSON File
-            <input type="file" accept=".csv,.json" onChange={handleFileUpload} className="hidden" />
+            <FileText className="w-4 h-4 text-sky-400" /> Choose CSV File
+            <input type="file" accept=".csv" onChange={handleFileUpload} className="hidden" />
           </label>
 
           <button
             type="button"
-            onClick={() => downloadSampleTemplate("csv")}
+            onClick={downloadTemplate}
             className="px-3 py-1.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-xs font-semibold hover:bg-[var(--bg-base)] text-sky-400 flex items-center gap-1.5"
           >
-            <Upload className="w-3.5 h-3.5 rotate-180" /> Sample CSV
+            <Upload className="w-3.5 h-3.5 rotate-180" /> Download Template
           </button>
 
           <button
             type="button"
-            onClick={() => downloadSampleTemplate("json")}
+            onClick={() => setCsvText(TEMPLATE_CSV)}
             className="px-3 py-1.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-xs font-semibold hover:bg-[var(--bg-base)] text-purple-400 flex items-center gap-1.5"
           >
-            Load Sample JSON
+            <ScrollText className="w-3.5 h-3.5" /> Load Sample
           </button>
         </div>
 
         <textarea
           rows={7}
-          placeholder='[{"name": "Alice Smith", "email": "alice@college.edu", "role": "operator"}]'
-          value={jsonText}
-          onChange={(e) => setJsonText(e.target.value)}
+          placeholder={"COURSE,H.T NO.,NAME OF THE STUDENT,FATHER NAME,GENDER,PHONE NUMBER,DOB,EMAIL ID,LAND LINE 0R PARENT NUMBER\nCSE,25JJ1A0501,AADITH KUMAR,..."}
+          value={csvText}
+          onChange={(e) => { setCsvText(e.target.value); setPreview(null); }}
           className="w-full font-mono text-xs p-3 bg-[var(--bg-base)] border border-[var(--border)] rounded-xl text-white focus:outline-none"
         />
+
+        {preview && preview.summary.total > 0 && (
+          <div className="p-3 rounded-lg text-xs space-y-2 bg-[var(--bg-base)] border border-[var(--border)]">
+            <div className="flex gap-4 font-semibold">
+              <span>{preview.summary.total} rows</span>
+              <span className="text-emerald-400">{preview.summary.valid} valid</span>
+              <span className={preview.summary.invalid ? "text-rose-400" : ""}>{preview.summary.invalid} invalid</span>
+            </div>
+            {preview.errors.length > 0 && (
+              <div className="max-h-32 overflow-y-auto space-y-1">
+                {preview.errors.slice(0, 10).map((er, i) => (
+                  <div key={i} className="text-rose-400">
+                    Row {er.row}{er.field ? ` (${er.field})` : ""}: {er.message}
+                  </div>
+                ))}
+                {preview.errors.length > 10 && <div className="text-[var(--text-muted)]">… and {preview.errors.length - 10} more</div>}
+              </div>
+            )}
+          </div>
+        )}
 
         {resultMsg && (
           <div className={`p-3 rounded-lg text-xs font-medium flex items-center gap-2 ${resultMsg.type === "success" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-rose-500/10 text-rose-400 border border-rose-500/20"}`}>
@@ -180,16 +209,27 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
           </div>
         )}
 
+        <details className="text-xs text-[var(--text-muted)]">
+          <summary className="cursor-pointer font-semibold">Column reference</summary>
+          <ul className="mt-2 space-y-1 pl-4 list-disc">
+            {TEMPLATE_HINTS.map(([k, v]) => (
+              <li key={k}><b>{k}</b> — {v}</li>
+            ))}
+          </ul>
+        </details>
+
         <div className="flex justify-end gap-2 pt-2 border-t border-[var(--border)]">
           <button onClick={onClose} className="px-3 py-1.5 text-xs text-[var(--text-muted)] hover:text-white font-medium">
             Cancel
           </button>
           <button
             onClick={handleImport}
-            disabled={busy || !jsonText.trim()}
-            className="px-4 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-lg disabled:opacity-50"
+            disabled={busy !== "idle" || !csvText.trim() || (preview !== null && preview.summary.valid === 0)}
+            className="px-4 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-lg disabled:opacity-50 flex items-center gap-2"
           >
-            {busy ? "Importing..." : "Start Import"}
+            {busy === "commit" ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Importing…</> :
+             busy === "validate" ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Validating…</> :
+             `Import ${preview ? `${preview.summary.valid} students` : ""}`}
           </button>
         </div>
       </div>

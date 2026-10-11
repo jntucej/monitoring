@@ -264,24 +264,67 @@ export function getAdmissionYearFromRoll(roll: string | null | undefined): numbe
 }
 
 /**
- * Convenience: extract the student's year of study from a roll number.
+ * Compute the "today" reference date used for year-of-study calculation,
+ * using the Indian academic-year convention: a new academic year starts
+ * on July 1. So Jan–Jun of year Y belongs to academic year (Y-1)-Y, and
+ * Jul–Dec of year Y belongs to academic year Y-(Y+1).
  *
- * For a regular student (1A), year of study = current year - admission year + 1.
- * For lateral entry students (5A), the same formula applies but the
- * effective programme is 3 years.
+ *   25-Jan-2027 -> academic year 2026-27
+ *   01-Jul-2027 -> academic year 2027-28
+ */
+export function currentAcademicYearStart(now: Date = new Date()): number {
+  // Academic year starts July 1: if month >= July (index 6), the running
+  // year is the start of the current AY; otherwise last year is.
+  return now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1;
+}
+
+/**
+ * Extract the student's year of study from a roll number.
  *
- * @param roll   - The raw roll number string.
- * @param now    - Optional override for "today" (defaults to `new Date()`).
+ * Uses the Indian academic year (July 1 start). A regular student (1A)
+ * admitted in 2024 (24JJ1A...) is in:
+ *   - 1st year during AY 2024-25 (Jul 2024 – Jun 2025)
+ *   - 2nd year during AY 2025-26 (Jul 2025 – Jun 2026)
+ *   - 3rd year during AY 2026-27 (Jul 2026 – Jun 2027)
+ *   - 4th year during AY 2027-28 (Jul 2027 – Jun 2028)
+ *
+ * A lateral-entry student (5A) joins directly in 2nd year, so the same
+ * admission year puts them one year ahead of a regular student. Both
+ * types run a full 4-year program (lateral caps at 4th year).
+ *
+ * @param roll - The raw roll number string.
+ * @param now  - Optional override for "today" (defaults to `new Date()`).
  * @returns Year of study (1–4) or `null` if the roll is unparseable.
  */
 export function getStudentYearFromRoll(roll: string | null | undefined, now: Date = new Date()): number | null {
   const decoded = parseRollNumber(roll);
   if (!decoded) return null;
-  const currentYear = now.getFullYear();
+  let yearsElapsed: number;
+  if (decoded.entryModeCode === "5A") {
+    // Lateral: admitted mid-AY, joined directly into 2nd year.
+    // 2026-27 spans AY 2025-26 -> 3rd year; 2027-28 -> 4th (cap).
+    yearsElapsed = Math.min(2, now.getFullYear() - decoded.admissionYear);
+  } else {
+    // Regular: 1st year spans Jul–Dec of the admission year. Jan–Jun of the
+    // tail belongs to the previous AY's end: 24JJ1A is 3rd year through
+    // Jun 2027, and 4th from Jul 2027 onward.
+    yearsElapsed = (now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1) - decoded.admissionYear;
+  }
   const baseYear = decoded.entryModeCode === "5A" ? 2 : 1;
-  const yearOfStudy = currentYear - decoded.admissionYear + baseYear;
+  const yearOfStudy = yearsElapsed + baseYear;
   if (yearOfStudy <= 0) return 1;
   return Math.min(4, Math.max(1, yearOfStudy));
+}
+
+/**
+ * Compute the batch label (e.g. "2024-25" / "2024") from a roll number's
+ * admission year, following the academic-year convention.
+ */
+export function getBatchFromRoll(roll: string | null | undefined): string | null {
+  const decoded = parseRollNumber(roll);
+  if (!decoded) return null;
+  // Batch = admission year (the year they enrolled).
+  return String(decoded.admissionYear);
 }
 
 /**
