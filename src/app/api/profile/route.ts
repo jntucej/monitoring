@@ -15,7 +15,7 @@ async function handleGet(_req: NextRequest, context: { auth: AuthContext }) {
   const { data: user, error } = await supabase
     .from("users")
     .select(`
-      id, name, email, phone, role, status, account_status, unique_id,
+      id, name, email, phone, role, status, unique_id,
       photo_url, department_id, login_identifier,
       two_factor_enabled, created_at,
       student_details ( roll, year, section, batch, hostel_block, room_number, gender, student_type ),
