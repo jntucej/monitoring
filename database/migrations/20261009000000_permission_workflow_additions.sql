@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS public.permission_requests (
   student_user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
   hostel_scope TEXT CHECK (hostel_scope IN ('boys','girls')),
   current_stage TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING','APPROVED','REJECTED','ESCALATED','COMPLETED')),
+  status TEXT NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING','APPROVED','REJECTED','ESCALATED','COMPLETED','CANCELLED')),
   stage_history JSONB NOT NULL DEFAULT '[]'::jsonb,
   document_required BOOLEAN NOT NULL DEFAULT FALSE,
   document_url TEXT,

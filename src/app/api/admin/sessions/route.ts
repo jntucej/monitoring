@@ -4,27 +4,27 @@ import { withAuthorization } from "@/middleware/authorization";
 
 async function handleGet(req: NextRequest) {
   try {
-    const supabase = getSupabaseServiceClient();
+    const { query } = await import("@/lib/postgres");
 
-    // Query active sessions from sessions table with joined user record
-    const { data: sessions, error } = await supabase
-      .from("sessions")
-      .select("id, user_id, refresh_hash, expires_at, last_seen_at, ip_address, user_agent, users(id, name, email, role, status)")
-      .is("revoked_at", null)
-      .gt("expires_at", new Date().toISOString())
-      .order("last_seen_at", { ascending: false });
+    // Query active sessions with joined user record using raw SQL
+    const { rows: sessions } = await query(`
+      SELECT s.id, s.user_id, s.refresh_hash, s.expires_at, s.last_seen_at,
+             s.ip_address, s.user_agent,
+             u.name, u.email, u.role, u.status
+        FROM sessions s
+        JOIN users u ON u.id = s.user_id
+       WHERE s.revoked_at IS NULL
+         AND s.expires_at > NOW()
+       ORDER BY s.last_seen_at DESC
+    `);
 
-    if (error) {
-      return NextResponse.json({ success: true, data: [] });
-    }
-
-    const activeSessions = (sessions || []).map((s: any) => ({
+    const activeSessions = sessions.map((s: any) => ({
       sessionId: s.id,
       userId: s.user_id,
-      name: s.users?.name,
-      email: s.users?.email,
-      role: s.users?.role,
-      status: s.users?.status,
+      name: s.name,
+      email: s.email,
+      role: s.role,
+      status: s.status,
       sessionTokenTruncated: s.refresh_hash
         ? `${s.refresh_hash.slice(0, 10)}...${s.refresh_hash.slice(-6)}`
         : "ACTIVE",

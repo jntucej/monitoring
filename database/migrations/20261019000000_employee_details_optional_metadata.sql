@@ -4,6 +4,8 @@ ALTER TABLE public.employee_details
   ALTER COLUMN employee_id DROP NOT NULL;
 
 -- Keep uniqueness when present, allow multiple NULLs
+ALTER TABLE public.employee_details
+  DROP CONSTRAINT IF EXISTS employee_details_employee_id_key;
 DROP INDEX IF EXISTS employee_details_employee_id_key;
 CREATE UNIQUE INDEX IF NOT EXISTS employee_details_employee_id_key
   ON public.employee_details (employee_id)

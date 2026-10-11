@@ -13,11 +13,12 @@ BEGIN
 
   -- Build the allowed next states from the current state
   CASE OLD.status
-    WHEN 'PENDING'   THEN v_allowed := ARRAY['APPROVED', 'REJECTED', 'ESCALATED', 'COMPLETED'];
-    WHEN 'ESCALATED' THEN v_allowed := ARRAY['APPROVED', 'REJECTED', 'COMPLETED'];
+    WHEN 'PENDING'   THEN v_allowed := ARRAY['APPROVED', 'REJECTED', 'ESCALATED', 'COMPLETED', 'CANCELLED'];
+    WHEN 'ESCALATED' THEN v_allowed := ARRAY['APPROVED', 'REJECTED', 'COMPLETED', 'CANCELLED'];
     WHEN 'APPROVED'  THEN v_allowed := ARRAY['COMPLETED'];
     WHEN 'REJECTED'  THEN v_allowed := ARRAY[]::text[];   -- terminal
     WHEN 'COMPLETED' THEN v_allowed := ARRAY[]::text[];   -- terminal
+    WHEN 'CANCELLED' THEN v_allowed := ARRAY[]::text[];   -- terminal
     ELSE v_allowed := ARRAY[]::text[];
   END CASE;
 
