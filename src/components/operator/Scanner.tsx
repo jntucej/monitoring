@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, X, RefreshCw, AlertTriangle, KeyRound, ScanLine, Volume2, VolumeX, Upload, QrCode } from "lucide-react";
+import { Camera, X, RefreshCw, AlertTriangle, KeyRound, ScanLine, Volume2, VolumeX, Upload, QrCode, CheckCircle } from "lucide-react";
 import { playAudioFeedback } from "@/lib/sound";
 import jsQR from "jsqr";
 import { SCANNABLE_FORMATS } from "@/lib/barcode";
@@ -31,11 +31,21 @@ const getUsableFormats = async (scope: FormatScope) => {
   return formatCache[key];
 };
 
+// ── Per-gate camera stream cache ──────────────────────────────────────────────
+// The operator is pinned to a fixed gate (user.gateId). When they flip between
+// the desk's gate views / reopen the scanner, the browser already knows the
+// camera is allowed, so reuse the live MediaStream keyed by gate instead of
+// calling getUserMedia again (avoids the permission-prompt flicker and the
+// ~400ms device re-open cost). The stream is only reclaimed on full unload.
+const gateStreamCache: Record<string, MediaStream> = {};
+
 interface ScannerModalProps {
   isOpen: boolean;
   onClose: () => void;
   onScan: (roll: string) => void;
   onManualEntryClick?: () => void;
+  /** The operator's fixed gate — used to key the stream cache; no UI picking. */
+  gateId?: string;
 }
 
 export function Scanner({
@@ -43,6 +53,7 @@ export function Scanner({
   onClose,
   onScan,
   onManualEntryClick,
+  gateId,
 }: ScannerModalProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -60,6 +71,8 @@ export function Scanner({
   const modeRef = useRef<ScanMode>("qr");
   const [barcodeApiAvailable, setBarcodeApiAvailable] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [showSuccessFlash, setShowSuccessFlash] = useState(false);
+  const successFlashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Detect whether the phone's browser can auto-detect barcodes natively.
   // QR is always auto-detectable via jsQR; 1D/2D barcodes need the native
@@ -77,8 +90,6 @@ export function Scanner({
 
   const playBeep = useCallback(() => {
     if (!soundEnabled) return;
-    // ponytail: shared AudioContext via lib — per-call `new AudioContext()`
-    // leaks contexts (browser cap ~6) and silences later scans.
     playAudioFeedback("success");
   }, [soundEnabled]);
 
@@ -92,15 +103,21 @@ export function Scanner({
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
     }
+    // Return the stream to the per-gate cache (don't stop the track — that's
+    // what lets the next open on the same gate skip permission + device re-open).
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
+      if (gateId) {
+        gateStreamCache[gateId] = streamRef.current;
+      } else {
+        streamRef.current.getTracks().forEach((t) => t.stop());
+      }
       streamRef.current = null;
     }
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
     setCameraState("idle");
-  }, []);
+  }, [gateId]);
 
   const handleSuccessScan = useCallback((scannedData: string) => {
     if (hasScannedRef.current || !scannedData) return;
@@ -118,9 +135,28 @@ export function Scanner({
     }
 
     stopCamera();
-    onScan(scannedData);
-    onClose();
+
+    // Show the green success flash inside the modal, then close on a delay.
+    // The page-level SuccessFlash component also fires after this; the
+    // in-modal flash is just the pre-close visual cue.
+    setShowSuccessFlash(true);
+    successFlashTimerRef.current = setTimeout(() => {
+      onScan(scannedData);
+      onClose();
+      setShowSuccessFlash(false);
+    }, 700);
   }, [stopCamera, onScan, onClose, playBeep]);
+
+  // Clean up the success-flash timer on unmount so a mid-flash navigation
+  // doesn't fire onScan/onClose after the component is gone.
+  useEffect(() => {
+    return () => {
+      if (successFlashTimerRef.current) {
+        clearTimeout(successFlashTimerRef.current);
+        successFlashTimerRef.current = null;
+      }
+    };
+  }, []);
 
   const handleImageFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -285,12 +321,62 @@ export function Scanner({
     processFrameRef.current = processFrame;
   }, [processFrame]);
 
+  const startDecodeLoop = () => {
+    if (!videoRef.current) return;
+    // ponytail: throttle decode to ~10fps + downscale to 640px wide.
+    // QR codes don't move fast enough to need 60fps; full-res jsQR costs
+    // 40-80ms/frame. 10fps keeps CPU + battery manageable.
+    const lastTick = { current: 0 };
+    const tick = () => {
+      if (!isScanningRef.current) return;
+      const elapsed = performance.now() - lastTick.current;
+      if (elapsed >= 100) {
+        lastTick.current = performance.now();
+        processFrameRef.current();
+      }
+      animationFrameRef.current = requestAnimationFrame(tick);
+    };
+    // Fire the first tick immediately so the first frame is processed the
+    // moment it arrives — no debounce delay on startup.
+    processFrameRef.current();
+    animationFrameRef.current = requestAnimationFrame(tick);
+  };
+
   const startCamera = useCallback(async () => {
-    stopCamera();
+    // Stop the current loop but DON'T stop the track if we have a cached
+    // stream for this gate — we'll reuse it below.
+    isScanningRef.current = false;
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+    if (animationFrameRef.current) { cancelAnimationFrame(animationFrameRef.current); animationFrameRef.current = null; }
     setCameraState("requesting");
     setErrorMessage("");
     hasScannedRef.current = false;
 
+    // 1. Per-gate cache hit: stream is already open, skip permission + device
+    //    re-open entirely. ~0ms to first frame vs ~400ms cold start.
+    if (gateId && gateStreamCache[gateId]) {
+      const cached = gateStreamCache[gateId];
+      const live = cached.getTracks().filter((t) => t.readyState === "live");
+      if (live.length > 0 && videoRef.current) {
+        streamRef.current = cached;
+        videoRef.current.srcObject = cached;
+        videoRef.current.setAttribute("playsinline", "true");
+        try {
+          await videoRef.current.play();
+        } catch { /* autoplay blocked; state still active */ }
+        setCameraState("active");
+        isScanningRef.current = true;
+        startDecodeLoop();
+        return;
+      } else {
+        // cached stream is stale — stop it and fall through to cold start
+        cached.getTracks().forEach((t) => t.stop());
+        delete gateStreamCache[gateId];
+      }
+    }
+
+    // 2. Cold start: request camera with facingMode environment + low-res
+    //    constraint first for the fastest possible start on phones.
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       setCameraState("error");
       setErrorMessage("Live camera feed requires HTTPS or localhost browser security permissions.");
@@ -300,8 +386,10 @@ export function Scanner({
     try {
       let stream: MediaStream;
       try {
+        // 640x480 environment — fastest opening path; QR decodes fine at
+        // this resolution (processFrame downscales to 640px anyway).
         stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } },
+          video: { facingMode: "environment", width: { ideal: 640 }, height: { ideal: 480 } },
           audio: false,
         });
       } catch (e1) {
@@ -325,21 +413,7 @@ export function Scanner({
         await videoRef.current.play();
         setCameraState("active");
         isScanningRef.current = true;
-
-        // ponytail: throttle decode to ~10fps + downscale to 640px wide.
-        // Full-res jsQR at rAF cadence costs 40-80ms/frame (heat + jank);
-        // QR codes don't move fast enough to need 60fps. ~4x faster decode.
-        const lastTickRef = { current: 0 };
-        const tick = () => {
-          if (!isScanningRef.current) return;
-          const elapsed = performance.now() - lastTickRef.current;
-          if (elapsed >= 100) {
-            lastTickRef.current = performance.now();
-            processFrameRef.current();
-          }
-          animationFrameRef.current = requestAnimationFrame(tick);
-        };
-        animationFrameRef.current = requestAnimationFrame(tick);
+        startDecodeLoop();
       }
     } catch (err: unknown) {
       setCameraState("error");
@@ -352,7 +426,7 @@ export function Scanner({
         setErrorMessage(error.message || "Unable to open camera stream.");
       }
     }
-  }, [stopCamera]);
+  }, [gateId]);
 
   useEffect(() => {
     if (isOpen) {
@@ -366,16 +440,11 @@ export function Scanner({
 
   // ponytail: kill camera + decode loop when tab hidden (battery, privacy
   // indicator, dead-stream-on-return). pagehide covers iOS tab suspension.
-  // Issue #384: also handle freeze/resume (Chrome/Android screen lock) and
-  // visibilitychange for iOS screen-lock (power button). The original code
-  // only listened to visibilitychange + pagehide, missing the screen-lock case
-  // where the camera stream stays open draining battery.
   useEffect(() => {
     if (!isOpen) return;
     const onHidden = () => stopCamera();
     const onVisible = () => { if (isOpen) startCamera(); };
     const onVis = () => (document.hidden ? onHidden() : onVisible());
-    // freeze fires on Chrome/Android screen lock; resume fires on unlock
     const onFreeze = () => stopCamera();
     const onResume = () => { if (isOpen) startCamera(); };
     document.addEventListener("visibilitychange", onVis);
@@ -390,6 +459,19 @@ export function Scanner({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
+
+  // On full unmount (gate change / page leave) drop cached streams —
+  // keeps the memory footprint bounded across sessions.
+  useEffect(() => {
+    return () => {
+      // Only drop if we're actually unmounting, not just closing the modal
+      // (stopCamera already handles the close case).
+      if (gateId && gateStreamCache[gateId]) {
+        gateStreamCache[gateId].getTracks().forEach((t) => t.stop());
+        delete gateStreamCache[gateId];
+      }
+    };
+  }, [gateId]);
 
   if (!isOpen) return null;
 
@@ -409,8 +491,10 @@ export function Scanner({
                 <Camera className="w-4 h-4" />
               </div>
               <div>
-                <h2 className="text-sm font-bold text-white">QR Scanner</h2>
-                <p className="text-[11px] text-slate-400">Institutional Gate Verification</p>
+                <h2 className="text-sm font-bold text-white">
+                  {gateId ? `Gate ${gateId}` : "Scanner"}
+                </h2>
+                <p className="text-[11px] text-slate-400">Auto-detecting · no re-prompt</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -432,7 +516,7 @@ export function Scanner({
             </div>
           </div>
 
-          {/* Mode tabs — QR vs Barcode, separate, both auto-detect from the phone camera */}
+          {/* Mode tabs — QR (default) vs Barcode, both auto-detecting */}
           <div className="flex border-b border-slate-800 bg-slate-900/60">
             <button
               type="button"
@@ -466,8 +550,7 @@ export function Scanner({
             <video ref={videoRef} className="w-full h-full object-cover" playsInline muted autoPlay />
 
             {/* Barcode tab: warn when the phone's browser can't decode 1D/2D
-                natively so the operator knows live auto-detect won't match —
-                they can still use the QR tab or the image upload path. */}
+                natively so the operator knows live auto-detect won't match. */}
             {cameraState === "active" && mode === "barcode" && !barcodeApiAvailable && (
               <div className="absolute top-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 text-[10px] font-semibold text-amber-300 bg-amber-950/80 border border-amber-500/40 rounded-full px-3 py-1.5 pointer-events-none">
                 <AlertTriangle className="w-3 h-3" />
@@ -508,6 +591,35 @@ export function Scanner({
                 </button>
               </div>
             )}
+
+            {/* Green success flash overlay — shown for ~700ms before modal closes */}
+            <AnimatePresence>
+              {showSuccessFlash && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-emerald-500/95"
+                >
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 18 }}
+                  >
+                    <CheckCircle className="w-20 h-20 text-white" />
+                  </motion.div>
+                  <motion.p
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.15 }}
+                    className="mt-3 text-lg font-extrabold text-white"
+                  >
+                    Scan Recorded
+                  </motion.p>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Actions */}
@@ -520,28 +632,28 @@ export function Scanner({
               onChange={handleImageFileChange}
             />
             <div className="flex flex-col gap-2">
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-750 text-slate-200 font-semibold text-xs transition-all flex items-center justify-center gap-2"
+                  className="w-full sm:flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs transition-all flex items-center justify-center gap-2"
                 >
-                  <Upload className="w-4 h-4 text-emerald-400" />
-                  <span>Upload QR Image</span>
+                  <Upload className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span className="truncate">Upload QR Image</span>
                 </button>
                 {onManualEntryClick && (
                   <button
                     onClick={() => { stopCamera(); onClose(); onManualEntryClick(); }}
-                    className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs transition-all flex items-center justify-center gap-2"
+                    className="w-full sm:flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs transition-all flex items-center justify-center gap-2"
                   >
-                    <KeyRound className="w-4 h-4 text-emerald-400" />
-                    <span>Manual Entry</span>
+                    <KeyRound className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span className="truncate">Manual Entry</span>
                   </button>
                 )}
               </div>
               <button
                 onClick={() => { stopCamera(); onClose(); }}
-                className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-400 text-xs font-bold"
+                className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 text-xs font-bold"
               >
                 Cancel & Close
               </button>
