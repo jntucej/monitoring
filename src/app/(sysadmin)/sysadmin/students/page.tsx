@@ -22,7 +22,9 @@ interface StudentRecord {
   email: string;
   phone?: string;
   department?: string;
+  course?: string;
   year?: number | string;
+  batch?: string;
   status: "ACTIVE" | "SUSPENDED" | string;
   hostelRoom?: string;
   isHosteller?: boolean;
@@ -44,6 +46,7 @@ export default function SysAdminStudentsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [branchFilter, setBranchFilter] = useState("ALL");
+  const [yearFilter, setYearFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -262,16 +265,66 @@ export default function SysAdminStudentsPage() {
       const q = search.toLowerCase();
       const matchesSearch = !q || s.name?.toLowerCase().includes(q) || s.roll?.toLowerCase().includes(q) ||
         s.uniqueId?.toLowerCase().includes(q) || s.email?.toLowerCase().includes(q) || s.department?.toLowerCase().includes(q);
-      const matchesBranch = branchFilter === "ALL" || s.department === branchFilter;
+      // Department: prefer the explicit department, fall back to course (both
+      // are populated from the roll branch code for imported students).
+      const deptOf = s.department || s.course;
+      const matchesBranch = branchFilter === "ALL" || deptOf === branchFilter;
+      const matchesYear = yearFilter === "ALL" || String(s.year ?? "") === yearFilter;
       const matchesStatus = statusFilter === "ALL" || s.status === statusFilter;
-      return matchesSearch && matchesBranch && matchesStatus;
+      return matchesSearch && matchesBranch && matchesYear && matchesStatus;
     });
-  }, [students, search, branchFilter, statusFilter]);
+  }, [students, search, branchFilter, yearFilter, statusFilter]);
 
   const branches = useMemo(() => {
-    const set = new Set(students.map((s) => s.department).filter(Boolean));
+    // Union of explicit department values and course (roll-derived branch) so
+    // imported students (which carry course, not department) are filterable.
+    const set = new Set<string>();
+    students.forEach((s) => {
+      if (s.department) set.add(s.department);
+      if (s.course) set.add(s.course);
+    });
     return Array.from(set).sort();
   }, [students]);
+
+  const years = useMemo(() => {
+    const set = new Set<string>();
+    students.forEach((s) => {
+      if (s.year != null && s.year !== "") set.add(String(s.year));
+    });
+    return Array.from(set).sort((a, b) => Number(a) - Number(b));
+  }, [students]);
+
+  // Infographic distributions (computed from the FULL roster, not the filtered view)
+  const byBranch = useMemo(() => {
+    const map: Record<string, number> = {};
+    students.forEach((s) => {
+      const k = s.department || s.course || "Unassigned";
+      map[k] = (map[k] || 0) + 1;
+    });
+    return Object.entries(map).sort((a, b) => b[1] - a[1]);
+  }, [students]);
+
+  const byYear = useMemo(() => {
+    const map: Record<string, number> = {};
+    students.forEach((s) => {
+      const k = s.year == null || s.year === "" ? "—" : String(s.year);
+      map[k] = (map[k] || 0) + 1;
+    });
+    return Object.entries(map).sort((a, b) => Number(a[0]) - Number(b[0]) || a[0].localeCompare(b[0]));
+  }, [students]);
+
+  const byBatch = useMemo(() => {
+    const map: Record<string, number> = {};
+    students.forEach((s) => {
+      const k = s.batch || "—";
+      map[k] = (map[k] || 0) + 1;
+    });
+    return Object.entries(map).sort((a, b) => a[0].localeCompare(b[0]));
+  }, [students]);
+
+  const activeCount = useMemo(() => students.filter((s) => s.status === "ACTIVE").length, [students]);
+  const totalStudents = students.length;
+  const topBranch = byBranch[0];
 
   // ponytail: newest 4 by createdAt (capped so the panel doesn't flood)
   const recentStudents = useMemo(() => {
@@ -315,11 +368,75 @@ export default function SysAdminStudentsPage() {
               <option value="ALL">All Branches</option>
               {branches.map((b) => <option key={b} value={b}>{b}</option>)}
             </select>
+            <select value={yearFilter} onChange={(e) => setYearFilter(e.target.value)} className="bg-[#0d1220] border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-300">
+              <option value="ALL">All Years</option>
+              {years.map((y) => <option key={y} value={y}>Year {y}</option>)}
+            </select>
             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="bg-[#0d1220] border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-300">
               <option value="ALL">All Status</option><option value="ACTIVE">Active</option><option value="SUSPENDED">Suspended</option>
             </select>
           </div>
         </div>
+
+        {/* Infographics — quick distributions over the full roster */}
+        {!loading && totalStudents > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {/* KPI strip */}
+            <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4 flex flex-col justify-between">
+              <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Total Students</div>
+              <div className="mt-2 text-3xl font-bold text-white">{totalStudents.toLocaleString()}</div>
+              <div className="mt-1 text-xs text-emerald-400">{activeCount.toLocaleString()} active ({totalStudents ? Math.round((activeCount / totalStudents) * 100) : 0}%)</div>
+            </div>
+            <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4 flex flex-col justify-between">
+              <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Largest Branch</div>
+              <div className="mt-2 text-3xl font-bold text-emerald-400">{topBranch ? topBranch[0] : "—"}</div>
+              <div className="mt-1 text-xs text-slate-400">{topBranch ? `${topBranch[1].toLocaleString()} students` : "No branch data"}</div>
+            </div>
+            {/* Branch distribution */}
+            <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4 sm:col-span-2">
+              <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-3">Branch / Department Distribution</div>
+              <div className="space-y-2">
+                {byBranch.slice(0, 6).map(([b, n]) => (
+                  <div key={b} className="flex items-center gap-2 text-xs">
+                    <div className="w-16 text-slate-300 truncate text-right">{b}</div>
+                    <div className="flex-1 h-2 rounded-full bg-slate-800 overflow-hidden">
+                      <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${totalStudents ? (n / totalStudents) * 100 : 0}%` }} />
+                    </div>
+                    <div className="w-12 text-slate-500 text-right">{n.toLocaleString()}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Year distribution */}
+            <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
+              <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-3">Year Distribution</div>
+              <div className="flex items-end gap-2 h-20">
+                {(() => {
+                  const maxCount = byYear.reduce((m, [, n]) => Math.max(m, n), 0);
+                  return byYear.map(([y, n]) => (
+                    <div key={y} className="flex-1 flex flex-col items-center gap-1">
+                      <div className="text-[10px] text-slate-400">{n}</div>
+                      <div className="w-full rounded-t bg-sky-500" style={{ height: `${maxCount ? Math.max(8, (n / maxCount) * 56) : 0}px` }} />
+                      <div className="text-[10px] text-slate-500">Yr {y}</div>
+                    </div>
+                  ));
+                })()}
+              </div>
+            </div>
+            {/* Batch distribution */}
+            <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
+              <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-3">Batch Distribution</div>
+              <div className="space-y-1.5 max-h-24 overflow-y-auto pr-1">
+                {byBatch.map(([b, n]) => (
+                  <div key={b} className="flex items-center gap-2 text-xs">
+                    <div className="w-16 text-slate-300 truncate text-right font-mono">{b}</div>
+                    <div className="w-14 text-slate-500 text-right">{n.toLocaleString()}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
 
         {loadError && (
