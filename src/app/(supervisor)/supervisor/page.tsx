@@ -237,8 +237,8 @@ export default function SupervisorDashboardPage() {
     const rows = students.map((s) => [
       `"${s.fullName}"`,
       `"${s.roll || s.uniqueId}"`,
-      `"${s.hostelBlock || "Boys Hostel A"}"`,
-      `"${s.roomNumber || "101"}"`,
+      `"${s.hostelBlock || "N/A"}"`,
+      `"${s.roomNumber || "N/A"}"`,
       `"${s.status === "ACTIVE" || !s.checkedOutAt ? "INSIDE CAMPUS" : "OUTSIDE (ON PASS)"}"`,
       studentStrikes[s.id] || 0,
     ]);
@@ -568,7 +568,7 @@ export default function SupervisorDashboardPage() {
                       return (
                         <tr key={s.id} className="hover:bg-[var(--bg-elevated)]/30">
                           <td className="p-3 font-bold text-[var(--text-primary)]">{s.fullName} <span className="font-mono text-[11px] text-[var(--text-muted)]">({s.roll || s.uniqueId})</span></td>
-                          <td className="p-3 text-[var(--text-muted)] font-mono">{s.hostelBlock || "Boys Hostel A"} - {s.roomNumber || "101"}</td>
+                          <td className="p-3 text-[var(--text-muted)] font-mono">{s.hostelBlock || "N/A"} - {s.roomNumber || "N/A"}</td>
                           <td className="p-3"><span className={`px-2.5 py-1 rounded-full font-bold text-[10px] border ${isInside ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border-amber-500/20"}`}>{isInside ? "INSIDE" : "OUT ON PASS"}</span></td>
                           <td className="p-3 font-mono">{strikes > 0 ? <span className="px-2 py-0.5 rounded font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-1 w-max"><Zap className="w-3 h-3 text-rose-400" /> {strikes} Strikes</span> : <span className="text-[var(--text-muted)]">0</span>}</td>
                           <td className="p-3 text-right"><button onClick={() => handleAddStrike(s.id)} className="px-2.5 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-lg text-[10px] font-bold">+ Strike</button></td>
