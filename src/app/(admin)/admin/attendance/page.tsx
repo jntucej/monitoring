@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { DataTable } from "@/components/ui/DataTable";
 import { CalendarDays, CheckCircle2, XCircle, Clock } from "lucide-react";
 import type { Scan, Student } from "@/lib/types";
 import { getAuthHeaders } from "@/lib/utils";
@@ -158,49 +159,31 @@ export default function AdminAttendancePage() {
             {loading ? "Loading…" : `${rows.length} record${rows.length === 1 ? "" : "s"}`}
           </span>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[700px]">
-            <thead>
-              <tr className="border-b border-[var(--border)] text-left text-[var(--text-muted)]">
-                <th className="p-4 font-medium">Student</th>
-                <th className="p-4 font-medium">Roll No</th>
-                <th className="p-4 font-medium">Status</th>
-                <th className="p-4 font-medium">Time In</th>
-                <th className="p-4 font-medium">Time Out</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--border)]">
-              {loading ? (
-                <tr><td colSpan={5} className="p-8 text-center text-[var(--text-muted)]">Loading…</td></tr>
-              ) : error ? (
-                <tr><td colSpan={5} className="p-8 text-center text-rose-400">{error}</td></tr>
-              ) : rows.length === 0 ? (
-                <tr><td colSpan={5} className="p-8 text-center text-[var(--text-muted)]">No records</td></tr>
-              ) : (
-                rows.map((r) => (
-                  <tr key={r.roll}>
-                    <td className="p-4 font-medium">{r.name}</td>
-                    <td className="p-4 font-mono text-[var(--text-muted)]">{r.roll}</td>
-                    <td className="p-4">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
-                        r.status === "present" ? "bg-emerald-500/10 text-emerald-400" :
-                        r.status === "absent" ? "bg-rose-500/10 text-rose-400" :
-                        "bg-amber-500/10 text-amber-400"
-                      }`}>
-                        {r.status === "present" ? <CheckCircle2 className="w-3.5 h-3.5" /> :
-                         r.status === "absent" ? <XCircle className="w-3.5 h-3.5" /> :
-                         <Clock className="w-3.5 h-3.5" />}
-                        <span className="capitalize">{r.status}</span>
-                      </span>
-                    </td>
-                    <td className="p-4 text-[var(--text-muted)]">{fmtTime(r.timeIn)}</td>
-                    <td className="p-4 text-[var(--text-muted)]">{fmtTime(r.timeOut)}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+      <DataTable
+        columns={[
+          { header: "Student", accessor: (r) => r.name, className: "font-medium" },
+          { header: "Roll No", accessor: (r) => r.roll, className: "font-mono text-[var(--text-muted)]" },
+          { header: "Status", accessor: (r) => (
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+              r.status === "present" ? "bg-emerald-500/10 text-emerald-400" :
+              r.status === "absent" ? "bg-rose-500/10 text-rose-400" :
+              "bg-amber-500/10 text-amber-400"
+            }`}>
+              {r.status === "present" ? <CheckCircle2 className="w-3.5 h-3.5" /> :
+               r.status === "absent" ? <XCircle className="w-3.5 h-3.5" /> :
+               <Clock className="w-3.5 h-3.5" />}
+              <span className="capitalize">{r.status}</span>
+            </span>
+          ) },
+          { header: "Time In", accessor: (r) => fmtTime(r.timeIn), className: "text-[var(--text-muted)]" },
+          { header: "Time Out", accessor: (r) => fmtTime(r.timeOut), className: "text-[var(--text-muted)]" },
+        ]}
+        data={rows}
+        loading={loading}
+        error={error}
+        emptyMessage="No attendance records for this date."
+        keyExtractor={(r) => r.roll}
+      />
       </div>
     </div>
   );

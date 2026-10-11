@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { DataTable } from "@/components/ui/DataTable";
 import { AlertTriangle, Bell, CheckCircle, Check, ShieldAlert, RefreshCw } from "lucide-react";
 import type { Alert } from "@/lib/types";
 import { getAuthHeaders } from "@/lib/utils";
@@ -121,56 +122,52 @@ export default function AdminAlertsPage() {
             {loading ? "Loading…" : `${alerts.length} alert${alerts.length === 1 ? "" : "s"}`}
           </span>
         </div>
-        <div className="divide-y divide-[var(--border)]">
-          {loading ? (
-            <div className="p-8 text-center text-[var(--text-muted)] text-sm">Loading…</div>
-          ) : error ? (
-            <div className="p-8 text-center text-rose-400 text-sm">{error}</div>
-          ) : alerts.length === 0 ? (
-            <div className="p-8 text-center text-[var(--text-muted)] text-sm">
-              No {filter === "all" ? "" : filter} alerts.
-            </div>
-          ) : (
-            alerts.map((alert) => {
-              const style = SEVERITY_STYLES[alert.severity] ?? SEVERITY_STYLES.info;
-              return (
-                <div key={alert.id} className="p-4 flex items-start gap-4">
-                  <div className={`mt-1 w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${style.bg} ${style.text}`}>
-                    {alert.resolved ? <CheckCircle className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="font-medium">{alert.title}</p>
-                      <span className="text-xs text-[var(--text-muted)]">{timeAgo(alert.timestamp)}</span>
-                    </div>
-                    <p className="text-sm text-[var(--text-muted)] mt-1">{alert.message}</p>
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded ${style.bg} ${style.text}`}>
-                        {style.label}
-                      </span>
-                      {alert.studentRoll && (
-                        <span className="text-[10px] font-mono text-[var(--text-muted)]">{alert.studentRoll}</span>
-                      )}
-                      {alert.gateId && (
-                        <span className="text-[10px] text-[var(--text-muted)]">at {alert.gateId}</span>
-                      )}
-                    </div>
-                  </div>
-                  {!alert.resolved && (
-                    <button
-                      onClick={() => resolve(alert.id)}
-                      disabled={busyId === alert.id}
-                      className="text-xs px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 inline-flex items-center gap-1"
-                    >
-                      <Check className="w-3 h-3" />
-                      Resolve
-                    </button>
-                  )}
+      <DataTable
+        columns={[
+          { header: "Alert", accessor: (a) => {
+            const style = SEVERITY_STYLES[a.severity] ?? SEVERITY_STYLES.info;
+            return (
+              <div className="flex items-start gap-3">
+                <div className={`mt-0.5 w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${style.bg} ${style.text}`}>
+                  {a.resolved ? <CheckCircle className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
                 </div>
-              );
-            })
-          )}
-        </div>
+                <div>
+                  <p className="font-medium">{a.title}</p>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">{a.message}</p>
+                </div>
+              </div>
+            );
+          } },
+          { header: "Details", accessor: (a) => {
+            const style = SEVERITY_STYLES[a.severity] ?? SEVERITY_STYLES.info;
+            return (
+              <div className="flex flex-wrap gap-2">
+                <span className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded ${style.bg} ${style.text}`}>
+                  {style.label}
+                </span>
+                {a.studentRoll && <span className="text-[10px] font-mono text-[var(--text-muted)]">{a.studentRoll}</span>}
+                {a.gateId && <span className="text-[10px] text-[var(--text-muted)]">at {a.gateId}</span>}
+              </div>
+            );
+          } },
+          { header: "Time", accessor: (a) => <span className="text-xs text-[var(--text-muted)]">{timeAgo(a.timestamp)}</span> },
+          { header: "Action", accessor: (a) => !a.resolved && (
+            <button
+              onClick={() => resolve(a.id)}
+              disabled={busyId === a.id}
+              className="text-xs px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 inline-flex items-center gap-1"
+            >
+              <Check className="w-3 h-3" />
+              Resolve
+            </button>
+          ) },
+        ]}
+        data={alerts}
+        loading={loading}
+        error={error}
+        emptyMessage={`No ${filter === "all" ? "" : filter} alerts.`}
+        keyExtractor={(a) => a.id}
+      />
       </div>
     </div>
   );

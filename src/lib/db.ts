@@ -917,7 +917,9 @@ async function fetchByIds<T>(db: any, table: string, ids: string[]): Promise<any
 export async function findAllPersons(type?: PersonType): Promise<Person[]> {
   const db = getDbClient();
   let query = db.from('users').select('*').eq('status', 'ACTIVE');
-  // Removing hard role filter for debug
+  if (type) {
+    query = query.eq('role', type);
+  }
   const { data, error } = await query;
 
   if (error) {
