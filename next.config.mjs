@@ -18,6 +18,23 @@ const nextConfig = {
       ],
     }];
   },
+  async redirects() {
+    return [
+      { source: '/admin/profile',      destination: '/profile', permanent: false },
+      { source: '/principal/profile',  destination: '/profile', permanent: false },
+      { source: '/hod/profile',        destination: '/profile', permanent: false },
+      { source: '/exam/profile',       destination: '/profile', permanent: false },
+      { source: '/hostel/profile',     destination: '/profile', permanent: false },
+      { source: '/staff/profile',      destination: '/profile', permanent: false },
+      { source: '/faculty/profile',    destination: '/profile', permanent: false },
+      { source: '/parent/profile',     destination: '/profile', permanent: false },
+      { source: '/supervisor/profile', destination: '/profile', permanent: false },
+      { source: '/warden/profile',     destination: '/profile', permanent: false },
+      { source: '/visitor/profile',    destination: '/profile', permanent: false },
+      { source: '/worker/profile',     destination: '/profile', permanent: false },
+      { source: '/operator/profile',   destination: '/profile', permanent: false },
+    ];
+  },
 };
 
 export default nextConfig;
