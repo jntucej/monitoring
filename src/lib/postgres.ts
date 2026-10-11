@@ -195,12 +195,14 @@ export class PostgresQueryBuilder<T = any> {
     let clean = columns
       .replace(/[a-zA-Z0-9_]+:[a-zA-Z0-9_!]+\([^)]*(?:\([^)]*\))*[^)]*\)/g, "")
       .replace(/,\s*\(\s*\*\s*\)\s*,/g, ",")
-      .replace(/,\s*\(\s*\*\s*\)$/, "")
+      .replace(/,\s*\(\s*\*\s*\)$/g, "")
       .replace(/[a-zA-Z0-9_]+\(\s*\*\s*\)/g, "")
       .replace(/,\s*,+/g, ",")
       .trim()
       .replace(/^,\s*/g, "")
       .replace(/\s*,\s*\)\s*$/, "")
+      .replace(/,\s*$/, "")
+      .replace(/,\s*$/, "")
       .trim();
 
     this.selectColumns = clean.length > 0 ? clean : "*";
@@ -219,7 +221,8 @@ export class PostgresQueryBuilder<T = any> {
         if (depth === 0) {
           const prefix = cols.slice(0, i);
           const lastComma = prefix.lastIndexOf(',');
-          header = prefix.slice(lastComma + 1).trim();
+          header = prefix.slice(lastComma + 1).replace(/,\s*$/, "")
+      .trim();
           currentRelStart = i + 1;
         }
         depth++;
@@ -233,12 +236,15 @@ export class PostgresQueryBuilder<T = any> {
           
           if (header.includes(':')) {
             const parts = header.split(':');
-            alias = parts[0].trim();
-            targetTable = parts[1].trim();
+            alias = parts[0].replace(/,\s*$/, "")
+      .trim();
+            targetTable = parts[1].replace(/,\s*$/, "")
+      .trim();
           }
           if (targetTable.includes('!')) {
             const parts = targetTable.split('!');
-            targetTable = parts[0].trim();
+            targetTable = parts[0].replace(/,\s*$/, "")
+      .trim();
             if (parts.some(p => p.toLowerCase() === 'inner')) {
               isInner = true;
             }
@@ -414,7 +420,8 @@ export class PostgresQueryBuilder<T = any> {
         const parts = token.match(/^([a-zA-Z0-9_.]+)\s*(=|!=|>|<|>=|<=|ILIKE|LIKE|IS)\s*(.+)$/i);
         if (parts) {
           const [, colRef, op, val] = parts;
-          let cleanVal: any = val.trim();
+          let cleanVal: any = val.replace(/,\s*$/, "")
+      .trim();
           if (cleanVal.startsWith('"') && cleanVal.endsWith('"')) cleanVal = cleanVal.slice(1, -1);
           else if (cleanVal.startsWith("'") && cleanVal.endsWith("'")) cleanVal = cleanVal.slice(1, -1);
           if (op.toUpperCase() === "IS") {
@@ -549,7 +556,8 @@ export class PostgresQueryBuilder<T = any> {
     for (const rel of this.embeddedRelations) {
       relationSubqueries.push(buildRelationSubquery(rel, this.tableName));
     }
-    const cleanBase = baseCols.replace(/,+$/, "").trim();
+    const cleanBase = baseCols.replace(/,+$/, "").replace(/,\s*$/, "")
+      .trim();
     return cleanBase;
   }
 
@@ -699,7 +707,8 @@ export const authAdmin = {
     const crypto = await import("crypto");
     const bcrypt = await import("bcryptjs");
     const id = crypto.randomUUID();
-    const email = safeAttributes.email.toLowerCase().trim();
+    const email = safeAttributes.email.toLowerCase().replace(/,\s*$/, "")
+      .trim();
     const name = safeAttributes.user_metadata?.name || safeAttributes.user_metadata?.full_name || email.split("@")[0];
     const role = safeAttributes.role || safeAttributes.user_metadata?.role || "student";
     const passwordHash = safeAttributes.password ? await bcrypt.hash(safeAttributes.password, 10) : null;
