@@ -152,14 +152,16 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       },
 
       pinLogin: async (employeeId, pin, mfa) => {
+        const cleanEmployeeId = employeeId.trim();
+        if (!cleanEmployeeId) return { success: false, error: "Employee ID is required" };
+        
         set({ loading: true });
         try {
-          const cleanEmployeeId = employeeId.trim().toUpperCase();
           const response = await fetch("/api/auth/pin-login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              employeeId: cleanEmployeeId,
+              employeeId: cleanEmployeeId.toUpperCase(),
               pin,
               mfa_challenge: mfa?.challenge,
               totp_code: mfa?.totpCode,
@@ -174,7 +176,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             set({
               user,
               token,
-              refreshToken: refreshToken ?? null,
+              refreshToken: refreshToken ?? get().refreshToken ?? null,
               role: user.role as Role,
               authenticated: true,
               loading: false,
