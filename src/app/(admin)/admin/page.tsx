@@ -32,10 +32,7 @@ import { useUIStore } from "@/stores/uiStore";
 import type { Lockdown } from "@/lib/db";
 import type { Role } from "@/lib/types";
 
-export const metadata = {
-  title: "Admin Dashboard",
-  description: "Campus dashboard and live telemetry"
-};
+
 
 const LOCKDOWN_SCOPES = [
   { id: "students", label: "Students",       color: "bg-blue-500/10 border-blue-500/30 text-blue-400" },
