@@ -2,21 +2,15 @@
 -- Purpose: Add exam_superintendent role to permission workflow
 
 -- 1. Expand users.role CHECK constraint
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'users_role_check' AND conrelid = 'public.users'::regclass) THEN
-        ALTER TABLE public.users DROP CONSTRAINT IF EXISTS users_role_check;
-    END IF;
-    
-    ALTER TABLE public.users ADD CONSTRAINT users_role_check CHECK (
-        role IN (
-            'operator','admin','sysadmin','supervisor','guardian','parent','hod','student',
-            'warden','faculty','staff','worker','visitor',
-            'caretaker','deputy_warden','hostel_manager','principal','vice_principal','oie','exam_branch',
-            'exam_superintendent'
-        )
-    );
-END $$;
+ALTER TABLE public.users DROP CONSTRAINT IF EXISTS users_role_check;
+ALTER TABLE public.users ADD CONSTRAINT users_role_check CHECK (
+    role IN (
+        'operator','admin','sysadmin','supervisor','guardian','parent','hod','student',
+        'warden','faculty','staff','worker','visitor',
+        'caretaker','deputy_warden','hostel_manager','principal','vice_principal','oie','exam_branch',
+        'exam_superintendent'
+    )
+);
 
 -- 2. Add hostel_scope users (if not exists)
 ALTER TABLE public.users ADD COLUMN IF NOT EXISTS hostel_scope TEXT CHECK (hostel_scope IN ('boys','girls','both'));
