@@ -23,10 +23,14 @@ export async function getCurrentOccupancy(): Promise<OccupancyStats> {
     if (key) byType[key] += row.count;
   }
 
+  const capacity = zones.reduce((sum, z) => sum + z.capacity, 0);
+
   return {
     total,
     byType,
     byDepartment: {}, 
     lastUpdated: new Date().toISOString(),
+    zones,
+    capacity,
   };
 }

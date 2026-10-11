@@ -34,6 +34,13 @@ done
 
 echo "✓ Verified ${#SEEN_VERSIONS[@]} unique migration version prefixes"
 
+# 1b. Guard: only one migration may own audit_logs_action_known
+AUDIT_ACTION_OWNERS=$(grep -l "audit_logs_action_known" database/migrations/*.sql 2>/dev/null | wc -l)
+if [ "$AUDIT_ACTION_OWNERS" -gt 1 ]; then
+  echo "ERROR: Multiple migrations modify audit_logs_action_known ($AUDIT_ACTION_OWNERS found). Only one canonical migration allowed." >&2
+  exit 1
+fi
+
 # 2. Start scratch Postgres container
 CONTAINER_NAME="scratch_check_migs_$$"
 POSTGRES_IMAGE="${POSTGRES_TEST_IMAGE:-postgres:17}"

@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { withRoute } from "@/middleware/authorization";
+import { withAuthorization } from "@/middleware/authorization";
 import { recordScan } from "@/server/services/scan/record";
 import { ok } from "@/server/http/response";
 import { TIER } from "@/server/policy/roles";
@@ -17,7 +17,7 @@ interface ScanBody {
   geo?: { latitude?: number | null; longitude?: number | null; accuracy?: number | null };
 }
 
-export const POST = withRoute(
+export const POST = withAuthorization(
   async (req: NextRequest, { auth }: { auth: AuthContext }) => {
     const csrf = assertCsrf(req);
     if (csrf) return csrf;

@@ -1,8 +1,8 @@
-import { withRoute } from "@/middleware/authorization";
+import { withAuthorization } from "@/middleware/authorization";
 import { getPredictions, detectAnomalies } from "@/server/services/analytics/predictions";
 import { ok } from "@/server/http/response";
 
-export const GET = withRoute(async (req) => {
+export const GET = withAuthorization(async (req) => {
   const type = req.nextUrl.searchParams.get("type") || undefined;
   const [predictions, anomalies] = await Promise.all([
     getPredictions(type),

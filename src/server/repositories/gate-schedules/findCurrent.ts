@@ -1,4 +1,4 @@
-import { db } from "@/lib/dbClient";
+import db from "@/lib/dbClient";
 
 export interface CurrentGateScheduleRow {
   id: string;

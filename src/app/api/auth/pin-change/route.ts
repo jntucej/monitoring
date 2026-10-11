@@ -4,7 +4,7 @@ import { withRateLimit } from "@/lib/rate-limit";
 import { withAuthorization } from "@/middleware/authorization";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { assertCsrf } from "@/lib/csrf";
-import bcrypt from "bcryptjs";
+import { hash, compare, genSalt } from "@/server/lib/crypto";
 import type { AuthContext } from "@/lib/authContext";
 import { addAudit } from "@/lib/db";
 
@@ -53,7 +53,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
           { status: 400 }
         );
       }
-      const isValid = await bcrypt.compare(currentPin, existingHash);
+      const isValid = await compare(currentPin, existingHash);
       if (!isValid) {
         return NextResponse.json(
           { success: false, error: { code: "UNAUTHORIZED", message: "Incorrect current PIN" } },
@@ -62,8 +62,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
       }
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPin = await bcrypt.hash(newPin, salt);
+    const hashedPin = await hash(newPin, 10);
 
     const { error: updateErr } = await supabase
       .from("users")

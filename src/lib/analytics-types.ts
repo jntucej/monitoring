@@ -10,6 +10,8 @@ export interface OccupancyStats {
   };
   byDepartment: Record<string, number>;
   lastUpdated: string;
+  zones: Array<{ id: string; name: string; type: string; capacity: number }>;
+  capacity: number;
 }
 
 export interface DailyStats {

@@ -1,4 +1,4 @@
-import { db } from "@/lib/dbClient";
+import db from "@/lib/dbClient";
 import { Alert } from "@/lib/types";
 
 export async function find(filters: {

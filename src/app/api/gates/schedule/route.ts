@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
-import { o } from "@/server/http/response"; // Will fix
+import { ok } from "@/server/http/response";
 import { listGateSchedules } from "@/server/services/gate-schedules/list";
 
 // Re-using original handleGet logic as it fetches MORE than just schedules (rules + holidays)

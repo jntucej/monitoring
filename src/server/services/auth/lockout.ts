@@ -1,5 +1,5 @@
 import { findByKey } from "@/server/repositories/login-attempts/findByKey";
-import { upsert } from "@/server/repositories/login-attempts/upsert";
+import { upsert } from "@/server/repositories/login-attempts/findByKey";
 import { AppError } from "@/server/http/errors";
 import { MAX_FAILURES, LOCK_MINUTES, shouldLock, lockUntil, isLocked } from "@/server/policy/lockout";
 

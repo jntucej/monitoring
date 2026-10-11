@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomInt } from "crypto";
-import bcrypt from "bcryptjs";
+import { hash, compare, genSalt } from "@/server/lib/crypto";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { addAudit } from "@/lib/db";
@@ -40,7 +40,7 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }) {
     .eq("user_id", userId).eq("purpose", purpose).is("used_at", null);
 
   const code = generateCode();
-  const code_hash = await bcrypt.hash(code, 10);
+  const code_hash = await hash(code, 10);
   const expires_at = new Date(Date.now() + ttlMinutes * 60_000).toISOString();
 
   const { error } = await svc.from("enrollment_codes").insert({
