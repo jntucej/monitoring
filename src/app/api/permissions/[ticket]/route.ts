@@ -1,94 +1,88 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
-import { addAudit, addNotification, verifyThumbprint } from "@/lib/db";
-import { withAuthorization } from "@/middleware/authorization";
+import withAuthorization from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import {
-  applyPermissionAction,
-  PermissionRuleError,
-  type RequestSnapshot,
-  type PermissionAction,
+  canApproveAtStage,
+  resolveNextStage,
+  appendStageHistory,
+  getScopedTicket,
 } from "@/lib/permission-workflow";
-import { getDeviceSetting } from "@/lib/device-settings";
-import { computeSignatureHash, fetchDocumentBytes } from "@/lib/document-signature";
-import type { Role } from "@/lib/types";
+import { addAudit, addNotification } from "@/lib/db";
+import type { WorkflowType } from "@/lib/types";
 
-function badRequest(message: string) {
-  return NextResponse.json(
-    { success: false, error: { code: "BAD_REQUEST", message } },
-    { status: 400 },
-  );
+function getTicketFromReq(req: NextRequest): string {
+  const segments = new URL(req.url).pathname.split("/").filter(Boolean);
+  return decodeURIComponent(segments[segments.length - 1] || "");
 }
 
-function forbidden(message: string) {
-  return NextResponse.json(
-    { success: false, error: { code: "FORBIDDEN", message } },
-    { status: 403 },
-  );
+async function handleGet(req: NextRequest): Promise<Response> {
+  const ticketParam = getTicketFromReq(req);
+  const authUserId = req.headers.get("x-user-id") || "";
+  const authUserRole = req.headers.get("x-user-role") || "";
+
+  if (!ticketParam) {
+    return NextResponse.json(
+      { success: false, error: { code: "BAD_REQUEST", message: "Ticket parameter required" } },
+      { status: 400 }
+    );
+  }
+
+  // Visibility scoping (student/parent/approver rules) now lives in one place —
+  // shared with the upload / document / sign routes (Step 7).
+  const scope = await getScopedTicket(ticketParam, authUserId, authUserRole);
+
+  if ("notFound" in scope && scope.notFound) {
+    return NextResponse.json(
+      { success: false, error: { code: "NOT_FOUND", message: "Permission request not found" } },
+      { status: 404 }
+    );
+  }
+
+  if ("forbidden" in scope && scope.forbidden) {
+    return NextResponse.json(
+      { success: false, error: { code: "FORBIDDEN", message: "Access denied" } },
+      { status: 403 }
+    );
+  }
+
+  return NextResponse.json({ success: true, data: scope.request });
 }
+async function handlePatch(req: NextRequest): Promise<Response> {
+  const ticketParam = getTicketFromReq(req);
+  const authUserId = req.headers.get("x-user-id") || "";
+  const authUserRole = req.headers.get("x-user-role") || "";
+  const authUserEmail = req.headers.get("x-user-email") || "";
 
-function notFound(message: string) {
-  return NextResponse.json(
-    { success: false, error: { code: "NOT_FOUND", message } },
-    { status: 404 },
-  );
-}
+  if (!ticketParam) {
+    return NextResponse.json(
+      { success: false, error: { code: "BAD_REQUEST", message: "Ticket parameter required" } },
+      { status: 400 }
+    );
+  }
 
-function serverError(message: string) {
-  return NextResponse.json(
-    { success: false, error: { code: "SERVER_ERROR", message } },
-    { status: 500 },
-  );
-}
-
-function getTicketFromReq(req: NextRequest, context?: any): string {
-  if (context?.params?.ticket) return context.params.ticket;
-  const segs = new URL(req.url).pathname.split("/").filter(Boolean);
-  return decodeURIComponent(segs[segs.length - 1] || "");
-}
-
-async function getHandler(req: NextRequest, context: any) {
-  const ticket = getTicketFromReq(req, context);
-  if (!ticket) return badRequest("Ticket parameter required");
-
-  const db = getSupabaseServiceClient();
-  const isUuid = /^[0-9a-f-]{36}$/i.test(ticket);
-  const lookup = isUuid
-    ? db.from("permission_requests").select("*").or(`id.eq.${ticket},ticket_number.eq.${ticket}`)
-    : db.from("permission_requests").select("*").eq("ticket_number", ticket);
-
-  const { data, error } = await lookup.single();
-  if (error || !data) return notFound("Permission request not found");
-
-  return NextResponse.json({ success: true, data });
-}
-
-async function handlePatch(req: NextRequest, context?: any): Promise<Response> {
-  const ticketParam = getTicketFromReq(req, context);
-  const authUserId = req.headers.get("x-user-id") || context?.auth?.userId || "";
-  const authUserRole = req.headers.get("x-user-role") || context?.auth?.role || "";
-  const authUserEmail = req.headers.get("x-user-email") || context?.auth?.email || "";
-
-  if (!ticketParam) return badRequest("Ticket parameter required");
-
-  let body: Record<string, unknown>;
+  let body: Record<string, unknown> | null = null;
   try {
     body = (await req.json()) as Record<string, unknown>;
   } catch {
-    return badRequest("Invalid JSON body");
+    return NextResponse.json(
+      { success: false, error: { code: "BAD_REQUEST", message: "Invalid JSON body" } },
+      { status: 400 }
+    );
   }
 
-  const rawAction = typeof body.action === "string" ? body.action.toUpperCase() : undefined;
-  const action = rawAction as PermissionAction | undefined;
-  const comment = (body.comment as string | undefined) ?? undefined;
-  const targetStage = body.targetStage as string | undefined;
+  const { action, comment, digitalSignature, targetStage } = (body || {}) as {
+    action?: string;
+    comment?: string;
+    digitalSignature?: string;
+    targetStage?: string;
+  };
 
-  const VALID: PermissionAction[] = [
+  const validActions = [
     "APPROVE",
-    "FORWARD",
     "REJECT",
     "ESCALATE",
+    "FORWARD",
     "REQUEST_INFO",
     "COMPLETE",
     "SIGN",
@@ -96,172 +90,182 @@ async function handlePatch(req: NextRequest, context?: any): Promise<Response> {
     "BIOMETRIC_GATE",
   ];
 
-  if (!action || !VALID.includes(action)) {
-    return badRequest(`Invalid or missing action. Must be one of: ${VALID.join(", ")}`);
+  if (!action || !validActions.includes(action)) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: "BAD_REQUEST",
+          message: "Invalid action. Must be one of: " + validActions.join(", "),
+        },
+      },
+      { status: 400 }
+    );
   }
 
   const supabase = getSupabaseServiceClient();
 
-  // ── 1. Load request ──────────────────────────────────────────────
-  const isUuid = /^[0-9a-f-]{36}$/i.test(ticketParam);
-  const lookup = isUuid
-    ? supabase.from("permission_requests").select("*").or(`id.eq.${ticketParam},ticket_number.eq.${ticketParam}`)
-    : supabase.from("permission_requests").select("*").eq("ticket_number", ticketParam);
-  const { data: request, error: fetchErr } = await lookup.single();
-  if (fetchErr || !request) return notFound("Permission request not found");
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(ticketParam);
+  let q = supabase.from("permission_requests").select("*");
+  if (isUuid) {
+    q = q.or("id.eq." + ticketParam + ",ticket_number.eq." + ticketParam);
+  } else {
+    q = q.eq("ticket_number", ticketParam);
+  }
 
-  const snapshot: RequestSnapshot = {
-    id: request.id,
-    ticket_number: request.ticket_number,
-    workflow_type: request.workflow_type,
-    current_stage: request.current_stage,
-    status: request.status,
-    hostel_scope: request.hostel_scope ?? null,
-    student_user_id: request.student_user_id || request.user_id,
-    stage_history: Array.isArray(request.stage_history) ? request.stage_history : [],
-    document_required: Boolean(request.document_required),
-    document_url: request.document_url ?? null,
-    biometric_hostel_at: request.biometric_hostel_at ?? null,
-    biometric_gate_at: request.biometric_gate_at ?? null,
-    digital_signature: request.digital_signature ?? null,
-  };
+  const { data: request, error: fetchErr } = await q.single();
 
-  // ── 2. Scope check (hostel_scope) ────────────────────────────────
-  if (
-    snapshot.workflow_type === "hostel" &&
-    ["caretaker", "deputy_warden", "hostel_manager"].includes(authUserRole)
-  ) {
-    const { data: user } = await supabase
+  if (fetchErr || !request) {
+    return NextResponse.json(
+      { success: false, error: { code: "NOT_FOUND", message: "Permission request not found" } },
+      { status: 404 }
+    );
+  }
+
+  if (request.status === "REJECTED" || request.status === "COMPLETED") {
+    return NextResponse.json(
+      { success: false, error: { code: "BAD_REQUEST", message: "Cannot modify a request with status " + request.status } },
+      { status: 400 }
+    );
+  }
+
+  const isAllowed = canApproveAtStage(authUserRole, request.workflow_type as WorkflowType, request.current_stage);
+  if (!isAllowed) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: "FORBIDDEN",
+          message: "Role " + authUserRole + " is not authorized to act on stage " + request.current_stage,
+        },
+      },
+      { status: 403 }
+    );
+  }
+  if (request.workflow_type === "hostel" && ["caretaker", "deputy_warden"].includes(authUserRole)) {
+    const { data: userData } = await supabase
       .from("users")
       .select("hostel_scope")
       .eq("id", authUserId)
       .single();
-    if (user?.hostel_scope && ["boys", "girls"].includes(user.hostel_scope)) {
-      if (snapshot.hostel_scope && snapshot.hostel_scope !== user.hostel_scope) {
-        return forbidden(`Cannot act on ${snapshot.hostel_scope} hostel request`);
+    if (userData?.hostel_scope && ["boys", "girls"].includes(userData.hostel_scope)) {
+      if (request.hostel_scope && request.hostel_scope !== userData.hostel_scope) {
+        return NextResponse.json(
+          { success: false, error: { code: "FORBIDDEN", message: "Cannot act on " + request.hostel_scope + " hostel request" } },
+          { status: 403 }
+        );
       }
     }
   }
 
-  // ── 3. Evidence acquisition (biometric / signature) ──────────────
-  let evidencePayload: { signatureHash?: string; deviceDisabled?: boolean } | undefined;
+  const { data: actorUser } = await supabase
+    .from("users")
+    .select("id, name, role")
+    .eq("id", authUserId)
+    .single();
 
-  if (action === "BIOMETRIC_HOSTEL" || action === "BIOMETRIC_GATE") {
-    const stage = action === "BIOMETRIC_HOSTEL" ? "hostel" : "gate";
-    const device = await getDeviceSetting(stage);
-    if (device.enabled) {
-      const biometricSignature = body.biometricSignature as string | undefined;
-      if (!biometricSignature) {
-        return badRequest("Biometric signature required (device enabled)");
-      }
-      const ok = await verifyThumbprint(snapshot.student_user_id, biometricSignature);
-      if (!ok) return badRequest("Biometric verification failed");
-      evidencePayload = {};
+  const actorName = actorUser?.name || authUserEmail || "Approver";
+
+  let nextStage = request.current_stage;
+  let nextStatus = request.status;
+  const updateFields: Record<string, unknown> = {};
+
+  if (action === "APPROVE" || action === "FORWARD") {
+    const resolvedNext = targetStage || resolveNextStage(request.workflow_type as WorkflowType, request.current_stage);
+    if (!resolvedNext || resolvedNext === "completed") {
+      nextStage = "completed";
+      nextStatus = "APPROVED";
     } else {
-      evidencePayload = { deviceDisabled: true };
+      nextStage = resolvedNext;
+      nextStatus = "PENDING";
     }
-  }
-
-  if (action === "SIGN") {
-    if (!snapshot.document_url) {
-      return badRequest("No document to sign");
+  } else if (action === "REJECT") {
+    nextStatus = "REJECTED";
+  } else if (action === "ESCALATE") {
+    nextStatus = "ESCALATED";
+    if (targetStage) nextStage = targetStage;
+  } else if (action === "COMPLETE") {
+    nextStage = "completed";
+    nextStatus = "COMPLETED";
+  } else if (action === "BIOMETRIC_HOSTEL") {
+    updateFields.biometric_hostel_at = new Date().toISOString();
+  } else if (action === "BIOMETRIC_GATE") {
+    updateFields.biometric_gate_at = new Date().toISOString();
+    if (request.current_stage === "main_gate") {
+      nextStage = "completed";
+      nextStatus = "COMPLETED";
     }
-    // I6: bind signature to bytes + ticket + signer + timestamp
-    const bytes = await fetchDocumentBytes(snapshot.document_url);
-    const signatureHash = await computeSignatureHash({
-      documentBytes: bytes,
-      ticketNumber: snapshot.ticket_number,
-      signerId: authUserId,
-      timestampMs: Date.now(),
-    });
-    evidencePayload = { signatureHash };
-  }
-
-  // ── 4. Delegate to pure engine ───────────────────────────────────
-  let decision;
-  try {
-    decision = applyPermissionAction(
-      snapshot,
-      { id: authUserId, name: authUserEmail || authUserId, role: authUserRole },
-      { action, comment, targetStage, evidencePayload },
-    );
-  } catch (e) {
-    if (e instanceof PermissionRuleError) {
+  } else if (action === "SIGN") {
+    if (!digitalSignature) {
       return NextResponse.json(
-        { success: false, error: { code: e.code, message: e.message } },
-        { status: e.code === "FORBIDDEN_STAGE" ? 403 : 400 },
+        { success: false, error: { code: "BAD_REQUEST", message: "digitalSignature payload is required for SIGN action" } },
+        { status: 400 }
       );
     }
-    throw e;
+    updateFields.digital_signature = digitalSignature;
+    await supabase.from("document_signatures").insert({
+      document_id: request.id,
+      signed_by: authUserId,
+      signature_hash: digitalSignature,
+    });
   }
 
-  // ── 5. Persist ───────────────────────────────────────────────────
+  const updatedHistory = appendStageHistory(
+    request.stage_history,
+    { id: authUserId, name: actorName, role: authUserRole },
+    action,
+    comment,
+    { from: request.current_stage, to: nextStage }
+  );
+
+  updateFields.current_stage = nextStage;
+  updateFields.status = nextStatus;
+  updateFields.stage_history = updatedHistory;
+
   const { data: updated, error: updateErr } = await supabase
     .from("permission_requests")
-    .update({ ...decision.updates, updated_at: new Date().toISOString() })
-    .eq("id", snapshot.id)
+    .update(updateFields)
+    .eq("id", request.id)
     .select()
     .single();
-  if (updateErr) return serverError(updateErr.message);
 
-  // ── 6. Side effects (audit, notification, signature row) ─────────
-  await addAudit({
-    action: decision.effects.auditAction,
-    userId: authUserId,
-    userName: authUserEmail,
-    role: authUserRole as Role,
-    details: {
-      ticketNumber: snapshot.ticket_number,
-      action,
-      fromStage: snapshot.current_stage,
-      toStage: decision.updates.current_stage,
-      status: decision.updates.status,
-      comment,
-    },
-  });
-
-  if (decision.effects.notifyUserId && decision.effects.notifyMessage) {
-    await addNotification(
-      "user",
-      decision.effects.notifyUserId,
-      "permission",
-      `Ticket ${snapshot.ticket_number} updated`,
-      decision.effects.notifyMessage,
+  if (updateErr) {
+    return NextResponse.json(
+      { success: false, error: { code: "UPDATE_ERROR", message: updateErr.message } },
+      { status: 500 }
     );
   }
 
-  if (decision.effects.signPayload) {
-    await supabase.from("document_signatures").insert({
-      document_id: snapshot.id,
-      signed_by: authUserId,
-      signature_hash: decision.effects.signPayload.signatureHash,
-    });
-  }
+  addAudit({
+    action: "PERMISSION_REQUEST_" + action,
+    userId: authUserId,
+    details: {
+      ticketNumber: request.ticket_number,
+      action,
+      fromStage: request.current_stage,
+      toStage: nextStage,
+      status: nextStatus,
+      comment,
+    },
+  }).catch((err) => console.error("[Permission Ticket API] addAudit error:", err));
+
+  addNotification(
+    "user",
+    request.student_user_id,
+    "permission",
+    "Permission Request " + request.ticket_number + " Updated",
+    "Your request " + request.ticket_number + " was marked as " + action + " (Status: " + nextStatus + ", Stage: " + nextStage + ")"
+  ).catch((err) => console.error("[Permission Ticket API] addNotification error:", err));
 
   return NextResponse.json({ success: true, data: updated });
 }
 
-export const GET = withRateLimit(
-  withAuthorization(getHandler),
-  { keyPrefix: "perm_tic_get", maxRequests: 50 },
-);
+export const GET = withRateLimit(withAuthorization(handleGet), {
+  keyPrefix: "permission_ticket_get",
+  maxRequests: 100,
+});
 
-export const PATCH = withRateLimit(
-  withAuthorization(handlePatch, {
-    requiredRole: [
-      "caretaker",
-      "deputy_warden",
-      "hostel_manager",
-      "warden",
-      "principal",
-      "faculty",
-      "hod",
-      "oie",
-      "vice_principal",
-      "operator",
-      "admin",
-      "sysadmin",
-    ],
-  }),
-  { keyPrefix: "perm_tic_patch", maxRequests: 20 },
-);
+export const PATCH = withRateLimit(withAuthorization(handlePatch), {
+  keyPrefix: "permission_ticket_patch",
+  maxRequests: 60,
+});

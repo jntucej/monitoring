@@ -1,6 +1,24 @@
 import { query } from "@/lib/postgres";
-import type { WorkflowType } from "@/lib/types";
+import type { Role, WorkflowType } from "@/lib/types";
+import getSupabaseServiceClient from "@/lib/dbClient";
+import { getParentChildren } from "@/lib/db";
 export type { WorkflowType };
+
+export const ROLE_STAGE_PERMISSIONS: Record<string, readonly string[]> = {
+  caretaker: ["caretaker"],
+  deputy_warden: ["deputy_warden"],
+  hostel_manager: ["hostel_manager"],
+  warden: ["warden_or_principal"],
+  principal: ["warden_or_principal", "principal"],
+  operator: ["main_gate"],
+  faculty: ["faculty"],
+  hod: ["hod"],
+  oie: ["oie"],
+  vice_principal: ["vice_principal"],
+  sysadmin: ["*"],
+  admin: ["*"],
+};
+
 
 export const WORKFLOW_STAGES: Record<WorkflowType, string[]> = {
   hostel: ["caretaker", "deputy_warden", "hostel_manager", "warden_or_principal", "main_gate", "completed"],
@@ -429,3 +447,94 @@ export function applyPermissionAction(
       );
   }
 }
+
+export interface ScopedTicketRow {
+  id: string;
+  ticket_number: string;
+  workflow_type: string;
+  student_user_id: string;
+  current_stage: string;
+  status: string;
+  stage_history: unknown[] | null;
+  document_required: boolean;
+  document_url?: string | null;
+  digital_signature?: string | null;
+  [key: string]: unknown;
+}
+
+/**
+ * Fetches a permission request by its ticket param (ticket number or UUID) and
+ * applies the same role-based visibility rules used by `GET /api/permissions/[ticket]`
+ * (student → own tickets only; parent/guardian → their children only; approvers,
+ * admin/sysadmin → allowed). Extracted in Step 7 so the upload / document / sign
+ * routes reuse the identical scoping instead of duplicating it.
+ *
+ * Returns `null` when the ticket does not exist, and `{ forbidden: true }` when
+ * the caller may not see it (caller must map to 404 / 403 respectively).
+ */
+export async function getScopedTicket(
+  ticketParam: string,
+  authUserId: string,
+  authUserRole: string
+): Promise<
+  | { notFound: true; forbidden?: never }
+  | { forbidden: true; notFound?: never }
+  | { request: ScopedTicketRow }
+> {
+  if (!ticketParam) return { notFound: true };
+
+  const supabase = getSupabaseServiceClient();
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(ticketParam);
+
+  let q = supabase
+    .from("permission_requests")
+    .select(
+      `
+      *,
+      student:student_user_id (
+        id,
+        name,
+        email,
+        phone,
+        role,
+        student_details (
+          roll,
+          year,
+          section,
+          hostel_block,
+          room_number,
+          gender
+        )
+      ),
+      document_signatures (
+        id,
+        signed_by,
+        signed_at,
+        signature_hash
+      )
+    `
+    );
+
+  if (isUuid) {
+    q = q.or("id.eq." + ticketParam + ",ticket_number.eq." + ticketParam);
+  } else {
+    q = q.eq("ticket_number", ticketParam);
+  }
+
+  const { data: request, error } = await q.single();
+
+  if (error || !request) return { notFound: true };
+
+  if (authUserRole === "student" && request.student_user_id !== authUserId) {
+    return { forbidden: true };
+  }
+
+  if (authUserRole === "parent" || authUserRole === "guardian") {
+    const children = await getParentChildren(authUserId);
+    const isChild = (children || []).some((c: { id?: string }) => c.id === request.student_user_id);
+    if (!isChild) return { forbidden: true };
+  }
+
+  return { request: request as unknown as ScopedTicketRow };
+}
+

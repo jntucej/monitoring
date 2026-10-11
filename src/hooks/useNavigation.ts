@@ -166,6 +166,9 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
             { href: "/security", label: "Security Status", icon: "ShieldCheck" },
             { href: "/sysadmin/compliance", label: "Compliance & Retention", icon: "ShieldCheck" },
             { href: "/sysadmin/exit-reasons", label: "Exit Reasons & Outpass", icon: "DoorOpen" },
+          { href: "/sysadmin/reasons", label: "Custom Reasons", icon: "MessageSquarePlus" },
+          { href: "/sysadmin/devices", label: "Device Verification", icon: "Cpu" },
+
             { href: "/sysadmin/alerts/rules", label: "Alert Rules", icon: "Bell" },
             { href: "/sysadmin/navigation", label: "Navigation Editor", icon: "Layout" },
             { href: "/help", label: "Help & Docs", icon: "BookOpen" },
@@ -348,6 +351,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
             { href: "/student", label: "Digital ID & Gate Pass", icon: "QrCode", badge: "ID PASS" },
             { href: "/student/history", label: "My Scan Logs", icon: "Clock" },
             { href: "/student/passes", label: "Outpass Requests", icon: "FileSpreadsheet" },
+            { href: "/student/permissions", label: "Permission Requests", icon: "ClipboardList", badge: "NEW" },
           ],
         },
         {
@@ -409,6 +413,7 @@ export function useNavItems(roleCode?: string) {
 
   useEffect(() => {
     if (!roleCode) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setNavigation([]);
       setLoading(false);
       return;
