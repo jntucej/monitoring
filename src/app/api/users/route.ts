@@ -48,7 +48,19 @@ async function handleGet(req: NextRequest) {
 
   try {
     const users = await findAllUsers();
-    return NextResponse.json({ success: true, data: users });
+
+    // Optional client-side name/roll/email/role filter so sysadmin pages can
+    // offer a search box instead of raw UUID entry.
+    const q = req.nextUrl.searchParams.get("q");
+    let result = users;
+    if (q && q.trim().length >= 1) {
+      const needle = q.trim().toLowerCase();
+      result = users.filter((u: any) =>
+        (u.name || u.email || u.uniqueId || u.unique_id || u.role || "").toString().toLowerCase().includes(needle) ||
+        (u.fullname || "").toString().toLowerCase().includes(needle)
+      );
+    }
+    return NextResponse.json({ success: true, data: result });
   } catch (error) {
     console.error('Error listing users:', error);
     return NextResponse.json(

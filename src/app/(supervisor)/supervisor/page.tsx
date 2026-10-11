@@ -359,23 +359,23 @@ function SupervisorDashboardInner() {
       {/* Metrics Row */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <div className="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)]">
-          <p className="text-[11px] text-[var(--text-muted)] flex items-center gap-1"><Users className="w-3.5 h-3.5 text-indigo-400" /> Total Wards</p>
+          <p className="text-[11px] text-[var(--text-muted)] flex items-center gap-1"><Users className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400" /> Total Wards</p>
           <p className="text-2xl font-black text-[var(--text-primary)]">{stats.totalWards}</p>
         </div>
         <div className="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)]">
-          <p className="text-[11px] text-[var(--text-muted)] flex items-center gap-1"><UserCheck className="w-3.5 h-3.5 text-emerald-400" /> Inside Hostel</p>
+          <p className="text-[11px] text-[var(--text-muted)] flex items-center gap-1"><UserCheck className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" /> Inside Hostel</p>
           <p className="text-2xl font-black text-emerald-400">{stats.onCampus}</p>
         </div>
         <div className="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)]">
-          <p className="text-[11px] text-[var(--text-muted)] flex items-center gap-1"><DoorOpen className="w-3.5 h-3.5 text-amber-400" /> Out on Pass</p>
+          <p className="text-[11px] text-[var(--text-muted)] flex items-center gap-1"><DoorOpen className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" /> Out on Pass</p>
           <p className="text-2xl font-black text-amber-400">{stats.offCampus}</p>
         </div>
         <div className="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)]">
-          <p className="text-[11px] text-[var(--text-muted)] flex items-center gap-1"><CheckSquare className="w-3.5 h-3.5 text-sky-400" /> Pending Passes</p>
+          <p className="text-[11px] text-[var(--text-muted)] flex items-center gap-1"><CheckSquare className="w-4 h-4 sm:w-5 sm:h-5 text-sky-400" /> Pending Passes</p>
           <p className="text-2xl font-black text-sky-400">{stats.pendingPasses}</p>
         </div>
         <div className="col-span-2 md:col-span-1 p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)]">
-          <p className="text-[11px] text-[var(--text-muted)] flex items-center gap-1"><ShieldAlert className="w-3.5 h-3.5 text-rose-400" /> Curfew Alerts</p>
+          <p className="text-[11px] text-[var(--text-muted)] flex items-center gap-1"><ShieldAlert className="w-4 h-4 sm:w-5 sm:h-5 text-rose-400" /> Curfew Alerts</p>
           <p className="text-2xl font-black text-rose-400">{stats.activeAlerts}</p>
         </div>
       {/* Overview Tab */}
@@ -423,7 +423,7 @@ function SupervisorDashboardInner() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <MessageSquare className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
+                      <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--text-muted)] shrink-0" />
                       <input value={rejectComment[p.id] || ""} onChange={(e) => setRejectComment((prev) => ({ ...prev, [p.id]: e.target.value, [`${p.id}_err`]: "" }))} placeholder="Rejection remark (required if rejecting)" className={`flex-1 text-xs px-3 py-1.5 rounded-lg bg-[var(--bg-base)] border ${rejectComment[`${p.id}_err`] ? "border-rose-500" : "border-[var(--border)]"} text-[var(--text-primary)] focus:outline-none`} />
                     </div>
                   </div>
@@ -545,7 +545,7 @@ function SupervisorDashboardInner() {
             <div className="flex items-center gap-3 w-full sm:w-auto">
               <div className="flex items-center bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-1 text-xs">
                 <button onClick={() => setRosterViewMode("list")} className={`px-2 py-1 rounded-lg font-bold flex items-center gap-1 ${rosterViewMode === "list" ? "bg-indigo-500 text-white" : "text-[var(--text-muted)]"}`}>
-                  <List className="w-3.5 h-3.5" /> List
+                  <List className="w-4 h-4 sm:w-5 sm:h-5" /> List
                 </button>
                 <button onClick={() => setRosterViewMode("heatmap")} className={`px-2 py-1 rounded-lg font-bold flex items-center gap-1 ${rosterViewMode === "heatmap" ? "bg-indigo-500 text-white" : "text-[var(--text-muted)]"}`}>
                   <Grid className="w-6 h-6 md:w-8 md:h-8" /> Grid Map
@@ -592,7 +592,7 @@ function SupervisorDashboardInner() {
                   ))}
                 </div>
               </div>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-4 md:grid-cols-6 gap-3">
                 {Array.from({ length: 12 }, (_, i) => {
                   const roomNum = selectedFloor * 100 + i + 1;
                   const matchStudent = students[i % (students.length || 1)];

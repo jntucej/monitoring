@@ -201,7 +201,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "Institutional Rosters",
           items: [
-            { href: "/supervisor?tab=curfew", label: "Student Master Roster", icon: "GraduationCap" },
+            { href: "/admin/students", label: "Student Master Roster", icon: "GraduationCap" },
             { href: "/admin/faculty", label: "Faculty Attendance", icon: "UserCheck" },
             { href: "/admin/staff", label: "Staff Oversight", icon: "Briefcase" },
             { href: "/admin/workers", label: "Worker Shift Tracker", icon: "HardHat" },

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { GateDeviceTracker, GateDevice } from "@/components/admin/GateDeviceTracker";
-import { AlertCircle, Signal } from "lucide-react";
+import { AlertCircle, Signal, Plus } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 
@@ -49,6 +49,11 @@ export default function AdminGatesPage() {
           <p className="text-sm text-[var(--text-muted)] mt-1">
             Monitor real-time gate terminal status, operator shifts, scan activity, and hardware health.
           </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <a href="/sysadmin/gates" className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">
+            <Plus className="w-3.5 h-3.5" /> Manage Gates (Add / Edit / Assign)
+          </a>
         </div>
       </div>
 

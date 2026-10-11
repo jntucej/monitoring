@@ -4,7 +4,7 @@ import { MockDataGenerator, GateStatusChangePayload, AlertPayload } from "./mock
 type TrafficCallback = (traffic: number) => void;
 type StatusCallback = (data: GateStatusChangePayload) => void;
 type AlertCallback = (data: AlertPayload) => void;
-type ConnectionCallback = (connected: boolean, isMock?: boolean) => void;
+type ConnectionCallback = (connected: boolean, isMock?: boolean, exhausted?: boolean) => void;
 
 export type WSEvent = "traffic" | "status" | "alert" | "connection";
 
@@ -13,6 +13,8 @@ export class GateMonitorWS {
   private socket: WebSocket | null = null;
   private mockGenerator: MockDataGenerator | null = null;
   public isConnected: boolean = false;
+  /** True once all reconnect attempts are spent AND the SSE fallback is down. */
+  public transportExhausted: boolean = false;
   public mockMode: boolean;
   public isMockFallback: boolean = false;
 
@@ -51,6 +53,7 @@ export class GateMonitorWS {
       this.socket.onopen = () => {
         this.isConnected = true;
         this.reconnectAttempts = 0;
+        this.transportExhausted = false;
         this.notifyConnectionChange(true);
       };
 
@@ -88,6 +91,10 @@ export class GateMonitorWS {
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
+    }
+    if (this.sseRetryTimer) {
+      clearTimeout(this.sseRetryTimer);
+      this.sseRetryTimer = null;
     }
     if (this.socket) {
       this.socket.close();
@@ -236,16 +243,21 @@ export class GateMonitorWS {
   /** Fallback to Server-Sent Events when WebSocket is unavailable */
   private connectSSEFallback(): void {
     if (this.mockMode) return; // Don't fallback if mock mode is forced
-    
+    // Entering the SSE fallback phase: transport is alive again, so the UI
+    // shows "reconnecting" (not the exhausted Offline state) while it retries.
+    this.transportExhausted = false;
+    this.sseRetryAttempts = 0;
+
     const sseUrl = this.url.replace(/^ws:\/\//i, 'http://').replace(/^wss:\/\//i, 'https://');
     const eventSource = new EventSource(sseUrl);
-    
+
     eventSource.onopen = () => {
       this.isConnected = true;
+      this.transportExhausted = false;
       this.isMockFallback = true;
-      this.notifyConnectionChange(true, true);
+      this.notifyConnectionChange(true, true, false);
     };
-    
+
     eventSource.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
@@ -254,19 +266,44 @@ export class GateMonitorWS {
         // Ignore invalid payload
       }
     };
-    
+
     eventSource.onerror = () => {
       this.isConnected = false;
-      eventSource.close();
-      this.notifyConnectionChange(false);
+      this.transportExhausted = true;
+      this.notifyConnectionChange(false, this.isMockFallback, true);
+      // Don't close the EventSource — it auto-reconnects and will re-emit
+      // onerror until the server is reachable again. A bounded backoff keeps
+      // the "reconnecting" indicator honest instead of perpetual.
+      if (!this.isExplicitlyClosed) this.scheduleSSERetry();
     };
-    
+
     // Store reference for cleanup
     (this as any)._sseSource = eventSource;
   }
 
-  private notifyConnectionChange(connected: boolean, isMock?: boolean): void {
+  /**
+   * Re-arm the SSE fallback after a bounded backoff so a fully-down transport
+   * can recover without the UI claiming it is "reconnecting" indefinitely.
+   * `transportExhausted` stays true until onopen fires again.
+   */
+  private sseRetryTimer: NodeJS.Timeout | null = null;
+  private sseRetryAttempts: number = 0;
+  private static readonly SSE_RETRY_MAX: number = 5;
+  private static readonly SSE_RETRY_BASE: number = 5000;
+
+  private scheduleSSERetry(): void {
+    if (this.mockMode || this.sseRetryTimer || this.sseRetryAttempts >= GateMonitorWS.SSE_RETRY_MAX) return;
+    this.sseRetryAttempts++;
+    const delay = Math.min(GateMonitorWS.SSE_RETRY_BASE * this.sseRetryAttempts, 30000);
+    this.sseRetryTimer = setTimeout(() => {
+      this.sseRetryTimer = null;
+      if (this.isExplicitlyClosed || this.isConnected) return;
+      this.connectSSEFallback();
+    }, delay);
+  }
+
+  private notifyConnectionChange(connected: boolean, isMock?: boolean, exhausted?: boolean): void {
     const isMockData = isMock !== undefined ? isMock : (this.mockMode || this.isMockFallback);
-    this.connectionListeners.forEach((fn) => fn(connected, isMockData));
+    this.connectionListeners.forEach((fn) => fn(connected, isMockData, exhausted));
   }
 }

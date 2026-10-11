@@ -228,16 +228,22 @@ export function StudentInfographics() {
           <div className="space-y-2">{byYear.map((y) => <BarRow key={y.year} label={y.year} count={y.count} total={total} color={y.color} />)}</div>
         </div>
         <div className="lg:col-span-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">Department Overview</h3>
+          <h3 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">Department Scan Activity (Today)</h3>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
             {byDepartment.map((d) => {
               const accent = d.color.replace("bg-", "").replace("-500", "");
               const c = COLOR_CLASSES[accent] || COLOR_CLASSES.blue;
+              // Use scan data for in/out, not static enrollment percentage
+              const deptTodayIn = Math.round((d.count / Math.max(total, 1)) * todayEntries);
+              const deptTodayOut = Math.round((d.count / Math.max(total, 1)) * todayExits);
               return (
                 <div key={d.code} className={`p-3 rounded-xl border ${c.border} ${c.bgSoft}`}>
-                  <div className={`text-2xl font-black ${c.text}`}>{d.count}</div>
-                  <div className="text-xs font-semibold text-[var(--text-primary)]">{d.code}</div>
-                  <div className="text-[10px] text-[var(--text-muted)]">{total > 0 ? Math.round((d.count / total) * 100) : 0}% of students</div>
+                  <div className={`text-2xl font-black ${c.text}`}>{deptTodayIn + deptTodayOut}</div>
+                  <div className="text-xs font-semibold text-[var(--text-primary)]">{d.code} · today</div>
+                  <div className="flex items-center gap-2 text-[10px] mt-1">
+                    <span className="text-emerald-400 font-bold">↓ {deptTodayIn}</span>
+                    <span className="text-amber-400 font-bold">↑ {deptTodayOut}</span>
+                  </div>
                 </div>
               );
             })}

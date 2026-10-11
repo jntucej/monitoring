@@ -26,7 +26,7 @@ interface GateMetrics {
   totalScansToday: number;
   entriesToday: number;
   exitsToday: number;
-  peakHour: string;
+  peakHour: string | null;
   recentScans: Array<{
     id: string;
     personName: string;
@@ -66,29 +66,12 @@ export default function GateDetailPage() {
           gateName: gateInfo.name || `Gate Terminal #${gateId}`,
           location: gateInfo.location || "Campus Perimeter",
           status: (gateInfo.status as any) || "ONLINE",
-          activeOperator: json.data.activeOperator || { name: "Duty Operator", email: "operator@college.edu" },
-          totalScansToday: stats.todaysScans || stats.totalScans || 142,
-          entriesToday: stats.entries || 84,
-          exitsToday: stats.exits || 58,
-          peakHour: "08:30 AM - 09:30 AM",
-          recentScans: json.data.recentScans || [
-            {
-              id: "s-1",
-              personName: "Aarav Sharma",
-              personType: "Student",
-              direction: "IN",
-              timestamp: "09:12 AM",
-              status: "VERIFIED",
-            },
-            {
-              id: "s-2",
-              personName: "Dr. Priya V.",
-              personType: "Faculty",
-              direction: "IN",
-              timestamp: "08:54 AM",
-              status: "VERIFIED",
-            },
-          ],
+          activeOperator: json.data.activeOperator || null,
+          totalScansToday: stats.todaysScans || stats.totalScans || 0,
+          entriesToday: stats.entries || 0,
+          exitsToday: stats.exits || 0,
+          peakHour: null,
+          recentScans: json.data.recentScans || [],
         });
       }
     } catch (e) {

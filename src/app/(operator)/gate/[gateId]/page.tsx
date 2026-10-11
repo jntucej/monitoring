@@ -35,7 +35,8 @@ function OperatorPageInner() {
   
   const { authenticated, user, logout } = useAuth();
   
-  const gateId = isSpecialPath ? (user?.gateId || "1") : (gateIdParam || "1");
+  // No hardcoded default gate: unassigned operators must be assigned by sysadmin first.
+  const gateId = isSpecialPath ? (user?.gateId || "") : (gateIdParam || user?.gateId || "");
   const currentTab = isSpecialPath && gateIdParam === "history" ? "history" : (searchParams?.get("tab") || "scandesk");
   
   const { addToast } = useToast();
@@ -94,11 +95,16 @@ function OperatorPageInner() {
   
   // Redirect special routing path shortcuts (/gate/history & /gate/manual) to operators dynamic gate path
   useEffect(() => {
-    if (isSpecialPath && user?.gateId) {
-      if (gateIdParam === "history") {
-        router.replace(`/gate/${user.gateId}?tab=history`);
+    if (isSpecialPath) {
+      if (user?.gateId) {
+        if (gateIdParam === "history") {
+          router.replace(`/gate/${user.gateId}?tab=history`);
+        } else {
+          router.replace(`/gate/${user.gateId}?tab=scandesk&mode=manual`);
+        }
       } else {
-        router.replace(`/gate/${user.gateId}?tab=scandesk&mode=manual`);
+        // No gate assigned yet — send to operator dashboard, not a hardcoded gate
+        router.replace("/operator");
       }
     }
   }, [isSpecialPath, gateIdParam, user?.gateId, router]);
@@ -116,6 +122,22 @@ function OperatorPageInner() {
       setOperatorSubMode(targetMode);
     }
   }, [searchParams, isSpecialPath, gateIdParam, operatorSubMode]);
+
+  // Unassigned operators (no gate_id) land on /gate/<empty> — show a
+  // "waiting for assignment" panel instead of a broken gate view.
+  const [needsAssignment, setNeedsAssignment] = useState(false);
+  useEffect(() => {
+    if (!authenticated || !user) return;
+    if (gateId === "" || gateId === "history" || gateId === "manual") {
+      if (user.gateId) {
+        setNeedsAssignment(false);
+      } else {
+        setNeedsAssignment(true);
+      }
+    } else {
+      setNeedsAssignment(false);
+    }
+  }, [authenticated, user, gateId]);
 
   // Ref to store polling interval ID
   const statsIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -322,6 +344,29 @@ function OperatorPageInner() {
 
       case "scandesk":
       default:
+        if (needsAssignment) {
+          return (
+            <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div className="bg-[var(--bg-surface)] border border-amber-500/30 rounded-2xl p-6 text-center space-y-3 shadow-sm">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-400 flex items-center justify-center mx-auto border border-amber-500/30">
+                  <AlertCircle className="w-6 h-6" />
+                </div>
+                <h3 className="font-bold text-sm text-[var(--text-primary)]">No gate assigned yet</h3>
+                <p className="text-xs text-[var(--text-secondary)] max-w-sm mx-auto leading-relaxed">
+                  You are not linked to a gate. Ask a system administrator to assign you to a gate
+                  (SysAdmin → Gates → Assign operator). Once assigned, your gate dashboard will open
+                  automatically.
+                </p>
+                <button
+                  onClick={() => router.push("/operator")}
+                  className="px-4 py-2 rounded-xl bg-[var(--action-primary)] text-slate-950 text-xs font-bold hover:brightness-110 transition"
+                >
+                  Go to Dashboard
+                </button>
+              </div>
+            </div>
+          );
+        }
         return (
           <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
             {/* Operational Mode Navigation */}

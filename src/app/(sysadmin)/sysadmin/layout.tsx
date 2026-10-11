@@ -55,6 +55,7 @@ const NAV = [
       { href: "/sysadmin/integrations", label: "Integration Hub", icon: Database },
       { href: "/sysadmin/jobs", label: "Scheduled Jobs", icon: Clock },
       { href: "/sysadmin/scheduling", label: "Smart Scheduling", icon: Sparkles },
+      { href: "/sysadmin/gates", label: "Gates & Access", icon: DoorOpen },
     ],
   },
   {

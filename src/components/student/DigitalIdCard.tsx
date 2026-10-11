@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
-import { QrCode, Loader2, AlertCircle } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { QrCode, Loader2, AlertCircle, Download } from "lucide-react";
 import { QRCode } from "react-qrcode-logo";
 import { parseRollNumber } from "@/lib/rollNumber";
 import { getAuthHeaders } from "@/lib/utils";
@@ -11,6 +11,8 @@ export function DigitalIdCard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [countdown, setCountdown] = useState(30);
+  const [downloading, setDownloading] = useState(false);
+  const qrRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -74,6 +76,24 @@ export function DigitalIdCard() {
     );
   }
 
+  const downloadQR = () => {
+    if (!student) return;
+    setDownloading(true);
+    // Find the canvas that react-qrcode-logo renders inside the ref
+    const container = qrRef.current;
+    const canvas = container?.querySelector("canvas");
+    if (canvas) {
+      const url = canvas.toDataURL("image/png");
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `gate-id-${student.roll || "student"}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+    setTimeout(() => setDownloading(false), 500);
+  };
+
   const decoded = parseRollNumber(student.roll);
   const photoSrc = student.photo || "/avatar-placeholder.png";
 
@@ -129,12 +149,20 @@ export function DigitalIdCard() {
       </div>
 
       {/* Dynamic Anti-Screenshot QR Code */}
-      <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-white rounded-2xl flex flex-col items-center shadow-lg relative">
+      <div ref={qrRef} className="mt-4 sm:mt-6 p-3 sm:p-4 bg-white rounded-2xl flex flex-col items-center shadow-lg relative">
         <QRCode value={JSON.stringify({ roll: student.roll, ts: Math.floor(Date.now() / 30000) })} size={140} />
         <div className="mt-1.5 sm:mt-2 text-[9px] sm:text-[10px] font-bold text-slate-700 font-mono flex items-center gap-1 sm:gap-1.5 bg-slate-100 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-slate-200">
           <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 animate-ping" />
           Anti-Screenshot Security Token • Refreshes in {countdown}s
         </div>
+        <button
+          onClick={downloadQR}
+          disabled={downloading}
+          className="mt-2.5 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 text-white text-[11px] font-bold hover:bg-slate-700 disabled:opacity-50 transition"
+        >
+          <Download className="w-3.5 h-3.5" />
+          {downloading ? "Saving…" : "Save QR as PNG"}
+        </button>
       </div>
       <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-[var(--text-muted)] flex items-center gap-1">
         <QrCode className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-indigo-400" />

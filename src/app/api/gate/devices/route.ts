@@ -17,14 +17,23 @@ async function handleGet(req: NextRequest) {
 
     const { data: opsData } = await service
       .from('users')
-      .select('id, name, unique_id, role')
+      .select('id, name, email, unique_id, role, gate_id')
       .eq('role', 'operator');
 
     const logs = logsData || [];
     const operators = opsData || [];
 
+    // Build the real assignment map: gate_id -> operators who are actually
+    // assigned to it (users.gate_id). No round-robin / hardcoded fallback.
+    const assignedByGate: Record<string, typeof operators> = {};
+    for (const op of operators) {
+      const gid = (op as any).gate_id;
+      if (!gid) continue;
+      (assignedByGate[gid] ||= []).push(op);
+    }
+
     const ALL_GATES = await getAllGatesLive();
-    const devices = ALL_GATES.map((gate, idx) => {
+    const devices = ALL_GATES.map((gate) => {
       const gateLogs = logs.filter((l: any) => l.gate_id === gate.id || l.gateId === gate.id);
       const entriesToday = gateLogs.filter((l: any) => {
         const dir = String(l.direction || l.scan_type || "").toUpperCase();
@@ -36,7 +45,7 @@ async function handleGet(req: NextRequest) {
       }).length;
       const lastLog = gateLogs.sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
 
-      const assignedOp = operators[idx % (operators.length || 1)] || { id: "none", name: "Unassigned", unique_id: "N/A" };
+      const gateOps = assignedByGate[gate.id] || [];
 
       return {
         id: gate.id,
@@ -44,12 +53,12 @@ async function handleGet(req: NextRequest) {
         location: gate.location,
         gateCode: gate.gateCode || "GATE",
         status: gate.isActive ? "online" : "maintenance",
-        currentOperator: {
-          id: assignedOp.id,
-          name: assignedOp.name,
-          employeeId: assignedOp.unique_id || (assignedOp as any).employeeId || "N/A",
-          workingHours: "Unassigned",
-        },
+        assignedOperators: gateOps.map((op: any) => ({
+          id: op.id,
+          name: op.name || op.email || "Unnamed operator",
+          email: op.email || "",
+          role: op.role || "operator",
+        })),
         lastScanTime: lastLog ? lastLog.timestamp : null,
         totalScansToday: gateLogs.length,
         entriesToday,

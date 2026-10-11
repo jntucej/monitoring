@@ -286,7 +286,7 @@ export default function AdminDashboardPage() {
         <div>
           <p className="text-sm text-[var(--text-muted)]">Loading live campus telemetry data…</p>
         </div>
-        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {[0, 1, 2, 3].map((i) => (
             <div key={i} className="h-28 rounded-xl bg-[var(--bg-surface)] animate-pulse border border-[var(--border)]" />
           ))}
@@ -491,15 +491,15 @@ export default function AdminDashboardPage() {
                         <span className={`inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-md text-[9px] sm:text-xs font-bold ${colorClass}`}>{dept.deptCode}</span>
                         <span className="text-[9px] sm:text-[11px] text-[var(--text-muted)] ml-1 sm:ml-2">{dept.dept}</span>
                       </td>
-                      <td className="py-2 sm:py-3 px-3 sm:px-4 text-right text-emerald-400 font-semibold text-xs sm:text-sm">{dept.in.toLocaleString()}</td>
-                      <td className="py-2 sm:py-3 px-3 sm:px-4 text-right text-amber-400 font-semibold text-xs sm:text-sm">{dept.out.toLocaleString()}</td>
-                      <td className="py-2 sm:py-3 px-3 sm:px-4 text-right text-[var(--text-primary)] font-bold text-xs sm:text-sm">{total.toLocaleString()}</td>
+                      <td className="py-2 sm:py-3 px-3 sm:px-4 text-right text-emerald-400 font-semibold text-xs sm:text-sm tabular-nums">{dept.in.toLocaleString()}</td>
+                      <td className="py-2 sm:py-3 px-3 sm:px-4 text-right text-amber-400 font-semibold text-xs sm:text-sm tabular-nums">{dept.out.toLocaleString()}</td>
+                      <td className="py-2 sm:py-3 px-3 sm:px-4 text-right text-[var(--text-primary)] font-bold text-xs sm:text-sm tabular-nums">{total.toLocaleString()}</td>
                       <td className="py-2 sm:py-3 px-3 sm:px-4">
                         <div className="flex items-center gap-1.5 sm:gap-2">
                           <div className="flex-1 h-1 sm:h-1.5 rounded-full bg-[var(--bg-elevated)] overflow-hidden">
                             <div className="h-full rounded-full bg-blue-500 transition-all" style={{ width: `${dept.pct}%` }} />
                           </div>
-                          <span className="text-[9px] sm:text-[10px] text-[var(--text-muted)] w-7 sm:w-8 text-right">{dept.pct}%</span>
+                          <span className="text-[9px] sm:text-[10px] text-[var(--text-muted)] w-7 sm:w-8 text-right tabular-nums">{dept.pct}%</span>
                         </div>
                       </td>
                     </tr>
