@@ -84,14 +84,4 @@ ALTER TABLE public.audit_logs
     'DEV_CONTACT_SENT'
   ));
 
--- 4. Track the applied migration if schema_migrations exists with filename/checksum
-DO $$
-BEGIN
-  IF EXISTS (SELECT 1 FROM pg_tables WHERE schemaname='public' AND tablename='schema_migrations') THEN
-    INSERT INTO public.schema_migrations (version, filename, checksum)
-    VALUES ('20261026000000', '20261026000000_dev_contact_channel.sql', 'applied')
-    ON CONFLICT (version) DO NOTHING;
-  END IF;
-END $$;
-
 COMMIT;
