@@ -13,7 +13,7 @@ COMMENT ON COLUMN public.users.dev_contact_enabled IS
 -- 2. Message store
 CREATE TABLE IF NOT EXISTS public.developer_messages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE SET NULL,
+  user_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
   user_name TEXT,
   user_role TEXT,
   user_email TEXT,
@@ -83,9 +83,5 @@ ALTER TABLE public.audit_logs
     'USER_ONBOARDED', 'ROLE_GRANTED', 'ROLE_REVOKED', 'MOBILE_ENROLLMENT_CODE_ISSUED',
     'DEV_CONTACT_SENT'
   ));
-
--- 4. Track the applied migration
-INSERT INTO public.schema_migrations (version) VALUES ('20261026000000')
-ON CONFLICT DO NOTHING;
 
 COMMIT;
