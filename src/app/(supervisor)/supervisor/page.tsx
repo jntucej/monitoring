@@ -28,6 +28,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { getAuthHeaders } from "@/lib/utils";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import type { GatePass, Alert } from "@/lib/types";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
 
 interface WardenStudent {
   id: string;
@@ -633,6 +634,11 @@ function SupervisorDashboardInner() {
           </div>
         </div>
       )}
+
+      {/* Contact the developer (all roles) */}
+      <div className="space-y-4">
+        <DevContactStrip />
+      </div>
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ import { PersonIdCard } from "@/components/person/PersonIdCard";
 import { ActivePasses } from "@/components/student/ActivePasses";
 import { RecentActivity } from "@/components/student/RecentActivity";
 import { UserProfileTab } from "@/components/shared/UserProfileTab";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { QrCode, FileCheck, Clock, User } from "lucide-react";
 
 function PersonDashboardInner() {
@@ -80,6 +81,9 @@ function PersonDashboardInner() {
 
       <main className="min-h-[50vh] flex flex-col justify-start">
         {renderActiveView()}
+        <div className="mt-6">
+          <DevContactStrip />
+        </div>
       </main>
     </div>
 

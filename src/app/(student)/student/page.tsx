@@ -6,6 +6,7 @@ import Link from "next/link";
 import { DigitalIdCard } from "@/components/student/DigitalIdCard";
 import { StudentDashboardWidgets } from "@/components/student/widgets";
 import { ActivePasses } from "@/components/student/ActivePasses";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { RecentActivity } from "@/components/student/RecentActivity";
 import { UserProfileTab } from "@/components/shared/UserProfileTab";
 import { QrCode, FileCheck, Clock, User, ShieldCheck, TrendingUp, AlertTriangle, Send, Calendar } from "lucide-react";
@@ -223,6 +224,9 @@ function StudentDashboardInner() {
 
       <main className="min-h-[50vh] flex flex-col justify-start">
         {renderActiveView()}
+        <div className="mt-6">
+          <DevContactStrip />
+        </div>
       </main>
     </div>
   );

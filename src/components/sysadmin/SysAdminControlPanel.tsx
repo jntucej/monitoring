@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { GovernanceModules } from "./SysAdminGovernanceModules";
 import { HealthDashboard } from "./HealthDashboard";
+import { DevMessagesPanel } from "@/components/admin/DevMessagesPanel";
 import { getAuthHeaders } from "@/lib/utils";
 
 interface AuditLog {
@@ -118,6 +119,9 @@ export function SysAdminControlPanel() {
 
       {/* System Health & Telemetry Dashboard */}
       <HealthDashboard />
+
+      {/* Incoming developer messages (direct-to-dev channel from all users) */}
+      <DevMessagesPanel />
 
       {/* Governance Control Modules */}
       <GovernanceModules />
