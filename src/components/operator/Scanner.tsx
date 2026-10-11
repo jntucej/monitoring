@@ -2,22 +2,33 @@
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, X, RefreshCw, AlertTriangle, KeyRound, ScanLine, Volume2, VolumeX, Upload } from "lucide-react";
+import { Camera, X, RefreshCw, AlertTriangle, KeyRound, ScanLine, Volume2, VolumeX, Upload, QrCode } from "lucide-react";
 import { playAudioFeedback } from "@/lib/sound";
 import jsQR from "jsqr";
 import { SCANNABLE_FORMATS } from "@/lib/barcode";
 
-let globalUsableFormats: string[] | null = null;
-const getUsableFormats = async () => {
-  if (globalUsableFormats !== null) return globalUsableFormats;
+type ScanMode = "qr" | "barcode";
+type FormatScope = ScanMode | "all";
+
+// QR codes decode via jsQR (universal, no API support needed). Linear/2D
+// barcodes decode via the native BarcodeDetector API, restricted per tab so
+// each mode auto-detects exactly what it's meant to catch.
+const QR_FORMATS: string[] = ["qr_code"];
+const BARCODE_FORMATS: string[] = SCANNABLE_FORMATS.filter((f) => f !== "qr_code");
+
+const formatCache: Record<string, string[]> = {};
+const getUsableFormats = async (scope: FormatScope) => {
+  const wanted = scope === "qr" ? QR_FORMATS : scope === "barcode" ? BARCODE_FORMATS : [...SCANNABLE_FORMATS];
+  const key = wanted.join(",");
+  if (formatCache[key]) return formatCache[key];
   let detectorFormats: string[] = [];
   if (typeof window !== "undefined" && "BarcodeDetector" in window) {
     try {
       detectorFormats = await (window as any).BarcodeDetector.getSupportedFormats();
     } catch { detectorFormats = []; }
   }
-  globalUsableFormats = SCANNABLE_FORMATS.filter(f => detectorFormats.includes(f));
-  return globalUsableFormats;
+  formatCache[key] = wanted.filter((f) => detectorFormats.includes(f));
+  return formatCache[key];
 };
 
 interface ScannerModalProps {
@@ -45,7 +56,24 @@ export function Scanner({
   const [cameraState, setCameraState] = useState<"idle" | "requesting" | "active" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [mode, setMode] = useState<ScanMode>("qr");
+  const modeRef = useRef<ScanMode>("qr");
+  const [barcodeApiAvailable, setBarcodeApiAvailable] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Detect whether the phone's browser can auto-detect barcodes natively.
+  // QR is always auto-detectable via jsQR; 1D/2D barcodes need the native
+  // BarcodeDetector API (Chromium-based phones). Told to the user so they
+  // aren't staring at a live feed that never matches.
+  useEffect(() => {
+    setBarcodeApiAvailable(typeof window !== "undefined" && "BarcodeDetector" in window);
+  }, []);
+
+  const switchMode = useCallback((next: ScanMode) => {
+    setMode(next);
+    modeRef.current = next;
+    hasScannedRef.current = false;
+  }, []);
 
   const playBeep = useCallback(() => {
     if (!soundEnabled) return;
@@ -152,7 +180,7 @@ export function Scanner({
           
           // Browser BarcodeDetector fallback
     if ("BarcodeDetector" in window) {
-      getUsableFormats().then((usableFormats) => {
+      getUsableFormats("all").then((usableFormats) => {
         if (usableFormats.length === 0) return;
         try {
           const barcodeDetector = new (window as any).BarcodeDetector({ formats: [...usableFormats] });
@@ -211,7 +239,12 @@ export function Scanner({
     const imageData = context.getImageData(0, 0, targetWidth, targetHeight);
 
     const decodeQR = typeof jsQR === "function" ? jsQR : (jsQR as any).default;
-    if (decodeQR) {
+    const activeMode = modeRef.current;
+
+    // QR tab: jsQR decodes QR codes universally (works even when the native
+    // BarcodeDetector API is absent). Barcode tab is handled by the native
+    // detector below, restricted to linear/2D formats so it won't match QR.
+    if (activeMode === "qr" && decodeQR) {
       try {
         const code = decodeQR(imageData.data, imageData.width, imageData.height, {
           inversionAttempts: "dontInvert",
@@ -226,9 +259,9 @@ export function Scanner({
       }
     }
 
-    // BarcodeDetector fallback
-    if ("BarcodeDetector" in window) {
-      getUsableFormats().then((usableFormats) => {
+    // Barcode tab: native detector auto-detecting 1D + 2D barcodes.
+    if (activeMode === "barcode" && "BarcodeDetector" in window) {
+      getUsableFormats("barcode").then((usableFormats) => {
         if (usableFormats.length === 0) return;
         try {
           const barcodeDetector = new (window as any).BarcodeDetector({ formats: [...usableFormats] });
@@ -399,14 +432,57 @@ export function Scanner({
             </div>
           </div>
 
+          {/* Mode tabs — QR vs Barcode, separate, both auto-detect from the phone camera */}
+          <div className="flex border-b border-slate-800 bg-slate-900/60">
+            <button
+              type="button"
+              onClick={() => switchMode("qr")}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs font-bold transition-colors ${
+                mode === "qr"
+                  ? "text-emerald-400 border-b-2 border-emerald-500 bg-emerald-500/5"
+                  : "text-slate-400 hover:text-white border-b-2 border-transparent"
+              }`}
+            >
+              <QrCode className="w-4 h-4" />
+              QR
+            </button>
+            <button
+              type="button"
+              onClick={() => switchMode("barcode")}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs font-bold transition-colors ${
+                mode === "barcode"
+                  ? "text-emerald-400 border-b-2 border-emerald-500 bg-emerald-500/5"
+                  : "text-slate-400 hover:text-white border-b-2 border-transparent"
+              }`}
+            >
+              <ScanLine className="w-4 h-4" />
+              Barcode
+            </button>
+          </div>
+
           {/* Camera viewfinder */}
           <div className="relative w-full h-[320px] sm:h-[400px] bg-black flex items-center justify-center overflow-hidden">
             <canvas ref={canvasRef} className="hidden" />
             <video ref={videoRef} className="w-full h-full object-cover" playsInline muted autoPlay />
 
+            {/* Barcode tab: warn when the phone's browser can't decode 1D/2D
+                natively so the operator knows live auto-detect won't match —
+                they can still use the QR tab or the image upload path. */}
+            {cameraState === "active" && mode === "barcode" && !barcodeApiAvailable && (
+              <div className="absolute top-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 text-[10px] font-semibold text-amber-300 bg-amber-950/80 border border-amber-500/40 rounded-full px-3 py-1.5 pointer-events-none">
+                <AlertTriangle className="w-3 h-3" />
+                <span>No native barcode decoder in this browser — try the QR tab or Upload below</span>
+              </div>
+            )}
+
             {cameraState === "active" && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                {/* Visual crosshairs box simplified/removed */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-3">
+                <div className="w-40 h-40 rounded-2xl border-2 border-emerald-400/70 shadow-[0_0_20px_rgba(52,211,153,0.35)]" />
+                <p className="text-[11px] font-semibold text-white/90 bg-slate-950/70 rounded-full px-3 py-1">
+                  {mode === "qr"
+                    ? "Point at a QR code — auto-detecting"
+                    : "Point at a barcode (1D/2D) — auto-detecting"}
+                </p>
               </div>
             )}
 

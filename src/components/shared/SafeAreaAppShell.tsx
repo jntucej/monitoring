@@ -38,6 +38,14 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
   // visual distinction and a tighter security surface.
   const isStandaloneSysadmin = pathname?.startsWith("/sysadmin") ?? false;
 
+  // The device-hardware fallback hint (live camera / optical scanner) is only
+  // relevant on routes that actually drive a camera scanner. It used to render
+  // on every page of every role; now it's gated to the hardware routes so it
+  // never clutters dashboards, admin, student or support views.
+  const isHardwareRoute =
+    pathname?.startsWith("/gate");
+  const showDeviceFallback = authenticated && !isStandaloneSysadmin && isHardwareRoute;
+
   // Initialize theme from localStorage on client-side mount
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -80,7 +88,7 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
                 : "flex-1 p-3 sm:p-5 md:p-6 pb-24 md:pb-6 max-w-7xl mx-auto w-full"
             }
           >
-            <GlassDeviceFallback />
+            {showDeviceFallback && <GlassDeviceFallback />}
             <AnimatePresence mode="wait">
               <motion.div
                 key={pathname || "page"}
