@@ -111,7 +111,7 @@ ALTER TABLE public.device_verification_settings
 DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM pg_tables WHERE schemaname='public' AND tablename='config_roles') THEN
-    INSERT INTO public.config_roles (role, description)
+    INSERT INTO public.config_roles (code, display_name)
     VALUES
       ('caretaker', 'Hostel Caretaker - level 1 hostel approval'),
       ('deputy_warden', 'Deputy Warden - level 2 hostel approval'),
@@ -120,7 +120,7 @@ BEGIN
       ('vice_principal', 'Vice Principal - level 4 exam/leave approval'),
       ('oie', 'Officer Incharge Examinations'),
       ('exam_branch', 'Exam Branch Administrator')
-    ON CONFLICT (role) DO NOTHING;
+    ON CONFLICT (code) DO NOTHING;
   END IF;
 END $$;
 
@@ -152,7 +152,7 @@ VALUES
   ('casual_leave', 'Casual Leave (CL)', 'staff_leave'),
   ('maternity_leave', 'Maternity / Paternity Leave', 'staff_leave'),
   ('earned_leave', 'Earned Leave (EL)', 'staff_leave')
-ON CONFLICT (code) DO NOTHING;
+ON CONFLICT (code, workflow_type) DO NOTHING;
 
 -- 11. Backward-compatible view for permission_requests
 DO $$
