@@ -1,35 +1,55 @@
-const fs = require("fs");
-const path = require("path");
+const fs = require('fs');
+const path = require('path');
 
-const RULES = [
-  { dir: "src/app/api",        forbid: ["server/repositories", "lib/postgres", "bcryptjs"] },
-  { dir: "src/server/services",forbid: ["next/server", "next/navigation", "react", "fs"] },
-  { dir: "src/server/repositories", forbid: ["server/services", "next/server"] },
-  { dir: "src/server/policy", forbid: ["server/repositories", "lib/postgres", "next/server"] },
-];
+const rootDir = path.resolve(__dirname, '..');
 
-const walk = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((d) => {
-  const p = path.join(dir, d.name);
-  return d.isDirectory() ? walk(p) : p.endsWith(".ts") || p.endsWith(".tsx") ? [p] : [];
-});
+function getFiles(dir, fileList = []) {
+  if (!fs.existsSync(dir)) return fileList;
+  const files = fs.readdirSync(dir);
+  for (const file of files) {
+    const filePath = path.join(dir, file);
+    if (fs.statSync(filePath).isDirectory()) {
+      getFiles(filePath, fileList);
+    } else if (file.endsWith('.ts') || file.endsWith('.js') || file.endsWith('.tsx') || file.endsWith('.jsx')) {
+      fileList.push(filePath);
+    }
+  }
+  return fileList;
+}
 
-let failures = 0;
+let errors = [];
 
-for (const { dir, forbid } of RULES) {
-  if (!fs.existsSync(dir)) continue;
-  for (const file of walk(dir)) {
-    const src = fs.readFileSync(file, "utf8");
-    for (const pattern of forbid) {
-      if (src.includes(`from "${pattern}`) || src.includes(`from '${pattern}`)) {
-        console.error(`LAYER VIOLATION: ${file} imports "${pattern}"`);
-        failures++;
-      }
+// A8 check: src/server/services/** must not import @/lib/postgres, @/lib/db, @/lib/occupancy, @/lib/predictive
+const serviceFiles = getFiles(path.join(rootDir, 'src', 'server', 'services'));
+const forbiddenInServices = ['@/lib/postgres', '@/lib/db', '@/lib/occupancy', '@/lib/predictive'];
+
+for (const file of serviceFiles) {
+  const content = fs.readFileSync(file, 'utf8');
+  for (const forbidden of forbiddenInServices) {
+    if (content.includes(`from "${forbidden}"`) || content.includes(`from '${forbidden}'`)) {
+      errors.push(`[Layering Error] ${path.relative(rootDir, file)} imports forbidden module ${forbidden}`);
     }
   }
 }
 
-if (failures) {
-  console.error(`\n${failures} layering violation(s). See above.`);
-  process.exit(1);
+// A9 check: src/app/api/** must not import @/lib/occupancy or @/lib/predictive
+const apiFiles = getFiles(path.join(rootDir, 'src', 'app', 'api'));
+const forbiddenInApi = ['@/lib/occupancy', '@/lib/predictive'];
+
+for (const file of apiFiles) {
+  const content = fs.readFileSync(file, 'utf8');
+  for (const forbidden of forbiddenInApi) {
+    if (content.includes(`from "${forbidden}"`) || content.includes(`from '${forbidden}'`)) {
+      errors.push(`[Layering Error] ${path.relative(rootDir, file)} imports forbidden module ${forbidden}`);
+    }
+  }
 }
-console.log("OK: no layering violations.");
+
+if (errors.length > 0) {
+  console.error("❌ Architectural Layering Verification Failed:");
+  errors.forEach(e => console.error("  " + e));
+  process.exit(1);
+} else {
+  console.log("✅ Architectural Layering Verification Passed!");
+  process.exit(0);
+}

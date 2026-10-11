@@ -18,8 +18,6 @@ const ALLOWED_APPROVER_ROLES: Role[] = [
   "faculty",
   "admin",
   "sysadmin",
-  "supervisor",
-  "staff",
 ];
 
 export default function ApproverLayout({

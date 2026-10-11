@@ -26,20 +26,6 @@ export const ROLES = {
   EXAM_BRANCH:     "exam_branch",
 } as const;
 
-/**
- * Authorization tiers used by withAuthorization() route wrappers.
- *
- * Never inline role arrays in route files — a single source of truth means a
- * future role addition (e.g. `vice_principal`) cannot accidentally receive
- * sysadmin-only surface just because a route forgot to be updated.
- */
-export const ADMIN_OR_SYSADMIN = ["admin", "sysadmin"] as const;
-export const SYSADMIN_ONLY     = ["sysadmin"]         as const;
-export const APPROVER_TIER     = ["principal", "vice_principal", "exam_branch",
-                                  "oie", "hostel_manager", "deputy_warden",
-                                  "caretaker", "warden", "hod"] as const;
-
-
 export type RoleKey = keyof typeof ROLES;
 export type Role    = (typeof ROLES)[RoleKey];
 
