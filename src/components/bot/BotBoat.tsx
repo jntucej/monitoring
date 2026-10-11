@@ -1,21 +1,34 @@
 "use client";
+import { memo } from "react";
 import { motion } from "framer-motion";
 
-export function BotBoat({ open, speaking }: { open: boolean; speaking?: boolean }) {
+type Phase = "idle" | "listening" | "thinking" | "speaking";
+
+export const BotBoat = memo(function BotBoat({
+  phase = "idle", size = 34,
+}: { phase?: Phase; size?: number }) {
+  const animate = (() => {
+    switch (phase) {
+      case "listening": return { y: [0, -2, 0], rotate: [-2, 2, -2] };
+      case "thinking":  return { y: [0, -3, 0, -2, 0], rotate: [-5, 5, -5] };
+      case "speaking":  return { y: [0, -4, 0, -3, 0], rotate: [-6, 6, -6] };
+      default:          return { y: [0, -2.5, 0], rotate: [-3, 3, -3] };
+    }
+  })();
+  const duration = phase === "thinking" ? 1.4 : phase === "speaking" ? 1.0 : 3.4;
+
   return (
     <motion.svg
-      width="34" height="34" viewBox="0 0 40 40" fill="none"
-      animate={{
-        y: speaking ? [0, -3, 0, -2, 0] : open ? 0 : [0, -2.5, 0],
-        rotate: speaking ? [-4, 4, -4] : open ? 0 : [-3, 3, -3],
-      }}
-      transition={{ duration: speaking ? 1.1 : 3.4, repeat: open || speaking ? Infinity : 0, ease: "easeInOut" }}
+      width={size} height={size} viewBox="0 0 40 40" fill="none"
+      animate={animate}
+      transition={{ duration, repeat: Infinity, ease: "easeInOut" }}
+      aria-hidden
     >
       <path d="M20 4 L20 24" stroke="white" strokeWidth="1.8" strokeLinecap="round" />
       <path d="M20 6 L32 21 L20 21 Z" fill="white" fillOpacity="0.95" />
       <path d="M19 10 L10 21 L19 21 Z" fill="white" fillOpacity="0.6" />
       <path d="M6 25 H34 L30 33 H10 Z" fill="white" fillOpacity="0.98" />
-      {speaking && (
+      {(phase === "speaking" || phase === "thinking") && (
         <>
           <motion.path
             d="M4 35 Q10 37 16 35 T28 35 T38 34"
@@ -33,4 +46,4 @@ export function BotBoat({ open, speaking }: { open: boolean; speaking?: boolean 
       )}
     </motion.svg>
   );
-}
+});

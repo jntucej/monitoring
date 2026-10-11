@@ -4,17 +4,13 @@ import type { BotLang } from "@/lib/rag/config";
 import { LANGS } from "@/lib/rag/config";
 
 interface SR extends EventTarget {
-  lang: string;
-  continuous: boolean;
-  interimResults: boolean;
-  maxAlternatives: number;
-  start(): void;
-  stop(): void;
-  abort(): void;
+  lang: string; continuous: boolean; interimResults: boolean; maxAlternatives: number;
+  start(): void; stop(): void; abort(): void;
   onresult: ((e: any) => void) | null;
   onerror: ((e: any) => void) | null;
   onend: (() => void) | null;
   onstart: (() => void) | null;
+  onaudiostart: (() => void) | null;
 }
 
 function getCtor(): (new () => SR) | null {
@@ -28,20 +24,34 @@ export interface UseSpeechRecognitionOpts {
   onFinal?: (transcript: string) => void;
   onPartial?: (transcript: string) => void;
   silenceMs?: number;
+  maxDurationMs?: number;
 }
 
-export function useSpeechRecognition({ lang, onFinal, onPartial, silenceMs = 1300 }: UseSpeechRecognitionOpts) {
+export function useSpeechRecognition({
+  lang, onFinal, onPartial, silenceMs = 1400, maxDurationMs = 30_000,
+}: UseSpeechRecognitionOpts) {
   const supported = typeof window !== "undefined" && !!getCtor();
   const [listening, setListening] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [interim, setInterim] = useState("");
+
   const recRef = useRef<SR | null>(null);
   const finalRef = useRef("");
-  const silenceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const silenceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hardTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onFinalRef = useRef(onFinal);
+  const onPartialRef = useRef(onPartial);
+  useEffect(() => { onFinalRef.current = onFinal; }, [onFinal]);
+  useEffect(() => { onPartialRef.current = onPartial; }, [onPartial]);
 
-  const clearSilence = () => { if (silenceRef.current) { clearTimeout(silenceRef.current); silenceRef.current = null; } };
+  const clearTimers = useCallback(() => {
+    if (silenceTimer.current) { clearTimeout(silenceTimer.current); silenceTimer.current = null; }
+    if (hardTimer.current) { clearTimeout(hardTimer.current); hardTimer.current = null; }
+  }, []);
+
   const armSilence = useCallback(() => {
-    clearSilence();
-    silenceRef.current = setTimeout(() => {
+    if (silenceTimer.current) clearTimeout(silenceTimer.current);
+    silenceTimer.current = setTimeout(() => {
       try { recRef.current?.stop(); } catch {}
     }, silenceMs);
   }, [silenceMs]);
@@ -49,7 +59,9 @@ export function useSpeechRecognition({ lang, onFinal, onPartial, silenceMs = 130
   const start = useCallback(() => {
     const Ctor = getCtor();
     if (!Ctor) { setError("unsupported"); return; }
-    if (recRef.current) { try { recRef.current.abort(); } catch {} }
+
+    try { recRef.current?.abort(); } catch {}
+    clearTimers();
 
     const rec = new Ctor();
     rec.lang = LANGS[lang].stt;
@@ -58,42 +70,62 @@ export function useSpeechRecognition({ lang, onFinal, onPartial, silenceMs = 130
     rec.maxAlternatives = 1;
 
     finalRef.current = "";
+    setInterim("");
+    setError(null);
 
-    rec.onstart = () => { setError(null); setListening(true); armSilence(); };
+    rec.onstart = () => setListening(true);
+
     rec.onresult = (e: any) => {
       armSilence();
-      let interim = "";
+      let interimText = "";
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const r = e.results[i];
         if (r.isFinal) finalRef.current += r[0].transcript;
-        else interim += r[0].transcript;
+        else interimText += r[0].transcript;
       }
-      const shown = (finalRef.current + " " + interim).trim();
-      onPartial?.(shown);
+      const shown = interimText.trim();
+      setInterim(shown);
+      onPartialRef.current?.(shown);
     };
+
     rec.onerror = (e: any) => {
-      if (e?.error && e.error !== "no-speech" && e.error !== "aborted") setError(e.error);
+      const err = e?.error;
+      if (err === "no-speech" || err === "aborted") return;
+      if (err === "not-allowed" || err === "service-not-allowed") {
+        setError("permission"); return;
+      }
+      setError(err || "error");
     };
+
     rec.onend = () => {
-      clearSilence();
+      clearTimers();
       setListening(false);
       const text = finalRef.current.trim();
-      if (text) onFinal?.(text);
+      setInterim("");
+      if (text) onFinalRef.current?.(text);
     };
 
     recRef.current = rec;
-    try { rec.start(); } catch {}
-  }, [lang, onFinal, onPartial, armSilence]);
+    try {
+      rec.start();
+      hardTimer.current = setTimeout(() => {
+        try { recRef.current?.stop(); } catch {}
+      }, maxDurationMs);
+    } catch {
+      setError("start-failed");
+      setListening(false);
+    }
+  }, [lang, armSilence, clearTimers, maxDurationMs]);
 
   const stop = useCallback(() => {
-    clearSilence();
+    clearTimers();
     try { recRef.current?.stop(); } catch {}
-  }, []);
+  }, [clearTimers]);
 
   useEffect(() => () => {
-    clearSilence();
+    clearTimers();
     try { recRef.current?.abort(); } catch {}
-  }, []);
+  }, [clearTimers]);
 
-  return { supported, listening, error, start, stop };
+  return { supported, listening, error, interim, start, stop };
 }
