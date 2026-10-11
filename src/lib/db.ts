@@ -114,6 +114,7 @@ export function mPerson(r: any): Person {
     uniqueId,
     fullName,
     personType,
+    course: r.student_details?.course || r.course || undefined,
     department: (() => {
       const deptCodeMap: Record<string, string> = {
         "01": "CIVIL",
