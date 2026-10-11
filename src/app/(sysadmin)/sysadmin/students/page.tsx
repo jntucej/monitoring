@@ -273,12 +273,12 @@ export default function SysAdminStudentsPage() {
     return Array.from(set).sort();
   }, [students]);
 
-  // ponytail: newest 5 by createdAt — needs /api/students to return createdAt
+  // ponytail: newest 4 by createdAt (capped so the panel doesn't flood)
   const recentStudents = useMemo(() => {
     return [...students]
       .filter((s) => s.createdAt)
       .sort((a, b) => (a.createdAt! < b.createdAt! ? 1 : -1))
-      .slice(0, 5);
+      .slice(0, 4);
   }, [students]);
 
 
