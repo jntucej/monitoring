@@ -50,6 +50,8 @@ export async function generateQrToken(
     .sign(getSigningKey());
 }
 
+const inMemoryNonces = new Set<string>();
+
 export async function validateQrToken(token: string): Promise<QrTokenClaims | null> {
   try {
     const { payload } = await jwtVerify(token, getSigningKey(), {
@@ -69,14 +71,22 @@ export async function validateQrToken(token: string): Promise<QrTokenClaims | nu
     const expTime = payload.exp ? new Date(payload.exp * 1000) : new Date(Date.now() + 300_000);
 
     // Atomically burn nonce to prevent replay
-    const { rowCount } = await query(
-      `INSERT INTO public.scan_nonces (jti, expires_at) VALUES ($1, $2) ON CONFLICT (jti) DO NOTHING`,
-      [payload.jti, expTime]
-    );
+    try {
+      const { rowCount } = await query(
+        `INSERT INTO public.scan_nonces (jti, expires_at) VALUES ($1, $2) ON CONFLICT (jti) DO NOTHING`,
+        [payload.jti, expTime]
+      );
 
-    if (rowCount === 0) {
-      console.warn('[qr-token] Replay detected for jti:', payload.jti);
-      return null;
+      if (rowCount === 0) {
+        console.warn('[qr-token] Replay detected for jti:', payload.jti);
+        return null;
+      }
+    } catch (dbErr) {
+      if (inMemoryNonces.has(payload.jti)) {
+        console.warn('[qr-token] Replay detected for jti (in-memory):', payload.jti);
+        return null;
+      }
+      inMemoryNonces.add(payload.jti);
     }
 
     return payload as QrTokenClaims;
