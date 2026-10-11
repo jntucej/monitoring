@@ -123,7 +123,7 @@ export function mPerson(r: any): Person {
         "05": "CSE",
         "12": "IT"
       };
-      const rawDept = r.department || r.department_id || r.employee_details?.department_id || undefined;
+      const rawDept = r.department || r.department_id || r.employee_details?.department_id || r.student_details?.course || undefined;
       if (!rawDept) return undefined;
       const deptCode = deptCodeMap[rawDept] || rawDept;
       const deptObj = DEPARTMENTS.find(d => d.code === deptCode || d.name === deptCode);
@@ -211,7 +211,7 @@ function mScan(r: any): Scan {
       "05": "CSE",
       "12": "IT"
     };
-    const rawDept = user?.department || user?.department_id || r.department || undefined;
+    const rawDept = user?.department || user?.department_id || r.department || user?.student_details?.course || undefined;
     if (!rawDept) return undefined;
     const deptCode = deptCodeMap[rawDept] || rawDept;
     const deptObj = DEPARTMENTS.find(d => d.code === deptCode || d.name === deptCode);

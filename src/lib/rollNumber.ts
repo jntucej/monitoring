@@ -317,14 +317,15 @@ export function getStudentYearFromRoll(roll: string | null | undefined, now: Dat
 }
 
 /**
- * Compute the batch label (e.g. "2024-25" / "2024") from a roll number's
- * admission year, following the academic-year convention.
+ * Compute the batch label from a roll number's admission year, using the
+ * Indian academic-year convention. A 2024 admission (24JJ...) belongs to
+ * academic year 2024-25, so the batch label is "2024-25".
  */
 export function getBatchFromRoll(roll: string | null | undefined): string | null {
   const decoded = parseRollNumber(roll);
   if (!decoded) return null;
-  // Batch = admission year (the year they enrolled).
-  return String(decoded.admissionYear);
+  // Batch = admission academic year (AY 2024-25 for a 2024 join).
+  return `${decoded.admissionYear}-${String(decoded.admissionYear + 1).slice(-2)}`;
 }
 
 /**
