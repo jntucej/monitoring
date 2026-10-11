@@ -134,7 +134,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
   gateId: null,
   _scanGeneration: 0,
 
-  startScan: async (roll) => {
+  startScan: async (roll: string) => {
     const cleanRoll = roll.trim().toUpperCase();
     if (!cleanRoll) return;
 
@@ -231,13 +231,13 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
     }
   },
 
-  setDirection: (direction) => {
+  setDirection: (direction: ScanDirection) => {
     const { currentStudent } = get();
     if (!currentStudent) return;
     set({ selectedDirection: direction, selectedReason: null });
   },
 
-  setReason: (reason) => {
+  setReason: (reason: ExitReason | null) => {
     set({ selectedReason: reason, state: "confirming" });
   },
 
@@ -246,7 +246,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
   // Clears only the error field, leaving other state intact
   clearError: () => set({ error: null }),
 
-  confirmScan: async (addToast, overrideDirection, overrideReason) => {
+  confirmScan: async (addToast: (toast: Omit<ToastData, "id">) => void, overrideDirection?: ScanDirection, overrideReason?: string) => {
     const { currentStudent } = get();
     if (!currentStudent) return;
 
@@ -449,7 +449,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
     }
   },
 
-  setGate: async (gateId) => {
+  setGate: async (gateId: string) => {
     if (!gateId) {
       set({ gate: null, gateId: null });
       return;
