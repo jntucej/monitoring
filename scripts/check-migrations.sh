@@ -61,16 +61,16 @@ done
 
 # 3. Setup mock Supabase roles & auth schema
 docker exec "$CONTAINER_NAME" psql -U postgres -v ON_ERROR_STOP=1 -c "
-DO \$\$
+DO \\$\$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'admin') THEN CREATE ROLE admin; END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN CREATE ROLE authenticated; END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN CREATE ROLE service_role; END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN CREATE ROLE anon; END IF;
-END \$\$;
+END \\$\$;
 
 CREATE SCHEMA IF NOT EXISTS auth;
-CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid AS \$\$ SELECT null::uuid; \$\$ LANGUAGE sql;
+CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid AS \\$\$ SELECT null::uuid; \\$\$ LANGUAGE sql;
 " >/dev/null
 
 # 4. Load baseline schema if present
@@ -101,7 +101,7 @@ for fname in "${SORTED_NAMES[@]}"; do
   
   ver="${fname%%_*}"
   docker exec "$CONTAINER_NAME" psql -U postgres -v ON_ERROR_STOP=1 -c \
-    "INSERT INTO schema_migrations (version, filename, checksum) VALUES ('$ver', '$fname', 'replayed');" >/dev/null
+    "INSERT INTO schema_migrations (version, filename, checksum) VALUES ('$ver', '$fname', 'replayed') ON CONFLICT (version) DO NOTHING;" >/dev/null
   APPLIED_COUNT=$((APPLIED_COUNT + 1))
 done
 
