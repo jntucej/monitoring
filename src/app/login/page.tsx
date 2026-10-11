@@ -17,21 +17,6 @@ export default function UnifiedLoginPage() {
             title="Login"
             subtitle="Enter your credentials or security PIN to access your dashboard."
           />
-
-          <Link
-            href="/study"
-            className="glass-card flex items-center justify-between gap-3 rounded-2xl px-5 py-3.5 group"
-          >
-            <span className="flex items-center gap-2.5">
-              <BookOpen className="w-4 h-4 text-[var(--action-primary)]" />
-              <span className="text-xs font-semibold text-[var(--text-secondary)]">
-                Study Portal — shared access for candidates
-              </span>
-            </span>
-            <span className="text-[11px] font-bold text-[var(--action-primary)] group-hover:translate-x-0.5 transition-transform">
-              Enter →
-            </span>
-          </Link>
         </div>
       </div>
     </Suspense>
