@@ -49,7 +49,6 @@ CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid AS \$\$ SELECT null::uuid; \$
 # 3. Load baseline schema in scratch
 if [ -f "database/schema.sql" ]; then
   docker exec -i "$SCRATCH_CONTAINER" psql -U postgres -v ON_ERROR_STOP=1 < "database/schema.sql" >/dev/null
-  docker exec "$SCRATCH_CONTAINER" psql -U postgres -c "DROP POLICY IF EXISTS \"service_role_all_pin_login_attempts\" ON pin_login_attempts;" >/dev/null 2>&1 || true
 fi
 
 # 4. Replay all migrations in scratch
