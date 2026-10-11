@@ -26,8 +26,8 @@ run_sql_var "SELECT id, unique_id, email, role, status,
      OR LOWER(login_identifier)=LOWER(:'login') OR LOWER(handle)=LOWER(:'login')
   LIMIT 1;"
 
-echo; echo "── 2. per-identifier lockout (pin_login_attempts) ──"
-run_sql_var "SELECT * FROM pin_login_attempts WHERE UPPER(identifier)=UPPER(:'login');"
+echo; echo "── 2. per-identifier lockout (login_attempts) ──"
+run_sql_var "SELECT * FROM login_attempts WHERE UPPER(identifier)=UPPER(:'login');"
 
 echo; echo "── 3. MFA posture (this shell's env) ──"
 echo "MFA_REQUIRED_FOR_ADMIN=${MFA_REQUIRED_FOR_ADMIN:-(unset)}"

@@ -26,6 +26,9 @@ CREATE TABLE IF NOT EXISTS gates (
   location   TEXT NOT NULL,
   type       TEXT NOT NULL DEFAULT 'main',
   is_active  BOOLEAN NOT NULL DEFAULT TRUE,
+  latitude   DOUBLE PRECISION,
+  longitude  DOUBLE PRECISION,
+  allowed_radius_meters INTEGER DEFAULT 200,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 -- 1.2 USERS (single unified identity; 1:1 with auth.users.id)
@@ -318,20 +321,30 @@ CREATE TABLE IF NOT EXISTS webauthn_credentials (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   last_used_at TIMESTAMPTZ
 );
-CREATE TABLE IF NOT EXISTS mobile_enrollment_codes (
-  id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id        UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  code_hash      TEXT NOT NULL,          -- bcrypt of the 8-char code
-  expires_at     TIMESTAMPTZ NOT NULL,
-  used_at        TIMESTAMPTZ,
-  used_device_id TEXT,
-  created_by     UUID REFERENCES users(id) ON DELETE SET NULL,
-  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+CREATE TABLE IF NOT EXISTS public.enrollment_codes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  code_hash TEXT NOT NULL,
+  purpose TEXT NOT NULL DEFAULT 'mobile' CHECK (purpose IN ('mobile', 'web_bootstrap', 'pin_reset', 'role_bootstrap')),
+  expires_at TIMESTAMPTZ NOT NULL,
+  used_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS idx_enroll_user_active
-  ON mobile_enrollment_codes (user_id, expires_at)
+  ON public.enrollment_codes (user_id, purpose, expires_at)
   WHERE used_at IS NULL;
+
+ALTER TABLE public.enrollment_codes ENABLE ROW LEVEL SECURITY;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'enrollment_codes' AND policyname = 'service_role_all_enrollment_codes'
+  ) THEN
+    CREATE POLICY "service_role_all_enrollment_codes" ON public.enrollment_codes FOR ALL TO service_role USING (true) WITH CHECK (true);
+  END IF;
+END $$;
 
 
 CREATE TABLE IF NOT EXISTS mfa_login_challenges (
@@ -952,12 +965,15 @@ CREATE INDEX IF NOT EXISTS idx_daily_stats_gate_date ON daily_stats(gate_id, dat
 -- SECTION 8: SEED DATA
 -- ============================================================================
 -- Gates are data-driven; no fixed gate-1/2/3 ids. Seed logical campus gates.
-INSERT INTO gates (gate_code, name, location, type, is_active) VALUES
-  ('MAIN',   'Main Campus Gate', 'Main Entrance',   'main',    TRUE),
-  ('HOSTEL', 'Hostel Gate 1',    'Boys Hostel Block A', 'hostel', TRUE)
+INSERT INTO gates (gate_code, name, location, type, is_active, latitude, longitude, allowed_radius_meters) VALUES
+  ('MAIN',   'Main Campus Gate', 'Main Entrance',   'main',    TRUE,  18.7950, 78.9300, 200),
+  ('HOSTEL', 'Hostel Gate 1',    'Boys Hostel Block A', 'hostel', TRUE,  18.7945, 78.9310, 200),
+  ('BACK',   'Back Gate',        'Back Campus Entry', 'back',   TRUE,  18.7960, 78.9290, 200)
 ON CONFLICT (gate_code) DO UPDATE
   SET name = EXCLUDED.name, location = EXCLUDED.location,
-      type = EXCLUDED.type, is_active = EXCLUDED.is_active;
+      type = EXCLUDED.type, is_active = EXCLUDED.is_active,
+      latitude = EXCLUDED.latitude, longitude = EXCLUDED.longitude,
+      allowed_radius_meters = EXCLUDED.allowed_radius_meters;
 -- ============================================================================
 -- SECTION 9: DOCUMENTATION COMMENTS
 -- ============================================================================
@@ -1036,28 +1052,28 @@ CREATE TABLE IF NOT EXISTS public.attendance_records (
 CREATE INDEX IF NOT EXISTS idx_attendance_records_date ON public.attendance_records(date);
 CREATE INDEX IF NOT EXISTS idx_attendance_dedupe ON public.attendance_records(dedupe_key);
 
--- ============================================================================
--- PIN LOGIN ATTEMPTS & LOCKOUT TABLE
--- ============================================================================
-CREATE TABLE IF NOT EXISTS public.pin_login_attempts (
+-- 4. Compatibility view students over users + student_details
+CREATE TABLE IF NOT EXISTS public.login_attempts (
   identifier TEXT PRIMARY KEY,
   failed_count INTEGER NOT NULL DEFAULT 0,
   locked_until TIMESTAMPTZ,
-  last_attempt_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  last_attempt_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  last_channel TEXT
 );
 
-CREATE INDEX IF NOT EXISTS idx_pin_login_attempts_locked
-  ON public.pin_login_attempts (locked_until)
-  WHERE locked_until IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_login_attempts_locked
+  ON public.login_attempts (locked_until) WHERE locked_until IS NOT NULL;
 
-ALTER TABLE public.pin_login_attempts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.login_attempts ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "service_role_all_pin_login_attempts"
-  ON public.pin_login_attempts
-  FOR ALL
-  TO service_role
-  USING (true)
-  WITH CHECK (true);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'login_attempts' AND policyname = 'service_role_all_login_attempts'
+  ) THEN
+    CREATE POLICY "service_role_all_login_attempts" ON public.login_attempts FOR ALL TO service_role USING (true) WITH CHECK (true);
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS public.config_college_info (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -1344,7 +1360,7 @@ SELECT id AS key, value, value AS data, updated_at
 FROM public.system_settings;
 
 CREATE TABLE IF NOT EXISTS public.password_reset_tokens (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id TEXT PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   token_hash VARCHAR(64) UNIQUE NOT NULL,
   expires_at TIMESTAMPTZ NOT NULL,

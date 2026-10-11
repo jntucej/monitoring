@@ -114,6 +114,7 @@ export function mPerson(r: any): Person {
     uniqueId,
     fullName,
     personType,
+    course: r.student_details?.course || r.course || undefined,
     department: (() => {
       const deptCodeMap: Record<string, string> = {
         "01": "CIVIL",
@@ -123,7 +124,7 @@ export function mPerson(r: any): Person {
         "05": "CSE",
         "12": "IT"
       };
-      const rawDept = r.department || r.department_id || r.employee_details?.department_id || undefined;
+      const rawDept = r.department || r.department_id || r.employee_details?.department_id || r.student_details?.course || undefined;
       if (!rawDept) return undefined;
       const deptCode = deptCodeMap[rawDept] || rawDept;
       const deptObj = DEPARTMENTS.find(d => d.code === deptCode || d.name === deptCode);
@@ -211,7 +212,7 @@ function mScan(r: any): Scan {
       "05": "CSE",
       "12": "IT"
     };
-    const rawDept = user?.department || user?.department_id || r.department || undefined;
+    const rawDept = user?.department || user?.department_id || r.department || user?.student_details?.course || undefined;
     if (!rawDept) return undefined;
     const deptCode = deptCodeMap[rawDept] || rawDept;
     const deptObj = DEPARTMENTS.find(d => d.code === deptCode || d.name === deptCode);
@@ -917,7 +918,9 @@ async function fetchByIds<T>(db: any, table: string, ids: string[]): Promise<any
 export async function findAllPersons(type?: PersonType): Promise<Person[]> {
   const db = getDbClient();
   let query = db.from('users').select('*').eq('status', 'ACTIVE');
-  // Removing hard role filter for debug
+  if (type) {
+    query = query.eq('role', type);
+  }
   const { data, error } = await query;
 
   if (error) {

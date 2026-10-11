@@ -78,66 +78,66 @@ export function DigitalIdCard() {
   const photoSrc = student.photo || "/avatar-placeholder.png";
 
   return (
-    <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-4 sm:p-8 flex flex-col items-center">
+    <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-3 sm:p-4 md:p-6 lg:p-8 flex flex-col items-center">
       {/* Student Photo */}
-      <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full mb-4 border-4 border-sky-500 overflow-hidden">
+      <div className="relative w-24 sm:w-28 md:w-28 lg:w-32 h-24 sm:h-28 md:h-28 lg:h-32 rounded-full mb-3 sm:mb-4 border-4 border-sky-500 overflow-hidden">
         <img src={photoSrc} alt={student.name} className="rounded-full w-full h-full object-cover" />
       </div>
 
       {/* Basic Info */}
-      <h2 className="text-xl sm:text-2xl font-bold text-center">{student.name}</h2>
-      <p className="text-[var(--text-secondary)] font-mono text-base sm:text-lg">{student.roll}</p>
+      <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-center">{student.name}</h2>
+      <p className="text-sm sm:text-base md:text-lg font-mono">{student.roll}</p>
 
       {decoded && (
-        <div className="mt-3 px-4 py-2 bg-[var(--bg-base)]/50 rounded-lg text-center">
+        <div className="mt-2 sm:mt-3 px-3 sm:px-4 py-1.5 sm:py-2 bg-[var(--bg-base)]/50 rounded-lg text-center">
           <p className="text-xs sm:text-sm font-medium text-[var(--text-primary)]">
             {decoded.departmentFullName}
           </p>
-          <p className="text-[10px] sm:text-xs text-[var(--text-muted)]">
+          <p className="text-[9px] sm:text-[10px] text-[var(--text-muted)]">
             {decoded.entryMode} • Batch {decoded.admissionYear}
           </p>
         </div>
       )}
 
       {/* Roll Number Breakdown */}
-      <div className="mt-6 w-full max-w-sm">
+      <div className="mt-4 sm:mt-6 w-full max-w-sm">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-[10px] sm:text-xs font-medium text-[var(--text-muted)] uppercase">Roll Number Breakdown</span>
+          <span className="text-[9px] sm:text-xs font-medium text-[var(--text-muted)] uppercase">Roll Number Breakdown</span>
         </div>
         <div className="grid grid-cols-5 gap-px bg-[var(--border)] rounded-lg overflow-hidden">
-          <div className="bg-[var(--bg-base)] p-1.5 sm:p-2 text-center">
-            <div className="text-[9px] sm:text-xs text-[var(--text-muted)]">Year</div>
-            <div className="font-mono text-xs sm:text-sm font-medium text-[var(--text-primary)]">{decoded?.yearCode ?? "—"}</div>
+          <div className="bg-[var(--bg-base)] p-1 sm:p-1.5 sm:p-2 text-center">
+            <div className="text-[8px] sm:text-[9px] text-[var(--text-muted)]">Year</div>
+            <div className="font-mono text-[8px] sm:text-xs sm:text-sm font-medium text-[var(--text-primary)]">{decoded?.yearCode ?? "—"}</div>
           </div>
-          <div className="bg-[var(--bg-base)] p-1.5 sm:p-2 text-center">
-            <div className="text-[9px] sm:text-xs text-[var(--text-muted)]">College</div>
-            <div className="font-mono text-xs sm:text-sm font-medium text-[var(--text-primary)]">{decoded?.collegeCode ?? "—"}</div>
+          <div className="bg-[var(--bg-base)] p-1 sm:p-1.5 sm:p-2 text-center">
+            <div className="text-[8px] sm:text-[9px] text-[var(--text-muted)]">College</div>
+            <div className="font-mono text-[8px] sm:text-xs sm:text-sm font-medium text-[var(--text-primary)]">{decoded?.collegeCode ?? "—"}</div>
           </div>
-          <div className="bg-[var(--bg-base)] p-1.5 sm:p-2 text-center">
-            <div className="text-[9px] sm:text-xs text-[var(--text-muted)]">Entry</div>
-            <div className="font-mono text-xs sm:text-sm font-medium text-[var(--text-primary)]">{decoded?.entryModeCode ?? "—"}</div>
+          <div className="bg-[var(--bg-base)] p-1 sm:p-1.5 sm:p-2 text-center">
+            <div className="text-[8px] sm:text-[9px] text-[var(--text-muted)]">Entry</div>
+            <div className="font-mono text-[8px] sm:text-xs sm:text-sm font-medium text-[var(--text-primary)]">{decoded?.entryModeCode ?? "—"}</div>
           </div>
-          <div className="bg-[var(--bg-base)] p-1.5 sm:p-2 text-center">
-            <div className="text-[9px] sm:text-xs text-[var(--text-muted)]">Dept</div>
-            <div className="font-mono text-xs sm:text-sm font-medium text-[var(--text-primary)]">{decoded?.departmentCode ?? "—"}</div>
+          <div className="bg-[var(--bg-base)] p-1 sm:p-1.5 sm:p-2 text-center">
+            <div className="text-[8px] sm:text-[9px] text-[var(--text-muted)]">Dept</div>
+            <div className="font-mono text-[8px] sm:text-xs sm:text-sm font-medium text-[var(--text-primary)]">{decoded?.departmentCode ?? "—"}</div>
           </div>
-          <div className="bg-[var(--bg-base)] p-1.5 sm:p-2 text-center">
-            <div className="text-[9px] sm:text-xs text-[var(--text-muted)]">Serial</div>
-            <div className="font-mono text-xs sm:text-sm font-medium text-[var(--text-primary)]">{decoded?.serial ?? "—"}</div>
+          <div className="bg-[var(--bg-base)] p-1 sm:p-1.5 sm:p-2 text-center">
+            <div className="text-[8px] sm:text-[9px] text-[var(--text-muted)]">Serial</div>
+            <div className="font-mono text-[8px] sm:text-xs sm:text-sm font-medium text-[var(--text-primary)]">{decoded?.serial ?? "—"}</div>
           </div>
         </div>
       </div>
 
       {/* Dynamic Anti-Screenshot QR Code */}
-      <div className="mt-6 p-4 bg-white rounded-2xl flex flex-col items-center shadow-lg relative">
-        <QRCode value={JSON.stringify({ roll: student.roll, ts: Math.floor(Date.now() / 30000) })} size={160} />
-        <div className="mt-2 text-[10px] font-bold text-slate-700 font-mono flex items-center gap-1.5 bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+      <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-white rounded-2xl flex flex-col items-center shadow-lg relative">
+        <QRCode value={JSON.stringify({ roll: student.roll, ts: Math.floor(Date.now() / 30000) })} size={140} />
+        <div className="mt-1.5 sm:mt-2 text-[9px] sm:text-[10px] font-bold text-slate-700 font-mono flex items-center gap-1 sm:gap-1.5 bg-slate-100 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-slate-200">
+          <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 animate-ping" />
           Anti-Screenshot Security Token • Refreshes in {countdown}s
         </div>
       </div>
-      <p className="mt-2 text-xs text-[var(--text-muted)] flex items-center gap-1">
-        <QrCode className="w-3.5 h-3.5 text-indigo-400" />
+      <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-[var(--text-muted)] flex items-center gap-1">
+        <QrCode className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-indigo-400" />
         Live Gate Verification Token
       </p>
     </div>

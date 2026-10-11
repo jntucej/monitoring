@@ -61,3 +61,5 @@ export async function invalidateAllUserSessions(userId: string): Promise<boolean
     return false;
   }
 }
+
+export default db;

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
+import { hash, compare, genSalt } from "@/server/lib/crypto";
 import { findPersonByUniqueId, getPersonHistory, addAudit } from "@/lib/db";
 import { generateMobileToken, validateMobileToken } from "@/lib/mobile-auth";
 import { withRateLimit, checkRateLimit } from "@/lib/rate-limit";
@@ -159,7 +159,7 @@ async function handlePost(
         return uniformFailure();
       }
 
-      const ok = await bcrypt.compare(String(code), row.code_hash);
+      const ok = await compare(String(code), row.code_hash);
       if (!ok) {
         return uniformFailure();
       }

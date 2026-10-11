@@ -4,10 +4,19 @@ const isDockerBuild = process.env.DOCKER_BUILD === 'true';
 const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
-  experimental: {
-    serverActions: { bodySizeLimit: '2mb' }
+  typescript: {
+    // Keep strict -- do NOT set to true, it hides real bugs.
+    ignoreBuildErrors: false,
   },
-  serverExternalPackages: ['pg'],
+  serverExternalPackages: ['bcryptjs', 'jose'],
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
+  },
+  images: {
+    unoptimized: true,
+  },
   async headers() {
     return [{
       source: '/(.*)',
@@ -38,4 +47,3 @@ const nextConfig = {
 };
 
 export default nextConfig;
-

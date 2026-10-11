@@ -112,20 +112,20 @@ export default function NavigationEditorPage() {
               <option value="guardian">Role: Guardian</option>
             </select>
             <button
-              onClick={() =>
-                setEditingItem({
-                  roleCode: selectedRole,
-                  groupLabel: "General",
-                  href: "",
-                  label: "",
-                  icon: "Link",
-                  order: navItems.length + 1,
-                })
-              }
-              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl text-xs flex items-center gap-2 transition"
-            >
-              <Plus className="w-4 h-4" /> Add Nav Item
-            </button>
+                          onClick={() =>
+                            setEditingItem({
+                              roleCode: selectedRole,
+                              groupLabel: "",
+                              href: "",
+                              label: "",
+                              icon: "Link",
+                              order: navItems.length + 1,
+                            })
+                          }
+                          className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl text-xs flex items-center gap-2 transition"
+                        >
+                          <Plus className="w-4 h-4" /> Add Nav Item
+                        </button>
           </div>
         </div>
 

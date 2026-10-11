@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { KeyRound } from "lucide-react";
 import { EnrollmentCodeModal } from "@/components/sysadmin/EnrollmentCodeModal";
@@ -27,6 +27,16 @@ interface StaffRecord {
   metadata?: Record<string, any>;
 }
 
+interface StaffStats {
+  total: number;
+  active: number;
+  suspended: number;
+  byGroup: Array<{ group: string; count: number; color: string; roles: Array<{ role: string; count: number }> }>;
+  byDepartment: Array<{ code: string; name: string; count: number }>;
+  byStaffCategory: Array<{ category: string; count: number }>;
+  byDesignation: Array<{ designation: string; count: number }>;
+}
+
 export default function SysAdminStaffPage() {
   const { addToast } = useUIStore();
   const [staffList, setStaffList] = useState<StaffRecord[]>([]);
@@ -34,6 +44,8 @@ export default function SysAdminStaffPage() {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [deptFilter, setDeptFilter] = useState("ALL");
+  const [stats, setStats] = useState<StaffStats | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingStaff, setEditingStaff] = useState<StaffRecord | null>(null);
   const [busy, setBusy] = useState(false);
@@ -67,6 +79,23 @@ export default function SysAdminStaffPage() {
 
   // Live toggle drives refetch; polls every 30s while Live.
   useLiveRefresh(loadStaff, { intervalMs: 30000 });
+
+  // Load the server-side staff statistics (role hierarchy / department /
+  // category / designation) for the infographic row.
+  const loadStats = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/staff/stats?role=${encodeURIComponent(roleFilter)}&dept=${encodeURIComponent(deptFilter)}&status=${encodeURIComponent(statusFilter)}`, {
+        headers: getAuthHeaders(),
+        cache: "no-store",
+      });
+      const json = await res.json();
+      if (res.ok && json.success) setStats(json.data as StaffStats);
+    } catch {
+      /* stats are non-critical; the table still renders */
+    }
+  }, [roleFilter, deptFilter, statusFilter]);
+
+  useEffect(() => { loadStats(); }, [loadStats]);
 
 
   const handleCreateStaff = async (e: React.FormEvent) => {
@@ -256,9 +285,79 @@ export default function SysAdminStaffPage() {
             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg px-3 py-2 text-xs text-[var(--text-secondary)]">
               <option value="ALL">All Status</option><option value="ACTIVE">Active</option><option value="SUSPENDED">Suspended</option>
             </select>
+            <select value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)} className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg px-3 py-2 text-xs text-[var(--text-secondary)]">
+              <option value="ALL">All Departments</option>
+              {(stats?.byDepartment ?? []).map((d) => <option key={d.code} value={d.code}>{d.name}</option>)}
+            </select>
           </div>
         </div>
 
+        {/* Infographics — staff hierarchy, department, category & designation */}
+        {stats && stats.total > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 flex flex-col justify-between">
+              <div className="text-xs text-[var(--text-muted)] font-semibold uppercase tracking-wider">Total Staff</div>
+              <div className="mt-2 text-3xl font-bold text-[var(--text-primary)]">{stats.total.toLocaleString()}</div>
+              <div className="mt-1 text-xs text-emerald-400">{stats.active.toLocaleString()} active ({stats.total ? Math.round((stats.active / stats.total) * 100) : 0}%)</div>
+            </div>
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 flex flex-col justify-between">
+              <div className="text-xs text-[var(--text-muted)] font-semibold uppercase tracking-wider">Role Groups</div>
+              <div className="mt-2 text-3xl font-bold text-emerald-400">{stats.byGroup.length}</div>
+              <div className="mt-1 text-xs text-[var(--text-muted)]">{stats.byGroup[0]?.group} leads ({stats.byGroup[0]?.count})</div>
+            </div>
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:col-span-2">
+              <div className="text-xs text-[var(--text-muted)] font-semibold uppercase tracking-wider mb-3">Role Hierarchy (grouped)</div>
+              <div className="space-y-2">
+                {stats.byGroup.map((g) => (
+                  <div key={g.group} className="flex items-center gap-2 text-xs">
+                    <div className="w-16 text-[var(--text-primary)] truncate text-right">{g.group}</div>
+                    <div className="flex-1 h-2 rounded-full bg-[var(--bg-elevated)] overflow-hidden">
+                      <div className={`h-full rounded-full ${g.color}`} style={{ width: `${stats.total ? (g.count / stats.total) * 100 : 0}%` }} />
+                    </div>
+                    <div className="w-10 text-[var(--text-muted)] text-right">{g.count}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
+              <div className="text-xs text-[var(--text-muted)] font-semibold uppercase tracking-wider mb-3">Department</div>
+              <div className="space-y-1.5 max-h-24 overflow-y-auto pr-1">
+                {stats.byDepartment.map((d) => (
+                  <div key={d.code} className="flex items-center gap-2 text-xs">
+                    <div className="flex-1 text-[var(--text-primary)] truncate">{d.name}</div>
+                    <div className="w-10 text-[var(--text-muted)] text-right">{d.count}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
+              <div className="text-xs text-[var(--text-muted)] font-semibold uppercase tracking-wider mb-3">Staff Category</div>
+              <div className="space-y-1.5 max-h-24 overflow-y-auto pr-1">
+                {stats.byStaffCategory.map((c) => (
+                  <div key={c.category} className="flex items-center gap-2 text-xs">
+                    <div className="flex-1 text-[var(--text-primary)] truncate">{c.category.replace(/_/g, " ")}</div>
+                    <div className="w-10 text-[var(--text-muted)] text-right">{c.count}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:col-span-2">
+              <div className="text-xs text-[var(--text-muted)] font-semibold uppercase tracking-wider mb-3">Top Designations</div>
+              <div className="flex items-end gap-2 h-16">
+                {(() => {
+                  const max = stats.byDesignation.reduce((m, d) => Math.max(m, d.count), 0);
+                  return stats.byDesignation.map((d) => (
+                    <div key={d.designation} className="flex-1 flex flex-col items-center gap-1" title={`${d.designation}: ${d.count}`}>
+                      <div className="text-[10px] text-[var(--text-muted)]">{d.count}</div>
+                      <div className="w-full rounded-t bg-sky-500" style={{ height: `${max ? Math.max(8, (d.count / max) * 48) : 0}px` }} />
+                      <div className="text-[10px] text-[var(--text-muted)] truncate max-w-full">{d.designation}</div>
+                    </div>
+                  ));
+                })()}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Table */}
         <div className="border border-[var(--border)] rounded-xl overflow-hidden bg-[var(--bg-surface)]">

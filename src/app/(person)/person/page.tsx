@@ -1,14 +1,15 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { PersonIdCard } from "@/components/person/PersonIdCard";
 import { ActivePasses } from "@/components/student/ActivePasses";
 import { RecentActivity } from "@/components/student/RecentActivity";
 import { UserProfileTab } from "@/components/shared/UserProfileTab";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { QrCode, FileCheck, Clock, User } from "lucide-react";
 
-export default function PersonDashboardPage() {
+function PersonDashboardInner() {
   const searchParams = useSearchParams();
   const currentTab = searchParams?.get("tab") || "idcard";
 
@@ -80,7 +81,19 @@ export default function PersonDashboardPage() {
 
       <main className="min-h-[50vh] flex flex-col justify-start">
         {renderActiveView()}
+        <div className="mt-6">
+          <DevContactStrip />
+        </div>
       </main>
     </div>
+
+  );
+}
+
+export default function PersonDashboardPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-sm text-[var(--text-muted)]">Loading…</div>}>
+      <PersonDashboardInner />
+    </Suspense>
   );
 }

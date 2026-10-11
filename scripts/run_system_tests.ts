@@ -236,6 +236,11 @@ async function runTests() {
 
   const verifiedQrRoll = await validateQrToken(qrToken);
   assert(verifiedQrRoll?.roll === "STU2024001", "D7a: Validate QR verification token");
+
+  // Replay check (Issue #51)
+  const replayQr = await validateQrToken(qrToken);
+  assert(replayQr === null, "D7d: validateQrToken rejects replayed QR token (single-use nonce replay protection)");
+
   const qrAsAccess = await verifyAccessToken(qrToken);
   assert(qrAsAccess === null, "D7b: verifyAccessToken rejects QR token");
 

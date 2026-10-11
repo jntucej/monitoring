@@ -1,16 +1,18 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { DigitalIdCard } from "@/components/student/DigitalIdCard";
+import { StudentDashboardWidgets } from "@/components/student/widgets";
 import { ActivePasses } from "@/components/student/ActivePasses";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { RecentActivity } from "@/components/student/RecentActivity";
 import { UserProfileTab } from "@/components/shared/UserProfileTab";
 import { QrCode, FileCheck, Clock, User, ShieldCheck, TrendingUp, AlertTriangle, Send, Calendar } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
 
-export default function StudentDashboardPage() {
+function StudentDashboardInner() {
   const searchParams = useSearchParams();
   const currentTab = searchParams?.get("tab") || "idcard";
 
@@ -162,6 +164,8 @@ export default function StudentDashboardPage() {
 
               <div className="p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] space-y-1">
                 <div className="flex items-center justify-between">
+
+
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]"><span className="sm:hidden">📄</span><span className="hidden sm:inline">📄 Active Passes</span></span>
                   <FileCheck className="w-4 h-4 text-[var(--action-warning)]" />
                 </div>
@@ -178,6 +182,12 @@ export default function StudentDashboardPage() {
                 <div className="text-[10px] text-[var(--action-info)] font-medium">Verified Server Log</div>
               </div>
             </div>
+
+            {/* Student Overview Widgets */}
+            <section aria-label="Student overview" className="mt-6">
+              <StudentDashboardWidgets />
+            </section>
+
 
             {/* Option A — Digital ID Card */}
             <div className="space-y-3">
@@ -214,7 +224,18 @@ export default function StudentDashboardPage() {
 
       <main className="min-h-[50vh] flex flex-col justify-start">
         {renderActiveView()}
+        <div className="mt-6">
+          <DevContactStrip />
+        </div>
       </main>
     </div>
+  );
+}
+
+export default function StudentDashboardPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-sm text-[var(--text-muted)]">Loading…</div>}>
+      <StudentDashboardInner />
+    </Suspense>
   );
 }

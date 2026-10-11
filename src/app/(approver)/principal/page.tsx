@@ -1,6 +1,7 @@
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PermissionList } from "@/components/approver/PermissionList";
 import { CampusStatusCards } from "@/components/admin/CampusStatusCards";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { ShieldCheck, AlertTriangle, Users, TrendingUp } from "lucide-react";
 
 export default function PrincipalDashboardPage() {
@@ -20,6 +21,9 @@ export default function PrincipalDashboardPage() {
           fetchUrl="/api/permissions?workflow_type=exam&stage=principal&status=PENDING"
           allowForward={false}
         />
+
+        {/* Contact the developer (all roles) */}
+        <DevContactStrip />
       </div>
     </AuthGuard>
   );

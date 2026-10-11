@@ -12,14 +12,16 @@ import type { AuthContext } from "@/lib/authContext";
 async function handleGet(_req: NextRequest, context: { auth: AuthContext }) {
   const supabase = getSupabaseServiceClient();
 
+  // NOTE: the shared Postgres query builder does not yet support embedded
+  // resource sub-selects (student_details / employee_details), so we fetch
+  // the base user row and the two detail tables separately and assemble
+  // here. This also avoids selecting the non-existent `account_status` column.
   const { data: user, error } = await supabase
     .from("users")
     .select(`
-      id, name, email, phone, role, status, account_status, unique_id,
+      id, name, email, phone, role, status, unique_id,
       photo_url, department_id, login_identifier,
-      two_factor_enabled, created_at,
-      student_details ( roll, year, section, batch, hostel_block, room_number, gender, student_type ),
-      employee_details ( employee_id, designation, department_id, staff_category )
+      two_factor_enabled, created_at
     `)
     .eq("id", context.auth.userId)
     .maybeSingle();
@@ -28,8 +30,21 @@ async function handleGet(_req: NextRequest, context: { auth: AuthContext }) {
     return NextResponse.json({ success: false, error: "Profile not found" }, { status: 404 });
   }
 
-  const rawStudent = (user as any).student_details;
-  const rawEmployee = (user as any).employee_details;
+  const [studentRes, employeeRes] = await Promise.all([
+    supabase
+      .from("student_details")
+      .select(`roll, year, section, batch, hostel_block, room_number, gender, student_type`)
+      .eq("user_id", context.auth.userId)
+      .maybeSingle(),
+    supabase
+      .from("employee_details")
+      .select(`employee_id, designation, department_id, staff_category`)
+      .eq("user_id", context.auth.userId)
+      .maybeSingle(),
+  ]);
+
+  const studentDetails = (studentRes && !studentRes.error ? studentRes.data : null) || null;
+  const employeeDetails = (employeeRes && !employeeRes.error ? employeeRes.data : null) || null;
 
   return NextResponse.json({
     success: true,
@@ -39,15 +54,15 @@ async function handleGet(_req: NextRequest, context: { auth: AuthContext }) {
       email: user.email,
       phone: user.phone,
       role: user.role,
-      status: user.status || (user as any).account_status || "ACTIVE",
+      status: user.status || "ACTIVE",
       uniqueId: user.unique_id,
       photoUrl: user.photo_url,
       departmentId: user.department_id,
       loginIdentifier: user.login_identifier,
       twoFactorEnabled: !!user.two_factor_enabled,
       createdAt: user.created_at,
-      studentDetails: Array.isArray(rawStudent) ? rawStudent[0] : rawStudent,
-      employeeDetails: Array.isArray(rawEmployee) ? rawEmployee[0] : rawEmployee,
+      studentDetails,
+      employeeDetails,
     },
   });
 }

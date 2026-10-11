@@ -18,7 +18,47 @@
  * ------------------------------------------------------------------ */
 
 export type CollegeCode = "JJ"; // JNTUH University College of Engineering Jagtial (UCEJ)
-export type EntryModeCode = "1A" | "5A"; // Regular B.Tech | Lateral Entry B.Tech
+export type EntryModeCode = "1A" | "5A"; // Regular B.Tech | Lateral Entry B.Tech / M.Tech
+
+export interface CourseType {
+  name: string;
+  shortName: string;
+  /** Total programme duration in years. */
+  durationYears: number;
+  /** Entry mode that admits students directly into the 2nd year. */
+  lateralEntryMode: EntryModeCode;
+}
+
+export const COURSE_TYPES: Record<string, CourseType> = {
+  "B.Tech": {
+    name: "B.Tech",
+    shortName: "B.Tech",
+    durationYears: 4,
+    lateralEntryMode: "5A",
+  },
+  "M.Tech": {
+    name: "M.Tech",
+    shortName: "M.Tech",
+    durationYears: 2,
+    lateralEntryMode: "5A",
+  },
+};
+
+/**
+ * Resolve the course type from a roll + optional course label. The COURSE
+ * column in the import sheet is authoritative when present; otherwise the
+ * roll's branch/entry codes only tell us the degree if we know the mapping.
+ */
+export function resolveCourseType(
+  courseLabel?: string | null,
+  entryModeCode?: EntryModeCode
+): CourseType {
+  const norm = (courseLabel || "").trim().toUpperCase();
+  if (norm === "M.TECH" || norm === "MTECH") return COURSE_TYPES["M.Tech"];
+  if (norm === "B.TECH" || norm === "BTECH") return COURSE_TYPES["B.Tech"];
+  // Fallback: B.Tech is the default programme at this college.
+  return COURSE_TYPES["B.Tech"];
+}
 export type RollDeptCode = "02" | "03" | "04" | "05" | "12"; // EEE | ME | ECE | CSE | IT
 
 export interface CollegeInfo {
@@ -264,24 +304,82 @@ export function getAdmissionYearFromRoll(roll: string | null | undefined): numbe
 }
 
 /**
- * Convenience: extract the student's year of study from a roll number.
+ * Compute the "today" reference date used for year-of-study calculation,
+ * using the Indian academic-year convention: a new academic year starts
+ * on July 1. So Jan–Jun of year Y belongs to academic year (Y-1)-Y, and
+ * Jul–Dec of year Y belongs to academic year Y-(Y+1).
  *
- * For a regular student (1A), year of study = current year - admission year + 1.
- * For lateral entry students (5A), the same formula applies but the
- * effective programme is 3 years.
- *
- * @param roll   - The raw roll number string.
- * @param now    - Optional override for "today" (defaults to `new Date()`).
- * @returns Year of study (1–4) or `null` if the roll is unparseable.
+ *   25-Jan-2027 -> academic year 2026-27
+ *   01-Jul-2027 -> academic year 2027-28
  */
-export function getStudentYearFromRoll(roll: string | null | undefined, now: Date = new Date()): number | null {
+export function currentAcademicYearStart(now: Date = new Date()): number {
+  // Academic year starts July 1: if month >= July (index 6), the running
+  // year is the start of the current AY; otherwise last year is.
+  return now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1;
+}
+
+/**
+ * Extract the student's year of study from a roll number, optionally
+ * constrained by the course type (B.Tech = 4 years, M.Tech = 2 years).
+ *
+ * Uses the Indian academic year (July 1 start). A regular B.Tech student
+ * (1A) admitted in 2024 (24JJ1A...) is in:
+ *   - 1st year during AY 2024-25 (Jul 2024 – Jun 2025)
+ *   - 2nd year during AY 2025-26 (Jul 2025 – Jun 2026)
+ *   - 3rd year during AY 2026-27 (Jul 2026 – Jun 2027)
+ *   - 4th year during AY 2027-28 (Jul 2027 – Jun 2028)
+ *
+ * A lateral-entry student (5A) joins directly into the 2nd year, so the
+ * same admission year puts them one year ahead of a regular student.
+ *
+ * For M.Tech the programme is 2 years: a 23JJ1A M.Tech regular is in 1st
+ * year until Jun 2024, then 2nd (final) year from Jul 2024 onward. A
+ * 23JJ5A M.Tech lateral (admitted mid-AY directly into 2nd year) is in
+ * their final year from Jul 2023 onward. Both cap at 2.
+ *
+ * @param roll - The raw roll number string.
+ * @param now  - Optional override for "today" (defaults to `new Date()`).
+ * @param courseType - Optional course-type code ("B.Tech" | "M.Tech") to
+ *   cap the computed year at the programme duration. Defaults to B.Tech (4).
+ * @returns Year of study (1–4 for B.Tech, 1–2 for M.Tech) or `null` if
+ *         the roll is unparseable.
+ */
+export function getStudentYearFromRoll(
+  roll: string | null | undefined,
+  now: Date = new Date(),
+  courseType?: string
+): number | null {
   const decoded = parseRollNumber(roll);
   if (!decoded) return null;
-  const currentYear = now.getFullYear();
+  const course = resolveCourseType(courseType, decoded.entryModeCode);
+  const cap = course.durationYears;
+  let yearsElapsed: number;
+  if (decoded.entryModeCode === "5A") {
+    // Lateral: admitted mid-AY, joined directly into 2nd year.
+    // 2026-27 spans AY 2025-26 -> 3rd year; 2027-28 -> 4th (cap).
+    yearsElapsed = Math.min(cap - 1, now.getFullYear() - decoded.admissionYear);
+  } else {
+    // Regular: 1st year spans Jul–Dec of the admission year. Jan–Jun of the
+    // tail belongs to the previous AY's end: 24JJ1A is 3rd year through
+    // Jun 2027, and 4th from Jul 2027 onward.
+    yearsElapsed = (now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1) - decoded.admissionYear;
+  }
   const baseYear = decoded.entryModeCode === "5A" ? 2 : 1;
-  const yearOfStudy = currentYear - decoded.admissionYear + baseYear;
-  if (yearOfStudy <= 0) return 1;
-  return Math.min(4, Math.max(1, yearOfStudy));
+  let yearOfStudy = yearsElapsed + baseYear;
+  if (yearOfStudy <= 0) yearOfStudy = 1;
+  return Math.min(cap, Math.max(1, yearOfStudy));
+}
+
+/**
+ * Compute the batch label from a roll number's admission year, using the
+ * Indian academic-year convention. A 2024 admission (24JJ...) belongs to
+ * academic year 2024-25, so the batch label is "2024-25".
+ */
+export function getBatchFromRoll(roll: string | null | undefined): string | null {
+  const decoded = parseRollNumber(roll);
+  if (!decoded) return null;
+  // Batch = admission academic year (AY 2024-25 for a 2024 join).
+  return `${decoded.admissionYear}-${String(decoded.admissionYear + 1).slice(-2)}`;
 }
 
 /**

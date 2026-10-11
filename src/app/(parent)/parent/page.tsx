@@ -1,6 +1,7 @@
 import { ChildStatus } from "@/components/parent/ChildStatus";
 import { ChildActivity } from "@/components/parent/ChildActivity";
 import { RequestPassForm } from "@/components/parent/RequestPassForm";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
 
 export default function ParentDashboardPage() {
   return (
@@ -19,6 +20,8 @@ export default function ParentDashboardPage() {
         <ChildActivity />
         <RequestPassForm />
       </div>
+
+      <DevContactStrip />
     </div>
   );
 }

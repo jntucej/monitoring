@@ -34,6 +34,13 @@ done
 
 echo "✓ Verified ${#SEEN_VERSIONS[@]} unique migration version prefixes"
 
+# 1b. Guard: only one migration may own audit_logs_action_known (count only executable ADD/DROP, not comments)
+AUDIT_ACTION_OWNERS=$(grep -l "ADD CONSTRAINT audit_logs_action_known\|DROP CONSTRAINT audit_logs_action_known" database/migrations/*.sql 2>/dev/null | wc -l)
+if [ "$AUDIT_ACTION_OWNERS" -gt 1 ]; then
+  echo "ERROR: Multiple migrations modify audit_logs_action_known ($AUDIT_ACTION_OWNERS found). Only one canonical migration allowed." >&2
+  exit 1
+fi
+
 # 2. Start scratch Postgres container
 CONTAINER_NAME="scratch_check_migs_$$"
 POSTGRES_IMAGE="${POSTGRES_TEST_IMAGE:-postgres:17}"
@@ -53,18 +60,29 @@ until docker exec "$CONTAINER_NAME" pg_isready -U postgres >/dev/null 2>&1; do
 done
 
 # 3. Setup mock Supabase roles & auth schema
-docker exec "$CONTAINER_NAME" psql -U postgres -v ON_ERROR_STOP=1 -c "
-DO \$\$
+docker exec -i "$CONTAINER_NAME" psql -U postgres -v ON_ERROR_STOP=1 <<'SQL'
+DO $$
 BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'admin') THEN CREATE ROLE admin; END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN CREATE ROLE authenticated; END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN CREATE ROLE service_role; END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN CREATE ROLE anon; END IF;
-END \$\$;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'admin') THEN
+    CREATE ROLE admin;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN
+    CREATE ROLE authenticated;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN
+    CREATE ROLE service_role;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
+    CREATE ROLE anon;
+  END IF;
+END
+$$;
 
 CREATE SCHEMA IF NOT EXISTS auth;
-CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid AS \$\$ SELECT null::uuid; \$\$ LANGUAGE sql;
-" >/dev/null
+CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid AS $$
+  SELECT null::uuid;
+$$ LANGUAGE sql;
+SQL
 
 # 4. Load baseline schema if present
 if [ -f "database/schema.sql" ]; then
@@ -94,7 +112,7 @@ for fname in "${SORTED_NAMES[@]}"; do
   
   ver="${fname%%_*}"
   docker exec "$CONTAINER_NAME" psql -U postgres -v ON_ERROR_STOP=1 -c \
-    "INSERT INTO schema_migrations (version, filename, checksum) VALUES ('$ver', '$fname', 'replayed');" >/dev/null
+    "INSERT INTO schema_migrations (version, filename, checksum) VALUES ('$ver', '$fname', 'replayed') ON CONFLICT (version) DO NOTHING;" >/dev/null
   APPLIED_COUNT=$((APPLIED_COUNT + 1))
 done
 

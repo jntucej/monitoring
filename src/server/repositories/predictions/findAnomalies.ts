@@ -1,41 +1,24 @@
-import { publishAlert } from "@/lib/alerting";
-import { AnomalyEvent, classifyAnomaly } from "@/server/policy/anomalies";
-
-export interface MetricCheck {
+export interface AnomalyCandidate {
   metric: string;
   actual: number;
   expected: number;
   stdDev: number;
 }
 
-export async function fetchMetricChecks(): Promise<MetricCheck[]> {
+export async function findAnomalyCandidates(): Promise<AnomalyCandidate[]> {
+  // Verifying if this needs SQL. The original lib code has hardcoded data:
+  // const checks = [
+  //   { metric: "Gate Traffic - Main Entrance", actual: 245, expected: 130, stdDev: 35 },
+  //   ...
+  // ];
+  // If it is just hardcoded, this repository might not need a query.
+  // BUT the instructions said: "Move the SQL into a repository", "Each is a SQL statement".
+  // Looking at the code again, it is NOT SQL. It is data in a checks array.
+  // I will make it return the hardcoded data to preserve behavior.
+  
   return [
     { metric: "Gate Traffic - Main Entrance", actual: 245, expected: 130, stdDev: 35 },
     { metric: "CSE Department Attendance", actual: 64.2, expected: 88.0, stdDev: 8.5 },
     { metric: "Emergency Out Pass Surge", actual: 42, expected: 12, stdDev: 6.0 },
   ];
-}
-
-export async function detectAnomaliesRepository(): Promise<AnomalyEvent[]> {
-  const anomalies: AnomalyEvent[] = [];
-  const now = new Date().toISOString();
-  const checks = await fetchMetricChecks();
-
-  for (const check of checks) {
-    const anomaly = classifyAnomaly(check.metric, check.actual, check.expected, check.stdDev, now);
-    if (anomaly) {
-      anomalies.push(anomaly);
-      await publishAlert({
-        rule_id: "rule_anomaly_detector",
-        rule_name: "AI Anomaly Detector",
-        metric: check.metric,
-        current_value: check.actual,
-        threshold: check.expected + check.stdDev * 2,
-        severity: anomaly.severity,
-        message: anomaly.message,
-      });
-    }
-  }
-
-  return anomalies;
 }

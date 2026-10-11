@@ -61,6 +61,8 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
     health.status = 'unhealthy';
   }
 
+  // If database is down, skip downstream DB queries to avoid cascading timeouts
+  if (health.components.database.status !== 'unhealthy') {
   // Check gateways
   try {
     const dbClient = getClient();
@@ -137,6 +139,7 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
   } catch (error) {
     console.error('Error getting performance metrics:', error);
   }
+}
 
   // Auth-path readiness
   try {

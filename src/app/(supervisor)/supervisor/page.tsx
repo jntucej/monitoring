@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   ShieldCheck,
@@ -28,6 +28,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { getAuthHeaders } from "@/lib/utils";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import type { GatePass, Alert } from "@/lib/types";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
 
 interface WardenStudent {
   id: string;
@@ -40,7 +41,7 @@ interface WardenStudent {
   checkedOutAt?: string;
 }
 
-export default function SupervisorDashboardPage() {
+function SupervisorDashboardInner() {
   const searchParams = useSearchParams();
   const initialTab = searchParams.get("tab") || "overview";
   const [activeTab, setActiveTab] = useState<string>(initialTab);
@@ -462,6 +463,8 @@ export default function SupervisorDashboardPage() {
       {/* Approvals Tab */}
       {activeTab === "approvals" && (
         <div className="space-y-4">
+
+
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <h2 className="text-lg font-bold text-[var(--text-primary)]">
               <span className="sm:hidden">📋</span><span className="hidden sm:inline">📋 Outpass Approvals</span>
@@ -545,7 +548,7 @@ export default function SupervisorDashboardPage() {
                   <List className="w-3.5 h-3.5" /> List
                 </button>
                 <button onClick={() => setRosterViewMode("heatmap")} className={`px-2 py-1 rounded-lg font-bold flex items-center gap-1 ${rosterViewMode === "heatmap" ? "bg-indigo-500 text-white" : "text-[var(--text-muted)]"}`}>
-                  <Grid className="w-3.5 h-3.5" /> Grid Map
+                  <Grid className="w-6 h-6 md:w-8 md:h-8" /> Grid Map
                 </button>
               </div>
               <input type="text" value={studentSearch} onChange={(e) => setStudentSearch(e.target.value)} placeholder="Search Ward..." className="px-3 py-1.5 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-xs text-[var(--text-primary)] flex-1 sm:w-48" />
@@ -631,7 +634,20 @@ export default function SupervisorDashboardPage() {
           </div>
         </div>
       )}
+
+      {/* Contact the developer (all roles) */}
+      <div className="space-y-4">
+        <DevContactStrip />
+      </div>
       </div>
     </div>
+  );
+}
+
+export default function SupervisorDashboardPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-sm text-[var(--text-muted)]">Loading…</div>}>
+      <SupervisorDashboardInner />
+    </Suspense>
   );
 }
