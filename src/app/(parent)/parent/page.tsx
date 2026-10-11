@@ -1,5 +1,6 @@
 import { ChildStatus } from "@/components/parent/ChildStatus";
 import { ChildActivity } from "@/components/parent/ChildActivity";
+import { ChildWeeklyActivity } from "@/components/parent/ChildWeeklyActivity";
 import { RequestPassForm } from "@/components/parent/RequestPassForm";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 
@@ -15,6 +16,9 @@ export default function ParentDashboardPage() {
       </div>
 
       <ChildStatus />
+
+      {/* Weekly infographics — only renders when a linked child has activity */}
+      <ChildWeeklyActivity />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ChildActivity />

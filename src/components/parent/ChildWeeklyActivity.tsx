@@ -14,6 +14,7 @@ interface DayBar {
 
 interface ChildDailyCounts {
   roll: string;
+  name: string;
   bars: DayBar[];
   totalIn: number;
   totalOut: number;
@@ -49,7 +50,7 @@ export function ChildWeeklyActivity() {
         });
         const json = await res.json();
         if (cancelled) return;
-        const kids: Array<{ roll?: string; uniqueId?: string }> = Array.isArray(json.data) ? json.data : [];
+        const kids: Array<{ roll?: string; uniqueId?: string; name?: string; fullName?: string }> = Array.isArray(json.data) ? json.data : [];
         if (kids.length === 0) {
           setDaily([]);
           setLoading(false);
@@ -101,7 +102,7 @@ export function ChildWeeklyActivity() {
               });
               const totalIn = bars.reduce((sum, b) => sum + b.inCount, 0);
               const totalOut = bars.reduce((sum, b) => sum + b.outCount, 0);
-              return { roll, bars, totalIn, totalOut };
+              return { roll, name: k.fullName || k.name || roll, bars, totalIn, totalOut };
             } catch {
               return null;
             }
@@ -145,7 +146,7 @@ export function ChildWeeklyActivity() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold flex items-center gap-2">
                 <BarChart3 className="w-4 h-4 text-emerald-500" />
-                7-Day Gate Activity
+                7-Day Gate Activity — {c.name}
               </h3>
               <div className="flex items-center gap-3 text-[11px] text-[var(--text-muted)]">
                 <span className="flex items-center gap-1">
@@ -161,7 +162,7 @@ export function ChildWeeklyActivity() {
               {c.bars.map((b) => {
                 const total = b.inCount + b.outCount;
                 return (
-                  <div className="flex-1 flex flex-col items-center gap-1">
+                  <div key={b.date} className="flex-1 flex flex-col items-center gap-1" title={`${b.date}: ${b.inCount} in / ${b.outCount} out`}>
                     <div className="text-[10px] text-[var(--text-muted)]">{total || ""}</div>
                     <div className="w-full flex flex-col justify-end" style={{ height: `${heightPct(total)}px` }}>
                       <div
