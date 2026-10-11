@@ -6,7 +6,7 @@ set -e
 
 COMPOSE_DIR="/opt/monitoring/compose"
 LOG_FILE="/opt/monitoring/logs/gate-watchdog.log"
-MIGRATIONS_DIR="$COMPOSE_DIR/supabase/migrations"
+MIGRATIONS_DIR="$COMPOSE_DIR/database/migrations"
 POSTGRES_CONTAINER="gate_postgres"
 DATABASE="gate_monitor"
 USER="postgres"
@@ -66,7 +66,7 @@ for f in "$MIGRATIONS_DIR"/*.sql; do
     applied=$(docker exec "$POSTGRES_CONTAINER" psql -U "$USER" -d "$DATABASE" -tAc "SELECT 1 FROM schema_migrations WHERE version='$ver';" 2>/dev/null)
     if [ "$applied" != "1" ]; then
         log "  Applying missed migration: $fname"
-        if docker exec -i "$POSTGRES_CONTAINER" psql -U "$USER" -d "$DATABASE" -v ON_ERROR_STOP=0 < "$f" 2>&1 | tee -a "$LOG_FILE"; then
+        if docker exec -i "$POSTGRES_CONTAINER" psql -U "$USER" -d "$DATABASE" -v ON_ERROR_STOP=1 < "$f" 2>&1 | tee -a "$LOG_FILE"; then
             docker exec "$POSTGRES_CONTAINER" psql -U "$USER" -d "$DATABASE" -c "INSERT INTO schema_migrations (version) VALUES ('$ver') ON CONFLICT DO NOTHING;" 2>/dev/null
         else
             log "  WARNING: Migration $fname had errors (non-fatal, may be idempotent)"
