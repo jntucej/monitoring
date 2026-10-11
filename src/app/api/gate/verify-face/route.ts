@@ -30,7 +30,7 @@ async function handlePost(req: NextRequest) {
     
     if (typeof livenessScore !== 'number' || livenessScore < MIN_LIVENESS_SCORE) {
       return NextResponse.json(
-        { success: false, error: { code: \"LOW_LIVENESS\", message: \"Face liveness check failed\" } },
+        { success: false, error: { code: "LOW_LIVENESS", message: "Face liveness check failed" } },
         { status: 403 }
       );
     }
