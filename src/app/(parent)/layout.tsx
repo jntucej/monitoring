@@ -8,7 +8,7 @@ export default function ParentLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthGuard allowedRoles={["parent", "admin", "sysadmin"]}>
+    <AuthGuard allowedRoles={["parent", "guardian", "admin", "sysadmin"]}>
       {children}
     </AuthGuard>
   );

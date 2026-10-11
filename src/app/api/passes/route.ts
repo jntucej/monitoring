@@ -45,7 +45,7 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
           );
         }
         roll = userRoll;
-      } else if (authRole === 'parent') {
+      } else if (authRole === 'parent' || authRole === 'guardian') {
         if (parentId && parentId !== authUserId) {
           return NextResponse.json(
             { success: false, error: { code: "FORBIDDEN", message: "You can only view your children's passes." } },
@@ -127,8 +127,8 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
           { status: 403 }
         );
       }
-    } else if (authRole === 'parent') {
-      // Parent can only create passes for their children
+    } else if (authRole === 'parent' || authRole === 'guardian') {
+      // Parent/guardian can only create passes for their children
       const children = await getParentChildren(authUserId);
       const childRolls = children.map((c: Student) => c.roll);
       if (!childRolls.includes(roll)) {
@@ -151,7 +151,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
       to,
       description,
       requestedById,
-      isParentRequest: authRole === 'parent',
+      isParentRequest: authRole === 'parent' || authRole === 'guardian',
     });
 
     if (!pass) {
@@ -176,11 +176,11 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ['admin', 'sysadmin', 'operator', 'parent', 'student', 'warden', 'supervisor'] }),
+  withAuthorization(handleGet, { requiredRole: ['admin', 'sysadmin', 'operator', 'parent', 'guardian', 'student', 'warden', 'supervisor'] }),
   { keyPrefix: 'passes_list', maxRequests: 100 }
 );
 
 export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ['student', 'parent', 'admin', 'sysadmin', 'operator'] }),
+  withAuthorization(handlePost, { requiredRole: ['student', 'parent', 'guardian', 'admin', 'sysadmin', 'operator'] }),
   { keyPrefix: 'passes_create', maxRequests: 10 }
 );
