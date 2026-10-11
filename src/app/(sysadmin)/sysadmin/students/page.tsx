@@ -7,7 +7,7 @@ import { EnrollmentCodeModal } from "@/components/sysadmin/EnrollmentCodeModal";
 import { UserRolesPanel } from "@/components/sysadmin/UserRolesPanel";
 import {
   GraduationCap, Search, RefreshCw, UserPlus, Edit, Trash2,
-  Ban, CheckCircle2, X, Upload, Phone, Mail, Home, SlidersHorizontal,
+  Ban, CheckCircle2, X, Upload, Phone, Mail, Home, SlidersHorizontal, Lock,
 } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
@@ -129,9 +129,7 @@ export default function SysAdminStudentsPage() {
           email: studentEmail, phone: createForm.phone || undefined,
           department: createForm.branch || undefined,
           departmentId: createForm.branch || undefined,
-          hostelRoom: createForm.hostelRoom || undefined,
-          isHosteller: createForm.isHosteller,
-          metadata: { ...parsedMeta, hostelRoom: createForm.hostelRoom, isHosteller: createForm.isHosteller },
+          metadata: parsedMeta,
         }),
       });
       const json = await res.json().catch(() => ({ success: false, error: { message: "Invalid server response." } }));
@@ -193,6 +191,30 @@ export default function SysAdminStudentsPage() {
     { value: "DISABLED",      label: "Disabled" },
     { value: "DEPROVISIONED", label: "Deprovisioned" },
   ] as const;
+
+  const handleResetPassword = async (s: StudentRecord) => {
+    const raw = window.prompt(`Reset password for ${s.name} (${s.roll || s.uniqueId})?\nEnter new password (min 6 chars), leave blank to cancel:`, "");
+    if (!raw || !raw.trim()) return;
+    if (raw.trim().length < 6) {
+      addToast({ variant: "error", title: "Too short", message: "Password must be at least 6 characters." });
+      return;
+    }
+    try {
+      const res = await fetch(`/api/users/${s.id}`, {
+        method: "PATCH",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ password: raw.trim() }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (res.ok) {
+        addToast({ variant: "success", title: "Password updated", message: `${s.name} can now log in with the new password. Kiosk PIN attempts have been cleared.` });
+      } else {
+        addToast({ variant: "error", title: "Error", message: json.error?.message || "Failed to reset password." });
+      }
+    } catch {
+      addToast({ variant: "error", title: "Error", message: "Network error resetting password." });
+    }
+  };
 
   const handleSetStatus = async (s: StudentRecord, newStatus: string) => {
     // Destructive transitions require a reason
@@ -646,6 +668,7 @@ export default function SysAdminStudentsPage() {
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <button onClick={() => setEnrollmentModalUser({ id: s.id, name: s.name })} className="p-1.5 rounded-lg hover:bg-slate-700 text-emerald-400" title="Enrollment Code"><KeyRound className="w-3.5 h-3.5" /></button>
+                          <button onClick={() => handleResetPassword(s)} className="p-1.5 rounded-lg hover:bg-slate-700 text-amber-400" title="Reset Password"><Lock className="w-3.5 h-3.5" /></button>
                           <button onClick={() => openEditModal(s)} className="p-1.5 rounded-lg hover:bg-slate-700 text-blue-400" title="Edit"><Edit className="w-3.5 h-3.5" /></button>
                           <button onClick={() => handleDeleteStudent(s)} className="p-1.5 rounded-lg hover:bg-slate-700 text-red-400" title="Delete"><Trash2 className="w-3.5 h-3.5" /></button>
                         </div>
@@ -696,20 +719,10 @@ export default function SysAdminStudentsPage() {
                     <input type="text" value={createForm.phone} onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })} className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs font-semibold text-slate-400 block mb-1">Branch</label>
-                    <input type="text" value={createForm.branch} onChange={(e) => setCreateForm({ ...createForm, branch: e.target.value })} className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-slate-400 block mb-1">Hostel Room</label>
-                    <input type="text" value={createForm.hostelRoom} onChange={(e) => setCreateForm({ ...createForm, hostelRoom: e.target.value })} className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
-                  </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-400 block mb-1">Branch (auto-detected from roll if blank)</label>
+                  <input type="text" value={createForm.branch} onChange={(e) => setCreateForm({ ...createForm, branch: e.target.value })} className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="Auto from roll" />
                 </div>
-                <label className="flex items-center gap-2 text-xs text-slate-300">
-                  <input type="checkbox" checked={createForm.isHosteller} onChange={(e) => setCreateForm({ ...createForm, isHosteller: e.target.checked })} className="rounded border-slate-600" />
-                  <Home className="w-3.5 h-3.5" /> Hosteller
-                </label>
                 <div>
                   <label className="text-xs font-semibold text-slate-400 block mb-1">Custom Metadata (JSON)</label>
                   <textarea rows={3} value={createForm.customMetaJson} onChange={(e) => setCreateForm({ ...createForm, customMetaJson: e.target.value })} className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs font-mono text-slate-200 focus:outline-none focus:border-emerald-500" />
