@@ -2,6 +2,9 @@
 
 import { useState, useMemo, useCallback } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { KeyRound } from "lucide-react";
+import { EnrollmentCodeModal } from "@/components/sysadmin/EnrollmentCodeModal";
+import { UserRolesPanel } from "@/components/sysadmin/UserRolesPanel";
 import {
   GraduationCap, Search, RefreshCw, UserPlus, Edit, Trash2,
   Ban, CheckCircle2, X, Upload, Phone, Mail, Home, SlidersHorizontal,
@@ -46,6 +49,7 @@ export default function SysAdminStudentsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingStudent, setEditingStudent] = useState<StudentRecord | null>(null);
   const [busy, setBusy] = useState(false);
+  const [enrollmentModalUser, setEnrollmentModalUser] = useState<{id: string, name: string} | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const [createForm, setCreateForm] = useState({
@@ -338,6 +342,7 @@ export default function SysAdminStudentsPage() {
                     <span className="font-semibold text-white">{s.name}</span>
                     <span className="ml-2 font-mono text-emerald-400">{s.roll || s.uniqueId}</span>
                   </div>
+                  <button onClick={() => setEnrollmentModalUser({ id: s.id, name: s.name })} className="p-1.5 rounded-lg hover:bg-slate-700 text-emerald-400" title={`Enrollment ${s.name}`}><KeyRound className="w-3.5 h-3.5" /></button>
                   <button onClick={() => openEditModal(s)} className="p-1.5 rounded-lg hover:bg-slate-700 text-blue-400" title={`Edit ${s.name}`}>
                     <Edit className="w-3.5 h-3.5" />
                   </button>
@@ -395,6 +400,7 @@ export default function SysAdminStudentsPage() {
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
+                          <button onClick={() => setEnrollmentModalUser({ id: s.id, name: s.name })} className="p-1.5 rounded-lg hover:bg-slate-700 text-emerald-400" title="Enrollment Code"><KeyRound className="w-3.5 h-3.5" /></button>
                           <button onClick={() => openEditModal(s)} className="p-1.5 rounded-lg hover:bg-slate-700 text-blue-400" title="Edit"><Edit className="w-3.5 h-3.5" /></button>
                           <button onClick={() => handleDeleteStudent(s)} className="p-1.5 rounded-lg hover:bg-slate-700 text-red-400" title="Delete"><Trash2 className="w-3.5 h-3.5" /></button>
                         </div>
@@ -409,7 +415,15 @@ export default function SysAdminStudentsPage() {
 
 
         {/* Create Modal */}
-        {showCreateModal && (
+        {enrollmentModalUser && (
+        <EnrollmentCodeModal
+          userId={enrollmentModalUser.id}
+          userName={enrollmentModalUser.name}
+          onClose={() => setEnrollmentModalUser(null)}
+        />
+      )}
+
+      {showCreateModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
             <div className="bg-[#0d1220] border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl">
               <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
@@ -474,6 +488,7 @@ export default function SysAdminStudentsPage() {
                 <button onClick={() => setEditingStudent(null)} className="p-1 rounded-lg hover:bg-slate-800 text-slate-400"><X className="w-5 h-5" /></button>
               </div>
               <form onSubmit={handleEditStudent} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
+              <UserRolesPanel userId={editingStudent.id} />
                 <div>
                   <label className="text-xs font-semibold text-slate-400 block mb-1">Full Name</label>
                   <input type="text" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />

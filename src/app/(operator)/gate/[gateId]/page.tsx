@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
+import { normalizeScannedPayload } from "@/lib/barcode";
 import { motion } from "framer-motion";
 import { RefreshCw, AlertCircle, Scan, KeyRound, UserCheck, LayoutDashboard, Clock, User as UserIcon, Mic, ShieldAlert } from "lucide-react";
 import { useOperatorStore } from "@/stores/operatorStore";
@@ -244,19 +245,13 @@ export default function OperatorPage() {
       addToast({ variant: "error", title: "Lockdown Active", message: "Scans are blocked during active campus lockdown." });
       return;
     }
-    let rollCandidate = scannedPayload.trim();
-    if (rollCandidate.startsWith("{")) {
-      try {
-        const parsed = JSON.parse(rollCandidate);
-        if (parsed.roll) rollCandidate = parsed.roll;
-        else if (parsed.student_roll) rollCandidate = parsed.student_roll;
-        else if (parsed.uniqueId) rollCandidate = parsed.uniqueId;
-      } catch {
-        // use raw
-      }
+    const rollCandidate = normalizeScannedPayload(scannedPayload);
+    if (!rollCandidate) {
+      addToast({ variant: "error", title: "Empty Scan", message: "No identifier found in the scanned code." });
+      return;
     }
     lastRollRef.current = rollCandidate;
-      startScan(rollCandidate);
+    startScan(rollCandidate);
   };
 
   const showWebAuthn = false;

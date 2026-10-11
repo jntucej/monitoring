@@ -171,6 +171,17 @@ export function createTcpLogFetcher(opts: {
 
         socket.on('timeout', () => {
           console.warn(`[log-fetcher] TCP 4370 connection to ${opts.host}:${opts.port} timed out after ${timeoutMs}ms.`);
+          if (process.env.NODE_ENV === 'production' && process.env.ALLOW_FAKE_DEVICE_LOGS !== 'true') {
+            throw new Error(`[log-fetcher] FATAL: TCP terminal ${opts.host}:${opts.port} unreachable and USE_FAKE_DEVICE_LOGS is disabled in production.`);
+          }
+          finish(process.env.USE_FAKE_DEVICE_LOGS === 'true' ? fakeTcpLogs() : []);
+        });
+
+        socket.on('error', (err) => {
+          console.error(`[log-fetcher] TCP 4370 connection error to ${opts.host}:${opts.port}:`, err.message);
+          if (process.env.NODE_ENV === 'production' && process.env.ALLOW_FAKE_DEVICE_LOGS !== 'true') {
+            throw new Error(`[log-fetcher] FATAL: TCP terminal ${opts.host}:${opts.port} error and USE_FAKE_DEVICE_LOGS is disabled in production: ${err.message}`);
+          }
           finish(process.env.USE_FAKE_DEVICE_LOGS === 'true' ? fakeTcpLogs() : []);
         });
 

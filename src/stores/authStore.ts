@@ -20,6 +20,7 @@ function toUser(raw: any): User {
     currentSessionToken: raw?.currentSessionToken ?? raw?.current_session_token,
     name: raw?.name ?? raw?.fullName ?? "",
     role: raw?.role as Role,
+    roles: raw?.roles ?? (raw?.role ? [raw.role] : []),
     gateId: raw?.gateId ?? raw?.gate_id,
     employeeId: raw?.employeeId ?? raw?.employee_id,
     email: raw?.email,
@@ -34,6 +35,11 @@ function toUser(raw: any): User {
   } as User;
 }
 
+interface MfaChallenge {
+  id: string;
+  expiresAt: string;
+}
+
 interface AuthState {
   user: User | null;
   token: string | null;
@@ -41,7 +47,7 @@ interface AuthState {
   role: Role | null;
   authenticated: boolean;
   loading: boolean;
-  mfaChallenge?: any;
+  mfaChallenge?: MfaChallenge | null;
   mfaPending?: boolean;
   enrollToken?: string | null;
   _hasHydrated: boolean;
@@ -51,17 +57,17 @@ interface AuthActions {
   login: (
     login: string,
     password: string,
-    mfa?: { challenge?: string; totpCode?: string }
+    mfa?: { challenge?: MfaChallenge; totpCode?: string }
   ) => Promise<{
     success: boolean;
     error?: string;
     code?: string;
     mfaRequired?: boolean;
-    mfaChallenge?: string;
+    mfaChallenge?: MfaChallenge;
     mfaEnrollmentRequired?: boolean;
     enrollToken?: string;
   }>;
-  pinLogin: (employeeId: string, pin: string, mfa?: { challenge?: string; totpCode?: string }) => Promise<{ success: boolean; error?: string; code?: string; mfaRequired?: boolean; mfaChallenge?: string; mfaEnrollmentRequired?: boolean; enrollToken?: string }>;
+  pinLogin: (employeeId: string, pin: string, mfa?: { challenge?: MfaChallenge; totpCode?: string }) => Promise<{ success: boolean; error?: string; code?: string; mfaRequired?: boolean; mfaChallenge?: MfaChallenge; mfaEnrollmentRequired?: boolean; enrollToken?: string }>;
   logout: () => Promise<void>;
   checkSession: () => Promise<boolean>;
   setRole: (role: Role) => void;

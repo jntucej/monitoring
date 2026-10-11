@@ -1,5 +1,7 @@
 import { SignJWT, jwtVerify, type JWTPayload } from 'jose';
 import { requireSecret } from '@/lib/env';
+import { randomUUID } from 'crypto';
+import { query } from '@/lib/postgres';
 
 let cachedKey: Uint8Array | null = null;
 let cachedKeySource = '';
@@ -24,6 +26,7 @@ export interface QrTokenClaims extends JWTPayload {
   sub: string;        // user id
   roll: string;
   purpose: 'qr_verification';
+  jti: string;
 }
 
 export async function generateQrToken(
@@ -32,12 +35,14 @@ export async function generateQrToken(
   ttlSeconds = 300,   // 5 minutes
 ): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
+  const jti = randomUUID();
   return new SignJWT({
     sub: userId,
     roll: roll.toUpperCase().trim(),
     purpose: 'qr_verification',
   })
     .setProtectedHeader({ alg: "HS256", kid: "qr-v1" })
+    .setJti(jti)
     .setIssuedAt(now)
     .setExpirationTime(now + ttlSeconds)
     .setIssuer('gate-monitor')
@@ -57,12 +62,25 @@ export async function validateQrToken(token: string): Promise<QrTokenClaims | nu
       console.warn('[qr-token] Wrong purpose:', payload.purpose);
       return null;
     }
-    if (typeof payload.sub !== 'string' || typeof payload.roll !== 'string') {
+    if (typeof payload.sub !== 'string' || typeof payload.roll !== 'string' || typeof payload.jti !== 'string') {
       return null;
     }
+
+    const expTime = payload.exp ? new Date(payload.exp * 1000) : new Date(Date.now() + 300_000);
+
+    // Atomically burn nonce to prevent replay
+    const { rowCount } = await query(
+      `INSERT INTO public.scan_nonces (jti, expires_at) VALUES ($1, $2) ON CONFLICT (jti) DO NOTHING`,
+      [payload.jti, expTime]
+    );
+
+    if (rowCount === 0) {
+      console.warn('[qr-token] Replay detected for jti:', payload.jti);
+      return null;
+    }
+
     return payload as QrTokenClaims;
   } catch (err) {
-    // Log class of failure without leaking the token
     const name = (err as Error).name;
     if (name === 'JWTExpired') console.warn('[qr-token] Expired token used');
     else if (name === 'JWSSignatureVerificationFailed') console.warn('[qr-token] Signature failed');

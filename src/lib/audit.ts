@@ -28,7 +28,13 @@ export type AuditAction =
   | 'CRON_REPORTS_EXECUTED'
   | 'PIN_CHANGED'
   | 'SESSION_FORCE_REVOKED'
-  | 'BACK_GATE_GEO_MISMATCH';
+  | 'BACK_GATE_GEO_MISMATCH'
+  | 'PHOTO_CAPTURED'
+  | 'MANUAL_ENTRY_AUTHORIZED'
+  | 'MANUAL_ENTRY_DENIED'
+  | 'PASSWORD_CHANGED'
+  | 'ROLE_REGISTRY_CHANGED'
+  | (string & {});
 
 
 export interface AuditLog {

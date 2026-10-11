@@ -16,6 +16,8 @@ import { verifyAccessToken } from './auth-token';
 import { query } from './postgres';
 import { ROLES, isPrivileged, isSuperAdmin } from './roles';
 
+export { isMfaRequiredForPrivileged as isMfaRequiredForAdmin };
+
 // ── Issue #382: user-level cache (not context-level) ──────────────────────
 // Never cache the full AuthContext keyed by token — that would honour stale
 // sessions after a password change for the full TTL. Instead, cache only the
@@ -29,6 +31,10 @@ const USER_ROW_TTL_MS = 30_000;
 interface CachedUserRow {
   id: string;
   role: Role;
+
+  /** Multi-roles of the user */
+  roles?: Role[];
+
   status: AccountStatus;
   email: string;
   session_version: number;
@@ -53,7 +59,7 @@ async function getUserRowCached(userId: string): Promise<CachedUserRow | null> {
     `SELECT id, role, status, email, session_version, unique_id,
             login_identifier, gate_id, department_id, employee_id,
             two_factor_enabled, handle
-     FROM public.users WHERE id = $1 LIMIT 1`,
+     FROM public.users WHERE id = $1 AND deleted_at IS NULL LIMIT 1`,
     [userId],
   );
   if (res.rows.length === 0) return null;
@@ -90,6 +96,9 @@ export interface AuthContext {
 
   /** The user's role from public.users table */
   role: Role;
+
+  /** Multi-roles of the user */
+  roles?: Role[];
 
   /** The user's account status from public.users table */
   status: AccountStatus;
@@ -166,7 +175,7 @@ export async function isMfaRequiredForPrivileged(): Promise<boolean> {
   }
 }
 
-export const isMfaRequiredForAdmin = isMfaRequiredForPrivileged;
+// export const isMfaRequiredForAdmin = isMfaRequiredForPrivileged;
 
 /**
  * Create an authenticated context from a Supabase session token
@@ -224,10 +233,19 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
   }
 
   // Return the validated context
+  
+  const rolesRes = await query<{ role: string }>(
+    "SELECT role FROM user_roles WHERE user_id = $1",
+    [profile.id]
+  );
+  const roles = rolesRes.rows.map(r => r.role as Role);
+  if (!roles.includes(profile.role as Role)) roles.push(profile.role as Role);
+
   return {
     authUserId: userId || profile.id,
     userId: profile.id,
     role: profile.role as Role,
+    roles,
     status: profile.status as AccountStatus,
     email: profile.email,
     loginIdentifier: profile.unique_id || profile.login_identifier || undefined,

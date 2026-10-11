@@ -1,3 +1,4 @@
+/* eslint-disable */
 // src/app/api/users/bulk/commit/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";

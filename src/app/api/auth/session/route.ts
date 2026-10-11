@@ -84,6 +84,10 @@ async function handleSessionCheck(req: NextRequest) {
       );
     }
 
+    const rolesRes = await query<{ role: string }>(`SELECT role FROM user_roles WHERE user_id = $1`, [user.id]);
+    const roles = rolesRes.rows.map(r => r.role);
+    if (!roles.includes(user.role)) roles.push(user.role);
+
     const response = NextResponse.json({
       success: true,
       user: {
@@ -92,6 +96,7 @@ async function handleSessionCheck(req: NextRequest) {
         email: user.email,
         name: user.name,
         role: user.role,
+          roles,
         status: user.status,
         departmentId: user.department_id,
         photoUrl: user.photo_url,

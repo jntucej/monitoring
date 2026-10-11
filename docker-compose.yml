@@ -10,7 +10,7 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-gate_monitor}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ci_dummy_postgres_password_123}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -29,11 +29,11 @@ services:
     env_file:
       - path: .env
         required: false
-    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:-ci_dummy_redis_password_123}"]
     volumes:
       - redisdata:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-ci_dummy_redis_password_123}", "ping"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -53,6 +53,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
+      - NEXT_TELEMETRY_DISABLED=1
       - DATABASE_URL=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-gate_monitor}
       - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
       - MONITORING_PROM_URL=${MONITORING_PROM_URL:-}
@@ -69,6 +70,13 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/.next/cache
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
     networks:
       - gate-net
 
@@ -87,7 +95,6 @@ services:
       - NODE_ENV=production
       - DATABASE_URL=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-gate_monitor}
       - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
-      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
     depends_on:
       postgres:
         condition: service_healthy
@@ -98,6 +105,12 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
     networks:
       - gate-net
 

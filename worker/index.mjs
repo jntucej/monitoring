@@ -18,6 +18,11 @@ const HEALTH_STATE = {
 
 const healthServer = http.createServer((req, res) => {
   if (req.url === '/health') {
+    res.writeHead(200);
+    res.end('ok');
+    return;
+  }
+  if (req.url === '/status') {
     const age = Date.now() - HEALTH_STATE.lastJobAt;
     const stale = age > 60 * 60_000;
     res.writeHead(stale ? 503 : 200, { 'Content-Type': 'application/json' });
@@ -64,6 +69,19 @@ cron.schedule('0 2 * * *', async () => {
     HEALTH_STATE.jobsProcessed++;
   } catch (err) {
     console.error('[Worker] backfill_daily_stats failed:', err);
+  }
+});
+
+cron.schedule('*/30 * * * *', async () => {
+  console.log('[Worker] Running scheduled job: dispatch_notifications');
+  try {
+    const job = await import('./jobs/dispatch_notifications.js');
+    if (job.default) await job.default();
+    HEALTH_STATE.lastJobAt = Date.now();
+    HEALTH_STATE.lastJobName = 'dispatch_notifications';
+    HEALTH_STATE.jobsProcessed++;
+  } catch (err) {
+    console.error('[Worker] dispatch_notifications failed:', err);
   }
 });
 

@@ -16,10 +16,7 @@ async function handleGet() {
       supabase.from("gate_holidays").select("*").order("date", { ascending: true }),
     ]);
 
-    const rules = resRules.data || [
-      { id: "rule-default-main", gate_id: "ALL", rule_name: "Standard Campus Operating Hours", days_of_week: [1,2,3,4,5,6], start_time: "06:00", end_time: "22:00", action: "allow", priority: 1, is_active: true },
-      { id: "rule-night-curfew", gate_id: "ALL", rule_name: "Night Curfew Restricted Access", days_of_week: [0,1,2,3,4,5,6], start_time: "22:01", end_time: "05:59", action: "restrict", priority: 2, is_active: true },
-    ];
+    const rules = resRules.data || [];
 
     return NextResponse.json({
       success: true,

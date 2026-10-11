@@ -2,11 +2,7 @@ import type { Pool, PoolClient, QueryResult, QueryResultRow } from "pg";
 
 /**
  * PostgreSQL Connection Pool for Self-Hosted Architecture.
- * Provides singleton pool lifecycle, parameterized query helpers,
- * transaction execution with contextual auth (app.current_user_id),
- * and query builder compatibility.
  */
-
 let poolInstance: Pool | null = null;
 let pgModule: any = null;
 
@@ -40,6 +36,7 @@ export async function getPostgresPool(): Promise<Pool> {
       connectionTimeoutMillis: 5000,
       statement_timeout: 30000,
       query_timeout: 30000,
+      idle_in_transaction_session_timeout: 10000,
       ssl:
         process.env.PG_SSL === "true"
           ? { rejectUnauthorized: process.env.PG_SSL_REJECT_UNAUTHORIZED !== "false" }
@@ -60,21 +57,15 @@ export async function getPostgresPool(): Promise<Pool> {
 }
 
 /**
- * Execute a parameterized query with automatic client management.
+ * Execute a parameterized query using a fast pool connection (no audit context).
  */
-export async function query<T extends QueryResultRow = any>(
+export async function poolQuery<T extends QueryResultRow = any>(
   text: string,
   params: any[] = []
 ): Promise<QueryResult<T>> {
   const pool = await getPostgresPool();
-  const start = Date.now();
   try {
-    const result = await pool.query<T>(text, params);
-    const duration = Date.now() - start;
-    if (process.env.DEBUG_SQL === "true") {
-      console.log(`[SQL Query] (${duration}ms) ${text} -- params:`, params);
-    }
-    return result;
+    return await pool.query<T>(text, params);
   } catch (err: any) {
     console.error(`[SQL Error] Query: ${text} | Params:`, params, "| Error:", err.message);
     throw err;
@@ -82,9 +73,31 @@ export async function query<T extends QueryResultRow = any>(
 }
 
 /**
+ * Execute a parameterized query with established user context for RLS.
+ * Manages its own connection to ensure GUC isolation.
+ */
+export async function query<T extends QueryResultRow = any>(
+  text: string,
+  params: any[] = [],
+  options?: { currentUserId?: string }
+): Promise<QueryResult<T>> {
+  const pool = await getPostgresPool();
+  const client = await pool.connect();
+  try {
+    if (options?.currentUserId) {
+      await client.query("SELECT set_config('app.current_user_id', $1, false)", [options.currentUserId]);
+    }
+    return await client.query<T>(text, params);
+  } catch (err: any) {
+    console.error(`[SQL Error] Query: ${text} | Params:`, params, "| Error:", err.message);
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+/**
  * Execute a unit of work within a database transaction.
- * Automatically handles BEGIN, COMMIT, and ROLLBACK.
- * Optionally sets app.current_user_id for audit logs and trigger compatibility.
  */
 export async function withTransaction<T>(
   callback: (client: PoolClient) => Promise<T>,
@@ -181,10 +194,15 @@ export class PostgresQueryBuilder<T = any> {
 
     let clean = columns
       .replace(/[a-zA-Z0-9_]+:[a-zA-Z0-9_!]+\([^)]*(?:\([^)]*\))*[^)]*\)/g, "")
-      .replace(/[a-zA-Z0-9_!]+\([^)]*(?:\([^)]*\))*[^)]*\)/g, "")
+      .replace(/,\s*\(\s*\*\s*\)\s*,/g, ",")
+      .replace(/,\s*\(\s*\*\s*\)$/g, "")
+      .replace(/[a-zA-Z0-9_]+\(\s*\*\s*\)/g, "")
       .replace(/,\s*,+/g, ",")
       .trim()
-      .replace(/^,+|,+$/g, "")
+      .replace(/^,\s*/g, "")
+      .replace(/\s*,\s*\)\s*$/, "")
+      .replace(/,\s*$/, "")
+      .replace(/,\s*$/, "")
       .trim();
 
     this.selectColumns = clean.length > 0 ? clean : "*";
@@ -203,7 +221,8 @@ export class PostgresQueryBuilder<T = any> {
         if (depth === 0) {
           const prefix = cols.slice(0, i);
           const lastComma = prefix.lastIndexOf(',');
-          header = prefix.slice(lastComma + 1).trim();
+          header = prefix.slice(lastComma + 1).replace(/,\s*$/, "")
+      .trim();
           currentRelStart = i + 1;
         }
         depth++;
@@ -217,12 +236,15 @@ export class PostgresQueryBuilder<T = any> {
           
           if (header.includes(':')) {
             const parts = header.split(':');
-            alias = parts[0].trim();
-            targetTable = parts[1].trim();
+            alias = parts[0].replace(/,\s*$/, "")
+      .trim();
+            targetTable = parts[1].replace(/,\s*$/, "")
+      .trim();
           }
           if (targetTable.includes('!')) {
             const parts = targetTable.split('!');
-            targetTable = parts[0].trim();
+            targetTable = parts[0].replace(/,\s*$/, "")
+      .trim();
             if (parts.some(p => p.toLowerCase() === 'inner')) {
               isInner = true;
             }
@@ -398,7 +420,8 @@ export class PostgresQueryBuilder<T = any> {
         const parts = token.match(/^([a-zA-Z0-9_.]+)\s*(=|!=|>|<|>=|<=|ILIKE|LIKE|IS)\s*(.+)$/i);
         if (parts) {
           const [, colRef, op, val] = parts;
-          let cleanVal: any = val.trim();
+          let cleanVal: any = val.replace(/,\s*$/, "")
+      .trim();
           if (cleanVal.startsWith('"') && cleanVal.endsWith('"')) cleanVal = cleanVal.slice(1, -1);
           else if (cleanVal.startsWith("'") && cleanVal.endsWith("'")) cleanVal = cleanVal.slice(1, -1);
           if (op.toUpperCase() === "IS") {
@@ -533,7 +556,8 @@ export class PostgresQueryBuilder<T = any> {
     for (const rel of this.embeddedRelations) {
       relationSubqueries.push(buildRelationSubquery(rel, this.tableName));
     }
-    const cleanBase = baseCols.replace(/,+$/, "").trim();
+    const cleanBase = baseCols.replace(/,+$/, "").replace(/,\s*$/, "")
+      .trim();
     return cleanBase;
   }
 
@@ -674,15 +698,21 @@ export class PostgresQueryBuilder<T = any> {
 }
 
 export const authAdmin = {
-  async createUser(attributes: { email: string; password?: string; user_metadata?: Record<string, any>; app_metadata?: Record<string, any>; email_confirm?: boolean; phone?: string; role?: string; }) {
+  async createUser(attributes: { email: string; password?: string; user_metadata?: Record<string, any> | null; app_metadata?: Record<string, any> | null; email_confirm?: boolean; phone?: string; role?: string; [key: string]: unknown; }) {
+    const safeAttributes = {
+      ...attributes,
+      user_metadata: attributes.user_metadata ?? {},
+      app_metadata: attributes.app_metadata ?? {},
+    };
     const crypto = await import("crypto");
     const bcrypt = await import("bcryptjs");
     const id = crypto.randomUUID();
-    const email = attributes.email.toLowerCase().trim();
-    const name = attributes.user_metadata?.name || attributes.user_metadata?.full_name || email.split("@")[0];
-    const role = attributes.role || attributes.user_metadata?.role || "student";
-    const passwordHash = attributes.password ? await bcrypt.hash(attributes.password, 10) : null;
-    const uniqueId = attributes.user_metadata?.unique_id || email.split("@")[0].toUpperCase();
+    const email = safeAttributes.email.toLowerCase().replace(/,\s*$/, "")
+      .trim();
+    const name = safeAttributes.user_metadata?.name || safeAttributes.user_metadata?.full_name || email.split("@")[0];
+    const role = safeAttributes.role || safeAttributes.user_metadata?.role || "student";
+    const passwordHash = safeAttributes.password ? await bcrypt.hash(safeAttributes.password, 10) : null;
+    const uniqueId = safeAttributes.user_metadata?.unique_id || email.split("@")[0].toUpperCase();
     const handle = (uniqueId || name || `user_${id.replace(/-/g, "").slice(0, 8)}`).toLowerCase().replace(/[^a-z0-9_]/g, "_");
     try {
       const res = await query(
@@ -697,13 +727,13 @@ export const authAdmin = {
         [id, uniqueId, handle, email, name, role, passwordHash]
       );
       const user = res.rows[0] || { id, email, name, role, handle, unique_id: uniqueId };
-      return { data: { user: { id: user.id, email: user.email, user_metadata: { ...attributes.user_metadata, name: user.name, role: user.role, handle: user.handle } } }, error: null };
+      return { data: { user: { id: user.id, email: user.email, user_metadata: { ...safeAttributes.user_metadata, name: user.name, role: user.role, handle: user.handle } } }, error: null };
     } catch (err: any) {
       return { data: null, error: { message: err.message, code: err.code } };
     }
   },
   async deleteUser(userId: string) {
-    try { await query("DELETE FROM users WHERE id = $1", [userId]); return { data: null, error: null }; } catch (err: any) { return { data: null, error: { message: err.message, code: err.code } }; }
+    try { await query("UPDATE users SET deleted_at = NOW() WHERE id = $1", [userId]); return { data: null, error: null }; } catch (err: any) { return { data: null, error: { message: err.message, code: err.code } }; }
   },
   async updateUserById(userId: string, attributes: { password?: string; email?: string; user_metadata?: Record<string, any>; app_metadata?: Record<string, any>; }) {
     try {

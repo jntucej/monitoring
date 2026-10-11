@@ -23,6 +23,9 @@ echo "==> 2. Copying Compose & Configuration files..."
 mkdir -p "${BASE_DIR}/compose" "${BASE_DIR}/config"
 cp docker-compose.yml "${BASE_DIR}/compose/docker-compose.yml"
 cp Caddyfile "${BASE_DIR}/compose/Caddyfile"
+if [ -f Dockerfile ]; then
+  cp Dockerfile "${BASE_DIR}/compose/Dockerfile"
+fi
 if [ -d database ]; then
   cp -r database "${BASE_DIR}/compose/"
 fi

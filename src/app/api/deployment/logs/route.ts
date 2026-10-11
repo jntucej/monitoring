@@ -23,13 +23,13 @@ async function handleGet(req: NextRequest, _context: { auth: AuthContext }) {
     );
   }
 
-  const resolved = resolve(path);
+  const resolved = resolve(/* turbopackIgnore: true */ path);
   if (!resolved.startsWith("/var/log/")) {
     return NextResponse.json({ success: false, error: { code: "BAD_REQUEST", message: "Invalid log path" } }, { status: 400 });
   }
 
   try {
-    const content = await fs.readFile(resolved, "utf-8");
+    const content = await fs.readFile(/* turbopackIgnore: true */ resolved, "utf-8");
     const lines = content.split("\n");
     const tail = lines.slice(-200);
     return NextResponse.json({ success: true, data: { log: logKey, lines: tail, total: lines.length } });

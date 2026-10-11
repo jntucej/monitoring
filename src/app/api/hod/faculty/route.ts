@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDbClient } from "@/lib/db";
+import { getSupabaseServiceClient as getDbClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 
@@ -15,10 +15,11 @@ async function handleGet(req: NextRequest, context: { auth: any }) {
     if (!isAdmin) {
       if (!callerDeptId) {
         return NextResponse.json(
-          { success: false, error: "Department not configured for caller." },
+          { success: false, error: "Department scope missing for non-admin caller." },
           { status: 403 }
         );
       }
+      // Force strict scoping to caller's department
       departmentId = callerDeptId;
     }
 
@@ -44,6 +45,6 @@ async function handleGet(req: NextRequest, context: { auth: any }) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "faculty"] }),
+  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "faculty", "hod"] }),
   { keyPrefix: "hod_faculty", maxRequests: 30 }
 );

@@ -5,6 +5,20 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Camera, X, RefreshCw, AlertTriangle, KeyRound, ScanLine, Volume2, VolumeX, Upload } from "lucide-react";
 import { playAudioFeedback } from "@/lib/sound";
 import jsQR from "jsqr";
+import { SCANNABLE_FORMATS } from "@/lib/barcode";
+
+let globalUsableFormats: string[] | null = null;
+const getUsableFormats = async () => {
+  if (globalUsableFormats !== null) return globalUsableFormats;
+  let detectorFormats: string[] = [];
+  if (typeof window !== "undefined" && "BarcodeDetector" in window) {
+    try {
+      detectorFormats = await (window as any).BarcodeDetector.getSupportedFormats();
+    } catch { detectorFormats = []; }
+  }
+  globalUsableFormats = SCANNABLE_FORMATS.filter(f => detectorFormats.includes(f));
+  return globalUsableFormats;
+};
 
 interface ScannerModalProps {
   isOpen: boolean;
@@ -137,27 +151,33 @@ export function Scanner({
           }
           
           // Browser BarcodeDetector fallback
-          if ("BarcodeDetector" in window) {
-            // @ts-expect-error - Web API BarcodeDetector
-            const barcodeDetector = new window.BarcodeDetector({ formats: ["qr_code"] });
-            barcodeDetector
-              .detect(canvas)
-              .then((barcodes: Array<{ rawValue: string }>) => {
-                if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
-                  playBeep();
-                  stopCamera();
-                  onScan(barcodes[0].rawValue.trim());
-                  onClose();
-                } else {
-                  alert("Could not detect any QR code in the uploaded image. Please try a clearer picture.");
-                }
-              })
-              .catch(() => {
-                alert("Could not detect any QR code in the uploaded image. Please try a clearer picture.");
-              });
-          } else {
-            alert("Could not decode QR code from the uploaded image. Please make sure the QR code is centered and clear.");
-          }
+    if ("BarcodeDetector" in window) {
+      getUsableFormats().then((usableFormats) => {
+        if (usableFormats.length === 0) return;
+        try {
+          const barcodeDetector = new (window as any).BarcodeDetector({ formats: [...usableFormats] });
+          barcodeDetector
+            .detect(canvas)
+            .then((barcodes: Array<{ rawValue: string }>) => {
+              if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
+                playBeep();
+                stopCamera();
+                onScan(barcodes[0].rawValue.trim());
+                onClose();
+              } else {
+                alert("Could not detect any QR/Barcode in the uploaded image. Please try a clearer picture.");
+              }
+            })
+            .catch(() => {
+              alert("Could not detect any QR/Barcode in the uploaded image. Please try a clearer picture.");
+            });
+        } catch {
+          // fallback
+        }
+      });
+    } else {
+      alert("Could not decode code from the uploaded image. Please make sure it is centered and clear.");
+    }
         }
       };
       img.src = e.target?.result as string;
@@ -208,20 +228,22 @@ export function Scanner({
 
     // BarcodeDetector fallback
     if ("BarcodeDetector" in window) {
-      try {
-        // @ts-expect-error - Web API BarcodeDetector
-        const barcodeDetector = new window.BarcodeDetector({ formats: ["qr_code"] });
-        barcodeDetector
-          .detect(canvas)
-          .then((barcodes: Array<{ rawValue: string }>) => {
-            if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
-              handleSuccessScan(barcodes[0].rawValue);
-            }
-          })
-          .catch(() => {});
-      } catch {
-        // Fallback catch
-      }
+      getUsableFormats().then((usableFormats) => {
+        if (usableFormats.length === 0) return;
+        try {
+          const barcodeDetector = new (window as any).BarcodeDetector({ formats: [...usableFormats] });
+          barcodeDetector
+            .detect(canvas)
+            .then((barcodes: Array<{ rawValue: string }>) => {
+              if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
+                handleSuccessScan(barcodes[0].rawValue);
+              }
+            })
+            .catch(() => {});
+        } catch {
+          // Fallback catch
+        }
+      });
     }
   }, [handleSuccessScan]);
 

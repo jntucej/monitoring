@@ -39,7 +39,7 @@ async function handlePost(req: NextRequest, context: { auth: AuthContext }) {
 
   // Invalidate any outstanding codes for this user
   await service
-    .from("mobile_enrollment_codes")
+    .from("enrollment_codes")
     .update({ used_at: new Date().toISOString() })
     .eq("user_id", userId)
     .is("used_at", null);
@@ -51,7 +51,7 @@ async function handlePost(req: NextRequest, context: { auth: AuthContext }) {
   const actorId = context?.auth?.userId || req.headers.get("x-user-id") || null;
   const actorRole = (context?.auth?.role || req.headers.get("x-user-role") || "admin") as Role;
 
-  const { error } = await service.from("mobile_enrollment_codes").insert({
+  const { error } = await service.from("enrollment_codes").insert({
     user_id: userId,
     code_hash,
     expires_at,

@@ -1175,7 +1175,7 @@ export async function findAllGates(): Promise<Gate[]> {
 
 export async function findAllUsers(): Promise<User[]> {
   const client = getDbClient();
-  const { data, error } = await client.from('users').select('*, employee_details(*)');
+  const { data, error } = await client.from('users').select('*');
   if (error || !data) return [];
   return data.map(mUser);
 }
@@ -1251,16 +1251,24 @@ export async function createUser(userData: {
   }
 
   // Insert/upsert auxiliary employee_details if applicable
-  if (userData.employeeId || userData.isHod || ['faculty', 'staff', 'worker', 'operator', 'admin', 'sysadmin'].includes(userData.role)) {
+  if (['faculty', 'staff', 'worker', 'operator', 'admin', 'sysadmin', 'caretaker', 'deputy_warden', 'hostel_manager', 'principal', 'vice_principal', 'oie', 'exam_branch', 'warden'].includes(userData.role) || userData.employeeId || userData.isHod) {
+    const finalEmployeeId =
+      (userData.employeeId && userData.employeeId.trim()) ||
+      (uniqueId && String(uniqueId).trim()) ||
+      `EMP-${userData.id.slice(0, 8).toUpperCase()}`;
+
     try {
-      await db.from('employee_details').upsert({
+      const { error } = await db.from('employee_details').upsert({
         user_id: userData.id,
-        employee_id: (userData.employeeId || uniqueId).trim().toUpperCase(),
+        employee_id: finalEmployeeId,
         is_hod: userData.isHod || false,
         department_id: userData.departmentId || null,
+        staff_category: (userData as any).staffCategory || userData.role,
       }, { onConflict: 'user_id' });
-    } catch (eErr) {
-      console.warn('Non-fatal employee_details upsert error:', eErr);
+
+      if (error) console.warn('[createUser] employee_details failed:', error.message);
+    } catch (err: any) {
+      console.warn('[createUser] employee_details threw:', err?.message ?? err);
     }
   }
 
@@ -1760,7 +1768,7 @@ export async function addScan(input: {
     is_correction: false,
   };
 
-  const { data, error } = await client.from('movement_logs').insert(scanRow).select('*, users:users!movement_logs_user_id_fkey(*)').single();
+  const { data, error } = await client.from('movement_logs').insert(scanRow).select().single();
   if (error || !data) {
     if (error?.code === '23505') {
       const { data: existingLog } = await client

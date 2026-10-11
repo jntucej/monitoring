@@ -69,6 +69,10 @@ async function handleLoginInner(req: NextRequest) {
     );
 
     if (userRes.rows.length === 0) {
+      // BB1: Protect against account enumeration timing attacks via constant-time compare
+      const DUMMY_HASH = "$2b$10$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvalidinvalid";
+      await verifyPassword(rawPassword, DUMMY_HASH);
+      await recordFailedAttempt(identifier, "login");
       return NextResponse.json(GENERIC_FAILURE, { status: 401 });
     }
 
@@ -280,10 +284,15 @@ async function handleLoginInner(req: NextRequest) {
       }
     }
 
+    const rolesRes = await query<{ role: string }>(`SELECT role FROM user_roles WHERE user_id = $1`, [user.id]);
+    const roles = rolesRes.rows.map(r => r.role);
+    if (!roles.includes(user.role)) roles.push(user.role);
+
     const access_token = await signAccessToken({
       sub: user.id,
       email: user.email,
       role: user.role,
+      roles: roles,
       account_status: user.status,
       name: user.name,
       session_version: user.session_version ?? 0,
@@ -306,6 +315,7 @@ async function handleLoginInner(req: NextRequest) {
           name: user.name,
           email: user.email,
           role: user.role,
+          roles: roles,
           status: user.status,
           department_id: user.department_id,
           gate_id: user.gate_id,

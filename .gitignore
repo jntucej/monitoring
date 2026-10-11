@@ -92,3 +92,6 @@ qa-evidence/
 *.bak.*
 docker-compose.yml.bak*
 users.json
+
+# deploy-state dedup file (local runtime state, never commit)
+.last_notified_hash

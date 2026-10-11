@@ -1,5 +1,6 @@
 import { SignJWT, jwtVerify, JWTPayload } from "jose";
 import bcrypt from "bcryptjs";
+import { randomUUID } from "crypto";
 import { requireSecret } from "@/lib/env";
 
 interface SigningKey {
@@ -101,6 +102,7 @@ export async function signAccessToken(claims: {
   })
     .setProtectedHeader({ alg: "HS256", typ: "JWT", kid: getAuthSigningKid() })
     .setSubject(claims.sub)
+    .setJti(randomUUID())
     .setIssuedAt(issuedAt)
     .setExpirationTime(expiry)
     .sign(key);
@@ -126,6 +128,7 @@ export async function signRefreshToken(claims: {
   })
     .setProtectedHeader({ alg: "HS256", typ: "JWT", kid: getAuthSigningKid() })
     .setSubject(claims.sub)
+    .setJti(randomUUID())
     .setIssuedAt(issuedAt)
     .setExpirationTime(expiry)
     .sign(key);

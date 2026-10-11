@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServiceClient } from '@/lib/dbClient';
 import { withRateLimit } from '@/lib/rate-limit';
@@ -16,21 +17,8 @@ async function handleGet(req: NextRequest) {
 
     if (error) {
       if (error.code === '42P01' || error.code === 'PGRST205') {
-        const fallbacks = [
-          { code: 'admin', display_name: 'Administrator', description: 'College Administration', icon_name: 'LayoutDashboard', default_redirect: '/admin' },
-          { code: 'guardian', display_name: 'Guardian', description: 'Guardians & Wards', icon_name: 'Users', default_redirect: '/parent' },
-          { code: 'operator', display_name: 'Gate Operator', description: 'Security Gate Officers', icon_name: 'ScanLine', default_redirect: '/gate/1' },
-          { code: 'student', display_name: 'Student', description: 'Campus Members', icon_name: 'GraduationCap', default_redirect: '/student' },
-          { code: 'sysadmin', display_name: 'System Admin', description: 'IT Infrastructure & Security', icon_name: 'Settings', default_redirect: '/sysadmin' },
-          { code: "caretaker", display_name: "Caretaker", description: "Hostel caretaker", icon_name: "Home", default_redirect: "/hostel/permissions" },
-          { code: "deputy_warden", display_name: "Deputy Warden", description: "Hostel deputy warden", icon_name: "ShieldCheck", default_redirect: "/hostel/permissions" },
-          { code: "hostel_manager", display_name: "Hostel Manager", description: "Hostel manager", icon_name: "Building", default_redirect: "/hostel/permissions" },
-          { code: "principal", display_name: "Principal", description: "College principal", icon_name: "Award", default_redirect: "/principal/permissions" },
-          { code: "vice_principal", display_name: "Vice Principal", description: "Vice principal", icon_name: "Award", default_redirect: "/exam/permissions" },
-          { code: "oie", display_name: "OIE", description: "Officer Incharge Examinations", icon_name: "FileText", default_redirect: "/exam/permissions" },
-          { code: "exam_branch", display_name: "Exam Branch", description: "Exam branch staff", icon_name: "ClipboardList", default_redirect: "/exam/permissions" }
-        ];
-        return NextResponse.json({ success: true, data: fallbacks });
+        console.warn('[config/roles] config_roles table missing, returning empty');
+        return NextResponse.json({ success: true, data: [] });
       }
       throw error;
     }

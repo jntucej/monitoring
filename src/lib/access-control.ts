@@ -38,9 +38,20 @@ export function checkTimeBasedAccess(
   customRule?: Partial<AccessRule>
 ): AccessCheckResult {
   if (personType === "student") {
-    // NOTE: Student curfew enforcement is handled via gate scan validation 
-    // against student_details.hostel_curfew_time
-    return { allowed: true };
+    const currentHour = timestamp.getHours();
+    const currentMinute = timestamp.getMinutes();
+    const currentTotalMinutes = currentHour * 60 + currentMinute;
+    const curfewStartMinutes = 21 * 60 + 30; // 21:30
+    const curfewEndMinutes = 6 * 60; // 06:00
+
+    if (currentTotalMinutes >= curfewStartMinutes || currentTotalMinutes < curfewEndMinutes) {
+      return {
+        allowed: false,
+        reason: "Student curfew restriction in effect (21:30 - 06:00)",
+        ruleSummary: "Curfew 21:30 - 06:00",
+      };
+    }
+    return { allowed: true, ruleSummary: "Standard Student Access" };
   }
 
   if (personType !== "worker") {
