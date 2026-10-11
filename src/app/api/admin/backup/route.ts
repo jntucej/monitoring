@@ -47,9 +47,23 @@ async function handlePost(req: NextRequest) {
 
   try {
     const body = await req.json().catch(() => ({}));
-    const { action = "create", anonymize = false, tables, backupData, truncate = false, checksum } = body;
+    const { action = "create", anonymize = false, tables, backupData, truncate = false, checksum, confirm } = body;
 
     if (action === "restore") {
+      if (actorRole !== "sysadmin") {
+        return NextResponse.json(
+          { success: false, error: { code: "FORBIDDEN", message: "Only sysadmin can restore database backups" } },
+          { status: 403 }
+        );
+      }
+
+      if (confirm !== "CONFIRM_RESTORE") {
+        return NextResponse.json(
+          { success: false, error: { code: "CONFIRMATION_REQUIRED", message: "Explicit confirmation body { confirm: 'CONFIRM_RESTORE' } required to restore backup" } },
+          { status: 400 }
+        );
+      }
+
       if (!backupData || typeof backupData !== "object") {
         return NextResponse.json(
           { success: false, error: { code: "BAD_REQUEST", message: "Invalid backup data provided for restore" } },

@@ -132,6 +132,23 @@ const TEMPLATES: Record<NotificationType, NotificationTemplate> = {
   },
 };
 
+export function isQuietHours(quietHours?: { start: string; end: string } | null, date = new Date()): boolean {
+  if (!quietHours || !quietHours.start || !quietHours.end) return false;
+  const currentMinutes = date.getHours() * 60 + date.getMinutes();
+
+  const [startH, startM] = quietHours.start.split(':').map(Number);
+  const [endH, endM] = quietHours.end.split(':').map(Number);
+  const startMinutes = (startH || 0) * 60 + (startM || 0);
+  const endMinutes = (endH || 0) * 60 + (endM || 0);
+
+  if (startMinutes <= endMinutes) {
+    return currentMinutes >= startMinutes && currentMinutes < endMinutes;
+  } else {
+    // Overnight quiet hours, e.g. 22:00 to 07:00
+    return currentMinutes >= startMinutes || currentMinutes < endMinutes;
+  }
+}
+
 // Send a notification
 export async function sendNotification(
   type: NotificationType,
@@ -156,9 +173,15 @@ export async function sendNotification(
 
     const userPrefs = prefs as NotificationPreferences | null;
     const enabledChannels = channels || template.defaultChannels;
+    const inQuietHours = isQuietHours(userPrefs?.quietHours);
     const finalChannels = enabledChannels.filter(channel => {
       if (!userPrefs) return true;
-      return userPrefs.channels[channel] !== false;
+      if (userPrefs.channels?.[channel] === false) return false;
+      // Intrusive channels (push, sms) silenced during quiet hours unless critical priority
+      if (inQuietHours && template.priority !== 'critical' && (channel === 'push' || channel === 'sms')) {
+        return false;
+      }
+      return true;
     });
 
     // Render template

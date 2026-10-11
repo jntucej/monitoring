@@ -29,7 +29,8 @@ export async function checkIdempotency(
         statusCode: rows[0].status_code,
       };
     }
-  } catch {
+  } catch (err) {
+    console.warn("[idempotency] Database lookup failed:", err);
     // Fail-open: if table does not exist or database error, proceed with normal execution
   }
 
@@ -58,7 +59,8 @@ export async function storeIdempotency(
              expires_at    = EXCLUDED.expires_at`,
       [key.trim(), userId, endpoint, JSON.stringify(responseBody), statusCode, ttlHours]
     );
-  } catch {
+  } catch (err) {
+    console.warn("[idempotency] Database storage failed:", err);
     // Best-effort storage
   }
 }
