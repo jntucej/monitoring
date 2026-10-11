@@ -328,7 +328,8 @@ CREATE TABLE IF NOT EXISTS public.enrollment_codes (
   purpose TEXT NOT NULL DEFAULT 'mobile' CHECK (purpose IN ('mobile', 'web_bootstrap', 'pin_reset', 'role_bootstrap')),
   expires_at TIMESTAMPTZ NOT NULL,
   used_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  created_by UUID REFERENCES public.users(id) ON DELETE SET NULL
 );
 
 CREATE INDEX IF NOT EXISTS idx_enroll_user_active

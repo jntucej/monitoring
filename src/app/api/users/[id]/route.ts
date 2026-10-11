@@ -7,6 +7,7 @@ import { query } from "@/lib/postgres";
 import type { Role, AccountStatus } from "@/lib/types";
 import type { FlagStatus } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
+import { invalidateAuthCache } from "@/lib/authContext";
 
 const VALID_ROLES: (Role | string)[] = ["operator", "admin", "sysadmin", "supervisor", "guardian", "parent", "hod", "student", "warden", "faculty", "staff", "worker", "visitor", "caretaker", "deputy_warden", "hostel_manager", "principal", "vice_principal", "oie", "exam_branch"];
 const VALID_STATUSES: AccountStatus[] = ["ACTIVE", "LOCKED", "SUSPENDED", "DISABLED", "DEPROVISIONED"];
@@ -114,6 +115,15 @@ async function handlePatch(req: NextRequest) {
         profileUpdates.locked_until = null;
       }
 
+      // Bump session_version when credentials change — immediately
+      // invalidates every existing JWT (login & PIN login tokens embed the
+      // current session_version; authContext rejects tokens whose version
+      // no longer matches the DB row).
+      const credentialsChanged = Boolean(body.password || body.pin);
+      if (credentialsChanged) {
+        profileUpdates.session_version = ((target as any).session_version ?? 0) + 1;
+      }
+
       if (Object.keys(profileUpdates).length > 0) {
         const { error } = await supabase.from("users").update(profileUpdates).eq("id", id);
         if (error) return NextResponse.json({ success: false, error: { message: error.message } }, { status: 400 });
@@ -135,6 +145,21 @@ async function handlePatch(req: NextRequest) {
             [ident]
           );
         }
+      }
+
+      // When credentials change, also revoke any rows in the sessions table
+      // (Supabase-Auth style deployments) and evict the cached user row so
+      // the bumped session_version is enforced on the very next request.
+      // Failure is non-fatal — session_version already invalidates every
+      // existing JWT issued before this write.
+      if (credentialsChanged) {
+        await query(
+          `UPDATE public.sessions
+              SET revoked_at = NOW()
+            WHERE user_id = $1 AND revoked_at IS NULL`,
+          [id]
+        ).catch(() => null);
+        invalidateAuthCache(id);
       }
 
       // 2. Student details
@@ -217,7 +242,7 @@ async function handlePatch(req: NextRequest) {
       await addAudit({
         userId: actorId,
         action: "USER_UPDATED",
-        details: { timestamp: new Date().toISOString(), targetId: id, updates: body },
+        details: { timestamp: new Date().toISOString(), targetId: id, updates: body, sessions_revoked: credentialsChanged },
       });
     }
 

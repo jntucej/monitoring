@@ -2,18 +2,17 @@
 
 import { useState, useMemo, useCallback } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import { KeyRound } from "lucide-react";
 import { EnrollmentCodeModal } from "@/components/sysadmin/EnrollmentCodeModal";
 import { UserRolesPanel } from "@/components/sysadmin/UserRolesPanel";
 import {
   GraduationCap, Search, RefreshCw, UserPlus, Edit, Trash2,
-  Ban, CheckCircle2, X, Upload, Phone, Mail, Home, SlidersHorizontal, Lock,
+  Ban, CheckCircle2, X, Upload, Phone, Mail, SlidersHorizontal, Lock, KeyRound,
 } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { BulkUserImportModal } from "@/components/sysadmin/BulkUserImportModal";
-import { ROLL_DEPT_CODES, parseRollNumber, getStudentYearFromRoll } from "@/lib/rollNumber";
+import { ROLL_DEPT_CODES, parseRollNumber, getStudentYearFromRoll, getDepartmentFromRoll } from "@/lib/rollNumber";
 
 interface StudentRecord {
   id: string;
@@ -59,13 +58,12 @@ export default function SysAdminStudentsPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const [createForm, setCreateForm] = useState({
-    roll: "", name: "", email: "", phone: "", branch: "CSE",
-    hostelRoom: "", isHosteller: false, customMetaJson: "{}",
+    roll: "", name: "", email: "", phone: "", branch: "", customMetaJson: "{}",
   });
 
   const [editForm, setEditForm] = useState({
     name: "", email: "", phone: "", branch: "",
-    hostelRoom: "", isHosteller: false, customMetaJson: "{}",
+    customMetaJson: "{}",
     newPassword: "", newPin: "",
   });
 
@@ -77,7 +75,6 @@ export default function SysAdminStudentsPage() {
       const res = await fetch(`/api/students?t=${Date.now()}`, { 
         headers: getAuthHeaders(), 
         cache: "no-store",
-        next: { revalidate: 0 } 
       });
       const json = await res.json().catch(() => ({ success: false, error: { message: "Invalid server response." } }));
       if (res.ok && json.success && Array.isArray(json.data)) {
@@ -113,6 +110,11 @@ export default function SysAdminStudentsPage() {
       addToast({ variant: "error", title: "Validation", message: "Roll and name are required." });
       return;
     }
+    // Branch: auto-derive from roll when the user left it blank.
+    const branch = createForm.branch.trim() || getDepartmentFromRoll(createForm.roll) || "";
+    if (branch && !createForm.branch.trim()) {
+      addToast({ variant: "info", title: "Branch Auto-Set", message: `Branch auto-detected as ${branch} from roll number.` });
+    }
     setBusy(true);
     try {
       let parsedMeta = {};
@@ -127,8 +129,8 @@ export default function SysAdminStudentsPage() {
         body: JSON.stringify({
           uniqueId: createForm.roll, name: createForm.name, role: "student",
           email: studentEmail, phone: createForm.phone || undefined,
-          department: createForm.branch || undefined,
-          departmentId: createForm.branch || undefined,
+          department: branch || undefined,
+          departmentId: branch || undefined,
           metadata: parsedMeta,
         }),
       });
@@ -136,7 +138,7 @@ export default function SysAdminStudentsPage() {
       if (res.ok && json.success) {
         addToast({ variant: "success", title: "Created", message: `Student ${createForm.name} added.` });
         setShowCreateModal(false);
-        setCreateForm({ roll: "", name: "", email: "", phone: "", branch: "CSE", hostelRoom: "", isHosteller: false, customMetaJson: "{}" });
+        setCreateForm({ roll: "", name: "", email: "", phone: "", branch: "", customMetaJson: "{}" });
         loadStudents();
       } else {
         addToast({ variant: "error", title: "Error", message: json.error?.message || "Failed to create student." });
@@ -165,10 +167,9 @@ export default function SysAdminStudentsPage() {
         body: JSON.stringify({
           name: editForm.name || undefined, email: editForm.email || undefined,
           phone: editForm.phone || undefined, department: editForm.branch || undefined,
-          hostelRoom: editForm.hostelRoom || undefined, isHosteller: editForm.isHosteller,
           password: editForm.newPassword || undefined,
           pin: editForm.newPin || undefined,
-          metadata: { ...parsedMeta, hostelRoom: editForm.hostelRoom, isHosteller: editForm.isHosteller },
+          metadata: parsedMeta,
         }),
       });
       const json = await res.json().catch(() => ({ success: false, error: { message: "Invalid server response." } }));
@@ -278,8 +279,7 @@ export default function SysAdminStudentsPage() {
     setEditingStudent(s);
     setEditForm({
       name: s.name, email: s.email || "", phone: s.phone || "",
-      branch: s.department || "", hostelRoom: s.hostelRoom || s.studentDetails?.hostelRoom || "",
-      isHosteller: s.isHosteller ?? s.studentDetails?.isHosteller ?? false,
+      branch: s.department || "",
       customMetaJson: JSON.stringify(s.metadata || {}, null, 2),
       newPassword: "", newPin: "",
     });
@@ -720,8 +720,11 @@ export default function SysAdminStudentsPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-400 block mb-1">Branch (auto-detected from roll if blank)</label>
-                  <input type="text" value={createForm.branch} onChange={(e) => setCreateForm({ ...createForm, branch: e.target.value })} className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="Auto from roll" />
+                  <label className="text-xs font-semibold text-slate-400 block mb-1">Branch <span className="text-slate-500 font-normal">(optional — auto-detected from roll when blank)</span></label>
+                  <input type="text" value={createForm.branch} onChange={(e) => setCreateForm({ ...createForm, branch: e.target.value })} className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="Auto from roll (e.g. CSE)" />
+                  {createForm.roll && getDepartmentFromRoll(createForm.roll) && (
+                    <div className="mt-1 text-[11px] text-emerald-400">Detected: {getDepartmentFromRoll(createForm.roll)}</div>
+                  )}
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-slate-400 block mb-1">Custom Metadata (JSON)</label>
@@ -761,20 +764,10 @@ export default function SysAdminStudentsPage() {
                     <input type="text" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs font-semibold text-slate-400 block mb-1">Branch</label>
-                    <input type="text" value={editForm.branch} onChange={(e) => setEditForm({ ...editForm, branch: e.target.value })} className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-slate-400 block mb-1">Hostel Room</label>
-                    <input type="text" value={editForm.hostelRoom} onChange={(e) => setEditForm({ ...editForm, hostelRoom: e.target.value })} className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
-                  </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-400 block mb-1">Branch</label>
+                  <input type="text" value={editForm.branch} onChange={(e) => setEditForm({ ...editForm, branch: e.target.value })} className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
                 </div>
-                <label className="flex items-center gap-2 text-xs text-slate-300">
-                  <input type="checkbox" checked={editForm.isHosteller} onChange={(e) => setEditForm({ ...editForm, isHosteller: e.target.checked })} className="rounded border-slate-600" />
-                  <Home className="w-3.5 h-3.5" /> Hosteller
-                </label>
                 <div className="grid grid-cols-2 gap-3 p-3 bg-slate-900/60 border border-slate-800 rounded-xl">
                   <div>
                     <label className="text-xs font-semibold text-amber-400 block mb-1">Reset Password (Optional)</label>
