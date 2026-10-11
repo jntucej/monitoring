@@ -21,6 +21,7 @@ CREATE INDEX IF NOT EXISTS idx_sso_states_expires
 -- Enable RLS
 ALTER TABLE sso_authorization_states ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "service_role_all_sso_authorization_states" ON sso_authorization_states;
 CREATE POLICY "service_role_all_sso_authorization_states"
   ON sso_authorization_states
   FOR ALL
