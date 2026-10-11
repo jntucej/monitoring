@@ -37,6 +37,14 @@ async function handlePost(req: NextRequest) {
       .limit(100);
 
     // Honest CSV: only columns movement_logs actually has (no fabricated PersonType/Role).
+    function sanitizeCsv(str: any): string {
+      let val = String(str ?? "");
+      if (/^[=+\-@\t\r]/.test(val)) {
+        val = "'" + val;
+      }
+      return val.replace(/"/g, '""');
+    }
+
     const rows: string[] = ["Timestamp,ScanID,GateID,Direction,Reason,Manual"];
     if (scans && scans.length > 0) {
       for (const s of scans) {
@@ -45,7 +53,7 @@ async function handlePost(req: NextRequest) {
         const dir = s.direction || "IN";
         const reason = s.reason || "-";
         const manual = s.is_manual ? "Y" : "N";
-        rows.push(`"${time}","${s.id}","${gate}","${dir}","${reason}","${manual}"`);
+        rows.push(`"${sanitizeCsv(time)}","${sanitizeCsv(s.id)}","${sanitizeCsv(gate)}","${sanitizeCsv(dir)}","${sanitizeCsv(reason)}","${sanitizeCsv(manual)}"`);
       }
     } else {
       rows.push(`"${now}","N/A","N/A","N/A","NO_DATA","N/A"`);

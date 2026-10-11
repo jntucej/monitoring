@@ -29,6 +29,7 @@ CREATE INDEX IF NOT EXISTS idx_mfa_challenges_user
 -- Enable RLS
 ALTER TABLE mfa_login_challenges ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "service_role_all_mfa_login_challenges" ON mfa_login_challenges;
 CREATE POLICY "service_role_all_mfa_login_challenges"
   ON mfa_login_challenges
   FOR ALL

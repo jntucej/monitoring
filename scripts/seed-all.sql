@@ -3,7 +3,7 @@
 -- Sysadmin password: junaid, pin: nf16
 
 -- Insert sysadmin with known ID
-INSERT INTO users (id, unique_id, name, role, email, status, password_hash, initial_pin_hash, two_factor_enabled)
+INSERT INTO users (id, unique_id, name, role, email, status, password_hash, initial_pin_hash, two_factor_enabled, pin_must_change)
 VALUES (
   '80eb29e3-7e71-48cb-a44c-6e0caa7f83f5',
   'SYSADMIN',
@@ -11,41 +11,44 @@ VALUES (
   'sysadmin',
   'sysadmin@college.edu',
   'ACTIVE',
-  crypt('junaid', gen_salt('bf', 10)),
-  crypt('nf16', gen_salt('bf', 10)),
-  false
+  crypt(COALESCE(NULLIF(current_setting('app.seed_password', true), ''), 'sysadmin_secure_change_me'), gen_salt('bf', 10)),
+  crypt(COALESCE(NULLIF(current_setting('app.seed_pin', true), ''), '654321'), gen_salt('bf', 10)),
+  false,
+  true
 ) ON CONFLICT (unique_id) DO UPDATE SET
   password_hash = EXCLUDED.password_hash,
-  initial_pin_hash = EXCLUDED.initial_pin_hash;
+  initial_pin_hash = EXCLUDED.initial_pin_hash,
+  pin_must_change = true;
 
 -- Insert other role users with random UUIDs
-INSERT INTO users (unique_id, name, role, email, status, password_hash, initial_pin_hash, two_factor_enabled)
+INSERT INTO users (unique_id, name, role, email, status, password_hash, initial_pin_hash, two_factor_enabled, pin_must_change)
 VALUES
   ('ADMIN', 'Campus Admin', 'admin', 'admin@college.edu', 'ACTIVE',
-   crypt('admin123', gen_salt('bf', 10)), crypt('123456', gen_salt('bf', 10)), false),
+   crypt('admin_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
   ('OPERATOR', 'Gate Operator', 'operator', 'operator@college.edu', 'ACTIVE',
-   crypt('operator123', gen_salt('bf', 10)), crypt('123456', gen_salt('bf', 10)), false),
+   crypt('operator_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
   ('SUPERVISOR', 'Gate Supervisor', 'supervisor', 'supervisor@college.edu', 'ACTIVE',
-   crypt('supervisor123', gen_salt('bf', 10)), crypt('123456', gen_salt('bf', 10)), false),
+   crypt('supervisor_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
   ('WARDEN', 'Hostel Warden', 'warden', 'warden@college.edu', 'ACTIVE',
-   crypt('warden123', gen_salt('bf', 10)), crypt('123456', gen_salt('bf', 10)), false),
+   crypt('warden_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
   ('HOD', 'Head of Department', 'hod', 'hod@college.edu', 'ACTIVE',
-   crypt('hod123', gen_salt('bf', 10)), crypt('123456', gen_salt('bf', 10)), false),
+   crypt('hod_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
   ('FACULTY', 'Faculty Member', 'faculty', 'faculty@college.edu', 'ACTIVE',
-   crypt('faculty123', gen_salt('bf', 10)), crypt('123456', gen_salt('bf', 10)), false),
+   crypt('faculty_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
   ('STAFF', 'Office Staff', 'staff', 'staff@college.edu', 'ACTIVE',
-   crypt('staff123', gen_salt('bf', 10)), crypt('123456', gen_salt('bf', 10)), false),
+   crypt('staff_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
   ('WORKER', 'Support Worker', 'worker', 'worker@college.edu', 'ACTIVE',
-   crypt('worker123', gen_salt('bf', 10)), crypt('123456', gen_salt('bf', 10)), false),
+   crypt('worker_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
   ('GUARDIAN', 'Parent Guardian', 'guardian', 'guardian@college.edu', 'ACTIVE',
-   crypt('guardian123', gen_salt('bf', 10)), crypt('123456', gen_salt('bf', 10)), false),
+   crypt('guardian_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
   ('STUDENT', 'Demo Student', 'student', 'student@college.edu', 'ACTIVE',
-   crypt('student123', gen_salt('bf', 10)), crypt('123456', gen_salt('bf', 10)), false),
+   crypt('student_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
   ('VISITOR', 'Demo Visitor', 'visitor', 'visitor@college.edu', 'ACTIVE',
-   crypt('visitor123', gen_salt('bf', 10)), crypt('123456', gen_salt('bf', 10)), false)
+   crypt('visitor_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true)
 ON CONFLICT (unique_id) DO UPDATE SET
   password_hash = EXCLUDED.password_hash,
-  initial_pin_hash = EXCLUDED.initial_pin_hash;
+  initial_pin_hash = EXCLUDED.initial_pin_hash,
+  pin_must_change = true;
 
 -- Insert config roles
 INSERT INTO config_roles (code, display_name, permissions, is_active)

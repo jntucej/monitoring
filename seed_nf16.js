@@ -1,23 +1,27 @@
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 const pool = new Pool({
-  connectionString: 'postgres://postgres:bdb7c264e1c2725edc1b@127.0.0.1:5432/gate_monitor'
+  connectionString: process.env.DATABASE_URL || 'postgres://postgres:postgres@127.0.0.1:5432/gate_monitor'
 });
 
 async function run() {
+  const seedPassword = process.env.SYSADMIN_SEED_PASSWORD || crypto.randomBytes(16).toString('hex');
+  const userId = process.env.SYSADMIN_SEED_ID || 'SYSADMIN';
+
   try {
-    const passwordHash = await bcrypt.hash('junaid', 10);
-    const userId = 'nf16';
+    const passwordHash = await bcrypt.hash(seedPassword, 10);
     
     // Upsert user
     const res = await pool.query(`
-      INSERT INTO users (id, unique_id, name, email, role, password_hash, status)
-      VALUES ($1, $1, 'System Admin', 'nf16@ucej.in', 'sysadmin', $2, 'active')
-      ON CONFLICT (id) DO UPDATE SET 
+      INSERT INTO users (id, unique_id, name, email, role, password_hash, status, pin_must_change)
+      VALUES (gen_random_uuid(), $1, 'System Admin', 'sysadmin@college.edu', 'sysadmin', $2, 'ACTIVE', true)
+      ON CONFLICT (unique_id) DO UPDATE SET 
         role = 'sysadmin', 
         password_hash = $2, 
-        status = 'active';
+        status = 'ACTIVE',
+        pin_must_change = true;
     `, [userId, passwordHash]);
     
     // Also add an employee detail just in case the system expects it for SysAdmin

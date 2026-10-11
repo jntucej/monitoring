@@ -26,6 +26,7 @@ CREATE INDEX IF NOT EXISTS idx_pwd_reset_user
 
 ALTER TABLE password_reset_tokens ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "service_role_all_pwd_reset_tokens" ON password_reset_tokens;
 CREATE POLICY "service_role_all_pwd_reset_tokens"
   ON password_reset_tokens
   FOR ALL

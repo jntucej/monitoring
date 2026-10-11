@@ -90,6 +90,9 @@ async function main() {
   const client = await pool.connect();
 
   try {
+    // Acquire migration lock to prevent concurrent runs
+    await client.query("SELECT pg_advisory_lock(7243981)");
+
     // 1. Ensure tracking table exists
     await client.query(`
       CREATE TABLE IF NOT EXISTS schema_migrations (
@@ -169,6 +172,7 @@ async function main() {
     console.log(`\nDone. Applied: ${applied_count}, Skipped: ${skipped}, Drifted: ${drifted}`);
     if (drifted) process.exit(1);
   } finally {
+    await client.query("SELECT pg_advisory_unlock(7243981)").catch(() => {});
     client.release();
     await pool.end();
   }

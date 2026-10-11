@@ -10,6 +10,7 @@ import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { addAudit } from "@/lib/db";
 import { assertCsrf } from "@/lib/csrf";
 import { checkLockout, recordFailedAttempt, clearLockout } from "@/lib/login-lockout";
+import { isPrivileged } from "@/lib/roles";
 import type { Role } from "@/lib/types";
 
 const INVALID_CREDENTIALS = {
@@ -90,6 +91,12 @@ async function handlePinLogin(req: NextRequest) {
     );
 
     const user = userRes.rows[0];
+
+    // Ensure privileged roles can NEVER authenticate via PIN login
+    if (user && isPrivileged(user.role)) {
+      await recordFailedAttempt(cleanId, "pin");
+      return NextResponse.json(INVALID_CREDENTIALS, { status: 401 });
+    }
 
     // Check per-user account lockout
     if (user?.locked_until && new Date(user.locked_until) > new Date()) {

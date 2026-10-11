@@ -136,6 +136,14 @@ test('Health endpoint: allowlists components and never echoes raw error strings'
   );
 });
 
+// 12. Alert Deduplication (Issue #216)
+test('Alert Deduplication (Issue #216): suppresses duplicate active alerts within 15-minute window', () => {
+  const alertCode = fs.readFileSync('src/lib/alerting.ts', 'utf8');
+  assert(alertCode.includes('15 * 60 * 1000'), 'Alert deduplication must use 15-minute threshold window');
+  assert(alertCode.includes('existingActive'), 'Alert deduplication must check for existing active alerts');
+  assert(alertCode.includes('Suppress duplicate notification flood'), 'Must contain deduplication suppression logic');
+});
+
 console.log(`\n🎉 Additional Remediations Results: ${passed}/${total} passed!`);
 if (passed === total) {
   process.exit(0);

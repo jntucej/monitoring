@@ -21,6 +21,7 @@ CREATE INDEX IF NOT EXISTS idx_enroll_user_active
 -- Enable RLS
 ALTER TABLE mobile_enrollment_codes ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "service_role_all_mobile_enrollment_codes" ON mobile_enrollment_codes;
 CREATE POLICY "service_role_all_mobile_enrollment_codes"
   ON mobile_enrollment_codes
   FOR ALL

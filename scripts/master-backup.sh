@@ -36,6 +36,7 @@ fi
 
 # 2. Export all secrets/credentials (for recovery use)
 SECRETS_FILE="$BACKUP_ROOT/secrets-$TIMESTAMP.txt"
+touch "$SECRETS_FILE" && chmod 600 "$SECRETS_FILE"
 {
     echo "# Gate Monitor Secrets Export - $TIMESTAMP"
     echo "# WARNING: This file contains sensitive data. Keep it secure."
