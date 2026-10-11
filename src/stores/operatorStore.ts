@@ -113,7 +113,9 @@ const EMPTY_BREAKDOWN: CategoryBreakdown = {
   others: { inside: 0, inToday: 0, outToday: 0 },
 };
 
-export const useOperatorStore = create<OperatorState>()((set, get) => ({
+let scanAbortController: AbortController | null = null;
+
+export const useOperatorStore = create<OperatorState>((set, get) => ({
   state: "idle",
   currentStudent: null,
   selectedDirection: "IN",
@@ -136,6 +138,12 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
     const cleanRoll = roll.trim().toUpperCase();
     if (!cleanRoll) return;
 
+    if (scanAbortController) {
+      scanAbortController.abort();
+    }
+    scanAbortController = new AbortController();
+    const signal = scanAbortController.signal;
+
     set({ state: "detecting", error: null, photoVerificationDone: false, currentStudent: null });
 
     const authStore = useAuthStore.getState();
@@ -150,7 +158,7 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
     }
 
     try {
-      const res = await fetch(`/api/persons/${encodeURIComponent(cleanRoll)}`, { headers });
+      const res = await fetch(`/api/persons/${encodeURIComponent(cleanRoll)}`, { headers, signal });
       const result = await res.json().catch(() => null);
 
       if (res.status === 401 || result?.error?.code === "SESSION_EXPIRED" || result?.error?.code === "UNAUTHORIZED") {
@@ -207,7 +215,10 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
         
         error: null,
       });
-    } catch (err) {
+    } catch (err: unknown) {
+      if ((err as Error)?.name === "AbortError") {
+        return;
+      }
       console.error("Network or fetch error during scan start:", err);
       set({
         state: "error",
