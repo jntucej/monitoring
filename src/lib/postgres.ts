@@ -205,6 +205,35 @@ export class PostgresQueryBuilder<T = any> {
       .replace(/,\s*$/, "")
       .trim();
 
+    // Remove embedded-relation tokens (e.g. "student_details ( a, b, c )" or
+    // "alias:table (...)") from the base column list — they are rendered as
+    // subqueries in buildSelectClause(). Leaving them in baseCols makes
+    // Postgres fail with "column X does not exist" on the first embedded field.
+    if (this.embeddedRelations.length > 0) {
+      // Split on top-level commas (paren-depth 0), then drop any token that
+      // is an embedded relation: an identifier (optionally "!inner"/":table")
+      // directly followed by "(". Nested parens keep it inside one token.
+      const tokens: string[] = [];
+      let depth = 0;
+      let start = 0;
+      for (let i = 0; i < clean.length; i++) {
+        const ch = clean[i];
+        if (ch === "(") depth++;
+        else if (ch === ")") depth--;
+        else if (ch === "," && depth === 0) {
+          tokens.push(clean.slice(start, i));
+          start = i + 1;
+        }
+      }
+      tokens.push(clean.slice(start));
+
+      const isEmbedded = (tok: string) => /^[\w!][\w:!]*\s*\(/.test(tok.trim());
+      clean = tokens
+        .map((t) => t.trim())
+        .filter((t) => t.length > 0 && !isEmbedded(t))
+        .join(", ");
+    }
+
     this.selectColumns = clean.length > 0 ? clean : "*";
     return this;
   }
@@ -527,7 +556,7 @@ export class PostgresQueryBuilder<T = any> {
     let baseCols = this.selectColumns;
     if (baseCols === "*" && this.embeddedRelations.length > 0) baseCols = `${this.tableName}.*`;
     if (this.embeddedRelations.length === 0) return baseCols;
-    
+
     const buildRelationSubquery = (rel: EmbeddedRelation, parentTable: string): string => {
       const { alias, targetTable, fields, nested } = rel;
       let joinCondition = "";
@@ -540,14 +569,14 @@ export class PostgresQueryBuilder<T = any> {
       else joinCondition = `${targetTable}.id = ${parentTable}.${targetTable.replace(/s$/, "")}_id`;
 
       const selectColsList = fields.includes("*") ? `${targetTable}.*` : fields.map((f) => `${targetTable}."${f}"`).join(", ");
-      
+
       const nestedSubqueries: string[] = [];
       if (nested && nested.length > 0) {
         for (const n of nested) {
           nestedSubqueries.push(buildRelationSubquery(n, targetTable));
         }
       }
-      
+
       const allSelected = nestedSubqueries.length > 0 ? `${selectColsList}, ${nestedSubqueries.join(", ")}` : selectColsList;
       return `(SELECT row_to_json(rel_sub) FROM (SELECT ${allSelected} FROM ${targetTable} WHERE ${joinCondition} LIMIT 1) rel_sub) AS "${alias}"`;
     };
@@ -558,7 +587,9 @@ export class PostgresQueryBuilder<T = any> {
     }
     const cleanBase = baseCols.replace(/,+$/, "").replace(/,\s*$/, "")
       .trim();
-    return cleanBase;
+    // Append the embedded-relation subqueries to the base column list so the
+    // final SQL actually includes them (previously built but never appended).
+    return relationSubqueries.length > 0 ? `${cleanBase}, ${relationSubqueries.join(", ")}` : cleanBase;
   }
 
   insert(rows: Record<string, any> | Record<string, any>[]) {
