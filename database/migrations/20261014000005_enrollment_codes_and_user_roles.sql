@@ -18,12 +18,13 @@ END $$;
 
 CREATE TABLE IF NOT EXISTS public.enrollment_codes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE   user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE   user_id UUID NOT NUL_a  user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE   user_id UUID obile', 'web_bootstrap', 'pin_reset', 'role_bootstrap'))
+  user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  code_hash TEXT NOT NULL,
+  purpose TEXT NOT NULL DEFAULT 'mobile' CHECK (purpose IN ('mobile', 'web_bootstrap', 'pin_reset', 'role_bootstrap')),
+  expires_at TIMESTAMPTZ NOT NULL,
+  used_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-
-DO $$
-BEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGNOT NULL DEFAULT 'mobile' CHECK (purpose IN ('mobile', 'web_BEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEGBEn THEN END;
-END $$;
 
 CREATE INDEX IF NOT EXISTS idx_enroll_user_active
   ON public.enrollment_codes (user_id, purpose, expires_at)
@@ -34,17 +35,30 @@ ALTER TABLE public.enrollment_codes ENABLE ROW LEVEL SECURITY;
 DO $$
 BEGIN
   IF NOT EXISTS (
-    SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename=    SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablenam'
+    SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='enrollment_codes' AND policyname='service_role_all_enrollment_codes'
   ) THEN
-    CREATE POLICY "service_role_all_enrollment_codes" ON public.enrollment_codes FOR ALL TO service_role USING (true)    CREATE POLICY "service_role_all_enrollment_codes" ON public.enrollment_codes FOR ALL TO service_role USING (true)    CREATE POLICY "service_role_all_enrollment_codes" ON public.enrollment_codes FOR ALL TO service_role USING (true)    CREATE POLICY "service_role_all_enrollmentted_by UUID     CREATE POLICY "service_role_all_enrollment_codes" ON public.enrollment_codes FOR ALL TO service_role USING (true)    CREATE POLICY "service_role_all_enrollment_codes" ON public.enrollment_codes FOR ALL TO service_role US NOT EXISTS     CREATE POLICY "service_role_all_enrollment_c
-ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
-
-DO DO DO DO DO DO DO DXISTS (
-    SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='user    SELECT 1 olicy    SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='user    SELECT 1 olicy    SELECT 1 FROM pg_policies WHERE schemle USING (true) WITH CHECK (true);
+    CREATE POLICY "service_role_all_enrollment_codes" ON public.enrollment_codes FOR ALL TO service_role USING (true) WITH CHECK (true);
   END IF;
 END $$;
 
--- 3. Backfill User Roles -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.user_roles (
+  user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  role TEXT NOT NULL,
+  granted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (user_id, role)
+);
+
+ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='user_roles' AND policyname='service_role_all_user_roles'
+  ) THEN
+    CREATE POLICY "service_role_all_user_roles" ON public.user_roles FOR ALL TO service_role USING (true) WITH CHECK (true);
+  END IF;
+END $$;
+
 INSERT INTO public.user_roles (user_id, role, granted_at)
 SELECT id, role, created_at FROM public.users
 ON CONFLICT (user_id, role) DO NOTHING;
