@@ -54,6 +54,9 @@ next-env.d.ts
 # logs and workspace outputs
 *.log
 repomix-output*
+
+# permission document uploads (Step 7) — never commit uploaded/signed PDFs
+data/uploads/
 .DS_Store
 
 # macOS
@@ -87,7 +90,7 @@ dumpScanner.js
 test_merge.ts
 test-del.js
 
-# Committed artifacts that should not be tracked
+# Committed artifacts not tracked
 qa-evidence/
 *.bak.*
 docker-compose.yml.bak*
@@ -95,3 +98,6 @@ users.json
 
 # deploy-state dedup file (local runtime state, never commit)
 .last_notified_hash
+
+# Permission workflow document uploads (never commit)
+data/uploads/

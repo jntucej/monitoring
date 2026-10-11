@@ -15,11 +15,14 @@ import {
   PenTool,
   RefreshCw,
   ArrowLeft,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatDateTime, getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import type { PermissionItem } from "./PermissionRow";
+import { DocumentUploadPanel } from "@/components/student/DocumentUploadPanel";
+import { DigitalSignPanel } from "@/components/approver/DigitalSignPanel";
 
 export interface PermissionDetailPanelProps {
   ticket: string | null;
@@ -55,6 +58,9 @@ export function PermissionDetailPanel({
   const [comment, setComment] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
   const addToast = useUIStore((s) => s.addToast);
+
+  // Exam/memo requests carry an uploaded document + digital signature (Step 7).
+  const isExamMemo = data?.workflow_type === "exam" || data?.workflow_type === "memo";
 
   const fetchDetail = useCallback(async () => {
     if (!ticket) return;
@@ -424,6 +430,41 @@ export function PermissionDetailPanel({
                   </Button>
                 </div>
               )}
+            </div>
+          )}
+
+          {isExamMemo && (
+            <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4 space-y-2">
+              <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider flex items-center gap-1.5">
+                <FileText className="w-3.5 h-3.5" />
+                Document
+              </h3>
+              <DocumentUploadPanel
+                ticketNumber={data.ticket_number}
+                workflowType={data.workflow_type === "memo" ? "memo" : "exam"}
+                currentStage={data.current_stage}
+                status={data.status}
+                documentUrl={data.document_url}
+                onUploaded={fetchDetail}
+              />
+            </div>
+          )}
+
+          {isExamMemo && (
+            <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4 space-y-2">
+              <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider flex items-center gap-1.5">
+                <PenTool className="w-3.5 h-3.5" />
+                Digital Signature
+              </h3>
+              <DigitalSignPanel
+                ticketNumber={data.ticket_number}
+                workflowType={data.workflow_type === "memo" ? "memo" : "exam"}
+                currentStage={data.current_stage}
+                status={data.status}
+                documentUrl={data.document_url}
+                digitalSignature={data.digital_signature}
+                onSigned={fetchDetail}
+              />
             </div>
           )}
 

@@ -26,7 +26,7 @@ test("Approval chains and roles in permission-workflow.ts", () => {
   const code = fs.readFileSync("src/lib/permission-workflow.ts", "utf8");
 
   // Approval chains
-  assert(code.includes('"caretaker", "deputy_warden", "hostel_manager", "warden_or_principal", "main_gate", "completed"'), "Hostel chain exact match");
+  assert(code.includes('"caretaker", "deputy_warden", "hostel_manager", "warden_or_principal", "hostel_biometric", "main_gate", "completed"'), "Hostel chain exact match");
   assert(code.includes('"faculty", "hod", "oie", "vice_principal", "principal", "completed"'), "Exam chain exact match");
   assert(code.includes('"hod", "vice_principal", "principal", "completed"'), "Staff leave chain exact match");
 
