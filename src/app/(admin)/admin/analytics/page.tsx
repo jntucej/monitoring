@@ -1,5 +1,6 @@
 "use client";
 
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { useState, useEffect } from "react";
 import { 
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, Legend

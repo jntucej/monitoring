@@ -14,6 +14,43 @@ export function PageLoading() {
   );
 }
 
+export function WidgetLoading() {
+  return (
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] animate-pulse p-4 space-y-3">
+      <div className="h-4 w-1/4 bg-[var(--bg-elevated)] rounded" />
+      <div className="h-4 w-1/2 bg-[var(--bg-elevated)] rounded" />
+      <div className="h-20 bg-[var(--bg-elevated)] rounded" />
+    </div>
+  );
+}
+
+export function TableLoading(rows = 5) {
+  return (
+    <div className="overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]">
+      <table className="w-full text-sm min-w-full">
+        <thead>
+          <tr className="border-b border-[var(--border)] text-left text-[var(--text-muted)]">
+            <th className="p-4 font-medium">Column 1</th>
+            <th className="p-4 font-medium">Column 2</th>
+            <th className="p-4 font-medium">Column 3</th>
+            <th className="p-4 font-medium">Column 4</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-[var(--border)]">
+          {[...Array(rows)].map((_, i) => (
+            <tr key={i} className="animate-pulse">
+              <td className="p-4"><div className="h-4 w-24 bg-[var(--bg-elevated)] rounded" /></td>
+              <td className="p-4"><div className="h-4 w-20 bg-[var(--bg-elevated)] rounded" /></td>
+              <td className="p-4"><div className="h-4 w-16 bg-[var(--bg-elevated)] rounded" /></td>
+              <td className="p-4"><div className="h-4 w-24 bg-[var(--bg-elevated)] rounded" /></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export function TableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
     <div role="status" aria-live="polite" aria-busy="true" className="space-y-2 animate-pulse">
