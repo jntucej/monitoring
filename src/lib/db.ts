@@ -1175,7 +1175,7 @@ export async function findAllGates(): Promise<Gate[]> {
 
 export async function findAllUsers(): Promise<User[]> {
   const client = getDbClient();
-  const { data, error } = await client.from('users').select('*, employee_details(*)');
+  const { data, error } = await client.from('users').select('*');
   if (error || !data) return [];
   return data.map(mUser);
 }

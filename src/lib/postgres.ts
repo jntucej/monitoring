@@ -193,6 +193,9 @@ export class PostgresQueryBuilder<T = any> {
 
     let clean = columns
       .replace(/[a-zA-Z0-9_]+:[a-zA-Z0-9_!]+\([^)]*(?:\([^)]*\))*[^)]*\)/g, "")
+      .replace(/,\s*\(\s*\*\s*\)\s*,/g, ",")
+      .replace(/,\s*\(\s*\*\s*\)$/, "")
+      .replace(/[a-zA-Z0-9_]+\(\s*\*\s*\)/g, "")
       .replace(/,\s*,+/g, ",")
       .trim()
       .replace(/^,\s*/g, "")
