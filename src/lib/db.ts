@@ -69,7 +69,7 @@ export const DEPARTMENTS: Department[] = [
   { code: "IT",  name: "Information Technology",        hod: "Dr. P. Sreedhar" },
   { code: "ECE", name: "Electronics & Communication Engineering", hod: "Dr. M. Srinivas" },
   { code: "EEE", name: "Electrical & Electronics Engineering",    hod: "Dr. K. Ramesh" },
-  { code: "ME",  name: "Mechanical Engineering",          hod: "Dr. R. Mahesh" },
+  { code: "MECH", name: "Mechanical Engineering",          hod: "Dr. R. Mahesh" },
 ];
 
 
@@ -119,7 +119,7 @@ export function mPerson(r: any): Person {
       const deptCodeMap: Record<string, string> = {
         "01": "CIVIL",
         "02": "EEE",
-        "03": "ME",
+        "03": "MECH",
         "04": "ECE",
         "05": "CSE",
         "12": "IT"
@@ -207,7 +207,7 @@ function mScan(r: any): Scan {
     const deptCodeMap: Record<string, string> = {
       "01": "CIVIL",
       "02": "EEE",
-      "03": "ME",
+      "03": "MECH",
       "04": "ECE",
       "05": "CSE",
       "12": "IT"

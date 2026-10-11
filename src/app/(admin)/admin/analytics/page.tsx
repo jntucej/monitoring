@@ -195,7 +195,7 @@ export default function AdminAnalyticsPage() {
               <option value="IT">IT</option>
               <option value="ECE">ECE</option>
               <option value="EEE">EEE</option>
-              <option value="ME">ME</option>
+              <option value="MECH">MECH</option>
             </select>
           </div>
           <div>
