@@ -4,6 +4,7 @@ import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { DigitalIdCard } from "@/components/student/DigitalIdCard";
+import { StudentDashboardWidgets } from "@/components/student/widgets";
 import { ActivePasses } from "@/components/student/ActivePasses";
 import { RecentActivity } from "@/components/student/RecentActivity";
 import { UserProfileTab } from "@/components/shared/UserProfileTab";
@@ -180,6 +181,12 @@ function StudentDashboardInner() {
                 <div className="text-[10px] text-[var(--action-info)] font-medium">Verified Server Log</div>
               </div>
             </div>
+
+            {/* Student Overview Widgets */}
+            <section aria-label="Student overview" className="mt-6">
+              <StudentDashboardWidgets />
+            </section>
+
 
             {/* Option A — Digital ID Card */}
             <div className="space-y-3">
