@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
-import { generatePredictions } from "@/server/services/analytics/predictions";
+import { generatePredictions } from "@/lib/predictive";
 
 async function handlePost(req: NextRequest) {
   try {
