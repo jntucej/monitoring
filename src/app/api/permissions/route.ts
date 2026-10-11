@@ -25,7 +25,7 @@ async function handlePost(req: NextRequest, context: any) {
 
   if (!workflowType) return NextResponse.json({ success: false, error: "Missing fields" }, { status: 400 });
 
-  if (!["student", "parent", "guardian", "admin", "sysadmin"].includes(role)) {
+  if (!["student", "parent", "guardian", "admin", "sysadmin", "staff", "faculty"].includes(role)) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 403 });
   }
 
@@ -48,6 +48,14 @@ async function handlePost(req: NextRequest, context: any) {
   const initialStage = resolveInitialStage(workflowType as WorkflowType);
   const slaDeadline = body.sla_deadline || new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
 
+  // For staff_leave: stamp the ticket with the requester's branch so the
+  // L4 approval gate (canApproveAtStageWithBranch) can enforce same-branch.
+  let branch: string | null = null;
+  if (workflowType === "staff_leave") {
+    const { data: reqRow } = await db.from("users").select("department_id").eq("id", userId).single();
+    branch = reqRow?.department_id ?? null;
+  }
+
   const { data: request, error: createError } = await db.from("permission_requests").insert({
     ticket_number: ticketNumber,
     workflow_type: workflowType,
@@ -59,6 +67,7 @@ async function handlePost(req: NextRequest, context: any) {
     current_stage: initialStage,
     status: "PENDING",
     stage_history: [],
+    ...(branch ? { branch } : {}),
   }).select().single();
 
   if (createError) return NextResponse.json({ success: false, error: createError.message }, { status: 500 });

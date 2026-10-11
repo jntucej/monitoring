@@ -22,7 +22,7 @@ import {
   UserCheck,
 } from "lucide-react";
 
-const MIN_TIER = 55;
+const MIN_TIER = 50;
 
 /* ── response shapes ── */
 
@@ -179,121 +179,131 @@ function HodDashboardInner() {
       )}
 
       {/* KPI row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          icon={Users}
-          label="Department Headcount"
-          value={deptHeadcount ?? "…"}
-          sub={deptParam ? `Faculty in dept ${deptParam}` : "All faculty in scope"}
-          accent="text-emerald-400"
-          loading={facultyLoading && facultyList.length === 0}
-        />
-        <StatCard
-          icon={GraduationCap}
-          label="Students On Campus"
-          value={onCampus ?? "…"}
-          sub={`${students?.data?.todayEntries ?? 0} entries · ${students?.data?.todayExits ?? 0} exits today`}
-          accent="text-sky-400"
-          loading={studentsLoading && onCampus === undefined}
-        />
-        <StatCard
-          icon={CheckCircle2}
-          label="Pending Requests"
-          value={pendingCount}
-          sub="Staff leave approvals awaiting HOD action"
-          accent="text-amber-400"
-        />
-        <StatCard
-          icon={UserCheck}
-          label="Active Faculty"
-          value={facultyList.filter((f) => f.status === "ACTIVE" || !f.status).length}
-          sub="Currently active in your department"
-          accent="text-emerald-400"
-          loading={facultyLoading && facultyList.length === 0}
-        />
-      </div>
-
-      {/* alerts — role-scoped conditional alert surface */}
-      <WidgetBoundary title="Alerts">
-        <ConditionalAlert
-          ctx={{
-            role,
-            userId: user?.id ?? "unknown",
-            gateId: user?.gateId ?? null,
-            departmentId: user?.departmentId ?? null,
-            assignedHostel: user?.assignedHostel ?? null,
-            metrics: {},
-          }}
-          limit={5}
-        />
-      </WidgetBoundary>
-
-      {/* faculty panel */}
-      <WidgetBoundary title="Faculty">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden">
-          <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wide">
-              Department Faculty
-            </h2>
-            <span className="text-xs text-slate-500">
-              {hodFaculty?.success ? `${facultyList.length} members` : "…"}
-            </span>
-          </div>
-
-          {facultyLoading ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-slate-500">
-              <Loader2 className="w-4 h-4 animate-spin" /> Loading faculty…
-            </div>
-          ) : facultyList.length === 0 ? (
-            <div className="p-4">
-              <EmptyState
-                message={
-                  facultyError
-                    ? "Could not load the faculty list for your department."
-                    : "No faculty members found in this department yet."
-                }
-              />
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-slate-800 text-slate-500 text-xs uppercase tracking-wide">
-                    <th className="text-left px-4 py-3">Name</th>
-                    <th className="text-left px-4 py-3">Designation</th>
-                    <th className="text-left px-4 py-3">ID</th>
-                    <th className="text-left px-4 py-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/60">
-                  {facultyList.map((f) => (
-                    <tr key={f.id} className="hover:bg-slate-800/30 transition-colors">
-                      <td className="px-4 py-3 text-white font-medium">{f.name}</td>
-                      <td className="px-4 py-3 text-slate-400">
-                        {f.employee_details?.designation || "—"}
-                      </td>
-                      <td className="px-4 py-3 text-slate-400 font-mono text-xs">
-                        {f.employee_details?.employee_id || f.unique_id || f.id.slice(0, 8)}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border ${
-                            f.status === "SUSPENDED" || f.status === "LOCKED"
-                              ? "text-rose-400 border-rose-400/30 bg-rose-400/10"
-                              : "text-emerald-400 border-emerald-400/30 bg-emerald-400/10"
-                          }`}
-                        >
-                          {f.status || "ACTIVE"}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+      {deptParam ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard
+            icon={Users}
+            label="Department Headcount"
+            value={deptHeadcount ?? "…"}
+            sub={`Faculty in dept ${deptParam}`}
+            accent="text-emerald-400"
+            loading={facultyLoading && facultyList.length === 0}
+          />
+          <StatCard
+            icon={GraduationCap}
+            label="Students On Campus"
+            value={onCampus ?? "…"}
+            sub={`${students?.data?.todayEntries ?? 0} entries · ${students?.data?.todayExits ?? 0} exits today`}
+            accent="text-sky-400"
+            loading={studentsLoading && onCampus === undefined}
+          />
+          <StatCard
+            icon={CheckCircle2}
+            label="Pending Requests"
+            value={pendingCount}
+            sub="Staff leave approvals awaiting HOD action"
+            accent="text-amber-400"
+          />
+          <StatCard
+            icon={UserCheck}
+            label="Active Faculty"
+            value={facultyList.filter((f) => f.status === "ACTIVE" || !f.status).length}
+            sub="Currently active in your department"
+            accent="text-emerald-400"
+            loading={facultyLoading && facultyList.length === 0}
+          />
         </div>
-      </WidgetBoundary>
+      ) : (
+        <EmptyState
+          message="No branch assigned — ask your sysadmin to assign a branch"
+        />
+      )}
+
+      {deptParam && (
+        <>
+        {/* alerts — role-scoped conditional alert surface */}
+        <WidgetBoundary title="Alerts">
+          <ConditionalAlert
+            ctx={{
+              role,
+              userId: user?.id ?? "unknown",
+              gateId: user?.gateId ?? null,
+              departmentId: user?.departmentId ?? null,
+              assignedHostel: user?.assignedHostel ?? null,
+              metrics: {},
+            }}
+            limit={5}
+          />
+        </WidgetBoundary>
+
+        {/* faculty panel */}
+        <WidgetBoundary title="Faculty">
+          <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden">
+            <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wide">
+                Department Faculty
+              </h2>
+              <span className="text-xs text-slate-500">
+                {hodFaculty?.success ? `${facultyList.length} members` : "…"}
+              </span>
+            </div>
+
+            {facultyLoading ? (
+              <div className="p-4 flex items-center gap-2 text-sm text-slate-500">
+                <Loader2 className="w-4 h-4 animate-spin" /> Loading faculty…
+              </div>
+            ) : facultyList.length === 0 ? (
+              <div className="p-4">
+                <EmptyState
+                  message={
+                    facultyError
+                      ? "Could not load the faculty list for your department."
+                      : "No faculty members found in this department yet."
+                  }
+                />
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-800 text-slate-500 text-xs uppercase tracking-wide">
+                      <th className="text-left px-4 py-3">Name</th>
+                      <th className="text-left px-4 py-3">Designation</th>
+                      <th className="text-left px-4 py-3">ID</th>
+                      <th className="text-left px-4 py-3">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/60">
+                    {facultyList.map((f) => (
+                      <tr key={f.id} className="hover:bg-slate-800/30 transition-colors">
+                        <td className="px-4 py-3 text-white font-medium">{f.name}</td>
+                        <td className="px-4 py-3 text-slate-400">
+                          {f.employee_details?.designation || "—"}
+                        </td>
+                        <td className="px-4 py-3 text-slate-400 font-mono text-xs">
+                          {f.employee_details?.employee_id || f.unique_id || f.id.slice(0, 8)}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border ${
+                              f.status === "SUSPENDED" || f.status === "LOCKED"
+                                ? "text-rose-400 border-rose-400/30 bg-rose-400/10"
+                                : "text-emerald-400 border-emerald-400/30 bg-emerald-400/10"
+                            }`}
+                          >
+                            {f.status || "ACTIVE"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </WidgetBoundary>
+        </>
+      )}
 
       <DevContactStrip />
     </div>

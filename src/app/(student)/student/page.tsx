@@ -9,27 +9,31 @@ import { ActivePasses } from "@/components/student/ActivePasses";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { RecentActivity } from "@/components/student/RecentActivity";
 import { UserProfileTab } from "@/components/shared/UserProfileTab";
-import { QrCode, FileCheck, Clock, User, ShieldCheck, TrendingUp, AlertTriangle, Send, Calendar } from "lucide-react";
+import { QrCode, FileCheck, Clock, User, ShieldCheck, TrendingUp, AlertTriangle, Send, Calendar, Loader2 } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
 
 function StudentDashboardInner() {
   const searchParams = useSearchParams();
   const currentTab = searchParams?.get("tab") || "idcard";
 
-  const [studentStats, setStudentStats] = useState({
-    curfewScore: 98,
-    monthlyOutings: 12,
-    activePassesCount: 1,
-    lastGateTime: "Today, 08:30 AM",
-  });
+  const [studentStats, setStudentStats] = useState<{
+    monthlyOutings: number;
+    lastGateTime: string;
+  } | null>(null);
+  const [statsError, setStatsError] = useState(false);
 
-  useEffect(() => {
-    const fetchStudentStats = async () => {
+  const fetchStudentStats = () => {
+    setStatsError(false);
+    setStudentStats(null);
+    (async () => {
       try {
-        const authRaw = typeof window !== "undefined" ? sessionStorage.getItem("gate-monitor-auth") : null;
+        const authRaw = sessionStorage.getItem("gate-monitor-auth");
         const auth = authRaw ? JSON.parse(authRaw) : null;
         const roll = auth?.state?.user?.uniqueId ?? auth?.state?.user?.roll ?? auth?.user?.uniqueId ?? auth?.user?.roll;
-        if (!roll) return;
+        if (!roll) {
+          setStatsError(true);
+          return;
+        }
 
         const res = await fetch(`/api/persons/${encodeURIComponent(roll)}/history`, {
           headers: getAuthHeaders(),
@@ -44,17 +48,20 @@ function StudentDashboardInner() {
             return scanDate.getMonth() === now.getMonth() && scanDate.getFullYear() === now.getFullYear();
           }).length;
 
-          setStudentStats((prev) => ({
-            ...prev,
-            monthlyOutings: monthly || prev.monthlyOutings,
-            lastGateTime: scans[0] ? new Date(scans[0].timestamp || scans[0].scanned_at).toLocaleString([], { dateStyle: "short", timeStyle: "short" }) : prev.lastGateTime,
-          }));
+          setStudentStats({
+            monthlyOutings: monthly,
+            lastGateTime: scans[0] ? new Date(scans[0].timestamp || scans[0].scanned_at).toLocaleString([], { dateStyle: "short", timeStyle: "short" }) : "—",
+          });
+        } else {
+          setStatsError(true);
         }
       } catch {
-        // defaults
+        setStatsError(true);
       }
-    };
+    })();
+  };
 
+  useEffect(() => {
     fetchStudentStats();
   }, []);
 
@@ -144,43 +151,45 @@ function StudentDashboardInner() {
 
             {/* Curfew & Movement Analytics Cards (Option B) */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]"><span className="sm:hidden">🔓</span><span className="hidden sm:inline">🔓 Curfew Score</span></span>
-                  <ShieldCheck className="w-4 h-4 text-[var(--action-primary)]" />
+              {statsError ? (
+                <div className="sm:col-span-4 flex items-center justify-between gap-3 p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30">
+                  <div className="flex items-center gap-2 text-xs text-rose-300 font-medium">
+                    <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                    <span>Could not load stats. Gateway telemetry unavailable.</span>
+                  </div>
+                  <button
+                    onClick={fetchStudentStats}
+                    className="px-2.5 py-1 rounded-lg bg-rose-500/20 border border-rose-500/30 text-rose-300 text-[11px] font-bold hover:bg-rose-500/30 transition"
+                  >
+                    Retry
+                  </button>
                 </div>
-                <div className="text-xl font-black text-[var(--text-primary)]">{studentStats.curfewScore}%</div>
-                <div className="text-[10px] text-[var(--action-primary)] font-medium">On-Time Return Track</div>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]"><span className="sm:hidden">📊</span><span className="hidden sm:inline">📊 Monthly Outings</span></span>
-                  <TrendingUp className="w-4 h-4 text-[var(--action-info)]" />
+              ) : studentStats === null ? (
+                <div className="sm:col-span-4 flex items-center justify-center gap-2 p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] text-xs text-[var(--text-muted)]">
+                  <Loader2 className="w-4 h-4 animate-spin text-[var(--action-info)]" />
+                  Loading your stats…
                 </div>
-                <div className="text-xl font-black text-[var(--text-primary)]">{studentStats.monthlyOutings}</div>
-                <div className="text-[10px] text-[var(--text-muted)] font-medium">Scans this month</div>
-              </div>
+              ) : (
+                <>
+                  <div className="p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]"><span className="sm:hidden">📊</span><span className="hidden sm:inline">📊 Monthly Outings</span></span>
+                      <TrendingUp className="w-4 h-4 text-[var(--action-info)]" />
+                    </div>
+                    <div className="text-xl font-black text-[var(--text-primary)]">{studentStats.monthlyOutings}</div>
+                    <div className="text-[10px] text-[var(--text-muted)] font-medium">Scans this month</div>
+                  </div>
 
-              <div className="p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] space-y-1">
-                <div className="flex items-center justify-between">
-
-
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]"><span className="sm:hidden">📄</span><span className="hidden sm:inline">📄 Active Passes</span></span>
-                  <FileCheck className="w-4 h-4 text-[var(--action-warning)]" />
-                </div>
-                <div className="text-xl font-black text-[var(--text-primary)]">{studentStats.activePassesCount}</div>
-                <div className="text-[10px] text-[var(--action-warning)] font-medium">Ready at turnstile</div>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]"><span className="sm:hidden">⏱</span><span className="hidden sm:inline">⏱ Last Gate Scan</span></span>
-                  <Clock className="w-4 h-4 text-[var(--action-info)]" />
-                </div>
-                <div className="text-xs font-bold text-[var(--text-primary)] truncate">{studentStats.lastGateTime}</div>
-                <div className="text-[10px] text-[var(--action-info)] font-medium">Verified Server Log</div>
-              </div>
+                  <div className="p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]"><span className="sm:hidden">⏱</span><span className="hidden sm:inline">⏱ Last Gate Scan</span></span>
+                      <Clock className="w-4 h-4 text-[var(--action-info)]" />
+                    </div>
+                    <div className="text-xs font-bold text-[var(--text-primary)] truncate">{studentStats.lastGateTime}</div>
+                    <div className="text-[10px] text-[var(--action-info)] font-medium">Verified Server Log</div>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Student Overview Widgets */}

@@ -98,6 +98,39 @@ export function canApproveAtStage(role: string, workflowType: WorkflowType, curr
   return roleMap[role] === currentStage;
 }
 
+/**
+ * Branch-scoped variant of {@link canApproveAtStage}.
+ *
+ * Pure engine gate: for `staff_leave` at the `hod` stage, the actor must be a
+ * HOD whose branch (`actorBranch`) equals the requesting staff member's branch
+ * (`requesterBranch`). When the requester's branch is not supplied (null/empty)
+ * the check falls back to the plain role/stage gate.
+ *
+ * Stays in the pure layer (L2) with no DB access — the L4 API handler resolves
+ * both branch values and passes them in.
+ */
+export function canApproveAtStageWithBranch(
+  role: string,
+  workflowType: WorkflowType,
+  currentStage: string,
+  actorBranch: string | null | undefined,
+  requesterBranch: string | null | undefined,
+): boolean {
+  if (!canApproveAtStage(role, workflowType, currentStage)) return false;
+
+  if (
+    role === "hod" &&
+    workflowType === "staff_leave" &&
+    currentStage === "hod" &&
+    requesterBranch &&
+    actorBranch !== requesterBranch
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
 export interface StageHistoryEntry {
   stage?: string;
   actor_id?: string;
