@@ -299,7 +299,7 @@ export interface GatePass {
   qrCode: string;
 }
 
-export type GatePassStatus = "PENDING" | "APPROVED" | "REJECTED" | "APPROVED_PARENT" | "APPROVED_ADMIN" | "COMPLETED";
+export type GatePassStatus = "PENDING" | "APPROVED" | "REJECTED" | "APPROVED_PARENT" | "APPROVED_ADMIN" | "COMPLETED" | "EXPIRED" | "CANCELLED";
 
 export interface Alert {
   id: string;

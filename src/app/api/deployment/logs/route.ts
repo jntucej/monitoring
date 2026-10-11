@@ -24,7 +24,8 @@ async function handleGet(req: NextRequest, _context: { auth: AuthContext }) {
   }
 
   const resolved = resolve(/* turbopackIgnore: true */ path);
-  if (!resolved.startsWith("/var/log/")) {
+  const normalized = resolved.replace(/\\/g, "/");
+  if (!normalized.startsWith("/var/log/") && !normalized.includes("/var/log/")) {
     return NextResponse.json({ success: false, error: { code: "BAD_REQUEST", message: "Invalid log path" } }, { status: 400 });
   }
 

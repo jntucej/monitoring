@@ -113,7 +113,9 @@ const EMPTY_BREAKDOWN: CategoryBreakdown = {
   others: { inside: 0, inToday: 0, outToday: 0 },
 };
 
-export const useOperatorStore = create<OperatorState>()((set, get) => ({
+let scanAbortController: AbortController | null = null;
+
+export const useOperatorStore = create<OperatorState>((set, get) => ({
   state: "idle",
   currentStudent: null,
   selectedDirection: "IN",
@@ -132,9 +134,15 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
   gateId: null,
   _scanGeneration: 0,
 
-  startScan: async (roll) => {
+  startScan: async (roll: string) => {
     const cleanRoll = roll.trim().toUpperCase();
     if (!cleanRoll) return;
+
+    if (scanAbortController) {
+      scanAbortController.abort();
+    }
+    scanAbortController = new AbortController();
+    const signal = scanAbortController.signal;
 
     set({ state: "detecting", error: null, photoVerificationDone: false, currentStudent: null });
 
@@ -150,7 +158,7 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
     }
 
     try {
-      const res = await fetch(`/api/persons/${encodeURIComponent(cleanRoll)}`, { headers });
+      const res = await fetch(`/api/persons/${encodeURIComponent(cleanRoll)}`, { headers, signal });
       const result = await res.json().catch(() => null);
 
       if (res.status === 401 || result?.error?.code === "SESSION_EXPIRED" || result?.error?.code === "UNAUTHORIZED") {
@@ -207,7 +215,10 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
         
         error: null,
       });
-    } catch (err) {
+    } catch (err: unknown) {
+      if ((err as Error)?.name === "AbortError") {
+        return;
+      }
       console.error("Network or fetch error during scan start:", err);
       set({
         state: "error",
@@ -220,13 +231,13 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
     }
   },
 
-  setDirection: (direction) => {
+  setDirection: (direction: ScanDirection) => {
     const { currentStudent } = get();
     if (!currentStudent) return;
     set({ selectedDirection: direction, selectedReason: null });
   },
 
-  setReason: (reason) => {
+  setReason: (reason: ExitReason | null) => {
     set({ selectedReason: reason, state: "confirming" });
   },
 
@@ -235,7 +246,7 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
   // Clears only the error field, leaving other state intact
   clearError: () => set({ error: null }),
 
-  confirmScan: async (addToast, overrideDirection, overrideReason) => {
+  confirmScan: async (addToast: (toast: Omit<ToastData, "id">) => void, overrideDirection?: ScanDirection, overrideReason?: string) => {
     const { currentStudent } = get();
     if (!currentStudent) return;
 
@@ -438,7 +449,7 @@ export const useOperatorStore = create<OperatorState>()((set, get) => ({
     }
   },
 
-  setGate: async (gateId) => {
+  setGate: async (gateId: string) => {
     if (!gateId) {
       set({ gate: null, gateId: null });
       return;
