@@ -1,0 +1,13 @@
+{
+  "name": "ai-scheduler-dashboard-generator",
+  "version": "1.0.0",
+  "description": "AI Scheduler Dashboard Plop generator for stamping out components",
+  "main": "index.js",
+  "scripts": {
+    "plop": "plop",
+    "generate": "node scripts/generate.js"
+  },
+  "keywords": ["plop", "generator", "ai", "scheduler", "dashboard", "charts", "panels"],
+  "author": "UCEJ Monitoring Team",
+  "license": "MIT"
+}
