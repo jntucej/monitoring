@@ -7,7 +7,7 @@ export { Role };
 
 export type AccountStatus = "ACTIVE" | "LOCKED" | "SUSPENDED" | "DISABLED" | "DEPROVISIONED";
 
-export type WorkflowType = "hostel" | "exam" | "memo" | "staff_leave";
+export type WorkflowType "hostel" "exam" "memo" "staff_leave" "lab_access";
 
 export type PermissionStatus = "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED" | "COMPLETED" | "ESCALATED";
 
@@ -23,7 +23,8 @@ export type PersonType =
   | "warden"
   | "operator"
   | "admin"
-  | "sysadmin";
+  | "sysadmin"
+  "exam_superintendent";
 
 export interface StudentDetails {
   personId: string;
