@@ -136,12 +136,7 @@ function UserFooter({
           <LogOut className="w-4 h-4" />
         </button>
       </div>
-      <Link
-        href="/login"
-        className="w-full py-1.5 px-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[11px] text-[var(--text-muted)] hover:text-rose-400 text-center font-semibold block"
-      >
-        Exit to Portal Login
-      </Link>
+
     </div>
   );
 }
