@@ -2,7 +2,7 @@
 
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { usePolling } from "@/hooks/usePolling";
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { fadeInUp } from "@/lib/animations";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,6 +11,13 @@ import { StudentList } from "@/components/admin/StudentList";
 import { CampusStatusCards } from "@/components/admin/CampusStatusCards";
 import { DevMessagesPanel } from "@/components/admin/DevMessagesPanel";
 import { GateCardsGrid } from "@/components/admin/GateCardsGrid";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { ChartCard } from "@/components/shared/ChartCard";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { useApiResource } from "@/hooks/useApiResource";
+import { useAuthStore } from "@/stores/authStore";
+import { getRoleTier } from "@/lib/alert-hierarchy";
+import { fmtInt, fmtRelative, fmtBytes } from "@/lib/formatters";
 import {
   Activity, GraduationCap, Briefcase, HardHat,
   UserCheck, RefreshCw, AlertCircle, Flame, ShieldAlert, X, Radio,
@@ -23,6 +30,12 @@ import type { DashboardData } from "@/lib/types";
 import { getAuthHeaders } from "@/hooks/useAuthHeaders";
 import { useUIStore } from "@/stores/uiStore";
 import type { Lockdown } from "@/lib/db";
+import type { Role } from "@/lib/types";
+
+export const metadata = {
+  title: "Admin Dashboard",
+  description: "Campus dashboard and live telemetry"
+};
 
 const LOCKDOWN_SCOPES = [
   { id: "students", label: "Students",       color: "bg-blue-500/10 border-blue-500/30 text-blue-400" },

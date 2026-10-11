@@ -207,15 +207,69 @@ async function cmdNew(name, flags) {
 
 // ── AUDIT ────────────────────────────────────────────────────────────────
 const CHECKS = [
-  { id: "guard",       test: (s) => /GuardedPage|AuthGuard/.test(s),                    msg: "No GuardedPage/AuthGuard — role may leak visually" },
-  { id: "roles",       test: (s) => /allowedRoles|minTier=/.test(s),                    msg: "Guard present but no allowedRoles / minTier" },
-  { id: "suspense",    test: (s) => !/useSearchParams/.test(s) || /Suspense/.test(s),   msg: "useSearchParams without <Suspense> wrapper" },
-  { id: "interval",    test: (s) => !/setInterval/.test(s) || /usePolling|useLiveRefresh/.test(s), msg: "Raw setInterval — migrate to usePolling" },
-  { id: "fetch",       test: (s) => !/useEffect\(\s*\(\)\s*=>\s*\{[\s\S]*?fetch\(/.test(s),  msg: "Manual fetch-in-useEffect — use useApiResource" },
-  { id: "alerts",      test: (s) => !/alerts\.slice|alerts\.map|AlertBanner/.test(s) || /ConditionalAlert/.test(s), msg: "Hand-rolled alert rendering — use ConditionalAlert" },
-  { id: "boundary",    test: (s) => !/recharts|Chart|DualTwin|Heatmap/.test(s) || /WidgetBoundary|ErrorBoundary/.test(s), msg: "Chart-like widget without error boundary" },
-  { id: "guardeddata", test: (s) => !/window\.location\.search/.test(s),                msg: "Reads window.location.search — use useSearchParams" },
-  { id: "authguard",   test: (s) => /GuardedPage/.test(s) || /<AuthGuard/.test(s),      msg: "Root of page has no guard" },
+  // Group 1 — Page Metadata & SEO
+  { id: "meta-title",    test: (s) => /export const metadata|<title>/.test(s),                        msg: "No page metadata/title export" },
+  { id: "meta-desc",     test: (s) => /description:/.test(s),                                        msg: "No meta description" },
+
+  // Group 2 — Duplicated Shells
+  { id: "guard",         test: (s) => /GuardedPage|AuthGuard/.test(s),                               msg: "No GuardedPage/AuthGuard — role may leak visually" },
+  { id: "roles",         test: (s) => /allowedRoles|minTier=/.test(s),                               msg: "Guard present but no allowedRoles / minTier" },
+  { id: "suspense",      test: (s) => !/useSearchParams/.test(s) || /Suspense/.test(s),              msg: "useSearchParams without <Suspense> wrapper" },
+  { id: "interval",      test: (s) => !/setInterval/.test(s) || /usePolling|useLiveRefresh/.test(s), msg: "Raw setInterval — migrate to usePolling" },
+  { id: "fetch",         test: (s) => !/useEffect\(\s*\(\)\s*=>\s*\{[\s\S]*?fetch\(/.test(s), msg: "Manual fetch-in-useEffect — use useApiResource" },
+  { id: "alerts",        test: (s) => !/alerts\.slice|alerts\.map|AlertBanner/.test(s) || /ConditionalAlert/.test(s), msg: "Hand-rolled alert rendering — use ConditionalAlert" },
+  { id: "boundary",      test: (s) => !/recharts|Chart|DualTwin|Heatmap/.test(s) || /WidgetBoundary|ErrorBoundary/.test(s), msg: "Chart-like widget without error boundary" },
+  { id: "guardeddata",   test: (s) => !/window\.location\.search/.test(s),                         msg: "Reads window.location.search — use useSearchParams" },
+  { id: "authguard",     test: (s) => /GuardedPage/.test(s) || /<AuthGuard/.test(s),                 msg: "Root of page has no guard" },
+
+  // Group 3 — Component Composition
+  { id: "page-header",   test: (s) => /<PageHeader/.test(s) || /<h1[^>]*>.*<\/h1>/.test(s),         msg: "No PageHeader — header duplicated" },
+  { id: "breadcrumb",    test: (s) => !/\/\[.*\]/.test(s) || /breadcrumb/i.test(s),               msg: "Detail page missing breadcrumb" },
+  { id: "refresh-btn",   test: (s) => !/onRefresh/.test(s) || !/window\.location\.reload\(\)/.test(s), msg: "Refresh uses window.location.reload() — destroys client state" },
+  { id: "hub-gating",    test: (s) => !/minTier/.test(s) || /getRoleTier|useAuthStore/.test(s),     msg: "Hub page lacks role-tier gating on tiles" },
+  { id: "wrapper-factory", test: (s) => !/GuardedPage/.test(s) || /wrapPage|GuardedPage minTier/.test(s), msg: "Wrapper factory not used — duplicated AuthGuard wrappers" },
+
+  // Group 3 (continued) — Chart best practices
+  { id: "chart-card",    test: (s) => !/recharts|Chart|DualTwin|Heatmap/.test(s) || /<ChartCard/.test(s), msg: "Chart without ChartCard wrapper (no title/legend)" },
+  { id: "chart-memo",    test: (s) => !/recharts|Chart|DualTwin|Heatmap/.test(s) || /React\.memo/.test(s), msg: "Chart not memoized — re-renders on every keystroke" },
+
+  // Group 4 — Performance & Memoization
+  { id: "usememo-filter", test: (s) => !/\.filter\(|\.map\(/.test(s) || /useMemo.*filter/.test(s), msg: "Client-side filter without useMemo" },
+  { id: "usecallback-refetch", test: (s) => !/load|refresh/.test(s) || /useCallback.*load|useCallback.*refresh/.test(s), msg: "Refetch function not memoized" },
+  { id: "stable-keys",   test: (s) => !/\.map\(/.test(s) || /key=.*\.(id|uid|roll)/.test(s),      msg: "List uses index as key — use stable ID" },
+
+  // Group 5 — Type Safety
+  { id: "no-any",        test: (s) => !/eslint-disable.*no-explicit-any/.test(s) && !/: any[\s,)]/.test(s), msg: "Explicit 'any' type used — replace with real type" },
+  { id: "api-typed",     test: (s) => !/useApiResource|fetch.*json/.test(s) || /useApiResource<|as [A-Z]/.test(s), msg: "API response not typed" },
+
+  // Group 6 — Error Handling
+  { id: "error-surface", test: (s) => !/error/.test(s) || /error && \(|WidgetBoundary|toast/.test(s), msg: "Error state not surfaced to user" },
+  { id: "retry-button",  test: (s) => !/error/.test(s) || /refresh|retry/.test(s),                   msg: "Error state has no retry button" },
+  { id: "offline-check", test: (s) => !/fetch|useApiResource/.test(s) || /navigator\.onLine/.test(s), msg: "No offline detection" },
+
+  // Group 7 — UX Polish
+  { id: "sticky-header", test: (s) => !/table|overflow-x/.test(s) || /sticky top-0/.test(s),        msg: "Long list missing sticky filter/header" },
+  { id: "column-sort",   test: (s) => !/table/.test(s) || /sort|setFilter.*dir/.test(s),            msg: "Table missing column sort" },
+  { id: "bulk-selection", test: (s) => !/bulk|selected/.test(s) || /useRef.*Set/.test(s),           msg: "Bulk selection not persisted across refetch" },
+  { id: "confirm-bulk",  test: (s) => !/bulk|delete/.test(s) || /ConfirmDialog/.test(s),           msg: "Destructive bulk action lacks confirmation dialog" },
+  { id: "time-element",  test: (s) => !/timeAgo|fmtRelative|timestamp/.test(s) || /<time/.test(s),  msg: "Timestamps not <time> elements" },
+  { id: "number-format", test: (s) => !/\d{4,}/.test(s) || /fmtInt|fmtBytes|Intl\.NumberFormat/.test(s), msg: "Numbers not formatted consistently" },
+  { id: "null-cell",     test: (s) => !/table/.test(s) || /fmtCell|\?\?|== null/.test(s),         msg: "Null/undefined cells render as blank" },
+
+  // Group 8 — Consistency
+  { id: "toast-format",  test: (s) => !/toast|addToast/.test(s) || /toast.*(Created|Updated|Deleted|Failed)/.test(s), msg: "Toast messages inconsistent format" },
+  { id: "confirm-dialog", test: (s) => !/window\.confirm/.test(s) || /ConfirmDialog/.test(s),      msg: "Uses window.confirm — use ConfirmDialog" },
+  { id: "pagination",    test: (s) => !/table|list/.test(s) || /Paginator|limit=/.test(s),           msg: "List/table missing pagination" },
+  { id: "date-format",   test: (s) => !/date|time|timestamp/.test(s) || /fmtDate|fmtTime|fmtDateTime/.test(s), msg: "Date/time formats inconsistent" },
+
+  // Group 9 — Accessibility
+  { id: "tabs-a11y",     test: (s) => !/Tabs|tabs/.test(s) || /role="tablist"/.test(s),          msg: "Tabs missing ARIA roles" },
+  { id: "chart-a11y",    test: (s) => !/recharts|Chart/.test(s) || /aria-label|aria-hidden="false"/.test(s), msg: "Chart missing accessibility label" },
+  { id: "file-upload",   test: (s) => !/type="file"/.test(s) || /htmlFor|tabIndex/.test(s),       msg: "File upload not keyboard accessible" },
+
+  // Group 10 — Data Integrity
+  { id: "dry-run",       test: (s) => !/bulk|import/.test(s) || /dry-run|validate.*commit/.test(s), msg: "Bulk operation lacks dry-run preview" },
+  { id: "structured-errors", test: (s) => !/form|POST|PATCH/.test(s) || /fields:\s*\{/.test(s),  msg: "Form errors not structured (field-level)" },
 ];
 
 async function* walk(dir) {
