@@ -103,7 +103,7 @@ async function handlePost(req: NextRequest) {
     const placeholders = tables.map((_, i) => `$${i + 2}`).join(",");
     const validTables = (await query(
       `SELECT table_name FROM information_schema.tables 
-       WHERE table_schema = 'public' AND table_name IN (${placeholders})`,
+       WHERE table_schema = $1 AND table_name IN (${placeholders})`,
       ["public", ...tables]
 )).rows;
 
