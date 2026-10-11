@@ -2,9 +2,8 @@ DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'gate_app') THEN
     CREATE ROLE gate_app LOGIN PASSWORD 'placeholder_to_be_rotated';
   END IF;
+  EXECUTE format('GRANT CONNECT ON DATABASE %I TO gate_app', current_database());
 END $$;
-
-GRANT CONNECT ON DATABASE gate_monitor TO gate_app;
 GRANT USAGE ON SCHEMA public TO gate_app;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO gate_app;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO gate_app;
