@@ -60,18 +60,29 @@ until docker exec "$CONTAINER_NAME" pg_isready -U postgres >/dev/null 2>&1; do
 done
 
 # 3. Setup mock Supabase roles & auth schema
-docker exec "$CONTAINER_NAME" psql -U postgres -v ON_ERROR_STOP=1 -c "
-DO \\$\$
+docker exec -i "$CONTAINER_NAME" psql -U postgres -v ON_ERROR_STOP=1 <<'SQL'
+DO $$
 BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'admin') THEN CREATE ROLE admin; END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN CREATE ROLE authenticated; END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN CREATE ROLE service_role; END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN CREATE ROLE anon; END IF;
-END \\$\$;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'admin') THEN
+    CREATE ROLE admin;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN
+    CREATE ROLE authenticated;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN
+    CREATE ROLE service_role;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
+    CREATE ROLE anon;
+  END IF;
+END
+$$;
 
 CREATE SCHEMA IF NOT EXISTS auth;
-CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid AS \\$\$ SELECT null::uuid; \\$\$ LANGUAGE sql;
-" >/dev/null
+CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid AS $$
+  SELECT null::uuid;
+$$ LANGUAGE sql;
+SQL
 
 # 4. Load baseline schema if present
 if [ -f "database/schema.sql" ]; then
