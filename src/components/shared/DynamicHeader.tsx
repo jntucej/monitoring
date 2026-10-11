@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, ShieldCheck, ShieldAlert, ShieldQuestion, RefreshCw } from "lucide-react";
+import { Menu, ShieldCheck, ShieldAlert, ShieldQuestion, RefreshCw, User, LogOut } from "lucide-react";
 import { useUIStore } from "@/stores/uiStore";
 import { useAuthStore } from "@/stores/authStore";
 import { useCollegeInfo } from "@/hooks/useCollegeInfo";
@@ -31,9 +31,27 @@ export function DynamicHeader() {
   const { role, user, logout } = useAuthStore();
   const { college } = useCollegeInfo();
   const { wsConnected, securityMode, activeAlerts, gateTraffic } = useGlass();
-  const [tapCount, setTapCount] = useState(0);
-  const tapTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [isOnline, setIsOnline] = useState(true);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement | null>(null);
+
+  // Close the user menu on outside click
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    const onDoc = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) setUserMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [userMenuOpen]);
+
+  const goProfile = () => { setUserMenuOpen(false); router.push("/profile"); };
+  const goSecurity = () => { setUserMenuOpen(false); router.push("/security"); };
+  const doSignOut = () => {
+    setUserMenuOpen(false);
+    addToast({ title: "Signed out", message: "You have been securely signed out.", variant: "warning" });
+    logout();
+  };
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -50,28 +68,6 @@ export function DynamicHeader() {
   }, []);
 
   const title = PAGE_TITLES[pathname] || `${college?.shortName || "College"} Gate Monitor`;
-
-  // Secret Triple-tap gesture on top-right area to instantly logout
-  const handleSecretTripleTap = () => {
-    setTapCount((prev) => {
-      const next = prev + 1;
-      if (next >= 3) {
-        addToast({
-          title: "Quick Sign Out",
-          message: "Triple-tap gesture recognized. Logging out...",
-          variant: "warning",
-        });
-        logout();
-        return 0;
-      }
-      return next;
-    });
-
-    if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
-    tapTimerRef.current = setTimeout(() => {
-      setTapCount(0);
-    }, 600);
-  };
 
   const toggleTheme = () => {
     const next = theme === "dark" ? "glass" : theme === "glass" ? "light" : "dark";
@@ -168,16 +164,49 @@ export function DynamicHeader() {
         {/* Glass & Appearance Theme Toggle */}
         <GlassThemeToggle showCard={false} />
 
-        {/* Quick User Avatar (triple-tap = quick sign out) */}
-        <div className="flex items-center gap-2 pl-1 border-l border-[var(--border)] shrink-0">
+        {/* User menu — discoverable access to /profile, security and sign-out
+            (replaces the old hidden triple-tap gesture) */}
+        <div className="relative flex items-center gap-2 pl-1 border-l border-[var(--border)] shrink-0" ref={userMenuRef}>
           <button
-            onClick={handleSecretTripleTap}
+            onClick={() => setUserMenuOpen((o) => !o)}
             className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[var(--action-primary)]/20 text-[var(--action-primary)] flex items-center justify-center text-[10px] sm:text-xs font-bold ring-1 ring-[var(--action-primary)]/30 transition-transform active:scale-95"
-            title={`${user?.name || role || "User"} — Triple-tap to sign out`}
-            aria-label="User menu. Tap repeatedly to sign out"
+            title={`${user?.name || role || "User"} — open user menu`}
+            aria-label="Open user menu"
+            aria-expanded={userMenuOpen}
           >
             {user?.name ? user.name.charAt(0).toUpperCase() : (role?.charAt(0).toUpperCase() || "U")}
           </button>
+          {userMenuOpen && (
+            <div className="absolute right-0 top-9 sm:top-10 w-48 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl shadow-2xl overflow-hidden z-50">
+              <div className="px-3 py-2.5 border-b border-[var(--border)]">
+                <p className="text-xs font-bold text-[var(--text-primary)] truncate">{user?.name || "User"}</p>
+                <p className="text-[10px] text-[var(--text-muted)] capitalize truncate">{role || "—"}</p>
+              </div>
+              <div className="p-1.5">
+                <button
+                  onClick={goProfile}
+                  className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium text-[var(--text-primary)] hover:bg-[var(--bg-base)] transition-colors text-left"
+                >
+                  <User className="w-4 h-4 text-[var(--text-muted)]" />
+                  My Profile
+                </button>
+                <button
+                  onClick={goSecurity}
+                  className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium text-[var(--text-primary)] hover:bg-[var(--bg-base)] transition-colors text-left"
+                >
+                  <ShieldCheck className="w-4 h-4 text-[var(--text-muted)]" />
+                  Security Center
+                </button>
+                <button
+                  onClick={doSignOut}
+                  className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium text-red-400 hover:bg-red-500/10 transition-colors text-left"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign out
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </header>
