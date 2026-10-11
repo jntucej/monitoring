@@ -1,560 +1,209 @@
 #!/usr/bin/env node
-// scripts/dash.mjs — Gate Monitor dashboard cookie cutter (v2).
-//
-//   node scripts/dash.mjs init                    install all shared primitives
-//   node scripts/dash.mjs init-groups             add error/loading/not-found to every (group)
-//   node scripts/dash.mjs new <role> [flags]      create a fully-wired dashboard
-//   node scripts/dash.mjs audit                   scan every page.tsx for 34 known issues
-//   node scripts/dash.mjs fix <file>              auto-patch safe wins on one page
-//   node scripts/dash.mjs sweep                   cross-file fixes (timeAgo, console.*, etc.)
+// scripts/dash.mjs — Gate Monitor Dashboard Cookie Cutter (v3).
 
-import { readFile, writeFile, mkdir, access, readdir } from "node:fs/promises";
-import { constants } from "node:fs";
-import { resolve, relative, join } from "node:path";
+import { readFile, writeFile, mkdir, readdir, stat } from "node:fs/promises";
+import { dirname, join, relative, resolve } from "node:path";
 
-const ROOT = process.cwd();
-const SRC  = resolve(ROOT, "src");
+// ────────────────────────────────────────────────────────────────────────────
 const C = {
   red:    (s) => `\x1b[31m${s}\x1b[0m`,
   green:  (s) => `\x1b[32m${s}\x1b[0m`,
   yellow: (s) => `\x1b[33m${s}\x1b[0m`,
+  blue:   (s) => `\x1b[34m${s}\x1b[0m`,
   dim:    (s) => `\x1b[2m${s}\x1b[0m`,
   bold:   (s) => `\x1b[1m${s}\x1b[0m`,
 };
-const die  = (m) => { console.error(C.red(`✖ ${m}`)); process.exit(1); };
+const die  = (m) => { console.error(C.red(`✗ ${m}`)); process.exit(1); };
 const ok   = (m) => console.log(C.green(`✓ ${m}`));
 const warn = (m) => console.log(C.yellow(`! ${m}`));
+const info = (m) => console.log(C.dim(`  ${m}`));
+const head = (m) => console.log(C.bold(m));
 
-const pascal    = (s) => s.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()).replace(/\s+/g, "");
+const ROOT = resolve(process.cwd());
+const APP  = join(ROOT, "src", "app");
+
+const pascal = (s) => s.replace(/(^|[-_])(\w)/g, (_, __, c) => c.toUpperCase());
 const titleCase = (s) => s.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-const exists    = async (p) => { try { await access(p, constants.F_OK); return true; } catch { return false; } };
+const exists = async (p) => { try { await stat(p); return true; } catch { return false; } };
+async function ensureDir(p) { await mkdir(p, { recursive: true }); }
+async function writeIfMissing(p, content) {
+  if (await exists(p)) { warn(`${relative(ROOT, p)} already exists — skipped`); return false; }
+  await ensureDir(dirname(p));
+  await writeFile(p, content, "utf8");
+  ok(relative(ROOT, p));
+  return true;
+}
 
 function parseArgs(argv) {
-  const [kind, name, ...rest] = argv;
+  const [, , cmd, ...rest] = argv;
+  const positional = [];
   const flags = {};
   for (let i = 0; i < rest.length; i++) {
-    if (!rest[i].startsWith("--")) continue;
-    const key = rest[i].slice(2);
-    const next = rest[i + 1];
-    if (!next || next.startsWith("--")) flags[key] = true;
-    else { flags[key] = next; i++; }
+    const a = rest[i];
+    if (a.startsWith("--")) {
+      const key = a.slice(2);
+      const next = rest[i + 1];
+      if (next && !next.startsWith("--")) { flags[key] = next; i++; }
+      else flags[key] = true;
+    } else positional.push(a);
   }
-  return { kind, name, flags };
+  return { cmd, positional, flags };
 }
 
-// ══════════════════════════════════════════════════════════════════════════
-// PRIMITIVES
-// ═══════════════════════════════════════════════════════════════════════════
-
-const PRIMITIVES = {
-
-"src/components/shared/GuardedPage.tsx": `"use client";
-import { AuthGuard } from "@/components/shared/AuthGuard";
-import { getRoleTier } from "@/lib/alert-hierarchy";
-import { useAuthStore } from "@/stores/authStore";
-import type { Role } from "@/lib/types";
-import { ShieldAlert } from "lucide-react";
-
-export function GuardedPage({ allowedRoles, minTier = 0, children }: {
-  allowedRoles?: Role[]; minTier?: number; children: React.ReactNode;
-}) {
-  const role = (useAuthStore((s) => s.user?.role) ?? "student") as Role;
-  const tier = getRoleTier(role);
-  const allowed = (allowedRoles ? allowedRoles.includes(role) : true) && tier >= minTier;
-  if (!allowed) return (
-    <AuthGuard>
-      <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-6 text-rose-100">
-        <p className="flex items-center gap-2 text-sm font-semibold">
-          <ShieldAlert className="h-4 w-4" />
-          Access denied — role {role} (tier {tier}) cannot open this workspace.
-        </p>
-      </div>
-    </AuthGuard>
-  );
-  return <AuthGuard allowedRoles={allowedRoles}>{children}</AuthGuard>;
-}
-`,
-
-"src/components/shared/WidgetBoundary.tsx": `"use client";
-import React from "react";
-import { AlertTriangle } from "lucide-react";
-
-export class WidgetBoundary extends React.Component<
-  { title?: string; children: React.ReactNode }, { error: Error | null }
-> {
-  state = { error: null as Error | null };
-  static getDerivedStateFromError(error: Error) { return { error }; }
-  componentDidCatch(error: Error) { console.error("[widget]", this.props.title, error); }
-  render() {
-    if (this.state.error) return (
-      <div className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-4 text-sm text-rose-200">
-        <p className="flex items-center gap-2 font-medium">
-          <AlertTriangle className="h-4 w-4" />
-          {this.props.title ?? "Widget"} failed to load
-        </p>
-        <p className="mt-1 text-xs opacity-70">{this.state.error.message}</p>
-      </div>
-    );
-    return this.props.children;
-  }
-}
-`,
-
-"src/components/shared/StatusPill.tsx": `import { cn } from "@/lib/utils";
-
-export type StatusLevel = "critical" | "high" | "medium" | "low" | "info";
-
-const MAP: Record<StatusLevel, string> = {
-  critical: "border-rose-500/40 bg-rose-500/10 text-rose-200",
-  high:     "border-amber-500/40 bg-amber-500/10 text-amber-200",
-  medium:   "border-sky-500/40 bg-sky-500/10 text-sky-200",
-  low:      "border-slate-500/40 bg-slate-500/10 text-slate-200",
-  info:     "border-slate-500/30 bg-slate-500/5 text-slate-200",
-};
-
-export function StatusPill({ status, className }: { status: StatusLevel; className?: string }) {
-  return (
-    <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium capitalize", MAP[status], className)}>
-      {status}
-    </span>
-  );
-}
-`,
-
-"src/components/ui/SearchInput.tsx": `"use client";
-import { useEffect, useState } from "react";
-import { Search } from "lucide-react";
-import { cn } from "@/lib/utils";
-
-export function SearchInput({
-  value, onChange, delayMs = 250, className, ...rest
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  delayMs?: number;
-} & Omit<React.InputHTMLAttributes<HTMLInputElement>, "value" | "onChange">) {
-  const [local, setLocal] = useState(value);
-  useEffect(() => { setLocal(value); }, [value]);
-  useEffect(() => {
-    const t = setTimeout(() => onChange(local), delayMs);
-    return () => clearTimeout(t);
-  }, [local, delayMs, onChange]);
-  return (
-    <div className={cn("relative", className)}>
-      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
-      <input
-        value={local}
-        onChange={(e) => setLocal(e.target.value)}
-        className="w-full rounded-xl border border-[var(--bg-surface)] py-2 pl-10 pr-3 text-sm focus:border-[var(--action-primary)] focus:outline-none"
-        {...rest}
-      />
-    </div>
-  );
-}
-`,
-
-"src/components/ui/Paginator.tsx": `"use client";
-export function Paginator({ page, limit, total, onChange }: {
-  page: number; limit: number; total: number; onChange: (p: number) => void;
-}) {
-  const last = Math.max(1, Math.ceil(total / limit));
-  if (last <= 1) return null;
-  return (
-    <div className="flex items-center justify-between py-3 text-sm">
-      <span className="text-[var(--text-muted)]">
-        Page {page} of {last} · {total} rows
-      </span>
-      <div className="flex gap-2">
-        <button onClick={() => onChange(page - 1)} disabled={page <= 1}
-          className="rounded-lg border border-[var(--border)] px-3 py-1.5 disabled:opacity-40">Prev</button>
-        <button onClick={() => onChange(page + 1)} disabled={page >= last}
-          className="rounded-lg border border-[var(--border)] px-3 py-1.5 disabled:opacity-40">Next</button>
-      </div>
-    </div>
-  );
-}
-`,
-
-"src/hooks/useUrlFilters.ts": `"use client";
-import { useCallback } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-
-export function useUrlFilters<T extends Record<string, string>>(defaults: T) {
-  const sp = useSearchParams();
-  const router = useRouter();
-  const path = usePathname();
-
-  const filters = { ...defaults };
-  for (const k of Object.keys(defaults)) {
-    const v = sp.get(k);
-    if (v !== null) filters[k] = v as T[keyof T];
-  }
-
-  const setFilter = useCallback((key: keyof T, value: string | null) => {
-    const next = new URLSearchParams(sp.toString());
-    if (value == null || value === "" || value === defaults[key]) next.delete(String(key));
-    else next.set(String(key), value);
-    router.replace(path + "?" + next.toString());
-  }, [sp, router, path, defaults]);
-
-  const reset = useCallback(() => router.replace(path), [router, path]);
-
-  return { filters, setFilter, reset };
-}
-`,
-
-"src/hooks/useFormSubmit.ts": `"use client";
-import { useState } from "react";
-
-export function useFormSubmit<T = void>(
-  action: () => Promise<T>,
-  { onSuccess, onError }: {
-    onSuccess?: (r: T) => void;
-    onError?: (e: unknown) => void;
-  } = {}
-) {
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-
-  const submit = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (submitting) return;
-    setSubmitting(true);
-    setError(null);
-    try {
-      const r = await action();
-      onSuccess?.(r);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error(String(err)));
-      onError?.(err);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  return { submitting, error, submit };
-}
-`,
-
-"src/hooks/useMountTime.ts": `"use client";
-import { useEffect, useState } from "react";
-
-/** Returns null on server + first client render, then a live-updating timestamp.
- *  Prevents React hydration mismatches from Date.now() in render. */
-export function useMountTime(tickMs = 60_000): number | null {
-  const [now, setNow] = useState<number | null>(null);
-  useEffect(() => {
-    setNow(Date.now());
-    const t = setInterval(() => setNow(Date.now()), tickMs);
-    return () => clearInterval(t);
-  }, [tickMs]);
-  return now;
-}
-`,
-
-"src/lib/client-cache.ts": `type Entry<T> = { data: T; at: number };
-const store = new Map<string, Entry<unknown>>();
-const inflight = new Map<string, Promise<unknown>>();
-
-export async function cachedFetch<T>(
-  url: string,
-  { ttlMs = 15_000, headers }: { ttlMs?: number; headers?: Record<string, string> } = {}
-): Promise<T> {
-  const now = Date.now();
-  const hit = store.get(url);
-  if (hit && now - hit.at < ttlMs) return hit.data as T;
-  const pending = inflight.get(url);
-  if (pending) return pending as Promise<T>;
-  const p = fetch(url, { headers })
-    .then((r) => { if (!r.ok) throw new Error(`\${r.status} \${r.statusText}`); return r.json(); })
-    .then((data) => { store.set(url, { data, at: Date.now() }); return data; })
-    .finally(() => inflight.delete(url));
-  inflight.set(url, p);
-  return p as Promise<T>;
-}
-
-export function invalidateClientCache(prefix: string) {
-  for (const k of store.keys()) if (k.startsWith(prefix)) store.delete(k);
-}
-`,
-
-"src/hooks/useApiResource.ts": `"use client";
-import { useCallback, useEffect, useState } from "react";
-import { cachedFetch } from "@/lib/client-cache";
-import { getAuthHeaders } from "@/lib/utils";
-
-export interface ApiResource<T> {
-  data: T | null; loading: boolean; error: string | null; refresh: () => Promise<void>;
-}
-
-export function useApiResource<T>(
-  url: string | null,
-  options: { deps?: unknown[]; enabled?: boolean; ttlMs?: number } = {}
-): ApiResource<T> {
-  const { enabled = true, ttlMs = 15_000 } = options;
-  const [data, setData] = useState<T | null>(null);
-  const [loading, setLoading] = useState(Boolean(url && enabled));
-  const [error, setError] = useState<string | null>(null);
-
-  const refresh = useCallback(async () => {
-    if (!url || !enabled) return;
-    setLoading(true); setError(null);
-    try { setData(await cachedFetch<T>(url, { ttlMs, headers: getAuthHeaders() })); }
-    catch (e) { setError(e instanceof Error ? e.message : "Request failed"); }
-    finally { setLoading(false); }
-  }, [url, enabled, ttlMs]);
-
-  useEffect(() => { void refresh(); }, [refresh, ...(options.deps ?? [])]);
-  return { data, loading, error, refresh };
-}
-`,
-
-"src/hooks/usePolling.ts": `"use client";
-import { useEffect } from "react";
-
-export function usePolling(
-  fn: () => Promise<unknown> | void,
-  { intervalMs = 30_000, enabled = true }: { intervalMs?: number; enabled?: boolean } = {}
-) {
-  useEffect(() => {
-    if (!enabled) return;
-    let timer: ReturnType<typeof setTimeout> | null = null;
-    let cancelled = false;
-    const tick = async () => {
-      if (cancelled) return;
-      try { await fn(); } catch { /* non-fatal */ }
-      if (!cancelled) timer = setTimeout(tick, intervalMs);
-    };
-    const onVis = () => {
-      if (document.visibilityState === "hidden") { if (timer) { clearTimeout(timer); timer = null; } }
-      else if (!timer) void tick();
-    };
-    void tick();
-    document.addEventListener("visibilitychange", onVis);
-    return () => { cancelled = true; if (timer) clearTimeout(timer); document.removeEventListener("visibilitychange", onVis); };
-  }, [fn, intervalMs, enabled]);
-}
-`,
-};
-
-// ═══════════════════════════════════════════════════════════════════════════
-// GROUP FILES (error.tsx / loading.tsx / not-found.tsx)
-// ═══════════════════════════════════════════════════════════════════════════
-
+// ────────────────────────────────────────────────────────────────────────────
+// GROUP-LEVEL FILES
+// ────────────────────────────────────────────────────────────────────────────
 const groupError = (name) => `"use client";
-export default function ${name}Error({ error, reset }: { error: Error; reset: () => void }) {
+
+import { useEffect } from "react";
+import { AlertTriangle, RefreshCw } from "lucide-react";
+import { reportClientError } from "@/lib/monitoring";
+
+export default function ${pascal(name)}Error({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  useEffect(() => {
+    reportClientError(error, { route: "${name}", component: "${pascal(name)}Error", digest: error.digest });
+  }, [error]);
+
   return (
-    <div className="m-6 rounded-2xl border border-rose-500/30 bg-rose-500/5 p-6 text-rose-200">
-      <h2 className="text-lg font-semibold">${name} workspace error</h2>
-      <p className="mt-1 text-sm opacity-80">{error.message}</p>
-      <button onClick={reset} className="mt-3 rounded-lg border border-rose-500/40 px-3 py-1.5 text-sm">Retry</button>
+    <div className="flex min-h-[60vh] items-center justify-center p-6">
+      <div className="glass-card max-w-md w-full p-6 text-center space-y-4">
+        <div className="mx-auto w-12 h-12 rounded-full bg-[var(--action-danger)]/10 flex items-center justify-center">
+          <AlertTriangle className="w-6 h-6 text-[var(--action-danger)]" />
+        </div>
+        <h2 className="text-lg font-semibold text-[var(--text-primary)]">Something went wrong</h2>
+        <p className="text-sm text-[var(--text-secondary)]">
+          ${error.message || "An unexpected error occurred in this workspace."}
+        </p>
+        ${error.digest ? `<p className="text-xs text-[var(--text-muted)] font-mono">ref: ${error.digest}</p>` : ""}
+        <button
+          type="button"
+          onClick={reset}
+          className="inline-flex items-center gap-2 rounded-lg bg-[var(--action-primary)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+        >
+          <RefreshCw className="w-4 h-4" />
+          Try again
+        </button>
+      </div>
     </div>
   );
 }
 `;
 
-const groupLoading = `import { PageLoading } from "@/components/shared/LoadingStates";
-export default function Loading() { return <PageLoading />; }
+const groupLoading = (name) => `import { PageLoading } from "@/components/shared/LoadingStates";
+
+export default function ${pascal(name)}Loading() {
+  return <PageLoading />;
+}
 `;
 
 const groupNotFound = (name) => `import Link from "next/link";
-export default function ${name}NotFound() {
+import { Compass } from "lucide-react";
+
+export default function ${pascal(name)}NotFound() {
   return (
-    <div className="m-6 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-10 text-center">
-      <h2 className="text-lg font-semibold">Page not found</h2>
-      <p className="mt-1 text-sm text-[var(--text-muted)]">This ${name} page does not exist.</p>
-      <Link href="/" className="mt-4 inline-block rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm">Go home</Link>
+    <div className="flex min-h-[60vh] items-center justify-center p-6">
+      <div className="glass-card max-w-md w-full p-6 text-center space-y-4">
+        <div className="mx-auto w-12 h-12 rounded-full bg-[var(--action-info)]/10 flex items-center justify-center">
+          <Compass className="w-6 h-6 text-[var(--action-info)]" />
+        </div>
+        <h2 className="text-lg font-semibold text-[var(--text-primary)]">Not found</h2>
+        <p className="text-sm text-[var(--text-secondary)]">
+          This page doesn&apos;t exist in the ${name} workspace.
+        </p>
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 rounded-lg bg-[var(--action-primary)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+        >
+          Back to dashboard
+        </Link>
+      </div>
     </div>
   );
 }
 `;
 
-// ═══════════════════════════════════════════════════════════════════════════
-// COMMAND: init
-// ═══════════════════════════════════════════════════════════════════════════
-
-async function cmdInit() {
-  console.log(C.bold("\nInstalling shared primitives…\n"));
-  let wrote = 0, skipped = 0;
-  for (const [rel, body] of Object.entries(PRIMITIVES)) {
-    const full = resolve(ROOT, rel);
-    if (await exists(full)) { warn(`exists: ${rel}`); skipped++; continue; }
-    await mkdir(resolve(full, ".."), { recursive: true });
-    await writeFile(full, body, "utf8");
-    ok(`wrote:  ${rel}`);
-    wrote++;
-  }
-
-  const hier = resolve(ROOT, "src/lib/alert-hierarchy.ts");
-  if (!await exists(hier)) warn("missing: src/lib/alert-hierarchy.ts — copy from earlier message");
-  else {
-    const src = await readFile(hier, "utf8");
-    if (!src.includes("SCAFFOLD:ALERTS")) {
-      warn("alert-hierarchy.ts missing SCAFFOLD:ALERTS marker");
-      console.log(C.dim("  add: // SCAFFOLD:ALERTS — new alerts are injected above this line"));
-    }
-  }
-
-  console.log(`\n${wrote} written, ${skipped} skipped.`);
-  console.log(C.dim("Next:  node scripts/dash.mjs init-groups\n"));
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// COMMAND: init-groups
-// ═══════════════════════════════════════════════════════════════════════════
-
-async function cmdInitGroups() {
-  const appDir = resolve(SRC, "app");
-  const groups = (await readdir(appDir, { withFileTypes: true }))
-    .filter((e) => e.isDirectory() && e.name.startsWith("(") && e.name.endsWith(")"))
-    .map((e) => e.name);
-
-  console.log(C.bold(`\nFound ${groups.length} route groups: ${groups.join(", ")}\n`));
-  let wrote = 0;
-
-  for (const g of groups) {
-    const display = g.replace(/[()]/g, "");
-    const Name = pascal(display);
-    const dir = resolve(appDir, g);
-
-    for (const [file, body] of [
-      ["error.tsx",     groupError(Name)],
-      ["loading.tsx",   groupLoading],
-      ["not-found.tsx", groupNotFound(display)],
-    ]) {
-      const p = join(dir, file);
-      if (await exists(p)) continue;
-      await writeFile(p, body, "utf8");
-      ok(`wrote: src/app/${g}/${file}`);
-      wrote++;
-    }
-  }
-  console.log(`\n${wrote} files written across ${groups.length} groups.\n`);
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// COMMAND: new
-// ═══════════════════════════════════════════════════════════════════════════
-
-function pageTemplate({ role, P, title, minTier, alertsUrl }) {
+// ────────────────────────────────────────────────────────────────────────────
+// PAGE / LAYOUT TEMPLATES
+// ────────────────────────────────────────────────────────────────────────────
+function pageTemplate({ role, componentName, title, minTier }) {
   return `"use client";
 
 import { Suspense } from "react";
 import { GuardedPage } from "@/components/shared/GuardedPage";
 import { ConditionalAlert } from "@/components/shared/ConditionalAlert";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { PageHeader } from "@/components/shared/PageHeader";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { EmptyState } from "@/components/shared/EmptyState";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Paginator } from "@/components/ui/Paginator";
-import { SearchInput } from "@/components/ui/SearchInput";
-import { useApiResource } from "@/hooks/useApiResource";
-import { usePolling } from "@/hooks/usePolling";
-import { useUrlFilters } from "@/hooks/useUrlFilters";
-import { useMountTime } from "@/hooks/useMountTime";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
+import { useDashboardData } from "@/hooks/useDashboardData";
 import { useAuthStore } from "@/stores/authStore";
 import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role } from "@/lib/types";
-import { RefreshCw } from "lucide-react";
 
-const MIN_TIER   = ${minTier};
-const ALERTS_URL = "${alertsUrl}";
+const MIN_TIER = ${minTier};
+const ALLOWED_ROLES: Role[] = ["${role}"];
 
-function ${P}DashboardInner() {
+interface HealthPayload { ok: boolean; status?: string; }
+
+function ${componentName}Inner() {
   const user = useAuthStore((s) => s.user);
-  const role = (user?.role ?? "${role}") as Role;
-  const tier = getRoleTier(role);
-  const now = useMountTime(); // mount-gated — avoids hydration mismatch
+  const tier = user?.role ? getRoleTier(user.role) : 0;
 
-  // URL-backed filters — refresh, share, back button all work.
-  const { filters, setFilter, reset } = useUrlFilters({
-    q: "", page: "1", tab: "overview",
+  const stats = useDashboardData<HealthPayload>("/api/health", {
+    ttlMs: 15_000,
+    pollMs: 30_000,
   });
-  const page = Number(filters.page) || 1;
-
-  const { data, loading, error, refresh } = useApiResource<Record<string, number>>(
-    ALERTS_URL,
-    { ttlMs: 10_000, deps: [page] }
-  );
-  usePolling(refresh, { intervalMs: 30_000, enabled: !!user });
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
-      <header className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">${title}</h1>
-          <p className="mt-1 text-sm text-[var(--text-muted)]">
-            Signed in as <span className="font-mono">{role}</span> · tier {tier}
-            {now && <> · {new Date(now).toLocaleTimeString()}</>}
-          </p>
-        </div>
-        <button
-          onClick={() => void refresh()}
-          disabled={loading}
-          className="rounded-lg border border-[var(--border)] px-3 py-2 text-sm hover:bg-[var(--bg-elevated)] disabled:opacity-50"
-        >
-          <RefreshCw className={\`mr-2 inline h-4 w-4 \${loading ? "animate-spin" : ""}\`} />
-          Refresh
-        </button>
-      </header>
+    <div className="space-y-6 p-4 md:p-6">
+      <PageHeader
+        title="${title}"
+        subtitle="Live workspace — role-scoped, tier-gated"
+        refreshing={stats.loading}
+        onRefresh={() => stats.refresh()}
+      />
 
-      {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200">
-          Data fetch failed: {error}
-        </div>
-      )}
-
-      <WidgetBoundary title="Alerts">
+      <WidgetBoundary label="Alerts" resetKey={user?.role}>
         <ConditionalAlert
           ctx={{
-            role,
-            userId: user?.id ?? "unknown",
+            role: user?.role ?? "${role}",
+            userId: user?.id ?? "",
             gateId: user?.gateId ?? null,
             departmentId: user?.departmentId ?? null,
             assignedHostel: user?.assignedHostel ?? null,
-            metrics: data ?? {},
+            metrics: { tier },
           }}
-          limit={5}
         />
       </WidgetBoundary>
 
-      {/* Search — debounced, URL-backed }}
-      <SearchInput
-        value={filters.q}
-        onChange={(v) => setFilter("q", v)}
-        placeholder="Search…"
-      />
+      <WidgetBoundary label="Overview" resetKey={stats.refreshKey}>
+        <div className="glass-card p-6">
+          <p className="text-sm text-[var(--text-secondary)]">
+            Dashboard ready. Add widgets here; wrap each section in its own
+            WidgetBoundary so a failure in one doesn't blank the page.
+          </p>
+          ${stats.error ? `<p className="mt-3 text-sm text-[var(--alert-critical)]" role="alert">Data fetch failed: ${stats.error}</p>` : ""}
+        </div>
+      </WidgetBoundary>
 
-      {/* Data section — swap the loading/data states for your real content */}
-      <WidgetBoundary title="Records">
-        {loading && !data ? (
-          <div className="space-y-3">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-12 w-full rounded-xl" />
-            ))}
-          </div>
-        ) : !data || Object.keys(data).length === 0 ? (
-          <EmptyState
-            title="No records match these filters"
-            description="Try clearing a filter or adjusting the search."
-          />
-        ) : (
-          <div className="space-y-2">
-            {/* TODO: render your table/rows here */}
-            <pre className="rounded-xl border border-[var(--border)] p-3 text-xs">{JSON.stringify(data, null, 2)}</pre>
-            <Paginator page={page} limit={20} total={Number(data.total ?? 0)} onChange={(p) => setFilter("page", String(p))} />
-          </div>
-        )}
+      <WidgetBoundary label="DevContact">
+        <DevContactStrip />
       </WidgetBoundary>
     </div>
   );
 }
 
-export default function ${P}DashboardPage() {
+export default function ${componentName}Page() {
   return (
-    <GuardedPage minTier={MIN_TIER}>
+    <GuardedPage allowedRoles={ALLOWED_ROLES} minTier={MIN_TIER}>
       <Suspense fallback={<PageLoading />}>
-        <${P}DashboardInner />
+        <${componentName}Inner />
       </Suspense>
     </GuardedPage>
   );
@@ -562,270 +211,559 @@ export default function ${P}DashboardPage() {
 `;
 }
 
-async function cmdNew(name, flags) {
-  if (!name) die("Usage: dash.mjs new <role> [flags]");
-  const role      = name;
-  const P         = pascal(role);
-  const minTier   = Number(flags["min-tier"] ?? 90);
-  const title     = flags.title   ?? `${titleCase(role)} Dashboard`;
-  const group     = flags.group   ?? `(${role})`;
-  const alertsUrl = flags.alerts  ?? "/api/admin/security/stats";
-  const pagePath  = resolve(ROOT, `src/app/${group}/${role}/page.tsx`);
+function layoutTemplate({ role, componentName }) {
+  return `"use client";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+import { SafeAreaAppShell } from "@/components/shared/SafeAreaAppShell";
+import type { Role } from "@/lib/types";
 
-  if (await exists(pagePath)) die(`${relative(ROOT, pagePath)} exists.`);
-  await mkdir(resolve(pagePath, ".."), { recursive: true });
-  await writeFile(pagePath, pageTemplate({ role, P, title, minTier, alertsUrl }), "utf8");
-  ok(`page → ${relative(ROOT, pagePath)}`);
+const ROLES: Role[] = ["${role}"];
 
-  if (flags.layout) {
-    const lp = resolve(ROOT, `src/app/${group}/layout.tsx`);
-    if (await exists(lp)) warn(`layout exists — skipped: ${relative(ROOT, lp)}`);
-    else {
-      await writeFile(lp,
-`"use client";
-import { GuardedPage } from "@/components/shared/GuardedPage`;
-export default function ${P}Layout({ children }: { children: React.ReactNode }) {
-  return <GuardedPage minTier={${minTier}}>{children}</GuardedPage>;
+export default function ${componentName}Layout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <AuthGuard allowedRoles={ROLES}>
+      <SafeAreaAppShell>{children}</SafeAreaAppShell>
+    </AuthGuard>
+  );
 }
-`, "utf8");
-      ok(`layout → ${relative(ROOT, lp)}`);
-    }
-  }
-  console.log(C.dim(`\nTier gate: ≥ ${minTier}  ·  Alerts: ${alertsUrl}\n`));
+`;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// COMMAND: audit — 34 checks
-// ════════════════════════════════════════════════════════════════════════════
+// ────────────────────────────────────────────────────────────────────────────
+// AUDIT RULES — 48 rules across 12 groups
+// ────────────────────────────────────────────────────────────────────────────
+const AUDIT_RULES = [
+  // Group 1: Authorization
+  { id: "no-auth-shell", group: "authz", severity: "error",
+    test: (s) => !/GuardedPage|AuthGuard/.test(s), msg: "page has no GuardedPage/AuthGuard wrapper" },
+  { id: "double-auth", group: "authz", severity: "warn",
+    test: (s) => /GuardedPage/.test(s) && /<AuthGuard/.test(s),
+    msg: "uses both GuardedPage and AuthGuard — pick one" },
+  { id: "manual-authorization-header", group: "authz", severity: "warn",
+    test: (s) => /Authorization['"]\s*:\s*`?Bearer/.test(s) && !/getAuthHeaders|useAuthHeaders/.test(s),
+    msg: "hand-rolled Authorization header — use getAuthHeaders()" },
+  { id: "missing-role-gate", group: "authz", severity: "info",
+    test: (s) => /GuardedPage/.test(s) && !/allowedRoles/.test(s), msg: "GuardedPage without explicit allowedRoles" },
 
-const CHECKS = [
-  // ── Group A: state & data flow ───────────────────────────────────────────
-  { id: "A1", test: (s) => !/useState<[^>]*>\(\s*"[^"]*"\s*\)[\s\S]{0,200}?filter|dept|year|status/i.test(s) || /useUrlFilters|useSearchParams/.test(s), msg: "filters in useState — use useUrlFilters" },
-  { id: "A2", test: (s) => !/useEffect\([\s\S]{0,400}?fetch\(/.test(s) || /AbortController|useApiResource|cachedFetch/.test(s), msg: "effect fetch without abort — use useApiResource" },
-  { id: "A3", test: (s) => !/(await fetch[\s\S]{0,200}?method:\s*["'](POST|PATCH|PUT|DELETE))/i.test(s) || /invalidateClientCache|refresh\(\)/.test(s), msg: "mutation without cache invalidation" },
-  { id: "A4", test: (s) => !/async \(e: React\.FormEvent\)/.test(s) || /disabled=\{(submitting|loading)\}/.test(s), msg: "form submit not disabled during flight" },
-  { id: "A6", test: (s) => !/useLiveRefresh/.test(s) || /usePolling/.test(s), msg: "useLiveRefresh — prefer usePolling (visibility-aware)" },
-  { id: "A7", test: (s) => !/useAuthStore\(\)/.test(s), msg: "whole-store subscription — use selectors" },
+  // Group 2: Polling & intervals
+  { id: "raw-setinterval", group: "polling", severity: "error",
+    test: (s) => /setInterval\s*\(/.test(s) && !/usePolling|useLiveRefresh|useDashboardData/.test(s),
+    msg: "raw setInterval with no visibility-aware wrapper" },
+  { id: "no-visibility-guard", group: "polling", severity: "warn",
+    test: (s) => /setInterval\s*\(/.test(s) && !/visibilitychange/.test(s),
+    msg: "setInterval without a visibilitychange guard" },
+  { id: "manual-clearinterval", group: "polling", severity: "info",
+    test: (s) => /clearInterval/.test(s) && !/usePolling|useDashboardData/.test(s),
+    msg: "manual clearInterval — prefer usePolling / useDashboardData" },
+  { id: "double-polling", group: "polling", severity: "warn",
+    test: (s) => /useLiveRefresh/.test(s) && /usePolling/.test(s) && !/useDashboardData/.test(s),
+    msg: "useLiveRefresh + usePolling both active — pick one" },
 
-  // ── Group B: UX consistency ──────────────────────────────────────────────
-  { id: "B1", test: (s) => !/function timeAgo|const timeAgo\s*=/.test(s), msg: "local timeAgo — import getTimeAgo from @/lib/utils" },
-  { id: "B2", test: (s) => !/severity[^a-z].*["'](critical|high|medium|low)["']/i.test(s) || /StatusPill/.test(s), msg: "inline severity styling — use <StatusPill>" },
-  { id: "B3", test: (s) => !/\.map\([^)]*=>\s*<tr/.test(s) || /Paginator|page=/.test(s), msg: "table without pagination" },
-  { id: "B4", test: (s) => !/\{loading \?|loading\s*&&/.test(s) || /Skeleton/.test(s), msg: "loading without skeleton" },
-  { id: "B5", test: (s) => !/(rows|data|items)\.length\s*===\s*0|!\s*(rows|data)\.length/.test(s) || /EmptyState/.test(s), msg: "list without EmptyState" },
-  { id: "B7", test: (s) => !/catch\s*\{[\s\S]{0,200}?\}/.test(s) || /toast|addToast/.test(s), msg: "silent catch — surface errors with a toast" },
+  // Group 3: Composition & boundaries
+  { id: "no-widget-boundary", group: "composition", severity: "warn",
+    test: (s) => /(Chart|Graph|Widget)/.test(s) && !/WidgetBoundary/.test(s),
+    msg: "chart/widget rendered without WidgetBoundary isolation" },
+  { id: "no-suspense-for-searchparams", group: "composition", severity: "error",
+    test: (s) => /useSearchParams/.test(s) && !/Suspense/.test(s),
+    msg: "useSearchParams without a Suspense boundary (Next 15/16 requirement)" },
+  { id: "no-dev-contact", group: "composition", severity: "warn",
+    test: (s) => /PageHeader/.test(s) && !/DevContactStrip/.test(s),
+    msg: "dashboard missing DevContactStrip" },
+  { id: "duplicate-error-boundary", group: "composition", severity: "warn",
+    test: (s) => /components\/ErrorBoundary/.test(s) && !/shared\/ErrorBoundary/.test(s),
+    msg: "imports the deprecated ErrorBoundary — use @/components/shared/ErrorBoundary" },
 
-  // ── Group C: accessibility ───────────────────────────────────────────────
-  { id: "C1", test: (s) => !/(feed|recentScans|activityFeed|liveFeed|metrics)/.test(s) || /aria-live/.test(s), msg: "dynamic region without aria-live" },
-  { id: "C4", test: (s) => !/<button[^>]*>\s*<(Check|X|Trash|Edit|Trash2)/.test(s) || /aria-label/.test(s), msg: "icon-only button missing aria-label" },
+  // Group 4: Error handling
+  { id: "swallowed-catch", group: "errors", severity: "warn",
+    test: (s) => /catch\s*\{\s*\}/.test(s), msg: "empty catch block swallows errors" },
+  { id: "console-only-catch", group: "errors", severity: "warn",
+    test: (s) => /catch[^{]*\{[^}]*console\.(error|warn)[^}]*\}/.test(s) && !/(setError|addToast|useUIStore|reportClientError)/.test(s),
+    msg: "catch only logs to console — no user-visible error state" },
+  { id: "no-error-role", group: "errors", severity: "info",
+    test: (s) => /stats\.error/.test(s) && !/role="alert"/.test(s),
+    msg: "inline error rendered without role=\"alert\"" },
 
-  // ── Group D: hygiene ─────────────────────────────────────────────────────
-  { id: "D1", test: (s) => !/console\.(log|error|warn)/.test(s) || /src\/lib\/log/.test(s), msg: "console.* in production — use lib/log" },
-  { id: "D2", test: (s) => !/Date\.now\(\)/.test(s) || /useMountTime|useEffect[\s\S]{0,200}setNow/.test(s), msg: "Date.now() in render — use useMountTime" },
-  { id: "D5", test: (s) => !/(mock|demo|fallback|placeholder)/i.test(s) || /\/\* mock-allowed \*\//.test(s), msg: "placeholder data in a page — remove or gate" },
+  // Group 5: Types
+  { id: "any-cast", group: "types", severity: "warn",
+    test: (s) => /:\s*any\b/.test(s), msg: "uses 'any' — prefer explicit types from src/lib/types" },
+  { id: "ts-ignore", group: "types", severity: "warn",
+    test: (s) => /@ts-(ignore|expect-error|nocheck)/.test(s), msg: "TypeScript suppression" },
+  { id: "eslint-disable-any", group: "types", severity: "warn",
+    test: (s) => /eslint-disable[^\n]*no-explicit-any/.test(s), msg: "file-wide no-explicit-any disable" },
+  { id: "as-unknown-as", group: "types", severity: "info",
+    test: (s) => /as\s+unknown\s+as\s+/.test(s), msg: "double cast 'as unknown as'" },
 
-  // ── Group E: architecture ────────────────────────────────────────────────
-  { id: "E4", test: (s) => !/usePathname/.test(s) || /useSearchParams/.test(s), msg: "pathname-only nav — pair with useSearchParams" },
-  { id: "E5", test: (s) => !/setSelected|setActive|setDetail/.test(s) || /setFilter|searchParams/.test(s), msg: "detail modal in state — move to URL for back-button support" },
-  { id: "E6", test: (s) => !/placeholder="Search/.test(s) || /SearchInput|setTimeout/.test(s), msg: "search input not debounced — use <SearchInput>" },
+  // Group 6: Data fetching
+  { id: "raw-fetch", group: "fetch", severity: "warn",
+    test: (s) => /(?:^|[^.\w])fetch\(/.test(s) && !/useApi|useApiResource|useDashboardData|authFetch|fetchWithTimeout/.test(s),
+    msg: "raw fetch() — use useApi / useDashboardData" },
+  { id: "no-store-hack", group: "fetch", severity: "warn",
+    test: (s) => /cache\s*:\s*['"]no-store['"]/.test(s) && /timestamp|Date\.now|\?_\=/.test(s),
+    msg: "cache:no-store plus a timestamp query param — fix the API cache header instead" },
+  { id: "retry-on-empty", group: "fetch", severity: "warn",
+    test: (s) => /automatic retry|retry.*empty|transient cache/i.test(s), msg: "client-side retry to bypass cache" },
+  { id: "unkeyed-client-cache", group: "fetch", severity: "error",
+    test: (s) => /new Map<.*CachedEntry|CachedEntry.*\[\]|module-level cache/.test(s) && !/userId|user\.id/.test(s),
+    msg: "module-level cache without a user scoping key" },
 
-  // ── Original checks (kept from v1) ──────────────────────────────────────
-  { id: "guard",    test: (s) => /GuardedPage|<AuthGuard/.test(s),                    msg: "no GuardedPage/AuthGuard at page root" },
-  { id: "tier",     test: (s) => /minTier|allowedRoles/.test(s),                       msg: "guard without allowedRoles/minTier" },
-  { id: "suspense", test: (s) => !/useSearchParams/.test(s) || /<Suspense/.test(s),    msg: "useSearchParams without Suspense" },
-  { id: "poll",     test: (s) => !/setInterval\(/.test(s) || /usePolling|useLiveRefresh/.test(s), msg: "raw setInterval" },
-  { id: "alerts",   test: (s) => !/alerts\.(slice|map)\(/.test(s) || /ConditionalAlert/.test(s), msg: "hand-rolled alert list" },
-  { id: "boundary", test: (s) => !/recharts|Chart|Heatmap|DualTwin/.test(s) || /WidgetBoundary|ErrorBoundary/.test(s), msg: "chart without error boundary" },
-  { id: "window",   test: (s) => !/window\.location\.search/.test(s),                  msg: "window.location.search in render" },
-  { id: "headers",  test: (s) => !/from\s+["']@\/hooks\/useAuthHeaders["']/.test(s),   msg: "getAuthHeaders imported from hook" },
+  // Group 7: Timezone & dates
+  { id: "local-today", group: "time", severity: "warn",
+    test: (s) => /new Date\(\)\.toISOString\(\)\.slice\(0,\s*10\)/.test(s),
+    msg: "local 'today' computed client-side — use getISTDateString server-side" },
+  { id: "no-tz-in-locale", group: "time", severity: "warn",
+    test: (s) => /toLocaleDateString\(\)/.test(s) && !/timeZone/.test(s),
+    msg: "toLocaleDateString() without an explicit timeZone" },
+  { id: "date-without-tz", group: "time", severity: "info",
+    test: (s) => /new Date\(\)\s*\)\s*\.\s*toLocaleString/.test(s),
+    msg: "toLocaleString() without a timezone — pass { timeZone: 'Asia/Kolkata' }" },
+
+  // Group 8: Accessibility
+  { id: "img-no-alt", group: "a11y", severity: "warn",
+    test: (s) => /<img\b(?![^>]*\balt=)/.test(s), msg: "<img> without alt attribute" },
+  { id: "button-no-type", group: "a11y", severity: "info",
+    test: (s) => /<button\b(?![^>]*\btype=)/.test(s), msg: "<button> without explicit type attribute" },
+  { id: "div-onclick", group: "a11y", severity: "warn",
+    test: (s) => /<div[^>]*onClick=/.test(s) && !/role="button"/.test(s), msg: "clickable <div> without role=\"button\"" },
+  { id: "toast-no-live", group: "a11y", severity: "info",
+    test: (s) => /ToastContainer|toast-root|toasts\.map/.test(s) && !/aria-live/.test(s),
+    msg: "toast container missing aria-live region" },
+  { id: "modal-no-focus-trap", group: "a11y", severity: "warn",
+    test: (s) => /role="dialog"/.test(s) && !/focus-trap|FocusTrap|useFocusTrap/.test(s), msg: "modal without a focus trap" },
+
+  // Group 9: Performance
+  { id: "inline-recharts", group: "perf", severity: "info",
+    test: (s) => /from\s+["']recharts["']/.test(s) && !/next\/dynamic/.test(s),
+    msg: "recharts imported directly — use next/dynamic ssr:false" },
+  { id: "no-usememo-chain", group: "perf", severity: "info",
+    test: (s) => /\.filter\(.*\)\.map\(/.test(s) && !/useMemo/.test(s),
+    msg: "chained filter/map without useMemo" },
+  { id: "heavy-on-first-paint", group: "perf", severity: "info",
+    test: (s) => (s.match(/useDashboardData|useApiResource/g) || []).length >= 4,
+    msg: "4+ data fetches on mount — defer non-critical widgets" },
+
+  // Group 10: Data integrity
+  { id: "setstate-in-effect", group: "data", severity: "warn",
+    test: (s) => /useEffect\([^)]*set[A-Z]\w*\(/.test(s) && !/void\s+fetch/.test(s),
+    msg: "setState directly in effect — prefer useDashboardData / void async fn" },
+  { id: "hardcoded-anomalies", group: "data", severity: "warn",
+    test: (s) => /anomaly.*hardcoded|checks\s*=\s*\[/i.test(s) && /AnomalyEvent/.test(s),
+    msg: "anomalies appear hardcoded" },
+  { id: "session-local-only", group: "data", severity: "warn",
+    test: (s) => /session-local only|in memory only|not persisted/i.test(s),
+    msg: "state kept in memory with a 'not persisted' comment" },
+  { id: "jsonb-stub-read", group: "data", severity: "warn",
+    test: (s) => /row\.data\?\.|data\?\.[a-z_]+/.test(s) && /lockdown|jsonb/i.test(s),
+    msg: "reading a JSONB stub column instead of real columns" },
+
+  // Group 11: Observability
+  { id: "no-error-reporting", group: "obs", severity: "info",
+    test: (s) => /<ErrorBoundary/.test(s) && !/reportClientError/.test(s), msg: "ErrorBoundary not wired to reportClientError" },
+  { id: "no-structured-logging", group: "obs", severity: "info",
+    test: (s) => /console\.log\(/.test(s) && !/log\.info|logger\./.test(s),
+    msg: "console.log in a page — use structured log() or remove" },
+
+  // Group 12: Library hygiene
+  { id: "two-qr-libs", group: "libs", severity: "warn",
+    test: (s) => /react-qrcode-logo/.test(s) && /qrcode\.react/.test(s),
+    msg: "both react-qrcode-logo and qrcode.react imported" },
+  { id: "duplicate-datatable", group: "libs", severity: "info",
+    test: (s) => /@components\/ui\/DataTable/.test(s), msg: "uses DataTable; prefer @/components/ui/table" },
+  { id: "raw-supabase-import", group: "libs", severity: "warn",
+    test: (s) => /from\s+["']@supabase\/supabase-js["']/.test(s), msg: "raw supabase-js import in a page" },
+  { id: "duplicate-use-client", group: "libs", severity: "info",
+    test: (s) => (s.match(/^"use client";/gm) || []).length > 1, msg: "duplicate 'use client' directive" },
 ];
 
-async function* walk(dir) {
-  for (const e of await readdir(dir, { withFileTypes: true })) {
+// ────────────────────────────────────────────────────────────────────────────
+// AUDIT
+// ────────────────────────────────────────────────────────────────────────────
+async function* walkPages(dir) {
+  const entries = await readdir(dir, { withFileTypes: true });
+  for (const e of entries) {
     const p = join(dir, e.name);
-    if (e.isDirectory()) yield* walk(p);
+    if (e.isDirectory()) yield* walkPages(p);
     else if (e.isFile() && e.name === "page.tsx") yield p;
   }
 }
 
-async function cmdAudit() {
-  const pages = [];
-  for await (const p of walk(resolve(SRC, "app"))) pages.push(p);
-  console.log(C.bold(`\nAuditing ${pages.length} page.tsx files against ${CHECKS.length} rules…\n`));
+async function cmdAudit(flags) {
+  head("Auditing every page.tsx under src/app…\n");
+  const json = !!flags.json;
+  const report = { pages: 0, findings: 0, byRule: {}, byFile: {} };
 
-  let total = 0;
-  const byIssue = new Map();
-  const failing = [];
+  for await (const file of walkPages(APP)) {
+    report.pages++;
+    const src = await readFile(file, "utf8");
+    const findings = AUDIT_RULES.filter((r) => { try { return r.test(src); } catch { return false; } });
+    if (!findings.length) continue;
 
-  for (const p of pages) {
-    const src = await readFile(p, "utf8");
-    const issues = CHECKS.filter((c) => !c.test(src));
-    if (!issues.length) continue;
-    total += issues.length;
-    failing.push({ path: relative(ROOT, p), issues });
-    for (const it of issues) byIssue.set(it.id, (byIssue.get(it.id) ?? 0) + 1);
-  }
-
-  for (const f of failing) {
-    console.log(C.bold(f.path));
-    for (const it of f.issues) console.log(`  ${C.red("✖")} [${it.id}] ${it.msg}`);
-    console.log("");
-  }
-
-  if (!total) { ok(`All ${pages.length} pages pass.`); return; }
-
-  console.log(C.bold("Summary:"));
-  for (const [id, n] of [...byIssue.entries()].sort((a, b) => b[1] - a[1])) {
-    console.log(`  ${String(n).padStart(4)}  [${id}] ${CHECKS.find((c) => c.id === id).msg}`);
-  }
-  console.log("");
-  console.log(C.yellow(`${total} issues across ${failing.length} pages.`));
-  console.log(C.dim(`Auto-patch:  node scripts/dash.mjs fix <file>\n`));
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// COMMAND: fix
-// ═══════════════════════════════════════════════════════════════════════════
-
-async function cmdFix(target) {
-  if (!target) die("Usage: dash.mjs fix <file>");
-  const full = resolve(ROOT, target);
-  if (!await exists(full)) die(`Not found: ${target}`);
-
-  const original = await readFile(full, "utf8");
-  let src = original;
-  const applied = [];
-  const header = /^("use client";?\s*\n)/;
-
-  const needed = [];
-  if (/useSearchParams/.test(src) && !/Suspense/.test(src)) {
-    needed.push(`import { Suspense } from "react";`, `import { PageLoading } from "@/components/shared/LoadingStates";`);
-  }
-  if (/<AuthGuard/.test(src) && !/GuardedPage/.test(src))
-    needed.push(`import { GuardedPage } from "@/components/shared/GuardedPage";`);
-  if (/recharts|Chart|Heatmap|DualTwin/.test(src) && !/WidgetBoundary/.test(src))
-    needed.push(`import { WidgetBoundary } from "@/components/shared/WidgetBoundary";`);
-  if (/alerts\.(slice|map)\(/.test(src) && !/ConditionalAlert/.test(src))
-    needed.push(`import { ConditionalAlert } from "@/components/shared/ConditionalAlert";`);
-  if (/setInterval\(/.test(src) && !/usePolling/.test(src))
-    needed.push(`import { usePolling } from "@/hooks/usePolling";`);
-  if (/function timeAgo|const timeAgo\s*=/.test(src) && !/getTimeAgo/.test(src))
-    needed.push(`import { getTimeAgo as timeAgo } from "@/lib/utils";`);
-  if (/Date\.now\(\)/.test(src) && !/useMountTime/.test(src))
-    needed.push(`import { useMountTime } from "@/hooks/useMountTime";`);
-  if (/placeholder="Search/.test(src) && !/SearchInput/.test(src))
-    needed.push(`import { SearchInput } from "@/components/ui/SearchInput";`);
-  if (/(rows|data|items)\.length\s*===\s*0/.test(src) && !/EmptyState/.test(src))
-    needed.push(`import { EmptyState } from "@/components/shared/EmptyState";`);
-
-  if (needed.length) {
-    const unique = [...new Set(needed)];
-    src = src.replace(header, `$1${unique.join("\n")}\n`);
-    applied.push(`imports(+${unique.length})`);
-  }
-
-  // Auto-delete local timeAgo when aliasing to shared one
-  if (/import\s*\{\s*getTimeAgo as timeAgo\s*\}/.test(src)) {
-    src = src.replace(/function timeAgo\s*\([^)]*\)\s*\{[\s\S]*?\n\}\n?/g, "");
-    src = src.replace(/const timeAgo\s*=\s*\([^)]*\)\s*=>\s*\{[\s\S]*?\n\};\n?/g, "");
-    applied.push("removed-local-timeAgo");
-  }
-
-  // Suspense wrapper
-  if (/useSearchParams/.test(src) && !/<Suspense/.test(src)) {
-    const m = src.match(/export default function (\w+)\s*\(/);
-    if (m) {
-      const n = m[1];
-      src = src.replace(new RegExp(`export default function ${n}\\s*\\(`), `function ${n}Inner(`);
-      src += `\nexport default function ${n}() {\n  return (\n    <Suspense fallback={<PageLoading />}>\n      <${n}Inner />\n    </Suspense>\n  );\n}\n`;
-      applied.push("suspense-wrap");
-    }
-  }
-
-  if (src === original) { ok(`${target} — nothing safe to auto-patch.`); return; }
-  await writeFile(full, src, "utf8");
-  ok(`${target} — applied: ${applied.join(", ")}`);
-
-  const manual = [];
-  if (/<AuthGuard/.test(src) && !/<GuardedPage/.test(src)) manual.push("swap <AuthGuard> → <GuardedPage minTier={…}>");
-  if (/alerts\.(slice|map)\(/.test(src)) manual.push("replace alert list with <ConditionalAlert ctx={…} />");
-  if (/setInterval\(/.test(src)) manual.push("replace setInterval with usePolling(fn, { intervalMs })");
-  if (/useEffect\([\s\S]{0,400}?fetch\(/.test(src)) manual.push("replace effect-fetch with useApiResource(url)");
-  if (/useState[\s\S]{0,500}?(dept|year|status|filter)/.test(src)) manual.push("move filter state to useUrlFilters");
-  if (/setSelected|setActive|setDetail/.test(src)) manual.push("move detail modal to URL (?id=…)");
-  if (manual.length) {
-    console.log(C.dim("  Manual follow-ups:"));
-    for (const m of manual) console.log(C.dim(`    • ${m}`));
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// COMMAND: sweep (cross-file fixes)
-// ═══════════════════════════════════════════════════════════════════════════
-
-async function cmdSweep() {
-  console.log(C.bold("\nSweeping cross-file issues…\n"));
-  const pages = [];
-  for await (const p of walk(resolve(SRC, "app"))) pages.push(p);
-
-  let replaced = 0, filesTouched = 0;
-
-  for (const p of pages) {
-    const original = await readFile(p, "utf8");
-    let src = original;
-
-    // 1. Replace local timeAgo via alias import
-    if (/function timeAgo|const timeAgo\s*=/.test(src) && !/getTimeAgo as timeAgo/.test(src)) {
-      const header = /^("use client";?\s*\n)/;
-      if (header.test(src)) {
-        src = src.replace(header, `$1import { getTimeAgo as timeAgo } from "@/lib/utils";\n`);
-        src = src.replace(/function timeAgo\s*\([^)]*\)\s*\{[\s\S]*?\n\}\n?/g, "");
-        src = src.replace(/const timeAgo\s*=\s*\([^)]*\)\s*=>\s*\{[\s\S]*?\n\};\n?/g, "");
-        replaced++;
+    const rel = relative(ROOT, file);
+    report.byFile[rel] = findings.map((f) => f.id);
+    if (!json) console.log(C.bold(rel));
+    for (const f of findings) {
+      report.findings++;
+      report.byRule[f.id] = (report.byRule[f.id] ?? 0) + 1;
+      if (!json) {
+        const tag = f.severity === "error" ? C.red(`[${f.severity}]`)
+                  : f.severity === "warn"  ? C.yellow(`[${f.severity}]`)
+                  :                          C.dim(`[${f.severity}]`);
+        console.log(`  ${tag} ${f.id} — ${f.msg}`);
       }
     }
+    if (!json) console.log("");
+  }
 
-    if (src !== original) {
-      await writeFile(p, src, "utf8");
-      filesTouched++;
-      console.log(C.green(`✓ ${relative(ROOT, p)}`));
-    } else {
-      console.log(C.dim(`  ${relative(ROOT, p)} — unchanged`));
+  if (json) { console.log(JSON.stringify(report, null, 2)); return; }
+
+  head("── Summary ───────────────────────────────");
+  console.log(`Pages scanned : ${report.pages}`);
+  console.log(`Findings      : ${report.findings}`);
+  if (Object.keys(report.byRule).length) {
+    console.log("\nTop rules:");
+    Object.entries(report.byRule)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 12)
+      .forEach(([id, n]) => console.log(`  ${String(n).padStart(4)}  ${id}`));
+  }
+  if (report.findings === 0) ok("No issues found — every dashboard is clean.");
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// FIX — safe auto-patches on one page
+// ────────────────────────────────────────────────────────────────────────────
+async function patchFile(file) {
+  let src = await readFile(file, "utf8");
+  const before = src;
+  const notes = [];
+
+  // 1. Wrap default export in Suspense if useSearchParams is present.
+  if (/useSearchParams/.test(src) && !/<Suspense/.test(src)) {
+    if (!/import\s*\{[^}]*Suspense[^}]*\}\s*from\s*"react"/.test(src)) {
+      if (/import\s*\{[^}]*\}\s*from\s*"react";/.test(src)) {
+        src = src.replace(/import\s*\{([^}]*)}\s*from\s*"react";/,
+          (_, inner) => `import { Suspense,${inner} } from "react";`);
+      } else {
+        src = `import { Suspense } from "react";\n` + src;
+      }
+    }
+    const nameMatch = src.match(/export default function (\w+)\s*\(/);
+    if (nameMatch) {
+      const n = nameMatch[1];
+      src = src.replace(/export default function (\w+)\s*\(/, `function ${n}Inner(`);
+      src += `\nexport default function ${n}Page() {\n  return (\n    <Suspense fallback={null}>\n      <${n}Inner />\n    </Suspense>\n  );\n}\n`;
+      notes.push("wrapped default export in <Suspense>");
     }
   }
 
-  console.log(`\n${replaced} timeAgo replacements, ${filesTouched} files touched.\n`);
+  // 2. Add GuardedPage import if only AuthGuard is used.
+  if (/<AuthGuard/.test(src) && !/GuardedPage/.test(src)) {
+    if (/from\s+["']@\/components\/shared\/AuthGuard["']/.test(src)) {
+      src = src.replace(
+        /import \{ AuthGuard \} from "@\/components\/shared\/AuthGuard";/,
+        `import { AuthGuard } from "@/components/shared/AuthGuard";\nimport { GuardedPage } from "@/components/shared/GuardedPage";`
+      );
+      notes.push("added GuardedPage import");
+    }
+  }
+
+  // 3. Add WidgetBoundary import when charts are present and not already imported.
+  if (/recharts/.test(src) && !/WidgetBoundary/.test(src)) {
+    src = src.replace(/^import[^\n]*\n/,
+      (m) => m + `import { WidgetBoundary } from "@/components/shared/WidgetBoundary";\n`);
+    notes.push("added WidgetBoundary import");
+  }
+
+  // 4. Add ConditionalAlert import when banners are hand-rolled.
+  if (/(AlertTriangle|ShieldAlert|ShieldCheck)/.test(src) && !/ConditionalAlert/.test(src)) {
+    src = src.replace(/^import[^\n]*\n/,
+      (m) => m + `import { ConditionalAlert } from "@/components/shared/ConditionalAlert";\n`);
+    notes.push("added ConditionalAlert import");
+  }
+
+  // 5. Redirect deprecated ErrorBoundary import.
+  if (/from\s+["']@\/components\/ErrorBoundary["']/.test(src)) {
+    src = src.replace(/from\s+["']@\/components\/ErrorBoundary["']/g, `from "@/components/shared/ErrorBoundary"`);
+    notes.push("redirected deprecated ErrorBoundary import");
+  }
+
+  // 6. Replace console.log with structured log() when obvious.
+  if (/console\.log\(/.test(src) && /from "@\/lib\/log"/.test(src)) {
+    src = src.replace(/console\.log\(/g, `log.info(`);
+    notes.push("console.log -> log.info");
+  }
+
+  // 7. Add explicit type="button" to buttons missing it.
+  if (/<button\b(?![^>]*\btype=)/.test(src)) {
+    src = src.replace(/<button\b(?![^>]*\btype=)/g, `<button type="button"`);
+    notes.push('added type="button" to buttons without it');
+  }
+
+  // 8. Deduplicate "use client".
+  const useClientCount = (src.match(/^"use client";/gm) || []).length;
+  if (useClientCount > 1) {
+    let seen = false;
+    src = src.replace(/^"use client";\n/gm, () => { if (seen) return ""; seen = true; return `"use client";\n`; });
+    notes.push("deduplicated 'use client'");
+  }
+
+  if (src === before) return { changed: false, notes: [] };
+  await writeFile(file, src, "utf8");
+  return { changed: true, notes };
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// DISPATCH
-// ═══════════════════════════════════════════════════════════════════════════
+async function cmdFix(target) {
+  if (!target) die("usage: dash.mjs fix <path/to/page.tsx>");
+  const file = resolve(target);
+  if (!(await exists(file))) die(`not found: ${file}`);
+  const r = await patchFile(file);
+  if (!r.changed) { ok("Nothing auto-patchable found."); return; }
+  ok(`Patched ${relative(ROOT, file)}`);
+  r.notes.forEach((n) => info(n));
+  info("Re-run `dash.mjs audit` to confirm.");
+}
 
-const { kind, name, flags } = parseArgs(process.argv.slice(2));
-const HANDLERS = { init: cmdInit, "init-groups": cmdInitGroups, new: cmdNew, audit: cmdAudit, fix: cmdFix, sweep: cmdSweep };
+async function cmdFixAll() {
+  head("Auto-patching every fixable page…\n");
+  let touched = 0;
+  for await (const file of walkPages(APP)) {
+    const r = await patchFile(file);
+    if (r.changed) {
+      touched++;
+      console.log(C.green(`✓ ${relative(ROOT, file)}`));
+      r.notes.forEach((n) => info(n));
+    }
+  }
+  ok(`Patched ${touched} file(s).`);
+}
 
-if (!kind || !HANDLERS[kind]) {
-  console.log(`
-${C.bold("Gate Monitor — Dashboard Cookie Cutter (v2)")
+// ────────────────────────────────────────────────────────────────────────────
+// SWEEP
+// ────────────────────────────────────────────────────────────────────────────
+async function cmdSweep() {
+  head("Sweeping across all page.tsx files…\n");
+  let touched = 0;
+  for await (const file of walkPages(APP)) {
+    const src = await readFile(file, "utf8");
+    let out = src;
+    const notes = [];
 
-  ${C.bold("node scripts/dash.mjs init")}                 install shared primitives
-  ${C.bold("node scripts/dash.mjs init-groups")}          add error/loading/not-found to each (group)
-  ${C.bold("node scripts/dash.mjs new <role> [flags]")}   create a fully-wired dashboard
-  ${C.bold("node scripts/dash.mjs audit")}                scan all pages against 34 rules
-  ${C.bold("node scripts/dash.mjs fix <file>")}           auto-patch safe wins
-  ${C.bold("node scripts/dash.mjs sweep")}                cross-file fixes (timeAgo, etc.)
+    const useClientCount = (out.match(/^"use client";/gm) || []).length;
+    if (useClientCount > 1) {
+      let seen = false;
+      out = out.replace(/^"use client";\n/gm, () => { if (seen) return ""; seen = true; return `"use client";\n`; });
+      notes.push("deduplicated 'use client'");
+    }
 
-${C.bold("new flags:")}
-  --min-tier <n>   --route <path>   --title "…"   --group (x)   --alerts <url>   --layout
+    const stripped = out.replace(/[ \t]+$/gm, "");
+    if (stripped !== out) { out = stripped; notes.push("trimmed trailing whitespace"); }
 
-${C.bold("Migration loop:")}
-  ${C.dim("1. node scripts/dash.mjs init && node scripts/dash.mjs init-groups")}
-  ${C.dim("2. node scripts/dash.mjs audit | tee baseline.txt")}
-  ${C.dim("3. for f in \$(grep -oP '^\\S+\.tsx' baseline.txt); do node scripts/dash.mjs fix \"$f\"; done})
-  ${C.dim("4. node scripts/dash.mjs sweep")}
-  ${C.dim("5. node scripts/dash.mjs audit   # target: All N pages pass")}
+    if (out !== src) {
+      await writeFile(file, out, "utf8");
+      touched++;
+      console.log(C.green(`✓ ${relative(ROOT, file)}`));
+      notes.forEach((n) => info(n));
+    }
+  }
+  ok(`Swept ${touched} file(s).`);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// INIT
+// ────────────────────────────────────────────────────────────────────────────
+async function cmdInit() {
+  head("Verifying shared primitives…");
+  const required = [
+    "src/components/shared/GuardedPage.tsx",
+    "src/components/shared/ConditionalAlert.tsx",
+    "src/components/shared/WidgetBoundary.tsx",
+    "src/components/shared/PageHeader.tsx",
+    "src/components/shared/LoadingStates.tsx",
+    "src/components/shared/DevContactStrip.tsx",
+    "src/components/shared/AuthGuard.tsx",
+    "src/components/shared/SafeAreaAppShell.tsx",
+    "src/hooks/useApiResource.ts",
+    "src/hooks/usePolling.ts",
+    "src/hooks/useLiveRefresh.ts",
+    "src/lib/alert-hierarchy.ts",
+    "src/lib/monitoring.ts",
+    "src/lib/types.ts",
+    "src/stores/authStore.ts",
+  ];
+  let missing = 0;
+  for (const rel of required) {
+    if (!(await exists(join(ROOT, rel)))) { warn(`missing: ${rel}`); missing++; }
+  }
+  if (missing) { die(`${missing} required primitive(s) missing.`); }
+  ok(`All ${required.length} primitives present.`);
+
+  await writeIfMissing(join(ROOT, "src/hooks/useDashboardData.ts"), USE_DASHBOARD_DATA_TEMPLATE);
+}
+
+async function cmdInitGroups() {
+  head("Installing group-level error/loading/not-found files…");
+  const entries = await readdir(APP, { withFileTypes: true });
+  const groups = entries.filter((e) => e.isDirectory() && e.name.startsWith("(") && e.name.endsWith(")"));
+  if (!groups.length) { warn("no route groups found under src/app"); return; }
+  for (const g of groups) {
+    const name = g.name.slice(1, -1);
+    const dir = join(APP, g.name);
+    await writeIfMissing(join(dir, "error.tsx"),     groupError(name));
+    await writeIfMissing(join(dir, "loading.tsx"),   groupLoading(name));
+    await writeIfMissing(join(dir, "not-found.tsx"), groupNotFound(name));
+  }
+  ok(`Processed ${groups.length} route group(s).`);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// NEW
+// ────────────────────────────────────────────────────────────────────────────
+async function cmdNew(name, flags) {
+  if (!name) die('usage: dash.mjs new <role> [--group "(admin)"] [--route /admin] [--title "…"] [--min-tier 90] [--layout]');
+  const groupName   = flags.group ?? `(${name})`;
+  const route       = flags.route ?? `/${name}`;
+  const title       = flags.title ?? `${titleCase(name)} Dashboard`;
+  const minTier     = Number(flags["min-tier"] ?? 40);
+  const withLayout  = !!flags.layout;
+  const componentName = pascal(name);
+
+  const groupDir = join(APP, groupName.startsWith("(") ? groupName : `(${groupName})`);
+  const routeSegments = route.replace(/^\//, "").split("/").filter(Boolean);
+  const pageDir = join(groupDir, ...routeSegments);
+
+  head(`Generating ${name} dashboard`);
+  info(`group:  ${relative(ROOT, groupDir)}`);
+  info(`route:  ${relative(ROOT, pageDir)}/page.tsx`);
+  info(`tier:   ${minTier}`);
+  info(`roles:  ${name}`);
+
+  await writeIfMissing(join(pageDir, "page.tsx"), pageTemplate({ role: name, componentName, title, minTier }));
+
+  if (withLayout) {
+    await writeIfMissing(join(groupDir, "layout.tsx"), layoutTemplate({ role: name, componentName }));
+  }
+
+  ok("Dashboard created. Next:");
+  info(`1) Confirm '${name}' is in src/lib/roles.ts ROLES`);
+  info(`2) Confirm it is in users.role CHECK + config_roles_registry`);
+  info(`3) Confirm getRoleTier('${name}') returns a number`);
+  info(`4) Run: node scripts/dash.mjs audit`);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Reference composite hook (written by `init` if missing)
+// ────────────────────────────────────────────────────────────────────────────
+const USE_DASHBOARD_DATA_TEMPLATE = `/**
+ * useDashboardData — a composite for dashboard reads.
+ *
+ * Wraps useApiResource (cached, deduped) and usePolling (visibility-aware) so
+ * every dashboard gets the same correct behaviour with one call.
+ *
+ * - Cache key is url + userId — never shared across users.
+ * - Polling is disabled while the tab is hidden.
+ * - refreshKey increments on every successful refresh so WidgetBoundary can reset.
+ */
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import { useApiResource } from "@/hooks/useApiResource";
+import { usePolling } from "@/hooks/usePolling";
+import { useAuthStore } from "@/stores/authStore";
+
+export interface DashboardData<T> {
+  data: T | null;
+  loading: boolean;
+  error: string | null;
+  refresh: () => Promise<void>;
+  refreshKey: number;
+}
+
+export function useDashboardData<T>(
+  url: string | null,
+  options: { ttlMs?: number; pollMs?: number; enabled?: boolean } = {}
+): DashboardData<T> {
+  const { ttlMs = 15000, pollMs = 30000, enabled = true } = options;
+  const userId = useAuthStore((s) => s.user?.id ?? "");
+  const scopedUrl = url ? url + (url.includes("?") ? "&" : "?") + "_u=" + userId : null;
+
+  const res = useApiResource<T>(scopedUrl, { ttlMs, enabled: enabled && !!scopedUrl });
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const refresh = useCallback(async () => {
+    await res.refresh();
+    setRefreshKey((k) => k + 1);
+  }, [res]);
+
+  usePolling(async () => { await refresh(); }, { intervalMs: pollMs, enabled: enabled && !!scopedUrl });
+
+  // Track loading for the very first paint only.
+  const [firstLoad, setFirstLoad] = useState(true);
+  useEffect(() => { if (!res.loading && firstLoad) setFirstLoad(false); }, [res.loading, firstLoad]);
+
+  return {
+    data: res.data,
+    loading: res.loading || firstLoad,
+    error: res.error,
+    refresh,
+    refreshKey,
+  };
+}
+`;
+
+// ────────────────────────────────────────────────────────────────────────────
+// HELP
+// ────────────────────────────────────────────────────────────────────────────
+function cmdHelp() {
+  console.log(`${C.bold("Gate Monitor Dashboard Cookie Cutter (v3)")}
+
+Usage:
+  node scripts/dash.mjs init                    verify shared primitives; write useDashboardData if missing
+  node scripts/dash.mjs init-groups             add error/loading/not-found per route group
+  node scripts/dash.mjs new <role> [flags]      create a fully wired dashboard
+  node scripts/dash.mjs audit [--json]          scan every page.tsx against 48 rules
+  node scripts/dash.mjs fix <file>              auto-patch safe wins on one page
+  node scripts/dash.mjs fix-all                 auto-patch every page with fixable findings
+  node scripts/dash.mjs sweep                   cross-file hygiene (dedupe directives, whitespace)
+
+Flags for \`new\`:
+  --group <name>     route group, default "(<role>)"
+  --route <path>     url route, default "/<role>"
+  --title "…"        page title, default "<Role> Dashboard"
+  --min-tier <n>     numeric tier floor, default 40
+  --layout           also emit a route-group layout.tsx
+
+Examples:
+  node scripts/dash.mjs new warden --min-tier 60 --title "Warden Console" --layout
+  node scripts/dash.mjs new operator --group "(operator)" --route /operator
+  node scripts/dash.mjs audit --json > /tmp/dash-audit.json
+  node scripts/dash.mjs fix-all
 `);
-  process.exit(kind ? 1 : 0);
 }
 
-await HANDLERS[kind](name, flags);
+// ────────────────────────────────────────────────────────────────────────────
+// DISPATCH
+// ────────────────────────────────────────────────────────────────────────────
+(async () => {
+  const { cmd, positional, flags } = parseArgs(process.argv);
+  try {
+    switch (cmd) {
+      case "init":        await cmdInit(); break;
+      case "init-groups": await cmdInitGroups(); break;
+      case "new":         await cmdNew(positional[0], flags); break;
+      case "audit":       await cmdAudit(flags); break;
+      case "fix":         await cmdFix(positional[0]); break;
+      case "fix-all":     await cmdFixAll(); break;
+      case "sweep":       await cmdSweep(); break;
+      case "help":
+      case undefined:
+      case "--help":
+      case "-h":          cmdHelp(); break;
+      default:            die(`unknown command: ${cmd}`);
+    }
+  } catch (e) {
+    die(e?.stack ?? e?.message ?? String(e));
+  }
+})();
