@@ -9,6 +9,7 @@ import { SafeAreaAppShell } from "@/components/shared/SafeAreaAppShell";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { Suspense } from "react";
 import { LoadingStates } from "@/components/shared/LoadingStates";
+import { FloatingBot } from "@/components/bot/FloatingBot";
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -29,6 +30,7 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
         <NavigationProvider>
           <ToastProvider>
             <SafeAreaAppShell>{children}</SafeAreaAppShell>
+            <FloatingBot />
           </ToastProvider>
         </NavigationProvider>
       </GlassProvider>
