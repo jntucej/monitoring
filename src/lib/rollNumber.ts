@@ -278,8 +278,10 @@ export function getStudentYearFromRoll(roll: string | null | undefined, now: Dat
   const decoded = parseRollNumber(roll);
   if (!decoded) return null;
   const currentYear = now.getFullYear();
-  const yearOfStudy = currentYear - decoded.admissionYear + 1;
-  return yearOfStudy > 0 ? yearOfStudy : null;
+  const baseYear = decoded.entryModeCode === "5A" ? 2 : 1;
+  const yearOfStudy = currentYear - decoded.admissionYear + baseYear;
+  if (yearOfStudy <= 0) return 1;
+  return Math.min(4, Math.max(1, yearOfStudy));
 }
 
 /**

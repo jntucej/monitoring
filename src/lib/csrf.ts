@@ -26,14 +26,16 @@ export function validateCsrf(req: NextRequest): CsrfValidationResult {
   // changing requests. 'none' covers direct user navigations.
   const secFetchSite = req.headers.get("sec-fetch-site");
   if (secFetchSite) {
-    if (!['same-origin', 'none'].includes(secFetchSite)) {
+    if (secFetchSite !== 'same-origin' && secFetchSite !== 'none') {
       return {
         valid: false,
         error: `Cross-site request blocked: Sec-Fetch-Site '${secFetchSite}' is not allowed.`,
       };
     }
-    // Sec-Fetch-Site is authoritative on modern browsers — no need to check Origin
-    return { valid: true };
+    if (secFetchSite === 'same-origin') {
+      return { valid: true };
+    }
+    // For 'none', fall through to verify Origin / Host consistency if present
   }
 
   const origin = req.headers.get("origin");
