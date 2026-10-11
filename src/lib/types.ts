@@ -133,6 +133,7 @@ export interface Person {
   year?: number;
   section?: string;
   batch?: string;
+  course?: string;
   parentName?: string;
   parentPhone?: string;
   parentId?: string;
