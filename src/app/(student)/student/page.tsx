@@ -9,7 +9,7 @@ import { ActivePasses } from "@/components/student/ActivePasses";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { RecentActivity } from "@/components/student/RecentActivity";
 import { UserProfileTab } from "@/components/shared/UserProfileTab";
-import { QrCode, FileCheck, Clock, User, ShieldCheck, TrendingUp, AlertTriangle, Send, Calendar, Loader2 } from "lucide-react";
+import { QrCode, FileCheck, Clock, User, TrendingUp, AlertTriangle, Send, Calendar, Loader2 } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
 
 function StudentDashboardInner() {

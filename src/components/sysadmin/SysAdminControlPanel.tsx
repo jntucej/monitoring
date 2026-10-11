@@ -45,11 +45,14 @@ export function SysAdminControlPanel() {
   const [auditCount, setAuditCount] = useState<number | null>(null);
   const [sessionCount, setSessionCount] = useState<number | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [telemetryError, setTelemetryError] = useState(false);
 
   const fetchTelemetry = useCallback(async () => {
     setIsSyncing(true);
+    setTelemetryError(false);
     try {
       const headers = getAuthHeaders();
+      let auditOk = false;
 
       // Fetch Recent Audit Logs & Count
       const auditRes = await fetch("/api/admin/audit?limit=8&offset=0", {
@@ -61,10 +64,12 @@ export function SysAdminControlPanel() {
         if (auditJson.success) {
           setAuditLogs(auditJson.data || []);
           setAuditCount(auditJson.total ?? 0);
+          auditOk = true;
         }
       }
 
       // Fetch Active Sessions Count
+      let sessionsOk = false;
       const sessRes = await fetch("/api/admin/sessions", {
         headers,
         cache: "no-store",
@@ -73,7 +78,12 @@ export function SysAdminControlPanel() {
         const sessJson = await sessRes.json();
         if (sessJson.success && Array.isArray(sessJson.data)) {
           setSessionCount(sessJson.data.length);
+          sessionsOk = true;
         }
+      }
+
+      if (!auditOk || !sessionsOk) {
+        setTelemetryError(true);
       }
     } finally {
       setIsSyncing(false);
