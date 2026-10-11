@@ -31,9 +31,9 @@ async function handleGet(req: NextRequest) {
       `SELECT table_name FROM information_schema.tables 
        WHERE table_schema = 'public' AND table_name = $1`,
       [tableName]
-    ).rows;
+    )).rows;
 
-    if (validTable.rows.length === 0) {
+    if (validTable.length === 0) {
       return NextResponse.json(
         { success: false, error: { code: "NOT_FOUND", message: "Table not found" } },
         { status: 404 }
@@ -41,7 +41,7 @@ async function handleGet(req: NextRequest) {
     }
 
     // Fetch data
-    const data = (await query(`SELECT * FROM "${tableName}" LIMIT 10000`).rows;
+    const data = (await query(`SELECT * FROM "${tableName}" LIMIT 10000`)).rows;
     
     if (data.length === 0) {
       return NextResponse.json(
@@ -101,11 +101,11 @@ async function handlePost(req: NextRequest) {
 
     // Validate all tables exist
     const placeholders = tables.map((_, i) => `$${i + 2}`).join(",");
-    const validTables = await query(
+    const validTables = (await query(
       `SELECT table_name FROM information_schema.tables 
        WHERE table_schema = 'public' AND table_name IN (${placeholders})`,
       ["public", ...tables]
-).rows;
+)).rows;
 
     const validTableNames = validTables.map((t: any) => t.table_name);
     const invalidTables = tables.filter((t: string) => !validTableNames.includes(t));
@@ -120,7 +120,7 @@ async function handlePost(req: NextRequest) {
     // For bulk export, return JSON (CSV would be complex for multiple tables)
     const result: Record<string, any[]> = {};
     for (const table of tables) {
-      const data = await query(`SELECT * FROM "${table}" LIMIT 10000`).rows;
+      const { rows: data } = await query(`SELECT * FROM \"${table}\" LIMIT 10000`);
       result[table] = data;
     }
 
