@@ -355,9 +355,15 @@ export function getStudentYearFromRoll(
   const cap = course.durationYears;
   let yearsElapsed: number;
   if (decoded.entryModeCode === "5A") {
-    // Lateral: admitted mid-AY, joined directly into 2nd year.
-    // 2026-27 spans AY 2025-26 -> 3rd year; 2027-28 -> 4th (cap).
-    yearsElapsed = Math.min(cap - 1, now.getFullYear() - decoded.admissionYear);
+    // Lateral (5A): joins directly into 2nd year of the same batch.
+    // A 23JJ5A student is in year 2 during AY 2023-24, year 3 during AY 2024-25,
+    // and graduates in the same year as the regular 23JJ1A cohort (2027 for B.Tech).
+    // Indian AY: Jul-Dec of calendar year Y belongs to AY Y-(Y+1).
+    // "Now" AY start = (month >= 6 ? nowYear : nowYear - 1).
+    // Years elapsed for lateral = AY start - admissionYear, capped at (cap - 1)
+    // since they start in year 2 (only cap-1 years remain).
+    const ayStart = now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1;
+    yearsElapsed = Math.min(cap - 1, Math.max(0, ayStart - decoded.admissionYear));
   } else {
     // Regular: 1st year spans Jul–Dec of the admission year. Jan–Jun of the
     // tail belongs to the previous AY's end: 24JJ1A is 3rd year through
