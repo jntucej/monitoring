@@ -28,13 +28,13 @@ interface PreviewSummary {
 // captured from the sheet; year is calculated, never typed.
 const TEMPLATE_CSV =
   "COURSE,H.T NO.,NAME OF THE STUDENT,FATHER NAME,GENDER,PHONE NUMBER,DOB,EMAIL ID,LAND LINE 0R PARENT NUMBER\n" +
-  "CSE,25JJ1A0501,AADITH KUMAR,PRAKASH RAO,male,9876543210,12-05-2005,aadith.k@jntuhcej.ac.in,9440123456\n" +
-  "CSE,24JJ5A0512,RAVI TEJA,SREENIVAS,female,9812345678,01-09-2003,ravi.tej@jntuhcej.ac.in,9440123457\n";
+  "B-Tech,25JJ1A0501,AADITH KUMAR,PRAKASH RAO,male,9876543210,12-05-2005,aadith.k@jntuhcej.ac.in,9440123456\n" +
+  "M-Tech,24JJ5A1205,RAVI TEJA,SREENIVAS,female,9812345678,01-09-2003,ravi.tej@jntuhcej.ac.in,9440123457\n";
 
 const TEMPLATE_HINTS: Array<[string, string]> = [
   ["H.T NO.", "The only required student field — yyJJVVBBNN. Year, batch and branch are calculated from it (1A = regular, 5A = lateral)."],
+  ["COURSE", "B-Tech (4-year programme) or M-Tech (2-year programme). The year is capped at the course duration; if blank, it falls back to the branch code in the H.T NO. (05 CSE, 12 IT, 04 ECE, 02 EEE, 03 MECH)."],
   ["EMAIL ID", "Required. Missing or invalid email = row is reported and skipped."],
-  ["COURSE", "Optional — if blank, it is filled from the branch code in the H.T NO. (05 CSE, 12 IT, 04 ECE, 02 EEE, 03 MECH)."],
   ["GENDER", "male / female (M, F also accepted)."],
   ["DOB", "DD-MM-YYYY or YYYY-MM-DD."],
   ["Other columns", "Father name, phone, landline/parent number — all optional."],
