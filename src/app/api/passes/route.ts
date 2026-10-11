@@ -6,7 +6,9 @@ import { withRateLimit } from "@/lib/rate-limit";
 import { validatePassRequestPayload } from "@/lib/validation";
 import { checkIdempotency, storeIdempotency } from "@/lib/idempotency";
 import type { AuthContext } from "@/lib/authContext";
-import type { Student } from "@/lib/types";
+import type { Student, GatePass } from "@/lib/types";
+
+const ADMIN_ROLES = ["admin", "sysadmin", "operator", "warden", "supervisor"];
 
 async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   try {
@@ -18,8 +20,8 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
     let roll = params.get("roll") || undefined;
     let parentId = params.get("parentId") || undefined;
 
-    // Authorization: Non-admins can only query their own data.
-    const isAdmin = ['admin', 'sysadmin', 'operator'].includes(authRole);
+    // Authorization: Non-admins *** only query their own data.
+    const isAdmin = ADMIN_ROLES.includes(authRole);
 
     if (!isAdmin) {
       if (authRole === 'student') {
@@ -61,8 +63,36 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
       }
     }
 
-    const passes = await findGatePasses({ status, roll, parentId });
-    return NextResponse.json({ success: true, data: passes });
+    // Warden/supervisor scoping: limit how many passes they can pull and
+    // optionally filter by hostel block.
+    let limit: number | undefined;
+    if (authRole === "warden" || authRole === "supervisor") {
+      limit = Math.min(parseInt(params.get("limit") || "200", 10), 500);
+      const hostel = params.get("hostel");
+      if (hostel && !["CSE", "IT", "ECE", "EEE", "ME"].includes(hostel.toUpperCase())) {
+        return NextResponse.json(
+          { success: false, error: { code: "INVALID_FILTER", message: "hostel must be one of CSE, IT, ECE, EEE, ME." } },
+          { status: 400 }
+        );
+      }
+    }
+
+    const passes = await findGatePasses({ status, roll, parentId, limit });
+
+    let data: GatePass[] = passes;
+    if ((authRole === "warden" || authRole === "supervisor") && params.get("hostel")) {
+      const hostel = params.get("hostel")!.toUpperCase();
+      const service = getSupabaseServiceClient();
+      const rolls = data.map((p) => p.roll).filter(Boolean);
+      const { data: details } = await service
+        .from("student_details")
+        .select("roll, hostel_block")
+        .in("roll", rolls.length ? rolls : ["__none__"]);
+      const blockByRoll = new Map((details || []).map((d: any) => [String(d.roll).toUpperCase(), d.hostel_block?.toUpperCase()]));
+      data = data.filter((p) => blockByRoll.get(p.roll?.toUpperCase() ?? "") === hostel);
+    }
+
+    return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error("Error fetching passes:", error);
     return NextResponse.json(
