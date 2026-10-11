@@ -33,6 +33,7 @@ interface StudentRecord {
   studentDetails?: {
     roll?: string;
     departmentId?: string;
+    course?: string;
     guardianName?: string;
     guardianPhone?: string;
     hostelRoom?: string;
@@ -46,6 +47,7 @@ export default function SysAdminStudentsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [branchFilter, setBranchFilter] = useState("ALL");
+  const [courseFilter, setCourseFilter] = useState("ALL");
   const [yearFilter, setYearFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [showBulkModal, setShowBulkModal] = useState(false);
@@ -265,15 +267,14 @@ export default function SysAdminStudentsPage() {
       const q = search.toLowerCase();
       const matchesSearch = !q || s.name?.toLowerCase().includes(q) || s.roll?.toLowerCase().includes(q) ||
         s.uniqueId?.toLowerCase().includes(q) || s.email?.toLowerCase().includes(q) || s.department?.toLowerCase().includes(q);
-      // Department: prefer the explicit department, fall back to course (both
-      // are populated from the roll branch code for imported students).
       const deptOf = s.department || s.course;
       const matchesBranch = branchFilter === "ALL" || deptOf === branchFilter;
+      const matchesCourse = courseFilter === "ALL" || s.course === courseFilter;
       const matchesYear = yearFilter === "ALL" || String(s.year ?? "") === yearFilter;
       const matchesStatus = statusFilter === "ALL" || s.status === statusFilter;
-      return matchesSearch && matchesBranch && matchesYear && matchesStatus;
+      return matchesSearch && matchesBranch && matchesCourse && matchesYear && matchesStatus;
     });
-  }, [students, search, branchFilter, yearFilter, statusFilter]);
+  }, [students, search, branchFilter, courseFilter, yearFilter, statusFilter]);
 
   const branches = useMemo(() => {
     // Union of explicit department values and course (roll-derived branch) so
@@ -322,6 +323,21 @@ export default function SysAdminStudentsPage() {
     return Object.entries(map).sort((a, b) => a[0].localeCompare(b[0]));
   }, [students]);
 
+  const courses = useMemo(() => {
+    const set = new Set<string>();
+    students.forEach((s) => { if (s.course) set.add(s.course); });
+    return Array.from(set).sort();
+  }, [students]);
+
+  const byCourse = useMemo(() => {
+    const map: Record<string, number> = {};
+    students.forEach((s) => {
+      const k = s.course || "Unassigned";
+      map[k] = (map[k] || 0) + 1;
+    });
+    return Object.entries(map).sort((a, b) => b[1] - a[1]);
+  }, [students]);
+
   const activeCount = useMemo(() => students.filter((s) => s.status === "ACTIVE").length, [students]);
   const totalStudents = students.length;
   const topBranch = byBranch[0];
@@ -364,6 +380,10 @@ export default function SysAdminStudentsPage() {
           </div>
           <div className="flex items-center gap-1.5 text-xs">
             <SlidersHorizontal className="w-3.5 h-3.5 text-slate-500" />
+            <select value={courseFilter} onChange={(e) => setCourseFilter(e.target.value)} className="bg-[#0d1220] border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-300">
+              <option value="ALL">All Courses</option>
+              {courses.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
             <select value={branchFilter} onChange={(e) => setBranchFilter(e.target.value)} className="bg-[#0d1220] border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-300">
               <option value="ALL">All Branches</option>
               {branches.map((b) => <option key={b} value={b}>{b}</option>)}
@@ -391,6 +411,20 @@ export default function SysAdminStudentsPage() {
               <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Largest Branch</div>
               <div className="mt-2 text-3xl font-bold text-emerald-400">{topBranch ? topBranch[0] : "—"}</div>
               <div className="mt-1 text-xs text-slate-400">{topBranch ? `${topBranch[1].toLocaleString()} students` : "No branch data"}</div>
+            </div>
+            <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
+              <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-3">Course (B.Tech / M.Tech)</div>
+              <div className="space-y-1.5">
+                {byCourse.map(([c, n]) => (
+                  <div key={c} className="flex items-center gap-2 text-xs">
+                    <div className="w-14 text-slate-300 text-right">{c}</div>
+                    <div className="flex-1 h-2 rounded-full bg-slate-800 overflow-hidden">
+                      <div className={`h-full rounded-full ${c === "M.Tech" ? "bg-purple-500" : "bg-sky-500"}`} style={{ width: `${totalStudents ? (n / totalStudents) * 100 : 0}%` }} />
+                    </div>
+                    <div className="w-10 text-slate-500 text-right">{n.toLocaleString()}</div>
+                  </div>
+                ))}
+              </div>
             </div>
             {/* Branch distribution */}
             <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4 sm:col-span-2">
