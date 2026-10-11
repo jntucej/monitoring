@@ -120,33 +120,33 @@ function LockdownDialog() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
+              className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 pointer-events-none"
             >
-              <div className="pointer-events-auto w-full max-w-md bg-[var(--bg-surface)] border border-rose-500/30 rounded-3xl p-6 shadow-2xl shadow-rose-500/20">
+              <div className="pointer-events-auto w-full max-w-md sm:max-w-lg bg-[var(--bg-surface)] border border-rose-500/30 rounded-3xl p-4 sm:p-6 shadow-2xl shadow-rose-500/20">
                 <div className="flex items-center justify-between mb-5">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center">
-                      <ShieldAlert className="w-5 h-5 text-rose-400" />
+                    <div className="w-8 sm:w-10 h-8 sm:h-10 rounded-2xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center">
+                      <ShieldAlert className="w-4 sm:w-5 h-4 sm:h-5 text-rose-400" />
                     </div>
                     <div>
-                      <h2 className="font-bold text-[var(--text-primary)] text-lg">Emergency Lockdown</h2>
-                      <p className="text-xs text-rose-300">Broadcast stop-flow to all gate operators</p>
+                      <h2 className="font-bold text-base sm:text-lg text-[var(--text-primary)]">Emergency Lockdown</h2>
+                      <p className="text-xs sm:text-sm text-rose-300">Broadcast stop-flow to all gate operators</p>
                     </div>
                   </div>
-                  <button onClick={() => setOpen(false)} className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors">
-                    <X className="w-4 h-4" />
+                  <button onClick={() => setOpen(false)} className="p-1.5 sm:p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors">
+                    <X className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
                   </button>
                 </div>
-                <p className="text-xs text-[var(--text-muted)] mb-4 leading-relaxed">
+                <p className="text-xs sm:text-sm text-[var(--text-muted)] mb-3 sm:mb-4 leading-relaxed">
                   Select scope. Operators see a <strong className="text-[var(--text-primary)]">red-banner alert</strong> immediately.
                   This does <em>not</em> physically lock gates — it issues a mandatory hold broadcast.
                 </p>
-                <div className="grid grid-cols-2 gap-2 mb-5">
+                <div className="grid gap-1.5 sm:gap-2 grid-cols-2 mb-4 sm:mb-5">
                   {LOCKDOWN_SCOPES.map(s => (
                     <button
                       key={s.id}
                       onClick={() => toggle(s.id)}
-                      className={`px-3 py-2.5 rounded-xl border text-xs font-bold transition-all ${s.id === "all" ? "col-span-2" : ""} ${
+                      className={`px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl border text-xs sm:text-xs font-bold transition-all ${s.id === "all" ? "col-span-2" : ""} ${
                         selected.includes(s.id)
                           ? s.color + " ring-2 ring-offset-1 ring-offset-[var(--bg-surface)] ring-current"
                           : "bg-[var(--bg-elevated)] border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--border-strong)]"
@@ -159,13 +159,25 @@ function LockdownDialog() {
                 <button
                   onClick={broadcast}
                   disabled={selected.length === 0 || sending || sent}
-                  className="w-full py-3 rounded-2xl bg-rose-500 hover:bg-rose-400 disabled:opacity-40 text-white font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-rose-500/30"
+                  className="w-full py-2.5 sm:py-3 rounded-2xl bg-rose-500 hover:bg-rose-400 disabled:opacity-40 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-rose-500/30"
                 >
                   {sent
-                    ? <><RadioIcon className="w-4 h-4 animate-pulse" /> Broadcast Sent to All Gates!</>
-                    : sending
-                    ? <><RadioIcon className="w-4 h-4 animate-spin" /> Sending…</>
-                    : <><ShieldAlert className="w-4 h-4" /> Broadcast Emergency Alert</>}
+                    ? (
+                      <>
+                        <RadioIcon className="w-3.5 sm:w-4 h-3.5 sm:h-4 animate-pulse" />
+                        Broadcast Sent to All Gates!
+                      </>
+                    ) : sending ? (
+                      <>
+                        <RadioIcon className="w-3.5 sm:w-4 h-3.5 sm:h-4 animate-spin" />
+                        Sending…
+                      </>
+                    ) : (
+                      <>
+                        <ShieldAlert className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
+                        Broadcast Emergency Alert
+                      </>
+                    )}
                 </button>
                 {apiError && (
                   <p className="mt-2 text-xs text-rose-400 text-center">{apiError}</p>
@@ -274,7 +286,7 @@ export default function AdminDashboardPage() {
         <div>
           <p className="text-sm text-[var(--text-muted)]">Loading live campus telemetry data…</p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
           {[0, 1, 2, 3].map((i) => (
             <div key={i} className="h-28 rounded-xl bg-[var(--bg-surface)] animate-pulse border border-[var(--border)]" />
           ))}
@@ -343,33 +355,33 @@ export default function AdminDashboardPage() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="rounded-2xl border border-rose-500/40 bg-rose-500/10 p-4 flex items-center gap-4 shadow-lg shadow-rose-500/10"
+            className="rounded-2xl border border-rose-500/40 bg-rose-500/10 p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:flex-row items-center gap-3 sm:gap-4 shadow-lg shadow-rose-500/10"
           >
-            <div className="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center shrink-0">
-              <ShieldAlert className="w-5 h-5 text-rose-400 animate-pulse" />
+            <div className="w-8 sm:w-10 h-8 sm:h-10 rounded-xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center shrink-0">
+              <ShieldAlert className="w-4 sm:w-5 h-4 sm:h-5 text-rose-400 animate-pulse" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-bold uppercase tracking-widest text-rose-400">⚠ Emergency Lockdown Active</span>
-                <span className="text-[10px] font-mono text-rose-300/70">
+              <div className="flex flex-col sm:flex-row items-start sm:flex-row items-center gap-1 sm:gap-2 flex-wrap">
+                <span className="text-xs sm:text-sm font-bold uppercase tracking-widest text-rose-400">⚠ Emergency Lockdown Active</span>
+                <span className="text-[9px] sm:text-[10px] font-mono text-rose-300/70">
                   {new Date(activeLockdown.issuedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </span>
               </div>
-              <div className="flex items-center gap-2 mt-1 flex-wrap">
+              <div className="flex flex-col sm:flex-row items-start sm:flex-row items-center gap-1 sm:gap-2 mt-1 flex-wrap">
                 <span className="text-xs text-rose-200/80">Scope:</span>
                 {activeLockdown.scopes.map(s => (
-                  <span key={s} className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 uppercase">
+                  <span key={s} className="px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 uppercase">
                     {s}
                   </span>
                 ))}
               </div>
               {activeLockdown.message && (
-                <p className="text-xs text-rose-200/60 mt-1">{activeLockdown.message}</p>
+                <p className="text-xs sm:text-sm text-rose-200/60 mt-1">{activeLockdown.message}</p>
               )}
             </div>
             <button
               onClick={() => { setActiveLockdown(null); load(false); }}
-              className="px-3 py-1.5 rounded-lg bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs font-bold hover:bg-rose-500/30 transition"
+              className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs sm:text-sm font-bold hover:bg-rose-500/30 transition shrink-0"
             >
               Dismiss
             </button>
@@ -397,20 +409,20 @@ export default function AdminDashboardPage() {
 {/* ── B: Recent Alerts Feed ── */}
       {recentAlerts.length > 0 && (
         <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] overflow-hidden">
-          <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Bell className="w-4 h-4 text-rose-400" />
-              <span className="font-semibold text-sm hidden sm:inline">🔔 Recent Alerts</span>
-              <span className="font-semibold text-sm sm:hidden">🔔</span>
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-rose-500/10 text-rose-400 font-bold">
+          <div className="p-3 sm:p-4 border-b border-[var(--border)] flex flex-col sm:flex-row items-start sm:flex-row items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <Bell className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-rose-400" />
+              <span className="font-semibold text-xs sm:text-sm hidden sm:inline">🔔 Recent Alerts</span>
+              <span className="font-semibold text-xs sm:hidden">🔔</span>
+              <span className="text-[9px] sm:text-[10px] px-1.5 sm:px-1.5 py-0.5 rounded-full bg-rose-500/10 text-rose-400 font-bold">
                 {recentAlerts.length} active
               </span>
             </div>
             <button
               onClick={() => router.push("/admin/alerts")}
-              className="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center gap-1 transition-colors"
+              className="text-xs sm:text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center gap-1 transition-colors shrink-0"
             >
-              View All <ChevronRight className="w-3 h-3" />
+              View All <ChevronRight className="w-2.5 sm:w-3 h-2.5 sm:h-3" />
             </button>
           </div>
           <div className="divide-y divide-[var(--border)]">
@@ -450,23 +462,23 @@ export default function AdminDashboardPage() {
 {/* ── E: Department Breakdown ── */}
       {deptBreakdown.length > 0 && (
         <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] overflow-hidden">
-          <div className="p-4 border-b border-[var(--border)]">
-            <div className="flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-blue-400" />
-              <span className="font-semibold text-sm hidden sm:inline">🏛️ Department Breakdown</span>
-              <span className="font-semibold text-sm sm:hidden">🏛️</span>
+          <div className="p-3 sm:p-4 border-b border-[var(--border)]">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <Building2 className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-blue-400" />
+              <span className="font-semibold text-xs sm:text-sm hidden sm:inline">🏛️ Department Breakdown</span>
+              <span className="font-semibold text-xs sm:hidden">🏛️</span>
             </div>
-            <p className="text-[11px] text-[var(--text-muted)] mt-0.5 hidden sm:block">Today's scan activity by department</p>
+            <p className="text-[10px] sm:text-[11px] text-[var(--text-muted)] mt-0.5 hidden sm:block">Today's scan activity by department</p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="border-b border-[var(--border)] text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider bg-[var(--bg-elevated)]/30">
-                  <th className="py-3 px-4">Department</th>
-                  <th className="py-3 px-4 text-right">Entries</th>
-                  <th className="py-3 px-4 text-right">Exits</th>
-                  <th className="py-3 px-4 text-right">Total</th>
-                  <th className="py-3 px-4">Share</th>
+                <tr className="border-b border-[var(--border)] text-[9px] sm:text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider bg-[var(--bg-elevated)]/30">
+                  <th className="py-2 sm:py-3 px-3 sm:px-4">Department</th>
+                  <th className="py-2 sm:py-3 px-3 sm:px-4 text-right">Entries</th>
+                  <th className="py-2 sm:py-3 px-3 sm:px-4 text-right">Exits</th>
+                  <th className="py-2 sm:py-3 px-3 sm:px-4 text-right">Total</th>
+                  <th className="py-2 sm:py-3 px-3 sm:px-4">Share</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
@@ -475,19 +487,19 @@ export default function AdminDashboardPage() {
                   const total = dept.in + dept.out;
                   return (
                     <tr key={dept.deptCode} className="hover:bg-[var(--bg-elevated)]/30 transition">
-                      <td className="py-3 px-4">
-                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-bold ${colorClass}`}>{dept.deptCode}</span>
-                        <span className="text-[11px] text-[var(--text-muted)] ml-2">{dept.dept}</span>
+                      <td className="py-2 sm:py-3 px-3 sm:px-4">
+                        <span className={`inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-md text-[9px] sm:text-xs font-bold ${colorClass}`}>{dept.deptCode}</span>
+                        <span className="text-[9px] sm:text-[11px] text-[var(--text-muted)] ml-1 sm:ml-2">{dept.dept}</span>
                       </td>
-                      <td className="py-3 px-4 text-right text-emerald-400 font-semibold text-sm">{dept.in.toLocaleString()}</td>
-                      <td className="py-3 px-4 text-right text-amber-400 font-semibold text-sm">{dept.out.toLocaleString()}</td>
-                      <td className="py-3 px-4 text-right text-[var(--text-primary)] font-bold text-sm">{total.toLocaleString()}</td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-2">
-                          <div className="flex-1 h-1.5 rounded-full bg-[var(--bg-elevated)] overflow-hidden">
+                      <td className="py-2 sm:py-3 px-3 sm:px-4 text-right text-emerald-400 font-semibold text-xs sm:text-sm">{dept.in.toLocaleString()}</td>
+                      <td className="py-2 sm:py-3 px-3 sm:px-4 text-right text-amber-400 font-semibold text-xs sm:text-sm">{dept.out.toLocaleString()}</td>
+                      <td className="py-2 sm:py-3 px-3 sm:px-4 text-right text-[var(--text-primary)] font-bold text-xs sm:text-sm">{total.toLocaleString()}</td>
+                      <td className="py-2 sm:py-3 px-3 sm:px-4">
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          <div className="flex-1 h-1 sm:h-1.5 rounded-full bg-[var(--bg-elevated)] overflow-hidden">
                             <div className="h-full rounded-full bg-blue-500 transition-all" style={{ width: `${dept.pct}%` }} />
                           </div>
-                          <span className="text-[10px] text-[var(--text-muted)] w-8 text-right">{dept.pct}%</span>
+                          <span className="text-[9px] sm:text-[10px] text-[var(--text-muted)] w-7 sm:w-8 text-right">{dept.pct}%</span>
                         </div>
                       </td>
                     </tr>
@@ -500,24 +512,24 @@ export default function AdminDashboardPage() {
       )}
 
       {/* ── H: Reorganized Quick Actions Grid (8 cards) ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 xl:grid-cols-4">
         <div
           onClick={() => router.push("/admin/alerts")}
-          className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] hover:border-rose-500/40 hover:bg-rose-500/5 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer group flex flex-col justify-between"
+          className="p-3 sm:p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] hover:border-rose-500/40 hover:bg-rose-500/5 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer group flex flex-col justify-between"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] group-hover:text-rose-400 hidden sm:inline">🚨 Outpass Alerts</span>
+            <span className="text-xs sm:text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] group-hover:text-rose-400 hidden sm:inline">🚨 Outpass Alerts</span>
             <span className="text-base sm:hidden">🚨</span>
-            <div className="p-2 rounded-lg bg-rose-500/10 text-rose-400 group-hover:scale-110 transition-transform">
-              <Shield className="w-4 h-4" />
+            <div className="p-1.5 sm:p-2 rounded-lg bg-rose-500/10 text-rose-400 group-hover:scale-110 transition-transform">
+              <Shield className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
             </div>
           </div>
-          <div className="mt-3 hidden sm:block">
-            <div className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-rose-400 transition-colors">
+          <div className="mt-2 sm:mt-3 hidden sm:block">
+            <div className="text-xs sm:text-sm font-semibold text-[var(--text-primary)] group-hover:text-rose-400 transition-colors">
               Security & Curfew Desk
             </div>
-            <p className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
-              Review flagged attempts <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+            <p className="text-[9px] sm:text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
+              Review flagged attempts <ArrowRight className="w-2.5 sm:w-3 h-2.5 sm:h-3 group-hover:translate-x-1 transition-transform" />
             </p>
           </div>
         </div>
@@ -533,11 +545,11 @@ export default function AdminDashboardPage() {
               <Sparkles className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-3 hidden sm:block">
+          <div className="mt-2 sm:mt-3 hidden sm:block">
             <div className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-amber-400 transition-colors">
               Announcements Manager
             </div>
-            <p className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
+            <p className="text-[9px] sm:text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
               Issue gate alerts & news <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
             </p>
           </div>
@@ -554,11 +566,11 @@ export default function AdminDashboardPage() {
               <Zap className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-3 hidden sm:block">
+          <div className="mt-2 sm:mt-3 hidden sm:block">
             <div className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-blue-400 transition-colors">
               Live Digital Twin
             </div>
-            <p className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
+            <p className="text-[9px] sm:text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
               Monitor zone capacity <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
             </p>
           </div>
@@ -575,11 +587,11 @@ export default function AdminDashboardPage() {
               <ShieldAlert className="w-4 h-4 text-emerald-400" />
             </div>
           </div>
-          <div className="mt-3 hidden sm:block">
+          <div className="mt-2 sm:mt-3 hidden sm:block">
             <div className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-emerald-400 transition-colors">
               Manage Security Holds & Bans
             </div>
-            <p className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
+            <p className="text-[9px] sm:text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
               Flag/unflag accounts for scanning <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
             </p>
           </div>
@@ -596,18 +608,18 @@ export default function AdminDashboardPage() {
               <Database className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-3 hidden sm:block">
+          <div className="mt-2 sm:mt-3 hidden sm:block">
             <div className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-cyan-400 transition-colors">
               Historical Data & Exports
             </div>
-            <p className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
+            <p className="text-[9px] sm:text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
               Generate reports and export data <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
             </p>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
         <EntryExitChart />
         <StudentList />
       </div>

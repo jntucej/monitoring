@@ -22,18 +22,18 @@ export function GateCard({ gate }: GateCardProps) {
       href={`/admin/gates/${gate.id}`}
       className="p-4 border-b sm:border-b-0 sm:border-r border-[var(--border)] last:border-r-0 hover:bg-[var(--bg-elevated)]/30 cursor-pointer transition group"
     >
-      <div className="flex items-center justify-between mb-2">
-        <span className="font-semibold text-sm text-[var(--text-primary)] group-hover:text-emerald-400 transition-colors">{gate.name}</span>
-        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${gate.isActive ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-rose-500/10 text-rose-400 border border-rose-500/20"}`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${gate.isActive ? "bg-emerald-400 animate-pulse" : "bg-rose-400"}`} />
+      <div className="flex items-center justify-between mb-1 sm:mb-2">
+        <span className="font-semibold text-xs sm:text-sm text-[var(--text-primary)] group-hover:text-emerald-400 transition-colors">{gate.name}</span>
+        <span className={`inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold uppercase ${gate.isActive ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-rose-500/10 text-rose-400 border border-rose-500/20"}`}>
+          <span className={`w-1 h-1.5 sm:w-1.5 sm:h-1.5 rounded-full ${gate.isActive ? "bg-emerald-400 animate-pulse" : "bg-rose-400"}`} />
           {gate.isActive ? "Online" : "Offline"}
         </span>
       </div>
-      <p className="text-[11px] text-[var(--text-muted)] mb-2">{gate.location}</p>
-      <div className="flex items-center gap-3 text-xs">
-        <span className="flex items-center gap-1 text-emerald-400"><ArrowDownLeft className="w-3 h-3" /> {gate.currentScanCount}</span>
+      <p className="text-[10px] sm:text-[11px] text-[var(--text-muted)] mb-1 sm:mb-2">{gate.location}</p>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 text-xs sm:text-sm">
+        <span className="flex items-center gap-1 text-emerald-400"><ArrowDownLeft className="w-2.5 sm:w-3 h-2.5 sm:h-3" /> {gate.currentScanCount}</span>
         {gate.lastScan && (
-          <span className="text-[var(--text-muted)] font-mono flex items-center gap-1"><Clock className="w-3 h-3" /> {timeAgo(gate.lastScan.timestamp)}</span>
+          <span className="text-[var(--text-muted)] font-mono flex items-center gap-1"><Clock className="w-2.5 sm:w-3 h-2.5 sm:h-3" /> {timeAgo(gate.lastScan.timestamp)}</span>
         )}
       </div>
     </Link>
@@ -58,7 +58,7 @@ export function GateCardsGrid({ locations }: GateCardsGridProps) {
           Manage Gates <ChevronRight className="w-3 h-3" />
         </Link>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-2 sm:gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {locations.map((gate) => (
           <GateCard key={gate.id} gate={gate} />
         ))}

@@ -547,7 +547,7 @@ function SupervisorDashboardInner() {
                   <List className="w-3.5 h-3.5" /> List
                 </button>
                 <button onClick={() => setRosterViewMode("heatmap")} className={`px-2 py-1 rounded-lg font-bold flex items-center gap-1 ${rosterViewMode === "heatmap" ? "bg-indigo-500 text-white" : "text-[var(--text-muted)]"}`}>
-                  <Grid className="w-3.5 h-3.5" /> Grid Map
+                  <Grid className="w-6 h-6 md:w-8 md:h-8" /> Grid Map
                 </button>
               </div>
               <input type="text" value={studentSearch} onChange={(e) => setStudentSearch(e.target.value)} placeholder="Search Ward..." className="px-3 py-1.5 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-xs text-[var(--text-primary)] flex-1 sm:w-48" />
