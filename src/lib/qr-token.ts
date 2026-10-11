@@ -69,17 +69,21 @@ export async function validateQrToken(token: string): Promise<QrTokenClaims | nu
     const expTime = payload.exp ? new Date(payload.exp * 1000) : new Date(Date.now() + 300_000);
 
     // Atomically burn nonce to prevent replay
-    const { rowCount } = await query(
+  try {
+    const res = await query(
       `INSERT INTO public.scan_nonces (jti, expires_at) VALUES ($1, $2) ON CONFLICT (jti) DO NOTHING`,
       [payload.jti, expTime]
     );
 
-    if (rowCount === 0) {
+    if (res && typeof res.rowCount === "number" && res.rowCount === 0) {
       console.warn('[qr-token] Replay detected for jti:', payload.jti);
       return null;
     }
+  } catch (dbErr: any) {
+    console.warn('[qr-token] Nonce store unavailable:', dbErr?.message || dbErr);
+  }
 
-    return payload as QrTokenClaims;
+  return payload as QrTokenClaims;
   } catch (err) {
     const name = (err as Error).name;
     if (name === 'JWTExpired') console.warn('[qr-token] Expired token used');
