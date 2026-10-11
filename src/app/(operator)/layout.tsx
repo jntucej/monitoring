@@ -8,7 +8,7 @@ export default function OperatorLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthGuard allowedRoles={["operator", "admin", "sysadmin"]}>
+    <AuthGuard allowedRoles={["operator", "worker", "admin", "sysadmin"]}>
       {children}
     </AuthGuard>
   );

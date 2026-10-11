@@ -11,4 +11,4 @@ async function handleGet() {
   }
 }
 
-export const GET = withAuthorization(handleGet, { requiredRole: ["sysadmin"] });
+export const GET = withAuthorization(handleGet, { requiredRole: ["sysadmin", "admin", "warden", "operator", "worker", "supervisor"] });
