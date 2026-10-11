@@ -14,7 +14,7 @@ BEGIN
       AND column_name = 'details_text_tsv'
   ) THEN
     ALTER TABLE public.audit_logs
-      ADD COLUMN details_text_tsv tsvector
+      ADD COLUMN IF NOT EXISTS details_text_tsv tsvector
       GENERATED ALWAYS AS (to_tsvector('english', COALESCE(details::text, ''))) STORED;
   END IF;
 END $$;
