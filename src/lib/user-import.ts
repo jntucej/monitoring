@@ -16,7 +16,6 @@ import {
   getStudentYearFromRoll,
   getBatchFromRoll,
 } from "@/lib/rollNumber";
-
 const VALID_ROLES: Role[] = [
   "operator", "admin", "sysadmin", "parent", "student",
   "warden", "faculty", "staff", "worker",
@@ -229,7 +228,7 @@ export async function validateImport(csvInput: string | ImportRow[]): Promise<Va
       continue;
     }
 
-    const derivedYear = isStudent ? (getStudentYearFromRoll(rollRaw) ?? undefined) : undefined;
+    const derivedYear = isStudent ? (getStudentYearFromRoll(rollRaw, undefined, course) ?? undefined) : undefined;
     const derivedBatch = isStudent ? (getBatchFromRoll(rollRaw) ?? undefined) : undefined;
     const rollCourse = decoded ? decoded.department : undefined;
 
