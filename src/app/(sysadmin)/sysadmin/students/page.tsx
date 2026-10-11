@@ -13,6 +13,7 @@ import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { BulkUserImportModal } from "@/components/sysadmin/BulkUserImportModal";
+import { ROLL_DEPT_CODES, parseRollNumber, getStudentYearFromRoll } from "@/lib/rollNumber";
 
 interface StudentRecord {
   id: string;
@@ -338,6 +339,67 @@ export default function SysAdminStudentsPage() {
     return Object.entries(map).sort((a, b) => b[1] - a[1]);
   }, [students]);
 
+  // --- Canonical branch card: always the 5 defined branches, decoded from roll
+  const CANONICAL_BRANCHES = ["CSE", "IT", "ECE", "EEE", "MECH"] as const;
+  const byBranchCanonical = useMemo(() => {
+    const map: Record<string, number> = {};
+    CANONICAL_BRANCHES.forEach((b) => { map[b] = 0; });
+    let unassigned = 0;
+    students.forEach((s) => {
+      const decoded = s.roll ? parseRollNumber(s.roll) : null;
+      const short = decoded ? ROLL_DEPT_CODES[decoded.departmentCode]?.short : undefined;
+      if (short && map[short] !== undefined) map[short] += 1;
+      else unassigned += 1;
+    });
+    return { entries: CANONICAL_BRANCHES.map((b) => [b, map[b]] as [string, number]), unassigned };
+  }, [students]);
+
+  // --- Batch → cohort spans with regular/lateral split + live year + graduation
+  interface CohortRow {
+    admissionYear: number;
+    course: string;          // "B.Tech" | "M.Tech" | "Unassigned"
+    regular: number;
+    lateral: number;
+    total: number;
+    liveYearRegular: number; // current year-of-study for regulars in this cohort
+    liveYearLateral: number; // current year-of-study for laterals in this cohort (usually 1 ahead)
+    graduationYear: number;  // regular & lateral both graduate in the same calendar year
+  }
+  const cohorts = useMemo(() => {
+    const now = new Date();
+    const map: Record<string, { course: string; regular: number; lateral: number; liveYearRegular: number; liveYearLateral: number; admissionYear: number }> = {};
+    students.forEach((s) => {
+      const decoded = s.roll ? parseRollNumber(s.roll) : null;
+      if (!decoded) return;
+      const course = s.course || "Unassigned";
+      const key = `${decoded.admissionYear}|${course}`;
+      if (!map[key]) map[key] = { course, admissionYear: decoded.admissionYear, regular: 0, lateral: 0, liveYearRegular: 0, liveYearLateral: 0 };
+      const rec = map[key];
+      const yos = getStudentYearFromRoll(s.roll, now, course);
+      if (decoded.entryModeCode === "5A") {
+        rec.lateral += 1;
+        if (yos && yos > rec.liveYearLateral) rec.liveYearLateral = yos;
+      } else {
+        rec.regular += 1;
+        if (yos && yos > rec.liveYearRegular) rec.liveYearRegular = yos;
+      }
+    });
+    const rows: CohortRow[] = Object.values(map).map((r) => {
+      const duration = r.course === "M.Tech" ? 2 : 4;
+      return {
+        admissionYear: r.admissionYear,
+        course: r.course,
+        regular: r.regular,
+        lateral: r.lateral,
+        total: r.regular + r.lateral,
+        liveYearRegular: r.liveYearRegular,
+        liveYearLateral: r.liveYearLateral,
+        graduationYear: r.admissionYear + duration,
+      };
+    });
+    return rows.sort((a, b) => a.admissionYear - b.admissionYear || a.course.localeCompare(b.course));
+  }, [students]);
+
   const activeCount = useMemo(() => students.filter((s) => s.status === "ACTIVE").length, [students]);
   const totalStudents = students.length;
   const topBranch = byBranch[0];
@@ -426,11 +488,11 @@ export default function SysAdminStudentsPage() {
                 ))}
               </div>
             </div>
-            {/* Branch distribution */}
+            {/* Branch distribution — canonical 5 branches decoded from roll */}
             <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4 sm:col-span-2">
               <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-3">Branch / Department Distribution</div>
               <div className="space-y-2">
-                {byBranch.slice(0, 6).map(([b, n]) => (
+                {byBranchCanonical.entries.map(([b, n]) => (
                   <div key={b} className="flex items-center gap-2 text-xs">
                     <div className="w-16 text-slate-300 truncate text-right">{b}</div>
                     <div className="flex-1 h-2 rounded-full bg-slate-800 overflow-hidden">
@@ -439,6 +501,9 @@ export default function SysAdminStudentsPage() {
                     <div className="w-12 text-slate-500 text-right">{n.toLocaleString()}</div>
                   </div>
                 ))}
+                {byBranchCanonical.unassigned > 0 && (
+                  <div className="text-[10px] text-slate-600">{byBranchCanonical.unassigned} unassigned / non-canonical</div>
+                )}
               </div>
             </div>
             {/* Year distribution */}
@@ -457,16 +522,45 @@ export default function SysAdminStudentsPage() {
                 })()}
               </div>
             </div>
-            {/* Batch distribution */}
-            <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
-              <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-3">Batch Distribution</div>
-              <div className="space-y-1.5 max-h-24 overflow-y-auto pr-1">
-                {byBatch.map(([b, n]) => (
-                  <div key={b} className="flex items-center gap-2 text-xs">
-                    <div className="w-16 text-slate-300 truncate text-right font-mono">{b}</div>
-                    <div className="w-14 text-slate-500 text-right">{n.toLocaleString()}</div>
-                  </div>
-                ))}
+            {/* Batch → cohort spans with regular/lateral split + live year + graduation */}
+            <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4 sm:col-span-2">
+              <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-3">
+                Batch Cohorts · Regular vs Lateral · Graduation Year
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="text-slate-500 uppercase text-[10px] tracking-wider">
+                      <th className="text-left pr-3 py-1">Batch</th>
+                      <th className="text-left pr-3 py-1">Course</th>
+                      <th className="text-right pr-3 py-1">Regular</th>
+                      <th className="text-right pr-3 py-1">Lateral</th>
+                      <th className="text-right pr-3 py-1">Total</th>
+                      <th className="text-center pr-3 py-1">Reg Yr</th>
+                      <th className="text-center pr-3 py-1">Lat Yr</th>
+                      <th className="text-right py-1">Grad</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {cohorts.map((c, i) => (
+                      <tr key={`${c.admissionYear}-${c.course}`} className={i % 2 ? "text-slate-400" : "text-slate-300"}>
+                        <td className="pr-3 py-1 font-mono">{String(c.admissionYear).slice(2)}</td>
+                        <td className="pr-3 py-1">
+                          <span className={c.course === "M.Tech" ? "text-purple-400" : "text-sky-400"}>{c.course}</span>
+                        </td>
+                        <td className="pr-3 py-1 text-right">{c.regular}</td>
+                        <td className="pr-3 py-1 text-right text-purple-300">{c.lateral}</td>
+                        <td className="pr-3 py-1 text-right font-semibold text-white">{c.total}</td>
+                        <td className="pr-3 py-1 text-center text-emerald-400">{c.liveYearRegular || "—"}</td>
+                        <td className="pr-3 py-1 text-center text-purple-300">{c.liveYearLateral || "—"}</td>
+                        <td className="py-1 text-right font-mono text-amber-300">{c.graduationYear}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="mt-2 text-[10px] text-slate-600">
+                B.Tech = 4 yrs · M.Tech = 2 yrs · Lateral (5A) joins 2nd year of the same batch → same graduation as regulars
               </div>
             </div>
           </div>
