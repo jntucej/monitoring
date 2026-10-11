@@ -6,3 +6,12 @@ CREATE TABLE IF NOT EXISTS public.scan_nonces (
 );
 
 CREATE INDEX IF NOT EXISTS idx_scan_nonces_expires ON public.scan_nonces(expires_at);
+
+ALTER TABLE public.scan_nonces ENABLE ROW LEVEL SECURITY;
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'scan_nonces' AND policyname = 'svc_all_scan_nonces'
+  ) THEN
+    CREATE POLICY svc_all_scan_nonces ON public.scan_nonces FOR ALL TO service_role USING (true) WITH CHECK (true);
+  END IF;
+END $$;
