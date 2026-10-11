@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { LoginForm } from "@/components/shared/LoginForm";
 import { Suspense } from 'react';
-import { BookOpen } from "lucide-react";
 
 export default function UnifiedLoginPage() {
   return (
