@@ -25,9 +25,18 @@ async function handlePost(req: NextRequest) {
     }
 
     // Live face verification check
+    const MIN_LIVENESS_SCORE = 0.85;
+    const livenessScore = body.livenessScore;
+    
+    if (typeof livenessScore !== 'number' || livenessScore < MIN_LIVENESS_SCORE) {
+      return NextResponse.json(
+        { success: false, error: { code: \"LOW_LIVENESS\", message: \"Face liveness check failed\" } },
+        { status: 403 }
+      );
+    }
     const hasPhoto = Boolean(person.photoUrl || person.photo);
     const providedLiveSample = Boolean(photoBase64 || image);
-    const verified = hasPhoto || providedLiveSample;
+    const verified = hasPhoto || providedLiveSample; // Still needs better logic
 
     return NextResponse.json({
       success: true,
