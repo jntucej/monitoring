@@ -65,7 +65,7 @@ export function DevContactStrip({ defaultOpen = false }: { defaultOpen?: boolean
         <div className="flex items-center gap-2">
           <MessageSquare className="w-4 h-4 text-emerald-400" />
           <span className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">
-            Message the Developer
+            Developer
           </span>
         </div>
         <span className="text-[10px] text-[var(--text-muted)]">{open ? "Hide" : "Open"}</span>

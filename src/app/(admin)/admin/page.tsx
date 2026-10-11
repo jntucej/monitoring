@@ -10,6 +10,7 @@ import { EntryExitChart } from "@/components/admin/EntryExitChart";
 import { StudentList } from "@/components/admin/StudentList";
 import { CampusStatusCards } from "@/components/admin/CampusStatusCards";
 import { DevMessagesPanel } from "@/components/admin/DevMessagesPanel";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { GateCardsGrid } from "@/components/admin/GateCardsGrid";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ChartCard } from "@/components/shared/ChartCard";
@@ -624,7 +625,10 @@ export default function AdminDashboardPage() {
         <StudentList />
       </div>
 
-      <DevMessagesPanel />
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
+        <DevContactStrip />
+        <DevMessagesPanel />
+      </div>
     </motion.div>
   );
 }

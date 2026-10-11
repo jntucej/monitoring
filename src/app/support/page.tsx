@@ -129,7 +129,7 @@ export default function UserSupportPage() {
 
       <Card className="border p-4">
         <h3 className="font-semibold text-base flex items-center gap-2 mb-1">
-          <Send className="w-4 h-4 text-emerald-500" /> Message the Developer
+          <Send className="w-4 h-4 text-emerald-500" /> Developer
         </h3>
         <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
           Suggestion, improvement, or anything that doesn't fit a ticket? Write it here.

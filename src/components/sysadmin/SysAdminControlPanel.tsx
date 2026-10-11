@@ -28,6 +28,7 @@ import {
 import { GovernanceModules } from "./SysAdminGovernanceModules";
 import { HealthDashboard } from "./HealthDashboard";
 import { DevMessagesPanel } from "@/components/admin/DevMessagesPanel";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { getAuthHeaders } from "@/lib/utils";
 
 interface AuditLog {
@@ -121,7 +122,10 @@ export function SysAdminControlPanel() {
       <HealthDashboard />
 
       {/* Incoming developer messages (direct-to-dev channel from all users) */}
-      <DevMessagesPanel />
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 items-start">
+        <DevContactStrip />
+        <DevMessagesPanel />
+      </div>
 
       {/* Governance Control Modules */}
       <GovernanceModules />

@@ -686,6 +686,7 @@ function OperatorPageInner() {
           setShowCameraScanner(false);
           setOperatorSubMode("manual");
         }}
+        gateId={gateId || user?.gateId}
       />
 
       {/* WebAuthn / Passkey Biometric confirmation step after the ID scan */}

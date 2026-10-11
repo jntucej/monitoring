@@ -2,55 +2,37 @@
 
 import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, KeyRound, QrCode, AlertCircle } from 'lucide-react';
+import { Camera, KeyRound, QrCode } from 'lucide-react';
 import { useGlass } from '@/context/GlassContext';
 
 interface ScanViewfinderProps {
   onStartScanner: () => void;
   onManualEntry: () => void;
+  /** Set while a scan request is in flight — reserved for future use. */
   scanning?: boolean;
+  /** Roll number from the most recent scan — reserved for future use. */
   lastScanRoll?: string;
-  error?: { code: string; message: string } | null;
 }
 
-/* Two source icons (Camera / Barcode) + labels, no full-screen QR+barcode modes */
-function ModeTile({
-  icon,
-  label,
-  sub,
-  active,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  sub: string;
-  active: boolean;
-}) {
-  return (
-    <div
-      className={`flex flex-col items-center gap-1.5 px-4 py-3 rounded-xl border transition-colors ${
-        active
-          ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400'
-          : 'border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-muted)]'
-      }`}
-    >
-      <span className={`w-8 h-8 rounded-lg flex items-center justify-center ${active ? 'bg-emerald-500/20' : 'bg-[var(--bg-elevated)]'}`}>
-        {icon}
-      </span>
-      <span className="text-xs font-bold text-[var(--text-primary)]">{label}</span>
-      <span className="text-[10px] text-[var(--text-muted)]">{sub}</span>
-    </div>
-  );
-}
-
+/*
+ * Operator gate scan viewfinder.
+ * No duplicated Camera/Manual mode tiles — those options live in the desk's
+ * top mode bar. The QR/Barcode mode tabs live inside the Scanner modal itself,
+ * so this panel is just a clean entry point:
+ *   - Open Camera Scanner (QR + Barcode tabs inside the modal, fixed gate)
+ *   - Manual Entry (jumps to the manual roll-number form)
+ * Buttons stack full-width on mobile, sit side-by-side on sm+.
+ * Camera-unavailable fallback (Upload / manual) is handled inside the Scanner
+ * modal, not here.
+ */
 export function ScanViewfinder({
   onStartScanner,
   onManualEntry,
-  error,
 }: ScanViewfinderProps) {
   const { wsConnected, wsReconnecting } = useGlass();
 
   return (
-    <div className="relative flex-1 min-h-[260px] w-full rounded-2xl overflow-hidden flex flex-col justify-between bg-[var(--bg-surface)] border border-[var(--border)] p-4 sm:p-6 shadow-sm">
+    <div className="relative flex-1 min-h-[220px] sm:min-h-[300px] w-full rounded-2xl overflow-hidden flex flex-col justify-between bg-[var(--bg-surface)] border border-[var(--border)] p-4 sm:p-6 shadow-sm">
       {/* Connection status — always visible */}
       <div className="flex items-center gap-2 mb-3">
         <div className="flex-1" />
@@ -72,7 +54,7 @@ export function ScanViewfinder({
         )}
       </div>
 
-      {/* Clean Scanner Workspace Info */}
+      {/* Scanner workspace info */}
       <div className="flex flex-col items-center justify-center flex-1 py-4 sm:py-6 text-center space-y-4">
         <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center justify-center shadow-inner">
           <QrCode className="w-8 h-8" />
@@ -82,65 +64,32 @@ export function ScanViewfinder({
             Gate Scanner
           </h3>
           <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-            Scan student ID QR codes, employee badges, or 1D barcodes for instant verification.
+            Scan student ID QR codes, employee badges, or 1D barcodes for
+            instant verification. QR and Barcode modes auto-detect inside the
+            camera scanner.
           </p>
         </div>
       </div>
 
-      {/* Error overlay */}
-      <AnimatePresence>
-        {error && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="absolute inset-0 flex items-center justify-center bg-rose-500/95 backdrop-blur z-30 p-6"
-          >
-            <div className="text-center text-white space-y-2">
-              <AlertCircle className="w-8 h-8 mx-auto" />
-              <p className="font-bold">{error.code}</p>
-              <p className="text-xs opacity-90">{error.message}</p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Action Buttons — Camera (QR) + Manual, no barcode mode */}
-      <div className="space-y-3 pt-4 border-t border-[var(--border)]">
-        <div className="grid grid-cols-2 gap-3">
-          <ModeTile
-            icon={<Camera className="w-4 h-4" />}
-            label="Camera"
-            sub="QR + barcode"
-            active
-          />
-          <ModeTile
-            icon={<KeyRound className="w-4 h-4 text-amber-500" />}
-            label="Manual"
-            sub="Type roll no."
-            active={false}
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            type="button"
-            onClick={onStartScanner}
-            className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98]"
-          >
-            <Camera className="w-4 h-4" />
-            <span>Open Camera</span>
-          </button>
-          <button
-            type="button"
-            onClick={onManualEntry}
-            className="w-full py-3 px-4 rounded-xl bg-[var(--bg-base)] hover:bg-[var(--border)] text-[var(--text-primary)] font-bold text-xs sm:text-sm flex items-center justify-center gap-2 border border-[var(--border)] transition-all active:scale-[0.98]"
-          >
-            <KeyRound className="w-4 h-4 text-amber-500" />
-            <span>Manual Entry</span>
-          </button>
-        </div>
+      {/* Action buttons — stack vertically on mobile, 2-col grid on sm+ */}
+      <div className="flex flex-col sm:grid sm:grid-cols-2 gap-3 pt-4 border-t border-[var(--border)]">
+        <button
+          type="button"
+          onClick={onStartScanner}
+          className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98] min-w-0"
+        >
+          <Camera className="w-4 h-4 shrink-0" />
+          <span className="truncate">Open Camera Scanner</span>
+        </button>
+        <button
+          type="button"
+          onClick={onManualEntry}
+          className="w-full py-3 px-4 rounded-xl bg-[var(--bg-base)] hover:bg-[var(--border)] text-[var(--text-primary)] font-bold text-xs sm:text-sm flex items-center justify-center gap-2 border border-[var(--border)] transition-all active:scale-[0.98] min-w-0"
+        >
+          <KeyRound className="w-4 h-4 text-amber-500 shrink-0" />
+          <span className="truncate">Manual Entry</span>
+        </button>
       </div>
     </div>
   );
 }
-

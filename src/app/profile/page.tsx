@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { getAuthHeaders } from "@/lib/utils";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import {
   User as UserIcon,
   Mail,
@@ -289,6 +290,9 @@ function ProfileDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Developer contact — available to every role (visitor, staff, etc.) */}
+      <DevContactStrip />
 
       {/* Tabs */}
       <div className="flex gap-2 border-b border-[var(--border)]">
