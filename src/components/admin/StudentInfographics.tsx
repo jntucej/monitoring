@@ -16,7 +16,7 @@ interface StudentStats {
 interface Filters { department: string; year: string; status: string; gender: string; type: string; }
 
 const FILTER_OPTIONS: Record<FilterKeys, string[]> = {
-  department: ["ALL", "CSE", "IT", "ECE", "EEE", "ME"],
+  department: ["ALL", "CSE", "IT", "ECE", "EEE", "MECH"],
   year: ["ALL", "1", "2", "3", "4"],
   status: ["ALL", "ACTIVE", "SUSPENDED"],
   gender: ["ALL", "male", "female"],

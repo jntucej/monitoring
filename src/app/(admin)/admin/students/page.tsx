@@ -134,7 +134,7 @@ export default function AdminStudentsPage() {
         </div>
         <select value={selectedBranch} onChange={e => setSelectedBranch(e.target.value)}
           className="px-3 py-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-sm focus:outline-none">
-          {["ALL","CSE","IT","ECE","EEE","ME"].map(b => (
+          {["ALL","CSE","IT","ECE","EEE","MECH"].map(b => (
             <option key={b} value={b}>{b === "ALL" ? "All Branches" : b}</option>
           ))}
         </select>
