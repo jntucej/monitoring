@@ -27,6 +27,7 @@ import {
   Server,
   MessageSquarePlus,
   Cpu,
+  KeyRound,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
@@ -38,6 +39,7 @@ const NAV = [
     items: [
       { href: "/sysadmin", label: "System Overview", icon: LayoutDashboard },
       { href: "/sysadmin/students", label: "Manage Students", icon: GraduationCap },
+      { href: "/sysadmin/access-keys", label: "Access Keys", icon: KeyRound },
       { href: "/sysadmin/staff", label: "Manage Staff", icon: Briefcase },
       { href: "/sysadmin/roles", label: "Roles & Permissions", icon: UserCheck },
       { href: "/sysadmin/audit", label: "Audit Telemetry", icon: ShieldAlert },
