@@ -1,4 +1,5 @@
 "use client";
+import { usePolling } from "@/hooks/usePolling";
 import { useEffect, useState } from "react";
 import { DataTable } from "@/components/ui/DataTable";
 import { AlertTriangle, Bell, CheckCircle, Check, ShieldAlert, RefreshCw } from "lucide-react";

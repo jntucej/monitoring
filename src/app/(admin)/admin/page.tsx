@@ -1,5 +1,7 @@
 "use client";
 
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { usePolling } from "@/hooks/usePolling";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { fadeInUp } from "@/lib/animations";
 import { useRouter } from "next/navigation";

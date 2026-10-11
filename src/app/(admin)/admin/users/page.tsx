@@ -1,5 +1,6 @@
 "use client";
 
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { useEffect, useState } from "react";
 import { Users, Shield, GraduationCap, Briefcase, RefreshCw, UserCheck, Grid } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
