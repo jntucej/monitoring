@@ -1768,7 +1768,7 @@ export async function addScan(input: {
     is_correction: false,
   };
 
-  const { data, error } = await client.from('movement_logs').insert(scanRow).select('*, users:users!movement_logs_user_id_fkey(*)').single();
+  const { data, error } = await client.from('movement_logs').insert(scanRow).select().single();
   if (error || !data) {
     if (error?.code === '23505') {
       const { data: existingLog } = await client

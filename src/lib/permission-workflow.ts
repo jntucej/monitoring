@@ -1,6 +1,6 @@
 import { query } from "@/lib/postgres";
 import type { Role, WorkflowType } from "@/lib/types";
-import getSupabaseServiceClient from "@/lib/dbClient";
+import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { getParentChildren } from "@/lib/db";
 export type { WorkflowType };
 

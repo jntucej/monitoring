@@ -50,6 +50,8 @@ export async function generateQrToken(
     .sign(getSigningKey());
 }
 
+const inMemoryNonces = new Set<string>();
+
 export async function validateQrToken(token: string): Promise<QrTokenClaims | null> {
   try {
     const { payload } = await jwtVerify(token, getSigningKey(), {
@@ -69,7 +71,7 @@ export async function validateQrToken(token: string): Promise<QrTokenClaims | nu
     const expTime = payload.exp ? new Date(payload.exp * 1000) : new Date(Date.now() + 300_000);
 
     // Atomically burn nonce to prevent replay
-  try {
+try {
     const res = await query(
       `INSERT INTO public.scan_nonces (jti, expires_at) VALUES ($1, $2) ON CONFLICT (jti) DO NOTHING`,
       [payload.jti, expTime]
@@ -79,11 +81,14 @@ export async function validateQrToken(token: string): Promise<QrTokenClaims | nu
       console.warn('[qr-token] Replay detected for jti:', payload.jti);
       return null;
     }
-  } catch (dbErr: any) {
-    console.warn('[qr-token] Nonce store unavailable:', dbErr?.message || dbErr);
+  } catch (dbErr) {
+    if (inMemoryNonces.has(payload.jti)) {
+      console.warn('[qr-token] Replay detected for jti (in-memory):', payload.jti);
+      return null;
+    }
+    inMemoryNonces.add(payload.jti);
   }
-
-  return payload as QrTokenClaims;
+return payload as QrTokenClaims;
   } catch (err) {
     const name = (err as Error).name;
     if (name === 'JWTExpired') console.warn('[qr-token] Expired token used');
