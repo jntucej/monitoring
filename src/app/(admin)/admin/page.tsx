@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { EntryExitChart } from "@/components/admin/EntryExitChart";
 import { StudentList } from "@/components/admin/StudentList";
 import { CampusStatusCards } from "@/components/admin/CampusStatusCards";
+import { DevMessagesPanel } from "@/components/admin/DevMessagesPanel";
 import { GateCardsGrid } from "@/components/admin/GateCardsGrid";
 import {
   Activity, GraduationCap, Briefcase, HardHat,
@@ -598,6 +599,8 @@ export default function AdminDashboardPage() {
         <EntryExitChart />
         <StudentList />
       </div>
+
+      <DevMessagesPanel />
     </motion.div>
   );
 }

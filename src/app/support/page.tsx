@@ -6,7 +6,7 @@ import { useUIStore } from "@/stores/uiStore";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { LifeBuoy, Plus, Clock } from "lucide-react";
+import { LifeBuoy, Plus, Clock, Send, Loader2 } from "lucide-react";
 
 export default function UserSupportPage() {
   const { user, token } = useAuthStore();
@@ -19,6 +19,42 @@ export default function UserSupportPage() {
   const [priority, setPriority] = useState("medium");
   const [subject, setSubject] = useState("");
   const [description, setDescription] = useState("");
+
+  // Direct developer message (any user / role)
+  const [devMessage, setDevMessage] = useState("");
+  const [devSending, setDevSending] = useState(false);
+
+  const sendDevMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!devMessage.trim()) return;
+    setDevSending(true);
+    try {
+      const res = await fetch("/api/dev/contact", {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ message: devMessage.trim(), channel: "support" }),
+      });
+      const result = await res.json();
+      if (result.success) {
+        addToast({
+          variant: "success",
+          title: "Sent",
+          message: result.data?.delivered
+            ? "Delivered to the developer via Telegram."
+            : "Saved and shared with the developer.",
+        });
+        setDevMessage("");
+      } else if (result.error?.code === "RATE_LIMITED") {
+        addToast({ variant: "error", title: "Slow down", message: "You are sending messages too quickly. Try again in a few minutes." });
+      } else {
+        addToast({ variant: "error", title: "Failed", message: result.error?.message || "Could not send message." });
+      }
+    } catch {
+      addToast({ variant: "error", title: "Failed", message: "Network error while sending." });
+    } finally {
+      setDevSending(false);
+    }
+  };
 
   const getHeaders = () => {
     const h: Record<string, string> = { "Content-Type": "application/json" };
@@ -90,6 +126,34 @@ export default function UserSupportPage() {
           </form>
         </Card>
       )}
+
+      <Card className="border p-4">
+        <h3 className="font-semibold text-base flex items-center gap-2 mb-1">
+          <Send className="w-4 h-4 text-emerald-500" /> Message the Developer
+        </h3>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+          Suggestion, improvement, or anything that doesn't fit a ticket? Write it here.
+          It goes straight to the developer with your name and role attached.
+        </p>
+        <form onSubmit={sendDevMessage} className="space-y-3">
+          <textarea
+            value={devMessage}
+            onChange={(e) => setDevMessage(e.target.value)}
+            rows={3}
+            maxLength={2000}
+            required
+            className="w-full p-2 border rounded text-sm bg-white dark:bg-gray-900"
+            placeholder="e.g. The gate page would load faster if…"
+          />
+          <div className="flex items-center gap-3">
+            <Button type="submit" size="sm" disabled={devSending} className="gap-2">
+              {devSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              {devSending ? "Sending…" : "Send"}
+            </Button>
+            <span className="text-xs text-gray-400">{devMessage.length}/2000</span>
+          </div>
+        </form>
+      </Card>
 
       <div className="space-y-4">
         {tickets.map((t) => (
