@@ -27,7 +27,10 @@ export function getDefaultRouteForRole(role: Role | string, gateId?: string): st
   const routes: Record<string, string> = {
     operator: `/gate/${gateId || "1"}`,
     admin: "/admin",
-    sysadmin: "/sysadmin",
+    // Admins land on the /admin dashboard. The sysadmin role keeps full
+    // /sysadmin access (reachable via URL / sidebar) — this only sets the
+    // post-login starting page, not permissions.
+    sysadmin: "/admin",
     supervisor: "/supervisor",
     guardian: "/parent",
     parent: "/parent",
