@@ -48,3 +48,38 @@ export async function lokiQueryRange(query: string, start: string, end: string, 
 
 export const MONITORING_GRAFANA_URL =
   process.env.MONITORING_GRAFANA_URL || "http://100.122.7.62:3001";
+
+/**
+ * Best-effort client error reporting. Posts to /api/dev/contact so the
+ * developer gets notified; never throws, never blocks the UI.
+ * Guarded with a per-session cap to avoid a spammy error-boundary loop.
+ */
+const CLIENT_ERROR_CAP = 5;
+let clientErrorReports = 0;
+
+export function reportClientError(
+  error: Error & { digest?: string },
+  ctx?: { route?: string; component?: string; digest?: string }
+): void {
+  if (clientErrorReports >= CLIENT_ERROR_CAP) return;
+  clientErrorReports += 1;
+  const msg = `[client-error] ${ctx?.component || "component"} @ ${ctx?.route || "route"}: ${
+    error?.message || "unknown error"
+  }${ctx?.digest ? ` (digest ${ctx.digest})` : ""}`;
+  try {
+    fetch("/api/dev/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        category: "error",
+        subject: `Client error: ${ctx?.component || "unknown"}`,
+        message: msg,
+      }),
+      keepalive: false,
+    }).catch(() => {
+      /* swallow: reporting must never crash the app */
+    });
+  } catch {
+    /* ignore */
+  }
+}

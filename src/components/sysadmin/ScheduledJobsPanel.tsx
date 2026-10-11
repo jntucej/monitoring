@@ -568,7 +568,7 @@ export function ScheduledJobsPanel() {
               options={[
                 { value: "ALL", label: "All categories" },
                 { value: "maintenance", label: "Maintenance" },
-                { value: "notifications", Label: "Notifications" },
+                { value: "notifications", label: "Notifications" },
                 { value: "analytics", label: "Analytics" },
                 { value: "security", label: "Security" },
                 { value: "cleanup", label: "Cleanup" },
