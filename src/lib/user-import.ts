@@ -199,12 +199,18 @@ export async function commitImport(
     }
   }
 
-  //   action: "BULK_USER_IMPORT",
-  //   userId: actorId,
-  //   userName: "SysAdmin",
-  //   role: "sysadmin",
-  //   details: { total: rows.length, importedCount, failedCount },
-  // }).catch(() => {});
+  // Audit the import (BULK_USER_IMPORT is whitelisted in audit_logs_action_known)
+  try {
+    await addAudit({
+      action: "BULK_USER_IMPORT",
+      userId: actorId,
+      userName: "SysAdmin",
+      role: "sysadmin",
+      details: { total: rows.length, importedCount, failedCount },
+    });
+  } catch {
+    // audit must never block the import
+  }
 
   return {
     success: errors.length === 0 || skipErrors,
@@ -291,14 +297,29 @@ async function processSingleRow(
     }
 
     if (["faculty", "staff", "operator", "admin", "sysadmin", "worker"].includes(row.role)) {
+      // staff_category has a CHECK constraint (teaching_faculty / assistant_professor
+      // / office_staff / support_staff / security / other / ...). Raw role names
+      // violate it and the upsert silently drops — map role -> allowed value.
+      const STAFF_CATEGORY_BY_ROLE: Record<string, string> = {
+        faculty: "teaching_faculty",
+        staff: "office_staff",
+        operator: "security",
+        worker: "support_staff",
+        admin: "other",
+        sysadmin: "other",
+      };
       const employeeData = {
         user_id: targetUserId,
         employee_id: row.employeeId || row.uniqueId || row.email.split("@")[0],
         designation: row.designation || (row.role === "faculty" ? "Assistant Professor" : row.role),
         department_id: row.departmentId || row.department || null,
-        staff_category: row.role,
+        staff_category: STAFF_CATEGORY_BY_ROLE[row.role] || "other",
       };
-      await supabase.from("employee_details").upsert(employeeData, { onConflict: "user_id" });
+      const { error: empErr } = await supabase.from("employee_details").upsert(employeeData, { onConflict: "user_id" });
+      if (empErr) {
+        // surface it in the per-row result instead of silently swallowing
+        throw new Error(`employee_details upsert failed: ${empErr.message}`);
+      }
     }
 
     return { row: rowNum, error: null };
