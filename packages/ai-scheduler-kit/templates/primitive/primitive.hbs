@@ -1,0 +1,26 @@
+// Template for primitive components
+/**
+ * {{pascalCase name}} Primitive Component
+ * 
+ * Base primitive for {{category}} components
+ */
+
+import React from 'react';
+import { cn } from '../lib/cn';
+
+export interface {{pascalCase name}}Props extends React.HTMLAttributes<HTMLDivElement> {
+  // Add your specific props here
+}
+
+export function {{pascalCase name}}({ className, ...props }: {{pascalCase name}}Props) {
+  return (
+    <div
+      className={cn(
+        'p-4 border border-gray-200 dark:border-gray-700 rounded-lg',
+        'bg-white dark:bg-gray-800',
+        className
+      )}
+      {...props}
+    />
+  );
+}

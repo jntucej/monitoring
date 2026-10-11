@@ -1,0 +1,24 @@
+{
+  "name": "ai-scheduler-kit",
+  "version": "1.0.0",
+  "description": "AI Scheduler Dashboard — Cookie cutter kit with primitives, charts, and generator tools",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "generate": "node scripts/generate.js",
+    "plop": "plop",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": ["ai", "scheduler", "dashboard", "cookiecutter", "charts", "panels"],
+  "author": "UCEJ Monitoring Team",
+  "license": "MIT",
+  "dependencies": {
+    "tslib": "^2.6.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  }
+}

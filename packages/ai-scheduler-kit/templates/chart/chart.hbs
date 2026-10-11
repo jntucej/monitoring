@@ -1,0 +1,47 @@
+// Template for chart components
+/**
+ * {{pascalCase name}} Component
+ * 
+ * {{description}}
+ */
+
+import React from 'react';
+
+export interface {{pascalCase name}}Props {
+  // Add your props here
+  data?: any[];
+  loading?: boolean;
+  error?: string | null;
+}
+
+export function {{pascalCase name}}({ data = [], loading = false, error = null }: {{pascalCase name}}Props) {
+  if (loading) {
+    return (
+      <div className="animate-pulse">
+        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-red-600 dark:text-red-400">
+        Error: {error}
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+      <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+        {{pascalCase name}}
+      </h3>
+      
+      {/* Chart implementation here */}
+      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+        {{pascalCase name}} component ready for implementation
+      </div>
+    </div>
+  );
+}

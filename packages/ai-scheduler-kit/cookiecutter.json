@@ -1,0 +1,10 @@
+{
+  "project_name": "UCEJ Scheduler Monitor",
+  "package_slug": "{{ cookiecutter.project_name.lower().replace(' ', '-') }}",
+  "api_base_url": "https://monitor.ucej.in/api",
+  "realtime_transport": ["websocket", "sse", "polling"],
+  "enable_dark_mode": ["yes", "no"],
+  "default_refresh_ms": "15000",
+  "chart_library": ["recharts", "visx"],
+  "_copy_without_render": ["node_modules", "*.lock"]
+}

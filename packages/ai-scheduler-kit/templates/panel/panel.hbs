@@ -1,0 +1,34 @@
+// Template for panel components
+/**
+ * {{pascalCase name}} Panel Component
+ * 
+ * {{description}}
+ */
+
+import React from 'react';
+
+export interface {{pascalCase name}}Props {
+  // Add your props here
+  title?: string;
+  description?: string;
+}
+
+export function {{pascalCase name}}({ title = "{{title}}", description = "" }: {{pascalCase name}}Props) {
+  return (
+    <div className="p-6 border border-gray-200 dark:border-gray-700 rounded-lg">
+      <h2 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">
+        {title}
+      </h2>
+      {description && (
+        <p className="text-gray-600 dark:text-gray-400">
+          {description}
+        </p>
+      )}
+      
+      {/* Panel content here */}
+      <div className="mt-4">
+        {{pascalCase name}} panel ready for implementation
+      </div>
+    </div>
+  );
+}
