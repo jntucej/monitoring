@@ -135,6 +135,70 @@ export default function RolesManagementPage() {
   const [grantMsg, setGrantMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [grantOpen, setGrantOpen] = useState(false);
 
+  // ---- HOD branch (department) assignment state ----
+  const HOD_BRANCHES = ["CSE", "IT", "ECE", "EEE", "MECH"];
+  const [hodUsers, setHodUsers] = useState<Array<{ id: string; name: string; department_id?: string | null; email?: string }>>([]);
+  const [hodBranchMsg, setHodBranchMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [hodBranchBusy, setHodBranchBusy] = useState<string | null>(null);
+
+  const fetchHodUsers = useCallback(async () => {
+    try {
+      const res = await fetch("/api/users?role=hod", {
+        headers: getAuthHeaders(),
+        cache: "no-store",
+      });
+      const json = await res.json();
+      const users: Array<{ id: string; name: string; department_id?: string | null; email?: string }> =
+        Array.isArray(json?.data) ? json.data : [];
+      setHodUsers(users);
+    } catch {
+      setHodUsers([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchHodUsers();
+  }, [fetchHodUsers]);
+
+  const assignHodBranch = async (userId: string, branch: string) => {
+    setHodBranchBusy(userId);
+    setHodBranchMsg(null);
+    try {
+      const res = await fetch(`/api/users/${userId}`, {
+        method: "PATCH",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ department_id: branch || null }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setHodBranchMsg({
+          type: "success",
+          text: branch ? `Branch ${branch} assigned` : "Branch cleared",
+        });
+        setHodUsers((prev) =>
+          prev.map((u) => (u.id === userId ? { ...u, department_id: branch || null } : u))
+        );
+      } else {
+        setHodBranchMsg({ type: "error", text: json.error?.message || "Failed to save branch" });
+      }
+    } catch {
+      setHodBranchMsg({ type: "error", text: "Network error saving branch" });
+    } finally {
+      setHodBranchBusy(null);
+    }
+  };
+
+  /** HOD users rendered in the tree, each with their assigned branch. */
+  const hodTreeRows = useMemo(
+    () =>
+      hodUsers.map((u) => ({
+        id: u.id,
+        name: u.name,
+        branch: u.department_id || "",
+      })),
+    [hodUsers]
+  );
+
   const roleDisplayName = useCallback((code: string) => displayNameForRole(code, roles), [roles]);
 
   const tree = useMemo(() => buildTree(roles), [roles]);
@@ -397,6 +461,71 @@ export default function RolesManagementPage() {
             </Link>
           </div>
         </div>
+
+        {/* HOD node: per-user branch assignment + current branch shown next to each name */}
+        {node.code === "hod" && isExpanded && (
+          <div className="mt-2 ml-4 border-l-2 border-[var(--border)] pl-4 space-y-2">
+            {hodTreeRows.length === 0 ? (
+              <div className="text-xs text-[var(--text-muted)] py-2">
+                No HOD users yet. Grant the &lsquo;hod&rsquo; role above, then assign a branch.
+              </div>
+            ) : (
+              hodTreeRows.map((u) => (
+                <div
+                  key={u.id}
+                  className="flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)]/40 px-3 py-2"
+                >
+                  <Users className="w-3.5 h-3.5 shrink-0 text-[var(--text-muted)]" />
+                  <span className="text-xs font-semibold text-[var(--text-primary)] flex-1 min-w-0 truncate">
+                    {u.name}
+                  </span>
+                  {u.branch ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-bold text-emerald-400">
+                      {u.branch}
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded-full bg-[var(--border)]/40 text-[10px] font-semibold text-[var(--text-muted)] uppercase">
+                      No branch
+                    </span>
+                  )}
+                  <label className="flex items-center gap-1.5 text-[10px] text-[var(--text-muted)] font-semibold">
+                    Branch
+                    <select
+                      value={u.branch}
+                      disabled={hodBranchBusy === u.id}
+                      onChange={(e) => void assignHodBranch(u.id, e.target.value)}
+                      className="min-w-[92px] px-2 py-1.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[11px] font-mono text-[var(--text-primary)] focus:outline-none focus:border-emerald-400 disabled:opacity-50"
+                      aria-label={`Assign branch to ${u.name}`}
+                    >
+                      <option value="">— none —</option>
+                      {HOD_BRANCHES.map((b) => (
+                        <option key={b} value={b}>
+                          {b}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+              ))
+            )}
+            {hodBranchMsg && (
+              <div
+                className={`text-xs flex items-center gap-1.5 ${
+                  hodBranchMsg.type === "success"
+                    ? "text-emerald-400"
+                    : "text-rose-400"
+                }`}
+              >
+                {hodBranchMsg.type === "success" ? (
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                ) : (
+                  <ShieldAlert className="w-3.5 h-3.5" />
+                )}
+                {hodBranchMsg.text}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* children with CSS connector lines (no graph library) */}
         {hasChildren && isExpanded && (

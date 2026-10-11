@@ -77,6 +77,8 @@ async function handlePatch(req: NextRequest) {
       if (body.email !== undefined) profileUpdates.email = body.email;
       if (body.phone !== undefined) profileUpdates.phone = body.phone;
       if (body.department !== undefined) profileUpdates.department_id = body.department;
+      // Direct department assignment (sysadmin assigning a branch to a HOD, etc.)
+      if (body.department_id !== undefined) profileUpdates.department_id = body.department_id === "" ? null : body.department_id;
       if (body.photoUrl !== undefined) profileUpdates.photo_url = body.photoUrl;
       if (body.uniqueId !== undefined) profileUpdates.unique_id = body.uniqueId;
       if (body.loginIdentifier !== undefined) profileUpdates.login_identifier = body.loginIdentifier;
