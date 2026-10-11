@@ -67,15 +67,15 @@ async function handlePost(req: NextRequest) {
     }
 
     const payload = {
-      role_code: roleCode,
-      group_label: groupLabel || 'General',
-      href,
-      label,
-      icon_name: icon || 'Link',
-      badge: badge || null,
-      order_num: Number(order || 1),
-      is_active: true,
-    };
+          role_code: roleCode,
+          group_label: groupLabel,
+          href,
+          label,
+          icon_name: icon || 'Link',
+          badge: badge || null,
+          order_num: Number(order || 1),
+          is_active: true,
+        };
 
     const service = getSupabaseServiceClient();
     const { data, error } = await service.from('config_navigation').upsert([payload]).select().single();
