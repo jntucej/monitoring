@@ -1,6 +1,9 @@
-"use client";
-
 import { AuthGuard } from "@/components/shared/AuthGuard";
+
+export const metadata = {
+  title: "Admin Dashboard",
+  description: "Campus dashboard and live telemetry"
+};
 
 export default function AdminLayout({
   children,
