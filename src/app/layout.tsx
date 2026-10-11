@@ -1,14 +1,8 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import { ClientProviders } from "./ClientProviders";
 import { getDbClient } from "@/lib/db";
 import { getServerTheme } from "@/lib/theme-cookie";
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
 
 export async function generateMetadata(): Promise<Metadata> {
   let siteName = "Gate Monitor";
@@ -49,7 +43,7 @@ export default async function RootLayout({
       lang="en"
       data-theme={theme}
       data-scroll-behavior="smooth"
-      className={`${inter.variable} min-h-full antialiased ${theme}`}
+      className={`min-h-full antialiased ${theme}`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] font-[var(--font-family)]">

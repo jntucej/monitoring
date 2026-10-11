@@ -18,7 +18,8 @@
     "test:e2e:smoke:auth": "SMOKE_USER=admin SMOKE_PASS=123456 playwright test tests/login-success.spec.ts",
     "lint": "eslint src",
     "kb:ingest": "node scripts/ingest-kb.mjs",
-    "kb:ingest:warden": "node scripts/ingest-kb.mjs --dir docs/kb/warden --role warden,admin,sysadmin"
+    "kb:ingest:warden": "node scripts/ingest-kb.mjs --dir docs/kb/warden --role warden,admin,sysadmin",
+    "verify:permission-workflow": "npx tsx scripts/verify-permission-workflow.ts"
   },
   "dependencies": {
     "@remotion/player": "^4.0.518",

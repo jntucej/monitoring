@@ -335,3 +335,5 @@ export function PermissionList({
     </div>
   );
 }
+
+export default PermissionList;

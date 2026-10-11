@@ -78,6 +78,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
       ];
+      break;
 
     case "principal":
       groups = [
@@ -114,6 +115,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
       ];
+      break;
 
     case "oie":
     case "exam_branch":
@@ -132,6 +134,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
       ];
+      break;
 
     case "sysadmin":
       groups = [
@@ -166,6 +169,9 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
             { href: "/security", label: "Security Status", icon: "ShieldCheck" },
             { href: "/sysadmin/compliance", label: "Compliance & Retention", icon: "ShieldCheck" },
             { href: "/sysadmin/exit-reasons", label: "Exit Reasons & Outpass", icon: "DoorOpen" },
+          { href: "/sysadmin/reasons", label: "Custom Reasons", icon: "MessageSquarePlus" },
+          { href: "/sysadmin/devices", label: "Device Verification", icon: "Cpu" },
+
             { href: "/sysadmin/alerts/rules", label: "Alert Rules", icon: "Bell" },
             { href: "/sysadmin/navigation", label: "Navigation Editor", icon: "Layout" },
             { href: "/help", label: "Help & Docs", icon: "BookOpen" },
@@ -180,6 +186,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
       ];
+      break;
 
     case "admin":
       groups = [
@@ -233,6 +240,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
       ];
+      break;
 
     case "operator":
       groups = [
@@ -258,6 +266,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
       ];
+      break;
 
     case "supervisor":
     case "warden":
@@ -286,12 +295,14 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
       ];
+      break;
 
     case "faculty":
       groups = [
         {
           groupLabel: "Faculty Portal",
           items: [
+            { href: "/faculty/permissions", label: "Student Permissions", icon: "CheckSquare", badge: "PENDING" },
             { href: "/admin/faculty", label: "Faculty Attendance Desk", icon: "UserCheck", badge: "MY DEPT" },
             { href: "/person", label: "Digital Gate Pass", icon: "QrCode" },
           ],
@@ -304,6 +315,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
       ];
+      break;
 
     case "staff":
       groups = [
@@ -322,6 +334,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
       ];
+      break;
 
     case "worker":
       groups = [
@@ -339,6 +352,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
       ];
+      break;
 
     case "student":
       groups = [
@@ -348,6 +362,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
             { href: "/student", label: "Digital ID & Gate Pass", icon: "QrCode", badge: "ID PASS" },
             { href: "/student/history", label: "My Scan Logs", icon: "Clock" },
             { href: "/student/passes", label: "Outpass Requests", icon: "FileSpreadsheet" },
+            { href: "/student/permissions", label: "Permission Requests", icon: "ClipboardList", badge: "NEW" },
           ],
         },
         {
@@ -359,6 +374,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
       ];
+      break;
 
     case "parent":
     case "guardian":
@@ -379,6 +395,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
       ];
+      break;
 
     default:
       groups = [
@@ -409,6 +426,7 @@ export function useNavItems(roleCode?: string) {
 
   useEffect(() => {
     if (!roleCode) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setNavigation([]);
       setLoading(false);
       return;

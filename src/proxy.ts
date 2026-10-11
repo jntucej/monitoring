@@ -7,12 +7,19 @@ export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   const BYPASS_PATHS = ['/api/health', '/metrics', '/api/metrics'];
-  if (BYPASS_PATHS.some(p => pathname.startsWith(p))) return NextResponse.next();
+  if (BYPASS_PATHS.some(p => pathname.startsWith(p))) {
+    const requestHeaders = new Headers(req.headers);
+    requestHeaders.set('x-request-id', requestId);
+    const res = NextResponse.next({ request: { headers: requestHeaders } });
+    res.headers.set('x-request-id', requestId);
+    return res;
+  }
 
   const SCRAPER_IPS = (process.env.SCRAPER_IPS ?? '').split(',').filter(Boolean);
-  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-    || req.headers.get('x-real-ip')
-    || 'unknown';
+  const ip =
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    req.headers.get('x-real-ip') ||
+    'unknown';
 
   if (SCRAPER_IPS.includes(ip)) return NextResponse.next();
 
@@ -22,7 +29,7 @@ export async function proxy(req: NextRequest) {
     return res;
   }
 
-  const limitResult = await rateLimit(`api_global:${ip}`, 300) as { limited: boolean };
+  const limitResult = (await rateLimit(`api_global:${ip}`, 300)) as { limited: boolean };
   if (limitResult.limited) {
     const res = NextResponse.json(
       { success: false, error: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many requests. Please try again later.', requestId } },
@@ -50,6 +57,7 @@ export async function proxy(req: NextRequest) {
 }
 
 export const middleware = proxy;
+export default proxy;
 
 export const config = {
   matcher: ['/api/:path*'],
