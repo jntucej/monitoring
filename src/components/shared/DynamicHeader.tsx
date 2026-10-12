@@ -24,6 +24,13 @@ const PAGE_TITLES: Record<string, string> = {
   "/student": "Digital ID & Pass Desk",
   // Approver / leadership desks
   "/principal": "Principal Command Center",
+  "/principal/attendance": "Institutional Attendance",
+  "/principal/gate-activity": "Gate Activity Overview",
+  "/principal/departments": "Department Performance",
+  "/principal/incidents": "Incident Oversight",
+  "/principal/reports": "Institutional Reports",
+  "/principal/approvals": "Approvals and Decisions",
+  "/principal/audit": "Audit and Compliance",
   "/principal/permissions": "Principal Approvals",
   "/vice-principal": "Vice Principal Desk",
   "/exam/permissions": "Exam Branch Permissions",
