@@ -408,3 +408,20 @@ export function describeRollNumber(roll: string | null | undefined): string {
   ].join(" • ");
 }
 
+/**
+ * Compute the expected graduation year (calendar year) for a student from
+ * their roll number. B.Tech = 4 years, M.Tech = 2 years.
+ *
+ * @param roll - The raw 10-character roll number.
+ * @returns The expected graduation year (admissionYear + duration) or `null`
+ *          when the roll cannot be parsed.
+ */
+export function getGraduationYearFromRoll(roll: string | null | undefined): number | null {
+  const decoded = parseRollNumber(roll);
+  if (!decoded) return null;
+  // M.Tech is a 2-year programme; everything else (B.Tech incl. lateral) is 4.
+  const courseType = resolveCourseType(undefined, decoded.entryModeCode).name;
+  const duration = courseType === "M.Tech" ? 2 : 4;
+  return decoded.admissionYear + duration;
+}
+

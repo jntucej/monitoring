@@ -143,6 +143,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           items: [
             { href: "/sysadmin", label: "System Overview", icon: "LayoutDashboard", badge: "SYSADMIN" },
             { href: "/sysadmin/students", label: "Students Management", icon: "GraduationCap" },
+            { href: "/sysadmin/alumni", label: "Alumni & Deprovision", icon: "GraduationCap", badge: "NEW" },
             { href: "/sysadmin/staff", label: "Staff Management", icon: "Briefcase" },
             { href: "/sysadmin/roles", label: "Roles & Permissions", icon: "ShieldCheck" },
             { href: "/sysadmin/audit", label: "SysAdmin Audit Telemetry", icon: "ShieldAlert" },
