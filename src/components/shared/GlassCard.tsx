@@ -7,6 +7,7 @@ import { useGlossyMotion, fadeInUp, cardHover } from "@/lib/animations";
 import { motion, useMotionValue, useSpring, useTransform, Transition } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useGlass, GateStatus } from "@/context/GlassContext";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
 
 import { WordByWordText } from "./WordByWordText";
 import { GlossyFloatingContainer } from "./GlossyFloatingContainer";
@@ -47,8 +48,10 @@ export function GlassCard({
   };
 
   // Critically damped springs for heavy industrial precision (or smooth easeOut on mobile/legacy)
+  const breakpoints = useBreakpoint({ sm: '(min-width: 640px)', md: '(min-width: 768px)' });
+  const isMobile = !breakpoints.md;
+
   const getTransition = (): Transition => {
-    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
     if (isMobile || performanceTier === "legacy") {
       return { duration: 0.2, ease: "easeOut" };
     }

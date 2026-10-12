@@ -1,5 +1,5 @@
-import { AppLoadingScreen } from "@/components/shared/AppLoadingScreen";
+import { PageLoading } from "@/components/shared/LoadingStates";
 
 export default function OperatorLoading() {
-  return <AppLoadingScreen />;
+  return <PageLoading />;
 }

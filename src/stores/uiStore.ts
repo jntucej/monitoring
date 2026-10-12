@@ -6,6 +6,9 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { ToastData, ToastVariant } from "@/components/ui/toast";
 
+// Fix 7: limit toasts to max 3 in the store
+const MAX_TOASTS = 3;
+
 interface UIState {
   toasts: ToastData[];
   theme: "dark" | "light" | "glass";
@@ -43,7 +46,12 @@ export const useUIStore = create<UIState & UIActions>()(
         const id = `toast-${Date.now()}-${randomSuffix}`;
         const duration = toast.duration ?? 4000;
         const newToast: ToastData = { ...toast, id, duration };
-        set((state) => ({ toasts: [...state.toasts, newToast] }));
+        set((state) => {
+          // Fix 7: enforce max 3 toasts
+          const overflow = state.toasts.length + 1 - MAX_TOASTS;
+          const trimmed = overflow > 0 ? state.toasts.slice(overflow) : state.toasts;
+          return { toasts: [...trimmed, newToast] };
+        });
         if (duration > 0) {
           setTimeout(() => set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) })), duration);
         }

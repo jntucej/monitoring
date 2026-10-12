@@ -58,15 +58,7 @@ export default function AdminAlertsPage() {
     }
   };
 
-  useEffect(() => {
-    setLoading(true);
-    load();
-    const t = setInterval(() => {
-      if (typeof document !== "undefined" && document.hidden) return;
-      load();
-    }, 15_000);
-    return () => clearInterval(t);
-  }, [filter, severity]);
+  usePolling(load, { intervalMs: 15_000 });
 
   const resolve = async (id: string) => {
     setBusyId(id);
