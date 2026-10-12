@@ -9,23 +9,21 @@ BEGIN;
 
 -- 1. Indexes --------------------------------------------------------------
 -- "My Tickets" — requester's own tickets, newest first.
--- Uses student_user_id (the column name exposed by the permission_requests
---  backward-compat VIEW that API routes query).
 CREATE INDEX IF NOT EXISTS idx_permissions_student_status_created
-  ON public.permissions (student_user_id, status, created_at DESC);
+  ON public.permission_requests (student_user_id, status, created_at DESC);
 
 -- Approval queues — workflow + hostel scope + stage + status.
 CREATE INDEX IF NOT EXISTS idx_permissions_workflow_stage_status
-  ON public.permissions (workflow_type, current_stage, status);
+  ON public.permission_requests (workflow_type, current_stage, status);
 
 -- SLA triage — pending rows ordered by deadline.
 CREATE INDEX IF NOT EXISTS idx_permissions_sla_pending
-  ON public.permissions (sla_deadline)
+  ON public.permission_requests (sla_deadline)
   WHERE status = 'PENDING' AND sla_deadline IS NOT NULL;
 
 -- 2. KPI rollup view ------------------------------------------------------
--- Uses the actual `permissions` table (post-reconciliation) which has
--- `requester_user_id` as the requester FKey column.
+-- Uses the permission_requests table with requester_user_id as the
+-- requester FKey column.
 CREATE OR REPLACE VIEW public.v_my_ticket_counts AS
 SELECT
   p.requester_user_id                                    AS user_id,
@@ -35,7 +33,7 @@ SELECT
   COUNT(*) FILTER (WHERE p.status = 'COMPLETED')         AS completed,
   COUNT(*) FILTER (WHERE p.status = 'CANCELLED')         AS cancelled,
   COUNT(*)                                               AS total
-FROM public.permissions p
+FROM public.permission_requests p
 GROUP BY p.requester_user_id;
 
 COMMENT ON VIEW public.v_my_ticket_counts
