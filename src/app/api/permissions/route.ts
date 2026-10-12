@@ -109,6 +109,35 @@ async function handleGet(req: NextRequest, context: any) {
   const sid = searchParams.get("student_user_id") || searchParams.get("studentUserId");
   const hscope = searchParams.get("hostel_scope") || searchParams.get("hostelScope");
   const status = searchParams.get("status");
+  const mineOnly = searchParams.get("mine") === "true";
+
+  // ?mine=true — self-service "My Tickets" view: requester's own tickets
+  // with the student join so the card can render the requester's name/details.
+  if (mineOnly) {
+    const { data: mineData, error: mineErr } = await db
+      .from("permission_requests")
+      .select(`
+        id, ticket_number, workflow_type, current_stage, status,
+        sla_deadline, created_at, updated_at, description, reason,
+        from_date, to_date, priority, hostel_scope,
+        student_user_id, digital_signature, stage_history,
+        student:users(
+          id, name, email, phone, role,
+          student_details(roll, year, section, hostel_block, room_number, gender)
+        )
+      `, { count: "exact" })
+      .eq("student_user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(200);
+
+    if (mineErr) {
+      return NextResponse.json(
+        { success: false, code: "DB_ERROR", error: mineErr.message },
+        { status: 500 },
+      );
+    }
+    return NextResponse.json({ success: true, data: mineData ?? [], total: mineData?.length ?? 0 });
+  }
 
   let query = db.from("permission_requests").select("*", { count: "exact" });
   if (type) query = query.eq("workflow_type", type);

@@ -101,8 +101,6 @@ export function StageQueuePanel({
   const [busyId, setBusyId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const rows = data?.data ?? [];
-
   // A row is actionable only when the server's own state says the caller is
   // the owner of this stage AND it is still pending. Everything else renders
   // read-only — so a 403 is structurally impossible from this component.
@@ -113,8 +111,8 @@ export function StageQueuePanel({
   );
 
   const visibleRows = useMemo(
-    () => rows.filter((r) => chain.includes(r.current_stage)),
-    [rows, chain],
+    () => (data?.data ?? []).filter((r) => chain.includes(r.current_stage)),
+    [data, chain],
   );
 
   const handle = useCallback(
