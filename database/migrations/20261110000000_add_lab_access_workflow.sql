@@ -14,10 +14,21 @@ ALTER TABLE public.users ADD CONSTRAINT users_role_check CHECK (
   )
 );
 
--- 2. Add lab_access to permission_requests workflow_type CHECK constraint
-ALTER TABLE public.permission_requests DROP CONSTRAINT IF EXISTS permission_requests_workflow_type_check;
-ALTER TABLE public.permission_requests ADD CONSTRAINT permission_requests_workflow_type_check
-  CHECK (workflow_type IN ('hostel','exam','memo','staff_leave','lab_access'));
+-- 2. Add lab_access to workflow_type CHECK constraint.
+-- permission_requests is a compatibility view over permissions, so the constraint must be
+-- applied to the underlying table rather than the view.
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'permissions') THEN
+    ALTER TABLE public.permissions DROP CONSTRAINT IF EXISTS permissions_workflow_type_check;
+    ALTER TABLE public.permissions ADD CONSTRAINT permissions_workflow_type_check
+      CHECK (workflow_type IN ('hostel','exam','memo','staff_leave','lab_access'));
+  ELSIF EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'permission_requests') THEN
+    ALTER TABLE public.permission_requests DROP CONSTRAINT IF EXISTS permission_requests_workflow_type_check;
+    ALTER TABLE public.permission_requests ADD CONSTRAINT permission_requests_workflow_type_check
+      CHECK (workflow_type IN ('hostel','exam','memo','staff_leave','lab_access'));
+  END IF;
+END $$;
 
 -- 3. Seed lab_access custom reasons (if any) and document templates
 INSERT INTO public.custom_reasons (code, label, workflow_type)
