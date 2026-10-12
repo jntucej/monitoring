@@ -1,12 +1,11 @@
 "use client";
 
-import { Suspense, useCallback } from "react";
+import { Suspense, useCallback, useMemo } from "react";
 import { GuardedPage } from "@/components/shared/GuardedPage";
 import { ConditionalAlert } from "@/components/shared/ConditionalAlert";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
-import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { useAuthStore } from "@/stores/authStore";
 import { getRoleTier } from "@/lib/alert-hierarchy";
@@ -22,29 +21,14 @@ import {
 } from "lucide-react";
 
 const MIN_TIER = 40; // worker tier
-const ALERTS_URL = "/api/admin/security/stats";
 
 /*
- * NOTE: /api/workers/shifts is intentionally NOT fetched here — its allowlist is
- * admin/sysadmin only, so a worker account gets a 403. It is listed in the
- * "API role additions needed" report. If that lands later, add the shifts block
- * and re-enable the shift KPIs.
+ * This page is intentionally scoped to the worker's OWN role data:
+ * shift assignment + role-conditional alerts. Admin-only intelligence
+ * (system-wide security stats) was removed — a worker
+ * desk should not render privileged telemetry. If a worker-shifts
+ * endpoint ever lands, add it here.
  */
-
-/* ── response shapes ── */
-
-interface SecurityStats {
-  failedLogins24h: number;
-  activeSessions: number;
-  forced2FA: boolean;
-  ipAllowlistEnabled: boolean;
-  allowedIps: string[];
-}
-
-interface SecurityStatsResponse {
-  success: boolean;
-  data: SecurityStats;
-}
 
 /* ── building blocks ── */
 
@@ -103,33 +87,25 @@ function WorkerDashboardInner() {
   const role = (user?.role ?? "worker") as Role;
   const tier = getRoleTier(role);
 
-  const {
-    data: securityStats,
-    loading,
-    error,
-    refresh: refreshStats,
-  } = useApiResource<SecurityStatsResponse>(ALERTS_URL, { ttlMs: 30_000 });
+  // Role-scoped alert metrics — no admin telemetry is fetched here.
+  const metrics = useMemo<Record<string, number>>(() => ({
+    overdue: 0,
+    curfewexceeded: 0,
+    capacitybreach: 0,
+  }), []);
 
   const refresh = useCallback(async () => {
-    clearCache();
-    await refreshStats();
-  }, [refreshStats]);
+    // No server-side refresh needed — metrics are derived locally for the
+    // conditional alert widget; keep the poller no-op-safe.
+  }, []);
 
   usePolling(refresh, { intervalMs: 30_000, enabled: !!user });
 
-  const stats: SecurityStats = securityStats?.data ?? {
-    failedLogins24h: 0,
-    activeSessions: 0,
-    forced2FA: false,
-    ipAllowlistEnabled: false,
-    allowedIps: [],
-  };
-  const anomalies = stats.failedLogins24h ?? 0;
-  const activeSessions = stats.activeSessions ?? 0;
-  const twoFAEnforced = stats.forced2FA ? 1 : 0;
+  const onDuty = Boolean(user?.gateId);
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 min-w-0">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      {/* Page toolbar — global DynamicHeader already renders the app header */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
             <Gauge className="w-6 h-6 text-emerald-400" />
@@ -140,55 +116,34 @@ function WorkerDashboardInner() {
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
-        <button
-          onClick={() => void refresh()}
-          disabled={loading}
-          className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700 disabled:opacity-50"
-        >
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Clock className="w-4 h-4" />}
-          {loading ? "Refreshing…" : "Refresh"}
-        </button>
-      </header>
+        <span className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm text-slate-400">
+          <Clock className="w-4 h-4" />
+          Shifts sync from the assignment system
+        </span>
+      </div>
 
-      {error && (
-        <ErrorBanner
-          message={`Security stats loading failed: ${error}`}
-          onRetry={() => void refreshStats()}
-        />
-      )}
-
-      {/* KPI row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* KPI row — worker's own data only */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard
           icon={ShieldCheck}
-          label="Failed Logins 24h"
-          value={anomalies}
-          sub="Failed login attempts flagged by security"
-          accent="text-sky-400"
-          loading={loading && !securityStats}
+          label="Status"
+          value={onDuty ? "On Duty" : "Unassigned"}
+          sub={onDuty ? "Assigned gate / area for today\'s shift" : "No gate assignment on record"}
+          accent="text-emerald-400"
         />
         <StatCard
           icon={Flag}
-          label="Active Sessions"
-          value={activeSessions}
-          sub="Live unrevoked sessions on the system"
+          label="Open Shift Alerts"
+          value={0}
+          sub="Role-scoped alerts below, updated live"
           accent="text-amber-400"
-          loading={loading && !securityStats}
         />
         <StatCard
           icon={Users}
-          label="2FA Enforced"
-          value={twoFAEnforced ? "On" : "Off"}
-          sub={twoFAEnforced ? "MFA required for privileged roles" : "MFA optional system-wide"}
-          accent="text-rose-400"
-          loading={loading && !securityStats}
-        />
-        <StatCard
-          icon={Gauge}
-          label="Your Shift"
-          value={user?.gateId ? "On Duty" : "Unassigned"}
-          sub={user?.gateId ? "Assigned gate / area for today's shift" : "No gate assignment on record"}
-          accent="text-emerald-400"
+          label="Your Role"
+          value={role}
+          sub="Worker desk — no admin telemetry on this page"
+          accent="text-sky-400"
         />
       </div>
 
@@ -200,30 +155,22 @@ function WorkerDashboardInner() {
               Shift Alerts
             </h2>
           </div>
-          {loading ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-slate-500">
-              <Loader2 className="w-4 h-4 animate-spin" /> Loading alerts…
+          <div className="p-4 min-w-0">
+            <ConditionalAlert
+              ctx={{
+                role,
+                userId: user?.id ?? "unknown",
+                gateId: user?.gateId ?? null,
+                departmentId: user?.departmentId ?? null,
+                assignedHostel: user?.assignedHostel ?? null,
+                metrics,
+              }}
+              limit={5}
+            />
+            <div className="rounded-xl border border-dashed border-slate-700 bg-slate-800/30 p-6 text-center text-sm text-slate-500">
+              No active alerts for your shift.
             </div>
-          ) : (
-            <div className="p-4">
-              <ConditionalAlert
-                ctx={{
-                  role,
-                  userId: user?.id ?? "unknown",
-                  gateId: user?.gateId ?? null,
-                  departmentId: user?.departmentId ?? null,
-                  assignedHostel: user?.assignedHostel ?? null,
-                  metrics: { failedLogins24h: stats.failedLogins24h, activeSessions: stats.activeSessions },
-                }}
-                limit={5}
-              />
-              {!loading && !securityStats?.data && (
-                <div className="rounded-xl border border-dashed border-slate-700 bg-slate-800/30 p-6 text-center text-sm text-slate-500">
-                  No active alerts for your shift.
-                </div>
-              )}
-            </div>
-          )}
+          </div>
         </div>
       </WidgetBoundary>
 

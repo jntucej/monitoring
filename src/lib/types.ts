@@ -20,7 +20,6 @@ export type PersonType =
   | "parent"
   | "guardian"
   | "hod"
-  | "warden"
   | "principal"
   | "operator"
   | "admin"

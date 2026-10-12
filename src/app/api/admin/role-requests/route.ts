@@ -90,7 +90,7 @@ async function handlePost(req: NextRequest) {
 
   try {
     const { userId, requestedRole, reason } = await req.json().catch(() => ({}));
-    const ALL_ROLES: Role[] = ["operator", "admin", "sysadmin", "supervisor", "guardian", "parent", "hod", "student", "warden", "principal", "faculty", "staff", "worker", "visitor"];
+    const ALL_ROLES: Role[] = ["operator", "admin", "sysadmin", "supervisor", "guardian", "parent", "hod", "student", "principal", "faculty", "staff", "worker", "visitor"];
 
     if (!userId || !requestedRole || !ALL_ROLES.includes(requestedRole as Role)) {
       return NextResponse.json(

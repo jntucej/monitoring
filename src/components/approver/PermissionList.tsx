@@ -215,15 +215,15 @@ export function PermissionList({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)]">{title}</h1>
+    <div className="space-y-6 min-w-0">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 min-w-0">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] min-w-0 truncate">{title}</h1>
           {effectiveDescription && (
-            <p className="text-sm text-[var(--text-secondary)] mt-1">{effectiveDescription}</p>
+            <p className="text-sm text-[var(--text-secondary)] mt-1 min-w-0">{effectiveDescription}</p>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <Button
             size="sm"
             variant="secondary"
@@ -237,7 +237,7 @@ export function PermissionList({
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row items-center justify-between gap-3 bg-[var(--bg-surface)] p-3 rounded-xl border border-[var(--border)]">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 bg-[var(--bg-surface)] p-3 rounded-xl border border-[var(--border)] min-w-0">
         <div className="relative w-full md:w-80">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
           <Input
@@ -248,18 +248,18 @@ export function PermissionList({
           />
         </div>
 
-        <div className="flex items-center gap-2 w-full md:w-auto justify-between md:justify-end">
-          <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] mr-2">
+        <div className="flex items-center gap-2 w-full md:w-auto justify-between md:justify-end min-w-0">
+          <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] mr-2 shrink-0">
             <Filter className="w-3.5 h-3.5" />
             <span>Status:</span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 overflow-x-auto min-w-0">
             {["ALL", "PENDING", "APPROVED", "REJECTED"].map((status) => (
               <button
                 key={status}
                 type="button"
                 onClick={() => setStatusFilter(status)}
-                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap ${
                   statusFilter === status
                     ? "bg-[var(--action-primary)] text-white"
                     : "bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:bg-[var(--bg-surface)]"
@@ -273,28 +273,28 @@ export function PermissionList({
       </div>
 
       {filteredPermissions.length > 0 && (
-        <div className="flex items-center justify-between px-1 text-xs text-[var(--text-muted)]">
+        <div className="flex items-center justify-between px-1 text-xs text-[var(--text-muted)] min-w-0">
           <button
             type="button"
             onClick={handleSelectAllFiltered}
-            className="hover:text-[var(--text-primary)] font-medium"
+            className="hover:text-[var(--text-primary)] font-medium min-w-0"
           >
             {selectedTickets.size === filteredPermissions.length
               ? "Deselect all visible"
               : `Select all visible (${filteredPermissions.length})`}
           </button>
-          <span>Showing {filteredPermissions.length} requests</span>
+          <span className="shrink-0">Showing {filteredPermissions.length} requests</span>
         </div>
       )}
 
       {filteredPermissions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center p-12 bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl text-center space-y-3">
+        <div className="flex flex-col items-center justify-center p-12 bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl text-center space-y-3 min-w-0">
           <AlertCircle className="w-10 h-10 text-[var(--text-muted)]" />
-          <div className="space-y-1">
+          <div className="space-y-1 max-w-md">
             <h3 className="text-base font-semibold text-[var(--text-primary)]">
               No permission requests found
             </h3>
-            <p className="text-xs text-[var(--text-muted)] max-w-sm">
+            <p className="text-xs text-[var(--text-muted)]">
               {searchQuery || statusFilter !== "ALL"
                 ? "No items match your active search or filter criteria."
                 : "There are currently no permission requests assigned to this queue."}
@@ -302,7 +302,7 @@ export function PermissionList({
           </div>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3 min-w-0">
           {filteredPermissions.map((req) => (
             <PermissionRow
               key={req.id || req.ticket_number}

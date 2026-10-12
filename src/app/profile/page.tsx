@@ -80,7 +80,6 @@ function roleLabel(role: string): string {
     visitor: "Visitor",
     parent: "Parent",
     guardian: "Guardian",
-    warden: "Warden",
     hod: "Head of Department",
     supervisor: "Supervisor",
   };

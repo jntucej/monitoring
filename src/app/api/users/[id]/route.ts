@@ -53,9 +53,9 @@ async function handlePatch(req: NextRequest) {
     const body = await req.json().catch(() => null);
     const { role, status, pin, password, flagStatus, flag_status, flags } = body || {};
 
-    if ((flagStatus !== undefined || flag_status !== undefined || flags !== undefined) && !["admin", "sysadmin", "warden", "principal"].includes(actorRole)) {
+    if ((flagStatus !== undefined || flag_status !== undefined || flags !== undefined) && !["admin", "sysadmin", "principal"].includes(actorRole)) {
       return NextResponse.json(
-        { success: false, error: { code: "FORBIDDEN", message: "Only administrators, wardens and principal can flag or suspend accounts" } },
+        { success: false, error: { code: "FORBIDDEN", message: "Only administrators and principal can flag or suspend accounts" } },
         { status: 403 }
       );
     }

@@ -78,7 +78,6 @@ export function getRoleTier(role: string): number {
     oie: 75,
     hostel_manager: 70,
     deputy_warden: 65,
-    warden: 60,
     caretaker: 55,
     hod: 50,
   exam_superintendent: 50,

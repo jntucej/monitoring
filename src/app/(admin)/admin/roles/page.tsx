@@ -77,7 +77,7 @@ type FilterKey = "all" | "staff" | "students" | "on-campus";
 
 /** Coarse role buckets used by the quick-filter chips. */
 const FILTER_ROLES: Record<Exclude<FilterKey, "all">, string[]> = {
-  staff: ["admin", "sysadmin", "principal", "vice_principal", "hod", "warden", "supervisor", "operator", "faculty", "staff", "worker"],
+  staff: ["admin", "sysadmin", "principal", "vice_principal", "hod", "supervisor", "operator", "faculty", "staff", "worker"],
   students: ["student", "parent", "guardian"],
   "on-campus": [],
 };

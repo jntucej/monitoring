@@ -23,7 +23,465 @@ import {
   UserCheck,
   Inbox,
   Siren,
+  ClipboardCheck,
+  BarChart3,
+  FileText,
+  ScrollText,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
+
+/* ── types for new panels ── */
+
+interface StaffAttendanceResp {
+  summary?: {
+    totalStaff: number;
+    presentToday: number;
+    absentToday: number;
+    onLeave: number;
+  };
+  data?: Array<{
+    name: string;
+    role: string;
+    department?: string;
+    present: boolean;
+  }>;
+}
+
+interface AuditRecord {
+  id: string;
+  action: string;
+  user?: { name: string };
+  userId?: string;
+  details?: string;
+  timestamp: string;
+}
+
+interface DepartmentRow {
+  code: string;
+  name: string;
+  hod?: string;
+  staffCount?: number;
+}
+
+interface AttendanceRecordRow {
+  user_id?: string;
+  user_role?: string;
+  gate_id?: string;
+  gate_name?: string;
+  direction?: string;
+  first_in_time?: string | null;
+  last_seen_at?: string | null;
+  checked_in_at?: string | null;
+  status?: string;
+  student_name?: string;
+  roll_no?: string;
+  [key: string]: unknown;
+}
+
+interface OutpassRow {
+  id: string;
+  ticket_number: string;
+  status: string;
+  workflow_type: string;
+  current_stage?: string;
+  student?: {
+    name: string;
+    student_details?: { roll?: string } | null;
+  } | null;
+  requested_at?: string;
+  expiry?: string | null;
+}
+
+/* ── Institutional Attendance panel ── */
+
+function AttendancePanel({
+  data,
+  loading,
+  error,
+}: {
+  data: StaffAttendanceResp | null;
+  loading: boolean;
+  error: string | null;
+}) {
+  const s = data?.summary;
+  const total = s?.totalStaff ?? 0;
+  const present = s?.presentToday ?? 0;
+  const pct = total > 0 ? Math.round((present / total) * 100) : 0;
+
+  return (
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
+      <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
+        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+        <span className="text-xs font-semibold uppercase tracking-wide">
+          Institutional Attendance
+        </span>
+      </div>
+      {loading && !data ? (
+        <div className="animate-pulse space-y-2">
+          <div className="h-4 w-1/3 bg-[var(--bg-elevated)] rounded" />
+          <div className="h-4 w-1/2 bg-[var(--bg-elevated)] rounded" />
+        </div>
+      ) : error ? (
+        <p className="text-xs text-amber-300">{error}</p>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div>
+            <p className="text-2xl font-bold text-emerald-400">{present}</p>
+            <p className="text-xs text-[var(--text-muted)]">Present</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-rose-400">{s?.absentToday ?? 0}</p>
+            <p className="text-xs text-[var(--text-muted)]">Absent</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-amber-400">{s?.onLeave ?? 0}</p>
+            <p className="text-xs text-[var(--text-muted)]">On Leave</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-[var(--text-primary)]">{pct}%</p>
+            <p className="text-xs text-[var(--text-muted)]">Attendance Rate</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Gate Activity Overview panel (reuses matrix data) ── */
+
+function GateActivityPanel({
+  matrix,
+  loading,
+  error,
+}: {
+  matrix: {
+    gates?: Array<{ id: string; name?: string; code?: string }>;
+    roles?: string[];
+    matrix?: Record<string, Record<string, number>>;
+  } | null;
+  loading: boolean;
+  error: string | null;
+}) {
+  const gates = matrix?.gates ?? [];
+  const gmatrix = matrix?.matrix ?? {};
+  const roles = matrix?.roles ?? [];
+
+  const gateTotals = useMemo(() => {
+    return gates.map((g) => {
+      const roleCounts = roles.map((r) => ({
+        role: r,
+        count: gmatrix[g.id]?.[r] ?? 0,
+      }));
+      const total = roleCounts.reduce((a, b) => a + b.count, 0);
+      return { ...g, total, roleCounts };
+    });
+  }, [gates, roles, gmatrix]);
+
+  return (
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
+      <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
+        <MapPin className="w-4 h-4 text-sky-400" />
+        <span className="text-xs font-semibold uppercase tracking-wide">
+          Gate Activity Overview
+        </span>
+      </div>
+      {loading && !matrix ? (
+        <div className="animate-pulse space-y-2">
+          <div className="h-4 w-1/3 bg-[var(--bg-elevated)] rounded" />
+        </div>
+      ) : error ? (
+        <p className="text-xs text-amber-300">{error}</p>
+      ) : gateTotals.length === 0 ? (
+        <p className="text-xs text-[var(--text-muted)]">No gates registered.</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-full">
+            <thead>
+              <tr className="text-left text-[var(--text-muted)] border-b border-[var(--border)]">
+                <th className="py-2 pr-4 font-medium">Gate</th>
+                <th className="py-2 pr-4 font-medium">On Campus</th>
+                <th className="py-2 font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[var(--border)]">
+              {gateTotals.map((g) => (
+                <tr key={g.id}>
+                  <td className="py-2 pr-4">
+                    <span className="text-[var(--text-primary)] font-medium">{g.name || g.code || g.id.slice(0, 8)}</span>
+                  </td>
+                  <td className="py-2 pr-4">
+                    <span className={`font-bold ${g.total > 0 ? "text-emerald-400" : "text-[var(--text-muted)]"}`}>
+                      {g.total}
+                    </span>
+                  </td>
+                  <td className="py-2">
+                    <span
+                      className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${
+                        g.total > 0
+                          ? "bg-emerald-500/15 text-emerald-300"
+                          : "bg-slate-500/15 text-slate-400"
+                      }`}
+                    >
+                      {g.total > 0 ? "Active" : "Clear"}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Department Performance panel ── */
+
+function DepartmentPerformancePanel({
+  departments,
+  students,
+  loading,
+  error,
+}: {
+  departments: DepartmentRow[] | null;
+  students: Person[] | null;
+  loading: boolean;
+  error: string | null;
+}) {
+  const deptMap = useMemo(() => {
+    const m = new Map<string, { code: string; name: string; count: number }>();
+    (departments ?? []).forEach((d) => {
+      const key = d.code || d.name;
+      m.set(key, { code: d.code, name: d.name, count: 0 });
+    });
+    (students ?? []).forEach((s) => {
+      const dep = (s as Person & { department_id?: string }).department_id || s.department || "Unassigned";
+      const key = dep;
+      if (!m.has(key)) m.set(key, { code: key, name: key, count: 0 });
+      m.get(key)!.count++;
+    });
+    return m;
+  }, [departments, students]);
+
+  const rows = [...deptMap.entries()]
+    .sort((a, b) => b[1].count - a[1].count)
+    .map(([key, d]) => ({ key, ...d }));
+
+  return (
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
+      <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
+        <Building2 className="w-4 h-4 text-violet-400" />
+        <span className="text-xs font-semibold uppercase tracking-wide">
+          Department Performance
+        </span>
+      </div>
+      {loading && !departments && !students ? (
+        <div className="animate-pulse space-y-2">
+          <div className="h-4 w-1/3 bg-[var(--bg-elevated)] rounded" />
+        </div>
+      ) : error ? (
+        <p className="text-xs text-amber-300">{error}</p>
+      ) : rows.length === 0 ? (
+        <p className="text-xs text-[var(--text-muted)]">No department data available.</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-full">
+            <thead>
+              <tr className="text-left text-[var(--text-muted)] border-b border-[var(--border)]">
+                <th className="py-2 pr-4 font-medium">Department</th>
+                <th className="py-2 font-medium">Active Students</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[var(--border)]">
+              {rows.map((r) => (
+                <tr key={r.key}>
+                  <td className="py-2 pr-4">
+                    <span className="text-[var(--text-primary)]">{r.name || r.key}</span>
+                  </td>
+                  <td className="py-2">
+                    <span className="font-bold text-[var(--text-primary)]">{r.count}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Incident Oversight panel ── */
+
+function IncidentOversightPanel({
+  alerts,
+  loading,
+  error,
+}: {
+  alerts: Alert[] | null;
+  loading: boolean;
+  error: string | null;
+}) {
+  const top = useMemo(() => {
+    if (!alerts) return [];
+    const sev = (a: Alert) => (a.severity === "critical" ? 0 : a.severity === "high" ? 1 : 2);
+    return [...alerts].sort((a, b) => sev(a) - sev(b)).slice(0, 5);
+  }, [alerts]);
+
+  const sevColor = (s?: string) =>
+    s === "critical" ? "text-rose-400" : s === "high" ? "text-amber-400" : "text-sky-400";
+
+  return (
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
+      <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
+        <Siren className="w-4 h-4 text-rose-400" />
+        <span className="text-xs font-semibold uppercase tracking-wide">
+          Incident Oversight
+        </span>
+      </div>
+      {loading && !alerts ? (
+        <div className="animate-pulse space-y-2">
+          <div className="h-4 w-1/2 bg-[var(--bg-elevated)] rounded" />
+        </div>
+      ) : error ? (
+        <p className="text-xs text-amber-300">{error}</p>
+      ) : top.length === 0 ? (
+        <div className="flex items-center gap-2 text-emerald-400 text-xs">
+          <XCircle className="w-3.5 h-3.5" />
+          No open incidents. All clear.
+        </div>
+      ) : (
+        <ul className="space-y-2.5 min-w-0">
+          {top.map((a) => (
+            <li key={a.id || a.title} className="min-w-0">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className={`text-xs font-bold ${sevColor(a.severity)} shrink-0`}>
+                  {a.severity?.toUpperCase() || "INFO"}
+                </span>
+                <span className="text-xs text-[var(--text-primary)] truncate">{a.title}</span>
+              </div>
+              {a.message && (
+                <p className="text-xs text-[var(--text-muted)] mt-0.5 line-clamp-2 min-w-0">{a.message}</p>
+              )}
+              {a.timestamp && (
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">{fmtTime(a.timestamp)}</p>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/* ── Institutional Reports panel ── */
+
+function InstitutionalReportsPanel({
+  attendance,
+  students,
+  loading,
+}: {
+  attendance: StaffAttendanceResp | null;
+  students: Person[] | null;
+  loading: boolean;
+}) {
+  const s = attendance?.summary;
+  const studentCount = students?.length ?? 0;
+  const reports = [
+    {
+      label: "Staff Attendance Summary",
+      value: s ? `${s.presentToday}/${s.totalStaff} present` : "—",
+      sub: `${s?.onLeave ?? 0} on leave`,
+    },
+    {
+      label: "Active Student Population",
+      value: String(studentCount),
+      sub: "On-campus roster",
+    },
+    {
+      label: "Detailed Analytics",
+      value: "Restricted",
+      sub: "Available to admin/sysadmin only",
+    },
+  ];
+
+  return (
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
+      <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
+        <FileText className="w-4 h-4 text-sky-400" />
+        <span className="text-xs font-semibold uppercase tracking-wide">
+          Institutional Reports
+        </span>
+      </div>
+      {loading ? (
+        <div className="animate-pulse space-y-2">
+          <div className="h-4 w-1/2 bg-[var(--bg-elevated)] rounded" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {reports.map((r) => (
+            <div key={r.label} className="rounded-xl bg-[var(--bg-elevated)] p-3 min-w-0">
+              <p className="text-xs text-[var(--text-muted)]">{r.label}</p>
+              <p className="text-lg font-bold text-[var(--text-primary)] mt-0.5">{r.value}</p>
+              <p className="text-xs text-[var(--text-muted)]">{r.sub}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Audit & Compliance panel ── */
+
+function AuditCompliancePanel({
+  records,
+  loading,
+  error,
+}: {
+  records: AuditRecord[] | null;
+  loading: boolean;
+  error: string | null;
+}) {
+  const recent = (records ?? []).slice(0, 6);
+  return (
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
+      <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
+        <ScrollText className="w-4 h-4 text-violet-400" />
+        <span className="text-xs font-semibold uppercase tracking-wide">
+          Audit & Compliance
+        </span>
+      </div>
+      {loading && !records ? (
+        <div className="animate-pulse space-y-2">
+          <div className="h-4 w-1/3 bg-[var(--bg-elevated)] rounded" />
+        </div>
+      ) : error ? (
+        <p className="text-xs text-amber-300">{error}</p>
+      ) : recent.length === 0 ? (
+        <p className="text-xs text-[var(--text-muted)]">No recent audit activity.</p>
+      ) : (
+        <ul className="space-y-2 min-w-0">
+          {recent.map((r) => (
+            <li key={r.id} className="min-w-0">
+              <div className="flex items-center gap-2 min-w-0">
+                <ClipboardCheck className="w-3 h-3 text-emerald-400 shrink-0" />
+                <span className="text-xs text-[var(--text-primary)] font-medium truncate">
+                  {r.action}
+                </span>
+              </div>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5 pl-5 min-w-0">
+                {r.user?.name || "System"} · {fmtDate(r.timestamp)} {fmtTime(r.timestamp)}
+                {r.details ? ` · ${r.details}` : ""}
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 type Resp = { success: boolean; data?: unknown; error?: { message?: string } };
 
@@ -300,6 +758,373 @@ function PresenceMatrixPanel({
   );
 }
 
+/* ── Hostel & Residents cluster ── */
+
+function HostelOverviewPanel({
+  matrix,
+  pendingApprovals,
+}: {
+  matrix: {
+    gates?: Array<{ id: string; name?: string; code?: string }>;
+    roles?: string[];
+    matrix?: Record<string, Record<string, number>>;
+  } | null;
+  pendingApprovals: number;
+}) {
+  const gates = matrix?.gates ?? [];
+  const m = matrix?.matrix ?? {};
+  const roles = matrix?.roles ?? [];
+  const onCampus = gates.reduce(
+    (sum, g) => sum + roles.reduce((s, r) => s + (m[g.id]?.[r] ?? 0), 0),
+    0
+  );
+  return (
+    <WidgetBoundary title="Hostel Overview">
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
+        <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
+          <Building2 className="w-4 h-4 text-indigo-400" />
+          <span className="text-xs font-semibold uppercase tracking-wide">Hostel Overview</span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 min-w-0">
+          <div>
+            <p className="text-2xl font-bold text-indigo-400">{matrix ? onCampus : "…"}</p>
+            <p className="text-xs text-[var(--text-muted)]">On-Campus Now</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-[var(--text-primary)]">{gates.length}</p>
+            <p className="text-xs text-[var(--text-muted)]">Active Gates</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-amber-400">{pendingApprovals}</p>
+            <p className="text-xs text-[var(--text-muted)]">Pending Hostel Approvals</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-emerald-400">
+              {roles.length > 0 ? "Active" : "—"}
+            </p>
+            <p className="text-xs text-[var(--text-muted)]">Hostel Status</p>
+          </div>
+        </div>
+      </div>
+    </WidgetBoundary>
+  );
+}
+
+function ResidentDirectoryPanel({
+  records,
+  loading,
+  error,
+}: {
+  records: AttendanceRecordRow[] | null;
+  loading: boolean;
+  error: string | null;
+}) {
+  return (
+    <WidgetBoundary title="Resident Directory">
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
+        <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
+          <Users className="w-4 h-4 text-violet-400" />
+          <span className="text-xs font-semibold uppercase tracking-wide">Resident Directory</span>
+        </div>
+        {loading && !records ? (
+          <p className="text-sm text-[var(--text-muted)]">Loading…</p>
+        ) : error ? (
+          <div className="rounded-lg border border-slate-600/40 bg-slate-700/20 p-3 text-xs text-slate-400 flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-slate-500 shrink-0" />
+            Resident directory is managed by the hostel manager. No dedicated resident feed is exposed at this tier.
+          </div>
+        ) : records && records.length > 0 ? (
+          <div className="overflow-x-auto min-w-0">
+            <table className="w-full text-sm min-w-[400px]">
+              <thead>
+                <tr className="text-[var(--text-muted)] text-xs uppercase tracking-wide border-b border-[var(--border)]">
+                  <th className="text-left px-3 py-2">Gate</th>
+                  <th className="text-left px-3 py-2">Direction</th>
+                  <th className="text-left px-3 py-2">First In</th>
+                  <th className="text-left px-3 py-2">Last Seen</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border)]">
+                {records.slice(0, 20).map((r, i) => (
+                  <tr key={i} className="hover:bg-[var(--bg-elevated)]">
+                    <td className="px-3 py-2 text-[var(--text-primary)]">{r.gate_name || r.gate_id?.slice(0, 8) || "—"}</td>
+                    <td className="px-3 py-2 text-[var(--text-muted)] capitalize">{r.direction || "—"}</td>
+                    <td className="px-3 py-2 text-[var(--text-muted)]">{r.first_in_time ? fmtTime(r.first_in_time) : "—"}</td>
+                    <td className="px-3 py-2 text-[var(--text-muted)]">{r.last_seen_at ? fmtTime(r.last_seen_at) : "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {records.length > 20 && (
+              <p className="text-xs text-[var(--text-muted)] mt-2">Showing first 20 of {records.length} records.</p>
+            )}
+          </div>
+        ) : (
+          <p className="text-sm text-[var(--text-muted)] py-4 text-center">No attendance records on file.</p>
+        )}
+      </div>
+    </WidgetBoundary>
+  );
+}
+
+function HostelAttendancePanel({
+  matrix,
+}: {
+  matrix: {
+    gates?: Array<{ id: string; name?: string; code?: string }>;
+    roles?: string[];
+    matrix?: Record<string, Record<string, number>>;
+  } | null;
+}) {
+  const gates = matrix?.gates ?? [];
+  const m = matrix?.matrix ?? {};
+  const roles = matrix?.roles ?? [];
+  const rows = gates.map((g) => ({
+    ...g,
+    total: roles.reduce((s, r) => s + (m[g.id]?.[r] ?? 0), 0),
+  }));
+  const total = rows.reduce((s, r) => s + r.total, 0);
+  return (
+    <WidgetBoundary title="Hostel Attendance">
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
+        <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          <span className="text-xs font-semibold uppercase tracking-wide">Hostel Attendance</span>
+        </div>
+        {rows.length === 0 ? (
+          <div className="rounded-lg border border-slate-600/40 bg-slate-700/20 p-3 text-xs text-slate-400 flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-slate-500 shrink-0" />
+            Detailed hostel attendance is managed by the hostel manager. Gate-level presence is shown below.
+          </div>
+        ) : (
+          <>
+            <div className="overflow-x-auto min-w-0">
+              <table className="w-full text-sm min-w-[360px]">
+                <thead>
+                  <tr className="text-[var(--text-muted)] text-xs uppercase tracking-wide border-b border-[var(--border)]">
+                    <th className="text-left px-3 py-2">Gate</th>
+                    <th className="text-right px-3 py-2">On-Campus</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--border)]">
+                  {rows.map((r) => (
+                    <tr key={r.id} className="hover:bg-[var(--bg-elevated)]">
+                      <td className="px-3 py-2 text-[var(--text-primary)]">{r.name || r.code || r.id.slice(0, 8)}</td>
+                      <td className="px-3 py-2 text-right">
+                        <span className={`font-bold ${r.total > 0 ? "text-emerald-400" : "text-[var(--text-muted)]"}`}>{r.total}</span>
+                      </td>
+                    </tr>
+                  ))}
+                  <tr className="border-t border-[var(--border)]">
+                    <td className="px-3 py-2 text-xs font-semibold text-[var(--text-muted)]">TOTAL</td>
+                    <td className="px-3 py-2 text-right text-sm font-bold text-emerald-400">{total}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="text-[10px] text-[var(--text-muted)] mt-2">
+              Presence-matrix signal. Staff-level attendance detail is admin-scoped.
+            </p>
+          </>
+        )}
+      </div>
+    </WidgetBoundary>
+  );
+}
+
+function OutpassLeavePanel({
+  outpasses,
+  leaves,
+  loading,
+  error,
+}: {
+  outpasses: OutpassRow[] | null;
+  leaves: OutpassRow[] | null;
+  loading: boolean;
+  error: string | null;
+}) {
+  const all = [...(outpasses ?? []), ...(leaves ?? [])];
+  return (
+    <WidgetBoundary title="Outpass and Leave Requests">
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
+        <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
+          <ClipboardCheck className="w-4 h-4 text-amber-400" />
+          <span className="text-xs font-semibold uppercase tracking-wide">Outpass &amp; Leave Requests</span>
+          {all.length > 0 && <span className="text-xs text-amber-400 ml-auto">{all.length} pending</span>}
+        </div>
+        {loading && !outpasses && !leaves ? (
+          <p className="text-sm text-[var(--text-muted)]">Loading…</p>
+        ) : error ? (
+          <p className="text-xs text-amber-300">{error}</p>
+        ) : all.length === 0 ? (
+          <p className="text-sm text-[var(--text-muted)] py-4 text-center">No pending outpass or leave requests.</p>
+        ) : (
+          <div className="overflow-x-auto min-w-0">
+            <table className="w-full text-sm min-w-[520px]">
+              <thead>
+                <tr className="text-[var(--text-muted)] text-xs uppercase tracking-wide border-b border-[var(--border)]">
+                  <th className="text-left px-3 py-2">Ticket</th>
+                  <th className="text-left px-3 py-2">Student</th>
+                  <th className="text-left px-3 py-2">Type</th>
+                  <th className="text-left px-3 py-2">Stage</th>
+                  <th className="text-left px-3 py-2">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border)]">
+                {all.slice(0, 15).map((r) => (
+                  <tr key={r.id} className="hover:bg-[var(--bg-elevated)]">
+                    <td className="px-3 py-2 font-mono text-xs text-[var(--text-primary)] whitespace-nowrap">{r.ticket_number}</td>
+                    <td className="px-3 py-2 text-[var(--text-primary)] min-w-0">
+                      {r.student?.name || "—"}
+                      {r.student?.student_details?.roll ? ` · ${r.student.student_details.roll}` : ""}
+                    </td>
+                    <td className="px-3 py-2 text-[var(--text-muted)] capitalize whitespace-nowrap">{r.workflow_type.replace(/_/g, " ")}</td>
+                    <td className="px-3 py-2 text-[var(--text-muted)] whitespace-nowrap">{r.current_stage || "—"}</td>
+                    <td className="px-3 py-2">
+                      <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium border border-amber-400/30 bg-amber-400/10 text-amber-400 whitespace-nowrap">
+                        {r.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </WidgetBoundary>
+  );
+}
+
+function EntryExitLogsPanel() {
+  return (
+    <WidgetBoundary title="Entry/Exit Logs">
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
+        <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
+          <MapPin className="w-4 h-4 text-sky-400" />
+          <span className="text-xs font-semibold uppercase tracking-wide">Entry / Exit Logs</span>
+        </div>
+        <div className="rounded-lg border border-slate-600/40 bg-slate-700/20 p-3 text-xs text-slate-400 flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-slate-500 shrink-0" />
+          Entry/exit detail is restricted at the principal tier. Gate-level presence is available in the Gate Activity panel above.
+        </div>
+      </div>
+    </WidgetBoundary>
+  );
+}
+
+function HostelIncidentsPanel({
+  alerts,
+  loading,
+  error,
+}: {
+  alerts: Alert[] | null;
+  loading: boolean;
+  error: string | null;
+}) {
+  return (
+    <WidgetBoundary title="Hostel Incidents">
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
+        <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
+          <Siren className="w-4 h-4 text-rose-400" />
+          <span className="text-xs font-semibold uppercase tracking-wide">Hostel Incidents</span>
+        </div>
+        {loading && !alerts ? (
+          <p className="text-sm text-[var(--text-muted)]">Loading…</p>
+        ) : error ? (
+          <div className="rounded-lg border border-slate-600/40 bg-slate-700/20 p-3 text-xs text-slate-400 flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-slate-500 shrink-0" />
+            Incident feeds are admin-scoped. No hostel incidents are exposed at the principal tier.
+          </div>
+        ) : alerts && alerts.length === 0 ? (
+          <p className="text-sm text-[var(--text-muted)] py-4 text-center">No hostel incidents on record. All clear.</p>
+        ) : alerts && alerts.length > 0 ? (
+          <ul className="space-y-2 min-w-0 max-h-48 overflow-y-auto">
+            {alerts.slice(0, 8).map((a) => (
+              <li key={a.id} className="flex items-center gap-2 min-w-0 text-sm hover:bg-[var(--bg-elevated)] rounded-lg px-2 py-1.5">
+                <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                  a.severity === "critical" ? "bg-rose-500/20 text-rose-400" : "bg-amber-500/20 text-amber-400"
+                }`}>
+                  {a.severity}
+                </span>
+                <span className="text-[var(--text-primary)] truncate min-w-0 flex-1">{a.title}</span>
+                <span className="text-[10px] text-[var(--text-muted)] shrink-0">{fmtTime(a.timestamp)}</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-[var(--text-muted)] py-4 text-center">No hostel incidents on record.</p>
+        )}
+      </div>
+    </WidgetBoundary>
+  );
+}
+
+function RoomOccupancyPanel() {
+  return (
+    <WidgetBoundary title="Room Occupancy">
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
+        <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
+          <Building2 className="w-4 h-4 text-indigo-400" />
+          <span className="text-xs font-semibold uppercase tracking-wide">Room Occupancy</span>
+        </div>
+        <div className="rounded-lg border border-slate-600/40 bg-slate-700/20 p-3 text-xs text-slate-400 flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-slate-500 shrink-0" />
+          Room-level occupancy data is managed by the hostel manager and not exposed at the principal tier.
+        </div>
+      </div>
+    </WidgetBoundary>
+  );
+}
+
+function HostelReportsPanel({
+  auditRecords,
+  loading,
+  error,
+}: {
+  auditRecords: AuditRecord[] | null;
+  loading: boolean;
+  error: string | null;
+}) {
+  const recent = auditRecords?.slice(0, 6) ?? [];
+  return (
+    <WidgetBoundary title="Hostel Reports">
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
+        <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
+          <FileText className="w-4 h-4 text-violet-400" />
+          <span className="text-xs font-semibold uppercase tracking-wide">Hostel Reports</span>
+        </div>
+        {loading && !auditRecords ? (
+          <p className="text-sm text-[var(--text-muted)]">Loading…</p>
+        ) : error ? (
+          <p className="text-xs text-amber-300">{error}</p>
+        ) : recent.length === 0 ? (
+          <p className="text-sm text-[var(--text-muted)] py-4 text-center">No recent hostel report activity.</p>
+        ) : (
+          <ul className="space-y-2 min-w-0">
+            {recent.map((r) => (
+              <li key={r.id} className="min-w-0 flex items-center gap-2">
+                <FileText className="w-3 h-3 text-[var(--text-muted)] shrink-0" />
+                <span className="text-xs text-[var(--text-primary)] font-medium truncate min-w-0 flex-1">{r.action}</span>
+                <span className="text-[10px] text-[var(--text-muted)] shrink-0">{fmtDate(r.timestamp)} {fmtTime(r.timestamp)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+        <p className="text-xs text-[var(--text-muted)] mt-3 pt-3 border-t border-[var(--border)]">
+          Authority: Manage the assigned hostel, residents, and hostel-related incidents.
+        </p>
+        <a
+          href="/hostel/permissions"
+          className="inline-flex items-center gap-1.5 mt-3 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-1.5 text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
+        >
+          Open Hostel Approvals Desk →
+        </a>
+      </div>
+    </WidgetBoundary>
+  );
+}
+
 function PrincipalDashboardInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "principal") as Role;
@@ -321,14 +1146,36 @@ function PrincipalDashboardInner() {
   } | null>(null);
   const [matrixError, setMatrixError] = useState<string | null>(null);
 
+  /* ── institution-level panel state ── */
+  const [attendance, setAttendance] = useState<StaffAttendanceResp | null>(null);
+  const [attendanceError, setAttendanceError] = useState<string | null>(null);
+  const [departments, setDepartments] = useState<DepartmentRow[] | null>(null);
+  const [departmentsError, setDepartmentsError] = useState<string | null>(null);
+  const [auditRecords, setAuditRecords] = useState<AuditRecord[] | null>(null);
+  const [auditError, setAuditError] = useState<string | null>(null);
+
+  /* ── hostel cluster state ── */
+  const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecordRow[] | null>(null);
+  const [attendanceRecordsError, setAttendanceRecordsError] = useState<string | null>(null);
+  const [outpasses, setOutpasses] = useState<OutpassRow[] | null>(null);
+  const [outpassesError, setOutpassesError] = useState<string | null>(null);
+  const [leaves, setLeaves] = useState<OutpassRow[] | null>(null);
+  const [leavesError, setLeavesError] = useState<string | null>(null);
+
   const refresh = useCallback(async () => {
     setRefreshing(true);
     clearCache();
-    const [passesR, studentsR, alertsR, matrixR] = await Promise.all([
+    const [passesR, studentsR, alertsR, matrixR, attR, deptR, auditR, attRecR, outR, leaveR] = await Promise.all([
       fetchJson("/api/passes?status=PENDING&limit=100"),
       fetchJson("/api/students?scope=active"),
       fetchJson("/api/alerts?resolved=false"),
       fetchJson("/api/occupancy/presence-matrix"),
+      fetchJson("/api/staff/attendance"),
+      fetchJson("/api/departments"),
+      fetchJson("/api/principal/audit"),
+      fetchJson("/api/attendance_records?limit=50"),
+      fetchJson("/api/permissions?workflow_type=outpass&status=PENDING"),
+      fetchJson("/api/permissions?workflow_type=staff_leave&status=PENDING"),
     ]);
     setPasses(passesR.success ? ((passesR.data as GatePass[]) ?? []) : null);
     setPassesError(passesR.success ? null : passesR.error?.message ?? "Unknown error");
@@ -337,6 +1184,18 @@ function PrincipalDashboardInner() {
     setAlertsError(alertsR.success ? null : alertsR.error?.message ?? "Unknown error");
     setMatrix(matrixR.success ? (matrixR.data ?? null) : null);
     setMatrixError(matrixR.success ? null : matrixR.error?.message ?? "Unknown error");
+    setAttendance(attR.success ? ((attR.data as StaffAttendanceResp) ?? null) : null);
+    setAttendanceError(attR.success ? null : attR.error?.message ?? "Unknown error");
+    setDepartments(deptR.success ? ((deptR.data as DepartmentRow[]) ?? []) : null);
+    setDepartmentsError(deptR.success ? null : deptR.error?.message ?? "Unknown error");
+    setAuditRecords(auditR.success ? ((auditR.data as AuditRecord[]) ?? []) : null);
+    setAuditError(auditR.success ? null : auditR.error?.message ?? "Unknown error");
+    setAttendanceRecords(attRecR.success ? ((attRecR.data as AttendanceRecordRow[]) ?? []) : null);
+    setAttendanceRecordsError(attRecR.success ? null : attRecR.error?.message ?? "Unknown error");
+    setOutpasses(outR.success ? ((outR.data as OutpassRow[]) ?? []) : null);
+    setOutpassesError(outR.success ? null : outR.error?.message ?? "Unknown error");
+    setLeaves(leaveR.success ? ((leaveR.data as OutpassRow[]) ?? []) : null);
+    setLeavesError(leaveR.success ? null : leaveR.error?.message ?? "Unknown error");
     setLastRefresh(new Date());
     setRefreshing(false);
   }, []);
@@ -399,7 +1258,8 @@ function PrincipalDashboardInner() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-5 sm:space-y-6 px-4 sm:px-6 py-6 sm:py-8 min-w-0">
-      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      {/* Page toolbar — global DynamicHeader already renders the app header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2 text-[var(--text-primary)]">
             <ShieldCheck className="w-6 h-6 text-emerald-400" />
@@ -418,7 +1278,7 @@ function PrincipalDashboardInner() {
           <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
           {refreshing ? "Refreshing…" : "Refresh"}
         </button>
-      </header>
+      </div>
 
       {anyError && (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex items-center gap-2">
@@ -439,12 +1299,62 @@ function PrincipalDashboardInner() {
         ))}
       </div>
 
-      {/* Pending permission approvals — principal is final approver for exams */}
-      <WidgetBoundary title="Pending Approvals">
+      {/* ── Institution-level panels ── */}
+
+      {/* 2. Institutional Attendance */}
+      <WidgetBoundary title="Institutional Attendance">
+        <AttendancePanel
+          data={attendance}
+          loading={attendance === null && !attendanceError}
+          error={attendanceError}
+        />
+      </WidgetBoundary>
+
+      {/* 3. Gate Activity Overview (reuses matrix data) */}
+      <WidgetBoundary title="Gate Activity">
+        <GateActivityPanel
+          matrix={matrix}
+          loading={matrix === null && !matrixError}
+          error={matrixError}
+        />
+      </WidgetBoundary>
+
+      {/* 4. Department Performance */}
+      <WidgetBoundary title="Department Performance">
+        <DepartmentPerformancePanel
+          departments={departments}
+          students={students}
+          loading={departments === null && students === null}
+          error={departmentsError}
+        />
+      </WidgetBoundary>
+
+      {/* 5. Incident Oversight */}
+      <WidgetBoundary title="Incident Oversight">
+        <IncidentOversightPanel
+          alerts={alerts}
+          loading={alerts === null && !alertsError}
+          error={alertsError}
+        />
+      </WidgetBoundary>
+
+      {/* 6. Institutional Reports */}
+      <WidgetBoundary title="Institutional Reports">
+        <InstitutionalReportsPanel
+          attendance={attendance}
+          students={students}
+          loading={attendance === null && students === null}
+        />
+      </WidgetBoundary>
+
+      {/* 7. Approvals and Decisions — consolidated single PermissionList */}
+      <WidgetBoundary title="Approvals and Decisions">
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5">
           <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
             <Users className="w-4 h-4" />
-            <span className="text-xs font-semibold uppercase tracking-wide">Pending Approvals</span>
+            <span className="text-xs font-semibold uppercase tracking-wide">
+              Approvals &amp; Decisions — Principal Stage
+            </span>
           </div>
           <PermissionList
             title="Pending Approvals"
@@ -456,12 +1366,58 @@ function PrincipalDashboardInner() {
         </div>
       </WidgetBoundary>
 
+      {/* 8. Audit and Compliance */}
+      <WidgetBoundary title="Audit and Compliance">
+        <AuditCompliancePanel
+          records={auditRecords}
+          loading={auditRecords === null && !auditError}
+          error={auditError}
+        />
+      </WidgetBoundary>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
         <HostelOccupancyPanel roster={students} />
         <AlertsPanel alerts={alerts} loading={alerts === null} error={alertsError} />
       </div>
 
       <PresenceMatrixPanel matrixData={matrix} loading={matrix === null} error={matrixError} />
+
+      {/* ── Hostel & Residents cluster ── */}
+      <div className="space-y-4 sm:space-y-5 min-w-0">
+        <p className="text-xs font-semibold uppercase tracking-widest text-[var(--text-muted)] pt-2">
+          Hostel &amp; Residents
+        </p>
+        <HostelOverviewPanel
+          matrix={matrix}
+          pendingApprovals={(outpasses?.length ?? 0) + (leaves?.length ?? 0)}
+        />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+          <ResidentDirectoryPanel
+            records={attendanceRecords}
+            loading={attendanceRecords === null && !attendanceRecordsError}
+            error={attendanceRecordsError}
+          />
+          <HostelAttendancePanel matrix={matrix} />
+        </div>
+        <OutpassLeavePanel
+          outpasses={outpasses}
+          leaves={leaves}
+          loading={outpasses === null && leaves === null}
+          error={outpassesError || leavesError}
+        />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+          <EntryExitLogsPanel />
+          <HostelIncidentsPanel alerts={alerts} loading={alerts === null} error={alertsError} />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+          <RoomOccupancyPanel />
+          <HostelReportsPanel
+            auditRecords={auditRecords}
+            loading={auditRecords === null && !auditError}
+            error={auditError}
+          />
+        </div>
+      </div>
 
       <DevContactStrip />
     </div>

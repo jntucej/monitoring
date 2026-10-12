@@ -9,7 +9,6 @@ const ALLOWED_APPROVER_ROLES: Role[] = [
   "caretaker",
   "deputy_warden",
   "hostel_manager",
-  "warden",
   "principal",
   "principal",
   "vice_principal",

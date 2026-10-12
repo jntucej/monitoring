@@ -47,7 +47,6 @@ echo "If seed scripts were run, the master PIN is configured in environment:"
 echo "\`SEED_DEFAULT_PIN\`"
 echo ""
 echo "Seed script references:"
-echo "- \`seed_sysadmin.js\`: password=\`junaid\`, pin=\`nf16\` for sysadmin@college.edu"
 echo "- \`seed-roles.js\`: uses SEED_DEFAULT_PIN env var"
 echo ""
 

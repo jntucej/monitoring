@@ -8,7 +8,7 @@ export default function SupervisorLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthGuard allowedRoles={["supervisor", "warden", "principal", "admin", "sysadmin"]}>
+    <AuthGuard allowedRoles={["supervisor", "principal", "admin", "sysadmin"]}>
       {children}
     </AuthGuard>
   );
