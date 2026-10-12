@@ -29,6 +29,9 @@ const ToastContext = React.createContext<ToastContextValue | undefined>(undefine
 // context queue rendered. Context now proxies to useUIStore so all ~33 callers
 // of useUIStore().addToast get visible toasts too — one queue, one renderer.
 
+// Fix 7: limit toasts to max 3 in the store to prevent overflow
+const MAX_TOASTS = 3;
+
 const toastIcons: Record<ToastVariant, React.ReactNode> = {
   success: <CheckCircle className="w-5 h-5" />,
   error: <AlertCircle className="w-5 h-5" />,
@@ -71,10 +74,18 @@ function ToastContainer() {
   const ctx = React.useContext(ToastContext);
   if (!ctx) return null;
 
+  // Fix 7: max 3 toasts visible at once
+  const visibleToasts = ctx.toasts.slice(-3);
+
   return (
-    <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none">
+    <div
+      className="fixed bottom-4 right-4 z-toast flex flex-col gap-2 pointer-events-none"
+      aria-live="polite"
+      aria-atomic="false"
+      role="status"
+    >
       <AnimatePresence>
-        {ctx.toasts.map((t) => (
+        {visibleToasts.map((t) => (
           <motion.div
             key={t.id}
             initial={{ opacity: 0, x: 50, scale: 0.9 }}

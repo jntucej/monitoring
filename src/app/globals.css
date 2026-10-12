@@ -699,6 +699,17 @@ body {
   --glass-sheen-start: 0%;
   --glass-sheen-end: 100%;
   --rail-width: 220px;
+
+  /* ============================================================
+     SEMANTIC Z-INDEX TOKEN SCALE — Fix 7
+     ============================================================ */
+  --z-nav: 40;          /* Sidebar rail (desktop) */
+  --z-header: 50;       /* Top header bar */
+  --z-sheet: 60;        /* Mobile drawer / slide-over sheets */
+  --z-modal: 70;        /* Dialog modals, permission panels */
+  --z-floating-bot: 75; /* Harbor floating bot (between modal & toast) */
+  --z-toast: 80;        /* Toast notifications — top of stack */
+  --z-overlay: 90;      /* Full-page overlays (loading, backdrop) */
 }
 @media (min-width: 768px) { :root { --rail-width: 240px; } }
 @media (min-width: 1024px){ :root { --rail-width: 260px; } }
@@ -875,12 +886,16 @@ html.glass .input-focus:focus-visible {
   --z-modal: 50;
 }
 
-/* Z-Index Helper Utilities */
+/* Z-Index Helper Utilities — Fix 7 */
 .z-base { z-index: var(--z-base); }
 .z-overlay { z-index: var(--z-overlay); }
 .z-sidebar { z-index: var(--z-sidebar); }
+.z-nav { z-index: var(--z-nav); }
 .z-header { z-index: var(--z-header); }
+.z-sheet { z-index: var(--z-sheet); }
 .z-modal { z-index: var(--z-modal); }
+.z-floating-bot { z-index: var(--z-floating-bot); }
+.z-toast { z-index: var(--z-toast); }
 
 /* Overscroll containment utility for pull-to-refresh prevention */
 .overscroll-contain {
@@ -1159,7 +1174,91 @@ html.glass [class*="bg-gray-800"] [class*="text-gray-"] {
   color: var(--text-secondary, #334155) !important;
 }
 
-/* ===== Login form error feedback animations ===== */
+/* FloatingBot hides when modal/sheet is open — Fix 7 stacking */
+body.modal-open .floating-bot-root,
+body.sheet-open .floating-bot-root {
+  display: none !important;
+}
+
+/* Strict z-index scale per role — Fix 7 */
+.sidebar-desktop { z-index: var(--z-nav); }
+.mobile-drawer { z-index: var(--z-sheet); }
+.header-bar { z-index: var(--z-header); }
+.modal-dialog { z-index: var(--z-modal); }
+.floating-bot-root { z-index: var(--z-floating-bot); }
+.toast-root { z-index: var(--z-toast); }
+
+/* Toast container: single instance, aria-live polite, max 3 toasts — Fix 7 */
+.toast-root {
+  max-width: calc(100vw - 2rem);
+}
+.toast-root > div > div {
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+/* Fix 7 — Sticky table headers + fixed BulkActionsBar on mobile */
+.table-sticky-header th {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+  background: var(--bg-surface);
+}
+.bulk-actions-bar--fixed-mobile {
+  position: sticky;
+  bottom: 0;
+  z-index: var(--z-modal);
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border);
+}
+
+/* ============================================================
+   PERFORMANCE: will-change only while animating — Fix 8
+   ============================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  .glass-card {
+    will-change: transform, backdrop-filter;
+    transition: backdrop-filter 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  }
+}
+/* Kill will-change for low-end devices */
+html[data-device-profile="low-profile"] .glass-card,
+html[data-device-profile="legacy"] .glass-card {
+  will-change: auto !important;
+  transform: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transition: none !important;
+}
+
+/* Kill heavy animations on reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .glass-card,
+  .glass-panel,
+  .float-animation,
+  [class*="animate-"] {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Skeleton fixed dimensions prevent CLS */
+.skeleton-block {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Long list virtualization hint */
+.list-virtualized {
+  contain: layout style;
+  overflow: clip;
+}
+
+/* Sound/haptics graceful no-op when AudioContext blocked */
+.sound-disabled [data-sound-trigger] {
+  pointer-events: none;
+  opacity: 0.5;
+}
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   10%, 30%, 50%, 70%, 90% { transform: translateX(-6px); }
