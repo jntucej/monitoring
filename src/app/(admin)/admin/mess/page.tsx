@@ -220,6 +220,7 @@ function MenuItemsTab() {
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <span className="flex-1">{itemsRes.error}</span>
           <button
+          type="button"
             onClick={() => void itemsRes.refresh()}
             className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-rose-500/20 hover:bg-rose-500/30"
           >
@@ -233,6 +234,7 @@ function MenuItemsTab() {
         subtitle="Items students can select as their primary or sub-item"
         action={
           <button
+          type="button"
             onClick={startNew}
             className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold transition"
           >
@@ -280,6 +282,7 @@ function MenuItemsTab() {
                     <td className="py-2.5 pl-2">
                       <div className="flex items-center justify-end gap-1.5">
                         <button
+                        type="button"
                           onClick={() => startEdit(it)}
                           className="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition"
                           aria-label={`Edit ${it.label}`}
@@ -287,6 +290,7 @@ function MenuItemsTab() {
                           <Pencil className="w-3 h-3" />
                         </button>
                         <button
+                        type="button"
                           onClick={() => setDeleteId(it.id)}
                           className="w-7 h-7 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 flex items-center justify-center transition"
                           aria-label={`Delete ${it.label}`}
@@ -309,6 +313,7 @@ function MenuItemsTab() {
           title={editing.id ? `Edit: ${editing.label}` : "New menu item"}
           action={
             <button onClick={() => setEditing(null)} className="text-slate-500 hover:text-white">
+            type="button"
               <X className="w-4 h-4" />
             </button>
           }
@@ -345,7 +350,7 @@ function MenuItemsTab() {
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Type</span>
               <div className="mt-1 flex gap-2">
                 <button
-                  type="button"
+                type="button"
                   onClick={() => setEditing({ ...editing, isPrimary: true })}
                   className={`flex-1 px-3 py-2 rounded-xl text-xs font-bold border transition ${
                     editing.isPrimary
@@ -356,7 +361,7 @@ function MenuItemsTab() {
                   Primary
                 </button>
                 <button
-                  type="button"
+                type="button"
                   onClick={() => setEditing({ ...editing, isPrimary: false })}
                   className={`flex-1 px-3 py-2 rounded-xl text-xs font-bold border transition ${
                     !editing.isPrimary
@@ -370,6 +375,7 @@ function MenuItemsTab() {
             </div>
           </div>
           <button
+          type="button"
             onClick={() => void saveItem()}
             disabled={saving}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-xs font-bold transition"
@@ -575,6 +581,7 @@ function MealDaysTab() {
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <span className="flex-1">{daysRes.error}</span>
           <button
+          type="button"
             onClick={() => void daysRes.refresh()}
             className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-rose-500/20 hover:bg-rose-500/30"
           >
@@ -644,8 +651,8 @@ function MealDaysTab() {
                 const on = draft.items.includes(it.id);
                 return (
                   <button
-                    key={it.id}
                     type="button"
+                    key={it.id}
                     onClick={() => toggleItem(it.id)}
                     className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold transition ${
                       on
@@ -670,6 +677,7 @@ function MealDaysTab() {
         </div>
 
         <button
+        type="button"
           onClick={() => void createDay()}
           disabled={creating}
           className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-xs font-bold transition"
@@ -685,6 +693,7 @@ function MealDaysTab() {
         subtitle={String(sortedDays.length)}
         action={
           <button
+          type="button"
             onClick={() => void daysRes.refresh()}
             className="text-slate-500 hover:text-white"
             aria-label="Refresh"
@@ -736,6 +745,7 @@ function MealDaysTab() {
                     <td className="py-2.5 pl-2">
                       <div className="flex items-center justify-end gap-1.5">
                         <button
+                        type="button"
                           onClick={() => startEditDay(d)}
                           className="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition"
                           aria-label="Edit"
@@ -743,6 +753,7 @@ function MealDaysTab() {
                           <Pencil className="w-3 h-3" />
                         </button>
                         <button
+                        type="button"
                           onClick={() => setCancelDayId(d.id)}
                           className="w-7 h-7 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 flex items-center justify-center transition"
                           aria-label="Cancel day"
@@ -765,6 +776,7 @@ function MealDaysTab() {
           title={`Edit meal day — ${fmtDate(editingDraft.mealDate)}`}
           action={
             <button onClick={() => { setEditingDay(null); setEditingDraft(null); }} className="text-slate-500 hover:text-white">
+            type="button"
               <X className="w-4 h-4" />
             </button>
           }
@@ -822,9 +834,9 @@ function MealDaysTab() {
                   const on = editingDraft.items.includes(it.id);
                   return (
                     <button
-                      key={it.id}
-                      type="button"
-                      onClick={() => toggleEditItem(it.id)}
+                        key={it.id}
+                        type="button"
+                        onClick={() => toggleEditItem(it.id)}
                       className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold transition ${
                         on
                           ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
@@ -840,6 +852,7 @@ function MealDaysTab() {
             )}
           </div>
           <button
+          type="button"
             onClick={() => void saveEditDay()}
             disabled={creating}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-xs font-bold transition"
@@ -961,6 +974,7 @@ function AnalyticsTab() {
         subtitle="Last 30 meal days — declared vs confirmed vs no-show"
         action={
           <button
+          type="button"
             onClick={() => void loadAnalytics()}
             disabled={loading}
             className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-[11px] font-bold transition disabled:opacity-50"
@@ -1079,6 +1093,7 @@ function AdminMessInner() {
       <div className="flex gap-1 rounded-xl border border-slate-800 bg-[#0d1220] p-1 overflow-x-auto">
         {tabs.map((t) => (
           <button
+          type="button"
             key={t.id}
             onClick={() => setTab(t.id)}
             className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg text-[11px] font-bold whitespace-nowrap transition ${

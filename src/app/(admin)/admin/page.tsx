@@ -135,7 +135,7 @@ function LockdownDialog() {
                     </div>
                   </div>
                   <button
-          type="button" onClick={() => setOpen(false)} className="p-1.5 sm:p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors">
+                    type="button" onClick={() => setOpen(false)} className="p-1.5 sm:p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors">
                     <X className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
                   </button>
                 </div>
