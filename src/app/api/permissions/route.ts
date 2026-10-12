@@ -126,7 +126,7 @@ async function handleGet(req: NextRequest, context: any) {
           student_details(roll, year, section, hostel_block, room_number, gender)
         )
       `, { count: "exact" })
-      .eq("requester_user_id", userId)
+      .eq("student_user_id", userId)
       .order("created_at", { ascending: false })
       .limit(200);
 

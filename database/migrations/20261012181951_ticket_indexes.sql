@@ -22,11 +22,16 @@ CREATE INDEX IF NOT EXISTS idx_permissions_sla_pending
   WHERE status = 'PENDING' AND sla_deadline IS NOT NULL;
 
 -- 2. KPI rollup view ------------------------------------------------------
--- Uses the permission_requests table with requester_user_id as the
--- requester FKey column.
+-- Adaptive: at this migration's timestamp the table is permission_requests
+-- with student_user_id as the requester column. The later reconciliation
+-- migration (20261026000001) renames student_user_id -> requester_user_id
+-- and renames the table to permissions; it also creates a backward-compat
+-- VIEW permission_requests AS SELECT *, requester_user_id AS student_user_id.
+-- So we use student_user_id here — it resolves correctly both before and
+-- after the reconciliation.
 CREATE OR REPLACE VIEW public.v_my_ticket_counts AS
 SELECT
-  p.requester_user_id                                    AS user_id,
+  p.student_user_id                                    AS user_id,
   COUNT(*) FILTER (WHERE p.status = 'PENDING')           AS pending,
   COUNT(*) FILTER (WHERE p.status = 'APPROVED')          AS approved,
   COUNT(*) FILTER (WHERE p.status = 'REJECTED')          AS rejected,
@@ -34,7 +39,7 @@ SELECT
   COUNT(*) FILTER (WHERE p.status = 'CANCELLED')         AS cancelled,
   COUNT(*)                                               AS total
 FROM public.permission_requests p
-GROUP BY p.requester_user_id;
+GROUP BY p.student_user_id;
 
 COMMENT ON VIEW public.v_my_ticket_counts
   IS 'Per-user rollup of ticket states; drives the My Tickets KPI strip '
