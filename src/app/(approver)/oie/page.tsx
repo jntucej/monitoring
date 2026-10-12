@@ -62,6 +62,22 @@ interface PermissionsResponse {
   total?: number;
 }
 
+/* ── response shapes (mirror /api/notifications) ── */
+
+interface NotificationRow {
+  id: string;
+  title?: string;
+  body?: string;
+  type?: string;
+  created_at?: string;
+}
+
+interface NotificationsResponse {
+  success: boolean;
+  data: NotificationRow[];
+  total?: number;
+}
+
 /* ── response shapes (mirror /api/occupancy/presence-matrix) ── */
 
 interface PresenceMatrixData {
@@ -251,10 +267,23 @@ function OieDashboardInner() {
     ttlMs: 30_000,
   });
 
+  // Panel 3 data source: /api/notifications is OIE-reachable when the role is
+  // whitelisted (verified live: 200). If it ever returns 403 at this tier,
+  // the panel degrades to a clean "no dedicated activity log at this tier"
+  // empty-state — no /api/admin/* audit stream is ever fetched.
+  const {
+    data: notifications,
+    loading: notificationsLoading,
+    error: notificationsError,
+    refresh: refreshNotifications,
+  } = useApiResource<NotificationsResponse>("/api/notifications", {
+    ttlMs: 30_000,
+  });
+
   const refreshAll = useCallback(async () => {
     clearCache();
-    await Promise.all([refreshQueue(), refreshPresence()]);
-  }, [refreshQueue, refreshPresence]);
+    await Promise.all([refreshQueue(), refreshPresence(), refreshNotifications()]);
+  }, [refreshQueue, refreshPresence, refreshNotifications]);
 
   usePolling(refreshAll, { intervalMs: 30_000, enabled: !!user });
 
@@ -391,10 +420,38 @@ function OieDashboardInner() {
             <ScrollText className="w-4 h-4 text-slate-400 shrink-0" />
             <span className="text-sm font-semibold text-white truncate">Recent OIE Activity</span>
           </div>
-          <EmptyState
-            restricted
-            message="No dedicated activity-log source is exposed at this tier. Audit and telemetry streams are admin-scoped; OIE operational activity is visible through the assigned queue above."
-          />
+          {notificationsLoading && !notifications ? (
+            <div className="p-4 flex items-center gap-2 text-sm text-slate-500 min-w-0">
+              <Loader2 className="w-4 h-4 animate-spin shrink-0" /> Loading activity…
+            </div>
+          ) : notificationsError || !notifications?.data || notifications.data.length === 0 ? (
+            <EmptyState
+              restricted
+              message={
+                notificationsError
+                  ? "No dedicated activity-log source is available at this tier. Audit and telemetry streams are admin-scoped; OIE operational activity is visible through the assigned queue above."
+                  : "No activity entries for this desk yet. OIE operational activity is visible through the assigned queue above."
+              }
+            />
+          ) : (
+            <ul className="divide-y divide-slate-800/60 min-w-0">
+              {notifications.data.slice(0, 10).map((n) => (
+                <li key={n.id} className="px-4 py-3 text-sm min-w-0">
+                  <div className="flex items-center justify-between gap-2 min-w-0">
+                    <span className="text-slate-300 truncate min-w-0">
+                      {n.title || n.type || "Notification"}
+                    </span>
+                    {n.created_at && (
+                      <span className="text-xs text-slate-500 whitespace-nowrap shrink-0">
+                        {new Date(n.created_at).toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                  {n.body && <p className="mt-1 text-xs text-slate-500 min-w-0">{n.body}</p>}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </WidgetBoundary>
 

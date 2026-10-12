@@ -23,7 +23,436 @@ import {
   UserCheck,
   Inbox,
   Siren,
+  ClipboardCheck,
+  BarChart3,
+  FileText,
+  ScrollText,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
+
+/* ── types for new panels ── */
+
+interface StaffAttendanceResp {
+  summary?: {
+    totalStaff: number;
+    presentToday: number;
+    absentToday: number;
+    onLeave: number;
+  };
+  data?: Array<{
+    name: string;
+    role: string;
+    department?: string;
+    present: boolean;
+  }>;
+}
+
+interface AuditRecord {
+  id: string;
+  action: string;
+  user?: { name: string };
+  userId?: string;
+  details?: string;
+  timestamp: string;
+}
+
+interface DepartmentRow {
+  code: string;
+  name: string;
+  hod?: string;
+  staffCount?: number;
+}
+
+/* ── Institutional Attendance panel ── */
+
+function AttendancePanel({
+  data,
+  loading,
+  error,
+}: {
+  data: StaffAttendanceResp | null;
+  loading: boolean;
+  error: string | null;
+}) {
+  const s = data?.summary;
+  const total = s?.totalStaff ?? 0;
+  const present = s?.presentToday ?? 0;
+  const pct = total > 0 ? Math.round((present / total) * 100) : 0;
+
+  return (
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
+      <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
+        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+        <span className="text-xs font-semibold uppercase tracking-wide">
+          Institutional Attendance
+        </span>
+      </div>
+      {loading && !data ? (
+        <div className="animate-pulse space-y-2">
+          <div className="h-4 w-1/3 bg-[var(--bg-elevated)] rounded" />
+          <div className="h-4 w-1/2 bg-[var(--bg-elevated)] rounded" />
+        </div>
+      ) : error ? (
+        <p className="text-xs text-amber-300">{error}</p>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div>
+            <p className="text-2xl font-bold text-emerald-400">{present}</p>
+            <p className="text-xs text-[var(--text-muted)]">Present</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-rose-400">{s?.absentToday ?? 0}</p>
+            <p className="text-xs text-[var(--text-muted)]">Absent</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-amber-400">{s?.onLeave ?? 0}</p>
+            <p className="text-xs text-[var(--text-muted)]">On Leave</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-[var(--text-primary)]">{pct}%</p>
+            <p className="text-xs text-[var(--text-muted)]">Attendance Rate</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Gate Activity Overview panel (reuses matrix data) ── */
+
+function GateActivityPanel({
+  matrix,
+  loading,
+  error,
+}: {
+  matrix: {
+    gates?: Array<{ id: string; name?: string; code?: string }>;
+    roles?: string[];
+    matrix?: Record<string, Record<string, number>>;
+  } | null;
+  loading: boolean;
+  error: string | null;
+}) {
+  const gates = matrix?.gates ?? [];
+  const gmatrix = matrix?.matrix ?? {};
+  const roles = matrix?.roles ?? [];
+
+  const gateTotals = useMemo(() => {
+    return gates.map((g) => {
+      const roleCounts = roles.map((r) => ({
+        role: r,
+        count: gmatrix[g.id]?.[r] ?? 0,
+      }));
+      const total = roleCounts.reduce((a, b) => a + b.count, 0);
+      return { ...g, total, roleCounts };
+    });
+  }, [gates, roles, gmatrix]);
+
+  return (
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
+      <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
+        <MapPin className="w-4 h-4 text-sky-400" />
+        <span className="text-xs font-semibold uppercase tracking-wide">
+          Gate Activity Overview
+        </span>
+      </div>
+      {loading && !matrix ? (
+        <div className="animate-pulse space-y-2">
+          <div className="h-4 w-1/3 bg-[var(--bg-elevated)] rounded" />
+        </div>
+      ) : error ? (
+        <p className="text-xs text-amber-300">{error}</p>
+      ) : gateTotals.length === 0 ? (
+        <p className="text-xs text-[var(--text-muted)]">No gates registered.</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-full">
+            <thead>
+              <tr className="text-left text-[var(--text-muted)] border-b border-[var(--border)]">
+                <th className="py-2 pr-4 font-medium">Gate</th>
+                <th className="py-2 pr-4 font-medium">On Campus</th>
+                <th className="py-2 font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[var(--border)]">
+              {gateTotals.map((g) => (
+                <tr key={g.id}>
+                  <td className="py-2 pr-4">
+                    <span className="text-[var(--text-primary)] font-medium">{g.name || g.code || g.id.slice(0, 8)}</span>
+                  </td>
+                  <td className="py-2 pr-4">
+                    <span className={`font-bold ${g.total > 0 ? "text-emerald-400" : "text-[var(--text-muted)]"}`}>
+                      {g.total}
+                    </span>
+                  </td>
+                  <td className="py-2">
+                    <span
+                      className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${
+                        g.total > 0
+                          ? "bg-emerald-500/15 text-emerald-300"
+                          : "bg-slate-500/15 text-slate-400"
+                      }`}
+                    >
+                      {g.total > 0 ? "Active" : "Clear"}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Department Performance panel ── */
+
+function DepartmentPerformancePanel({
+  departments,
+  students,
+  loading,
+  error,
+}: {
+  departments: DepartmentRow[] | null;
+  students: Person[] | null;
+  loading: boolean;
+  error: string | null;
+}) {
+  const deptMap = useMemo(() => {
+    const m = new Map<string, { code: string; name: string; count: number }>();
+    (departments ?? []).forEach((d) => {
+      const key = d.code || d.name;
+      m.set(key, { code: d.code, name: d.name, count: 0 });
+    });
+    (students ?? []).forEach((s) => {
+      const dep = (s as Person & { department_id?: string }).department_id || s.department || "Unassigned";
+      const key = dep;
+      if (!m.has(key)) m.set(key, { code: key, name: key, count: 0 });
+      m.get(key)!.count++;
+    });
+    return m;
+  }, [departments, students]);
+
+  const rows = [...deptMap.entries()]
+    .sort((a, b) => b[1].count - a[1].count)
+    .map(([key, d]) => ({ key, ...d }));
+
+  return (
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
+      <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
+        <Building2 className="w-4 h-4 text-violet-400" />
+        <span className="text-xs font-semibold uppercase tracking-wide">
+          Department Performance
+        </span>
+      </div>
+      {loading && !departments && !students ? (
+        <div className="animate-pulse space-y-2">
+          <div className="h-4 w-1/3 bg-[var(--bg-elevated)] rounded" />
+        </div>
+      ) : error ? (
+        <p className="text-xs text-amber-300">{error}</p>
+      ) : rows.length === 0 ? (
+        <p className="text-xs text-[var(--text-muted)]">No department data available.</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-full">
+            <thead>
+              <tr className="text-left text-[var(--text-muted)] border-b border-[var(--border)]">
+                <th className="py-2 pr-4 font-medium">Department</th>
+                <th className="py-2 font-medium">Active Students</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[var(--border)]">
+              {rows.map((r) => (
+                <tr key={r.key}>
+                  <td className="py-2 pr-4">
+                    <span className="text-[var(--text-primary)]">{r.name || r.key}</span>
+                  </td>
+                  <td className="py-2">
+                    <span className="font-bold text-[var(--text-primary)]">{r.count}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Incident Oversight panel ── */
+
+function IncidentOversightPanel({
+  alerts,
+  loading,
+  error,
+}: {
+  alerts: Alert[] | null;
+  loading: boolean;
+  error: string | null;
+}) {
+  const top = useMemo(() => {
+    if (!alerts) return [];
+    const sev = (a: Alert) => (a.severity === "critical" ? 0 : a.severity === "high" ? 1 : 2);
+    return [...alerts].sort((a, b) => sev(a) - sev(b)).slice(0, 5);
+  }, [alerts]);
+
+  const sevColor = (s?: string) =>
+    s === "critical" ? "text-rose-400" : s === "high" ? "text-amber-400" : "text-sky-400";
+
+  return (
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
+      <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
+        <Siren className="w-4 h-4 text-rose-400" />
+        <span className="text-xs font-semibold uppercase tracking-wide">
+          Incident Oversight
+        </span>
+      </div>
+      {loading && !alerts ? (
+        <div className="animate-pulse space-y-2">
+          <div className="h-4 w-1/2 bg-[var(--bg-elevated)] rounded" />
+        </div>
+      ) : error ? (
+        <p className="text-xs text-amber-300">{error}</p>
+      ) : top.length === 0 ? (
+        <div className="flex items-center gap-2 text-emerald-400 text-xs">
+          <XCircle className="w-3.5 h-3.5" />
+          No open incidents. All clear.
+        </div>
+      ) : (
+        <ul className="space-y-2.5 min-w-0">
+          {top.map((a) => (
+            <li key={a.id || a.title} className="min-w-0">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className={`text-xs font-bold ${sevColor(a.severity)} shrink-0`}>
+                  {a.severity?.toUpperCase() || "INFO"}
+                </span>
+                <span className="text-xs text-[var(--text-primary)] truncate">{a.title}</span>
+              </div>
+              {a.message && (
+                <p className="text-xs text-[var(--text-muted)] mt-0.5 line-clamp-2 min-w-0">{a.message}</p>
+              )}
+              {a.timestamp && (
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">{fmtTime(a.timestamp)}</p>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/* ── Institutional Reports panel ── */
+
+function InstitutionalReportsPanel({
+  attendance,
+  students,
+  loading,
+}: {
+  attendance: StaffAttendanceResp | null;
+  students: Person[] | null;
+  loading: boolean;
+}) {
+  const s = attendance?.summary;
+  const studentCount = students?.length ?? 0;
+  const reports = [
+    {
+      label: "Staff Attendance Summary",
+      value: s ? `${s.presentToday}/${s.totalStaff} present` : "—",
+      sub: `${s?.onLeave ?? 0} on leave`,
+    },
+    {
+      label: "Active Student Population",
+      value: String(studentCount),
+      sub: "On-campus roster",
+    },
+    {
+      label: "Detailed Analytics",
+      value: "Restricted",
+      sub: "Available to admin/sysadmin only",
+    },
+  ];
+
+  return (
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
+      <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
+        <FileText className="w-4 h-4 text-sky-400" />
+        <span className="text-xs font-semibold uppercase tracking-wide">
+          Institutional Reports
+        </span>
+      </div>
+      {loading ? (
+        <div className="animate-pulse space-y-2">
+          <div className="h-4 w-1/2 bg-[var(--bg-elevated)] rounded" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {reports.map((r) => (
+            <div key={r.label} className="rounded-xl bg-[var(--bg-elevated)] p-3 min-w-0">
+              <p className="text-xs text-[var(--text-muted)]">{r.label}</p>
+              <p className="text-lg font-bold text-[var(--text-primary)] mt-0.5">{r.value}</p>
+              <p className="text-xs text-[var(--text-muted)]">{r.sub}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Audit & Compliance panel ── */
+
+function AuditCompliancePanel({
+  records,
+  loading,
+  error,
+}: {
+  records: AuditRecord[] | null;
+  loading: boolean;
+  error: string | null;
+}) {
+  const recent = (records ?? []).slice(0, 6);
+  return (
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
+      <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
+        <ScrollText className="w-4 h-4 text-violet-400" />
+        <span className="text-xs font-semibold uppercase tracking-wide">
+          Audit & Compliance
+        </span>
+      </div>
+      {loading && !records ? (
+        <div className="animate-pulse space-y-2">
+          <div className="h-4 w-1/3 bg-[var(--bg-elevated)] rounded" />
+        </div>
+      ) : error ? (
+        <p className="text-xs text-amber-300">{error}</p>
+      ) : recent.length === 0 ? (
+        <p className="text-xs text-[var(--text-muted)]">No recent audit activity.</p>
+      ) : (
+        <ul className="space-y-2 min-w-0">
+          {recent.map((r) => (
+            <li key={r.id} className="min-w-0">
+              <div className="flex items-center gap-2 min-w-0">
+                <ClipboardCheck className="w-3 h-3 text-emerald-400 shrink-0" />
+                <span className="text-xs text-[var(--text-primary)] font-medium truncate">
+                  {r.action}
+                </span>
+              </div>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5 pl-5 min-w-0">
+                {r.user?.name || "System"} · {fmtDate(r.timestamp)} {fmtTime(r.timestamp)}
+                {r.details ? ` · ${r.details}` : ""}
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 type Resp = { success: boolean; data?: unknown; error?: { message?: string } };
 
@@ -321,14 +750,25 @@ function PrincipalDashboardInner() {
   } | null>(null);
   const [matrixError, setMatrixError] = useState<string | null>(null);
 
+  /* ── institution-level panel state ── */
+  const [attendance, setAttendance] = useState<StaffAttendanceResp | null>(null);
+  const [attendanceError, setAttendanceError] = useState<string | null>(null);
+  const [departments, setDepartments] = useState<DepartmentRow[] | null>(null);
+  const [departmentsError, setDepartmentsError] = useState<string | null>(null);
+  const [auditRecords, setAuditRecords] = useState<AuditRecord[] | null>(null);
+  const [auditError, setAuditError] = useState<string | null>(null);
+
   const refresh = useCallback(async () => {
     setRefreshing(true);
     clearCache();
-    const [passesR, studentsR, alertsR, matrixR] = await Promise.all([
+    const [passesR, studentsR, alertsR, matrixR, attR, deptR, auditR] = await Promise.all([
       fetchJson("/api/passes?status=PENDING&limit=100"),
       fetchJson("/api/students?scope=active"),
       fetchJson("/api/alerts?resolved=false"),
       fetchJson("/api/occupancy/presence-matrix"),
+      fetchJson("/api/staff/attendance"),
+      fetchJson("/api/departments"),
+      fetchJson("/api/principal/audit"),
     ]);
     setPasses(passesR.success ? ((passesR.data as GatePass[]) ?? []) : null);
     setPassesError(passesR.success ? null : passesR.error?.message ?? "Unknown error");
@@ -337,6 +777,12 @@ function PrincipalDashboardInner() {
     setAlertsError(alertsR.success ? null : alertsR.error?.message ?? "Unknown error");
     setMatrix(matrixR.success ? (matrixR.data ?? null) : null);
     setMatrixError(matrixR.success ? null : matrixR.error?.message ?? "Unknown error");
+    setAttendance(attR.success ? ((attR.data as StaffAttendanceResp) ?? null) : null);
+    setAttendanceError(attR.success ? null : attR.error?.message ?? "Unknown error");
+    setDepartments(deptR.success ? ((deptR.data as DepartmentRow[]) ?? []) : null);
+    setDepartmentsError(deptR.success ? null : deptR.error?.message ?? "Unknown error");
+    setAuditRecords(auditR.success ? ((auditR.data as AuditRecord[]) ?? []) : null);
+    setAuditError(auditR.success ? null : auditR.error?.message ?? "Unknown error");
     setLastRefresh(new Date());
     setRefreshing(false);
   }, []);
@@ -440,12 +886,62 @@ function PrincipalDashboardInner() {
         ))}
       </div>
 
-      {/* Pending permission approvals — principal is final approver for exams */}
-      <WidgetBoundary title="Pending Approvals">
+      {/* ── Institution-level panels ── */}
+
+      {/* 2. Institutional Attendance */}
+      <WidgetBoundary title="Institutional Attendance">
+        <AttendancePanel
+          data={attendance}
+          loading={attendance === null && !attendanceError}
+          error={attendanceError}
+        />
+      </WidgetBoundary>
+
+      {/* 3. Gate Activity Overview (reuses matrix data) */}
+      <WidgetBoundary title="Gate Activity">
+        <GateActivityPanel
+          matrix={matrix}
+          loading={matrix === null && !matrixError}
+          error={matrixError}
+        />
+      </WidgetBoundary>
+
+      {/* 4. Department Performance */}
+      <WidgetBoundary title="Department Performance">
+        <DepartmentPerformancePanel
+          departments={departments}
+          students={students}
+          loading={departments === null && students === null}
+          error={departmentsError}
+        />
+      </WidgetBoundary>
+
+      {/* 5. Incident Oversight */}
+      <WidgetBoundary title="Incident Oversight">
+        <IncidentOversightPanel
+          alerts={alerts}
+          loading={alerts === null && !alertsError}
+          error={alertsError}
+        />
+      </WidgetBoundary>
+
+      {/* 6. Institutional Reports */}
+      <WidgetBoundary title="Institutional Reports">
+        <InstitutionalReportsPanel
+          attendance={attendance}
+          students={students}
+          loading={attendance === null && students === null}
+        />
+      </WidgetBoundary>
+
+      {/* 7. Approvals and Decisions — consolidated single PermissionList */}
+      <WidgetBoundary title="Approvals and Decisions">
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5">
           <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
             <Users className="w-4 h-4" />
-            <span className="text-xs font-semibold uppercase tracking-wide">Pending Approvals</span>
+            <span className="text-xs font-semibold uppercase tracking-wide">
+              Approvals &amp; Decisions — Principal Stage
+            </span>
           </div>
           <PermissionList
             title="Pending Approvals"
@@ -455,6 +951,15 @@ function PrincipalDashboardInner() {
             allowForward={false}
           />
         </div>
+      </WidgetBoundary>
+
+      {/* 8. Audit and Compliance */}
+      <WidgetBoundary title="Audit and Compliance">
+        <AuditCompliancePanel
+          records={auditRecords}
+          loading={auditRecords === null && !auditError}
+          error={auditError}
+        />
       </WidgetBoundary>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
