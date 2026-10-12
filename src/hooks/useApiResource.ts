@@ -61,6 +61,9 @@ export function useApiResource<T>(
 
   const refresh = useCallback(async () => {
     if (!url || !enabled) return;
+    // Clear the entry first so a *failing* cached fetch (or a stale cache)
+    // can't mask a genuine re-fetch on Retry.
+    clearCache(url);
     setLoading(true);
     setError(null);
     try {

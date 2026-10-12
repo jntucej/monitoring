@@ -269,9 +269,9 @@ function SupervisorDashboardInner() {
   });
 
   return (
-    <div className="space-y-6 pb-12">
-      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-3xl p-6 sm:p-8 shadow-xl">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+    <div className="space-y-5 sm:space-y-6 pb-8 sm:pb-12">
+      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-3xl p-5 sm:p-8 shadow-xl">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-2xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center shrink-0">
               <ShieldCheck className="w-7 h-7 text-indigo-400" />
@@ -289,7 +289,7 @@ function SupervisorDashboardInner() {
               <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-1">{user?.name || "Hostel Warden"} • Real-time hostel curfew oversight & outpass desk.</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap shrink-0">
             <button
               onClick={handleToggleLockdown}
               disabled={lockdownBusy}
@@ -335,7 +335,7 @@ function SupervisorDashboardInner() {
       </div>
 
       {isLockdown && (
-        <div className="p-4 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-300 font-bold text-sm flex items-center justify-between shadow-lg shadow-rose-500/10">
+        <div className="p-4 sm:p-5 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-300 font-bold text-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg shadow-rose-500/10">
           <div className="flex items-center gap-3">
             <Lock className="w-6 h-6 text-rose-400 shrink-0 animate-bounce" />
             <div>
@@ -357,30 +357,32 @@ function SupervisorDashboardInner() {
       )}
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <div className="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)]">
-          <p className="text-[11px] text-[var(--text-muted)] flex items-center gap-1"><Users className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400" /> Total Wards</p>
-          <p className="text-2xl font-black text-[var(--text-primary)]">{stats.totalWards}</p>
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4">
+        <div className="p-4 sm:p-5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)] flex flex-col gap-1.5">
+          <p className="text-[11px] sm:text-xs text-[var(--text-muted)] flex items-center gap-1.5"><Users className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400" /> Total Wards</p>
+          <p className="text-2xl sm:text-3xl font-black text-[var(--text-primary)]">{stats.totalWards}</p>
         </div>
-        <div className="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)]">
-          <p className="text-[11px] text-[var(--text-muted)] flex items-center gap-1"><UserCheck className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" /> Inside Hostel</p>
-          <p className="text-2xl font-black text-emerald-400">{stats.onCampus}</p>
+        <div className="p-4 sm:p-5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)] flex flex-col gap-1.5">
+          <p className="text-[11px] sm:text-xs text-[var(--text-muted)] flex items-center gap-1.5"><UserCheck className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" /> Inside Hostel</p>
+          <p className="text-2xl sm:text-3xl font-black text-emerald-400">{stats.onCampus}</p>
         </div>
-        <div className="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)]">
-          <p className="text-[11px] text-[var(--text-muted)] flex items-center gap-1"><DoorOpen className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" /> Out on Pass</p>
-          <p className="text-2xl font-black text-amber-400">{stats.offCampus}</p>
+        <div className="p-4 sm:p-5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)] flex flex-col gap-1.5">
+          <p className="text-[11px] sm:text-xs text-[var(--text-muted)] flex items-center gap-1.5"><DoorOpen className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" /> Out on Pass</p>
+          <p className="text-2xl sm:text-3xl font-black text-amber-400">{stats.offCampus}</p>
         </div>
-        <div className="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)]">
-          <p className="text-[11px] text-[var(--text-muted)] flex items-center gap-1"><CheckSquare className="w-4 h-4 sm:w-5 sm:h-5 text-sky-400" /> Pending Passes</p>
-          <p className="text-2xl font-black text-sky-400">{stats.pendingPasses}</p>
+        <div className="p-4 sm:p-5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)] flex flex-col gap-1.5">
+          <p className="text-[11px] sm:text-xs text-[var(--text-muted)] flex items-center gap-1.5"><CheckSquare className="w-4 h-4 sm:w-5 sm:h-5 text-sky-400" /> Pending Passes</p>
+          <p className="text-2xl sm:text-3xl font-black text-sky-400">{stats.pendingPasses}</p>
         </div>
-        <div className="col-span-2 md:col-span-1 p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)]">
-          <p className="text-[11px] text-[var(--text-muted)] flex items-center gap-1"><ShieldAlert className="w-4 h-4 sm:w-5 sm:h-5 text-rose-400" /> Curfew Alerts</p>
-          <p className="text-2xl font-black text-rose-400">{stats.activeAlerts}</p>
+        <div className="col-span-2 md:col-span-1 p-4 sm:p-5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)] flex flex-col gap-1.5">
+          <p className="text-[11px] sm:text-xs text-[var(--text-muted)] flex items-center gap-1.5"><ShieldAlert className="w-4 h-4 sm:w-5 sm:h-5 text-rose-400" /> Curfew Alerts</p>
+          <p className="text-2xl sm:text-3xl font-black text-rose-400">{stats.activeAlerts}</p>
         </div>
+      </div>
+
       {/* Overview Tab */}
       {activeTab === "overview" && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
@@ -403,7 +405,7 @@ function SupervisorDashboardInner() {
                 </div>
               ) : (
                 passes.slice(0, 5).map((p) => (
-                  <div key={p.id} className="p-4 space-y-3 hover:bg-[var(--bg-elevated)]/40 transition-colors">
+                  <div key={p.id} className="p-4 sm:p-5 space-y-3 hover:bg-[var(--bg-elevated)]/40 transition-colors">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div>
                         <div className="flex items-center gap-2">
@@ -436,7 +438,7 @@ function SupervisorDashboardInner() {
             <h2 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
               <ShieldAlert className="w-5 h-5 text-rose-400" /> <span className="sm:hidden">🔔</span><span className="hidden sm:inline">🔔 Curfew Radar ({alerts.length})</span>
             </h2>
-            <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 space-y-3">
+            <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 sm:p-5 space-y-3">
               {alerts.length === 0 ? (
                 <div className="p-6 text-center text-xs text-[var(--text-muted)]">
                   <ShieldCheck className="w-8 h-8 text-emerald-400 mx-auto mb-2 opacity-50" />
@@ -462,7 +464,7 @@ function SupervisorDashboardInner() {
 
       {/* Approvals Tab */}
       {activeTab === "approvals" && (
-        <div className="space-y-4">
+        <div className="space-y-4 sm:space-y-5">
 
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -479,7 +481,7 @@ function SupervisorDashboardInner() {
           </div>
 
           {filteredPasses.length > 0 && (
-            <div className="p-3 bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl flex items-center justify-between text-xs">
+            <div className="p-3 sm:p-4 bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-2 text-xs">
               <div className="flex items-center gap-2 font-mono text-[var(--text-muted)]">
                 <button onClick={() => setSelectedPasses(selectedPasses.length === filteredPasses.length ? [] : filteredPasses.map((p) => p.id))} className="px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] font-semibold">
                   {selectedPasses.length === filteredPasses.length ? "Deselect All" : "Select All"}
@@ -495,7 +497,7 @@ function SupervisorDashboardInner() {
             </div>
           )}
 
-          <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 text-xs divide-y divide-[var(--border)]">
+          <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 sm:p-5 text-xs divide-y divide-[var(--border)]">
             {filteredPasses.length === 0 ? (
               <p className="p-8 text-center text-[var(--text-muted)]">No pending outpasses match filter criteria.</p>
             ) : (
@@ -503,7 +505,7 @@ function SupervisorDashboardInner() {
                 const parentPhone = (p as any).parentPhone;
                 const isVerified = verifiedParents[p.id] || false;
                 return (
-                  <div key={p.id} className="py-4 space-y-3">
+                  <div key={p.id} className="py-4 sm:py-5 space-y-3">
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-start gap-3">
                         <input type="checkbox" checked={selectedPasses.includes(p.id)} onChange={() => togglePassSelection(p.id)} className="mt-1 accent-indigo-500 rounded cursor-pointer" />
@@ -541,7 +543,7 @@ function SupervisorDashboardInner() {
 
       {/* Curfew Roster Tab */}
       {activeTab === "curfew" && (
-        <div className="space-y-4">
+        <div className="space-y-4 sm:space-y-5">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <h2 className="text-lg font-bold text-[var(--text-primary)]">
               <span className="sm:hidden">👥</span><span className="hidden sm:inline">👥 Hostel Wards</span>
@@ -596,7 +598,7 @@ function SupervisorDashboardInner() {
                   ))}
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-4 md:grid-cols-6 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-4 md:grid-cols-6 gap-2.5 sm:gap-3">
                 {Array.from({ length: 12 }, (_, i) => {
                   const roomNum = selectedFloor * 100 + i + 1;
                   const matchStudent = students[i % (students.length || 1)];
@@ -619,9 +621,9 @@ function SupervisorDashboardInner() {
 
       {/* Alerts Tab */}
       {activeTab === "alerts" && (
-        <div className="space-y-4">
+        <div className="space-y-4 sm:space-y-5">
           <h2 className="text-lg font-bold text-[var(--text-primary)]">Security & Curfew Radar</h2>
-          <div className="space-y-3">
+          <div className="space-y-3 sm:space-y-4">
             {alerts.length === 0 ? (
               <div className="p-8 text-center text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] rounded-2xl border border-[var(--border)]">No active curfew alerts.</div>
             ) : (
@@ -640,10 +642,7 @@ function SupervisorDashboardInner() {
       )}
 
       {/* Contact the developer (all roles) */}
-      <div className="space-y-4">
-        <DevContactStrip />
-      </div>
-      </div>
+      <DevContactStrip />
     </div>
   );
 }

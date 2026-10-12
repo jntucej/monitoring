@@ -28,8 +28,8 @@ async function handleGet(req: NextRequest) {
       );
     }
 
-    // Authorization: enforce ownership when caller is not an admin
-    const isAdmin = ["admin", "sysadmin"].includes(authRole || "");
+    // Authorization: enforce *** when caller is not an admin
+    const isAdmin = ["admin", "sysadmin", "principal"].includes(authRole || "");
     if (!isAdmin) {
       const { getSupabaseServiceClient } = await import("@/lib/dbClient");
       const service = getSupabaseServiceClient();
@@ -149,7 +149,7 @@ async function handlePut(req: NextRequest) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "parent", "student", "warden"] }),
+  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "parent", "student", "warden", "principal"] }),
   { keyPrefix: "passes_get", maxRequests: 100 }
 );
 

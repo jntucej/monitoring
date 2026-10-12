@@ -91,6 +91,6 @@ async function handleGet(_req: NextRequest) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "operator", "warden", "supervisor"] }),
+  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "operator", "warden", "supervisor", "principal"] }),
   { keyPrefix: "presence_matrix", maxRequests: 60 }
 );

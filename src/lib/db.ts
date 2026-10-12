@@ -197,6 +197,8 @@ function mUser(r: any): User {
     uniqueId: r.unique_id || undefined,
     // flag_status is not on the User type but we pass it through for API consumers
     ...( r.flag_status !== undefined ? { flagStatus: r.flag_status } : {} ),
+    ...( r.is_kiosk_default !== undefined ? { isKioskDefault: Boolean(r.is_kiosk_default) } : {} ),
+    ...( r.login_identifier !== undefined ? { loginIdentifier: r.login_identifier } : {} ),
   };
 }
 

@@ -6,7 +6,7 @@ import { useUIStore } from "@/stores/uiStore";
 import { getAuthHeaders } from "@/lib/utils";
 import {
   DoorOpen, Plus, Pencil, Power, Trash2, Search, UserCog,
-  Building2, ShieldCheck, X,
+  Building2, ShieldCheck, X, KeyRound, Monitor,
 } from "lucide-react";
 
 interface Gate {
@@ -27,6 +27,17 @@ interface AssignableUser {
   role?: string;
   gateId?: string;
   uniqueId?: string;
+  isKioskDefault?: boolean;
+}
+
+interface KioskOperator {
+  id: string;
+  name?: string;
+  email?: string;
+  role?: string;
+  uniqueId?: string;
+  gateId?: string | null;
+  isKioskDefault?: boolean;
 }
 
 const AUDIENCES = [
@@ -57,6 +68,76 @@ export default function SysAdminGatesPage() {
   const [userQuery, setUserQuery] = useState("");
   const [userResults, setUserResults] = useState<AssignableUser[]>([]);
 
+  // Kiosk default operator panel state
+  const [kioskOperator, setKioskOperator] = useState<KioskOperator | null>(null);
+  const [kioskGate, setKioskGate] = useState<string>("");
+  const [kioskBusy, setKioskBusy] = useState(false);
+
+  const loadKioskOperator = useCallback(async () => {
+    try {
+      const res = await fetch("/api/users", { headers: getAuthHeaders(), cache: "no-store" });
+      const json = await res.json();
+      if (!res.ok || !Array.isArray(json?.data)) return;
+      const operators = json.data.filter(
+        (u: KioskOperator) => u.role === "operator" || u.uniqueId?.toUpperCase() === "OPERATOR"
+      );
+      // Find the explicitly-flagged kiosk default first; fall back to 'OPERATOR'
+      const flagged = operators.find((u: KioskOperator) => u.isKioskDefault);
+      const fallback = operators.find((u: KioskOperator) => u.uniqueId?.toUpperCase() === "OPERATOR");
+      const current: KioskOperator | null = flagged ?? fallback ?? null;
+      setKioskOperator(current);
+      if (current?.gateId) setKioskGate(current.gateId);
+    } catch { /* silent */ }
+  }, []);
+
+  const setKioskDefault = async (userId: string, gateId: string | null) => {
+    setKioskBusy(true);
+    try {
+      const headers = { ...getAuthHeaders(), "Content-Type": "application/json" };
+      const body: Record<string, unknown> = {};
+      // Clear all other flags, set this one
+      body.isKioskDefault = true;
+      if (gateId !== null) body.gateId = gateId;
+      const res = await fetch(`/api/users/${userId}`, { method: "PATCH", headers, body: JSON.stringify(body) });
+      const json = await res.json();
+      if (res.ok && json.success !== false) {
+        addToast({ variant: "success", title: "Updated", message: "Default gate operator saved. The kiosk will now auto-sign in as this operator." });
+        await loadKioskOperator();
+      } else {
+        addToast({ variant: "error", title: "Error", message: json.error?.message || "Failed to update default gate operator." });
+      }
+    } catch {
+      addToast({ variant: "error", title: "Error", message: "Failed to update default gate operator." });
+    } finally {
+      setKioskBusy(false);
+    }
+  };
+
+  const clearKioskDefault = async () => {
+    if (!kioskOperator) return;
+    setKioskBusy(true);
+    try {
+      const headers = { ...getAuthHeaders(), "Content-Type": "application/json" };
+      const res = await fetch(`/api/users/${kioskOperator.id}`, {
+        method: "PATCH",
+        headers,
+        body: JSON.stringify({ isKioskDefault: false }),
+      });
+      const json = await res.json();
+      if (res.ok && json.success !== false) {
+        addToast({ variant: "success", title: "Cleared", message: "Default gate operator designation removed." });
+        setKioskOperator(null);
+        setKioskGate("");
+      } else {
+        addToast({ variant: "error", title: "Error", message: json.error?.message || "Failed to clear designation." });
+      }
+    } catch {
+      addToast({ variant: "error", title: "Error", message: "Failed to clear designation." });
+    } finally {
+      setKioskBusy(false);
+    }
+  };
+
   const loadGates = useCallback(async () => {
     setLoading(true);
     try {
@@ -70,7 +151,7 @@ export default function SysAdminGatesPage() {
     }
   }, [addToast]);
 
-  useEffect(() => { loadGates(); }, [loadGates]);
+  useEffect(() => { loadGates(); loadKioskOperator(); }, [loadGates, loadKioskOperator]);
 
   // --- search users by name/roll/email for the assign picker ---
   const searchUsers = useCallback(async (q: string) => {
@@ -282,6 +363,86 @@ export default function SysAdminGatesPage() {
             </div>
           </div>
         )}
+
+        {/* Default Gate Operator (Kiosk) Panel */}
+        <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <Monitor className="w-4 h-4 text-emerald-400" />
+            <h3 className="text-sm font-bold text-white">Default Gate Operator (Kiosk)</h3>
+            <span className="text-[10px] text-slate-500">auto-sign-in for unattended kiosks</span>
+          </div>
+          <p className="text-xs text-slate-400">
+            The designated operator is used by <code className="text-emerald-300">/api/operator/kiosk-session</code> to mint
+            a short-lived session when the kiosk opens without credentials. Default kiosk PIN is <strong className="text-amber-400">1234</strong> —
+            rotate it after first use via the kiosk PIN reset in the user management panel.
+          </p>
+
+          {kioskOperator ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-900 border border-slate-800">
+                <KeyRound className="w-4 h-4 text-emerald-400 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-bold text-white truncate">
+                    {kioskOperator.name || kioskOperator.uniqueId || kioskOperator.id}
+                    {kioskOperator.uniqueId && <span className="text-slate-500 font-normal ml-2">ID: {kioskOperator.uniqueId}</span>}
+                  </div>
+                  <div className="text-[10px] text-slate-500">
+                    {kioskOperator.isKioskDefault
+                      ? "Explicitly designated as kiosk default"
+                      : "Built-in OPERATOR fallback (no explicit flag set)"}
+                  </div>
+                </div>
+                <button onClick={clearKioskDefault} disabled={kioskBusy}
+                  className="text-[10px] px-2 py-1 rounded bg-slate-800 text-slate-300 hover:bg-slate-700 disabled:opacity-50">
+                  Clear
+                </button>
+              </div>
+
+              <div className="flex items-end gap-3">
+                <div className="flex-1">
+                  <label className="text-[10px] text-slate-400 block mb-1">Kiosk gate (default for auto-session)</label>
+                  <select value={kioskGate} onChange={(e) => setKioskGate(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500">
+                    <option value="">— Operator's assigned gate —</option>
+                    {gates.filter((g) => g.is_active !== false).map((g) => (
+                      <option key={g.id} value={g.id}>{g.name}{g.gate_code ? ` (${g.gate_code})` : ""}</option>
+                    ))}
+                  </select>
+                </div>
+                <button onClick={() => setKioskDefault(kioskOperator.id, kioskGate || null)} disabled={kioskBusy}
+                  className="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-500 disabled:opacity-50 whitespace-nowrap">
+                  {kioskBusy ? "Saving…" : "Save"}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-xs text-slate-500 italic">No kiosk default operator found. Designate one below.</p>
+          )}
+
+          <div className="pt-2 border-t border-slate-800">
+            <label className="text-[10px] text-slate-400 block mb-1.5">Designate operator account</label>
+            <input
+              value={userQuery}
+              onChange={(e) => searchUsers(e.target.value)}
+              placeholder="Search operator name / roll / email…"
+              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500"
+            />
+            {userResults.length > 0 && (
+              <div className="mt-2 border border-slate-800 rounded-lg overflow-hidden divide-y divide-slate-800 max-h-36 overflow-y-auto">
+                {userResults.map((u) => (
+                  <button key={u.id} onClick={() => setKioskDefault(u.id, null)} disabled={kioskBusy}
+                    className="w-full text-left px-3 py-2 text-xs hover:bg-slate-800/60 transition-colors flex items-center justify-between disabled:opacity-50">
+                    <span>
+                      <span className="font-semibold text-white">{u.name || u.email}</span>
+                      <span className="text-slate-500 ml-2">{u.role}{u.uniqueId ? ` · ${u.uniqueId}` : ""}</span>
+                    </span>
+                    <span className="text-emerald-400 font-semibold">Set as default</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </AuthGuard>
   );

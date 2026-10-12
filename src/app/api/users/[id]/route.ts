@@ -71,7 +71,7 @@ async function handlePatch(req: NextRequest) {
     const supabase = getSupabaseServiceClient();
 
     if (body && typeof body === "object") {
-      // 1. Basic profile fields
+      // Basic profile fields
       const profileUpdates: Record<string, any> = {};
       if (body.name !== undefined) profileUpdates.name = body.name;
       if (body.email !== undefined) profileUpdates.email = body.email;
@@ -82,6 +82,60 @@ async function handlePatch(req: NextRequest) {
       if (body.photoUrl !== undefined) profileUpdates.photo_url = body.photoUrl;
       if (body.uniqueId !== undefined) profileUpdates.unique_id = body.uniqueId;
       if (body.loginIdentifier !== undefined) profileUpdates.login_identifier = body.loginIdentifier;
+
+      // Gate assignment (sysadmin/admin only — operators can't reassign themselves)
+      if (isAdmin && body.gateId !== undefined) {
+        const gid = body.gateId;
+        if (typeof gid !== "string" && gid !== null) {
+          return NextResponse.json(
+            { success: false, error: { code: "INVALID_GATE_ID", message: "gateId must be a UUID or null" } },
+            { status: 400 }
+          );
+        }
+        if (gid !== null) {
+          // Validate the gate exists and is active
+          const gateRes = await query<{ id: string; is_active: boolean }>(
+            `SELECT id, is_active FROM public.gates WHERE id = $1`,
+            [gid]
+          );
+          const gate = gateRes.rows[0];
+          if (!gate) {
+            return NextResponse.json(
+              { success: false, error: { code: "GATE_NOT_FOUND", message: `Gate ${gid} does not exist.` } },
+              { status: 404 }
+            );
+          }
+          if (!gate.is_active) {
+            return NextResponse.json(
+              { success: false, error: { code: "GATE_INACTIVE", message: `Gate ${gid} is not active.` } },
+              { status: 400 }
+            );
+          }
+        }
+        profileUpdates.gate_id = gid || null;
+      }
+
+      // Designate kiosk default operator (admin/sysadmin only)
+      if (isAdmin && body.isKioskDefault !== undefined) {
+        if (typeof body.isKioskDefault !== "boolean") {
+          return NextResponse.json(
+            { success: false, error: { code: "INVALID_FLAG", message: "isKioskDefault must be a boolean" } },
+            { status: 400 }
+          );
+        }
+        if (body.isKioskDefault) {
+          // Only operators can be kiosk defaults
+          if (target.role !== "operator") {
+            return NextResponse.json(
+              { success: false, error: { code: "NOT_OPERATOR", message: "Only operator accounts can be designated as kiosk default." } },
+              { status: 400 }
+            );
+          }
+          // Clear the flag from all other users first (single-flag invariant)
+          await supabase.from("users").update({ is_kiosk_default: false }).neq("id", id);
+        }
+        profileUpdates.is_kiosk_default = body.isKioskDefault;
+      }
 
       // Password update
       if (body.password) {
@@ -286,7 +340,7 @@ async function handlePatch(req: NextRequest) {
       await addAudit({
         userId: actorId,
         action: "USER_UPDATED",
-        details: { timestamp: new Date().toISOString(), targetId: id, updates: body, sessions_revoked: credentialsChanged },
+        details: { timestamp: new Date().toISOString(), targetId: id, updates: body, sessions_revoked: credentialsChanged, kiosk_default_changed: body.isKioskDefault !== undefined },
       });
     }
 
