@@ -199,6 +199,12 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
         {
+          groupLabel: "Hostel & Mess",
+          items: [
+            { href: "/admin/mess", label: "Mess Configuration", icon: "UtensilsCrossed", badge: "MESS" },
+          ],
+        },
+        {
           groupLabel: "Institutional Rosters",
           items: [
             { href: "/admin/students", label: "Student Master Roster", icon: "GraduationCap" },
@@ -217,6 +223,12 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
             { href: "/admin/occupancy", label: "Density Heatmap & Digital Twin", icon: "MapPin", badge: "2D LIVE" },
             { href: "/admin/analytics/users", label: "User Behavioral Analytics", icon: "Users" },
             { href: "/admin/sustainability", label: "Green IT & Sustainability", icon: "Leaf" },
+          ],
+        },
+        {
+          groupLabel: "Mess Management",
+          items: [
+            { href: "/admin/mess", label: "Mess Food Preferences", icon: "UtensilsCrossed", badge: "NEW" },
           ],
         },
         {
@@ -285,6 +297,25 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           items: [
             { href: "/supervisor?tab=alerts", label: "Security Radar", icon: "ShieldAlert", badge: "ALERTS" },
             { href: "/supervisor?tab=curfew", label: "Students Roster", icon: "GraduationCap" },
+          ],
+        },
+        {
+          groupLabel: "General & Support",
+          items: [
+            { href: "/profile", label: "My Profile", icon: "User" },
+            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+          ],
+        },
+      ];
+      break;
+
+    case "mess_incharge":
+      groups = [
+        {
+          groupLabel: "Mess Operations",
+          items: [
+            { href: "/mess", label: "Mess Dashboard", icon: "LayoutDashboard", badge: "LIVE" },
+            { href: "/mess/scan", label: "Token Scanner", icon: "QrCode", badge: "SCAN" },
           ],
         },
         {

@@ -61,6 +61,7 @@ const getPriorityItems = (role: Role, items: NavItem[]): NavItem[] => {
     staff: ['/staff', '/staff/attendance', '/admin/alerts', '/staff/profile'],
     worker: ['/worker', '/worker/schedule', '/admin/alerts', '/worker/profile'],
     visitor: ['/visitor', '/visitor/passes', '/visitor/status', '/visitor/profile'],
+    mess_incharge: ['/mess', '/mess/scan'],
   };
   const priority = priorityMap[role] || [];
   const prioritized = items.filter(item => priority.some(p => item.href.startsWith(p)));

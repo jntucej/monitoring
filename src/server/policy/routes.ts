@@ -22,6 +22,7 @@ export const ALL_ROLES: Role[] = [
   "deputy_warden",
   "caretaker",
   "exam_superintendent",
+  "mess_incharge",
 ];
 
 export function getDefaultRouteForRole(role: Role | string, gateId?: string): string {
