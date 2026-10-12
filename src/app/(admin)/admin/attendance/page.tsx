@@ -121,7 +121,7 @@ export default function AdminAttendancePage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-          <h1 className="text-2xl font-bold">Attendance</h1>
+          <p className="text-2xl font-bold">Attendance</p>
           <p className="text-[var(--text-muted)]">Daily student attendance records</p>
         </div>
         <div className="flex items-center gap-2">

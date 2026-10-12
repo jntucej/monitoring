@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { MessageSquare, Send } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
+import { usePolling } from "@/hooks/usePolling";
 
 interface DevMessage {
   id: string;
@@ -38,11 +39,11 @@ export function DevMessagesPanel() {
     }
   }, []);
 
+  // Initial load + visibility-aware polling (no raw setInterval)
   useEffect(() => {
     load();
-    const t = setInterval(load, 60_000);
-    return () => clearInterval(t);
   }, [load]);
+  usePolling(load, { intervalMs: 60_000 });
 
   return (
     <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">

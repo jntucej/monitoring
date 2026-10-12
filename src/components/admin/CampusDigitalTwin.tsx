@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { usePolling } from "@/hooks/usePolling";
 import dynamic from "next/dynamic";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -33,26 +34,26 @@ function CampusDigitalTwinView() {
   const [showHeatmap, setShowHeatmap] = useState(true);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchTwin = async () => {
-      try {
-        const headers: Record<string, string> = { "Content-Type": "application/json" };
-        if (token) headers["Authorization"] = `Bearer ${token}`;
+  const fetchTwin = useCallback(async () => {
+    try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
 
-        const res = await fetch("/api/admin/digital-twin", { headers });
-        const result = await res.json();
-        if (result.success && result.data) {
-          setTwinData(result.data);
-        }
-      } catch {} finally {
-        setLoading(false);
+      const res = await fetch("/api/admin/digital-twin", { headers });
+      const result = await res.json();
+      if (result.success && result.data) {
+        setTwinData(result.data);
       }
-    };
-
-    fetchTwin();
-    const interval = setInterval(fetchTwin, 10000);
-    return () => clearInterval(interval);
+    } catch {} finally {
+      setLoading(false);
+    }
   }, [token]);
+
+  // Initial load + visibility-aware polling (no raw setInterval)
+  useEffect(() => {
+    fetchTwin();
+  }, [fetchTwin]);
+  usePolling(fetchTwin, { intervalMs: 10_000 });
 
   if (loading || !twinData) {
     return <div className="p-8 text-center text-xs text-[var(--text-secondary)]">Initializing 2D Campus Digital Twin Engine...</div>;

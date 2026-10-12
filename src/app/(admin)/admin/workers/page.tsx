@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { HardHat, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { WorkerShiftTracker, WorkerShift } from "@/components/admin/WorkerShiftTracker";
 import { getAuthHeaders } from "@/lib/utils";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh"
@@ -53,11 +53,7 @@ export default function AdminWorkersPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
-            <HardHat className="w-6 h-6 text-amber-500" />
-            Worker & Contractor Management
-          </h1>
-          <p className="text-sm text-[var(--text-muted)] mt-1">
+          <p className="text-sm text-[var(--text-muted)]">
             Track daily worker shifts, contractor compliance, late check-ins, and duty progress.
           </p>
         </div>

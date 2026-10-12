@@ -1,6 +1,6 @@
 "use client";
 import { useState, useMemo, useCallback, useEffect } from "react";
-import { User, Search, RefreshCw, GraduationCap, Ban, AlertTriangle } from "lucide-react";
+import { User, Search, RefreshCw, Ban, AlertTriangle } from "lucide-react";
 import { parseRollNumber, getStudentYearFromRoll } from "@/lib/rollNumber";
 import type { Student } from "@/lib/types";
 import { getAuthHeaders } from "@/lib/utils";
@@ -114,10 +114,6 @@ export default function AdminStudentsPage() {
         <StudentInfographics />
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <GraduationCap className="w-6 h-6 text-blue-400" />
-            Registered Students &amp; Roster
-          </h1>
           <p className="text-[var(--text-muted)]">
             {loading
               ? "Loading roster…"

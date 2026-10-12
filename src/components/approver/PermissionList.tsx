@@ -218,7 +218,7 @@ export function PermissionList({
     <div className="space-y-6 min-w-0">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 min-w-0">
         <div className="min-w-0">
-          <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] min-w-0 truncate">{title}</h1>
+          <p className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] min-w-0 truncate">{title}</p>
           {effectiveDescription && (
             <p className="text-sm text-[var(--text-secondary)] mt-1 min-w-0">{effectiveDescription}</p>
           )}

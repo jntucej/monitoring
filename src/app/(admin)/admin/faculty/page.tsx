@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Users, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { FacultyTracking } from "@/components/admin/FacultyTracking";
 import { FacultyMemberAttendance, DepartmentAttendanceSummary } from "@/lib/types";
 import { getAuthHeaders } from "@/lib/utils";
@@ -58,11 +58,7 @@ export default function AdminFacultyPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
-            <Users className="w-6 h-6 text-indigo-400" />
-            Faculty Attendance & Movement Oversight
-          </h1>
-          <p className="text-sm text-[var(--text-muted)] mt-1">
+          <p className="text-sm text-[var(--text-muted)]">
             Real-time entry/exit logs, punctuality tracking, and department-level attendance metrics.
           </p>
         </div>

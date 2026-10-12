@@ -101,7 +101,7 @@ export function ComplianceSettings() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Compliance & Data Retention</h1>
+          <p className="text-2xl font-bold tracking-tight">Compliance & Data Retention</p>
           <p className="text-sm text-gray-500">Automate GDPR right-to-be-forgotten and data lifecycle policies.</p>
         </div>
         <Button onClick={handleRunRetention} variant="secondary" className="gap-2">

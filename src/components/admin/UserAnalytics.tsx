@@ -63,10 +63,10 @@ export function UserAnalytics() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-xl font-bold flex items-center gap-2">
+          <p className="text-xl font-bold flex items-center gap-2">
             <Users className="h-6 w-6 text-blue-400" />
             User & Role Behavioral Analytics
-          </h1>
+          </p>
           <p className="text-xs text-[var(--text-secondary)]">
             Engagement scoring (0-100), adoption trends by role, and active user analytics.
           </p>

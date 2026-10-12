@@ -89,10 +89,10 @@ export function PredictiveAnalytics() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-xl font-bold flex items-center gap-2">
+          <p className="text-xl font-bold flex items-center gap-2">
             <Brain className="h-6 w-6 text-purple-400" />
             AI Predictive Analytics & Anomaly Engine
-          </h1>
+          </p>
           <p className="text-xs text-[var(--text-secondary)]">
             Hourly time-series forecasting (ARIMA / Exponential Smoothing) with Z-Score anomaly detection.
           </p>

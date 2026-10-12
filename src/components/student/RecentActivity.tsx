@@ -1,8 +1,9 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
 import type { Scan } from "@/lib/types";
 import { getAuthHeaders } from "@/lib/utils";
+import { usePolling } from "@/hooks/usePolling";
 
 /**
  * Self-service gate activity feed. Works for every account type with a
@@ -12,38 +13,33 @@ export function RecentActivity() {
   const [activities, setActivities] = useState<Scan[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const authRaw = sessionStorage.getItem("gate-monitor-auth");
-        const auth = authRaw ? JSON.parse(authRaw) : null;
-        const uniqueId = auth?.state?.user?.uniqueId ?? auth?.state?.user?.roll ?? auth?.user?.uniqueId ?? auth?.user?.roll;
-        if (!uniqueId) {
-          if (!cancelled) setLoading(false);
-          return;
-        }
-        const res = await fetch(`/api/persons/${encodeURIComponent(uniqueId)}/history?limit=5`, {
-          headers: getAuthHeaders(),
-          cache: "no-store",
-        });
-        const json = await res.json();
-        if (!cancelled) {
-          const history = json?.data?.history;
-          setActivities(Array.isArray(history) ? history : []);
-          setLoading(false);
-        }
-      } catch {
-        if (!cancelled) setLoading(false);
+  const load = useCallback(async () => {
+    try {
+      const authRaw = sessionStorage.getItem("gate-monitor-auth");
+      const auth = authRaw ? JSON.parse(authRaw) : null;
+      const uniqueId = auth?.state?.user?.uniqueId ?? auth?.state?.user?.roll ?? auth?.user?.uniqueId ?? auth?.user?.roll;
+      if (!uniqueId) {
+        setLoading(false);
+        return;
       }
-    };
-    load();
-    const t = setInterval(load, 30_000);
-    return () => {
-      cancelled = true;
-      clearInterval(t);
-    };
+      const res = await fetch(`/api/persons/${encodeURIComponent(uniqueId)}/history?limit=5`, {
+        headers: getAuthHeaders(),
+        cache: "no-store",
+      });
+      const json = await res.json();
+      const history = json?.data?.history;
+      setActivities(Array.isArray(history) ? history : []);
+      setLoading(false);
+    } catch {
+      setLoading(false);
+    }
   }, []);
+
+  // Initial load + visibility-aware polling (no raw setInterval)
+  useEffect(() => {
+    load();
+  }, [load]);
+  usePolling(load, { intervalMs: 30_000 });
 
   return (
     <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-6">

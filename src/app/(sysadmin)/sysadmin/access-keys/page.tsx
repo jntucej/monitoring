@@ -175,7 +175,7 @@ export default function SysAdminAccessKeysPage() {
             <KeyRound className="w-5 h-5 text-emerald-400" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-[var(--text-primary)]">Access Keys</h1>
+            <p className="text-xl font-bold text-[var(--text-primary)]">Access Keys</p>
             <p className="text-xs text-[var(--text-muted)]">
               One-time enrollment codes for student bootstrap, mobile pairing and PIN reset. {activeCount} active.
             </p>

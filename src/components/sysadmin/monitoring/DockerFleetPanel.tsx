@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Server, RefreshCw, ExternalLink } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
+import { usePolling } from "@/hooks/usePolling";
 
 interface PromSample {
   metric: Record<string, string>;
@@ -72,14 +73,11 @@ export function DockerFleetPanel() {
     }
   }, []);
 
+  // Initial load + visibility-aware polling (no raw setInterval)
   useEffect(() => {
     load();
-    const t = setInterval(() => {
-      if (typeof document !== "undefined" && document.hidden) return;
-      load();
-    }, 30_000);
-    return () => clearInterval(t);
   }, [load]);
+  usePolling(load, { intervalMs: 30_000 });
 
   const fmtMem = (bytes: number) => {
     const mib = bytes / 1024 / 1024;
@@ -92,10 +90,10 @@ export function DockerFleetPanel() {
     <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]">
       <div className="flex items-center justify-between p-4 border-b border-[var(--border)]">
         <div>
-          <h3 className="text-sm font-bold flex items-center gap-2">
+          <p className="text-sm font-bold flex items-center gap-2">
             <Server className="w-4 h-4 text-emerald-400" />
             Docker Fleet
-          </h3>
+          </p>
           <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
             {lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString()}` : "Loading…"}
           </p>

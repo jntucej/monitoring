@@ -1,10 +1,11 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { RequestPassForm } from "@/components/parent/RequestPassForm";
 import { Ticket, Clock, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import type { GatePass, GatePassStatus } from "@/lib/types";
 import { getPassTypeName } from "@/hooks/usePassTypes";
 import { getAuthHeaders } from "@/lib/utils";
+import { usePolling } from "@/hooks/usePolling";
 
 function statusStyle(status: string) {
   if (status === "APPROVED" || status === "COMPLETED") {
@@ -27,7 +28,7 @@ export default function ParentPassesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     try {
       const authRaw = sessionStorage.getItem("gate-monitor-auth");
       const auth = authRaw ? JSON.parse(authRaw) : null;
@@ -50,21 +51,18 @@ export default function ParentPassesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
+  // Initial load + visibility-aware polling (no raw setInterval)
   useEffect(() => {
     load();
-    const t = setInterval(() => {
-      if (typeof document !== "undefined" && document.hidden) return;
-      load();
-    }, 30_000);
-    return () => clearInterval(t);
-  }, []);
+  }, [load]);
+  usePolling(load, { intervalMs: 30_000 });
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Pass Requests</h1>
+        <p className="text-2xl font-bold">Pass Requests</p>
         <p className="text-[var(--text-muted)]">Request and track gate passes</p>
       </div>
 

@@ -1060,7 +1060,7 @@ function AdminMessInner() {
               <UtensilsCrossed className="w-5 h-5 text-emerald-400" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-base sm:text-lg font-black text-white truncate">Mess Configuration</h1>
+              <p className="text-base sm:text-lg font-black text-white truncate">Mess Configuration</p>
               <p className="text-[11px] text-slate-500">
                 Manage menu items, meal days and review historical counts
               </p>

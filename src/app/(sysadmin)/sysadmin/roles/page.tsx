@@ -587,10 +587,10 @@ export default function RolesManagementPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+            <p className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
               <UserCog className="w-6 h-6 text-purple-400" />
               Roles &amp; Authorization Policies
-            </h1>
+            </p>
             <p className="text-sm text-[var(--text-muted)]">
               Manage system role definitions, hierarchy, user assignments, and page access
             </p>

@@ -179,10 +179,10 @@ function GuardianDashboardInner() {
       {/* Page toolbar — global DynamicHeader already renders the app header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
+          <p className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
             <ShieldCheck className="w-6 h-6 text-emerald-400" />
             Guardian Dashboard
-          </h1>
+          </p>
           <p className="mt-1 text-sm text-[var(--text-muted)]">
             Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> ·
             tier {tier}

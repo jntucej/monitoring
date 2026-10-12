@@ -12,7 +12,7 @@ export default function PeopleHubPage() {
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">People & Identity Hub</h1>
+        <p className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">People & Identity Hub</p>
         <p className="text-sm text-[var(--text-secondary)] mt-1">
           Unified management of students, faculty, staff, wardens, and bulk CSV ingestion.
         </p>

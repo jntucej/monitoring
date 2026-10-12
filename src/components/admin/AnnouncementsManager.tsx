@@ -60,7 +60,7 @@ export function AnnouncementsManager() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Announcements</h1>
+          <p className="text-2xl font-bold tracking-tight">Announcements</p>
           <p className="text-sm text-gray-500">Publish broadcast notifications.</p>
         </div>
         <Button onClick={() => setShowCreate(!showCreate)} className="gap-2">

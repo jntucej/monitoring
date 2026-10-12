@@ -1,7 +1,8 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import dynamic from "next/dynamic";
 import { getAuthHeaders } from "@/lib/utils";
+import { usePolling } from "@/hooks/usePolling";
 
 type Point = { name: string; entries: number; exits: number };
 
@@ -71,10 +72,7 @@ export function EntryExitChart() {
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    if (!isVisible) return;
-    let cancelled = false;
-    const load = async () => {
+  const load = useCallback(async () => {
       try {
         const today = new Date();
         const start = new Date(today);
@@ -109,24 +107,20 @@ export function EntryExitChart() {
           exits: v.exits,
         }));
 
-        if (!cancelled) {
-          setData(points);
-          setLoading(false);
-        }
-      } catch (e) {
-        if (!cancelled) setLoading(false);
+        setData(points);
+        setLoading(false);
+      } catch {
+        setLoading(false);
       }
-    };
+    },
+    []);
+
+  // Initial load when visible + visibility-aware polling (no raw setInterval)
+  useEffect(() => {
+    if (!isVisible) return;
     load();
-    const t = setInterval(() => {
-      if (typeof document !== "undefined" && document.hidden) return;
-      load();
-    }, 60_000);
-    return () => {
-      cancelled = true;
-      clearInterval(t);
-    };
-  }, [isVisible]);
+  }, [isVisible, load]);
+  usePolling(load, { intervalMs: 60_000, enabled: isVisible });
 
   return (
     <div ref={containerRef} className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-6 h-96">

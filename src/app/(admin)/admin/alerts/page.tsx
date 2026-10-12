@@ -86,10 +86,6 @@ export default function AdminAlertsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">
-            <span className="sm:hidden">🔔</span>
-            <span className="hidden sm:inline">🔔 Alerts</span>
-          </h1>
           <p className="text-[var(--text-muted)]">System alerts and notifications</p>
         </div>
         <div className="flex gap-2">

@@ -1,9 +1,10 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Ticket, Loader2, Clock, CheckCircle2, XCircle } from "lucide-react";
 import type { GatePass } from "@/lib/types";
 import { getPassTypeName } from "@/hooks/usePassTypes";
 import { getAuthHeaders } from "@/lib/utils";
+import { usePolling } from "@/hooks/usePolling";
 
 function expiryLabel(to: string, status: string): string {
   if (status === "REJECTED") return "Rejected";
@@ -27,37 +28,32 @@ export function ActivePasses() {
   const [passes, setPasses] = useState<GatePass[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const authRaw = sessionStorage.getItem("gate-monitor-auth");
-        const auth = authRaw ? JSON.parse(authRaw) : null;
-        const roll = auth?.state?.user?.uniqueId ?? auth?.state?.user?.roll ?? auth?.state?.user?.studentRoll ?? auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll;
-        if (!roll) {
-          if (!cancelled) setLoading(false);
-          return;
-        }
-        const res = await fetch(`/api/passes?roll=${encodeURIComponent(roll)}`, { 
-          headers: getAuthHeaders(),
-          cache: "no-store" 
-        });
-        const json = await res.json();
-        if (!cancelled) {
-          setPasses(Array.isArray(json.data) ? json.data : []);
-          setLoading(false);
-        }
-      } catch {
-        if (!cancelled) setLoading(false);
+  const load = useCallback(async () => {
+    try {
+      const authRaw = sessionStorage.getItem("gate-monitor-auth");
+      const auth = authRaw ? JSON.parse(authRaw) : null;
+      const roll = auth?.state?.user?.uniqueId ?? auth?.state?.user?.roll ?? auth?.state?.user?.studentRoll ?? auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll;
+      if (!roll) {
+        setLoading(false);
+        return;
       }
-    };
-    load();
-    const t = setInterval(load, 30_000);
-    return () => {
-      cancelled = true;
-      clearInterval(t);
-    };
+      const res = await fetch(`/api/passes?roll=${encodeURIComponent(roll)}`, { 
+        headers: getAuthHeaders(),
+        cache: "no-store" 
+      });
+      const json = await res.json();
+      setPasses(Array.isArray(json.data) ? json.data : []);
+      setLoading(false);
+    } catch {
+      setLoading(false);
+    }
   }, []);
+
+  // Initial load + visibility-aware polling (no raw setInterval)
+  useEffect(() => {
+    load();
+  }, [load]);
+  usePolling(load, { intervalMs: 30_000 });
 
   return (
     <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-6">

@@ -200,9 +200,9 @@ function StaffDashboardInner() {
       {/* Page toolbar — global DynamicHeader already renders the app header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-white">
+          <p className="text-2xl font-semibold tracking-tight text-white">
             Staff Dashboard
-          </h1>
+          </p>
           <p className="mt-1 text-sm text-slate-400">
             Signed in as <span className="font-mono text-slate-300">{role}</span>
             {user?.name ? ` · ${user.name}` : ""}

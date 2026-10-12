@@ -81,7 +81,7 @@ export function IntegrationsDashboard() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Integration Hub</h1>
+          <p className="text-2xl font-bold tracking-tight">Integration Hub</p>
           <p className="text-sm text-gray-500">Manage HR, SIS, Email/SMS, and Biometric connections.</p>
         </div>
         <Button onClick={fetchIntegrations} variant="secondary" size="sm" className="gap-2">

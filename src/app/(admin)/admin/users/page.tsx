@@ -2,7 +2,7 @@
 
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { useEffect, useMemo, useState } from "react";
-import { Users, Shield, GraduationCap, Briefcase, UserCheck, Grid, Search, ArrowRight } from "lucide-react";
+import { Shield, GraduationCap, Briefcase, UserCheck, Grid, Search, ArrowRight } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
 import Link from "next/link";
 
@@ -109,10 +109,6 @@ export default function AdminUsersPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Users className="w-6 h-6 text-purple-400" />
-            Roles & Branch Heatmaps
-          </h1>
           <p className="text-[var(--text-muted)]">
             Staff & admin account directory, HOD oversight, branch student & faculty density heatmaps
           </p>

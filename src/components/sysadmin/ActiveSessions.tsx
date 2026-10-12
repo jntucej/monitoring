@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { usePolling } from "@/hooks/usePolling";
 import { useUIStore } from "@/stores/uiStore";
 import { Users, LogOut, RefreshCw } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
@@ -38,11 +39,11 @@ export function ActiveSessions() {
     }
   }, []);
 
+  // Initial load + visibility-aware polling (no raw setInterval)
   useEffect(() => {
     fetchSessions();
-    const interval = setInterval(() => fetchSessions(), 30000);
-    return () => clearInterval(interval);
   }, [fetchSessions]);
+  usePolling(() => { fetchSessions(); }, { intervalMs: 30_000 });
 
   const handleRevokeSession = async (targetUserId: string, userName: string) => {
     if (!confirm(`Are you sure you want to force logout ${userName}?`)) return;

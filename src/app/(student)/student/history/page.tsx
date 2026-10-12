@@ -45,7 +45,6 @@ export default function StudentHistoryPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold">My History</h1>
           <p className="text-[var(--text-muted)]">All your gate activity</p>
         </div>
         <div className="flex items-center gap-1 bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg p-1">

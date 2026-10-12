@@ -65,12 +65,12 @@ function PersonDashboardInner() {
     <div className="space-y-6 pb-12">
       {/* Dynamic Tab Heading */}
       <div className="text-center sm:text-left border-b border-[var(--border)] pb-4 space-y-1">
-        <h1 className="text-2xl font-extrabold tracking-tight text-[var(--text-primary)]">
+        <p className="text-2xl font-extrabold tracking-tight text-[var(--text-primary)]">
           {currentTab === "idcard" && "Campus Pass Hub"}
           {currentTab === "passes" && "Gate Passes Desk"}
           {currentTab === "history" && "Activity History"}
           {currentTab === "profile" && "Account Center"}
-        </h1>
+        </p>
         <p className="text-xs text-[var(--text-muted)]">
           {currentTab === "idcard" && "Your permanent digital identity card & boarding passes"}
           {currentTab === "passes" && "Track permissions, request leaves, and review warden status"}

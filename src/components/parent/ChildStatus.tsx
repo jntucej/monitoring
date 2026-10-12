@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from "react";
 import { CheckCircle, XCircle, Loader2, AlertCircle } from "lucide-react";
 import type { Student } from "@/lib/types";
 import { getAuthHeaders } from "@/lib/utils";
+import { usePolling } from "@/hooks/usePolling";
 
 export function ChildStatus() {
   const [children, setChildren] = useState<Student[]>([]);
@@ -55,11 +56,11 @@ export function ChildStatus() {
     }
   }, []);
 
+  // Initial load + visibility-aware polling (no raw setInterval)
   useEffect(() => {
     load();
-    const t = setInterval(load, 30_000);
-    return () => clearInterval(t);
   }, [load]);
+  usePolling(load, { intervalMs: 30_000 });
 
   if (error) {
     return (

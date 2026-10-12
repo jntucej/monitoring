@@ -61,7 +61,7 @@ export default function StudentPermissionsPage() {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <ClipboardList className="w-6 h-6 text-[var(--action-primary)]" />
-              <h1 className="text-xl md:text-2xl font-bold text-[var(--text-primary)]">My Permissions</h1>
+              <p className="text-xl md:text-2xl font-bold text-[var(--text-primary)]">My Permissions</p>
             </div>
             <p className="text-xs md:text-sm text-[var(--text-muted)]">Track your requests and approvals</p>
           </div>

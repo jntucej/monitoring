@@ -70,7 +70,7 @@ export function GateSchedule() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Gate Access Scheduling</h1>
+          <p className="text-2xl font-bold tracking-tight">Gate Access Scheduling</p>
           <p className="text-sm text-gray-500">Configure time-of-day access rules.</p>
         </div>
         <Button onClick={() => setShowAddRule(!showAddRule)} className="gap-2">

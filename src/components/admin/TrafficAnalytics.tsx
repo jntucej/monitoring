@@ -213,7 +213,7 @@ export function TrafficAnalytics() {
             <Brain className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold text-[var(--text-primary)]">Traffic</h1>
+            <p className="text-xl font-semibold text-[var(--text-primary)]">Traffic</p>
             <p className="text-xs text-[var(--text-muted)]">
               Forecasts, confidence intervals, anomaly detection &amp; model metrics
             </p>

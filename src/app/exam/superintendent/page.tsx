@@ -143,10 +143,10 @@ function ExamSuperintendentDashboardInner() {
           element. */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
+          <p className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
             <FileText className="w-6 h-6 text-emerald-400" />
             Exam Superintendent Dashboard
-          </h1>
+          </p>
           <p className="mt-1 text-sm text-slate-400">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}

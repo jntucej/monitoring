@@ -151,10 +151,10 @@ export default function SysadminDevicesPage() {
       <div className="space-y-6 max-w-7xl mx-auto p-4 md:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+            <p className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
               <Cpu className="w-6 h-6 text-indigo-400" />
               Device Verification Settings
-            </h1>
+            </p>
             <p className="text-sm text-[var(--text-secondary)] mt-1">
               Configure automated gate turnstile and device scan verification methods across campus.
             </p>

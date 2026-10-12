@@ -234,9 +234,9 @@ export default function SysAdminGatesPage() {
       <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-white flex items-center gap-2.5">
+            <p className="text-2xl font-bold text-white flex items-center gap-2.5">
               <DoorOpen className="w-7 h-7 text-emerald-400" /> Gate Management
-            </h1>
+            </p>
             <p className="text-sm text-slate-400 mt-1">{gates.length} gates · add / edit / assign operators · all DB-driven</p>
           </div>
           <button onClick={() => { setEditing(null); setForm({ gateCode: "", name: "", location: "", type: "main", audience: "all" }); setShowAdd(true); }}

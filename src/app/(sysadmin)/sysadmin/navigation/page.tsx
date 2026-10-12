@@ -90,10 +90,10 @@ export default function NavigationEditorPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+            <p className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
               <Layout className="w-6 h-6 text-blue-400" />
               Dynamic Sidebar Navigation Editor
-            </h1>
+            </p>
             <p className="text-sm text-[var(--text-muted)]">
               Customize sidebar links, labels, group headers, and icons dynamically per role
             </p>

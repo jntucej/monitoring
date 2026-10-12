@@ -127,7 +127,7 @@ export default function AdminReportsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Reports</h1>
+        <p className="text-2xl font-bold">Reports</p>
         <p className="text-[var(--text-muted)]">Generate and download reports</p>
       </div>
 

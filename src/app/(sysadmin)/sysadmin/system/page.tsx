@@ -7,7 +7,7 @@ export default function SystemHubPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">System Operations & Integrations</h1>
+        <p className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">System Operations & Integrations</p>
         <p className="text-sm text-[var(--text-secondary)] mt-1">
           Monitor service uptime, background job schedulers, webhooks, and UI navigation hierarchies.
         </p>

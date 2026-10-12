@@ -50,7 +50,7 @@ export function PageHeader({
             ))}
           </nav>
         )}
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+        <p className="text-2xl font-semibold tracking-tight">{title}</p>
         {subtitle && <p className="mt-1 text-sm text-[var(--text-muted)]">{subtitle}</p>}
       </div>
       <div className="flex shrink-0 items-center gap-2">

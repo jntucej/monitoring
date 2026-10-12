@@ -7,7 +7,7 @@ export default function SafetyHubPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">Safety & Security Control</h1>
+        <p className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">Safety & Security Control</p>
         <p className="text-sm text-[var(--text-secondary)] mt-1">
           Zero-trust gate enforcement, real-time alert rules, perimeter lockdown, and standardized exit codes.
         </p>

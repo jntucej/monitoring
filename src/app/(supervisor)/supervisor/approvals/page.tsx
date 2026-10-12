@@ -68,10 +68,10 @@ export default function WardenApprovalsPage() {
             <ShieldCheck className="w-5 h-5 text-indigo-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-[var(--text-primary)]">
+            <p className="text-2xl font-bold text-[var(--text-primary)]">
               <span className="sm:hidden">🛡️</span>
               <span className="hidden sm:inline">🛡️ Warden Authorizations</span>
-            </h1>
+            </p>
             <p className="text-xs text-[var(--text-muted)] hidden sm:block">Review and approve or reject outgoing student passes</p>
           </div>
         </div>

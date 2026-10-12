@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Briefcase, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { StaffTracking, StaffMember } from "@/components/admin/StaffTracking";
 import { getAuthHeaders } from "@/lib/utils";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh"
@@ -54,11 +54,7 @@ export default function AdminStaffPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
-            <Briefcase className="w-6 h-6 text-purple-400" />
-            Administrative Staff Oversight & Movement
-          </h1>
-          <p className="text-sm text-[var(--text-muted)] mt-1">
+          <p className="text-sm text-[var(--text-muted)]">
             Real-time staff gate entries, presence tracking, exception flags (WRN), and log history.
           </p>
         </div>

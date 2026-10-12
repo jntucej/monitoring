@@ -214,10 +214,10 @@ export default function SysAdminParentsPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
+            <p className="text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
               <Users className="w-7 h-7 text-violet-400" />
               Parents &amp; Guardians
-            </h1>
+            </p>
             <p className="text-sm text-slate-400 mt-1">
               Create parent accounts, link them to students, and manage guardian access. {parents.length} parents.
             </p>

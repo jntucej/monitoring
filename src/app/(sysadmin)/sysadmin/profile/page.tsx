@@ -355,10 +355,10 @@ function SysAdminProfileDashboard() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)] flex items-center gap-2.5">
+          <p className="text-2xl font-bold tracking-tight text-[var(--text-primary)] flex items-center gap-2.5">
             <Shield className="w-7 h-7 text-rose-500" />
             System Administrator Profile
-          </h1>
+          </p>
           <p className="text-xs text-[var(--text-muted)] mt-1">
             Root identity control, privileged credential governance, and security telemetry for the campus gate platform.
           </p>

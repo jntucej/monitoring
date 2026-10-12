@@ -97,9 +97,9 @@ export default function GateDetailPage() {
           </button>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-[var(--text-primary)]">
+              <p className="text-xl font-bold text-[var(--text-primary)]">
                 {data?.gateName || `Gate #${gateId}`}
-              </h1>
+              </p>
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                 {data?.status || "ONLINE"}
               </span>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import {
   Activity,
@@ -93,20 +94,15 @@ export function SysAdminControlPanel() {
 
   useEffect(() => {
     fetchTelemetry();
-    const interval = setInterval(fetchTelemetry, 30_000);
-    return () => clearInterval(interval);
   }, [fetchTelemetry]);
+  usePolling(() => { fetchTelemetry(); }, { intervalMs: 30_000 });
 
   return (
     <div className="space-y-8">
       {/* Page Heading */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2.5">
-            <Shield className="w-6 h-6 text-rose-400" />
-            System Control Room
-          </h1>
-          <p className="text-xs text-[var(--text-muted)] mt-1">
+          <p className="text-xs text-[var(--text-muted)]">
             Dedicated infrastructure, security governance, SSO/LDAP integrations & telemetry console.
           </p>
         </div>

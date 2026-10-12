@@ -101,7 +101,7 @@ function LockdownDialog() {
 
   return (
     <>
-      <button
+      <button type="button"
         onClick={() => setOpen(true)}
         className="group inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-bold uppercase tracking-widest hover:bg-rose-500/20 transition-all"
       >
@@ -134,7 +134,8 @@ function LockdownDialog() {
                       <p className="text-xs sm:text-sm text-rose-300">Broadcast stop-flow to all gate operators</p>
                     </div>
                   </div>
-                  <button onClick={() => setOpen(false)} className="p-1.5 sm:p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors">
+                  <button
+          type="button" onClick={() => setOpen(false)} className="p-1.5 sm:p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors">
                     <X className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
                   </button>
                 </div>
@@ -144,7 +145,7 @@ function LockdownDialog() {
                 </p>
                 <div className="grid gap-1.5 sm:gap-2 grid-cols-2 mb-4 sm:mb-5">
                   {LOCKDOWN_SCOPES.map(s => (
-                    <button
+                    <button type="button"
                       key={s.id}
                       onClick={() => toggle(s.id)}
                       className={`px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl border text-xs sm:text-xs font-bold transition-all ${s.id === "all" ? "col-span-2" : ""} ${
@@ -157,7 +158,7 @@ function LockdownDialog() {
                     </button>
                   ))}
                 </div>
-                <button
+                <button type="button"
                   onClick={broadcast}
                   disabled={selected.length === 0 || sending || sent}
                   className="w-full py-2.5 sm:py-3 rounded-2xl bg-rose-500 hover:bg-rose-400 disabled:opacity-40 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-rose-500/30"
@@ -270,7 +271,7 @@ export default function AdminDashboardPage() {
             <span>Connection Warning</span>
           </div>
           <p className="text-sm">{error}.</p>
-          <button
+          <button type="button"
             onClick={() => load(true)}
             className="px-4 py-2 bg-rose-500 text-white rounded-lg text-xs font-bold hover:bg-rose-600 transition flex items-center gap-2"
           >
@@ -345,7 +346,7 @@ export default function AdminDashboardPage() {
                 <p className="text-xs sm:text-sm text-rose-200/60 mt-1">{activeLockdown.message}</p>
               )}
             </div>
-            <button
+            <button type="button"
               onClick={() => { setActiveLockdown(null); load(false); }}
               className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs sm:text-sm font-bold hover:bg-rose-500/30 transition shrink-0"
             >
@@ -384,7 +385,7 @@ export default function AdminDashboardPage() {
                 {recentAlerts.length} active
               </span>
             </div>
-            <button
+            <button type="button"
               onClick={() => router.push("/admin/alerts")}
               className="text-xs sm:text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center gap-1 transition-colors shrink-0"
             >

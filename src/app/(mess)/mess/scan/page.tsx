@@ -153,7 +153,7 @@ function ScanPageInner() {
               <ScanLine className="w-5 h-5 text-emerald-400" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-base sm:text-lg font-black text-white truncate">Token Scanner</h1>
+              <p className="text-base sm:text-lg font-black text-white truncate">Token Scanner</p>
               <p className="text-[11px] text-slate-500">Scan or enter a mess token code to serve</p>
             </div>
           </div>

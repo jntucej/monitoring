@@ -57,7 +57,7 @@ export function SupportDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Support Ticket Management</h1>
+        <p className="text-2xl font-bold tracking-tight">Support Ticket Management</p>
         <p className="text-sm text-gray-500">Triage, assign, and resolve user feedback and gate issues.</p>
       </div>
 

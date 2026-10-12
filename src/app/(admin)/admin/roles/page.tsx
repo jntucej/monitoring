@@ -165,9 +165,9 @@ function AdminRolesInner() {
               <ShieldCheck className="w-5 h-5 text-emerald-400" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-base sm:text-lg font-black text-white truncate">
+              <p className="text-base sm:text-lg font-black text-white truncate">
                 Roles &amp; Hierarchy
-              </h1>
+              </p>
               <p className="text-[11px] text-slate-500">
                 Read-only role mind map, member counts and in-campus presence
               </p>

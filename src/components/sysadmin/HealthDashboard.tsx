@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   Activity,
@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { SystemHealth } from "@/lib/health";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
+import { usePolling } from "@/hooks/usePolling";
 import { useGlass } from "@/context/GlassContext";
 
 export function HealthDashboard() {
@@ -25,7 +26,6 @@ export function HealthDashboard() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchHealth = useCallback(async (isManual = false) => {
     if (isManual) setLoading(true);
@@ -45,27 +45,12 @@ export function HealthDashboard() {
     }
   }, []);
 
+  // Initial load + visibility-aware polling (no raw setInterval).
+  // Faster cadence when the global Live stream toggle is on (5s vs 30s).
   useEffect(() => {
     fetchHealth(true);
-
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-      } else {
-        fetchHealth();
-        // Faster polling when live stream is enabled (5s instead of 30s)
-        intervalRef.current = setInterval(() => fetchHealth(), isLiveStream ? 5000 : 30000);
-      }
-    };
-
-    intervalRef.current = setInterval(() => fetchHealth(), isLiveStream ? 5000 : 30000);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
   }, [fetchHealth]);
+  usePolling(() => { fetchHealth(); }, { intervalMs: isLiveStream ? 5000 : 30000 });
 
   // Live toggle transition also fires a health re-check.
   useLiveRefresh(() => fetchHealth(), {});

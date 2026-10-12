@@ -511,10 +511,10 @@ export function ScheduledJobsPanel() {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="flex items-center gap-2 text-xl font-semibold text-[var(--text-primary)]">
+          <p className="flex items-center gap-2 text-xl font-semibold text-[var(--text-primary)]">
             <CalendarClock className="h-5 w-5 text-emerald-400" />
             Scheduled Jobs
-          </h1>
+          </p>
           <p className="mt-0.5 text-sm text-[var(--text-muted)]">
             {kpis.enabled} active · {kpis.disabled} paused
           </p>

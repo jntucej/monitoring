@@ -1,8 +1,9 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ArrowRight, Loader2, BarChart3 } from "lucide-react";
 import type { Scan } from "@/lib/types";
 import { getAuthHeaders } from "@/lib/utils";
+import { usePolling } from "@/hooks/usePolling";
 
 interface DayBar {
   day: string;        // "Mon"
@@ -33,94 +34,88 @@ export function ChildWeeklyActivity() {
   const [daily, setDaily] = useState<ChildDailyCounts[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const authRaw = sessionStorage.getItem("gate-monitor-auth");
-        const auth = authRaw ? JSON.parse(authRaw) : null;
-        const parentId = auth?.state?.user?.id ?? auth?.user?.id;
-        if (!parentId) {
-          if (!cancelled) setLoading(false);
-          return;
-        }
-        const res = await fetch(`/api/students?parentId=${parentId}`, {
-          headers: getAuthHeaders(),
-          cache: "no-store",
-        });
-        const json = await res.json();
-        if (cancelled) return;
-        const kids: Array<{ roll?: string; uniqueId?: string; name?: string; fullName?: string }> = Array.isArray(json.data) ? json.data : [];
-        if (kids.length === 0) {
-          setDaily([]);
-          setLoading(false);
-          return;
-        }
-
-        // Build the 7-day axis (most-recent day on the right).
-        const days: DayBar[] = [];
-        for (let i = 6; i >= 0; i--) {
-          const d = new Date();
-          d.setDate(d.getDate() - i);
-          const key = d.toISOString().slice(0, 10);
-          days.push({
-            day: d.toLocaleDateString("en-IN", { weekday: "short" }),
-            date: key,
-            inCount: 0,
-            outCount: 0,
-            isToday: i === 0,
-          });
-        }
-        const results = await Promise.all(
-          kids.map(async (k) => {
-            const roll = k.uniqueId || k.roll || "";
-            if (!roll) return null;
-            try {
-              const r = await fetch(`/api/persons/${encodeURIComponent(roll)}/history?limit=70`, {
-                headers: getAuthHeaders(),
-                cache: "no-store",
-              });
-              const j = await r.json();
-              const scans: Scan[] = Array.isArray(j?.data?.history) ? j.data.history : [];
-              // Group scans by local calendar day (IST-ish: use the device's local tz)
-              const byDay = new Map<string, { inCount: number; outCount: number }>();
-              for (const s of scans) {
-                if (!s.timestamp) continue;
-                const d = new Date(s.timestamp);
-                const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-                const bucket = byDay.get(key) ?? { inCount: 0, outCount: 0 };
-                if (s.direction === "IN") bucket.inCount += 1;
-                else bucket.outCount += 1;
-                byDay.set(key, bucket);
-              }
-              // Map into the 7-day axis
-              const bars: DayBar[] = days.map((d) => {
-                const bucket = byDay.get(d.date);
-                return { ...d, inCount: bucket?.inCount ?? 0, outCount: bucket?.outCount ?? 0 };
-              });
-              const totalIn = bars.reduce((sum, b) => sum + b.inCount, 0);
-              const totalOut = bars.reduce((sum, b) => sum + b.outCount, 0);
-              return { roll, name: k.fullName || k.name || roll, bars, totalIn, totalOut };
-            } catch {
-              return null;
-            }
-          })
-        );
-        if (!cancelled) {
-          setDaily(results.filter((r): r is ChildDailyCounts => r !== null));
-          setLoading(false);
-        }
-      } catch {
-        if (!cancelled) setLoading(false);
+  const load = useCallback(async () => {
+    try {
+      const authRaw = sessionStorage.getItem("gate-monitor-auth");
+      const auth = authRaw ? JSON.parse(authRaw) : null;
+      const parentId = auth?.state?.user?.id ?? auth?.user?.id;
+      if (!parentId) {
+        setLoading(false);
+        return;
       }
-    };
-    load();
-    const t = setInterval(load, 60_000);
-    return () => {
-      cancelled = true;
-      clearInterval(t);
-    };
+      const res = await fetch(`/api/students?parentId=${parentId}`, {
+        headers: getAuthHeaders(),
+        cache: "no-store",
+      });
+      const json = await res.json();
+      const kids: Array<{ roll?: string; uniqueId?: string; name?: string; fullName?: string }> = Array.isArray(json.data) ? json.data : [];
+      if (kids.length === 0) {
+        setDaily([]);
+        setLoading(false);
+        return;
+      }
+
+      // Build the 7-day axis (most-recent day on the right).
+      const days: DayBar[] = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const key = d.toISOString().slice(0, 10);
+        days.push({
+          day: d.toLocaleDateString("en-IN", { weekday: "short" }),
+          date: key,
+          inCount: 0,
+          outCount: 0,
+          isToday: i === 0,
+        });
+      }
+      const results = await Promise.all(
+        kids.map(async (k) => {
+          const roll = k.uniqueId || k.roll || "";
+          if (!roll) return null;
+          try {
+            const r = await fetch(`/api/persons/${encodeURIComponent(roll)}/history?limit=70`, {
+              headers: getAuthHeaders(),
+              cache: "no-store",
+            });
+            const j = await r.json();
+            const scans: Scan[] = Array.isArray(j?.data?.history) ? j.data.history : [];
+            // Group scans by local calendar day (IST-ish: use the device's local tz)
+            const byDay = new Map<string, { inCount: number; outCount: number }>();
+            for (const s of scans) {
+              if (!s.timestamp) continue;
+              const d = new Date(s.timestamp);
+              const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+              const bucket = byDay.get(key) ?? { inCount: 0, outCount: 0 };
+              if (s.direction === "IN") bucket.inCount += 1;
+              else bucket.outCount += 1;
+              byDay.set(key, bucket);
+            }
+            // Map into the 7-day axis
+            const bars: DayBar[] = days.map((d) => {
+              const bucket = byDay.get(d.date);
+              return { ...d, inCount: bucket?.inCount ?? 0, outCount: bucket?.outCount ?? 0 };
+            });
+            const totalIn = bars.reduce((sum, b) => sum + b.inCount, 0);
+            const totalOut = bars.reduce((sum, b) => sum + b.outCount, 0);
+            return { roll, name: k.fullName || k.name || roll, bars, totalIn, totalOut };
+          } catch {
+            return null;
+          }
+        })
+      );
+      setDaily(results.filter((r): r is ChildDailyCounts => r !== null));
+      setLoading(false);
+    } catch {
+      setLoading(false);
+    }
   }, []);
+
+  // Initial load + visibility-aware polling (no raw setInterval)
+  useEffect(() => {
+    load();
+  }, [load]);
+  usePolling(load, { intervalMs: 60_000 });
 
   // Nothing to render if there is no activity data at all.
   const hasData = daily.some((c) => c.totalIn > 0 || c.totalOut > 0);

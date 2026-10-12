@@ -68,7 +68,7 @@ export function AdvancedAnalytics() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Advanced Analytics</h1>
+          <p className="text-2xl font-bold tracking-tight">Advanced Analytics</p>
           <p className="text-sm text-gray-500">Build queries and custom reports.</p>
         </div>
         <Button onClick={() => setShowSave(!showSave)} variant="secondary" size="sm" className="gap-2">

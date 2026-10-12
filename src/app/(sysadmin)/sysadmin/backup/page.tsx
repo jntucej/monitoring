@@ -170,7 +170,7 @@ export default function BackupPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)]">Backup & Export</h1>
+          <p className="text-2xl font-bold text-[var(--text-primary)]">Backup & Export</p>
           <p className="text-[var(--text-muted)] mt-1">Manage database backups and data exports</p>
         </div>
         <button
