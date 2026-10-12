@@ -1,5 +1,5 @@
-import { PageLoading } from "@/components/shared/LoadingStates";
+import { AppLoadingScreen } from "@/components/shared/AppLoadingScreen";
 
 export default function ApproverLoading() {
-  return <PageLoading />;
+  return <AppLoadingScreen />;
 }
