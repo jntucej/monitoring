@@ -45,13 +45,13 @@ const STAGE_LABELS: Record<string, string> = {
 };
 
 export function PermissionDetailPanel({
-const api = useApi();
-
   ticket,
   onClose,
   onActionComplete,
   isStandalonePage = false,
 }: PermissionDetailPanelProps) {
+  const api = useApi();
+
   const [data, setData] = useState<PermissionItem | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
