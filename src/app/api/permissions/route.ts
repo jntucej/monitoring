@@ -112,6 +112,19 @@ async function handleGet(req: NextRequest, context: any) {
   let query = db.from("permission_requests").select("*", { count: "exact" });
   if (type) query = query.eq("workflow_type", type);
   if (status) query = query.eq("status", status);
+  // Explicit stage filter (used by UI PermissionList: ?stage=principal etc.)
+  const stageParam = searchParams.get("stage") || searchParams.get("current_stage");
+  if (stageParam && ["faculty", "hod", "oie", "vice_principal", "principal", "caretaker", "deputy_warden", "hostel_manager", "main_gate", "warden_or_principal"].includes(stageParam)) {
+    query = query.eq("current_stage", stageParam);
+    // For principal: also include hostel requests at warden_or_principal stage
+    if (stageParam === "principal") {
+      query = query.or("current_stage.eq.principal,current_stage.eq.warden_or_principal");
+    }
+    // Return early — explicit stage param overrides role-based filtering below
+    const { data: stageData, count: stageCount, error: stageErr } = await query;
+    if (stageErr) return NextResponse.json({ success: false, error: stageErr.message }, { status: 500 });
+    return NextResponse.json({ success: true, data: stageData, total: stageCount || 0 });
+  }
 
   if (role === "student") {
     query = query.eq("student_user_id", userId);
@@ -126,11 +139,6 @@ async function handleGet(req: NextRequest, context: any) {
       query = query.in("student_user_id", childIds);
     }
   } else if (["caretaker", "deputy_warden", "hostel_manager", "faculty", "hod", "oie", "vice_principal"].includes(role)) {
-    query = query.eq("current_stage", role);
-    if (hscope) query = query.eq("hostel_scope", hscope);
-  } else if (["faculty", "hod", "oie", "vice_principal"].includes(role)) {
-    // These approver roles see requests currently at THEIR stage,
-    // across any workflow type. Warden's former queue is now principal's.
     query = query.eq("current_stage", role);
     if (hscope) query = query.eq("hostel_scope", hscope);
   } else if (["warden", "principal"].includes(role)) {
