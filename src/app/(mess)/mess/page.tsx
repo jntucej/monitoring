@@ -15,7 +15,6 @@ import {
   ShieldCheck,
   ArrowRight,
 } from "lucide-react";
-import { GuardedPage } from "@/components/shared/GuardedPage";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
@@ -490,10 +489,10 @@ function MessDashboardInner() {
 
 export default function MessDashboardPage() {
   return (
-    <GuardedPage allowedRoles={["mess_incharge", "admin", "sysadmin"]}>
+
       <Suspense fallback={<PageLoading />}>
         <MessDashboardInner />
       </Suspense>
-    </GuardedPage>
+    
   );
 }

@@ -2,10 +2,8 @@
 
 import { Suspense } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { GuardedPage } from "@/components/shared/GuardedPage";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { PermissionList } from "@/components/approver/PermissionList";
-import { ClipboardCheck } from "lucide-react";
 
 function FacultyPermissionsInner() {
   return (
@@ -13,10 +11,6 @@ function FacultyPermissionsInner() {
       {/* Page toolbar — global DynamicHeader already renders the app header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2 min-w-0">
-            <ClipboardCheck className="w-6 h-6 text-emerald-400 shrink-0" />
-            <span className="min-w-0 truncate">Faculty & HOD Approvals</span>
-          </h1>
           <p className="mt-1 text-sm text-slate-400">
             Initial-stage exam clearances and memo requests
           </p>
@@ -47,10 +41,8 @@ function FacultyPermissionsInner() {
 
 export default function FacultyPermissionsPage() {
   return (
-    <GuardedPage allowedRoles={["faculty", "hod", "admin", "sysadmin"]}>
-      <Suspense fallback={<PageLoading />}>
-        <FacultyPermissionsInner />
-      </Suspense>
-    </GuardedPage>
+    <Suspense fallback={<PageLoading />}>
+      <FacultyPermissionsInner />
+    </Suspense>
   );
 }

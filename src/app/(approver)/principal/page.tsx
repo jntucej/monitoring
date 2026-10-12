@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import { GuardedPage } from "@/components/shared/GuardedPage";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
@@ -24,7 +23,7 @@ import {
   Inbox,
   Siren,
   ClipboardCheck,
-  BarChart3,
+
   FileText,
   ScrollText,
   CheckCircle2,
@@ -1261,10 +1260,6 @@ function PrincipalDashboardInner() {
       {/* Page toolbar — global DynamicHeader already renders the app header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2 text-[var(--text-primary)]">
-            <ShieldCheck className="w-6 h-6 text-emerald-400" />
-            Principal Command Center
-          </h1>
           <p className="mt-1 text-sm text-[var(--text-muted)]">
             Signed in as <span className="font-mono">{role}</span> · tier {tier} · campus-wide oversight
             {lastRefresh && <span className="ml-2">· last refresh {fmtTime(lastRefresh.toISOString())}</span>}
@@ -1426,10 +1421,8 @@ function PrincipalDashboardInner() {
 
 export default function PrincipalDashboardPage() {
   return (
-    <GuardedPage allowedRoles={["principal"]}>
-      <Suspense fallback={<PageLoading />}>
-        <PrincipalDashboardInner />
-      </Suspense>
-    </GuardedPage>
+    <Suspense fallback={<PageLoading />}>
+      <PrincipalDashboardInner />
+    </Suspense>
   );
 }

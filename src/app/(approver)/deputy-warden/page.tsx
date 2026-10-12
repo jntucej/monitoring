@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense, useCallback } from "react";
-import { GuardedPage } from "@/components/shared/GuardedPage";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
@@ -11,7 +10,7 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import {
-  ClipboardCheck,
+
   Users,
   Building2,
   DoorOpen,
@@ -317,10 +316,6 @@ function DeputyWardenDashboardInner() {
       {/* Page toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <h1 className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
-            <ClipboardCheck className="w-6 h-6 text-emerald-400 shrink-0" />
-            <span className="truncate">Deputy Warden Dashboard</span>
-          </h1>
           <p className="mt-1 text-sm text-slate-400 min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
@@ -620,10 +615,8 @@ function DeputyWardenDashboardInner() {
 
 export default function DeputyWardenDashboardPage() {
   return (
-    <GuardedPage allowedRoles={["deputy_warden", "admin", "sysadmin"]}>
-      <Suspense fallback={<PageLoading />}>
-        <DeputyWardenDashboardInner />
-      </Suspense>
-    </GuardedPage>
+    <Suspense fallback={<PageLoading />}>
+      <DeputyWardenDashboardInner />
+    </Suspense>
   );
 }

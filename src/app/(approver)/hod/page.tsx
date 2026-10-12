@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense, useCallback, useMemo } from "react";
-import { GuardedPage } from "@/components/shared/GuardedPage";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
@@ -11,14 +10,14 @@ import { useAuthStore } from "@/stores/authStore";
 import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role } from "@/lib/types";
 import {
-  Building2,
+
   Users,
   GraduationCap,
   CheckCircle2,
   Clock,
   AlertTriangle,
   Loader2,
-  UserCheck,
+
   Inbox,
 } from "lucide-react";
 
@@ -202,10 +201,6 @@ function HodDashboardInner() {
       {/* Page toolbar — global DynamicHeader already renders the app header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
-            <Building2 className="w-6 h-6 text-emerald-400" />
-            HOD Dashboard
-          </h1>
           <p className="mt-1 text-sm text-slate-400">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
@@ -413,10 +408,8 @@ function HodDashboardInner() {
 
 export default function HodDashboardPage() {
   return (
-    <GuardedPage minTier={MIN_TIER}>
-      <Suspense fallback={<PageLoading />}>
-        <HodDashboardInner />
-      </Suspense>
-    </GuardedPage>
+    <Suspense fallback={<PageLoading />}>
+      <HodDashboardInner />
+    </Suspense>
   );
 }

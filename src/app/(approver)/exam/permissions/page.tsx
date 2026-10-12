@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { GuardedPage } from "@/components/shared/GuardedPage";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
@@ -15,7 +14,7 @@ import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
 import type { PermissionItem } from "@/components/approver/PermissionRow";
 import {
-  ClipboardCheck,
+
   ShieldCheck,
   UserCheck,
   AlertTriangle,
@@ -23,7 +22,6 @@ import {
   Inbox,
   Clock,
 } from "lucide-react";
-
 
 /* ── response shapes (mirror /api/permissions) ── */
 
@@ -179,10 +177,6 @@ function ExamPermissionsInner() {
           renders the app header; this is NOT a second <header>. */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
-            <ClipboardCheck className="w-6 h-6 text-emerald-400" />
-            Exam Branch Permissions
-          </h1>
           <p className="mt-1 text-sm text-slate-400">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
@@ -296,10 +290,8 @@ function ExamPermissionsInner() {
 
 export default function ExamPermissionsPage() {
   return (
-    <GuardedPage allowedRoles={["exam_branch", "oie", "vice_principal", "admin", "sysadmin"]}>
-      <Suspense fallback={<PageLoading />}>
-        <ExamPermissionsInner />
-      </Suspense>
-    </GuardedPage>
+    <Suspense fallback={<PageLoading />}>
+      <ExamPermissionsInner />
+    </Suspense>
   );
 }

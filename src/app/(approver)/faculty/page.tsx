@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense, useCallback } from "react";
-import { GuardedPage } from "@/components/shared/GuardedPage";
 import { ConditionalAlert } from "@/components/shared/ConditionalAlert";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
@@ -12,7 +11,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role, FacultyMemberAttendance, DepartmentAttendanceSummary } from "@/lib/types";
 import {
-  GraduationCap,
+
   CalendarCheck,
   Users,
   CheckCircle2,
@@ -153,7 +152,6 @@ function FacultyDashboardInner() {
       {/* Page toolbar — global DynamicHeader already renders the app header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-white">Faculty Dashboard</h1>
           <p className="mt-1 text-sm text-slate-400">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
@@ -341,10 +339,8 @@ function FacultyDashboardInner() {
 
 export default function FacultyDashboardPage() {
   return (
-    <GuardedPage minTier={MIN_TIER}>
-      <Suspense fallback={<PageLoading />}>
-        <FacultyDashboardInner />
-      </Suspense>
-    </GuardedPage>
+    <Suspense fallback={<PageLoading />}>
+      <FacultyDashboardInner />
+    </Suspense>
   );
 }

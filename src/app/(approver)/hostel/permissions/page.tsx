@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense, useCallback } from "react";
-import { GuardedPage } from "@/components/shared/GuardedPage";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
@@ -19,9 +18,8 @@ import {
   Clock,
   AlertTriangle,
   Loader2,
-  Home,
-} from "lucide-react";
 
+} from "lucide-react";
 
 /* ── response shapes (mirror the route handlers — all read-only) ── */
 
@@ -182,10 +180,6 @@ function HostelPermissionsInner() {
       {/* Page toolbar — global DynamicHeader already renders the app header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
-            <Home className="w-6 h-6 text-emerald-400" />
-            Hostel Permissions
-          </h1>
           <p className="mt-1 text-sm text-slate-400">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
@@ -335,10 +329,8 @@ function HostelPermissionsInner() {
 
 export default function HostelPermissionsPage() {
   return (
-    <GuardedPage allowedRoles={["caretaker", "deputy_warden", "hostel_manager", "principal", "admin", "sysadmin"]}>
-      <Suspense fallback={<PageLoading />}>
-        <HostelPermissionsInner />
-      </Suspense>
-    </GuardedPage>
+    <Suspense fallback={<PageLoading />}>
+      <HostelPermissionsInner />
+    </Suspense>
   );
 }
