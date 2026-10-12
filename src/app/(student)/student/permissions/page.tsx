@@ -10,6 +10,7 @@ import type { PermissionItem } from "@/components/approver/PermissionRow";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
+import { usePolling } from "@/hooks/usePolling";
 
 type StatusFilter = "ALL" | "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED";
 
@@ -45,23 +46,8 @@ export default function StudentPermissionsPage() {
     }
   }, []);
 
-  // Initial load + 30s polling (always on); Live-toggle refetch via useLiveRefresh.
-  // `fetchTickets` awaits its first setState, so nothing runs synchronously here.
-  useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      await fetchTickets();
-      if (cancelled) return;
-    };
-    void load();
-    const id = setInterval(() => {
-      void load();
-    }, 30000);
-    return () => {
-      cancelled = true;
-      clearInterval(id);
-    };
-  }, [fetchTickets]);
+  // 30s polling via usePolling (visibility-aware); Live-toggle refetch via useLiveRefresh.
+  usePolling(fetchTickets, { intervalMs: 30000 });
   useLiveRefresh(fetchTickets, { intervalMs: 30000 });
 
   const filtered =

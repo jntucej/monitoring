@@ -13,7 +13,7 @@ export default function StudentNotFound() {
           This page doesn't exist in the student workspace.
         </p>
         <Link
-          href="/"
+          href="/student"
           className="inline-flex items-center gap-2 rounded-lg bg-[var(--action-primary)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
         >
           Back to dashboard

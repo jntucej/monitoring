@@ -4,6 +4,7 @@ import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
 
 export interface ModalProps {
   isOpen: boolean;
@@ -34,6 +35,22 @@ const Modal = ({
   size = "md",
   showClose = true,
 }: ModalProps) => {
+  // Use useBreakpoint for responsive modal sizing
+  const breakpoints = useBreakpoint({ sm: "(min-width: 640px)", md: "(min-width: 768px)" });
+  const isMobile = !breakpoints.md;
+
+  // Full-screen on mobile, centered on desktop
+  const modalClassName = isMobile
+    ? "fixed inset-0 z-50 flex flex-col bg-black/90 backdrop-blur-md"
+    : "fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm";
+
+  const contentClassName = isMobile
+    ? "relative w-full h-full bg-[var(--bg-surface)] overflow-y-auto overscroll-contain"
+    : cn(
+        "relative bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl shadow-xl w-full mx-4 max-h-[90dvh] overflow-y-auto overscroll-contain",
+        sizeClasses[size]
+      );
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -42,31 +59,34 @@ const Modal = ({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          className={modalClassName}
           onClick={onClose}
         >
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            initial={isMobile ? { y: "100%" } : { opacity: 0, scale: 0.95, y: 20 }}
+            animate={isMobile ? { y: 0 } : { opacity: 1, scale: 1, y: 0 }}
+            exit={isMobile ? { y: "100%" } : { opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            role="dialog" aria-modal="true" aria-labelledby={title ? "modal-title" : undefined} className={cn(
-              "relative bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl shadow-xl w-full mx-4 max-h-[90dvh] overflow-y-auto overscroll-contain",
-              sizeClasses[size]
-            )}
+            role="dialog" aria-modal="true" aria-labelledby={title ? "modal-title" : undefined}
+            className={contentClassName}
             onClick={(e) => e.stopPropagation()}
           >
             {showClose && (
               <button
                 onClick={onClose}
                 aria-label="Close modal"
-                className="absolute top-3 right-3 p-3 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors active:scale-95"
+                className={cn(
+                  "flex items-center justify-center rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors active:scale-95",
+                  isMobile
+                    ? "absolute top-3 right-3 p-3 min-w-[44px] min-h-[44px]"
+                    : "absolute top-3 right-3 p-3 min-w-[44px] min-h-[44px]"
+                )}
               >
                 <X className="w-5 h-5" />
               </button>
             )}
             {title && (
-              <div className="px-6 py-4 border-b border-[var(--border)]">
+              <div className={cn("border-b border-[var(--border)]", isMobile ? "px-6 py-4" : "px-6 py-4")}>
                 <h2 id="modal-title" className="text-xl font-semibold">{title}</h2>
               </div>
             )}

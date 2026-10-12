@@ -1,7 +1,6 @@
 "use client";
-
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuthStore, useHasHydrated } from "@/stores/authStore";
 import type { Role } from "@/lib/types";
 
@@ -18,6 +17,8 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   const { user, authenticated, checkSession } = useAuthStore();
   const [isChecking, setIsChecking] = useState(true);
   const [timedOut, setTimedOut] = useState(false);
+  const redirectCountRef = useRef(0);
+  const handledRef = useRef(false);
 
   const userId = user?.id;
   const userRole = user?.role;
@@ -26,7 +27,6 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   useEffect(() => {
     if (hasHydrated) return;
     const t = setTimeout(() => {
-      // give the store a nudge — this is safe even in private mode
       try {
         useAuthStore.persist?.rehydrate();
       } catch {
@@ -40,8 +40,11 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
     // Wait until store has hydrated from localStorage/sessionStorage
     if (!hasHydrated) return;
 
-    // If not authenticated or no user set, redirect to login
+    // If not authenticated or no user set, redirect to login — guard against loops
     if (!authenticated || !userId) {
+      if (handledRef.current) return;
+      handledRef.current = true;
+
       let targetRole: Role | null = null;
 
       if (typeof window !== "undefined") {
@@ -67,6 +70,8 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
 
     // Check role authorization if specified
     if (allowedRoles && allowedRoles.length > 0 && userRole && !allowedRoles.includes(userRole)) {
+      if (redirectCountRef.current >= 3) return; // 3-strike guard
+      redirectCountRef.current += 1;
       const defaultRoute = getDefaultRouteForRole(userRole, gateId);
       router.replace(defaultRoute);
       return;
@@ -75,16 +80,12 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
     setIsChecking(false);
   }, [hasHydrated, authenticated, userId, userRole, gateId, allowedRoles, router]);
 
-  // Revalidate session asynchronously — background revalidation
-  // is now handled implicitly by API-level 401 handling in useApi.
+  // Revalidate session asynchronously
   useEffect(() => {
     if (!hasHydrated || !authenticated || !userId) return;
     checkSession();
   }, [hasHydrated, authenticated, userId, checkSession]);
 
-  // ponytail: timedOut flunks hydration — fail closed to /login rather than
-  // spinning. First effect already routed unauthenticated users; this covers
-  // the stuck-hydration path.
   if (timedOut && !hasHydrated) {
     router.replace("/login");
     return (

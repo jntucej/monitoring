@@ -69,7 +69,7 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
   const showNav = _hasHydrated && authenticated && !isStandaloneSysadmin;
 
   return (
-    <div className="relative min-h-[100dvh] flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] antialiased selection:bg-[var(--action-primary)] selection:text-white">
+    <div className="relative min-h-[100dvh] flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] antialiased selection:bg-[var(--action-primary)] selection:text-white pt-safe pb-safe pl-safe pr-safe">
       {/* Global loading overlay — covers the entire shell until auth hydrates */}
       <AppLoadingScreen />
       {/* Ambient Desktop Mouse-Parallax Orbs Layer */}

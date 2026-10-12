@@ -1,9 +1,13 @@
 "use client";
-import { AuthGuard } from "@/components/shared/AuthGuard";
+import { useEffect, useRef } from "react";
 import { getRoleTier } from "@/lib/alert-hierarchy";
 import { useAuthStore } from "@/stores/authStore";
 import type { Role } from "@/lib/types";
+import { useRouter } from "next/navigation";
+import { getDefaultRouteForRole } from "@/lib/route-helpers";
+import { AppLoadingScreen } from "@/components/shared/AppLoadingScreen";
 import { ShieldAlert } from "lucide-react";
+import { AuthGuard } from "./AuthGuard";
 
 export interface GuardedPageProps {
   allowedRoles?: Role[];
@@ -15,21 +19,28 @@ export function GuardedPage({ allowedRoles, minTier = 0, children }: GuardedPage
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "student") as Role;
   const tier = getRoleTier(role);
+  const router = useRouter();
 
   const roleOk = allowedRoles ? allowedRoles.includes(role) : true;
   const tierOk = tier >= minTier;
 
-  if (!roleOk || !tierOk) {
-    return (
-      <AuthGuard>
-        <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-6 text-rose-100">
-          <p className="flex items-center gap-2 text-sm font-semibold">
-            <ShieldAlert className="h-4 w-4" />
-            Access denied — role {role} (tier {tier}) cannot open this workspace.
-          </p>
-        </div>
-      </AuthGuard>
-    );
+  // Guard against double-mount in React strict mode — single render pass
+  const redirectedRef = useRef(false);
+
+  useEffect(() => {
+    if (redirectedRef.current) return;
+    redirectedRef.current = true;
+
+    if (!roleOk || !tierOk) {
+      const defaultRoute = getDefaultRouteForRole(role);
+      router.replace(defaultRoute);
+    }
+  }, [roleOk, tierOk, role, router]);
+
+  // Show loading screen while auth resolves — prevents bounce-loop flash
+  if (!user || !roleOk || !tierOk) {
+    return <AppLoadingScreen />;
   }
+
   return <AuthGuard allowedRoles={allowedRoles}>{children}</AuthGuard>;
 }
