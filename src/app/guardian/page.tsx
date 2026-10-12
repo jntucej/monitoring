@@ -267,7 +267,7 @@ function GuardianDashboardInner() {
               />
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto min-w-0">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-xs uppercase tracking-wide">
@@ -340,7 +340,7 @@ function GuardianDashboardInner() {
               />
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto min-w-0">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-xs uppercase tracking-wide">
