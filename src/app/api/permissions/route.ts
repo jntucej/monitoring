@@ -120,8 +120,15 @@ async function handleGet(req: NextRequest, context: any) {
   } else if (["caretaker", "deputy_warden", "hostel_manager", "faculty", "hod", "oie", "vice_principal"].includes(role)) {
     query = query.eq("current_stage", role);
     if (hscope) query = query.eq("hostel_scope", hscope);
+  } else if (["faculty", "hod", "oie", "vice_principal"].includes(role)) {
+    // These approver roles see requests currently at THEIR stage,
+    // across any workflow type. Warden's former queue is now principal's.
+    query = query.eq("current_stage", role);
+    if (hscope) query = query.eq("hostel_scope", hscope);
   } else if (["warden", "principal"].includes(role)) {
-    query = query.eq("workflow_type", "hostel").eq("current_stage", "warden_or_principal");
+    // Principal sees hostel requests at warden_or_principal stage AND
+    // any other workflow requests currently at the principal stage.
+    query = query.or("current_stage.eq.warden_or_principal,current_stage.eq.principal");
   } else if (["admin", "sysadmin"].includes(role)) {
     if (sid) query = query.eq("student_user_id", sid);
   } else if (role === "operator") {
