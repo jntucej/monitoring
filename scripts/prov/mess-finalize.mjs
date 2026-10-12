@@ -32,7 +32,7 @@ const res = await fetch("http://localhost/api/users", {
     email: "mess_incharge@jntuhcej.ac.in",
     role: "mess_incharge",
     uniqueId: "MESS_INCHARGE",
-    pin: "1109",
+    pin: process.env.MESS_PIN || require("crypto").randomInt(1000, 9999).toString(),
     status: "ACTIVE",
   }),
 });

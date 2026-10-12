@@ -228,60 +228,25 @@ const api = useApi();
   }, []);
 
   // Fetch active lockdown on mount and poll every 30s (via API, not direct DB call)
-  useEffect(() => {
-    const fetchLockdown = async () => {
-      try {
-        const res = await fetch("/api/admin/lockdown", {
-          headers: api.getHeaders(),
-        });
-        const json = await res.json();
-        setActiveLockdown(json.data ?? null);
-      } catch {
-        // non-blocking: keep previous lockdown state on error
-      }
-    };
-    fetchLockdown();
-    const t = setInterval(fetchLockdown, 30_000);
-    return () => clearInterval(t);
+  const fetchLockdown = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/lockdown", {
+        headers: getAuthHeaders(),
+      });
+      const json = await res.json();
+      setActiveLockdown(json.data ?? null);
+    } catch {
+      // non-blocking: keep previous lockdown state on error
+    }
   }, []);
 
-  // Dynamic polling interval ref: 30s desktop -> 60s mobile (< 768px)
-  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
   useEffect(() => {
-    const setupInterval = () => {
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current);
-        pollIntervalRef.current = null;
-      }
+    fetchLockdown();
+  }, [fetchLockdown]);
+  usePolling(fetchLockdown, { intervalMs: 30_000 });
 
-      if (typeof document !== "undefined" && document.hidden) return;
-
-      const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-      const pollInterval = isMobile ? 60000 : 30000;
-
-      pollIntervalRef.current = setInterval(() => {
-        if (typeof document !== "undefined" && document.hidden) return;
-        load(false);
-      }, pollInterval);
-    };
-
-    load(true);
-    setupInterval();
-
-    const handleVisibilityChange = () => {
-      setupInterval();
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current);
-      }
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, [load]);
+  // Main dashboard data: 30s polling (visibility-aware via usePolling)
+  usePolling(() => load(false), { intervalMs: 30_000 });
 
   if (loading) {
     return (

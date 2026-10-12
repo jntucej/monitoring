@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 
 interface VVState {
@@ -6,6 +7,7 @@ interface VVState {
   offsetTop: number;
   keyboardOffset: number;
   isKeyboardOpen: boolean;
+  visualViewportWidth: number;
 }
 
 export function useVisualViewport(): VVState {
@@ -14,6 +16,7 @@ export function useVisualViewport(): VVState {
     offsetTop: 0,
     keyboardOffset: 0,
     isKeyboardOpen: false,
+    visualViewportWidth: typeof window !== "undefined" ? window.innerWidth : 0,
   });
 
   useEffect(() => {
@@ -31,6 +34,7 @@ export function useVisualViewport(): VVState {
         offsetTop: off,
         keyboardOffset: kb,
         isKeyboardOpen: kb > 120,
+        visualViewportWidth: vv.width,
       });
     };
     update();

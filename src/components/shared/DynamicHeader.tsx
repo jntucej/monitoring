@@ -22,6 +22,20 @@ const PAGE_TITLES: Record<string, string> = {
   "/sysadmin": "Administration",
   "/parent": "Parent Student Tracker",
   "/student": "Digital ID & Pass Desk",
+  // Approver / leadership desks
+  "/principal": "Principal Command Center",
+  "/principal/permissions": "Principal Approvals",
+  "/vice-principal": "Vice Principal Desk",
+  "/exam/permissions": "Exam Branch Permissions",
+  "/oie": "OIE Dashboard",
+  "/deputy-warden": "Deputy Warden Dashboard",
+  "/hostel-manager": "Hostel Manager Dashboard",
+  "/hostel/permissions": "Hostel Approvals",
+  "/hod": "HOD Workspace",
+  "/hod/permissions": "HOD Approvals",
+  "/faculty": "Faculty Dashboard",
+  "/faculty/permissions": "Faculty Approvals",
+  "/staff/leaves": "Staff Leave Approvals",
 };
 
 export function DynamicHeader() {
@@ -123,6 +137,9 @@ export function DynamicHeader() {
         >
           <Menu className="w-5 h-5" />
         </button>
+        <h1 className="hidden md:block text-sm font-semibold text-[var(--text-primary)] truncate select-none">
+          {title}
+        </h1>
       </div>
 
       <div className="flex items-center gap-1 sm:gap-2.5 shrink-0">

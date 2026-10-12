@@ -5,6 +5,7 @@ import { useReducedMotion } from "framer-motion";
 import { useUIStore } from "@/stores/uiStore";
 import { GateMonitorWS } from "@/lib/websocket";
 import { AlertPayload, GateStatusChangePayload } from "@/lib/mockData";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
 
 export type GateStatus = "entry" | "exit" | "idle" | "warning";
 export type PerformanceTier = "splusplus" | "performance" | "legacy" | "emergency" | "high" | "medium" | "low";
@@ -258,21 +259,26 @@ export function GlassProvider({
   };
 
   // Mobile-first performance detection: Force legacy tier and outdoor display mode on mobile devices
+  // Uses useBreakpoint instead of raw window.innerWidth for SSR safety
+  const breakpoints = useBreakpoint({ sm: '(min-width: 640px)', md: '(min-width: 768px)' });
+  const isMobileViewport = !breakpoints.md;
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     const isTouch = window.matchMedia("(pointer: coarse)").matches;
-    const isMobile = window.innerWidth < 768 && isTouch;
+    const isMobile = isMobileViewport && isTouch;
     if (isMobile) {
       setPerformanceTier("legacy");
       setDisplayModeState("outdoor");
       document.documentElement.setAttribute("data-display-mode", "outdoor");
     }
-  }, [setPerformanceTier]);
+  }, [setPerformanceTier, isMobileViewport]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     const isTouch = window.matchMedia("(pointer: coarse)").matches;
-    const isMobile = window.innerWidth < 768 && isTouch;
+    // Use pre-computed isMobileViewport instead of raw window.innerWidth
+    const isMobile = isMobileViewport && isTouch;
     if (isMobile) {
       setPerformanceTier("legacy");
       return;

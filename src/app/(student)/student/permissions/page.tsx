@@ -10,6 +10,7 @@ import type { PermissionItem } from "@/components/approver/PermissionRow";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useApi } from "@/hooks/useApi";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
+import { usePolling } from "@/hooks/usePolling";
 
 type StatusFilter = "ALL" | "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED";
 
@@ -47,23 +48,8 @@ const api = useApi();
     }
   }, []);
 
-  // Initial load + 30s polling (always on); Live-toggle refetch via useLiveRefresh.
-  // `fetchTickets` awaits its first setState, so nothing runs synchronously here.
-  useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      await fetchTickets();
-      if (cancelled) return;
-    };
-    void load();
-    const id = setInterval(() => {
-      void load();
-    }, 30000);
-    return () => {
-      cancelled = true;
-      clearInterval(id);
-    };
-  }, [fetchTickets]);
+  // 30s polling via usePolling (visibility-aware); Live-toggle refetch via useLiveRefresh.
+  usePolling(fetchTickets, { intervalMs: 30000 });
   useLiveRefresh(fetchTickets, { intervalMs: 30000 });
 
   const filtered =
@@ -72,8 +58,8 @@ const api = useApi();
   return (
     <AuthGuard allowedRoles={["student"]}>
       <div className="p-4 md:p-6 space-y-6 max-w-4xl mx-auto">
-        {/* Header */}
-        <header className="flex flex-wrap items-start justify-between gap-3">
+        {/* Page toolbar — global DynamicHeader renders the app header */}
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <ClipboardList className="w-6 h-6 text-[var(--action-primary)]" />
@@ -88,7 +74,7 @@ const api = useApi();
             <Plus className="w-4 h-4" />
             New Request
           </Link>
-        </header>
+        </div>
 
         {/* Filter tabs */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1">

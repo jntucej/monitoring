@@ -25,7 +25,7 @@ export const BOT_STRINGS: Record<BotLang, BotStrings> = {
     suggestions: [
       "How do I request an out-of-campus pass?",
       "What are the hostel curfew rules?",
-      "How does a warden approve a home_out pass?",
+      "How does a principal approve a home_out pass?",
       "What does the OVERDUE flag mean?",
     ],
     quickChips: [

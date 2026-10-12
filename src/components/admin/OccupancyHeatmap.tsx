@@ -21,7 +21,6 @@ const ROLE_LABELS: Record<string, string> = {
   staff: "Staff",
   worker: "Worker",
   visitor: "Visitor",
-  warden: "Warden",
   admin: "Admin",
   sysadmin: "SysAdmin",
   operator: "Operator",
@@ -31,7 +30,7 @@ const ROLE_LABELS: Record<string, string> = {
 
 const ROLE_COLORS: Record<string, string> = {
   student: "blue", faculty: "emerald", staff: "purple", worker: "amber",
-  visitor: "cyan", warden: "rose", admin: "sky", sysadmin: "violet",
+  visitor: "cyan", admin: "sky", sysadmin: "violet",
   operator: "lime", supervisor: "orange", unknown: "slate",
 };
 

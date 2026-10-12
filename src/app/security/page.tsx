@@ -64,7 +64,6 @@ const ROLE_DISPLAY_NAMES: Record<string, string> = {
   guardian: "Parent / Guardian",
   parent: "Parent / Guardian",
   student: "Student Member",
-  warden: "Hostel Warden",
   principal: "Principal",
   faculty: "Faculty Member",
   staff: "University Staff",
@@ -144,13 +143,13 @@ export default function SecurityPage() {
             { label: "High-Risk Alert Lock", value: "System Freeze Ready" },
           ],
         };
-      case "warden":
+      case "principal":
         return {
           title: "Hostel Clearance & Night Pass Security",
           icon: Building2,
-          desc: "Hostel sector curfew compliance and warden approval verification.",
+          desc: "Hostel sector curfew compliance and approval verification.",
           items: [
-            { label: "Outing Clearance Lock", value: "Warden Digital Signature" },
+            { label: "Outing Clearance Lock", value: "Digital Signature" },
             { label: "Hostel Sector Scope", value: "Isolated Hostel Block" },
             { label: "Late Return Tracker", value: "Automated Flagging" },
             { label: "Resident Roster Sync", value: "Real-time Live Sync" },

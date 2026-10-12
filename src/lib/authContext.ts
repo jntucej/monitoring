@@ -112,7 +112,7 @@ export interface AuthContext {
   /** The user's gate ID (for operators) */
   gateId?: string;
 
-  /** The user's department ID (for HOD/faculty/warden scoping) */
+  /** The user's department ID (for HOD/faculty scoping) */
   departmentId?: string;
 
   /** The user's employee ID (for staff) */
@@ -374,7 +374,8 @@ export async function validateStudentAccess(token: string, studentId: string): P
   }
 
   // Admins and system admins can access students based on RLS
-  if (['admin', 'sysadmin', 'warden'].includes(context.role)) {
+  // 'warden' kept for legacy rows — the role is folded into principal
+  if (['admin', 'sysadmin', 'principal', 'warden'].includes(context.role)) {
     return context;
   }
 

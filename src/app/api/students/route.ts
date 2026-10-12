@@ -17,13 +17,16 @@ const PRINCIPAL_ROLES = ["principal"];
  *   (hostel without scope is rejected — wardens only get scoped listings)
  */
 async function findWardenScopedStudents(scope: string | null, hostel: string | null): Promise<Student[]> {
+  if (!HOSTEL_CODES.includes(hostel?.toUpperCase() ?? "")) {
+    throw new Error("Invalid hostel code. Use one of CSE, IT, ECE, EEE, ME.");
+  }
   const service = getSupabaseServiceClient();
   let query = service
     .from("users")
     .select("*")
     .eq("role", "student")
     .eq("status", "ACTIVE");
-  if (hostel && HOSTEL_CODES.includes(hostel.toUpperCase())) {
+  if (hostel) {
     query = query.eq("department", hostel.toUpperCase());
   }
   if (scope === "active") {

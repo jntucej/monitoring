@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useMotionValue, useSpring, MotionValue } from 'framer-motion';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
 
 interface ParallaxReturn {
   x: MotionValue<number>;
@@ -12,7 +13,11 @@ export const useMouseParallax = (factor: number = 0.02, damping: number = 20, st
   const y = useMotionValue(0);
   const springX = useSpring(x, { damping, stiffness });
   const springY = useSpring(y, { damping, stiffness });
-  const [isDesktop, setIsDesktop] = useState(false);
+
+  // Use useBreakpoint instead of raw window.innerWidth for SSR safety
+  const breakpoints = useBreakpoint({ sm: '(min-width: 640px)', md: '(min-width: 768px)', lg: '(min-width: 1024px)' });
+  const isDesktopDevice = breakpoints.md || false;
+
   // Issue #399: respect prefers-reduced-motion (WCAG 2.2 §2.3.3).
   // Users who set "reduce motion" in their OS must never see the parallax effect.
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -23,16 +28,6 @@ export const useMouseParallax = (factor: number = 0.02, damping: number = 20, st
     const handler = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
-  }, []);
-
-  useEffect(() => {
-    const checkDesktop = () => {
-      const isDesktopDevice = typeof window !== 'undefined' && window.innerWidth >= 640;
-      setIsDesktop(isDesktopDevice);
-    };
-    checkDesktop();
-    window.addEventListener('resize', checkDesktop);
-    return () => window.removeEventListener('resize', checkDesktop);
   }, []);
 
   useEffect(() => {
@@ -52,7 +47,7 @@ export const useMouseParallax = (factor: number = 0.02, damping: number = 20, st
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, [x, y, factor, reducedMotion]);
 
-  return { x: springX, y: springY, isDesktop: isDesktop && !reducedMotion };
+  return { x: springX, y: springY, isDesktop: isDesktopDevice && !reducedMotion };
 };
 
 export default useMouseParallax;

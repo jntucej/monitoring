@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useRef, Suspense } from "react";
+import { useEffect, useState, useRef, Suspense, useCallback } from "react";
+import { usePolling } from "@/hooks/usePolling";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { normalizeScannedPayload } from "@/lib/barcode";
 import { motion } from "framer-motion";
@@ -81,28 +82,28 @@ function OperatorPageInner() {
   // `authenticated` to true before the redirect would fire. Once the kiosk
   // attempt settles without a session (notConfigured / error), redirect.
   useEffect(() => {
-    if (authenticated) return;
-    if (kiosk.pending) return; // wait for the in-flight kiosk session attempt
+    if (!authenticated) return;
     router.replace(`/login/operator?redirect=/gate/${gateId}`);
   }, [authenticated, kiosk.pending, gateId, router]);
 
-  useEffect(() => {
+  // Check lockdown status
+  const checkLockdown = useCallback(async () => {
     if (!authenticated) return;
-    const checkLockdown = async () => {
-      try {
-        const res = await fetch("/api/admin/lockdown");
-        const json = await res.json();
-        if (json.success && json.data) {
-          setActiveLockdown(json.data);
-        } else {
-          setActiveLockdown(null);
-        }
-      } catch {}
-    };
-    checkLockdown();
-    const interval = setInterval(checkLockdown, 10000);
-    return () => clearInterval(interval);
+    try {
+      const res = await fetch("/api/lockdown/active");
+      const json = await res.json();
+      if (json.success && json.data) {
+        setActiveLockdown(json.data);
+      } else {
+        setActiveLockdown(null);
+      }
+    } catch {}
   }, [authenticated]);
+
+  useEffect(() => {
+    checkLockdown();
+  }, [checkLockdown]);
+  usePolling(checkLockdown, { intervalMs: 10000 });
   
   // Redirect special routing path shortcuts (/gate/history & /gate/manual) to operators dynamic gate path
   useEffect(() => {
@@ -150,47 +151,8 @@ function OperatorPageInner() {
     }
   }, [authenticated, user, gateId]);
 
-  // Ref to store polling interval ID
-  const statsIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
   // Dynamic periodic sync of stats: 5s on desktop, 15s on mobile (width < 768)
-  useEffect(() => {
-    if (!authenticated) return;
-
-    const setupInterval = () => {
-      if (statsIntervalRef.current) {
-        clearInterval(statsIntervalRef.current);
-        statsIntervalRef.current = null;
-      }
-
-      if (typeof document !== "undefined" && document.hidden) return;
-
-      loadStats();
-
-      const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-      const pollInterval = isMobile ? 15000 : 5000;
-
-      statsIntervalRef.current = setInterval(() => {
-        if (typeof document !== "undefined" && document.hidden) return;
-        loadStats();
-      }, pollInterval);
-    };
-
-    setupInterval();
-
-    const handleVisibilityChange = () => {
-      setupInterval();
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      if (statsIntervalRef.current) {
-        clearInterval(statsIntervalRef.current);
-      }
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, [authenticated, loadStats]);
+  usePolling(loadStats, { intervalMs: 5000 });
   const [showCameraScanner, setShowCameraScanner] = useState(false);
   const [manualRollInput, setManualRollInput] = useState("");
 
@@ -689,7 +651,7 @@ function OperatorPageInner() {
         )}
 
         {/* Dynamic Inner view */}
-        {renderActiveView()}
+        <div className="min-w-0 w-full">{renderActiveView()}</div>
 
         {/* Dev contact strip for reporting gate issues */}
         <div className="pt-2">

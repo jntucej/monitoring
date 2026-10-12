@@ -115,7 +115,7 @@ export const ARTICLES: HelpArticle[] = [
     icon: Settings,
     category: "Operations",
     minTier: 20,
-    visibleToRoles: ["sysadmin", "admin", "warden", "principal", "operator", "guard"],
+    visibleToRoles: ["sysadmin", "admin", "principal", "operator", "guard"],
     body: [
       "Start of shift: Confirm the kiosk screen boots to 'Ready' state, the badge reader LED is green, and the video feed shows the approach lane clearly. If any of these fail, raise a kiosk fault ticket before the first scan.",
       "Normal scan: The badge reader reads the card or QR in under 2 seconds. A green chime means permitted entry; a red chime means the gate is denying access — record the reason code shown on the kiosk screen in the shift log.",
@@ -191,7 +191,6 @@ function getRoleTier(role: string): number {
     oie: 75,
     hostel_manager: 70,
     deputy_warden: 65,
-    warden: 60,
     caretaker: 55,
     hod: 50,
     staff: 45,
@@ -243,13 +242,14 @@ export default function HelpPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 space-y-6">
-      <header>
+    <div className="mx-auto max-w-3xl px-4 py-8 space-y-6 min-w-0">
+      {/* Page title — global DynamicHeader renders the app header */}
+      <div>
         <h1 className="text-3xl font-semibold tracking-tight">Help Center</h1>
         <p className="mt-1 text-[var(--text-muted)]">
           Role-scoped documentation for <span className="font-mono">{user.role}</span> (tier {tier})
         </p>
-      </header>
+      </div>
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-muted)]" />

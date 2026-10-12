@@ -176,7 +176,8 @@ function GuardianDashboardInner() {
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 min-w-0">
       {/* header */}
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      {/* Page toolbar — global DynamicHeader already renders the app header */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
             <ShieldCheck className="w-6 h-6 text-emerald-400" />
@@ -196,7 +197,7 @@ function GuardianDashboardInner() {
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Clock className="w-4 h-4" />}
           {loading ? "Refreshing…" : "Refresh"}
         </button>
-      </header>
+      </div>
 
       {anyError && (
         <ErrorBanner
@@ -267,7 +268,7 @@ function GuardianDashboardInner() {
               />
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto min-w-0">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-xs uppercase tracking-wide">
@@ -340,7 +341,7 @@ function GuardianDashboardInner() {
               />
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto min-w-0">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-xs uppercase tracking-wide">

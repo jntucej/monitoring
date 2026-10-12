@@ -22,7 +22,6 @@ import {
   Home,
 } from "lucide-react";
 
-const MIN_TIER = 55; // caretaker (lowest hostel desk role: 55; deputy_warden 65; hostel_manager 70)
 
 /* ── response shapes (mirror the route handlers — all read-only) ── */
 
@@ -180,7 +179,8 @@ function HostelPermissionsInner() {
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       {/* header */}
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      {/* Page toolbar — global DynamicHeader already renders the app header */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
             <Home className="w-6 h-6 text-emerald-400" />
@@ -203,7 +203,7 @@ function HostelPermissionsInner() {
           )}
           {permLoading || presenceLoading ? "Refreshing…" : "Refresh"}
         </button>
-      </header>
+      </div>
 
       {/* error banners — presence matrix may 403 for hostel roles; render gracefully */}
       {presenceError && (
@@ -273,7 +273,7 @@ function HostelPermissionsInner() {
               <Loader2 className="w-4 h-4 animate-spin" /> Loading occupancy…
             </div>
           ) : presence ? (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto min-w-0">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-800 text-slate-500 text-xs uppercase tracking-wide">
@@ -335,19 +335,7 @@ function HostelPermissionsInner() {
 
 export default function HostelPermissionsPage() {
   return (
-    <GuardedPage
-      minTier={MIN_TIER}
-      allowedRoles={[
-        "caretaker",
-        "deputy_warden",
-        "hostel_manager",
-        "warden",
-        "principal",
-        "principal",
-        "admin",
-        "sysadmin",
-      ]}
-    >
+    <GuardedPage allowedRoles={["caretaker", "deputy_warden", "hostel_manager", "principal", "admin", "sysadmin"]}>
       <Suspense fallback={<PageLoading />}>
         <HostelPermissionsInner />
       </Suspense>

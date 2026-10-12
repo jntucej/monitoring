@@ -24,7 +24,6 @@ import {
   Clock,
 } from "lucide-react";
 
-const MIN_TIER = 80; // exam_branch tier (oie=75 / vice_principal=85 also reach this desk)
 
 /* ── response shapes (mirror /api/permissions) ── */
 
@@ -133,15 +132,22 @@ function ExamPermissionsInner() {
   ];
 
   // KPI fetches — /api/permissions filters by the caller's stage server-side,
-  // so each queue shows its own pending count.
+  // so each queue shows its own pending count. An explicit stage param is used
+  // for the exam_branch role (not in the role→stage map) so it sees the OIE
+  // queue, never the full exam pipeline.
+  const isExamBranchRole = role === "exam_branch";
+
   const {
     data: oieData,
     loading: oieLoading,
     error: oieError,
     refresh: refreshOie,
-  } = useApiResource<PermissionsResponse>("/api/permissions?workflowType=exam&status=PENDING", {
-    ttlMs: 30_000,
-  });
+  } = useApiResource<PermissionsResponse>(
+    isExamBranchRole
+      ? "/api/permissions?workflowType=exam&status=PENDING&stage=oie"
+      : "/api/permissions?workflowType=exam&status=PENDING",
+    { ttlMs: 30_000 },
+  );
 
   const {
     data: vpData,
@@ -169,8 +175,9 @@ function ExamPermissionsInner() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
-      {/* header */}
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      {/* Page toolbar — the global DynamicHeader (SafeAreaAppShell) already
+          renders the app header; this is NOT a second <header>. */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
             <ClipboardCheck className="w-6 h-6 text-emerald-400" />
@@ -193,7 +200,7 @@ function ExamPermissionsInner() {
           )}
           {(oieLoading || vpLoading) ? "Refreshing…" : "Refresh"}
         </button>
-      </header>
+      </div>
 
       {/* error banner */}
       {(oieError || (!oieData && !oieLoading)) && (
@@ -289,7 +296,7 @@ function ExamPermissionsInner() {
 
 export default function ExamPermissionsPage() {
   return (
-    <GuardedPage minTier={MIN_TIER} allowedRoles={["exam_branch", "oie", "vice_principal", "admin", "sysadmin"]}>
+    <GuardedPage allowedRoles={["exam_branch", "oie", "vice_principal", "admin", "sysadmin"]}>
       <Suspense fallback={<PageLoading />}>
         <ExamPermissionsInner />
       </Suspense>

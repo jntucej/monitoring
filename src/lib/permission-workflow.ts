@@ -22,8 +22,8 @@ export const ROLE_STAGE_PERMISSIONS: Record<string, readonly string[]> = {
 
 export const WORKFLOW_STAGES: Record<WorkflowType, string[]> = {
   hostel: ["caretaker", "deputy_warden", "hostel_manager", "warden_or_principal", "hostel_biometric", "main_gate", "completed"],
-  exam: ["faculty", "hod", "oie", "vice_principal", "principal", "completed"],
-  memo: ["faculty", "hod", "oie", "vice_principal", "principal", "completed"],
+  exam: ["hod", "oie", "vice_principal", "principal", "completed"],
+  memo: ["faculty", "hod", "vice_principal", "principal", "completed"],
   staff_leave: ["hod", "vice_principal", "principal", "completed"],
 };
 
@@ -74,7 +74,7 @@ export function canApproveAtStage(role: string, workflowType: WorkflowType, curr
   if (role === "admin" || role === "sysadmin") return true;
 
   if (currentStage === "hostel_biometric") {
-    return ["caretaker", "deputy_warden", "hostel_manager", "warden", "principal"].includes(role);
+    return ["caretaker", "deputy_warden", "hostel_manager", "principal"].includes(role);
   }
 
   const roleMap: Record<string, string> = {

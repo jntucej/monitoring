@@ -12,7 +12,7 @@ export const ROLES = {
   PARENT:          "parent",
   HOD:             "hod",
   STUDENT:         "student",
-  WARDEN:          "warden", // warden role folded into principal — principal carries its privileges
+  // warden was folded into principal — principal carries its privileges
   FACULTY:         "faculty",
   STAFF:           "staff",
   WORKER:          "worker",

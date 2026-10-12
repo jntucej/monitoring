@@ -91,8 +91,12 @@ export async function checkRateLimit(
   if (!isEdge && process.env.NODE_ENV === 'production' && !isDev) {
     try {
       const { query } = await import('./postgres');
+      // Count only real request rows, NOT the limiter's own bookkeeping
+      // (method='LIMITER') rows — otherwise the limiter counts itself
+      // and 429s after its own INSERTs fill the window.
       const rows = await query(
-        `SELECT COUNT(*) as count FROM api_metrics WHERE path = $1 AND timestamp >= $2`,
+        `SELECT COUNT(*) as count FROM api_metrics
+         WHERE path = $1 AND timestamp >= $2 AND method != 'LIMITER'`,
         [key, new Date(Date.now() - windowMs).toISOString()]
       );
 

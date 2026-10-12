@@ -1,50 +1,55 @@
-# 🔑 Role Credentials (dev / testing)
+# Role Credentials (dev / testing)
 
 > **Test-only credentials** provisioned for the campus monitoring stack.
 > These accounts exist so every role dashboard can be exercised end-to-end.
-> They live in the dev DB (`gate_monitor`) and should **not** be used in a
-> hardened production deployment. Rotate or delete before going live.
+> They live in the dev DB (`gate_monitor`).
+>
+> **⚠️ No plaintext passwords are stored in this file or anywhere in the repo.**
+> All credentials are bcrypt-hashed in the DB. The last rotation was 2026-10-12.
+> If you need the current values, ask the repo owner or set new ones via the
+> `/api/users` PATCH endpoint (sysadmin).
 
 ## Login
 
 - **PIN login** (`/login` → PIN tab): works only for the *device-facing* roles —
   `operator`, `staff`, `worker`, `faculty`, and students (bulk-imported).
-- **Password login** (`/login` → password tab): use the identifier + password below
-  for privileged roles. (Privileged roles are intentionally excluded from PIN login
-  by design.)
+- **Password login** (`/login` → password tab): use the identifier for privileged
+  roles. (Privileged roles are intentionally excluded from PIN login by design.)
 - The **operator kiosk** (`/gate`) auto-signs-in the designated default operator
   (Main Campus Gate) without a manual login.
 
 ## Provisioned role accounts (13)
 
-| # | Role | Login identifier | Credential | Dashboard |
-|---|------|------------------|------------|-----------|
-| 1 | `operator`       | `OPERATOR`       | PIN **`9001`** ✓ (kiosk auto-login also works) | `/gate` |
-| 2 | `principal`      | `PRINCIPAL`      | pw `Principal@123` | `/principal` |
-| 3 | `vice_principal` | `VICE_PRINCIPAL` | pw `VicePrinc@123` | `/principal` |
-| 4 | `exam_branch`    | `EXAM_BRANCH`    | pw `ExamBranch@123` | `/exam/permissions` |
-| 5 | `oie`            | `OIE`            | pw `OIE@123` | `/exam/permissions` |
-| 6 | `caretaker`      | `CARETAKER`      | pw `Caretaker@123` | `/hostel/permissions` |
-| 7 | `deputy_warden`  | `DEPUTY_WARDEN`  | pw `DepWarden@123` | `/hostel/permissions` |
-| 8 | `hostel_manager` | `HOSTEL_MANAGER` | pw `HostelMgr@123` | `/hostel/permissions` |
-| 9 | `parent`         | `PARENT`         | pw `Parent@123` | `/parent` |
-| 10| `mess_incharge`  | `MESS_INCHARGE`  | PIN **`1109`** ✓ | `/mess` |
-| 11| `warden`         | `WARDEN`         | pw `Warden@123` | `/principal` (principal desk) |
-| 12| `supervisor`     | `SUPERVISOR`     | pw `Supervisor@123` | `/supervisor` |
-| 13| `student`        | e.g. `23JJ1A0210` | bulk-import PIN | `/student` |
+| # | Role | Login identifier | Dashboard |
+|---|------|------------------|-----------|
+| 1 | `operator`       | `OPERATOR`       | `/gate` |
+| 2 | `principal`      | `PRINCIPAL`      | `/principal` |
+| 3 | `vice_principal` | `VICE_PRINCIPAL` | `/vice-principal` |
+| 4 | `exam_branch`    | `EXAM_BRANCH`    | `/exam-branch` |
+| 5 | `oie`            | `OIE`            | `/oie` |
+| 6 | `caretaker`      | `CARETAKER`      | `/hostel/permissions` |
+| 7 | `deputy_warden`  | `DEPUTY_WARDEN`  | `/hostel/permissions` |
+| 8 | `hostel_manager` | `HOSTEL_MANAGER` | `/hostel/permissions` |
+| 9 | `parent`         | `PARENT`         | `/parent` |
+| 10| `mess_incharge`  | `MESS_INCHARGE`  | `/mess` |
+| 11| `supervisor`     | `SUPERVISOR`     | `/supervisor` |
+| 12| `student`        | e.g. `23JJ1A0210` | `/student` |
 
 ### Supporting roles (pre-existing, not part of the 13)
 
-| Role | Login identifier | Note |
-|------|------------------|------|
-| `admin`     | `ADMIN`     | `Admin@123` (initial PIN set) |
-| `sysadmin`  | `SYSADMIN`  | your existing sysadmin password |
-| `guardian`  | `GUARDIAN`  | `Guardian@123` |
-| `hod`       | `HOD`       | `HOD@123` |
-| `staff`     | `STAFF`     | `Staff@123` |
-| `worker`    | `WORKER`    | PIN (if set) |
-| `faculty`   | `FACULTY`   | `Faculty@123` |
-| `visitor`   | `VISITOR`   | `Visitor@123` |
+| Role | Login identifier |
+|------|------------------|
+| `admin`      | `ADMIN` |
+| `sysadmin`   | `SYSADMIN` |
+| `guardian`   | `GUARDIAN` |
+| `hod`        | `HOD` |
+| `staff`      | `STAFF` |
+| `worker`     | `WORKER` |
+| `faculty`    | `FACULTY` |
+| `visitor`    | `VISITOR` |
+
+> **To get or change a credential:** log in as `sysadmin` and use the
+> `/api/users` PATCH endpoint. Never commit credentials to the repo.
 
 ## How these were provisioned
 
@@ -61,10 +66,9 @@
 
 ```bash
 cd /root/monitoring
-npx tsx scripts/prov/index.mts        # (re)provision the 9 role accounts
+npx tsx scripts/prov/index.mts         # (re)provision the 9 role accounts
 npx tsx scripts/prov/mess-finalize.mjs # create MESS_INCHARGE
 ```
 
 To change a single PIN/password use the `/api/users` PATCH endpoint (sysadmin).
-
----
+**Never commit credentials to the repo.**

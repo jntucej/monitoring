@@ -1,6 +1,6 @@
 import React from 'react';
 import { PersonType } from '@/lib/types';
-import { User, GraduationCap, Briefcase, Wrench, UserCheck, HeartHandshake, Shield, ShieldCheck, ShieldAlert, Building, Radio } from 'lucide-react';
+import { User, GraduationCap, Briefcase, Wrench, UserCheck, HeartHandshake, ShieldCheck, ShieldAlert, Building, Radio } from 'lucide-react';
 
 interface PersonBadgeProps {
   type: PersonType | string;
@@ -71,13 +71,6 @@ export const PersonBadge: React.FC<PersonBadgeProps> = ({
       text: 'text-indigo-400',
       border: 'border-indigo-500/20',
       icon: <Building className="w-3.5 h-3.5 mr-1" />,
-    },
-    warden: {
-      label: 'Warden',
-      bg: 'bg-amber-500/10',
-      text: 'text-amber-400',
-      border: 'border-amber-500/20',
-      icon: <Shield className="w-3.5 h-3.5 mr-1" />,
     },
     principal: {
       label: 'Principal',

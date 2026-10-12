@@ -60,12 +60,50 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
 
   switch (roleCode) {
     case "caretaker":
-    case "deputy_warden":
+      groups = [
+        {
+          groupLabel: "Hostel Permissions",
+          items: [
+            { href: "/hostel/permissions", label: "Pending Approvals", icon: "ClipboardList", badge: "PENDING" },
+            { href: "/permissions", label: "My Tickets", icon: "FileText" },
+            { href: "/profile", label: "My Profile", icon: "User" },
+          ],
+        },
+        {
+          groupLabel: "General",
+          items: [
+            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+          ],
+        },
+      ];
+      break;
+
     case "hostel_manager":
       groups = [
         {
           groupLabel: "Hostel Permissions",
           items: [
+            { href: "/hostel-manager", label: "Hostel Manager Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
+            { href: "/hostel/permissions", label: "Pending Approvals", icon: "ClipboardList", badge: "PENDING" },
+            { href: "/permissions", label: "My Tickets", icon: "FileText" },
+          ],
+        },
+        {
+          groupLabel: "General",
+          items: [
+            { href: "/profile", label: "My Profile", icon: "User" },
+            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+          ],
+        },
+      ];
+      break;
+
+    case "deputy_warden":
+      groups = [
+        {
+          groupLabel: "Hostel Permissions",
+          items: [
+            { href: "/deputy-warden", label: "Deputy Warden Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
             { href: "/hostel/permissions", label: "Pending Approvals", icon: "ClipboardList", badge: "PENDING" },
             { href: "/permissions", label: "My Tickets", icon: "FileText" },
           ],
@@ -85,12 +123,13 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "Principal Desk",
           items: [
-					{ href: "/principal/permissions", label: "Warden / Principal Approvals", icon: "CheckSquare", badge: "PENDING" },
-
+            { href: "/principal", label: "Principal Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
+            { href: "/principal/permissions", label: "Principal Approvals", icon: "CheckSquare", badge: "PENDING" },
+            { href: "/supervisor?tab=alerts", label: "Security Radar", icon: "ShieldAlert", badge: "ALERTS" },
           ],
         },
         {
-          groupLabel: "General",
+          groupLabel: "General & Support",
           items: [
             { href: "/profile", label: "My Profile", icon: "User" },
             { href: "/about", label: "About Campus", icon: "HelpCircle" },
@@ -104,11 +143,12 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "Vice Principal Desk",
           items: [
+            { href: "/vice-principal", label: "VP Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
             { href: "/exam/permissions", label: "VP Approvals", icon: "CheckSquare", badge: "PENDING" },
           ],
         },
         {
-          groupLabel: "General",
+          groupLabel: "General & Support",
           items: [
             { href: "/profile", label: "My Profile", icon: "User" },
             { href: "/about", label: "About Campus", icon: "HelpCircle" },
@@ -118,22 +158,66 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       break;
 
     case "oie":
-    case "exam_branch":
       groups = [
         {
           groupLabel: "Exam Branch",
           items: [
-            { href: "/exam/permissions", label: "Exam Documents", icon: "FileText", badge: "PENDING" },
+            { href: "/oie", label: "OIE Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
+            { href: "/exam/permissions", label: "OIE Approvals", icon: "CheckSquare", badge: "PENDING" },
           ],
         },
         {
-          groupLabel: "General",
+          groupLabel: "General & Support",
           items: [
             { href: "/profile", label: "My Profile", icon: "User" },
             { href: "/about", label: "About Campus", icon: "HelpCircle" },
           ],
         },
       ];
+      break;
+
+    case "exam_branch":
+      groups = [
+        {
+          groupLabel: "Exam Branch",
+          items: [
+            { href: "/exam-branch", label: "Exam Branch Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
+            { href: "/exam/permissions", label: "Exam Documents", icon: "FileText", badge: "PENDING" },
+          ],
+        },
+        {
+          groupLabel: "General & Support",
+          items: [
+            { href: "/profile", label: "My Profile", icon: "User" },
+            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+          ],
+        },
+      ];
+      break;
+
+    case "hostel_manager":
+    case "caretaker":
+      // Already handled above; these were listed in original code too
+      break;
+
+    case "deputy_warden":
+      // Already handled above
+      break;
+
+    case "principal":
+      // Already handled above
+      break;
+
+    case "vice_principal":
+      // Already handled above
+      break;
+
+    case "oie":
+      // Already handled above
+      break;
+
+    case "exam_branch":
+      // Already handled above
       break;
 
     case "sysadmin":
@@ -175,9 +259,8 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
             { href: "/security", label: "Security Status", icon: "ShieldCheck" },
             { href: "/sysadmin/compliance", label: "Compliance & Retention", icon: "ShieldCheck" },
             { href: "/sysadmin/exit-reasons", label: "Exit Reasons & Outpass", icon: "DoorOpen" },
-          { href: "/sysadmin/reasons", label: "Custom Reasons", icon: "MessageSquarePlus" },
-          { href: "/sysadmin/devices", label: "Device Verification", icon: "Cpu" },
-
+            { href: "/sysadmin/reasons", label: "Custom Reasons", icon: "MessageSquarePlus" },
+            { href: "/sysadmin/devices", label: "Device Verification", icon: "Cpu" },
             { href: "/sysadmin/alerts/rules", label: "Alert Rules", icon: "Bell" },
             { href: "/sysadmin/navigation", label: "Navigation Editor", icon: "Layout" },
             { href: "/help", label: "Help & Docs", icon: "BookOpen" },
@@ -288,11 +371,9 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       break;
 
     case "supervisor":
-    case "principal":
-    case "warden":
       groups = [
         {
-          groupLabel: "Supervisor & Warden Desk",
+          groupLabel: "Supervisor Desk",
           items: [
             { href: "/supervisor", label: "Supervisor Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
             { href: "/supervisor?tab=approvals", label: "Outpass Approvals", icon: "CheckSquare", badge: "PENDING" },
@@ -508,7 +589,7 @@ export function useNavItems(roleCode?: string) {
         setNavigation(defaults);
       } finally {
         setLoading(false);
-      }
+      };
     };
     fetchNav();
   }, [roleCode, isHod, dept]);

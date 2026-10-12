@@ -12,6 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useGlass } from "@/context/GlassContext";
 import { useGlossyMotion } from "@/lib/animations";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
 
 export interface GlassInteractiveCardProps {
   children: React.ReactNode;
@@ -38,14 +39,15 @@ export function GlassInteractiveCard({
 
   // Mobile Touch Detection (pointer: coarse physical screen check)
   const [isTouchDevice, setIsTouchDevice] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  // Use useBreakpoint instead of raw window.innerWidth for SSR safety
+  const breakpoints = useBreakpoint({ sm: '(min-width: 640px)', md: '(min-width: 768px)' });
+  const isMobile = !breakpoints.md;
   const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const touch = window.matchMedia("(pointer: coarse)").matches;
       setIsTouchDevice(touch);
-      setIsMobile(window.innerWidth < 768 && touch);
     }
   }, []);
 

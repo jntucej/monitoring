@@ -12,7 +12,6 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import {
   ClipboardCheck,
-  ShieldCheck,
   Users,
   FileText,
   AlertTriangle,
@@ -22,7 +21,10 @@ import {
   Flag,
 } from "lucide-react";
 
-const MIN_TIER = 50; // exam_superintendent tier
+// Restricted to exam-staff approvers: exam_superintendent (tier 50) plus the
+// exam-branch roles that act on the same queue (oie 75 / exam_branch 80 /
+// vice_principal 85) and admin/sysadmin.
+const MIN_TIER = 50;
 
 /* ── response shapes ── */
 
@@ -43,10 +45,6 @@ interface PermissionsResponse {
   success: boolean;
   data: ExamQueueRow[];
   total?: number;
-}
-
-interface SecurityStats {
-  [key: string]: number;
 }
 
 /* ── building blocks ── */
@@ -125,21 +123,10 @@ function ExamSuperintendentDashboardInner() {
     { ttlMs: 30_000 }
   );
 
-  // Gate-scan anomaly counters surfaced during exam windows.
-  const {
-    data: securityStats,
-    loading: statsLoading,
-    error: statsError,
-    refresh: refreshStats,
-  } = useApiResource<{ success: boolean; data: SecurityStats }>(
-    "/api/admin/security/stats",
-    { ttlMs: 30_000 }
-  );
-
   const refresh = useCallback(async () => {
     clearCache();
-    await Promise.all([refreshQueue(), refreshStats()]);
-  }, [refreshQueue, refreshStats]);
+    await refreshQueue();
+  }, [refreshQueue]);
 
   usePolling(refresh, { intervalMs: 30_000, enabled: !!user });
 
@@ -148,11 +135,13 @@ function ExamSuperintendentDashboardInner() {
   const breachedCount = queueRows.filter(
     (r) => r.sla_deadline && new Date(r.sla_deadline).getTime() < Date.now()
   ).length;
-  const anomalies = (securityStats?.data?.anomalies ?? 0) || 0;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 min-w-0">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      {/* Page toolbar — the global DynamicHeader (SafeAreaAppShell) already
+          carries the app title bar / user chip, so this div is not a header
+          element. */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
             <FileText className="w-6 h-6 text-emerald-400" />
@@ -165,27 +154,27 @@ function ExamSuperintendentDashboardInner() {
         </div>
         <button
           onClick={() => void refresh()}
-          disabled={queueLoading || statsLoading}
+          disabled={queueLoading}
           className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700 disabled:opacity-50"
         >
-          {queueLoading || statsLoading ? (
+          {queueLoading ? (
             <Loader2 className="w-4 h-4 animate-spin" />
           ) : (
             <Clock className="w-4 h-4" />
           )}
-          {queueLoading || statsLoading ? "Refreshing…" : "Refresh"}
+          {queueLoading ? "Refreshing…" : "Refresh"}
         </button>
-      </header>
+      </div>
 
-      {(queueError || statsError) && (
+      {queueError && (
         <ErrorBanner
-          message={`${queueError ? `Exam queue: ${queueError}` : ""}${queueError && statsError ? " · " : ""}${statsError ? `Security stats: ${statsError}` : ""}`}
-          onRetry={() => void refresh()}
+          message={`Exam queue: ${queueError}`}
+          onRetry={() => void refreshQueue()}
         />
       )}
 
       {/* KPI row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard
           icon={Inbox}
           label="Pending Exam Passes"
@@ -201,14 +190,6 @@ function ExamSuperintendentDashboardInner() {
           sub="Past their 48h approval deadline"
           accent="text-amber-400"
           loading={queueLoading && !examQueue}
-        />
-        <StatCard
-          icon={ShieldCheck}
-          label="Gate Anomalies"
-          value={anomalies}
-          sub="Scan anomalies in the security log"
-          accent="text-sky-400"
-          loading={statsLoading && !securityStats}
         />
         <StatCard
           icon={Users}
@@ -238,7 +219,7 @@ function ExamSuperintendentDashboardInner() {
           ) : queueRows.length === 0 ? (
             <EmptyState message="No pending exam clearance requests. All exam passes have cleared the pipeline." />
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto min-w-0">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-800 text-slate-500 text-xs uppercase tracking-wide">
@@ -302,7 +283,7 @@ function ExamSuperintendentDashboardInner() {
 
 export default function ExamSuperintendentDashboardPage() {
   return (
-    <GuardedPage minTier={MIN_TIER} allowedRoles={["exam_superintendent", "admin", "sysadmin"]}>
+    <GuardedPage minTier={MIN_TIER} allowedRoles={["exam_superintendent", "oie", "exam_branch", "vice_principal", "admin", "sysadmin"]}>
       <Suspense fallback={<PageLoading />}>
         <ExamSuperintendentDashboardInner />
       </Suspense>

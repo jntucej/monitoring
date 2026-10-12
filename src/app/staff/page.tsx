@@ -196,9 +196,9 @@ function StaffDashboardInner() {
   const hasAnyData = !!s || attRecords.length > 0;
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
-      {/* header */}
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 min-w-0">
+      {/* Page toolbar — global DynamicHeader already renders the app header */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-white">
             Staff Dashboard
@@ -220,7 +220,7 @@ function StaffDashboardInner() {
           )}
           {statsLoading || attLoading ? "Refreshing…" : "Refresh"}
         </button>
-      </header>
+      </div>
 
       {/* errors */}
       {(statsError || attError) && (
@@ -443,7 +443,7 @@ function StaffDashboardInner() {
               <EmptyState message="No staff attendance records yet." />
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto min-w-0">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-800 text-slate-500 text-xs uppercase tracking-wide">

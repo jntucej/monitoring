@@ -62,8 +62,8 @@ const ROLE_ACCESS_MATRIX: { label: string; path: string; roles: string[] }[] = [
   { label: "Admin Dashboard", path: "/admin", roles: ["admin", "sysadmin"] },
   { label: "Principal / Approvals", path: "/principal/permissions", roles: ["principal", "vice_principal", "admin", "sysadmin"] },
   { label: "HOD Workspace", path: "/hod", roles: ["hod", "principal", "vice_principal", "admin", "sysadmin"] },
-  { label: "Warden / Gate Ops", path: "/principal", roles: ["warden", "principal", "supervisor", "admin", "sysadmin"] },
-  { label: "Supervisor Dashboard", path: "/supervisor", roles: ["supervisor", "warden", "principal", "admin", "sysadmin"] },
+  { label: "Principal / Gate Ops", path: "/principal", roles: ["principal", "supervisor", "admin", "sysadmin"] },
+  { label: "Supervisor Dashboard", path: "/supervisor", roles: ["supervisor", "principal", "admin", "sysadmin"] },
   { label: "Operator Gate", path: "/operator", roles: ["operator", "worker", "admin", "sysadmin"] },
   { label: "Worker Console", path: "/worker", roles: ["worker", "admin", "sysadmin"] },
   { label: "Faculty / Leaves", path: "/faculty/permissions", roles: ["faculty", "admin", "sysadmin"] },
@@ -120,6 +120,7 @@ export default function RolesManagementPage() {
   // ---- role hierarchy state ----
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [countLoading, setCountLoading] = useState(false);
+  const [userCounts, setUserCounts] = useState<Record<string, number>>({});
 
   // ---- grant / revoke state ----
   const [grantRoleCode, setGrantRoleCode] = useState<string | null>(null);
@@ -342,6 +343,32 @@ export default function RolesManagementPage() {
     }
   };
 
+  // ---- per-role user counts (client-side role filter against /api/users) ----
+  const roleCodes = useMemo(() => roles.map((r) => r.code), [roles]);
+  const fetchUserCounts = async () => {
+    setCountLoading(true);
+    try {
+      const res = await fetch("/api/users", { headers: getAuthHeaders(), cache: "no-store" });
+      const json = await res.json();
+      const users: PickedUser[] = Array.isArray(json?.data) ? json.data : [];
+      const counts: Record<string, number> = {};
+      roleCodes.forEach((c) => (counts[c] = 0));
+      users.forEach((u) => {
+        const role = u ? u.role : undefined;
+        if (role && counts[role] !== undefined) counts[role] += 1;
+      });
+      setUserCounts(counts);
+    } catch {
+      setUserCounts({});
+    } finally {
+      setCountLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserCounts();
+  }, []);
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingRole?.code || !editingRole?.display_name) return;
@@ -357,6 +384,7 @@ export default function RolesManagementPage() {
         addToast({ variant: "success", message: `Saved role ${editingRole.code}` });
         setEditingRole(null);
         fetchRoles();
+        fetchUserCounts();
       } else {
         addToast({ variant: "error", message: json.error?.message || "Failed to save role" });
       }
