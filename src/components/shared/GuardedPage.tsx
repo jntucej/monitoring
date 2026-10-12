@@ -6,7 +6,6 @@ import type { Role } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import { getDefaultRouteForRole } from "@/lib/route-helpers";
 import { AppLoadingScreen } from "@/components/shared/AppLoadingScreen";
-import { ShieldAlert } from "lucide-react";
 import { AuthGuard } from "./AuthGuard";
 
 export interface GuardedPageProps {
@@ -17,6 +16,7 @@ export interface GuardedPageProps {
 
 export function GuardedPage({ allowedRoles, minTier = 0, children }: GuardedPageProps) {
   const user = useAuthStore((s) => s.user);
+  const hasHydrated = useAuthStore((s) => s._hasHydrated);
   const role = (user?.role ?? "student") as Role;
   const tier = getRoleTier(role);
   const router = useRouter();
@@ -37,8 +37,12 @@ export function GuardedPage({ allowedRoles, minTier = 0, children }: GuardedPage
     }
   }, [roleOk, tierOk, role, router]);
 
-  // Show loading screen while auth resolves — prevents bounce-loop flash
-  if (!user || !roleOk || !tierOk) {
+  // Fix 6: if auth status === 'loading' → render <AppLoadingScreen/> and NOTHING else
+  if (!hasHydrated || !user) {
+    return <AppLoadingScreen />;
+  }
+
+  if (!roleOk || !tierOk) {
     return <AppLoadingScreen />;
   }
 

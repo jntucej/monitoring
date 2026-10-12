@@ -878,12 +878,12 @@ html.glass .input-focus:focus-visible {
   --rail-width: 256px;
   --rail-width-collapsed: 64px;
 
-  /* Strict Z-Index Scale Tokens */
+  /* Strict Z-Index Scale Tokens — Fix 7 (kept for backward compat) */
   --z-base: 10;
   --z-overlay: 20;
   --z-sidebar: 30;
-  --z-header: 40;
-  --z-modal: 50;
+  --z-header: 50;
+  --z-modal: 70;
 }
 
 /* Z-Index Helper Utilities — Fix 7 */

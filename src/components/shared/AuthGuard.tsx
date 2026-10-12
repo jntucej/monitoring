@@ -24,6 +24,13 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   const userRole = user?.role;
   const gateId = user?.gateId;
 
+  // Fix 6: set data-user-role on body for CSS/a11y
+  useEffect(() => {
+    if (userRole && typeof document !== "undefined") {
+      document.body.setAttribute("data-user-role", userRole);
+    }
+  }, [userRole]);
+
   useEffect(() => {
     if (hasHydrated) return;
     const t = setTimeout(() => {
