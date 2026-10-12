@@ -28,14 +28,14 @@ export const CANONICAL_EXIT_FLOWS: Record<
   home_out: {
     code: "home_out",
     name: "Home Out",
-    description: "Weekend/overnight leave (requires warden approved pass)",
+    description: "Weekend/overnight leave (requires principal-approved pass)",
     requiresPass: true,
     maxDurationHours: 48,
   },
   day_pass: {
     code: "day_pass",
     name: "Day Pass",
-    description: "Full day leave (requires warden approved pass)",
+    description: "Full day leave (requires principal-approved pass)",
     requiresPass: true,
     maxDurationHours: 12,
   },

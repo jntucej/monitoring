@@ -2233,7 +2233,7 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
   // Calculate person type breakdown
   const personTypes: PersonType[] = [
     "student", "faculty", "staff", "worker", "visitor", "parent",
-    "guardian", "hod", "warden", "principal", "operator", "admin", "sysadmin"
+    "guardian", "hod", "principal", "operator", "admin", "sysadmin"
   ];
   const personTypeBreakdown: Record<PersonType, PersonTypeStats> = {
     student: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
@@ -2244,7 +2244,6 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
     parent: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
     guardian: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
     hod: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
-    warden: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
     principal: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
     operator: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
     admin: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
@@ -2446,7 +2445,6 @@ export async function statsToday(gateId?: string): Promise<{
     parent: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
     guardian: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
     hod: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
-    warden: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
     principal: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
     operator: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
     admin: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },

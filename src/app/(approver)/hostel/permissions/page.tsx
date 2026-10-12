@@ -335,7 +335,7 @@ function HostelPermissionsInner() {
 
 export default function HostelPermissionsPage() {
   return (
-    <GuardedPage allowedRoles={["caretaker", "deputy_warden", "hostel_manager", "warden", "principal", "admin", "sysadmin"]}>
+    <GuardedPage allowedRoles={["caretaker", "deputy_warden", "hostel_manager", "principal", "admin", "sysadmin"]}>
       <Suspense fallback={<PageLoading />}>
         <HostelPermissionsInner />
       </Suspense>

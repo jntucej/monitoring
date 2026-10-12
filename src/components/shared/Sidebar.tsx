@@ -432,7 +432,8 @@ function SidebarInner() {
     else if (pathname?.startsWith("/admin")) activeRole = "admin";
     else if (pathname?.startsWith("/gate")) activeRole = "operator";
     else if (pathname?.startsWith("/supervisor") || pathname?.startsWith("/warden")) {
-      activeRole = storeRole === "warden" || storeRole === "principal" ? "principal" : "supervisor";
+      // warden role is folded into principal — /warden resolves to principal nav
+      activeRole = storeRole === "principal" ? "principal" : "supervisor";
     } else if (pathname?.startsWith("/student")) activeRole = "student";
     else if (pathname?.startsWith("/parent")) activeRole = "parent";
     else if (storeRole) activeRole = storeRole;

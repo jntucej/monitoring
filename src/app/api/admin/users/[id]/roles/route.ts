@@ -7,7 +7,7 @@ import type { Role } from "@/lib/types";
 
 const ALL_ROLES: Role[] = [
   "operator","admin","sysadmin","supervisor","guardian","parent","hod","student",
-  "warden","faculty","staff","worker","visitor","caretaker","deputy_warden",
+  "faculty","staff","worker","visitor","caretaker","deputy_warden",
   "hostel_manager","principal","vice_principal","oie","exam_branch",
 ];
 

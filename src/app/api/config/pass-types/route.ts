@@ -80,7 +80,7 @@ async function handlePatch(req: NextRequest) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet as any, { requiredRole: ['student', 'parent', 'admin', 'sysadmin', 'faculty', 'warden'] }),
+  withAuthorization(handleGet as any, { requiredRole: ['student', 'parent', 'admin', 'sysadmin', 'faculty', 'principal'] }),
   { keyPrefix: 'config_pass_types_get', maxRequests: 100 }
 );
 

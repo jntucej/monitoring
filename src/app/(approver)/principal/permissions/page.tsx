@@ -39,7 +39,7 @@ function PrincipalPermissionsInner() {
 
 export default function PrincipalPermissionsPage() {
   return (
-    <GuardedPage allowedRoles={["principal", "warden", "admin", "sysadmin"]}>
+    <GuardedPage allowedRoles={["principal", "admin", "sysadmin"]}>
       <Suspense fallback={<PageLoading />}>
         <PrincipalPermissionsInner />
       </Suspense>

@@ -74,7 +74,7 @@ export function canApproveAtStage(role: string, workflowType: WorkflowType, curr
   if (role === "admin" || role === "sysadmin") return true;
 
   if (currentStage === "hostel_biometric") {
-    return ["caretaker", "deputy_warden", "hostel_manager", "warden", "principal"].includes(role);
+    return ["caretaker", "deputy_warden", "hostel_manager", "principal"].includes(role);
   }
 
   const roleMap: Record<string, string> = {

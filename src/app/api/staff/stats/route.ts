@@ -10,7 +10,7 @@ import { withRateLimit } from "@/lib/rate-limit";
 
 const STAFF_ROLES = [
   "operator", "admin", "sysadmin", "supervisor", "guardian", "hod",
-  "faculty", "staff", "warden", "principal", "worker", "visitor", "caretaker",
+  "faculty", "staff", "principal", "worker", "visitor", "caretaker",
   "deputy_warden", "hostel_manager", "principal", "vice_principal",
   "oie", "exam_branch",
 ];

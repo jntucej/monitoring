@@ -141,7 +141,7 @@ async function handleGet(req: NextRequest, context: any) {
   } else if (["caretaker", "deputy_warden", "hostel_manager", "faculty", "hod", "oie", "vice_principal"].includes(role)) {
     query = query.eq("current_stage", role);
     if (hscope) query = query.eq("hostel_scope", hscope);
-  } else if (["warden", "principal"].includes(role)) {
+  } else if (role === "principal") {
     // Principal sees hostel requests at warden_or_principal stage AND
     // any other workflow requests currently at the principal stage.
     query = query.or("current_stage.eq.warden_or_principal,current_stage.eq.principal");

@@ -449,7 +449,6 @@ export default function SysAdminStaffPage() {
                   <option value="faculty">Faculty</option><option value="operator">Operator</option>
                   <option value="staff">Staff</option><option value="worker">Worker</option>
                   <option value="admin">Admin</option><option value="sysadmin">SysAdmin</option>
-                  <option value="warden">Warden</option>
                   <optgroup label="Hostel">
                     <option value="caretaker">Caretaker</option>
                     <option value="deputy_warden">Deputy Warden</option>
@@ -529,7 +528,6 @@ export default function SysAdminStaffPage() {
                   <option value="faculty">Faculty</option><option value="operator">Operator</option>
                   <option value="staff">Staff</option><option value="worker">Worker</option>
                   <option value="admin">Admin</option><option value="sysadmin">SysAdmin</option>
-                  <option value="warden">Warden</option>
                   <optgroup label="Hostel">
                     <option value="caretaker">Caretaker</option>
                     <option value="deputy_warden">Deputy Warden</option>

@@ -85,7 +85,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "Principal Desk",
           items: [
-					{ href: "/principal/permissions", label: "Warden / Principal Approvals", icon: "CheckSquare", badge: "PENDING" },
+					{ href: "/principal/permissions", label: "Principal Approvals", icon: "CheckSquare", badge: "PENDING" },
 
           ],
         },
@@ -309,10 +309,9 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
 
     case "supervisor":
     case "principal":
-    case "warden":
       groups = [
         {
-          groupLabel: "Supervisor & Warden Desk",
+          groupLabel: "Supervisor Desk",
           items: [
             { href: "/supervisor", label: "Supervisor Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
             { href: "/supervisor?tab=approvals", label: "Outpass Approvals", icon: "CheckSquare", badge: "PENDING" },

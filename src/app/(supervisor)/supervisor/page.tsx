@@ -240,7 +240,7 @@ function SupervisorDashboardInner() {
   const handleBulkAction = async (action: "approve" | "reject") => {
     if (selectedPasses.length === 0) return;
     await Promise.all(selectedPasses.map(passId => 
-      handlePassAction(passId, action, action === "approve" ? "Bulk Approved by Warden" : "Bulk Rejected by Warden")
+      handlePassAction(passId, action, action === "approve" ? "Bulk Approved" : "Bulk Rejected")
     ));
     setSelectedPasses([]);
   };
@@ -310,13 +310,13 @@ function SupervisorDashboardInner() {
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)]">
                   <span className="sm:hidden">🏫</span>
-                  <span className="hidden sm:inline">🏫 Supervisor & Warden Desk</span>
+                  <span className="hidden sm:inline">🏫 Supervisor Desk</span>
                 </h1>
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
                   {user?.employeeId || user?.uniqueId || "WDN-001"}
                 </span>
               </div>
-              <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-1">{user?.name || "Hostel Warden"} • Real-time hostel curfew oversight & outpass desk.</p>
+              <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-1">{user?.name || "Supervisor"} • Real-time hostel curfew oversight & outpass desk.</p>
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-3 flex-wrap shrink-0">
@@ -411,7 +411,7 @@ function SupervisorDashboardInner() {
                 <div className="p-8 text-center space-y-2 text-xs text-[var(--text-muted)]">
                   <CheckCircle className="w-10 h-10 text-emerald-400 mx-auto opacity-40" />
                   <p className="font-bold text-[var(--text-primary)]">All Passes Approved</p>
-                  <p>No outpasses pending warden sign-off.</p>
+                  <p>No outpasses pending sign-off.</p>
                 </div>
               ) : (
                 passes.slice(0, 5).map((p) => {
