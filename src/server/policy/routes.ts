@@ -40,7 +40,7 @@ export function getDefaultRouteForRole(role: Role | string, gateId?: string): st
     worker: "/worker",
     visitor: "/visitor",
     caretaker: "/hostel/permissions",
-    deputy_warden: "/hostel/permissions",
+    deputy_warden: "/deputy-warden",
     hostel_manager: "/hostel-manager",
     principal: "/principal/permissions",
     vice_principal: "/vice-principal",

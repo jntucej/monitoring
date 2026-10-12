@@ -60,13 +60,32 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
 
   switch (roleCode) {
     case "caretaker":
-    case "deputy_warden":
     case "hostel_manager":
       groups = [
         {
           groupLabel: "Hostel Permissions",
           items: [
             { href: "/hostel-manager", label: "Hostel Manager Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
+            { href: "/hostel/permissions", label: "Pending Approvals", icon: "ClipboardList", badge: "PENDING" },
+            { href: "/permissions", label: "My Tickets", icon: "FileText" },
+          ],
+        },
+        {
+          groupLabel: "General",
+          items: [
+            { href: "/profile", label: "My Profile", icon: "User" },
+            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+          ],
+        },
+      ];
+      break;
+
+    case "deputy_warden":
+      groups = [
+        {
+          groupLabel: "Hostel Permissions",
+          items: [
+            { href: "/deputy-warden", label: "Deputy Warden Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
             { href: "/hostel/permissions", label: "Pending Approvals", icon: "ClipboardList", badge: "PENDING" },
             { href: "/permissions", label: "My Tickets", icon: "FileText" },
           ],
