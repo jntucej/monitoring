@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { User, CheckCircle2, LogIn, Home, Sun, Clock, X, Briefcase, Fingerprint, ShieldAlert, Flag } from "lucide-react";
+import { User, CheckCircle2, LogIn, Home, Sun, Clock, X, Briefcase, ShieldAlert, Flag } from "lucide-react";
 import { ExitReason, StudentType, Student, ScanDirection } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
@@ -16,8 +16,6 @@ interface ScanConfirmationProps {
   onCancel: () => void;
   suggestedDirection?: ScanDirection;
   isInline?: boolean;
-  /** When true, the thumbprint/biometric step has been completed (or fallback allowed). */
-  thumbprintVerified?: boolean;
 }
 
 type ActionEntry = {
@@ -52,7 +50,6 @@ export function ScanConfirmation({
   onCancel,
   suggestedDirection = "IN",
   isInline = false,
-  thumbprintVerified = true,
 }: ScanConfirmationProps) {
   const { exitReasons } = useCampusConfig();
   const validExitReasons = exitReasons.length > 0 ? exitReasons : [];
@@ -191,10 +188,8 @@ export function ScanConfirmation({
     },
   ];
 
-  const biometricOk = !student.thumbprintHash || thumbprintVerified !== false;
-
   const handleConfirmClick = async (direction: ScanDirection, reason?: ExitReason) => {
-    if (!photoVerified || !biometricOk || isFlagged) {
+    if (!photoVerified || isFlagged) {
       return;
     }
     setSelectedDirection(direction);
@@ -221,7 +216,7 @@ export function ScanConfirmation({
           if (p.reason.toLowerCase() === code.toLowerCase() || p.reason.toLowerCase() === name.toLowerCase()) return true;
           return normalizeReason(p.reason) === normalizeReason(code) || normalizeReason(p.reason) === normalizeReason(name);
         });
-        const isDisabled = !photoVerified || !biometricOk || isFlagged || (passRequired && !hasApprovedPass);
+        const isDisabled = !photoVerified || isFlagged || (passRequired && !hasApprovedPass);
         return (
           <button
             key={`${direction}-${code}`}
@@ -290,19 +285,6 @@ export function ScanConfirmation({
             <span>Verifying Identity... {countdown}s</span>
           </span>
         )}
-      </div>
-
-      {/* Biometric (thumbprint) verification status */}
-      <div className="flex justify-center">
-        <span className={cn(
-          "text-[10px] font-bold px-3 py-1 rounded-full flex items-center gap-1.5 border",
-          true
-            ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
-            : "text-amber-400 bg-amber-500/10 border-amber-500/20 animate-pulse"
-        )}>
-          <Fingerprint className="w-3.5 h-3.5" />
-          {true ? "Biometric Verified" : "Biometric Pending"}
-        </span>
       </div>
 
       {/* Student Avatar & Basic Info */}

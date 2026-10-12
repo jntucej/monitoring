@@ -154,6 +154,7 @@ function OperatorPageInner() {
   // Dynamic periodic sync of stats: 5s on desktop, 15s on mobile (width < 768)
   usePolling(loadStats, { intervalMs: 5000 });
   const [showCameraScanner, setShowCameraScanner] = useState(false);
+  const [cameraScannerMode, setCameraScannerMode] = useState<"qr" | "barcode">("qr");
   const [manualRollInput, setManualRollInput] = useState("");
 
   // Derive effective sub-mode: when a scan flow is active, force the
@@ -400,7 +401,14 @@ function OperatorPageInner() {
                 <>
                   {effectiveSubMode === "scan" && (
                     <ScanViewfinder
-                      onStartScanner={() => setShowCameraScanner(true)}
+                      onScanQr={() => {
+                        setCameraScannerMode("qr");
+                        setShowCameraScanner(true);
+                      }}
+                      onScanBarcode={() => {
+                        setCameraScannerMode("barcode");
+                        setShowCameraScanner(true);
+                      }}
                       onManualEntry={() => setOperatorSubMode("manual")}
                       scanning={state === "detecting"}
                       lastScanRoll={lastScan?.roll}
@@ -474,57 +482,75 @@ function OperatorPageInner() {
                   )}
 
                   {/* Operational Exceptions & Error States */}
-                  {state === "error" && error && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.96 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="scan-error p-5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-center space-y-3"
-                    >
-                      <div className="w-10 h-10 rounded-full bg-rose-500/20 text-rose-500 flex items-center justify-center mx-auto">
-                        <AlertCircle className="w-5 h-5" />
-                      </div>
-                      <div className="space-y-1">
-                        <h3 className="font-bold text-sm text-[var(--action-danger)]">
-                          {error.code === "NOT_FOUND"
-                            ? "Person Not Found"
-                            : error.code === "ACCOUNT_INACTIVE"
-                            ? "Verification Denied (Account Inactive)"
-                            : error.code === "DUPLICATE"
-                            ? "Duplicate Scan Warning"
-                            : error.code === "NETWORK_ERROR" || error.code === "TIMEOUT"
-                            ? "Network Error"
-                            : "Verification Denied"}
-                        </h3>
-                        <p className="text-xs text-[var(--text-secondary)]">{error.message}</p>
-                      </div>
-                      <div className="flex justify-center gap-2">
-                        <button
-                          id="retry-btn"
-                          onClick={() => {
-                            if (currentStudent) { confirmScan(addToast); } else if (lastRollRef.current) { startScan(lastRollRef.current); } else { reset(); }
-                          }}
-                          className="px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs hover:bg-emerald-400 transition-colors active:scale-[0.98] flex items-center gap-1.5"
-                        >
-
-                          <RefreshCw className="w-3.5 h-3.5" /> Retry
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (error.code === "UNAUTHORIZED" || error.code === "SESSION_EXPIRED" || error.message?.toLowerCase().includes("token")) {
-                              logout();
-                            } else {
-                              reset();
-                            }
-                          }}
-                          className="px-4 py-2 rounded-xl bg-rose-500 text-white font-semibold text-xs hover:bg-rose-600 transition-colors active:scale-[0.98]"
-                        >
-                          {error.code === "UNAUTHORIZED" || error.code === "SESSION_EXPIRED" || error.message?.toLowerCase().includes("token")
-                            ? "Log In Again"
-                            : "Dismiss"}
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
+                  {state === "error" && error && (() => {
+                    const isAuthError =
+                      error.code === "UNAUTHORIZED" ||
+                      error.code === "SESSION_EXPIRED" ||
+                      (typeof error.message === "string" &&
+                        /token|session|unauthorized|sign in|authentication/i.test(error.message));
+                    const canRetry = error.retryable === true;
+                    const isNetworkError =
+                      error.code === "NETWORK_ERROR" || error.code === "TIMEOUT" || error.code === "OFFLINE_BLOCKED";
+                    return (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.96 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="scan-error p-5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-center space-y-3"
+                      >
+                        <div className="w-10 h-10 rounded-full bg-rose-500/20 text-rose-500 flex items-center justify-center mx-auto">
+                          <AlertCircle className="w-5 h-5" />
+                        </div>
+                        <div className="space-y-1">
+                          <h3 className="font-bold text-sm text-[var(--action-danger)]">
+                            {isAuthError
+                              ? "Verification Failed"
+                              : error.code === "NOT_FOUND"
+                              ? "Person Not Found"
+                              : error.code === "ACCOUNT_INACTIVE"
+                              ? "Verification Failed (Account Inactive)"
+                              : error.code === "DUPLICATE"
+                              ? "Duplicate Scan"
+                              : isNetworkError
+                              ? "Network Error"
+                              : "Verification Failed"}
+                          </h3>
+                          <p className="text-xs text-[var(--text-secondary)]">{error.message}</p>
+                          {isAuthError && (
+                            <p className="text-[10px] font-semibold text-amber-400">
+                              Your session could not be verified. Dismiss to sign in again.
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex justify-center gap-2">
+                          {canRetry && (
+                            <button
+                              type="button"
+                              id="retry-btn"
+                              onClick={() => {
+                                if (currentStudent) { confirmScan(addToast); } else if (lastRollRef.current) { startScan(lastRollRef.current); } else { reset(); }
+                              }}
+                              className="px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs hover:bg-emerald-400 transition-colors active:scale-[0.98] flex items-center gap-1.5"
+                            >
+                              <RefreshCw className="w-3.5 h-3.5" /> Retry
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (isAuthError) {
+                                logout();
+                              } else {
+                                reset();
+                              }
+                            }}
+                            className="px-4 py-2 rounded-xl bg-rose-500 text-white font-semibold text-xs hover:bg-rose-600 transition-colors active:scale-[0.98]"
+                          >
+                            {isAuthError ? "Dismiss & Sign In Again" : "Dismiss"}
+                          </button>
+                        </div>
+                      </motion.div>
+                    );
+                  })()}
 
                   {/* Scan Confirmation Verification Interface */}
                   {state === "confirming" && currentStudent && (
@@ -672,9 +698,10 @@ function OperatorPageInner() {
           setOperatorSubMode("manual");
         }}
         gateId={gateId || user?.gateId}
+        initialMode={cameraScannerMode}
       />
 
-      {/* WebAuthn / Passkey Biometric confirmation step after the ID scan */}
+      {/* WebAuthn / Passkey confirmation step placeholder after the ID scan */}
       
     </div>
   );

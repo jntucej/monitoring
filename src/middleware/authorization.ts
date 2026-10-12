@@ -190,9 +190,9 @@ export function withAuthorization(
       }
 
       if (error instanceof Error) {
-        if (error.message.includes('UNAUTHORIZED')) {
+        if (error.message.includes('UNAUTHORIZED') || error.message.includes('SESSION_EXPIRED') || error.message.includes('invalid_token') || error.message.includes('expired') || error.message.includes('not authenticated')) {
           return NextResponse.json(
-            { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
+            { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication failed. Please sign in again.' } },
             { status: 401 }
           );
         } else if (error.message.includes('ACCOUNT_INACTIVE')) {
@@ -218,11 +218,21 @@ export function withAuthorization(
         }
       }
 
-      // Default error response
+      // Default error response — any auth-layer exception (Supabase/DB/network
+      // hiccups while verifying identity) that the checks above did not
+      // classify. Log enough context to diagnose without leaking internals.
+      const detail =
+        error instanceof Error ? `${error.name}: ${error.message}` : String(error);
       console.error('Authorization middleware error:', error);
       return NextResponse.json(
-        { success: false, error: { code: 'INTERNAL_ERROR', message: 'Authorization failed' } },
-        { status: 500 }
+        {
+          success: false,
+          error: {
+            code: 'UNAUTHORIZED',
+            message: 'Session verification failed. Please sign in again.',
+          },
+        },
+        { status: 401 }
       );
     }
   };

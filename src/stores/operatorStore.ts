@@ -64,6 +64,8 @@ type ScanState = "idle" | "detecting" | "confirming" | "selecting_reason" | "suc
 interface ScanError {
   message: string;
   code?: string;
+  /** True when pressing Retry can realistically recover (network issues, timeouts, duplicates). */
+  retryable?: boolean;
 }
 
 export interface TodayStatsResult {
@@ -83,10 +85,6 @@ interface OperatorState {
   selectedReason: ExitReason | null;
   photoVerificationDone: boolean;
   error: ScanError | null;
-  /** Thumbprint (biometric) confirmation for the current scan person */
-  
-  /** True when verification was allowed because the person has no thumbprint on file */
-  
 
   // Data
   lastScan: Scan | null;
@@ -131,8 +129,6 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
   selectedDirection: "IN",
   selectedReason: null,
   photoVerificationDone: false,
-  
-  
   error: null,
 
   lastScan: null,
@@ -193,7 +189,6 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
         });
         return;
       }
-
       const person: Person = result.data.person;
 
       // Check account status — do not allow inactive/suspended accounts to proceed
@@ -221,8 +216,6 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
         selectedDirection: direction,
         selectedReason: null,
         photoVerificationDone: false,
-        
-        
         error: null,
       });
     } catch (err: unknown) {
@@ -235,6 +228,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
         error: {
           message: err instanceof Error ? err.message : "Unable to communicate with server.",
           code: "NETWORK_ERROR",
+          retryable: true,
         },
         currentStudent: null,
       });
@@ -334,9 +328,8 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
           set({ state: "error", error: { message: "Duplicate scan detected", code: "DUPLICATE" } });
           return null;
         }
-
         // Handle session expiry — log out and redirect to login
-        if (res.status === 401 && result?.error?.code === "SESSION_EXPIRED") {
+        if (res.status === 401 || result?.error?.code === "SESSION_EXPIRED" || result?.error?.code === "UNAUTHORIZED") {
           const authStore = useAuthStore.getState();
           authStore.logout();
           if (typeof window !== "undefined") {
@@ -356,7 +349,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
             title: "Duplicate Scan",
             message: `This student was already scanned ${directionToUse === "OUT" ? "out" : "in"} recently.`,
           });
-          set({ state: "error", error: { message: "Duplicate scan detected", code: "DUPLICATE" } });
+          set({ state: "error", error: { message: "Duplicate scan detected — wait a moment, then retry.", code: "DUPLICATE", retryable: true } });
           return;
         }
 
@@ -391,12 +384,20 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
       })
       .catch((err: unknown) => {
         const msg = err instanceof Error ? err.message : "An unexpected error occurred during scan confirmation.";
+        const isTimeout = err instanceof Error && err.message.includes("timed out");
         addToast({
           variant: "error",
           title: "Scan Failed",
           message: msg,
         });
-        set({ state: "error", error: { message: msg, code: "UNKNOWN" } });
+        set({
+          state: "error",
+          error: {
+            message: msg,
+            code: isTimeout ? "TIMEOUT" : "UNKNOWN",
+            retryable: isTimeout,
+          },
+        });
       });
   },
 
@@ -407,8 +408,6 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
       selectedDirection: "IN",
       selectedReason: null,
       photoVerificationDone: false,
-      
-      
       error: null,
     });
   },

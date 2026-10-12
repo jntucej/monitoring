@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, X, RefreshCw, AlertTriangle, KeyRound, ScanLine, Volume2, VolumeX, Upload, QrCode, CheckCircle } from "lucide-react";
+import { Camera, X, RefreshCw, AlertTriangle, KeyRound, Volume2, VolumeX, Upload, CheckCircle, ArrowLeftRight } from "lucide-react";
 import { playAudioFeedback } from "@/lib/sound";
 import jsQR from "jsqr";
 import { SCANNABLE_FORMATS, normalizeScannedPayload } from "@/lib/barcode";
@@ -46,6 +46,8 @@ interface ScannerModalProps {
   onManualEntryClick?: () => void;
   /** The operator's fixed gate — used to key the stream cache; no UI picking. */
   gateId?: string;
+  /** Which scan mode the operator chose before opening (QR-only or barcode-only). */
+  initialMode?: ScanMode;
 }
 
 export function Scanner({
@@ -54,6 +56,7 @@ export function Scanner({
   onScan,
   onManualEntryClick,
   gateId,
+  initialMode = "qr",
 }: ScannerModalProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -67,12 +70,22 @@ export function Scanner({
   const [cameraState, setCameraState] = useState<"idle" | "requesting" | "active" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [mode, setMode] = useState<ScanMode>("qr");
-  const modeRef = useRef<ScanMode>("qr");
+  const [mode, setMode] = useState<ScanMode>(initialMode);
+  const modeRef = useRef<ScanMode>(initialMode);
   const [barcodeApiAvailable, setBarcodeApiAvailable] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [showSuccessFlash, setShowSuccessFlash] = useState(false);
   const successFlashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Keep the selected mode in sync with the mode the operator chose before
+  // opening the modal (the viewfinder's Scan QR / Scan Barcode buttons).
+  useEffect(() => {
+    if (isOpen) {
+      setMode(initialMode);
+      modeRef.current = initialMode;
+      hasScannedRef.current = false;
+    }
+  }, [isOpen, initialMode]);
 
   // Detect whether the phone's browser can auto-detect barcodes natively.
   // QR is always auto-detectable via jsQR; 1D/2D barcodes need the native
@@ -533,31 +546,20 @@ export function Scanner({
             </div>
           </div>
 
-          {/* Mode tabs — QR (default) vs Barcode, both auto-detecting */}
-          <div className="flex border-b border-slate-800 bg-slate-900/60">
+          {/* Mode indicator — the mode was chosen by the viewfinder button the
+              operator tapped; the link just flips to the other mode. */}
+          <div className="flex items-center justify-between border-b border-slate-800 bg-slate-900/60 px-4 py-2.5">
+            <span className="flex items-center gap-2 text-xs font-bold text-emerald-400">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              {mode === "qr" ? "QR-only mode" : "Barcode-only mode"}
+            </span>
             <button
               type="button"
-              onClick={() => switchMode("qr")}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs font-bold transition-colors ${
-                mode === "qr"
-                  ? "text-emerald-400 border-b-2 border-emerald-500 bg-emerald-500/5"
-                  : "text-slate-400 hover:text-white border-b-2 border-transparent"
-              }`}
+              onClick={() => switchMode(mode === "qr" ? "barcode" : "qr")}
+              className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 hover:text-white transition-colors"
             >
-              <QrCode className="w-4 h-4" />
-              QR
-            </button>
-            <button
-              type="button"
-              onClick={() => switchMode("barcode")}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs font-bold transition-colors ${
-                mode === "barcode"
-                  ? "text-emerald-400 border-b-2 border-emerald-500 bg-emerald-500/5"
-                  : "text-slate-400 hover:text-white border-b-2 border-transparent"
-              }`}
-            >
-              <ScanLine className="w-4 h-4" />
-              Barcode
+              <ArrowLeftRight className="w-3.5 h-3.5" />
+              {mode === "qr" ? "Switch to Barcode" : "Switch to QR"}
             </button>
           </div>
 
@@ -571,7 +573,7 @@ export function Scanner({
             {cameraState === "active" && mode === "barcode" && !barcodeApiAvailable && (
               <div className="absolute top-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 text-[10px] font-semibold text-amber-300 bg-amber-950/80 border border-amber-500/40 rounded-full px-3 py-1.5 pointer-events-none">
                 <AlertTriangle className="w-3 h-3" />
-                <span>No native barcode decoder in this browser — try the QR tab or Upload below</span>
+                <span>No native barcode decoder in this browser — switch to QR or Upload below</span>
               </div>
             )}
 
@@ -585,7 +587,6 @@ export function Scanner({
                 </p>
               </div>
             )}
-
             {cameraState === "requesting" && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950 text-white space-y-3 p-4 text-center">
                 <RefreshCw className="w-8 h-8 text-emerald-400 animate-spin" />
@@ -601,6 +602,7 @@ export function Scanner({
                 <h3 className="text-sm font-bold text-amber-400">Camera Unavailable</h3>
                 <p className="text-xs text-slate-300 max-w-xs">{errorMessage}</p>
                 <button
+                  type="button"
                   onClick={() => startCamera()}
                   className="mt-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5"
                 >
@@ -660,6 +662,7 @@ export function Scanner({
                 </button>
                 {onManualEntryClick && (
                   <button
+                    type="button"
                     onClick={() => { stopCamera(); onClose(); onManualEntryClick(); }}
                     className="w-full sm:flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs transition-all flex items-center justify-center gap-2"
                   >
@@ -669,6 +672,7 @@ export function Scanner({
                 )}
               </div>
               <button
+                type="button"
                 onClick={() => { stopCamera(); onClose(); }}
                 className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 text-xs font-bold"
               >

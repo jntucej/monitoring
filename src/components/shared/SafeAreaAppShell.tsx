@@ -9,7 +9,6 @@ import { useGlass } from "@/context/GlassContext";
 import { DynamicHeader } from "./DynamicHeader";
 import { NetworkStatusBanner } from "./NetworkStatusBanner";
 import { Sidebar } from "./Sidebar";
-import { GlassDeviceFallback } from "./GlassDeviceFallback";
 import { FloatingOrbs } from "./FloatingOrbs";
 import { AppLoadingScreen } from "./AppLoadingScreen";
 
@@ -44,14 +43,6 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
   // navigation chrome so there is no doubled sidebar/header for maximum
   // visual distinction and a tighter security surface.
   const isStandaloneSysadmin = pathname?.startsWith("/sysadmin") ?? false;
-
-  // The device-hardware fallback hint (live camera / optical scanner) is only
-  // relevant on routes that actually drive a camera scanner. It used to render
-  // on every page of every role; now it's gated to the hardware routes so it
-  // never clutters dashboards, admin, student or support views.
-  const isHardwareRoute =
-    pathname?.startsWith("/gate");
-  const showDeviceFallback = false; // Removed — was showing duplicate fallback on gate routes
 
   // Initialize theme from localStorage on client-side mount
   useEffect(() => {
