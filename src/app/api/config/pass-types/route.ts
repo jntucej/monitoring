@@ -4,8 +4,8 @@ import { withAuthorization } from '@/middleware/authorization';
 import { withRateLimit } from '@/lib/rate-limit';
 
 const DEFAULT_PASS_TYPES = [
-  { code: "day_pass", name: "Day Pass", description: "Full day out (returns by evening curfew)", defaultDurationHours: 12, requiresApproval: true, approvalFlow: "warden" },
-  { code: "home_out", name: "Home Out", description: "Weekend or overnight home leave", defaultDurationHours: 48, requiresApproval: true, approvalFlow: "warden" },
+  { code: "day_pass", name: "Day Pass", description: "Full day out (returns by evening curfew)", defaultDurationHours: 12, requiresApproval: true, approvalFlow: "principal" },
+  { code: "home_out", name: "Home Out", description: "Weekend or overnight home leave", defaultDurationHours: 48, requiresApproval: true, approvalFlow: "principal" },
 ];
 
 async function handleGet(req: NextRequest) {
@@ -50,7 +50,7 @@ async function handlePatch(req: NextRequest) {
       description: item.description || '',
       default_duration_hours: item.defaultDurationHours || 24,
       requires_approval: item.requiresApproval ?? true,
-      approval_flow: item.approvalFlow || 'warden',
+      approval_flow: item.approvalFlow || 'principal',
       is_active: true,
       updated_at: new Date().toISOString()
     }));

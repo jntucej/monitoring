@@ -35,7 +35,7 @@ const ALLOWED_PIN_ROLES: Role[] = [
   "hostel_manager",
   "parent",
   "mess_incharge",
-  "warden",
+  "principal",
   "supervisor",
 ];
 

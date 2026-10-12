@@ -79,6 +79,13 @@ export const PersonBadge: React.FC<PersonBadgeProps> = ({
       border: 'border-amber-500/20',
       icon: <Shield className="w-3.5 h-3.5 mr-1" />,
     },
+    principal: {
+      label: 'Principal',
+      bg: 'bg-emerald-500/10',
+      text: 'text-emerald-400',
+      border: 'border-emerald-500/20',
+      icon: <ShieldCheck className="w-3.5 h-3.5 mr-1" />,
+    },
     operator: {
       label: 'Operator',
       bg: 'bg-cyan-500/10',

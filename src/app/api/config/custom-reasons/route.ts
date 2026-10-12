@@ -186,7 +186,7 @@ export const GET = withRateLimit(handleGet, {
 
 export const POST = withRateLimit(
   withAuthorization(handlePost, {
-    requiredRole: ["sysadmin", "admin", "warden", "hod", "principal", "oie"],
+    requiredRole: ["sysadmin", "admin", "principal", "hod", "principal", "oie"],
   }),
   {
     keyPrefix: "custom_reasons_post",

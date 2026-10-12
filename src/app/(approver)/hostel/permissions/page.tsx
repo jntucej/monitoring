@@ -343,6 +343,7 @@ export default function HostelPermissionsPage() {
         "hostel_manager",
         "warden",
         "principal",
+        "principal",
         "admin",
         "sysadmin",
       ]}

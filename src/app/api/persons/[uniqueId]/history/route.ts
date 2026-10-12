@@ -56,7 +56,7 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
 
 export const GET = withRateLimit(
   withAuthorization(handleGet, {
-    requiredRole: ["admin", "sysadmin", "operator", "student", "faculty", "staff", "worker", "parent", "guardian", "warden", "supervisor"],
+    requiredRole: ["admin", "sysadmin", "operator", "student", "faculty", "staff", "worker", "parent", "guardian", "principal", "supervisor"],
   }),
   { keyPrefix: "person_history", maxRequests: 60 }
 );

@@ -270,7 +270,7 @@ export function UserManagement() {
               <option value="operator">Operator</option>
               <option value="parent">Parent</option>
               <option value="student">Student</option>
-                <option value="warden">Warden</option>
+                <option value="principal">Principal</option>
                 <option value="faculty">Faculty</option>
                 <option value="staff">Staff</option>
                 <option value="sysadmin">System Administrator</option>

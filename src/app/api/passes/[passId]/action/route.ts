@@ -64,7 +64,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
     }
 
     // Warden/supervisor hostel block scoping check
-    if (authRole === "warden" || authRole === "supervisor") {
+    if (authRole === "principal" || authRole === "supervisor") {
       const service = getSupabaseServiceClient();
       const { data: approverProfile } = await service
         .from("users")

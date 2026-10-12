@@ -21,6 +21,7 @@ export type PersonType =
   | "guardian"
   | "hod"
   | "warden"
+  | "principal"
   | "operator"
   | "admin"
   | "sysadmin";
@@ -435,7 +436,7 @@ export interface ExitReasonConfig {
   applicableTo: StudentType[];
   maxDurationHours?: number;
   requiresApproval: boolean;
-  approvalBy?: "warden" | "faculty" | "admin" | "none";
+  approvalBy?: "principal" | "faculty" | "admin" | "none";
   parentNotification: "silent" | "push" | "sms" | "urgent";
   autoApproveTimeRange?: string;
 }

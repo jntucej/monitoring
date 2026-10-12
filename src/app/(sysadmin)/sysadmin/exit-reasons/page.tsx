@@ -102,7 +102,7 @@ export default function ExitReasonsPage() {
                 description: "",
                 applicableTo: ["student"],
                 requiresApproval: true,
-                approvalBy: "warden",
+                approvalBy: "principal",
                 parentNotification: "immediate",
                 maxDurationHours: 12,
               })
@@ -252,12 +252,12 @@ export default function ExitReasonsPage() {
                       Approval By
                     </label>
                     <select
-                      value={editingReason.approvalBy || "warden"}
+                      value={editingReason.approvalBy || "principal"}
                       onChange={(e) => setEditingReason({ ...editingReason, approvalBy: e.target.value, requiresApproval: e.target.value !== "none" })}
                       className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:border-amber-400"
                     >
                       <option value="none">None (Auto Approve)</option>
-                      <option value="warden">Warden</option>
+                      <option value="principal">Principal</option>
                       <option value="hod">HOD</option>
                       <option value="principal">Principal</option>
                     </select>

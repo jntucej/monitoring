@@ -43,7 +43,7 @@ async function handleGet(req: NextRequest) {
       const isOwner =
         (authRole === "student" && Boolean(userUniqueId && pass.roll === userUniqueId)) ||
         (authRole === "parent" && pass.requestedById === authUserId) ||
-        authRole === "warden";
+        authRole === "principal";
 
       if (!isOwner) {
         return NextResponse.json(
@@ -66,7 +66,7 @@ async function handleGet(req: NextRequest) {
 async function handlePut(req: NextRequest) {
   try {
     const approverId = req.headers.get("x-user-id");
-    const authRole = req.headers.get("x-user-role") || "warden";
+    const authRole = req.headers.get("x-user-role") || "principal";
     if (!approverId) {
       return NextResponse.json(
         { success: false, error: { code: "UNAUTHORIZED", message: "Could not identify approver." } },
@@ -101,7 +101,7 @@ async function handlePut(req: NextRequest) {
     }
 
     // Warden hostel block scoping check
-    if (authRole === "warden" && approverId) {
+    if (authRole === "principal" && approverId) {
       const { getSupabaseServiceClient } = await import("@/lib/dbClient");
       const service = getSupabaseServiceClient();
       const { data: approverProfile } = await service
@@ -135,8 +135,8 @@ async function handlePut(req: NextRequest) {
 
     const result =
       action === "approve"
-        ? await approvePass(passId, authRole || "warden", comment, approverId)
-        : await rejectPass(passId, authRole || "warden", comment, approverId);
+        ? await approvePass(passId, authRole || "principal", comment, approverId)
+        : await rejectPass(passId, authRole || "principal", comment, approverId);
 
     return NextResponse.json({ success: true, data: result });
   } catch (error) {
@@ -149,11 +149,11 @@ async function handlePut(req: NextRequest) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "parent", "student", "warden", "principal"] }),
+  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "parent", "student", "principal", "principal"] }),
   { keyPrefix: "passes_get", maxRequests: 100 }
 );
 
 export const PUT = withRateLimit(
-  withAuthorization(handlePut, { requiredRole: ["admin", "sysadmin", "warden"] }),
+  withAuthorization(handlePut, { requiredRole: ["admin", "sysadmin", "principal"] }),
   { keyPrefix: "passes_update", maxRequests: 20 }
 );

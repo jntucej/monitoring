@@ -18,7 +18,7 @@ import {
 } from "@/lib/rollNumber";
 const VALID_ROLES: Role[] = [
   "operator", "admin", "sysadmin", "parent", "student",
-  "warden", "faculty", "staff", "worker",
+  "principal", "faculty", "staff", "worker",
 ];
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

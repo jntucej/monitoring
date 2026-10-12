@@ -34,9 +34,9 @@ export const ALERT_CATALOGUE: AlertDefinition[] = [
     title: "Warden.Overdue",
     message: "Describe the trigger condition in one sentence.",
     minTier: 60,
-    visibleToRoles: ["warden", "deputy_warden", "hostel_manager"],
+    visibleToRoles: ["principal", "deputy_warden", "hostel_manager"],
     condition: (c) => (c.metrics?.overdue ?? 0) > 0,
-    href: "/warden",
+    href: "/principal",
     ctaLabel: "Open",
   },
     /* student.curfewexceeded */

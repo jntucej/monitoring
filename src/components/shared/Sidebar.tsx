@@ -53,7 +53,7 @@ const getPriorityItems = (role: Role, items: NavItem[]): NavItem[] => {
     sysadmin: ['/sysadmin', '/sysadmin/analytics', '/sysadmin/security', '/sysadmin/audit'],
     operator: ['/gate', '/gate/history', '/admin/alerts', '/gate/manual'],
     supervisor: ['/supervisor', '/supervisor?tab=approvals', '/supervisor?tab=alerts', '/supervisor?tab=curfew'],
-    warden: ['/warden', '/supervisor?tab=approvals', '/supervisor?tab=alerts', '/supervisor?tab=curfew'],
+    principal: ['/principal', '/principal/permissions'],
     student: ['/student', '/student/history', '/student/passes', '/student/profile'],
     parent: ['/parent', '/parent/requests', '/parent/students', '/parent/profile'],
     guardian: ['/parent', '/parent/requests', '/parent/students', '/parent/profile'],
@@ -432,7 +432,7 @@ function SidebarInner() {
     else if (pathname?.startsWith("/admin")) activeRole = "admin";
     else if (pathname?.startsWith("/gate")) activeRole = "operator";
     else if (pathname?.startsWith("/supervisor") || pathname?.startsWith("/warden")) {
-      activeRole = storeRole === "warden" ? "warden" : "supervisor";
+      activeRole = storeRole === "warden" || storeRole === "principal" ? "principal" : "supervisor";
     } else if (pathname?.startsWith("/student")) activeRole = "student";
     else if (pathname?.startsWith("/parent")) activeRole = "parent";
     else if (storeRole) activeRole = storeRole;
