@@ -244,12 +244,13 @@ export default function HelpPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 space-y-6">
-      <header>
+      {/* Page title — global DynamicHeader renders the app header */}
+      <div>
         <h1 className="text-3xl font-semibold tracking-tight">Help Center</h1>
         <p className="mt-1 text-[var(--text-muted)]">
           Role-scoped documentation for <span className="font-mono">{user.role}</span> (tier {tier})
         </p>
-      </header>
+      </div>
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-muted)]" />

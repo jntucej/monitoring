@@ -10,8 +10,8 @@ import { ClipboardCheck } from "lucide-react";
 function PrincipalPermissionsInner() {
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
-      {/* header */}
-      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      {/* Page toolbar — global DynamicHeader already renders the app header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="min-w-0">
           <h1 className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2 min-w-0">
             <ClipboardCheck className="w-6 h-6 text-emerald-400 shrink-0" />
@@ -21,7 +21,7 @@ function PrincipalPermissionsInner() {
             Final-stage exam clearances and hostel requests escalated to you
           </p>
         </div>
-      </header>
+      </div>
 
       {/* exam queue */}
       <PermissionList

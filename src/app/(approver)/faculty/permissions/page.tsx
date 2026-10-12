@@ -10,7 +10,8 @@ import { ClipboardCheck } from "lucide-react";
 function FacultyPermissionsInner() {
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
-      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      {/* Page toolbar — global DynamicHeader already renders the app header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="min-w-0">
           <h1 className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2 min-w-0">
             <ClipboardCheck className="w-6 h-6 text-emerald-400 shrink-0" />
@@ -20,7 +21,7 @@ function FacultyPermissionsInner() {
             Initial-stage exam clearances and memo requests
           </p>
         </div>
-      </header>
+      </div>
 
       <PermissionList
         title="Exam — Faculty / HOD Stage"

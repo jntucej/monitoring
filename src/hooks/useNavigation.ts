@@ -104,6 +104,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "Vice Principal Desk",
           items: [
+            { href: "/vice-principal", label: "VP Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
             { href: "/exam/permissions", label: "VP Approvals", icon: "CheckSquare", badge: "PENDING" },
           ],
         },
@@ -123,6 +124,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "Exam Branch",
           items: [
+            { href: "/exam-branch", label: "Exam Branch Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
             { href: "/exam/permissions", label: "Exam Documents", icon: "FileText", badge: "PENDING" },
           ],
         },

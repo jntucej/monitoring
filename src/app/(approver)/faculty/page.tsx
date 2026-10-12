@@ -149,9 +149,9 @@ function FacultyDashboardInner() {
   const attendanceRate = sum?.overallAttendanceRate ?? null;
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
-      {/* header */}
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 min-w-0">
+      {/* Page toolbar — global DynamicHeader already renders the app header */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-white">Faculty Dashboard</h1>
           <p className="mt-1 text-sm text-slate-400">
@@ -171,7 +171,7 @@ function FacultyDashboardInner() {
           )}
           {facultyLoading || studentsLoading ? "Refreshing…" : "Refresh"}
         </button>
-      </header>
+      </div>
 
       {/* errors — never dump raw JSON to the user */}
       {facultyError && (

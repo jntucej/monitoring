@@ -689,7 +689,7 @@ function OperatorPageInner() {
         )}
 
         {/* Dynamic Inner view */}
-        {renderActiveView()}
+        <div className="min-w-0 w-full">{renderActiveView()}</div>
 
         {/* Dev contact strip for reporting gate issues */}
         <div className="pt-2">

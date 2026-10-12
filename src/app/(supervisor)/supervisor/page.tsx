@@ -17,7 +17,6 @@ import {
   ShieldAlert,
   PhoneCall,
   Lock,
-  Unlock,
   Download,
   BarChart2,
   Zap,
@@ -104,9 +103,10 @@ function SupervisorDashboardInner() {
   const [studentSearch, setStudentSearch] = useState("");
   const [hostelFilter, setHostelFilter] = useState("ALL");
 
-  // New Feature States
-  const [isLockdown, setIsLockdown] = useState(false);
-  const [lockdownBusy, setLockdownBusy] = useState(false);
+  // Lockdown state is admin-managed (/api/admin/lockdown is admin-only and
+  // intentionally NOT polled from the warden desk — a supervisor/warden only
+  // READS the active lockdown when a scan is attempted; the gate desk pages
+  // surface it. No admin telemetry is fetched on this dashboard.
   const [selectedPasses, setSelectedPasses] = useState<string[]>([]);
   const [verifiedParents, setVerifiedParents] = useState<Record<string, boolean>>({});
   const [passTypeFilter, setPassTypeFilter] = useState<string>("ALL");
@@ -146,25 +146,6 @@ function SupervisorDashboardInner() {
     const tabParam = searchParams.get("tab");
     setActiveTab(tabParam || "overview");
   }, [searchParams]);
-
-  // Lockdown is global shared state -- it can be raised/lifted by an admin or a
-  // different session, so mirror the DB rather than trusting local component state.
-  const syncLockdown = useCallback(async () => {
-    try {
-      const res = await fetch("/api/admin/lockdown", { headers: getAuthHeaders(), cache: "no-store" });
-      if (!res.ok) return;
-      const json = await res.json();
-      setIsLockdown(!!json.data);
-    } catch {
-      /* keep last known state on transient network failure */
-    }
-  }, []);
-
-  useEffect(() => {
-    syncLockdown();
-    const id = setInterval(syncLockdown, 10_000);
-    return () => clearInterval(id);
-  }, [syncLockdown]);
 
   const loadData = useCallback(async () => {
     setRefreshing(true);
@@ -277,33 +258,9 @@ function SupervisorDashboardInner() {
   };
 
   const handleToggleLockdown = async () => {
-    if (lockdownBusy) return;
-    const nextState = !isLockdown;
-    setLockdownBusy(true);
-    setError(null);
-    try {
-      const res = nextState
-        ? await fetch("/api/admin/lockdown", {
-            method: "POST",
-            headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
-            // API contract: non-empty scopes[] + message (it reads `message`, NOT `reason`)
-            body: JSON.stringify({ scopes: ["all"], message: "Supervisor Emergency Lockdown" }),
-          })
-        : await fetch("/api/admin/lockdown", {
-            method: "DELETE",
-            headers: getAuthHeaders(),
-          });
-      const json = await res.json();
-      if (!res.ok || !json.success) {
-        setError(json.error?.message || "Lockdown update failed");
-        return;
-      }
-      setIsLockdown(nextState);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Lockdown update failed");
-    } finally {
-      setLockdownBusy(false);
-    }
+    // Lockdown is an admin capability — a warden/supervisor cannot raise or
+    // lift it. Surface a clear message instead of calling the admin endpoint.
+    setError("Emergency lockdown can only be raised or lifted by an administrator.");
   };
 
   const exportMovementCSV = () => {
@@ -365,15 +322,10 @@ function SupervisorDashboardInner() {
           <div className="flex items-center gap-2 sm:gap-3 flex-wrap shrink-0">
             <button
               onClick={handleToggleLockdown}
-              disabled={lockdownBusy}
-              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border disabled:opacity-50 ${
-                isLockdown
-                  ? "bg-rose-500 text-white border-rose-600 animate-pulse shadow-lg shadow-rose-500/30"
-                  : "bg-rose-500/10 text-rose-400 border-rose-500/20 hover:bg-rose-500/20"
-              }`}
+              className="px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border bg-rose-500/10 text-rose-400 border-rose-500/20 hover:bg-rose-500/20"
             >
-              {isLockdown ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
-              <span>{isLockdown ? "LOCKDOWN ACTIVE" : "Emergency Lockdown"}</span>
+              <Lock className="w-4 h-4" />
+              <span>Report Lockdown</span>
             </button>
 
             <button
@@ -387,7 +339,7 @@ function SupervisorDashboardInner() {
         </div>
 
         {/* Tab Controls */}
-        <div className="flex items-center gap-2 mt-6 pt-6 border-t border-[var(--border)] overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-2 mt-6 pt-6 border-t border-[var(--border)] overflow-x-auto no-scrollbar min-w-0">
           {[
             { id: "overview", label: "Overview", icon: Home },
             { id: "approvals", label: "Outpass Approvals", icon: CheckSquare, badge: stats.pendingPasses },
@@ -406,21 +358,6 @@ function SupervisorDashboardInner() {
           })}
         </div>
       </div>
-
-      {isLockdown && (
-        <div className="p-4 sm:p-5 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-300 font-bold text-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg shadow-rose-500/10">
-          <div className="flex items-center gap-3">
-            <Lock className="w-6 h-6 text-rose-400 shrink-0 animate-bounce" />
-            <div>
-              <p className="text-base font-black uppercase tracking-wider text-rose-200">🚨 HOSTEL EMERGENCY LOCKDOWN IN EFFECT</p>
-              <p className="text-xs font-normal text-rose-300 mt-0.5">All student outpasses & exit scan authorizations are temporarily suspended by Warden Command.</p>
-            </div>
-          </div>
-          <button onClick={handleToggleLockdown} disabled={lockdownBusy} className="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white text-xs rounded-xl font-bold shrink-0">
-            Deactivate
-          </button>
-        </div>
-      )}
 
       {error && (
         <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-sm flex items-center gap-3">

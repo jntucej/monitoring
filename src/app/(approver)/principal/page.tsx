@@ -399,7 +399,8 @@ function PrincipalDashboardInner() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-5 sm:space-y-6 px-4 sm:px-6 py-6 sm:py-8 min-w-0">
-      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      {/* Page toolbar — global DynamicHeader already renders the app header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2 text-[var(--text-primary)]">
             <ShieldCheck className="w-6 h-6 text-emerald-400" />
@@ -418,7 +419,7 @@ function PrincipalDashboardInner() {
           <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
           {refreshing ? "Refreshing…" : "Refresh"}
         </button>
-      </header>
+      </div>
 
       {anyError && (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex items-center gap-2">

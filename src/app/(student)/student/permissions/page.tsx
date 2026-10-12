@@ -70,8 +70,8 @@ export default function StudentPermissionsPage() {
   return (
     <AuthGuard allowedRoles={["student"]}>
       <div className="p-4 md:p-6 space-y-6 max-w-4xl mx-auto">
-        {/* Header */}
-        <header className="flex flex-wrap items-start justify-between gap-3">
+        {/* Page toolbar — global DynamicHeader renders the app header */}
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <ClipboardList className="w-6 h-6 text-[var(--action-primary)]" />
@@ -86,7 +86,7 @@ export default function StudentPermissionsPage() {
             <Plus className="w-4 h-4" />
             New Request
           </Link>
-        </header>
+        </div>
 
         {/* Filter tabs */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1">

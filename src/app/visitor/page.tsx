@@ -98,8 +98,9 @@ function VisitorDashboardInner() {
   const passStatus = !visitorData ? "UNAVAILABLE" : activeLogs.length ? "ACTIVE" : "CHECKED OUT";
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
-      <header className="flex items-center justify-between gap-4">
+    <div className="mx-auto max-w-4xl space-y-6 px-4 py-8 min-w-0">
+      {/* Page toolbar — global DynamicHeader already renders the app header */}
+      <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
             <DoorOpen className="w-6 h-6 text-emerald-400" />
@@ -123,7 +124,7 @@ function VisitorDashboardInner() {
             {loading ? "Refreshing…" : "Refresh"}
           </button>
         </div>
-      </header>
+      </div>
 
       {/* error banner — visitor role is not in /api/visitors' allowlist; render gracefully */}
       {error && (
