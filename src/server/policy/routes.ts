@@ -47,6 +47,7 @@ export function getDefaultRouteForRole(role: Role | string, gateId?: string): st
     exam_branch: "/exam/permissions",
     hod: "/hod",
     exam_superintendent: "/exam/superintendent",
+    mess_incharge: "/mess",
   };
   return routes[role] || "/login";
 }

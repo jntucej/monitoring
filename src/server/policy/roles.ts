@@ -9,4 +9,5 @@ export const TIER = {
   OPERATOR: ["operator", "warden", "admin", "sysadmin"] as Role[],
   ADMIN:    ["admin", "sysadmin"] as Role[],
   SYSADMIN: ["sysadmin"] as Role[],
+  MESS_INCHARGE: ["mess_incharge", "warden", "admin", "sysadmin"] as Role[],
 } as const;
