@@ -17,9 +17,25 @@ CREATE INDEX IF NOT EXISTS idx_permissions_workflow_stage_status
   ON public.permission_requests (workflow_type, current_stage, status);
 
 -- SLA triage — pending rows ordered by deadline.
-CREATE INDEX IF NOT EXISTS idx_permissions_sla_pending
-  ON public.permission_requests (sla_deadline)
-  WHERE status = 'PENDING' AND sla_deadline IS NOT NULL;
+-- This column is added by the later reconciliation migration (20261026000001);
+-- guard with a column-existence check so the index is created conditionally.
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema='public' AND table_name='permission_requests'
+      AND column_name='sla_deadline'
+  ) THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_indexes
+      WHERE schemaname='public' AND indexname='idx_permissions_sla_pending'
+    ) THEN
+      CREATE INDEX idx_permissions_sla_pending
+        ON public.permission_requests (sla_deadline)
+        WHERE status = 'PENDING' AND sla_deadline IS NOT NULL;
+    END IF;
+  END IF;
+END $$;
 
 -- 2. KPI rollup view ------------------------------------------------------
 -- Adaptive: at this migration's timestamp the table is permission_requests
