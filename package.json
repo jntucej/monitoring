@@ -20,7 +20,13 @@
     "kb:ingest": "node scripts/ingest-kb.mjs",
     "kb:ingest:warden": "node scripts/ingest-kb.mjs --dir docs/kb/warden --role warden,admin,sysadmin",
     "verify:permission-workflow": "npx tsx scripts/verify-permission-workflow.ts",
-    "scaffold:panel": "node scripts/scaffold-panel.mjs"
+    "scaffold:panel": "node scripts/scaffold-panel.mjs",
+    "dash:audit": "node scripts/dashboard-doctor.mjs audit",
+    "dash:report": "node scripts/dashboard-doctor.mjs report > DASHBOARDS.md",
+    "dash:fix": "node scripts/dashboard-doctor.mjs fix --all --write",
+    "dash:routes": "node scripts/dashboard-doctor.mjs routes",
+    "dash:dead": "node scripts/dashboard-doctor.mjs dead",
+    "dash:ci": "node scripts/check-dashboards.mjs"
   },
   "dependencies": {
     "@remotion/player": "^4.0.518",
