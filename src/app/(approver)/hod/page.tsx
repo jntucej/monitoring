@@ -19,6 +19,7 @@ import {
   AlertTriangle,
   Loader2,
   UserCheck,
+  Inbox,
 } from "lucide-react";
 
 const MIN_TIER = 55;
