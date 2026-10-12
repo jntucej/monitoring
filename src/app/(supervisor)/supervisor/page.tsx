@@ -31,7 +31,6 @@ import {
   HandHelping,
   ClipboardCheck,
 } from "lucide-react";
-import { GuardedPage } from "@/components/shared/GuardedPage";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { useAuthStore } from "@/stores/authStore";
@@ -1392,10 +1391,10 @@ function SupervisorDashboardInner() {
 
 export default function SupervisorDashboardPage() {
   return (
-    <GuardedPage allowedRoles={["supervisor", "principal", "admin", "sysadmin"]}>
+
       <Suspense fallback={<PageLoading />}>
         <SupervisorDashboardInner />
       </Suspense>
-    </GuardedPage>
+    
   );
 }

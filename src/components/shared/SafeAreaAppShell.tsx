@@ -51,7 +51,7 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
   // never clutters dashboards, admin, student or support views.
   const isHardwareRoute =
     pathname?.startsWith("/gate");
-  const showDeviceFallback = authenticated && !isStandaloneSysadmin && isHardwareRoute;
+  const showDeviceFallback = false; // Removed — was showing duplicate fallback on gate routes
 
   // Initialize theme from localStorage on client-side mount
   useEffect(() => {
@@ -97,7 +97,7 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
                 : "flex-1 p-3 sm:p-5 md:p-6 pb-24 md:pb-6 max-w-7xl mx-auto w-full"
             }
           >
-            {showDeviceFallback && <GlassDeviceFallback />}
+
             <AnimatePresence mode="wait">
               <motion.div
                 key={pathname || "page"}

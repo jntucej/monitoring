@@ -5,7 +5,6 @@ import {
   GraduationCap, Search, RefreshCw, Users, Archive,
   AlertTriangle, CheckCircle2, Loader2, ShieldAlert, Ban, UserCheck, Database,
 } from "lucide-react";
-import { GuardedPage } from "@/components/shared/GuardedPage";
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import { usePolling } from "@/hooks/usePolling";
@@ -269,8 +268,7 @@ export default function AlumniPage() {
   ];
 
   return (
-    <GuardedPage minTier={100}>
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
@@ -577,7 +575,6 @@ export default function AlumniPage() {
 
         <DevContactStrip />
       </div>
-    </GuardedPage>
   );
 }
 

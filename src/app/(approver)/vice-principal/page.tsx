@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import { GuardedPage } from "@/components/shared/GuardedPage";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
@@ -12,7 +11,7 @@ import { useApiResource, clearCache, cachedFetch } from "@/hooks/useApiResource"
 import { usePolling } from "@/hooks/usePolling";
 import {
   ShieldCheck,
-  UserCheck,
+
   AlertTriangle,
   Loader2,
   Inbox,
@@ -420,10 +419,6 @@ function VicePrincipalDashboardInner() {
       {/* ── Page toolbar ── */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <h1 className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
-            <UserCheck className="w-6 h-6 text-sky-400 shrink-0" />
-            <span className="truncate">Vice Principal Desk</span>
-          </h1>
           <p className="mt-1 text-sm text-slate-400 min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
@@ -877,10 +872,8 @@ function VicePrincipalDashboardInner() {
 
 export default function VicePrincipalDashboardPage() {
   return (
-    <GuardedPage allowedRoles={["vice_principal", "admin", "sysadmin"]}>
-      <Suspense fallback={<PageLoading />}>
-        <VicePrincipalDashboardInner />
-      </Suspense>
-    </GuardedPage>
+    <Suspense fallback={<PageLoading />}>
+      <VicePrincipalDashboardInner />
+    </Suspense>
   );
 }

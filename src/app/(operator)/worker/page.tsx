@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense, useCallback, useMemo } from "react";
-import { GuardedPage } from "@/components/shared/GuardedPage";
 import { ConditionalAlert } from "@/components/shared/ConditionalAlert";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
@@ -181,10 +180,10 @@ function WorkerDashboardInner() {
 
 export default function WorkerDashboardPage() {
   return (
-    <GuardedPage minTier={MIN_TIER} allowedRoles={["worker", "operator", "admin", "sysadmin"]}>
+
       <Suspense fallback={<PageLoading />}>
         <WorkerDashboardInner />
       </Suspense>
-    </GuardedPage>
+    
   );
 }
