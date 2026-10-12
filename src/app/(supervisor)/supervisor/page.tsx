@@ -500,7 +500,7 @@ function SupervisorDashboardInner() {
               <p className="p-8 text-center text-[var(--text-muted)]">No pending outpasses match filter criteria.</p>
             ) : (
               filteredPasses.map((p) => {
-                const parentPhone = (p as any).parentPhone || "+91 98765 43210";
+                const parentPhone = (p as any).parentPhone;
                 const isVerified = verifiedParents[p.id] || false;
                 return (
                   <div key={p.id} className="py-4 space-y-3">
@@ -519,7 +519,11 @@ function SupervisorDashboardInner() {
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                       <div className="p-2.5 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] flex items-center justify-between">
-                        <span className="text-[11px] font-bold text-[var(--text-primary)]">Parent: <a href={`tel:${parentPhone}`} className="font-mono text-indigo-400">{parentPhone}</a></span>
+                        {parentPhone ? (
+                          <span className="text-[11px] font-bold text-[var(--text-primary)]">Parent: <a href={`tel:${parentPhone}`} className="font-mono text-indigo-400">{parentPhone}</a></span>
+                        ) : (
+                          <span className="text-[11px] font-bold text-[var(--text-muted)]">Parent: Not on file</span>
+                        )}
                         <label className="flex items-center gap-1 text-[10px] text-[var(--text-muted)] font-semibold cursor-pointer">
                           <input type="checkbox" checked={isVerified} onChange={(e) => setVerifiedParents((prev) => ({ ...prev, [p.id]: e.target.checked }))} className="accent-emerald-500" />
                           <span>Verified Call</span>
@@ -556,8 +560,8 @@ function SupervisorDashboardInner() {
           </div>
 
           {rosterViewMode === "list" ? (
-            <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden text-xs">
-              <table className="w-full text-left">
+            <div className="overflow-x-auto bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl">
+              <table className="w-full min-w-[560px] text-left">
                 <thead className="bg-[var(--bg-elevated)] text-[var(--text-muted)] border-b border-[var(--border)] font-mono uppercase">
                   <tr><th className="p-3">Ward Student</th><th className="p-3">Block / Room</th><th className="p-3">Campus Status</th><th className="p-3">Demerits</th><th className="p-3 text-right">Actions</th></tr>
                 </thead>

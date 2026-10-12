@@ -22,6 +22,7 @@ import { ScanDetailModal } from "@/components/operator/ScanDetailModal";
 import type { Scan as ScanRecord } from "@/lib/types";
 import { useCollegeInfo } from "@/hooks/useCollegeInfo";
 import { useUIStore } from "@/stores/uiStore";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
 
 function OperatorPageInner() {
   const params = useParams<{ gateId: string }>();
@@ -672,6 +673,11 @@ function OperatorPageInner() {
 
         {/* Dynamic Inner view */}
         {renderActiveView()}
+
+        {/* Dev contact strip for reporting gate issues */}
+        <div className="pt-2">
+          <DevContactStrip />
+        </div>
       </main>
 
       {/* Person overview modal opened by tapping a log */}
