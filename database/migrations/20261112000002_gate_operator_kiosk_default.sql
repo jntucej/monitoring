@@ -71,8 +71,35 @@ UPDATE public.users
    AND role = 'operator';
 
 -- Record migration
-INSERT INTO public.schema_migrations (version)
-VALUES ('20261112000002')
-ON CONFLICT (version) DO NOTHING;
+DO $$
+DECLARE
+  has_filename BOOLEAN;
+  has_checksum BOOLEAN;
+BEGIN
+  SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'schema_migrations' AND column_name = 'filename'
+  ) INTO has_filename;
+  SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'schema_migrations' AND column_name = 'checksum'
+  ) INTO has_checksum;
+
+  IF has_filename AND has_checksum THEN
+    INSERT INTO public.schema_migrations (version, filename, applied_at, checksum)
+    VALUES ('20261112000002', '20261112000002_gate_operator_kiosk_default.sql', NOW(),
+            md5('20261112000002_gate_operator_kiosk_default'))
+    ON CONFLICT (version) DO NOTHING;
+  ELSIF has_filename THEN
+    INSERT INTO public.schema_migrations (version, filename, applied_at)
+    VALUES ('20261112000002', '20261112000002_gate_operator_kiosk_default.sql', NOW())
+    ON CONFLICT (version) DO NOTHING;
+  ELSE
+    INSERT INTO public.schema_migrations (version, applied_at)
+    VALUES ('20261112000002', NOW())
+    ON CONFLICT (version) DO NOTHING;
+  END IF;
+END
+$$;
 
 COMMIT;
