@@ -419,10 +419,6 @@ function VicePrincipalDashboardInner() {
       {/* ── Page toolbar ── */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <h1 className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
-            <UserCheck className="w-6 h-6 text-sky-400 shrink-0" />
-            <span className="truncate">Vice Principal Desk</span>
-          </h1>
           <p className="mt-1 text-sm text-slate-400 min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}

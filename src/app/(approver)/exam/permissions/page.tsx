@@ -178,10 +178,6 @@ function ExamPermissionsInner() {
           renders the app header; this is NOT a second <header>. */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
-            <ClipboardCheck className="w-6 h-6 text-emerald-400" />
-            Exam Branch Permissions
-          </h1>
           <p className="mt-1 text-sm text-slate-400">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
