@@ -458,3 +458,9 @@ npx plop
 See the full implementation in `packages/ai-scheduler-kit/` for complete details.
 
 
+
+## 🔑 Role Credentials
+
+All provisioned role login credentials (operator kiosk, principal, exam, hostel,
+parent, mess-in-charge, warden, supervisor, student, plus supporting roles) are
+documented in **[README_CREDENTIALS.md](./README_CREDENTIALS.md)**.
