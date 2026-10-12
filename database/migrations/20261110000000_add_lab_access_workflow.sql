@@ -30,16 +30,36 @@ BEGIN
   END IF;
 END $$;
 
--- 3. Seed lab_access custom reasons (if any) and document templates
+-- 3. Expand custom_reasons workflow_type CHECK to include lab_access
+-- The inline CHECK from CREATE TABLE may be auto-named; drop both possible names.
+DO $$
+BEGIN
+  ALTER TABLE public.custom_reasons DROP CONSTRAINT IF EXISTS custom_reasons_workflow_type_check;
+  -- PostgreSQL auto-names inline column checks as {table}_{column}_check
+  ALTER TABLE public.custom_reasons DROP CONSTRAINT IF EXISTS custom_reasons_check;
+  ALTER TABLE public.custom_reasons ADD CONSTRAINT custom_reasons_workflow_type_check
+    CHECK (workflow_type IN ('hostel','exam','memo','staff_leave','lab_access'));
+END $$;
+
+-- 4. Expand document_templates workflow_type CHECK to include lab_access
+DO $$
+BEGIN
+  ALTER TABLE public.document_templates DROP CONSTRAINT IF EXISTS document_templates_workflow_type_check;
+  ALTER TABLE public.document_templates DROP CONSTRAINT IF EXISTS document_templates_check;
+  ALTER TABLE public.document_templates ADD CONSTRAINT document_templates_workflow_type_check
+    CHECK (workflow_type IN ('hostel','exam','memo','staff_leave','lab_access'));
+END $$;
+
+-- 5. Seed lab_access custom reasons
 INSERT INTO public.custom_reasons (code, label, workflow_type)
 VALUES
   ('LAB_DEFAULT', 'Default lab access', 'lab_access')
 ON CONFLICT (code, workflow_type) DO NOTHING;
 
--- 4. Create LAB ticket sequence
+-- 6. Create LAB ticket sequence
 CREATE SEQUENCE IF NOT EXISTS public.lab_ticket_seq START 1001;
 
--- 5. Add trigger for lab_access updated_at (already covered by existing trigger on permission_requests)
+-- 7. Add trigger for lab_access updated_at (already covered by existing trigger on permission_requests)
 
 -- Record migration
 INSERT INTO public.schema_migrations (version)
