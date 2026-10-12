@@ -389,7 +389,7 @@ function MessDashboardInner() {
   const totalHostellers = analyticsRes.data?.totalHostellers ?? 0;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 min-w-0">
       {/* Header */}
       <div className="rounded-2xl border border-slate-800 bg-[#0d1220] p-4 sm:p-5 space-y-3">
         <div className="flex items-start justify-between gap-3">

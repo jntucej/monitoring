@@ -162,6 +162,6 @@ async function handleKioskSession(req: NextRequest) {
 // mount; a sustained flood is an abuse signal worth throttling hard.
 export const GET = withRateLimit(handleKioskSession, {
   windowMs: 15 * 60 * 1000,
-  maxRequests: 20,
+  maxRequests: 200,
   keyPrefix: "kiosk_session_limit",
 });

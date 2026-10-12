@@ -174,7 +174,7 @@ function GuardianDashboardInner() {
   const loading = personsLoading || passesLoading || pendingLoading;
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+    <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 min-w-0">
       {/* header */}
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
