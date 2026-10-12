@@ -919,9 +919,9 @@ async function fetchByIds<T>(db: any, table: string, ids: string[]): Promise<any
   return out;
 }
 
-export async function findAllPersons(type?: PersonType): Promise<Person[]> {
+export async function findAllPersons(type?: PersonType, status?: string): Promise<Person[]> {
   const db = getDbClient();
-  let query = db.from('users').select('*').eq('status', 'ACTIVE');
+  let query = db.from('users').select('*').eq('status', status ?? 'ACTIVE');
   if (type) {
     query = query.eq('role', type);
   }
@@ -953,7 +953,7 @@ export async function findAllPersons(type?: PersonType): Promise<Person[]> {
   });
 }
 
-export const findAllStudents = () => findAllPersons('student');
+export const findAllStudents = (status?: string) => findAllPersons('student', status);
 
 export async function findPersonsByType(type: PersonType): Promise<Person[]> {
   return findAllPersons(type);

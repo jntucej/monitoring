@@ -64,6 +64,10 @@ async function handleGet(req: NextRequest) {
     const parentId = params.get("parentId");
     const scope = params.get("scope");
     const hostel = params.get("hostel");
+    // status=ALL returns every student regardless of ACTIVE/DEPROVISIONED;
+    // any other value filters on users.status (used by the alumni page).
+    const statusParam = params.get("status");
+    const status = statusParam && statusParam !== "ALL" ? statusParam : undefined;
 
     // Parents can only list their own children
     if (parentId) {
@@ -91,7 +95,7 @@ async function handleGet(req: NextRequest) {
       );
     }
 
-    const result: Person[] = q ? await searchStudents(q) : await findAllStudents();
+    const result: Person[] = q ? await searchStudents(q) : await findAllStudents(status);
     return NextResponse.json({ success: true, data: result });
   } catch (error) {
     console.error("Error fetching students:", error);
