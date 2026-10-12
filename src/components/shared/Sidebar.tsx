@@ -82,7 +82,7 @@ function DesktopSidebar({
   return (
     <aside
       aria-label="Primary navigation"
-      className={`hidden md:flex fixed inset-y-0 left-0 z-30 flex-col bg-[var(--bg-surface)]/95 backdrop-blur-xl border-r border-[var(--border)] select-none transition-all duration-300 glass-nav-rail ${
+      className={`hidden md:flex fixed inset-y-0 left-0 z-nav flex-col bg-[var(--bg-surface)]/95 backdrop-blur-xl border-r border-[var(--border)] select-none transition-all duration-300 glass-nav-rail ${
         isSidebarCollapsed ? "w-16" : "w-64"
       }`}
     >
