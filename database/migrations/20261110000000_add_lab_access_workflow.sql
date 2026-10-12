@@ -1,7 +1,7 @@
--- ===========================================================================
+-- ============================================================================
 -- Migration: 20261110000000_add_lab_access_workflow
 -- Purpose: Add Lab Access workflow with LAB ticket prefix, chain-driven approval
--- ===========================================================================
+-- ============================================================================
 
 -- 1. Expand users.role CHECK constraint to include exam_superintendent (already in roles.ts)
 ALTER TABLE public.users DROP CONSTRAINT IF EXISTS users_role_check;
