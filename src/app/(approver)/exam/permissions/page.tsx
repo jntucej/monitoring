@@ -14,7 +14,7 @@ import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
 import type { PermissionItem } from "@/components/approver/PermissionRow";
 import {
-  ClipboardCheck,
+
   ShieldCheck,
   UserCheck,
   AlertTriangle,
@@ -22,7 +22,6 @@ import {
   Inbox,
   Clock,
 } from "lucide-react";
-
 
 /* ── response shapes (mirror /api/permissions) ── */
 

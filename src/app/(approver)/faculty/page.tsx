@@ -11,7 +11,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role, FacultyMemberAttendance, DepartmentAttendanceSummary } from "@/lib/types";
 import {
-  GraduationCap,
+
   CalendarCheck,
   Users,
   CheckCircle2,

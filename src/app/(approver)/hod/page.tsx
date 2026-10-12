@@ -10,14 +10,14 @@ import { useAuthStore } from "@/stores/authStore";
 import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role } from "@/lib/types";
 import {
-  Building2,
+
   Users,
   GraduationCap,
   CheckCircle2,
   Clock,
   AlertTriangle,
   Loader2,
-  UserCheck,
+
   Inbox,
 } from "lucide-react";
 

@@ -5,7 +5,7 @@ import { PageLoading } from "@/components/shared/LoadingStates";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { PermissionList } from "@/components/approver/PermissionList";
-import { ClipboardCheck, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 
 function PrincipalPermissionsInner() {
   return (

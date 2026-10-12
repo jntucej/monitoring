@@ -23,7 +23,7 @@ import {
   Inbox,
   Siren,
   ClipboardCheck,
-  BarChart3,
+
   FileText,
   ScrollText,
   CheckCircle2,

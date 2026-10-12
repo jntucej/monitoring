@@ -18,9 +18,8 @@ import {
   Clock,
   AlertTriangle,
   Loader2,
-  Home,
-} from "lucide-react";
 
+} from "lucide-react";
 
 /* ── response shapes (mirror the route handlers — all read-only) ── */
 

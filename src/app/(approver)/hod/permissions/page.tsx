@@ -4,7 +4,6 @@ import { Suspense } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { PermissionList } from "@/components/approver/PermissionList";
-import { ClipboardCheck } from "lucide-react";
 
 function HodPermissionsInner() {
   return (
