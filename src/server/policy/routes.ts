@@ -14,7 +14,6 @@ export const ALL_ROLES: Role[] = [
   "parent",
   "guardian",
   "hod",
-  "principal",
   "vice_principal",
   "exam_branch",
   "oie",
