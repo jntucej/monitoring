@@ -12,16 +12,16 @@ import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role } from "@/lib/types";
 import {
   Building2,
+  Users,
   GraduationCap,
+  CheckCircle2,
   Clock,
   AlertTriangle,
   Loader2,
-  CheckCircle2,
-  Users,
-  Inbox,
+  UserCheck,
 } from "lucide-react";
 
-const MIN_TIER = 50;
+const MIN_TIER = 55;
 
 /* ── response shapes ── */
 
@@ -31,7 +31,10 @@ interface HodFacultyData {
     id: string;
     name: string;
     email: string;
+    phone?: string;
+    unique_id?: string;
     status?: string;
+    department_id?: string;
     employee_details?: {
       designation?: string;
       employee_id?: string;
