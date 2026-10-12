@@ -24,7 +24,9 @@ async function findWardenScopedStudents(scope: string | null, hostel: string | n
     .eq("role", "student")
     .eq("status", "ACTIVE");
   if (hostel && HOSTEL_CODES.includes(hostel.toUpperCase())) {
-    query = query.eq("department", hostel.toUpperCase());
+    // users stores the department code in department_id (e.g. "CSE", "IT").
+    // The column is department_id — not department (which does not exist).
+    query = query.eq("department_id", hostel.toUpperCase());
   }
   if (scope === "active") {
     query = query.or(`checked_out_at.is.null`);
