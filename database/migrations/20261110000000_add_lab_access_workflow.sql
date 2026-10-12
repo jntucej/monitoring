@@ -62,6 +62,23 @@ CREATE SEQUENCE IF NOT EXISTS public.lab_ticket_seq START 1001;
 -- 7. Add trigger for lab_access updated_at (already covered by existing trigger on permission_requests)
 
 -- Record migration
-INSERT INTO public.schema_migrations (version)
-VALUES ('20261110000000')
-ON CONFLICT (version) DO NOTHING;
+DO $$
+DECLARE
+  has_filename BOOLEAN;
+BEGIN
+  SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'schema_migrations' AND column_name = 'filename'
+  ) INTO has_filename;
+
+  IF has_filename THEN
+    INSERT INTO public.schema_migrations (version, filename, applied_at)
+    VALUES ('20261110000000', '20261110000000_add_lab_access_workflow.sql', NOW())
+    ON CONFLICT (version) DO NOTHING;
+  ELSE
+    INSERT INTO public.schema_migrations (version)
+    VALUES ('20261110000000')
+    ON CONFLICT (version) DO NOTHING;
+  END IF;
+END
+$$;
