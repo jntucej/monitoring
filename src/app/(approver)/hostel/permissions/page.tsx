@@ -22,7 +22,6 @@ import {
   Home,
 } from "lucide-react";
 
-const MIN_TIER = 55; // caretaker (lowest hostel desk role: 55; deputy_warden 65; hostel_manager 70)
 
 /* ── response shapes (mirror the route handlers — all read-only) ── */
 
@@ -335,19 +334,7 @@ function HostelPermissionsInner() {
 
 export default function HostelPermissionsPage() {
   return (
-    <GuardedPage
-      minTier={MIN_TIER}
-      allowedRoles={[
-        "caretaker",
-        "deputy_warden",
-        "hostel_manager",
-        "warden",
-        "principal",
-        "principal",
-        "admin",
-        "sysadmin",
-      ]}
-    >
+    <GuardedPage allowedRoles={["caretaker", "deputy_warden", "hostel_manager", "warden", "principal", "admin", "sysadmin"]}>
       <Suspense fallback={<PageLoading />}>
         <HostelPermissionsInner />
       </Suspense>
