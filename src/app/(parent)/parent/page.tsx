@@ -110,7 +110,7 @@ export default function ParentDashboardPage() {
   const { cards, error, refresh, user } = useParentKpis();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-w-0">
       <div>
         <h1 className="text-2xl font-bold">
           <span className="sm:hidden">👨‍👩‍👧</span>

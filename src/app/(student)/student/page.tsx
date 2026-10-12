@@ -285,7 +285,7 @@ function StudentDashboardInner() {
   };
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-6 pb-12 min-w-0">
       {/* Dynamic Tab Heading */}
       <div className="text-center sm:text-left border-b border-[var(--border)] pb-4 space-y-1">
         <h1 className="text-2xl font-extrabold tracking-tight text-[var(--text-primary)]">

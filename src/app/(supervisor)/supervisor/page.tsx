@@ -342,7 +342,7 @@ function SupervisorDashboardInner() {
   });
 
   return (
-    <div className="space-y-5 sm:space-y-6 pb-8 sm:pb-12">
+    <div className="space-y-5 sm:space-y-6 pb-8 sm:pb-12 min-w-0">
       <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-3xl p-5 sm:p-8 shadow-xl">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">
           <div className="flex items-center gap-4">
