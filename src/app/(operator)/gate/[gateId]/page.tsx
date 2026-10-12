@@ -90,7 +90,7 @@ function OperatorPageInner() {
     if (!authenticated) return;
     const checkLockdown = async () => {
       try {
-        const res = await fetch("/api/admin/lockdown");
+        const res = await fetch("/api/lockdown/active");
         const json = await res.json();
         if (json.success && json.data) {
           setActiveLockdown(json.data);

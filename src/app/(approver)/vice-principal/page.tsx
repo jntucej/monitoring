@@ -24,7 +24,8 @@ import {
  * Vice Principal dedicated dashboard — shows ONLY VP-stage data:
  *   • pending approvals at the vice_principal stage (exam + memo + staff_leave)
  *   • SLA status of the escalation queue
- * No admin analytics / intelligence panels; /api/admin/* is never fetched.
+ * No admin analytics / intelligence panels — admin API endpoints are never
+ * fetched.
  * The full action desk (forward / reject with remarks / bulk ops) lives at
  * /exam/permissions for exam workflows.
  */

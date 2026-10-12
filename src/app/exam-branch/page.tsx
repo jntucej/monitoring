@@ -21,13 +21,14 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-/*
+/**
  * Exam Branch landing — the oie / exam_branch role has no admin workspace.
  * This dashboard shows ONLY exam-stage permission data:
  *   • OIE queue (exam clearances awaiting the examination officer)
  *   • Pending approvals at the exam stage
  *   • SLA status (48h deadline breaches)
- * No admin analytics, no intelligence panels — /api/admin/* is never fetched.
+ * No admin analytics, no intelligence panels — admin API endpoints are
+ * never fetched.
  */
 
 /* ── response shapes (mirror /api/permissions) ── */
@@ -162,8 +163,8 @@ function ExamBranchLandingInner() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
-      {/* header */}
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
+      {/* Page toolbar — global DynamicHeader already renders the app header */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <h1 className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
             <ClipboardCheck className="w-6 h-6 text-emerald-400 shrink-0" />
@@ -186,7 +187,7 @@ function ExamBranchLandingInner() {
           )}
           {oieLoading || vpLoading ? "Refreshing…" : "Refresh"}
         </button>
-      </header>
+      </div>
 
       {/* error banner */}
       {(oieError || (!oieData && !oieLoading)) && (

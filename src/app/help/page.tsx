@@ -243,7 +243,7 @@ export default function HelpPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 space-y-6">
+    <div className="mx-auto max-w-3xl px-4 py-8 space-y-6 min-w-0">
       {/* Page title — global DynamicHeader renders the app header */}
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">Help Center</h1>

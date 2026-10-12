@@ -103,7 +103,7 @@ function SupervisorDashboardInner() {
   const [studentSearch, setStudentSearch] = useState("");
   const [hostelFilter, setHostelFilter] = useState("ALL");
 
-  // Lockdown state is admin-managed (/api/admin/lockdown is admin-only and
+  // Lockdown state is admin-managed (admin endpoint is admin-only and
   // intentionally NOT polled from the warden desk — a supervisor/warden only
   // READS the active lockdown when a scan is attempted; the gate desk pages
   // surface it. No admin telemetry is fetched on this dashboard.

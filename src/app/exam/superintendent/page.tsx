@@ -138,8 +138,9 @@ function ExamSuperintendentDashboardInner() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 min-w-0">
-      {/* Page toolbar — the global DynamicHeader (SafeAreaAppShell) already carries
-          the app title bar / user chip, so this is NOT a <header>. */}
+      {/* Page toolbar — the global DynamicHeader (SafeAreaAppShell) already
+          carries the app title bar / user chip, so this div is not a header
+          element. */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">

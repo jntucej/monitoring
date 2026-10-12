@@ -231,7 +231,7 @@ function VisitorDashboardInner() {
               </div>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto min-w-0">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-800 text-slate-500 text-xs uppercase tracking-wide">

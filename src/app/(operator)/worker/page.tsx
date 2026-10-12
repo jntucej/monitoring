@@ -25,7 +25,7 @@ const MIN_TIER = 40; // worker tier
 /*
  * This page is intentionally scoped to the worker's OWN role data:
  * shift assignment + role-conditional alerts. Admin-only intelligence
- * (system-wide security stats via /api/admin/*) was removed — a worker
+ * (system-wide security stats) was removed — a worker
  * desk should not render privileged telemetry. If a worker-shifts
  * endpoint ever lands, add it here.
  */

@@ -15,7 +15,7 @@ const MIN_TIER = 20;
 
 /*
  * The operator desk shows its OWN role-scoped alerts only. The previous
- * pull of /api/admin/security/stats (system-wide admin telemetry) was
+ * pull of system-wide security stats (admin telemetry) was
  * removed — a gate operator should not surface privileged security
  * counters. If operator-specific metrics ever ship, fetch them here.
  */
