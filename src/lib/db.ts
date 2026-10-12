@@ -97,6 +97,8 @@ export function mPerson(r: any): Person {
     roomNumber: r.student_details.roomNumber || r.student_details.room_number,
     hostelCurfewTime: r.student_details.hostel_curfew_time,
     gender: r.student_details.gender,
+    completed: r.student_details.completed,
+    completedAt: r.student_details.completed_at || r.student_details.completedAt,
     wardenId: r.student_details.warden_id,
   } : undefined;
 
@@ -163,6 +165,8 @@ export function mPerson(r: any): Person {
     hostelBlock: (studentDetails as any)?.hostel_block || studentDetails?.hostelBlock || r.hostel_block,
     roomNumber: (studentDetails as any)?.room_number || studentDetails?.roomNumber || r.room_number,
     hostelCurfewTime: (studentDetails as any)?.hostel_curfew_time || studentDetails?.hostelCurfewTime || r.hostel_curfew_time,
+    completed: studentDetails?.completed,
+    completedAt: studentDetails?.completedAt,
     wardenId: (studentDetails as any)?.warden_id || studentDetails?.wardenId || r.warden_id,
   };
 }

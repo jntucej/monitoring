@@ -165,7 +165,7 @@ async function handlePatch(req: NextRequest) {
       }
 
       // 2. Student details
-      if (body.studentDetails || body.roll || body.year || body.hostelRoom) {
+      if (body.studentDetails || body.roll || body.year || body.hostelRoom || body.completed !== undefined || body.completedAt !== undefined) {
         const sd = body.studentDetails ?? body;
         const studentUpdates: Record<string, any> = {};
         if (sd.roll !== undefined) studentUpdates.roll = sd.roll;
@@ -179,12 +179,54 @@ async function handlePatch(req: NextRequest) {
         if (sd.studentType !== undefined) studentUpdates.student_type = sd.studentType;
         if (sd.gender !== undefined) studentUpdates.gender = sd.gender;
         if (sd.wardenId !== undefined) studentUpdates.warden_id = sd.wardenId;
+        // Graduation flag: completed=TRUE + completed_at for passed-out students.
+        if (sd.completed !== undefined) studentUpdates.completed = sd.completed;
+        if (sd.completedAt !== undefined) studentUpdates.completed_at = sd.completedAt;
 
         if (Object.keys(studentUpdates).length > 0) {
           const { error } = await supabase
             .from("student_details")
             .upsert({ user_id: id, ...studentUpdates }, { onConflict: "user_id" });
           if (error) return NextResponse.json({ success: false, error: { message: error.message } }, { status: 400 });
+        }
+      }
+
+      // 2b. Graduation / alumni fields (student_details.completed + completed_at).
+      // Accepted on both the flat body and a nested studentDetails object.
+      // Only admins/sysadmins may flip graduation state (it implies deprovisioning).
+      const flatCompleted = body.completed;
+      const flatCompletedAt = body.completedAt;
+      const sdCompleted = body.studentDetails?.completed;
+      const sdCompletedAt = body.studentDetails?.completedAt;
+      if (flatCompleted !== undefined || flatCompletedAt !== undefined || sdCompleted !== undefined || sdCompletedAt !== undefined) {
+        if (!isAdmin) {
+          return NextResponse.json(
+            { success: false, error: { code: "FORBIDDEN", message: "Only administrators can mark graduation state" } },
+            { status: 403 }
+          );
+        }
+        const completion: Record<string, any> = { user_id: id };
+        if (sdCompleted !== undefined) completion.completed = sdCompleted;
+        else if (flatCompleted !== undefined) completion.completed = flatCompleted;
+        if (sdCompletedAt !== undefined) completion.completed_at = sdCompletedAt;
+        else if (flatCompletedAt !== undefined) completion.completed_at = flatCompletedAt;
+
+        const { error } = await supabase
+          .from("student_details")
+          .upsert(completion, { onConflict: "user_id" });
+        if (error) return NextResponse.json({ success: false, error: { message: error.message } }, { status: 400 });
+
+        // Marking a student completed implies they have left campus: deprovision
+        // the account unless the caller explicitly wants to keep it active.
+        const completedFlag = completion.completed;
+        if (completedFlag === true) {
+          const explicitStatus = body.status || body.account_status;
+          const targetStatus: AccountStatus = explicitStatus && VALID_STATUSES.includes(explicitStatus)
+            ? explicitStatus
+            : "DEPROVISIONED";
+          if (target.status !== "ACTIVE") {
+            await updateAccountStatus(id, targetStatus);
+          }
         }
       }
 

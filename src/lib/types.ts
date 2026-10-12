@@ -41,6 +41,10 @@ export interface StudentDetails {
   hostelCurfewTime?: string;
   gender?: "male" | "female";
   wardenId?: string;
+  /** Graduation flag — student_details.completed (TRUE when graduated). */
+  completed?: boolean;
+  /** ISO timestamp when the student was marked graduated. */
+  completedAt?: string;
 }
 
 export type StaffCategory =
@@ -143,6 +147,10 @@ export interface Person {
   hostelBlock?: string;
   roomNumber?: string;
   hostelCurfewTime?: string;
+  /** Graduation flag — true when the student has completed the programme. */
+  completed?: boolean;
+  /** ISO timestamp when the student was marked graduated. */
+  completedAt?: string;
   wardenId?: string;
 }
 
