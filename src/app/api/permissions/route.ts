@@ -10,7 +10,15 @@ import { resolveInitialStage, generateTicketNumber, WorkflowType } from "@/lib/p
 async function handlePost(req: NextRequest, context: any) {
   const { auth: { userId, role } } = context;
   const db = getSupabaseServiceClient();
-  const body = await req.json();
+  let body: Record<string, unknown>;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json(
+      { success: false, error: { code: "BAD_REQUEST", message: "Invalid JSON body" } },
+      { status: 400 }
+    );
+  }
   const workflowType = body.workflow_type || body.workflowType;
   const studentUserId = body.student_user_id || body.studentUserId;
   const hostelScope = body.hostel_scope || body.hostelScope;
@@ -60,11 +68,18 @@ async function handlePost(req: NextRequest, context: any) {
   const { data: request, error: createError } = await db.from("permission_requests").insert({
     ticket_number: ticketNumber,
     workflow_type: workflowType,
-    requester_user_id: userId,
     student_user_id: targetUserId,
     hostel_scope: hostelScope,
     sla_deadline: slaDeadline,
-    ...rest,
+    requester_user_id: userId,
+    // Strip any caller-supplied columns that we already set explicitly above;
+    // Postgres rejects duplicate column keys in a single SET (e.g. a `staff`
+    // actor re-submitting its own `requester_user_id` in the payload body).
+    ...Object.fromEntries(Object.entries(rest).filter(([k]) => ![
+      "ticket_number", "workflow_type", "student_user_id", "hostel_scope",
+      "sla_deadline", "requester_user_id", "current_stage", "status",
+      "stage_history", "branch",
+    ].includes(k))),
     current_stage: initialStage,
     status: "PENDING",
     stage_history: [],
@@ -98,6 +113,19 @@ async function handleGet(req: NextRequest, context: any) {
   let query = db.from("permission_requests").select("*", { count: "exact" });
   if (type) query = query.eq("workflow_type", type);
   if (status) query = query.eq("status", status);
+  // Explicit stage filter (used by UI PermissionList: ?stage=principal etc.)
+  const stageParam = searchParams.get("stage") || searchParams.get("current_stage");
+  if (stageParam && ["faculty", "hod", "oie", "vice_principal", "principal", "caretaker", "deputy_warden", "hostel_manager", "main_gate", "warden_or_principal"].includes(stageParam)) {
+    query = query.eq("current_stage", stageParam);
+    // For principal: also include hostel requests at warden_or_principal stage
+    if (stageParam === "principal") {
+      query = query.or("current_stage.eq.principal,current_stage.eq.warden_or_principal");
+    }
+    // Return early — explicit stage param overrides role-based filtering below
+    const { data: stageData, count: stageCount, error: stageErr } = await query;
+    if (stageErr) return NextResponse.json({ success: false, error: stageErr.message }, { status: 500 });
+    return NextResponse.json({ success: true, data: stageData, total: stageCount || 0 });
+  }
 
   if (role === "student") {
     query = query.eq("student_user_id", userId);
@@ -115,7 +143,9 @@ async function handleGet(req: NextRequest, context: any) {
     query = query.eq("current_stage", role);
     if (hscope) query = query.eq("hostel_scope", hscope);
   } else if (["warden", "principal"].includes(role)) {
-    query = query.eq("workflow_type", "hostel").eq("current_stage", "warden_or_principal");
+    // Principal sees hostel requests at warden_or_principal stage AND
+    // any other workflow requests currently at the principal stage.
+    query = query.or("current_stage.eq.warden_or_principal,current_stage.eq.principal");
   } else if (["admin", "sysadmin"].includes(role)) {
     if (sid) query = query.eq("student_user_id", sid);
   } else if (role === "operator") {

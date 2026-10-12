@@ -32,12 +32,17 @@ const api = useApi();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "active" | "resolved">("active");
+  const [severity, setSeverity] = useState<string>("all");
   const [busyId, setBusyId] = useState<string | null>(null);
 
   const load = async () => {
     try {
-      const url = filter === "all" ? "/api/alerts" : `/api/alerts?resolved=${filter === "resolved"}`;
-      const res = await fetch(url, { headers: api.getHeaders(), cache: "no-store" });
+      const params = new URLSearchParams();
+      if (filter !== "all") params.set("resolved", filter === "resolved" ? "true" : "false");
+      if (severity !== "all") params.set("severity", severity);
+      const qs = params.toString();
+      const url = qs ? `/api/alerts?${qs}` : "/api/alerts";
+      const res = await fetch(url, { headers: getAuthHeaders(), cache: "no-store" });
       if (!res.ok) throw new Error("Failed to fetch alerts");
       const json = await res.json();
       if (json.success) {
@@ -63,7 +68,7 @@ const api = useApi();
       load();
     }, 15_000);
     return () => clearInterval(t);
-  }, [filter]);
+  }, [filter, severity]);
 
   const resolve = async (id: string) => {
     setBusyId(id);
@@ -98,6 +103,17 @@ const api = useApi();
           <p className="text-[var(--text-muted)]">System alerts and notifications</p>
         </div>
         <div className="flex gap-2">
+          <select
+            value={severity}
+            onChange={(e) => setSeverity(e.target.value)}
+            className="px-3 py-1.5 rounded-lg text-sm font-medium bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border)]"
+          >
+            <option value="all">All severities</option>
+            <option value="critical">Critical only</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
           {(["active", "resolved", "all"] as const).map((f) => (
             <button
               key={f}

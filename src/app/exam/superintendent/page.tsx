@@ -151,7 +151,7 @@ function ExamSuperintendentDashboardInner() {
   const anomalies = (securityStats?.data?.anomalies ?? 0) || 0;
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+    <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 min-w-0">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
@@ -238,7 +238,7 @@ function ExamSuperintendentDashboardInner() {
           ) : queueRows.length === 0 ? (
             <EmptyState message="No pending exam clearance requests. All exam passes have cleared the pipeline." />
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto min-w-0">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-800 text-slate-500 text-xs uppercase tracking-wide">

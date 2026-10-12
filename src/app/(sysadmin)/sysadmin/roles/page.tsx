@@ -62,8 +62,8 @@ const ROLE_ACCESS_MATRIX: { label: string; path: string; roles: string[] }[] = [
   { label: "Admin Dashboard", path: "/admin", roles: ["admin", "sysadmin"] },
   { label: "Principal / Approvals", path: "/principal/permissions", roles: ["principal", "vice_principal", "admin", "sysadmin"] },
   { label: "HOD Workspace", path: "/hod", roles: ["hod", "principal", "vice_principal", "admin", "sysadmin"] },
-  { label: "Warden / Gate Ops", path: "/warden", roles: ["warden", "supervisor", "admin", "sysadmin"] },
-  { label: "Supervisor Dashboard", path: "/supervisor", roles: ["supervisor", "warden", "admin", "sysadmin"] },
+  { label: "Warden / Gate Ops", path: "/principal", roles: ["warden", "principal", "supervisor", "admin", "sysadmin"] },
+  { label: "Supervisor Dashboard", path: "/supervisor", roles: ["supervisor", "warden", "principal", "admin", "sysadmin"] },
   { label: "Operator Gate", path: "/operator", roles: ["operator", "worker", "admin", "sysadmin"] },
   { label: "Worker Console", path: "/worker", roles: ["worker", "admin", "sysadmin"] },
   { label: "Faculty / Leaves", path: "/faculty/permissions", roles: ["faculty", "admin", "sysadmin"] },
@@ -342,6 +342,118 @@ export default function RolesManagementPage() {
     }
   };
 
+  // ---- per-role user counts (client-side role filter against /api/users) ----
+  const fetchUserCounts = async () => {
+    setCountLoading(true);
+    try {
+      const res = await fetch("/api/users", { headers: getAuthHeaders(), cache: "no-store" });
+      const json = await res.json();
+      const users: PickedUser[] = Array.isArray(json?.data) ? json.data : [];
+      const counts: Record<string, number> = {};
+      ALL_ROLE_CODES.forEach((c) => (counts[c] = 0));
+      users.forEach((u) => {
+        const role = u ? u.role : undefined;
+        if (role && counts[role] !== undefined) counts[role] += 1;
+      });
+      setUserCounts(counts);
+    } catch {
+      setUserCounts({});
+    } finally {
+      setCountLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserCounts();
+  }, []);
+
+  const toggleExpand = (code: string) => setExpanded((prev) => ({ ...prev, [code]: !prev[code] }));
+  const expandAll = () => setExpanded(Object.fromEntries(ALL_ROLE_CODES.map((c) => [c, true])));
+  const collapseAll = () => setExpanded({});
+
+  // ---- grant / revoke role actions ----
+  const openGrantPanel = (code: string) => {
+    setGrantRoleCode(code);
+    setGrantSearch("");
+    setGrantResults([]);
+    setGrantMsg(null);
+    setGrantOpen(true);
+  };
+  const closeGrantPanel = () => {
+    setGrantOpen(false);
+    setGrantRoleCode(null);
+    setGrantMsg(null);
+  };
+
+  const searchUsers = async (q: string) => {
+    setGrantSearch(q);
+    if (q.trim().length < 1) {
+      setGrantResults([]);
+      return;
+    }
+    try {
+      const res = await fetch(`/api/users?q=${encodeURIComponent(q.trim())}`, {
+        headers: getAuthHeaders(),
+        cache: "no-store",
+      });
+      const json = await res.json();
+      setGrantResults(Array.isArray(json?.data) ? json.data.slice(0, 12) : []);
+    } catch {
+      setGrantResults([]);
+    }
+  };
+
+  const grantRole = async (user: PickedUser) => {
+    if (!grantRoleCode) return;
+    setGrantBusy(true);
+    try {
+      const res = await fetch(`/api/users/${user.id}`, {
+        method: "PATCH",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ role: grantRoleCode }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setGrantMsg({ type: "success", text: `Granted '${grantRoleCode}' to ${user.name}` });
+        fetchUserCounts();
+      } else {
+        setGrantMsg({ type: "error", text: json.error?.message || "Failed to grant role" });
+      }
+    } catch {
+      setGrantMsg({ type: "error", text: "Network error granting role" });
+    } finally {
+      setGrantBusy(false);
+    }
+  };
+
+  const revokeRole = async (user: PickedUser) => {
+    if (!grantRoleCode) return;
+    // Revoke = demote the user to their parent role in the hierarchy (or visitor if none).
+    const targetRole = ROLE_PARENTS[grantRoleCode] || "visitor";
+    setGrantBusy(true);
+    try {
+      const res = await fetch(`/api/users/${user.id}`, {
+        method: "PATCH",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ role: targetRole }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setGrantMsg({
+          type: "success",
+          text: `Revoked '${grantRoleCode}' from ${user.name} → demoted to '${targetRole}'`,
+        });
+        fetchUserCounts();
+      } else {
+        setGrantMsg({ type: "error", text: json.error?.message || "Failed to revoke role" });
+      }
+    } catch {
+      setGrantMsg({ type: "error", text: "Network error revoking role" });
+    } finally {
+      setGrantBusy(false);
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingRole?.code || !editingRole?.display_name) return;
@@ -357,6 +469,7 @@ export default function RolesManagementPage() {
         addToast({ variant: "success", message: `Saved role ${editingRole.code}` });
         setEditingRole(null);
         fetchRoles();
+        fetchUserCounts();
       } else {
         addToast({ variant: "error", message: json.error?.message || "Failed to save role" });
       }

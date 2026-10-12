@@ -12,16 +12,16 @@ import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role } from "@/lib/types";
 import {
   Building2,
+  Users,
   GraduationCap,
+  CheckCircle2,
   Clock,
   AlertTriangle,
   Loader2,
-  CheckCircle2,
-  Users,
-  Inbox,
+  UserCheck,
 } from "lucide-react";
 
-const MIN_TIER = 50;
+const MIN_TIER = 55;
 
 /* ── response shapes ── */
 
@@ -31,7 +31,10 @@ interface HodFacultyData {
     id: string;
     name: string;
     email: string;
+    phone?: string;
+    unique_id?: string;
     status?: string;
+    department_id?: string;
     employee_details?: {
       designation?: string;
       employee_id?: string;
@@ -193,7 +196,7 @@ function HodDashboardInner() {
   const loading = facultyLoading || studentsLoading || pendingLoading;
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+    <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 min-w-0">
       {/* header */}
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -286,7 +289,7 @@ function HodDashboardInner() {
                   <EmptyState message="No pending approvals in your branch queue." />
                 </div>
               ) : (
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto min-w-0">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-slate-800 text-slate-500 text-xs uppercase tracking-wide">
@@ -359,7 +362,7 @@ function HodDashboardInner() {
                   />
                 </div>
               ) : (
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto min-w-0">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-slate-800 text-slate-500 text-xs uppercase tracking-wide">

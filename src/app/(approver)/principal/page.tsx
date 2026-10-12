@@ -93,26 +93,28 @@ const HOSTEL_CAPACITIES: Record<string, number> = {
   ME: 400,
 };
 
-async function fetchHostelActive(hostel: string): Promise<HostelRow> {
-  const url = `/api/students?scope=active&hostel=${hostel}`;
-  const r = await fetchJson(url);
-  const list = r.success ? ((r.data as Person[]) ?? []) : [];
-  return { hostel, count: list.length, capacity: HOSTEL_CAPACITIES[hostel] ?? 0 };
+function hostelRowFor(code: string, count: number): HostelRow {
+  return { hostel: code, count, capacity: HOSTEL_CAPACITIES[code] ?? 0 };
 }
 
-function HostelOccupancyPanel() {
-  const [rows, setRows] = useState<HostelRow[] | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const results = await Promise.all(HOSTEL_CODES.map((code) => fetchHostelActive(code)));
-      if (!cancelled) setRows(results);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+function HostelOccupancyPanel({
+  roster,
+}: {
+  roster: Person[] | null;
+}) {
+  // Derive per-hostel occupancy client-side from the single active roster
+  // fetch (reuses the /api/students?scope=active data already loaded by the
+  // page). No more 5 parallel per-hostel /api/students calls.
+  const rows: HostelRow[] | null = useMemo(() => {
+    if (!roster) return null;
+    const counts: Record<string, number> = {};
+    for (const code of HOSTEL_CODES) counts[code] = 0;
+    for (const p of roster) {
+      const block = (p.hostelBlock || p.studentDetails?.hostelBlock || "").toUpperCase();
+      if (block in counts) counts[block] += 1;
+    }
+    return HOSTEL_CODES.map((code) => hostelRowFor(code, counts[code] ?? 0));
+  }, [roster]);
 
   return (
     <WidgetBoundary title="Hostel Occupancy">
@@ -242,8 +244,8 @@ function PresenceMatrixPanel({
           <p className="text-sm text-[var(--text-muted)] py-4 text-center">No active gates configured.</p>
         )}
         {matrixData && !loading && !error && gates.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs">
+          <div className="overflow-x-auto min-w-0">
+            <table className="w-full text-xs min-w-[560px]">
               <thead>
                 <tr>
                   <th className="text-left text-[var(--text-muted)] font-semibold pr-3 pb-2">Gate</th>
@@ -396,7 +398,7 @@ function PrincipalDashboardInner() {
   const anyError = passesError || alertsError || matrixError;
 
   return (
-    <div className="mx-auto max-w-7xl space-y-5 sm:space-y-6 px-4 sm:px-6 py-6 sm:py-8">
+    <div className="mx-auto max-w-7xl space-y-5 sm:space-y-6 px-4 sm:px-6 py-6 sm:py-8 min-w-0">
       <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2 text-[var(--text-primary)]">
@@ -431,7 +433,7 @@ function PrincipalDashboardInner() {
       )}
 
       {/* KPI row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
         {kpis.map((k) => (
           <StatCard key={k.label} icon={k.icon} label={k.label} value={k.value} sub={k.sub} accent={k.accent} />
         ))}
@@ -455,7 +457,7 @@ function PrincipalDashboardInner() {
       </WidgetBoundary>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-        <HostelOccupancyPanel />
+        <HostelOccupancyPanel roster={students} />
         <AlertsPanel alerts={alerts} loading={alerts === null} error={alertsError} />
       </div>
 

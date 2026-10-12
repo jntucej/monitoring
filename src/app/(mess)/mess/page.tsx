@@ -389,7 +389,7 @@ function MessDashboardInner() {
   const totalHostellers = analyticsRes.data?.totalHostellers ?? 0;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 min-w-0">
       {/* Header */}
       <div className="rounded-2xl border border-slate-800 bg-[#0d1220] p-4 sm:p-5 space-y-3">
         <div className="flex items-start justify-between gap-3">
@@ -529,7 +529,7 @@ function MessDashboardInner() {
             <span className="text-xs font-bold text-white uppercase tracking-wider">By Hostel Block</span>
           </div>
 
-          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+          <div className="overflow-x-auto min-w-0 -mx-4 px-4 sm:mx-0 sm:px-0">
             <table className="w-full text-sm min-w-[420px]">
               <thead>
                 <tr className="text-left border-b border-slate-800 text-[10px] font-bold uppercase tracking-wider text-slate-500">

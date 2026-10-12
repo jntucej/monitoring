@@ -206,7 +206,7 @@ const api = useApi();
                           role === "staff" ? "text-purple-400" :
                           role === "worker" ? "text-amber-400" :
                           role === "visitor" ? "text-cyan-400" :
-                          role === "warden" ? "text-rose-400" : "text-slate-400"
+                          role === "principal" ? "text-rose-400" : "text-slate-400"
                         }`}>
                           {ROLE_LABELS[role] ?? role}
                         </span>

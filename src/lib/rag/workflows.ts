@@ -17,7 +17,7 @@ export const WORKFLOWS: WorkflowDef[] = [
     labelTe: "హాస్టల్ పాస్",
     chain: [
       { stage: "student_request",     role: "student" },
-      { stage: "warden_approval",     role: "warden" },
+      { stage: "warden_approval",     role: "principal" },
       { stage: "completed",           role: "system" },
     ],
   },

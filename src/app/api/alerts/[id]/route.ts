@@ -50,6 +50,6 @@ async function handlePatch(req: NextRequest) {
 }
 
 export const PATCH = withRateLimit(
-  withAuthorization(handlePatch, { requiredRole: ["admin", "sysadmin", "warden"] }),
+  withAuthorization(handlePatch, { requiredRole: ["admin", "sysadmin", "warden", "principal"] }),
   { keyPrefix: "resolve_alert", maxRequests: 30 }
 );

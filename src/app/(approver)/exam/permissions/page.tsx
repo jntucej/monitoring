@@ -13,6 +13,7 @@ import { PermissionList } from "@/components/approver/PermissionList";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
+import type { PermissionItem } from "@/components/approver/PermissionRow";
 import {
   ClipboardCheck,
   ShieldCheck,
@@ -23,7 +24,6 @@ import {
   Clock,
 } from "lucide-react";
 
-const MIN_TIER = 80; // exam_branch tier (oie=75 / vice_principal=85 also reach this desk)
 
 /* ── response shapes (mirror /api/permissions) ── */
 
@@ -160,12 +160,14 @@ function ExamPermissionsInner() {
   const oieTotal = oieData?.total ?? oieData?.data?.length ?? 0;
   const vpTotal = vpData?.total ?? vpData?.data?.length ?? 0;
 
-  const oieSlaBreached = (oieData?.data ?? []).filter(
-    (r) => r.sla_deadline && new Date(r.sla_deadline).getTime() < Date.now()
-  ).length;
+  const oieSlaBreached = (oieData?.data ?? []).filter((r) => {
+    if (!r.sla_deadline) return false;
+    const ts = new Date(r.sla_deadline).getTime();
+    return !Number.isNaN(ts) && ts < Date.now();
+  }).length;
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6">
+    <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       {/* header */}
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -248,7 +250,7 @@ function ExamPermissionsInner() {
               stageFilter="oie"
               title="OIE Queue"
               subtitle="Officer in Examination approval queue"
-              initialPermissions={oieData.data as never[]}
+              initialPermissions={oieData.data as unknown as PermissionItem[]}
             />
           ) : oieLoading ? (
             <div className="p-4 flex items-center gap-2 text-sm text-slate-500">
@@ -267,7 +269,7 @@ function ExamPermissionsInner() {
               stageFilter="vice_principal"
               title="Vice Principal Queue"
               subtitle="Vice Principal examination review queue"
-              initialPermissions={vpData.data as never[]}
+              initialPermissions={vpData.data as unknown as PermissionItem[]}
             />
           ) : vpLoading ? (
             <div className="p-4 flex items-center gap-2 text-sm text-slate-500">
@@ -286,7 +288,7 @@ function ExamPermissionsInner() {
 
 export default function ExamPermissionsPage() {
   return (
-    <GuardedPage minTier={MIN_TIER} allowedRoles={["exam_branch", "oie", "vice_principal", "admin", "sysadmin"]}>
+    <GuardedPage allowedRoles={["exam_branch", "oie", "vice_principal", "admin", "sysadmin"]}>
       <Suspense fallback={<PageLoading />}>
         <ExamPermissionsInner />
       </Suspense>

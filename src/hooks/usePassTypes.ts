@@ -19,7 +19,7 @@ export const DEFAULT_PASS_TYPES: PassType[] = [
     description: "Full day out (returns by evening curfew)",
     defaultDurationHours: 12,
     requiresApproval: true,
-    approvalFlow: "warden"
+    approvalFlow: "principal"
   },
   {
     code: "home_out",
@@ -27,7 +27,7 @@ export const DEFAULT_PASS_TYPES: PassType[] = [
     description: "Weekend or overnight home leave",
     defaultDurationHours: 48,
     requiresApproval: true,
-    approvalFlow: "warden"
+    approvalFlow: "principal"
   }
 ];
 

@@ -85,6 +85,10 @@ export function PermissionList({
   }, [getEffectiveUrl, addToast]);
 
   useEffect(() => {
+    // Render from the provided initialPermissions without re-fetching when
+    // the parent already loaded the queue (prevents the double-fetch storm
+    // on exam/permissions where useApiResource already owns the data).
+    if (initialPermissions && initialPermissions.length > 0) return;
     let ignore = false;
     const url = getEffectiveUrl();
     fetch(url, {
@@ -102,7 +106,7 @@ export function PermissionList({
     return () => {
       ignore = true;
     };
-  }, [getEffectiveUrl]);
+  }, [getEffectiveUrl, initialPermissions]);
 
   const filteredPermissions = useMemo(() => {
     return permissions.filter((p) => {

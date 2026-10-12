@@ -2233,7 +2233,7 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
   // Calculate person type breakdown
   const personTypes: PersonType[] = [
     "student", "faculty", "staff", "worker", "visitor", "parent",
-    "guardian", "hod", "warden", "operator", "admin", "sysadmin"
+    "guardian", "hod", "warden", "principal", "operator", "admin", "sysadmin"
   ];
   const personTypeBreakdown: Record<PersonType, PersonTypeStats> = {
     student: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
@@ -2245,6 +2245,7 @@ export async function dashboard(gateId?: string | null): Promise<DashboardData> 
     guardian: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
     hod: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
     warden: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
+    principal: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
     operator: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
     admin: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
     sysadmin: { total: 0, onCampus: 0, inToday: 0, outToday: 0, attendanceRate: 0 },
@@ -2446,6 +2447,7 @@ export async function statsToday(gateId?: string): Promise<{
     guardian: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
     hod: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
     warden: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
+    principal: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
     operator: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
     admin: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
     sysadmin: { total: 0, onCampus: 0, inToday: 0, outToday: 0 },
@@ -2598,7 +2600,13 @@ export async function getLinkedPersons(
 
     if (uErr || !users) return [];
     const sMap = new Map((sDetails || []).map((s: any) => [s.user_id, s]));
-    return users.map((u: any) => mPerson({ ...u, student_details: sMap.get(u.id) }));
+    // child_id is the stable contract used by API callers
+    // (permissions route filters on c.child_id). Map it explicitly from
+    // student_details.user_id; the `id` field is also exposed for clarity.
+    return users.map((u: any) => ({
+      ...mPerson({ ...u, student_details: sMap.get(u.id) }),
+      child_id: u.id,
+    }));
   }
 
   // direction === 'guardians_of': return users whose id is the guardian of userId's student record

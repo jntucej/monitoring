@@ -623,7 +623,7 @@ function OperatorPageInner() {
   };
 
   return (
-    <div className="min-h-[85vh] flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] pb-safe">
+    <div className="min-h-[85vh] flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] pb-safe min-w-0">
       <main className="flex-1 w-full max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto p-2 sm:p-4 space-y-4">
         {/* Emergency Lockdown Active Alert Header Banner */}
         {activeLockdown && (
