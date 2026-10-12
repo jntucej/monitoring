@@ -2,7 +2,6 @@
 
 import { Suspense } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { GuardedPage } from "@/components/shared/GuardedPage";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { PermissionList } from "@/components/approver/PermissionList";
@@ -70,10 +69,8 @@ function PrincipalPermissionsInner() {
 
 export default function PrincipalPermissionsPage() {
   return (
-    <GuardedPage allowedRoles={["principal", "admin", "sysadmin"]}>
-      <Suspense fallback={<PageLoading />}>
-        <PrincipalPermissionsInner />
-      </Suspense>
-    </GuardedPage>
+    <Suspense fallback={<PageLoading />}>
+      <PrincipalPermissionsInner />
+    </Suspense>
   );
 }

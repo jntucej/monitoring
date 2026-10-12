@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { GuardedPage } from "@/components/shared/GuardedPage";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
@@ -296,10 +295,8 @@ function ExamPermissionsInner() {
 
 export default function ExamPermissionsPage() {
   return (
-    <GuardedPage allowedRoles={["exam_branch", "oie", "vice_principal", "admin", "sysadmin"]}>
-      <Suspense fallback={<PageLoading />}>
-        <ExamPermissionsInner />
-      </Suspense>
-    </GuardedPage>
+    <Suspense fallback={<PageLoading />}>
+      <ExamPermissionsInner />
+    </Suspense>
   );
 }

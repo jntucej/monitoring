@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense, useCallback } from "react";
-import { GuardedPage } from "@/components/shared/GuardedPage";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
@@ -335,10 +334,8 @@ function HostelPermissionsInner() {
 
 export default function HostelPermissionsPage() {
   return (
-    <GuardedPage allowedRoles={["caretaker", "deputy_warden", "hostel_manager", "principal", "admin", "sysadmin"]}>
-      <Suspense fallback={<PageLoading />}>
-        <HostelPermissionsInner />
-      </Suspense>
-    </GuardedPage>
+    <Suspense fallback={<PageLoading />}>
+      <HostelPermissionsInner />
+    </Suspense>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense, useCallback } from "react";
-import { GuardedPage } from "@/components/shared/GuardedPage";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
@@ -466,10 +465,8 @@ function OieDashboardInner() {
 
 export default function OieDashboardPage() {
   return (
-    <GuardedPage allowedRoles={["oie", "admin", "sysadmin"]}>
-      <Suspense fallback={<PageLoading />}>
-        <OieDashboardInner />
-      </Suspense>
-    </GuardedPage>
+    <Suspense fallback={<PageLoading />}>
+      <OieDashboardInner />
+    </Suspense>
   );
 }

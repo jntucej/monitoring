@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense, useCallback } from "react";
-import { GuardedPage } from "@/components/shared/GuardedPage";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
@@ -620,10 +619,8 @@ function DeputyWardenDashboardInner() {
 
 export default function DeputyWardenDashboardPage() {
   return (
-    <GuardedPage allowedRoles={["deputy_warden", "admin", "sysadmin"]}>
-      <Suspense fallback={<PageLoading />}>
-        <DeputyWardenDashboardInner />
-      </Suspense>
-    </GuardedPage>
+    <Suspense fallback={<PageLoading />}>
+      <DeputyWardenDashboardInner />
+    </Suspense>
   );
 }

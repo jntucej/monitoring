@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense, useCallback, useMemo } from "react";
-import { GuardedPage } from "@/components/shared/GuardedPage";
 import { ConditionalAlert } from "@/components/shared/ConditionalAlert";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
@@ -82,10 +81,10 @@ function OperatorDashboardInner() {
 
 export default function OperatorDashboardPage() {
   return (
-    <GuardedPage minTier={MIN_TIER}>
+
       <Suspense fallback={<PageLoading />}>
         <OperatorDashboardInner />
       </Suspense>
-    </GuardedPage>
+    
   );
 }

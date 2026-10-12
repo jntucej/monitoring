@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense, useCallback } from "react";
-import { GuardedPage } from "@/components/shared/GuardedPage";
 import { ConditionalAlert } from "@/components/shared/ConditionalAlert";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
@@ -341,10 +340,8 @@ function FacultyDashboardInner() {
 
 export default function FacultyDashboardPage() {
   return (
-    <GuardedPage minTier={MIN_TIER}>
-      <Suspense fallback={<PageLoading />}>
-        <FacultyDashboardInner />
-      </Suspense>
-    </GuardedPage>
+    <Suspense fallback={<PageLoading />}>
+      <FacultyDashboardInner />
+    </Suspense>
   );
 }

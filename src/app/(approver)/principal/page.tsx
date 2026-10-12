@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import { GuardedPage } from "@/components/shared/GuardedPage";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
@@ -1426,10 +1425,8 @@ function PrincipalDashboardInner() {
 
 export default function PrincipalDashboardPage() {
   return (
-    <GuardedPage allowedRoles={["principal"]}>
-      <Suspense fallback={<PageLoading />}>
-        <PrincipalDashboardInner />
-      </Suspense>
-    </GuardedPage>
+    <Suspense fallback={<PageLoading />}>
+      <PrincipalDashboardInner />
+    </Suspense>
   );
 }

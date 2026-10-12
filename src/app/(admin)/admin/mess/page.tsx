@@ -22,7 +22,6 @@ import {
   Leaf,
   Beef,
 } from "lucide-react";
-import { GuardedPage } from "@/components/shared/GuardedPage";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
@@ -1108,7 +1107,7 @@ function AdminMessInner() {
 
 export default function AdminMessPage() {
   return (
-    <GuardedPage allowedRoles={["admin", "sysadmin"]} minTier={95}>
+
       <Suspense
         fallback={
           <div className="p-8 flex items-center justify-center min-h-[50vh]">
@@ -1118,6 +1117,6 @@ export default function AdminMessPage() {
       >
         <AdminMessInner />
       </Suspense>
-    </GuardedPage>
+    
   );
 }

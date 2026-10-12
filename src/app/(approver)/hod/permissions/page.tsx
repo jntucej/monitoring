@@ -2,7 +2,6 @@
 
 import { Suspense } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { GuardedPage } from "@/components/shared/GuardedPage";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { PermissionList } from "@/components/approver/PermissionList";
 import { ClipboardCheck } from "lucide-react";
@@ -46,10 +45,8 @@ function HodPermissionsInner() {
 
 export default function HodPermissionsPage() {
   return (
-    <GuardedPage allowedRoles={["hod", "admin", "sysadmin"]}>
-      <Suspense fallback={<PageLoading />}>
-        <HodPermissionsInner />
-      </Suspense>
-    </GuardedPage>
+    <Suspense fallback={<PageLoading />}>
+      <HodPermissionsInner />
+    </Suspense>
   );
 }

@@ -2,7 +2,6 @@
 
 import { Suspense } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { GuardedPage } from "@/components/shared/GuardedPage";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { PermissionList } from "@/components/approver/PermissionList";
 import { ClipboardCheck } from "lucide-react";
@@ -47,10 +46,8 @@ function FacultyPermissionsInner() {
 
 export default function FacultyPermissionsPage() {
   return (
-    <GuardedPage allowedRoles={["faculty", "hod", "admin", "sysadmin"]}>
-      <Suspense fallback={<PageLoading />}>
-        <FacultyPermissionsInner />
-      </Suspense>
-    </GuardedPage>
+    <Suspense fallback={<PageLoading />}>
+      <FacultyPermissionsInner />
+    </Suspense>
   );
 }
