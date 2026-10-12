@@ -119,6 +119,24 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       break;
 
     case "oie":
+      groups = [
+        {
+          groupLabel: "Exam Branch",
+          items: [
+            { href: "/oie", label: "OIE Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
+            { href: "/exam/permissions", label: "OIE Approvals", icon: "CheckSquare", badge: "PENDING" },
+          ],
+        },
+        {
+          groupLabel: "General",
+          items: [
+            { href: "/profile", label: "My Profile", icon: "User" },
+            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+          ],
+        },
+      ];
+      break;
+
     case "exam_branch":
       groups = [
         {
