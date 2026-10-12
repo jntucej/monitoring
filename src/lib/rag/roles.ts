@@ -36,7 +36,7 @@ export const ROLE_PROFILES: Record<string, RoleProfile> = {
     displayName: "Principal", displayNameTe: "ప్రిన్సిపాల్",
     exactRoleBoost: 1.5, sameTierBoost: 1.2,
     canApproveStages: ["principal_approval", "final"],
-    canViewRoles: ["student", "faculty", "staff", "worker", "warden", "hod"],
+    canViewRoles: ["student", "faculty", "staff", "worker", "warden", "principal", "hod"],
     personaEn: "The caller is the Principal. Speak at the policy level.",
     personaTe: "కాలర్ ప్రిన్సిపాల్. విధానం స్థాయిలో మాట్లాడండి.",
     primaryActionsEn: ["Approve exam permissions"],

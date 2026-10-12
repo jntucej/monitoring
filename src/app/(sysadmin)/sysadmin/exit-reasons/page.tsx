@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { DoorOpen, Plus, Trash2, Edit3, ShieldAlert, CheckCircle2 } from "lucide-react";
-import { useApi } from "@/hooks/useApi";
+import { getAuthHeaders } from "@/lib/utils";
 
 interface ExitReason {
   code: string;
@@ -17,8 +17,6 @@ interface ExitReason {
 }
 
 export default function ExitReasonsPage() {
-const api = useApi();
-
   const [reasons, setReasons] = useState<ExitReason[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingReason, setEditingReason] = useState<Partial<ExitReason> | null>(null);
@@ -27,7 +25,7 @@ const api = useApi();
   const fetchReasons = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/config/exit-reasons", { headers: api.getHeaders() });
+      const res = await fetch("/api/config/exit-reasons", { headers: getAuthHeaders() });
       const json = await res.json();
       if (json.success) setReasons(json.data || []);
     } catch {
@@ -48,7 +46,7 @@ const api = useApi();
     try {
       const res = await fetch("/api/config/exit-reasons", {
         method: "POST",
-        headers: { ...api.getHeaders(), "Content-Type": "application/json" },
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify(editingReason),
       });
       const json = await res.json();
@@ -69,7 +67,7 @@ const api = useApi();
     try {
       const res = await fetch(`/api/config/exit-reasons?code=${code}`, {
         method: "DELETE",
-        headers: api.getHeaders(),
+        headers: getAuthHeaders(),
       });
       const json = await res.json();
       if (json.success) {
@@ -104,7 +102,7 @@ const api = useApi();
                 description: "",
                 applicableTo: ["student"],
                 requiresApproval: true,
-                approvalBy: "warden",
+                approvalBy: "principal",
                 parentNotification: "immediate",
                 maxDurationHours: 12,
               })
@@ -254,12 +252,12 @@ const api = useApi();
                       Approval By
                     </label>
                     <select
-                      value={editingReason.approvalBy || "warden"}
+                      value={editingReason.approvalBy || "principal"}
                       onChange={(e) => setEditingReason({ ...editingReason, approvalBy: e.target.value, requiresApproval: e.target.value !== "none" })}
                       className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:border-amber-400"
                     >
                       <option value="none">None (Auto Approve)</option>
-                      <option value="warden">Warden</option>
+                      <option value="principal">Principal</option>
                       <option value="hod">HOD</option>
                       <option value="principal">Principal</option>
                     </select>

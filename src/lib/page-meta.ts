@@ -54,7 +54,7 @@ export const PAGE_META: Record<string, { title: string; description?: string }> 
   "/gate/[gateId]": { title: "Gate Terminal", description: "Gate scanner desk and operations" },
   "/faculty": { title: "Faculty Dashboard", description: "Faculty attendance and approvals" },
   "/hod": { title: "HOD Dashboard", description: "Department head approvals and reports" },
-  "/warden": { title: "Warden Dashboard", description: "Hostel warden approvals and curfew" },
+  "/principal": { title: "Principal Command Center", description: "Campus command center: occupancy, alerts and pending passes" },
   "/operator": { title: "Gate Operator", description: "Gate scanner desk operations" },
   "/supervisor": { title: "Supervisor Dashboard", description: "Supervisor approvals and curfew roster" },
   "/student": { title: "Student Dashboard", description: "Digital ID, gate pass, and scan logs" },

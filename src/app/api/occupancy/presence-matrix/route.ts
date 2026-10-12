@@ -11,7 +11,7 @@ import { getSupabaseServiceClient } from "@/lib/dbClient";
  * if the latest is direction=IN they are currently inside that gate.
  * Returns a gate × role count matrix for the admin heatmap.
  */
-const ROLES = ["student", "faculty", "staff", "worker", "visitor", "warden", "admin", "sysadmin", "operator", "supervisor"] as const;
+const ROLES = ["student", "faculty", "staff", "worker", "visitor", "principal", "admin", "sysadmin", "operator", "supervisor"] as const;
 
 async function handleGet(_req: NextRequest) {
   try {
@@ -91,6 +91,6 @@ async function handleGet(_req: NextRequest) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "operator", "warden", "supervisor", "principal"] }),
+  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "operator", "warden", "supervisor", "principal", "vice_principal", "caretaker", "deputy_warden", "hostel_manager", "exam_branch", "oie"] }),
   { keyPrefix: "presence_matrix", maxRequests: 60 }
 );

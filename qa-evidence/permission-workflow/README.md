@@ -1,6 +1,0 @@
-- **Hostel flow** — student → caretaker → deputy → HM → warden → hostel biometric → operator gate biometric → COMPLETED.
-- **Exam flow** — student uploads PDF → HOD → OIE → VP → Principal signs → signed PDF downloadable.
-- **Staff leave** — staff → HOD → VP → Principal → COMPLETED.
-- **Bulk action** — select 5 rows in `/hostel/permissions`, approve → single API call, summary toast.
-- **Device OFF default** — confirm `/sysadmin/devices` shows all off; hostel stage auto-passes.
-- **Device ON** — enable thumb, retry hostel stage → requires signature.

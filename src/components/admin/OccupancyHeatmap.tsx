@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { MapPin, Users, Activity, RefreshCw, X } from "lucide-react";
-import { useApi } from "@/hooks/useApi";
+import { getAuthHeaders } from "@/lib/utils";
 
 /* ------------------------------------------------------------------ */
 /*  Types returned by /api/occupancy/presence-matrix                 */
@@ -55,8 +55,6 @@ function heatTextColor(v: number): string {
 
 /* ------------------------------------------------------------------ */
 export function OccupancyHeatmap() {
-const api = useApi();
-
   const [data, setData] = useState<MatrixPayload | null>(null);
   const [live, setLive] = useState(true);
   const [selected, setSelected] = useState<{ gate: MatrixGate; role: string } | null>(null);
@@ -66,7 +64,7 @@ const api = useApi();
   const load = useCallback(async () => {
     try {
       const res = await fetch("/api/occupancy/presence-matrix", {
-        headers: api.getHeaders(),
+        headers: getAuthHeaders(),
         cache: "no-store",
       });
       const json = await res.json();
@@ -206,7 +204,7 @@ const api = useApi();
                           role === "staff" ? "text-purple-400" :
                           role === "worker" ? "text-amber-400" :
                           role === "visitor" ? "text-cyan-400" :
-                          role === "warden" ? "text-rose-400" : "text-slate-400"
+                          role === "principal" ? "text-rose-400" : "text-slate-400"
                         }`}>
                           {ROLE_LABELS[role] ?? role}
                         </span>

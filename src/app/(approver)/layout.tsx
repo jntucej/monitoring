@@ -11,6 +11,7 @@ const ALLOWED_APPROVER_ROLES: Role[] = [
   "hostel_manager",
   "warden",
   "principal",
+  "principal",
   "vice_principal",
   "hod",
   "oie",

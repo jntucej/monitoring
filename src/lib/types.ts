@@ -21,6 +21,7 @@ export type PersonType =
   | "guardian"
   | "hod"
   | "warden"
+  | "principal"
   | "operator"
   | "admin"
   | "sysadmin";
@@ -323,6 +324,10 @@ export interface Alert {
   studentRoll?: string;
   timestamp: string;
   resolved: boolean;
+  /** Minimum role tier required to see this alert (0 = all roles). */
+  minTier?: number;
+  /** Restrict visibility to these roles; undefined = all roles. */
+  visibleToRoles?: string[];
 }
 
 export type AlertSeverity = "low" | "medium" | "high" | "critical";
@@ -431,7 +436,7 @@ export interface ExitReasonConfig {
   applicableTo: StudentType[];
   maxDurationHours?: number;
   requiresApproval: boolean;
-  approvalBy?: "warden" | "faculty" | "admin" | "none";
+  approvalBy?: "principal" | "faculty" | "admin" | "none";
   parentNotification: "silent" | "push" | "sms" | "urgent";
   autoApproveTimeRange?: string;
 }

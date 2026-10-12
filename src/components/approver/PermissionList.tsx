@@ -8,7 +8,7 @@ import { PermissionRow, type PermissionItem } from "./PermissionRow";
 import { BulkActionsBar } from "./BulkActionsBar";
 import { PermissionDetailPanel } from "./PermissionDetailPanel";
 import { useUIStore } from "@/stores/uiStore";
-import { useApi } from "@/hooks/useApi";
+import { getAuthHeaders } from "@/lib/utils";
 
 export interface PermissionListProps {
   title: string;
@@ -62,7 +62,7 @@ export function PermissionList({
     try {
       const url = getEffectiveUrl();
       const res = await fetch(url, {
-        headers: api.getHeaders(),
+        headers: getAuthHeaders(),
         cache: "no-store",
       });
       const json = await res.json();
@@ -85,10 +85,14 @@ export function PermissionList({
   }, [getEffectiveUrl, addToast]);
 
   useEffect(() => {
+    // Render from the provided initialPermissions without re-fetching when
+    // the parent already loaded the queue (prevents the double-fetch storm
+    // on exam/permissions where useApiResource already owns the data).
+    if (initialPermissions && initialPermissions.length > 0) return;
     let ignore = false;
     const url = getEffectiveUrl();
     fetch(url, {
-      headers: api.getHeaders(),
+      headers: getAuthHeaders(),
       cache: "no-store",
     })
       .then((res) => res.json())
@@ -102,7 +106,7 @@ export function PermissionList({
     return () => {
       ignore = true;
     };
-  }, [getEffectiveUrl]);
+  }, [getEffectiveUrl, initialPermissions]);
 
   const filteredPermissions = useMemo(() => {
     return permissions.filter((p) => {
@@ -147,7 +151,7 @@ export function PermissionList({
     try {
       const res = await fetch(`/api/permissions/${encodeURIComponent(ticket)}`, {
         method: "PATCH",
-        headers: api.getHeaders(),
+        headers: getAuthHeaders(),
         body: JSON.stringify({ action, comment }),
       });
       const json = await res.json();
@@ -186,7 +190,7 @@ export function PermissionList({
       try {
         const res = await fetch(`/api/permissions/${encodeURIComponent(ticket)}`, {
           method: "PATCH",
-          headers: api.getHeaders(),
+          headers: getAuthHeaders(),
           body: JSON.stringify({ action, comment }),
         });
         const json = await res.json();
@@ -337,5 +341,3 @@ export function PermissionList({
 }
 
 export default PermissionList;
-const api = useApi();
-

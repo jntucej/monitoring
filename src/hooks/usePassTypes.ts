@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useApi } from "@/hooks/useApi";
+import { getAuthHeaders } from '@/lib/utils';
 
 export interface PassType {
   code: string;
@@ -19,7 +19,7 @@ export const DEFAULT_PASS_TYPES: PassType[] = [
     description: "Full day out (returns by evening curfew)",
     defaultDurationHours: 12,
     requiresApproval: true,
-    approvalFlow: "warden"
+    approvalFlow: "principal"
   },
   {
     code: "home_out",
@@ -27,7 +27,7 @@ export const DEFAULT_PASS_TYPES: PassType[] = [
     description: "Weekend or overnight home leave",
     defaultDurationHours: 48,
     requiresApproval: true,
-    approvalFlow: "warden"
+    approvalFlow: "principal"
   }
 ];
 
@@ -41,8 +41,6 @@ export function getPassTypeName(codeOrReason?: string): string {
 }
 
 export function usePassTypes() {
-const api = useApi();
-
   const [passTypes, setPassTypes] = useState<PassType[]>(DEFAULT_PASS_TYPES);
   const [loading, setLoading] = useState(true);
 
@@ -50,7 +48,7 @@ const api = useApi();
     let active = true;
     const fetchPassTypes = async () => {
       try {
-        const headers = api.getHeaders();
+        const headers = getAuthHeaders();
         const res = await fetch('/api/config/pass-types', { headers, cache: 'no-store' });
         if (res.ok) {
           const json = await res.json();

@@ -6,7 +6,7 @@ import { SafeAreaAppShell } from "@/components/shared/SafeAreaAppShell";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import type { Role } from "@/lib/types";
 
-const MESS_ALLOWED_ROLES: Role[] = ["mess_incharge", "warden", "admin", "sysadmin"];
+const MESS_ALLOWED_ROLES: Role[] = ["mess_incharge", "warden", "principal", "admin", "sysadmin"];
 
 export default function MessLayout({
   children,

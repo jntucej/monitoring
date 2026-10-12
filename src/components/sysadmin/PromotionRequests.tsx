@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 import { UserCheck, CheckCircle, XCircle, Plus, RefreshCw, Send } from "lucide-react";
-import { useApi } from "@/hooks/useApi";
+import { getAuthHeaders } from "@/lib/utils";
 
 interface RoleRequest {
   id: string;
@@ -22,8 +22,6 @@ interface RoleRequest {
 }
 
 export function PromotionRequests() {
-const api = useApi();
-
   const { user } = useAuthStore();
   const { addToast } = useUIStore();
 
@@ -46,7 +44,7 @@ const api = useApi();
     setUserQuery(q);
     if (q.trim().length < 2) { setUserResults([]); return; }
     try {
-      const res = await fetch(`/api/users?q=${encodeURIComponent(q.trim())}`, { headers: api.getHeaders(), cache: "no-store" });
+      const res = await fetch(`/api/users?q=${encodeURIComponent(q.trim())}`, { headers: getAuthHeaders(), cache: "no-store" });
       const json = await res.json();
       setUserResults(Array.isArray(json?.data) ? json.data.slice(0, 8) : []);
     } catch { setUserResults([]); }
@@ -55,7 +53,7 @@ const api = useApi();
   const fetchRequests = useCallback(async () => {
     setLoading(true);
     try {
-      const headers = api.getHeaders();
+      const headers = getAuthHeaders();
       const url = filterStatus !== "ALL"
         ? `/api/admin/role-requests?status=${filterStatus}`
         : "/api/admin/role-requests";
@@ -79,7 +77,7 @@ const api = useApi();
   const handleAction = async (requestId: string, status: "APPROVED" | "REJECTED") => {
     try {
       const headers = {
-        ...api.getHeaders(),
+        ...getAuthHeaders(),
         "Content-Type": "application/json",
       };
       const res = await fetch(`/api/admin/role-requests/${requestId}`, {
@@ -111,7 +109,7 @@ const api = useApi();
 
     try {
       const headers = {
-        ...api.getHeaders(),
+        ...getAuthHeaders(),
         "Content-Type": "application/json",
       };
       const res = await fetch("/api/admin/role-requests", {
@@ -313,7 +311,7 @@ const api = useApi();
                 >
                   <option value="admin">admin</option>
                   <option value="sysadmin">sysadmin</option>
-                  <option value="warden">warden</option>
+                  <option value="principal">principal</option>
                   <option value="operator">operator</option>
                   <option value="faculty">faculty</option>
                 </select>

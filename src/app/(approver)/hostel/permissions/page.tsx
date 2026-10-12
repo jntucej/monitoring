@@ -178,7 +178,7 @@ function HostelPermissionsInner() {
   );
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6">
+    <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       {/* header */}
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -342,6 +342,7 @@ export default function HostelPermissionsPage() {
         "deputy_warden",
         "hostel_manager",
         "warden",
+        "principal",
         "principal",
         "admin",
         "sysadmin",

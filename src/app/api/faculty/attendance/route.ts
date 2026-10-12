@@ -2,7 +2,6 @@
 /* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextRequest, NextResponse } from "next/server";
-import { err } from "@/lib/api-response";
 import { getSupabaseServiceClient, supabase } from "@/lib/dbClient";
 import { getDepartments } from "@/lib/departments";
 import { withAuthorization } from "@/middleware/authorization";
@@ -326,9 +325,12 @@ async function handleGet(req: NextRequest, context: { auth: any }) {
     });
   } catch (error) {
     console.error("Error in faculty attendance API:", error);
-    return NextResponse.json(err("INTERNAL_ERROR", "Failed to retrieve faculty attendance metrics").body, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: "Failed to retrieve faculty attendance metrics" },
+      { status: 500 }
+    );
   }
 }
 export const GET = withAuthorization(handleGet, {
-  requiredRole: ["admin", "sysadmin", "hod", "faculty", "staff", "warden"],
+  requiredRole: ["admin", "sysadmin", "hod", "faculty", "staff", "principal"],
 });

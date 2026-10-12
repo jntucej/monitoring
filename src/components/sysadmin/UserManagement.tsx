@@ -5,11 +5,9 @@ import { useEffect, useState } from "react";
 import { UserPlus, User, Loader2, XCircle, Fingerprint, ShieldCheck, Upload, KeyRound } from "lucide-react";
 import type { User as UserType } from "@/lib/types";
 import { BulkUserImportModal } from "./BulkUserImportModal";
-import { useApi } from "@/hooks/useApi";
+import { getAuthHeaders } from "@/lib/utils";
 
 export function UserManagement() {
-const api = useApi();
-
   const [users, setUsers] = useState<UserType[]>([]);
   const [gates, setGates] = useState<Array<{ id: string; name: string }>>([]);
   const [gateId, setGateId] = useState("");
@@ -28,7 +26,7 @@ const api = useApi();
   /** Auth headers required by every /api route (withAuthorization). */
   const authHeaders = (): Record<string, string> => {
     return {
-      ...api.getHeaders(),
+      ...getAuthHeaders(),
       "Content-Type": "application/json",
     };
   };
@@ -272,7 +270,7 @@ const api = useApi();
               <option value="operator">Operator</option>
               <option value="parent">Parent</option>
               <option value="student">Student</option>
-                <option value="warden">Warden</option>
+                <option value="principal">Principal</option>
                 <option value="faculty">Faculty</option>
                 <option value="staff">Staff</option>
                 <option value="sysadmin">System Administrator</option>

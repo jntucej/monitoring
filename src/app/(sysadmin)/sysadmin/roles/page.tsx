@@ -62,8 +62,8 @@ const ROLE_ACCESS_MATRIX: { label: string; path: string; roles: string[] }[] = [
   { label: "Admin Dashboard", path: "/admin", roles: ["admin", "sysadmin"] },
   { label: "Principal / Approvals", path: "/principal/permissions", roles: ["principal", "vice_principal", "admin", "sysadmin"] },
   { label: "HOD Workspace", path: "/hod", roles: ["hod", "principal", "vice_principal", "admin", "sysadmin"] },
-  { label: "Warden / Gate Ops", path: "/warden", roles: ["warden", "supervisor", "admin", "sysadmin"] },
-  { label: "Supervisor Dashboard", path: "/supervisor", roles: ["supervisor", "warden", "admin", "sysadmin"] },
+  { label: "Warden / Gate Ops", path: "/principal", roles: ["warden", "principal", "supervisor", "admin", "sysadmin"] },
+  { label: "Supervisor Dashboard", path: "/supervisor", roles: ["supervisor", "warden", "principal", "admin", "sysadmin"] },
   { label: "Operator Gate", path: "/operator", roles: ["operator", "worker", "admin", "sysadmin"] },
   { label: "Worker Console", path: "/worker", roles: ["worker", "admin", "sysadmin"] },
   { label: "Faculty / Leaves", path: "/faculty/permissions", roles: ["faculty", "admin", "sysadmin"] },
@@ -349,7 +349,7 @@ export default function RolesManagementPage() {
     try {
       const res = await fetch("/api/config/roles", {
         method: "POST",
-        headers: { ...api.getHeaders(), "Content-Type": "application/json" },
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify(editingRole),
       });
       const json = await res.json();
@@ -370,7 +370,7 @@ export default function RolesManagementPage() {
     try {
       const res = await fetch(`/api/config/roles?code=${code}`, {
         method: "DELETE",
-        headers: api.getHeaders(),
+        headers: getAuthHeaders(),
       });
       const json = await res.json();
       if (json.success) {

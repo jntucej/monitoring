@@ -7,7 +7,7 @@ import { mPerson } from "@/lib/db";
 import type { Person, Student } from "@/lib/types";
 
 const HOSTEL_CODES = ["CSE", "IT", "ECE", "EEE", "ME"];
-const WARDEN_ROLES = ["warden", "supervisor"];
+const WARDEN_ROLES = ["principal", "supervisor"];
 const PRINCIPAL_ROLES = ["principal"];
 
 /**
@@ -109,7 +109,7 @@ async function handleGet(req: NextRequest) {
 
 export const GET = withRateLimit(
   withAuthorization(handleGet, {
-    requiredRole: ["admin", "sysadmin", "parent", "guardian", "warden", "supervisor", "principal"],
+    requiredRole: ["admin", "sysadmin", "parent", "guardian", "principal", "supervisor"],
   }),
   { keyPrefix: "students_list", maxRequests: 100 }
 );

@@ -128,7 +128,7 @@ function WorkerDashboardInner() {
   const activeSessions = stats.activeSessions ?? 0;
   const twoFAEnforced = stats.forced2FA ? 1 : 0;
   return (
-    <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+    <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 min-w-0">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">

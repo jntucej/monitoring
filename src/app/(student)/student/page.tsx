@@ -252,6 +252,12 @@ function StudentDashboardInner() {
               )}
             </div>
 
+            {/* Student Overview Widgets */}
+            <section aria-label="Student overview" className="mt-6">
+              <StudentDashboardWidgets />
+            </section>
+
+
             {/* Option A — Digital ID Card */}
             <div className="space-y-3">
               <div className="flex items-center gap-2 justify-center sm:justify-start">
@@ -279,7 +285,7 @@ function StudentDashboardInner() {
   };
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-6 pb-12 min-w-0">
       {/* Dynamic Tab Heading */}
       <div className="text-center sm:text-left border-b border-[var(--border)] pb-4 space-y-1">
         <h1 className="text-2xl font-extrabold tracking-tight text-[var(--text-primary)]">
@@ -307,8 +313,6 @@ function StudentDashboardInner() {
 }
 
 export default function StudentDashboardPage() {
-const api = useApi();
-
   return (
     <Suspense fallback={<div className="p-6 text-sm text-[var(--text-muted)]">Loading…</div>}>
       <StudentDashboardInner />
