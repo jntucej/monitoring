@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import jsQR from "jsqr";
 import { playAudioFeedback } from "@/lib/sound";
+import { normalizeScannedPayload } from "@/lib/barcode";
 import { useOperatorStore } from "@/stores/operatorStore";
 import { useToast } from "@/components/ui/toast";
 import { getAvatarPlaceholder } from "@/lib/utils";
@@ -45,8 +46,18 @@ export function MobileOperatorScanView() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const animFrameRef = useRef<number | null>(null);
+  // Set of in-flight rAF ids: the decode loop re-schedules itself recursively,
+  // so a single ref can't cover it — track every scheduled frame and cancel
+  // them all on stop/unmount so no stale chain survives.
+  const animFrameIdsRef = useRef<Set<number>>(new Set());
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  // Mirror of isCameraActive state, kept authoritative by stopCamera/
+  // launchCamera themselves (the async camera path outlives re-renders, so a
+  // state value read inside launchCamera would be stale).
+  const isCameraActiveRef = useRef(false);
+  // Monotonic launch counter: a launch whose generation is stale after its
+  // getUserMedia await (superseded launch or stopCamera) must not attach.
+  const launchGen = useRef(0);
 
   const playBeep = useCallback((type: "success" | "error") => {
     if (!soundEnabled) return;
@@ -64,7 +75,10 @@ export function MobileOperatorScanView() {
   }, []);
 
   const stopCamera = useCallback(() => {
-    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    isCameraActiveRef.current = false;
+    launchGen.current += 1;
+    animFrameIdsRef.current.forEach((id) => cancelAnimationFrame(id));
+    animFrameIdsRef.current.clear();
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
@@ -74,9 +88,15 @@ export function MobileOperatorScanView() {
     setCameraState("idle");
   }, []);
 
+  const scheduleFrame = useCallback((cb: FrameRequestCallback) => {
+    const id = requestAnimationFrame(cb);
+    animFrameIdsRef.current.add(id);
+    return id;
+  }, []);
+
   const processFrame = useCallback(() => {
     if (!videoRef.current || videoRef.current.readyState !== HTMLMediaElement.HAVE_ENOUGH_DATA) {
-      animFrameRef.current = requestAnimationFrame(processFrame);
+      scheduleFrame(processFrame);
       return;
     }
 
@@ -104,28 +124,52 @@ export function MobileOperatorScanView() {
         playBeep("success");
         triggerHaptic([100, 50, 100]);
         stopCamera();
-        startScan(scannedValue);
+        startScan(normalizeScannedPayload(scannedValue));
         return;
       }
     }
 
-    animFrameRef.current = requestAnimationFrame(processFrame);
-  }, [playBeep, triggerHaptic, stopCamera, startScan]);
+    scheduleFrame(processFrame);
+  }, [playBeep, triggerHaptic, stopCamera, startScan, scheduleFrame]);
 
   const launchCamera = useCallback(async () => {
+    // Cancel any in-flight decode loop first so a rapid re-launch can't run
+    // two chains simultaneously.
+    animFrameIdsRef.current.forEach((id) => cancelAnimationFrame(id));
+    animFrameIdsRef.current.clear();
+    isCameraActiveRef.current = true;
+    launchGen.current += 1;
+    const gen = launchGen.current;
     setCameraState("requesting");
     setIsCameraActive(true);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
       });
+      // If stopCamera/unmount or a newer launch happened while getUserMedia
+      // was pending, this start is stale — stop the tracks and bail so no
+      // second decode chain (or hot camera) survives.
+      if (gen !== launchGen.current || !isCameraActiveRef.current) {
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         videoRef.current.setAttribute("playsinline", "true");
-        await videoRef.current.play();
-        setCameraState("active");
-        animFrameRef.current = requestAnimationFrame(processFrame);
+        try {
+          await videoRef.current.play();
+        } catch {
+          /* autoplay blocked; frames still decode */
+        }
+        // The view can be swapped (idle ↔ active branch) while play() was
+        // pending — only start the loop if the video is still mounted.
+        if (gen === launchGen.current && videoRef.current) {
+          setCameraState("active");
+          scheduleFrame(processFrame);
+        } else {
+          stream.getTracks().forEach((track) => track.stop());
+        }
       }
     } catch (err: unknown) {
       setCameraState("error");
@@ -134,7 +178,7 @@ export function MobileOperatorScanView() {
       playBeep("error");
       triggerHaptic([200, 100, 200]);
     }
-  }, [processFrame, playBeep, triggerHaptic]);
+  }, [processFrame, playBeep, triggerHaptic, scheduleFrame]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -159,7 +203,7 @@ export function MobileOperatorScanView() {
             } catch {}
             playBeep("success");
             triggerHaptic([100, 50, 100]);
-            startScan(scannedValue);
+            startScan(normalizeScannedPayload(scannedValue));
           } else {
             addToast({ variant: "error", title: "QR Unreadable", message: "No valid QR code found in uploaded image." });
           }

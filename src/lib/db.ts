@@ -665,52 +665,111 @@ export async function correctScan(
   return mScan(newScanData);
 }
 
+/**
+ * Derive which gate UUIDs currently have a live activity signal.
+ *
+ * A gate counts as "operational" when ANY of these is true:
+ *   1. A session row exists for a gate-desk role (operator/supervisor/warden)
+ *      assigned to (or supervising) the gate. Sessions are written on
+ *      refresh-token rotation, so this captures operators that are actively
+ *      using their desk app. We do NOT count sysadmin/admin sessions —
+ *      an admin browsing the dashboard should not mark every gate online.
+ *   2. A movement_log row was written for the gate within 5 minutes.
+ *      5 minutes matches the operator UI's own heartbeat (it polls
+ *      /api/operator/stats every 5s desktop / 15s mobile), so a gate with
+ *      an open desk app that is between student scans still counts as
+ *      online while the operator is at the keyboard.
+ *
+ * We intentionally do NOT treat "has scanned today" as a live signal —
+ * that's how the old implementation marked dormant gates "Online" for
+ * hours after the last scan of the day.
+ */
+const GATE_OPERATOR_ROLES: string[] = ['operator', 'supervisor', 'warden'];
+const ACTIVE_SESSION_WINDOW_MIN = 5;
+
+async function getGateOnlineIds(client: ReturnType<typeof getDbClient>): Promise<Set<string>> {
+  // --- Signal 1: live operator sessions -----------------------------------
+  // A valid, unrevoked, unexpired session row means the user has a browser /
+  // desk app currently authenticated. Query the session table with plain
+  // single-column filters (the fluent builder only supports single-column
+  // comparisons), then filter user roles + gate mapping on the app side.
+  const nowIso = new Date().toISOString();
+  const { data: activeSessions, error: sessionErr } = await client
+    .from('sessions')
+    .select('user_id')
+    .is('revoked_at', null)
+    .gt('expires_at', nowIso);
+
+  if (sessionErr) {
+    // Sessions are a soft signal — never let a query failure take the whole
+    // dashboard offline. Scan-activity signal alone still works.
+    console.error('[getAllGatesLive] sessions query failed, using scan activity only:', sessionErr);
+  }
+
+  const activeUserIds = Array.from(new Set(
+    (activeSessions || []).map((s: any) => s.user_id).filter(Boolean)
+  ));
+
+  const gateFromOperatorSession = new Set<string>();
+  if (activeUserIds.length > 0) {
+    // Chunk the IN clause to avoid oversized queries when many users are online.
+    for (let i = 0; i < activeUserIds.length; i += 200) {
+      const slice = activeUserIds.slice(i, i + 200);
+      const { data: onlineOperators } = await client
+        .from('users')
+        .select('id, gate_id, supervised_gates, role, status')
+        .in('id', slice);
+
+      for (const op of onlineOperators || []) {
+        // Only gate-desk roles mark a gate online. status ACTIVE so a
+        // LOCKED/SUSPENDED operator does not keep a gate "online".
+        if (!GATE_OPERATOR_ROLES.includes(op.role)) continue;
+        if (op.status && op.status !== 'ACTIVE') continue;
+        if (op.gate_id) gateFromOperatorSession.add(op.gate_id);
+        if (Array.isArray(op.supervised_gates)) {
+          for (const sg of op.supervised_gates) gateFromOperatorSession.add(sg);
+        }
+      }
+    }
+  }
+
+  // --- Signal 2: recent movement_logs on the gate -------------------------
+  // 5-minute window: the SSE monitor (/api/gate/stream, 3 s poll) and the
+  // operator desk UI both surface gate activity within this timeframe, so
+  // a gate with a live desk and/or active scan traffic will be online.
+  // Dormant desks (no session heartbeat, no scans) correctly go offline.
+  const windowStartIso = new Date(Date.now() - ACTIVE_SESSION_WINDOW_MIN * 60 * 1000).toISOString();
+  const { data: recentScans, error: scansErr } = await client
+    .from('movement_logs')
+    .select('gate_id')
+    .gte('timestamp', windowStartIso);
+
+  if (scansErr) {
+    console.error('[getAllGatesLive] recent-scans query failed, session signal only:', scansErr);
+  }
+
+  const gateFromRecentScan = new Set(
+    (recentScans || []).map((s: any) => s.gate_id).filter(Boolean)
+  );
+
+  // Union of both signals.
+  return new Set<string>([...gateFromOperatorSession, ...gateFromRecentScan]);
+}
+
 export async function getAllGatesLive(): Promise<Gate[]> {
   const client = getDbClient();
   const { data: persistentGates } = await client.from('gates').select('*');
   if (!persistentGates || persistentGates.length === 0) return [];
 
-  // Active operators = operators who have a non-revoked, non-expired session
-  const { data: activeSessions } = await client
-    .from('sessions')
-    .select('user_id')
-    .is('revoked_at', null)
-    .gt('expires_at', new Date().toISOString());
-
-  const activeUserIds = new Set((activeSessions || []).map((s: any) => s.user_id));
-
-  let onlineOperatorGateIds = new Set<string>();
-  if (activeUserIds.size > 0) {
-    const { data: onlineOperators } = await client
-      .from('users')
-      .select('id, gate_id, supervised_gates')
-      .in('id', Array.from(activeUserIds))
-      .eq('role', 'operator'); // only operators, not admin/sysadmin
-
-    for (const op of onlineOperators || []) {
-      if (op.gate_id) onlineOperatorGateIds.add(op.gate_id);
-      if (Array.isArray(op.supervised_gates)) {
-        for (const sg of op.supervised_gates) onlineOperatorGateIds.add(sg);
-      }
-    }
-  }
-
-  // Fetch recent scans (within last 15 minutes)
-  const fifteenMinsAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
-  const { data: recentScans } = await client
-    .from('movement_logs')
-    .select('gate_id')
-    .gte('timestamp', fifteenMinsAgo);
-
-  const activeGateIdsFromScans = new Set((recentScans || []).map((s: any) => s.gate_id));
+  const onlineGateIds = await getGateOnlineIds(client);
 
   return persistentGates.map((g: any) => {
     const isConfiguredActive = g.is_active !== false;
-    const hasOnlineOperator = onlineOperatorGateIds.has(g.id);
-    const hasRecentScan = activeGateIdsFromScans.has(g.id);
+    const hasLiveSignal = onlineGateIds.has(g.id);
 
-    // Gate is ONLINE if it is configured active AND has an online operator or recent scan activity
-    const isOnline = isConfiguredActive && (hasOnlineOperator || hasRecentScan);
+    // Gate is ONLINE if it is configured active AND has a live operator
+    // session OR a recent scan on the gate within the activity window.
+    const isOnline = isConfiguredActive && hasLiveSignal;
 
     return {
       id: g.id,
