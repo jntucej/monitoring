@@ -27,7 +27,7 @@ async function findWardenScopedStudents(scope: string | null, hostel: string | n
     query = query.eq("department", hostel.toUpperCase());
   }
   if (scope === "active") {
-    query = query.or(`checked_out_at.is.null,checked_out_at.eq.`);
+    query = query.or(`checked_out_at.is.null`);
   }
   const { data, error } = await query;
   if (error) throw error;
