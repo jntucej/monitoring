@@ -59,11 +59,18 @@ async function handlePost(req: NextRequest, context: any) {
   const { data: request, error: createError } = await db.from("permission_requests").insert({
     ticket_number: ticketNumber,
     workflow_type: workflowType,
-    requester_user_id: userId,
     student_user_id: targetUserId,
     hostel_scope: hostelScope,
     sla_deadline: slaDeadline,
-    ...rest,
+    requester_user_id: userId,
+    // Strip any caller-supplied columns that we already set explicitly above;
+    // Postgres rejects duplicate column keys in a single SET (e.g. a `staff`
+    // actor re-submitting its own `requester_user_id` in the payload body).
+    ...Object.fromEntries(Object.entries(rest).filter(([k]) => ![
+      "ticket_number", "workflow_type", "student_user_id", "hostel_scope",
+      "sla_deadline", "requester_user_id", "current_stage", "status",
+      "stage_history", "branch",
+    ].includes(k))),
     current_stage: initialStage,
     status: "PENDING",
     stage_history: [],
