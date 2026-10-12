@@ -9,7 +9,15 @@ import { resolveInitialStage, generateTicketNumber, WorkflowType } from "@/lib/p
 async function handlePost(req: NextRequest, context: any) {
   const { auth: { userId, role } } = context;
   const db = getSupabaseServiceClient();
-  const body = await req.json();
+  let body: Record<string, unknown>;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json(
+      { success: false, error: { code: "BAD_REQUEST", message: "Invalid JSON body" } },
+      { status: 400 }
+    );
+  }
   const workflowType = body.workflow_type || body.workflowType;
   const studentUserId = body.student_user_id || body.studentUserId;
   const hostelScope = body.hostel_scope || body.hostelScope;

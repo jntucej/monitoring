@@ -2600,7 +2600,13 @@ export async function getLinkedPersons(
 
     if (uErr || !users) return [];
     const sMap = new Map((sDetails || []).map((s: any) => [s.user_id, s]));
-    return users.map((u: any) => mPerson({ ...u, student_details: sMap.get(u.id) }));
+    // child_id is the stable contract used by API callers
+    // (permissions route filters on c.child_id). Map it explicitly from
+    // student_details.user_id; the `id` field is also exposed for clarity.
+    return users.map((u: any) => ({
+      ...mPerson({ ...u, student_details: sMap.get(u.id) }),
+      child_id: u.id,
+    }));
   }
 
   // direction === 'guardians_of': return users whose id is the guardian of userId's student record
