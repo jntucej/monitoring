@@ -10,7 +10,7 @@ import { getAuthHeaders } from "@/hooks/useAuthHeaders";
 import { usePolling } from "@/hooks/usePolling";
 import { useAuthStore } from "@/stores/authStore";
 import { getRoleTier } from "@/lib/alert-hierarchy";
-import type { Role, GatePass, Alert, Person } from "@/lib/types";
+import type { Role, GatePass, Alert, Person, Gate } from "@/lib/types";
 import {
   ShieldCheck,
   Clock,
@@ -137,6 +137,25 @@ function fmtDate(iso: string | null | undefined): string {
 }
 
 // ------------------------------------------------------------- Pass panel
+// Gate/terminal directory for the warden desk: pass rows carry no gate info
+// today, so the desk label is derived from the live gate feed and rendered
+// defensively (never leaks "undefined"/"NaN" into the panel).
+function useGateDesk(): { desks: string; loading: boolean } {
+  const [gates, setGates] = useState<Gate[] | null>(null);
+  useEffect(() => {
+    let active = true;
+    fetchJson("/api/gates").then((r) => {
+      if (!active) return;
+      if (r.success && Array.isArray(r.data)) {
+        const names = (r.data as Gate[]).filter((g) => g?.name).map((g) => g.name);
+        setGates(names.length ? (names as unknown as Gate[]) : []);
+      }
+    }).catch(() => undefined);
+    return () => { active = false; };
+  }, []);
+  return { desks: gates ? `${gates.length}` : "…", loading: gates === null };
+}
+
 function PendingPassesPanel({ onLoaded }: { onLoaded?: () => void }) {
   const [passes, setPasses] = useState<GatePass[] | null>(null);
   const [loading, setLoading] = useState(true);
@@ -144,6 +163,7 @@ function PendingPassesPanel({ onLoaded }: { onLoaded?: () => void }) {
   const [actionBusy, setActionBusy] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionFailedFor, setActionFailedFor] = useState<string | null>(null);
+  const { desks, loading: desksLoading } = useGateDesk();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -192,9 +212,9 @@ function PendingPassesPanel({ onLoaded }: { onLoaded?: () => void }) {
   return (
     <Panel
       title="Pending Gate Passes"
-      sub="Approve or reject hostel outpass requests"
+      sub={`Approve or reject hostel outpass requests · gate terminal desk ${desksLoading ? "loading…" : `${desks} terminal(s)`}`}
       icon={Inbox}
-      className="sm:col-span-1 lg:col-span-1"
+      className="sm:col-span-1 lg:col-span-1 min-w-0"
       right={
         <span className="text-xs text-[var(--text-muted)]">
           {passes ? `${passes.length} open` : "…"}
@@ -221,20 +241,21 @@ function PendingPassesPanel({ onLoaded }: { onLoaded?: () => void }) {
           {passes.map((p) => {
             const busy = actionBusy === p.id + ":approve" || actionBusy === p.id + ":reject";
             const expired = p.to ? new Date(p.to).getTime() < Date.now() : false;
+            const safeName = p.studentName && p.studentName !== "undefined" ? p.studentName : "Unknown student";
             return (
               <li key={p.id} className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-3 sm:p-4 space-y-2.5">
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div className="min-w-0">
+                <div className="flex flex-wrap items-start justify-between gap-2 min-w-0">
+                  <div className="min-w-0 flex-1 basis-40">
                     <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
-                      {p.studentName || "Unknown student"}
-                      <span className="ml-2 font-mono text-xs text-[var(--text-muted)]">{p.roll}</span>
+                      {safeName}
+                      <span className="ml-2 font-mono text-xs text-[var(--text-muted)]">{p.roll || "—"}</span>
                     </p>
                     <p className="text-xs text-[var(--text-muted)] mt-1">
-                      {p.department || "—"} · {p.reason}
+                      {p.department || "—"} · {p.reason || "Gate pass"}
                     </p>
                     <p className="text-xs text-[var(--text-muted)] mt-0.5">
                       Destination:{" "}
-                      <span className="text-[var(--text-primary)]">{p.description || p.reason}</span>
+                      <span className="text-[var(--text-primary)] break-words">{p.description || p.reason || "—"}</span>
                       {" · "}Valid until{" "}
                       <span className={expired ? "text-rose-400" : "text-[var(--text-primary)]"}>
                         {fmtDate(p.to)} {fmtTime(p.to)}
