@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 import { useUIStore } from "@/stores/uiStore";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import {
   SEED_SCHEDULED_JOBS,
   SEED_SCHEDULED_JOBS_RUNS,
@@ -61,7 +61,7 @@ interface ApiRow {
 }
 
 /* ── Utilities ────────────────────────────────────────────────────────── */
-const getHeaders = () => getAuthHeaders();
+const getHeaders = () => api.getHeaders();
 
 function timeAgo(iso: string | null): string {
   if (!iso) return "—";
@@ -295,6 +295,8 @@ function RunsTimeline({ runs, loading }: { runs: Run[]; loading: boolean }) {
    Main component
    ══════════════════════════════════════════════════════════════════════════ */
 export function ScheduledJobsPanel() {
+const api = useApi();
+
   const addToast = useUIStore((s) => s.addToast);
 
   const [rows, setRows] = useState<Row[]>([]);

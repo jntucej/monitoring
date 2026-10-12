@@ -2,6 +2,7 @@
 /* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextRequest, NextResponse } from "next/server";
+import { err } from "@/lib/api-response";
 import { getSupabaseServiceClient, supabase } from "@/lib/dbClient";
 
 export const dynamic = "force-dynamic";
@@ -122,7 +123,7 @@ async function handleGet(req: NextRequest) {
     });
   } catch (error) {
     console.error("Error in staff attendance API:", error);
-    return NextResponse.json({ success: false, error: "Failed to load staff metrics" }, { status: 500 });
+    return NextResponse.json(err("INTERNAL_ERROR", "Failed to load staff metrics").body, { status: 500 });
   }
 }
 export const GET = withAuthorization(handleGet, {

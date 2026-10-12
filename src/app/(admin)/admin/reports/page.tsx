@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { FileText, Download, BarChart3, Loader2 } from "lucide-react";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import type { DashboardData } from "@/lib/types";
 
 interface GeneratedReport {
@@ -58,6 +58,8 @@ function downloadReportCSV(report: GeneratedReport, data: DashboardData | null) 
 }
 
 export default function AdminReportsPage() {
+const api = useApi();
+
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [generated, setGenerated] = useState<GeneratedReport[]>([]);
@@ -67,7 +69,7 @@ export default function AdminReportsPage() {
     let cancelled = false;
     const load = async () => {
       try {
-        const res = await fetch("/api/admin/dashboard", { headers: getAuthHeaders(), cache: "no-store" });
+        const res = await fetch("/api/admin/dashboard", { headers: api.getHeaders(), cache: "no-store" });
         const json = await res.json();
         if (!cancelled) {
           if (json.success) setData(json.data);

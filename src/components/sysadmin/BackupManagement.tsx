@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { Database, Download, Upload, Loader2, RefreshCw, ShieldCheck } from "lucide-react";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 export function BackupManagement() {
+const api = useApi();
+
   const [backups, setBackups] = useState<any[]>([]);
   const [verifications, setVerifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -15,7 +17,7 @@ export function BackupManagement() {
   const fetchBackups = async () => {
     setLoading(true);
     try {
-      const headers = getAuthHeaders();
+      const headers = api.getHeaders();
       const [resB, resV] = await Promise.all([
         fetch("/api/admin/backup", { headers }),
         fetch("/api/admin/backup/verify", { headers }),
@@ -30,7 +32,7 @@ export function BackupManagement() {
   const handleVerifyBackup = async () => {
     setVerifying(true); setMsg(null);
     try {
-      const headers = getAuthHeaders();
+      const headers = api.getHeaders();
       const res = await fetch("/api/admin/backup/verify", { method: "POST", headers });
       const json = await res.json();
       if (res.ok && json.success) {
@@ -49,7 +51,7 @@ export function BackupManagement() {
   const handleCreateBackup = async () => {
     setBusy(true); setMsg(null);
     try {
-      const headers = getAuthHeaders();
+      const headers = api.getHeaders();
       const res = await fetch("/api/admin/backup", { method: "POST", headers, body: JSON.stringify({ action: "create" }) });
       const json = await res.json();
       if (res.ok && json.success) {
@@ -73,7 +75,7 @@ export function BackupManagement() {
       reader.onload = async (event) => {
         try {
           const backupData = JSON.parse(event.target?.result as string);
-          const headers = getAuthHeaders();
+          const headers = api.getHeaders();
           const res = await fetch("/api/admin/backup", { method: "POST", headers, body: JSON.stringify({ action: "restore", backupData }) });
           const json = await res.json();
           if (res.ok && json.success) {

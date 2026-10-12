@@ -3,14 +3,12 @@
 import React from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
-import { useCollegeInfo } from "@/hooks/useCollegeInfo";
-import { User, Mail, Shield, CheckCircle, Tag, LogOut, School, Smartphone } from "lucide-react";
+import { User, Mail, CheckCircle, LogOut } from "lucide-react";
 import { GlassThemeToggle } from "@/components/shared/GlassThemeToggle";
 
 export function UserProfileTab() {
   const { user, role, logout } = useAuthStore();
   const { theme, setTheme, addToast } = useUIStore();
-  const { college } = useCollegeInfo();
 
   const handleLogout = async () => {
     try {
@@ -51,16 +49,12 @@ export function UserProfileTab() {
     );
   }
 
-  // Derived label or identifier
   const userIdentifier = user.employeeId || user.id;
 
   return (
     <div className="max-w-md mx-auto space-y-6">
       {/* Profile Card Header */}
       <div className="bg-[var(--bg-surface)] border border-[var(--border-strong)] rounded-2xl p-6 shadow-xl relative overflow-hidden">
-        {/* Glow effect */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--action-primary)]/10 rounded-full blur-3xl -z-10" />
-
         <div className="flex flex-col items-center text-center space-y-4">
           <div className="relative">
             <div className="w-20 h-20 rounded-full bg-[var(--action-primary)]/10 text-[var(--action-primary)] border-2 border-[var(--action-primary)]/30 flex items-center justify-center text-3xl font-extrabold shadow-inner">
@@ -99,14 +93,6 @@ export function UserProfileTab() {
               <span className="text-xs font-medium text-[var(--text-primary)] max-w-[200px] truncate">{user.email}</span>
             </div>
           )}
-
-          <div className="flex items-center justify-between py-2 border-b border-[var(--border)]/50">
-            <div className="flex items-center gap-2.5 text-xs text-[var(--text-secondary)] font-medium">
-              <School className="w-4 h-4 text-[var(--text-muted)]" />
-              <span>Institution</span>
-            </div>
-            <span className="text-xs font-bold text-[var(--text-primary)]">{college?.shortName || "College"}</span>
-          </div>
 
           <div className="flex items-center justify-between py-2">
             <div className="flex items-center gap-2.5 text-xs text-[var(--text-secondary)] font-medium">

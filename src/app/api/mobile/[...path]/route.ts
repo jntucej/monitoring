@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { err } from "@/lib/api-response";
 import { hash, compare, genSalt } from "@/server/lib/crypto";
 import { findPersonByUniqueId, getPersonHistory, addAudit } from "@/lib/db";
 import { generateMobileToken, validateMobileToken } from "@/lib/mobile-auth";
@@ -227,7 +228,7 @@ export async function GET(
 
   const authHeader = req.headers.get("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(err("UNAUTHORIZED", "Unauthorized").body, { status: 401 });
   }
 
   const deviceId = req.headers.get("x-device-id") || undefined;
@@ -235,7 +236,7 @@ export async function GET(
   const person = await validateMobileToken(token, deviceId);
 
   if (!person) {
-    return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
+    return NextResponse.json(err("UNAUTHORIZED", "Invalid or expired token").body, { status: 401 });
   }
 
   if (path === "profile") return NextResponse.json({ person });
@@ -255,5 +256,5 @@ export async function GET(
       status: person.status,
     });
   }
-  return NextResponse.json({ error: "Endpoint not found" }, { status: 404 });
+  return NextResponse.json(err("NOT_FOUND", "Endpoint not found").body, { status: 404 });
 }

@@ -27,9 +27,9 @@ export function PersonIdCard({ person: initialPerson, type }: PersonIdCardProps 
     let cancelled = false;
     const load = async () => {
       try {
-        const authRaw = sessionStorage.getItem("gate-monitor-auth");
-        const auth = authRaw ? JSON.parse(authRaw) : null;
-        const uniqueId = auth?.state?.user?.uniqueId ?? auth?.state?.user?.roll ?? auth?.state?.user?.studentRoll ?? auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll;
+        const auth = useAuthStore.getState();
+        const auth = auth ? JSON.parse(auth) : null;
+        const uniqueId = auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll ?? auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll;
         if (!uniqueId) {
           if (!cancelled) setLoading(false);
           return;

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { MapPin, Users, Activity, RefreshCw, X } from "lucide-react";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 /* ------------------------------------------------------------------ */
 /*  Types returned by /api/occupancy/presence-matrix                 */
@@ -55,6 +55,8 @@ function heatTextColor(v: number): string {
 
 /* ------------------------------------------------------------------ */
 export function OccupancyHeatmap() {
+const api = useApi();
+
   const [data, setData] = useState<MatrixPayload | null>(null);
   const [live, setLive] = useState(true);
   const [selected, setSelected] = useState<{ gate: MatrixGate; role: string } | null>(null);
@@ -64,7 +66,7 @@ export function OccupancyHeatmap() {
   const load = useCallback(async () => {
     try {
       const res = await fetch("/api/occupancy/presence-matrix", {
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
         cache: "no-store",
       });
       const json = await res.json();

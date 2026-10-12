@@ -4,9 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, KeyRound, Eye, EyeOff, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 export function ChangePasswordCard() {
+const api = useApi();
+
   const router = useRouter();
   const logout = useAuthStore((s) => s.logout);
 
@@ -45,7 +47,7 @@ export function ChangePasswordCard() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...getAuthHeaders(),
+          ...api.getHeaders(),
         },
         body: JSON.stringify({
           currentPassword: current,

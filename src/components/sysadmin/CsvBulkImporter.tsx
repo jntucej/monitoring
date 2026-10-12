@@ -2,12 +2,14 @@
 
 import { useState, useRef } from "react";
 import { Upload, FileSpreadsheet, Download, Loader2, ShieldAlert } from "lucide-react";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import { CsvValidationPreview } from "./CsvValidationPreview";
 
 const SAMPLE_CSV = `NAME OF THE STUDENT,EMAIL ID,role,H.T NO.,COURSE,FATHER NAME,DOB,PHONE NUMBER,LAND LINE 0R PARENT NUMBER,GENDER\nJohn Doe,john.doe@college.edu,student,22JJ1A0501,CSE,Robert Doe,2005-01-01,+919****3211,040-123456,Male`;
 
 export function CsvBulkImporter() {
+const api = useApi();
+
   const [csvText, setCsvText] = useState("");
   const [validating, setValidating] = useState(false);
   const [committing, setCommitting] = useState(false);
@@ -48,7 +50,7 @@ export function CsvBulkImporter() {
     try {
       const res = await fetch("/api/users/bulk/validate", {
         method: "POST",
-        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        headers: { ...api.getHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({ csvText })
       });
       const json = await res.json();
@@ -68,7 +70,7 @@ export function CsvBulkImporter() {
     try {
       const res = await fetch("/api/users/bulk/commit", {
         method: "POST",
-        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        headers: { ...api.getHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({ csvText, skipErrors })
       });
       const json = await res.json();

@@ -211,6 +211,6 @@ export const GET = withRateLimit(
 );
 
 export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ['student', 'parent', 'guardian', 'admin', 'sysadmin', 'operator'] }),
+  withAuthorization(handlePost, { requiredRole: ['student', 'parent', 'guardian', 'admin', 'sysadmin', 'operator', 'supervisor'] }),
   { keyPrefix: 'passes_create', maxRequests: 10 }
 );

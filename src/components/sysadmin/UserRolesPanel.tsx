@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Plus, X, Shield } from "lucide-react";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 const ALL_ROLES = [
   "operator","admin","sysadmin","supervisor","guardian","parent","hod","student",
@@ -10,12 +10,14 @@ const ALL_ROLES = [
 ];
 
 export function UserRolesPanel({ userId }: { userId: string }) {
+const api = useApi();
+
   const [roles, setRoles] = useState<{ role: string; scope: string | null }[]>([]);
   const [newRole, setNewRole] = useState("");
   const [newScope, setNewScope] = useState("");
 
   const load = async () => {
-    const res = await fetch(`/api/admin/users/${userId}/roles`, { headers: getAuthHeaders() });
+    const res = await fetch(`/api/admin/users/${userId}/roles`, { headers: api.getHeaders() });
     const json = await res.json();
     if (json.success) setRoles(json.data || []);
   };
@@ -25,7 +27,7 @@ export function UserRolesPanel({ userId }: { userId: string }) {
     if (!newRole) return;
     await fetch(`/api/admin/users/${userId}/roles`, {
       method: "POST",
-      headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+      headers: { ...api.getHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify({ action: "grant", role: newRole, scope: newScope || undefined }),
     });
     setNewRole(""); setNewScope(""); load();
@@ -34,7 +36,7 @@ export function UserRolesPanel({ userId }: { userId: string }) {
   const revoke = async (role: string, scope: string | null) => {
     await fetch(`/api/admin/users/${userId}/roles`, {
       method: "POST",
-      headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+      headers: { ...api.getHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify({ action: "revoke", role, scope: scope || undefined }),
     });
     load();

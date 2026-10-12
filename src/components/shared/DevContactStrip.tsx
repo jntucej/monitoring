@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { MessageSquare, Send, Loader2, CheckCircle2, LifeBuoy } from "lucide-react";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import { useUIStore } from "@/stores/uiStore";
 import Link from "next/link";
 
@@ -13,6 +13,8 @@ import Link from "next/link";
  * enforced server-side (users.dev_contact_enabled).
  */
 export function DevContactStrip({ defaultOpen = false }: { defaultOpen?: boolean }) {
+const api = useApi();
+
   const [open, setOpen] = useState(defaultOpen);
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
@@ -26,7 +28,7 @@ export function DevContactStrip({ defaultOpen = false }: { defaultOpen?: boolean
     try {
       const res = await fetch("/api/dev/contact", {
         method: "POST",
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
         body: JSON.stringify({ message: message.trim(), channel: "dashboard" }),
       });
       const result = await res.json();

@@ -252,12 +252,6 @@ function StudentDashboardInner() {
               )}
             </div>
 
-            {/* Student Overview Widgets */}
-            <section aria-label="Student overview" className="mt-6">
-              <StudentDashboardWidgets />
-            </section>
-
-
             {/* Option A — Digital ID Card */}
             <div className="space-y-3">
               <div className="flex items-center gap-2 justify-center sm:justify-start">
@@ -313,6 +307,8 @@ function StudentDashboardInner() {
 }
 
 export default function StudentDashboardPage() {
+const api = useApi();
+
   return (
     <Suspense fallback={<div className="p-6 text-sm text-[var(--text-muted)]">Loading…</div>}>
       <StudentDashboardInner />

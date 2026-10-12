@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import dynamic from "next/dynamic";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 type Point = { name: string; entries: number; exits: number };
 
@@ -50,6 +50,8 @@ const DynamicRechartsBar = dynamic(
  * Lazy-loaded via next/dynamic (ssr: false) and IntersectionObserver when visible.
  */
 export function EntryExitChart() {
+const api = useApi();
+
   const [data, setData] = useState<Point[]>([]);
   const [loading, setLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
@@ -84,7 +86,7 @@ export function EntryExitChart() {
 
         const res = await fetch(
           `/api/gate/logs?from=${startStr}&to=${endStr}&limit=1000`,
-          { headers: getAuthHeaders(), cache: "no-store" }
+          { headers: api.getHeaders(), cache: "no-store" }
         );
         const json = await res.json();
 

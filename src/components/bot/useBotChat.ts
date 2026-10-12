@@ -1,12 +1,14 @@
 "use client";
 import { useCallback, useRef } from "react";
 import { useBotStore, type Citation } from "./store";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import { useAuthStore } from "@/stores/authStore";
 
 const FLUSH_MS = 33;
 
 export function useBotChat() {
+const api = useApi();
+
   const lang = useBotStore((s) => s.lang);
   const conversationId = useBotStore((s) => s.conversationId);
   const appendUser = useBotStore((s) => s.appendUser);
@@ -61,7 +63,7 @@ export function useBotChat() {
     try {
       const res = await fetch("/api/bot/chat", {
         method: "POST",
-        headers: { "content-type": "application/json", ...getAuthHeaders() },
+        headers: { "content-type": "application/json", ...api.getHeaders() },
         body: JSON.stringify({
           message: text,
           conversationId,
@@ -147,7 +149,7 @@ export function useBotChat() {
     try {
       await fetch("/api/bot/feedback", {
         method: "POST",
-        headers: { "content-type": "application/json", ...getAuthHeaders() },
+        headers: { "content-type": "application/json", ...api.getHeaders() },
         body: JSON.stringify({ messageId: msg.dbId, feedback }),
       });
     } catch {}

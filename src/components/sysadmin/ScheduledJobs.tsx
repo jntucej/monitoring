@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useUIStore } from "@/stores/uiStore";
 import { Clock, Play, RefreshCw, CheckCircle2, XCircle } from "lucide-react";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 interface Job {
   id: string;
@@ -25,6 +25,8 @@ interface JobRun {
 }
 
 export function ScheduledJobs() {
+const api = useApi();
+
   const { addToast } = useUIStore();
 
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -35,7 +37,7 @@ export function ScheduledJobs() {
   const fetchJobs = useCallback(async () => {
     setLoading(true);
     try {
-      const headers = getAuthHeaders();
+      const headers = api.getHeaders();
       const res = await fetch("/api/admin/jobs", { headers });
       const data = await res.json();
       if (res.ok && data.success && data.data) {
@@ -56,7 +58,7 @@ export function ScheduledJobs() {
   const handleToggleJob = async (jobId: string, currentEnabled: boolean) => {
     try {
       const headers = {
-        ...getAuthHeaders(),
+        ...api.getHeaders(),
         "Content-Type": "application/json",
       };
       const res = await fetch(`/api/admin/jobs/${jobId}`, {
@@ -78,7 +80,7 @@ export function ScheduledJobs() {
   const handleRunNow = async (jobId: string) => {
     setRunningJobId(jobId);
     try {
-      const headers = getAuthHeaders();
+      const headers = api.getHeaders();
       const res = await fetch(`/api/admin/jobs/${jobId}/run`, { method: "POST", headers });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.error?.message || "Failed to execute job");

@@ -15,33 +15,7 @@ async function handlePost(req: NextRequest) {
     const supabase = getSupabaseServiceClient();
     const hash = randomBytes(4).toString("hex");
 
-    await supabase
-      .from("users")
-      .update({
-        name: `[ANONYMIZED_${hash}]`,
-        email: `anonymized_${hash}@gdpr.disabled`,
-        phone: "[ANONYMIZED]",
-        unique_id: `ANON-${hash.toUpperCase()}`,
-        login_identifier: `anon_${hash}`,
-      })
-      .eq("id", userId);
-
-    await supabase.from("data_compliance_logs").insert({
-      id: `cmp-${Date.now()}`,
-      action: "USER_ANONYMIZE",
-      target_user_id: userId,
-      details: `Anonymized PII fields for user ${userId}.`,
-      performed_by: actorId,
-      timestamp: new Date().toISOString(),
-    });
-
-    await addAudit({
-      action: "GDPR_ANONYMIZE",
-      userId: actorId,
-      userName: "SysAdmin",
-      role: "sysadmin",
-      details: `Anonymized user account ${userId} per GDPR right to be forgotten.`,
-    });
+    await supabase.rpc("anonymize_user", { p_user_id: userId, p_hash: hash, p_actor_id: actorId });
 
     return NextResponse.json({ success: true, data: { userId, anonymized: true } });
   } catch (error: any) {

@@ -4,7 +4,7 @@ import { RequestPassForm } from "@/components/parent/RequestPassForm";
 import { Ticket, Clock, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import type { GatePass, GatePassStatus } from "@/lib/types";
 import { getPassTypeName } from "@/hooks/usePassTypes";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 function statusStyle(status: string) {
   if (status === "APPROVED" || status === "COMPLETED") {
@@ -23,17 +23,22 @@ function statusIcon(status: string) {
 }
 
 export default function ParentPassesPage() {
+const api = useApi();
+
   const [passes, setPasses] = useState<GatePass[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const load = async () => {
-    try {
-      const authRaw = sessionStorage.getItem("gate-monitor-auth");
-      const auth = authRaw ? JSON.parse(authRaw) : null;
-      const parentId = auth?.user?.parentId ?? auth?.user?.id ?? "pa-1";
-      const res = await fetch(`/api/passes?parentId=${parentId}`, { 
-        headers: getAuthHeaders(),
+      try {
+        const auth = useAuthStore.getState();
+        const parentId = auth?.user?.parentId ?? auth?.user?.id;
+        if (!parentId) {
+          setError("Parent ID not found in session. Please log in again.");
+          return;
+        }
+        const res = await fetch(`/api/passes?parentId=${parentId}`, {
+        headers: api.getHeaders(),
         cache: "no-store" 
       });
       if (!res.ok) throw new Error("Failed to fetch passes");

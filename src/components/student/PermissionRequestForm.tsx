@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Loader2, CheckCircle2, ClipboardList, FileText, CalendarClock, AlertCircle, ArrowRight } from "lucide-react";
 import { ReasonSelect } from "@/components/shared/ReasonSelect";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import type { WorkflowType } from "@/lib/types";
 
 export interface PermissionRequestFormProps {
@@ -78,7 +78,7 @@ export function PermissionRequestForm({ onSubmitted, defaultWorkflow = "hostel" 
     try {
       const res = await fetch("/api/permissions", {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        headers: { "Content-Type": "application/json", ...api.getHeaders() },
         body: JSON.stringify({
           workflowType,
           reason,
@@ -308,6 +308,8 @@ export function PermissionRequestForm({ onSubmitted, defaultWorkflow = "hostel" 
 }
 
 export default PermissionRequestForm;
+const api = useApi();
+
 
 
 

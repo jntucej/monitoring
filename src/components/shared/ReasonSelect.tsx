@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useState, useId } from "react";
-import { cn, getAuthHeaders } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import type { WorkflowType } from "@/lib/types";
 
 export interface ReasonSelectProps {
@@ -39,7 +40,7 @@ export function ReasonSelect({
     async function loadReasons() {
       setLoading(true);
       try {
-        const headers = getAuthHeaders();
+        const headers = api.getHeaders();
         const [exitReasonsRes, customReasonsRes] = await Promise.all([
           fetch("/api/config/exit-reasons", { headers }).catch(() => null),
           fetch(`/api/config/custom-reasons?workflowType=${encodeURIComponent(workflowType)}`, {
@@ -142,3 +143,5 @@ export function ReasonSelect({
 }
 
 export default ReasonSelect;
+const api = useApi();
+

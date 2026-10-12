@@ -3,9 +3,11 @@ import { useEffect, useState } from "react";
 import { Ticket, Loader2, CheckCircle2 } from "lucide-react";
 import type { Student } from "@/lib/types";
 import { usePassTypes } from "@/hooks/usePassTypes";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 export function RequestPassForm() {
+const api = useApi();
+
   const { passTypes, loading: loadingPassTypes } = usePassTypes();
   const [passType, setPassType] = useState("");
   const [reason, setReason] = useState("");
@@ -21,16 +23,20 @@ export function RequestPassForm() {
   }, [passTypes, passType]);
 
   const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setBusy(true);
-    setSuccess(null);
-    try {
-      // Look up the parent's first child
-      const authRaw = sessionStorage.getItem("gate-monitor-auth");
-      const auth = authRaw ? JSON.parse(authRaw) : null;
-      const parentId = auth?.user?.parentId ?? auth?.user?.id ?? "pa-1";
-      const res = await fetch(`/api/students?parentId=${parentId}`, { 
-        headers: getAuthHeaders(),
+      e.preventDefault();
+      setBusy(true);
+      setSuccess(null);
+      try {
+        // Look up the parent's first child
+        const auth = useAuthStore.getState();
+        const parentId = auth?.user?.parentId ?? auth?.user?.id;
+        if (!parentId) {
+          setSuccess("❌ No parent ID in session. Please log in again.");
+          setBusy(false);
+          return;
+        }
+        const res = await fetch(`/api/students?parentId=${parentId}`, {
+        headers: api.getHeaders(),
         cache: "no-store" 
       });
       const json = await res.json();
@@ -61,7 +67,7 @@ export function RequestPassForm() {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
-          ...getAuthHeaders(),
+          ...api.getHeaders(),
         },
         body: JSON.stringify({
           roll: child.roll,

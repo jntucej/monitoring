@@ -2,9 +2,11 @@
 import { useEffect, useState, useCallback } from "react";
 import { ArrowRight, ArrowLeft, Loader2, AlertCircle } from "lucide-react";
 import type { Scan } from "@/lib/types";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 export function ChildActivity() {
+const api = useApi();
+
   const [activities, setActivities] = useState<Scan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);

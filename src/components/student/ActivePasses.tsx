@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Ticket, Loader2, Clock, CheckCircle2, XCircle } from "lucide-react";
 import type { GatePass } from "@/lib/types";
 import { getPassTypeName } from "@/hooks/usePassTypes";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 function expiryLabel(to: string, status: string): string {
   if (status === "REJECTED") return "Rejected";
@@ -24,6 +24,8 @@ function statusStyle(s: string) {
 }
 
 export function ActivePasses() {
+const api = useApi();
+
   const [passes, setPasses] = useState<GatePass[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -31,15 +33,15 @@ export function ActivePasses() {
     let cancelled = false;
     const load = async () => {
       try {
-        const authRaw = sessionStorage.getItem("gate-monitor-auth");
-        const auth = authRaw ? JSON.parse(authRaw) : null;
-        const roll = auth?.state?.user?.uniqueId ?? auth?.state?.user?.roll ?? auth?.state?.user?.studentRoll ?? auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll;
+        const auth = useAuthStore.getState();
+        const auth = auth ? JSON.parse(auth) : null;
+        const roll = auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll ?? auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll;
         if (!roll) {
           if (!cancelled) setLoading(false);
           return;
         }
         const res = await fetch(`/api/passes?roll=${encodeURIComponent(roll)}`, { 
-          headers: getAuthHeaders(),
+          headers: api.getHeaders(),
           cache: "no-store" 
         });
         const json = await res.json();

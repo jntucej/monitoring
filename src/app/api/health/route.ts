@@ -22,7 +22,11 @@ async function handleGet(req: NextRequest) {
     }
   }
 
-  const statusCodes = { healthy: 200, degraded: 200, unhealthy: 503 };
+  const statusCodes = {
+    healthy: 200,
+    degraded: health.uptime > 120 ? 503 : 200,
+    unhealthy: 503,
+  };
   const sanitize = (h: typeof health): typeof h => ({
     status: h.status,
     timestamp: h.timestamp,

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse, NextRequest } from "next/server";
+import { err } from "@/lib/api-response";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { addAudit, addNotification, getLinkedPersons } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
@@ -23,7 +24,7 @@ async function handlePost(req: NextRequest, context: any) {
     ...rest
   } = body;
 
-  if (!workflowType) return NextResponse.json({ success: false, error: "Missing fields" }, { status: 400 });
+  if (!workflowType) return NextResponse.json(err("BAD_REQUEST", "Missing fields").body, { status: 400 });
 
   if (!["student", "parent", "guardian", "admin", "sysadmin", "staff", "faculty"].includes(role)) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 403 });
@@ -31,15 +32,15 @@ async function handlePost(req: NextRequest, context: any) {
 
   let targetUserId = userId;
   if (role === "parent" || role === "guardian") {
-    if (!studentUserId) return NextResponse.json({ success: false, error: "Missing child ID" }, { status: 400 });
+    if (!studentUserId) return NextResponse.json(err("BAD_REQUEST", "Missing child ID").body, { status: 400 });
     const children = await getLinkedPersons(userId);
     if (!children.some((c: any) => c.child_id === studentUserId)) {
-      return NextResponse.json({ success: false, error: "Not your child" }, { status: 403 });
+      return NextResponse.json(err("FORBIDDEN", "Not your child").body, { status: 403 });
     }
     targetUserId = studentUserId;
   } else if (studentUserId && studentUserId !== userId) {
     if (role !== "admin" && role !== "sysadmin") {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 403 });
+      return NextResponse.json(err("FORBIDDEN", "Unauthorized").body, { status: 403 });
     }
     targetUserId = studentUserId;
   }
@@ -106,7 +107,7 @@ async function handleGet(req: NextRequest, context: any) {
     if (!childIds.length) return NextResponse.json({ success: true, data: [], total: 0 });
     if (sid) {
       if (childIds.includes(sid)) query = query.eq("student_user_id", sid);
-      else return NextResponse.json({ success: false, error: "Not your child" }, { status: 403 });
+      else return NextResponse.json(err("FORBIDDEN", "Not your child").body, { status: 403 });
     } else {
       query = query.in("student_user_id", childIds);
     }

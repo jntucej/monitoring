@@ -8,7 +8,7 @@ import type { ReactNode } from "react";
 import { useEffect, useState, useCallback } from "react";
 import { RadialMeter } from "./RadialMeter";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 /* -------------------------------------------------------------------------- */
 /*  Types                                                                       */
@@ -42,7 +42,7 @@ export function HostelDashboard() {
   const fetchDashboard = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/dashboard/hostel", { headers: getAuthHeaders(), cache: "no-store" });
+      const res = await fetch("/api/dashboard/hostel", { headers: api.getHeaders(), cache: "no-store" });
       const json: DashboardResponse = await res.json();
       if (json.success && json.data) setData(json.data);
       else console.error("[HostelDashboard] fetch failed:", json.error?.message);
@@ -209,6 +209,8 @@ interface CardDivProps {
 }
 
 export function CardDiv({ children, className = "" }: CardDivProps) {
+const api = useApi();
+
   return (
     <div className={`rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 ${className}`}>
       {children}

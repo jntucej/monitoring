@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { X, Copy, Check, KeyRound, Clock } from "lucide-react";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 interface Props {
   userId: string;
@@ -10,6 +10,8 @@ interface Props {
 }
 
 export function EnrollmentCodeModal({ userId, userName, onClose }: Props) {
+const api = useApi();
+
   const [purpose, setPurpose] = useState<"web_bootstrap" | "mobile" | "pin_reset">("web_bootstrap");
   const [issued, setIssued] = useState<{ code: string; expiresAt: string } | null>(null);
   const [loading, setLoading] = useState(false);
@@ -21,7 +23,7 @@ export function EnrollmentCodeModal({ userId, userName, onClose }: Props) {
     try {
       const res = await fetch(`/api/admin/users/${userId}/enrollment-code`, {
         method: "POST",
-        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        headers: { ...api.getHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({ purpose }),
       });
       const json = await res.json();

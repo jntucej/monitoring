@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { err } from "@/lib/api-response";
 import { getDbClient } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -53,10 +54,7 @@ async function handlePost(req: NextRequest) {
     return NextResponse.json({ success: true, data: feedback });
   } catch (error) {
     console.error("Feedback error:", error);
-    return NextResponse.json(
-      { success: false, error: "Internal error" },
-      { status: 500 }
-    );
+    return NextResponse.json(err("INTERNAL_ERROR", "Internal error").body, { status: 500 });
   }
 }
 

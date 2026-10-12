@@ -18,7 +18,8 @@ import {
   FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { formatDateTime, getAuthHeaders } from "@/lib/utils";
+import { formatDateTime } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import { useUIStore } from "@/stores/uiStore";
 import type { PermissionItem } from "./PermissionRow";
 import { DocumentUploadPanel } from "@/components/student/DocumentUploadPanel";
@@ -44,6 +45,8 @@ const STAGE_LABELS: Record<string, string> = {
 };
 
 export function PermissionDetailPanel({
+const api = useApi();
+
   ticket,
   onClose,
   onActionComplete,
@@ -68,7 +71,7 @@ export function PermissionDetailPanel({
     setError(null);
     try {
       const res = await fetch(`/api/permissions/${encodeURIComponent(ticket)}`, {
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
         cache: "no-store",
       });
       const json = await res.json();
@@ -89,7 +92,7 @@ export function PermissionDetailPanel({
     let ignore = false;
 
     fetch(`/api/permissions/${encodeURIComponent(ticket)}`, {
-      headers: getAuthHeaders(),
+      headers: api.getHeaders(),
       cache: "no-store",
     })
       .then((res) => res.json())
@@ -119,7 +122,7 @@ export function PermissionDetailPanel({
     try {
       const res = await fetch(`/api/permissions/${encodeURIComponent(ticket)}`, {
         method: "PATCH",
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
         body: JSON.stringify({ action, comment: comment.trim() || undefined }),
       });
       const json = await res.json();

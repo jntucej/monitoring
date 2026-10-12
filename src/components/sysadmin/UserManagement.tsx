@@ -5,9 +5,11 @@ import { useEffect, useState } from "react";
 import { UserPlus, User, Loader2, XCircle, Fingerprint, ShieldCheck, Upload, KeyRound } from "lucide-react";
 import type { User as UserType } from "@/lib/types";
 import { BulkUserImportModal } from "./BulkUserImportModal";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 export function UserManagement() {
+const api = useApi();
+
   const [users, setUsers] = useState<UserType[]>([]);
   const [gates, setGates] = useState<Array<{ id: string; name: string }>>([]);
   const [gateId, setGateId] = useState("");
@@ -26,7 +28,7 @@ export function UserManagement() {
   /** Auth headers required by every /api route (withAuthorization). */
   const authHeaders = (): Record<string, string> => {
     return {
-      ...getAuthHeaders(),
+      ...api.getHeaders(),
       "Content-Type": "application/json",
     };
   };

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { DoorOpen, Plus, Trash2, Edit3, ShieldAlert, CheckCircle2 } from "lucide-react";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 interface ExitReason {
   code: string;
@@ -17,6 +17,8 @@ interface ExitReason {
 }
 
 export default function ExitReasonsPage() {
+const api = useApi();
+
   const [reasons, setReasons] = useState<ExitReason[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingReason, setEditingReason] = useState<Partial<ExitReason> | null>(null);
@@ -25,7 +27,7 @@ export default function ExitReasonsPage() {
   const fetchReasons = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/config/exit-reasons", { headers: getAuthHeaders() });
+      const res = await fetch("/api/config/exit-reasons", { headers: api.getHeaders() });
       const json = await res.json();
       if (json.success) setReasons(json.data || []);
     } catch {
@@ -46,7 +48,7 @@ export default function ExitReasonsPage() {
     try {
       const res = await fetch("/api/config/exit-reasons", {
         method: "POST",
-        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        headers: { ...api.getHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify(editingReason),
       });
       const json = await res.json();
@@ -67,7 +69,7 @@ export default function ExitReasonsPage() {
     try {
       const res = await fetch(`/api/config/exit-reasons?code=${code}`, {
         method: "DELETE",
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
       });
       const json = await res.json();
       if (json.success) {

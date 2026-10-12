@@ -30,7 +30,7 @@ import { GovernanceModules } from "./SysAdminGovernanceModules";
 import { HealthDashboard } from "./HealthDashboard";
 import { DevMessagesPanel } from "@/components/admin/DevMessagesPanel";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 interface AuditLog {
   id: string;
@@ -42,6 +42,8 @@ interface AuditLog {
 }
 
 export function SysAdminControlPanel() {
+const api = useApi();
+
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [auditCount, setAuditCount] = useState<number | null>(null);
   const [sessionCount, setSessionCount] = useState<number | null>(null);

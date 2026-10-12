@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { MessageSquare, Send } from "lucide-react";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 interface DevMessage {
   id: string;
@@ -20,13 +20,15 @@ interface DevMessage {
  * Self-contained — mount on any admin dashboard; polls every 60s.
  */
 export function DevMessagesPanel() {
+const api = useApi();
+
   const [messages, setMessages] = useState<DevMessage[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     try {
       const res = await fetch("/api/dev/contact?limit=10", {
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
         cache: "no-store",
       });
       const data = await res.json();

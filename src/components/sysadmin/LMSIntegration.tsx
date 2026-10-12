@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useUIStore } from "@/stores/uiStore";
 import { BookOpen, RefreshCw, Settings, Save } from "lucide-react";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 export function LMSIntegration() {
+const api = useApi();
+
   const { addToast } = useUIStore();
   const [config, setConfig] = useState({
     platform: "moodle",
@@ -25,7 +27,7 @@ export function LMSIntegration() {
   const fetchStatus = async () => {
     setLoading(true);
     try {
-      const headers = getAuthHeaders();
+      const headers = api.getHeaders();
       const res = await fetch("/api/integrations/lms/status", { headers });
       const result = await res.json();
       if (result.success && result.data) {
@@ -45,7 +47,7 @@ export function LMSIntegration() {
   const handleSyncNow = async () => {
     setSyncing(true);
     try {
-      const headers = getAuthHeaders();
+      const headers = api.getHeaders();
       const res = await fetch("/api/integrations/lms/sync", { method: "POST", headers });
       const result = await res.json();
       if (result.success) {

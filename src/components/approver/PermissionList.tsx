@@ -8,7 +8,7 @@ import { PermissionRow, type PermissionItem } from "./PermissionRow";
 import { BulkActionsBar } from "./BulkActionsBar";
 import { PermissionDetailPanel } from "./PermissionDetailPanel";
 import { useUIStore } from "@/stores/uiStore";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 export interface PermissionListProps {
   title: string;
@@ -62,7 +62,7 @@ export function PermissionList({
     try {
       const url = getEffectiveUrl();
       const res = await fetch(url, {
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
         cache: "no-store",
       });
       const json = await res.json();
@@ -88,7 +88,7 @@ export function PermissionList({
     let ignore = false;
     const url = getEffectiveUrl();
     fetch(url, {
-      headers: getAuthHeaders(),
+      headers: api.getHeaders(),
       cache: "no-store",
     })
       .then((res) => res.json())
@@ -147,7 +147,7 @@ export function PermissionList({
     try {
       const res = await fetch(`/api/permissions/${encodeURIComponent(ticket)}`, {
         method: "PATCH",
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
         body: JSON.stringify({ action, comment }),
       });
       const json = await res.json();
@@ -186,7 +186,7 @@ export function PermissionList({
       try {
         const res = await fetch(`/api/permissions/${encodeURIComponent(ticket)}`, {
           method: "PATCH",
-          headers: getAuthHeaders(),
+          headers: api.getHeaders(),
           body: JSON.stringify({ action, comment }),
         });
         const json = await res.json();
@@ -337,3 +337,5 @@ export function PermissionList({
 }
 
 export default PermissionList;
+const api = useApi();
+

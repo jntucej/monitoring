@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { Layout, Plus, Trash2, Edit3, CheckCircle2, ShieldAlert, Layers } from "lucide-react";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 interface NavItem {
   id?: string;
@@ -17,6 +17,8 @@ interface NavItem {
 }
 
 export default function NavigationEditorPage() {
+const api = useApi();
+
   const [navItems, setNavItems] = useState<NavItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRole, setSelectedRole] = useState("sysadmin");
@@ -26,7 +28,7 @@ export default function NavigationEditorPage() {
   const fetchNav = async (role: string) => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/config/navigation?role=${role}`, { headers: getAuthHeaders() });
+      const res = await fetch(`/api/config/navigation?role=${role}`, { headers: api.getHeaders() });
       const json = await res.json();
       if (json.success) {
         const flat: NavItem[] = json.raw || [];
@@ -50,7 +52,7 @@ export default function NavigationEditorPage() {
     try {
       const res = await fetch("/api/config/navigation", {
         method: "POST",
-        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        headers: { ...api.getHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({ ...editingItem, roleCode: selectedRole }),
       });
       const json = await res.json();
@@ -71,7 +73,7 @@ export default function NavigationEditorPage() {
     try {
       const res = await fetch(`/api/config/navigation?id=${id}`, {
         method: "DELETE",
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
       });
       const json = await res.json();
       if (json.success) {

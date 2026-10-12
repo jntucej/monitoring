@@ -3,11 +3,13 @@
 import React, { useState } from "react";
 import { Briefcase, AlertCircle } from "lucide-react";
 import { StaffTracking, StaffMember } from "@/components/admin/StaffTracking";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh"
 import { CampusStatusBar } from "@/components/admin/CampusStatusBar";
 
 export default function AdminStaffPage() {
+const api = useApi();
+
   const [records, setRecords] = useState<StaffMember[]>([]);
   const [summary, setSummary] = useState({
     totalStaff: 0,
@@ -25,7 +27,7 @@ export default function AdminStaffPage() {
       setLoading(true);
       setError(null);
       const res = await fetch("/api/staff/attendance", {
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
         cache: "no-store",
       });
       const data = await res.json();

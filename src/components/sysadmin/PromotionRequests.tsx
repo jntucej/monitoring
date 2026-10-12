@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 import { UserCheck, CheckCircle, XCircle, Plus, RefreshCw, Send } from "lucide-react";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 interface RoleRequest {
   id: string;
@@ -22,6 +22,8 @@ interface RoleRequest {
 }
 
 export function PromotionRequests() {
+const api = useApi();
+
   const { user } = useAuthStore();
   const { addToast } = useUIStore();
 
@@ -44,7 +46,7 @@ export function PromotionRequests() {
     setUserQuery(q);
     if (q.trim().length < 2) { setUserResults([]); return; }
     try {
-      const res = await fetch(`/api/users?q=${encodeURIComponent(q.trim())}`, { headers: getAuthHeaders(), cache: "no-store" });
+      const res = await fetch(`/api/users?q=${encodeURIComponent(q.trim())}`, { headers: api.getHeaders(), cache: "no-store" });
       const json = await res.json();
       setUserResults(Array.isArray(json?.data) ? json.data.slice(0, 8) : []);
     } catch { setUserResults([]); }
@@ -53,7 +55,7 @@ export function PromotionRequests() {
   const fetchRequests = useCallback(async () => {
     setLoading(true);
     try {
-      const headers = getAuthHeaders();
+      const headers = api.getHeaders();
       const url = filterStatus !== "ALL"
         ? `/api/admin/role-requests?status=${filterStatus}`
         : "/api/admin/role-requests";
@@ -77,7 +79,7 @@ export function PromotionRequests() {
   const handleAction = async (requestId: string, status: "APPROVED" | "REJECTED") => {
     try {
       const headers = {
-        ...getAuthHeaders(),
+        ...api.getHeaders(),
         "Content-Type": "application/json",
       };
       const res = await fetch(`/api/admin/role-requests/${requestId}`, {
@@ -109,7 +111,7 @@ export function PromotionRequests() {
 
     try {
       const headers = {
-        ...getAuthHeaders(),
+        ...api.getHeaders(),
         "Content-Type": "application/json",
       };
       const res = await fetch("/api/admin/role-requests", {

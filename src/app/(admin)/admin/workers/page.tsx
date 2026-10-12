@@ -3,11 +3,13 @@
 import React, { useState } from "react";
 import { HardHat, AlertCircle } from "lucide-react";
 import { WorkerShiftTracker, WorkerShift } from "@/components/admin/WorkerShiftTracker";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh"
 import { CampusStatusBar } from "@/components/admin/CampusStatusBar";
 
 export default function AdminWorkersPage() {
+const api = useApi();
+
   const [shifts, setShifts] = useState<WorkerShift[]>([]);
   const [summary, setSummary] = useState({
     totalActive: 0,
@@ -24,7 +26,7 @@ export default function AdminWorkersPage() {
       setLoading(true);
       setError(null);
       const res = await fetch("/api/workers/shifts", {
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
         cache: "no-store",
       });
       const data = await res.json();

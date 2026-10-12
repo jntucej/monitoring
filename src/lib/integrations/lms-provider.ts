@@ -26,6 +26,7 @@ export interface SyncResult {
   synced_courses: number;
   synced_users: number;
   errors: string[];
+  mode: "live" | "mock";
 }
 
 export interface LMSProvider {
@@ -46,34 +47,37 @@ export class MoodleProvider implements LMSProvider {
     let syncedCourses = 0;
 
     if (config.api_url && config.api_url.startsWith("http")) {
-      try {
-        const token = config.wstoken || config.api_key_encrypted || "demo_wstoken";
-        const url = `${config.api_url}?wstoken=${encodeURIComponent(token)}&moodlewsrestformat=json&wsfunction=core_course_get_courses`;
+          try {
+            const token = config.wstoken || config.api_key_encrypted || "demo_wstoken";
+            const url = `${config.api_url}?wstoken=${encodeURIComponent(token)}&moodlewsrestformat=json&wsfunction=core_course_get_courses`;
         
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
-        const res = await fetch(url, { signal: controller.signal }).catch(() => null);
-        clearTimeout(timeoutId);
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
+            const res = await fetch(url, { signal: controller.signal }).catch(() => null);
+            clearTimeout(timeoutId);
 
-        if (res && res.ok) {
-          const courses = await res.json().catch(() => null);
-          if (Array.isArray(courses)) {
-            syncedCourses = courses.length;
+            if (res && res.ok) {
+              const courses = await res.json().catch(() => null);
+              if (Array.isArray(courses)) {
+                syncedCourses = courses.length;
+              }
+            } else {
+              errors.push("Moodle API returned non-ok status");
+            }
+          } catch (err: any) {
+            errors.push(`Moodle API sync error: ${err.message}`);
           }
         }
-      } catch (err: any) {
-        errors.push(`Moodle API sync error: ${err.message}`);
-      }
-    }
 
-    const { data: usersData } = await getDbClient().from("users").select("id").eq("role", "student");
-    const { data: deptsData } = await getDbClient().from("departments").select("id");
+        const { data: usersData } = await getDbClient().from("users").select("id").eq("role", "student");
+        const { data: deptsData } = await getDbClient().from("departments").select("id");
 
-    return {
-      synced_courses: syncedCourses || (deptsData?.length || 12),
-      synced_users: syncedUsers || (usersData?.length || 150),
-      errors,
-    };
+        return {
+          synced_courses: syncedCourses,
+          synced_users: syncedUsers,
+          errors,
+          mode: errors.length === 0 ? "live" : "mock",
+        };
   }
 
   async pushAttendance(config: LMSConfig, record: AttendanceRecord): Promise<boolean> {
@@ -118,34 +122,37 @@ export class CanvasProvider implements LMSProvider {
     let syncedCourses = 0;
 
     if (config.api_url && config.api_url.startsWith("http")) {
-      try {
-        const apiKey = config.api_key_encrypted || "canvas_demo_token";
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
+          try {
+            const apiKey = config.api_key_encrypted || "canvas_demo_token";
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-        const res = await fetch(`${config.api_url.replace(/\/$/, "")}/api/v1/courses`, {
-          headers: { Authorization: `Bearer ${apiKey}` },
-          signal: controller.signal,
-        }).catch(() => null);
-        clearTimeout(timeoutId);
+            const res = await fetch(`${config.api_url.replace(/\/$/, "")}/api/v1/courses`, {
+              headers: { Authorization: `Bearer ${apiKey}` },
+              signal: controller.signal,
+            }).catch(() => null);
+            clearTimeout(timeoutId);
 
-        if (res && res.ok) {
-          const courses = await res.json().catch(() => null);
-          if (Array.isArray(courses)) syncedCourses = courses.length;
+            if (res && res.ok) {
+              const courses = await res.json().catch(() => null);
+              if (Array.isArray(courses)) syncedCourses = courses.length;
+            } else {
+              errors.push("Canvas API returned non-ok status");
+            }
+          } catch (err: any) {
+            errors.push(`Canvas API sync error: ${err.message}`);
+          }
         }
-      } catch (err: any) {
-        errors.push(`Canvas API sync error: ${err.message}`);
-      }
-    }
 
-    const { data: usersData } = await getDbClient().from("users").select("id").eq("role", "student");
-    const { data: deptsData } = await getDbClient().from("departments").select("id");
+        const { data: usersData } = await getDbClient().from("users").select("id").eq("role", "student");
+        const { data: deptsData } = await getDbClient().from("departments").select("id");
 
-    return {
-      synced_courses: syncedCourses || (deptsData?.length || 12),
-      synced_users: syncedUsers || (usersData?.length || 150),
-      errors,
-    };
+        return {
+          synced_courses: syncedCourses,
+          synced_users: syncedUsers,
+          errors,
+          mode: errors.length === 0 ? "live" : "mock",
+        };
   }
 
   async pushAttendance(config: LMSConfig, record: AttendanceRecord): Promise<boolean> {
@@ -191,36 +198,39 @@ export class BlackboardProvider implements LMSProvider {
     let syncedCourses = 0;
 
     if (config.api_url && config.api_url.startsWith("http")) {
-      try {
-        const apiKey = config.api_key_encrypted || "bb_demo_token";
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
+          try {
+            const apiKey = config.api_key_encrypted || "bb_demo_token";
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-        const res = await fetch(`${config.api_url.replace(/\/$/, "")}/learn/api/public/v1/courses`, {
-          headers: { Authorization: `Bearer ${apiKey}` },
-          signal: controller.signal,
-        }).catch(() => null);
-        clearTimeout(timeoutId);
+            const res = await fetch(`${config.api_url.replace(/\/$/, "")}/learn/api/public/v1/courses`, {
+              headers: { Authorization: `Bearer ${apiKey}` },
+              signal: controller.signal,
+            }).catch(() => null);
+            clearTimeout(timeoutId);
 
-        if (res && res.ok) {
-          const data = await res.json().catch(() => null);
-          if (data?.results && Array.isArray(data.results)) {
-            syncedCourses = data.results.length;
+            if (res && res.ok) {
+              const data = await res.json().catch(() => null);
+              if (data?.results && Array.isArray(data.results)) {
+                syncedCourses = data.results.length;
+              }
+            } else {
+              errors.push("Blackboard API returned non-ok status");
+            }
+          } catch (err: any) {
+            errors.push(`Blackboard API sync error: ${err.message}`);
           }
         }
-      } catch (err: any) {
-        errors.push(`Blackboard API sync error: ${err.message}`);
-      }
-    }
 
-    const { data: usersData } = await getDbClient().from("users").select("id").eq("role", "student");
-    const { data: deptsData } = await getDbClient().from("departments").select("id");
+        const { data: usersData } = await getDbClient().from("users").select("id").eq("role", "student");
+        const { data: deptsData } = await getDbClient().from("departments").select("id");
 
-    return {
-      synced_courses: syncedCourses || (deptsData?.length || 12),
-      synced_users: syncedUsers || (usersData?.length || 150),
-      errors,
-    };
+        return {
+          synced_courses: syncedCourses,
+          synced_users: syncedUsers,
+          errors,
+          mode: errors.length === 0 ? "live" : "mock",
+        };
   }
 
   async pushAttendance(config: LMSConfig, record: AttendanceRecord): Promise<boolean> {
@@ -266,36 +276,39 @@ export class SakaiProvider implements LMSProvider {
     let syncedCourses = 0;
 
     if (config.api_url && config.api_url.startsWith("http")) {
-      try {
-        const apiKey = config.api_key_encrypted || "sakai_demo_token";
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
+          try {
+            const apiKey = config.api_key_encrypted || "sakai_demo_token";
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-        const res = await fetch(`${config.api_url.replace(/\/$/, "")}/direct/site.json`, {
-          headers: { Authorization: `Bearer ${apiKey}` },
-          signal: controller.signal,
-        }).catch(() => null);
-        clearTimeout(timeoutId);
+            const res = await fetch(`${config.api_url.replace(/\/$/, "")}/direct/site.json`, {
+              headers: { Authorization: `Bearer ${apiKey}` },
+              signal: controller.signal,
+            }).catch(() => null);
+            clearTimeout(timeoutId);
 
-        if (res && res.ok) {
-          const data = await res.json().catch(() => null);
-          if (data?.site_collection && Array.isArray(data.site_collection)) {
-            syncedCourses = data.site_collection.length;
+            if (res && res.ok) {
+              const data = await res.json().catch(() => null);
+              if (data?.site_collection && Array.isArray(data.site_collection)) {
+                syncedCourses = data.site_collection.length;
+              }
+            } else {
+              errors.push("Sakai API returned non-ok status");
+            }
+          } catch (err: any) {
+            errors.push(`Sakai API sync error: ${err.message}`);
           }
         }
-      } catch (err: any) {
-        errors.push(`Sakai API sync error: ${err.message}`);
-      }
-    }
 
-    const { data: usersData } = await getDbClient().from("users").select("id").eq("role", "student");
-    const { data: deptsData } = await getDbClient().from("departments").select("id");
+        const { data: usersData } = await getDbClient().from("users").select("id").eq("role", "student");
+        const { data: deptsData } = await getDbClient().from("departments").select("id");
 
-    return {
-      synced_courses: syncedCourses || (deptsData?.length || 12),
-      synced_users: syncedUsers || (usersData?.length || 150),
-      errors,
-    };
+        return {
+          synced_courses: syncedCourses,
+          synced_users: syncedUsers,
+          errors,
+          mode: errors.length === 0 ? "live" : "mock",
+        };
   }
 
   async pushAttendance(config: LMSConfig, record: AttendanceRecord): Promise<boolean> {

@@ -1,4 +1,5 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { err } from "@/lib/api-response";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
@@ -23,7 +24,7 @@ async function handler(req: NextRequest, { auth }: { auth: AuthContext }): Promi
   const sourceLang: BotLang | "auto" = body?.sourceLang ?? "auto";
 
   if (!message || message.length > 4000) {
-    return new Response(JSON.stringify({ error: "invalid_message" }), { status: 400 });
+    return NextResponse.json(err("BAD_REQUEST", "invalid_message").body, { status: 400 });
   }
 
   await query(`UPDATE public.users SET bot_lang=$1 WHERE id=$2`, [lang, auth.userId]);

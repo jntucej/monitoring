@@ -8,7 +8,7 @@ import { AuthGuard } from "@/components/shared/AuthGuard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import {
   User as UserIcon,
@@ -51,7 +51,7 @@ type Tab = "personal" | "security" | "appearance";
  * ------------------------------------------------------------------ */
 function authHeaders(): Record<string, string> {
   if (typeof window === "undefined") return {};
-  const utilHeaders = getAuthHeaders();
+  const utilHeaders = api.getHeaders();
   if (Object.keys(utilHeaders).length > 0) return utilHeaders;
 
   const token =
@@ -91,6 +91,8 @@ function roleLabel(role: string): string {
  *  Page
  * ------------------------------------------------------------------ */
 export default function ProfilePage() {
+const api = useApi();
+
   return (
     <AuthGuard>
       <ProfileDashboard />

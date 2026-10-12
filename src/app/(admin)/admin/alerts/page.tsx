@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { DataTable } from "@/components/ui/DataTable";
 import { AlertTriangle, Bell, CheckCircle, Check, ShieldAlert, RefreshCw } from "lucide-react";
 import type { Alert } from "@/lib/types";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 const SEVERITY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   critical: { bg: "bg-rose-500/10 border-rose-500/30", text: "text-rose-400", label: "Critical Breach" },
@@ -26,6 +26,8 @@ function timeAgo(iso: string): string {
 }
 
 export default function AdminAlertsPage() {
+const api = useApi();
+
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +37,7 @@ export default function AdminAlertsPage() {
   const load = async () => {
     try {
       const url = filter === "all" ? "/api/alerts" : `/api/alerts?resolved=${filter === "resolved"}`;
-      const res = await fetch(url, { headers: getAuthHeaders(), cache: "no-store" });
+      const res = await fetch(url, { headers: api.getHeaders(), cache: "no-store" });
       if (!res.ok) throw new Error("Failed to fetch alerts");
       const json = await res.json();
       if (json.success) {
@@ -66,7 +68,7 @@ export default function AdminAlertsPage() {
   const resolve = async (id: string) => {
     setBusyId(id);
     try {
-      const headers = { ...getAuthHeaders(), "Content-Type": "application/json" };
+      const headers = { ...api.getHeaders(), "Content-Type": "application/json" };
       const res = await fetch(`/api/alerts/${id}`, {
         method: "PATCH",
         headers,

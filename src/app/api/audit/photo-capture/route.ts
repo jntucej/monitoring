@@ -7,6 +7,7 @@
  * is a timestamped record of who captured it and for what purpose.
  */
 import { NextRequest, NextResponse } from "next/server";
+import { err } from "@/lib/api-response";
 import { withAuthorization } from "@/middleware/authorization";
 import { addAudit } from "@/lib/db";
 import type { AuthContext } from "@/lib/authContext";
@@ -20,16 +21,13 @@ async function handlePost(
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    return NextResponse.json(err("BAD_REQUEST", "Invalid JSON").body, { status: 400 });
   }
 
   const { scannedUserId, gateId, direction } = body;
 
   if (typeof scannedUserId !== "string" || typeof gateId !== "string") {
-    return NextResponse.json(
-      { error: "scannedUserId and gateId are required strings" },
-      { status: 400 },
-    );
+    return NextResponse.json(err("BAD_REQUEST", "scannedUserId and gateId are required strings").body, { status: 400 });
   }
 
   await addAudit({

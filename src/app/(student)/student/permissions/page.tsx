@@ -8,7 +8,7 @@ import { PermissionTicketCard } from "@/components/student/PermissionTicketCard"
 import { PermissionDetailPanel } from "@/components/approver/PermissionDetailPanel";
 import type { PermissionItem } from "@/components/approver/PermissionRow";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 
 type StatusFilter = "ALL" | "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED";
@@ -22,6 +22,8 @@ const FILTERS: StatusFilter[] = ["ALL", "PENDING", "APPROVED", "REJECTED", "COMP
  * shared `PermissionDetailPanel` on select.
  */
 export default function StudentPermissionsPage() {
+const api = useApi();
+
   const [tickets, setTickets] = useState<PermissionItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +32,7 @@ export default function StudentPermissionsPage() {
 
   const fetchTickets = useCallback(async () => {
     try {
-      const res = await fetch("/api/permissions", { headers: getAuthHeaders(), cache: "no-store" });
+      const res = await fetch("/api/permissions", { headers: api.getHeaders(), cache: "no-store" });
       const json = await res.json().catch(() => ({}));
       if (json.success && Array.isArray(json.data)) {
         setTickets(json.data);

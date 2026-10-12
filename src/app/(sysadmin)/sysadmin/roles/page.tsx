@@ -349,7 +349,7 @@ export default function RolesManagementPage() {
     try {
       const res = await fetch("/api/config/roles", {
         method: "POST",
-        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        headers: { ...api.getHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify(editingRole),
       });
       const json = await res.json();
@@ -370,7 +370,7 @@ export default function RolesManagementPage() {
     try {
       const res = await fetch(`/api/config/roles?code=${code}`, {
         method: "DELETE",
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
       });
       const json = await res.json();
       if (json.success) {

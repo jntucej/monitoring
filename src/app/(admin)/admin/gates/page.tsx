@@ -3,10 +3,12 @@
 import React, { useState } from "react";
 import { GateDeviceTracker, GateDevice } from "@/components/admin/GateDeviceTracker";
 import { AlertCircle, Signal, Plus } from "lucide-react";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 
 export default function AdminGatesPage() {
+const api = useApi();
+
   const [devices, setDevices] = useState<GateDevice[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -16,7 +18,7 @@ export default function AdminGatesPage() {
       setLoading(true);
       setError(null);
       const res = await fetch("/api/gate/devices", {
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
         cache: "no-store",
       });
       const data = await res.json();

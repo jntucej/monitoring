@@ -25,7 +25,7 @@ import {
   List,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import type { GatePass, Alert } from "@/lib/types";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
@@ -78,7 +78,7 @@ function SupervisorDashboardInner() {
   // different session, so mirror the DB rather than trusting local component state.
   const syncLockdown = useCallback(async () => {
     try {
-      const res = await fetch("/api/admin/lockdown", { headers: getAuthHeaders(), cache: "no-store" });
+      const res = await fetch("/api/admin/lockdown", { headers: api.getHeaders(), cache: "no-store" });
       if (!res.ok) return;
       const json = await res.json();
       setIsLockdown(!!json.data);
@@ -98,9 +98,9 @@ function SupervisorDashboardInner() {
     setError(null);
     try {
       const [passesRes, studentsRes, alertsRes] = await Promise.all([
-        fetch("/api/passes?status=PENDING", { headers: getAuthHeaders(), cache: "no-store" }),
-        fetch("/api/students", { headers: getAuthHeaders(), cache: "no-store" }),
-        fetch("/api/alerts?resolved=false", { headers: getAuthHeaders(), cache: "no-store" }),
+        fetch("/api/passes?status=PENDING", { headers: api.getHeaders(), cache: "no-store" }),
+        fetch("/api/students", { headers: api.getHeaders(), cache: "no-store" }),
+        fetch("/api/alerts?resolved=false", { headers: api.getHeaders(), cache: "no-store" }),
       ]);
 
       // Never fabricate: only read a body from a response that actually succeeded,
@@ -153,7 +153,7 @@ function SupervisorDashboardInner() {
     try {
       const res = await fetch(`/api/passes/${passId}`, {
         method: "PUT",
-        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        headers: { ...api.getHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({ action, comment }),
       });
       const json = await res.json();
@@ -172,7 +172,7 @@ function SupervisorDashboardInner() {
     try {
       const res = await fetch(`/api/alerts/${alertId}`, {
         method: "PATCH",
-        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        headers: { ...api.getHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({ resolved: true }),
       });
       const json = await res.json();
@@ -212,13 +212,13 @@ function SupervisorDashboardInner() {
       const res = nextState
         ? await fetch("/api/admin/lockdown", {
             method: "POST",
-            headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+            headers: { ...api.getHeaders(), "Content-Type": "application/json" },
             // API contract: non-empty scopes[] + message (it reads `message`, NOT `reason`)
             body: JSON.stringify({ scopes: ["all"], message: "Supervisor Emergency Lockdown" }),
           })
         : await fetch("/api/admin/lockdown", {
             method: "DELETE",
-            headers: getAuthHeaders(),
+            headers: api.getHeaders(),
           });
       const json = await res.json();
       if (!res.ok || !json.success) {
@@ -648,6 +648,8 @@ function SupervisorDashboardInner() {
 }
 
 export default function SupervisorDashboardPage() {
+const api = useApi();
+
   return (
     <Suspense fallback={<div className="p-6 text-sm text-[var(--text-muted)]">Loading…</div>}>
       <SupervisorDashboardInner />

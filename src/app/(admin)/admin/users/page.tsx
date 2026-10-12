@@ -3,7 +3,7 @@
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { useEffect, useMemo, useState } from "react";
 import { Users, Shield, GraduationCap, Briefcase, UserCheck, Grid, Search, ArrowRight } from "lucide-react";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import Link from "next/link";
 
 interface UserProfile {
@@ -26,6 +26,8 @@ interface DepartmentData {
 }
 
 export default function AdminUsersPage() {
+const api = useApi();
+
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [departments, setDepartments] = useState<DepartmentData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,7 +44,7 @@ export default function AdminUsersPage() {
     setError(null);
     try {
       const url = q.trim() ? `/api/users?q=${encodeURIComponent(q.trim())}` : "/api/users";
-      const res = await fetch(url, { headers: getAuthHeaders(), cache: "no-store" });
+      const res = await fetch(url, { headers: api.getHeaders(), cache: "no-store" });
       const json = await res.json();
       if (json.success && Array.isArray(json.data)) {
         setUsers(json.data);
@@ -61,7 +63,7 @@ export default function AdminUsersPage() {
   const loadDepartments = async () => {
     setLoadingDepts(true);
     try {
-      const res = await fetch("/api/departments", { headers: getAuthHeaders(), cache: "no-store" });
+      const res = await fetch("/api/departments", { headers: api.getHeaders(), cache: "no-store" });
       const json = await res.json();
       if (json.success && Array.isArray(json.data)) {
         const processedDepts = json.data.map((d: any) => ({
