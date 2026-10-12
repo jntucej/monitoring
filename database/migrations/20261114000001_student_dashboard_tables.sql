@@ -178,16 +178,17 @@ CREATE TRIGGER trg_movement_recompute_student
 -- ============================================================================
 -- Case-insensitive dedupe (the app stores identifiers lower-cased, but a
 -- historical duplicate can still block the unique constraint).
+-- login_attempts has identifier as PK (no id column); use ctid for dedup.
 WITH dups AS (
-  SELECT LOWER(identifier) AS key, MIN(id::text) AS keep_id
-    FROM public.login_attempts
-   GROUP BY LOWER(identifier)
-   HAVING COUNT(*) > 1
+  SELECT LOWER(identifier) AS key, MIN(identifier) AS keep_identifier
+  FROM public.login_attempts
+  GROUP BY LOWER(identifier)
+  HAVING COUNT(*) > 1
 )
 DELETE FROM public.login_attempts la
   USING dups
- WHERE LOWER(la.identifier) = dups.key
-   AND la.id::text <> dups.keep_id;
+  WHERE LOWER(la.identifier) = dups.key
+    AND la.identifier <> dups.keep_identifier;
 
 -- (Idempotent re-add: if this schema's login_attempts already carries a
 -- UNIQUE(identifier) constraint/index, the DROP below is a no-op.)
