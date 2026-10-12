@@ -75,7 +75,7 @@ const NEW_ROLES: { role: string; pin: string }[] = [
   { role: "deputy_warden", pin: "1106" },
   { role: "hostel_manager", pin: "1107" },
   { role: "parent", pin: "1108" },
-  { role: "mess_incharge", pin: "1109" },
+  { role: "mess_incharge", pin: process.env.MESS_PIN || require("crypto").randomInt(1000, 9999).toString() },
 ];
 
 const pre = new Set(q(`SELECT role FROM users WHERE deleted_at IS NULL AND role = ANY(ARRAY[${NEW_ROLES.map((r) => `'${r.role}'`).join(",")}])`).map((r) => r[0]));
@@ -150,7 +150,7 @@ const spot: Record<string, any> = {};
 {
   const opRow = q(`SELECT id, unique_id, name FROM users WHERE deleted_at IS NULL AND role = 'operator' AND status = 'ACTIVE' AND unique_id IS NOT NULL ORDER BY updated_at DESC NULLS LAST LIMIT 1`)[0];
   if (opRow) {
-    const spotPin = "9001";
+    const spotPin = process.env.OPERATOR_PIN || require("crypto").randomInt(1000, 9999).toString();
     const bcrypt = await import("bcryptjs");
     const hash = await bcrypt.default.hash(spotPin, 10);
     psql(`UPDATE users SET initial_pin_hash = ${lit(hash)} WHERE id = ${lit(opRow[0])}`);
