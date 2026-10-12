@@ -4,12 +4,13 @@ import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { DigitalIdCard } from "@/components/student/DigitalIdCard";
+import { MessFoodPreference } from "@/components/student/MessFoodPreference";
 import { StudentDashboardWidgets } from "@/components/student/widgets";
 import { ActivePasses } from "@/components/student/ActivePasses";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { RecentActivity } from "@/components/student/RecentActivity";
 import { UserProfileTab } from "@/components/shared/UserProfileTab";
-import { QrCode, FileCheck, Clock, User, TrendingUp, AlertTriangle, Send, Calendar, Loader2 } from "lucide-react";
+import { QrCode, FileCheck, Clock, User, TrendingUp, AlertTriangle, Send, Calendar, Loader2, UtensilsCrossed } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
 
 function StudentDashboardInner() {
@@ -206,6 +207,17 @@ function StudentDashboardInner() {
               </div>
               <div className="max-w-md mx-auto sm:max-w-none">
                 <DigitalIdCard />
+              </div>
+            </div>
+
+            {/* Mess Food Preference */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 justify-center sm:justify-start">
+                <UtensilsCrossed className="w-5 h-5 text-[var(--action-primary)]" />
+                <h2 className="text-lg font-bold text-[var(--text-primary)]"><span className="sm:hidden">🍽</span><span className="hidden sm:inline">🍽 Mess Food Preference</span></h2>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <MessFoodPreference />
               </div>
             </div>
           </div>

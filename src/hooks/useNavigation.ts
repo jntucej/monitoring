@@ -363,6 +363,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
             { href: "/student/history", label: "My Scan Logs", icon: "Clock" },
             { href: "/student/passes", label: "Outpass Requests", icon: "FileSpreadsheet" },
             { href: "/student/permissions", label: "Permission Requests", icon: "ClipboardList", badge: "NEW" },
+            { href: "/mess/default", label: "Mess Default", icon: "UtensilsCrossed" },
           ],
         },
         {

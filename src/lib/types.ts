@@ -502,3 +502,59 @@ export interface DepartmentAttendanceSummary {
   outsideCount?: number;
 }
 
+/* ── Mess Food Preference System ─────────────────────────────────────────── */
+
+/** Meal-day row from /api/mess/days. */
+export interface MessDay {
+  id: string;
+  mealDate: string;
+  dayType?: string;
+  windowOpens?: string;
+  windowCloses?: string;
+  /** Menu item ids attached to this meal day. */
+  itemIds?: string[];
+}
+
+/** Menu catalog row from /api/mess/menu-items. */
+export interface MessMenuItem {
+  id: string;
+  code: string;
+  label: string;
+  isPrimary: boolean;
+  sortOrder: number;
+}
+
+/** Arrival row from /api/mess/arrivals?dayId=. */
+export interface MessArrival {
+  userId: string;
+  roll?: string;
+  name?: string;
+  primaryItem?: "VEG" | "NON_VEG";
+  confirmed?: boolean;
+  noShow?: boolean;
+}
+
+/** Analytics snapshot from /api/mess/analytics?dayId=. */
+export interface MessAnalytics {
+  totalHostellers: number;
+  declaredPresent: number;
+  confirmedPresent: number;
+  notSelected: number;
+  byBlock: { block: string; veg: number; nonVeg: number }[];
+  byPrimary: { veg: number; nonVeg: number };
+}
+
+/** Token lookup result from /api/mess/token/:code. */
+export interface MessToken {
+  valid: boolean;
+  primaryItem?: "VEG" | "NON_VEG";
+  subItemLabels?: string[];
+  usedAt?: string | null;
+  revokedAt?: string | null;
+  expiresAt?: string | null;
+  studentRoll?: string;
+  studentName?: string;
+  reason?: string;
+}
+
+

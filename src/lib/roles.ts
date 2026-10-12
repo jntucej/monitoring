@@ -25,6 +25,7 @@ export const ROLES = {
   OIE:             "oie",
   EXAM_BRANCH:     "exam_branch",
   EXAM_SUPERINTENDENT: "exam_superintendent",
+  MESS_INCHARGE:       "mess_incharge",
 } as const;
 
 export type RoleKey = keyof typeof ROLES;
