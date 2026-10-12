@@ -12,8 +12,15 @@ export async function checkLockout(identifier: string): Promise<{ locked: boolea
       [cleanId]
     );
     const row = res.rows?.[0];
-    if (row?.locked_until && new Date(row.locked_until) > new Date()) {
-      return { locked: true, until: new Date(row.locked_until) };
+    if (row?.locked_until) {
+      if (new Date(row.locked_until) > new Date()) {
+        return { locked: true, until: new Date(row.locked_until) };
+      }
+      // Lock expired — reset the counter so a single mistake doesn't re-lock
+      await query(
+        `UPDATE public.login_attempts SET failed_count = 0, locked_until = NULL WHERE identifier = $1`,
+        [cleanId]
+      ).catch(() => {});
     }
     return { locked: false };
   } catch {
@@ -28,6 +35,11 @@ export async function checkLockout(identifier: string): Promise<{ locked: boolea
     if (data.locked_until && new Date(data.locked_until) > new Date()) {
       return { locked: true, until: new Date(data.locked_until) };
     }
+    // Lock expired — reset the counter so a single mistake doesn't re-lock
+    await supabase
+      .from('login_attempts')
+      .update({ failed_count: 0, locked_until: null })
+      .eq('identifier', cleanId);
     return { locked: false };
   }
 }

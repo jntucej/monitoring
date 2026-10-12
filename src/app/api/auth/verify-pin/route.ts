@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/postgres";
 import { withRateLimit } from "@/lib/rate-limit";
-import { verifyPassword, verifyAccessToken } from "@/lib/auth-token";
+import { verifyPassword } from "@/lib/auth-token";
 import { assertCsrf } from "@/lib/csrf";
+import { withAuthorization } from "@/middleware/authorization";
 
 const INVALID_PIN = {
   success: false,
@@ -23,20 +24,12 @@ async function handleVerifyPin(req: NextRequest) {
       );
     }
 
-    let callerId = req.headers.get("x-user-id");
-    let callerRole = req.headers.get("x-user-role");
-
-    if (!callerId) {
-      const authHeader = req.headers.get("authorization");
-      const bearerToken = authHeader?.startsWith("Bearer ") ? authHeader.slice(7).trim() : req.headers.get("x-session-token");
-      if (bearerToken) {
-        const payload = await verifyAccessToken(bearerToken);
-        if (payload?.sub) {
-          callerId = payload.sub;
-          callerRole = payload.role;
-        }
-      }
-    }
+    // Identity is read ONLY from the trusted headers injected by
+    // withAuthorization (server-validated token data). The Bearer-token
+    // fallback below was removed: client-supplied x-user-* headers can no
+    // longer spoof identity because withAuthorization always overwrites them.
+    const callerId = req.headers.get("x-user-id");
+    const callerRole = req.headers.get("x-user-role");
 
     if (!callerId) {
       return NextResponse.json(
@@ -122,8 +115,13 @@ async function handleVerifyPin(req: NextRequest) {
   }
 }
 
-export const POST = withRateLimit(handleVerifyPin, {
-  keyPrefix: "verify_pin",
-  maxRequests: 15,
-  windowMs: 60 * 1000,
-});
+export const POST = withRateLimit(
+  withAuthorization(handleVerifyPin, {
+    requiredRole: ["student", "operator", "admin", "sysadmin", "supervisor", "staff", "faculty", "guardian", "parent"],
+  }),
+  {
+    keyPrefix: "verify_pin",
+    maxRequests: 15,
+    windowMs: 60 * 1000,
+  }
+);

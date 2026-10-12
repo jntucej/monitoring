@@ -16,10 +16,27 @@ export async function proxy(req: NextRequest) {
   }
 
   const SCRAPER_IPS = (process.env.SCRAPER_IPS ?? '').split(',').filter(Boolean);
-  const ip =
-    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-    req.headers.get('x-real-ip') ||
-    'unknown';
+
+  // Most trusted source: x-client-ip is set by the trusted reverse proxy
+  // (Caddy) from the remote address; client cannot spoof it.
+  const clientIp = req.headers.get('x-client-ip');
+  let ip: string;
+  if (clientIp) {
+    ip = clientIp;
+  } else {
+    const xff = req.headers.get('x-forwarded-for');
+    if (xff) {
+      // In production the LAST entry is the actual client IP set by the
+      // trusted proxy; earlier entries are upstream proxies. In dev there
+      // is no proxy chain, so the first entry is the client IP.
+      const entries = xff.split(',').map(s => s.trim()).filter(Boolean);
+      ip = process.env.NODE_ENV === 'production' ? entries[entries.length - 1] : entries[0];
+    } else {
+      // x-real-ip is client-spoofable; only fall back to it in development
+      // where no trusted proxy sets x-client-ip / x-forwarded-for.
+      ip = req.headers.get('x-real-ip') || 'unknown';
+    }
+  }
 
   if (SCRAPER_IPS.includes(ip)) return NextResponse.next();
 
