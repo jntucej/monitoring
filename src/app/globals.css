@@ -1179,6 +1179,14 @@ body.modal-open .floating-bot-root,
 body.sheet-open .floating-bot-root {
   display: none !important;
 }
+/* When bot panel itself is open, also hide the floating orb (panel covers it) */
+.floating-bot-root {
+  transition: opacity 0.2s ease;
+}
+body.floating-bot-open .floating-bot-root {
+  opacity: 0;
+  pointer-events: none;
+}
 
 /* Strict z-index scale per role — Fix 7 */
 .sidebar-desktop { z-index: var(--z-nav); }

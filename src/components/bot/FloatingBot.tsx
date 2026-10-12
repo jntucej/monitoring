@@ -15,6 +15,17 @@ export function FloatingBot() {
   const setOpen = useBotStore((s) => s.setOpen);
   const messages = useBotStore((s) => s.messages);
 
+  // Fix 7: hide FloatingBot when modal/sheet is open
+  useEffect(() => {
+    const body = document.body;
+    if (open) {
+      body.classList.add("floating-bot-open");
+    } else {
+      body.classList.remove("floating-bot-open");
+    }
+    return () => body.classList.remove("floating-bot-open");
+  }, [open]);
+
   useEffect(() => {
     if (!user) return;
     const onKey = (e: KeyboardEvent) => {
@@ -38,15 +49,15 @@ export function FloatingBot() {
         aria-label={open ? "Close Harbor" : "Open Harbor assistant"}
         aria-expanded={open}
         onClick={() => { toggleOpen(); playAudioFeedback("success"); }}
-        className="fixed z-[71] bottom-5 right-5 h-14 w-14 rounded-full
+        className="fixed z-floating-bot bottom-5 right-5 h-14 w-14 rounded-full
                    bg-gradient-to-br from-emerald-500 to-cyan-600 shadow-2xl
                    ring-1 ring-white/20 flex items-center justify-center
                    active:scale-95 transition
-                   pointer-events-auto"
+                   pointer-events-auto floating-bot-root"
         animate={{ y: open ? 0 : [0, -3, 0], scale: open ? 0.96 : 1 }}
         transition={{
           y: { duration: 3.2, repeat: open ? 0 : Infinity, ease: "easeInOut" },
-          scale: { type: "spring", stiffness: 340, damping: 22 },
+          scale: { type: "spring" as const, stiffness: 340, damping: 22 },
         }}
         style={{ boxShadow: "0 10px 30px -10px rgba(16,185,129,0.7)" }}
       >

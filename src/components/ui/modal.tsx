@@ -35,14 +35,23 @@ const Modal = ({
   size = "md",
   showClose = true,
 }: ModalProps) => {
+  // Fix 7: single modal at a time — close any other open modal
+  useEffect(() => {
+    if (!isOpen) return;
+    document.body.classList.add("modal-open");
+    // Close all other modals by dispatching a custom event
+    window.dispatchEvent(new CustomEvent("gate-monitor-modal-close-all", { detail: { exceptId: Date.now() } }));
+    return () => document.body.classList.remove("modal-open");
+  }, [isOpen]);
+
   // Use useBreakpoint for responsive modal sizing
   const breakpoints = useBreakpoint({ sm: "(min-width: 640px)", md: "(min-width: 768px)" });
   const isMobile = !breakpoints.md;
 
   // Full-screen on mobile, centered on desktop
   const modalClassName = isMobile
-    ? "fixed inset-0 z-50 flex flex-col bg-black/90 backdrop-blur-md"
-    : "fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm";
+    ? "fixed inset-0 z-modal flex flex-col bg-black/90 backdrop-blur-md"
+    : "fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm";
 
   const contentClassName = isMobile
     ? "relative w-full h-full bg-[var(--bg-surface)] overflow-y-auto overscroll-contain"
