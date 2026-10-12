@@ -35,6 +35,7 @@ function MessDefaultInner() {
   const [current, setCurrent] = useState<MessDefaultData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [empty, setEmpty] = useState(false); /* true when no saved default yet */
 
   const [primaryItem, setPrimaryItem] = useState("");
   const [subItemIds, setSubItemIds] = useState<string[]>([]);
@@ -43,16 +44,23 @@ function MessDefaultInner() {
   const load = async () => {
     setLoading(true);
     setError(null);
+    setEmpty(false);
     try {
       const res = await fetch("/api/mess/default", { headers: getAuthHeaders(), cache: "no-store" });
       const json = await res.json().catch(() => null);
-      if (res.ok && json?.success) {
-        const data: MessDefaultData = json.data ?? json;
-        setCurrent(data);
-        setPrimaryItem(data.primaryItem ?? "");
-        setSubItemIds(Array.isArray(data.subItemIds) ? data.subItemIds : []);
+      if (res.ok && json?.success !== false) {
+        const data: MessDefaultData | null = json?.data ?? null;
+        if (data === null) {
+          /* no saved default yet — show friendly empty state */
+          setCurrent(null);
+          setEmpty(true);
+        } else {
+          setCurrent(data);
+          setPrimaryItem(data.primaryItem ?? "");
+          setSubItemIds(Array.isArray(data.subItemIds) ? data.subItemIds : []);
+        }
       } else {
-        setError(json?.error?.message ?? `HTTP ${res.status}`);
+        setError(json?.error?.message ?? json?.error ?? `HTTP ${res.status}`);
       }
     } catch {
       setError("Network error — could not load your default settings.");
@@ -104,7 +112,17 @@ function MessDefaultInner() {
           <div className="flex items-center gap-2 p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)] text-xs text-[var(--text-muted)]">
             <Loader2 className="w-4 h-4 animate-spin text-emerald-400" /> Loading your default meal…
           </div>
-        ) : error || !current ? (
+        ) : empty ? (
+          <div className="space-y-3 p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)]">
+            <div className="flex items-center gap-2">
+              <UtensilsCrossed className="w-4 h-4 text-emerald-400" />
+              <p className="text-xs font-semibold text-[var(--text-primary)]">No default set yet</p>
+            </div>
+            <p className="text-[11px] text-[var(--text-muted)]">
+              Pick your default meal below — it will be used to pre-fill the preference window every day.
+            </p>
+          </div>
+        ) : error ? (
           <div className="space-y-3 p-6 rounded-2xl bg-rose-500/10 border border-rose-500/30">
             <p className="text-xs font-semibold text-rose-300 flex items-center gap-2">
               <Loader2 className="w-4 h-4 hidden" /> Could not load your default settings{error ? `: ${error}` : ""}
@@ -196,6 +214,7 @@ function MessDefaultInner() {
             </div>
 
             {/* Current saved state */}
+            {current && (
             <div className="space-y-2 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)] p-5">
               <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Currently saved</p>
               <p className="text-sm font-bold text-[var(--text-primary)]">
@@ -215,6 +234,7 @@ function MessDefaultInner() {
                 </div>
               </div>
             </div>
+            )}
           </div>
         )}
       </WidgetBoundary>
@@ -226,7 +246,7 @@ function MessDefaultInner() {
 
 export default function MessDefaultPage() {
   return (
-    <GuardedPage minTier={30}>
+    <GuardedPage allowedRoles={["student"]}>
       <Suspense fallback={<div className="p-6 text-sm text-[var(--text-muted)]">Loading…</div>}>
         <MessDefaultInner />
       </Suspense>
