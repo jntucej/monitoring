@@ -46,7 +46,7 @@ export default async function RootLayout({
       className={`min-h-full antialiased ${theme}`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] font-[var(--font-family)]">
+      <body className="min-h-full flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] font-[var(--font-family)]" data-user-role="">
         <ClientProviders>{children}</ClientProviders>
       </body>
     </html>

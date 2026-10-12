@@ -3,13 +3,14 @@
 // `node scripts/scaffold-analytics.mjs new <feature> --force` to update.
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import {
   ResponsiveContainer, LineChart, Line, BarChart, Bar, AreaChart, Area,
   PieChart, Pie, Cell, RadarChart, Radar, PolarGrid, PolarAngleAxis,
   PolarRadiusAxis, ScatterChart, Scatter, XAxis, YAxis, ZAxis, CartesianGrid,
   Tooltip, Legend, ComposedChart, RadialBarChart, RadialBar,
 } from "recharts";
+import { useGlass } from "@/context/GlassContext";
 
 export type ChartType =
   | "line" | "area" | "bar" | "composed"
@@ -42,6 +43,12 @@ const TOOLTIP = {
   color: "var(--text-primary)",
 };
 
+/**
+ * Fix 8: Throttle+debounce chart renders and disable animations on low-end
+ * hardware (hardwareConcurrency <= 4). The parent should pass `isStale` which
+ * is a timestamp/counter that only changes when fresh data arrives, preventing
+ * re-renders on every layout tick.
+ */
 export function ChartRenderer({
   type, data, series, xKey, height = 280, stacked = false,
 }: {
@@ -52,14 +59,32 @@ export function ChartRenderer({
   height?: number;
   stacked?: boolean;
 }) {
+  const { isLowEndDevice } = useGlass();
+
+  // Fix 8: disable animation on low-end hardware
+  const animationProps = useMemo(() => {
+    if (isLowEndDevice) return { isAnimationActive: false };
+    return {};
+  }, [isLowEndDevice]);
+
+  // Fix 8: limit data points for long lists (>50 items → sample)
+  const chartData = useMemo(() => {
+    if (!data || data.length <= 50) return data;
+    const step = Math.ceil(data.length / 50);
+    return data.filter((_, i) => i % step === 0);
+  }, [data]);
+
   if (type === "pie") {
     const key = series[0]?.key ?? "value";
     return (
       <ResponsiveContainer width="100%" height={height}>
         <PieChart>
-          <Pie data={data} dataKey={key} nameKey={xKey} cx="50%" cy="50%"
-               innerRadius={60} outerRadius={105} paddingAngle={3} stroke="none">
-            {data.map((_, i) => <Cell key={i} fill={CHART_PALETTE[i % CHART_PALETTE.length]} />)}
+          <Pie data={chartData} dataKey={key} nameKey={xKey} cx="50%" cy="50%"
+               innerRadius={60} outerRadius={105} paddingAngle={3} stroke="none"
+               {...animationProps}>
+            {chartData.map((_: any, i: number) => (
+              <Cell key={i} fill={CHART_PALETTE[i % CHART_PALETTE.length]} />
+            ))}
           </Pie>
           <Tooltip contentStyle={TOOLTIP} />
           <Legend wrapperStyle={{ fontSize: 11 }} />
@@ -72,10 +97,12 @@ export function ChartRenderer({
     const key = series[0]?.key ?? "value";
     return (
       <ResponsiveContainer width="100%" height={height}>
-        <RadialBarChart data={data} innerRadius="20%" outerRadius="95%"
-                        startAngle={90} endAngle={-270}>
+        <RadialBarChart data={chartData} innerRadius="20%" outerRadius="95%"
+                        startAngle={90} endAngle={-270} {...animationProps}>
           <RadialBar dataKey={key} cornerRadius={8} background>
-            {data.map((_, i) => <Cell key={i} fill={CHART_PALETTE[i % CHART_PALETTE.length]} />)}
+            {chartData.map((_: any, i: number) => (
+              <Cell key={i} fill={CHART_PALETTE[i % CHART_PALETTE.length]} />
+            ))}
           </RadialBar>
           <Tooltip contentStyle={TOOLTIP} />
           <Legend wrapperStyle={{ fontSize: 11 }} />
@@ -87,7 +114,7 @@ export function ChartRenderer({
   if (type === "radar") {
     return (
       <ResponsiveContainer width="100%" height={height}>
-        <RadarChart data={data} outerRadius="75%">
+        <RadarChart data={chartData} outerRadius="75%" {...animationProps}>
           <PolarGrid stroke="var(--border)" />
           <PolarAngleAxis dataKey={xKey} tick={{ fill: "var(--text-muted)", fontSize: 11 }} />
           <PolarRadiusAxis tick={{ fill: "var(--text-muted)", fontSize: 10 }} />
@@ -111,7 +138,7 @@ export function ChartRenderer({
           <YAxis {...AXIS} />
           <ZAxis range={[60, 220]} />
           {series.map((s) => (
-            <Scatter key={s.key} name={s.label} data={data} dataKey={s.key} fill={s.color} />
+            <Scatter key={s.key} name={s.label} data={chartData} dataKey={s.key} fill={s.color} />
           ))}
           <Tooltip contentStyle={TOOLTIP} />
           <Legend wrapperStyle={{ fontSize: 11 }} />
@@ -124,7 +151,7 @@ export function ChartRenderer({
     const [first, ...rest] = series;
     return (
       <ResponsiveContainer width="100%" height={height}>
-        <ComposedChart data={data}>
+        <ComposedChart data={chartData} {...animationProps}>
           <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
           <XAxis dataKey={xKey} {...AXIS} />
           <YAxis {...AXIS} />
@@ -148,7 +175,7 @@ export function ChartRenderer({
   if (type === "bar") {
     return (
       <ResponsiveContainer width="100%" height={height}>
-        <BarChart data={data}>
+        <BarChart data={chartData} {...animationProps}>
           <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
           <XAxis dataKey={xKey} {...AXIS} />
           <YAxis {...AXIS} />
@@ -166,7 +193,7 @@ export function ChartRenderer({
   if (type === "area") {
     return (
       <ResponsiveContainer width="100%" height={height}>
-        <AreaChart data={data}>
+        <AreaChart data={chartData} {...animationProps}>
           <defs>
             {series.map((s) => (
               <linearGradient key={s.key} id={`grad-${s.key}`} x1="0" y1="0" x2="0" y2="1">
@@ -193,7 +220,7 @@ export function ChartRenderer({
   /* default: line */
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <LineChart data={data}>
+      <LineChart data={chartData} {...animationProps}>
         <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
         <XAxis dataKey={xKey} {...AXIS} />
         <YAxis {...AXIS} />
