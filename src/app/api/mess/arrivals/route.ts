@@ -61,8 +61,53 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
 async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   try {
     const body = await req.json().catch(() => null);
-    const userId: string = body?.userId ?? "";
     const dayId: string = body?.dayId ?? "";
+
+    // Bulk no-show flag: POST { dayId, flagNoShow: true }
+    // Finds every eligible student for this day who said will_be_present=TRUE
+    // but was never served, and writes a NO_SHOW notification log row.
+    // No data is mutated on the preference/token rows themselves — this is
+    // an audit/reporting action only, matching the cron no-show-check.
+    if (body?.flagNoShow === true) {
+      if (!dayId) return fail("MISSING_PARAM", "dayId is required", 400);
+      const day = await getDayById(dayId);
+      if (!day) return fail("DAY_NOT_FOUND", "Mess day not found", 404);
+
+      const res = await query(
+        `INSERT INTO mess_notifications_log (user_id, mess_day_id, event_type, channel, status, payload, sent_at)
+         SELECT p.user_id, p.mess_day_id, 'NO_SHOW_FLAGGED', 'DASHBOARD', 'SENT',
+                jsonb_build_object('dayId', p.mess_day_id::text, 'primaryItem', p.primary_item),
+                NOW()
+           FROM mess_preferences p
+          WHERE p.mess_day_id::text = $1
+            AND p.will_be_present = TRUE
+            AND NOT EXISTS (
+              SELECT 1 FROM mess_meal_served s
+               WHERE s.mess_day_id::text = p.mess_day_id::text AND s.user_id::text = p.user_id::text
+            )
+            AND NOT EXISTS (
+              SELECT 1 FROM mess_notifications_log n
+               WHERE n.user_id::text = p.user_id::text
+                 AND n.mess_day_id::text = p.mess_day_id::text
+                 AND n.event_type = 'NO_SHOW_FLAGGED'
+            )
+         RETURNING user_id`,
+        [dayId]
+      );
+      const flagged = res.rows.length;
+
+      await addAudit({
+        action: "MESS_NO_SHOW_FLAGGED",
+        userId: auth.userId,
+        role: auth.role,
+        details: { dayId, flagged },
+      });
+
+      return ok({ dayId, flagged, message: `${flagged} student(s) flagged as no-show for this meal day.` });
+    }
+
+    // Single arrival confirm: POST { userId, dayId }
+    const userId: string = body?.userId ?? "";
     if (!userId || !dayId) return fail("MISSING_PARAM", "userId and dayId are required", 400);
 
     const day = await getDayById(dayId);

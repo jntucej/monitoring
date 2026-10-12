@@ -39,7 +39,7 @@ export default function AlumniPage() {
 
   const fetchStudents = useCallback(async () => {
     try {
-      const headers = await getAuthHeaders();
+      const headers = getAuthHeaders();
       const res = await fetch("/api/students?status=ALL", { headers });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
@@ -103,7 +103,7 @@ export default function AlumniPage() {
   const handleSingleGraduate = useCallback(async (student: StudentRow) => {
     setSingleBusy(student.id);
     try {
-      const headers = await getAuthHeaders();
+      const headers = getAuthHeaders();
       const res = await fetch(`/api/users/${student.id}`, {
         method: "PATCH",
         headers: { ...headers, "Content-Type": "application/json" },
@@ -128,7 +128,7 @@ export default function AlumniPage() {
     setBulkLoading(true);
     setConfirmBulk(false);
     try {
-      const headers = await getAuthHeaders();
+      const headers = getAuthHeaders();
       const rolls = filteredAuto.map((s) => s.roll).filter(Boolean);
       const res = await fetch("/api/users/bulk-graduate", {
         method: "POST",
@@ -152,7 +152,7 @@ export default function AlumniPage() {
   const handleReprovision = useCallback(async (student: StudentRow) => {
     setReprovisionBusy(student.id);
     try {
-      const headers = await getAuthHeaders();
+      const headers = getAuthHeaders();
       const res = await fetch(`/api/users/${student.id}`, {
         method: "PATCH",
         headers: { ...headers, "Content-Type": "application/json" },
