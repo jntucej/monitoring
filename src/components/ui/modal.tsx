@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
+import { useEffect } from "react";
 
 export interface ModalProps {
   isOpen: boolean;

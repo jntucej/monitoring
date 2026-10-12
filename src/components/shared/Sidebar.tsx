@@ -246,7 +246,7 @@ function MobileDrawer({
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="md:hidden fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] flex flex-col bg-[var(--bg-surface)] border-r border-[var(--border)] shadow-2xl"
+            className="md:hidden fixed inset-y-0 left-0 z-sheet w-72 max-w-[85vw] flex flex-col bg-[var(--bg-surface)] border-r border-[var(--border)] shadow-2xl"
             role="dialog"
             aria-modal="true"
             aria-label="Mobile navigation menu"
@@ -354,7 +354,7 @@ function MobileBottomBar({ toggleMobileSidebar, bottomTabs, pathname, searchPara
   return (
     <nav
       aria-label="Mobile navigation bar"
-      className="glass-nav-dock fixed bottom-0 inset-x-0 z-40 flex md:hidden bg-[var(--bg-surface)]/95 backdrop-blur-xl border-t border-[var(--border)] pb-safe select-none shadow-2xl"
+      className="glass-nav-dock fixed bottom-0 inset-x-0 z-nav flex md:hidden bg-[var(--bg-surface)]/95 backdrop-blur-xl border-t border-[var(--border)] pb-safe select-none shadow-2xl"
       style={{ willChange: "transform" }}
     >
       <div className="w-full max-w-md mx-auto grid grid-cols-5 h-14 items-center px-1">
