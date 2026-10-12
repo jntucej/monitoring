@@ -115,7 +115,7 @@ export const ARTICLES: HelpArticle[] = [
     icon: Settings,
     category: "Operations",
     minTier: 20,
-    visibleToRoles: ["sysadmin", "admin", "warden", "operator", "guard"],
+    visibleToRoles: ["sysadmin", "admin", "warden", "principal", "operator", "guard"],
     body: [
       "Start of shift: Confirm the kiosk screen boots to 'Ready' state, the badge reader LED is green, and the video feed shows the approach lane clearly. If any of these fail, raise a kiosk fault ticket before the first scan.",
       "Normal scan: The badge reader reads the card or QR in under 2 seconds. A green chime means permitted entry; a red chime means the gate is denying access — record the reason code shown on the kiosk screen in the shift log.",

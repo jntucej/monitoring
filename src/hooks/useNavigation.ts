@@ -288,6 +288,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       break;
 
     case "supervisor":
+    case "principal":
     case "warden":
       groups = [
         {

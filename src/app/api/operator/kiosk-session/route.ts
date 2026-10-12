@@ -68,6 +68,7 @@ async function handleKioskSession(req: NextRequest) {
       account_status: operator.status,
       name: operator.name || undefined,
       session_version: operator.session_version,
+      gateId: gate?.gateId ?? operator.gate_id ?? undefined,
     });
 
     const refreshToken = await signRefreshToken({

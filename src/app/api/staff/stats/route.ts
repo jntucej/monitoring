@@ -10,7 +10,7 @@ import { withRateLimit } from "@/lib/rate-limit";
 
 const STAFF_ROLES = [
   "operator", "admin", "sysadmin", "supervisor", "guardian", "hod",
-  "faculty", "staff", "warden", "worker", "visitor", "caretaker",
+  "faculty", "staff", "warden", "principal", "worker", "visitor", "caretaker",
   "deputy_warden", "hostel_manager", "principal", "vice_principal",
   "oie", "exam_branch",
 ];
@@ -20,7 +20,7 @@ const STAFF_ROLES = [
 const ROLE_GROUPS: Array<{ label: string; roles: string[]; color: string }> = [
   { label: "Admin", roles: ["sysadmin", "admin"], color: "bg-red-500" },
   { label: "Academic", roles: ["principal", "vice_principal", "oie", "exam_branch", "hod", "faculty"], color: "bg-blue-500" },
-  { label: "Hostel", roles: ["warden", "deputy_warden", "hostel_manager", "caretaker", "supervisor"], color: "bg-cyan-500" },
+  { label: "Hostel", roles: ["warden", "principal", "deputy_warden", "hostel_manager", "caretaker", "supervisor"], color: "bg-cyan-500" },
   { label: "Field", roles: ["operator", "staff", "worker"], color: "bg-emerald-500" },
   { label: "Other", roles: ["guardian", "visitor"], color: "bg-slate-500" },
 ];

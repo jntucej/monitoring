@@ -8,7 +8,7 @@ import { addAudit, addNotification, verifyThumbprint, findPersonByUniqueId } fro
 type BiometricStage = "hostel" | "gate";
 type DeviceType = "thumb" | "face";
 
-const HOSTEL_ROLES = ["caretaker", "deputy_warden", "hostel_manager", "warden", "principal", "admin", "sysadmin"];
+const HOSTEL_ROLES = ["caretaker", "deputy_warden", "hostel_manager", "principal", "principal", "admin", "sysadmin"];
 const GATE_ROLES = ["operator", "admin", "sysadmin"];
 
 function getTicketParam(req: NextRequest): string {
@@ -210,7 +210,7 @@ async function handlePost(req: NextRequest): Promise<Response> {
 
 export const POST = withRateLimit(
   withAuthorization(handlePost, {
-    requiredRole: ["caretaker", "deputy_warden", "hostel_manager", "warden", "principal", "operator", "admin", "sysadmin"],
+    requiredRole: ["caretaker", "deputy_warden", "hostel_manager", "principal", "principal", "operator", "admin", "sysadmin"],
   }),
   { keyPrefix: "permission_biometric", maxRequests: 60 }
 );

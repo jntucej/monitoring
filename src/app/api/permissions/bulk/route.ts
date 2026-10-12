@@ -291,7 +291,7 @@ export const POST = withRateLimit(
       "caretaker",
       "deputy_warden",
       "hostel_manager",
-      "warden",
+      "principal",
       "principal",
       "vice_principal",
       "hod",

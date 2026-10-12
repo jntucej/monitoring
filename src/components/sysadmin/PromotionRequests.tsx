@@ -311,7 +311,7 @@ export function PromotionRequests() {
                 >
                   <option value="admin">admin</option>
                   <option value="sysadmin">sysadmin</option>
-                  <option value="warden">warden</option>
+                  <option value="principal">principal</option>
                   <option value="operator">operator</option>
                   <option value="faculty">faculty</option>
                 </select>
