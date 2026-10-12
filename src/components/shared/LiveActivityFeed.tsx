@@ -68,7 +68,9 @@ export function LiveActivityFeed({ compact = false, limit = MAX_FEED }: LiveActi
     const additions: FeedEvent[] = [];
     for (const card of cards) {
       const prevStatus = prev.get(card.gateId);
-      if (card.gateId === "gate-1" || !user?.gateId || card.gateId === user.gateId) {
+      const isInScope =
+        !user?.gateId || card.gateId === user.gateId;
+      if (isInScope) {
         if (prevStatus && prevStatus !== card.status && card.status !== "idle") {
           additions.push({
             id: `gate-${card.gateId}-${card.lastUpdate}`,

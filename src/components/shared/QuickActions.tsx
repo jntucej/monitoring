@@ -10,8 +10,6 @@ import {
   ScanLine,
   LayoutDashboard,
   ClipboardList,
-  Bell,
-  ShieldAlert,
 } from "lucide-react";
 import { useAuthStore, useHasHydrated } from "@/stores/authStore";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
@@ -76,7 +74,7 @@ function actionsForRole(role: string | null, userGateId?: string | null): QuickA
     return [
       { label: "Request Pass", icon: FilePlus2, href: "/parent/passes" },
       { label: "View My Requests", icon: Ticket, href: "/parent/passes" },
-      { label: "Child Status", icon: ShieldAlert, href: "/parent/child" },
+      { label: "Child Status", icon: LayoutDashboard, href: "/parent/child" },
       { label: "Dashboard", icon: LayoutDashboard, href: "/parent" },
     ];
   }
@@ -153,7 +151,7 @@ export function QuickActions({ compact = false }: QuickActionsProps) {
   const card = (
     <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)]/40 p-4 sm:p-5 min-w-0">
       <div className="flex items-center gap-2 mb-4">
-        <Bell className="h-4 w-4 text-[var(--action-primary)]" />
+        <Inbox className="h-4 w-4 text-[var(--action-primary)]" />
         <h3 className="text-sm font-semibold text-[var(--text-primary)]">Quick Actions</h3>
       </div>
       {grid}
