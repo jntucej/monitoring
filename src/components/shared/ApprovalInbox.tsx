@@ -365,7 +365,7 @@ export function ApprovalInbox({ compact = false, pollMs = 30_000, limit = 20 }: 
 
   return (
     <WidgetBoundary title="Approval Inbox">
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)]/40 p-4 sm:p-5">
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)]/40 p-4 sm:p-5">
         {inner}
       </div>
     </WidgetBoundary>
