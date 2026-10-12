@@ -24,7 +24,6 @@ import {
   Clock,
 } from "lucide-react";
 
-const MIN_TIER = 80; // exam_branch tier (oie=75 / vice_principal=85 also reach this desk)
 
 /* ── response shapes (mirror /api/permissions) ── */
 
@@ -289,7 +288,7 @@ function ExamPermissionsInner() {
 
 export default function ExamPermissionsPage() {
   return (
-    <GuardedPage minTier={MIN_TIER} allowedRoles={["exam_branch", "oie", "vice_principal", "admin", "sysadmin"]}>
+    <GuardedPage allowedRoles={["exam_branch", "oie", "vice_principal", "admin", "sysadmin"]}>
       <Suspense fallback={<PageLoading />}>
         <ExamPermissionsInner />
       </Suspense>
