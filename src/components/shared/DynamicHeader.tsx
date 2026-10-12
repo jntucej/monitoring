@@ -27,6 +27,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/principal/permissions": "Principal Approvals",
   "/vice-principal": "Vice Principal Desk",
   "/exam/permissions": "Exam Branch Permissions",
+  "/exam-branch": "Exam Branch Dashboard",
   "/oie": "OIE Dashboard",
   "/deputy-warden": "Deputy Warden Dashboard",
   "/hostel-manager": "Hostel Manager Dashboard",

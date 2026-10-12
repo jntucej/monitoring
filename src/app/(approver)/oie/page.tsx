@@ -9,8 +9,8 @@ import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
+import Link from "next/link";
 import {
-
   ShieldCheck,
   UserCheck,
   AlertTriangle,
@@ -18,29 +18,9 @@ import {
   Inbox,
   Clock,
   ArrowRight,
-  FileText,
-  ScrollText,
-  BellOff,
-  CheckSquare,
-  Lock,
 } from "lucide-react";
 
-/**
- * OIE (Officer Incharge Examinations) dedicated dashboard — examination-
- * operations focused, NOT a broad institutional dashboard.
- *
- * Data sources (all verified 200 for the oie role):
- *   • /api/permissions?workflow_type=exam&stage=oie&status=PENDING — the OIE
- *     exam-stage queue (the OIE role's assigned duties)
- *   • /api/occupancy/presence-matrix — on-campus presence by gate × role
- *
- * Endpoints that are 403 for oie (/api/staff/attendance, /api/staff/stats,
- * /api/attendance_records, /api/alerts, and everything under /api/admin/*)
- * are NEVER fetched — restricted panels render a clean "restricted /
- * assigned-only" empty-state instead of a 403 banner.
- */
-
-/* ── response shapes (mirror /api/permissions) ── */
+/* ── response shapes ── */
 
 interface PermissionRequestRow {
   id: string;
@@ -60,8 +40,6 @@ interface PermissionsResponse {
   data: PermissionRequestRow[];
   total?: number;
 }
-
-/* ── response shapes (mirror /api/occupancy/presence-matrix) ── */
 
 interface PresenceMatrixData {
   gates: Array<{ id: string; name: string; code: string; audience: string; type: string }>;
@@ -108,18 +86,12 @@ function StatCard({
   );
 }
 
-function EmptyState({ message, restricted }: { message: string; restricted?: boolean }) {
+function EmptyState({ message }: { message: string }) {
   return (
-    <div
-      className={`rounded-xl border p-8 text-center text-sm min-w-0 ${
-        restricted
-          ? "border-dashed border-slate-700 bg-slate-800/30 text-slate-500"
-          : "border border-slate-800 bg-[#111827] text-slate-400"
-      }`}
-    >
+    <div className="rounded-xl border border-slate-800 bg-[#111827] p-8 text-center text-sm min-w-0">
       <div className="flex flex-col items-center gap-2">
-        {restricted ? <Lock className="w-5 h-5 text-slate-600" /> : <Inbox className="w-5 h-5 text-slate-600" />}
-        <p className="max-w-md">{message}</p>
+        <Inbox className="w-5 h-5 text-slate-600" />
+        <p className="max-w-md text-slate-400">{message}</p>
       </div>
     </div>
   );
@@ -142,14 +114,7 @@ function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => voi
   );
 }
 
-/** Ticket table shared by the records + tasks panels. */
-function TicketTable({
-  rows,
-  linkLabel,
-}: {
-  rows: PermissionRequestRow[];
-  linkLabel?: string;
-}) {
+function TicketTable({ rows }: { rows: PermissionRequestRow[] }) {
   if (rows.length === 0) {
     return <EmptyState message="No pending items at the OIE examination stage. The queue is clear." />;
   }
@@ -205,19 +170,6 @@ function TicketTable({
           ))}
         </tbody>
       </table>
-      {linkLabel && (
-        <div className="px-4 py-3 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2 min-w-0">
-          <p className="text-xs text-slate-500 min-w-0">
-            {rows.length} pending at the OIE stage — all are actionable.
-          </p>
-          <a
-            href="/exam/permissions"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-400 hover:bg-emerald-500/20 shrink-0"
-          >
-            {linkLabel} <ArrowRight className="w-3.5 h-3.5" />
-          </a>
-        </div>
-      )}
     </div>
   );
 }
@@ -229,8 +181,6 @@ function OieDashboardInner() {
   const role = (user?.role ?? "oie") as Role;
   const tier = getRoleTier(role);
 
-  // The server scopes /api/permissions to current_stage=oie for the oie role;
-  // the explicit stage param pins the queue to the OIE examination step.
   const {
     data: oieQueue,
     loading: queueLoading,
@@ -265,7 +215,6 @@ function OieDashboardInner() {
     return !Number.isNaN(ts) && ts < Date.now();
   }).length;
 
-  // On-campus count: total people currently inside all active gates.
   const matrix = presence?.data?.matrix ?? {};
   const gates = presence?.data?.gates ?? [];
   const onCampusTotal = gates.reduce(
@@ -273,10 +222,16 @@ function OieDashboardInner() {
     0
   );
 
-  const queueBusy = (queueLoading || presenceLoading) && !oieQueue && !presence;
-
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
+      {/* Back link */}
+      <Link
+        href="/oie"
+        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+      >
+        <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
+      </Link>
+
       {/* Page toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
@@ -307,7 +262,7 @@ function OieDashboardInner() {
         />
       )}
 
-      {/* 1 · OIE Overview — KPI row */}
+      {/* KPI row */}
       <WidgetBoundary title="OIE Overview">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
           <StatCard
@@ -344,115 +299,13 @@ function OieDashboardInner() {
         </div>
       </WidgetBoundary>
 
-      {/* presence-matrix error — friendly, no 403 banner */}
+      {/* presence-matrix error — friendly */}
       {presenceError && (
         <div className="rounded-xl border border-slate-800 bg-[#111827] p-3 text-xs text-slate-500 min-w-0">
           Live campus presence is unavailable right now — this panel does not affect the
           examination queues below.
         </div>
       )}
-
-      {/* 2 · Assigned Operational Records */}
-      <WidgetBoundary title="Assigned Operational Records">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2 min-w-0">
-              <FileText className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span className="text-sm font-semibold text-white truncate">
-                OIE Examination-Stage Queue
-              </span>
-            </div>
-            <span className="text-xs text-slate-500 shrink-0">assigned duties only</span>
-          </div>
-          {queueLoading ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-slate-500 min-w-0">
-              <Loader2 className="w-4 h-4 animate-spin shrink-0" /> Loading OIE queue…
-            </div>
-          ) : (
-            <TicketTable rows={oieRows} />
-          )}
-          <div className="px-4 py-3 border-t border-slate-800 text-xs text-slate-500 min-w-0">
-            Broader institutional records (staff attendance, attendance statistics) are
-            restricted at this tier — this desk surfaces only the records assigned to the
-            OIE examination duties.
-          </div>
-        </div>
-      </WidgetBoundary>
-
-      {/* 3 · Inspection or Activity Logs */}
-      <WidgetBoundary title="Inspection or Activity Logs">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-slate-800 flex items-center gap-2 min-w-0">
-            <ScrollText className="w-4 h-4 text-slate-400 shrink-0" />
-            <span className="text-sm font-semibold text-white truncate">Recent OIE Activity</span>
-          </div>
-          <EmptyState
-            restricted
-            message="No dedicated activity-log source is exposed at this tier. Audit and telemetry streams are admin-scoped; OIE operational activity is visible through the assigned queue above."
-          />
-        </div>
-      </WidgetBoundary>
-
-      {/* 4 · Exceptions and Incidents */}
-      <WidgetBoundary title="Exceptions and Incidents">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-slate-800 flex items-center gap-2 min-w-0">
-            <BellOff className="w-4 h-4 text-amber-400/70 shrink-0" />
-            <span className="text-sm font-semibold text-white truncate">
-              OIE-Flagged Exceptions
-            </span>
-          </div>
-          <EmptyState
-            restricted
-            message="Incident and alert feeds are admin-scoped and not available at this tier. The only exception OIE can act on is SLA breach in its own queue — flagged above."
-          />
-        </div>
-      </WidgetBoundary>
-
-      {/* 5 · Assigned Tasks */}
-      <WidgetBoundary title="Assigned Tasks">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-slate-800 flex items-center gap-2 min-w-0">
-            <CheckSquare className="w-4 h-4 text-sky-400 shrink-0" />
-            <span className="text-sm font-semibold text-white truncate">
-              Actionable at the OIE Step
-            </span>
-          </div>
-          {queueLoading ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-slate-500 min-w-0">
-              <Loader2 className="w-4 h-4 animate-spin shrink-0" /> Loading tasks…
-            </div>
-          ) : oieRows.length === 0 ? (
-            <EmptyState message="No tasks awaiting the OIE step. Nothing needs action right now." />
-          ) : (
-            <TicketTable rows={oieRows} linkLabel="Open Approvals Desk" />
-          )}
-        </div>
-      </WidgetBoundary>
-
-      {/* 6 · Reports and Approvals */}
-      <WidgetBoundary title="Reports and Approvals">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 min-w-0">
-            <div className="min-w-0">
-              <p className="text-sm text-slate-300">
-                OIE approval actions — approve, forward or reject with remarks — run from the
-                examination approvals desk.
-              </p>
-              <p className="mt-2 text-xs text-slate-500 min-w-0">
-                OIE is restricted to the actual duties assigned to OIE; examination marks and
-                confidential results are not exposed by viewing attendance.
-              </p>
-            </div>
-            <a
-              href="/exam/permissions"
-              className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-400 hover:bg-emerald-500/20 shrink-0"
-            >
-              Exam Approvals Desk <ArrowRight className="w-3.5 h-3.5" />
-            </a>
-          </div>
-        </div>
-      </WidgetBoundary>
 
       <DevContactStrip />
     </div>
