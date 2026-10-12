@@ -18,9 +18,27 @@ import {
   KeyRound,
   Search,
   X,
+  Network,
+  RefreshCw,
 } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
-import { getDefaultRouteForRole } from "@/lib/route-helpers";
+import { useUIStore } from "@/stores/uiStore";
+
+/** Shape of the read-only /api/roles-graph response. */
+interface RolesGraphPayload {
+  root: string;
+  nodes: {
+    code: string;
+    display_name: string;
+    description: string;
+    icon_name: string;
+    default_redirect: string;
+    user_count: number;
+  }[];
+  edges: { parent: string; child: string }[];
+  user_counts: Record<string, number>;
+  generated_at: string;
+}
 
 interface SystemRole {
   code: string;
@@ -37,28 +55,6 @@ interface PickedUser {
   uniqueId?: string;
   email?: string;
 }
-
-/** Collapsible role-hierarchy DAG. Node code -> child codes. */
-const ROLE_HIERARCHY: Record<string, string[]> = {
-  sysadmin: ["admin"],
-  admin: ["principal"],
-  principal: ["vice_principal"],
-  vice_principal: ["hod"],
-  hod: ["warden"],
-  warden: ["supervisor"],
-  supervisor: ["operator", "faculty", "staff", "worker"],
-  operator: ["student"],
-  faculty: ["student"],
-  staff: ["parent"],
-  worker: ["guardian"],
-  parent: ["guardian"],
-  guardian: [],
-};
-
-const HIERARCHY_ROOT = "sysadmin";
-
-/** All role codes participating in the tree (used for user-count lookups). */
-const ALL_ROLE_CODES = Object.keys(ROLE_HIERARCHY);
 
 /** Role -> pages it can access (drives the access matrix). */
 const ROLE_ACCESS_MATRIX: { label: string; path: string; roles: string[] }[] = [
@@ -87,44 +83,42 @@ interface HierarchyNode {
   children: HierarchyNode[];
 }
 
-/**
- * Recursively builds the nested tree from ROLE_HIERARCHY.
- * Includes only codes present in the loaded `roles` list;
- * falls back to the full built-in hierarchy when the API returns nothing.
- */
-function buildTree(roles: SystemRole[]): HierarchyNode[] {
-  const hasExplicit = roles.length > 0;
-  const knownCodes = hasExplicit ? new Set(roles.map((r) => r.code)) : null;
-
-  const include = (code: string): boolean =>
-    !hasExplicit || !!knownCodes?.has(code);
-
-  const build = (code: string): HierarchyNode => ({
-    code,
-    children: (ROLE_HIERARCHY[code] || []).filter(include).map(build),
-  });
-
-  return [HIERARCHY_ROOT].filter(include).map(build);
+function buildTreeFromGraph(graph: RolesGraphPayload | null, roles: SystemRole[]): HierarchyNode[] {
+  // Prefer the server-provided DAG; fall back to config role list order.
+  if (graph && graph.edges.length > 0) {
+    const childrenByParent = new Map<string, string[]>();
+    for (const e of graph.edges) {
+      childrenByParent.set(e.parent, [...(childrenByParent.get(e.parent) || []), e.child]);
+    }
+    const known = new Set(graph.nodes.map((n) => n.code));
+    const build = (code: string): HierarchyNode => ({
+      code,
+      children: (childrenByParent.get(code) || []).filter((c) => known.has(c)).map(build),
+    });
+    return [graph.root].filter((c) => known.has(c)).map(build);
+  }
+  // Fallback: flat list of active definitions.
+  return roles.map((r) => ({ code: r.code, children: [] }));
 }
 
-/** Parent lookup derived from the hierarchy (used for role revocation/demotion). */
-const ROLE_PARENTS: Record<string, string> = Object.entries(ROLE_HIERARCHY).reduce(
-  (acc, [parent, kids]) => {
-    kids.forEach((k) => (acc[k] = parent));
-    return acc;
-  },
-  {} as Record<string, string>,
-);
+/** Parent lookup derived from the graph edges (used for revocation/demotion). */
+function buildParents(graph: RolesGraphPayload | null): Record<string, string> {
+  if (!graph) return {};
+  const acc: Record<string, string> = {};
+  for (const e of graph.edges) acc[e.child] = e.parent;
+  return acc;
+}
 
 export default function RolesManagementPage() {
+  const addToast = useUIStore((s) => s.addToast);
   const [roles, setRoles] = useState<SystemRole[]>([]);
+  const [graph, setGraph] = useState<RolesGraphPayload | null>(null);
+  const [graphError, setGraphError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [editingRole, setEditingRole] = useState<Partial<SystemRole> | null>(null);
-  const [statusMsg, setStatusMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // ---- role hierarchy state ----
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({ sysadmin: true });
-  const [userCounts, setUserCounts] = useState<Record<string, number>>({});
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [countLoading, setCountLoading] = useState(false);
 
   // ---- grant / revoke state ----
@@ -171,18 +165,15 @@ export default function RolesManagementPage() {
       });
       const json = await res.json();
       if (json.success) {
-        setHodBranchMsg({
-          type: "success",
-          text: branch ? `Branch ${branch} assigned` : "Branch cleared",
-        });
+        addToast({ variant: "success", message: branch ? `Branch ${branch} assigned` : "Branch cleared" });
         setHodUsers((prev) =>
           prev.map((u) => (u.id === userId ? { ...u, department_id: branch || null } : u))
         );
       } else {
-        setHodBranchMsg({ type: "error", text: json.error?.message || "Failed to save branch" });
+        addToast({ variant: "error", message: json.error?.message || "Failed to save branch" });
       }
     } catch {
-      setHodBranchMsg({ type: "error", text: "Network error saving branch" });
+      addToast({ variant: "error", message: "Network error saving branch" });
     } finally {
       setHodBranchBusy(null);
     }
@@ -201,53 +192,70 @@ export default function RolesManagementPage() {
 
   const roleDisplayName = useCallback((code: string) => displayNameForRole(code, roles), [roles]);
 
-  const tree = useMemo(() => buildTree(roles), [roles]);
+  const tree = useMemo(() => buildTreeFromGraph(graph, roles), [graph, roles]);
+  const roleParents = useMemo(() => buildParents(graph), [graph]);
 
-  const fetchRoles = async () => {
+  const fetchRoles = useCallback(async () => {
     setLoading(true);
+    setGraphError(null);
     try {
-      const res = await fetch("/api/config/roles", { headers: getAuthHeaders() });
-      const json = await res.json();
-      if (json.success) setRoles(json.data || []);
+      const [rolesRes, graphRes] = await Promise.all([
+        fetch("/api/config/roles", { headers: getAuthHeaders() }),
+        fetch("/api/roles-graph", { headers: getAuthHeaders(), cache: "no-store" }),
+      ]);
+      const rolesJson = await rolesRes.json();
+      if (rolesJson.success) setRoles(rolesJson.data || []);
+
+      const graphJson = await graphRes.json();
+      if (graphRes.ok && graphJson.success) {
+        setGraph(graphJson.data);
+        // Expand top of the graph by default.
+        setExpanded((prev) => ({ sysadmin: true, ...(prev.sysadmin === undefined ? { [graphJson.data.root]: true } : {}) }));
+      } else {
+        // Keep the page usable: fall back to the flat definitions list.
+        setGraph(null);
+        setGraphError(
+          graphJson?.error?.message || "Role graph unavailable — showing definitions only"
+        );
+      }
     } catch {
-      setStatusMsg({ type: "error", text: "Failed to load system roles" });
+      setGraph(null);
+      setGraphError("Failed to load role hierarchy");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchRoles();
-  }, []);
+  }, [fetchRoles]);
 
-  // ---- per-role user counts (client-side role filter against /api/users) ----
-  const fetchUserCounts = async () => {
+  const toggleExpand = (code: string) => setExpanded((prev) => ({ ...prev, [code]: !prev[code] }));
+  const expandAll = () =>
+    setExpanded(Object.fromEntries(tree.flatMap((n) => collectCodes(n)).map((c) => [c, true])));
+  const collapseAll = () => setExpanded({});
+
+  function collectCodes(node: HierarchyNode): string[] {
+    return [node.code, ...node.children.flatMap(collectCodes)];
+  }
+
+  const refreshGraph = async () => {
     setCountLoading(true);
     try {
-      const res = await fetch("/api/users", { headers: getAuthHeaders(), cache: "no-store" });
+      const res = await fetch("/api/roles-graph", { headers: getAuthHeaders(), cache: "no-store" });
       const json = await res.json();
-      const users: PickedUser[] = Array.isArray(json?.data) ? json.data : [];
-      const counts: Record<string, number> = {};
-      ALL_ROLE_CODES.forEach((c) => (counts[c] = 0));
-      users.forEach((u) => {
-        const role = u ? u.role : undefined;
-        if (role && counts[role] !== undefined) counts[role] += 1;
-      });
-      setUserCounts(counts);
+      if (res.ok && json.success) {
+        setGraph(json.data);
+        addToast({ variant: "info", message: "Role graph refreshed" });
+      } else {
+        addToast({ variant: "error", message: "Failed to refresh role graph" });
+      }
     } catch {
-      setUserCounts({});
+      addToast({ variant: "error", message: "Network error refreshing role graph" });
     } finally {
       setCountLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchUserCounts();
-  }, []);
-
-  const toggleExpand = (code: string) => setExpanded((prev) => ({ ...prev, [code]: !prev[code] }));
-  const expandAll = () => setExpanded(Object.fromEntries(ALL_ROLE_CODES.map((c) => [c, true])));
-  const collapseAll = () => setExpanded({});
 
   // ---- grant / revoke role actions ----
   const openGrantPanel = (code: string) => {
@@ -292,13 +300,14 @@ export default function RolesManagementPage() {
       });
       const json = await res.json();
       if (json.success) {
-        setGrantMsg({ type: "success", text: `Granted '${grantRoleCode}' to ${user.name}` });
-        fetchUserCounts();
+        addToast({ variant: "success", message: `Granted '${grantRoleCode}' to ${user.name}` });
+        setGrantOpen(false);
+        refreshGraph();
       } else {
-        setGrantMsg({ type: "error", text: json.error?.message || "Failed to grant role" });
+        addToast({ variant: "error", message: json.error?.message || "Failed to grant role" });
       }
     } catch {
-      setGrantMsg({ type: "error", text: "Network error granting role" });
+      addToast({ variant: "error", message: "Network error granting role" });
     } finally {
       setGrantBusy(false);
     }
@@ -307,7 +316,7 @@ export default function RolesManagementPage() {
   const revokeRole = async (user: PickedUser) => {
     if (!grantRoleCode) return;
     // Revoke = demote the user to their parent role in the hierarchy (or visitor if none).
-    const targetRole = ROLE_PARENTS[grantRoleCode] || "visitor";
+    const targetRole = roleParents[grantRoleCode] || "visitor";
     setGrantBusy(true);
     try {
       const res = await fetch(`/api/users/${user.id}`, {
@@ -317,16 +326,17 @@ export default function RolesManagementPage() {
       });
       const json = await res.json();
       if (json.success) {
-        setGrantMsg({
-          type: "success",
-          text: `Revoked '${grantRoleCode}' from ${user.name} → demoted to '${targetRole}'`,
+        addToast({
+          variant: "success",
+          message: `Revoked '${grantRoleCode}' from ${user.name} → demoted to '${targetRole}'`,
         });
-        fetchUserCounts();
+        setGrantOpen(false);
+        refreshGraph();
       } else {
-        setGrantMsg({ type: "error", text: json.error?.message || "Failed to revoke role" });
+        addToast({ variant: "error", message: json.error?.message || "Failed to revoke role" });
       }
     } catch {
-      setGrantMsg({ type: "error", text: "Network error revoking role" });
+      addToast({ variant: "error", message: "Network error revoking role" });
     } finally {
       setGrantBusy(false);
     }
@@ -344,15 +354,14 @@ export default function RolesManagementPage() {
       });
       const json = await res.json();
       if (json.success) {
-        setStatusMsg({ type: "success", text: `Saved role ${editingRole.code}` });
+        addToast({ variant: "success", message: `Saved role ${editingRole.code}` });
         setEditingRole(null);
         fetchRoles();
-        fetchUserCounts();
       } else {
-        setStatusMsg({ type: "error", text: json.error?.message || "Failed to save role" });
+        addToast({ variant: "error", message: json.error?.message || "Failed to save role" });
       }
     } catch {
-      setStatusMsg({ type: "error", text: "Network error saving role" });
+      addToast({ variant: "error", message: "Network error saving role" });
     }
   };
 
@@ -365,30 +374,31 @@ export default function RolesManagementPage() {
       });
       const json = await res.json();
       if (json.success) {
-        setStatusMsg({ type: "success", text: `Deactivated role ${code}` });
+        addToast({ variant: "success", message: `Deactivated role ${code}` });
         fetchRoles();
       } else {
-        setStatusMsg({ type: "error", text: json.error?.message || "Failed to deactivate role" });
+        addToast({ variant: "error", message: json.error?.message || "Failed to deactivate role" });
       }
     } catch {
-      setStatusMsg({ type: "error", text: "Network error deactivating role" });
+      addToast({ variant: "error", message: "Network error deactivating role" });
     }
   };
 
   // ---------------------------------------------------------------- render
 
-  const renderTreeNode = (node: HierarchyNode): React.ReactNode => {
+  const renderTreeNode = (node: HierarchyNode, depth = 0): React.ReactNode => {
     const isExpanded = !!expanded[node.code];
     const hasChildren = node.children.length > 0;
-    const count = userCounts[node.code];
-    const dashboardRoute = getDefaultRouteForRole(node.code);
+    const graphNode = graph?.nodes.find((n) => n.code === node.code);
+    const count = graphNode?.user_count ?? graph?.user_counts[node.code];
+    const isRoot = node.code === graph?.root;
 
     return (
       <div key={node.code} className="relative">
         {/* node card */}
         <div
           className={`group flex items-center gap-3 rounded-xl border px-3 py-2.5 transition ${
-            node.code === HIERARCHY_ROOT
+            isRoot
               ? "border-purple-500/50 bg-purple-500/10"
               : "border-[var(--border)] bg-[var(--bg-elevated)]/40 hover:bg-[var(--bg-elevated)]"
           }`}
@@ -410,7 +420,7 @@ export default function RolesManagementPage() {
 
           <ShieldCheck
             className={`w-4 h-4 shrink-0 ${
-              node.code === HIERARCHY_ROOT ? "text-purple-400" : "text-[var(--text-muted)]"
+              isRoot ? "text-purple-400" : "text-[var(--text-muted)]"
             }`}
           />
 
@@ -418,7 +428,7 @@ export default function RolesManagementPage() {
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-mono text-xs font-bold text-purple-400">{node.code}</span>
               <span className="text-xs font-semibold text-[var(--text-primary)]">
-                {roleDisplayName(node.code)}
+                {graphNode?.display_name || roleDisplayName(node.code)}
               </span>
               {hasChildren && (
                 <span className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
@@ -450,15 +460,17 @@ export default function RolesManagementPage() {
               <KeyRound className="w-3 h-3" />
               Grant
             </button>
-            <Link
-              href={dashboardRoute}
-              target="_blank"
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-purple-500/15 border border-purple-500/30 text-[10px] font-semibold text-purple-300 hover:bg-purple-500/30 transition"
-              title={`Open the ${roleDisplayName(node.code)} dashboard`}
-            >
-              <ArrowUpRight className="w-3 h-3" />
-              View Dashboard
-            </Link>
+            {graphNode?.default_redirect && (
+              <Link
+                href={graphNode.default_redirect}
+                target="_blank"
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-purple-500/15 border border-purple-500/30 text-[10px] font-semibold text-purple-300 hover:bg-purple-500/30 transition"
+                title={`Open the ${graphNode.display_name} dashboard`}
+              >
+                <ArrowUpRight className="w-3 h-3" />
+                View Dashboard
+              </Link>
+            )}
           </div>
         </div>
 
@@ -511,9 +523,7 @@ export default function RolesManagementPage() {
             {hodBranchMsg && (
               <div
                 className={`text-xs flex items-center gap-1.5 ${
-                  hodBranchMsg.type === "success"
-                    ? "text-emerald-400"
-                    : "text-rose-400"
+                  hodBranchMsg.type === "success" ? "text-emerald-400" : "text-rose-400"
                 }`}
               >
                 {hodBranchMsg.type === "success" ? (
@@ -533,7 +543,7 @@ export default function RolesManagementPage() {
             {node.children.map((child) => (
               <div key={child.code} className="relative">
                 <div className="absolute -left-4 top-1/2 h-0.5 w-4 bg-[var(--border)]" />
-                {renderTreeNode(child)}
+                {renderTreeNode(child, depth + 1)}
               </div>
             ))}
           </div>
@@ -573,34 +583,30 @@ export default function RolesManagementPage() {
           </button>
         </div>
 
-        {statusMsg && (
-          <div
-            className={`p-4 rounded-xl border text-sm flex items-center gap-2 ${
-              statusMsg.type === "success"
-                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
-                : "bg-rose-500/10 border-rose-500/30 text-rose-400"
-            }`}
-          >
-            {statusMsg.type === "success" ? (
-              <CheckCircle2 className="w-5 h-5" />
-            ) : (
-              <ShieldAlert className="w-5 h-5" />
-            )}
-            {statusMsg.text}
-          </div>
-        )}
-
-        {/* ------------------------------------------------ role hierarchy tree */}
+        {/* ------------------------------------------------ role hierarchy graph (from /api/roles-graph) */}
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)] bg-[var(--bg-elevated)]/50">
-            <div>
-              <h2 className="text-sm font-bold text-[var(--text-primary)]">Role Hierarchy</h2>
-              <p className="text-xs text-[var(--text-muted)]">
-                Expand / collapse the authorization DAG. Grant or demote users per node; view each
-                role&apos;s dashboard.
-              </p>
+            <div className="flex items-center gap-2">
+              <Network className="w-4 h-4 text-purple-400" />
+              <div>
+                <h2 className="text-sm font-bold text-[var(--text-primary)]">Role Hierarchy Graph</h2>
+                <p className="text-xs text-[var(--text-muted)]">
+                  {graph
+                    ? `Served by /api/roles-graph · ${graph.nodes.length} nodes · ${graph.edges.length} edges · ${new Date(graph.generated_at).toLocaleTimeString()}`
+                    : graphError
+                      ? graphError
+                      : "Loading role hierarchy…"}
+                </p>
+              </div>
             </div>
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => void refreshGraph()}
+                disabled={countLoading}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[10px] font-semibold text-[var(--text-muted)] hover:text-purple-400 transition disabled:opacity-50"
+              >
+                <RefreshCw className="w-3 h-3" /> Refresh
+              </button>
               <button
                 onClick={expandAll}
                 className="px-3 py-1.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[10px] font-semibold text-[var(--text-muted)] hover:text-purple-400 transition"
@@ -620,6 +626,10 @@ export default function RolesManagementPage() {
             {loading ? (
               <div className="p-8 text-center text-[var(--text-muted)] text-sm animate-pulse">
                 Loading role hierarchy…
+              </div>
+            ) : tree.length === 0 ? (
+              <div className="p-8 text-center text-[var(--text-muted)] text-sm">
+                No roles defined yet. Use &ldquo;Define System Role&rdquo; to add one.
               </div>
             ) : (
               tree.map((node) => renderTreeNode(node))
@@ -909,7 +919,7 @@ export default function RolesManagementPage() {
                       setEditingRole({ ...editingRole, display_name: e.target.value })
                     }
                     placeholder="e.g. Gate Supervisor"
-                    className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:border-purple-400"
+                    className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm font-mono text-[var(--text-primary)] focus:outline-none focus:border-purple-400"
                   />
                 </div>
 
@@ -924,7 +934,7 @@ export default function RolesManagementPage() {
                       setEditingRole({ ...editingRole, description: e.target.value })
                     }
                     placeholder="Scope of authority..."
-                    className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:border-purple-400"
+                    className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm font-mono text-[var(--text-primary)] focus:outline-none focus:border-purple-400"
                   />
                 </div>
 
