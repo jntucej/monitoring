@@ -26,6 +26,22 @@ import { isPrivileged } from "@/lib/roles";
 import { getRequestBody, setupBodyCaching } from "@/lib/body-cache";
 
 /**
+ * Typed error for authorization failures. Carries a stable `code` and HTTP
+ * `status` so the middleware's catch block can handle it without brittle
+ * substring matching on `error.message`.
+ */
+class AuthError extends Error {
+  code: string;
+  status: number;
+  constructor(code: string, message: string, status: number) {
+    super(message);
+    this.name = "AuthError";
+    this.code = code;
+    this.status = status;
+  }
+}
+
+/**
  * Authorization middleware that validates:
  * - Token validity using Supabase Auth (single validation per request)
  * - User existence in public.users
@@ -114,8 +130,10 @@ export function withAuthorization(
           isPrivileged(authContext.role) &&
           !authContext.twoFactorEnabled
         ) {
-          throw new Error(
-            'MFA_REQUIRED: administrator accounts must enable two-factor authentication'
+          throw new AuthError(
+            "MFA_REQUIRED",
+            "MFA_REQUIRED: administrator accounts must enable two-factor authentication",
+            403
           );
         }
       }
@@ -158,10 +176,19 @@ export function withAuthorization(
       req.headers.set('x-user-role', authContext.role);
       req.headers.set('x-user-email', authContext.email);
 
-      // If all checks pass, continue to the handler with auth context
-      return handler(req, { auth: authContext });
+      // If all checks pass, continue to the handler with auth context.
+      // MUST await: without it, a handler rejection escapes the try/catch
+      // and becomes an unhandled rejection instead of a JSON 500.
+      return await handler(req, { auth: authContext });
     } catch (error) {
       // Handle different types of errors
+      if (error instanceof AuthError) {
+        return NextResponse.json(
+          { success: false, error: { code: error.code, message: error.message } },
+          { status: error.status }
+        );
+      }
+
       if (error instanceof Error) {
         if (error.message.includes('UNAUTHORIZED')) {
           return NextResponse.json(
