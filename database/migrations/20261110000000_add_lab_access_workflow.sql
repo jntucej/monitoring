@@ -65,19 +65,29 @@ CREATE SEQUENCE IF NOT EXISTS public.lab_ticket_seq START 1001;
 DO $$
 DECLARE
   has_filename BOOLEAN;
+  has_checksum BOOLEAN;
 BEGIN
   SELECT EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_schema = 'public' AND table_name = 'schema_migrations' AND column_name = 'filename'
   ) INTO has_filename;
+  SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'schema_migrations' AND column_name = 'checksum'
+  ) INTO has_checksum;
 
-  IF has_filename THEN
+  IF has_filename AND has_checksum THEN
+    INSERT INTO public.schema_migrations (version, filename, applied_at, checksum)
+    VALUES ('20261110000000', '20261110000000_add_lab_access_workflow.sql', NOW(),
+            md5('20261110000000_add_lab_access_workflow'))
+    ON CONFLICT (version) DO NOTHING;
+  ELSIF has_filename THEN
     INSERT INTO public.schema_migrations (version, filename, applied_at)
     VALUES ('20261110000000', '20261110000000_add_lab_access_workflow.sql', NOW())
     ON CONFLICT (version) DO NOTHING;
   ELSE
-    INSERT INTO public.schema_migrations (version)
-    VALUES ('20261110000000')
+    INSERT INTO public.schema_migrations (version, applied_at)
+    VALUES ('20261110000000', NOW())
     ON CONFLICT (version) DO NOTHING;
   END IF;
 END
