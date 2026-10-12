@@ -52,6 +52,12 @@ const NAV = [
     ],
   },
   {
+    group: "Records & Alumni",
+    items: [
+      { href: "/sysadmin/alumni", label: "Alumni & Deprovision", icon: GraduationCap },
+    ],
+  },
+  {
     group: "Integrations & Automation",
     items: [
       { href: "/sysadmin/sso", label: "SSO Configuration", icon: Landmark },

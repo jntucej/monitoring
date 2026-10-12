@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { RefreshCw, AlertCircle, Scan, KeyRound, UserCheck, LayoutDashboard, Clock, User as UserIcon, Mic, ShieldAlert } from "lucide-react";
 import { useOperatorStore } from "@/stores/operatorStore";
 import { useAuth } from "@/hooks/useAuth";
+import { useKioskOperator } from "@/hooks/useKioskOperator";
 import { useToast } from "@/components/ui/toast";
 import { ScanConfirmation } from "@/components/operator/ScanConfirmation";
 import { VoiceAssistantModal } from "@/components/operator/VoiceAssistantModal";
@@ -22,6 +23,7 @@ import { ScanDetailModal } from "@/components/operator/ScanDetailModal";
 import type { Scan as ScanRecord } from "@/lib/types";
 import { useCollegeInfo } from "@/hooks/useCollegeInfo";
 import { useUIStore } from "@/stores/uiStore";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
 
 function OperatorPageInner() {
   const params = useParams<{ gateId: string }>();
@@ -66,14 +68,23 @@ function OperatorPageInner() {
   // Local active tab for the desk panel: scan, manual, entry
   const [operatorSubMode, setOperatorSubMode] = useState<"scan" | "manual" | "entry">("scan");
 
-  // Poll for Active Lockdown
-  // Redirect unauthenticated users to operator login
+  // Kiosk auto-sign-in: when this page opens with NO active session, try
+  // to mint a default-operator session via /api/operator/kiosk-session.
+  // The hook is a no-op if a real operator already has an active session,
+  // so a normal PIN/password login always takes precedence.
+  const { state: kiosk } = useKioskOperator(
+    gateIdParam && !isSpecialPath ? gateIdParam : undefined
+  );
+
+  // Redirect unauthenticated users to operator login, but hold off while the
+  // kiosk fetch is in flight: a default session may still arrive and flip
+  // `authenticated` to true before the redirect would fire. Once the kiosk
+  // attempt settles without a session (notConfigured / error), redirect.
   useEffect(() => {
-    if (!authenticated) {
-      router.replace(`/login/operator?redirect=/gate/${gateId}`);
-      return;
-    }
-  }, [authenticated, gateId, router]);
+    if (authenticated) return;
+    if (kiosk.pending) return; // wait for the in-flight kiosk session attempt
+    router.replace(`/login/operator?redirect=/gate/${gateId}`);
+  }, [authenticated, kiosk.pending, gateId, router]);
 
   useEffect(() => {
     if (!authenticated) return;
@@ -612,7 +623,7 @@ function OperatorPageInner() {
   };
 
   return (
-    <div className="min-h-[85vh] flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] pb-safe">
+    <div className="min-h-[85vh] flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] pb-safe min-w-0">
       <main className="flex-1 w-full max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto p-2 sm:p-4 space-y-4">
         {/* Emergency Lockdown Active Alert Header Banner */}
         {activeLockdown && (
@@ -629,11 +640,18 @@ function OperatorPageInner() {
 
         {/* Gate Operational Status Bar */}
         <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] shadow-sm">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs font-bold text-[var(--text-primary)]">{gateName}</span>
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+            <div className="min-w-0">
+              <span className="text-xs font-bold text-[var(--text-primary)]">{gateName}</span>
+              {user?.name && (
+                <span className="block text-[9px] text-[var(--text-muted)] truncate">
+                  {user.name} · {user.role}
+                </span>
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => setShowVoiceModal(!showVoiceModal)}
               className="p-1.5 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20 hover:bg-purple-500/20 flex items-center gap-1 text-xs font-semibold"
@@ -672,6 +690,11 @@ function OperatorPageInner() {
 
         {/* Dynamic Inner view */}
         {renderActiveView()}
+
+        {/* Dev contact strip for reporting gate issues */}
+        <div className="pt-2">
+          <DevContactStrip />
+        </div>
       </main>
 
       {/* Person overview modal opened by tapping a log */}

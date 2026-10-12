@@ -43,6 +43,28 @@ async function handleGet(req: NextRequest) {
     const genderFilter = req.nextUrl.searchParams.get("gender");
     const typeFilter = req.nextUrl.searchParams.get("type");
 
+    // HOD auto-scope: if the caller is a HOD who omitted the department param,
+    // resolve their department from users.department_id via the service client
+    // so they can't accidentally see all-college stats.
+    const callerId = req.headers.get("x-user-id");
+    const callerRole = req.headers.get("x-user-role");
+    let effectiveDeptFilter = deptFilter;
+    if (callerRole === "hod" && !deptFilter && callerId) {
+      const { data: callerRow } = await svc
+        .from("users")
+        .select("department_id")
+        .eq("id", callerId)
+        .single();
+      const callerDeptId: string = callerRow?.department_id ?? "";
+      if (callerDeptId) {
+        const DEPT_CODE_MAP: Record<string, string> = {
+          "01": "CIVIL", "02": "EEE", "03": "MECH", "04": "ECE",
+          "05": "CSE", "12": "IT",
+        };
+        effectiveDeptFilter = DEPT_CODE_MAP[callerDeptId] || callerDeptId;
+      }
+    }
+
     const [usersRes, detailsRes] = await Promise.all([
       svc.from("users").select("id, role, status, flag_status, department_id").eq("role", "student"),
       svc.from("student_details").select("user_id, roll, year, section, batch, student_type, gender, hostel_block, room_number"),
@@ -82,7 +104,7 @@ async function handleGet(req: NextRequest) {
     }).filter((s: any) => {
       if (statusFilter && statusFilter !== "ALL" && s.status !== statusFilter) return false;
       if (genderFilter && genderFilter !== "ALL" && String(s.gender).toLowerCase() !== genderFilter.toLowerCase()) return false;
-      if (deptFilter && deptFilter !== "ALL" && s.department !== deptFilter) return false;
+      if (effectiveDeptFilter && effectiveDeptFilter !== "ALL" && s.department !== effectiveDeptFilter) return false;
       if (yearFilter && yearFilter !== "ALL" && String(s.year) !== String(yearFilter)) return false;
       if (typeFilter && typeFilter !== "ALL" && s.student_type !== typeFilter) return false;
       return true;
@@ -194,6 +216,6 @@ async function handleGet(req: NextRequest) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin"] }),
+  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "hod", "faculty", "staff"] }),
   { keyPrefix: "student_stats", maxRequests: 30 }
 );

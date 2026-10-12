@@ -12,7 +12,7 @@ export const ROLES = {
   PARENT:          "parent",
   HOD:             "hod",
   STUDENT:         "student",
-  WARDEN:          "warden",
+  WARDEN:          "warden", // warden role folded into principal — principal carries its privileges
   FACULTY:         "faculty",
   STAFF:           "staff",
   WORKER:          "worker",
@@ -25,6 +25,7 @@ export const ROLES = {
   OIE:             "oie",
   EXAM_BRANCH:     "exam_branch",
   EXAM_SUPERINTENDENT: "exam_superintendent",
+  MESS_INCHARGE:       "mess_incharge",
 } as const;
 
 export type RoleKey = keyof typeof ROLES;

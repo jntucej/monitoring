@@ -48,7 +48,7 @@ export function PassTypesForm() {
   };
 
   const addType = () => {
-    setData([...data, { code: 'new_pass', name: 'New Pass', description: '', defaultDurationHours: 24, requiresApproval: true, approvalFlow: 'warden' }]);
+    setData([...data, { code: 'new_pass', name: 'New Pass', description: '', defaultDurationHours: 24, requiresApproval: true, approvalFlow: 'principal' }]);
   };
 
   const removeType = (index: number) => {

@@ -11,13 +11,20 @@ import { NetworkStatusBanner } from "./NetworkStatusBanner";
 import { Sidebar } from "./Sidebar";
 import { GlassDeviceFallback } from "./GlassDeviceFallback";
 import { FloatingOrbs } from "./FloatingOrbs";
+import { AppLoadingScreen } from "./AppLoadingScreen";
 
 interface SafeAreaAppShellProps {
   children: React.ReactNode;
 }
 
 export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
+  // The loading screen covers the app while the auth store hydrates.
+  // `_hasHydrated` becomes true after ClientProviders' checkSession() completes.
+  const { _hasHydrated } = useAuthStore();
   const { authenticated } = useAuthStore();
+
+  // Auth shell + global loading overlay (first paint + route transition)
+  const showApp = _hasHydrated;
   const { theme, setTheme, isSidebarCollapsed } = useUIStore();
   const { performanceTier } = useGlass();
   const pathname = usePathname();
@@ -59,10 +66,12 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
     }
   }, [setTheme]);
 
-  const showNav = authenticated && !isStandaloneSysadmin;
+  const showNav = _hasHydrated && authenticated && !isStandaloneSysadmin;
 
   return (
     <div className="relative min-h-[100dvh] flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] antialiased selection:bg-[var(--action-primary)] selection:text-white">
+      {/* Global loading overlay — covers the entire shell until auth hydrates */}
+      <AppLoadingScreen />
       {/* Ambient Desktop Mouse-Parallax Orbs Layer */}
       <FloatingOrbs />
 

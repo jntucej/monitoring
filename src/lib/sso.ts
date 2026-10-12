@@ -124,7 +124,7 @@ export function mapExternalGroupToRole(groups: string[]): string | null {
   const mappings = config.groupMappings ?? {};
 
   // Highest-privilege match wins, but only if the group is explicitly mapped.
-  const priority = ["sysadmin", "admin", "warden", "faculty", "staff", "operator", "student"];
+  const priority = ["sysadmin", "admin", "principal", "warden", "faculty", "staff", "operator", "student"];
   const granted = new Set<string>();
   for (const g of groups) {
     const role = mappings[g];

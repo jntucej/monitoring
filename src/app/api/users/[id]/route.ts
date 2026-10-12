@@ -53,9 +53,9 @@ async function handlePatch(req: NextRequest) {
     const body = await req.json().catch(() => null);
     const { role, status, pin, password, flagStatus, flag_status, flags } = body || {};
 
-    if ((flagStatus !== undefined || flag_status !== undefined || flags !== undefined) && !["admin", "sysadmin", "warden"].includes(actorRole)) {
+    if ((flagStatus !== undefined || flag_status !== undefined || flags !== undefined) && !["admin", "sysadmin", "warden", "principal"].includes(actorRole)) {
       return NextResponse.json(
-        { success: false, error: { code: "FORBIDDEN", message: "Only administrators and wardens can flag or suspend accounts" } },
+        { success: false, error: { code: "FORBIDDEN", message: "Only administrators, wardens and principal can flag or suspend accounts" } },
         { status: 403 }
       );
     }
@@ -71,15 +71,71 @@ async function handlePatch(req: NextRequest) {
     const supabase = getSupabaseServiceClient();
 
     if (body && typeof body === "object") {
-      // 1. Basic profile fields
+      // Basic profile fields
       const profileUpdates: Record<string, any> = {};
       if (body.name !== undefined) profileUpdates.name = body.name;
       if (body.email !== undefined) profileUpdates.email = body.email;
       if (body.phone !== undefined) profileUpdates.phone = body.phone;
       if (body.department !== undefined) profileUpdates.department_id = body.department;
+      // Direct department assignment (sysadmin assigning a branch to a HOD, etc.)
+      if (body.department_id !== undefined) profileUpdates.department_id = body.department_id === "" ? null : body.department_id;
       if (body.photoUrl !== undefined) profileUpdates.photo_url = body.photoUrl;
       if (body.uniqueId !== undefined) profileUpdates.unique_id = body.uniqueId;
       if (body.loginIdentifier !== undefined) profileUpdates.login_identifier = body.loginIdentifier;
+
+      // Gate assignment (sysadmin/admin only — operators can't reassign themselves)
+      if (isAdmin && body.gateId !== undefined) {
+        const gid = body.gateId;
+        if (typeof gid !== "string" && gid !== null) {
+          return NextResponse.json(
+            { success: false, error: { code: "INVALID_GATE_ID", message: "gateId must be a UUID or null" } },
+            { status: 400 }
+          );
+        }
+        if (gid !== null) {
+          // Validate the gate exists and is active
+          const gateRes = await query<{ id: string; is_active: boolean }>(
+            `SELECT id, is_active FROM public.gates WHERE id = $1`,
+            [gid]
+          );
+          const gate = gateRes.rows[0];
+          if (!gate) {
+            return NextResponse.json(
+              { success: false, error: { code: "GATE_NOT_FOUND", message: `Gate ${gid} does not exist.` } },
+              { status: 404 }
+            );
+          }
+          if (!gate.is_active) {
+            return NextResponse.json(
+              { success: false, error: { code: "GATE_INACTIVE", message: `Gate ${gid} is not active.` } },
+              { status: 400 }
+            );
+          }
+        }
+        profileUpdates.gate_id = gid || null;
+      }
+
+      // Designate kiosk default operator (admin/sysadmin only)
+      if (isAdmin && body.isKioskDefault !== undefined) {
+        if (typeof body.isKioskDefault !== "boolean") {
+          return NextResponse.json(
+            { success: false, error: { code: "INVALID_FLAG", message: "isKioskDefault must be a boolean" } },
+            { status: 400 }
+          );
+        }
+        if (body.isKioskDefault) {
+          // Only operators can be kiosk defaults
+          if (target.role !== "operator") {
+            return NextResponse.json(
+              { success: false, error: { code: "NOT_OPERATOR", message: "Only operator accounts can be designated as kiosk default." } },
+              { status: 400 }
+            );
+          }
+          // Clear the flag from all other users first (single-flag invariant)
+          await supabase.from("users").update({ is_kiosk_default: false }).neq("id", id);
+        }
+        profileUpdates.is_kiosk_default = body.isKioskDefault;
+      }
 
       // Password update
       if (body.password) {
@@ -163,7 +219,7 @@ async function handlePatch(req: NextRequest) {
       }
 
       // 2. Student details
-      if (body.studentDetails || body.roll || body.year || body.hostelRoom) {
+      if (body.studentDetails || body.roll || body.year || body.hostelRoom || body.completed !== undefined || body.completedAt !== undefined) {
         const sd = body.studentDetails ?? body;
         const studentUpdates: Record<string, any> = {};
         if (sd.roll !== undefined) studentUpdates.roll = sd.roll;
@@ -177,12 +233,54 @@ async function handlePatch(req: NextRequest) {
         if (sd.studentType !== undefined) studentUpdates.student_type = sd.studentType;
         if (sd.gender !== undefined) studentUpdates.gender = sd.gender;
         if (sd.wardenId !== undefined) studentUpdates.warden_id = sd.wardenId;
+        // Graduation flag: completed=TRUE + completed_at for passed-out students.
+        if (sd.completed !== undefined) studentUpdates.completed = sd.completed;
+        if (sd.completedAt !== undefined) studentUpdates.completed_at = sd.completedAt;
 
         if (Object.keys(studentUpdates).length > 0) {
           const { error } = await supabase
             .from("student_details")
             .upsert({ user_id: id, ...studentUpdates }, { onConflict: "user_id" });
           if (error) return NextResponse.json({ success: false, error: { message: error.message } }, { status: 400 });
+        }
+      }
+
+      // 2b. Graduation / alumni fields (student_details.completed + completed_at).
+      // Accepted on both the flat body and a nested studentDetails object.
+      // Only admins/sysadmins may flip graduation state (it implies deprovisioning).
+      const flatCompleted = body.completed;
+      const flatCompletedAt = body.completedAt;
+      const sdCompleted = body.studentDetails?.completed;
+      const sdCompletedAt = body.studentDetails?.completedAt;
+      if (flatCompleted !== undefined || flatCompletedAt !== undefined || sdCompleted !== undefined || sdCompletedAt !== undefined) {
+        if (!isAdmin) {
+          return NextResponse.json(
+            { success: false, error: { code: "FORBIDDEN", message: "Only administrators can mark graduation state" } },
+            { status: 403 }
+          );
+        }
+        const completion: Record<string, any> = { user_id: id };
+        if (sdCompleted !== undefined) completion.completed = sdCompleted;
+        else if (flatCompleted !== undefined) completion.completed = flatCompleted;
+        if (sdCompletedAt !== undefined) completion.completed_at = sdCompletedAt;
+        else if (flatCompletedAt !== undefined) completion.completed_at = flatCompletedAt;
+
+        const { error } = await supabase
+          .from("student_details")
+          .upsert(completion, { onConflict: "user_id" });
+        if (error) return NextResponse.json({ success: false, error: { message: error.message } }, { status: 400 });
+
+        // Marking a student completed implies they have left campus: deprovision
+        // the account unless the caller explicitly wants to keep it active.
+        const completedFlag = completion.completed;
+        if (completedFlag === true) {
+          const explicitStatus = body.status || body.account_status;
+          const targetStatus: AccountStatus = explicitStatus && VALID_STATUSES.includes(explicitStatus)
+            ? explicitStatus
+            : "DEPROVISIONED";
+          if (target.status !== "ACTIVE") {
+            await updateAccountStatus(id, targetStatus);
+          }
         }
       }
 
@@ -242,7 +340,7 @@ async function handlePatch(req: NextRequest) {
       await addAudit({
         userId: actorId,
         action: "USER_UPDATED",
-        details: { timestamp: new Date().toISOString(), targetId: id, updates: body, sessions_revoked: credentialsChanged },
+        details: { timestamp: new Date().toISOString(), targetId: id, updates: body, sessions_revoked: credentialsChanged, kiosk_default_changed: body.isKioskDefault !== undefined },
       });
     }
 

@@ -620,8 +620,12 @@ export class PostgresQueryBuilder<T = any> {
         if (list.length === 0) return { data: [], error: null };
         const keys = Object.keys(list[0]);
         const params: any[] = [];
+        // Serialize object/array values (JSONB columns such as stage_history)
+        // so the Postgres driver sends them as a JSON string literal.
+        const serialize = (v: any) =>
+          v !== null && typeof v === "object" ? JSON.stringify(v) : v;
         const valueTuples = list.map((row) => {
-          const tuple = keys.map((k) => { params.push(row[k]); return `$${params.length}`; });
+          const tuple = keys.map((k) => { params.push(serialize(row[k])); return `$${params.length}`; });
           return `(${tuple.join(", ")})`;
         });
         const returningCols = this.selectColumns === "*" ? "*" : this.selectColumns;
@@ -639,7 +643,12 @@ export class PostgresQueryBuilder<T = any> {
         const keys = Object.keys(values);
         if (keys.length === 0) return { data: [], error: null };
         const params: any[] = [];
-        const setClauses = keys.map((k) => { params.push(values[k]); return `"${k}" = $${params.length}`; });
+        // Serialize object/array values (JSONB columns such as stage_history)
+        // so the Postgres driver sends them as a JSON string literal rather
+        // than an unparsable array parameter ("invalid input syntax for json").
+        const serialize = (v: any) =>
+          v !== null && typeof v === "object" ? JSON.stringify(v) : v;
+        const setClauses = keys.map((k) => { params.push(serialize(values[k])); return `"${k}" = $${params.length}`; });
         const where = this.buildWhereClause(params);
         const returningCols = this.selectColumns === "*" ? "*" : this.selectColumns;
         const sql = `UPDATE ${this.tableName} SET ${setClauses.join(", ")} ${where} RETURNING ${returningCols}`;
@@ -666,8 +675,10 @@ export class PostgresQueryBuilder<T = any> {
         if (list.length === 0) return { data: [], error: null };
         const keys = Object.keys(list[0]);
         const params: any[] = [];
+        const serialize = (v: any) =>
+          v !== null && typeof v === "object" ? JSON.stringify(v) : v;
         const valueTuples = list.map((row) => {
-          const tuple = keys.map((k) => { params.push(row[k]); return `$${params.length}`; });
+          const tuple = keys.map((k) => { params.push(serialize(row[k])); return `$${params.length}`; });
           return `(${tuple.join(", ")})`;
         });
         const conflictCol = this.pendingMutation.options?.onConflict || "id";

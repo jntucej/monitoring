@@ -5,7 +5,7 @@ export const ALL_ROLES: Role[] = [
   "sysadmin",
   "operator",
   "supervisor",
-  "warden",
+  "principal",
   "faculty",
   "staff",
   "worker",
@@ -22,6 +22,7 @@ export const ALL_ROLES: Role[] = [
   "deputy_warden",
   "caretaker",
   "exam_superintendent",
+  "mess_incharge",
 ];
 
 export function getDefaultRouteForRole(role: Role | string, gateId?: string): string {
@@ -33,7 +34,7 @@ export function getDefaultRouteForRole(role: Role | string, gateId?: string): st
     guardian: "/parent",
     parent: "/parent",
     student: "/student",
-    warden: "/warden",
+    warden: "/principal",
     faculty: "/faculty/permissions",
     staff: "/staff",
     worker: "/worker",
@@ -47,6 +48,7 @@ export function getDefaultRouteForRole(role: Role | string, gateId?: string): st
     exam_branch: "/exam/permissions",
     hod: "/hod",
     exam_superintendent: "/exam/superintendent",
+    mess_incharge: "/mess",
   };
   return routes[role] || "/login";
 }

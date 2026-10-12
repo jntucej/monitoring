@@ -365,12 +365,12 @@ export default function AdminDashboardPage() {
               <div className="flex flex-col sm:flex-row items-start sm:flex-row items-center gap-1 sm:gap-2 flex-wrap">
                 <span className="text-xs sm:text-sm font-bold uppercase tracking-widest text-rose-400">⚠ Emergency Lockdown Active</span>
                 <span className="text-[9px] sm:text-[10px] font-mono text-rose-300/70">
-                  {new Date(activeLockdown.issuedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  {new Date(activeLockdown.issuedAt ?? Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </span>
               </div>
               <div className="flex flex-col sm:flex-row items-start sm:flex-row items-center gap-1 sm:gap-2 mt-1 flex-wrap">
                 <span className="text-xs text-rose-200/80">Scope:</span>
-                {activeLockdown.scopes.map(s => (
+                {(activeLockdown.scopes ?? []).map(s => (
                   <span key={s} className="px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 uppercase">
                     {s}
                   </span>

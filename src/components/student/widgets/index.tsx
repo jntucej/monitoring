@@ -1,5 +1,6 @@
 "use client";
 import { Suspense, lazy } from "react";
+import { RefreshCw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { useApiResource } from "@/hooks/useApiResource";
@@ -20,7 +21,7 @@ const CARDS: Record<string, React.LazyExoticComponent<React.ComponentType<Studen
 };
 
 export function StudentDashboardWidgets() {
-  const { data, loading, error } = useApiResource<Record<string, unknown>>(
+  const { data, loading, error, refresh } = useApiResource<Record<string, unknown>>(
     "/api/student/dashboard",
     { ttlMs: 20_000 }
   );
@@ -37,8 +38,15 @@ export function StudentDashboardWidgets() {
 
   if (error) {
     return (
-      <div className="rounded-2xl border border-rose-500/30 bg-rose-500/5 p-4 text-sm text-rose-200">
-        Could not load dashboard: {error}
+      <div className="rounded-2xl border border-rose-500/30 bg-rose-500/5 p-4 text-sm text-rose-200 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p>Could not load dashboard: {error}</p>
+        <button
+          type="button"
+          onClick={() => void refresh()}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-300 text-[11px] font-bold hover:bg-rose-500/20 transition self-start sm:self-auto"
+        >
+          <RefreshCw className="h-3 w-3" /> Retry
+        </button>
       </div>
     );
   }

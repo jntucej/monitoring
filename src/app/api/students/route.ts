@@ -7,7 +7,8 @@ import { mPerson } from "@/lib/db";
 import type { Person, Student } from "@/lib/types";
 
 const HOSTEL_CODES = ["CSE", "IT", "ECE", "EEE", "ME"];
-const WARDEN_ROLES = ["warden", "supervisor"];
+const WARDEN_ROLES = ["principal", "supervisor"];
+const PRINCIPAL_ROLES = ["principal"];
 
 /**
  * Warden/supervisor scoped roster query, via the Postgres service client:
@@ -67,6 +68,10 @@ async function handleGet(req: NextRequest) {
     const parentId = params.get("parentId");
     const scope = params.get("scope");
     const hostel = params.get("hostel");
+    // status=ALL returns every student regardless of ACTIVE/DEPROVISIONED;
+    // any other value filters on users.status (used by the alumni page).
+    const statusParam = params.get("status");
+    const status = statusParam && statusParam !== "ALL" ? statusParam : undefined;
 
     // Parents can only list their own children
     if (parentId) {
@@ -80,8 +85,8 @@ async function handleGet(req: NextRequest) {
       return NextResponse.json({ success: true, data: children });
     }
 
-    // Warden/supervisor: scoped query (active roster, optional hostel block)
-    if (WARDEN_ROLES.includes(authRole)) {
+    // Warden/supervisor/principal: scoped query (active roster, optional hostel block)
+    if (WARDEN_ROLES.includes(authRole) || PRINCIPAL_ROLES.includes(authRole)) {
       const data = await findWardenScopedStudents(scope, hostel);
       return NextResponse.json({ success: true, data });
     }
@@ -94,7 +99,7 @@ async function handleGet(req: NextRequest) {
       );
     }
 
-    const result: Person[] = q ? await searchStudents(q) : await findAllStudents();
+    const result: Person[] = q ? await searchStudents(q) : await findAllStudents(status);
     return NextResponse.json({ success: true, data: result });
   } catch (error) {
     console.error("Error fetching students:", error);
@@ -107,7 +112,7 @@ async function handleGet(req: NextRequest) {
 
 export const GET = withRateLimit(
   withAuthorization(handleGet, {
-    requiredRole: ["admin", "sysadmin", "parent", "guardian", "warden", "supervisor"],
+    requiredRole: ["admin", "sysadmin", "parent", "guardian", "principal", "supervisor"],
   }),
   { keyPrefix: "students_list", maxRequests: 100 }
 );

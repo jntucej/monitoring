@@ -4,6 +4,7 @@ import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import {
   canApproveAtStage,
+  canApproveAtStageWithBranch,
   resolveNextStage,
   appendStageHistory,
   getScopedTicket,
@@ -105,6 +106,13 @@ async function handlePatch(req: NextRequest): Promise<Response> {
   }
 
   const supabase = getSupabaseServiceClient();
+  // Pre-fetch branch scoping for HODs (used by the L4 staff_leave guard below)
+  const actorIsHod = authUserRole === "hod";
+  const actorBranch = actorIsHod
+    ? await (
+        supabase.from("users").select("department_id").eq("id", authUserId).single()
+      ).then(({ data }) => data?.department_id ?? null)
+    : null;
 
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(ticketParam);
   let q = supabase.from("permission_requests").select("*");
@@ -176,6 +184,30 @@ async function handlePatch(req: NextRequest): Promise<Response> {
           );
         }
       }
+    }
+
+    // L4: branch scoping — a HOD may only act on staff_leave requests in the
+    // hod stage when their own branch matches the ticket's branch.
+    // (The branch check itself lives in the pure engine as
+    // canApproveAtStageWithBranch; the L4 layer only resolves the two branch
+    // values and applies the gate — P4 layering rule.)
+    if (!canApproveAtStageWithBranch(
+      authUserRole,
+      request.workflow_type as WorkflowType,
+      request.current_stage,
+      actorBranch,
+      request.branch,
+    )) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "FORBIDDEN",
+            message: `HOD of branch ${request.branch} required to act at the hod stage`,
+          },
+        },
+        { status: 403 }
+      );
     }
   }
 

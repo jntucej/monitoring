@@ -74,6 +74,7 @@ CREATE TABLE IF NOT EXISTS users (
   pin_must_change BOOLEAN NOT NULL DEFAULT FALSE,
   failed_login_count INTEGER NOT NULL DEFAULT 0,
   locked_until TIMESTAMPTZ,
+  is_kiosk_default   BOOLEAN NOT NULL DEFAULT FALSE,
 
 
   created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),

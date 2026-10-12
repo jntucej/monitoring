@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
-import { query } from "@/lib/postgres";
+import { query, withTransaction } from "@/lib/postgres";
 import { verifyRefreshToken, signAccessToken, signRefreshToken } from "@/lib/auth-token";
 import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
@@ -102,9 +102,6 @@ async function handleRefresh(req: NextRequest) {
       );
     }
 
-    // Revoke old session token
-    await query("UPDATE sessions SET revoked_at = NOW() WHERE refresh_hash = $1", [oldTokenHash]).catch(() => {});
-
     const access_token = await signAccessToken({
       sub: user.id,
       email: user.email,
@@ -120,12 +117,32 @@ async function handleRefresh(req: NextRequest) {
       role: user.role,
     });
 
-    // Record new rotated session
+    // Atomic rotation: insert new session AND revoke old one in a single
+    // transaction. If the insert fails, the revoke is rolled back and the
+    // user's old session remains valid — they are never left without one.
+    const newSessionId = crypto.randomUUID();
     const newTokenHash = crypto.createHash("sha256").update(refresh_token).digest("hex");
-    await query(
-      "INSERT INTO sessions (id, user_id, refresh_hash, expires_at, created_at) VALUES ($1, $2, $3, NOW() + INTERVAL '30 days', NOW())",
-      [crypto.randomUUID(), user.id, newTokenHash]
-    ).catch(() => {});
+    try {
+      await withTransaction(async (client) => {
+        await client.query(
+          "INSERT INTO sessions (id, user_id, refresh_hash, expires_at, created_at) VALUES ($1, $2, $3, NOW() + INTERVAL '30 days', NOW())",
+          [newSessionId, user.id, newTokenHash]
+        );
+        await client.query(
+          "UPDATE sessions SET revoked_at = NOW() WHERE refresh_hash = $1",
+          [oldTokenHash]
+        );
+      });
+    } catch (err: unknown) {
+      console.error("[refresh] session rotation transaction failed:", err);
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: "SERVER_ERROR", message: "Session rotation failed. Try again." },
+        },
+        { status: 503 }
+      );
+    }
 
     const cookieOptions = {
       httpOnly: true,
@@ -137,24 +154,7 @@ async function handleRefresh(req: NextRequest) {
     const response = NextResponse.json(
       {
         success: true,
-        data: {
-          token: access_token,
-          refreshToken: refresh_token,
-          user: {
-            id: user.id,
-            uniqueId: user.unique_id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            status: user.status,
-            department: user.department_id,
-            photoUrl: user.photo_url,
-          },
-        },
-        access_token,
-        refresh_token,
-        expires_in: 3600,
-        token_type: "Bearer",
+        message: "Session refreshed",
       },
       { status: 200 }
     );

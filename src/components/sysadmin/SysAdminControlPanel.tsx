@@ -24,6 +24,7 @@ import {
   GraduationCap,
   Briefcase,
   CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
 import { GovernanceModules } from "./SysAdminGovernanceModules";
 import { HealthDashboard } from "./HealthDashboard";
@@ -45,11 +46,14 @@ export function SysAdminControlPanel() {
   const [auditCount, setAuditCount] = useState<number | null>(null);
   const [sessionCount, setSessionCount] = useState<number | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [telemetryError, setTelemetryError] = useState(false);
 
   const fetchTelemetry = useCallback(async () => {
     setIsSyncing(true);
+    setTelemetryError(false);
     try {
       const headers = getAuthHeaders();
+      let auditOk = false;
 
       // Fetch Recent Audit Logs & Count
       const auditRes = await fetch("/api/admin/audit?limit=8&offset=0", {
@@ -61,10 +65,12 @@ export function SysAdminControlPanel() {
         if (auditJson.success) {
           setAuditLogs(auditJson.data || []);
           setAuditCount(auditJson.total ?? 0);
+          auditOk = true;
         }
       }
 
       // Fetch Active Sessions Count
+      let sessionsOk = false;
       const sessRes = await fetch("/api/admin/sessions", {
         headers,
         cache: "no-store",
@@ -73,7 +79,12 @@ export function SysAdminControlPanel() {
         const sessJson = await sessRes.json();
         if (sessJson.success && Array.isArray(sessJson.data)) {
           setSessionCount(sessJson.data.length);
+          sessionsOk = true;
         }
+      }
+
+      if (!auditOk || !sessionsOk) {
+        setTelemetryError(true);
       }
     } finally {
       setIsSyncing(false);
@@ -145,13 +156,29 @@ export function SysAdminControlPanel() {
           </Link>
         </div>
 
+        {telemetryError && (
+          <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30">
+            <div className="flex items-center gap-2 text-xs text-rose-300 font-medium">
+              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+              <span>Could not load telemetry. Audit or session endpoints unavailable.</span>
+            </div>
+            <button
+              onClick={fetchTelemetry}
+              disabled={isSyncing}
+              className="px-2.5 py-1 rounded-lg bg-rose-500/20 border border-rose-500/30 text-rose-300 text-[11px] font-bold hover:bg-rose-500/30 transition disabled:opacity-50"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs text-[var(--text-primary)]">
             <thead className="bg-[var(--bg-elevated)] text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] border-b border-[var(--border)]">
               <tr>
                 <th className="py-2.5 px-3">Action Event</th>
                 <th className="py-2.5 px-3">User / Executed By</th>
-                <th className="py-2.5 px-3">Sys Tag & Location (Admin Only)</th>
+                <th className="py-2.5 px-3">Sys Tag &amp; Location (Admin Only)</th>
                 <th className="py-2.5 px-3">Timestamp</th>
               </tr>
             </thead>
@@ -181,7 +208,7 @@ export function SysAdminControlPanel() {
                         </div>
                       </td>
                       <td className="py-2.5 px-3 text-[var(--text-muted)] text-[11px]">
-                        {new Date(log.timestamp).toLocaleString()}
+                        {log.timestamp ? new Date(log.timestamp).toLocaleString() : "—"}
                       </td>
                     </tr>
                   );
@@ -189,7 +216,7 @@ export function SysAdminControlPanel() {
               ) : (
                 <tr>
                   <td colSpan={4} className="py-6 text-center text-[var(--text-muted)] font-sans">
-                    No recent audit logs available or initializing...
+                    {telemetryError ? "Telemetry unavailable — see banner above." : "No recent audit logs available or initializing..."}
                   </td>
                 </tr>
               )}

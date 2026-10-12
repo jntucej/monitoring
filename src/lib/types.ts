@@ -21,6 +21,7 @@ export type PersonType =
   | "guardian"
   | "hod"
   | "warden"
+  | "principal"
   | "operator"
   | "admin"
   | "sysadmin";
@@ -41,6 +42,10 @@ export interface StudentDetails {
   hostelCurfewTime?: string;
   gender?: "male" | "female";
   wardenId?: string;
+  /** Graduation flag — student_details.completed (TRUE when graduated). */
+  completed?: boolean;
+  /** ISO timestamp when the student was marked graduated. */
+  completedAt?: string;
 }
 
 export type StaffCategory =
@@ -143,6 +148,10 @@ export interface Person {
   hostelBlock?: string;
   roomNumber?: string;
   hostelCurfewTime?: string;
+  /** Graduation flag — true when the student has completed the programme. */
+  completed?: boolean;
+  /** ISO timestamp when the student was marked graduated. */
+  completedAt?: string;
   wardenId?: string;
 }
 
@@ -188,6 +197,10 @@ export interface User {
   thumbprintHash?: string;
   /** When thumbprint was last registered */
   thumbprintVerifiedAt?: string;
+  /** Kiosk default operator flag (sysadmin/designated) */
+  isKioskDefault?: boolean;
+  /** Login identifier used by PIN/password login */
+  loginIdentifier?: string;
 }
 
 export type ExitReason =
@@ -311,6 +324,10 @@ export interface Alert {
   studentRoll?: string;
   timestamp: string;
   resolved: boolean;
+  /** Minimum role tier required to see this alert (0 = all roles). */
+  minTier?: number;
+  /** Restrict visibility to these roles; undefined = all roles. */
+  visibleToRoles?: string[];
 }
 
 export type AlertSeverity = "low" | "medium" | "high" | "critical";
@@ -419,7 +436,7 @@ export interface ExitReasonConfig {
   applicableTo: StudentType[];
   maxDurationHours?: number;
   requiresApproval: boolean;
-  approvalBy?: "warden" | "faculty" | "admin" | "none";
+  approvalBy?: "principal" | "faculty" | "admin" | "none";
   parentNotification: "silent" | "push" | "sms" | "urgent";
   autoApproveTimeRange?: string;
 }
@@ -501,4 +518,60 @@ export interface DepartmentAttendanceSummary {
   insideCount?: number;
   outsideCount?: number;
 }
+
+/* ── Mess Food Preference System ─────────────────────────────────────────── */
+
+/** Meal-day row from /api/mess/days. */
+export interface MessDay {
+  id: string;
+  mealDate: string;
+  dayType?: string;
+  windowOpens?: string;
+  windowCloses?: string;
+  /** Menu item ids attached to this meal day. */
+  itemIds?: string[];
+}
+
+/** Menu catalog row from /api/mess/menu-items. */
+export interface MessMenuItem {
+  id: string;
+  code: string;
+  label: string;
+  isPrimary: boolean;
+  sortOrder: number;
+}
+
+/** Arrival row from /api/mess/arrivals?dayId=. */
+export interface MessArrival {
+  userId: string;
+  roll?: string;
+  name?: string;
+  primaryItem?: "VEG" | "NON_VEG";
+  confirmed?: boolean;
+  noShow?: boolean;
+}
+
+/** Analytics snapshot from /api/mess/analytics?dayId=. */
+export interface MessAnalytics {
+  totalHostellers: number;
+  declaredPresent: number;
+  confirmedPresent: number;
+  notSelected: number;
+  byBlock: { block: string; veg: number; nonVeg: number }[];
+  byPrimary: { veg: number; nonVeg: number };
+}
+
+/** Token lookup result from /api/mess/token/:code. */
+export interface MessToken {
+  valid: boolean;
+  primaryItem?: "VEG" | "NON_VEG";
+  subItemLabels?: string[];
+  usedAt?: string | null;
+  revokedAt?: string | null;
+  expiresAt?: string | null;
+  studentRoll?: string;
+  studentName?: string;
+  reason?: string;
+}
+
 

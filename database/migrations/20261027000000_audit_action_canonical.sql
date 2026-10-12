@@ -9,6 +9,7 @@ ALTER TABLE public.audit_logs
   ADD CONSTRAINT audit_logs_action_known
   CHECK (action IN (
     'ACCOUNT_STATUS_CHANGED',
+    'ADMIN_EXPORT',
     'ADMIN_STREAM_OTHER_USER',
     'ALERT_RESOLVE_DENIED',
     'ALERT_RESOLVED',

@@ -3,6 +3,7 @@ import { findPass, approvePass, rejectPass } from "@/lib/db";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
+import type { AuthContext } from "@/lib/authContext";
 
 /**
  * POST /api/passes/[id]/action
@@ -17,7 +18,7 @@ function getPassId(req: NextRequest): string {
   return segments[segments.length - 2];
 }
 
-async function handlePost(req: NextRequest, { auth }: { auth: { userId: string; role: string } }) {
+async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   try {
     const passId = getPassId(req);
     if (!passId) {
@@ -63,7 +64,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: { userId: string; 
     }
 
     // Warden/supervisor hostel block scoping check
-    if (authRole === "warden" || authRole === "supervisor") {
+    if (authRole === "principal" || authRole === "supervisor") {
       const service = getSupabaseServiceClient();
       const { data: approverProfile } = await service
         .from("users")
@@ -108,7 +109,13 @@ async function handlePost(req: NextRequest, { auth }: { auth: { userId: string; 
 
     return NextResponse.json({
       success: true,
-      data: { ...pass, [action === "approve" ? "adminStatus" : "adminStatus"]: "APPROVED" as never, finalStatus: action === "approve" ? "APPROVED" : "REJECTED" },
+      data: {
+        ...pass,
+        adminStatus: action === "approve" ? "APPROVED" : "REJECTED",
+        finalStatus: action === "approve" ? "APPROVED" : "REJECTED",
+        adminComment: comment,
+        adminApproverId: authUserId,
+      },
     });
   } catch (error) {
     console.error("Error executing pass action:", error);
@@ -121,7 +128,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: { userId: string; 
 
 export const POST = withRateLimit(
   withAuthorization(handlePost, {
-    requiredRole: ["admin", "sysadmin", "operator", "warden", "supervisor"],
+    requiredRole: ["admin", "sysadmin", "operator", "warden", "supervisor", "principal"],
   }),
   { keyPrefix: "passes_action", maxRequests: 50 }
 );

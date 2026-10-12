@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Camera, X, RefreshCw, AlertTriangle, KeyRound, ScanLine, Volume2, VolumeX, Upload, QrCode, CheckCircle } from "lucide-react";
 import { playAudioFeedback } from "@/lib/sound";
 import jsQR from "jsqr";
-import { SCANNABLE_FORMATS } from "@/lib/barcode";
+import { SCANNABLE_FORMATS, normalizeScannedPayload } from "@/lib/barcode";
 
 type ScanMode = "qr" | "barcode";
 type FormatScope = ScanMode | "all";
@@ -119,7 +119,8 @@ export function Scanner({
     setCameraState("idle");
   }, [gateId]);
 
-  const handleSuccessScan = useCallback((scannedData: string) => {
+  const handleSuccessScan = useCallback((rawScannedData: string) => {
+    const scannedData = normalizeScannedPayload(rawScannedData);
     if (hasScannedRef.current || !scannedData) return;
     hasScannedRef.current = true;
     isScanningRef.current = false;
@@ -199,13 +200,14 @@ export function Scanner({
               const code = decodeQR(imageData.data, imageData.width, imageData.height, {
                 inversionAttempts: "dontInvert",
               });
-              if (code && code.data && code.data.trim().length > 0) {
+              const roll = normalizeScannedPayload(code?.data || "");
+              if (roll) {
                 playBeep();
                 if (typeof window !== "undefined" && "navigator" in window && window.navigator.vibrate) {
                   window.navigator.vibrate([100, 50, 100]);
                 }
                 stopCamera();
-                onScan(code.data.trim());
+                onScan(roll);
                 onClose();
                 return;
               }
@@ -223,10 +225,11 @@ export function Scanner({
           barcodeDetector
             .detect(canvas)
             .then((barcodes: Array<{ rawValue: string }>) => {
-              if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
+              const roll = normalizeScannedPayload(barcodes?.[0]?.rawValue || "");
+              if (roll) {
                 playBeep();
                 stopCamera();
-                onScan(barcodes[0].rawValue.trim());
+                onScan(roll);
                 onClose();
               } else {
                 alert("Could not detect any QR/Barcode in the uploaded image. Please try a clearer picture.");
@@ -321,7 +324,7 @@ export function Scanner({
     processFrameRef.current = processFrame;
   }, [processFrame]);
 
-  const startDecodeLoop = () => {
+  const startDecodeLoop = useCallback(() => {
     if (!videoRef.current) return;
     // ponytail: throttle decode to ~10fps + downscale to 640px wide.
     // QR codes don't move fast enough to need 60fps; full-res jsQR costs
@@ -340,14 +343,17 @@ export function Scanner({
     // moment it arrives — no debounce delay on startup.
     processFrameRef.current();
     animationFrameRef.current = requestAnimationFrame(tick);
-  };
+  }, []);
 
   const startCamera = useCallback(async () => {
     // Stop the current loop but DON'T stop the track if we have a cached
     // stream for this gate — we'll reuse it below.
     isScanningRef.current = false;
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
-    if (animationFrameRef.current) { cancelAnimationFrame(animationFrameRef.current); animationFrameRef.current = null; }
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
     setCameraState("requesting");
     setErrorMessage("");
     hasScannedRef.current = false;
@@ -405,6 +411,15 @@ export function Scanner({
           });
         }
       }
+      // Retry/unmount (stopCamera) can run between the getUserMedia await and
+      // here — stopCamera clears streamRef; if it fired, the start is stale.
+      // Park the new stream in the per-gate cache (don't leak the device) and
+      // return without starting a decode loop.
+      if (!streamRef.current) {
+        if (gateId) gateStreamCache[gateId] = stream;
+        else stream.getTracks().forEach((t) => t.stop());
+        return;
+      }
       streamRef.current = stream;
 
       if (videoRef.current) {
@@ -426,7 +441,7 @@ export function Scanner({
         setErrorMessage(error.message || "Unable to open camera stream.");
       }
     }
-  }, [gateId]);
+  }, [gateId, startDecodeLoop]);
 
   useEffect(() => {
     if (isOpen) {
@@ -436,7 +451,7 @@ export function Scanner({
     }
     return () => { stopCamera(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+  }, [isOpen, startCamera, stopCamera]);
 
   // ponytail: kill camera + decode loop when tab hidden (battery, privacy
   // indicator, dead-stream-on-return). pagehide covers iOS tab suspension.
@@ -458,15 +473,17 @@ export function Scanner({
       document.removeEventListener("resume", onResume as EventListener);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+  }, [isOpen, startCamera, stopCamera]);
 
   // On full unmount (gate change / page leave) drop cached streams —
   // keeps the memory footprint bounded across sessions.
   useEffect(() => {
     return () => {
       // Only drop if we're actually unmounting, not just closing the modal
-      // (stopCamera already handles the close case).
-      if (gateId && gateStreamCache[gateId]) {
+      // (stopCamera already handles the close case). If the modal is still
+      // open with this gate's live stream, leave it alone — closing the
+      // modal will park it back in the cache for the next session.
+      if (gateId && gateStreamCache[gateId] && gateStreamCache[gateId] !== streamRef.current) {
         gateStreamCache[gateId].getTracks().forEach((t) => t.stop());
         delete gateStreamCache[gateId];
       }

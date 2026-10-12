@@ -8,7 +8,7 @@ import { checkIdempotency, storeIdempotency } from "@/lib/idempotency";
 import type { AuthContext } from "@/lib/authContext";
 import type { Student, GatePass } from "@/lib/types";
 
-const ADMIN_ROLES = ["admin", "sysadmin", "operator", "warden", "supervisor"];
+const ADMIN_ROLES = ["admin", "sysadmin", "operator", "principal", "supervisor", "principal"];
 
 async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   try {
@@ -66,7 +66,7 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
     // Warden/supervisor scoping: limit how many passes they can pull and
     // optionally filter by hostel block.
     let limit: number | undefined;
-    if (authRole === "warden" || authRole === "supervisor") {
+    if (authRole === "principal" || authRole === "supervisor") {
       limit = Math.min(parseInt(params.get("limit") || "200", 10), 500);
       const hostel = params.get("hostel");
       if (hostel && !["CSE", "IT", "ECE", "EEE", "ME"].includes(hostel.toUpperCase())) {
@@ -80,7 +80,7 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
     const passes = await findGatePasses({ status, roll, parentId, limit });
 
     let data: GatePass[] = passes;
-    if ((authRole === "warden" || authRole === "supervisor") && params.get("hostel")) {
+    if ((authRole === "principal" || authRole === "supervisor") && params.get("hostel")) {
       const hostel = params.get("hostel")!.toUpperCase();
       const service = getSupabaseServiceClient();
       const rolls = data.map((p) => p.roll).filter(Boolean);
@@ -206,7 +206,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ['admin', 'sysadmin', 'operator', 'parent', 'guardian', 'student', 'warden', 'supervisor'] }),
+  withAuthorization(handleGet, { requiredRole: ['admin', 'sysadmin', 'operator', 'parent', 'guardian', 'student', 'warden', 'supervisor', 'principal'] }),
   { keyPrefix: 'passes_list', maxRequests: 100 }
 );
 

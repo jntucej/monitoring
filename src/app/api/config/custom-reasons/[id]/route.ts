@@ -167,14 +167,14 @@ async function handleDelete(req: NextRequest): Promise<Response> {
 
 export const PATCH = withRateLimit(
   withAuthorization(handlePatch, {
-    requiredRole: ["sysadmin", "admin", "warden", "hod", "principal", "oie"],
+    requiredRole: ["sysadmin", "admin", "principal", "hod", "principal", "oie"],
   }),
   { keyPrefix: "custom_reasons_patch", maxRequests: 60 }
 );
 
 export const DELETE = withRateLimit(
   withAuthorization(handleDelete, {
-    requiredRole: ["sysadmin", "admin", "warden", "hod", "principal", "oie"],
+    requiredRole: ["sysadmin", "admin", "principal", "hod", "principal", "oie"],
   }),
   { keyPrefix: "custom_reasons_delete", maxRequests: 60 }
 );

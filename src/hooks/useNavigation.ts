@@ -154,6 +154,12 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
         {
+          groupLabel: "Records & Alumni",
+          items: [
+            { href: "/sysadmin/alumni", label: "Alumni & Deprovision", icon: "GraduationCap", badge: "NEW" },
+          ],
+        },
+        {
           groupLabel: "Integrations & Automation",
           items: [
             { href: "/sysadmin/sso", label: "SSO Configuration", icon: "Shield" },
@@ -199,6 +205,12 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
         {
+          groupLabel: "Hostel & Mess",
+          items: [
+            { href: "/admin/mess", label: "Mess Configuration", icon: "UtensilsCrossed", badge: "MESS" },
+          ],
+        },
+        {
           groupLabel: "Institutional Rosters",
           items: [
             { href: "/admin/students", label: "Student Master Roster", icon: "GraduationCap" },
@@ -220,9 +232,16 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
         {
+          groupLabel: "Mess Management",
+          items: [
+            { href: "/admin/mess", label: "Mess Food Preferences", icon: "UtensilsCrossed", badge: "NEW" },
+          ],
+        },
+        {
           groupLabel: "Administration & Settings",
           items: [
             { href: "/admin/users", label: "User Accounts & Roles", icon: "UserCog" },
+            { href: "/admin/roles", label: "Roles & Hierarchy", icon: "ShieldCheck", badge: "LIVE" },
             { href: "/admin/announcements", label: "Broadcast Announcements", icon: "Megaphone" },
             { href: "/admin/support", label: "Support Desk Triage", icon: "LifeBuoy" },
             { href: "/admin/gates", label: "Gate Hardware Desk", icon: "QrCode" },
@@ -269,6 +288,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       break;
 
     case "supervisor":
+    case "principal":
     case "warden":
       groups = [
         {
@@ -297,13 +317,32 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       ];
       break;
 
+    case "mess_incharge":
+      groups = [
+        {
+          groupLabel: "Mess Operations",
+          items: [
+            { href: "/mess", label: "Mess Dashboard", icon: "LayoutDashboard", badge: "LIVE" },
+            { href: "/mess/scan", label: "Token Scanner", icon: "QrCode", badge: "SCAN" },
+          ],
+        },
+        {
+          groupLabel: "General & Support",
+          items: [
+            { href: "/profile", label: "My Profile", icon: "User" },
+            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+          ],
+        },
+      ];
+      break;
+
     case "faculty":
       groups = [
         {
           groupLabel: "Faculty Portal",
           items: [
             { href: "/faculty/permissions", label: "Student Permissions", icon: "CheckSquare", badge: "PENDING" },
-            { href: "/admin/faculty", label: "Faculty Attendance Desk", icon: "UserCheck", badge: "MY DEPT" },
+            { href: "/faculty/attendance", label: "Faculty Attendance Desk", icon: "UserCheck", badge: "MY DEPT" },
             { href: "/person", label: "Digital Gate Pass", icon: "QrCode" },
           ],
         },
@@ -363,6 +402,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
             { href: "/student/history", label: "My Scan Logs", icon: "Clock" },
             { href: "/student/passes", label: "Outpass Requests", icon: "FileSpreadsheet" },
             { href: "/student/permissions", label: "Permission Requests", icon: "ClipboardList", badge: "NEW" },
+            { href: "/mess/default", label: "Mess Default", icon: "UtensilsCrossed" },
           ],
         },
         {

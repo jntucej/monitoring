@@ -18,7 +18,7 @@ import {
 } from "@/lib/rollNumber";
 const VALID_ROLES: Role[] = [
   "operator", "admin", "sysadmin", "parent", "student",
-  "warden", "faculty", "staff", "worker",
+  "principal", "faculty", "staff", "worker",
 ];
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -40,6 +40,7 @@ export interface ImportRow {
   roomNumber?: string;
   status?: string;
   gender?: string;
+  studentType?: string;
   course?: string;
   courseFromRoll?: string;
   fatherName?: string;
@@ -258,6 +259,8 @@ export async function validateImport(csvInput: string | ImportRow[]): Promise<Va
       designation: pick(r, "designation", "DESIGNATION"),
       hostelBlock: pick(r, "hostelBlock", "HOSTEL", "assignedHostel"),
       roomNumber: pick(r, "roomNumber", "ROOM", "hostelRoom"),
+      // If the sheet carries an explicit student type (HM/HF/DM/DF), honor it.
+      studentType: pick(r, "studentType", "STUDENT TYPE", "STUDENT_TYPE", "TYPE") || undefined,
       status: "ACTIVE",
     };
 
@@ -385,6 +388,20 @@ async function processSingleRow(
       // Course: prefer the sheet's COURSE cell; fall back to the branch name
       // decoded from the roll (CSE / IT / ECE / EEE / ME).
       const courseValue = row.course || row.courseFromRoll || null;
+
+      // Derive student_type (HM/HF/DM/DF) — a soft indicator, not a hard gate.
+      // hosteller = has a hostel_block; day scholar = no hostel block.
+      // Gender drives M/F; missing gender → null (left unset until hostel data
+      // is backfilled). Mess eligibility falls back to hostel_block presence,
+      // so a day scholar who later gets a hostel assignment still qualifies.
+      const genderRaw = (row.gender || "").toLowerCase();
+      const hasHostel = !!row.hostelBlock;
+      let studentType: string | null = null;
+      if (genderRaw === "male" || genderRaw === "m") studentType = hasHostel ? "HM" : "DM";
+      else if (genderRaw === "female" || genderRaw === "f") studentType = hasHostel ? "HF" : "DF";
+      // A CSV TYPE / STUDENT_TYPE column, when present, overrides the derivation.
+      if (row.studentType) studentType = row.studentType;
+
       const studentData = {
         user_id: targetUserId,
         // Roll stored as given (the UNIQUE index is case-sensitive; keep the
@@ -401,6 +418,7 @@ async function processSingleRow(
         course: courseValue,
         father_name: row.fatherName || null,
         landline_number: row.landlineNumber || null,
+        student_type: studentType,
       };
       const { error: stuErr } = await supabase.from("student_details").upsert(studentData, { onConflict: "user_id" });
       if (stuErr) throw new Error(`student_details upsert failed: ${stuErr.message}`);

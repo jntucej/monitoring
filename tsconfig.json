@@ -41,6 +41,8 @@
     "docs",
     "tests",
     "gate-monitor-migration",
-    "packages"
+    "packages",
+    "scripts/provision-role-accounts.mts",
+    "scripts/prov"
   ]
 }

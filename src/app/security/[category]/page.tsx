@@ -33,6 +33,7 @@ const ROLE_NAMES: Record<string, string> = {
   parent: "Parent / Guardian",
   student: "Student Member",
   warden: "Hostel Warden",
+  principal: "Principal",
   faculty: "Faculty Member",
   staff: "University Staff",
   worker: "Campus Worker",

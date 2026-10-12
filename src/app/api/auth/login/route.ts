@@ -367,7 +367,7 @@ const handleLogin = log.wrap("/api/auth/login", handleLoginInner);
 
 export const POST = withRateLimit(handleLogin, {
   keyPrefix: "login",
-  maxRequests: 20,
+  maxRequests: 100,
   windowMs: 60 * 1000,
 });
 
