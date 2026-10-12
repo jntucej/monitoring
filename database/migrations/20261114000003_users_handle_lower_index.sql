@@ -1,5 +1,5 @@
 -- ============================================================================
--- Migration: 20261114000001_users_handle_lower_index
+-- Migration: 20261114000003_users_handle_lower_index
 -- Purpose:   20261025000001 added case-insensitive indexes for email,
 --            login_identifier and unique_id, but missed `handle`.
 --            findUserByLogin() ILIKEs handle on every login -> seq scan.
@@ -21,18 +21,18 @@ BEGIN
       AND column_name='checksum') INTO has_checksum;
   IF has_filename AND has_checksum THEN
     INSERT INTO public.schema_migrations (version, filename, applied_at, checksum)
-    VALUES ('20261114000001',
-            '20261114000001_users_handle_lower_index.sql', NOW(),
-            md5('20261114000001_users_handle_lower_index'))
+    VALUES ('20261114000003',
+            '20261114000003_users_handle_lower_index.sql', NOW(),
+            md5('20261114000003_users_handle_lower_index'))
     ON CONFLICT (version) DO NOTHING;
   ELSIF has_filename THEN
     INSERT INTO public.schema_migrations (version, filename, applied_at)
-    VALUES ('20261114000001',
-            '20261114000001_users_handle_lower_index.sql', NOW())
+    VALUES ('20261114000003',
+            '20261114000003_users_handle_lower_index.sql', NOW())
     ON CONFLICT (version) DO NOTHING;
   ELSE
     INSERT INTO public.schema_migrations (version, applied_at)
-    VALUES ('20261114000001', NOW())
+    VALUES ('20261114000003', NOW())
     ON CONFLICT (version) DO NOTHING;
   END IF;
 END $$;
