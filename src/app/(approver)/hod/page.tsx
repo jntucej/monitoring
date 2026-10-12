@@ -2,7 +2,6 @@
 
 import { Suspense, useCallback, useMemo } from "react";
 import { GuardedPage } from "@/components/shared/GuardedPage";
-import { ConditionalAlert } from "@/components/shared/ConditionalAlert";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
@@ -13,13 +12,13 @@ import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role } from "@/lib/types";
 import {
   Building2,
-  Users,
   GraduationCap,
-  CheckCircle2,
   Clock,
   AlertTriangle,
   Loader2,
-  UserCheck,
+  CheckCircle2,
+  Users,
+  Inbox,
 } from "lucide-react";
 
 const MIN_TIER = 50;
@@ -32,10 +31,7 @@ interface HodFacultyData {
     id: string;
     name: string;
     email: string;
-    phone?: string;
-    unique_id?: string;
     status?: string;
-    department_id?: string;
     employee_details?: {
       designation?: string;
       employee_id?: string;
@@ -52,9 +48,21 @@ interface StudentStatsData {
   byDepartment: Array<{ code: string; name: string; count: number }>;
 }
 
-interface PendingCount {
+interface PermissionRow {
+  id: string;
+  ticket_number?: string;
+  workflow_type?: string;
+  status?: string;
+  current_stage?: string;
+  student_user_id?: string | null;
+  created_at?: string;
+  description?: string;
+}
+
+interface PermissionListData {
+  success: boolean;
+  data: PermissionRow[];
   total?: number;
-  data?: unknown[];
 }
 
 /* ── building blocks ── */
@@ -77,7 +85,7 @@ function StatCard({
   return (
     <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2">
       <div className="flex items-center gap-2 text-slate-400">
-        <Icon className="w-4 h-4" />
+        <Icon className="w-4 h-4 text-emerald-400" />
         <span className="text-xs font-semibold uppercase tracking-wide">{label}</span>
       </div>
       {loading ? (
@@ -98,6 +106,24 @@ function EmptyState({ message }: { message: string }) {
   );
 }
 
+function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => void }) {
+  return (
+    <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200 flex items-center justify-between gap-3">
+      <span className="flex items-center gap-2">
+        <AlertTriangle className="w-4 h-4 shrink-0" />
+        {message}
+      </span>
+      <button
+        onClick={onRetry}
+        className="inline-flex items-center gap-1.5 rounded-lg border border-rose-400/40 bg-rose-500/20 px-3 py-1.5 text-xs font-semibold text-rose-100 hover:bg-rose-500/30"
+      >
+        <Loader2 className="w-3.5 h-3.5" />
+        Retry
+      </button>
+    </div>
+  );
+}
+
 /* ── main content ── */
 
 function HodDashboardInner() {
@@ -106,27 +132,34 @@ function HodDashboardInner() {
   const tier = getRoleTier(role);
   const deptParam = user?.departmentId || "";
 
-  // HOD-scoped faculty list (route forces department scope for non-admin callers)
   const {
     data: hodFaculty,
     loading: facultyLoading,
     error: facultyError,
     refresh: refreshFaculty,
   } = useApiResource<HodFacultyData>(
-    deptParam ? `/api/hod/faculty?departmentId=${encodeURIComponent(deptParam)}` : "/api/hod/faculty",
+    deptParam
+      ? `/api/hod/faculty?departmentId=${encodeURIComponent(deptParam)}`
+      : "/api/hod/faculty",
     { ttlMs: 30_000 }
   );
 
   const {
     data: students,
     loading: studentsLoading,
+    error: studentsError,
     refresh: refreshStudents,
   } = useApiResource<{ success: boolean; data: StudentStatsData }>("/api/students/stats", {
     ttlMs: 30_000,
   });
 
-  // Pending permission requests currently sitting at the HOD stage
-  const { data: pending, refresh: refreshPending } = useApiResource<PendingCount>(
+  // Branch-scoped queue of pending permission requests awaiting HOD-stage action
+  const {
+    data: pending,
+    loading: pendingLoading,
+    error: pendingError,
+    refresh: refreshPending,
+  } = useApiResource<PermissionListData>(
     "/api/permissions?workflowType=staff_leave&status=PENDING",
     { ttlMs: 60_000 }
   );
@@ -138,22 +171,36 @@ function HodDashboardInner() {
   usePolling(refresh, { intervalMs: 30_000, enabled: !!user });
 
   const facultyList = hodFaculty?.data ?? [];
-  const onCampus = students?.data?.onCampusToday;
-  const pendingCount = pending?.total ?? 0;
+  const pendingRows = useMemo<PermissionRow[]>(() => {
+    const rows = pending?.data;
+    return Array.isArray(rows) ? rows : [];
+  }, [pending]);
 
-  const deptHeadcount = useMemo(
-    () => (hodFaculty?.success ? facultyList.length : null),
-    [hodFaculty, facultyList.length]
-  );
+  const pendingCount = pending?.total ?? pendingRows.length;
 
-  const loading = facultyLoading || studentsLoading;
+  const approvalsToday = useMemo(() => {
+    if (pendingRows.length === 0) return 0;
+    const today = new Date().toDateString();
+    return pendingRows.filter((r) => r.created_at && new Date(r.created_at).toDateString() === today).length;
+  }, [pendingRows]);
+
+  const deptStudentCount = useMemo(() => {
+    const row = students?.data?.byDepartment?.find((d) => d.code === deptParam || d.name === deptParam);
+    return row?.count ?? null;
+  }, [students, deptParam]);
+
+  const anyError = !!(facultyError || studentsError || pendingError);
+  const loading = facultyLoading || studentsLoading || pendingLoading;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
       {/* header */}
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-white">HOD Dashboard</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
+            <Building2 className="w-6 h-6 text-emerald-400" />
+            HOD Dashboard
+          </h1>
           <p className="mt-1 text-sm text-slate-400">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
@@ -163,145 +210,194 @@ function HodDashboardInner() {
         <button
           onClick={() => void refresh()}
           disabled={loading}
-          className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700 disabled:opacity-50"
+          className="inline-flex items-center gap-2 self-start rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700 disabled:opacity-50"
         >
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Clock className="w-4 h-4" />}
           {loading ? "Refreshing…" : "Refresh"}
         </button>
       </header>
 
-      {/* errors — human-readable, no raw JSON dumps */}
-      {facultyError && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4 shrink-0" />
-          <span>Faculty panel unavailable: {facultyError}</span>
-        </div>
+      {anyError && (
+        <ErrorBanner
+          message={facultyError || studentsError || pendingError || "Some panels failed to load."}
+          onRetry={() => void refresh()}
+        />
       )}
 
       {/* KPI row */}
       {deptParam ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
-            icon={Users}
-            label="Department Headcount"
-            value={deptHeadcount ?? "…"}
-            sub={`Faculty in dept ${deptParam}`}
-            accent="text-emerald-400"
-            loading={facultyLoading && facultyList.length === 0}
+            icon={Inbox}
+            label="Branch Pending"
+            value={pendingCount}
+            sub="Permissions awaiting HOD-stage action"
+            accent="text-amber-400"
+            loading={pendingLoading}
           />
           <StatCard
             icon={GraduationCap}
-            label="Students On Campus"
-            value={onCampus ?? "…"}
-            sub={`${students?.data?.todayEntries ?? 0} entries · ${students?.data?.todayExits ?? 0} exits today`}
-            accent="text-sky-400"
-            loading={studentsLoading && onCampus === undefined}
+            label="Branch Students"
+            value={deptStudentCount ?? "…"}
+            sub={deptStudentCount === null ? `Students in dept ${deptParam}` : `Dept ${deptParam} · ${students?.data?.total ?? 0} total campus`}
+            accent="text-emerald-400"
+            loading={studentsLoading && deptStudentCount === null}
           />
           <StatCard
             icon={CheckCircle2}
-            label="Pending Requests"
-            value={pendingCount}
-            sub="Staff leave approvals awaiting HOD action"
-            accent="text-amber-400"
+            label="Approvals Today"
+            value={approvalsToday}
+            sub="Requests raised today in your queue"
+            accent="text-sky-400"
+            loading={pendingLoading && pendingRows.length === 0}
           />
           <StatCard
-            icon={UserCheck}
-            label="Active Faculty"
-            value={facultyList.filter((f) => f.status === "ACTIVE" || !f.status).length}
-            sub="Currently active in your department"
+            icon={Users}
+            label="Department Faculty"
+            value={hodFaculty?.success ? facultyList.length : "…"}
+            sub="Faculty members on branch"
             accent="text-emerald-400"
             loading={facultyLoading && facultyList.length === 0}
           />
         </div>
       ) : (
-        <EmptyState
-          message="No branch assigned — ask your sysadmin to assign a branch"
-        />
+        <EmptyState message="No branch assigned — ask your sysadmin to assign a department" />
       )}
 
       {deptParam && (
         <>
-        {/* alerts — role-scoped conditional alert surface */}
-        <WidgetBoundary title="Alerts">
-          <ConditionalAlert
-            ctx={{
-              role,
-              userId: user?.id ?? "unknown",
-              gateId: user?.gateId ?? null,
-              departmentId: user?.departmentId ?? null,
-              assignedHostel: user?.assignedHostel ?? null,
-              metrics: {},
-            }}
-            limit={5}
-          />
-        </WidgetBoundary>
-
-        {/* faculty panel */}
-        <WidgetBoundary title="Faculty">
-          <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wide">
-                Department Faculty
-              </h2>
-              <span className="text-xs text-slate-500">
-                {hodFaculty?.success ? `${facultyList.length} members` : "…"}
-              </span>
-            </div>
-
-            {facultyLoading ? (
-              <div className="p-4 flex items-center gap-2 text-sm text-slate-500">
-                <Loader2 className="w-4 h-4 animate-spin" /> Loading faculty…
+          {/* branch-scoped pending approvals */}
+          <WidgetBoundary title="Pending Approvals">
+            <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wide">
+                  Branch Pending Queue
+                </h2>
+                <span className="text-xs text-slate-500">
+                  {pendingRows.length > 0 ? `${pendingRows.length} waiting` : "queue clear"}
+                </span>
               </div>
-            ) : facultyList.length === 0 ? (
-              <div className="p-4">
-                <EmptyState
-                  message={
-                    facultyError
-                      ? "Could not load the faculty list for your department."
-                      : "No faculty members found in this department yet."
-                  }
-                />
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-800 text-slate-500 text-xs uppercase tracking-wide">
-                      <th className="text-left px-4 py-3">Name</th>
-                      <th className="text-left px-4 py-3">Designation</th>
-                      <th className="text-left px-4 py-3">ID</th>
-                      <th className="text-left px-4 py-3">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-800/60">
-                    {facultyList.map((f) => (
-                      <tr key={f.id} className="hover:bg-slate-800/30 transition-colors">
-                        <td className="px-4 py-3 text-white font-medium">{f.name}</td>
-                        <td className="px-4 py-3 text-slate-400">
-                          {f.employee_details?.designation || "—"}
-                        </td>
-                        <td className="px-4 py-3 text-slate-400 font-mono text-xs">
-                          {f.employee_details?.employee_id || f.unique_id || f.id.slice(0, 8)}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span
-                            className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border ${
-                              f.status === "SUSPENDED" || f.status === "LOCKED"
-                                ? "text-rose-400 border-rose-400/30 bg-rose-400/10"
-                                : "text-emerald-400 border-emerald-400/30 bg-emerald-400/10"
-                            }`}
-                          >
-                            {f.status || "ACTIVE"}
-                          </span>
-                        </td>
+              {pendingLoading ? (
+                <div className="p-4 flex items-center gap-2 text-sm text-slate-500">
+                  <Loader2 className="w-4 h-4 animate-spin" /> Loading pending requests…
+                </div>
+              ) : pendingRows.length === 0 ? (
+                <div className="p-4">
+                  <EmptyState message="No pending approvals in your branch queue." />
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-slate-800 text-slate-500 text-xs uppercase tracking-wide">
+                        <th className="text-left px-4 py-3">Ticket</th>
+                        <th className="text-left px-4 py-3">Workflow</th>
+                        <th className="text-left px-4 py-3">Requester</th>
+                        <th className="text-left px-4 py-3">Status</th>
+                        <th className="text-left px-4 py-3">Raised</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800/60">
+                      {pendingRows.slice(0, 15).map((r) => (
+                        <tr key={r.id} className="hover:bg-slate-800/30 transition-colors">
+                          <td className="px-4 py-3 text-white font-mono text-xs">
+                            {r.ticket_number || r.id.slice(0, 8)}
+                          </td>
+                          <td className="px-4 py-3 text-slate-400">
+                            {r.workflow_type || "—"}
+                          </td>
+                          <td className="px-4 py-3 text-slate-400 font-mono text-xs">
+                            {r.student_user_id ? r.student_user_id.slice(0, 8) : "—"}
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium border text-amber-400 border-amber-400/30 bg-amber-400/10">
+                              {r.status || "PENDING"}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-slate-500 text-xs">
+                            {r.created_at
+                              ? new Date(r.created_at).toLocaleString("en-IN", {
+                                  day: "2-digit",
+                                  month: "short",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })
+                              : "—"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </WidgetBoundary>
+
+          {/* faculty panel */}
+          <WidgetBoundary title="Faculty">
+            <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wide">
+                  Department Faculty
+                </h2>
+                <span className="text-xs text-slate-500">
+                  {hodFaculty?.success ? `${facultyList.length} members` : "…"}
+                </span>
               </div>
-            )}
-          </div>
-        </WidgetBoundary>
+              {facultyLoading ? (
+                <div className="p-4 flex items-center gap-2 text-sm text-slate-500">
+                  <Loader2 className="w-4 h-4 animate-spin" /> Loading faculty…
+                </div>
+              ) : facultyList.length === 0 ? (
+                <div className="p-4">
+                  <EmptyState
+                    message={
+                      facultyError
+                        ? "Could not load the faculty list for your department."
+                        : "No faculty members found in this department yet."
+                    }
+                  />
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-slate-800 text-slate-500 text-xs uppercase tracking-wide">
+                        <th className="text-left px-4 py-3">Name</th>
+                        <th className="text-left px-4 py-3">Designation</th>
+                        <th className="text-left px-4 py-3">ID</th>
+                        <th className="text-left px-4 py-3">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800/60">
+                      {facultyList.map((f) => (
+                        <tr key={f.id} className="hover:bg-slate-800/30 transition-colors">
+                          <td className="px-4 py-3 text-white font-medium">{f.name}</td>
+                          <td className="px-4 py-3 text-slate-400">
+                            {f.employee_details?.designation || "—"}
+                          </td>
+                          <td className="px-4 py-3 text-slate-400 font-mono text-xs">
+                            {f.employee_details?.employee_id || f.id.slice(0, 8)}
+                          </td>
+                          <td className="px-4 py-3">
+                            <span
+                              className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border ${
+                                f.status === "SUSPENDED" || f.status === "LOCKED"
+                                  ? "text-rose-400 border-rose-400/30 bg-rose-400/10"
+                                  : "text-emerald-400 border-emerald-400/30 bg-emerald-400/10"
+                              }`}
+                            >
+                              {f.status || "ACTIVE"}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </WidgetBoundary>
         </>
       )}
 

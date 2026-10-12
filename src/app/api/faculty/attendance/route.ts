@@ -49,6 +49,15 @@ async function handleGet(req: NextRequest, context: { auth: any }) {
       usersQuery = usersQuery.eq("department_id", callerDept);
     }
 
+    // Faculty / HOD scoping: honor an optional ?dept= override ONLY for
+    // faculty/hod callers, and only when it matches their own department —
+    // they must not be able to query another department's attendance.
+    // Admin/sysadmin callers see everything and the param is ignored.
+    const requestedDept = req.nextUrl.searchParams.get("dept");
+    if (!isAdmin && requestedDept && callerDept && requestedDept.toUpperCase() === String(callerDept).toUpperCase()) {
+      usersQuery = usersQuery.eq("department_id", requestedDept);
+    }
+
     const { data: users, error: usersErr } = await usersQuery;
 
     if (usersErr) {

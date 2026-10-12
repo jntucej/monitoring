@@ -341,7 +341,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           groupLabel: "Faculty Portal",
           items: [
             { href: "/faculty/permissions", label: "Student Permissions", icon: "CheckSquare", badge: "PENDING" },
-            { href: "/admin/faculty", label: "Faculty Attendance Desk", icon: "UserCheck", badge: "MY DEPT" },
+            { href: "/faculty/attendance", label: "Faculty Attendance Desk", icon: "UserCheck", badge: "MY DEPT" },
             { href: "/person", label: "Digital Gate Pass", icon: "QrCode" },
           ],
         },

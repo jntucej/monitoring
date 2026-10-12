@@ -128,7 +128,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
 
 export const POST = withRateLimit(
   withAuthorization(handlePost, {
-    requiredRole: ["admin", "sysadmin", "operator", "warden", "supervisor"],
+    requiredRole: ["admin", "sysadmin", "operator", "warden", "supervisor", "principal"],
   }),
   { keyPrefix: "passes_action", maxRequests: 50 }
 );

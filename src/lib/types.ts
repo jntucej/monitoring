@@ -196,6 +196,10 @@ export interface User {
   thumbprintHash?: string;
   /** When thumbprint was last registered */
   thumbprintVerifiedAt?: string;
+  /** Kiosk default operator flag (sysadmin/designated) */
+  isKioskDefault?: boolean;
+  /** Login identifier used by PIN/password login */
+  loginIdentifier?: string;
 }
 
 export type ExitReason =

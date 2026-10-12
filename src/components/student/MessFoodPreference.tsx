@@ -18,6 +18,7 @@ import Link from "next/link";
 import { QRCodeCanvas } from "qrcode.react";
 import { getAuthHeaders } from "@/lib/utils";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
+import { friendlyApiError } from "@/lib/student-utils";
 import { usePolling } from "@/hooks/usePolling";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { useUIStore } from "@/stores/uiStore";
@@ -216,12 +217,23 @@ function MessFoodPreferenceInner() {
   }
 
   /* ---------------- error ---------------- */
-  if (preference.error) {
+  if (preference.error || menu.error) {
+    const detail = preference.error ?? menu.error ?? "";
+    const httpMatch = detail.match(/^HTTP (\d{3})/);
+    const status = httpMatch ? Number(httpMatch[1]) : null;
+    const friendly = status ? friendlyApiError(status, detail) : detail || "Unable to load mess data.";
     return (
       <div className="space-y-2 p-1">
-        <p className="text-xs text-rose-300">Could not load mess data: {preference.error}</p>
+        <p className="text-xs text-rose-300">Could not load mess data: {friendly}</p>
         <button
-          onClick={() => void preference.refresh()}
+          onClick={() => {
+            clearCache("/api/mess/preference");
+            clearCache("/api/mess/menu");
+            void (async () => {
+              await preference.refresh();
+              await menu.refresh();
+            })();
+          }}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-300 text-[11px] font-bold hover:bg-rose-500/20 transition"
         >
           <RefreshCw className="w-3 h-3" /> Retry

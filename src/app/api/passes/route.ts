@@ -8,7 +8,7 @@ import { checkIdempotency, storeIdempotency } from "@/lib/idempotency";
 import type { AuthContext } from "@/lib/authContext";
 import type { Student, GatePass } from "@/lib/types";
 
-const ADMIN_ROLES = ["admin", "sysadmin", "operator", "warden", "supervisor"];
+const ADMIN_ROLES = ["admin", "sysadmin", "operator", "warden", "supervisor", "principal"];
 
 async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   try {
@@ -206,7 +206,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ['admin', 'sysadmin', 'operator', 'parent', 'guardian', 'student', 'warden', 'supervisor'] }),
+  withAuthorization(handleGet, { requiredRole: ['admin', 'sysadmin', 'operator', 'parent', 'guardian', 'student', 'warden', 'supervisor', 'principal'] }),
   { keyPrefix: 'passes_list', maxRequests: 100 }
 );
 

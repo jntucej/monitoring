@@ -71,12 +71,12 @@ function StatCard({
   accent?: string;
 }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 flex flex-col gap-2">
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 flex flex-col gap-2.5 sm:gap-3">
       <div className="flex items-center gap-2 text-[var(--text-muted)]">
         <Icon className="w-4 h-4" />
         <span className="text-xs font-semibold uppercase tracking-wide">{label}</span>
       </div>
-      <p className={`text-2xl font-bold ${accent}`}>
+      <p className={`text-2xl sm:text-3xl font-bold ${accent}`}>
         {typeof value === "boolean" ? (value ? "ON" : "OFF") : value}
       </p>
       {sub && <p className="text-xs text-[var(--text-muted)]">{sub}</p>}
@@ -101,19 +101,19 @@ function Panel({
 }) {
   return (
     <section
-      className={`rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] flex flex-col ${className}`}
+      className={`rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] flex flex-col ${className}`}
     >
-      <div className="flex items-start justify-between gap-3 border-b border-[var(--border)] p-4">
-        <div className="flex items-center gap-2">
+      <div className="flex items-start justify-between gap-3 border-b border-[var(--border)] p-4 sm:p-5">
+        <div className="flex items-center gap-2.5">
           <Icon className="w-4 h-4 text-indigo-400" />
           <div>
             <h2 className="text-sm font-semibold text-[var(--text-primary)]">{title}</h2>
-            {sub && <p className="text-xs text-[var(--text-muted)]">{sub}</p>}
+            {sub && <p className="text-xs text-[var(--text-muted)] mt-0.5">{sub}</p>}
           </div>
         </div>
         {right}
       </div>
-      <div className="p-4 flex-1 min-w-0">{children}</div>
+      <div className="p-4 sm:p-5 flex-1 min-w-0">{children}</div>
     </section>
   );
 }
@@ -217,12 +217,12 @@ function PendingPassesPanel({ onLoaded }: { onLoaded?: () => void }) {
         <EmptyState text="No pending passes. All clear." />
       )}
       {!loading && passes && passes.length > 0 && (
-        <ul className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+        <ul className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
           {passes.map((p) => {
             const busy = actionBusy === p.id + ":approve" || actionBusy === p.id + ":reject";
             const expired = p.to ? new Date(p.to).getTime() < Date.now() : false;
             return (
-              <li key={p.id} className="rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] p-3 space-y-2">
+              <li key={p.id} className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-3 sm:p-4 space-y-2.5">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
@@ -315,12 +315,12 @@ function HostelOccupancyPanel() {
       {loading && <p className="text-sm text-[var(--text-muted)]">Loading…</p>}
       {error && <p className="text-sm text-rose-400">{error}</p>}
       {rows && (
-        <ul className="space-y-3">
+        <ul className="space-y-4">
           {rows.map((r) => {
             const pct = Math.min(100, Math.round((r.count / r.capacity) * 100));
             const full = r.count >= r.capacity;
             return (
-              <li key={r.hostel} className="space-y-1">
+              <li key={r.hostel} className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-mono font-semibold text-[var(--text-primary)]">{r.hostel}</span>
                   <span className="text-[var(--text-muted)]">
@@ -462,9 +462,9 @@ function RecentMovementPanel({ students }: { students: Person[] | null }) {
           {onCampus.length === 0 ? (
             <p className="text-xs text-[var(--text-muted)]">No students with a recent IN scan.</p>
           ) : (
-            <ul className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+            <ul className="space-y-2 sm:space-y-2.5 max-h-48 overflow-y-auto pr-1">
               {onCampus.map((s) => (
-                <li key={s.roll} className="flex items-center justify-between text-xs rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] px-3 py-2 gap-2">
+                <li key={s.roll} className="flex items-center justify-between text-xs rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] px-3 py-2.5 gap-2">
                   <span className="text-[var(--text-primary)] font-medium truncate min-w-0">{s.name}</span>
                   <span className="font-mono text-[var(--text-muted)] shrink-0">{s.roll}</span>
                   <span className="text-emerald-400 flex items-center gap-1 shrink-0">
@@ -505,9 +505,9 @@ function AlertsPanel({ alerts, loading, error }: { alerts: Alert[] | null; loadi
       )}
       {alerts && alerts.length === 0 && !loading && !error && <EmptyState text="No active alerts. All clear." />}
       {alerts && alerts.length > 0 && (
-        <ul className="space-y-2 max-h-64 overflow-y-auto pr-1">
+        <ul className="space-y-3 max-h-64 overflow-y-auto pr-1">
           {alerts.map((a) => (
-            <li key={a.id} className="rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] p-3 flex items-start gap-3">
+            <li key={a.id} className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-3 sm:p-4 flex items-start gap-3">
               <span
                 className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase ${
                   sevColor[a.severity] ?? sevColor.low
@@ -564,9 +564,9 @@ function PresenceMatrixPanel({
           <table className="w-full text-xs">
             <thead>
               <tr>
-                <th className="text-left text-[var(--text-muted)] font-semibold pr-3">Gate</th>
+                <th className="text-left text-[var(--text-muted)] font-semibold pr-3 pb-2">Gate</th>
                 {roles.map((r) => (
-                  <th key={r} className="text-center text-[var(--text-muted)] font-semibold px-1.5">
+                  <th key={r} className="text-center text-[var(--text-muted)] font-semibold px-1.5 pb-2">
                     {r.length > 6 ? `${r.slice(0, 5)}…` : r}
                   </th>
                 ))}
@@ -579,13 +579,13 @@ function PresenceMatrixPanel({
                 const total = roles.reduce((acc, r) => acc + (Number(row[r]) || 0), 0);
                 return (
                   <tr key={g.id} className="border-t border-[var(--border)]">
-                    <td className="py-2 pr-3 font-medium text-[var(--text-primary)]">
+                    <td className="py-2.5 pr-3 font-medium text-[var(--text-primary)]">
                       {g.name || g.code || g.id}
                     </td>
                     {roles.map((r) => {
                       const v = Number(row[r]) || 0;
                       return (
-                        <td key={r} className="text-center px-1.5 py-2">
+                        <td key={r} className="text-center px-1.5 py-2.5">
                           <span
                             className={`inline-block min-w-[1.5rem] rounded px-1 py-0.5 text-center font-mono ${
                               v > 0
@@ -728,7 +728,7 @@ function WardenDashboardInner() {
     passesError || studentsError || alertsError || matrixError;
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-8">
+    <div className="mx-auto max-w-7xl space-y-5 sm:space-y-6 px-4 sm:px-6 py-6 sm:py-8">
       <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2 text-[var(--text-primary)]">
@@ -763,14 +763,14 @@ function WardenDashboardInner() {
       )}
 
       {/* KPI row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
         {kpis.map((k) => (
           <StatCard key={k.label} icon={k.icon} label={k.label} value={k.value} sub={k.sub} accent={k.accent} />
         ))}
       </div>
 
       {/* Main panels */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
         <WidgetBoundary title="Pending Gate Passes">
           <PendingPassesPanel />
         </WidgetBoundary>
@@ -784,7 +784,7 @@ function WardenDashboardInner() {
         </WidgetBoundary>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
         <WidgetBoundary title="Active Alerts">
           <AlertsPanel alerts={alerts} loading={alerts === null} error={alertsError} />
         </WidgetBoundary>
