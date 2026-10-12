@@ -238,7 +238,7 @@ function ExamSuperintendentDashboardInner() {
           ) : queueRows.length === 0 ? (
             <EmptyState message="No pending exam clearance requests. All exam passes have cleared the pipeline." />
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto min-w-0">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-800 text-slate-500 text-xs uppercase tracking-wide">

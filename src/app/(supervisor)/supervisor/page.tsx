@@ -669,7 +669,7 @@ function SupervisorDashboardInner() {
           </div>
 
           {rosterViewMode === "list" ? (
-            <div className="overflow-x-auto bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl">
+            <div className="overflow-x-auto min-w-0 bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl">
               <table className="w-full min-w-[560px] text-left">
                 <thead className="bg-[var(--bg-elevated)] text-[var(--text-muted)] border-b border-[var(--border)] font-mono uppercase">
                   <tr><th className="p-3">Ward Student</th><th className="p-3">Block / Room</th><th className="p-3">Campus Status</th><th className="p-3">Demerits</th><th className="p-3 text-right">Actions</th></tr>

@@ -244,8 +244,8 @@ function PresenceMatrixPanel({
           <p className="text-sm text-[var(--text-muted)] py-4 text-center">No active gates configured.</p>
         )}
         {matrixData && !loading && !error && gates.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs">
+          <div className="overflow-x-auto min-w-0">
+            <table className="w-full text-xs min-w-[560px]">
               <thead>
                 <tr>
                   <th className="text-left text-[var(--text-muted)] font-semibold pr-3 pb-2">Gate</th>
@@ -433,7 +433,7 @@ function PrincipalDashboardInner() {
       )}
 
       {/* KPI row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
         {kpis.map((k) => (
           <StatCard key={k.label} icon={k.icon} label={k.label} value={k.value} sub={k.sub} accent={k.accent} />
         ))}
