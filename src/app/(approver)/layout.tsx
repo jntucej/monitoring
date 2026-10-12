@@ -2,14 +2,12 @@
 
 import React from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import { SafeAreaAppShell } from "@/components/shared/SafeAreaAppShell";
 import type { Role } from "@/lib/types";
 
 const ALLOWED_APPROVER_ROLES: Role[] = [
   "caretaker",
   "deputy_warden",
   "hostel_manager",
-  "principal",
   "principal",
   "vice_principal",
   "hod",
@@ -25,11 +23,5 @@ export default function ApproverLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <AuthGuard allowedRoles={ALLOWED_APPROVER_ROLES}>
-      <SafeAreaAppShell>
-        {children}
-      </SafeAreaAppShell>
-    </AuthGuard>
-  );
+  return <AuthGuard allowedRoles={ALLOWED_APPROVER_ROLES}>{children}</AuthGuard>;
 }
