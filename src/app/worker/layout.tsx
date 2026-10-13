@@ -30,7 +30,10 @@ function WorkerTabs({ children }: { children: React.ReactNode }) {
         <div className="mx-auto max-w-7xl px-4 py-3 md:px-6">
           <ol className="flex flex-wrap items-center gap-1 text-sm">
             {TABS.map((tab) => {
-              const isActive = pathname === tab.href || pathname.startsWith(tab.href + "/");
+              const isActive =
+                "exact" in tab && tab.exact
+                  ? pathname === tab.href
+                  : pathname === tab.href || pathname.startsWith(tab.href + "/");
               return (
                 <li key={tab.href}>
                   {isActive ? (
