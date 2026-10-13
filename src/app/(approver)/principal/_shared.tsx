@@ -69,6 +69,8 @@ export interface OutpassRow {
     student_details?: { roll?: string } | null;
   } | null;
   requested_at?: string;
+  updated_at?: string;
+  created_at?: string;
   expiry?: string | null;
 }
 

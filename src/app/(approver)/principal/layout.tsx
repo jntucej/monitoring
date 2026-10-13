@@ -4,15 +4,30 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+/**
+ * Principal tab bar — covers every section in the institutional spec.
+ * Existing directory-based sections are kept as aliases where a spec
+ * section already had a home (e.g. /principal/departments for Department
+ * Analytics, /principal/incidents for Incident Centre); the new 12
+ * spec sections each get their own tab entry.
+ */
 const TABS = [
   { href: "/principal", label: "Overview" },
+  { href: "/principal/all-pass-requests", label: "All Pass Requests" },
+  { href: "/principal/approval-centre", label: "Approval Centre" },
+  { href: "/principal/departments", label: "Departments" },
+  { href: "/principal/department-analytics", label: "Dept Analytics" },
+  { href: "/principal/hostel-oversight", label: "Hostel" },
+  { href: "/principal/examination-oversight", label: "Exams" },
+  { href: "/principal/incidents", label: "Incidents" },
+  { href: "/principal/delegation-manager", label: "Delegation" },
+  { href: "/principal/permission-management", label: "Permissions" },
+  { href: "/principal/reports", label: "Reports" },
+  { href: "/principal/audit", label: "Audit" },
+  { href: "/principal/emergency-decisions", label: "Emergency" },
   { href: "/principal/attendance", label: "Attendance" },
   { href: "/principal/gate-activity", label: "Gates" },
-  { href: "/principal/departments", label: "Departments" },
-  { href: "/principal/incidents", label: "Incidents" },
-  { href: "/principal/reports", label: "Reports" },
   { href: "/principal/approvals", label: "Approvals" },
-  { href: "/principal/audit", label: "Audit" },
 ] as const;
 
 function isActive(pathname: string, href: string) {
@@ -36,7 +51,10 @@ export default function PrincipalLayout({ children }: { children: React.ReactNod
             return (
               <li key={tab.href} className="shrink-0">
                 {active ? (
-                  <span className="inline-flex items-center rounded-lg bg-[var(--action-primary)]/15 px-3 py-1.5 text-[var(--action-primary)] font-semibold text-xs sm:text-sm">
+                  <span
+                    aria-current="page"
+                    className="inline-flex items-center rounded-lg bg-[var(--action-primary)]/15 px-3 py-1.5 text-[var(--action-primary)] font-semibold text-xs sm:text-sm"
+                  >
                     {tab.label}
                   </span>
                 ) : (

@@ -29,6 +29,19 @@ function AuditContent({
 }) {
   const recent = (records ?? []).slice(0, 20);
 
+  // Decision / rejection / override / delegation events the spec asks for
+  const decisions = (records ?? []).filter((r) =>
+    /EXAM_APPROVAL|APPROVAL|APPROVE|REJECT|OVERRIDE|ESCALAT|DELEGATION/i.test(r.action)
+  );
+  const decisionEvents = decisions.slice(0, 12);
+
+  const resolutionPct = (() => {
+    const total = decisions.length;
+    if (total === 0) return null;
+    const done = decisions.filter((r) => /REJECT|OVERRIDE|COMPLETED|RESOLVED/i.test(r.action)).length;
+    return Math.round((done / total) * 100);
+  })();
+
   return (
     <WidgetBoundary title="Audit & Compliance">
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
@@ -60,6 +73,73 @@ function AuditContent({
                   </span>
                 </div>
                 <p className="text-xs text-[var(--text-muted)] mt-0.5 pl-5 min-w-0">
+                  {r.user?.name || "System"} · {fmtDate(r.timestamp)} {fmtTime(r.timestamp)}
+                  {r.details ? ` · ${r.details}` : ""}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* Decision & escalation history (spec: decisions / rejections / overrides / delegation) */}
+      <div className="mt-5">
+        <div className="flex items-center justify-between mb-2 min-w-0">
+          <span className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+            Decisions, Overrides &amp; Delegations
+          </span>
+          {resolutionPct !== null && (
+            <span className="text-xs text-[var(--text-muted)]">
+              {decisions.length} events · {resolutionPct}% resolved
+            </span>
+          )}
+        </div>
+        {decisionEvents.length === 0 ? (
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] p-3">
+            <p className="text-xs text-[var(--text-muted)]">
+              No approval, rejection, override, or delegation events on record yet. Emergency
+              decisions logged from the{" "}
+              <Link
+                href="/principal/emergency-decisions"
+                className="underline hover:text-[var(--text-primary)]"
+              >
+                Emergency Decisions
+              </Link>{" "}
+              section appear here within one polling cycle.
+            </p>
+          </div>
+        ) : (
+          <ul className="space-y-2 min-w-0">
+            {decisionEvents.map((r) => (
+              <li
+                key={`d-${r.id}`}
+                className="min-w-0 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] p-2.5"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <span
+                    className={`text-[10px] font-bold uppercase shrink-0 rounded-full px-2 py-0.5 ${
+                      /REJECT|OVERRIDE/i.test(r.action)
+                        ? "bg-rose-500/20 text-rose-400"
+                        : /DELEGAT|ESCALAT/i.test(r.action)
+                        ? "bg-sky-500/20 text-sky-400"
+                        : "bg-emerald-500/20 text-emerald-400"
+                    }`}
+                  >
+                    {/DELEGAT/i.test(r.action)
+                      ? "Delegation"
+                      : /OVERRIDE/i.test(r.action)
+                      ? "Override"
+                      : /REJECT/i.test(r.action)
+                      ? "Rejection"
+                      : /ESCALAT/i.test(r.action)
+                      ? "Escalation"
+                      : "Decision"}
+                  </span>
+                  <span className="text-xs text-[var(--text-primary)] font-medium truncate min-w-0 flex-1">
+                    {r.action}
+                  </span>
+                </div>
+                <p className="text-xs text-[var(--text-muted)] mt-1 pl-1 min-w-0">
                   {r.user?.name || "System"} · {fmtDate(r.timestamp)} {fmtTime(r.timestamp)}
                   {r.details ? ` · ${r.details}` : ""}
                 </p>

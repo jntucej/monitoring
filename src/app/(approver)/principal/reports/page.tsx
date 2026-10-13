@@ -77,6 +77,24 @@ function ReportsContent({
           </div>
         )}
 
+        {/* Export note (spec: Reports & Exports) */}
+        <div className="mt-4 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] p-3 sm:p-4">
+          <div className="flex items-center gap-2 mb-1.5">
+            <FileText className="w-4 h-4 text-sky-400 shrink-0" />
+            <span className="text-xs font-semibold text-[var(--text-primary)]">
+              Exports
+            </span>
+          </div>
+          <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+            Institutional report exports (attendance registers, gate-movement logs, permission
+            decision history) are generated on request by the system desk and issued as signed
+            PDFs. To request an export, note the report type, date range, and purpose — exports
+            are audit-logged against your identity. Detailed analytics charts are restricted to
+            the admin tier; use the <span className="text-[var(--text-primary)]">Reports &amp;
+            Exports</span> desk for anything not shown here.
+          </p>
+        </div>
+
         {/* Quick attendance breakdown when available */}
         {s && (
           <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 min-w-0">

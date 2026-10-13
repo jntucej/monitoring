@@ -9,6 +9,7 @@ import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role, GatePass, Alert, Person } from "@/lib/types";
 import { usePolling } from "@/hooks/usePolling";
 import { clearCache } from "@/hooks/useApiResource";
+import Link from "next/link";
 import {
   UserCheck,
   Inbox,
@@ -37,6 +38,7 @@ import {
   AuditRecord,
 } from "./_shared";
 import { QuickActions } from "@/components/shared/QuickActions";
+import { LiveActivityFeed } from "@/components/shared/LiveActivityFeed";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { ApprovalInbox } from "@/components/shared/ApprovalInbox";
 import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
@@ -257,6 +259,42 @@ function PrincipalDashboardInner() {
           />
         </div>
       </div>
+
+      {/* Quick links — all 12 spec sections */}
+      <WidgetBoundary title="Section Quick Links">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
+          {[
+            { href: "/principal/all-pass-requests", label: "All Pass Requests", desc: "Every request at your stage" },
+            { href: "/principal/approval-centre", label: "Approval Centre", desc: "Pending, rejected, overdue, escalated" },
+            { href: "/principal/departments", label: "Departments", desc: "Department directory & HODs" },
+            { href: "/principal/department-analytics", label: "Dept Analytics", desc: "Headcount & turnaround by department" },
+            { href: "/principal/hostel-oversight", label: "Hostel Oversight", desc: "Occupancy, outpasses, escalations" },
+            { href: "/principal/examination-oversight", label: "Examination Oversight", desc: "Exam clearances & analytics" },
+            { href: "/principal/incidents", label: "Incident Centre", desc: "Active alerts & resolution" },
+            { href: "/principal/delegation-manager", label: "Delegation Manager", desc: "Acting authorities & periods" },
+            { href: "/principal/permission-management", label: "Permission Management", desc: "Grant/review/revoke permissions" },
+            { href: "/principal/reports", label: "Reports & Exports", desc: "Institutional reports desk" },
+            { href: "/principal/audit", label: "Audit & Accountability", desc: "Decisions, overrides, delegations" },
+            { href: "/principal/emergency-decisions", label: "Emergency Decisions", desc: "Exceptional, audited exceptions" },
+          ].map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              className="group rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3 hover:bg-[var(--bg-elevated)] hover:border-[var(--action-primary)]/40 transition-colors min-w-0"
+            >
+              <p className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-[var(--action-primary)] transition-colors">
+                {l.label}
+              </p>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">{l.desc}</p>
+            </Link>
+          ))}
+        </div>
+      </WidgetBoundary>
+
+      {/* Live activity feed */}
+      <WidgetBoundary title="Live Activity">
+        <LiveActivityFeed limit={8} />
+      </WidgetBoundary>
 
       {/* Quick panel */}
       <WidgetBoundary title="Quick Panel">

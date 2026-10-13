@@ -15,8 +15,9 @@ import {
   ArrowLeft,
   Siren,
   XCircle,
+  CheckCircle2,
 } from "lucide-react";
-import { fetchJson, fmtTime, fmtDate } from "../_shared";
+import { fetchJson, fmtTime, fmtDate, OutpassRow } from "../_shared";
 
 function IncidentContent({
   alerts,
@@ -94,6 +95,7 @@ function IncidentsInner() {
   const tier = getRoleTier(role);
 
   const [alerts, setAlerts] = useState<Alert[] | null>(null);
+  const [escalated, setEscalated] = useState<OutpassRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
@@ -101,8 +103,12 @@ function IncidentsInner() {
   const refresh = useCallback(async () => {
     setRefreshing(true);
     clearCache();
-    const alertsR = await fetchJson("/api/alerts?resolved=false");
+    const [alertsR, escR] = await Promise.all([
+      fetchJson("/api/alerts?resolved=false"),
+      fetchJson("/api/permissions?status=ESCALATED&limit=25"),
+    ]);
     setAlerts(alertsR.success ? ((alertsR.data as Alert[]) ?? []) : null);
+    setEscalated(escR.success ? ((escR.data as OutpassRow[]) ?? []) : null);
     setError(alertsR.success ? null : alertsR.error?.message ?? "Unknown error");
     setLastRefresh(new Date());
     setRefreshing(false);
@@ -148,6 +154,57 @@ function IncidentsInner() {
         loading={alerts === null && !error && refreshing}
         error={error}
       />
+
+      {/* Escalated requests + resolution progress (spec: escalated + resolution progress) */}
+      <WidgetBoundary title="Escalated Requests & Resolution">
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
+          {escalated === null ? (
+            <div className="animate-pulse space-y-2">
+              <div className="h-4 w-1/2 bg-[var(--bg-elevated)] rounded" />
+            </div>
+          ) : (escalated.length ?? 0) === 0 ? (
+            <div className="flex items-center gap-2 text-emerald-400 text-xs py-3">
+              <CheckCircle2 className="w-3.5 h-3.5" /> No escalations. All incidents resolved within stage.
+            </div>
+          ) : (
+            <>
+              <p className="text-xs text-[var(--text-muted)] mb-3">
+                {(escalated?.length ?? 0)} request(s) have been escalated beyond their stage and need
+                principal intervention.
+              </p>
+              <ul className="space-y-2 min-w-0">
+                {(escalated ?? []).map((r) => (
+                  <li
+                    key={r.id}
+                    className="min-w-0 rounded-lg border border-rose-500/20 bg-rose-500/5 p-2.5 flex items-center gap-2"
+                  >
+                    <Siren className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                    <span className="font-mono text-xs text-[var(--text-primary)] shrink-0">
+                      {r.ticket_number}
+                    </span>
+                    <span className="text-xs text-[var(--text-primary)] truncate min-w-0 flex-1">
+                      {r.student?.name || "—"}
+                    </span>
+                    <span className="text-[10px] text-[var(--text-muted)] uppercase shrink-0">
+                      {r.workflow_type.replace(/_/g, " ")}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="text-xs text-[var(--text-muted)] mt-3 pt-3 border-t border-[var(--border)]">
+                Resolution progress and decisions are logged in the{" "}
+                <Link
+                  href="/principal/audit"
+                  className="underline hover:text-[var(--text-primary)]"
+                >
+                  Audit &amp; Accountability
+                </Link>{" "}
+                section.
+              </p>
+            </>
+          )}
+        </div>
+      </WidgetBoundary>
 
       <DevContactStrip />
     </div>
