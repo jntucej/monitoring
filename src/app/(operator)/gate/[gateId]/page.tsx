@@ -647,7 +647,11 @@ function OperatorPageInner() {
               <span className="hidden sm:inline">Voice</span>
             </button>
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--bg-base)] border border-[var(--border)] text-[10px] text-[var(--text-secondary)]">
-              <span className="font-bold text-emerald-400">Online</span>
+              {(operatorStore.gate?.isOnline ?? true) ? (
+                <span className="font-bold text-emerald-400">Online</span>
+              ) : (
+                <span className="font-bold text-rose-400">Offline</span>
+              )}
             </div>
           </div>
         </div>

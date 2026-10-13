@@ -357,6 +357,9 @@ export type DepartmentCode = string;
   location: string;
   type: string;
   isActive: boolean;
+  /** Live operational status: true when the gate has an active operator
+   *  session or recent scan traffic. Falls back to isActive when unknown. */
+  isOnline?: boolean;
   latitude?: number;
   longitude?: number;
   allowedRadiusMeters?: number;

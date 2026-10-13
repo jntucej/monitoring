@@ -275,7 +275,24 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
     const directionToUse = overrideDirection || get().selectedDirection;
     const reasonToUse = (overrideReason as ExitReason) || get().selectedReason;
     const uniqueId = currentStudent.uniqueId || currentStudent.roll || "";
-    const operatorId = useAuthStore.getState().user?.id || "op-1";
+    const authState = useAuthStore.getState();
+    const operatorId = authState.user?.id || "op-1";
+    const resolvedGateId = get().gate?.id || get().gateId || authState.user?.gateId || "";
+    if (!resolvedGateId) {
+      playAudioFeedback("error");
+      addToast({
+        variant: "error",
+        title: "No Gate Assigned",
+        message: "This operator account has no gate assignment. Ask your supervisor or sysadmin to assign a gate, then sign in at that gate's kiosk.",
+      });
+      set({
+        error: {
+          message: "No gate assigned to this operator. A gate must be assigned before scans can be recorded.",
+          code: "NO_GATE_ASSIGNED",
+        },
+      });
+      return;
+    }
 
     // Async execution with GPS geolocation & sysTag telemetry with strict 5s timeout
     return (async () => {
@@ -299,7 +316,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
           body: JSON.stringify({ clientEventId: crypto.randomUUID(), roll: uniqueId,
             direction: directionToUse,
             reason: reasonToUse || (directionToUse === "OUT" ? "Regular" : undefined),
-            gateId: get().gate?.id || get().gateId || useAuthStore.getState().user?.gateId || "gate-1",
+            gateId: resolvedGateId,
             operatorId,
             isManual: false,
             sysTag,

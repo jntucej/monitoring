@@ -13,7 +13,7 @@ function timeAgo(iso: string): string {
 }
 
 interface GateCardProps {
-  gate: Gate & { currentScanCount: number; lastScan: { timestamp: string } | null };
+  gate: Gate & { currentScanCount: number; lastScan: { timestamp: string } | null; isOnline?: boolean };
 }
 
 export function GateCard({ gate }: GateCardProps) {
@@ -24,9 +24,9 @@ export function GateCard({ gate }: GateCardProps) {
     >
       <div className="flex items-center justify-between mb-1 sm:mb-2">
         <span className="font-semibold text-xs sm:text-sm text-[var(--text-primary)] group-hover:text-emerald-400 transition-colors">{gate.name}</span>
-        <span className={`inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold uppercase ${gate.isActive ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-rose-500/10 text-rose-400 border border-rose-500/20"}`}>
-          <span className={`w-1 h-1.5 sm:w-1.5 sm:h-1.5 rounded-full ${gate.isActive ? "bg-emerald-400 animate-pulse" : "bg-rose-400"}`} />
-          {gate.isActive ? "Online" : "Offline"}
+        <span className={`inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold uppercase ${(gate.isOnline ?? gate.isActive) ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-rose-500/10 text-rose-400 border border-rose-500/20"}`}>
+          <span className={`w-1 h-1.5 sm:w-1.5 sm:h-1.5 rounded-full ${(gate.isOnline ?? gate.isActive) ? "bg-emerald-400 animate-pulse" : "bg-rose-400"}`} />
+          {(gate.isOnline ?? gate.isActive) ? "Online" : "Offline"}
         </span>
       </div>
       <p className="text-[10px] sm:text-[11px] text-[var(--text-muted)] mb-1 sm:mb-2">{gate.location}</p>
@@ -41,7 +41,7 @@ export function GateCard({ gate }: GateCardProps) {
 }
 
 interface GateCardsGridProps {
-  locations: (Gate & { currentScanCount: number; lastScan: { timestamp: string } | null })[];
+  locations: (Gate & { currentScanCount: number; lastScan: { timestamp: string } | null; isOnline?: boolean })[];
 }
 
 export function GateCardsGrid({ locations }: GateCardsGridProps) {
