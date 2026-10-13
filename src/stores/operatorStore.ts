@@ -325,7 +325,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
           signal: controller.signal,
           body: JSON.stringify({ clientEventId: crypto.randomUUID(), roll: uniqueId,
             direction: directionToUse,
-            reason: reasonToUse || (directionToUse === "OUT" ? "Regular" : undefined),
+            reason: reasonToUse || (directionToUse === "OUT" ? "daily_outing" : undefined),
             gateId: resolvedGateId,
             operatorId,
             isManual: false,

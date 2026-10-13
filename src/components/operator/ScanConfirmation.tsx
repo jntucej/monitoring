@@ -228,12 +228,26 @@ export function ScanConfirmation({
     icon: reasonIcons[config.code] || Briefcase,
   }));
 
+  // Entry (IN) options. Only two reasons exist for coming in:
+  //   - Daily Outing: day scholars entering for the day (24h window).
+  //     Also permitted for hostelers doing a short day trip out.
+  //   - Home In: return to campus from a home visit.
+  // IN never requires a gate pass (server returns early on direction "IN").
   const inActions: ActionEntry[] = [
     {
-      code: "Regular",
-      name: "Entry",
+      code: "daily_outing",
+      name: "Daily Outing",
       direction: "IN",
-      icon: LogIn,
+      icon: Sun,
+      applicableTo: ["HM", "HF", "DM", "DF"],
+      requiresApproval: false,
+      parentNotification: false,
+    },
+    {
+      code: "home_in",
+      name: "Home In",
+      direction: "IN",
+      icon: Home,
       applicableTo: ["HM", "HF", "DM", "DF"],
       requiresApproval: false,
       parentNotification: false,
