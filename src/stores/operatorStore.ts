@@ -352,7 +352,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
             title: "Duplicate Scan",
             message: `Duplicate scan detected. Same student scanned recently.`,
           });
-          set({ state: "error", error: { message: "Duplicate scan detected", code: "DUPLICATE" } });
+          set({ state: "error", error: { message: "Duplicate scan detected", code: "DUPLICATE", retryable: true } });
           return null;
         }
         // Handle session expiry — log out and redirect to login
@@ -369,20 +369,54 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
       .then((result) => {
         if (get()._scanGeneration !== gen) return;
         if (!result) return;
-        if (result?.duplicate) {
+
+        // /api/gate/scan success shape: { data: { scan, isDuplicate, person } }
+        // Failure shapes: { error, message } (fail()) or { success:false, error:{code,message} } (auth).
+        const payload = result.data;
+
+        // A duplicate still inserted/returned the pre-existing row — the
+        // movement is already on record, so surface it as a success with a
+        // "duplicate" note rather than an error (avoids the confusing
+        // "failed but movement recorded" state).
+        if (payload?.isDuplicate) {
           playAudioFeedback("warning");
           addToast({
-            variant: "error",
+            variant: "warning",
             title: "Duplicate Scan",
-            message: `This student was already scanned ${directionToUse === "OUT" ? "out" : "in"} recently.`,
+            message: `This student was already scanned ${directionToUse === "OUT" ? "out" : "in"} recently — using the existing record.`,
           });
-          set({ state: "error", error: { message: "Duplicate scan detected — wait a moment, then retry.", code: "DUPLICATE", retryable: true } });
+          const dupScan = payload.scan ?? null;
+          set({
+            state: "success",
+            lastScan: dupScan,
+            recentScans: dupScan ? [dupScan, ...get().recentScans.slice(0, 4)] : get().recentScans,
+            error: null,
+          });
           return;
         }
 
-        if (!result?.success) {
+        // Any top-level error (fail() / auth layer) → error state
+        if (result.error || result.success === false) {
+          const msg = result.error?.message || result.message || result.error?.code || "Scan failed";
           playAudioFeedback("error");
-          throw new Error(result?.error?.message || "Scan failed");
+          set({
+            state: "error",
+            currentStudent: null,
+            error: { message: msg, code: result.error?.code || "ERROR", retryable: true },
+          });
+          addToast({ variant: "error", title: "Scan Failed", message: msg });
+          return;
+        }
+
+        // Success: a valid { data } payload means the movement was recorded
+        if (payload === undefined) {
+          playAudioFeedback("error");
+          set({
+            state: "error",
+            currentStudent: null,
+            error: { message: "Scan failed — no data returned.", code: "UNKNOWN", retryable: true },
+          });
+          return;
         }
 
         playAudioFeedback("success");
@@ -401,11 +435,12 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
             }
           : null;
 
+        const scan = payload.scan ?? null;
         set({
           state: "success",
-          lastScan: result.scan ?? null,
+          lastScan: scan,
           todaysStats: newStats,
-          recentScans: result.scan ? [result.scan, ...get().recentScans.slice(0, 4)] : get().recentScans,
+          recentScans: scan ? [scan, ...get().recentScans.slice(0, 4)] : get().recentScans,
           error: null,
         });
       })
