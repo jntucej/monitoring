@@ -5,6 +5,7 @@ import { Ticket, Clock, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import type { GatePass, GatePassStatus } from "@/lib/types";
 import { getPassTypeName } from "@/hooks/usePassTypes";
 import { useApi } from "@/hooks/useApi";
+import { useAuthStore } from "@/stores/authStore";
 
 function statusStyle(status: string) {
   if (status === "APPROVED" || status === "COMPLETED") {

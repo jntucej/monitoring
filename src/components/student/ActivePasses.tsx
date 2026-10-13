@@ -4,6 +4,7 @@ import { Ticket, Loader2, Clock, CheckCircle2, XCircle } from "lucide-react";
 import type { GatePass } from "@/lib/types";
 import { getPassTypeName } from "@/hooks/usePassTypes";
 import { useApi } from "@/hooks/useApi";
+import { useAuthStore } from "@/stores/authStore";
 
 function expiryLabel(to: string, status: string): string {
   if (status === "REJECTED") return "Rejected";
@@ -34,8 +35,7 @@ const api = useApi();
     const load = async () => {
       try {
         const auth = useAuthStore.getState();
-        const auth = auth ? JSON.parse(auth) : null;
-        const roll = auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll ?? auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll;
+        const roll = auth?.user?.uniqueId;
         if (!roll) {
           if (!cancelled) setLoading(false);
           return;

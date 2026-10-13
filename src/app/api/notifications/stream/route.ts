@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { getNotifications } from "@/lib/db";
+import { err } from "@/lib/api-response";
 
 // SSE stream: securely streams user notifications with ping keepalive and session IDOR guards
 async function handleGet(req: NextRequest) {

@@ -7,6 +7,7 @@ import { useUIStore } from "@/stores/uiStore";
 import type { GatePass } from "@/lib/types";
 import { usePassTypes, getPassTypeName } from "@/hooks/usePassTypes";
 import { useApi } from "@/hooks/useApi";
+import { useAuthStore } from "@/stores/authStore";
 
 export default function StudentPassesPage() {
 const api = useApi();
@@ -76,13 +77,7 @@ const api = useApi();
   const getStudentRoll = (): string | null => {
     if (typeof window === "undefined") return null;
     const auth = useAuthStore.getState();
-    if (!auth) return null;
-    try {
-      const auth = JSON.parse(auth);
-      return auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll ?? auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll ?? null;
-    } catch {
-      return null;
-    }
+    return auth?.user?.uniqueId ?? null;
   };
 
   const loadPasses = async () => {

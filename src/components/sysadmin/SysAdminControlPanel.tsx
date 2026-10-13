@@ -54,7 +54,7 @@ const api = useApi();
     setIsSyncing(true);
     setTelemetryError(false);
     try {
-      const headers = getAuthHeaders();
+      const headers = api.getHeaders();
       let auditOk = false;
 
       // Fetch Recent Audit Logs & Count

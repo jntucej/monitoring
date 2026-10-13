@@ -21,7 +21,7 @@ const api = useApi();
       const auth = authRaw ? JSON.parse(authRaw) : null;
       const parentId = auth?.state?.user?.id ?? auth?.user?.id ?? "pa-1";
 
-      const res = await fetch(`/api/students?parentId=${parentId}`, { headers: getAuthHeaders(), cache: "no-store" });
+      const res = await fetch(`/api/students?parentId=${parentId}`, { headers: api.getHeaders(), cache: "no-store" });
       if (!res.ok) {
         setError(true);
         setLoading(false);
@@ -38,7 +38,7 @@ const api = useApi();
           const roll = k.uniqueId || k.roll || "";
           if (!roll) return;
           try {
-            const r = await fetch(`/api/persons/${encodeURIComponent(roll)}`, { headers: getAuthHeaders(), cache: "no-store" });
+            const r = await fetch(`/api/persons/${encodeURIComponent(roll)}`, { headers: api.getHeaders(), cache: "no-store" });
             const j = await r.json();
             // persons API returns { person, campusStatus, lastScan, history }
             stat[roll] = j?.data?.campusStatus

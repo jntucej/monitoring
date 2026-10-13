@@ -96,14 +96,19 @@ CREATE SEQUENCE IF NOT EXISTS public.memo_ticket_seq START 1001;
 CREATE SEQUENCE IF NOT EXISTS public.staff_leave_ticket_seq START 1001;
 
 -- 9. Triggers for updated_at on new tables
+-- DROP IF EXISTS first: CREATE TRIGGER has no IF NOT EXISTS, so a re-run of
+-- this migration would fail with "trigger already exists".
+DROP TRIGGER IF EXISTS trg_permission_requests_updated_at ON public.permission_requests;
 CREATE TRIGGER trg_permission_requests_updated_at
   BEFORE UPDATE ON public.permission_requests
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+DROP TRIGGER IF EXISTS trg_device_verification_settings_updated_at ON public.device_verification_settings;
 CREATE TRIGGER trg_device_verification_settings_updated_at
   BEFORE UPDATE ON public.device_verification_settings
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+DROP TRIGGER IF EXISTS trg_document_templates_updated_at ON public.document_templates;
 CREATE TRIGGER trg_document_templates_updated_at
   BEFORE UPDATE ON public.document_templates
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();

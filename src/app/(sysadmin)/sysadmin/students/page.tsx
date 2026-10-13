@@ -70,7 +70,7 @@ const api = useApi();
   const loadParents = useCallback(async () => {
     try {
       const res = await fetch(`/api/parents?role=guardian&includeUnlinked=true`, {
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
         cache: "no-store",
       });
       const json = await res.json().catch(() => ({ success: false, data: [] }));
@@ -93,7 +93,7 @@ const api = useApi();
     try {
       const res = await fetch("/api/parents/link", {
         method: "POST",
-        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        headers: { ...api.getHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({ studentId: linkStudent.id, parentUserId: selectedParentId }),
       });
       const json = await res.json().catch(() => ({ success: false }));

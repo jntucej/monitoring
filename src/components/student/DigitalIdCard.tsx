@@ -4,6 +4,7 @@ import { QrCode, Loader2, AlertCircle, Download } from "lucide-react";
 import { QRCode } from "react-qrcode-logo";
 import { parseRollNumber } from "@/lib/rollNumber";
 import { useApi } from "@/hooks/useApi";
+import { useAuthStore } from "@/stores/authStore";
 import type { Student } from "@/lib/types";
 
 export function DigitalIdCard() {
@@ -28,8 +29,7 @@ const api = useApi();
     const load = async () => {
       try {
         const auth = useAuthStore.getState();
-        const auth = auth ? JSON.parse(auth) : null;
-        const roll = auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll ?? auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll;
+        const roll = auth?.user?.uniqueId;
         if (!roll) {
           if (!cancelled) {
             setError("No student roll number found in session. Please log in again.");

@@ -51,10 +51,13 @@ type Tab = "personal" | "security" | "appearance";
  * ------------------------------------------------------------------ */
 function authHeaders(): Record<string, string> {
   if (typeof window === "undefined") return {};
-  const utilHeaders = api.getHeaders();
-  if (Object.keys(utilHeaders).length > 0) return utilHeaders;
+  // Read the auth store directly (no React hook needed in an event handler)
+  const state = useAuthStore.getState();
+  const token = state.token;
+  if (token) return { Authorization: `Bearer ${token}` };
 
-  const token =
+  // Fallback: try localStorage (legacy storage)
+  const legacyToken =
     localStorage.getItem("auth-token") ||
     sessionStorage.getItem("auth-token") ||
     (() => {
@@ -65,7 +68,7 @@ function authHeaders(): Record<string, string> {
         return null;
       }
     })();
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  return legacyToken ? { Authorization: `Bearer ${legacyToken}` } : {};
 }
 
 function roleLabel(role: string): string {

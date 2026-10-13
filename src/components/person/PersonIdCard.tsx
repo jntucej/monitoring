@@ -5,6 +5,7 @@ import { QRCode } from "react-qrcode-logo";
 import { parseRollNumber } from "@/lib/rollNumber";
 import type { Person } from "@/lib/types";
 import { getAvatarPlaceholder } from "@/lib/utils";
+import { useAuthStore } from "@/stores/authStore";
 
 import { PersonBadge } from "@/components/shared/PersonBadge";
 
@@ -28,8 +29,7 @@ export function PersonIdCard({ person: initialPerson, type }: PersonIdCardProps 
     const load = async () => {
       try {
         const auth = useAuthStore.getState();
-        const auth = auth ? JSON.parse(auth) : null;
-        const uniqueId = auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll ?? auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll;
+        const uniqueId = auth?.user?.uniqueId;
         if (!uniqueId) {
           if (!cancelled) setLoading(false);
           return;

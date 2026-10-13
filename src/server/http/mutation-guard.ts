@@ -14,8 +14,9 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { withAuthorization, type AuthorizationOptions } from "@/middleware/authorization";
-import { withRateLimit, type RateLimitConfig } from "@/lib/rate-limit";
+import { withRateLimit, type RateLimitConfig, checkRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
 import type { AuthContext } from "@/lib/authContext";
 
@@ -48,10 +49,32 @@ export function withRateLimitByUser(
 ): Handler {
   return async (req, ctx) => {
     const key = `user:${ctx.auth.userId}`;
-    const limited = await withRateLimit(
-      async () => handler(req, ctx),
-      config,
-    )(req as NextRequest, key as unknown as string);
-    return limited;
+    const result = await checkRateLimit(key, config);
+    if (result.limited) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "RATE_LIMIT_EXCEEDED",
+            message: "Too many requests. Please try again later.",
+            resetAt: result.resetTime.toISOString(),
+          },
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": (result.retryAfter || 60).toString(),
+            "X-RateLimit-Limit": (config.maxRequests || 60).toString(),
+            "X-RateLimit-Remaining": "0",
+            "X-RateLimit-Reset": result.resetTime.toISOString(),
+          },
+        },
+      );
+    }
+    const response = await handler(req, ctx);
+    response.headers.set("X-RateLimit-Limit", (config.maxRequests || 60).toString());
+    response.headers.set("X-RateLimit-Remaining", result.remaining.toString());
+    response.headers.set("X-RateLimit-Reset", result.resetTime.toISOString());
+    return response;
   };
 }

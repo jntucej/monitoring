@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { ArrowRight, ArrowLeft, Loader2, Filter } from "lucide-react";
 import type { Scan } from "@/lib/types";
 import { useApi } from "@/hooks/useApi";
+import { useAuthStore } from "@/stores/authStore";
 
 export default function StudentHistoryPage() {
 const api = useApi();
@@ -16,8 +17,7 @@ const api = useApi();
     const load = async () => {
       try {
         const auth = useAuthStore.getState();
-        const auth = auth ? JSON.parse(auth) : null;
-        const roll = auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll ?? auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll;
+        const roll = auth?.user?.uniqueId;
         if (!roll) {
           if (!cancelled) setLoading(false);
           return;

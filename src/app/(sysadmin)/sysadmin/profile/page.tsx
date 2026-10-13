@@ -69,7 +69,8 @@ const api = useApi();
 }
 
 function SysAdminProfileDashboard() {
-  const { addToast } = useUIStore();
+const api = useApi();
+  const { addToast} = useUIStore();
   const { user: authUser, setUser } = useAuthStore();
 
   const [profile, setProfile] = useState<SysAdminProfile | null>(null);
