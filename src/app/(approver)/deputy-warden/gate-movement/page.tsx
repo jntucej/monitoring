@@ -45,10 +45,10 @@ function DeputyWardenGatemovementInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       {/* Back link */}
       <Link
-        href="/deputy-warden"
+        href="/deputy-warden/daily-overview"
         className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
       >
-        <ArrowRight className="w-3 h-3 rotate-180" /> Back to Warden Overview
+        <ArrowRight className="w-3 h-3 rotate-180" /> Back to Daily Overview
       </Link>
 
       {/* Page toolbar */}

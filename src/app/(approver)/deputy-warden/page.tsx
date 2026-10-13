@@ -155,11 +155,25 @@ function DeputyWardenInner() {
         </button>
       </div>
 
+      {/* Authority scope note */}
+      <WidgetBoundary title="Authority Scope">
+        <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 min-w-0">
+            <ShieldCheck className="w-5 h-5 text-sky-400 shrink-0" />
+            <p className="text-sm text-slate-300 min-w-0">
+              Deputy-warden approvals are effective only <span className="font-semibold text-sky-300">within an explicit delegation or standing policy scope</span> issued by the
+              principal/warden. Without recorded delegation data, review actions surface as
+              read-only here and are escalated to the warden stage.
+            </p>
+          </div>
+        </div>
+      </WidgetBoundary>
+
       {/* KPI row */}
       <WidgetBoundary title="Deputy Warden Overview">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
           <StatCard icon={UserCheck} label="On Campus Total" value={'live presence matrix'} sub="People inside all active gates" accent="text-emerald-400" loading={presenceLoading && !presence} />
-          <StatCard icon={Inbox} label="Pending Review" value={outpassTotal} sub="Outpass items awaiting warden stage" accent="text-amber-400" loading={outpassLoading && !outpass} />
+          <StatCard icon={Inbox} label="Pending at Warden Stage" value={outpassTotal} sub="Hostel / outpass items awaiting warden review" accent="text-amber-400" loading={outpassLoading && !outpass} />
           <StatCard icon={AlertTriangle} label="Pending Leaves" value={leavesTotal} sub="Staff-leave items awaiting review" accent="text-sky-400" loading={leavesLoading && !leaves} />
           <StatCard icon={ShieldCheck} label="Active Gates" value="live presence matrix" sub="Gates reporting to presence matrix" accent="text-white" loading={presenceLoading && !presence} />
         </div>
@@ -167,15 +181,16 @@ function DeputyWardenInner() {
 
       {/* Section quick-links */}
       <WidgetBoundary title="Sections">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
-          <SectionLink href="/deputy-warden/attendance" title="Attendance" sub="Resident attendance by gate" />
-          <SectionLink href="/deputy-warden/outpass" title="Outpass" sub="Outpass requests at warden stage" />
-          <SectionLink href="/deputy-warden/leave" title="Leave" sub="Staff-leave requests at warden stage" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 min-w-0">
+          <SectionLink href="/deputy-warden/daily-overview" title="Daily Overview" sub="KPI row and authority scope" />
+          <SectionLink href="/deputy-warden/resident-attendance" title="Resident Attendance" sub="Resident attendance by gate" />
+          <SectionLink href="/deputy-warden/outpass-queue" title="Outpass Queue" sub="Outpass and hostel pass requests at warden stage" />
+          <SectionLink href="/deputy-warden/leave-requests" title="Leave Requests" sub="Staff-leave requests awaiting review" />
           <SectionLink href="/deputy-warden/gate-movement" title="Gate Movement" sub="Live gate presence and movement" />
-          <SectionLink href="/deputy-warden/incidents" title="Incidents" sub="Incident recording and escalation" />
-          <SectionLink href="/deputy-warden/handover" title="Handover" sub="Shift handover notes" />
-          <SectionLink href="/deputy-warden/approvals" title="Approvals" sub="Warden-stage approval queue" />
-          <SectionLink href="/deputy-warden/history" title="History" sub="Past gate activity and approvals" />
+          <SectionLink href="/deputy-warden/incident-reporting" title="Incident Reporting" sub="Incident recording and escalation" />
+          <SectionLink href="/deputy-warden/shift-handover" title="Shift Handover" sub="Shift handover notes" />
+          <SectionLink href="/deputy-warden/delegated-approvals" title="Delegated Approvals" sub="Delegation-scoped approval queue" />
+          <SectionLink href="/deputy-warden/decision-history" title="Decision History" sub="Past gate activity and approval decisions" />
         </div>
       </WidgetBoundary>
 
