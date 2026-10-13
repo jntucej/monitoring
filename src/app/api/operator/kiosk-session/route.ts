@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/postgres";
 import { withRateLimit, extractClientIp } from "@/lib/rate-limit";
 import { signAccessToken, signRefreshToken } from "@/lib/auth-token";
+import crypto from "crypto";
 import { addAudit } from "@/lib/db";
 import { findKioskDefaultOperator, resolveKioskGateId } from "@/lib/kiosk-operator";
 import type { Role } from "@/lib/types";
@@ -78,7 +79,24 @@ async function handleKioskSession(req: NextRequest) {
       roles,
     });
 
-    // 5. Audit every session issue.
+    // 5. Persist a session row so the gate-online detector (getGateOnlineIds)
+    //    sees the kiosk as a live desk for this gate — otherwise the gate
+    //    would always read as "offline" to admin/sysadmin dashboards.
+    const kioskSessionId = crypto.randomUUID();
+    const kioskRefreshHash = crypto.createHash("sha256").update(refreshToken).digest("hex");
+    try {
+      await query(
+        `INSERT INTO sessions (id, user_id, refresh_hash, expires_at, created_at)
+         VALUES ($1, $2, $3, NOW() + INTERVAL '30 days', NOW())
+         ON CONFLICT (id) DO UPDATE SET refresh_hash = $3, revoked_at = NULL`,
+        [kioskSessionId, operator.id, kioskRefreshHash]
+      );
+    } catch (sessionErr) {
+      // Sessions are a soft signal — a failure here should not block kiosk sign-in.
+      console.error("[kiosk-session] session row insert failed:", sessionErr);
+    }
+
+    // 6. Audit every session issue.
     await addAudit({
       action: "OPERATOR_KIOSK_SESSION",
       userId: operator.id,
