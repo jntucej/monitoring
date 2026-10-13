@@ -4,101 +4,125 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, X } from "lucide-react";
-import {
-  ShieldCheck,
-  LayoutDashboard,
-  Users,
-  UserCheck,
-  Building2,
-  Activity,
-  ShieldAlert,
-  Landmark,
-  Database,
-  Clock,
-  Sparkles,
-  Lock,
-  DoorOpen,
-  Bell,
-  Layout,
-  GraduationCap,
-  Briefcase,
-  LogOut,
-  Server,
-  MessageSquarePlus,
-  Cpu,
-  KeyRound,
-} from "lucide-react";
+import { Menu, X, ShieldCheck, LogOut } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
-import { useUIStore } from "@/stores/uiStore";
 import { GlassThemeToggle } from "@/components/shared/GlassThemeToggle";
 
-const NAV = [
-  {
-    group: "System Governance",
-    items: [
-      { href: "/sysadmin", label: "System Overview", icon: LayoutDashboard },
-      { href: "/sysadmin/students", label: "Manage Students", icon: GraduationCap },
-      { href: "/sysadmin/parents", label: "Parents & Guardians", icon: Users },
-      { href: "/sysadmin/access-keys", label: "Access Keys", icon: KeyRound },
-      { href: "/sysadmin/staff", label: "Manage Staff", icon: Briefcase },
-      { href: "/sysadmin/roles", label: "Roles & Permissions", icon: UserCheck },
-      { href: "/sysadmin/audit", label: "Audit Telemetry", icon: ShieldAlert },
-      { href: "/sysadmin/departments", label: "Departments & HOD", icon: Building2 },
-      { href: "/sysadmin/promotions", label: "Role Promotions", icon: Users },
-      { href: "/sysadmin/sessions", label: "Active Sessions", icon: Lock },
-      { href: "/sysadmin/health", label: "System Health", icon: Activity },
-      { href: "/sysadmin/infrastructure", label: "Infrastructure Monitoring", icon: Server },
-    ],
-  },
-  {
-    group: "Records & Alumni",
-    items: [
-      { href: "/sysadmin/alumni", label: "Alumni & Deprovision", icon: GraduationCap },
-    ],
-  },
-  {
-    group: "Integrations & Automation",
-    items: [
-      { href: "/sysadmin/sso", label: "SSO Configuration", icon: Landmark },
-      { href: "/sysadmin/integrations", label: "Integration Hub", icon: Database },
-      { href: "/sysadmin/jobs", label: "Scheduled Jobs", icon: Clock },
-      { href: "/sysadmin/scheduling", label: "Smart Scheduling", icon: Sparkles },
-      { href: "/sysadmin/gates", label: "Gates & Access", icon: DoorOpen },
-    ],
-  },
-  {
-    group: "Security & Policy",
-    items: [
-      { href: "/sysadmin/security", label: "Zero-Trust Security", icon: ShieldCheck },
-      { href: "/sysadmin/compliance", label: "Compliance & Retention", icon: Landmark },
-      { href: "/sysadmin/exit-reasons", label: "Exit Reasons", icon: DoorOpen },
-      { href: "/sysadmin/reasons", label: "Custom Reasons", icon: MessageSquarePlus },
-      { href: "/sysadmin/devices", label: "Device Verification", icon: Cpu },
+/**
+ * Spec section tabs (main bar): 10 spec sections mapped onto the existing
+ * sysadmin tree. Everything else stays reachable under "More" overflow
+ * groups so no existing route is orphaned.
+ */
+const SPEC_TABS = [
+  { href: "/sysadmin/health", label: "Server Health", icon: "▨" },
+  { href: "/sysadmin/application-health", label: "Application Health", icon: "⚙" },
+  { href: "/sysadmin/docker-services", label: "Docker & Services", icon: "⬢" },
+  { href: "/sysadmin/database-health", label: "Database Health", icon: "🗄" },
+  { href: "/sysadmin/redis-worker", label: "Redis & Worker", icon: "⚡" },
+  { href: "/sysadmin/deployments", label: "Deployment History", icon: "⇣" },
+  { href: "/sysadmin/backup", label: "Backup Status", icon: "⎙" },
+  { href: "/sysadmin/alerts", label: "Monitoring & Alerts", icon: "🔔" },
+  { href: "/sysadmin/security", label: "Infrastructure Security", icon: "🛡" },
+  { href: "/sysadmin/audit", label: "Technical Audit Logs", icon: "📜" },
+] as const;
 
-      { href: "/sysadmin/alerts/rules", label: "Alert Rules", icon: Bell },
-      { href: "/sysadmin/navigation", label: "Navigation Editor", icon: Layout },
+const MORE_GROUPS = [
+  {
+    label: "People & Records",
+    items: [
+      { href: "/sysadmin/students", label: "Manage Students" },
+      { href: "/sysadmin/parents", label: "Parents & Guardians" },
+      { href: "/sysadmin/staff", label: "Manage Staff" },
+      { href: "/sysadmin/roles", label: "Roles & Permissions" },
+      { href: "/sysadmin/departments", label: "Departments & HOD" },
+      { href: "/sysadmin/promotions", label: "Role Promotions" },
+      { href: "/sysadmin/alumni", label: "Alumni & Deprovision" },
+      { href: "/sysadmin/sessions", label: "Active Sessions" },
+      { href: "/sysadmin/access-keys", label: "Access Keys" },
     ],
   },
-];
+  {
+    label: "Data & Integrations",
+    items: [
+      { href: "/sysadmin/data", label: "Data & Backups" },
+      { href: "/sysadmin/integrations", label: "Integration Hub" },
+      { href: "/sysadmin/jobs", label: "Scheduled Jobs" },
+      { href: "/sysadmin/scheduling", label: "Smart Scheduling" },
+      { href: "/sysadmin/gates", label: "Gates & Access" },
+      { href: "/sysadmin/sso", label: "SSO Configuration" },
+      { href: "/sysadmin/infrastructure", label: "Host Telemetry" },
+    ],
+  },
+  {
+    label: "Policy & Platform",
+    items: [
+      { href: "/sysadmin/compliance", label: "Compliance & Retention" },
+      { href: "/sysadmin/exit-reasons", label: "Exit Reasons" },
+      { href: "/sysadmin/reasons", label: "Custom Reasons" },
+      { href: "/sysadmin/devices", label: "Device Verification" },
+      { href: "/sysadmin/alerts/rules", label: "Alert Rules" },
+      { href: "/sysadmin/navigation", label: "Navigation Editor" },
+      { href: "/sysadmin/system", label: "System" },
+    ],
+  },
+] as const;
 
 // Shared nav list — renders once for the desktop sidebar and the mobile drawer
 function NavList({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   const isActive = (href: string) =>
-    href === "/sysadmin" ? pathname === "/sysadmin" : pathname?.startsWith(href);
+    href === "/sysadmin" ? pathname === href : pathname?.startsWith(href);
 
   return (
     <nav className="flex-1 overflow-y-auto p-3 space-y-5">
-      {NAV.map((group) => (
-        <div key={group.group}>
+      {/* Spec sections — the main bar */}
+      <div>
+        <p className="px-3 pb-1.5 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">
+          System Sections
+        </p>
+        <div className="space-y-0.5">
+          <Link
+            href="/sysadmin"
+            onClick={onNavigate}
+            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] ${
+              isActive("/sysadmin")
+                ? "bg-rose-600/15 text-rose-400 ring-1 ring-rose-500/30"
+                : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
+            }`}
+          >
+            <span className="w-4 text-center text-xs">⌂</span>
+            <span className="truncate">System Overview</span>
+          </Link>
+          {SPEC_TABS.map((tab) => {
+            const active = isActive(tab.href);
+            return (
+              <Link
+                key={tab.href}
+                href={tab.href}
+                onClick={onNavigate}
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] ${
+                  active
+                    ? "bg-rose-600/15 text-rose-400 ring-1 ring-rose-500/30"
+                    : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
+                }`}
+              >
+                <span className="w-4 text-center text-xs">{tab.icon}</span>
+                <span className="truncate">{tab.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* More overflow — grouped extras, all existing routes preserved */}
+      {MORE_GROUPS.map((group) => (
+        <div key={group.label}>
           <p className="px-3 pb-1.5 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">
-            {group.group}
+            {group.label}
           </p>
           <div className="space-y-0.5">
             {group.items.map((item) => {
               const active = isActive(item.href);
-              const Icon = item.icon;
               return (
                 <Link
                   key={item.href}
@@ -110,7 +134,6 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
                       : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
                   }`}
                 >
-                  <Icon className="w-4 h-4 shrink-0" />
                   <span className="truncate">{item.label}</span>
                 </Link>
               );
@@ -151,7 +174,6 @@ function UserFooter({
           <LogOut className="w-4 h-4" />
         </button>
       </div>
-
     </div>
   );
 }
@@ -162,7 +184,6 @@ export default function SysadminStandaloneShellLayout({
   children: React.ReactNode;
 }) {
   const { user, logout } = useAuthStore();
-  const { theme, setTheme } = useUIStore();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
@@ -232,7 +253,7 @@ export default function SysadminStandaloneShellLayout({
       <div className="flex-1 min-w-0 flex flex-col">
         <header className="relative h-14 sticky top-0 z-40 flex items-center justify-between gap-2 px-3 sm:px-6 bg-transparent border-b border-[var(--border)] select-none">
           {/* Inner backdrop glass layer for iOS Safari chrome tint optimization */}
-          <div 
+          <div
             className="absolute inset-0 -z-10 pointer-events-none backdrop-blur-xl bg-[var(--glass-bg,var(--bg-surface))]"
             style={{
               WebkitBackdropFilter: "blur(24px) saturate(200%)",

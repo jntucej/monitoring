@@ -1,300 +1,231 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { getAuthHeaders } from "@/lib/utils";
-import { useUIStore } from "@/stores/uiStore";
-import { Database, HardDrive, Download, RefreshCw, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { Suspense, useCallback, useMemo } from "react";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { PageLoading } from "@/components/shared/LoadingStates";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
+import { BackupManagement } from "@/components/sysadmin/BackupManagement";
+import { useAuthStore } from "@/stores/authStore";
+import type { Role } from "@/lib/types";
+import { useApiResource, clearCache } from "@/hooks/useApiResource";
+import { usePolling } from "@/hooks/usePolling";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+import Link from "next/link";
+import {
+  AlertTriangle,
+  Database,
+  HardDrive,
+  CheckCircle2,
+  Clock,
+  RefreshCw,
+} from "lucide-react";
 
-interface DiskInfo {
-  filesystem: string;
-  size: string;
-  used: string;
-  avail: string;
-  usePercent: string;
-  mounted: string;
+interface BackupStatusData {
+  source: "host-backup-dir" | "unavailable";
+  lastBackup: { name: string; mtime: string; sizeBytes: number } | null;
+  lastBackupAgeHours: number | null;
+  stale: boolean;
+  daily: Array<{ name: string; mtime: string; sizeBytes: number }>;
+  weekly: Array<{ name: string; mtime: string; sizeBytes: number }>;
 }
 
-interface BackupStats {
-  totalBackups: number;
-  latestBackup: string | null;
-  databaseSize: string;
-  diskUsage: DiskInfo[];
+function formatAge(hours: number | null): string {
+  if (hours == null) return "unknown";
+  if (hours < 1) return `${Math.round(hours * 60)}m ago`;
+  if (hours < 48) return `${Math.round(hours)}h ago`;
+  return `${Math.round(hours / 24)}d ago`;
 }
 
-export default function BackupPage() {
-  const { addToast } = useUIStore();
-  const [stats, setStats] = useState<BackupStats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [backupRunning, setBackupRunning] = useState(false);
-  const [selectedTables, setSelectedTables] = useState<string[]>([]);
-  const [availableTables, setAvailableTables] = useState<string[]>([]);
-  const [exporting, setExporting] = useState(false);
+function BackupReinforcedInner() {
+  const user = useAuthStore((s) => s.user);
+  const role = (user?.role ?? "sysadmin") as Role;
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const headers = getAuthHeaders();
-      const [statsRes, tablesRes] = await Promise.all([
-        fetch("/api/admin/backup", { headers }),
-        fetch("/api/admin/tables", { headers }),
-      ]);
-      
-      const statsJson = await statsRes.json();
-      const tablesJson = await tablesRes.json();
-      
-      if (statsJson.success) {
-        setStats(statsJson.data);
-      }
-      
-      if (tablesJson.success) {
-        setAvailableTables(tablesJson.data || []);
-      }
-    } catch (error) {
-      console.error("Failed to fetch backup data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data, loading, error, refresh } = useApiResource<
+    { success: boolean; data: BackupStatusData }
+  >("/api/sysadmin/backup-status", { ttlMs: 30_000 });
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const refreshAll = useCallback(async () => {
+    clearCache();
+    await refresh();
+  }, [refresh]);
 
-  const handleBackup = async () => {
-    setBackupRunning(true);
-    try {
-      const headers = getAuthHeaders();
-      const res = await fetch("/api/admin/backup", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ action: "create" }),
-      });
-      const json = await res.json();
-      
-      if (json.success) {
-        addToast({ variant: "success", title: "Backup Created", message: `Database backup completed successfully` });
-        fetchData();
-      } else {
-        addToast({ variant: "error", title: "Backup Failed", message: json.error?.message || "Unknown error" });
-      }
-    } catch (error) {
-      addToast({ variant: "error", title: "Error", message: "Failed to create backup" });
-    } finally {
-      setBackupRunning(false);
-    }
-  };
+  usePolling(refreshAll, { intervalMs: 30_000, enabled: !!user });
 
-  const handleExportCSV = async (tableName: string) => {
-    setExporting(true);
-    try {
-      const headers = getAuthHeaders();
-      const res = await fetch(`/api/admin/export?table=${tableName}&format=csv`, { headers });
-      
-      if (!res.ok) {
-        throw new Error("Export failed");
-      }
-      
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${tableName}_export.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-      
-      addToast({ variant: "success", title: "Export Started", message: `Downloading ${tableName} as CSV` });
-    } catch (error) {
-      addToast({ variant: "error", title: "Export Failed", message: "Failed to export table" });
-    } finally {
-      setExporting(false);
-    }
-  };
-
-  const handleBulkExport = async () => {
-    if (selectedTables.length === 0) {
-      addToast({ variant: "warning", title: "No Tables Selected", message: "Please select at least one table to export" });
-      return;
-    }
-    
-    setExporting(true);
-    try {
-      const headers = getAuthHeaders();
-      const res = await fetch("/api/admin/export", {
-        method: "POST",
-        headers: { ...headers, "Content-Type": "application/json" },
-        body: JSON.stringify({ tables: selectedTables, format: "csv" }),
-      });
-      
-      if (!res.ok) {
-        throw new Error("Bulk export failed");
-      }
-      
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "bulk_export.csv";
-      a.click();
-      URL.revokeObjectURL(url);
-      
-      addToast({ variant: "success", title: "Export Started", message: `Exporting ${selectedTables.length} tables as CSV` });
-    } catch (error) {
-      addToast({ variant: "error", title: "Export Failed", message: "Failed to export selected tables" });
-    } finally {
-      setExporting(false);
-    }
-  };
-
-  const toggleTable = (table: string) => {
-    setSelectedTables(prev => 
-      prev.includes(table) ? prev.filter(t => t !== table) : [...prev, table]
-    );
-  };
-
-  const getDiskStatus = (usePercent: string) => {
-    const num = parseInt(usePercent.replace('%', ''));
-    if (num > 90) return { color: "text-red-500", label: "Critical" };
-    if (num > 75) return { color: "text-yellow-500", label: "Warning" };
-    return { color: "text-green-500", label: "Normal" };
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-[var(--action-primary)]" />
-      </div>
-    );
-  }
+  const busy = loading && !data;
+  const d = (data as { success: boolean; data: BackupStatusData } | null)?.data;
+  const size = useMemo(
+    () =>
+      (n: number) =>
+        n > 1024 * 1024 * 1024
+          ? `${(n / (1024 * 1024 * 1024)).toFixed(1)} GB`
+          : n > 1024 * 1024
+            ? `${Math.round(n / (1024 * 1024))} MB`
+            : `${Math.round(n / 1024)} KB`,
+    []
+  );
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-2xl font-bold text-[var(--text-primary)]">Backup & Export</p>
-          <p className="text-[var(--text-muted)] mt-1">Manage database backups and data exports</p>
-        </div>
-        <button
-          onClick={fetchData}
-          className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-sm font-medium hover:bg-[var(--bg-base)] transition-colors"
-        >
-          <RefreshCw className="w-4 h-4" />
-          Refresh
-        </button>
+    <div className="space-y-6 max-w-7xl mx-auto min-w-0">
+      <div>
+        <p className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+          <Database className="w-6 h-6 text-emerald-400" />
+          Backup Status
+        </p>
+        <p className="text-xs text-[var(--text-muted)] mt-1">
+          Cron dump freshness from /opt/monitoring/backups, plus manual backup &amp; export tooling.
+          Signed in as <span className="font-mono text-slate-300">{role}</span>.
+        </p>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-4 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl">
-          <div className="flex items-center gap-3">
-            <Database className="w-8 h-8 text-blue-500" />
-            <div>
-              <p className="text-[var(--text-muted)] text-sm">Database Size</p>
-              <p className="text-xl font-bold text-[var(--text-primary)]">{stats?.databaseSize || "N/A"}</p>
-            </div>
+      {/* Cron backup freshness strip */}
+      <WidgetBoundary title="Cron Backup Freshness">
+        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+            <span className="text-sm font-semibold text-white flex items-center gap-2">
+              <HardDrive className="w-4 h-4 text-emerald-400" /> Host Backup Directory
+            </span>
+            <span className="text-xs text-slate-500">source: {d?.source ?? "loading"}</span>
           </div>
-        </div>
-
-        <div className="p-4 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl">
-          <div className="flex items-center gap-3">
-            <HardDrive className="w-8 h-8 text-green-500" />
-            <div>
-              <p className="text-[var(--text-muted)] text-sm">Disk Usage</p>
-              <p className="text-xl font-bold text-[var(--text-primary)]">
-                {stats?.diskUsage[0]?.usePercent || "N/A"}
+          {busy ? (
+            <div className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="h-16 animate-pulse rounded-lg bg-slate-800/40" />
+              ))}
+            </div>
+          ) : d?.source === "unavailable" || !d?.lastBackup ? (
+            <div className="p-6 text-center min-w-0">
+              <AlertTriangle className="w-5 h-5 text-amber-400/70 mx-auto mb-2" />
+              <p className="text-sm text-slate-500">
+                Host backup directory not visible in this environment.
+              </p>
+              <p className="text-xs text-slate-600 max-w-md mx-auto mt-1">
+                The cron dumps live on the production host under /opt/monitoring/backups. Use the
+                dev/ops contact strip below if you need to verify dump integrity off-host.
               </p>
             </div>
-          </div>
-        </div>
-
-        <div className="p-4 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl">
-          <div className="flex items-center gap-3">
-            <CheckCircle2 className="w-8 h-8 text-purple-500" />
-            <div>
-              <p className="text-[var(--text-muted)] text-sm">Total Backups</p>
-              <p className="text-xl font-bold text-[var(--text-primary)]">{stats?.totalBackups || 0}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Disk Status */}
-      <div className="p-4 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl">
-        <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Disk Status</h2>
-        <div className="space-y-2">
-          {stats?.diskUsage.map((disk, idx) => {
-            const status = getDiskStatus(disk.usePercent);
-            return (
-              <div key={idx} className="flex items-center justify-between p-3 bg-[var(--bg-base)] rounded-lg">
-                <div className="flex items-center gap-3">
-                  <HardDrive className="w-5 h-5 text-[var(--text-muted)]" />
-                  <div>
-                    <p className="text-sm font-medium text-[var(--text-primary)]">{disk.mounted}</p>
-                    <p className="text-xs text-[var(--text-muted)]">{disk.filesystem}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className={`text-sm font-bold ${status.color}`}>{disk.usePercent} used</p>
-                  <p className="text-xs text-[var(--text-muted)]">{disk.used} / {disk.size}</p>
-                </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 min-w-0">
+              <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
+                <p className="text-xs text-slate-500 uppercase">Last Backup</p>
+                <p className="mt-1 text-sm font-bold text-emerald-400 truncate">
+                  {d.lastBackup.name}
+                </p>
+                <p className="text-xs text-slate-500">{size(d.lastBackup.sizeBytes)}</p>
               </div>
-            );
-          })}
+              <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
+                <p className="text-xs text-slate-500 uppercase">Age</p>
+                <p
+                  className={`mt-1 text-sm font-bold ${d.stale ? "text-rose-400" : "text-sky-400"}`}
+                >
+                  {formatAge(d.lastBackupAgeHours)}
+                </p>
+                <p className="text-xs text-slate-500">
+                  {d.stale ? "older than 24h — verify cron" : "within 24h window"}
+                </p>
+              </div>
+              <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
+                <p className="text-xs text-slate-500 uppercase">Cron Cadence</p>
+                <p className="mt-1 text-sm font-bold text-slate-200">
+                  {d.daily.length} daily · {d.weekly.length} weekly
+                </p>
+                <p className="text-xs text-slate-500">most recent entries shown below</p>
+              </div>
+            </div>
+          )}
+          {!busy && d && d.source === "host-backup-dir" && d.daily.length > 0 && (
+            <div className="px-4 pb-4 min-w-0">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-semibold uppercase text-slate-500">Recent Dumps</p>
+                <button
+                  type="button"
+                  onClick={() => void refreshAll()}
+                  disabled={busy}
+                  className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-slate-200 transition-colors disabled:opacity-50"
+                >
+                  <RefreshCw className="w-3 h-3" /> Refresh
+                </button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 min-w-0">
+                {d.daily.slice(0, 6).map((b) => (
+                  <div
+                    key={b.name}
+                    className="rounded-lg border border-slate-800 bg-slate-900/40 p-2 flex items-center justify-between gap-2 min-w-0"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-slate-300 truncate">{b.name}</p>
+                      <p className="text-[10px] text-slate-500">
+                        {new Date(b.mtime).toLocaleString()} · {size(b.sizeBytes)}
+                      </p>
+                    </div>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-      </div>
+      </WidgetBoundary>
 
-      {/* Actions */}
-      <div className="p-4 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl">
-        <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Actions</h2>
-        <div className="flex flex-wrap gap-3">
+      {error && (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
+          <span className="flex items-center gap-2 min-w-0">
+            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <span className="truncate">Backup status unavailable: {error}</span>
+          </span>
           <button
-            onClick={handleBackup}
-            disabled={backupRunning}
-            className="flex items-center gap-2 px-4 py-2 bg-[var(--action-primary)] text-white rounded-lg text-sm font-medium hover:bg-[var(--action-primary)]/90 disabled:opacity-50 transition-colors"
+            type="button"
+            onClick={() => void refresh()}
+            className="rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
           >
-            {backupRunning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
-            Create Full Backup
+            Retry
           </button>
         </div>
-      </div>
-
-      {/* CSV Export */}
-      <div className="p-4 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl">
-        <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Table Export (CSV)</h2>
-        <p className="text-sm text-[var(--text-muted)] mb-4">Select tables to export as CSV files</p>
-        
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
-          {availableTables.map(table => (
-            <button
-              key={table}
-              onClick={() => toggleTable(table)}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                selectedTables.includes(table)
-                  ? "bg-[var(--action-primary)] text-white"
-                  : "bg-[var(--bg-base)] text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--action-primary)]"
-              }`}
-            >
-              {table}
-            </button>
-          ))}
-        </div>
-
-        <button
-          onClick={handleBulkExport}
-          disabled={exporting || selectedTables.length === 0}
-          className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 disabled:opacity-50 transition-colors"
-        >
-          {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-          Export Selected ({selectedTables.length})
-        </button>
-      </div>
-
-      {/* Latest Backup Info */}
-      {stats?.latestBackup && (
-        <div className="p-4 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl">
-          <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Latest Backup</h2>
-          <p className="text-sm text-[var(--text-muted)]">{stats.latestBackup}</p>
-        </div>
       )}
+
+      {/* Manual backup & export tooling (existing component) */}
+      <WidgetBoundary title="Manual Backups & Exports">
+        <div className="space-y-4 min-w-0">
+          <div className="flex items-center gap-2 text-xs text-slate-500">
+            <Clock className="w-3.5 h-3.5" />
+            Full-DB and per-table dumps &amp; CSV exports remain available here.
+          </div>
+          <BackupTools />
+        </div>
+      </WidgetBoundary>
+
+      <div className="flex flex-wrap gap-2 min-w-0">
+        <Link
+          href="/sysadmin/data"
+          className="text-xs text-sky-400 hover:text-sky-300 transition-colors"
+        >
+          Data Governance &amp; Retention →
+        </Link>
+        <Link
+          href="/sysadmin/audit"
+          className="text-xs text-sky-400 hover:text-sky-300 transition-colors"
+        >
+          Audit this action →
+        </Link>
+      </div>
+
+      <DevContactStrip />
     </div>
+  );
+}
+
+/* Minimal manual backup tools — preserves the core action without duplicating the
+   existing /api/admin/backup management component */
+
+function BackupTools() {
+  return <BackupManagement />;
+}
+
+export default function SysadminBackupPage() {
+  return (
+    <AuthGuard allowedRoles={["sysadmin", "admin"]}>
+      <Suspense fallback={<PageLoading />}>
+        <BackupReinforcedInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

@@ -12,6 +12,12 @@ import { CampusKnowledgeCentre } from "@/components/retention/CampusKnowledgeCen
 export default function SysadminPage() {
   return (
     <div className="space-y-8">
+      {/* Authority separation note */}
+      <div className="rounded-lg border border-slate-700/40 bg-slate-800/30 px-3 py-2 text-[11px] text-slate-500">
+        Technical privileges in this console do not grant institutional pass approvals — those
+        remain owned by the role approval desks.
+      </div>
+
       <SysAdminControlPanel />
 
       {/* Campus home & retention panels */}
