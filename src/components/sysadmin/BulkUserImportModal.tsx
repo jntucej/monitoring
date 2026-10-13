@@ -192,7 +192,7 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
 
         <textarea
           rows={7}
-          placeholder={"COURSE,H.T NO.,NAME OF THE STUDENT,FATHER NAME,GENDER,PHONE NUMBER,DOB,EMAIL ID,LAND LINE 0R PARENT NUMBER\nCSE,25JJ1A0501,AADITH KUMAR,..."}
+          placeholder={"COURSE,DEPARTMENT,BRANCH,SEMESTER,REGULATION,YEAR,HTNO,STUDENT_NAME,GENDER,MOBILE,EMAIL,DOB,…\nB-Tech,CS,CSE,3,1,2,25JJ1A0501,AADITH KUMAR,male,9876543210,aadith.k@jntuhcej.ac.in,12-05-2005,…"}
           value={csvText}
           onChange={(e) => { setCsvText(e.target.value); setPreview(null); }}
           className="w-full font-mono text-xs p-3 bg-[var(--bg-base)] border border-[var(--border)] rounded-xl text-white focus:outline-none"
@@ -227,11 +227,25 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
 
         <details className="text-xs text-[var(--text-muted)]">
           <summary className="cursor-pointer font-semibold">Column reference</summary>
-          <ul className="mt-2 space-y-1 pl-4 list-disc">
-            {TEMPLATE_HINTS.map(([k, v]) => (
-              <li key={k}><b>{k}</b> — {v}</li>
-            ))}
-          </ul>
+          <div className="mt-2 space-y-3">
+            {(() => {
+              const groups: Record<string, Array<[string, string]>> = {};
+              for (const [k, v] of TEMPLATE_HINTS) {
+                const section = k.split(" — ")[0];
+                (groups[section] ??= []).push([k, v]);
+              }
+              return Object.entries(groups).map(([section, hints]) => (
+                <div key={section}>
+                  <p className="font-semibold text-[var(--text)] mb-1">{section}</p>
+                  <ul className="space-y-1 pl-4 list-disc">
+                    {hints.map(([k, v]) => (
+                      <li key={k}><b>{k}</b> — {v}</li>
+                    ))}
+                  </ul>
+                </div>
+              ));
+            })()}
+          </div>
         </details>
 
         <div className="flex justify-end gap-2 pt-2 border-t border-[var(--border)]">
