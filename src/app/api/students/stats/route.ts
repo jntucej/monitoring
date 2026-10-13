@@ -67,7 +67,14 @@ async function handleGet(req: NextRequest) {
 
     const [usersRes, detailsRes] = await Promise.all([
       svc.from("users").select("id, role, status, flag_status, department_id").eq("role", "student"),
-      svc.from("student_details").select("user_id, roll, year, section, batch, student_type, gender, hostel_block, room_number"),
+      svc.from("student_details").select(
+        "user_id, roll, year, section, batch, student_type, gender, hostel_block, room_number, " +
+        "department, branch, semester, regulation, admission_date, admission_category, eamcet_htno, " +
+        "eamcet_ecet_rank, htno, student_name, identification_marks_1, identification_marks_2, " +
+        "mobile, email, blood_group, nationality, religion, caste, subcaste, ph_status, dob, " +
+        "father_guardian_name, mother_name, parent_mobile, parent_email, father_occupation, " +
+        "income_per_annum, address, city, district, state, pincode, course, father_name, landline_number"
+      ),
     ]);
 
     const users = usersRes.data || [];

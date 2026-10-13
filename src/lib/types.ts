@@ -36,6 +36,9 @@ export interface StudentDetails {
   /** Guardian (parent/ward caretaker) user id */
   guardianId?: string;
   studentType?: StudentType;
+  course?: string;
+  fatherName?: string;
+  landlineNumber?: string;
   hostelBlock?: string;
   roomNumber?: string;
   hostelCurfewTime?: string;
@@ -45,6 +48,39 @@ export interface StudentDetails {
   completed?: boolean;
   /** ISO timestamp when the student was marked graduated. */
   completedAt?: string;
+  /* ── Academic & Personal (extended student_details) ─────────────── */
+  department?: string;
+  branch?: string;
+  semester?: string;
+  regulation?: string;
+  admissionDate?: string;
+  admissionCategory?: string;
+  eamcetHtNo?: string;
+  eamcetEcetRank?: string;
+  htNo?: string;
+  studentName?: string;
+  identificationMarks1?: string;
+  identificationMarks2?: string;
+  mobile?: string;
+  email?: string;
+  bloodGroup?: string;
+  nationality?: string;
+  religion?: string;
+  caste?: string;
+  subcaste?: string;
+  phStatus?: string;
+  dob?: string;
+  fatherGuardianName?: string;
+  motherName?: string;
+  parentMobile?: string;
+  parentEmail?: string;
+  fatherOccupation?: string;
+  incomePerAnnum?: string;
+  address?: string;
+  city?: string;
+  district?: string;
+  state?: string;
+  pincode?: string;
 }
 
 export type StaffCategory =

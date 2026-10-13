@@ -33,7 +33,15 @@ async function handleGet(_req: NextRequest, context: { auth: AuthContext }) {
   const [studentRes, employeeRes] = await Promise.all([
     supabase
       .from("student_details")
-      .select(`roll, year, section, batch, hostel_block, room_number, gender, student_type`)
+      .select(
+        "roll, year, section, batch, hostel_block, room_number, gender, student_type, " +
+        "course, father_name, landline_number, department, branch, semester, regulation, " +
+        "admission_date, admission_category, eamcet_htno, eamcet_ecet_rank, htno, student_name, " +
+        "identification_marks_1, identification_marks_2, mobile, email, blood_group, nationality, " +
+        "religion, caste, subcaste, ph_status, dob, father_guardian_name, mother_name, " +
+        "parent_mobile, parent_email, father_occupation, income_per_annum, address, city, " +
+        "district, state, pincode"
+      )
       .eq("user_id", context.auth.userId)
       .maybeSingle(),
     supabase
