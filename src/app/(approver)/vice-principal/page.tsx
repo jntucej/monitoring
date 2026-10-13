@@ -26,9 +26,9 @@ import { ApprovalInbox } from "@/components/shared/ApprovalInbox";
 import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { ContributionPortfolio } from "@/components/retention/ContributionPortfolio";
-import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { CampusKnowledgeCentre } from "@/components/retention/CampusKnowledgeCentre";
+import { DigitalHandover } from "@/components/retention/DigitalHandover";
 
 /* ── response shapes ── */
 
@@ -57,6 +57,17 @@ interface PresenceMatrixData {
   matrix: Record<string, Record<string, number>>;
   lastUpdated: string;
 }
+
+const SECTION_LINKS = [
+  { href: "/vice-principal/department-performance", label: "Department Performance", sub: "Cross-dept comparison" },
+  { href: "/vice-principal/pending-approvals", label: "Pending Approvals", sub: "VP-stage queue" },
+  { href: "/vice-principal/escalated-requests", label: "Escalated Requests", sub: "Senior review items" },
+  { href: "/vice-principal/attendance-exceptions", label: "Attendance Exceptions", sub: "Staff exception triage" },
+  { href: "/vice-principal/hostel-security-summaries", label: "Hostel & Security", sub: "Presence + alert rollup" },
+  { href: "/vice-principal/examination-coordination", label: "Examination", sub: "Exam ops coordination" },
+  { href: "/vice-principal/delegated-responsibilities", label: "Delegated Duties", sub: "Authority scope" },
+  { href: "/vice-principal/decision-history", label: "Decision History", sub: "Past VP decisions" },
+] as const;
 
 function StatCard({
   icon: Icon,
@@ -109,7 +120,10 @@ function VicePrincipalDashboardInner() {
     { ttlMs: 30_000 }
   );
 
-  const alertsProbe = useProbe<{ data?: unknown; total?: number }>("/api/alerts?resolved=false", 30_000);
+  const alertsProbe = useProbe<{ data?: unknown; total?: number }>(
+    "/api/alerts?resolved=false",
+    30_000
+  );
 
   const rows = vpQueue?.data ?? [];
   const total = vpQueue?.total ?? rows.length;
@@ -152,8 +166,6 @@ function VicePrincipalDashboardInner() {
 
   usePolling(refreshAll, { intervalMs: 30_000, enabled: !!user });
 
-  const anyLoading = (queueLoading && !vpQueue) || alertsProbe.loading;
-
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       {/* Page toolbar */}
@@ -195,6 +207,7 @@ function VicePrincipalDashboardInner() {
         </div>
       )}
 
+      {/* KPI row */}
       <WidgetBoundary title="Executive Overview">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 min-w-0">
           <StatCard
@@ -233,16 +246,9 @@ function VicePrincipalDashboardInner() {
       </WidgetBoundary>
 
       {/* Section quick links */}
-      <WidgetBoundary title="Desk Sections">
+      <WidgetBoundary title="Institutional Sections">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 min-w-0">
-          {[
-            { href: "/vice-principal/analytics", label: "Academic Analytics", sub: "Department summary" },
-            { href: "/vice-principal/attendance", label: "Attendance Exceptions", sub: "Staff attendance detail" },
-            { href: "/vice-principal/gates", label: "Gate Summary", sub: "Per-gate presence" },
-            { href: "/vice-principal/approvals", label: "Approvals", sub: "VP-stage queue" },
-            { href: "/vice-principal/reports", label: "Reports", sub: "Staff & operational" },
-            { href: "/vice-principal/tasks", label: "Tasks", sub: "Delegated items" },
-          ].map((s) => (
+          {SECTION_LINKS.map((s) => (
             <Link
               key={s.href}
               href={s.href}
@@ -272,7 +278,7 @@ function VicePrincipalDashboardInner() {
           <PersonalizedCampusHome />
           <TaskContinuity />
           <ContributionPortfolio />
-          <CampusFeedbackDesk />
+          <DigitalHandover />
         </div>
       </WidgetBoundary>
 

@@ -5,13 +5,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const TABS = [
-  { href: "/vice-principal", label: "Dashboard", exact: true },
-  { href: "/vice-principal/analytics", label: "Academic Analytics" },
-  { href: "/vice-principal/attendance", label: "Attendance Exceptions" },
-  { href: "/vice-principal/gates", label: "Gate Summary" },
-  { href: "/vice-principal/approvals", label: "Approvals" },
-  { href: "/vice-principal/reports", label: "Reports" },
-  { href: "/vice-principal/tasks", label: "Tasks" },
+  { href: "/vice-principal", label: "Institutional Overview", exact: true },
+  { href: "/vice-principal/department-performance", label: "Department Performance" },
+  { href: "/vice-principal/pending-approvals", label: "Pending Approvals" },
+  { href: "/vice-principal/escalated-requests", label: "Escalated Requests" },
+  { href: "/vice-principal/attendance-exceptions", label: "Attendance Exceptions" },
+  { href: "/vice-principal/hostel-security-summaries", label: "Hostel & Security" },
+  { href: "/vice-principal/examination-coordination", label: "Examination" },
+  { href: "/vice-principal/delegated-responsibilities", label: "Delegated Duties" },
+  { href: "/vice-principal/decision-history", label: "Decision History" },
 ] as const;
 
 function tabActive(tab: (typeof TABS)[number], pathname: string): boolean {
@@ -23,7 +25,10 @@ export default function VicePrincipalLayout({ children }: { children: React.Reac
   const pathname = usePathname();
   return (
     <div className="min-w-0">
-      <nav className="sticky top-14 sm:top-16 z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 bg-[var(--bg-base)]/80 backdrop-blur-md border-b border-[var(--border)]" aria-label="Vice Principal sections">
+      <nav
+        className="sticky top-14 sm:top-16 z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 bg-[var(--bg-base)]/80 backdrop-blur-md border-b border-[var(--border)]"
+        aria-label="Vice Principal sections"
+      >
         <ol className="flex overflow-x-auto no-scrollbar gap-1 text-sm py-2 whitespace-nowrap">
           {TABS.map((tab) => {
             const isActive = tabActive(tab, pathname);
