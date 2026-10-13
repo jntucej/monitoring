@@ -412,7 +412,7 @@ const api = useApi();
     setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, enabled: !r.enabled } : r)));
     try {
       if (!usingSeed) {
-        const res = await fetch(`/api/admin/scheduled-jobs/${row.id}`, {
+        const res = await fetch(`/api/admin/jobs/${row.id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json", ...getHeaders() },
           body: JSON.stringify({ enabled: !row.enabled }),
@@ -445,7 +445,7 @@ const api = useApi();
     setRuns((prev) => [optimistic, ...prev]);
 
     try {
-      const res = await fetch(`/api/admin/scheduled-jobs/${row.id}/run`, { method: "POST", headers: getHeaders() });
+      const res = await fetch(`/api/admin/jobs/${row.id}/run`, { method: "POST", headers: getHeaders() });
       const body = await res.json().catch(() => ({}));
       const success = res.ok && body?.success !== false;
       const durationMs = body?.durationMs ?? 1_800;
@@ -493,10 +493,22 @@ const api = useApi();
     }
   };
 
-  const saveCron = (row: Row, cron: string) => {
+  const saveCron = async (row: Row, cron: string) => {
     setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, cron_expression: cron } : r)));
-    addToast({ variant: "success", message: `Updated schedule for ${row.name}.` });
-    // TODO: PATCH /api/admin/scheduled-jobs/<id> { cron_expression: cron }
+    try {
+      if (!usingSeed) {
+        const res = await fetch(`/api/admin/jobs/${row.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json", ...getHeaders() },
+          body: JSON.stringify({ cron_expression: cron }),
+        });
+        if (!res.ok) throw new Error("schedule update failed");
+      }
+      addToast({ variant: "success", message: `Updated schedule for ${row.name}.` });
+    } catch {
+      setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, cron_expression: row.cron_expression } : r)));
+      addToast({ variant: "error", message: `Failed to update schedule for ${row.name}.` });
+    }
   };
 
   const toggleExpanded = (id: string) => setExpanded((e) => ({ ...e, [id]: !e[id] }));
@@ -768,7 +780,7 @@ const api = useApi();
         row={editorRow}
         isOpen={!!editorRow}
         onClose={() => setEditorRow(null)}
-        onSave={(cron) => editorRow && saveCron(editorRow, cron)}
+        onSave={(cron) => { if (editorRow) void saveCron(editorRow, cron); }}
       />
     </div>
   );

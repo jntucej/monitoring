@@ -75,6 +75,7 @@ export function ContributionPortfolio() {
     return map;
   }, [items]);
 
+  const userName = user?.name;
   const handleExport = useCallback(async () => {
     if (items.length === 0) return;
     try {
@@ -90,7 +91,7 @@ export function ContributionPortfolio() {
       const json = JSON.stringify(
         {
           exportedAt: new Date().toISOString(),
-          userName: user?.name,
+          userName,
           items: exportData,
           note: "Verified contributions only. Not an official transcript.",
         },
@@ -116,7 +117,7 @@ export function ContributionPortfolio() {
     } catch {
       // Silently ignore
     }
-  }, [items, user?.name]);
+  }, [items, userName]);
 
   const totalVerified = items.filter((i) => i.verified).length;
 

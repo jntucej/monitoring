@@ -328,8 +328,6 @@ function OutpassApprovalsInner() {
 
 /* ── Wards & Curfew ── */
 
-interface WardenStudentFull extends WardenStudent {}
-
 function CurfewRosterInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "supervisor") as Role;

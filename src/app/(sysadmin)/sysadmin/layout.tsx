@@ -1,139 +1,121 @@
 "use client";
 
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, X, ShieldCheck, LogOut } from "lucide-react";
+import {
+  Menu, X, ShieldCheck, LogOut,
+  Activity, Server, Boxes, Database, Zap, Rocket, HardDrive,
+  Bell, Lock, ScrollText, LayoutDashboard, Users, GraduationCap,
+  Briefcase, Key, Shield, Building2, UserCheck, Clock,
+  Cpu, Globe, Settings, FileText, LifeBuoy, UserCog, FileLock,
+  Link as LinkIcon, ArrowLeftRight,
+} from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { GlassThemeToggle } from "@/components/shared/GlassThemeToggle";
 
-/**
- * Spec section tabs (main bar): 10 spec sections mapped onto the existing
- * sysadmin tree. Everything else stays reachable under "More" overflow
- * groups so no existing route is orphaned.
- */
-const SPEC_TABS = [
-  { href: "/sysadmin/health", label: "Server Health", icon: "▨" },
-  { href: "/sysadmin/application-health", label: "Application Health", icon: "⚙" },
-  { href: "/sysadmin/docker-services", label: "Docker & Services", icon: "⬢" },
-  { href: "/sysadmin/database-health", label: "Database Health", icon: "🗄" },
-  { href: "/sysadmin/redis-worker", label: "Redis & Worker", icon: "⚡" },
-  { href: "/sysadmin/deployments", label: "Deployment History", icon: "⇣" },
-  { href: "/sysadmin/backup", label: "Backup Status", icon: "⎙" },
-  { href: "/sysadmin/alerts", label: "Monitoring & Alerts", icon: "🔔" },
-  { href: "/sysadmin/security", label: "Infrastructure Security", icon: "🛡" },
-  { href: "/sysadmin/audit", label: "Technical Audit Logs", icon: "📜" },
-] as const;
+type NavEntry = {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  exact?: boolean;
+};
+type NavGroup = { label: string; items: NavEntry[] };
 
-const MORE_GROUPS = [
+const NAV_GROUPS: NavGroup[] = [
+  {
+    label: "System Overview",
+    items: [
+      { href: "/sysadmin", label: "System Overview", icon: LayoutDashboard, exact: true },
+      { href: "/sysadmin/health", label: "Server Health", icon: Activity },
+      { href: "/sysadmin/application-health", label: "Application Health", icon: Cpu },
+      { href: "/sysadmin/docker-services", label: "Docker & Services", icon: Boxes },
+      { href: "/sysadmin/database-health", label: "Database Health", icon: Database },
+      { href: "/sysadmin/redis-worker", label: "Redis & Worker", icon: Zap },
+      { href: "/sysadmin/deployments", label: "Deployment History", icon: Rocket },
+      { href: "/sysadmin/backup", label: "Backup Status", icon: HardDrive },
+      { href: "/sysadmin/infrastructure", label: "Host Telemetry", icon: Server },
+    ],
+  },
+  {
+    label: "Security & Policy",
+    items: [
+      { href: "/sysadmin/security", label: "Infrastructure Security", icon: Lock },
+      { href: "/sysadmin/audit", label: "Technical Audit Logs", icon: ScrollText },
+      { href: "/sysadmin/compliance", label: "Compliance & Retention", icon: FileLock },
+      { href: "/sysadmin/exit-reasons", label: "Exit Reasons", icon: ArrowLeftRight },
+      { href: "/sysadmin/reasons", label: "Custom Reasons", icon: FileText },
+      { href: "/sysadmin/devices", label: "Device Verification", icon: Cpu },
+      { href: "/sysadmin/alerts", label: "Monitoring & Alerts", icon: Bell },
+      { href: "/sysadmin/alerts/rules", label: "Alert Rules", icon: Bell },
+      { href: "/sysadmin/sessions", label: "Active Sessions", icon: Users },
+      { href: "/sysadmin/access-keys", label: "Access Keys", icon: Key },
+    ],
+  },
   {
     label: "People & Records",
     items: [
-      { href: "/sysadmin/students", label: "Manage Students" },
-      { href: "/sysadmin/parents", label: "Parents & Guardians" },
-      { href: "/sysadmin/staff", label: "Manage Staff" },
-      { href: "/sysadmin/roles", label: "Roles & Permissions" },
-      { href: "/sysadmin/departments", label: "Departments & HOD" },
-      { href: "/sysadmin/promotions", label: "Role Promotions" },
-      { href: "/sysadmin/alumni", label: "Alumni & Deprovision" },
-      { href: "/sysadmin/sessions", label: "Active Sessions" },
-      { href: "/sysadmin/access-keys", label: "Access Keys" },
+      { href: "/sysadmin/students", label: "Manage Students", icon: GraduationCap },
+      { href: "/sysadmin/parents", label: "Parents & Guardians", icon: Users },
+      { href: "/sysadmin/staff", label: "Manage Staff", icon: Briefcase },
+      { href: "/sysadmin/roles", label: "Roles & Permissions", icon: Shield },
+      { href: "/sysadmin/departments", label: "Departments & HOD", icon: Building2 },
+      { href: "/sysadmin/promotions", label: "Role Promotions", icon: UserCheck },
+      { href: "/sysadmin/alumni", label: "Alumni & Deprovision", icon: Users },
+      { href: "/sysadmin/hostel-tickets", label: "Hostel Tickets", icon: LifeBuoy },
     ],
   },
   {
     label: "Data & Integrations",
     items: [
-      { href: "/sysadmin/data", label: "Data & Backups" },
-      { href: "/sysadmin/integrations", label: "Integration Hub" },
-      { href: "/sysadmin/jobs", label: "Scheduled Jobs" },
-      { href: "/sysadmin/scheduling", label: "Smart Scheduling" },
-      { href: "/sysadmin/gates", label: "Gates & Access" },
-      { href: "/sysadmin/sso", label: "SSO Configuration" },
-      { href: "/sysadmin/infrastructure", label: "Host Telemetry" },
+      { href: "/sysadmin/data", label: "Data & Backups", icon: Database },
+      { href: "/sysadmin/integrations", label: "Integration Hub", icon: LinkIcon },
+      { href: "/sysadmin/jobs", label: "Scheduled Jobs", icon: Clock },
+      { href: "/sysadmin/scheduling", label: "Smart Scheduling", icon: Clock },
+      { href: "/sysadmin/gates", label: "Gates & Access", icon: Key },
+      { href: "/sysadmin/sso", label: "SSO Configuration", icon: Globe },
     ],
   },
   {
-    label: "Policy & Platform",
+    label: "Platform & Account",
     items: [
-      { href: "/sysadmin/compliance", label: "Compliance & Retention" },
-      { href: "/sysadmin/exit-reasons", label: "Exit Reasons" },
-      { href: "/sysadmin/reasons", label: "Custom Reasons" },
-      { href: "/sysadmin/devices", label: "Device Verification" },
-      { href: "/sysadmin/alerts/rules", label: "Alert Rules" },
-      { href: "/sysadmin/navigation", label: "Navigation Editor" },
-      { href: "/sysadmin/system", label: "System" },
+      { href: "/sysadmin/system", label: "System Configuration", icon: Settings },
+      { href: "/sysadmin/navigation", label: "Navigation Editor", icon: Settings },
+      { href: "/sysadmin/profile", label: "SysAdmin Profile", icon: UserCog },
     ],
   },
-] as const;
+];
 
-// Shared nav list — renders once for the desktop sidebar and the mobile drawer
+/* ── Shared nav list (desktop sidebar + mobile drawer) ───────────────── */
 function NavList({ onNavigate }: { onNavigate?: () => void }) {
-  const pathname = usePathname();
-  const isActive = (href: string) =>
-    href === "/sysadmin" ? pathname === href : pathname?.startsWith(href);
+  const pathname = usePathname() ?? "";
+  const isActive = (href: string, exact?: boolean) =>
+    exact ? pathname === href : pathname.startsWith(href);
 
   return (
-    <nav className="flex-1 overflow-y-auto p-3 space-y-5">
-      {/* Spec sections — the main bar */}
-      <div>
-        <p className="px-3 pb-1.5 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">
-          System Sections
-        </p>
-        <div className="space-y-0.5">
-          <Link
-            href="/sysadmin"
-            onClick={onNavigate}
-            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] ${
-              isActive("/sysadmin")
-                ? "bg-rose-600/15 text-rose-400 ring-1 ring-rose-500/30"
-                : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
-            }`}
-          >
-            <span className="w-4 text-center text-xs">⌂</span>
-            <span className="truncate">System Overview</span>
-          </Link>
-          {SPEC_TABS.map((tab) => {
-            const active = isActive(tab.href);
-            return (
-              <Link
-                key={tab.href}
-                href={tab.href}
-                onClick={onNavigate}
-                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] ${
-                  active
-                    ? "bg-rose-600/15 text-rose-400 ring-1 ring-rose-500/30"
-                    : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
-                }`}
-              >
-                <span className="w-4 text-center text-xs">{tab.icon}</span>
-                <span className="truncate">{tab.label}</span>
-              </Link>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* More overflow — grouped extras, all existing routes preserved */}
-      {MORE_GROUPS.map((group) => (
+    <nav className="flex-1 space-y-5 overflow-y-auto p-3" aria-label="SysAdmin sections">
+      {NAV_GROUPS.map((group) => (
         <div key={group.label}>
-          <p className="px-3 pb-1.5 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">
+          <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
             {group.label}
           </p>
           <div className="space-y-0.5">
             {group.items.map((item) => {
-              const active = isActive(item.href);
+              const active = isActive(item.href, item.exact);
+              const Icon = item.icon;
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={onNavigate}
-                  className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] ${
+                  className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] ${
                     active
                       ? "bg-rose-600/15 text-rose-400 ring-1 ring-rose-500/30"
-                      : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
+                      : "text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"
                   }`}
                 >
+                  <Icon className="h-4 w-4 shrink-0" />
                   <span className="truncate">{item.label}</span>
                 </Link>
               );
@@ -145,7 +127,7 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-// Shared account footer — used by both shells
+/* ── Account footer ──────────────────────────────────────────────────── */
 function UserFooter({
   user,
   logout,
@@ -154,24 +136,24 @@ function UserFooter({
   logout: () => void;
 }) {
   return (
-    <div className="p-3 border-t border-[var(--border)] space-y-2">
-      <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)]">
-        <div className="flex items-center gap-2 min-w-0">
-          <div className="w-7 h-7 rounded-full bg-rose-600/20 text-rose-300 flex items-center justify-center text-xs font-bold ring-1 ring-rose-500/30 shrink-0">
+    <div className="space-y-2 border-t border-[var(--border)] p-3 pb-safe">
+      <div className="flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] p-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-rose-600/20 text-xs font-bold text-rose-300 ring-1 ring-rose-500/30">
             {user?.name ? user.name.charAt(0).toUpperCase() : "S"}
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-bold truncate">{user?.name || "System Admin"}</p>
-            <p className="text-[10px] text-[var(--text-muted)] font-mono truncate">SYSADMIN</p>
+            <p className="truncate text-xs font-bold">{user?.name || "System Admin"}</p>
+            <p className="truncate font-mono text-[10px] text-[var(--text-muted)]">SYSADMIN</p>
           </div>
         </div>
         <button
           onClick={logout}
-          className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-rose-400 hover:bg-rose-500/10 transition-colors focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+          className="rounded-lg p-1.5 text-[var(--text-muted)] transition-colors hover:bg-rose-500/10 hover:text-rose-400 focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
           aria-label="Sign out"
           title="Sign Out"
         >
-          <LogOut className="w-4 h-4" />
+          <LogOut className="h-4 w-4" />
         </button>
       </div>
     </div>
@@ -186,18 +168,32 @@ export default function SysadminStandaloneShellLayout({
   const { user, logout } = useAuthStore();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+  // Close drawer on Escape + lock body scroll while open
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setDrawerOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [drawerOpen]);
+
   return (
-    <div className="min-h-[100dvh] w-full flex flex-col md:flex-row bg-[var(--bg-base)] text-[var(--text-primary)]">
-      {/* Standalone SysAdmin Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 shrink-0 border-r border-[var(--border)] bg-[var(--bg-surface)]">
-        <div className="p-5 border-b border-[var(--border)]">
+    <div className="flex min-h-[100dvh] w-full flex-col bg-[var(--bg-base)] text-[var(--text-primary)] md:flex-row">
+      {/* Desktop sidebar */}
+      <aside className="hidden shrink-0 border-r border-[var(--border)] bg-[var(--bg-surface)] md:flex md:w-64 md:flex-col">
+        <div className="border-b border-[var(--border)] p-5">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-rose-600/20 text-rose-400 flex items-center justify-center ring-1 ring-rose-500/40">
-              <ShieldCheck className="w-5 h-5" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-rose-600/20 text-rose-400 ring-1 ring-rose-500/40">
+              <ShieldCheck className="h-5 w-5" />
             </div>
             <div className="min-w-0">
               <p className="text-sm font-bold tracking-tight">SysAdmin</p>
-              <p className="text-[10px] text-[var(--text-muted)] font-mono uppercase">Control Room</p>
+              <p className="font-mono text-[10px] uppercase text-[var(--text-muted)]">Control Room</p>
             </div>
           </div>
         </div>
@@ -206,7 +202,7 @@ export default function SysadminStandaloneShellLayout({
         <UserFooter user={user} logout={logout} />
       </aside>
 
-      {/* Mobile Navigation Drawer — follows Sidebar drawer pattern */}
+      {/* Mobile drawer */}
       <AnimatePresence>
         {drawerOpen && (
           <>
@@ -222,24 +218,24 @@ export default function SysadminStandaloneShellLayout({
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] flex flex-col bg-[var(--bg-surface)] border-r border-[var(--border)] md:hidden"
+              className="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] flex-col border-r border-[var(--border)] bg-[var(--bg-surface)] md:hidden"
               role="dialog"
               aria-modal="true"
               aria-label="Navigation menu"
             >
-              <div className="p-5 border-b border-[var(--border)] flex items-center justify-between">
+              <div className="flex items-center justify-between border-b border-[var(--border)] p-5">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-rose-600/20 text-rose-400 flex items-center justify-center ring-1 ring-rose-500/40">
-                    <ShieldCheck className="w-5 h-5" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-rose-600/20 text-rose-400 ring-1 ring-rose-500/40">
+                    <ShieldCheck className="h-5 w-5" />
                   </div>
                   <p className="text-sm font-bold tracking-tight">SysAdmin</p>
                 </div>
                 <button
                   onClick={() => setDrawerOpen(false)}
-                  className="p-2 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
+                  className="rounded-lg p-2 text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)]"
                   aria-label="Close navigation menu"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="h-5 w-5" />
                 </button>
               </div>
               <NavList onNavigate={() => setDrawerOpen(false)} />
@@ -249,43 +245,46 @@ export default function SysadminStandaloneShellLayout({
         )}
       </AnimatePresence>
 
-      {/* Main Standalone Workspace */}
-      <div className="flex-1 min-w-0 flex flex-col">
-        <header className="relative h-14 sticky top-0 z-40 flex items-center justify-between gap-2 px-3 sm:px-6 bg-transparent border-b border-[var(--border)] select-none">
-          {/* Inner backdrop glass layer for iOS Safari chrome tint optimization */}
+      {/* Main workspace */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-40 flex h-14 select-none items-center justify-between gap-2 border-b border-[var(--border)] bg-transparent px-3 pt-safe sm:px-6">
           <div
-            className="absolute inset-0 -z-10 pointer-events-none backdrop-blur-xl bg-[var(--glass-bg,var(--bg-surface))]"
+            className="pointer-events-none absolute inset-0 -z-10 bg-[var(--glass-bg,var(--bg-surface))] backdrop-blur-xl"
             style={{
               WebkitBackdropFilter: "blur(24px) saturate(200%)",
               backdropFilter: "blur(24px) saturate(200%)",
             }}
           />
-          <div className="flex items-center gap-2 min-w-0 flex-1">
+          <div className="flex min-w-0 flex-1 items-center gap-2">
             <button
               onClick={() => setDrawerOpen(true)}
-              className="md:hidden p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] shrink-0"
+              className="shrink-0 rounded-lg p-1.5 text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] md:hidden"
               aria-label="Open navigation menu"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="h-5 w-5" />
             </button>
-            <p className="text-xs sm:text-sm font-bold tracking-tight truncate">🔐 System Administration Console</p>
+            <p className="truncate text-xs font-bold tracking-tight sm:text-sm">
+              System Administration Console
+            </p>
           </div>
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             <GlassThemeToggle showCard={false} />
-            <span className="hidden md:inline-flex items-center gap-1 px-2 py-1 rounded-full bg-rose-600/10 text-rose-400 border border-rose-500/30 text-[10px] font-bold uppercase shrink-0">
-              <ShieldCheck className="w-3 h-3" /> Elevated Security
+            <span className="hidden items-center gap-1 rounded-full border border-rose-500/30 bg-rose-600/10 px-2 py-1 text-[10px] font-bold uppercase text-rose-400 md:inline-flex">
+              <ShieldCheck className="h-3 w-3" /> Elevated Security
             </span>
             <button
               onClick={logout}
-              className="md:hidden p-1.5 rounded-lg text-[var(--text-muted)] hover:text-rose-400 hover:bg-rose-500/10 shrink-0"
+              className="rounded-lg p-1.5 text-[var(--text-muted)] hover:bg-rose-500/10 hover:text-rose-400 md:hidden"
               title="Sign Out"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="h-4 w-4" />
             </button>
           </div>
         </header>
 
-        <main className="flex-1 p-4 sm:p-6 pb-24 md:pb-6">{children}</main>
+        <main className="mx-auto w-full max-w-6xl flex-1 p-4 pb-24 sm:p-6 md:pb-6 md:px-8">
+          {children}
+        </main>
       </div>
     </div>
   );

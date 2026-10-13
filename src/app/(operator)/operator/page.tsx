@@ -100,13 +100,14 @@ function OperatorOverviewInner() {
   usePolling(refreshAll, { intervalMs: 30_000, enabled: !!user });
 
   const counts = transactions?.data?.counts;
+  const gateId = user?.gateId;
   const activeGates = useMemo(() => {
-    if (user?.gateId) {
+    if (gateId) {
       // Operator is scoped to a single gate.
-      return [{ id: user.gateId, name: user.gateId, gate_code: undefined, is_active: true }];
+      return [{ id: gateId, name: gateId, gate_code: undefined, is_active: true }];
     }
     return (gates?.data ?? []).filter((g) => g.is_active !== false);
-  }, [gates, user?.gateId]);
+  }, [gates, gateId]);
 
   const queueTotal = permissions?.total ?? 0;
   const queueBusy =

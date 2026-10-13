@@ -42,7 +42,7 @@ async function handleGet(
 
   return ok({ rows, count: rows.length });
 }
-export const GET = withAuthorization(handleGet, {  });
+export const GET = withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin"] });
 
 /**
  * POST admin/announcements
@@ -93,4 +93,4 @@ async function handlePost(
 
   return ok(created, 201);
 }
-export const POST = withAuthorization(handlePost, {  });
+export const POST = withAuthorization(handlePost, { requiredRole: ["admin", "sysadmin"] });
