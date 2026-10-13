@@ -7,13 +7,12 @@ const TABS = [
   { href: "/supervisor", label: "Security Overview", exact: true },
   { href: "/supervisor/gates", label: "Gate Status" },
   { href: "/supervisor/gate-activity", label: "Gate Activity" },
-  { href: "/supervisor/shifts", label: "Shifts" },
+  { href: "/supervisor/shifts", label: "Operator & Shifts" },
   { href: "/supervisor/exceptions", label: "Exceptions" },
   { href: "/supervisor/incidents", label: "Incidents" },
   { href: "/supervisor/handover", label: "Handover" },
+  { href: "/supervisor/escalation-centre", label: "Escalation" },
   { href: "/supervisor/reports", label: "Reports" },
-  { href: "/supervisor/approvals", label: "Approvals" },
-  { href: "/supervisor/curfew", label: "Wards & Curfew" },
 ] as const;
 
 function tabActive(

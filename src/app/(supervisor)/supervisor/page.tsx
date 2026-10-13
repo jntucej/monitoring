@@ -200,13 +200,13 @@ function SupervisorOverviewInner() {
           {[
             { href: "/supervisor/gates", label: "Gate Status", sub: "Live presence by gate" },
             { href: "/supervisor/gate-activity", label: "Gate Activity", sub: "Per-gate live counts" },
-            { href: "/supervisor/shifts", label: "Shifts", sub: "Guard & staff attendance" },
+            { href: "/supervisor/shifts", label: "Operator & Shifts", sub: "Guard & staff attendance" },
             { href: "/supervisor/exceptions", label: "Exceptions", sub: "Pending staff leave & outpass" },
-            { href: "/supervisor/incidents", label: "Incidents", sub: "Active alert feed" },
-            { href: "/supervisor/approvals", label: "Approvals", sub: "Outpass decision desk" },
+            { href: "/supervisor/incidents", label: "Incidents", sub: "Assign & acknowledge alerts" },
             { href: "/supervisor/handover", label: "Handover", sub: "Shift handover log" },
+            { href: "/supervisor/escalation-centre", label: "Escalation Centre", sub: "Escalated requests & routing" },
             { href: "/supervisor/reports", label: "Reports", sub: "Security report exports" },
-            { href: "/supervisor/curfew", label: "Wards & Curfew", sub: "Hostel roster & strikes" },
+            { href: "/supervisor/approvals", label: "Approvals", sub: "Outpass decision desk" },
           ].map((s) => (
             <Link
               key={s.href}
