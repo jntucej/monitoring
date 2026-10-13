@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback } from "react";
+import { Suspense, useCallback, useMemo } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
@@ -10,14 +10,42 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
-import { Inbox, Clock, Loader2, ShieldCheck, AlertTriangle, ArrowRight } from "lucide-react";
+import {
+  Clock,
+  Loader2,
+  ChartBar,
+  AlertTriangle,
+  ArrowRight,
+  FileBarChart,
+  Users,
+} from "lucide-react";
 
-/* response shapes */
+/* /api/campus-extra/analytics response shape */
+interface AnalyticsMetric {
+  key: string;
+  label: string;
+  value: number;
+  unit?: string;
+}
 
-interface DataResponse {
+interface AnalyticsResponse {
   success: boolean;
-  data: unknown;
-  total?: number;
+  data: {
+    metrics: AnalyticsMetric[];
+    seriesData: Array<Record<string, string | number>>;
+    role: string;
+  };
+}
+
+/* /api/occupancy/presence-matrix response shape */
+interface PresenceResponse {
+  success: boolean;
+  data: {
+    gates: Array<{ id: string; name: string; code: string; audience: string; type: string }>;
+    roles: string[];
+    matrix: Record<string, Record<string, number>>;
+    lastUpdated: string;
+  };
 }
 
 function ExamBranchReportsInner() {
@@ -26,32 +54,68 @@ function ExamBranchReportsInner() {
   const tier = getRoleTier(role);
 
   const {
-    data,
-    loading,
-    error,
-    refresh,
-  } = useApiResource<DataResponse>("/api/occupancy/presence-matrix", { ttlMs: 30_000 });
+    data: analytics,
+    loading: analyticsLoading,
+    error: analyticsError,
+    refresh: refreshAnalytics,
+  } = useApiResource<AnalyticsResponse>("/api/campus-extra/analytics", {
+    ttlMs: 30_000,
+  });
+
+  const {
+    data: presence,
+    loading: presenceLoading,
+    error: presenceError,
+    refresh: refreshPresence,
+  } = useApiResource<PresenceResponse>("/api/occupancy/presence-matrix", {
+    ttlMs: 30_000,
+  });
 
   const refreshAll = useCallback(async () => {
     clearCache();
-    await refresh();
-  }, [refresh]);
+    await Promise.all([refreshAnalytics(), refreshPresence()]);
+  }, [refreshAnalytics, refreshPresence]);
 
   usePolling(refreshAll, { intervalMs: 30_000, enabled: !!user });
 
-  const busy = loading && !data;
+  const busy =
+    (analyticsLoading && !analytics) || (presenceLoading && !presence);
+
+  const metrics = analytics?.data?.metrics ?? [];
+  const series = analytics?.data?.seriesData ?? [];
+  const gates = presence?.data?.gates ?? [];
+  const matrix = presence?.data?.matrix ?? {};
+
+  const totalOnCampus = useMemo(() => {
+    return Object.values(matrix).reduce(
+      (sum, gateCounts) => sum + Object.values(gateCounts).reduce((a, b) => a + b, 0),
+      0
+    );
+  }, [matrix]);
+
+  const metricsForbidden =
+    typeof analyticsError === "string" &&
+    (analyticsError.includes("403") || analyticsError.includes("FORBIDDEN"));
+
+  /*
+   * exam_branch is not included in APPROVER_ROLES / OPERATOR_ROLES / MANAGER_ROLES
+   * in /api/campus-extra/analytics, so it falls back to the generic "role" metric
+   * with value 0. That's fine — the presence matrix is the primary report source
+   * for exam_branch, and the metrics section is best-effort / informational.
+   */
+  const hasMeaningfulMetrics =
+    metrics.length > 0 && !(metrics.length === 1 && metrics[0].key === "role");
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
-      {/* Back link */}
       <Link
-        href="/exam-branch/calendar"
+        href="/exam-branch"
         className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
       >
-        <ArrowRight className="w-3 h-3 rotate-180" /> Back to Exam Calendar
+        <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
 
-      {/* Page toolbar */}
+      {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <p className="mt-1 text-sm text-slate-400 min-w-0">
@@ -74,15 +138,15 @@ function ExamBranchReportsInner() {
         </button>
       </div>
 
-      {error && (
+      {presenceError && (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
-            <span className="truncate">Reports data unavailable: {error}</span>
+            <span className="truncate">Reports data unavailable: {presenceError}</span>
           </span>
           <button
             type="button"
-            onClick={() => void refresh()}
+            onClick={() => void refreshPresence()}
             className="rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
           >
             Retry
@@ -90,50 +154,205 @@ function ExamBranchReportsInner() {
         </div>
       )}
 
-      <WidgetBoundary title="Reports">
+      {/* Top KPI cards */}
+      <WidgetBoundary title="Examination-Day Reports">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
+          <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
+            <div className="flex items-center gap-2 text-slate-400 min-w-0">
+              <Users className="w-4 h-4 shrink-0" />
+              <span className="text-xs font-semibold uppercase tracking-wide truncate">
+                On Campus Now
+              </span>
+            </div>
+            {presenceLoading && !presence ? (
+              <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-slate-500" />
+            ) : (
+              <p className="text-2xl font-bold text-emerald-400">{totalOnCampus}</p>
+            )}
+            <p className="text-xs text-slate-500">All roles inside active gates</p>
+          </div>
+          <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
+            <div className="flex items-center gap-2 text-slate-400 min-w-0">
+              <ChartBar className="w-4 h-4 shrink-0" />
+              <span className="text-xs font-semibold uppercase tracking-wide truncate">
+                Active Gates
+              </span>
+            </div>
+            {presenceLoading && !presence ? (
+              <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-slate-500" />
+            ) : (
+              <p className="text-2xl font-bold text-sky-400">{gates.length}</p>
+            )}
+            <p className="text-xs text-slate-500">Gates reporting in real-time</p>
+          </div>
+          <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
+            <div className="flex items-center gap-2 text-slate-400 min-w-0">
+              <FileBarChart className="w-4 h-4 shrink-0" />
+              <span className="text-xs font-semibold uppercase tracking-wide truncate">
+                Analytics
+              </span>
+            </div>
+            {analyticsLoading && !analytics ? (
+              <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-slate-500" />
+            ) : hasMeaningfulMetrics ? (
+              <p className="text-2xl font-bold text-amber-400">{metrics.length} metrics</p>
+            ) : (
+              <p className="text-2xl font-bold text-slate-500">N/A</p>
+            )}
+            <p className="text-xs text-slate-500">
+              {hasMeaningfulMetrics
+                ? "Approval and turnaround analytics"
+                : "Analytics not available for this role"}
+            </p>
+          </div>
+          <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
+            <div className="flex items-center gap-2 text-slate-400 min-w-0">
+              <Clock className="w-4 h-4 shrink-0" />
+              <span className="text-xs font-semibold uppercase tracking-wide truncate">
+                Last Updated
+              </span>
+            </div>
+            <p className="text-2xl font-bold text-white">
+              {presence?.data?.lastUpdated
+                ? new Date(presence.data.lastUpdated).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : "—"}
+            </p>
+            <p className="text-xs text-slate-500">Auto-refreshes every 30 seconds</p>
+          </div>
+        </div>
+      </WidgetBoundary>
+
+      {/* Gate × role matrix */}
+      <WidgetBoundary title="Gate Occupancy Matrix">
         <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
           <div className="px-4 py-3 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
-              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span className="text-sm font-semibold text-white truncate">Reports</span>
+              <ChartBar className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span className="text-sm font-semibold text-white truncate">
+                Gate × Role Occupancy
+              </span>
             </div>
             <span className="text-xs text-slate-500 shrink-0">
-              {(data as DataResponse | null)?.total ?? 0} item(s)
+              {gates.length} gates · live
             </span>
           </div>
-          {busy ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-slate-500 min-w-0">
-              <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" /> Loading Reports…
+
+          {presenceLoading && !presence ? (
+            <div className="p-4 space-y-3 min-w-0">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="h-12 rounded-lg border border-slate-800 bg-slate-900/40 animate-pulse motion-reduce:animate-none"
+                />
+              ))}
+            </div>
+          ) : gates.length === 0 ? (
+            <div className="p-6 text-center min-w-0">
+              <ChartBar className="w-8 h-8 mx-auto text-slate-600 mb-2" />
+              <p className="text-sm text-slate-400">No active gates reporting.</p>
             </div>
           ) : (
-            <div className="p-4 min-w-0">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Status</p>
-                  <p className="mt-1 text-lg font-bold text-emerald-400">Live</p>
-                  <p className="text-xs text-slate-500">Reports data streams from the campus gate network.</p>
-                </div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Last Updated</p>
-                  <p className="mt-1 text-lg font-bold text-sky-400">
-                    {new Date().toLocaleString([], { hour: "2-digit", minute: "2-digit" })}
-                  </p>
-                  <p className="text-xs text-slate-500">Auto-refreshes every 30 seconds.</p>
-                </div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Records</p>
-                  <p className="mt-1 text-lg font-bold text-amber-400">
-                    {Array.isArray((data as unknown as { data?: unknown[] })?.data)
-                      ? (data as unknown as { data?: unknown[] }).data!.length
-                      : 0}
-                  </p>
-                  <p className="text-xs text-slate-500">Entries currently visible in this view.</p>
-                </div>
-              </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs min-w-[480px]">
+                <thead>
+                  <tr className="border-b border-slate-800 text-slate-500">
+                    <th className="text-left px-4 py-2.5 font-semibold">Gate</th>
+                    {presence?.data?.roles?.map((roleKey) => (
+                      <th key={roleKey} className="text-right px-3 py-2.5 font-semibold">
+                        {roleKey}
+                      </th>
+                    ))}
+                    <th className="text-right px-4 py-2.5 font-semibold text-emerald-400">
+                      Total
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {gates.map((gate) => {
+                    const counts = matrix[gate.id] ?? {};
+                    const total = Object.values(counts).reduce((a, b) => a + b, 0);
+                    return (
+                      <tr key={gate.id} className="border-b border-slate-800/40 last:border-b-0">
+                        <td className="px-4 py-2.5 text-slate-300 font-medium">
+                          {gate.name}
+                          <span className="ml-1.5 text-slate-600">{gate.code}</span>
+                        </td>
+                        {presence?.data?.roles?.map((roleKey) => (
+                          <td
+                            key={roleKey}
+                            className={`px-3 py-2.5 text-right tabular-nums ${
+                              (counts[roleKey] ?? 0) > 0
+                                ? "text-white"
+                                : "text-slate-700"
+                            }`}
+                          >
+                            {counts[roleKey] ?? 0}
+                          </td>
+                        ))}
+                        <td className="px-4 py-2.5 text-right tabular-nums text-emerald-400 font-semibold">
+                          {total}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
       </WidgetBoundary>
+
+      {/* Analytics metrics (if available for this role) */}
+      {hasMeaningfulMetrics && !metricsForbidden && (
+        <WidgetBoundary title="Role Analytics">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
+            {metrics.map((m) => (
+              <div key={m.key} className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
+                <p className="text-xs text-slate-500 uppercase tracking-wide">{m.label}</p>
+                <p className="mt-1 text-xl font-bold text-white">
+                  {m.value}
+                  {m.unit && <span className="text-sm text-slate-500 ml-1">{m.unit}</span>}
+                </p>
+              </div>
+            ))}
+          </div>
+        </WidgetBoundary>
+      )}
+
+      {/* Series data (daily breakdown) */}
+      {series.length > 0 && (
+        <WidgetBoundary title="Daily Series">
+          <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs min-w-[300px]">
+                <thead>
+                  <tr className="border-b border-slate-800 text-slate-500">
+                    {Object.keys(series[0]).map((k) => (
+                      <th key={k} className="text-left px-4 py-2 font-semibold">
+                        {k}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {series.slice(0, 14).map((row, i) => (
+                    <tr key={i} className="border-b border-slate-800/40 last:border-b-0">
+                      {Object.values(row).map((val, j) => (
+                        <td key={j} className="px-4 py-2 text-slate-300 tabular-nums">
+                          {String(val)}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </WidgetBoundary>
+      )}
 
       <DevContactStrip />
     </div>

@@ -12,13 +12,13 @@ import type { Role } from "@/lib/types";
 const ALLOWED_ROLES: Role[] = ["oie", "exam_branch", "vice_principal", "admin", "sysadmin"];
 
 const TABS = [
-  { href: "/exam-branch/calendar", label: "Calendar" },
+  { href: "/exam-branch/calendar", label: "Exam Calendar" },
   { href: "/exam-branch/records", label: "Records" },
   { href: "/exam-branch/pass-queue", label: "Pass Queue" },
   { href: "/exam-branch/verification", label: "Verification" },
   { href: "/exam-branch/discrepancies", label: "Discrepancies" },
   { href: "/exam-branch/reports", label: "Reports" },
-  { href: "/exam-branch/oie-handoff", label: "OIE Handoff" },
+  { href: "/exam-branch/oie-approval-requests", label: "OIE Approvals" },
   { href: "/exam-branch/docs", label: "Docs" },
 ] as const;
 
