@@ -30,18 +30,18 @@ async function handleGet(
 
     const sql = dateParam
       ? `SELECT ar.*, u.name AS candidate_name, u.unique_id AS candidate_unique_id,
-                sd.roll_number AS roll
+                sd.roll
            FROM public.attendance_records ar
            JOIN public.users u ON u.id = ar.person_id
-           LEFT JOIN public.student_details sd ON sd.student_id = u.id
+           LEFT JOIN public.student_details sd ON sd.user_id = u.id
           WHERE ar.date = $1
           ORDER BY ar.timestamp_utc DESC
           LIMIT $2`
       : `SELECT ar.*, u.name AS candidate_name, u.unique_id AS candidate_unique_id,
-                sd.roll_number AS roll
+                sd.roll
            FROM public.attendance_records ar
            JOIN public.users u ON u.id = ar.person_id
-           LEFT JOIN public.student_details sd ON sd.student_id = u.id
+           LEFT JOIN public.student_details sd ON sd.user_id = u.id
           WHERE ar.direction IN ('IN','OUT')
           ORDER BY ar.timestamp_utc DESC
           LIMIT $1`;

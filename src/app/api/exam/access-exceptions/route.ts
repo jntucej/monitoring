@@ -52,10 +52,10 @@ async function handleGet(
         pr.stage_history,
         u.name AS candidate_name,
         u.unique_id AS candidate_unique_id,
-        sd.roll_number AS roll
+        sd.roll
       FROM public.permission_requests pr
       JOIN public.users u ON u.id = pr.student_user_id
-      LEFT JOIN public.student_details sd ON sd.student_id = u.id
+      LEFT JOIN public.student_details sd ON sd.user_id = u.id
       WHERE ${conditions.join(" AND ")}
       ORDER BY
         CASE WHEN pr.sla_deadline IS NOT NULL AND pr.sla_deadline < NOW() THEN 0 ELSE 1 END,

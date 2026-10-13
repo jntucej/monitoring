@@ -104,11 +104,8 @@ export function GlassThemeToggle({ className = "" }: GlassThemeToggleProps) {
           }`}
           title="Toggle Real-Time Live Data Telemetry (Click to trigger sine wave loading & metric refresh)"
         >
-          <Radio className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${isLiveStream ? "animate-pulse text-emerald-400" : ""}`} />
+          <Radio className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${isLiveStream ? "text-emerald-400" : ""}`} />
           <span className="hidden md:inline">{isLiveStream ? "Live Data" : "Paused"}</span>
-          {isLiveStream && (
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-          )}
         </button>
 
         {/* Feedback / Report Option */}

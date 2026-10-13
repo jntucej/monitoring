@@ -37,10 +37,10 @@ async function handleGet(
         u.id AS candidate_user_id,
         u.name AS candidate_name,
         u.unique_id AS candidate_unique_id,
-        sd.roll_number
+        sd.roll
       FROM public.permission_requests pr
       JOIN public.users u ON u.id = pr.student_user_id
-      LEFT JOIN public.student_details sd ON sd.student_id = u.id
+      LEFT JOIN public.student_details sd ON sd.user_id = u.id
       WHERE pr.workflow_type = 'exam'
         AND pr.status IN ('PENDING', 'APPROVED', 'ESCALATED')
       ORDER BY
