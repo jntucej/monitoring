@@ -6,6 +6,7 @@ import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { usePolling } from "@/hooks/usePolling";
+import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { useAuthStore } from "@/stores/authStore";
 import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role } from "@/lib/types";
@@ -88,6 +89,13 @@ function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => voi
 
 /* ── main content ── */
 
+interface ShiftSummary {
+  myShift?: { check_in?: string | null; check_out?: string | null; status?: string } | null;
+  todayShifts?: Array<{ name?: string; check_in?: string | null; check_out?: string | null; scans?: number }> | null;
+  openWorkOrders?: unknown[];
+  myRecent?: unknown[];
+}
+
 function WorkerDashboardInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "worker") as Role;
@@ -100,14 +108,26 @@ function WorkerDashboardInner() {
     capacitybreach: 0,
   }), []);
 
+  const {
+    data: shiftData,
+    loading: shiftLoading,
+    refresh: refreshShift,
+  } = useApiResource<{ success: boolean; data: ShiftSummary }>(
+    "/api/workers/my-shift",
+    { ttlMs: 30_000 }
+  );
+
+  const shift = shiftData?.data;
+  const openOrders = shift?.openWorkOrders?.length ?? 0;
+
   const refresh = useCallback(async () => {
-    // No server-side refresh needed — metrics are derived locally for the
-    // conditional alert widget; keep the poller no-op-safe.
-  }, []);
+    clearCache();
+    await refreshShift();
+  }, [refreshShift]);
 
   usePolling(refresh, { intervalMs: 30_000, enabled: !!user });
 
-  const onDuty = Boolean(user?.gateId);
+  const onDuty = Boolean(user?.gateId || shift?.myShift?.check_in);
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 min-w-0">
       {/* Page toolbar — global DynamicHeader already renders the app header */}
@@ -130,7 +150,7 @@ function WorkerDashboardInner() {
           icon={ShieldCheck}
           label="Status"
           value={onDuty ? "On Duty" : "Unassigned"}
-          sub={onDuty ? "Assigned gate / area for today\'s shift" : "No gate assignment on record"}
+          sub={shift?.myShift?.check_in ? "Checked in — shift active" : onDuty ? "Assigned gate / area for today's shift" : "No gate assignment on record"}
           accent="text-emerald-400"
         />
         <StatCard
@@ -142,10 +162,11 @@ function WorkerDashboardInner() {
         />
         <StatCard
           icon={Users}
-          label="Your Role"
-          value={role}
-          sub="Worker desk — no admin telemetry on this page"
+          label="Open Work Orders"
+          value={openOrders}
+          sub="Pending assignments for your shift"
           accent="text-sky-400"
+          loading={shiftLoading && !shift}
         />
       </div>
 
