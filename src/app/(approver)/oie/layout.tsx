@@ -10,11 +10,14 @@ const ALLOWED_ROLES: Role[] = ["oie", "admin", "sysadmin"];
 
 const TABS = [
   { href: "/oie", label: "Overview" },
-  { href: "/oie/records", label: "Records" },
-  { href: "/oie/logs", label: "Logs" },
-  { href: "/oie/incidents", label: "Incidents" },
-  { href: "/oie/tasks", label: "Tasks" },
-  { href: "/oie/approvals", label: "Approvals" },
+  { href: "/oie/examination-pass-requests", label: "Pass Requests" },
+  { href: "/oie/examination-day-access", label: "Exam-Day Access" },
+  { href: "/oie/candidate-attendance", label: "Candidate Attendance" },
+  { href: "/oie/access-exceptions", label: "Access Exceptions" },
+  { href: "/oie/exam-branch-coordination", label: "Exam Branch" },
+  { href: "/oie/pending-approvals", label: "Approvals" },
+  { href: "/oie/examination-reports", label: "Reports" },
+  { href: "/oie/decision-history", label: "Decision History" },
 ] as const;
 
 export default function OieLayout({ children }: { children: React.ReactNode }) {
