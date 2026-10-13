@@ -11,18 +11,20 @@ import type { Role } from "@/lib/types";
 
 const ALLOWED_ROLES: Role[] = [
   "exam_superintendent",
-  "oie",
   "exam_branch",
+  "oie",
   "vice_principal",
   "admin",
   "sysadmin",
 ];
 
+/* Spec sections: Overview (home) + 4 exam-ops sections */
 const TABS = [
-  { href: "/exam/superintendent/schedule", label: "Schedule" },
-  { href: "/exam/superintendent/access", label: "Access" },
-  { href: "/exam/superintendent/incidents", label: "Incidents" },
-  { href: "/exam/superintendent/reports", label: "Reports" },
+  { href: "/exam/superintendent", label: "Overview" },
+  { href: "/exam/superintendent/schedule", label: "Exam Schedule" },
+  { href: "/exam/superintendent/access", label: "Exam Access" },
+  { href: "/exam/superintendent/incidents", label: "Exam Incidents" },
+  { href: "/exam/superintendent/reports", label: "Exam Reports" },
 ] as const;
 
 function SuperintendentTabs({ children }: { children: React.ReactNode }) {
@@ -32,9 +34,12 @@ function SuperintendentTabs({ children }: { children: React.ReactNode }) {
     <div className="min-w-0">
       <nav className="sticky top-0 z-30 border-b border-[var(--border)] bg-[var(--bg-base)]/95 backdrop-blur-md">
         <div className="mx-auto max-w-7xl px-4 py-3 md:px-6">
-          <ol className="flex flex-wrap items-center gap-1 text-sm">
+          <ol className="flex flex-wrap items-center gap-1 text-sm" aria-label="Exam superintendent sections">
             {TABS.map((tab) => {
-              const isActive = pathname === tab.href || pathname.startsWith(tab.href + "/");
+              const isActive =
+                tab.href === "/exam/superintendent"
+                  ? pathname === tab.href
+                  : pathname === tab.href || pathname.startsWith(tab.href + "/");
               return (
                 <li key={tab.href}>
                   {isActive ? (

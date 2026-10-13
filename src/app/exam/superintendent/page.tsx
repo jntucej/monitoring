@@ -16,6 +16,7 @@ import { ApprovalInbox } from "@/components/shared/ApprovalInbox";
 import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
+import { DigitalHandover } from "@/components/retention/DigitalHandover";
 import {
   Inbox,
   Clock,
@@ -106,12 +107,17 @@ function ExamSuperintendentInner() {
     error: queueError,
     refresh: refreshQueue,
   } = useApiResource<DataResponse>("/api/permissions?workflowType=exam&status=PENDING", { ttlMs: 30_000 });
+  const alerts = useApiResource<DataResponse>("/api/alerts?resolved=false", { ttlMs: 30_000 });
+  const openAlertCount: number = Array.isArray((alerts.data as DataResponse | null)?.data)
+    ? ((alerts.data as DataResponse | null)?.data as unknown[]).length
+    : 0;
   const refreshAll = useCallback(async () => {
     clearCache();
     await Promise.all([
-      refreshQueue()
+      refreshQueue(),
+      alerts.refresh()
     ]);
-  }, [refreshQueue]);
+  }, [refreshQueue, alerts.refresh]);
   usePolling(refreshAll, { intervalMs: 30_000, enabled: !!user });
   const busy = queueLoading && !queue;
 
@@ -149,7 +155,7 @@ function ExamSuperintendentInner() {
       <WidgetBoundary title="Exam Superintendent Overview">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
           <StatCard icon={Inbox} label="Pending Exam Passes" value={queueTotal} sub="Awaiting clearance at superintendent desk" accent="text-emerald-400" loading={queueLoading && !queue} />
-          <StatCard icon={AlertTriangle} label="SLA Breached" value='0' sub="Past 48h approval deadline" accent="text-amber-400" loading={queueLoading && !queue} />
+          <StatCard icon={AlertTriangle} label="Open Alerts" value={openAlertCount} sub="Unresolved exam & system alerts" accent="text-amber-400" loading={alerts.loading && !alerts.data} />
           <StatCard icon={UserCheck} label="Scope" value={scopeName} sub="Examination clearance and escalation authority" accent="text-sky-400" loading={false} />
           <StatCard icon={ShieldCheck} label="Stage" value="Superintendent" sub="Examination clearance desk" accent="text-white" loading={false} />
         </div>
@@ -176,6 +182,7 @@ function ExamSuperintendentInner() {
         <QuickActions />
         <NotificationCenter />
       </div>
+      <DigitalHandover />
 
       <DevContactStrip />
     </div>
