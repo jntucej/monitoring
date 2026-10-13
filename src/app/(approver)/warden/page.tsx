@@ -19,6 +19,13 @@ import {
   UserCheck,
   ArrowRight,
 } from "lucide-react";
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { ContributionPortfolio } from "@/components/retention/ContributionPortfolio";
+import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
+import { DigitalHandover } from "@/components/retention/DigitalHandover";
 
 /* response shapes */
 
@@ -37,6 +44,30 @@ interface PresenceMatrixData {
 interface PresenceMatrixResponse {
   success: boolean;
   data: PresenceMatrixData;
+}
+
+interface WardenScopeRow {
+  id: string;
+  name: string;
+  role: string;
+  assigned_hostel: string | null;
+  supervised_gates: string[] | null;
+}
+
+interface WardenScopeResponse {
+  success: boolean;
+  data: {
+    requestingUser: WardenScopeRow | null;
+    wardens: WardenScopeRow[];
+    activeDelegations: Array<{
+      id: string;
+      scope: string;
+      status: string;
+      delegate_role: string;
+      note: string | null;
+      expires_at: string;
+    }>;
+  };
 }
 
 function StatCard({
@@ -127,17 +158,33 @@ function WardenInner() {
     ttlMs: 30_000,
   });
 
+  // Warden authority scope (assigned hostel + active delegations).
+  const {
+    data: scope,
+    loading: scopeLoading,
+    error: scopeError,
+    refresh: refreshScope,
+  } = useApiResource<WardenScopeResponse>("/api/warden/hostel-scope", {
+    ttlMs: 60_000,
+  });
+
   const refreshAll = useCallback(async () => {
     clearCache();
-    await Promise.all([refreshOutpass(), refreshAlerts(), refreshPresence()]);
-  }, [refreshOutpass, refreshAlerts, refreshPresence]);
+    await Promise.all([
+      refreshOutpass(),
+      refreshAlerts(),
+      refreshPresence(),
+      refreshScope(),
+    ]);
+  }, [refreshOutpass, refreshAlerts, refreshPresence, refreshScope]);
 
   usePolling(refreshAll, { intervalMs: 30_000, enabled: !!user });
 
   const busy =
     (outpassLoading && !outpass) ||
     (alertsLoading && !alerts) ||
-    (presenceLoading && !presence);
+    (presenceLoading && !presence) ||
+    (scopeLoading && !scope);
 
   const outpassTotal: number = outpass?.total ?? 0;
   const openAlerts: number = (alerts as { total?: number } | null)?.total ??
@@ -149,6 +196,17 @@ function WardenInner() {
     0
   );
   const activeGates = gates.length;
+
+  const scopeRow = scope?.data?.requestingUser ?? null;
+  const assignedHostel = scopeRow?.assigned_hostel ?? null;
+  const activeDelegations = scope?.data?.activeDelegations ?? [];
+  const scopeSummary = assignedHostel
+    ? `Assigned hostel: ${assignedHostel}`
+    : "Assigned hostel not set";
+  const scopeDelegation =
+    activeDelegations.length > 0
+      ? ` · ${activeDelegations.length} active delegation(s)`
+      : "";
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
@@ -163,6 +221,12 @@ function WardenInner() {
       {/* Page toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
+          <p className="text-sm text-slate-400 min-w-0">
+            Authority: warden approves hostel requests within assigned hostel +
+            delegated scope ·{" "}
+            <span className="text-slate-300">{scopeSummary}</span>
+            {scopeDelegation}
+          </p>
           <p className="mt-1 text-sm text-slate-400 min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
@@ -184,12 +248,12 @@ function WardenInner() {
       </div>
 
       {/* error banners */}
-      {(outpassError || alertsError || presenceError) && (
+      {(outpassError || alertsError || presenceError || scopeError) && (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span>
-              {[outpassError, alertsError, presenceError]
+              {[outpassError, alertsError, presenceError, scopeError]
                 .filter(Boolean)
                 .map((e) => e as string)
                 .join(" · ")}
@@ -251,12 +315,17 @@ function WardenInner() {
           />
           <SectionLink
             href="/warden/outpass-leave"
-            title="Outpass & Leave Requests"
-            sub="Outpass and leave requests awaiting the warden"
+            title="Outpass Requests"
+            sub="Outpass requests awaiting the warden"
+          />
+          <SectionLink
+            href="/warden/leave-requests"
+            title="Leave Requests"
+            sub="Leave requests at the warden stage"
           />
           <SectionLink
             href="/warden/entry-exit"
-            title="Entry/Exit Logs"
+            title="Entry/Exit Records"
             sub="Movement logs at hostel gates"
           />
           <SectionLink
@@ -266,14 +335,44 @@ function WardenInner() {
           />
           <SectionLink
             href="/warden/room-occupancy"
-            title="Room Occupancy"
+            title="Room Allocation"
             sub="Current room and gate occupancy"
+          />
+          <SectionLink
+            href="/warden/escalated-requests"
+            title="Escalated Requests"
+            sub="Tickets escalated past the warden stage"
           />
           <SectionLink
             href="/warden/hostel-reports"
             title="Hostel Reports"
             sub="Hostel analytics and summaries"
           />
+        </div>
+      </WidgetBoundary>
+
+      {/* Quick panel */}
+      <WidgetBoundary title="Quick Panel">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 min-w-0">
+          <QuickActions />
+          <NotificationCenter />
+        </div>
+      </WidgetBoundary>
+
+      {/* Campus services */}
+      <WidgetBoundary title="Campus Services">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 min-w-0">
+          <PersonalizedCampusHome />
+          <TaskContinuity />
+          <ContributionPortfolio />
+          <CampusFeedbackDesk />
+        </div>
+      </WidgetBoundary>
+
+      {/* Shift handover */}
+      <WidgetBoundary title="Shift Handover">
+        <div className="grid grid-cols-1 min-w-0">
+          <DigitalHandover />
         </div>
       </WidgetBoundary>
 

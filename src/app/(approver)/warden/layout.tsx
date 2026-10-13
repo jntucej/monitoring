@@ -8,14 +8,16 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 const TABS = [
-  { href: "/warden", label: "Overview" },
-  { href: "/warden/resident-directory", label: "Residents" },
-  { href: "/warden/hostel-attendance", label: "Attendance" },
-  { href: "/warden/outpass-leave", label: "Outpass & Leave" },
-  { href: "/warden/entry-exit", label: "Entry/Exit" },
-  { href: "/warden/incidents", label: "Incidents" },
-  { href: "/warden/room-occupancy", label: "Room Occupancy" },
-  { href: "/warden/hostel-reports", label: "Reports" },
+  { href: "/warden", label: "Hostel Overview" },
+  { href: "/warden/resident-directory", label: "Resident Directory" },
+  { href: "/warden/hostel-attendance", label: "Hostel Attendance" },
+  { href: "/warden/outpass-leave", label: "Outpass Requests" },
+  { href: "/warden/leave-requests", label: "Leave Requests" },
+  { href: "/warden/entry-exit", label: "Entry/Exit Records" },
+  { href: "/warden/incidents", label: "Hostel Incidents" },
+  { href: "/warden/room-occupancy", label: "Room Allocation" },
+  { href: "/warden/escalated-requests", label: "Escalated Requests" },
+  { href: "/warden/hostel-reports", label: "Hostel Reports" },
 ] as const;
 
 function WardenTabs({ children }: { children: React.ReactNode }) {
