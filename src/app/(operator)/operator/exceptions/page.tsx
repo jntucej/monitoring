@@ -29,7 +29,8 @@ interface TransactionRow {
   gate_id: string | null;
   gate_name: string | null;
   timestamp: string;
-  scan_type: string | null;
+  scan_type: boolean | null;
+  is_correction: boolean | null;
   created_at: string | null;
 }
 
@@ -100,16 +101,7 @@ function ExceptionsInner() {
   const busy = txLoading && !transactions;
 
   const isFlagged = (r: TransactionRow) =>
-    r.scan_type === "correction" ||
-    r.scan_type === "CORRECTION" ||
-    (r.scan_type !== "correction" && r.scan_type !== "CORRECTION" &&
-      r.scan_type !== "manual" &&
-      r.scan_type !== "MANUAL" &&
-      r.scan_type !== "scan" &&
-      r.scan_type !== "SCAN" &&
-      r.scan_type !== "qr" &&
-      r.scan_type !== "QR" &&
-      Boolean(r.scan_type)) ||
+    Boolean(r.is_correction) ||
     (r.reason !== null && r.reason !== undefined &&
       /denied|rejected|blocked|violation|exception|correction|hold/i.test(
         String(r.reason)
@@ -121,7 +113,7 @@ function ExceptionsInner() {
     /denied|rejected|blocked/i.test(String(r.reason));
 
   const isManual = (r: TransactionRow) =>
-    r.scan_type === "manual" || r.scan_type === "MANUAL";
+    r.scan_type === true;
 
   const filtered = useMemo(() => {
     switch (filter) {
@@ -247,7 +239,7 @@ function ExceptionsInner() {
                     if (isDenied(r)) tags.push("Denied");
                     if (isFlagged(r)) tags.push("Flagged");
                     if (isManual(r)) tags.push("Manual");
-                    if (r.scan_type === "correction" || r.scan_type === "CORRECTION")
+                    if (Boolean(r.is_correction))
                       tags.push("Correction");
                     return (
                       <tr key={r.id} className="hover:bg-[var(--bg-surface)] transition-colors">

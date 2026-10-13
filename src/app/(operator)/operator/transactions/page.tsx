@@ -31,6 +31,7 @@ interface TransactionRow {
   gate_name: string | null;
   timestamp: string;
   scan_type: string | null;
+  is_correction: boolean | null;
   created_at: string | null;
 }
 
@@ -231,14 +232,16 @@ function OperatorTransactionsInner() {
                         {r.gate_name || r.gate_id || "—"}
                       </td>
                       <td className="px-3 py-2.5 text-xs">
-                        {r.scan_type === "manual" || r.scan_type === "MANUAL" ? (
+                        {r.scan_type ? (
                           <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-amber-400 font-medium">
                             Manual
                           </span>
-                        ) : (
-                          <span className="text-[var(--text-muted)]">
-                            {r.scan_type === "correction" ? "Correction" : "Scan"}
+                        ) : r.is_correction ? (
+                          <span className="rounded-full border border-rose-400/30 bg-rose-400/10 px-2 py-0.5 text-rose-400 font-medium">
+                            Correction
                           </span>
+                        ) : (
+                          <span className="text-[var(--text-muted)]">Scan</span>
                         )}
                       </td>
                     </tr>
