@@ -22,8 +22,14 @@ import {
   CheckCircle2,
   Wrench,
 } from "lucide-react";
-
-/* response shapes */
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { ApprovalInbox } from "@/components/shared/ApprovalInbox";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { ContributionPortfolio } from "@/components/retention/ContributionPortfolio";
+import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
+import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 
 interface DataResponse {
   success: boolean;
@@ -164,6 +170,32 @@ function HodInner() {
           <SectionLink href="/hod/approvals" title="Approvals" sub="Exam and memo requests at HOD stage" />
           <SectionLink href="/hod/reports" title="Reports" sub="Department performance reports" />
           <SectionLink href="/hod/escalations" title="Escalations" sub="Requests escalated to vice principal" />
+        </div>
+      </WidgetBoundary>
+
+      {/* Quick panel */}
+      <WidgetBoundary title="Quick Panel">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 min-w-0">
+          <QuickActions />
+          <NotificationCenter />
+        </div>
+      </WidgetBoundary>
+
+      {/* Campus services */}
+      <WidgetBoundary title="Campus Services">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 min-w-0">
+          <PersonalizedCampusHome />
+          <TaskContinuity />
+          <ContributionPortfolio />
+          <CampusFeedbackDesk />
+        </div>
+      </WidgetBoundary>
+
+      {/* Approvals & analytics */}
+      <WidgetBoundary title="Approvals & Analytics">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 min-w-0">
+          <ApprovalInbox />
+          <RoleAnalytics />
         </div>
       </WidgetBoundary>
 

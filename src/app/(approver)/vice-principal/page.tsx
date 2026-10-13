@@ -20,6 +20,15 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { useProbe } from "./_probe";
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { ApprovalInbox } from "@/components/shared/ApprovalInbox";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { ContributionPortfolio } from "@/components/retention/ContributionPortfolio";
+import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
+import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
+import { CampusKnowledgeCentre } from "@/components/retention/CampusKnowledgeCentre";
 
 /* ── response shapes ── */
 
@@ -246,6 +255,39 @@ function VicePrincipalDashboardInner() {
               <ArrowRight className="w-4 h-4 text-slate-500 shrink-0" />
             </Link>
           ))}
+        </div>
+      </WidgetBoundary>
+
+      {/* Quick panel */}
+      <WidgetBoundary title="Quick Panel">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 min-w-0">
+          <QuickActions />
+          <NotificationCenter />
+        </div>
+      </WidgetBoundary>
+
+      {/* Campus services */}
+      <WidgetBoundary title="Campus Services">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 min-w-0">
+          <PersonalizedCampusHome />
+          <TaskContinuity />
+          <ContributionPortfolio />
+          <CampusFeedbackDesk />
+        </div>
+      </WidgetBoundary>
+
+      {/* Approvals & analytics */}
+      <WidgetBoundary title="Approvals & Analytics">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 min-w-0">
+          <ApprovalInbox />
+          <RoleAnalytics />
+        </div>
+      </WidgetBoundary>
+
+      {/* Knowledge centre */}
+      <WidgetBoundary title="Knowledge Centre">
+        <div className="grid grid-cols-1 min-w-0">
+          <CampusKnowledgeCentre />
         </div>
       </WidgetBoundary>
 

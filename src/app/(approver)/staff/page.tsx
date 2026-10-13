@@ -22,6 +22,13 @@ import {
   CheckCircle2,
   Wrench,
 } from "lucide-react";
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { ContributionPortfolio } from "@/components/retention/ContributionPortfolio";
+import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
+import { DigitalHandover } from "@/components/retention/DigitalHandover";
 
 /* response shapes */
 
@@ -163,6 +170,31 @@ function StaffInner() {
           <SectionLink href="/staff/duties" title="Duties" sub="Duty roster and shifts" />
           <SectionLink href="/staff/requests" title="Requests" sub="Leave requests and approvals" />
           <SectionLink href="/staff/history" title="History" sub="Past attendance and movement logs" />
+        </div>
+      </WidgetBoundary>
+
+      {/* Quick panel */}
+      <WidgetBoundary title="Quick Panel">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 min-w-0">
+          <QuickActions />
+          <NotificationCenter />
+        </div>
+      </WidgetBoundary>
+
+      {/* Campus services */}
+      <WidgetBoundary title="Campus Services">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 min-w-0">
+          <PersonalizedCampusHome />
+          <TaskContinuity />
+          <ContributionPortfolio />
+          <CampusFeedbackDesk />
+        </div>
+      </WidgetBoundary>
+
+      {/* Shift handover */}
+      <WidgetBoundary title="Shift Handover">
+        <div className="grid grid-cols-1 min-w-0">
+          <DigitalHandover />
         </div>
       </WidgetBoundary>
 

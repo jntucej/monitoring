@@ -36,6 +36,14 @@ import {
   AttendanceRecordRow,
   AuditRecord,
 } from "./_shared";
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { ApprovalInbox } from "@/components/shared/ApprovalInbox";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { ContributionPortfolio } from "@/components/retention/ContributionPortfolio";
+import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
+import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 
 function PrincipalDashboardInner() {
   const user = useAuthStore((s) => s.user);
@@ -249,6 +257,32 @@ function PrincipalDashboardInner() {
           />
         </div>
       </div>
+
+      {/* Quick panel */}
+      <WidgetBoundary title="Quick Panel">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 min-w-0">
+          <QuickActions />
+          <NotificationCenter />
+        </div>
+      </WidgetBoundary>
+
+      {/* Campus services */}
+      <WidgetBoundary title="Campus Services">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 min-w-0">
+          <PersonalizedCampusHome />
+          <TaskContinuity />
+          <ContributionPortfolio />
+          <CampusFeedbackDesk />
+        </div>
+      </WidgetBoundary>
+
+      {/* Approvals & analytics */}
+      <WidgetBoundary title="Approvals & Analytics">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 min-w-0">
+          <ApprovalInbox />
+          <RoleAnalytics />
+        </div>
+      </WidgetBoundary>
 
       <DevContactStrip />
     </div>
