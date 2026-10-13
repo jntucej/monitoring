@@ -2,7 +2,7 @@
 
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { usePolling } from "@/hooks/usePolling";
-import { useEffect, useState, useCallback, useRef, useMemo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { fadeInUp } from "@/lib/animations";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,9 +12,6 @@ import { CampusStatusCards } from "@/components/admin/CampusStatusCards";
 import { DevMessagesPanel } from "@/components/admin/DevMessagesPanel";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { GateCardsGrid } from "@/components/admin/GateCardsGrid";
-import { PageHeader } from "@/components/shared/PageHeader";
-import { ChartCard } from "@/components/shared/ChartCard";
-import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { ApprovalInbox } from "@/components/shared/ApprovalInbox";
@@ -23,24 +20,18 @@ import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { ContributionPortfolio } from "@/components/retention/ContributionPortfolio";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { DashboardCustomizer } from "@/components/engagement/DashboardCustomizer";
-import { useApiResource } from "@/hooks/useApiResource";
 import { useAuthStore } from "@/stores/authStore";
-import { getRoleTier } from "@/lib/alert-hierarchy";
 import { fmtInt, fmtRelative, fmtBytes } from "@/lib/formatters";
 import {
-  Activity, GraduationCap, Briefcase, HardHat,
-  UserCheck, RefreshCw, AlertCircle, Flame, ShieldAlert, X, Radio,
-  Shield, Zap, Sparkles, Database, ArrowRight,
-  AlertTriangle, Building2, Users,
+  AlertCircle, Flame, ShieldAlert, X,
+  RefreshCw, Shield, Zap, Sparkles, Database, ArrowRight,
+  Building2,
   ChevronRight, Bell,
   Radio as RadioIcon
 } from "lucide-react";
 import type { DashboardData } from "@/lib/types";
 import { getAuthHeaders } from "@/hooks/useAuthHeaders";
-import { useUIStore } from "@/stores/uiStore";
 import type { Lockdown } from "@/lib/db";
-import type { Role } from "@/lib/types";
-
 
 
 const LOCKDOWN_SCOPES = [
