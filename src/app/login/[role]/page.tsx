@@ -6,7 +6,18 @@ export const metadata: Metadata = {
   description: "Login to the Gate Monitoring System",
 };
 
-export default function RoleLoginRedirect({ searchParams }: { searchParams: { redirect?: string } }) {
+/**
+ * /login/[role]?redirect=/foo → /login?role=<role>&redirect=/foo
+ * Preserves role + redirect so LoginForm's post-auth redirect override works.
+ */
+export default function RoleLoginRedirect({
+  params,
+  searchParams,
+}: {
+  params: { role: string };
+  searchParams: { redirect?: string };
+}) {
   const r = searchParams?.redirect;
-  redirect(r ? `/login?redirect=${encodeURIComponent(r)}` : "/login");
+  const qs = r ? `?role=${params.role}&redirect=${encodeURIComponent(r)}` : `?role=${params.role}`;
+  redirect(`/login${qs}`);
 }

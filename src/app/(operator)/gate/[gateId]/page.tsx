@@ -82,7 +82,7 @@ function OperatorPageInner() {
   // `authenticated` to true before the redirect would fire. Once the kiosk
   // attempt settles without a session (notConfigured / error), redirect.
   useEffect(() => {
-    if (!authenticated) return;
+    if (authenticated || kiosk.pending) return;
     router.replace(`/login/operator?redirect=/gate/${gateId}`);
   }, [authenticated, kiosk.pending, gateId, router]);
 
@@ -121,7 +121,7 @@ function OperatorPageInner() {
     }
   }, [isSpecialPath, gateIdParam, user?.gateId, router]);
 
-  // Adjust operatorSubMode when URL parameters change
+  // Adjust operatorSubMode when URL parameters change (mode=manual → manual desk)
   useEffect(() => {
     const mode = searchParams?.get("mode");
     let targetMode: "scan" | "manual" | "entry" | null = null;
@@ -130,10 +130,8 @@ function OperatorPageInner() {
     } else if (mode === "scan") {
       targetMode = "scan";
     }
-    if (targetMode && operatorSubMode !== targetMode) {
-      setOperatorSubMode(targetMode);
-    }
-  }, [searchParams, isSpecialPath, gateIdParam, operatorSubMode]);
+    if (targetMode) setOperatorSubMode(targetMode);
+  }, [searchParams, isSpecialPath, gateIdParam]);
 
   // Unassigned operators (no gate_id) land on /gate/<empty> — show a
   // "waiting for assignment" panel instead of a broken gate view.
