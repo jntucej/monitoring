@@ -45,10 +45,10 @@ function CaretakerWorkordersInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       {/* Back link */}
       <Link
-        href="/caretaker/facilities"
+        href="/caretaker"
         className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
       >
-        <ArrowRight className="w-3 h-3 rotate-180" /> Back to Facilities
+        <ArrowRight className="w-3 h-3 rotate-180" /> Back to Facilities Overview
       </Link>
 
       {/* Page toolbar */}
@@ -98,7 +98,7 @@ function CaretakerWorkordersInner() {
               <span className="text-sm font-semibold text-white truncate">Work Orders</span>
             </div>
             <span className="text-xs text-slate-500 shrink-0">
-              {(data as DataResponse | null)?.total ?? 0} item(s)
+              {Array.isArray((data as unknown as { data?: unknown[] })?.data) ? (data as unknown as { data?: unknown[] }).data!.length : 0} item(s)
             </span>
           </div>
           {busy ? (
@@ -123,9 +123,7 @@ function CaretakerWorkordersInner() {
                 <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
                   <p className="text-xs text-slate-500 uppercase tracking-wide">Records</p>
                   <p className="mt-1 text-lg font-bold text-amber-400">
-                    {Array.isArray((data as unknown as { data?: unknown[] })?.data)
-                      ? (data as unknown as { data?: unknown[] }).data!.length
-                      : 0}
+                    {Array.isArray((data as unknown as { data?: unknown[] })?.data) ? (data as unknown as { data?: unknown[] }).data!.length : 0}
                   </p>
                   <p className="text-xs text-slate-500">Entries currently visible in this view.</p>
                 </div>

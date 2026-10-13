@@ -8,14 +8,14 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 const TABS = [
-  { href: "/caretaker/facilities", label: "Facilities" },
-  { href: "/caretaker/assets", label: "Assets" },
-  { href: "/caretaker/maintenance", label: "Maintenance" },
-  { href: "/caretaker/work-orders", label: "Work Orders" },
-  { href: "/caretaker/faults", label: "Faults" },
-  { href: "/caretaker/history", label: "History" },
-  { href: "/caretaker/workers", label: "Workers" },
-  { href: "/caretaker/reports", label: "Reports" },
+  { href: "/caretaker", label: "Facilities Overview" },
+  { href: "/caretaker/assets", label: "Asset Register" },
+  { href: "/caretaker/maintenance", label: "Maintenance Requests" },
+  { href: "/caretaker/faults", label: "Fault Reporting" },
+  { href: "/caretaker/work-orders", label: "Work Order Status" },
+  { href: "/caretaker/history", label: "Maintenance History" },
+  { href: "/caretaker/workers", label: "Assigned Workers" },
+  { href: "/caretaker/reports", label: "Facilities Reports" },
 ] as const;
 
 function CaretakerTabs({ children }: { children: React.ReactNode }) {
