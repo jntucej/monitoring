@@ -46,6 +46,35 @@ export interface ImportRow {
   fatherName?: string;
   dob?: string;
   landlineNumber?: string;
+  identificationMarks1?: string;
+  identificationMarks2?: string;
+  mobile?: string;
+  bloodGroup?: string;
+  nationality?: string;
+  religion?: string;
+  caste?: string;
+  subcaste?: string;
+  phStatus?: string;
+  fatherGuardianName?: string;
+  motherName?: string;
+  parentMobile?: string;
+  parentEmail?: string;
+  fatherOccupation?: string;
+  incomePerAnnum?: string;
+  address?: string;
+  city?: string;
+  district?: string;
+  state?: string;
+  pincode?: string;
+  branch?: string;
+  semester?: string;
+  regulation?: string;
+  admissionDate?: string;
+  admissionCategory?: string;
+  eamcetHtno?: string;
+  eamcetEcetRank?: string;
+  htno?: string;
+  studentName?: string;
   [key: string]: any;
 }
 
@@ -186,6 +215,37 @@ export async function validateImport(csvInput: string | ImportRow[]): Promise<Va
     const landlineNumber = pick(r, "LAND LINE 0R PARENT NUMBER", "LANDLINE", "LAND LINE", "PARENT NUMBER", "LANDLINE_NUMBER");
     const course = pick(r, "COURSE", "course", "PROGRAM", "DEGREE");
 
+    // New student_details columns (all optional, case-insensitive header match).
+    const branch = pick(r, "branch", "BRANCH");
+    const semester = pick(r, "semester", "SEMESTER");
+    const regulation = pick(r, "regulation", "REGULATION");
+    const htno = pick(r, "htno", "HTNO", "HT NO", "HTNO NO");
+    const studentName = pick(r, "studentName", "STUDENT NAME");
+    const mobile = pick(r, "mobile", "MOBILE", "MOBILE NUMBER");
+    const bloodGroup = pick(r, "bloodGroup", "BLOOD GROUP", "BLOODGROUP");
+    const nationality = pick(r, "nationality", "NATIONALITY");
+    const religion = pick(r, "religion", "RELIGION");
+    const caste = pick(r, "caste", "CASTE");
+    const subcaste = pick(r, "subcaste", "SUBCASTE");
+    const phStatus = pick(r, "phStatus", "PH STATUS", "PH_STATUS");
+    const identificationMarks1 = pick(r, "identificationMarks1", "IDENTIFICATION MARKS 1", "IDENTIFICATION MARKS_1", "IDENTIFICATIONMARKS1");
+    const identificationMarks2 = pick(r, "identificationMarks2", "IDENTIFICATION MARKS 2", "IDENTIFICATION MARKS_2", "IDENTIFICATIONMARKS2");
+    const fatherGuardianName = pick(r, "fatherGuardianName", "FATHER GUARDIAN NAME", "FATHER_GUARDIAN_NAME");
+    const motherName = pick(r, "motherName", "MOTHER NAME", "MOTHERNAME", "MOTHER_NAME");
+    const parentMobile = pick(r, "parentMobile", "PARENT MOBILE", "PARENT_MOBILE", "PARENT MOBILE NUMBER");
+    const parentEmail = pick(r, "parentEmail", "PARENT EMAIL", "PARENT_EMAIL");
+    const fatherOccupation = pick(r, "fatherOccupation", "FATHER OCCUPATION", "FATHER_OCCUPATION");
+    const incomePerAnnum = pick(r, "incomePerAnnum", "INCOME PER ANNUM", "INCOME PER ANNAM", "INCOME_PER_ANNUM");
+    const address = pick(r, "address", "ADDRESS");
+    const city = pick(r, "city", "CITY");
+    const district = pick(r, "district", "DISTRICT");
+    const state = pick(r, "state", "STATE");
+    const pincode = pick(r, "pincode", "PINCODE", "PIN CODE");
+    const eamcetHtno = pick(r, "eamcetHtno", "EAMCET HTNO", "EAMCET_HTNO");
+    const eamcetEcetRank = pick(r, "eamcetEcetRank", "EAMCET ECET RANK", "EAMCET_ECET_RANK");
+    const admissionDate = normalizeDate(pick(r, "admissionDate", "ADMISSION DATE", "ADMISSION_DATE"));
+    const admissionCategory = pick(r, "admissionCategory", "ADMISSION CATEGORY", "ADMISSION_CATEGORY");
+
     // 1. Name — required (it is the human-readable identifier).
     if (!name) {
       errors.push({ row: rowNum, field: "name", message: "Name is required" });
@@ -262,6 +322,36 @@ export async function validateImport(csvInput: string | ImportRow[]): Promise<Va
       // If the sheet carries an explicit student type (HM/HF/DM/DF), honor it.
       studentType: pick(r, "studentType", "STUDENT TYPE", "STUDENT_TYPE", "TYPE") || undefined,
       status: "ACTIVE",
+      // New student_details columns (all optional).
+      branch: branch || undefined,
+      semester: semester || undefined,
+      regulation: regulation || undefined,
+      htno: htno || undefined,
+      studentName: studentName || undefined,
+      mobile: mobile || undefined,
+      bloodGroup: bloodGroup || undefined,
+      nationality: nationality || undefined,
+      religion: religion || undefined,
+      caste: caste || undefined,
+      subcaste: subcaste || undefined,
+      phStatus: phStatus || undefined,
+      identificationMarks1: identificationMarks1 || undefined,
+      identificationMarks2: identificationMarks2 || undefined,
+      fatherGuardianName: fatherGuardianName || undefined,
+      motherName: motherName || undefined,
+      parentMobile: parentMobile || undefined,
+      parentEmail: parentEmail || undefined,
+      fatherOccupation: fatherOccupation || undefined,
+      incomePerAnnum: incomePerAnnum || undefined,
+      address: address || undefined,
+      city: city || undefined,
+      district: district || undefined,
+      state: state || undefined,
+      pincode: pincode || undefined,
+      eamcetHtno: eamcetHtno || undefined,
+      eamcetEcetRank: eamcetEcetRank || undefined,
+      admissionDate: admissionDate,
+      admissionCategory: admissionCategory || undefined,
     };
 
     validRows.push(rowObj);
@@ -419,6 +509,39 @@ async function processSingleRow(
         father_name: row.fatherName || null,
         landline_number: row.landlineNumber || null,
         student_type: studentType,
+        // New student_details columns (all optional, written as null when absent).
+        department: row.department || null,
+        branch: row.branch || null,
+        semester: row.semester || null,
+        regulation: row.regulation || null,
+        admission_date: row.admissionDate || null,
+        admission_category: row.admissionCategory || null,
+        eamcet_htno: row.eamcetHtno || null,
+        eamcet_ecet_rank: row.eamcetEcetRank || null,
+        htno: row.htno || null,
+        student_name: row.studentName || null,
+        identification_marks_1: row.identificationMarks1 || null,
+        identification_marks_2: row.identificationMarks2 || null,
+        mobile: row.mobile || null,
+        email: row.email || null,
+        blood_group: row.bloodGroup || null,
+        nationality: row.nationality || null,
+        religion: row.religion || null,
+        caste: row.caste || null,
+        subcaste: row.subcaste || null,
+        ph_status: row.phStatus || null,
+        dob: row.dob || null,
+        father_guardian_name: row.fatherGuardianName || null,
+        mother_name: row.motherName || null,
+        parent_mobile: row.parentMobile || null,
+        parent_email: row.parentEmail || null,
+        father_occupation: row.fatherOccupation || null,
+        income_per_annum: row.incomePerAnnum || null,
+        address: row.address || null,
+        city: row.city || null,
+        district: row.district || null,
+        state: row.state || null,
+        pincode: row.pincode || null,
       };
       const { error: stuErr } = await supabase.from("student_details").upsert(studentData, { onConflict: "user_id" });
       if (stuErr) throw new Error(`student_details upsert failed: ${stuErr.message}`);

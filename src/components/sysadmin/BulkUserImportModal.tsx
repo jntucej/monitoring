@@ -23,21 +23,37 @@ interface PreviewSummary {
   invalid: number;
 }
 
-// The exact sheet layout used by the college. H.T NO. (roll) is the only
-// field that drives year / batch / branch / course — everything else is just
-// captured from the sheet; year is calculated, never typed.
+// 35-column college bulk-import sheet. H.T NO. (roll) drives year / batch /
+// branch / course — everything else is captured as-is; year is calculated,
+// never typed.
 const TEMPLATE_CSV =
-  "COURSE,H.T NO.,NAME OF THE STUDENT,FATHER NAME,GENDER,PHONE NUMBER,DOB,EMAIL ID,LAND LINE 0R PARENT NUMBER\n" +
-  "B-Tech,25JJ1A0501,AADITH KUMAR,PRAKASH RAO,male,9876543210,12-05-2005,aadith.k@jntuhcej.ac.in,9440123456\n" +
-  "M-Tech,24JJ5A1205,RAVI TEJA,SREENIVAS,female,9812345678,01-09-2003,ravi.tej@jntuhcej.ac.in,9440123457\n";
+  "COURSE,DEPARTMENT,BRANCH,SEMESTER,REGULATION,YEAR,HTNO,STUDENT_NAME,GENDER,MOBILE,EMAIL,DOB,IDENTIFICATION_MARKS_1,IDENTIFICATION_MARKS_2,BLOOD_GROUP,NATIONALITY,RELIGION,CASTE,SUBCASTE,PH_STATUS,FATHER_GUARDIAN_NAME,MOTHER_NAME,PARENT_MOBILE,PARENT_EMAIL,ADDRESS,CITY,DISTRICT,STATE,PINCODE,FATHER_OCCUPATION,INCOME_PER_ANNUM,EAMCET_HTNO,EAMCET_ECET_RANK,ADMISSION_DATE,ADMISSION_CATEGORY\n" +
+  "B-Tech,CS,CSE,3,1,2,25JJ1A0501,AADITH KUMAR,male,9876543210,aadith.k@jntuhcej.ac.in,12-05-2005,Left mole,Scars,None,Indian,Hindu,BC,Other,none,Prakash Rao,Lakshmi Rao,9440123456,rao.prakash@example.com,123 Main Road,Hyderabad,Hyderabad,TS,500001,Teacher,250000,EAM250001,4523,01-07-2025,Open\n";
 
 const TEMPLATE_HINTS: Array<[string, string]> = [
-  ["H.T NO.", "The only required student field — yyJJVVBBNN. Year, batch and branch are calculated from it (1A = regular, 5A = lateral)."],
-  ["COURSE", "B-Tech (4-year programme) or M-Tech (2-year programme). The year is capped at the course duration; if blank, it falls back to the branch code in the H.T NO. (05 CSE, 12 IT, 04 ECE, 02 EEE, 03 MECH)."],
-  ["EMAIL ID", "Required. Missing or invalid email = row is reported and skipped."],
-  ["GENDER", "male / female (M, F also accepted)."],
-  ["DOB", "DD-MM-YYYY or YYYY-MM-DD."],
-  ["Other columns", "Father name, phone, landline/parent number — all optional."],
+  // Academic
+  ["Academic — COURSE", "B-Tech (4-year programme) or M-Tech (2-year programme). Year is capped at the course duration; if blank, it falls back to the branch code in HTNO (05 CSE, 12 IT, 04 ECE, 02 EEE, 03 MECH)."],
+  ["Academic — DEPARTMENT / BRANCH", "Department abbreviation (CS, IT, ECE, EEE, MECH) and branch code (CSE, CDA, IT, ECE, EEE, MECH, CSE-AI)."],
+  ["Academic — SEMESTER / REGULATION / YEAR", "Semester number (1–8), academic regulation code, and academic year. Computed from HTNO when omitted."],
+  ["Academic — HTNO", "Required student field — yyJJVVBBNN. Year, batch and branch are calculated from it (1A = regular, 5A = lateral)."],
+  // Identity
+  ["Identity — STUDENT_NAME", "Full name as on the degree certificate. Required."],
+  ["Identity — GENDER", "male / female (M, F also accepted)."],
+  ["Identity — MOBILE", "10-digit student mobile number."],
+  ["Identity — EMAIL", "Required. Missing or invalid email = row is reported and skipped."],
+  ["Identity — DOB", "DD-MM-YYYY or YYYY-MM-DD."],
+  ["Identity — BLOOD_GROUP / NATIONALITY / RELIGION / CASTE / SUBCASTE / PH_STATUS", "All optional. CASTE: SC / ST / BC / Other. PH_STATUS: Y / N or description."],
+  // Identification marks
+  ["Identification marks — IDENTIFICATION_MARKS_1 / _2", "Physical identification details (left mole, scar, etc.). Optional."],
+  // Family
+  ["Family — FATHER_GUARDIAN_NAME / MOTHER_NAME", "Full names. Required for registration."],
+  ["Family — PARENT_MOBILE / PARENT_EMAIL", "Primary parent contact. PARENT_MOBILE required; PARENT_EMAIL optional."],
+  ["Family — FATHER_OCCUPATION / INCOME_PER_ANNUM", "Occupation and annual family income in INR. Required for fee waivers / categories."],
+  // Address
+  ["Address — ADDRESS / CITY / DISTRICT / STATE / PINCODE", "Residential address. STATE is a 2-letter code (TS, AP, …). PINCODE is a 6-digit code."],
+  // Admission
+  ["Admission — ADMISSION_DATE / ADMISSION_CATEGORY", "Date of admission (DD-MM-YYYY) and category (Open / SC / ST / BC / EWS / Minorities)."],
+  ["Admission — EAMCET_HTNO / EAMCET_ECET_RANK", "EAMCET hall-ticket number and ECET rank. Optional; used for counselling audit."],
 ];
 
 export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalProps) {
@@ -146,8 +162,8 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
 
         <div className="text-xs text-[var(--text-muted)] space-y-1">
           <p>
-            Upload the college sheet (<code>COURSE, H.T NO., NAME, FATHER NAME, GENDER, PHONE, DOB, EMAIL, LAND LINE</code>).
-            Year, batch and branch are <b>calculated from the H.T NO.</b> — nothing is typed by hand.
+            Upload the college sheet (<code>35 columns</code>).
+            HTNO drives year, batch and branch — <b>everything else is captured as-is.</b>
           </p>
         </div>
 
