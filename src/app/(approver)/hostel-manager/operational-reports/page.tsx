@@ -45,7 +45,7 @@ function HostelManagerReportsInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       {/* Back link */}
       <Link
-        href="/hostel-manager/operations-overview"
+        href="/hostel-manager"
         className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Operations Overview

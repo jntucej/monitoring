@@ -107,7 +107,10 @@ function HostelManagerInner() {
     loading: outpassLoading,
     error: outpassError,
     refresh: refreshOutpass,
-  } = useApiResource<DataResponse>("/api/permissions?workflowType=outpass&status=PENDING", { ttlMs: 30_000 });
+  } = useApiResource<DataResponse>(
+    "/api/permissions?workflowType=hostel&status=PENDING&stage=hostel_manager",
+    { ttlMs: 30_000 }
+  );
   const {
     data: leaves,
     loading: leavesLoading,
@@ -153,11 +156,25 @@ function HostelManagerInner() {
         </button>
       </div>
 
+      {/* Authority scope note */}
+      <WidgetBoundary title="Authority Scope">
+        <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 min-w-0">
+            <Building2 className="w-5 h-5 text-sky-400 shrink-0" />
+            <p className="text-sm text-slate-300 min-w-0">
+              The hostel manager owns <span className="font-semibold text-sky-300">resources and facilities</span> — rooms, beds, utilities and stock. This role
+              does <span className="font-semibold text-rose-300">not</span> carry hostel-disciplinary authority or final outpass power; outpass and
+              disciplinary decisions route through the warden/principal chain.
+            </p>
+          </div>
+        </div>
+      </WidgetBoundary>
+
       {/* KPI row */}
       <WidgetBoundary title="Hostel Operations Overview">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
           <StatCard icon={UserCheck} label="On Campus Total" value={'live presence matrix'} sub="People inside all active gates" accent="text-sky-400" loading={presenceLoading && !presence} />
-          <StatCard icon={Inbox} label="Pending Outpass" value={outpassTotal} sub="Outpass requests awaiting review" accent="text-emerald-400" loading={outpassLoading && !outpass} />
+          <StatCard icon={Inbox} label="Pending at Manager Stage" value={outpassTotal} sub="Hostel-flow requests awaiting hostel-manager review" accent="text-emerald-400" loading={outpassLoading && !outpass} />
           <StatCard icon={AlertTriangle} label="Pending Staff Leave" value={leavesTotal} sub="Staff-leave requests awaiting review" accent="text-amber-400" loading={leavesLoading && !leaves} />
           <StatCard icon={Building2} label="Active Gates" value="presence matrix live" sub="Gates reporting to presence matrix" accent="text-white" loading={presenceLoading && !presence} />
         </div>
@@ -165,14 +182,14 @@ function HostelManagerInner() {
 
       {/* Section quick-links */}
       <WidgetBoundary title="Sections">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
-          <SectionLink href="/hostel-manager/operations" title="Operations" sub="Daily hostel operations overview" />
-          <SectionLink href="/hostel-manager/rooms" title="Rooms" sub="Room and bed allocation status" />
-          <SectionLink href="/hostel-manager/occupancy" title="Occupancy" sub="Live occupancy by gate" />
-          <SectionLink href="/hostel-manager/maintenance" title="Maintenance" sub="Facility and maintenance queue" />
-          <SectionLink href="/hostel-manager/housekeeping" title="Housekeeping" sub="Duty rosters and housekeeping schedules" />
-          <SectionLink href="/hostel-manager/service-requests" title="Service Requests" sub="Outpass and staff-leave queues" />
-          <SectionLink href="/hostel-manager/reports" title="Reports" sub="Hostel resource and inventory reports" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 min-w-0">
+          <SectionLink href="/hostel-manager/room-bed-allocation" title="Room &amp; Bed Allocation" sub="Room and bed allocation status" />
+          <SectionLink href="/hostel-manager/occupancy-reports" title="Occupancy Reports" sub="Live occupancy by gate" />
+          <SectionLink href="/hostel-manager/maintenance-requests" title="Maintenance Requests" sub="Facility and maintenance queue" />
+          <SectionLink href="/hostel-manager/housekeeping-tasks" title="Housekeeping Tasks" sub="Duty rosters and housekeeping schedules" />
+          <SectionLink href="/hostel-manager/resident-service-requests" title="Resident Service Requests" sub="Hostel-flow service requests at manager stage" />
+          <SectionLink href="/hostel-manager/resource-management" title="Resource Management" sub="Stock, utilities and facility resources" />
+          <SectionLink href="/hostel-manager/operational-reports" title="Operational Reports" sub="Hostel resource and operational reports" />
         </div>
       </WidgetBoundary>
 
