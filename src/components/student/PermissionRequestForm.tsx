@@ -26,6 +26,7 @@ const WORKFLOW_OPTIONS: { value: FormWorkflow; label: string }[] = [
  * On success it renders a confirmation panel with the server-issued ticket number.
  */
 export function PermissionRequestForm({ onSubmitted, defaultWorkflow = "hostel" }: PermissionRequestFormProps) {
+  const api = useApi();
   const [workflowType, setWorkflowType] = useState<FormWorkflow>(defaultWorkflow);
   const [reason, setReason] = useState("");
   const [description, setDescription] = useState("");
@@ -308,8 +309,4 @@ export function PermissionRequestForm({ onSubmitted, defaultWorkflow = "hostel" 
 }
 
 export default PermissionRequestForm;
-const api = useApi();
-
-
-
 

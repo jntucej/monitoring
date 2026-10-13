@@ -34,6 +34,7 @@ export function DigitalSignPanel({
   digitalSignature,
   onSigned,
 }: DigitalSignPanelProps) {
+  const api = useApi();
   const addToast = useUIStore((s) => s.addToast);
   const [note, setNote] = useState("");
   const [signing, setSigning] = useState(false);
@@ -157,5 +158,4 @@ export function DigitalSignPanel({
 
 }
 export default DigitalSignPanel;
-const api = useApi();
 
