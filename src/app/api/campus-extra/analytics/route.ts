@@ -76,7 +76,7 @@ async function handleGet(
 
     const dailyMap = new Map<string, { pending: number; resolved: number }>();
     for (const p of perms) {
-      const day = p.created_at.slice(0, 10);
+      const day = new Date(p.created_at).toISOString().slice(0, 10);
       const entry = dailyMap.get(day) || { pending: 0, resolved: 0 };
       if (p.status === "APPROVED" || p.status === "REJECTED") entry.resolved += 1;
       else entry.pending += 1;
@@ -109,7 +109,7 @@ async function handleGet(
 
     const dailyMap = new Map<string, { scans: number; failed: number }>();
     for (const s of scans) {
-      const day = s.timestamp.slice(0, 10);
+      const day = new Date(s.timestamp).toISOString().slice(0, 10);
       const entry = dailyMap.get(day) || { scans: 0, failed: 0 };
       entry.scans += 1;
       if (s.is_correction) entry.failed += 1;
@@ -127,7 +127,7 @@ async function handleGet(
     if (gate) { params.push(gate); where += ` AND gate_id = $${params.length}`; }
     if (department) { params.push(department); where += ` AND gate_id = $${params.length}`; }
 
-    const alertRes = await query<{ id: string; timestamp: string; resolved: boolean; resolved_at: string | null }>(
+    const alertRes = await query<{ id: string; created_at: unknown; resolved: boolean; resolved_at: unknown }>(
       `SELECT id, timestamp AS created_at, resolved, resolved_at FROM alerts WHERE ${where} ORDER BY timestamp DESC LIMIT 500`,
       params
     );
@@ -141,8 +141,9 @@ async function handleGet(
             alerts
               .filter((a) => a.resolved && a.resolved_at)
               .reduce((sum, a) => {
-                const ms = new Date(a.resolved_at as string).getTime() - new Date(a.timestamp).getTime();
-                return sum + Math.max(0, ms);
+                const started = new Date(a.created_at as string | number).getTime();
+                const finished = new Date(a.resolved_at as string).getTime();
+                return sum + Math.max(0, finished - started);
               }, 0) /
               resolvedAlerts /
               60000
@@ -155,7 +156,8 @@ async function handleGet(
 
     const dailyMap = new Map<string, { alerts: number; resolved: number }>();
     for (const a of alerts) {
-      const day = a.timestamp.slice(0, 10);
+      // Safe timestamp: handle string, number, or Date
+      const day = new Date(a.created_at as string | number).toISOString().slice(0, 10);
       const entry = dailyMap.get(day) || { alerts: 0, resolved: 0 };
       entry.alerts += 1;
       if (a.resolved) entry.resolved += 1;

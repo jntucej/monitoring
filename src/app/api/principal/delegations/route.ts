@@ -51,17 +51,19 @@ interface DelegationAuditRow {
 }
 
 async function fetchDelegations(authUserId: string, status: string | null): Promise<DelegationRow[]> {
-  const clauses: string[] = [];
+  // The delegation_logs table has no status column; ACTIVE = not yet expired,
+  // EXPIRED = past expires_at (null expires_at means indefinite).
+  const clauses: string[] = [`l.created_by = $1`];
   const params: string[] = [authUserId];
   if (status && status !== "ALL") {
-    params.push(status.toUpperCase());
-    clauses.push(`AND l.status = $${params.length}`);
+    if (status === "ACTIVE") clauses.push("(l.expires_at IS NULL OR l.expires_at > now())");
+    if (status === "EXPIRED") clauses.push("l.expires_at IS NOT NULL AND l.expires_at <= now()");
   }
   const { rows } = await query(
-    `SELECT l.id, l.delegator_id, l.delegate_role, l.scope, l.starts_at, l.expires_at,
-            l.status, l.note, l.created_at
+    `SELECT l.id, l.created_by AS delegator_id, l.delegate_role, l.scope,
+            l.created_at AS starts_at, l.expires_at, 'ACTIVE' AS status, l.reason AS note, l.created_at
        FROM delegation_logs l
-       WHERE l.delegator_id = $1 ${clauses.join(" ")}
+       WHERE ${clauses.join(" AND ")}
        ORDER BY l.created_at DESC
        LIMIT 50`,
     params
@@ -151,18 +153,14 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   try {
     await query(
       `INSERT INTO delegation_logs
-        (id, delegator_id, delegate_role, delegate_user_id, scope, starts_at, expires_at, status, note)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, 'ACTIVE', $8)
-       ON CONFLICT (id) DO NOTHING`,
+        (delegator_role, delegatee_role, scope, reason, created_by, expires_at)
+       VALUES ('principal', $1, $2, $3, $4, $5)`,
       [
-        id,
-        auth.userId,
         body.delegate_role,
-        body.delegate_user_id ?? null,
         body.scope.trim(),
-        startsAt,
-        expiresAt,
         body.note?.trim() || null,
+        auth.userId,
+        expiresAt,
       ]
     );
   } catch {
