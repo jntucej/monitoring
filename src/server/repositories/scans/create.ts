@@ -20,6 +20,8 @@ export interface CreateScanResult {
 }
 
 export async function createScan(input: CreateScanInput): Promise<CreateScanResult> {
+  // The Postgres process_gate_scan is SECURITY DEFINER and re-derives the
+  // caller from the app.current_user_id GUC; it must equal operator_id.
   const { rows } = await query<{ inserted_log: Record<string, unknown>; is_duplicate: boolean }>(
     `SELECT inserted_log, is_duplicate
        FROM process_gate_scan($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
@@ -36,6 +38,7 @@ export async function createScan(input: CreateScanInput): Promise<CreateScanResu
       input.isManual,
       input.dupWindowMinutes ?? 5,
     ],
+    { currentUserId: input.operatorId },
   );
   const row = rows[0];
   return {
