@@ -5,6 +5,7 @@ import { QRCode } from "react-qrcode-logo";
 import { parseRollNumber } from "@/lib/rollNumber";
 import type { Person } from "@/lib/types";
 import { getAvatarPlaceholder } from "@/lib/utils";
+import { useAuthStore } from "@/stores/authStore";
 
 import { PersonBadge } from "@/components/shared/PersonBadge";
 
@@ -27,9 +28,8 @@ export function PersonIdCard({ person: initialPerson, type }: PersonIdCardProps 
     let cancelled = false;
     const load = async () => {
       try {
-        const authRaw = sessionStorage.getItem("gate-monitor-auth");
-        const auth = authRaw ? JSON.parse(authRaw) : null;
-        const uniqueId = auth?.state?.user?.uniqueId ?? auth?.state?.user?.roll ?? auth?.state?.user?.studentRoll ?? auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll;
+        const auth = useAuthStore.getState();
+        const uniqueId = auth?.user?.uniqueId;
         if (!uniqueId) {
           if (!cancelled) setLoading(false);
           return;

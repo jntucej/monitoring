@@ -8,7 +8,7 @@ import { AuthGuard } from "@/components/shared/AuthGuard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import {
   User as UserIcon,
@@ -51,10 +51,13 @@ type Tab = "personal" | "security" | "appearance";
  * ------------------------------------------------------------------ */
 function authHeaders(): Record<string, string> {
   if (typeof window === "undefined") return {};
-  const utilHeaders = getAuthHeaders();
-  if (Object.keys(utilHeaders).length > 0) return utilHeaders;
+  // Read the auth store directly (no React hook needed in an event handler)
+  const state = useAuthStore.getState();
+  const token = state.token;
+  if (token) return { Authorization: `Bearer ${token}` };
 
-  const token =
+  // Fallback: try localStorage (legacy storage)
+  const legacyToken =
     localStorage.getItem("auth-token") ||
     sessionStorage.getItem("auth-token") ||
     (() => {
@@ -65,7 +68,7 @@ function authHeaders(): Record<string, string> {
         return null;
       }
     })();
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  return legacyToken ? { Authorization: `Bearer ${legacyToken}` } : {};
 }
 
 function roleLabel(role: string): string {
@@ -90,6 +93,8 @@ function roleLabel(role: string): string {
  *  Page
  * ------------------------------------------------------------------ */
 export default function ProfilePage() {
+const api = useApi();
+
   return (
     <AuthGuard>
       <ProfileDashboard />

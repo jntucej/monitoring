@@ -6,9 +6,11 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RefreshCw, CheckCircle2, Zap, Server, Activity, Database, Mail } from "lucide-react";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 export function IntegrationsDashboard() {
+const api = useApi();
+
   const { addToast } = useUIStore();
 
   const [integrations, setIntegrations] = useState<any[]>([]);
@@ -20,7 +22,7 @@ export function IntegrationsDashboard() {
   const handleLdapSync = async () => {
     setLdapSyncing(true);
     try {
-      const headers = getAuthHeaders();
+      const headers = api.getHeaders();
       const res = await fetch("/api/admin/ldap/sync", { method: "POST", headers });
       const result = await res.json();
       if (result.success) {
@@ -43,7 +45,7 @@ export function IntegrationsDashboard() {
   const fetchIntegrations = async () => {
     setLoading(true);
     try {
-      const headers = getAuthHeaders();
+      const headers = api.getHeaders();
       const [resConfig, resLogs] = await Promise.all([
         fetch("/api/integrations", { headers }),
         fetch("/api/integrations/logs", { headers }),
@@ -65,7 +67,7 @@ export function IntegrationsDashboard() {
   const handleSyncNow = async (id: string) => {
     setSyncingId(id);
     try {
-      const headers = getAuthHeaders();
+      const headers = api.getHeaders();
       const res = await fetch(`/api/integrations/${id}/sync`, { method: "POST", headers });
       const result = await res.json();
       if (result.success) {

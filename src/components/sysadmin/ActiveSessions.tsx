@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { usePolling } from "@/hooks/usePolling";
 import { useUIStore } from "@/stores/uiStore";
 import { Users, LogOut, RefreshCw } from "lucide-react";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 interface ActiveSession {
   userId: string;
@@ -17,6 +17,8 @@ interface ActiveSession {
 }
 
 export function ActiveSessions() {
+const api = useApi();
+
   const { addToast } = useUIStore();
 
   const [sessions, setSessions] = useState<ActiveSession[]>([]);
@@ -26,7 +28,7 @@ export function ActiveSessions() {
   const fetchSessions = useCallback(async () => {
     setLoading(true);
     try {
-      const headers = getAuthHeaders();
+      const headers = api.getHeaders();
       const res = await fetch("/api/admin/sessions", { headers });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -50,7 +52,7 @@ export function ActiveSessions() {
 
     setRevokingId(targetUserId);
     try {
-      const headers = getAuthHeaders();
+      const headers = api.getHeaders();
       const res = await fetch(`/api/admin/sessions/${targetUserId}`, {
         method: "DELETE",
         headers,

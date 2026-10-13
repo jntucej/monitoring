@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { Building2, Plus, Trash2, Edit3, CheckCircle2, ShieldAlert, Users, GraduationCap } from "lucide-react";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 interface Department {
   code: string;
@@ -15,6 +15,8 @@ interface Department {
 }
 
 export default function DepartmentsManagementPage() {
+const api = useApi();
+
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingDept, setEditingDept] = useState<Partial<Department> | null>(null);
@@ -23,7 +25,7 @@ export default function DepartmentsManagementPage() {
   const fetchDepts = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/departments?t=${Date.now()}`, { headers: getAuthHeaders() });
+      const res = await fetch(`/api/departments?t=${Date.now()}`, { headers: api.getHeaders() });
       const json = await res.json();
       if (json.success) setDepartments(json.data || []);
     } catch {
@@ -44,7 +46,7 @@ export default function DepartmentsManagementPage() {
     try {
       const res = await fetch("/api/departments", {
         method: "POST",
-        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        headers: { ...api.getHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify(editingDept),
       });
       const json = await res.json();
@@ -65,7 +67,7 @@ export default function DepartmentsManagementPage() {
     try {
       const res = await fetch(`/api/departments?code=${code}`, {
         method: "DELETE",
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
       });
       const json = await res.json();
       if (json.success) {

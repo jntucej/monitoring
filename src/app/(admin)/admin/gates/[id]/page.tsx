@@ -15,7 +15,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { StatCard } from "@/components/admin/StatCard";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 interface GateMetrics {
   gateId: string;
@@ -38,6 +38,8 @@ interface GateMetrics {
 }
 
 export default function GateDetailPage() {
+const api = useApi();
+
   const params = useParams<{ id: string }>();
   const gateId = params?.id || "1";
   const router = useRouter();
@@ -48,7 +50,7 @@ export default function GateDetailPage() {
   const fetchGateDetails = async () => {
     setLoading(true);
     try {
-      const headers = getAuthHeaders();
+      const headers = api.getHeaders();
       const res = await fetch(`/api/admin/dashboard?gateId=${gateId}`, { headers });
       const json = await res.json();
 

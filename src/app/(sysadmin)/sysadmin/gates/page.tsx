@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { useUIStore } from "@/stores/uiStore";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import {
   DoorOpen, Plus, Pencil, Power, Trash2, Search, UserCog,
   Building2, ShieldCheck, X, KeyRound, Monitor,
@@ -55,6 +55,8 @@ const GATE_TYPES = [
 ];
 
 export default function SysAdminGatesPage() {
+const api = useApi();
+
   const { addToast } = useUIStore();
 
   const [gates, setGates] = useState<Gate[]>([]);
@@ -75,7 +77,7 @@ export default function SysAdminGatesPage() {
 
   const loadKioskOperator = useCallback(async () => {
     try {
-      const res = await fetch("/api/users", { headers: getAuthHeaders(), cache: "no-store" });
+      const res = await fetch("/api/users", { headers: api.getHeaders(), cache: "no-store" });
       const json = await res.json();
       if (!res.ok || !Array.isArray(json?.data)) return;
       const operators = json.data.filter(
@@ -93,7 +95,7 @@ export default function SysAdminGatesPage() {
   const setKioskDefault = async (userId: string, gateId: string | null) => {
     setKioskBusy(true);
     try {
-      const headers = { ...getAuthHeaders(), "Content-Type": "application/json" };
+      const headers = { ...api.getHeaders(), "Content-Type": "application/json" };
       const body: Record<string, unknown> = {};
       // Clear all other flags, set this one
       body.isKioskDefault = true;
@@ -117,7 +119,7 @@ export default function SysAdminGatesPage() {
     if (!kioskOperator) return;
     setKioskBusy(true);
     try {
-      const headers = { ...getAuthHeaders(), "Content-Type": "application/json" };
+      const headers = { ...api.getHeaders(), "Content-Type": "application/json" };
       const res = await fetch(`/api/users/${kioskOperator.id}`, {
         method: "PATCH",
         headers,
@@ -141,7 +143,7 @@ export default function SysAdminGatesPage() {
   const loadGates = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/gates", { headers: getAuthHeaders(), cache: "no-store" });
+      const res = await fetch("/api/gates", { headers: api.getHeaders(), cache: "no-store" });
       const json = await res.json();
       if (res.ok && json.success) setGates(json.data || []);
     } catch {
@@ -158,7 +160,7 @@ export default function SysAdminGatesPage() {
     setUserQuery(q);
     if (q.trim().length < 1) { setUserResults([]); return; }
     try {
-      const res = await fetch(`/api/users?q=${encodeURIComponent(q.trim())}`, { headers: getAuthHeaders(), cache: "no-store" });
+      const res = await fetch(`/api/users?q=${encodeURIComponent(q.trim())}`, { headers: api.getHeaders(), cache: "no-store" });
       const json = await res.json();
       setUserResults(Array.isArray(json?.data) ? json.data.slice(0, 10) : []);
     } catch { setUserResults([]); }
@@ -166,7 +168,7 @@ export default function SysAdminGatesPage() {
 
   const saveGate = async (e: React.FormEvent) => {
     e.preventDefault();
-    const headers = { ...getAuthHeaders(), "Content-Type": "application/json" };
+    const headers = { ...api.getHeaders(), "Content-Type": "application/json" };
     const payload = { gateCode: form.gateCode, name: form.name, location: form.location, type: form.type, audience: form.audience };
     let ok = false;
     if (editing) {
@@ -187,7 +189,7 @@ export default function SysAdminGatesPage() {
   };
 
   const toggleActive = async (g: Gate) => {
-    const headers = { ...getAuthHeaders(), "Content-Type": "application/json" };
+    const headers = { ...api.getHeaders(), "Content-Type": "application/json" };
     const res = await fetch(`/api/gates?id=${g.id}`, {
       method: "PATCH",
       headers,
@@ -202,7 +204,7 @@ export default function SysAdminGatesPage() {
 
   const removeGate = async (g: Gate) => {
     if (!confirm(`Deactivate gate "${g.name}"? (Historical logs are kept.)`)) return;
-    const res = await fetch(`/api/gates?id=${g.id}`, { method: "DELETE", headers: getAuthHeaders() });
+    const res = await fetch(`/api/gates?id=${g.id}`, { method: "DELETE", headers: api.getHeaders() });
     const json = await res.json();
     if (json.success) {
       addToast({ variant: "success", title: "Deactivated", message: `${g.name} hidden from live dashboards.` });
@@ -212,7 +214,7 @@ export default function SysAdminGatesPage() {
 
   const assignUserToGate = async (u: AssignableUser) => {
     if (!assigningGate) return;
-    const headers = { ...getAuthHeaders(), "Content-Type": "application/json" };
+    const headers = { ...api.getHeaders(), "Content-Type": "application/json" };
     const res = await fetch(`/api/users/${u.id}`, {
       method: "PATCH",
       headers,

@@ -10,7 +10,7 @@ import {
   Ban, CheckCircle2, X, Upload, Phone, Mail, SlidersHorizontal, Lock, KeyRound,
   Link as LinkIcon, Loader2,
 } from "lucide-react";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import { useUIStore } from "@/stores/uiStore";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { BulkUserImportModal } from "@/components/sysadmin/BulkUserImportModal";
@@ -75,6 +75,8 @@ interface StudentRecord {
 }
 
 export default function SysAdminStudentsPage() {
+const api = useApi();
+
   const { addToast } = useUIStore();
   const [students, setStudents] = useState<StudentRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -99,7 +101,7 @@ export default function SysAdminStudentsPage() {
   const loadParents = useCallback(async () => {
     try {
       const res = await fetch(`/api/parents?role=guardian&includeUnlinked=true`, {
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
         cache: "no-store",
       });
       const json = await res.json().catch(() => ({ success: false, data: [] }));
@@ -122,7 +124,7 @@ export default function SysAdminStudentsPage() {
     try {
       const res = await fetch("/api/parents/link", {
         method: "POST",
-        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        headers: { ...api.getHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({ studentId: linkStudent.id, parentUserId: selectedParentId }),
       });
       const json = await res.json().catch(() => ({ success: false }));
@@ -156,7 +158,7 @@ export default function SysAdminStudentsPage() {
     try {
       // Force cache: 'no-store' is already here, but let's add a timestamp to ensure zero caching
       const res = await fetch(`/api/students?t=${Date.now()}`, { 
-        headers: getAuthHeaders(), 
+        headers: api.getHeaders(), 
         cache: "no-store",
       });
       const json = await res.json().catch(() => ({ success: false, error: { message: "Invalid server response." } }));
@@ -166,7 +168,7 @@ export default function SysAdminStudentsPage() {
         // If data is empty but res is ok, trigger a one-time automatic retry to bypass transient cache
         if (Array.isArray(json.data) && json.data.length === 0) {
            console.warn("API returned empty data, attempting one-time quiet retry...");
-           const retryRes = await fetch(`/api/students?t=${Date.now()}&retry=1`, { headers: getAuthHeaders(), cache: "no-store" });
+           const retryRes = await fetch(`/api/students?t=${Date.now()}&retry=1`, { headers: api.getHeaders(), cache: "no-store" });
            const retryJson = await retryRes.json().catch(() => ({}));
            if (retryRes.ok && retryJson.success && Array.isArray(retryJson.data)) {
               setStudents(retryJson.data);
@@ -211,7 +213,7 @@ export default function SysAdminStudentsPage() {
       const studentEmail = createForm.email.trim() || (finalUniqueId ? `${finalUniqueId.toLowerCase()}@jntuhcej.ac.in` : undefined);
       const res = await fetch("/api/users", {
         method: "POST",
-        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        headers: { ...api.getHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({
           uniqueId: finalUniqueId || undefined, name: createForm.name, role: "student",
           email: studentEmail, phone: createForm.phone || undefined,
@@ -250,7 +252,7 @@ export default function SysAdminStudentsPage() {
         : `/api/users/${editingStudent.id}`;
       const res = await fetch(targetEndpoint, {
         method: "PATCH",
-        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        headers: { ...api.getHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({
           name: editForm.name || undefined, email: editForm.email || undefined,
           phone: editForm.phone || undefined, department: editForm.branch || undefined,
@@ -290,7 +292,7 @@ export default function SysAdminStudentsPage() {
     try {
       const res = await fetch(`/api/users/${s.id}`, {
         method: "PATCH",
-        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        headers: { ...api.getHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({ password: raw.trim() }),
       });
       const json = await res.json().catch(() => ({}));
@@ -321,7 +323,7 @@ export default function SysAdminStudentsPage() {
         : `/api/users/${s.id}`;
       const res = await fetch(targetEndpoint, {
         method: "PATCH",
-        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        headers: { ...api.getHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus, reason }),
       });
 
@@ -343,7 +345,7 @@ export default function SysAdminStudentsPage() {
       const targetEndpoint = (s.roll || s.uniqueId)
         ? `/api/students/${encodeURIComponent(s.roll || s.uniqueId || "")}`
         : `/api/users/${s.id}`;
-      const res = await fetch(targetEndpoint, { method: "DELETE", headers: getAuthHeaders() });
+      const res = await fetch(targetEndpoint, { method: "DELETE", headers: api.getHeaders() });
       const data = await res.json();
       
       if (res.ok) {

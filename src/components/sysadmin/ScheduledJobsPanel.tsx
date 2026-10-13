@@ -28,8 +28,9 @@ import {
   CalendarClock, Timer, TrendingUp, CircleDot, Info,
 } from "lucide-react";
 import { useUIStore } from "@/stores/uiStore";
+import { useAuthStore } from "@/stores/authStore";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import {
   SEED_SCHEDULED_JOBS,
   SEED_SCHEDULED_JOBS_RUNS,
@@ -61,7 +62,13 @@ interface ApiRow {
 }
 
 /* ── Utilities ────────────────────────────────────────────────────────── */
-const getHeaders = () => getAuthHeaders();
+function getHeaders(): Record<string, string> {
+  const state = useAuthStore.getState();
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (state.token) headers["Authorization"] = `Bearer ${state.token}`;
+  if (state.user?.currentSessionToken) headers["X-Session-Token"] = state.user.currentSessionToken;
+  return headers;
+}
 
 function timeAgo(iso: string | null): string {
   if (!iso) return "—";
@@ -295,6 +302,8 @@ function RunsTimeline({ runs, loading }: { runs: Run[]; loading: boolean }) {
    Main component
    ══════════════════════════════════════════════════════════════════════════ */
 export function ScheduledJobsPanel() {
+const api = useApi();
+
   const addToast = useUIStore((s) => s.addToast);
 
   const [rows, setRows] = useState<Row[]>([]);

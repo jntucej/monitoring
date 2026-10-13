@@ -65,7 +65,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           groupLabel: "Hostel Permissions",
           items: [
             { href: "/hostel/permissions", label: "Pending Approvals", icon: "ClipboardList", badge: "PENDING" },
-            { href: "/permissions", label: "My Tickets", icon: "FileText" },
+            { href: "/hostel-manager/tickets", label: "My Tickets", icon: "FileText" },
             { href: "/profile", label: "My Profile", icon: "User" },
           ],
         },
@@ -85,7 +85,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           items: [
             { href: "/hostel-manager", label: "Hostel Manager Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
             { href: "/hostel/permissions", label: "Pending Approvals", icon: "ClipboardList", badge: "PENDING" },
-            { href: "/permissions", label: "My Tickets", icon: "FileText" },
+            { href: "/hostel-manager/tickets", label: "My Tickets", icon: "FileText" },
           ],
         },
         {
@@ -105,7 +105,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           items: [
             { href: "/deputy-warden", label: "Deputy Warden Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
             { href: "/hostel/permissions", label: "Pending Approvals", icon: "ClipboardList", badge: "PENDING" },
-            { href: "/permissions", label: "My Tickets", icon: "FileText" },
+            { href: "/hostel-manager/tickets", label: "My Tickets", icon: "FileText" },
           ],
         },
         {

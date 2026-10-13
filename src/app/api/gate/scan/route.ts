@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { recordScan } from "@/server/services/scan/record";
-import { ok } from "@/server/http/response";
+import { ok, fail } from "@/server/http/response";
 import { TIER } from "@/server/policy/roles";
 import { assertCsrf } from "@/lib/csrf";
 import type { AuthContext } from "@/lib/authContext";
@@ -24,7 +24,7 @@ export const POST = withAuthorization(
 
     const body = (await req.json().catch(() => null)) as ScanBody | null;
     if (!body?.gateId || !body?.direction) {
-      return ok({ error: "gateId and direction are required" });
+      return fail("BAD_REQUEST", "gateId and direction are required", 400);
     }
 
     // clientEventId must be a UUID for the Postgres process_gate_scan

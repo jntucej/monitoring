@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { err } from "@/lib/api-response";
 import { getSupabaseServiceClient as getDbClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -15,7 +16,7 @@ async function handleGet(req: NextRequest, context: { auth: any }) {
     if (!isAdmin) {
       if (!callerDeptId) {
         return NextResponse.json(
-          { success: false, error: "Department scope missing for non-admin caller." },
+          err("FORBIDDEN", "Department scope missing for non-admin caller.").body,
           { status: 403 }
         );
       }
@@ -35,12 +36,12 @@ async function handleGet(req: NextRequest, context: { auth: any }) {
     const { data, error } = await query;
 
     if (error) {
-      return NextResponse.json({ success: false, error: "Failed to fetch faculty" }, { status: 500 });
+      return NextResponse.json(err("INTERNAL_ERROR", "Failed to fetch faculty").body, { status: 500 });
     }
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(err("INTERNAL_ERROR", "Internal server error").body, { status: 500 });
   }
 }
 

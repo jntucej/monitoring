@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { err } from "@/lib/api-response";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { getAllGatesLive } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
@@ -50,7 +51,7 @@ async function handlePatch(req: NextRequest, ctx: any) {
   const body = await req.json();
   const gateId = req.nextUrl.searchParams.get("id");
   if (!gateId) {
-    return NextResponse.json({ success: false, error: "id required" }, { status: 400 });
+    return NextResponse.json(err("BAD_REQUEST", "id required").body, { status: 400 });
   }
   const svc = getSupabaseServiceClient();
   const patch: Record<string, any> = {};
@@ -62,7 +63,7 @@ async function handlePatch(req: NextRequest, ctx: any) {
   if (body.gateCode) patch.gate_code = body.gateCode;
 
   const { data, error } = await svc.from("gates").update(patch).eq("id", gateId).select().single();
-  if (error) return NextResponse.json({ success: false, error }, { status: 500 });
+  if (error) return NextResponse.json(err("INTERNAL_ERROR", error?.message ?? "Internal error").body, { status: 500 });
 
   await addAudit({
     action: "GATE_UPDATED",
@@ -77,7 +78,7 @@ async function handlePatch(req: NextRequest, ctx: any) {
 
 async function handleDelete(req: NextRequest, ctx: any) {
   const gateId = req.nextUrl.searchParams.get("id");
-  if (!gateId) return NextResponse.json({ success: false, error: "id required" }, { status: 400 });
+  if (!gateId) return NextResponse.json(err("BAD_REQUEST", "id required").body, { status: 400 });
   const svc = getSupabaseServiceClient();
   // Soft-delete: mark inactive instead of deleting (FK references would break)
   await svc.from("gates").update({ is_active: false }).eq("id", gateId);

@@ -3,12 +3,14 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { User, Search, RefreshCw, Ban, AlertTriangle } from "lucide-react";
 import { parseRollNumber, getStudentYearFromRoll } from "@/lib/rollNumber";
 import type { Student } from "@/lib/types";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh"
 import { CampusStatusBar } from "@/components/admin/CampusStatusBar";
 import { StudentInfographics } from "@/components/admin/StudentInfographics";
 
 export default function AdminStudentsPage() {
+const api = useApi();
+
   const [students, setStudents] = useState<Student[]>([]);
   const [query, setQuery] = useState("");
   const [selectedBranch, setSelectedBranch] = useState("ALL");
@@ -24,7 +26,7 @@ export default function AdminStudentsPage() {
       const url = q?.trim()
         ? `/api/students?q=${encodeURIComponent(q.trim())}`
         : "/api/students";
-      const res = await fetch(url, { headers: getAuthHeaders(), cache: "no-store" });
+      const res = await fetch(url, { headers: api.getHeaders(), cache: "no-store" });
       const json = await res.json();
       console.log("[Students Page] API Response:", { success: json.success, data_type: typeof json.data, is_array: Array.isArray(json.data), count: Array.isArray(json.data) ? json.data.length : 0 });
       if (Array.isArray(json.data)) {
@@ -57,7 +59,7 @@ export default function AdminStudentsPage() {
     try {
       const res = await fetch(`/api/users/${id}`, {
         method: "PATCH",
-        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        headers: { ...api.getHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify(patch),
       });
       const json = await res.json();

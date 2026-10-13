@@ -8,9 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { Edit2, ShieldCheck, Download, UserX, Play, Database } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 export function ComplianceSettings() {
+const api = useApi();
+
   const { addToast } = useUIStore();
 
   const [policies, setPolicies] = useState<any[]>([]);
@@ -20,7 +22,7 @@ export function ComplianceSettings() {
   const [savingPolicy, setSavingPolicy] = useState(false);
 
   const getHeaders = () => ({
-    ...getAuthHeaders(),
+    ...api.getHeaders(),
     "Content-Type": "application/json",
   });
 

@@ -3,6 +3,7 @@ import { usePolling } from "@/hooks/usePolling";
 import { useEffect, useState } from "react";
 import { DataTable } from "@/components/ui/DataTable";
 import { AlertTriangle, Bell, CheckCircle, Check, ShieldAlert, RefreshCw } from "lucide-react";
+import { useToast } from "@/components/ui/toast";
 import type { Alert } from "@/lib/types";
 import { getAuthHeaders } from "@/lib/utils";
 
@@ -32,6 +33,7 @@ export default function AdminAlertsPage() {
   const [filter, setFilter] = useState<"all" | "active" | "resolved">("active");
   const [severity, setSeverity] = useState<string>("all");
   const [busyId, setBusyId] = useState<string | null>(null);
+  const { addToast } = useToast();
 
   const load = async () => {
     try {
@@ -71,12 +73,13 @@ export default function AdminAlertsPage() {
       const json = await res.json();
       if (json.success) {
         setAlerts((prev) => prev.map((a) => (a.id === id ? { ...a, resolved: true } : a)));
+        addToast({ variant: "success", title: "Alert resolved", message: "The alert was marked as resolved." });
       } else {
-        alert(json.error?.message || "Failed to resolve alert");
+        addToast({ variant: "error", title: "Resolve failed", message: json.error?.message || "Failed to resolve alert" });
       }
     } catch (err) {
       console.error("Failed to resolve alert:", err);
-      alert("Failed to resolve alert due to network error");
+      addToast({ variant: "error", title: "Resolve failed", message: "Failed to resolve alert due to network error" });
     } finally {
       setBusyId(null);
     }

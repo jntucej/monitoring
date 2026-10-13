@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { useUIStore } from "@/stores/uiStore";
-import { getAuthHeaders, cn, formatDate } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import {
   Cpu,
   Fingerprint,
@@ -71,6 +72,8 @@ const DEVICE_CONFIGS: DeviceConfig[] = [
   },
 ];
 export default function SysadminDevicesPage() {
+const api = useApi();
+
   const { addToast } = useUIStore();
   const [settings, setSettings] = useState<Record<string, DeviceSetting>>({});
   const [loading, setLoading] = useState(true);
@@ -79,7 +82,7 @@ export default function SysadminDevicesPage() {
   const fetchSettings = useCallback(async () => {
     try {
       const res = await fetch("/api/admin/device-settings", {
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
       });
       if (!res.ok) throw new Error("Failed to load device settings");
       const json = await res.json();
@@ -112,7 +115,7 @@ export default function SysadminDevicesPage() {
     try {
       const res = await fetch(`/api/admin/device-settings/${targetId}`, {
         method: "PATCH",
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
         body: JSON.stringify({
           enabled: targetState,
           scope: current.scope || "global",

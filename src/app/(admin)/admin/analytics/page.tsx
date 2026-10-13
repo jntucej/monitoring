@@ -11,11 +11,13 @@ import {
 import { useUIStore } from "@/stores/uiStore";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { OccupancyStats, DailyStats, VisitorAnalytics, EnhancedAnalytics } from "@/lib/analytics-types";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 const COLORS = ["#10b981", "#3b82f6", "#8b5cf6", "#f59e0b", "#ef4444", "#06b6d4"];
 
 export default function AdminAnalyticsPage() {
+const api = useApi();
+
   const { addToast } = useUIStore();
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState({
@@ -38,7 +40,7 @@ export default function AdminAnalyticsPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const headers = getAuthHeaders();
+      const headers = api.getHeaders();
       const occRes = await fetch("/api/analytics/occupancy", { headers });
       const occData = await occRes.json();
       if (occData.success) setOccupancy(occData.data);
@@ -75,7 +77,7 @@ export default function AdminAnalyticsPage() {
 
   const handleExport = async (format: "pdf" | "csv") => {
     try {
-      const headers = getAuthHeaders();
+      const headers = api.getHeaders();
       const queryParams = new URLSearchParams({
         format,
         from: dateRange.from,

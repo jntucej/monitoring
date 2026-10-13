@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { DataTable } from "@/components/ui/DataTable";
 import { CalendarDays, CheckCircle2, XCircle, Clock } from "lucide-react";
 import type { Scan, Student } from "@/lib/types";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 interface Row {
   roll: string;
@@ -24,6 +24,8 @@ function fmtTime(iso: string | null) {
 }
 
 export default function AdminAttendancePage() {
+const api = useApi();
+
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,8 +38,8 @@ export default function AdminAttendancePage() {
       setError(null);
       try {
         const [logsRes, stuRes] = await Promise.all([
-          fetch(`/api/gate/logs?date=${date}&limit=1000`, { headers: getAuthHeaders(), cache: "no-store" }),
-          fetch(`/api/students`, { headers: getAuthHeaders(), cache: "no-store" }),
+          fetch(`/api/gate/logs?date=${date}&limit=1000`, { headers: api.getHeaders(), cache: "no-store" }),
+          fetch(`/api/students`, { headers: api.getHeaders(), cache: "no-store" }),
         ]);
 
         if (!logsRes.ok || !stuRes.ok) {

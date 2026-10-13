@@ -6,9 +6,12 @@ import Link from "next/link";
 import { useUIStore } from "@/stores/uiStore";
 import type { GatePass } from "@/lib/types";
 import { usePassTypes, getPassTypeName } from "@/hooks/usePassTypes";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
+import { useAuthStore } from "@/stores/authStore";
 
 export default function StudentPassesPage() {
+const api = useApi();
+
   const { addToast } = useUIStore();
   const [passes, setPasses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -73,14 +76,8 @@ export default function StudentPassesPage() {
 
   const getStudentRoll = (): string | null => {
     if (typeof window === "undefined") return null;
-    const authRaw = sessionStorage.getItem("gate-monitor-auth");
-    if (!authRaw) return null;
-    try {
-      const auth = JSON.parse(authRaw);
-      return auth?.state?.user?.uniqueId ?? auth?.state?.user?.roll ?? auth?.state?.user?.studentRoll ?? auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll ?? null;
-    } catch {
-      return null;
-    }
+    const auth = useAuthStore.getState();
+    return auth?.user?.uniqueId ?? null;
   };
 
   const loadPasses = async () => {
@@ -92,7 +89,7 @@ export default function StudentPassesPage() {
         return;
       }
       const res = await fetch(`/api/passes?roll=${encodeURIComponent(roll)}`, { 
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
         cache: "no-store" 
       });
       const json = await res.json();
@@ -151,7 +148,7 @@ export default function StudentPassesPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...getAuthHeaders(),
+          ...api.getHeaders(),
         },
         body: JSON.stringify({
           roll,

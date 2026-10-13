@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { useUIStore } from "@/stores/uiStore";
-import { getAuthHeaders, cn, formatDate } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import type { WorkflowType } from "@/lib/types";
 import {
   MessageSquarePlus,
@@ -43,6 +44,8 @@ const WORKFLOW_OPTIONS: { value: WorkflowType; label: string; icon: typeof Build
 ];
 
 export default function SysadminReasonsPage() {
+const api = useApi();
+
   const { addToast } = useUIStore();
   const [reasons, setReasons] = useState<CustomReasonItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,7 +66,7 @@ export default function SysadminReasonsPage() {
   const fetchReasons = useCallback(async () => {
     try {
       const res = await fetch("/api/config/custom-reasons", {
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
       });
       if (!res.ok) throw new Error("Failed to load");
       const json = await res.json();
@@ -134,7 +137,7 @@ export default function SysadminReasonsPage() {
       const method = isCreate ? "POST" : "PATCH";
       const res = await fetch(url, {
         method,
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
         body: JSON.stringify({ code: cleanCode, label: cleanLabel, workflow_type: formWorkflow }),
       });
       const json = await res.json();
@@ -155,7 +158,7 @@ export default function SysadminReasonsPage() {
     try {
       const res = await fetch(`/api/config/custom-reasons/${deleteConfirmItem.id}`, {
         method: "DELETE",
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
       });
       const json = await res.json();
       if (!res.ok || !json.success) throw new Error(json.error?.message || "Delete failed");

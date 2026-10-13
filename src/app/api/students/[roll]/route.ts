@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { err } from "@/lib/api-response";
 import { findStudentByRoll, getStudentHistory, getStudentStatus } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -163,7 +164,7 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
       .maybeSingle();
 
     if (userErr) return NextResponse.json({ error: userErr.message }, { status: 500 });
-    if (!user) return NextResponse.json({ error: "NOT_FOUND" }, { status: 404 });
+    if (!user) return NextResponse.json(err("NOT_FOUND", "NOT_FOUND").body, { status: 404 });
 
     // 2. Check for historical data
     const [{ count: passCount }, { count: logCount }] = await Promise.all([

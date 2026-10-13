@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createHash } from "crypto";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
+import { addAudit } from "@/lib/db";
 
 async function handlePost(req: NextRequest) {
   try {
     const { userId } = await req.json();
+    const actorId = req.headers.get("x-user-id") || "sysadmin";
     const supabase = getSupabaseServiceClient();
 
     const [resUser, resLogs, resPasses] = await Promise.all([
@@ -19,6 +22,23 @@ async function handlePost(req: NextRequest) {
       movementLogs: resLogs.data || [],
       passes: resPasses.data || [],
     };
+
+    // Audit log for the export
+    const payloadHash = createHash("sha256").update(JSON.stringify(exportBundle)).digest("hex");
+    await supabase.from("data_compliance_logs").insert({
+      action: "USER_DATA_EXPORT",
+      target_user_id: userId,
+      performed_by: actorId,
+      details: JSON.stringify({ payloadHash }),
+      timestamp: new Date().toISOString(),
+    });
+
+    await addAudit({
+      action: "GDPR_EXPORT",
+      userId: actorId,
+      role: "sysadmin",
+      details: `Exported user data for ${userId}`,
+    });
 
     return NextResponse.json({
       success: true,

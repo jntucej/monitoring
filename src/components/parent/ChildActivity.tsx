@@ -2,9 +2,11 @@
 import { useEffect, useState, useCallback } from "react";
 import { ArrowRight, ArrowLeft, Loader2, AlertCircle } from "lucide-react";
 import type { Scan } from "@/lib/types";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 export function ChildActivity() {
+const api = useApi();
+
   const [activities, setActivities] = useState<Scan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -21,7 +23,7 @@ export function ChildActivity() {
         setLoading(false);
         return;
       }
-      const res = await fetch(`/api/students?parentId=${parentId}`, { headers: getAuthHeaders(), cache: "no-store" });
+      const res = await fetch(`/api/students?parentId=${parentId}`, { headers: api.getHeaders(), cache: "no-store" });
       if (!res.ok) {
         setError(true);
         setLoading(false);
@@ -37,7 +39,7 @@ export function ChildActivity() {
       }
       setChildRoll(first.roll);
       const r2 = await fetch(`/api/persons/${encodeURIComponent(first.uniqueId || first.roll)}/history?limit=10`, {
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
         cache: "no-store",
       });
       if (!r2.ok) {

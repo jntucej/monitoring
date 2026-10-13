@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Minimal migration runner.
- * - Reads .sql files from database/migrations/ and supabase/migrations/ in filename order
+ * - Reads .sql files from database/migrations/ in filename order
  * - Deduplicates by filename
  * - Records applied versions in schema_migrations
  * - Skips files already applied (by filename)
@@ -151,19 +151,24 @@ async function main() {
       }
 
       console.log(`→ applying ${f.name} …`);
+      // A file that declares its own BEGIN;/COMMIT; must not be wrapped by
+      // the runner: the file's COMMIT would end the runner's transaction
+      // early, and the runner's follow-up INSERT would then fail (or worse,
+      // land outside the migration's transaction). Detect and skip wrapping.
+      const selfTx = /^\s*BEGIN\s*;/im.test(sql) && /^\s*COMMIT\s*;/im.test(sql);
       try {
-        await client.query("BEGIN");
+        if (!selfTx) await client.query("BEGIN");
         await client.query(sql);
         const version = f.name.replace(/_.*/, "");
         await client.query(
           "INSERT INTO schema_migrations (version, filename, checksum) VALUES ($1, $2, $3)",
           [version, f.name, sum]
         );
-        await client.query("COMMIT");
+        if (!selfTx) await client.query("COMMIT");
         applied_count++;
-        console.log(`✓ ${f.name} applied`);
+        console.log(`✓ ${f.name} applied${selfTx ? " (own transaction)" : ""}`);
       } catch (err) {
-        await client.query("ROLLBACK").catch(() => {});
+        if (!selfTx) await client.query("ROLLBACK").catch(() => {});
         console.error(`✗ ${f.name} FAILED:`, err);
         process.exit(1);
       }

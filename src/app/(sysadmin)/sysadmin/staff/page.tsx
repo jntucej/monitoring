@@ -10,7 +10,7 @@ import {
   Briefcase, Search, RefreshCw, UserPlus, Edit, Trash2,
   Ban, CheckCircle2, X, Mail, ShieldCheck, SlidersHorizontal,
 } from "lucide-react";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import { useUIStore } from "@/stores/uiStore";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 
@@ -38,6 +38,8 @@ interface StaffStats {
 }
 
 export default function SysAdminStaffPage() {
+const api = useApi();
+
   const { addToast } = useUIStore();
   const [staffList, setStaffList] = useState<StaffRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,7 +67,7 @@ export default function SysAdminStaffPage() {
   const loadStaff = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/users", { headers: getAuthHeaders(), cache: "no-store" });
+      const res = await fetch("/api/users", { headers: api.getHeaders(), cache: "no-store" });
       const json = await res.json();
       if (res.ok && Array.isArray(json.data)) {
         setStaffList(json.data.filter((u: any) => u.role !== "student" && u.role !== "parent"));
@@ -85,7 +87,7 @@ export default function SysAdminStaffPage() {
   const loadStats = useCallback(async () => {
     try {
       const res = await fetch(`/api/staff/stats?role=${encodeURIComponent(roleFilter)}&dept=${encodeURIComponent(deptFilter)}&status=${encodeURIComponent(statusFilter)}`, {
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
         cache: "no-store",
       });
       const json = await res.json();
@@ -113,7 +115,7 @@ export default function SysAdminStaffPage() {
       }
       const res = await fetch("/api/users", {
         method: "POST",
-        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        headers: { ...api.getHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({
           employeeId: createForm.employeeId?.trim() || null,
           name: createForm.name.trim(),
@@ -151,7 +153,7 @@ export default function SysAdminStaffPage() {
       }
       const res = await fetch(`/api/users/${editingStaff.id}`, {
         method: "PATCH",
-        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        headers: { ...api.getHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({
           name: editForm.name, email: editForm.email || undefined,
           phone: editForm.phone || undefined, role: editForm.role,
@@ -179,7 +181,7 @@ export default function SysAdminStaffPage() {
     try {
       const res = await fetch(`/api/users/${s.id}`, {
         method: "PATCH",
-        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        headers: { ...api.getHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
       });
       if (res.ok) {
@@ -192,7 +194,7 @@ export default function SysAdminStaffPage() {
   const handleDeleteStaff = async (s: StaffRecord) => {
     if (!confirm(`Delete ${s.name} (${s.uniqueId || s.id})? This is irreversible.`)) return;
     try {
-      const res = await fetch(`/api/users/${s.id}`, { method: "DELETE", headers: getAuthHeaders() });
+      const res = await fetch(`/api/users/${s.id}`, { method: "DELETE", headers: api.getHeaders() });
       if (res.ok) { addToast({ variant: "success", title: "Deleted", message: `${s.name} removed.` }); loadStaff(); }
     } catch { addToast({ variant: "error", title: "Error", message: "Could not delete." }); }
   };

@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { getNotifications } from "@/lib/db";
+import { err } from "@/lib/api-response";
 
 // SSE stream: securely streams user notifications with ping keepalive and session IDOR guards
 async function handleGet(req: NextRequest) {
@@ -22,7 +23,7 @@ async function handleGet(req: NextRequest) {
   const encoder = new TextEncoder();
 
   if (!userId) {
-    return new Response(JSON.stringify({ success: false, error: "userId parameter required" }), {
+    return new Response(JSON.stringify(err("BAD_REQUEST", "userId parameter required").body), {
       status: 400,
       headers: { "Content-Type": "application/json" },
     });

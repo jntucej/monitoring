@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { err } from "@/lib/api-response";
 import { withAuthorization } from "@/middleware/authorization";
 import { applyScheduleSuggestion } from "@/lib/scheduling-assistant";
 import { logAuditEvent } from "@/lib/audit";
@@ -8,10 +9,7 @@ async function handlePost(req: NextRequest) {
     // Client posts { suggestionId }, so read the field instead of the whole body.
     const { suggestionId } = await req.json();
     if (!suggestionId || typeof suggestionId !== "string") {
-      return NextResponse.json(
-        { success: false, error: "Missing suggestionId" },
-        { status: 400 }
-      );
+      return NextResponse.json(err("BAD_REQUEST", "Missing suggestionId").body, { status: 400 });
     }
 
     // withAuthorization overwrites these with server-validated identity.
@@ -21,10 +19,7 @@ async function handlePost(req: NextRequest) {
 
     const applied = await applyScheduleSuggestion(suggestionId);
     if (!applied) {
-      return NextResponse.json(
-        { success: false, error: "Suggestion not found or has no gate hours to apply" },
-        { status: 404 }
-      );
+      return NextResponse.json(err("NOT_FOUND", "Suggestion not found or has no gate hours to apply").body, { status: 404 });
     }
 
     await logAuditEvent({
@@ -40,7 +35,7 @@ async function handlePost(req: NextRequest) {
       message: "Schedule recommendation applied successfully; audit log updated.",
     });
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json(err("INTERNAL_ERROR", error instanceof Error ? error.message : "Internal error").body, { status: 500 });
   }
 }
 

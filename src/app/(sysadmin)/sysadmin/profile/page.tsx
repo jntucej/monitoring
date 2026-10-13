@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import {
   Shield,
   KeyRound,
@@ -59,6 +59,8 @@ interface RecentAuditItem {
 }
 
 export default function SysAdminProfilePage() {
+const api = useApi();
+
   return (
     <AuthGuard allowedRoles={["sysadmin"]}>
       <SysAdminProfileDashboard />
@@ -67,7 +69,8 @@ export default function SysAdminProfilePage() {
 }
 
 function SysAdminProfileDashboard() {
-  const { addToast } = useUIStore();
+const api = useApi();
+  const { addToast} = useUIStore();
   const { user: authUser, setUser } = useAuthStore();
 
   const [profile, setProfile] = useState<SysAdminProfile | null>(null);
@@ -100,7 +103,7 @@ function SysAdminProfileDashboard() {
   const loadProfile = useCallback(async () => {
     setLoading(true);
     try {
-      const headers = getAuthHeaders();
+      const headers = api.getHeaders();
       const res = await fetch("/api/profile", { headers, cache: "no-store" });
       const json = await res.json();
 
@@ -174,7 +177,7 @@ function SysAdminProfileDashboard() {
 
     setSavingProfile(true);
     try {
-      const headers = { ...getAuthHeaders(), "Content-Type": "application/json" };
+      const headers = { ...api.getHeaders(), "Content-Type": "application/json" };
       const res = await fetch("/api/profile", {
         method: "PATCH",
         headers,
@@ -250,7 +253,7 @@ function SysAdminProfileDashboard() {
 
     setSavingPassword(true);
     try {
-      const headers = { ...getAuthHeaders(), "Content-Type": "application/json" };
+      const headers = { ...api.getHeaders(), "Content-Type": "application/json" };
       const res = await fetch("/api/auth/change-password", {
         method: "POST",
         headers,
@@ -298,7 +301,7 @@ function SysAdminProfileDashboard() {
 
     setSavingPin(true);
     try {
-      const headers = { ...getAuthHeaders(), "Content-Type": "application/json" };
+      const headers = { ...api.getHeaders(), "Content-Type": "application/json" };
       const res = await fetch("/api/auth/pin-change", {
         method: "POST",
         headers,

@@ -179,7 +179,7 @@ export function Scanner({
     // Validate file type
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
     if (!allowedTypes.includes(file.type)) {
-      alert("Invalid file type. Please upload a PNG, JPEG, or WEBP image.");
+      setErrorMessage("Invalid file type. Please upload a PNG, JPEG, or WEBP image.");
       if (event.target) {
         event.target.value = "";
       }
@@ -189,7 +189,7 @@ export function Scanner({
     // Limit file size to 5MB
     const maxSizeBytes = 5 * 1024 * 1024;
     if (file.size > maxSizeBytes) {
-      alert("Image is too large. Please upload an image smaller than 5MB.");
+      setErrorMessage("Image is too large. Please upload an image smaller than 5MB.");
       if (event.target) {
         event.target.value = "";
       }
@@ -245,18 +245,18 @@ export function Scanner({
                 onScan(roll);
                 onClose();
               } else {
-                alert("Could not detect any QR/Barcode in the uploaded image. Please try a clearer picture.");
+                setErrorMessage("Could not detect any QR/Barcode in the uploaded image. Please try a clearer picture.");
               }
             })
             .catch(() => {
-              alert("Could not detect any QR/Barcode in the uploaded image. Please try a clearer picture.");
+              setErrorMessage("Could not detect any QR/Barcode in the uploaded image. Please try a clearer picture.");
             });
         } catch {
           // fallback
         }
       });
     } else {
-      alert("Could not decode code from the uploaded image. Please make sure it is centered and clear.");
+      setErrorMessage("Could not decode code from the uploaded image. Please make sure it is centered and clear.");
     }
         }
       };

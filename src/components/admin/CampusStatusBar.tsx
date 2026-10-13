@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Activity, GraduationCap, UserCheck, Briefcase, HardHat, Users } from "lucide-react";
 import Link from "next/link";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 interface CampusStats {
   studentStats: { onCampus: number; inToday: number; outToday: number };
@@ -15,6 +15,8 @@ interface CampusStats {
 }
 
 export function CampusStatusBar() {
+const api = useApi();
+
   const [stats, setStats] = useState<CampusStats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -22,7 +24,7 @@ export function CampusStatusBar() {
     const fetchDashboard = async () => {
       try {
         const res = await fetch("/api/admin/dashboard", {
-          headers: getAuthHeaders(),
+          headers: api.getHeaders(),
           cache: "no-store",
         });
         const json = await res.json();
