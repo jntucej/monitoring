@@ -53,6 +53,7 @@ export function useDeviceSettings(): {
   loading: boolean;
   refresh: () => void;
 } {
+  const api = useApi();
   const token = useAuthStore((s) => s.token);
   const [settings, setSettings] = useState<DeviceSetting[]>(
     () => cache?.settings ?? []
@@ -115,5 +116,4 @@ export function useDeviceSettings(): {
 }
 
 export default useDeviceSettings;
-const api = useApi();
 

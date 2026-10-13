@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { FileText, Download, BarChart3, Loader2 } from "lucide-react";
 import { useApi } from "@/hooks/useApi";
+import { useToast } from "@/components/ui/toast";
 import type { DashboardData } from "@/lib/types";
 
 interface GeneratedReport {
@@ -58,7 +59,8 @@ function downloadReportCSV(report: GeneratedReport, data: DashboardData | null) 
 }
 
 export default function AdminReportsPage() {
-const api = useApi();
+  const api = useApi();
+  const { addToast } = useToast();
 
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -114,9 +116,10 @@ const api = useApi();
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+      addToast({ variant: "success", title: "Report exported", message: "Gate activity report downloaded." });
     } catch (err) {
       console.error("Export error:", err);
-      alert("Failed to export report from server");
+      addToast({ variant: "error", title: "Export failed", message: "Failed to export report from server" });
     }
   };
 
