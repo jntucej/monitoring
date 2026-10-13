@@ -14,23 +14,27 @@ import type { AuthContext } from "@/lib/authContext";
  */
 async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
   try {
+    // Assignment-scoped: work items assigned to the caller's user id only.
+    // Worker permissions are based on assigned duties — no institutional
+    // movement records of other persons.
     const openTasks = await query(
       `SELECT id, ticket_number AS ticket, workflow_type AS type,
               current_stage AS stage, status, created_at AS createdAt
          FROM permission_requests
-        WHERE workflow_type = 'staff_leave'
+        WHERE student_user_id = $1
           AND status = 'PENDING'
           AND created_at >= NOW() - INTERVAL '30 days'
         ORDER BY created_at DESC
         LIMIT 20`,
-      []
+      [auth.userId]
     );
 
     const completed = await query(
       `SELECT COUNT(*)::int AS c FROM permission_requests
-        WHERE workflow_type = 'staff_leave' AND status IN ('COMPLETED','APPROVED')
+        WHERE student_user_id = $1
+          AND status IN ('COMPLETED','APPROVED')
           AND updated_at >= NOW() - INTERVAL '7 days'`,
-      []
+      [auth.userId]
     );
 
     const todayShift = await query(

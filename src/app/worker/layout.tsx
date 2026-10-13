@@ -11,14 +11,15 @@ import type { Role } from "@/lib/types";
 const ALLOWED_ROLES: Role[] = ["worker", "admin", "sysadmin", "supervisor"];
 
 const TABS = [
-  { href: "/worker/my-work", label: "My Work" },
-  { href: "/worker/shift", label: "Shift" },
+  { href: "/worker", label: "Overview", exact: true },
+  { href: "/worker/my-work", label: "My Assigned Work" },
+  { href: "/worker/shift", label: "Shift Information" },
   { href: "/worker/attendance", label: "Attendance" },
-  { href: "/worker/work-orders", label: "Work Orders" },
-  { href: "/worker/maintenance", label: "Maintenance" },
+  { href: "/worker/work-orders", label: "Work Order Updates" },
+  { href: "/worker/maintenance", label: "Maintenance Tasks" },
   { href: "/worker/task-completion", label: "Task Completion" },
   { href: "/worker/notifications", label: "Notifications" },
-  { href: "/worker/history", label: "History" },
+  { href: "/worker/history", label: "Personal History" },
 ] as const;
 
 function WorkerTabs({ children }: { children: React.ReactNode }) {

@@ -11,16 +11,11 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import {
-  Inbox,
+  UserCheck,
   Clock,
   Loader2,
-  ShieldCheck,
-  UserCheck,
   AlertTriangle,
-  Building2,
-  FileText,
-  CheckCircle2,
-  Wrench,
+  Inbox,
 } from "lucide-react";
 
 /* response shapes */
@@ -35,6 +30,27 @@ interface ShiftSummary {
   shiftStatus?: string;
   myRecent?: unknown[];
   openWorkOrders?: unknown[];
+  todayShifts?: Array<{
+    id?: string;
+    name?: string;
+    worker_id?: string;
+    check_in?: string | null;
+    check_out?: string | null;
+    scans?: number;
+  }>;
+}
+
+interface MyWorkResponse {
+  success: boolean;
+  data: {
+    tasks: unknown[];
+    completedLastWeek: number;
+    todayShift: {
+      checkIn: string | null;
+      checkOut: string | null;
+      scans: number;
+    } | null;
+  };
 }
 
 function StatCard({
@@ -101,24 +117,39 @@ function WorkerInner() {
     error: myShiftError,
     refresh: refreshMyShift,
   } = useApiResource<DataResponse>("/api/workers/my-shift", { ttlMs: 30_000 });
+
+  const {
+    data: myWork,
+    loading: myWorkLoading,
+    error: myWorkError,
+    refresh: refreshMyWork,
+  } = useApiResource<MyWorkResponse>("/api/workers/my-work", { ttlMs: 30_000 });
+
   const refreshAll = useCallback(async () => {
     clearCache();
-    await Promise.all([
-      refreshMyShift()
-    ]);
-  }, [refreshMyShift]);
+    await Promise.all([refreshMyShift(), refreshMyWork()]);
+  }, [refreshMyShift, refreshMyWork]);
   usePolling(refreshAll, { intervalMs: 30_000, enabled: !!user });
-  const busy = myShiftLoading && !myShift;
+  const busy = (myShiftLoading && !myShift) || (myWorkLoading && !myWork);
   const summary = ((myShift as { data?: ShiftSummary } | null)?.data) as ShiftSummary | undefined;
-  const recentLogCount = summary?.myRecent?.length ?? 0;
   const openOrderCount = summary?.openWorkOrders?.length ?? 0;
+
+  const todayShiftRow = summary?.todayShifts?.[0];
+  const onShift = Boolean(todayShiftRow?.check_in && !todayShiftRow.check_out);
+  const shiftLabel = todayShiftRow?.check_in
+    ? onShift
+      ? "On shift"
+      : "Shift complete"
+    : "No check-in today";
+  const attendanceLabel = todayShiftRow?.check_in ? "Checked in" : "Not checked in";
+  const assignedWorkCount = myWork?.data?.tasks?.length ?? 0;
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       {/* Page toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-slate-400 min-w-0">
+          <p className="text-sm text-slate-400 min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -138,15 +169,66 @@ function WorkerInner() {
         </button>
       </div>
 
-      {/* KPI row */}
-      <WidgetBoundary title="Worker My Work">
+      {/* KPI row — spec: assigned work count, current shift, attendance status, open work orders */}
+      <WidgetBoundary title="Worker Overview">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
-          <StatCard icon={UserCheck} label="My Shift Status" value={'live'} sub="Current shift and gate status" accent="text-emerald-400" loading={myShiftLoading && !myShift} />
-          <StatCard icon={Inbox} label="My Recent Logs" value={recentLogCount} sub="Recent gate movements" accent="text-sky-400" loading={myShiftLoading && !myShift} />
-          <StatCard icon={AlertTriangle} label="Open Work Orders" value={openOrderCount} sub="Pending work assignments" accent="text-amber-400" loading={myShiftLoading && !myShift} />
-          <StatCard icon={Clock} label="Hours Today" value={'live'} sub="Hours logged this shift" accent="text-white" loading={myShiftLoading && !myShift} />
+          <StatCard
+            icon={Inbox}
+            label="Assigned Work"
+            value={assignedWorkCount}
+            sub="Open tasks in your queue"
+            accent="text-sky-400"
+            loading={myWorkLoading && !myWork}
+          />
+          <StatCard
+            icon={Clock}
+            label="Current Shift"
+            value={shiftLabel}
+            sub={
+              todayShiftRow?.check_in
+                ? `Check-in ${new Date(todayShiftRow.check_in).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}`
+                : "Gate check-in pending"
+            }
+            accent={onShift ? "text-emerald-400" : "text-white"}
+            loading={myShiftLoading && !myShift}
+          />
+          <StatCard
+            icon={UserCheck}
+            label="Attendance Status"
+            value={attendanceLabel}
+            sub={`${todayShiftRow?.scans ?? 0} gate scan(s) today`}
+            accent={attendanceLabel === "Checked in" ? "text-emerald-400" : "text-amber-400"}
+            loading={myShiftLoading && !myShift}
+          />
+          <StatCard
+            icon={AlertTriangle}
+            label="Open Work Orders"
+            value={openOrderCount}
+            sub="Pending work assignments"
+            accent="text-amber-400"
+            loading={myShiftLoading && !myShift}
+          />
         </div>
       </WidgetBoundary>
+
+      {/* Error banner */}
+      {(myShiftError || myWorkError) && (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
+          <span className="flex items-center gap-2 min-w-0">
+            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <span className="truncate">
+              Overview data unavailable: {myShiftError || myWorkError}
+            </span>
+          </span>
+          <button
+            type="button"
+            onClick={() => void refreshAll()}
+            className="rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+          >
+            Retry
+          </button>
+        </div>
+      )}
 
       {/* Section quick-links */}
       <WidgetBoundary title="Sections">

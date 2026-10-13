@@ -21,14 +21,14 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
       [auth.userId]
     );
 
-    // Work orders / maintenance requests (any open maintenance-typed
-    // permission request), plus a today snapshot of this worker's shift.
+    // Work items assigned to this worker's own user id (assignment-scoped),
+    // plus a today snapshot of this worker's shift.
     const openWorkOrders = await query(
       `SELECT pr.* FROM permission_requests pr
-        WHERE pr.workflow_type = 'staff_leave'
+        WHERE pr.student_user_id = $1
           AND pr.status = 'PENDING'
         ORDER BY pr.created_at DESC LIMIT 15`,
-      []
+      [auth.userId]
     );
 
     const todayShifts = await query(
