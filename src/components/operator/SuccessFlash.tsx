@@ -8,9 +8,11 @@ interface SuccessFlashProps {
   onClick?: () => void;
   autoDismissMs?: number;
   children?: React.ReactNode;
+  direction?: "IN" | "OUT";
+  reason?: string;
 }
 
-export function SuccessFlash({ onClick, autoDismissMs = 2500, children }: SuccessFlashProps) {
+export function SuccessFlash({ onClick, autoDismissMs = 2500, children, direction, reason }: SuccessFlashProps) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dismissedRef = useRef(false);
 
@@ -37,6 +39,13 @@ export function SuccessFlash({ onClick, autoDismissMs = 2500, children }: Succes
     if (timerRef.current) clearTimeout(timerRef.current);
     onClick?.();
   };
+
+  const heading =
+    direction === "IN"
+      ? "Entry Recorded"
+      : direction === "OUT"
+        ? "Exit Recorded"
+        : "Scan Recorded!";
 
   return (
     <motion.div
@@ -65,7 +74,7 @@ export function SuccessFlash({ onClick, autoDismissMs = 2500, children }: Succes
             transition={{ delay: 0.2 }}
             className="mt-4 text-3xl font-extrabold tracking-tight"
           >
-            Scan Recorded!
+            {heading}
           </motion.p>
           <motion.p
             initial={{ opacity: 0 }}
@@ -73,7 +82,7 @@ export function SuccessFlash({ onClick, autoDismissMs = 2500, children }: Succes
             transition={{ delay: 0.3 }}
             className="mt-2 text-xs font-semibold uppercase tracking-wider bg-slate-950/10 px-3 py-1 rounded-full text-slate-900"
           >
-            Tap anywhere to scan next
+            {reason ? `${reason} · ` : ""}Tap anywhere to scan next
           </motion.p>
         </>
       )}

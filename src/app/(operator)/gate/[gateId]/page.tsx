@@ -47,7 +47,9 @@ function OperatorPageInner() {
   const {
     state,
     currentStudent,
+    currentCampusStatus,
     lastScan,
+    selectedDirection,
     todaysStats,
     recentScans,
     breakdown,
@@ -463,7 +465,7 @@ function OperatorPageInner() {
                   {/* Success Visual Flash & Tap Anywhere to Reset */}
                   {state === "success" && (
                     <div className="scan-success space-y-4 cursor-pointer select-none" onClick={reset}>
-                      <SuccessFlash onClick={reset} />
+                      <SuccessFlash onClick={reset} direction={lastScan?.direction} reason={lastScan?.reason as string} />
                       <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-center space-y-2 hover:bg-emerald-500/20 transition-colors">
                         <p className="text-xs text-emerald-400 font-bold">Movement Recorded Successfully</p>
                         <p className="text-[11px] text-[var(--text-secondary)]">
@@ -554,6 +556,7 @@ function OperatorPageInner() {
                   {state === "confirming" && currentStudent && (
                     <ScanConfirmation
                       student={currentStudent}
+                      campusStatus={currentCampusStatus}
                       onConfirm={async (dir, reason) => await confirmScan(addToast, dir, reason)}
                       onCancel={cancelScan}
                       isInline={true}

@@ -81,6 +81,8 @@ interface OperatorState {
   // Current scan flow
   state: ScanState;
   currentStudent: Student | null;
+  /** Authoritative current IN/OUT condition of the scanned person (from campus_occupancy). */
+  currentCampusStatus: "IN" | "OUT" | null;
   selectedDirection: ScanDirection;
   selectedReason: ExitReason | null;
   photoVerificationDone: boolean;
@@ -126,6 +128,7 @@ let scanAbortController: AbortController | null = null;
 export const useOperatorStore = create<OperatorState>((set, get) => ({
   state: "idle",
   currentStudent: null,
+  currentCampusStatus: null,
   selectedDirection: "IN",
   selectedReason: null,
   photoVerificationDone: false,
@@ -204,15 +207,22 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
         return;
       }
 
-      // Infer direction from last scan returned by the API
-      let direction: ScanDirection = "IN";
-      if (result.data.lastScan?.direction) {
+      // Use authoritative campus occupancy status to suggest next direction
+      const campusStatus = result.data.campusStatus;
+      let direction: ScanDirection;
+      if (campusStatus) {
+        direction = campusStatus === "IN" ? "OUT" : "IN";
+      } else if (result.data.lastScan?.direction) {
         direction = result.data.lastScan.direction === "IN" ? "OUT" : "IN";
+      } else {
+        direction = "IN";
       }
 
       set({
         state: "confirming",
         currentStudent: person,
+        currentCampusStatus:
+          campusStatus === "IN" || campusStatus === "OUT" ? campusStatus : null,
         selectedDirection: direction,
         selectedReason: null,
         photoVerificationDone: false,
@@ -422,6 +432,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
     set({
       state: "idle",
       currentStudent: null,
+      currentCampusStatus: null,
       selectedDirection: "IN",
       selectedReason: null,
       photoVerificationDone: false,
@@ -450,6 +461,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
     set({
       state: "idle",
       currentStudent: null,
+      currentCampusStatus: null,
       selectedDirection: "IN",
       selectedReason: null,
       photoVerificationDone: false,

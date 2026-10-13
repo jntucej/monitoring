@@ -15,6 +15,8 @@ interface ScanConfirmationProps {
   onConfirm: (direction: ScanDirection, reason?: ExitReason) => void | Promise<void>;
   onCancel: () => void;
   suggestedDirection?: ScanDirection;
+  /** Authoritative current IN/OUT condition of the scanned person. */
+  campusStatus?: "IN" | "OUT" | null;
   isInline?: boolean;
 }
 
@@ -49,6 +51,7 @@ export function ScanConfirmation({
   onConfirm,
   onCancel,
   suggestedDirection = "IN",
+  campusStatus = null,
   isInline = false,
 }: ScanConfirmationProps) {
   const { exitReasons } = useCampusConfig();
@@ -374,11 +377,57 @@ export function ScanConfirmation({
         </div>
       )}
 
+      {/* Current condition banner: shows the scanned person's live IN/OUT status
+          and which operations are available, before the operator picks an action */}
+      <div className="bg-[var(--bg-base)] border border-[var(--border)] rounded-2xl p-3 space-y-2 text-left">
+        <span className="text-[10px] font-extrabold uppercase tracking-wide text-[var(--text-muted)] block">
+          Current Status
+        </span>
+        {campusStatus ? (
+          <div className="flex items-center gap-2">
+            <span
+              className={cn(
+                "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-extrabold border",
+                campusStatus === "IN"
+                  ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                  : "bg-amber-500/15 text-amber-400 border-amber-500/30"
+              )}
+            >
+              {campusStatus === "IN" ? (
+                <LogIn className="w-3.5 h-3.5" />
+              ) : (
+                <Briefcase className="w-3.5 h-3.5" />
+              )}
+              {campusStatus === "IN" ? "Inside Campus" : "Outside Campus"}
+            </span>
+            <span className="text-[11px] text-[var(--text-secondary)]">
+              {campusStatus === "IN"
+                ? "Currently on campus — an exit can be recorded."
+                : "Currently off campus — an entry can be recorded."}
+            </span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-extrabold border bg-slate-500/15 text-[var(--text-muted)] border-[var(--border)]">
+              Unknown
+            </span>
+            <span className="text-[11px] text-[var(--text-secondary)]">
+              No occupancy record yet. Choose entry or exit manually below.
+            </span>
+          </div>
+        )}
+      </div>
+
       {/* Action Movement Category Selection */}
       <div className="space-y-4 pt-1">
         <div>
           <label className="text-[11px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] block text-center mb-2">
             Confirm Entry
+            {suggestedDirection === "IN" && (
+              <span className="ml-2 inline-block text-[9px] font-extrabold uppercase tracking-wide px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 align-middle">
+                Suggested
+              </span>
+            )}
           </label>
           {renderActionButtons(inActions)}
         </div>
@@ -386,6 +435,11 @@ export function ScanConfirmation({
         <div>
           <label className="text-[11px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] block text-center mb-2">
             Confirm Exit
+            {suggestedDirection === "OUT" && (
+              <span className="ml-2 inline-block text-[9px] font-extrabold uppercase tracking-wide px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30 align-middle">
+                Suggested
+              </span>
+            )}
           </label>
           {renderActionButtons(outActions)}
         </div>
