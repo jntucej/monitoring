@@ -11,16 +11,12 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import {
-  Inbox,
   Clock,
   Loader2,
-  ShieldCheck,
+  Inbox,
   UserCheck,
   AlertTriangle,
-  Building2,
   FileText,
-  CheckCircle2,
-  Wrench,
 } from "lucide-react";
 import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
@@ -167,9 +163,13 @@ function FacultyInner() {
       <WidgetBoundary title="Sections">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
           <SectionLink href="/faculty/my-classes" title="My Classes" sub="Class schedule and attendance records" />
-          <SectionLink href="/faculty/attendance" title="Attendance" sub="Record and correct faculty attendance" />
-          <SectionLink href="/faculty/requests" title="Requests" sub="Student requests and notifications" />
-          <SectionLink href="/faculty/reports" title="Reports" sub="Department attendance and performance reports" />
+          <SectionLink href="/faculty/student-directory" title="Student Directory" sub="Students under your supervision" />
+          <SectionLink href="/faculty/attendance-management" title="Attendance Management" sub="Record and review faculty attendance" />
+          <SectionLink href="/faculty/correction-requests" title="Correction Requests" sub="Memos you can recommend on — HOD approves" />
+          <SectionLink href="/faculty/student-requests" title="Student Requests" sub="Requests awaiting your recommendation" />
+          <SectionLink href="/faculty/class-attendance-reports" title="Class Reports" sub="Per-class attendance summaries" />
+          <SectionLink href="/faculty/notifications" title="Notifications" sub="Campus announcements for your role" />
+          <SectionLink href="/faculty/request-history" title="Request History" sub="All requests you raised, any status" />
         </div>
       </WidgetBoundary>
 

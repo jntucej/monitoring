@@ -9,10 +9,15 @@ import { Loader2 } from "lucide-react";
 import { Suspense } from "react";
 
 const TABS = [
+  { href: "/faculty", label: "Overview" },
   { href: "/faculty/my-classes", label: "My Classes" },
-  { href: "/faculty/attendance", label: "Attendance" },
-  { href: "/faculty/requests", label: "Requests" },
-  { href: "/faculty/reports", label: "Reports" },
+  { href: "/faculty/student-directory", label: "Students" },
+  { href: "/faculty/attendance-management", label: "Attendance" },
+  { href: "/faculty/correction-requests", label: "Corrections" },
+  { href: "/faculty/student-requests", label: "Requests" },
+  { href: "/faculty/class-attendance-reports", label: "Reports" },
+  { href: "/faculty/notifications", label: "Notifications" },
+  { href: "/faculty/request-history", label: "History" },
 ] as const;
 
 function FacultyTabs({ children }: { children: React.ReactNode }) {
