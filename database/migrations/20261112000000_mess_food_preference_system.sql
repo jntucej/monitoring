@@ -217,7 +217,34 @@ SELECT id, 'NON_VEG' FROM public.mess_menu_items WHERE code = 'PANEER'
                   WHERE a.menu_item_id = (SELECT id FROM public.mess_menu_items WHERE code='PANEER')
                     AND a.applicable_to='NON_VEG');
 
--- Record this migration in schema_migrations
-INSERT INTO public.schema_migrations (version)
-VALUES ('20261112000000')
-ON CONFLICT (version) DO NOTHING;
+-- Record migration in schema_migrations
+DO $$
+DECLARE
+  has_filename BOOLEAN;
+  has_checksum BOOLEAN;
+BEGIN
+  SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'schema_migrations' AND column_name = 'filename'
+  ) INTO has_filename;
+  SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'schema_migrations' AND column_name = 'checksum'
+  ) INTO has_checksum;
+
+  IF has_filename AND has_checksum THEN
+    INSERT INTO public.schema_migrations (version, filename, applied_at, checksum)
+    VALUES ('20261112000000', '20261112000000_mess_food_preference_system.sql', NOW(),
+            md5('20261112000000_mess_food_preference_system'))
+    ON CONFLICT (version) DO NOTHING;
+  ELSIF has_filename THEN
+    INSERT INTO public.schema_migrations (version, filename, applied_at)
+    VALUES ('20261112000000', '20261112000000_mess_food_preference_system.sql', NOW())
+    ON CONFLICT (version) DO NOTHING;
+  ELSE
+    INSERT INTO public.schema_migrations (version, applied_at)
+    VALUES ('20261112000000', NOW())
+    ON CONFLICT (version) DO NOTHING;
+  END IF;
+END
+$$;
