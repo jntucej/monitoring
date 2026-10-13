@@ -21,6 +21,12 @@ export async function checkLockout(identifier: string): Promise<{ locked: boolea
         `UPDATE public.login_attempts SET failed_count = 0, locked_until = NULL WHERE identifier = $1`,
         [cleanId]
       ).catch(() => {});
+      // Also clear any per-user DB lock that was set when the counter rolled over
+      await query(
+        `UPDATE public.users SET locked_until = NULL
+          WHERE COALESCE(login_identifier, LOWER(unique_id)) = $1 AND locked_until IS NOT NULL AND locked_until <= now()`,
+        [cleanId]
+      ).catch(() => {});
     }
     return { locked: false };
   } catch {
@@ -52,10 +58,14 @@ export async function recordFailedAttempt(identifier: string, channel: string): 
        VALUES ($1, 1, $2, NOW(), NULL)
        ON CONFLICT (identifier)
        DO UPDATE SET
-         failed_count = login_attempts.failed_count + 1,
+         failed_count = CASE
+           WHEN NOW() - login_attempts.last_attempt_at > INTERVAL '10 minutes' THEN 1
+           ELSE login_attempts.failed_count + 1
+         END,
          last_channel = EXCLUDED.last_channel,
          last_attempt_at = NOW(),
          locked_until = CASE
+           WHEN NOW() - login_attempts.last_attempt_at > INTERVAL '10 minutes' THEN NULL
            WHEN login_attempts.failed_count + 1 >= 5 THEN NOW() + INTERVAL '15 minutes'
            ELSE login_attempts.locked_until
          END`,
@@ -91,6 +101,11 @@ export async function clearLockout(identifier: string): Promise<void> {
   try {
     await query(
       `UPDATE public.login_attempts SET failed_count = 0, locked_until = NULL WHERE identifier = $1`,
+      [cleanId]
+    );
+    await query(
+      `UPDATE public.users SET locked_until = NULL
+        WHERE COALESCE(login_identifier, LOWER(unique_id)) = $1 AND locked_until IS NOT NULL`,
       [cleanId]
     );
   } catch {
