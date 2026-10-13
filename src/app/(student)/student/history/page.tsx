@@ -2,9 +2,11 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, ArrowLeft, Loader2, Filter } from "lucide-react";
 import type { Scan } from "@/lib/types";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 export default function StudentHistoryPage() {
+const api = useApi();
+
   const [scans, setScans] = useState<Scan[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"ALL" | "IN" | "OUT">("ALL");
@@ -13,15 +15,15 @@ export default function StudentHistoryPage() {
     let cancelled = false;
     const load = async () => {
       try {
-        const authRaw = sessionStorage.getItem("gate-monitor-auth");
-        const auth = authRaw ? JSON.parse(authRaw) : null;
-        const roll = auth?.state?.user?.uniqueId ?? auth?.state?.user?.roll ?? auth?.state?.user?.studentRoll ?? auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll;
+        const auth = useAuthStore.getState();
+        const auth = auth ? JSON.parse(auth) : null;
+        const roll = auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll ?? auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll;
         if (!roll) {
           if (!cancelled) setLoading(false);
           return;
         }
         const res = await fetch(`/api/persons/${encodeURIComponent(roll)}/history?limit=200`, {
-          headers: getAuthHeaders(),
+          headers: api.getHeaders(),
           cache: "no-store",
         });
         const json = await res.json();

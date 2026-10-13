@@ -4,11 +4,13 @@ import React, { useState } from "react";
 import { Users, AlertCircle } from "lucide-react";
 import { FacultyTracking } from "@/components/admin/FacultyTracking";
 import { FacultyMemberAttendance, DepartmentAttendanceSummary } from "@/lib/types";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh"
 import { CampusStatusBar } from "@/components/admin/CampusStatusBar";
 
 export default function AdminFacultyPage() {
+const api = useApi();
+
   const [records, setRecords] = useState<FacultyMemberAttendance[]>([]);
   const [summary, setSummary] = useState({
     totalFaculty: 0,
@@ -28,7 +30,7 @@ export default function AdminFacultyPage() {
       setLoading(true);
       setError(null);
       const res = await fetch("/api/faculty/attendance", {
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
         cache: "no-store",
       });
       const data = await res.json();

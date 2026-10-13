@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { GraduationCap, Users, Home, Building2, ArrowDownLeft, ArrowUpRight, AlertTriangle, Ban, User, UserCircle, Filter, X } from "lucide-react";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 type FilterKeys = "department" | "year" | "status" | "gender" | "type";
 
@@ -108,6 +108,8 @@ function BarRow({ label, count, total, color }: { label: string; count: number; 
 }
 
 export function StudentInfographics() {
+const api = useApi();
+
   const [stats, setStats] = useState<StudentStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<Filters>({ department: "ALL", year: "ALL", status: "ALL", gender: "ALL", type: "ALL" });
@@ -118,7 +120,7 @@ export function StudentInfographics() {
     try {
       const params = new URLSearchParams();
       Object.entries(f).forEach(([k, v]) => { if (v !== "ALL") params.set(k, v); });
-      const res = await fetch(`/api/students/stats?${params.toString()}`, { headers: getAuthHeaders(), cache: "no-store" });
+      const res = await fetch(`/api/students/stats?${params.toString()}`, { headers: api.getHeaders(), cache: "no-store" });
       const j = await res.json();
       if (j.success) setStats(j.data);
     } catch (err) { console.error("Failed to load stats:", err); }

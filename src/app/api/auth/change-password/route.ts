@@ -1,5 +1,6 @@
 // src/app/api/auth/change-password/route.ts
 import { NextRequest, NextResponse } from "next/server";
+import { err } from "@/lib/api-response";
 import { query } from "@/lib/postgres";
 import { hashPassword, verifyPassword } from "@/lib/auth-token";
 import { addAudit } from "@/lib/db";
@@ -23,7 +24,7 @@ async function handleChangePassword(
   // 2. Body — accept both camelCase (new) and snake_case (legacy) keys.
   const body = await req.json().catch(() => null);
   if (!body || typeof body !== "object") {
-    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+    return NextResponse.json(err("BAD_REQUEST", "Invalid request body").body, { status: 400 });
   }
   const currentPassword = String(
     body.currentPassword ?? body.current_password ?? body.oldPassword ?? ""
@@ -33,28 +34,16 @@ async function handleChangePassword(
   );
 
   if (!currentPassword || !newPassword) {
-    return NextResponse.json(
-      { error: "Current password and new password are required" },
-      { status: 400 }
-    );
+    return NextResponse.json(err("BAD_REQUEST", "Current password and new password are required").body, { status: 400 });
   }
   if (newPassword.length < MIN_LEN) {
-    return NextResponse.json(
-      { error: `New password must be at least ${MIN_LEN} characters` },
-      { status: 400 }
-    );
+    return NextResponse.json(err("BAD_REQUEST", `New password must be at least ${MIN_LEN} characters`).body, { status: 400 });
   }
   if (newPassword.length > MAX_LEN) {
-    return NextResponse.json(
-      { error: `New password must be at most ${MAX_LEN} characters` },
-      { status: 400 }
-    );
+    return NextResponse.json(err("BAD_REQUEST", `New password must be at most ${MAX_LEN} characters`).body, { status: 400 });
   }
   if (newPassword === currentPassword) {
-    return NextResponse.json(
-      { error: "New password must be different from current password" },
-      { status: 400 }
-    );
+    return NextResponse.json(err("BAD_REQUEST", "New password must be different from current password").body, { status: 400 });
   }
 
   // 3. Load the caller's current password hash.
@@ -65,14 +54,11 @@ async function handleChangePassword(
     [auth.userId]
   );
   if (rows.length === 0) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
+    return NextResponse.json(err("NOT_FOUND", "User not found").body, { status: 404 });
   }
   const currentHash = rows[0].password_hash;
   if (!currentHash) {
-    return NextResponse.json(
-      { error: "No password is set for this account" },
-      { status: 400 }
-    );
+    return NextResponse.json(err("BAD_REQUEST", "No password is set for this account").body, { status: 400 });
   }
 
   // 4. Verify the current password (constant-time bcrypt compare).
@@ -85,10 +71,7 @@ async function handleChangePassword(
       details: { reason: "bad_current_password", endpoint: "change-password" },
     }).catch(() => null);
 
-    return NextResponse.json(
-      { error: "Current password is incorrect" },
-      { status: 401 }
-    );
+    return NextResponse.json(err("UNAUTHORIZED", "Current password is incorrect").body, { status: 401 });
   }
 
   // 5. Hash + persist. Bump session_version in the SAME UPDATE so the

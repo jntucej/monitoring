@@ -2,13 +2,15 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
 import type { Scan } from "@/lib/types";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 /**
  * Self-service gate activity feed. Works for every account type with a
  * uniqueId (student, faculty, staff, worker) via /api/persons/:id/history.
  */
 export function RecentActivity() {
+const api = useApi();
+
   const [activities, setActivities] = useState<Scan[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -16,15 +18,15 @@ export function RecentActivity() {
     let cancelled = false;
     const load = async () => {
       try {
-        const authRaw = sessionStorage.getItem("gate-monitor-auth");
-        const auth = authRaw ? JSON.parse(authRaw) : null;
-        const uniqueId = auth?.state?.user?.uniqueId ?? auth?.state?.user?.roll ?? auth?.user?.uniqueId ?? auth?.user?.roll;
+        const auth = useAuthStore.getState();
+        const auth = auth ? JSON.parse(auth) : null;
+        const uniqueId = auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.uniqueId ?? auth?.user?.roll;
         if (!uniqueId) {
           if (!cancelled) setLoading(false);
           return;
         }
         const res = await fetch(`/api/persons/${encodeURIComponent(uniqueId)}/history?limit=5`, {
-          headers: getAuthHeaders(),
+          headers: api.getHeaders(),
           cache: "no-store",
         });
         const json = await res.json();

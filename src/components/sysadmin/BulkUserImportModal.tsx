@@ -4,7 +4,7 @@ import { useState } from "react";
 import {
   Upload, X, CheckCircle2, AlertTriangle, FileText, Loader2, ScrollText,
 } from "lucide-react";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 interface BulkUserImportModalProps {
   onClose: () => void;
@@ -41,6 +41,8 @@ const TEMPLATE_HINTS: Array<[string, string]> = [
 ];
 
 export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalProps) {
+const api = useApi();
+
   const [csvText, setCsvText] = useState("");
   const [busy, setBusy] = useState<"idle" | "validate" | "commit">("idle");
   const [resultMsg, setResultMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -77,7 +79,7 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
   const runValidate = async (): Promise<unknown[] | null> => {
     const res = await fetch("/api/users/bulk/validate", {
       method: "POST",
-      headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+      headers: { "Content-Type": "application/json", ...api.getHeaders() },
       body: JSON.stringify({ csv: csvText }),
     });
     const json = await res.json();
@@ -107,7 +109,7 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
       setBusy("commit");
       const res = await fetch("/api/users/bulk/commit", {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        headers: { "Content-Type": "application/json", ...api.getHeaders() },
         body: JSON.stringify({ rows: validRows, skipErrors: true }),
       });
       const json = await res.json();

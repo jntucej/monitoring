@@ -22,7 +22,7 @@ async function handleGet(req: NextRequest) {
   const encoder = new TextEncoder();
 
   if (!userId) {
-    return new Response(JSON.stringify({ success: false, error: "userId parameter required" }), {
+    return new Response(JSON.stringify(err("BAD_REQUEST", "userId parameter required").body), {
       status: 400,
       headers: { "Content-Type": "application/json" },
     });

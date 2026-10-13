@@ -5,7 +5,7 @@ import { parseRollNumber } from "@/lib/rollNumber";
 import type { Student } from "@/lib/types";
 import { motion } from "framer-motion";
 import { useGlossyMotion, staggerContainer, fadeInUp } from "@/lib/animations";
-import { getAuthHeaders } from "@/hooks/useAuthHeaders";
+import { useApi } from "@/hooks/useApi";
 
 const DEPT_COLORS: Record<string, string> = {
   CSE: "bg-blue-500/20 text-blue-400",
@@ -16,6 +16,8 @@ const DEPT_COLORS: Record<string, string> = {
 };
 
 export function StudentList() {
+const api = useApi();
+
   const [students, setStudents] = useState<Student[]>([]);
   const isGlossyMotion = useGlossyMotion();
   const [query, setQuery] = useState("");
@@ -28,7 +30,7 @@ export function StudentList() {
         const url = query.trim()
           ? `/api/students?q=${encodeURIComponent(query.trim())}`
           : "/api/students";
-        const res = await fetch(url, { headers: getAuthHeaders(), cache: "no-store" });
+        const res = await fetch(url, { headers: api.getHeaders(), cache: "no-store" });
         const json = await res.json();
         if (!cancelled) {
           setStudents(Array.isArray(json.data) ? json.data : []);

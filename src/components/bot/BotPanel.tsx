@@ -9,13 +9,15 @@ import { useIsMobile } from "@/hooks/useMediaQuery";
 import { useVisualViewport } from "@/hooks/useVisualViewport";
 import { BOT_STRINGS } from "@/lib/i18n/bot-strings";
 import { playAudioFeedback } from "@/lib/sound";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import { useAuthStore } from "@/stores/authStore";
 import { BotHeader } from "./BotHeader";
 import { BotMessages } from "./BotMessages";
 import { BotComposer } from "./BotComposer";
 
 export function BotPanel() {
+const api = useApi();
+
   const isMobile = useIsMobile();
   const vv = useVisualViewport();
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -89,7 +91,7 @@ export function BotPanel() {
     if (!user) return;
     fetch("/api/profile", {
       method: "PATCH",
-      headers: { "content-type": "application/json", ...getAuthHeaders() },
+      headers: { "content-type": "application/json", ...api.getHeaders() },
       body: JSON.stringify({ bot_lang: lang, bot_voice_replies: voiceReplies }),
     }).catch(() => {});
   }, [lang, voiceReplies]);

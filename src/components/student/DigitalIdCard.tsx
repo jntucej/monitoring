@@ -3,10 +3,12 @@ import { useEffect, useState, useRef } from "react";
 import { QrCode, Loader2, AlertCircle, Download } from "lucide-react";
 import { QRCode } from "react-qrcode-logo";
 import { parseRollNumber } from "@/lib/rollNumber";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import type { Student } from "@/lib/types";
 
 export function DigitalIdCard() {
+const api = useApi();
+
   const [student, setStudent] = useState<Student | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,9 +27,9 @@ export function DigitalIdCard() {
     let cancelled = false;
     const load = async () => {
       try {
-        const authRaw = sessionStorage.getItem("gate-monitor-auth");
-        const auth = authRaw ? JSON.parse(authRaw) : null;
-        const roll = auth?.state?.user?.uniqueId ?? auth?.state?.user?.roll ?? auth?.state?.user?.studentRoll ?? auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll;
+        const auth = useAuthStore.getState();
+        const auth = auth ? JSON.parse(auth) : null;
+        const roll = auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll ?? auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll;
         if (!roll) {
           if (!cancelled) {
             setError("No student roll number found in session. Please log in again.");
@@ -35,7 +37,7 @@ export function DigitalIdCard() {
           }
           return;
         }
-        const res = await fetch(`/api/students/${encodeURIComponent(roll)}`, { headers: getAuthHeaders(), cache: "no-store" });
+        const res = await fetch(`/api/students/${encodeURIComponent(roll)}`, { headers: api.getHeaders(), cache: "no-store" });
         const json = await res.json();
         if (!cancelled) {
           if (res.ok && json.success) {

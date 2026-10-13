@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { Server, RefreshCw, ExternalLink } from "lucide-react";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 interface PromSample {
   metric: Record<string, string>;
@@ -20,6 +20,8 @@ interface FleetRow {
 const GRAFANA_BASE = process.env.NEXT_PUBLIC_MONITORING_GRAFANA_URL || "";
 
 export function DockerFleetPanel() {
+const api = useApi();
+
   const [rows, setRows] = useState<FleetRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +29,7 @@ export function DockerFleetPanel() {
 
   const load = useCallback(async () => {
     try {
-      const headers = getAuthHeaders();
+      const headers = api.getHeaders();
       const fetchQ = (id: string) =>
         fetch(`/api/admin/monitoring?queryId=${id}`, { headers, cache: "no-store" }).then((r) => r.json());
 

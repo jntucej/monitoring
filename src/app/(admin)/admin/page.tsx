@@ -28,7 +28,7 @@ import {
   Radio as RadioIcon
 } from "lucide-react";
 import type { DashboardData } from "@/lib/types";
-import { getAuthHeaders } from "@/hooks/useAuthHeaders";
+import { useApi } from "@/hooks/useApi";
 import { useUIStore } from "@/stores/uiStore";
 import type { Lockdown } from "@/lib/db";
 import type { Role } from "@/lib/types";
@@ -82,7 +82,7 @@ function LockdownDialog() {
     try {
       const res = await fetch("/api/admin/lockdown", {
         method: "POST",
-        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        headers: { ...api.getHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({ scopes: selected }),
       });
       const json = await res.json();
@@ -193,6 +193,8 @@ function LockdownDialog() {
 }
 
 export default function AdminDashboardPage() {
+const api = useApi();
+
   const router = useRouter();
 
   const [data, setData] = useState<DashboardData | null>(null);
@@ -206,7 +208,7 @@ export default function AdminDashboardPage() {
     if (showLoadingState) setLoading(true);
     setIsRefreshing(true);
     try {
-      const headers = getAuthHeaders();
+      const headers = api.getHeaders();
       const res = await fetch("/api/admin/dashboard", { headers, cache: "no-store" });
       const json = await res.json();
       if (json.success && json.data) {

@@ -157,20 +157,43 @@ async function handlePatch(req: NextRequest): Promise<Response> {
     }
 
     const isAllowed = canApproveAtStage(authUserRole, request.workflow_type as WorkflowType, request.current_stage);
-    if (!isAllowed) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "FORBIDDEN",
-            message: `Role ${authUserRole} is not authorized to act at stage ${request.current_stage}`,
-          },
-        },
-        { status: 403 }
-      );
-    }
+        if (!isAllowed) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: {
+                code: "FORBIDDEN",
+                message: `Role ${authUserRole} is not authorized to act at stage ${request.current_stage}`,
+              },
+            },
+            { status: 403 }
+          );
+        }
 
-    if (request.workflow_type === "hostel" && ["caretaker", "deputy_warden"].includes(authUserRole)) {
+        // HOD department scope check: HODs may only act on requests from students
+        // in their own department. Admins and sysadmins are exempt.
+        if (authUserRole === "hod") {
+          const { data: studentData } = await supabase
+            .from("users")
+            .select("department_id")
+            .eq("id", request.student_user_id)
+            .single();
+          const { data: hodData } = await supabase
+            .from("users")
+            .select("department_id")
+            .eq("id", authUserId)
+            .single();
+          const studentDept = studentData?.department_id;
+          const hodDept = hodData?.department_id;
+          if (!studentDept || !hodDept || studentDept !== hodDept) {
+            return NextResponse.json(
+              { success: false, error: { code: "FORBIDDEN", message: "HOD may only approve requests from own department" } },
+              { status: 403 }
+            );
+          }
+        }
+
+        if (request.workflow_type === "hostel" && ["caretaker", "deputy_warden"].includes(authUserRole)) {
       const { data: userData } = await supabase
         .from("users")
         .select("hostel_scope")

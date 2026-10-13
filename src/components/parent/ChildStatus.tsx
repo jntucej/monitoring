@@ -2,9 +2,11 @@
 import { useEffect, useState, useCallback } from "react";
 import { CheckCircle, XCircle, Loader2, AlertCircle } from "lucide-react";
 import type { Student } from "@/lib/types";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 export function ChildStatus() {
+const api = useApi();
+
   const [children, setChildren] = useState<Student[]>([]);
   const [statuses, setStatuses] = useState<Record<string, { status: "IN" | "OUT"; last: { timestamp: string; gateName: string } | null }>>({});
   const [loading, setLoading] = useState(true);

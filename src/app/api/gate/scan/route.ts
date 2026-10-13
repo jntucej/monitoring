@@ -24,7 +24,7 @@ export const POST = withAuthorization(
 
     const body = (await req.json().catch(() => null)) as ScanBody | null;
     if (!body?.gateId || !body?.direction) {
-      return ok({ error: "gateId and direction are required" });
+      return ok(undefined, "gateId and direction are required", 400);
     }
 
     const result = await recordScan({

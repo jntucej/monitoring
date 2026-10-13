@@ -16,6 +16,15 @@ function parseFilename(disposition: string | null): string {
 export function useApi() {
   const { token, logout } = useAuthStore();
 
+  /** Build the auth header map from the current store state (no React hook needed). */
+  function getHeaders(): Record<string, string> {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    const state = useAuthStore.getState();
+    if (state.token) headers["Authorization"] = `Bearer ${state.token}`;
+    if (state.user?.currentSessionToken) headers["X-Session-Token"] = state.user.currentSessionToken;
+    return headers;
+  }
+
   const request = async <T = any>(
     input: string | URL,
     init?: RequestInit
@@ -109,5 +118,5 @@ export function useApi() {
     request(url, { method: "PUT", body: JSON.stringify(body) });
   const del = (url: string) => request(url, { method: "DELETE" });
 
-  return { request, get, post, put, del };
-}
+  return { request, get, post, put, del, getHeaders };
+  }

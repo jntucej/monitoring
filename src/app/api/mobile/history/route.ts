@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { err } from "@/lib/api-response";
 import { getPersonHistory } from "@/lib/db";
 import { validateMobileToken } from "@/lib/mobile-auth";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -6,7 +7,7 @@ import { withRateLimit } from "@/lib/rate-limit";
 async function handleGet(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(err("UNAUTHORIZED", "Unauthorized").body, { status: 401 });
   }
 
   const deviceId = req.headers.get("x-device-id") || undefined;
@@ -14,7 +15,7 @@ async function handleGet(req: NextRequest) {
   const person = await validateMobileToken(token, deviceId);
 
   if (!person) {
-    return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
+    return NextResponse.json(err("UNAUTHORIZED", "Invalid or expired token").body, { status: 401 });
   }
 
   const history = await getPersonHistory(person.id);

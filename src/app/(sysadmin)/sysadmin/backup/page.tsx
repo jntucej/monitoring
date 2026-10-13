@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import { useUIStore } from "@/stores/uiStore";
 import { Database, HardDrive, Download, RefreshCw, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 
@@ -22,6 +22,8 @@ interface BackupStats {
 }
 
 export default function BackupPage() {
+const api = useApi();
+
   const { addToast } = useUIStore();
   const [stats, setStats] = useState<BackupStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -33,7 +35,7 @@ export default function BackupPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const headers = getAuthHeaders();
+      const headers = api.getHeaders();
       const [statsRes, tablesRes] = await Promise.all([
         fetch("/api/admin/backup", { headers }),
         fetch("/api/admin/tables", { headers }),
@@ -63,7 +65,7 @@ export default function BackupPage() {
   const handleBackup = async () => {
     setBackupRunning(true);
     try {
-      const headers = getAuthHeaders();
+      const headers = api.getHeaders();
       const res = await fetch("/api/admin/backup", {
         method: "POST",
         headers,
@@ -87,7 +89,7 @@ export default function BackupPage() {
   const handleExportCSV = async (tableName: string) => {
     setExporting(true);
     try {
-      const headers = getAuthHeaders();
+      const headers = api.getHeaders();
       const res = await fetch(`/api/admin/export?table=${tableName}&format=csv`, { headers });
       
       if (!res.ok) {
@@ -118,7 +120,7 @@ export default function BackupPage() {
     
     setExporting(true);
     try {
-      const headers = getAuthHeaders();
+      const headers = api.getHeaders();
       const res = await fetch("/api/admin/export", {
         method: "POST",
         headers: { ...headers, "Content-Type": "application/json" },

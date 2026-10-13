@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse, NextRequest } from "next/server";
+import { err } from "@/lib/api-response";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { addAudit, addNotification, getLinkedPersons } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
@@ -31,7 +32,7 @@ async function handlePost(req: NextRequest, context: any) {
     ...rest
   } = body;
 
-  if (!workflowType) return NextResponse.json({ success: false, error: "Missing fields" }, { status: 400 });
+  if (!workflowType) return NextResponse.json(err("BAD_REQUEST", "Missing fields").body, { status: 400 });
 
   if (!["student", "parent", "guardian", "admin", "sysadmin", "staff", "faculty"].includes(role)) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 403 });
@@ -39,15 +40,15 @@ async function handlePost(req: NextRequest, context: any) {
 
   let targetUserId = userId;
   if (role === "parent" || role === "guardian") {
-    if (!studentUserId) return NextResponse.json({ success: false, error: "Missing child ID" }, { status: 400 });
+    if (!studentUserId) return NextResponse.json(err("BAD_REQUEST", "Missing child ID").body, { status: 400 });
     const children = await getLinkedPersons(userId);
     if (!children.some((c: any) => c.child_id === studentUserId)) {
-      return NextResponse.json({ success: false, error: "Not your child" }, { status: 403 });
+      return NextResponse.json(err("FORBIDDEN", "Not your child").body, { status: 403 });
     }
     targetUserId = studentUserId;
   } else if (studentUserId && studentUserId !== userId) {
     if (role !== "admin" && role !== "sysadmin") {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 403 });
+      return NextResponse.json(err("FORBIDDEN", "Unauthorized").body, { status: 403 });
     }
     targetUserId = studentUserId;
   }
@@ -108,6 +109,35 @@ async function handleGet(req: NextRequest, context: any) {
   const sid = searchParams.get("student_user_id") || searchParams.get("studentUserId");
   const hscope = searchParams.get("hostel_scope") || searchParams.get("hostelScope");
   const status = searchParams.get("status");
+  const mineOnly = searchParams.get("mine") === "true";
+
+  // ?mine=true — self-service "My Tickets" view: requester's own tickets
+  // with the student join so the card can render the requester's name/details.
+  if (mineOnly) {
+    const { data: mineData, error: mineErr } = await db
+      .from("permission_requests")
+      .select(`
+        id, ticket_number, workflow_type, current_stage, status,
+        sla_deadline, created_at, updated_at, description, reason,
+        from_date, to_date, priority, hostel_scope,
+        student_user_id, digital_signature, stage_history,
+        student:users(
+          id, name, email, phone, role,
+          student_details(roll, year, section, hostel_block, room_number, gender)
+        )
+      `, { count: "exact" })
+      .eq("student_user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(200);
+
+    if (mineErr) {
+      return NextResponse.json(
+        { success: false, code: "DB_ERROR", error: mineErr.message },
+        { status: 500 },
+      );
+    }
+    return NextResponse.json({ success: true, data: mineData ?? [], total: mineData?.length ?? 0 });
+  }
 
   let query = db.from("permission_requests").select("*", { count: "exact" });
   if (type) query = query.eq("workflow_type", type);
@@ -134,7 +164,7 @@ async function handleGet(req: NextRequest, context: any) {
     if (!childIds.length) return NextResponse.json({ success: true, data: [], total: 0 });
     if (sid) {
       if (childIds.includes(sid)) query = query.eq("student_user_id", sid);
-      else return NextResponse.json({ success: false, error: "Not your child" }, { status: 403 });
+      else return NextResponse.json(err("FORBIDDEN", "Not your child").body, { status: 403 });
     } else {
       query = query.in("student_user_id", childIds);
     }

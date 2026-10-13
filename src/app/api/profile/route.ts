@@ -1,5 +1,6 @@
 // src/app/api/profile/route.ts
 import { NextRequest, NextResponse } from "next/server";
+import { err } from "@/lib/api-response";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { addAudit } from "@/lib/db";
@@ -27,7 +28,7 @@ async function handleGet(_req: NextRequest, context: { auth: AuthContext }) {
     .maybeSingle();
 
   if (error || !user) {
-    return NextResponse.json({ success: false, error: "Profile not found" }, { status: 404 });
+    return NextResponse.json(err("NOT_FOUND", "Profile not found").body, { status: 404 });
   }
 
   const [studentRes, employeeRes] = await Promise.all([
@@ -83,7 +84,7 @@ async function handlePatch(req: NextRequest, context: { auth: AuthContext }) {
   if (typeof body.name === "string") {
     const name = body.name.trim();
     if (name.length < 2 || name.length > 100) {
-      return NextResponse.json({ success: false, error: "Name must be 2–100 characters" }, { status: 400 });
+      return NextResponse.json(err("BAD_REQUEST", "Name must be 2–100 characters").body, { status: 400 });
     }
     updates.name = name;
   }
@@ -91,7 +92,7 @@ async function handlePatch(req: NextRequest, context: { auth: AuthContext }) {
   if (typeof body.phone === "string") {
     const phone = body.phone.trim();
     if (phone && !/^[+\d][\d\s\-()]{6,20}$/.test(phone)) {
-      return NextResponse.json({ success: false, error: "Invalid phone number" }, { status: 400 });
+      return NextResponse.json(err("BAD_REQUEST", "Invalid phone number").body, { status: 400 });
     }
     updates.phone = phone || null;
   }
@@ -101,7 +102,7 @@ async function handlePatch(req: NextRequest, context: { auth: AuthContext }) {
   }
 
   if (Object.keys(updates).length === 0) {
-    return NextResponse.json({ success: false, error: "No updatable fields supplied" }, { status: 400 });
+    return NextResponse.json(err("BAD_REQUEST", "No updatable fields supplied").body, { status: 400 });
   }
 
   updates.updated_at = new Date().toISOString();

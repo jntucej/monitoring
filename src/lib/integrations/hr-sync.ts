@@ -20,62 +20,32 @@ export async function syncEmployeesFromHR(): Promise<{
     const hrmsEndpoint = process.env.HRMS_API_ENDPOINT;
     const hrmsApiKey = process.env.HRMS_API_KEY;
 
-    if (hrmsEndpoint) {
-      try {
-        const hrmsRes = await fetch(hrmsEndpoint, {
-          headers: {
-            "Content-Type": "application/json",
-            ...(hrmsApiKey ? { Authorization: `Bearer ${hrmsApiKey}` } : {}),
-          },
-        });
-        if (hrmsRes.ok) {
-          const resData = await hrmsRes.json();
-          employeesToSync = Array.isArray(resData) ? resData : resData.data || [];
-        } else {
-          errors.push(`HRMS API responded with status ${hrmsRes.status}`);
-        }
-      } catch (hrmsErr: any) {
-        errors.push(`Failed to reach HRMS endpoint: ${hrmsErr.message}`);
-      }
+    if (!hrmsEndpoint) {
+      return { success: false, added: 0, updated: 0, errors: ["HRMS_API_ENDPOINT not configured"] };
     }
 
-    // Default sample employee feed for local / test environments
-    if (employeesToSync.length === 0 && (process.env.HRMS_ENABLE_MOCK === "true" || !hrmsEndpoint)) {
-      employeesToSync = [
-        {
-          employeeId: "FAC-001",
-          fullName: "Dr. S. Sharma",
-          email: "s.sharma@campus.edu",
-          phone: "+919876543210",
-          department: "CSE",
-          designation: "Professor",
-          isHod: true,
-          joiningDate: "2015-06-01",
-          status: "active",
+    try {
+      const hrmsRes = await fetch(hrmsEndpoint, {
+        headers: {
+          "Content-Type": "application/json",
+          ...(hrmsApiKey ? { Authorization: `Bearer ${hrmsApiKey}` } : {}),
         },
-        {
-          employeeId: "FAC-002",
-          fullName: "Dr. P. Reddy",
-          email: "p.reddy@campus.edu",
-          phone: "+919876543211",
-          department: "CSE",
-          designation: "Associate Professor",
-          isHod: false,
-          joiningDate: "2018-08-15",
-          status: "active",
-        },
-        {
-          employeeId: "STF-001",
-          fullName: "R. Kumar",
-          email: "r.kumar@campus.edu",
-          phone: "+919876543212",
-          department: "Admin",
-          designation: "Administrative Officer",
-          isHod: false,
-          joiningDate: "2010-01-01",
-          status: "active",
-        },
-      ];
+      });
+      if (hrmsRes.ok) {
+        const resData = await hrmsRes.json();
+        employeesToSync = Array.isArray(resData) ? resData : resData.data || [];
+      } else {
+        errors.push(`HRMS API responded with status ${hrmsRes.status}`);
+      }
+    } catch (hrmsErr: any) {
+      errors.push(`Failed to reach HRMS endpoint: ${hrmsErr.message}`);
+    }
+
+    // No mock fallback — if the endpoint is configured but returns no data,
+    // the sync returns an empty result with a warning in errors.
+    if (employeesToSync.length === 0) {
+      errors.push("HRMS endpoint returned no employees");
+      return { success: false, added: 0, updated: 0, errors };
     }
 
     for (const emp of employeesToSync) {

@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Bell, ShieldCheck, Database, Loader2, XCircle } from "lucide-react";
 import { BackupManagement } from "./BackupManagement";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 interface SystemConfig {
   notificationsEnabled?: boolean;
@@ -10,6 +10,8 @@ interface SystemConfig {
 }
 
 export function SystemSettings() {
+const api = useApi();
+
   const [config, setConfig] = useState<SystemConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +23,7 @@ export function SystemSettings() {
     try {
       setLoading(true);
       const res = await fetch("/api/system/config", {
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
         cache: "no-store",
       });
       const json = await res.json();
@@ -43,7 +45,7 @@ export function SystemSettings() {
     try {
       const res = await fetch("/api/system/config", {
         method: "PATCH",
-        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        headers: { ...api.getHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({ [key]: value }),
       });
       const j = await res.json();

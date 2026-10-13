@@ -56,20 +56,9 @@ export async function authenticateLdapUser(
     };
   }
 
-  try {
-    const baseDn = process.env.LDAP_BASE_DN || "ou=users,dc=campus,dc=edu";
-    return {
-      success: true,
-      user: {
-        dn: `uid=${cleanUsername},${baseDn}`,
-        cn: cleanUsername,
-        mail: cleanUsername.includes("@") ? cleanUsername : `${cleanUsername}@campus.edu`,
-        uid: cleanUsername,
-      },
-    };
-  } catch (err: any) {
-    return { success: false, error: `LDAP error: ${err.message}` };
-  }
+  // Real LDAP bind — not implemented yet. Fail loudly so callers know
+  // the integration is missing instead of silently succeeding with fake data.
+  return { success: false, error: "LDAP authentication not implemented — install ldapts or set LDAP_ENABLE_MOCK=true" };
 }
 
 /**

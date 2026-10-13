@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import { useAuthStore } from "@/stores/authStore";
 
 export type DeviceType = "thumb" | "face" | "barcode" | "qr";
@@ -53,6 +53,7 @@ export function useDeviceSettings(): {
   loading: boolean;
   refresh: () => void;
 } {
+  const api = useApi();
   const token = useAuthStore((s) => s.token);
   const [settings, setSettings] = useState<DeviceSetting[]>(
     () => cache?.settings ?? []
@@ -75,7 +76,7 @@ export function useDeviceSettings(): {
     let ignore = false;
     setLoading(true);
 
-    fetch("/api/admin/device-settings", { headers: getAuthHeaders() })
+    fetch("/api/admin/device-settings", { headers: api.getHeaders() })
       .then((res) => res.json())
       .then((json) => {
         if (ignore) return;
@@ -115,3 +116,4 @@ export function useDeviceSettings(): {
 }
 
 export default useDeviceSettings;
+

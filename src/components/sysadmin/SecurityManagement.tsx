@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShieldCheck, ShieldAlert, Lock, Globe, KeyRound, RefreshCw } from "lucide-react";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 
 interface SecurityStats {
   failedLogins24h: number;
@@ -17,6 +17,8 @@ interface SecurityStats {
 }
 
 export function SecurityManagement() {
+const api = useApi();
+
   const { addToast } = useUIStore();
   const [stats, setStats] = useState<SecurityStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,7 +28,7 @@ export function SecurityManagement() {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      const headers = getAuthHeaders();
+      const headers = api.getHeaders();
       const res = await fetch("/api/admin/security/stats", { headers });
       const result = await res.json();
       if (result.success && result.data) {
@@ -45,7 +47,7 @@ export function SecurityManagement() {
 
   const handleSave = async () => {
     try {
-      const headers = getAuthHeaders();
+      const headers = api.getHeaders();
       const ips = ipInput.split(",").map((s) => s.trim()).filter(Boolean);
       const res = await fetch("/api/admin/security/ip-allowlist", {
         method: "POST",

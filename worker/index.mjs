@@ -59,6 +59,19 @@ cron.schedule('*/15 * * * *', async () => {
   }
 });
 
+cron.schedule('*/15 * * * *', async () => {
+  console.log('[Worker] Running scheduled job: retry_notifications');
+  try {
+    const job = await import('./jobs/retry_notifications.js');
+    if (job.default) await job.default();
+    HEALTH_STATE.lastJobAt = Date.now();
+    HEALTH_STATE.lastJobName = 'retry_notifications';
+    HEALTH_STATE.jobsProcessed++;
+  } catch (err) {
+    console.error('[Worker] retry_notifications failed:', err);
+  }
+});
+
 cron.schedule('0 2 * * *', async () => {
   console.log('[Worker] Running scheduled job: backfill_daily_stats');
   try {

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { PenTool, Download, Eye, AlertCircle, CheckCircle2, Hash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUIStore } from "@/stores/uiStore";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import type { PermissionStatus } from "@/lib/types";
 
 export interface DigitalSignPanelProps {
@@ -34,6 +34,7 @@ export function DigitalSignPanel({
   digitalSignature,
   onSigned,
 }: DigitalSignPanelProps) {
+  const api = useApi();
   const addToast = useUIStore((s) => s.addToast);
   const [note, setNote] = useState("");
   const [signing, setSigning] = useState(false);
@@ -58,7 +59,7 @@ export function DigitalSignPanel({
     try {
       const res = await fetch(`/api/permissions/${encodeURIComponent(ticketNumber)}/sign`, {
         method: "POST",
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
         body: JSON.stringify({ signatureNote: note.trim() || undefined }),
       });
       const json = await res.json().catch(() => null);
@@ -157,3 +158,4 @@ export function DigitalSignPanel({
 
 }
 export default DigitalSignPanel;
+

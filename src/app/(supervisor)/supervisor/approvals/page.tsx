@@ -3,12 +3,14 @@
 import { useState, useCallback } from "react";
 import { CheckCircle, XCircle, ShieldCheck, Clock, MessageSquare } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
-import { getAuthHeaders } from "@/lib/utils";
+import { useApi } from "@/hooks/useApi";
 import type { GatePass } from "@/lib/types";
 import { getPassTypeName } from "@/hooks/usePassTypes";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 
 export default function WardenApprovalsPage() {
+const api = useApi();
+
   const [passes, setPasses] = useState<GatePass[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +23,7 @@ export default function WardenApprovalsPage() {
     setError(null);
     try {
       const res = await fetch("/api/passes?status=PENDING", {
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
         cache: "no-store",
       });
       const json = await res.json();
@@ -46,7 +48,7 @@ export default function WardenApprovalsPage() {
     try {
       const res = await fetch(`/api/passes/${passId}`, {
         method: "PUT",
-        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        headers: { ...api.getHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({ action, comment }),
       });
       const json = await res.json();
