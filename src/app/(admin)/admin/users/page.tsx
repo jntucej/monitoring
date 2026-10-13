@@ -1,9 +1,9 @@
 "use client";
 
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { useEffect, useMemo, useState } from "react";
-import { Shield, GraduationCap, Briefcase, UserCheck, Grid, Search, ArrowRight } from "lucide-react";
+import { Shield, GraduationCap, Briefcase, UserCheck, Grid, Search, ArrowRight, Lock } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import Link from "next/link";
 
 interface UserProfile {
@@ -332,7 +332,24 @@ export default function AdminUsersPage() {
                 </tbody>
               </table>
             </div>
+
+            {/* Role-change guidance — grant/revoke lives on the sysadmin
+                console (/api/admin/users/[id]/roles). Admins can view
+                assignments but privilege changes are sysadmin-gated. */}
+            <div className="m-4 mt-0 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] p-4 flex items-start gap-3">
+              <Lock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold text-amber-300">Role changes require sysadmin</p>
+                <p className="mt-1 text-xs text-slate-400">
+                  Granting or revoking roles (including <code className="text-[11px]">sysadmin</code>
+                  escalation) runs through the sysadmin console — <Link href="/admin/roles" className="text-emerald-400 hover:underline">view the role hierarchy</Link>{" "}
+                  for the assignment map. If an account's role looks out of date, contact the platform team.
+                </p>
+              </div>
+            </div>
           </div>
+
+          <DevContactStrip />
         </div>
       )}
     </div>

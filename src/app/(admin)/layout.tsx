@@ -22,6 +22,12 @@ const TABS = [
   { href: "/admin/staff", label: "Staff" },
   { href: "/admin/users", label: "Users & Roles" },
   { href: "/admin/settings", label: "Settings" },
+  { href: "/admin/permission-policies", label: "Permission Policies" },
+  { href: "/admin/institutional-configuration", label: "Institutional Config" },
+  { href: "/admin/gate-device-configuration", label: "Gate & Devices" },
+  { href: "/admin/workflow-configuration", label: "Workflows" },
+  { href: "/admin/notification-settings", label: "Notification Settings" },
+  { href: "/admin/audit-logs", label: "Audit Logs" },
 ] as const;
 
 function tabActive(tab: (typeof TABS)[number], pathname: string): boolean {

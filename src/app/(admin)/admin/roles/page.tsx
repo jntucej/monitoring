@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { RoleHierarchyGraph, ROLE_HIERARCHY } from "@/components/shared/RoleHierarchyGraph";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 
@@ -381,6 +382,23 @@ function AdminRolesInner() {
           </div>
         )}
       </div>
+
+      {/* Role-change guidance — grant/revoke endpoints are sysadmin-gated.
+          Admins view the assignment map here; mutations route through the
+          sysadmin console. */}
+      <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.06] p-4 flex items-start gap-3">
+        <Lock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+        <div>
+          <p className="text-sm font-semibold text-amber-300">Role changes require sysadmin</p>
+          <p className="mt-1 text-xs text-slate-400">
+            Granting or revoking roles runs through the sysadmin console. If an account&apos;s role
+            looks out of date, open a role change request or contact the platform team — admins
+            cannot reassign privileges here.
+          </p>
+        </div>
+      </div>
+
+      <DevContactStrip />
     </div>
   );
 }

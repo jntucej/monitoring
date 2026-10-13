@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
-import { FileText, Download, BarChart3, Loader2 } from "lucide-react";
+import { FileText, Download, BarChart3, Loader2, ClipboardList, Clock } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import type { DashboardData } from "@/lib/types";
 
 interface GeneratedReport {
@@ -149,6 +150,40 @@ export default function AdminReportsPage() {
         </div>
       </div>
 
+      {/* KPI summary cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-4">
+          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+            <ClipboardList className="w-3.5 h-3.5 text-[var(--action-primary)]" /> Reports Generated
+          </div>
+          <div className="mt-1.5 text-xl font-black text-[var(--text-primary)] tabular-nums">{generated.length}</div>
+          <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">Session reports (refresh resets)</p>
+        </div>
+        <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-4">
+          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+            <Clock className="w-3.5 h-3.5 text-[var(--action-info)]" /> Last Export
+          </div>
+          <div className="mt-1.5 text-sm font-bold text-[var(--text-primary)]">
+            {generated.length > 0
+              ? new Date(generated[0].generatedAt).toLocaleString("en-IN", {
+                  day: "2-digit",
+                  month: "short",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "No exports this session"}
+          </div>
+          <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">{generated.length > 0 ? generated[0].title : "Export a report above"}</p>
+        </div>
+        <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-4">
+          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+            <FileText className="w-3.5 h-3.5 text-[var(--action-warning)]" /> Export Formats
+          </div>
+          <div className="mt-1.5 text-sm font-bold text-[var(--text-primary)]">CSV</div>
+          <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">One-click download from report rows</p>
+        </div>
+      </div>
+
       <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)]">
         <div className="p-4 border-b border-[var(--border)] flex items-center justify-between gap-2 flex-wrap">
           <h3 className="font-semibold flex items-center gap-2">
@@ -213,6 +248,8 @@ export default function AdminReportsPage() {
           )}
         </div>
       </div>
+
+      <DevContactStrip />
     </div>
   );
 }
