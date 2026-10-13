@@ -47,9 +47,27 @@ async function handleKioskSession(req: NextRequest) {
       );
     }
 
-    // 2. Resolve the session's gate binding.
+    // A kiosk session is always bound to a specific gate: the requested
+    // gateId, or the operator's own assignment. No gate resolvable → the
+    // operator is not authenticated for any gate, so refuse the session
+    // rather than mint a gateless token.
     const gateIdParam = req.nextUrl.searchParams.get("gateId")?.trim() || null;
     const gate = await resolveKioskGateId(gateIdParam, operator.gate_id);
+    if (!gate) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "NO_GATE_ASSIGNED",
+            message:
+              gateIdParam
+                ? "The requested gate is inactive or unknown. Sign in at the gate the operator is assigned to."
+                : "This operator is not assigned to a gate. Assign one under SysAdmin → Gates, then open the kiosk at that gate.",
+          },
+        },
+        { status: 404 }
+      );
+    }
 
     // 3. Build role list (mirror pin-login logic).
     const role = (operator.role as Role) || "operator";

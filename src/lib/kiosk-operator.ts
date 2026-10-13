@@ -16,11 +16,10 @@ export interface KioskOperatorRow {
 /**
  * Locate the designated kiosk default operator.
  *
- * Resolution order:
- *   1. The user with is_kiosk_default = TRUE (explicit admin designation).
- *   2. The built-in 'OPERATOR' account (unique_id = 'OPERATOR', role = 'operator').
- *
- * Returns null if no active operator qualifies (404 from the endpoint).
+ * Only an explicitly designated operator (is_kiosk_default = TRUE, set by a
+ * sysadmin under Gates → Default Gate Operator) may receive a kiosk session.
+ * No implicit fallback — an operator with no assigned gate must be assigned
+ * before they can sign in at a gate kiosk. Returns null otherwise (404).
  */
 export async function findKioskDefaultOperator(): Promise<KioskOperatorRow | null> {
   const res = await query<KioskOperatorRow>(
@@ -28,13 +27,10 @@ export async function findKioskDefaultOperator(): Promise<KioskOperatorRow | nul
             COALESCE(session_version, 0) AS session_version,
             COALESCE(is_kiosk_default, FALSE) AS is_kiosk_default
        FROM public.users
-      WHERE (is_kiosk_default = TRUE
-             AND status = 'ACTIVE'
-             AND role = 'operator')
-         OR (unique_id = 'OPERATOR'
-             AND status = 'ACTIVE'
-             AND role = 'operator')
-      ORDER BY is_kiosk_default DESC, created_at ASC
+      WHERE is_kiosk_default = TRUE
+        AND status = 'ACTIVE'
+        AND role = 'operator'
+      ORDER BY created_at ASC
       LIMIT 1`
   );
   return res.rows[0] ?? null;
