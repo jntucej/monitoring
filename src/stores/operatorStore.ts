@@ -374,22 +374,27 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
         // Failure shapes: { error, message } (fail()) or { success:false, error:{code,message} } (auth).
         const payload = result.data;
 
-        // A duplicate still inserted/returned the pre-existing row — the
-        // movement is already on record, so surface it as a success with a
-        // "duplicate" note rather than an error (avoids the confusing
-        // "failed but movement recorded" state).
+        // A duplicate means the movement is ALREADY on record (the server
+        // returned the pre-existing row and did not insert a new one). We
+        // show the "already scanned" time and cancel this operation instead
+        // of recording a second movement.
         if (payload?.isDuplicate) {
           playAudioFeedback("warning");
+          const dupScan: any = payload.scan;
+          const scannedAt =
+            (dupScan?.timestamp && new Date(dupScan.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })) ||
+            "just now";
           addToast({
             variant: "warning",
-            title: "Duplicate Scan",
-            message: `This student was already scanned ${directionToUse === "OUT" ? "out" : "in"} recently — using the existing record.`,
+            title: "Already Scanned",
+            message: `${currentStudent.name} was already scanned ${directionToUse === "OUT" ? "out" : "in"} at ${scannedAt}. This scan was not recorded.`,
           });
-          const dupScan = payload.scan ?? null;
+          // Cancel the operation: do not count as a new movement, do not push
+          // into recentScans (it's the same row), just surface the existing
+          // record so the operator can see the time.
           set({
             state: "success",
-            lastScan: dupScan,
-            recentScans: dupScan ? [dupScan, ...get().recentScans.slice(0, 4)] : get().recentScans,
+            lastScan: dupScan ?? get().lastScan,
             error: null,
           });
           return;
