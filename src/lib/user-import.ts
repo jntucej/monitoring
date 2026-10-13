@@ -203,11 +203,14 @@ export async function validateImport(csvInput: string | ImportRow[]): Promise<Va
     const rowNum = i + 1;
 
     // The sheet's own header names (and programmatic aliases).
-    const name = pick(r, "name", "NAME OF THE STUDENT", "NAME");
+    const name = pick(r, "name", "NAME OF THE STUDENT", "NAME", "STUDENT_NAME", "STUDENT NAME");
     const email = pick(r, "email", "EMAIL ID", "EMAIL").toLowerCase();
     const role = (pick(r, "role") || "student").toLowerCase() as Role;
     // H.T NO. is the roll number — the primary identifier.
-    const rollRaw = pick(r, "H.T NO.", "HT NO", "H T NO", "HALL TICKET NO", "ROLL", "roll", "uniqueId");
+    // htno/htno are parsed later (below); fold them into rollRaw here so the
+    // required-field check + roll decode accept the bare HTNO header too.
+    const htnoHeader = pick(r, "htno", "HTNO", "HT NO", "HTNO NO", "HALL TICKET NO");
+    const rollRaw = pick(r, "H.T NO.", "HT NO", "H T NO", "HALL TICKET NO", "ROLL", "roll", "uniqueId") || htnoHeader;
     const phone = pick(r, "phone", "PHONE NUMBER", "PHONE");
     const gender = normalizeGender(pick(r, "gender", "GENDER"));
     const dob = normalizeDate(pick(r, "dob", "DOB", "DATE OF BIRTH"));
