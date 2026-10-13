@@ -35,6 +35,7 @@ interface DashboardResponse {
 /* -------------------------------------------------------------------------- */
 
 export function HostelDashboard() {
+  const api = useApi();
   const [data, setData] = useState<HostelDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -209,13 +210,9 @@ interface CardDivProps {
 }
 
 export function CardDiv({ children, className = "" }: CardDivProps) {
-const api = useApi();
-
   return (
     <div className={`rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 ${className}`}>
       {children}
     </div>
   );
 }
-
-            <h2 className="text-sm font-semibold text-[var(--text-primary)] mb-4">Overdue Requests (&gt; 48h)</h2>

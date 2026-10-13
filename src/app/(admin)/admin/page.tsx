@@ -62,6 +62,7 @@ function timeAgo(iso: string): string {
 }
 
 function LockdownDialog() {
+  const api = useApi();
   const [open, setOpen]         = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
   const [sending, setSending]   = useState(false);
@@ -231,7 +232,7 @@ const api = useApi();
   const fetchLockdown = useCallback(async () => {
     try {
       const res = await fetch("/api/admin/lockdown", {
-        headers: getAuthHeaders(),
+        headers: api.getHeaders(),
       });
       const json = await res.json();
       setActiveLockdown(json.data ?? null);

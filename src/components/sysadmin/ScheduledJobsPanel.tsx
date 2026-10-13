@@ -28,6 +28,7 @@ import {
   CalendarClock, Timer, TrendingUp, CircleDot, Info,
 } from "lucide-react";
 import { useUIStore } from "@/stores/uiStore";
+import { useAuthStore } from "@/stores/authStore";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { useApi } from "@/hooks/useApi";
 import {
@@ -61,7 +62,13 @@ interface ApiRow {
 }
 
 /* ── Utilities ────────────────────────────────────────────────────────── */
-const getHeaders = () => api.getHeaders();
+function getHeaders(): Record<string, string> {
+  const state = useAuthStore.getState();
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (state.token) headers["Authorization"] = `Bearer ${state.token}`;
+  if (state.user?.currentSessionToken) headers["X-Session-Token"] = state.user.currentSessionToken;
+  return headers;
+}
 
 function timeAgo(iso: string | null): string {
   if (!iso) return "—";

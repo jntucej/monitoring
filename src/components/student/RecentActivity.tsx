@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
 import type { Scan } from "@/lib/types";
 import { useApi } from "@/hooks/useApi";
+import { useAuthStore } from "@/stores/authStore";
 
 /**
  * Self-service gate activity feed. Works for every account type with a
@@ -19,8 +20,7 @@ const api = useApi();
     const load = async () => {
       try {
         const auth = useAuthStore.getState();
-        const auth = auth ? JSON.parse(auth) : null;
-        const uniqueId = auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.uniqueId ?? auth?.user?.roll;
+        const uniqueId = auth?.user?.uniqueId;
         if (!uniqueId) {
           if (!cancelled) setLoading(false);
           return;

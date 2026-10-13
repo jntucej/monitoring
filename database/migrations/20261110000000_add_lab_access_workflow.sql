@@ -4,15 +4,68 @@
 -- ============================================================================
 
 -- 1. Expand users.role CHECK constraint to include exam_superintendent (already in roles.ts)
-ALTER TABLE public.users DROP CONSTRAINT IF EXISTS users_role_check;
-ALTER TABLE public.users ADD CONSTRAINT users_role_check CHECK (
-  role IN (
-    'operator','admin','sysadmin','supervisor','guardian','parent','hod','student',
-    'warden','faculty','staff','worker','visitor',
-    'caretaker','deputy_warden','hostel_manager','principal','vice_principal','oie','exam_branch',
-    'exam_superintendent'
-  )
-);
+--    Merge into the EXISTING constraint instead of replacing it with a hardcoded
+--    list, so roles added by other migrations are never silently dropped.
+--    (The previous hardcoded list omitted mess_incharge and any future role.)
+DO $$
+DECLARE
+  cdef   TEXT;
+  newdef TEXT;
+  lit    CONSTANT TEXT := '''';
+  extra  TEXT;
+  suffix TEXT;
+BEGIN
+  SELECT pg_get_constraintdef(c.oid) INTO cdef
+    FROM pg_constraint c
+    JOIN pg_class t ON t.oid = c.conrelid
+    JOIN pg_namespace n ON n.oid = t.relnamespace
+   WHERE t.relname = 'users' AND c.conname = 'users_role_check' AND c.contype = 'c';
+
+  -- Constraint missing entirely → create it from the full role registry.
+  IF cdef IS NULL THEN
+    ALTER TABLE public.users ADD CONSTRAINT users_role_check CHECK (
+      role IN (
+        'operator','admin','sysadmin','supervisor','guardian','parent','hod','student',
+        'warden','faculty','staff','worker','visitor',
+        'caretaker','deputy_warden','hostel_manager','principal','vice_principal','oie','exam_branch',
+        'exam_superintendent','mess_incharge'
+      )
+    );
+    RETURN;
+  END IF;
+
+  -- Already patched (idempotent). Match the BARE quoted value — never the
+  -- cast suffix, which Postgres renders differently per version
+  -- (::text, ::character varying, or no cast at all).
+  IF position(lit || 'exam_superintendent' || lit IN cdef) > 0 THEN
+    RETURN;
+  END IF;
+
+  -- Reuse the cast suffix of the first existing ARRAY LITERAL so the appended
+  -- value matches the rest of the definition. Anchored after ARRAY[ so we
+  -- capture the literal's cast, not the column's own (role)::text.
+  suffix := substring(
+    substring(cdef FROM 'ARRAY\[')
+    FROM '''[^'']*''(::[a-zA-Z][a-zA-Z0-9_ ]*)'
+  );
+
+  IF suffix IS NULL THEN
+    suffix := '';
+  END IF;
+
+  extra := lit || 'exam_superintendent' || lit || suffix;
+
+  -- The live definition is CHECK (((role)::text = ANY (ARRAY['x'::text, ...])))
+  -- or CHECK ((role)::text = ANY (ARRAY['x'::text, ...])). Splice after ARRAY[.
+  newdef := replace(cdef, 'ARRAY[', 'ARRAY[' || extra || ',');
+
+  IF newdef = cdef THEN
+    RAISE EXCEPTION 'users_role_check: could not locate ARRAY[ anchor; refusing to drop known roles';
+  END IF;
+
+  EXECUTE 'ALTER TABLE public.users DROP CONSTRAINT users_role_check';
+  EXECUTE 'ALTER TABLE public.users ADD CONSTRAINT users_role_check ' || newdef;
+END $$;
 
 -- 2. Add lab_access to workflow_type CHECK constraint.
 -- permission_requests is a compatibility view over permissions, so the constraint must be

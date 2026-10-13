@@ -162,6 +162,8 @@ BEGIN
 END;
 $$;
 
+-- DROP first: CREATE TRIGGER has no IF NOT EXISTS, so a re-run of this
+-- migration would fail with "trigger already exists".
 DROP TRIGGER IF EXISTS trg_movement_recompute_student ON public.movement_logs;
 CREATE TRIGGER trg_movement_recompute_student
   AFTER INSERT ON public.movement_logs

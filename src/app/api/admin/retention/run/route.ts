@@ -42,7 +42,7 @@ async function handlePost(req: NextRequest) {
 
       const cutoff = new Date(Date.now() - p.retention_days * 24 * 60 * 60 * 1000).toISOString();
       let where = `${mapping.timestampCol} < '${cutoff}'`;
-      if (mapping.extraWhere) where += ` AND ${mapping.extraWhere}`;
+      if ("extraWhere" in mapping && mapping.extraWhere) where += ` AND ${mapping.extraWhere}`;
 
       const sql = `DELETE FROM ${mapping.table} WHERE ${where}`;
       

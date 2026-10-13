@@ -77,7 +77,7 @@ const api = useApi();
 
   const loadKioskOperator = useCallback(async () => {
     try {
-      const res = await fetch("/api/users", { headers: getAuthHeaders(), cache: "no-store" });
+      const res = await fetch("/api/users", { headers: api.getHeaders(), cache: "no-store" });
       const json = await res.json();
       if (!res.ok || !Array.isArray(json?.data)) return;
       const operators = json.data.filter(
@@ -95,7 +95,7 @@ const api = useApi();
   const setKioskDefault = async (userId: string, gateId: string | null) => {
     setKioskBusy(true);
     try {
-      const headers = { ...getAuthHeaders(), "Content-Type": "application/json" };
+      const headers = { ...api.getHeaders(), "Content-Type": "application/json" };
       const body: Record<string, unknown> = {};
       // Clear all other flags, set this one
       body.isKioskDefault = true;
@@ -119,7 +119,7 @@ const api = useApi();
     if (!kioskOperator) return;
     setKioskBusy(true);
     try {
-      const headers = { ...getAuthHeaders(), "Content-Type": "application/json" };
+      const headers = { ...api.getHeaders(), "Content-Type": "application/json" };
       const res = await fetch(`/api/users/${kioskOperator.id}`, {
         method: "PATCH",
         headers,

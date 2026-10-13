@@ -224,7 +224,7 @@ export function SchedulingPanel() {
         </div>
       ) : null}
 
-      <WidgetBoundary label="scheduling-kpis">
+      <WidgetBoundary title="scheduling-kpis">
         <section aria-label="Key metrics" className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <KpiCard
             icon={Sparkles}
@@ -263,7 +263,7 @@ export function SchedulingPanel() {
 
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <WidgetBoundary label="items-list">
+          <WidgetBoundary title="items-list">
             <section aria-label="Recommendations" className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]">
               <header className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)] px-4 py-3">
                 <div className="flex items-center gap-2">
@@ -309,7 +309,7 @@ export function SchedulingPanel() {
         </div>
 
         <aside className="space-y-4 lg:col-span-1">
-          <WidgetBoundary label="model-info">
+          <WidgetBoundary title="model-info">
             <section aria-label="Model information" className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
               <header className="mb-3 flex items-center gap-2">
                 <Brain className="h-4 w-4 text-[var(--text-muted)]" aria-hidden />
@@ -338,7 +338,7 @@ export function SchedulingPanel() {
             </section>
           </WidgetBoundary>
 
-          <WidgetBoundary label="recent-applications">
+          <WidgetBoundary title="recent-applications">
             <section aria-label="Recently applied changes" className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
               <header className="mb-3 flex items-center gap-2">
                 <Activity className="h-4 w-4 text-[var(--text-muted)]" aria-hidden />

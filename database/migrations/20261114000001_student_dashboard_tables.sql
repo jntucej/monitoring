@@ -175,10 +175,34 @@ CREATE TRIGGER trg_movement_recompute_student
 --    upserts in src/lib/login-lockout.ts can succeed.
 --    Idempotent: dedupe any historical duplicate rows first, then create the
 --    unique index (which backs the ON CONFLICT target).
+--    Guards the table itself: `migrate.ts` runs migrations WITHOUT the
+--    baseline schema.sql, so login_attempts may not exist yet on a fresh DB.
+--    NOTE: login_attempts has NO `id` column — identifier is the PK.
 -- ============================================================================
+
+-- 7a. Ensure the table exists (identifier is already the PK in every shape).
+CREATE TABLE IF NOT EXISTS public.login_attempts (
+  identifier      TEXT PRIMARY KEY,
+  failed_count    INTEGER NOT NULL DEFAULT 0,
+  locked_until    TIMESTAMPTZ,
+  last_attempt_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  last_channel    TEXT
+);
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema='public' AND table_name='login_attempts'
+      AND column_name='last_channel'
+  ) THEN
+    ALTER TABLE public.login_attempts ADD COLUMN last_channel TEXT;
+  END IF;
+END $$;
+
 -- Case-insensitive dedupe (the app stores identifiers lower-cased, but a
 -- historical duplicate can still block the unique constraint).
--- login_attempts has identifier as PK (no id column); use ctid for dedup.
+-- login_attempts has identifier as PK (no id column); dedupe on identifier.
 WITH dups AS (
   SELECT LOWER(identifier) AS key, MIN(identifier) AS keep_identifier
   FROM public.login_attempts
@@ -190,13 +214,24 @@ DELETE FROM public.login_attempts la
   WHERE LOWER(la.identifier) = dups.key
     AND la.identifier <> dups.keep_identifier;
 
--- (Idempotent re-add: if this schema's login_attempts already carries a
--- UNIQUE(identifier) constraint/index, the DROP below is a no-op.)
+-- (Idempotent re-add: the identifier PK already guarantees uniqueness, so
+-- this named constraint exists to make the ON CONFLICT target explicit.)
 ALTER TABLE public.login_attempts
   DROP CONSTRAINT IF EXISTS uq_login_attempts_identifier;
 
-ALTER TABLE public.login_attempts
-  ADD CONSTRAINT uq_login_attempts_identifier UNIQUE (identifier);
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'uq_login_attempts_identifier'
+      AND conrelid = 'public.login_attempts'::regclass
+  ) THEN
+    RETURN;
+  END IF;
+
+  ALTER TABLE public.login_attempts
+    ADD CONSTRAINT uq_login_attempts_identifier UNIQUE (identifier);
+END $$;
 
 -- ============================================================================
 -- 8. audit_logs: expand the action allowlist with every audit action the

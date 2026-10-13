@@ -4,6 +4,7 @@ import { Ticket, Loader2, CheckCircle2 } from "lucide-react";
 import type { Student } from "@/lib/types";
 import { usePassTypes } from "@/hooks/usePassTypes";
 import { useApi } from "@/hooks/useApi";
+import { useAuthStore } from "@/stores/authStore";
 
 export function RequestPassForm() {
 const api = useApi();

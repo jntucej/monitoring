@@ -26,7 +26,7 @@ export interface SyncResult {
   synced_courses: number;
   synced_users: number;
   errors: string[];
-  mode: "live" | "mock";
+  mode?: "live" | "mock";
 }
 
 export interface LMSProvider {

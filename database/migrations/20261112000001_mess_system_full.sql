@@ -11,15 +11,64 @@
 BEGIN;
 
 -- 1. Extend users.role CHECK constraint to include mess_incharge
-ALTER TABLE public.users DROP CONSTRAINT IF EXISTS users_role_check;
-ALTER TABLE public.users ADD CONSTRAINT users_role_check CHECK (
-  role IN (
-    'operator','admin','sysadmin','supervisor','guardian','parent','hod','student',
-    'warden','faculty','staff','worker','visitor',
-    'caretaker','deputy_warden','hostel_manager','principal','vice_principal','oie','exam_branch',
-    'exam_superintendent','mess_incharge'
-  )
-);
+--    Merge into the EXISTING constraint rather than replacing it with a
+--    hardcoded list, so roles added by other migrations (exam_superintendent,
+--    any future role) are never silently dropped.
+DO $$
+DECLARE
+  cdef   TEXT;
+  newdef TEXT;
+  lit    CONSTANT TEXT := '''';
+  extra  TEXT;
+  suffix TEXT;
+BEGIN
+  SELECT pg_get_constraintdef(c.oid) INTO cdef
+    FROM pg_constraint c
+    JOIN pg_class t ON t.oid = c.conrelid
+    JOIN pg_namespace n ON n.oid = t.relnamespace
+   WHERE t.relname = 'users' AND c.conname = 'users_role_check' AND c.contype = 'c';
+
+  IF cdef IS NULL THEN
+    ALTER TABLE public.users ADD CONSTRAINT users_role_check CHECK (
+      role IN (
+        'operator','admin','sysadmin','supervisor','guardian','parent','hod','student',
+        'warden','faculty','staff','worker','visitor',
+        'caretaker','deputy_warden','hostel_manager','principal','vice_principal','oie','exam_branch',
+        'exam_superintendent','mess_incharge'
+      )
+    );
+    RETURN;
+  END IF;
+
+  -- Already patched (idempotent). Match the BARE quoted value — never the
+  -- cast suffix, which Postgres renders differently per version.
+  IF position(lit || 'mess_incharge' || lit IN cdef) > 0 THEN
+    RETURN;
+  END IF;
+
+  -- Reuse the cast suffix of the first existing ARRAY LITERAL so the appended
+  -- value matches the rest of the definition. Anchored after ARRAY[ so we
+  -- capture the literal's cast, not the column's own (role)::text.
+  suffix := substring(
+    substring(cdef FROM 'ARRAY\[')
+    FROM '''[^'']*''(::[a-zA-Z][a-zA-Z0-9_ ]*)'
+  );
+
+  IF suffix IS NULL THEN
+    suffix := '';
+  END IF;
+
+  extra := lit || 'mess_incharge' || lit || suffix;
+
+  newdef := replace(cdef, 'ARRAY[', 'ARRAY[' || extra || ',');
+
+  IF newdef = cdef THEN
+    RAISE EXCEPTION 'users_role_check: could not locate ARRAY[ anchor; refusing to drop known roles';
+  END IF;
+
+  EXECUTE 'ALTER TABLE public.users DROP CONSTRAINT users_role_check';
+  EXECUTE 'ALTER TABLE public.users ADD CONSTRAINT users_role_check ' || newdef;
+END $$;
 
 -- 2. Register mess_incharge in config_roles_registry (idempotent)
 INSERT INTO public.config_roles_registry (code, display_name, is_privileged, is_super, is_active)
