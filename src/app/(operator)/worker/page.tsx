@@ -17,6 +17,14 @@ import {
   Users,
   Flag,
 } from "lucide-react";
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { ContributionPortfolio } from "@/components/retention/ContributionPortfolio";
+import { DigitalHandover } from "@/components/retention/DigitalHandover";
+import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
+import { CampusFeed } from "@/components/engagement/CampusFeed";
 
 const MIN_TIER = 40; // worker tier
 
@@ -167,6 +175,30 @@ function WorkerDashboardInner() {
           </div>
         </div>
       </WidgetBoundary>
+
+      {/* Shared action & notification surfaces */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 min-w-0">
+        <QuickActions />
+        <NotificationCenter />
+      </div>
+
+      {/* Campus engagement feed */}
+      <CampusFeed />
+
+      {/* Personalized campus home (retention) */}
+      <PersonalizedCampusHome />
+
+      {/* Task continuity + contribution portfolio */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 min-w-0">
+        <TaskContinuity />
+        <ContributionPortfolio />
+      </div>
+
+      {/* Digital handover + feedback desk */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 min-w-0">
+        <DigitalHandover />
+        <CampusFeedbackDesk />
+      </div>
 
       <DevContactStrip />
     </div>

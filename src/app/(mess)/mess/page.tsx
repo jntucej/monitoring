@@ -20,6 +20,14 @@ import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { DigitalHandover } from "@/components/retention/DigitalHandover";
+import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
+import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
+import { CampusFeed } from "@/components/engagement/CampusFeed";
 
 /* ── response shapes ──────────────────────────────────────────────────────── */
 
@@ -270,7 +278,7 @@ function MessDashboardInner() {
         </div>
       </WidgetBoundary>
 
-      {/* Section quick links */}
+      {/* Mess Sections */}
       <WidgetBoundary title="Mess Sections">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 min-w-0">
           {[
@@ -292,6 +300,30 @@ function MessDashboardInner() {
           ))}
         </div>
       </WidgetBoundary>
+
+      {/* Shared action & notification surfaces */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 min-w-0">
+        <QuickActions />
+        <NotificationCenter />
+      </div>
+
+      {/* Campus engagement feed */}
+      <CampusFeed />
+
+      {/* Personalized campus home (retention) */}
+      <PersonalizedCampusHome />
+
+      {/* Task continuity */}
+      <TaskContinuity />
+
+      {/* Digital handover + feedback desk */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 min-w-0">
+        <DigitalHandover />
+        <CampusFeedbackDesk />
+      </div>
+
+      {/* Unified campus calendar */}
+      <UnifiedCampusCalendar />
 
       <DevContactStrip />
     </div>

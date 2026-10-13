@@ -9,6 +9,16 @@ import { usePolling } from "@/hooks/usePolling";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import type { Alert, Role } from "@/lib/types";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { ApprovalInbox } from "@/components/shared/ApprovalInbox";
+import { LiveActivityFeed } from "@/components/shared/LiveActivityFeed";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { ContributionPortfolio } from "@/components/retention/ContributionPortfolio";
+import { DigitalHandover } from "@/components/retention/DigitalHandover";
+import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
+import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import Link from "next/link";
 import { ArrowRight, Loader2, Clock, AlertTriangle, ShieldCheck, Lock, Users, DoorOpen } from "lucide-react";
 
@@ -212,6 +222,36 @@ function SupervisorOverviewInner() {
           ))}
         </div>
       </WidgetBoundary>
+
+      {/* Shared action & notification surfaces */}
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 min-w-0">
+        <QuickActions />
+        <NotificationCenter />
+      </div>
+
+      {/* Approval & live activity (shift-based ops) */}
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 min-w-0">
+        <ApprovalInbox />
+        <LiveActivityFeed />
+      </div>
+
+      {/* Personalized campus home (retention) */}
+      <PersonalizedCampusHome />
+
+      {/* Task continuity + contribution portfolio */}
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 min-w-0">
+        <TaskContinuity />
+        <ContributionPortfolio />
+      </div>
+
+      {/* Digital handover + feedback desk */}
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 min-w-0">
+        <DigitalHandover />
+        <CampusFeedbackDesk />
+      </div>
+
+      {/* Unified campus calendar */}
+      <UnifiedCampusCalendar />
 
       <DevContactStrip />
     </div>
