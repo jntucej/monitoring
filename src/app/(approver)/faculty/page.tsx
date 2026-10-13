@@ -103,13 +103,11 @@ function FacultyInner() {
   const {
     data: attendance,
     loading: attendanceLoading,
-    error: attendanceError,
     refresh: refreshAttendance,
   } = useApiResource<DataResponse>("/api/faculty/attendance", { ttlMs: 30_000 });
   const {
     data: leaves,
     loading: leavesLoading,
-    error: leavesError,
     refresh: refreshLeaves,
   } = useApiResource<DataResponse>("/api/permissions?workflowType=staff_leave&status=PENDING&stage=faculty", { ttlMs: 30_000 });
   const refreshAll = useCallback(async () => {

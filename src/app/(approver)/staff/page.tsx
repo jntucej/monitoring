@@ -103,13 +103,11 @@ function StaffInner() {
   const {
     data: myDay,
     loading: myDayLoading,
-    error: myDayError,
     refresh: refreshMyDay,
   } = useApiResource<DataResponse>("/api/staff/my-day", { ttlMs: 30_000 });
   const {
     data: leaves,
     loading: leavesLoading,
-    error: leavesError,
     refresh: refreshLeaves,
   } = useApiResource<DataResponse>("/api/permissions?workflowType=staff_leave&status=PENDING", { ttlMs: 30_000 });
   const refreshAll = useCallback(async () => {

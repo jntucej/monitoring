@@ -20,7 +20,7 @@ import { DigitalHandover } from "@/components/retention/DigitalHandover";
 import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import Link from "next/link";
-import { ArrowRight, Loader2, Clock, AlertTriangle, ShieldCheck, Lock, Users, DoorOpen } from "lucide-react";
+import { ArrowRight, Loader2, Clock, AlertTriangle, ShieldCheck, Lock, Users } from "lucide-react";
 
 /* ── response shapes ── */
 
