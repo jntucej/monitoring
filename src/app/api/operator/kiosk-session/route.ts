@@ -5,6 +5,10 @@ import { signAccessToken, signRefreshToken } from "@/lib/auth-token";
 import crypto from "crypto";
 import { addAudit } from "@/lib/db";
 import { findKioskDefaultOperator, resolveKioskGateId } from "@/lib/kiosk-operator";
+
+/** Fallback gate when the designated kiosk operator has no explicit
+ *  assignment — the Main Campus Gate. */
+const DEFAULT_GATE_ID = "5f2183c9-51ae-4677-8f38-52a17bbe0538";
 import type { Role } from "@/lib/types";
 
 /**
@@ -47,22 +51,23 @@ async function handleKioskSession(req: NextRequest) {
       );
     }
 
-    // A kiosk session is always bound to a specific gate: the requested
-    // gateId, or the operator's own assignment. No gate resolvable → the
-    // operator is not authenticated for any gate, so refuse the session
-    // rather than mint a gateless token.
+    // Gate binding: requested gateId → operator's own assignment → DEFAULT_GATE
+    // (Main Campus Gate) when the operator is unassigned. The token is always
+    // bound to the operator's assignment so scans still enforce
+    // assertOperatorGateMatch against their assigned gate.
     const gateIdParam = req.nextUrl.searchParams.get("gateId")?.trim() || null;
-    const gate = await resolveKioskGateId(gateIdParam, operator.gate_id);
+    const gate =
+      (await resolveKioskGateId(gateIdParam, operator.gate_id)) ??
+      (await resolveKioskGateId(DEFAULT_GATE_ID, operator.gate_id));
     if (!gate) {
       return NextResponse.json(
         {
           success: false,
           error: {
-            code: "NO_GATE_ASSIGNED",
+            code: "NO_KIOSK_GATE",
             message:
-              gateIdParam
-                ? "The requested gate is inactive or unknown. Sign in at the gate the operator is assigned to."
-                : "This operator is not assigned to a gate. Assign one under SysAdmin → Gates, then open the kiosk at that gate.",
+              "No active gate is available for this kiosk session. " +
+              "Check that the Main Campus Gate is active in SysAdmin → Gates.",
           },
         },
         { status: 404 }

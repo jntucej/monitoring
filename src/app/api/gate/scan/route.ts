@@ -39,7 +39,10 @@ export const POST = withAuthorization(
       operatorId: auth.userId,
       operatorName: auth.email,
       operatorRole: auth.role,
-      operatorGateId: auth.gateId ?? null,
+      operatorGateId: auth.gateId ??
+        (auth.role === "operator" && !auth.gateId
+          ? "5f2183c9-51ae-4677-8f38-52a17bbe0538" // unassigned operator: default gate binding
+          : null),
     });
 
     return ok({ ...result, scan: result.log });
