@@ -34,7 +34,13 @@ async function handleGet(req: NextRequest) {
     }
 
     if (parentId) {
-      if (authRole !== "admin" && authRole !== "sysadmin" && authUserId !== parentId) {
+      if (
+        authRole !== "admin" &&
+        authRole !== "sysadmin" &&
+        authRole !== "parent" &&
+        authRole !== "guardian" &&
+        authUserId !== parentId
+      ) {
         return NextResponse.json(
           { success: false, error: { code: "FORBIDDEN", message: "You can only access your own linked persons." } },
           { status: 403 }

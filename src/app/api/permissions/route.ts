@@ -41,7 +41,7 @@ async function handlePost(req: NextRequest, context: any) {
   if (role === "parent" || role === "guardian") {
     if (!studentUserId) return NextResponse.json({ success: false, error: "Missing child ID" }, { status: 400 });
     const children = await getLinkedPersons(userId);
-    if (!children.some((c: any) => c.child_id === studentUserId)) {
+    if (!children.some((c: any) => c.child_id === studentUserId || c.id === studentUserId || c.uniqueId === studentUserId)) {
       return NextResponse.json({ success: false, error: "Not your child" }, { status: 403 });
     }
     targetUserId = studentUserId;

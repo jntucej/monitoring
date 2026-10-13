@@ -5,6 +5,11 @@ import Link from "next/link";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { useAuthStore } from "@/stores/authStore";
@@ -17,6 +22,8 @@ import {
   Loader2,
   ArrowRight,
   Clock,
+  Repeat,
+  FileText,
 } from "lucide-react";
 
 /* ── response shapes ── */
@@ -171,7 +178,7 @@ function GuardianOverviewInner() {
         <div className="min-w-0">
           <p className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
             <ShieldCheck className="w-6 h-6 text-emerald-400" />
-            Guardian Overview
+            Linked Student Overview
           </p>
           <p className="mt-1 text-sm text-[var(--text-muted)]">
             Signed in as{" "}
@@ -179,6 +186,7 @@ function GuardianOverviewInner() {
               {user?.role ?? "guardian"}
             </span>
             {user?.name ? ` · ${user.name}` : ""}
+            {" — submission only, no approval authority"}
           </p>
         </div>
         <button
@@ -196,6 +204,14 @@ function GuardianOverviewInner() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           icon={Users}
+          label="Wards Supervised"
+          value={wards.length}
+          sub="Students linked to your account"
+          accent="text-white"
+          loading={personsLoading && wards.length === 0}
+        />
+        <StatCard
+          icon={ShieldCheck}
           label="On Campus"
           value={onCampus}
           sub={`${offCampus} ward(s) off campus`}
@@ -206,7 +222,7 @@ function GuardianOverviewInner() {
           icon={Inbox}
           label="Pending Requests"
           value={pendingRows.length || pending?.total || 0}
-          sub="Ward pass/leave requests awaiting action"
+          sub="Ward pass/leave requests awaiting the approval chain"
           accent="text-amber-400"
           loading={pendingLoading && pendingRows.length === 0}
         />
@@ -218,48 +234,57 @@ function GuardianOverviewInner() {
           accent="text-emerald-400"
           loading={passesLoading && passList.length === 0}
         />
-        <StatCard
-          icon={ShieldCheck}
-          label="Wards Supervised"
-          value={wards.length}
-          sub="Students linked to your account"
-          accent="text-white"
-          loading={personsLoading && wards.length === 0}
-        />
       </div>
 
-      {/* section quick-links */}
+      {/* section quick-links — aligned to the 7 spec sections */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <SectionLink
-          href="/guardian/child-status"
-          icon={ShieldCheck}
-          title="Child Status"
-          sub="Live in/out status and current gate"
-        />
-        <SectionLink
-          href="/guardian/child-requests"
-          icon={Inbox}
-          title="Child Requests"
-          sub="View and act on pending pass/leave requests"
-        />
         <SectionLink
           href="/guardian/child-attendance"
           icon={Clock}
-          title="Child Attendance"
-          sub="Ward attendance summary and weekly activity"
+          title="Attendance Summary"
+          sub="Ward attendance and weekly gate activity"
+        />
+        <SectionLink
+          href="/guardian/movement-info"
+          icon={Repeat}
+          title="Authorised Movement Information"
+          sub="Recent authorised entry and exit at the gates"
+        />
+        <SectionLink
+          href="/guardian/pass-leave-submission"
+          icon={FileText}
+          title="Pass & Leave Request"
+          sub="Submit a pass or leave request for a ward"
+        />
+        <SectionLink
+          href="/guardian/request-status"
+          icon={Inbox}
+          title="Request Status"
+          sub="Approval timelines for your wards’ requests"
         />
         <SectionLink
           href="/guardian/notifications"
-          icon={Inbox}
+          icon={ShieldCheck}
           title="Notifications"
           sub="Alerts, approvals and campus notices"
         />
         <SectionLink
-          href="/guardian/visit-schedule"
-          icon={Clock}
-          title="Visit Schedule"
-          sub="Planned campus events and visits"
+          href="/guardian/contact-info"
+          icon={Users}
+          title="Contact Information"
+          sub="Your account contact details"
         />
+      </div>
+
+      {/* shared + retention panels */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <QuickActions />
+        <NotificationCenter />
+      </div>
+      <PersonalizedCampusHome />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <TaskContinuity />
+        <UnifiedCampusCalendar />
       </div>
 
       <DevContactStrip />
