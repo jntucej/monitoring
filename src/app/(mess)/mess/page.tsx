@@ -282,12 +282,14 @@ function MessDashboardInner() {
       <WidgetBoundary title="Mess Sections">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 min-w-0">
           {[
-            { href: "/mess/meal-counts", label: "Meal Counts", sub: "Daily meal counts" },
-            { href: "/mess/attendance", label: "Meal Attendance", sub: "Hosteller attendance" },
-            { href: "/mess/menu", label: "Menu", sub: "Current meal-day menu" },
-            { href: "/mess/inventory", label: "Inventory", sub: "Stock levels" },
-            { href: "/mess/consumption", label: "Consumption", sub: "Consumption reports" },
-            { href: "/mess/issues", label: "Issues", sub: "Mess incidents" },
+            { href: "/mess/meal-counts", label: "Daily Meal Counts", sub: "Per-day serving counts" },
+            { href: "/mess/attendance", label: "Meal Attendance", sub: "Declared vs confirmed" },
+            { href: "/mess/menu", label: "Menu Management", sub: "Current meal-day menu" },
+            { href: "/mess/inventory", label: "Inventory and Stock", sub: "Item catalog stock state" },
+            { href: "/mess/consumption", label: "Consumption Reports", sub: "Serving trends by day" },
+            { href: "/mess/issues", label: "Mess Issues", sub: "Exception events feed" },
+            { href: "/mess/operational-requests", label: "Operational Requests", sub: "Raise requests to caretaker" },
+            { href: "/mess/scan", label: "Token Scanner", sub: "Scan or serve mess tokens" },
           ].map((s) => (
             <Link
               key={s.href}

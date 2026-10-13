@@ -10,12 +10,14 @@ const MESS_ALLOWED_ROLES: Role[] = ["mess_incharge", "principal", "admin", "sysa
 
 const TABS = [
   { href: "/mess", label: "Mess Overview", exact: true },
-  { href: "/mess/meal-counts", label: "Meal Counts" },
+  { href: "/mess/meal-counts", label: "Daily Meal Counts" },
   { href: "/mess/attendance", label: "Meal Attendance" },
-  { href: "/mess/menu", label: "Menu" },
-  { href: "/mess/inventory", label: "Inventory" },
-  { href: "/mess/consumption", label: "Consumption" },
-  { href: "/mess/issues", label: "Issues" },
+  { href: "/mess/menu", label: "Menu Management" },
+  { href: "/mess/inventory", label: "Inventory and Stock" },
+  { href: "/mess/consumption", label: "Consumption Reports" },
+  { href: "/mess/issues", label: "Mess Issues" },
+  { href: "/mess/operational-requests", label: "Operational Requests" },
+  { href: "/mess/scan", label: "Token Scanner" },
 ] as const;
 
 function tabActive(tab: (typeof TABS)[number], pathname: string): boolean {
