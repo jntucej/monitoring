@@ -8,10 +8,14 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 const TABS = [
+  { href: "/staff", label: "Overview" },
   { href: "/staff/my-day", label: "My Day" },
-  { href: "/staff/duties", label: "Duties" },
-  { href: "/staff/requests", label: "Requests" },
-  { href: "/staff/history", label: "History" },
+  { href: "/staff/duties", label: "Duties & Attendance" },
+  { href: "/staff/requests", label: "Pass Requests" },
+  { href: "/staff/assigned-tasks", label: "Assigned Tasks" },
+  { href: "/staff/notifications", label: "Notifications" },
+  { href: "/staff/request-status", label: "Request Status" },
+  { href: "/staff/history", label: "Reports" },
 ] as const;
 
 function StaffTabs({ children }: { children: React.ReactNode }) {

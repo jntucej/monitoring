@@ -14,13 +14,9 @@ import {
   Inbox,
   Clock,
   Loader2,
-  ShieldCheck,
   UserCheck,
   AlertTriangle,
-  Building2,
   FileText,
-  CheckCircle2,
-  Wrench,
 } from "lucide-react";
 import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
@@ -167,9 +163,11 @@ function StaffInner() {
       <WidgetBoundary title="Sections">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
           <SectionLink href="/staff/my-day" title="My Day" sub="Today's duties and gate activity" />
-          <SectionLink href="/staff/duties" title="Duties" sub="Duty roster and shifts" />
-          <SectionLink href="/staff/requests" title="Requests" sub="Leave requests and approvals" />
-          <SectionLink href="/staff/history" title="History" sub="Past attendance and movement logs" />
+          <SectionLink href="/staff/duties" title="Duties & Attendance" sub="Duty roster and shift records" />
+          <SectionLink href="/staff/requests" title="Pass Requests" sub="Leave requests and approvals" />
+          <SectionLink href="/staff/assigned-tasks" title="Assigned Tasks" sub="Open duties and requests assigned to you" />
+          <SectionLink href="/staff/notifications" title="Notifications" sub="Campus announcements for your role" />
+          <SectionLink href="/staff/request-status" title="Request Status" sub="Live status of your open requests" />
         </div>
       </WidgetBoundary>
 
