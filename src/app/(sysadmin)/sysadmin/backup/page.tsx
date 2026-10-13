@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useState, useEffect } from "react";
 import { useApi } from "@/hooks/useApi";
 import { useUIStore } from "@/stores/uiStore";
@@ -172,7 +174,7 @@ const api = useApi();
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)]">Backup & Export</h1>
+          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">Backup & Export</p>
           <p className="text-[var(--text-muted)] mt-1">Manage database backups and data exports</p>
         </div>
         <button

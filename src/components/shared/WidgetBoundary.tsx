@@ -1,24 +1,52 @@
 "use client";
+
+// src/components/shared/WidgetBoundary.tsx — patched by scripts/dashboard-fixup.mjs
+// Fixes C2 (resetKey prop so an errored panel self-heals on the next poll).
+
 import React from "react";
 import { AlertTriangle } from "lucide-react";
 
-export class WidgetBoundary extends React.Component<
-  { title?: string; children: React.ReactNode },
-  { error: Error | null }
-> {
-  state = { error: null as Error | null };
-  static getDerivedStateFromError(error: Error) { return { error }; }
-  componentDidCatch(error: Error) { console.error("[widget]", this.props.title, error); }
+interface Props {
+  children: React.ReactNode;
+  /** Legacy label — still accepted for backward compatibility. */
+  title?: string;
+  /** Newer alias for `title` (used for logging). */
+  name?: string;
+  fallback?: React.ReactNode;
+  /** When this value changes, an errored boundary resets and re-renders. */
+  resetKey?: unknown;
+}
+interface State {
+  hasError: boolean;
+  error: Error | null;
+}
+
+export class WidgetBoundary extends React.Component<Props, State> {
+  state: State = { hasError: false, error: null };
+
+  static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error };
+  }
+
+  componentDidUpdate(prev: Props) {
+    if (this.state.hasError && prev.resetKey !== this.props.resetKey) {
+      this.setState({ hasError: false, error: null });
+    }
+  }
+
+  componentDidCatch(error: Error) {
+    console.error("[WidgetBoundary]", this.props.name ?? this.props.title ?? "unnamed", error);
+  }
+
   render() {
-    if (this.state.error) {
+    if (this.state.hasError) {
       return (
-        <div className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-4 text-sm text-rose-200">
-          <p className="flex items-center gap-2 font-medium">
-            <AlertTriangle className="h-4 w-4" />
-            {this.props.title ?? "Widget"} failed to load
-          </p>
-          <p className="mt-1 text-xs opacity-70">{this.state.error.message}</p>
-        </div>
+        this.props.fallback ?? (
+          <div className="p-6 text-center text-sm text-rose-400">
+            <AlertTriangle className="h-5 w-5 mx-auto" />
+            <p className="mt-2">Panel failed to load.</p>
+          </div>
+        )
       );
     }
     return this.props.children;

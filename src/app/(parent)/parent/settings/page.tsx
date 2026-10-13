@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import React, { useState, useEffect } from "react";
 import { Bell, User, Shield, Save, CheckCircle2 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
@@ -40,7 +42,7 @@ export default function ParentSettingsPage() {
   return (
     <div className="space-y-6 max-w-4xl">
       <div>
-        <h1 className="text-2xl font-extrabold text-[var(--text-primary)]">Guardian Settings</h1>
+        <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">Guardian Settings</p>
         <p className="text-xs text-[var(--text-muted)]">Manage preferences and profile</p>
       </div>
 

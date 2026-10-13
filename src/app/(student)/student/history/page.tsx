@@ -1,4 +1,6 @@
 "use client";
+export const dynamic = "force-dynamic";
+
 import { useEffect, useState } from "react";
 import { ArrowRight, ArrowLeft, Loader2, Filter } from "lucide-react";
 import type { Scan } from "@/lib/types";
@@ -47,7 +49,7 @@ const api = useApi();
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold">My History</h1>
+          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">My History</p>
           <p className="text-[var(--text-muted)]">All your gate activity</p>
         </div>
         <div className="flex items-center gap-1 bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg p-1">

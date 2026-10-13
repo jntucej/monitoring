@@ -1,4 +1,6 @@
 "use client";
+export const dynamic = "force-dynamic";
+
 import { useEffect, useState } from "react";
 import { RequestPassForm } from "@/components/parent/RequestPassForm";
 import { Ticket, Clock, CheckCircle2, XCircle, Loader2 } from "lucide-react";
@@ -70,7 +72,7 @@ const api = useApi();
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Pass Requests</h1>
+        <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">Pass Requests</p>
         <p className="text-[var(--text-muted)]">Request and track gate passes</p>
       </div>
 

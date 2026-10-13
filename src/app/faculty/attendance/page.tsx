@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import React, { useState, useCallback } from "react";
 import { Users, AlertCircle, RotateCw, Inbox } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
@@ -83,10 +85,10 @@ function FacultyAttendanceInner() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
             <Users className="w-6 h-6 text-emerald-400" />
             Faculty Attendance Desk
-          </h1>
+          </p>
           <p className="text-sm text-slate-400 mt-1">
             {isFaculty
               ? `Your department${deptCode || " (assigned branch)"} — live entry/exit, punctuality and attendance metrics.`

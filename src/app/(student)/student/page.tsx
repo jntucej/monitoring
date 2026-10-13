@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -288,12 +290,12 @@ function StudentDashboardInner() {
     <div className="space-y-6 pb-12 min-w-0">
       {/* Dynamic Tab Heading */}
       <div className="text-center sm:text-left border-b border-[var(--border)] pb-4 space-y-1">
-        <h1 className="text-2xl font-extrabold tracking-tight text-[var(--text-primary)]">
+        <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
           {currentTab === "idcard" && <><span className="sm:hidden">🪪</span><span className="hidden sm:inline">🪪 Student Hub</span></>}
           {currentTab === "passes" && <><span className="sm:hidden">📋</span><span className="hidden sm:inline">📋 Gate Passes Desk</span></>}
           {currentTab === "history" && <><span className="sm:hidden">🕐</span><span className="hidden sm:inline">🕐 Activity History</span></>}
           {currentTab === "profile" && <><span className="sm:hidden">👤</span><span className="hidden sm:inline">👤 Account Center</span></>}
-        </h1>
+        </p>
         <p className="text-xs text-[var(--text-muted)] hidden sm:block">
           {currentTab === "idcard" && "Your permanent digital identity card & boarding passes"}
           {currentTab === "passes" && "Track permissions, request leaves, and review warden status"}

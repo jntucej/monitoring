@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { Suspense } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
@@ -8,7 +10,7 @@ import { PermissionList } from "@/components/approver/PermissionList";
 function FacultyPermissionsInner() {
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
-      {/* Page toolbar — global DynamicHeader already renders the app header */}
+      
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="min-w-0">
           <p className="mt-1 text-sm text-slate-400">

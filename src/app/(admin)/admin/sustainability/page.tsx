@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { SustainabilityDashboard } from "@/components/admin/SustainabilityDashboard";
 
 export default function SustainabilityPage() {

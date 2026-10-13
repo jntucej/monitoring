@@ -1,5 +1,8 @@
-// src/app/(sysadmin)/sysadmin/profile/page.tsx
 "use client";
+
+export const dynamic = "force-dynamic";
+
+// src/app/(sysadmin)/sysadmin/profile/page.tsx
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
@@ -358,10 +361,10 @@ const api = useApi();
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)] flex items-center gap-2.5">
+          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
             <Shield className="w-7 h-7 text-rose-500" />
             System Administrator Profile
-          </h1>
+          </p>
           <p className="text-xs text-[var(--text-muted)] mt-1">
             Root identity control, privileged credential governance, and security telemetry for the campus gate platform.
           </p>

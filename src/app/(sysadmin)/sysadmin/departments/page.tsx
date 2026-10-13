@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useEffect, useState } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { Building2, Plus, Trash2, Edit3, CheckCircle2, ShieldAlert, Users, GraduationCap } from "lucide-react";
@@ -86,10 +88,10 @@ const api = useApi();
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+            <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
               <Building2 className="w-6 h-6 text-emerald-400" />
               Department & HOD Governance Desk
-            </h1>
+            </p>
             <p className="text-sm text-[var(--text-muted)]">
               Manage academic departments, student/faculty allocation, and HOD assignments
             </p>

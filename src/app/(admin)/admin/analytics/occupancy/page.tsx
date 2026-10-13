@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // src/app/(admin)/admin/analytics/occupancy/page.tsx
 // SCAFFOLD:PAGE — thin wrapper around the OccupancyAnalytics component.
 import { OccupancyAnalytics } from "@/components/admin/OccupancyAnalytics";

@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import React, { useState } from "react";
 import { HardHat, AlertCircle } from "lucide-react";
 import { WorkerShiftTracker, WorkerShift } from "@/components/admin/WorkerShiftTracker";
@@ -55,10 +57,10 @@ const api = useApi();
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
             <HardHat className="w-6 h-6 text-amber-500" />
             Worker & Contractor Management
-          </h1>
+          </p>
           <p className="text-sm text-[var(--text-muted)] mt-1">
             Track daily worker shifts, contractor compliance, late check-ins, and duty progress.
           </p>

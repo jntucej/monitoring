@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useEffect, useState, useRef, Suspense, useCallback } from "react";
 import { usePolling } from "@/hooks/usePolling";
 import { useParams, useSearchParams, useRouter } from "next/navigation";

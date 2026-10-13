@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useEffect, useState } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { useAuthStore } from "@/stores/authStore";
@@ -89,9 +91,9 @@ export default function SSOConfigPage() {
       <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+            <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
               <Shield className="w-6 h-6 text-purple-500" /> SSO Configuration
-            </h1>
+            </p>
             <p className="text-sm text-gray-500">Configure OAuth 2.0 / OpenID Connect identity provider federation.</p>
           </div>
           <Button onClick={fetchSSO} variant="secondary" size="sm" className="gap-2">

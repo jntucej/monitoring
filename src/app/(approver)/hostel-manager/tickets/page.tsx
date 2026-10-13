@@ -1,4 +1,6 @@
 "use client";
+export const dynamic = "force-dynamic";
+
 // src/app/(approver)/hostel-manager/tickets/page.tsx
 // SCAFFOLD:TICKETS — thin wrapper around MyTicketsPanel.
 // Regenerate with: node scripts/scaffold-tickets.mjs new hostel-manager --force

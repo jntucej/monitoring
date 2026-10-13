@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { useEffect, useMemo, useState } from "react";
 import { Users, Shield, GraduationCap, Briefcase, UserCheck, Grid, Search, ArrowRight } from "lucide-react";
@@ -111,10 +113,10 @@ const api = useApi();
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
+          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
             <Users className="w-6 h-6 text-purple-400" />
             Roles & Branch Heatmaps
-          </h1>
+          </p>
           <p className="text-[var(--text-muted)]">
             Staff & admin account directory, HOD oversight, branch student & faculty density heatmaps
           </p>

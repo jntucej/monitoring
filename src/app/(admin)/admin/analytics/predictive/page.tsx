@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { PredictiveAnalytics } from "@/components/admin/PredictiveAnalytics";
 
 export default function PredictiveAnalyticsPage() {

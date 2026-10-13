@@ -1,4 +1,6 @@
 'use client';
+export const dynamic = "force-dynamic";
+
 import React from 'react';
 import Link from 'next/link';
 import { useCollegeInfo } from '@/hooks/useCollegeInfo';
@@ -21,7 +23,7 @@ export default function AboutPage() {
   return (
     <main className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] p-6 md:p-12">
       <div className="max-w-3xl mx-auto glass-card p-8 rounded-3xl border-slate-800/50">
-        <h1 className="text-3xl font-bold mb-6">About {college.name} Monitoring</h1>
+        <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">About {college.name} Monitoring</p>
         <div className="space-y-4 text-[var(--text-secondary)]">
           <p>
             Welcome to the {college.name} Gate Monitoring System. This platform provides real-time oversight of campus mobility, enhancing security and operational efficiency for students, faculty, and administration.

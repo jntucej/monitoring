@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useState, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
@@ -498,10 +500,10 @@ const api = useApi();
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
+            <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
               <GraduationCap className="w-7 h-7 text-emerald-400" />
               Student Management
-            </h1>
+            </p>
             <p className="text-sm text-slate-400 mt-1">Manage student roster. {students.length} records.</p>
           </div>
           <div className="flex items-center gap-2">

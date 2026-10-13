@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { UserCheck, Lock, Landmark, Users, ArrowUpRight, ShieldCheck } from "lucide-react";
 
@@ -7,7 +9,7 @@ export default function AccessHubPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">Access & Identity Governance</h1>
+        <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">Access & Identity Governance</p>
         <p className="text-sm text-[var(--text-secondary)] mt-1">
           Manage roles, live session terminations, SSO authentication providers, and role promotions.
         </p>

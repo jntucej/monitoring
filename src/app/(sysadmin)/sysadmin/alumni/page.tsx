@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useState, useMemo, useCallback, useEffect, type ReactNode } from "react";
 import {
   GraduationCap, Search, RefreshCw, Users, Archive,
@@ -272,10 +274,10 @@ export default function AlumniPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-3">
+            <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
               <GraduationCap className="w-7 h-7 text-emerald-400" />
               Alumni &amp; Deprovision
-            </h1>
+            </p>
             <p className="text-sm text-slate-400 mt-1 max-w-2xl">
               Graduated students are <span className="text-emerald-400 font-medium">flagged, not deleted</span> —
               completed + deprovisioned, with all historical scan, attendance &amp; gate data preserved and queryable.

@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import React, { useState, useCallback, useEffect } from "react";
 import { ClipboardList, Plus, Inbox, AlertCircle } from "lucide-react";
 import Link from "next/link";
@@ -58,12 +60,12 @@ const api = useApi();
   return (
     <AuthGuard allowedRoles={["student"]}>
       <div className="p-4 md:p-6 space-y-6 max-w-4xl mx-auto">
-        {/* Page toolbar — global DynamicHeader renders the app header */}
+        
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <ClipboardList className="w-6 h-6 text-[var(--action-primary)]" />
-              <h1 className="text-xl md:text-2xl font-bold text-[var(--text-primary)]">My Permissions</h1>
+              <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">My Permissions</p>
             </div>
             <p className="text-xs md:text-sm text-[var(--text-muted)]">Track your requests and approvals</p>
           </div>

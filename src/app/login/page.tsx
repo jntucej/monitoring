@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { LoginForm } from "@/components/shared/LoginForm";
 import { Suspense } from 'react';

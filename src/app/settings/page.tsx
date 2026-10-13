@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { KeyRound, Bell, ChevronRight } from "lucide-react";
@@ -10,7 +12,7 @@ export default function SettingsHubPage() {
       <div className="mx-auto max-w-3xl p-6 space-y-6 min-w-0">
         {/* Page title — global DynamicHeader renders the app header */}
         <div>
-          <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Settings</h1>
+          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">Settings</p>
           <p className="text-sm text-[var(--text-muted)] mt-1">
             Manage your account, security, and notifications.
           </p>

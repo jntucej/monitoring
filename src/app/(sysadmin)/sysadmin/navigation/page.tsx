@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useEffect, useState } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { Layout, Plus, Trash2, Edit3, CheckCircle2, ShieldAlert, Layers } from "lucide-react";
@@ -92,10 +94,10 @@ const api = useApi();
       <div className="space-y-6">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+            <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
               <Layout className="w-6 h-6 text-blue-400" />
               Dynamic Sidebar Navigation Editor
-            </h1>
+            </p>
             <p className="text-sm text-[var(--text-muted)]">
               Customize sidebar links, labels, group headers, and icons dynamically per role
             </p>

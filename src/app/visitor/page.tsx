@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { Suspense, useCallback } from "react";
 import { GuardedPage } from "@/components/shared/GuardedPage";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
@@ -99,13 +101,13 @@ function VisitorDashboardInner() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-8 min-w-0">
-      {/* Page toolbar — global DynamicHeader already renders the app header */}
+      
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
+          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
             <DoorOpen className="w-6 h-6 text-emerald-400" />
             Visitor Dashboard
-          </h1>
+          </p>
           <p className="mt-1 text-sm text-slate-400">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier} ·{" "}
             {user?.name || "Campus Visitor"}

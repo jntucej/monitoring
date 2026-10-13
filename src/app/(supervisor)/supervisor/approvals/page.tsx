@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useState, useCallback } from "react";
 import { CheckCircle, XCircle, ShieldCheck, Clock, MessageSquare } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
@@ -70,10 +72,10 @@ const api = useApi();
             <ShieldCheck className="w-5 h-5 text-indigo-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-[var(--text-primary)]">
+            <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
               <span className="sm:hidden">🛡️</span>
               <span className="hidden sm:inline">🛡️ Warden Authorizations</span>
-            </h1>
+            </p>
             <p className="text-xs text-[var(--text-muted)] hidden sm:block">Review and approve or reject outgoing student passes</p>
           </div>
         </div>

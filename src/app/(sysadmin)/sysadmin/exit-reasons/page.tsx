@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useEffect, useState } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { DoorOpen, Plus, Trash2, Edit3, ShieldAlert, CheckCircle2 } from "lucide-react";
@@ -86,10 +88,10 @@ export default function ExitReasonsPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+            <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
               <DoorOpen className="w-6 h-6 text-amber-400" />
               Exit Reasons & Outpass Governance
-            </h1>
+            </p>
             <p className="text-sm text-[var(--text-muted)]">
               Manage departure reasons, approval levels, and automatic notification workflows
             </p>

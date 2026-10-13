@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { Bell, Shield, Database, Component } from "lucide-react";
 import { CollegeInfoForm } from "./CollegeInfoForm";
 import { PassTypesForm } from "./PassTypesForm";
@@ -6,7 +8,7 @@ export default function AdminSettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Settings</h1>
+        <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">Settings</p>
         <p className="text-[var(--text-muted)]">Configure dynamic system preferences</p>
       </div>
 

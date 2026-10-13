@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { getDefaultRouteForRole } from "@/lib/route-helpers";
@@ -22,7 +24,7 @@ export default function ForbiddenPage() {
           <ShieldAlert className="w-8 h-8" />
         </div>
         <div className="space-y-2">
-          <h1 className="text-2xl font-extrabold tracking-tight">403 - Access Forbidden</h1>
+          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">403 - Access Forbidden</p>
           <p className="text-sm text-[var(--text-muted)]">
             You do not have the required administrative role or privileges to access this resource.
           </p>

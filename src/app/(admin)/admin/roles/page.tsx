@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { Suspense, useMemo, useState } from "react";
 import {
   ShieldCheck,

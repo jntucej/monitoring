@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useState, useCallback, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import {
@@ -1039,10 +1041,10 @@ function SupervisorDashboardInner() {
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap min-w-0">
-                <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)]">
+                <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
                   <span className="sm:hidden">🏫</span>
                   <span className="hidden sm:inline">🏫 Supervisor Desk</span>
-                </h1>
+                </p>
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
                   {user?.employeeId || user?.uniqueId || "SUP-001"}
                 </span>

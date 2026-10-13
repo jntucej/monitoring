@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { ChildStatus } from "@/components/parent/ChildStatus";
 import { ChildActivity } from "@/components/parent/ChildActivity";
 import { ChildWeeklyActivity } from "@/components/parent/ChildWeeklyActivity";
@@ -112,10 +114,10 @@ export default function ParentDashboardPage() {
   return (
     <div className="space-y-6 min-w-0">
       <div>
-        <h1 className="text-2xl font-bold">
+        <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
           <span className="sm:hidden">👨‍👩‍👧</span>
           <span className="hidden sm:inline">👨‍👩‍👧 Parent Dashboard</span>
-        </h1>
+        </p>
         <p className="text-[var(--text-muted)] hidden sm:block">
           Monitor your child&apos;s campus activity
           {user?.name ? ` · signed in as ${user.name}` : ""}

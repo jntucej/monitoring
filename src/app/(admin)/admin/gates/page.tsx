@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import React, { useState } from "react";
 import { GateDeviceTracker, GateDevice } from "@/components/admin/GateDeviceTracker";
 import { AlertCircle, Signal, Plus } from "lucide-react";
@@ -44,10 +46,10 @@ const api = useApi();
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
             <Signal className="w-6 h-6 text-emerald-400" />
             Gate & Hardware Management
-          </h1>
+          </p>
           <p className="text-sm text-[var(--text-muted)] mt-1">
             Monitor real-time gate terminal status, operator shifts, scan activity, and hardware health.
           </p>

@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
@@ -1257,7 +1259,7 @@ function PrincipalDashboardInner() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-5 sm:space-y-6 px-4 sm:px-6 py-6 sm:py-8 min-w-0">
-      {/* Page toolbar — global DynamicHeader already renders the app header */}
+      
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <p className="mt-1 text-sm text-[var(--text-muted)]">

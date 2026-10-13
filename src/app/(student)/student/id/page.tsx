@@ -1,4 +1,6 @@
 "use client";
+export const dynamic = "force-dynamic";
+
 import { useEffect, useState } from "react";
 import { DigitalIdCard } from "@/components/student/DigitalIdCard";
 
@@ -6,7 +8,7 @@ export default function StudentIdPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Digital ID Card</h1>
+        <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">Digital ID Card</p>
         <p className="text-[var(--text-muted)]">Show this card at the gate for scanning</p>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

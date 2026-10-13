@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useEffect, useState } from "react";
 import { QrCode, Plus, CheckCircle2, Clock, XCircle, ArrowLeft, AlertCircle, Sparkles, Loader2 } from "lucide-react";
 import Link from "next/link";
@@ -221,9 +223,9 @@ const api = useApi();
             <Link href="/student" className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors">
               <ArrowLeft className="w-4 h-4" />
             </Link>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)]">
+            <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
               Digital Gate Passes
-            </h1>
+            </p>
           </div>
           <p className="text-xs text-[var(--text-muted)]">
             Apply, track and show QR passes at campus security gates

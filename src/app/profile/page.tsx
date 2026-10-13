@@ -1,5 +1,6 @@
-// src/app/profile/page.tsx
 "use client";
+
+export const dynamic = "force-dynamic";
 
 import { useEffect, useState, useCallback } from "react";
 import { useAuthStore } from "@/stores/authStore";
@@ -275,9 +276,9 @@ function ProfileDashboard() {
           {initials || <UserIcon className="w-8 h-8" />}
         </div>
         <div className="flex-1 min-w-0">
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] truncate">
+          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
             {profile.name}
-          </h1>
+          </p>
           <p className="text-sm text-[var(--text-secondary)] truncate">
             {profile.email}
           </p>

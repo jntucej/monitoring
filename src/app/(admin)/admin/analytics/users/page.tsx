@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { UserAnalytics } from "@/components/admin/UserAnalytics";
 
 export default function UserAnalyticsPage() {

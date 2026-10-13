@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import React, { useState } from "react";
 import { Briefcase, AlertCircle } from "lucide-react";
 import { StaffTracking, StaffMember } from "@/components/admin/StaffTracking";
@@ -56,10 +58,10 @@ const api = useApi();
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
             <Briefcase className="w-6 h-6 text-purple-400" />
             Administrative Staff Oversight & Movement
-          </h1>
+          </p>
           <p className="text-sm text-[var(--text-muted)] mt-1">
             Real-time staff gate entries, presence tracking, exception flags (WRN), and log history.
           </p>

@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { Suspense, useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
@@ -173,8 +175,7 @@ function ExamPermissionsInner() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
-      {/* Page toolbar — the global DynamicHeader (SafeAreaAppShell) already
-          renders the app header; this is NOT a second <header>. */}
+      
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="mt-1 text-sm text-slate-400">

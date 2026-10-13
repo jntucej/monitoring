@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import React, { Suspense, useEffect, useState } from "react";
 import {
   Check,
@@ -12,7 +14,6 @@ import {
 import { GuardedPage } from "@/components/shared/GuardedPage";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
-import { PageHeader } from "@/components/shared/PageHeader";
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 
@@ -101,11 +102,9 @@ function MessDefaultInner() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Mess Default Settings"
-        subtitle="Set your default meal choice — used to pre-fill the preference window every day."
-        actions={<SlidersHorizontal className="w-5 h-5 text-emerald-400" />}
-      />
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-sm font-medium text-[var(--text-secondary)]">Workspace</p>
+      </div>
 
       <WidgetBoundary title="Mess default settings">
         {loading ? (

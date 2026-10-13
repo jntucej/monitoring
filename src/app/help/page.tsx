@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useMemo, useState } from "react";
 import { Search, ChevronDown, BookOpen, Shield, Users, Settings, FileText, DoorOpen, Bell, AlertCircle } from "lucide-react";
 import type { ForwardRefExoticComponent, RefAttributes } from "react";
@@ -245,7 +247,7 @@ export default function HelpPage() {
     <div className="mx-auto max-w-3xl px-4 py-8 space-y-6 min-w-0">
       {/* Page title — global DynamicHeader renders the app header */}
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Help Center</h1>
+        <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">Help Center</p>
         <p className="mt-1 text-[var(--text-muted)]">
           Role-scoped documentation for <span className="font-mono">{user.role}</span> (tier {tier})
         </p>

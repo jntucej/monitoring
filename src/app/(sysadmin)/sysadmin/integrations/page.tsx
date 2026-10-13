@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { IntegrationsDashboard } from "@/components/sysadmin/IntegrationsDashboard";
 import { LMSIntegration } from "@/components/sysadmin/LMSIntegration";

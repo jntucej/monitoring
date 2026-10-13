@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
@@ -95,7 +97,7 @@ export default function UserSupportPage() {
     <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Help & Support</h1>
+          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">Help & Support</p>
           <p className="text-sm text-gray-500">Report gate issues or request support.</p>
         </div>
         <Button onClick={() => setShowModal(!showModal)} className="gap-2">

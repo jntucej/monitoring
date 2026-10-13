@@ -1,4 +1,6 @@
 "use client";
+export const dynamic = "force-dynamic";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -48,7 +50,7 @@ export default function BootstrapPage() {
       <div className="min-h-screen flex items-center justify-center bg-[var(--bg-base)] p-4">
         <div className="text-center space-y-3">
           <CheckCircle2 className="w-16 h-16 text-emerald-400 mx-auto" />
-          <h1 className="text-2xl font-bold text-[var(--text-primary)]">Setup Complete</h1>
+          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">Setup Complete</p>
           <p className="text-sm text-[var(--text-muted)]">Redirecting you to login…</p>
         </div>
       </div>

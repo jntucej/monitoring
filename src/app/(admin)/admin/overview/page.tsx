@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { Shield, AlertTriangle, Clock, Info, ArrowRight, Activity, GraduationCap, UserCheck, Briefcase, HardHat, Zap, Database } from "lucide-react";
 import Link from "next/link";
 

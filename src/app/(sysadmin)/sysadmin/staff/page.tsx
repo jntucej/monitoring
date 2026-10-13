@@ -1,5 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+export const dynamic = "force-dynamic";
 
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
@@ -246,10 +249,10 @@ const api = useApi();
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)] flex items-center gap-2.5">
+            <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
               <Briefcase className="w-7 h-7 text-[var(--action-primary)]" />
               Staff &amp; Non-Students Management
-            </h1>
+            </p>
             <p className="text-sm text-[var(--text-muted)] mt-1">Manage faculty, operators, admins, and all non-student personnel. {staffList.length} records.</p>
           </div>
           <div className="flex items-center gap-2">

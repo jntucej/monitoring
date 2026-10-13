@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // src/app/(sysadmin)/sysadmin/scheduling/page.tsx
 // SCAFFOLD:RICH-PAGE — thin wrapper; the (sysadmin) layout owns the shell.
 import { Suspense } from "react";

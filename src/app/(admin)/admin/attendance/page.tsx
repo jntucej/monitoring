@@ -1,4 +1,6 @@
 "use client";
+export const dynamic = "force-dynamic";
+
 import { useEffect, useState } from "react";
 import { DataTable } from "@/components/ui/DataTable";
 import { CalendarDays, CheckCircle2, XCircle, Clock } from "lucide-react";
@@ -123,7 +125,7 @@ const api = useApi();
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-          <h1 className="text-2xl font-bold">Attendance</h1>
+          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">Attendance</p>
           <p className="text-[var(--text-muted)]">Daily student attendance records</p>
         </div>
         <div className="flex items-center gap-2">

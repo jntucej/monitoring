@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { Suspense, useCallback } from "react";
 import { ConditionalAlert } from "@/components/shared/ConditionalAlert";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
@@ -149,7 +151,7 @@ function FacultyDashboardInner() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 min-w-0">
-      {/* Page toolbar — global DynamicHeader already renders the app header */}
+      
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="mt-1 text-sm text-slate-400">

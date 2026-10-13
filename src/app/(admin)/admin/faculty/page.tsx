@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import React, { useState } from "react";
 import { Users, AlertCircle } from "lucide-react";
 import { FacultyTracking } from "@/components/admin/FacultyTracking";
@@ -60,10 +62,10 @@ const api = useApi();
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
             <Users className="w-6 h-6 text-indigo-400" />
             Faculty Attendance & Movement Oversight
-          </h1>
+          </p>
           <p className="text-sm text-[var(--text-muted)] mt-1">
             Real-time entry/exit logs, punctuality tracking, and department-level attendance metrics.
           </p>

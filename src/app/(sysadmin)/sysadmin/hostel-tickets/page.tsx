@@ -1,4 +1,6 @@
 "use client";
+export const dynamic = "force-dynamic";
+
 // src/app/(sysadmin)/sysadmin/hostel-tickets/page.tsx
 // SCAFFOLD:TICKETS — cross-cutting Hostel ticket view.
 

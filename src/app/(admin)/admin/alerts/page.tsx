@@ -1,4 +1,6 @@
 "use client";
+export const dynamic = "force-dynamic";
+
 import { usePolling } from "@/hooks/usePolling";
 import { useEffect, useState } from "react";
 import { DataTable } from "@/components/ui/DataTable";
@@ -89,10 +91,10 @@ export default function AdminAlertsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">
+          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
             <span className="sm:hidden">🔔</span>
             <span className="hidden sm:inline">🔔 Alerts</span>
-          </h1>
+          </p>
           <p className="text-[var(--text-muted)]">System alerts and notifications</p>
         </div>
         <div className="flex gap-2">

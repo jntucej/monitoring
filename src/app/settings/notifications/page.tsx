@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useState, useEffect } from "react";
 import { useAuthStore } from "@/stores/authStore";
 
@@ -89,10 +91,10 @@ export default function NotificationSettingsPage() {
     <div className="max-w-4xl mx-auto p-6 space-y-8">
       <div className="flex items-center justify-between border-b border-[var(--border)] pb-6">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
             <Bell className="w-6 h-6 text-[var(--action-primary)]" />
             Notification Preferences
-          </h1>
+          </p>
           <p className="text-sm text-[var(--text-muted)] mt-1">
             Manage how and when you receive campus gate system alerts.
           </p>

@@ -1,4 +1,6 @@
 "use client";
+export const dynamic = "force-dynamic";
+
 import { useEffect, useState } from "react";
 import { FileText, Download, BarChart3, Loader2 } from "lucide-react";
 import { useApi } from "@/hooks/useApi";
@@ -132,7 +134,7 @@ export default function AdminReportsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Reports</h1>
+        <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">Reports</p>
         <p className="text-[var(--text-muted)]">Generate and download reports</p>
       </div>
 

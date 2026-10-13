@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { Suspense, useCallback } from "react";
 import Link from "next/link";
 import {
@@ -254,13 +256,13 @@ function MessDashboardInner() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
-      {/* Page toolbar */}
+      
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <h1 className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
+          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
             <UtensilsCrossed className="w-6 h-6 text-emerald-400 shrink-0" />
             <span className="truncate">Mess In-charge Dashboard</span>
-          </h1>
+          </p>
           <p className="mt-1 text-sm text-slate-400 min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}

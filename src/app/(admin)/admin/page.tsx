@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { usePolling } from "@/hooks/usePolling";
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";

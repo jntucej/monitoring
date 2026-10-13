@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useState } from "react";
 import Link from "next/link";
 import { Users, GraduationCap, Briefcase, Building2, Upload, ArrowUpRight, UserCheck } from "lucide-react";
@@ -12,7 +14,7 @@ export default function PeopleHubPage() {
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">People & Identity Hub</h1>
+        <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">People & Identity Hub</p>
         <p className="text-sm text-[var(--text-secondary)] mt-1">
           Unified management of students, faculty, staff, wardens, and bulk CSV ingestion.
         </p>

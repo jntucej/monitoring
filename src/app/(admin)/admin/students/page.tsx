@@ -1,4 +1,6 @@
 "use client";
+export const dynamic = "force-dynamic";
+
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { User, Search, RefreshCw, GraduationCap, Ban, AlertTriangle } from "lucide-react";
 import { parseRollNumber, getStudentYearFromRoll } from "@/lib/rollNumber";
@@ -116,10 +118,10 @@ const api = useApi();
         <StudentInfographics />
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
+          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
             <GraduationCap className="w-6 h-6 text-blue-400" />
             Registered Students &amp; Roster
-          </h1>
+          </p>
           <p className="text-[var(--text-muted)]">
             {loading
               ? "Loading roster…"
