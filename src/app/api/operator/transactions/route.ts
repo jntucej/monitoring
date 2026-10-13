@@ -77,7 +77,7 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
                 ml.timestamp,
                 ml.is_manual AS scan_type,
                 ml.is_correction AS is_correction,
-                ml.created_at
+                ml.timestamp AS created_at
            FROM movement_logs ml
            LEFT JOIN users u ON u.id = ml.user_id
           WHERE ${where}

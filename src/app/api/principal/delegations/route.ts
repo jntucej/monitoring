@@ -60,7 +60,7 @@ async function fetchDelegations(authUserId: string, status: string | null): Prom
     if (status === "EXPIRED") clauses.push("l.expires_at IS NOT NULL AND l.expires_at <= now()");
   }
   const { rows } = await query(
-    `SELECT l.id, l.created_by AS delegator_id, l.delegate_role, l.scope,
+    `SELECT l.id, l.created_by AS delegator_id, l.delegatee_role AS delegate_role, l.scope,
             l.created_at AS starts_at, l.expires_at, 'ACTIVE' AS status, l.reason AS note, l.created_at
        FROM delegation_logs l
        WHERE ${clauses.join(" AND ")}
