@@ -135,7 +135,40 @@ function VisitorCheckinoutInner() {
         </div>
       </WidgetBoundary>
 
-      <DevContactStrip />
+      {/* Access expiry */}
+      <WidgetBoundary title="Access Expiry">
+        <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
+          <div className="flex flex-col gap-2 min-w-0">
+            <p className="text-sm font-semibold text-white min-w-0">Time-bound, host-linked visitor access</p>
+            <p className="text-xs text-slate-400 min-w-0">
+              Visitor passes are granted for the approved visit window and tied to your host&apos;s department.
+              Unchecked-out passes auto-expire when the approved window ends, after which gate scans are refused.
+            </p>
+            {(() => {
+              const logs = (data as { data?: { logs?: Array<{ check_in_at?: string; check_out_at?: string | null; status?: string; expires_at?: string | null }> } } | null)?.data?.logs ?? [];
+              const active = logs.find((l) => l.status === "active" && !l.check_out_at);
+              const expAt = active?.expires_at;
+              if (expAt) {
+                const ms = new Date(expAt).getTime() - Date.now();
+                const expired = ms < 0;
+                const hours = Math.max(1, Math.ceil(Math.abs(ms) / 3_600_000));
+                return (
+                  <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${expired ? "bg-rose-500/15 text-rose-300" : "bg-emerald-500/15 text-emerald-300"}`}>
+                    {expired ? "Pass expired" : `Expires in ~${hours}h`}
+                  </span>
+                );
+              }
+              return (
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-700/40 px-2.5 py-1 text-xs text-slate-300">
+                  Expiry set by approved visit window
+                </span>
+              );
+            })()}
+          </div>
+        </div>
+      </WidgetBoundary>
+
+<DevContactStrip />
     </div>
   );
 }

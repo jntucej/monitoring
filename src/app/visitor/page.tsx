@@ -21,11 +21,7 @@ import {
   Loader2,
   ShieldCheck,
   UserCheck,
-  AlertTriangle,
-  Building2,
   FileText,
-  CheckCircle2,
-  Wrench,
 } from "lucide-react";
 
 /* response shapes */
@@ -165,12 +161,12 @@ function VisitorInner() {
       <WidgetBoundary title="Sections">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
           <SectionLink href="/visitor/registration" title="Registration" sub="Visitor registration and pass details" />
-          <SectionLink href="/visitor/request" title="Request" sub="Extend or modify your visit request" />
-          <SectionLink href="/visitor/host-info" title="Host Info" sub="Your host's details and contact" />
-          <SectionLink href="/visitor/approval-status" title="Approval Status" sub="Current approval status of your pass" />
-          <SectionLink href="/visitor/visit-details" title="Visit Details" sub="Purpose, duration and gate info" />
-          <SectionLink href="/visitor/checkin-out" title="Check-in / Out" sub="Scan your pass at any gate" />
-          <SectionLink href="/visitor/history" title="History" sub="Past visit records" />
+          <SectionLink href="/visitor/request" title="Visit Request" sub="Extend or modify your visit request" />
+          <SectionLink href="/visitor/host-info" title="Host & Department Info" sub="Your host's details and contact" />
+          <SectionLink href="/visitor/approval-status" title="Visit Approval Status" sub="Current approval status of your pass" />
+          <SectionLink href="/visitor/visit-details" title="Approved Visit Details" sub="Purpose, duration and gate info" />
+          <SectionLink href="/visitor/checkin-out" title="Check-in / Check-out" sub="Scan your time-bound pass at any gate" />
+          <SectionLink href="/visitor/history" title="Visit History" sub="Past visit records with expiry state" />
         </div>
       </WidgetBoundary>
 

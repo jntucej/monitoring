@@ -13,12 +13,12 @@ const ALLOWED_ROLES: Role[] = ["visitor", "admin", "sysadmin"];
 
 const TABS = [
   { href: "/visitor/registration", label: "Registration" },
-  { href: "/visitor/request", label: "Request" },
-  { href: "/visitor/host-info", label: "Host Info" },
+  { href: "/visitor/request", label: "Visit Request" },
+  { href: "/visitor/host-info", label: "Host & Department" },
   { href: "/visitor/approval-status", label: "Approval Status" },
   { href: "/visitor/visit-details", label: "Visit Details" },
-  { href: "/visitor/checkin-out", label: "Check-in/Out" },
-  { href: "/visitor/history", label: "History" },
+  { href: "/visitor/checkin-out", label: "Check-in/Check-out" },
+  { href: "/visitor/history", label: "Visit History" },
 ] as const;
 
 function VisitorTabs({ children }: { children: React.ReactNode }) {
