@@ -2,9 +2,8 @@
 
 import React from "react";
 import { usePathname } from "next/navigation";
-import { GuardedPage } from "@/components/shared/GuardedPage";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import Link from "next/link";
 import { Suspense } from "react";
 import type { Role } from "@/lib/types";
@@ -54,7 +53,6 @@ function VisitorTabs({ children }: { children: React.ReactNode }) {
 
       <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6">{children}</div>
 
-      <DevContactStrip />
     </div>
   );
 }
@@ -65,10 +63,10 @@ export default function VisitorTabbedLayout({
   children: React.ReactNode;
 }) {
   return (
-    <GuardedPage allowedRoles={ALLOWED_ROLES}>
+    <AuthGuard allowedRoles={ALLOWED_ROLES}>
       <Suspense fallback={<PageLoading />}>
         <VisitorTabs>{children}</VisitorTabs>
       </Suspense>
-    </GuardedPage>
+    </AuthGuard>
   );
 }

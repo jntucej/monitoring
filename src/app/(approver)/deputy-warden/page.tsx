@@ -107,7 +107,10 @@ function DeputyWardenInner() {
     loading: outpassLoading,
     error: outpassError,
     refresh: refreshOutpass,
-  } = useApiResource<DataResponse>("/api/permissions?workflowType=outpass&status=PENDING", { ttlMs: 30_000 });
+  } = useApiResource<DataResponse>(
+    "/api/permissions?workflowType=hostel&status=PENDING&stage=deputy_warden",
+    { ttlMs: 30_000 }
+  );
   const {
     data: leaves,
     loading: leavesLoading,

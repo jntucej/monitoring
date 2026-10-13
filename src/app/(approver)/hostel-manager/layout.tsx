@@ -8,13 +8,14 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 const TABS = [
-  { href: "/hostel-manager/operations", label: "Operations" },
-  { href: "/hostel-manager/rooms", label: "Rooms" },
-  { href: "/hostel-manager/occupancy", label: "Occupancy" },
-  { href: "/hostel-manager/maintenance", label: "Maintenance" },
-  { href: "/hostel-manager/housekeeping", label: "Housekeeping" },
-  { href: "/hostel-manager/service-requests", label: "Service Requests" },
-  { href: "/hostel-manager/reports", label: "Reports" },
+  { href: "/hostel-manager", label: "Operations Overview" },
+  { href: "/hostel-manager/room-bed-allocation", label: "Room & Bed Allocation" },
+  { href: "/hostel-manager/occupancy-reports", label: "Occupancy Reports" },
+  { href: "/hostel-manager/maintenance-requests", label: "Maintenance Requests" },
+  { href: "/hostel-manager/housekeeping-tasks", label: "Housekeeping Tasks" },
+  { href: "/hostel-manager/resident-service-requests", label: "Resident Service Requests" },
+  { href: "/hostel-manager/resource-management", label: "Resource Management" },
+  { href: "/hostel-manager/operational-reports", label: "Operational Reports" },
 ] as const;
 
 function HostelManagerTabs({ children }: { children: React.ReactNode }) {

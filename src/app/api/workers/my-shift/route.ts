@@ -14,7 +14,8 @@ import type { AuthContext } from "@/lib/authContext";
 async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   try {
     const myRecent = await query(
-      `SELECT * FROM movement_logs
+      `SELECT id, direction, gate_name, is_manual, timestamp
+         FROM movement_logs
         WHERE user_id = $1
         ORDER BY timestamp DESC LIMIT 15`,
       [auth.userId]

@@ -151,14 +151,14 @@ function WorkerInner() {
       {/* Section quick-links */}
       <WidgetBoundary title="Sections">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
-          <SectionLink href="/worker/my-work" title="My Work" sub="Today's tasks and assignments" />
-          <SectionLink href="/worker/shift" title="Shift" sub="Shift schedule and status" />
+          <SectionLink href="/worker/my-work" title="My Assigned Work" sub="Today's tasks and assignments" />
+          <SectionLink href="/worker/shift" title="Shift Information" sub="Shift schedule and status" />
           <SectionLink href="/worker/attendance" title="Attendance" sub="Attendance records and punch times" />
-          <SectionLink href="/worker/work-orders" title="Work Orders" sub="Open and completed work orders" />
-          <SectionLink href="/worker/maintenance" title="Maintenance" sub="Assigned maintenance tasks" />
+          <SectionLink href="/worker/work-orders" title="Work Order Updates" sub="Open and completed work orders" />
+          <SectionLink href="/worker/maintenance" title="Maintenance Tasks" sub="Assigned maintenance tasks" />
           <SectionLink href="/worker/task-completion" title="Task Completion" sub="Task completion status" />
           <SectionLink href="/worker/notifications" title="Notifications" sub="Work-related notifications" />
-          <SectionLink href="/worker/history" title="History" sub="Past shifts and work logs" />
+          <SectionLink href="/worker/history" title="Personal History" sub="Past shifts and work logs" />
         </div>
       </WidgetBoundary>
 

@@ -8,15 +8,15 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 const TABS = [
-  { href: "/deputy-warden", label: "Overview" },
-  { href: "/deputy-warden/attendance", label: "Attendance" },
-  { href: "/deputy-warden/outpass", label: "Outpass" },
-  { href: "/deputy-warden/leave", label: "Leave" },
+  { href: "/deputy-warden", label: "Daily Overview" },
+  { href: "/deputy-warden/resident-attendance", label: "Resident Attendance" },
+  { href: "/deputy-warden/outpass-queue", label: "Outpass Queue" },
+  { href: "/deputy-warden/leave-requests", label: "Leave Requests" },
   { href: "/deputy-warden/gate-movement", label: "Gate Movement" },
-  { href: "/deputy-warden/incidents", label: "Incidents" },
-  { href: "/deputy-warden/handover", label: "Handover" },
-  { href: "/deputy-warden/approvals", label: "Approvals" },
-  { href: "/deputy-warden/history", label: "History" },
+  { href: "/deputy-warden/incident-reporting", label: "Incident Reporting" },
+  { href: "/deputy-warden/shift-handover", label: "Shift Handover" },
+  { href: "/deputy-warden/delegated-approvals", label: "Delegated Approvals" },
+  { href: "/deputy-warden/decision-history", label: "Decision History" },
 ] as const;
 
 function DeputyWardenTabs({ children }: { children: React.ReactNode }) {
