@@ -3,7 +3,7 @@
 import React from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
-import { User, Mail, CheckCircle, LogOut } from "lucide-react";
+import { User, Mail, Shield, CheckCircle, Tag, LogOut, Smartphone } from "lucide-react";
 import { GlassThemeToggle } from "@/components/shared/GlassThemeToggle";
 
 export function UserProfileTab() {
