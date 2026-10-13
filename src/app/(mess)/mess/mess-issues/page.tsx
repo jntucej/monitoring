@@ -4,10 +4,18 @@ import { Suspense } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { Inbox } from "lucide-react";
+import Link from "next/link";
 
-function MessIssuesInner() {
+function MessIssuesShell() {
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
+      <Link
+        href="/mess"
+        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+      >
+        Back to Mess Overview
+      </Link>
+
       <WidgetBoundary title="Mess Issues">
         <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
           <div className="px-4 py-3 border-b border-slate-800 flex items-center gap-2 min-w-0">
@@ -17,9 +25,15 @@ function MessIssuesInner() {
           <div className="p-6 text-center">
             <Inbox className="w-6 h-6 text-slate-600 mx-auto mb-2" />
             <p className="text-sm text-slate-500 max-w-md mx-auto min-w-0">
-              Mess issues and the incident feed are admin-scoped. The Mess In-charge role does
-              not have access to the alerts and incident endpoint.
+              This section was consolidated into the primary Mess Issues tab. See the issues
+              feed and raise form under the main nav.
             </p>
+            <Link
+              href="/mess/issues"
+              className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-400 hover:bg-emerald-500/20"
+            >
+              Open Mess Issues
+            </Link>
           </div>
         </div>
       </WidgetBoundary>
@@ -30,7 +44,7 @@ function MessIssuesInner() {
 export default function MessIssuesPage() {
   return (
     <Suspense fallback={<PageLoading />}>
-      <MessIssuesInner />
+      <MessIssuesShell />
     </Suspense>
   );
 }
