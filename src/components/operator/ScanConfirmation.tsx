@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { User, CheckCircle2, LogIn, Home, Sun, Clock, X, Briefcase, ShieldAlert, Flag } from "lucide-react";
-import { ExitReason, StudentType, Student, ScanDirection } from "@/lib/types";
+import { ExitReason, StudentType, Student, ScanDirection, ExitReasonConfig } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { PersonBadge } from "@/components/shared/PersonBadge";
@@ -56,6 +56,39 @@ export function ScanConfirmation({
 }: ScanConfirmationProps) {
   const { exitReasons } = useCampusConfig();
   const validExitReasons = exitReasons.length > 0 ? exitReasons : [];
+
+  // Fallback OUT options so the operator always has a path even when the
+  // campus exit-reason config fails to load (empty array) or returns no
+  // reasons applicable to this student. Mirrors the canonical exit-flow
+  // codes in src/lib/student-exit-flow.ts.
+  const FALLBACK_EXIT_REASONS: ExitReasonConfig[] = [
+    {
+      code: "daily_outing",
+      name: "Daily Outing",
+      description: "Standard local daily outing (no pass required)",
+      applicableTo: ["HM", "HF", "DM", "DF"],
+      requiresApproval: false,
+      parentNotification: "silent",
+    },
+    {
+      code: "home_out",
+      name: "Home Out",
+      description: "Weekend/overnight leave (requires principal-approved pass)",
+      applicableTo: ["HM", "HF"],
+      requiresApproval: true,
+      approvalBy: "principal",
+      parentNotification: "sms",
+    },
+    {
+      code: "day_pass",
+      name: "Day Pass",
+      description: "Full day leave (requires principal-approved pass)",
+      applicableTo: ["DM", "DF"],
+      requiresApproval: true,
+      approvalBy: "principal",
+      parentNotification: "sms",
+    },
+  ];
   
   // Photo verification state
   const [photoVerified, setPhotoVerified] = useState(false);
@@ -166,11 +199,27 @@ export function ScanConfirmation({
     fetchApprovedPasses();
   }, [student.id, student.uniqueId, student.roll]);
 
-  const applicableReasons = (student.personType && student.personType !== "student")
+  // The config's `applicableTo` is a person-type (e.g. "student"), but
+  // `student.studentType` is a sub-category (HM/HF/DM/DF). A reason that
+  // applies to "student" therefore applies to every student sub-type.
+  const studentAppliesTo = (cfg: ExitReasonConfig) => {
+    if (!student.studentType) return true;
+    const applicable = cfg.applicableTo as string[];
+    if (applicable.includes(student.studentType)) return true;
+    if (applicable.includes("student")) return true;
+    return false;
+  };
+
+  const baseExitReasons = (student.personType && student.personType !== "student")
     ? [validExitReasons.find((cfg) => cfg.code === "Regular") || validExitReasons[0]].filter(Boolean)
-    : validExitReasons.filter(
-        (config) => !student.studentType || config.applicableTo.includes(student.studentType)
-      );
+    : validExitReasons.filter(studentAppliesTo);
+
+  // If the live config produced no usable options (config fetch failed, or
+  // none apply to this student), fall back to the canonical exit reasons so
+  // the operator is never left with an empty OUT section.
+  const applicableReasons = baseExitReasons.length > 0
+    ? baseExitReasons
+    : FALLBACK_EXIT_REASONS.filter(studentAppliesTo);
 
   const outActions: ActionEntry[] = applicableReasons.map((config) => ({
     ...config,
@@ -200,11 +249,19 @@ export function ScanConfirmation({
     await onConfirm(direction, reason);
   };
 
+  // Map a reason value (canonical code or legacy/label form) to a stable
+  // token so pass-reason matching is consistent across the config, the
+  // passed reason, and the canonical exit-flow codes.
   const normalizeReason = (r?: string) => {
     if (!r) return "";
     const s = r.trim().toLowerCase().replace(/[\s_-]+/g, "");
-    if (s === "dayout" || s === "daypass") return "dayout";
-    if (s === "homeout" || s === "homepass") return "homeout";
+    // Canonical exit-flow codes (src/lib/student-exit-flow.ts)
+    if (s === "dailyouting" || s === "outing" || s === "dayout") return "daily_outing";
+    if (s === "homein") return "home_in";
+    if (s === "homeout" || s === "leave") return "home_out";
+    if (s === "daypass") return "day_pass";
+    if (s === "emergency") return "daily_outing";
+    if (s === "regular") return "regular";
     return s;
   };
 
