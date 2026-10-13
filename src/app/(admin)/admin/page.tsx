@@ -15,6 +15,14 @@ import { GateCardsGrid } from "@/components/admin/GateCardsGrid";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ChartCard } from "@/components/shared/ChartCard";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { ApprovalInbox } from "@/components/shared/ApprovalInbox";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { ContributionPortfolio } from "@/components/retention/ContributionPortfolio";
+import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
+import { DashboardCustomizer } from "@/components/engagement/DashboardCustomizer";
 import { useApiResource } from "@/hooks/useApiResource";
 import { useAuthStore } from "@/stores/authStore";
 import { getRoleTier } from "@/lib/alert-hierarchy";
@@ -594,6 +602,22 @@ export default function AdminDashboardPage() {
       <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
         <DevContactStrip />
         <DevMessagesPanel />
+      </div>
+
+      {/* ── I: Campus Home & Retention Panels ── */}
+      <PersonalizedCampusHome />
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
+        <TaskContinuity />
+        <ContributionPortfolio />
+      </div>
+      <ApprovalInbox />
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
+        <RoleAnalytics />
+        <DashboardCustomizer />
+      </div>
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
+        <QuickActions />
+        <NotificationCenter />
       </div>
     </motion.div>
   );

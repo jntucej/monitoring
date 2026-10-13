@@ -10,6 +10,13 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { ApprovalInbox } from "@/components/shared/ApprovalInbox";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
+import { DigitalHandover } from "@/components/retention/DigitalHandover";
 import {
   Inbox,
   Clock,
@@ -168,6 +175,19 @@ function ExamBranchInner() {
           <SectionLink href="/exam-branch/docs" title="Docs" sub="Exam branch documentation" />
         </div>
       </WidgetBoundary>
+
+      {/* Campus home & retention panels */}
+      <PersonalizedCampusHome />
+      <ApprovalInbox />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 min-w-0">
+        <TaskContinuity />
+        <RoleAnalytics />
+      </div>
+      <DigitalHandover />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 min-w-0">
+        <QuickActions />
+        <NotificationCenter />
+      </div>
 
       <DevContactStrip />
     </div>
