@@ -11,16 +11,12 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import {
-  Inbox,
   Clock,
   Loader2,
-  ShieldCheck,
+  Inbox,
   UserCheck,
-  AlertTriangle,
   Building2,
-  FileText,
   CheckCircle2,
-  Wrench,
 } from "lucide-react";
 import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
@@ -165,11 +161,14 @@ function HodInner() {
       {/* Section quick-links */}
       <WidgetBoundary title="Sections">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
-          <SectionLink href="/hod/students" title="Students" sub="Department student population and status" />
-          <SectionLink href="/hod/faculty" title="Faculty" sub="Department faculty roster" />
-          <SectionLink href="/hod/approvals" title="Approvals" sub="Exam and memo requests at HOD stage" />
-          <SectionLink href="/hod/reports" title="Reports" sub="Department performance reports" />
-          <SectionLink href="/hod/escalations" title="Escalations" sub="Requests escalated to vice principal" />
+          <SectionLink href="/hod/student-directory" title="Student Directory" sub="Department student population and status" />
+          <SectionLink href="/hod/department-attendance" title="Department Attendance" sub="Live faculty and staff attendance" />
+          <SectionLink href="/hod/attendance-exceptions" title="Attendance Exceptions" sub="Flagged absences and anomalies" />
+          <SectionLink href="/hod/faculty-overview" title="Faculty Overview" sub="Department faculty roster" />
+          <SectionLink href="/hod/department-pass-requests" title="Pass Requests" sub="Exit and leave passes at HOD stage" />
+          <SectionLink href="/hod/pending-approvals" title="Pending Approvals" sub="Exam and memo requests at HOD stage" />
+          <SectionLink href="/hod/department-reports" title="Department Reports" sub="Performance and attendance reports" />
+          <SectionLink href="/hod/escalation-centre" title="Escalation Centre" sub="Requests escalated to vice principal" />
         </div>
       </WidgetBoundary>
 

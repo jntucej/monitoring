@@ -8,12 +8,15 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 const TABS = [
-  { href: "/hod", label: "Overview" },
-  { href: "/hod/students", label: "Students" },
-  { href: "/hod/faculty", label: "Faculty" },
-  { href: "/hod/approvals", label: "Approvals" },
-  { href: "/hod/reports", label: "Reports" },
-  { href: "/hod/escalations", label: "Escalations" },
+  { href: "/hod", label: "Department Overview" },
+  { href: "/hod/student-directory", label: "Student Directory" },
+  { href: "/hod/department-attendance", label: "Attendance" },
+  { href: "/hod/attendance-exceptions", label: "Exceptions" },
+  { href: "/hod/faculty-overview", label: "Faculty" },
+  { href: "/hod/department-pass-requests", label: "Pass Requests" },
+  { href: "/hod/pending-approvals", label: "Approvals" },
+  { href: "/hod/department-reports", label: "Reports" },
+  { href: "/hod/escalation-centre", label: "Escalations" },
 ] as const;
 
 function HodTabs({ children }: { children: React.ReactNode }) {
