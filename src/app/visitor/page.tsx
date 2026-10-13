@@ -33,7 +33,8 @@ interface DataResponse {
 }
 
 interface VisitorSummary {
-  active?: string;
+  active?: { status?: string; log?: Record<string, unknown> } | null;
+  lastCompleted?: Record<string, unknown> | null;
   logs?: unknown[];
 }
 
@@ -112,6 +113,11 @@ function VisitorInner() {
   const summary = ((mine as { data?: VisitorSummary } | null)?.data) as VisitorSummary | undefined;
   const passStatus = summary?.active ? "ACTIVE" : "—";
   const logCount = summary?.logs?.length ?? 0;
+  const lastCompleted = summary?.lastCompleted as
+    | { check_in_at?: string | null; check_out_at?: string | null }
+    | null
+    | undefined;
+  const lastCheckIn = lastCompleted?.check_in_at ? new Date(lastCompleted.check_in_at).toLocaleString([], { dateStyle: "short", timeStyle: "short" }) : "—";
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
@@ -152,7 +158,7 @@ function VisitorInner() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
           <StatCard icon={UserCheck} label="My Pass Status" value={passStatus} sub="Current visitor pass status" accent="text-emerald-400" loading={mineLoading && !mine} />
           <StatCard icon={Inbox} label="My Visit Logs" value={logCount} sub="Total visit history" accent="text-sky-400" loading={mineLoading && !mine} />
-          <StatCard icon={FileText} label="Check-in Time" value="—" sub="Last check-in time" accent="text-amber-400" loading={mineLoading && !mine} />
+          <StatCard icon={FileText} label="Check-in Time" value={lastCheckIn} sub="Last completed check-in time" accent="text-amber-400" loading={mineLoading && !mine} />
           <StatCard icon={ShieldCheck} label="Campus Rules" value="Required" sub="Accompany your host on premises" accent="text-white" loading={false} />
         </div>
       </WidgetBoundary>

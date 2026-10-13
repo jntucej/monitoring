@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback } from "react";
+import { Suspense, useCallback, useMemo } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
@@ -36,6 +36,18 @@ interface DataResponse {
   success: boolean;
   data: unknown;
   total?: number;
+}
+
+interface PresenceMatrixData {
+  gates: Array<{ id: string; name: string; code: string }>;
+  roles: string[];
+  matrix: Record<string, Record<string, number>>;
+  lastUpdated: string;
+}
+
+interface PresenceMatrixResponse {
+  success: boolean;
+  data: PresenceMatrixData;
 }
 
 function StatCard({
@@ -113,7 +125,7 @@ function ExamBranchInner() {
     loading: presenceLoading,
     error: presenceError,
     refresh: refreshPresence,
-  } = useApiResource<DataResponse>("/api/occupancy/presence-matrix", { ttlMs: 30_000 });
+  } = useApiResource<PresenceMatrixResponse>("/api/occupancy/presence-matrix", { ttlMs: 30_000 });
   const refreshAll = useCallback(async () => {
     clearCache();
     await Promise.all([
@@ -126,6 +138,16 @@ function ExamBranchInner() {
   const busy = oieQueueLoading && !oieQueue || vpQueueLoading && !vpQueue || presenceLoading && !presence;
   const oieTotal: number = (oieQueue as { total?: number } | null)?.total ?? 0;
   const vpTotal: number = (vpQueue as { total?: number } | null)?.total ?? 0;
+  const onCampusTotal: number = useMemo(() => {
+    const gates = presence?.data?.gates ?? [];
+    const m = presence?.data?.matrix ?? {};
+    const rolesList = presence?.data?.roles ?? [];
+    const gateTotals = gates.map((g) => ({
+      ...g,
+      total: rolesList.reduce((sum, r) => sum + (m[g.id]?.[r] ?? 0), 0),
+    }));
+    return gateTotals.reduce((sum, g) => sum + g.total, 0);
+  }, [presence]);
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
@@ -158,7 +180,7 @@ function ExamBranchInner() {
           <StatCard icon={Inbox} label="OIE-Stage Pending" value={oieTotal} sub="Exam clearances awaiting OIE review" accent="text-emerald-400" loading={oieQueueLoading && !oieQueue} />
           <StatCard icon={UserCheck} label="VP-Stage Escalations" value={vpTotal} sub="Exam requests escalated to vice principal" accent="text-sky-400" loading={vpQueueLoading && !vpQueue} />
           <StatCard icon={AlertTriangle} label="Total Open" value={oieTotal} sub="All pending exam-stage approvals" accent="text-amber-400" loading={oieQueueLoading && !oieQueue} />
-          <StatCard icon={ShieldCheck} label="On Campus Now" value={'live presence matrix'} sub="All roles inside active gates" accent="text-white" loading={presenceLoading && !presence} />
+          <StatCard icon={ShieldCheck} label="On Campus Now" value={presence ? onCampusTotal : "…"} sub="All roles inside active gates" accent="text-emerald-400" loading={presenceLoading && !presence} />
         </div>
       </WidgetBoundary>
 

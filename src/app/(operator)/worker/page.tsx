@@ -90,7 +90,6 @@ function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => voi
 /* ── main content ── */
 
 interface ShiftSummary {
-  myShift?: { check_in?: string | null; check_out?: string | null; status?: string } | null;
   todayShifts?: Array<{ name?: string; check_in?: string | null; check_out?: string | null; scans?: number }> | null;
   openWorkOrders?: unknown[];
   myRecent?: unknown[];
@@ -119,6 +118,8 @@ function WorkerDashboardInner() {
 
   const shift = shiftData?.data;
   const openOrders = shift?.openWorkOrders?.length ?? 0;
+  // my-shift returns todayShifts (own shift snapshot); derive on-duty state from it.
+  const myTodayShift = shift?.todayShifts?.[0] ?? null;
 
   const refresh = useCallback(async () => {
     clearCache();
@@ -127,7 +128,7 @@ function WorkerDashboardInner() {
 
   usePolling(refresh, { intervalMs: 30_000, enabled: !!user });
 
-  const onDuty = Boolean(user?.gateId || shift?.myShift?.check_in);
+  const onDuty = Boolean(user?.gateId || myTodayShift?.check_in);
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 min-w-0">
       {/* Page toolbar — global DynamicHeader already renders the app header */}
@@ -150,7 +151,7 @@ function WorkerDashboardInner() {
           icon={ShieldCheck}
           label="Status"
           value={onDuty ? "On Duty" : "Unassigned"}
-          sub={shift?.myShift?.check_in ? "Checked in — shift active" : onDuty ? "Assigned gate / area for today's shift" : "No gate assignment on record"}
+          sub={myTodayShift?.check_in ? "Checked in — shift active" : onDuty ? "Assigned gate / area for today's shift" : "No gate assignment on record"}
           accent="text-emerald-400"
         />
         <StatCard
