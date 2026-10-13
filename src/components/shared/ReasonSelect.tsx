@@ -29,6 +29,7 @@ export function ReasonSelect({
   required = false,
   placeholder = "Select a reason...",
 }: ReasonSelectProps) {
+  const api = useApi();
   const id = useId();
   const [standardReasons, setStandardReasons] = useState<ReasonOption[]>([]);
   const [customReasons, setCustomReasons] = useState<ReasonOption[]>([]);
@@ -143,5 +144,4 @@ export function ReasonSelect({
 }
 
 export default ReasonSelect;
-const api = useApi();
 
