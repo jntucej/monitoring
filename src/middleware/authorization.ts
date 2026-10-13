@@ -224,6 +224,18 @@ export function withAuthorization(
       const detail =
         error instanceof Error ? `${error.name}: ${error.message}` : String(error);
       console.error('Authorization middleware error:', error);
+      // Typed domain errors (AppError subclasses: ForbiddenError,
+      // NotFoundError, BadRequestError) carry their own code + status.
+      if (
+        error instanceof Error &&
+        (error as any).code &&
+        (error as any).status
+      ) {
+        return NextResponse.json(
+          { success: false, error: { code: (error as any).code, message: error.message } },
+          { status: (error as any).status }
+        );
+      }
       return NextResponse.json(
         {
           success: false,
