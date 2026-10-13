@@ -27,6 +27,13 @@ export const POST = withAuthorization(
       return ok({ error: "gateId and direction are required" });
     }
 
+    // clientEventId must be a UUID for the Postgres process_gate_scan
+    // function; normalise non-UUID values (e.g. test IDs) to a fresh UUID.
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const clientEventId = UUID_RE.test(body.clientEventId || "")
+      ? body.clientEventId
+      : crypto.randomUUID();
+
     const result = await recordScan({
       roll: body.roll,
       personId: body.personId,
@@ -34,7 +41,7 @@ export const POST = withAuthorization(
       reason: body.reason,
       gateId: body.gateId,
       isManual: body.isManual,
-      clientEventId: body.clientEventId,
+      clientEventId,
       geo: body.geo,
       operatorId: auth.userId,
       operatorName: auth.email,
