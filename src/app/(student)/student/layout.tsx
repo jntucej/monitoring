@@ -5,13 +5,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const TABS = [
-  { href: "/student", label: "Digital ID", exact: true },
-  { href: "/student/id", label: "ID Card" },
-  { href: "/student/gate-pass", label: "Gate Pass" },
-  { href: "/student/passes", label: "Outpass Requests" },
-  { href: "/student/history", label: "Scan History" },
-  { href: "/student/permissions", label: "Permissions" },
-  { href: "/student/profile", label: "Profile" },
+  { href: "/student", label: "Overview", exact: true },
+  { href: "/student/attendance-calendar", label: "Attendance" },
+  { href: "/student/pass-application", label: "Passes" },
+  { href: "/student/leave-requests", label: "Leave" },
+  { href: "/student/request-tracking", label: "Requests" },
+  { href: "/student/history", label: "Entry / Exit" },
+  { href: "/student/notifications", label: "Notifications" },
+  { href: "/student/profile-security", label: "Profile" },
 ] as const;
 
 function tabActive(tab: (typeof TABS)[number], pathname: string): boolean {
