@@ -6,6 +6,15 @@ import { DigitalIdCard } from "@/components/student/DigitalIdCard";
 import { MessFoodPreference } from "@/components/student/MessFoodPreference";
 import { StudentDashboardWidgets } from "@/components/student/widgets";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { CampusFeed } from "@/components/engagement/CampusFeed";
+import { EventsPanel } from "@/components/engagement/EventsPanel";
+import { Achievements } from "@/components/engagement/Achievements";
+import { PersonalGoals } from "@/components/engagement/PersonalGoals";
+import { SemesterRecap } from "@/components/engagement/SemesterRecap";
 import { useAuthStore } from "@/stores/authStore";
 import { extractStudentRoll, fetchAuthWithFriendlyError } from "@/lib/student-utils";
 import {
@@ -118,6 +127,21 @@ function StudentDashboardInner() {
 
   return (
     <div className="space-y-6 pb-12 min-w-0">
+      {/* Shared + engagement panels */}
+      <QuickActions />
+      <NotificationCenter />
+      <PersonalizedCampusHome />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <CampusFeed />
+        <EventsPanel />
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Achievements />
+        <PersonalGoals />
+      </div>
+      <SemesterRecap />
+      <TaskContinuity />
+
       {/* Quick Actions & Pass Request Bar */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <Link

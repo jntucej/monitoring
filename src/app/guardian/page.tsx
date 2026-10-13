@@ -6,6 +6,12 @@ import { GuardedPage } from "@/components/shared/GuardedPage";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
+import { CampusFeed } from "@/components/engagement/CampusFeed";
 import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { useAuthStore } from "@/stores/authStore";
@@ -241,6 +247,16 @@ function GuardianDashboardInner() {
           loading={passesLoading && passList.length === 0}
         />
       </div>
+
+      {/* Shared + engagement panels */}
+      <QuickActions />
+      <NotificationCenter />
+      <PersonalizedCampusHome />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <CampusFeed />
+        <TaskContinuity />
+      </div>
+      <UnifiedCampusCalendar />
 
       {/* pending approval list */}
       <WidgetBoundary title="Pending Approvals">

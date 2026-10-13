@@ -4,6 +4,11 @@ import { Suspense, useCallback } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { CampusKnowledgeCentre } from "@/components/retention/CampusKnowledgeCentre";
 import { useAuthStore } from "@/stores/authStore";
 import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role } from "@/lib/types";
@@ -135,6 +140,15 @@ function VisitorInner() {
           )}
           {busy ? "Refreshing…" : "Refresh"}
         </button>
+      </div>
+
+      {/* Shared + engagement panels */}
+      <QuickActions />
+      <NotificationCenter />
+      <PersonalizedCampusHome />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <CampusKnowledgeCentre />
+        <TaskContinuity />
       </div>
 
       {/* KPI row */}

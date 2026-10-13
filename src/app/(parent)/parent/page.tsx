@@ -5,6 +5,12 @@ import { ChildActivity } from "@/components/parent/ChildActivity";
 import { ChildWeeklyActivity } from "@/components/parent/ChildWeeklyActivity";
 import { RequestPassForm } from "@/components/parent/RequestPassForm";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
+import { CampusFeed } from "@/components/engagement/CampusFeed";
 import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { useAuthStore } from "@/stores/authStore";
@@ -136,6 +142,16 @@ export default function ParentDashboardPage() {
           </button>
         </div>
       )}
+
+      {/* Shared + engagement panels */}
+      <QuickActions />
+      <NotificationCenter />
+      <PersonalizedCampusHome />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <CampusFeed />
+        <TaskContinuity />
+      </div>
+      <UnifiedCampusCalendar />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {cards.map((c) => (
