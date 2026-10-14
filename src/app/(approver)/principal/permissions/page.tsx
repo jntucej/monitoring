@@ -6,6 +6,8 @@ import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { PermissionList } from "@/components/approver/PermissionList";
 import { RefreshCw } from "lucide-react";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+import type { Role } from "@/lib/types";
 
 function PrincipalPermissionsInner() {
   return (
@@ -62,11 +64,12 @@ function PrincipalPermissionsInner() {
     </div>
   );
 }
-
 export default function PrincipalPermissionsPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <PrincipalPermissionsInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <PrincipalPermissionsInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

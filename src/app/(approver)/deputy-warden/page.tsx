@@ -30,6 +30,7 @@ import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
 import { DigitalHandover } from "@/components/retention/DigitalHandover";
 import { AttentionQueue } from "@/components/engagement/AttentionQueue";
 import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 /* response shapes */
 
@@ -214,11 +215,12 @@ function DeputyWardenInner() {
     </div>
   );
 }
-
 export default function DeputyWardenPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <DeputyWardenInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['deputy_warden', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <DeputyWardenInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

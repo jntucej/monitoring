@@ -26,6 +26,7 @@ import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
 import { DigitalHandover } from "@/components/retention/DigitalHandover";
 import { AttentionQueue } from "@/components/engagement/AttentionQueue";
 import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 /* response shapes */
 
@@ -189,11 +190,12 @@ function StaffInner() {
     </div>
   );
 }
-
 export default function StaffPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <StaffInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['staff', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <StaffInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

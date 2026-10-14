@@ -6,6 +6,7 @@ import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
   Loader2,
   Inbox,
@@ -204,11 +205,12 @@ function VpExaminationInner() {
     </div>
   );
 }
-
-export default function VpExaminationCoordinationPage() {
+export default function VpExaminationPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <VpExaminationInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['vice_principal', 'exam_branch', 'oie', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <VpExaminationInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

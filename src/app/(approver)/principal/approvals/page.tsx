@@ -16,6 +16,7 @@ import {
   Users,
 } from "lucide-react";
 import { useCallback, useState } from "react";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 function ApprovalsInner() {
   const user = useAuthStore((s) => s.user);
@@ -76,11 +77,12 @@ function ApprovalsInner() {
     </div>
   );
 }
-
-export default function PrincipalApprovalsPage() {
+export default function ApprovalsPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <ApprovalsInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <ApprovalsInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

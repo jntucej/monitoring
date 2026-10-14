@@ -1,5 +1,4 @@
 // Main scheduler dashboard component
-import React from 'react';
 import { DashboardGrid } from './layout/DashboardGrid';
 import { AIIntelligencePanel } from './panels/AIIntelligencePanel';
 import { Card } from './primitives/Card';
@@ -9,7 +8,7 @@ import { useSchedulerData } from './hooks/useSchedulerData';
 import { MockAdapter } from './lib/adapters/MockAdapter';
 
 export function SchedulerDashboard() {
-  const { jobs, resources, conflicts, loading, error } = useSchedulerData({
+  const { jobs, conflicts, loading, error } = useSchedulerData({
     adapter: new MockAdapter(),
     autoFetch: true,
     refreshInterval: 15000

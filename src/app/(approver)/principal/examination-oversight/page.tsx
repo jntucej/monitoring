@@ -18,6 +18,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { fetchJson, StatCard, OutpassRow } from "../_shared";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 interface AnalyticsMetric {
   key: string;
@@ -203,11 +204,12 @@ function ExaminationOversightInner() {
     </div>
   );
 }
-
 export default function ExaminationOversightPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <ExaminationOversightInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <ExaminationOversightInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

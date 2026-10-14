@@ -98,8 +98,8 @@ async function handlePost(req: NextRequest): Promise<Response> {
     if (!biometricHostelAt) {
       return badRequest("BAD_REQUEST", "Hostel biometric must be verified before the gate check");
     }
-    if (request.current_stage !== "main_gate") {
-      return badRequest("BAD_REQUEST", "Gate biometric is only available at the Main Gate stage");
+    if (request.current_stage !== "completed") {
+      return badRequest("BAD_REQUEST", "Gate biometric is only available at the final stage");
     }
     if (biometricGateAt) {
       return badRequest("BAD_REQUEST", "Gate biometric already verified");

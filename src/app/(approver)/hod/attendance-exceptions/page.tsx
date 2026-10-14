@@ -11,6 +11,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { Loader2, ShieldCheck, AlertTriangle, ArrowRight } from "lucide-react";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 /* response shapes */
 
@@ -161,11 +162,12 @@ function HodAttendanceExceptionsInner() {
     </div>
   );
 }
-
 export default function HodAttendanceExceptionsPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <HodAttendanceExceptionsInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['hod', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <HodAttendanceExceptionsInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

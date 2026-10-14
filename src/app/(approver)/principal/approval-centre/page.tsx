@@ -22,6 +22,7 @@ import {
   CalendarClock,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 interface PermissionRow {
   id: string;
@@ -229,11 +230,12 @@ function ApprovalCentreInner() {
     </div>
   );
 }
-
 export default function ApprovalCentrePage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <ApprovalCentreInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <ApprovalCentreInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

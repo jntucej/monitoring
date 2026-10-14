@@ -27,6 +27,8 @@ import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { useAuthStore } from "@/stores/authStore";
 import type { GatePass, Person } from "@/lib/types";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+import type { Role } from "@/lib/types";
 
 /* ── response shapes ── */
 
@@ -286,13 +288,12 @@ function GuardianOverviewInner() {
     </div>
   );
 }
-
 export default function GuardianOverviewPage() {
   return (
-    <WidgetBoundary title="Guardian Overview">
+    <AuthGuard allowedRoles={['guardian', 'parent', 'admin', 'sysadmin']}>
       <Suspense fallback={<PageLoading />}>
         <GuardianOverviewInner />
       </Suspense>
-    </WidgetBoundary>
+    </AuthGuard>
   );
 }

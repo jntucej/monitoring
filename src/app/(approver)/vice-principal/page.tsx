@@ -30,6 +30,7 @@ import { CampusKnowledgeCentre } from "@/components/retention/CampusKnowledgeCen
 import { DigitalHandover } from "@/components/retention/DigitalHandover";
 import { AttentionQueue } from "@/components/engagement/AttentionQueue";
 import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 /* ── response shapes ── */
 
@@ -292,11 +293,12 @@ function VicePrincipalDashboardInner() {
     </div>
   );
 }
-
 export default function VicePrincipalDashboardPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <VicePrincipalDashboardInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['vice_principal', 'exam_branch', 'oie', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <VicePrincipalDashboardInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

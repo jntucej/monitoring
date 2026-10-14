@@ -8,6 +8,7 @@ import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role } from "@/lib/types";
 import Link from "next/link";
 import { ArrowRight, BellOff, Lock } from "lucide-react";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 function OieIncidentsInner() {
   const user = useAuthStore((s) => s.user);
@@ -57,11 +58,12 @@ function OieIncidentsInner() {
     </div>
   );
 }
-
 export default function OieIncidentsPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <OieIncidentsInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['oie', 'exam_branch', 'exam_superintendent', 'vice_principal', 'principal', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <OieIncidentsInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

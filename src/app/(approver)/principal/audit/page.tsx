@@ -16,6 +16,7 @@ import {
   ClipboardCheck,
 } from "lucide-react";
 import { fetchJson, fmtDate, fmtTime, AuditRecord } from "../_shared";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 function AuditContent({
   records,
@@ -207,11 +208,12 @@ function AuditInner() {
     </div>
   );
 }
-
-export default function PrincipalAuditPage() {
+export default function AuditPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <AuditInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <AuditInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

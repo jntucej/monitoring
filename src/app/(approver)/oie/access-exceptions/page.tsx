@@ -10,6 +10,7 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
   ArrowRight,
   ShieldOff,
@@ -261,11 +262,12 @@ function AccessExceptionsInner() {
     </div>
   );
 }
-
 export default function AccessExceptionsPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <AccessExceptionsInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['oie', 'exam_branch', 'exam_superintendent', 'vice_principal', 'principal', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <AccessExceptionsInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

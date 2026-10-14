@@ -13,6 +13,8 @@ import { RequestTimeline } from "@/components/shared/RequestTimeline";
 import { useAuthStore } from "@/stores/authStore";
 import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+import type { Role } from "@/lib/types";
 
 /* ── shapes ── */
 
@@ -172,13 +174,12 @@ function RequestStatusContent({ ticketParam }: { ticketParam: string }) {
     </div>
   );
 }
-
-export default function RequestStatusPage() {
+export default function RequestStatusPagePage() {
   return (
-    <WidgetBoundary title="Request Status">
+    <AuthGuard allowedRoles={['guardian', 'parent', 'admin', 'sysadmin']}>
       <Suspense fallback={<PageLoading />}>
         <RequestStatusPageInner />
       </Suspense>
-    </WidgetBoundary>
+    </AuthGuard>
   );
 }

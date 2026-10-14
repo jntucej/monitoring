@@ -6,6 +6,8 @@ import { PageLoading } from "@/components/shared/LoadingStates";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { History, ScrollText } from "lucide-react";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+import type { Role } from "@/lib/types";
 
 interface DecisionRow {
   id: string;
@@ -174,11 +176,12 @@ function VpDecisionHistoryInner() {
     </div>
   );
 }
-
 export default function VpDecisionHistoryPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <VpDecisionHistoryInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['vice_principal', 'exam_branch', 'oie', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <VpDecisionHistoryInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

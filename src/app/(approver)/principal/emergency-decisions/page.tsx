@@ -23,6 +23,7 @@ import {
   Plus,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 interface EmergencyRow {
   id: string;
@@ -314,11 +315,12 @@ function EmergencyDecisionsInner() {
     </div>
   );
 }
-
 export default function EmergencyDecisionsPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <EmergencyDecisionsInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <EmergencyDecisionsInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

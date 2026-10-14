@@ -6,6 +6,7 @@ import { PageLoading } from "@/components/shared/LoadingStates";
 import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
   Loader2,
   AlertTriangle,
@@ -322,13 +323,12 @@ function groupedMonth(events: CalendarEvent[]): [string, CalendarEvent[]][] {
   }
   return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]));
 }
-
 export default function VisitSchedulePage() {
   return (
-    <WidgetBoundary title="Visit Schedule">
+    <AuthGuard allowedRoles={['guardian', 'parent', 'admin', 'sysadmin']}>
       <Suspense fallback={<PageLoading />}>
         <VisitScheduleInner />
       </Suspense>
-    </WidgetBoundary>
+    </AuthGuard>
   );
 }

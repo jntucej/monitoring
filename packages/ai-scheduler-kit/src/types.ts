@@ -1,2 +1,2 @@
 // Library entry point
-export * from './src/';
+export * from './index';

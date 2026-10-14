@@ -10,6 +10,7 @@ import { usePolling } from "@/hooks/usePolling";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { clearCache } from "@/hooks/useApiResource";
 import Link from "next/link";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
   ArrowLeft,
   FileText,
@@ -191,11 +192,12 @@ function ReportsInner() {
     </div>
   );
 }
-
-export default function PrincipalReportsPage() {
+export default function ReportsPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <ReportsInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <ReportsInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

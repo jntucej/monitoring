@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
   Bell
 } from "lucide-react";
@@ -30,13 +31,12 @@ function NotificationsInner() {
     </div>
   );
 }
-
 export default function NotificationsPage() {
   return (
-    <WidgetBoundary title="Notifications">
+    <AuthGuard allowedRoles={['guardian', 'parent', 'admin', 'sysadmin']}>
       <Suspense fallback={<PageLoading />}>
         <NotificationsInner />
       </Suspense>
-    </WidgetBoundary>
+    </AuthGuard>
   );
 }

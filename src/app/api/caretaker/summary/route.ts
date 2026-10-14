@@ -16,8 +16,8 @@ import type { Role } from "@/lib/types";
 
 const ROLES: readonly Role[] = ["caretaker", "admin", "sysadmin"] as const;
 
-/** Stages the caretaker owns (own stage + the shared hostel_biometric stage). */
-const STAGES = ["caretaker", "hostel_biometric"] as const;
+/** Stages the caretaker owns. */
+const STAGES = ["caretaker"] as const;
 
 async function handleGet(
   _req: NextRequest,

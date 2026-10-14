@@ -55,7 +55,7 @@ function ExamBranchRecordsInner() {
   /*
    * exam_branch is not a stage name in /api/permissions (allowed stage values:
    * faculty, hod, oie, vice_principal, principal, caretaker, deputy_warden,
-   * hostel_manager, main_gate, warden_or_principal).
+   * hostel_manager, warden_or_principal).
    * Fetch all exam workflow requests regardless of stage to give the records
    * view a complete candidate & examination history.
    */

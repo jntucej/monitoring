@@ -6,6 +6,8 @@ import { PageLoading } from "@/components/shared/LoadingStates";
 import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { Loader2, Inbox, Building2, TrendingUp, Users, School } from "lucide-react";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+import type { Role } from "@/lib/types";
 
 interface DepartmentRow {
   code: string;
@@ -187,11 +189,12 @@ function VpDepartmentPerformanceInner() {
     </div>
   );
 }
-
 export default function VpDepartmentPerformancePage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <VpDepartmentPerformanceInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['vice_principal', 'exam_branch', 'oie', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <VpDepartmentPerformanceInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

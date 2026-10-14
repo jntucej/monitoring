@@ -8,6 +8,7 @@ import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
 import type { Person, Scan } from "@/lib/types";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
   Loader2,
   ArrowRight,
@@ -244,13 +245,12 @@ function MovementInfoInner() {
     </div>
   );
 }
-
 export default function MovementInfoPage() {
   return (
-    <WidgetBoundary title="Authorised Movement Information">
+    <AuthGuard allowedRoles={['guardian', 'parent', 'admin', 'sysadmin']}>
       <Suspense fallback={<PageLoading />}>
         <MovementInfoInner />
       </Suspense>
-    </WidgetBoundary>
+    </AuthGuard>
   );
 }

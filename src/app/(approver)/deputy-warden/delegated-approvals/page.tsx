@@ -18,6 +18,7 @@ import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 /* response shapes */
 
@@ -305,11 +306,12 @@ function DeputyWardenDelegatedApprovalsInner() {
     </div>
   );
 }
-
 export default function DeputyWardenDelegatedApprovalsPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <DeputyWardenDelegatedApprovalsInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['deputy_warden', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <DeputyWardenDelegatedApprovalsInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

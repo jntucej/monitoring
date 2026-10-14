@@ -11,6 +11,7 @@ import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { clearCache } from "@/hooks/useApiResource";
 import { fetchJson } from "../_shared";
 import Link from "next/link";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
   ArrowLeft,
   MapPin,
@@ -214,11 +215,12 @@ function GateActivityInner() {
     </div>
   );
 }
-
-export default function PrincipalGateActivityPage() {
+export default function GateActivityPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <GateActivityInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <GateActivityInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

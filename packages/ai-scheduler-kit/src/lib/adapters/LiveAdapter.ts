@@ -1,4 +1,5 @@
 // Live data adapter with real API integration
+import { SchedulerDataAdapter } from './base/SchedulerDataAdapter';
 export class LiveAdapter extends SchedulerDataAdapter {
   private baseUrl: string;
   private apiKey: string;
@@ -19,7 +20,7 @@ export class LiveAdapter extends SchedulerDataAdapter {
 
     const response = await fetch(url.toString(), {
       headers: {
-        'Authorization': `Bearer ${this.apiKey}`,\
+        'Authorization': `Bearer ${this.apiKey}`,
         'Content-Type': 'application/json'
       }
     });
@@ -50,7 +51,7 @@ export class LiveAdapter extends SchedulerDataAdapter {
     const response = await fetch(`${this.baseUrl}/jobs`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${this.apiKey}`,\
+        'Authorization': `Bearer ${this.apiKey}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(data)
@@ -67,7 +68,7 @@ export class LiveAdapter extends SchedulerDataAdapter {
     const response = await fetch(`${this.baseUrl}/jobs/${id}`, {
       method: 'PUT',
       headers: {
-        'Authorization': `Bearer ${this.apiKey}`,\
+        'Authorization': `Bearer ${this.apiKey}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(data)
@@ -84,7 +85,7 @@ export class LiveAdapter extends SchedulerDataAdapter {
     const response = await fetch(`${this.baseUrl}/jobs/${id}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${this.apiKey}`,\
+        'Authorization': `Bearer ${this.apiKey}`,
         'Content-Type': 'application/json'
       }
     });
@@ -104,7 +105,7 @@ export class LiveAdapter extends SchedulerDataAdapter {
 
     const response = await fetch(url.toString(), {
       headers: {
-        'Authorization': `Bearer ${this.apiKey}`,\
+        'Authorization': `Bearer ${this.apiKey}`,
         'Content-Type': 'application/json'
       }
     });
@@ -126,7 +127,7 @@ export class LiveAdapter extends SchedulerDataAdapter {
 
     const response = await fetch(url.toString(), {
       headers: {
-        'Authorization': `Bearer ${this.apiKey}`,\
+        'Authorization': `Bearer ${this.apiKey}`,
         'Content-Type': 'application/json'
       }
     });

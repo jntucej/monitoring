@@ -11,6 +11,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { Inbox, Loader2, ShieldCheck, AlertTriangle, ArrowRight } from "lucide-react";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 /* response shapes */
 
@@ -126,11 +127,12 @@ function StaffRequestsInner() {
     </div>
   );
 }
-
 export default function StaffRequestsPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <StaffRequestsInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['staff', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <StaffRequestsInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

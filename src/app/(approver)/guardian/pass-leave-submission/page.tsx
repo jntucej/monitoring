@@ -11,6 +11,7 @@ import { usePolling } from "@/hooks/usePolling";
 import { usePassTypes } from "@/hooks/usePassTypes";
 import { getAuthHeaders } from "@/lib/utils";
 import type { Person } from "@/lib/types";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
   Loader2,
   CheckCircle2,
@@ -393,13 +394,12 @@ function PassLeaveSubmissionInner() {
     </div>
   );
 }
-
 export default function PassLeaveSubmissionPage() {
   return (
-    <WidgetBoundary title="Pass and Leave Request Submission">
+    <AuthGuard allowedRoles={['guardian', 'parent', 'admin', 'sysadmin']}>
       <Suspense fallback={<PageLoading />}>
         <PassLeaveSubmissionInner />
       </Suspense>
-    </WidgetBoundary>
+    </AuthGuard>
   );
 }

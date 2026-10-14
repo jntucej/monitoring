@@ -22,6 +22,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 interface Delegation {
   id: string;
@@ -407,11 +408,12 @@ function DelegationManagerInner() {
     </div>
   );
 }
-
 export default function DelegationManagerPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <DelegationManagerInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <DelegationManagerInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

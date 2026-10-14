@@ -29,6 +29,7 @@ import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { CampusKnowledgeCentre } from "@/components/retention/CampusKnowledgeCentre";
 import { AttentionQueue } from "@/components/engagement/AttentionQueue";
 import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 /* ── response shapes ── */
 
@@ -345,11 +346,12 @@ function OieDashboardInner() {
     </div>
   );
 }
-
 export default function OieDashboardPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <OieDashboardInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['oie', 'exam_branch', 'exam_superintendent', 'vice_principal', 'principal', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <OieDashboardInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

@@ -1,5 +1,4 @@
 // Gauge chart for AI confidence scores
-import React from 'react';
 import { RadialBarChart, RadialBar, ResponsiveContainer, Legend } from 'recharts';
 
 export interface AIConfidenceGaugeData {
@@ -25,7 +24,6 @@ export function AIConfidenceGauge({ data, height = 300 }: AIConfidenceGaugeProps
     <ResponsiveContainer width="100%" height={height}>
       <RadialBarChart cx="50%" cy="50%" innerRadius={20} outerRadius={140} barSize={20} data={formattedData}>
         <RadialBar
-          minAngle={15}
           label={{ position: 'insideStart', fill: '#fff', fontSize: '12px' }}
           background
           dataKey="value"

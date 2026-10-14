@@ -3,6 +3,7 @@
 import React from "react";
 import { Check, Eye, Clock, Shield, User, Building, FileText } from "lucide-react";
 import { formatDateTime } from "@/lib/utils";
+import { SlaBadge } from "./SlaBadge";
 import type { PermissionStatus, WorkflowType } from "@/lib/types";
 
 export interface PermissionItem {
@@ -30,6 +31,7 @@ export interface PermissionItem {
   digital_signature?: string | null;
   created_at: string;
   updated_at: string;
+  sla_deadline?: string | null;
   student?: {
     id: string;
     name: string;
@@ -68,7 +70,7 @@ const STAGE_LABELS: Record<string, string> = {
   deputy_warden: "Deputy Warden",
   hostel_manager: "Hostel Manager",
   warden_or_principal: "Warden / Principal",
-  main_gate: "Main Gate",
+  lab_incharge: "Lab In-charge",
   hod: "HOD",
   oie: "Officer in Exam (OIE)",
   vice_principal: "Vice Principal",
@@ -165,6 +167,7 @@ export function PermissionRow({
               <Clock className="w-3 h-3" />
               {formatDateTime(request.created_at)}
             </span>
+            <SlaBadge slaDeadline={request.sla_deadline} status={request.status} />
           </div>
         </div>
       </div>

@@ -17,6 +17,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { fetchJson, fmtTime, fmtDate, OutpassRow } from "../_shared";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 function IncidentContent({
   alerts,
@@ -200,11 +201,12 @@ function IncidentsInner() {
     </div>
   );
 }
-
-export default function PrincipalIncidentsPage() {
+export default function IncidentsPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <IncidentsInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <IncidentsInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

@@ -8,6 +8,7 @@ import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
 import type { Person, Scan } from "@/lib/types";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
   Loader2,
   CheckCircle2,
@@ -257,13 +258,12 @@ function ChildStatusInner() {
     </div>
   );
 }
-
 export default function ChildStatusPage() {
   return (
-    <WidgetBoundary title="Child Status">
+    <AuthGuard allowedRoles={['guardian', 'parent', 'admin', 'sysadmin']}>
       <Suspense fallback={<PageLoading />}>
         <ChildStatusInner />
       </Suspense>
-    </WidgetBoundary>
+    </AuthGuard>
   );
 }

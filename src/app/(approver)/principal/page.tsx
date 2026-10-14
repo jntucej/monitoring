@@ -47,6 +47,7 @@ import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { AttentionQueue } from "@/components/engagement/AttentionQueue";
 import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 function PrincipalDashboardInner() {
   const user = useAuthStore((s) => s.user);
@@ -321,11 +322,12 @@ function PrincipalDashboardInner() {
     </div>
   );
 }
-
 export default function PrincipalDashboardPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <PrincipalDashboardInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <PrincipalDashboardInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

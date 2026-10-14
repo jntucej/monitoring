@@ -10,6 +10,7 @@ import { usePolling } from "@/hooks/usePolling";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { clearCache } from "@/hooks/useApiResource";
 import Link from "next/link";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -181,11 +182,12 @@ function AttendanceInner() {
     </div>
   );
 }
-
-export default function PrincipalAttendancePage() {
+export default function AttendancePage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <AttendanceInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <AttendanceInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

@@ -1,6 +1,6 @@
 // src/app/api/hostel-manager/summary/route.ts
 // Per-role summary feed for the hostel manager: open tickets at the
-// hostel-manager-owned stages (incl. the shared hostel_biometric stage),
+// hostel-manager-owned stages,
 // broken down by hostel_scope.
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
@@ -16,8 +16,8 @@ import type { Role } from "@/lib/types";
 
 const ROLES: readonly Role[] = ["hostel_manager", "admin", "sysadmin"] as const;
 
-/** Stages the hostel manager owns (own stage + the shared hostel_biometric stage). */
-const STAGES = ["hostel_manager", "hostel_biometric"] as const;
+/** Stages the hostel manager owns. */
+const STAGES = ["hostel_manager"] as const;
 
 async function handleGet(
   _req: NextRequest,
@@ -78,7 +78,7 @@ async function handleGet(
       hostelScope,
       notes:
         "hostelScope counts the open tickets by users.hostel_scope (boys/girls); 'unscoped' " +
-        "covers tickets with no hostel_scope set. Stage scope: hostel_manager + hostel_biometric.",
+        "covers tickets with no hostel_scope set. Stage scope: hostel_manager.",
     },
   });
 }

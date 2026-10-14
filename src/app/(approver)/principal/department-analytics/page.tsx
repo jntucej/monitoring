@@ -17,6 +17,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { fetchJson, StatCard, DepartmentRow } from "../_shared";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 interface AnalyticsMetric {
   key: string;
@@ -184,11 +185,12 @@ function DepartmentAnalyticsInner() {
     </div>
   );
 }
-
 export default function DepartmentAnalyticsPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <DepartmentAnalyticsInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <DepartmentAnalyticsInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

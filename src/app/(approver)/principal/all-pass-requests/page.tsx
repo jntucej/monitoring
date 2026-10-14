@@ -18,6 +18,7 @@ import {
   Search,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 interface PermissionRow {
   id: string;
@@ -236,11 +237,12 @@ function AllPassRequestsInner() {
     </div>
   );
 }
-
 export default function AllPassRequestsPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <AllPassRequestsInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <AllPassRequestsInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

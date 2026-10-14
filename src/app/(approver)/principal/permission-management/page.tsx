@@ -13,6 +13,7 @@ import type { Role } from "@/lib/types";
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import Link from "next/link";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
   RefreshCw,
   ArrowLeft,
@@ -326,11 +327,12 @@ function GrantedTickets({ onRevoke }: { onRevoke: (t: RevokeTarget) => void }) {
     </div>
   );
 }
-
 export default function PermissionManagementPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <PermissionManagementInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <PermissionManagementInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

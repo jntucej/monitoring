@@ -10,6 +10,7 @@ import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
   Building2,
   Inbox,
@@ -313,11 +314,12 @@ function HostelPermissionsInner() {
     </div>
   );
 }
-
 export default function HostelPermissionsPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <HostelPermissionsInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['hostel', 'hostel_manager', 'deputy_warden', 'warden', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <HostelPermissionsInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

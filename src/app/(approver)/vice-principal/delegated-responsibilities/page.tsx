@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
   Briefcase,
   ArrowRight,
@@ -150,11 +151,12 @@ function VpDelegatedResponsibilitiesInner() {
     </div>
   );
 }
-
 export default function VpDelegatedResponsibilitiesPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <VpDelegatedResponsibilitiesInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['vice_principal', 'exam_branch', 'oie', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <VpDelegatedResponsibilitiesInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

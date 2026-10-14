@@ -11,6 +11,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { Inbox, Loader2, ShieldCheck, AlertTriangle, ArrowRight } from "lucide-react";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 /* response shapes */
 
@@ -126,11 +127,12 @@ function HostelManagerHousekeepingInner() {
     </div>
   );
 }
-
 export default function HostelManagerHousekeepingPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <HostelManagerHousekeepingInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['hostel_manager', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <HostelManagerHousekeepingInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

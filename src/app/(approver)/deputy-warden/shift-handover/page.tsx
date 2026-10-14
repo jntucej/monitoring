@@ -10,6 +10,7 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
   ShieldCheck,
   Inbox,
@@ -156,11 +157,12 @@ function DeputyWardenHandoverInner() {
     </div>
   );
 }
-
 export default function DeputyWardenHandoverPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <DeputyWardenHandoverInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['deputy_warden', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <DeputyWardenHandoverInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

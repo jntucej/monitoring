@@ -7,6 +7,7 @@ import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { useAuthStore } from "@/stores/authStore";
 import { useApiResource } from "@/hooks/useApiResource";
 import { getAuthHeaders } from "@/lib/utils";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
   ShieldCheck,
   Loader2,
@@ -225,13 +226,12 @@ function ContactInfoInner() {
     </div>
   );
 }
-
 export default function ContactInfoPage() {
   return (
-    <WidgetBoundary title="Contact Information">
+    <AuthGuard allowedRoles={['guardian', 'parent', 'admin', 'sysadmin']}>
       <Suspense fallback={<PageLoading />}>
         <ContactInfoInner />
       </Suspense>
-    </WidgetBoundary>
+    </AuthGuard>
   );
 }

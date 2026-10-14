@@ -30,6 +30,7 @@ import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
 import { DigitalHandover } from "@/components/retention/DigitalHandover";
 import { AttentionQueue } from "@/components/engagement/AttentionQueue";
 import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 /* response shapes */
 
@@ -189,11 +190,12 @@ function CaretakerInner() {
     </div>
   );
 }
-
 export default function CaretakerPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <CaretakerInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['caretaker', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <CaretakerInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

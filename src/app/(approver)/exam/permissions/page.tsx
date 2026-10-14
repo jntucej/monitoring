@@ -13,6 +13,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
 import type { PermissionItem } from "@/components/approver/PermissionRow";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
   ShieldCheck,
   UserCheck,
@@ -273,11 +274,12 @@ function ExamPermissionsInner() {
     </div>
   );
 }
-
 export default function ExamPermissionsPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <ExamPermissionsInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['exam_superintendent', 'exam_branch', 'oie', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <ExamPermissionsInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

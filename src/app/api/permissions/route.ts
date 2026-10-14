@@ -114,7 +114,7 @@ async function handleGet(req: NextRequest, context: any) {
   if (status) query = query.eq("status", status);
   // Explicit stage filter (used by UI PermissionList: ?stage=principal etc.)
   const stageParam = searchParams.get("stage") || searchParams.get("current_stage");
-  if (stageParam && ["faculty", "hod", "oie", "vice_principal", "principal", "caretaker", "deputy_warden", "hostel_manager", "main_gate", "warden_or_principal"].includes(stageParam)) {
+  if (stageParam && ["faculty", "hod", "oie", "vice_principal", "principal", "caretaker", "deputy_warden", "hostel_manager", "warden_or_principal", "lab_incharge"].includes(stageParam)) {
     query = query.eq("current_stage", stageParam);
     // For principal: also include hostel requests at warden_or_principal stage
     if (stageParam === "principal") {
@@ -148,7 +148,7 @@ async function handleGet(req: NextRequest, context: any) {
   } else if (["admin", "sysadmin"].includes(role)) {
     if (sid) query = query.eq("student_user_id", sid);
   } else if (role === "operator") {
-    query = query.eq("current_stage", "main_gate");
+    query = query.eq("current_stage", "hostel_manager");
   } else {
     return NextResponse.json({ success: true, data: [], total: 0 });
   }

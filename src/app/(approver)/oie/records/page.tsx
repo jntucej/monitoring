@@ -10,6 +10,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { ArrowRight, Loader2, FileText, AlertTriangle } from "lucide-react";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 interface PermissionRequestRow {
   id: string;
@@ -207,11 +208,12 @@ function OieRecordsInner() {
     </div>
   );
 }
-
 export default function OieRecordsPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <OieRecordsInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['oie', 'exam_branch', 'exam_superintendent', 'vice_principal', 'principal', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <OieRecordsInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

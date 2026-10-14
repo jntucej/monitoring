@@ -10,6 +10,7 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
   Inbox,
   Loader2,
@@ -174,11 +175,12 @@ function CaretakerFacilitiesInner() {
     </div>
   );
 }
-
 export default function CaretakerFacilitiesPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <CaretakerFacilitiesInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['caretaker', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <CaretakerFacilitiesInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

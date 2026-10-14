@@ -27,6 +27,7 @@ import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
 import { DigitalHandover } from "@/components/retention/DigitalHandover";
 import { AttentionQueue } from "@/components/engagement/AttentionQueue";
 import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 /* response shapes */
 
@@ -371,11 +372,12 @@ function WardenInner() {
     </div>
   );
 }
-
-export default function WardenDashboardPage() {
+export default function WardenPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <WardenInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['warden', 'principal', 'deputy_warden', 'hostel_manager', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <WardenInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

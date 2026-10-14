@@ -13,6 +13,7 @@ export const ROLES = {
   HOD:             "hod",
   STUDENT:         "student",
   // warden was folded into principal — principal carries its privileges
+  WARDEN:          "warden",
   FACULTY:         "faculty",
   STAFF:           "staff",
   WORKER:          "worker",
@@ -25,7 +26,9 @@ export const ROLES = {
   OIE:             "oie",
   EXAM_BRANCH:     "exam_branch",
   EXAM_SUPERINTENDENT: "exam_superintendent",
-  MESS_INCHARGE:       "mess_incharge",
+  MESS_INCHARGE:   "mess_incharge",
+  // Legacy roles — folded but still recognized for approver surface compatibility
+  HOSTEL:          "hostel",
 } as const;
 
 export type RoleKey = keyof typeof ROLES;

@@ -18,6 +18,7 @@ import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 /* response shapes (mirror shared endpoints) */
 
@@ -256,11 +257,12 @@ function DeputyWardenDailyOverviewInner() {
     </div>
   );
 }
-
 export default function DeputyWardenDailyOverviewPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <DeputyWardenDailyOverviewInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['deputy_warden', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <DeputyWardenDailyOverviewInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

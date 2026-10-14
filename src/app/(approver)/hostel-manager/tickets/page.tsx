@@ -4,7 +4,7 @@
 // Regenerate with: node scripts/scaffold-tickets.mjs new hostel-manager --force
 
 import { Suspense } from "react";
-import { GuardedPage } from "@/components/shared/GuardedPage";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { MyTicketsPanel } from "@/components/shared/MyTicketsPanel";
@@ -14,7 +14,7 @@ const ALLOWED_ROLES: Role[] = ["hostel_manager","deputy_warden","caretaker","war
 
 function Inner() {
   return (
-    <GuardedPage allowedRoles={ALLOWED_ROLES}>
+    <div className="flex flex-col gap-4 p-4 md:p-6">
       <MyTicketsPanel
         title="My Tickets"
         subtitle="Permission requests you have raised"
@@ -23,14 +23,16 @@ function Inner() {
         canCreate={true}
       />
       <DevContactStrip />
-    </GuardedPage>
+    </div>
   );
 }
 
 export default function HostelManagerTicketsPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <Inner />
-    </Suspense>
+    <AuthGuard allowedRoles={ALLOWED_ROLES}>
+      <Suspense fallback={<PageLoading />}>
+        <Inner />
+      </Suspense>
+    </AuthGuard>
   );
 }

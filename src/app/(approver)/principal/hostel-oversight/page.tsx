@@ -10,6 +10,7 @@ import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role } from "@/lib/types";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
   ArrowLeft,
   Building2,
@@ -158,11 +159,12 @@ function HostelOversightInner() {
     </div>
   );
 }
-
 export default function HostelOversightPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <HostelOversightInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <HostelOversightInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

@@ -61,7 +61,7 @@ function OperatorOverviewInner() {
   const gatesUrl = user?.gateId ? null : "/api/gates";
   const permissionsUrl =
     user?.role === "operator"
-      ? "/api/permissions?status=PENDING&stage=main_gate"
+      ? "/api/permissions?status=PENDING&stage=hostel_manager"
       : user?.gateId
         ? null
         : "/api/permissions?status=PENDING";

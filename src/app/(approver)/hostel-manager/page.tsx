@@ -30,6 +30,7 @@ import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
 import { DigitalHandover } from "@/components/retention/DigitalHandover";
 import { AttentionQueue } from "@/components/engagement/AttentionQueue";
 import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 /* response shapes */
 
@@ -213,11 +214,12 @@ function HostelManagerInner() {
     </div>
   );
 }
-
 export default function HostelManagerPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <HostelManagerInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['hostel_manager', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <HostelManagerInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

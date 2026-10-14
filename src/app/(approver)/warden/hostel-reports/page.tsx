@@ -10,6 +10,7 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
   Inbox,
   Loader2,
@@ -171,11 +172,12 @@ function WardenHostelReportsInner() {
     </div>
   );
 }
-
 export default function WardenHostelReportsPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <WardenHostelReportsInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['warden', 'principal', 'deputy_warden', 'hostel_manager', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <WardenHostelReportsInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

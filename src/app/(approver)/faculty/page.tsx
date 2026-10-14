@@ -26,6 +26,7 @@ import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
 import { DigitalHandover } from "@/components/retention/DigitalHandover";
 import { AttentionQueue } from "@/components/engagement/AttentionQueue";
 import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 /* response shapes */
 
@@ -191,11 +192,12 @@ function FacultyInner() {
     </div>
   );
 }
-
 export default function FacultyPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <FacultyInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['faculty', 'hod', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <FacultyInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

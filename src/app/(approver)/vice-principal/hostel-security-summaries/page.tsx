@@ -7,6 +7,8 @@ import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { useProbe } from "../_probe";
 import { Loader2, Inbox, Building2, Siren, ShieldCheck, Users } from "lucide-react";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+import type { Role } from "@/lib/types";
 
 interface PresenceMatrixData {
   gates: Array<{ id: string; name: string; code: string }>;
@@ -209,11 +211,12 @@ function VpHostelSecurityInner() {
     </div>
   );
 }
-
-export default function VpHostelSecuritySummariesPage() {
+export default function VpHostelSecurityPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <VpHostelSecurityInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['vice_principal', 'exam_branch', 'oie', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <VpHostelSecurityInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

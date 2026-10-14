@@ -70,7 +70,6 @@ export function HostelDashboard() {
     "deputy_warden",
     "hostel_manager",
     "warden_or_principal",
-    "main_gate",
   ];
   const stageData: { stage: string; count: number }[] = stageKeys.map((k) => ({
     stage: k,

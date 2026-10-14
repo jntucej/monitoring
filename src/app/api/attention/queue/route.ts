@@ -54,7 +54,7 @@ function ownedStages(role: Role): string[] {
     return [
       "faculty", "hod", "oie", "vice_principal", "principal",
       "caretaker", "deputy_warden", "hostel_manager", "warden_or_principal",
-      "hostel_biometric", "main_gate",
+      "lab_incharge",
     ];
   }
   return [...list];

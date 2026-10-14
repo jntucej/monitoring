@@ -12,6 +12,8 @@ import {
 import { useAuthStore } from "@/stores/authStore";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+import type { Role } from "@/lib/types";
 
 /* ── shapes ── */
 
@@ -220,13 +222,12 @@ function ChildRequestsInner() {
     </div>
   );
 }
-
 export default function ChildRequestsPage() {
   return (
-    <WidgetBoundary title="Child Requests">
+    <AuthGuard allowedRoles={['guardian', 'parent', 'admin', 'sysadmin']}>
       <Suspense fallback={<PageLoading />}>
         <ChildRequestsInner />
       </Suspense>
-    </WidgetBoundary>
+    </AuthGuard>
   );
 }

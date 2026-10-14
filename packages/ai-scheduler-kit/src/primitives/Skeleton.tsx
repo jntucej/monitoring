@@ -1,5 +1,4 @@
 // Skeleton loading placeholder
-import React from 'react';
 import { cn } from '../lib/cn';
 
 export interface SkeletonProps {

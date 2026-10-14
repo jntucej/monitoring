@@ -27,6 +27,7 @@ import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { AttentionQueue } from "@/components/engagement/AttentionQueue";
 import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 interface DataResponse {
   success: boolean;
@@ -193,11 +194,12 @@ function HodInner() {
     </div>
   );
 }
-
 export default function HodPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <HodInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['hod', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <HodInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

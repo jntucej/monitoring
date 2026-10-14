@@ -5,6 +5,7 @@ import { ChildWeeklyActivity } from "@/components/parent/ChildWeeklyActivity";
 import { ChildStatus } from "@/components/parent/ChildStatus";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
   BarChart3
 } from "lucide-react";
@@ -32,13 +33,12 @@ function ChildAttendanceInner() {
     </div>
   );
 }
-
 export default function ChildAttendancePage() {
   return (
-    <WidgetBoundary title="Child Attendance">
+    <AuthGuard allowedRoles={['guardian', 'parent', 'admin', 'sysadmin']}>
       <Suspense fallback={<PageLoading />}>
         <ChildAttendanceInner />
       </Suspense>
-    </WidgetBoundary>
+    </AuthGuard>
   );
 }

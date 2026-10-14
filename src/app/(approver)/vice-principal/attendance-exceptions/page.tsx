@@ -6,6 +6,8 @@ import { PageLoading } from "@/components/shared/LoadingStates";
 import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { Loader2, Inbox, UserX, Clock4, Flag, AlertTriangle } from "lucide-react";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+import type { Role } from "@/lib/types";
 
 interface ExceptionRecord {
   id: string;
@@ -180,11 +182,12 @@ function VpAttendanceExceptionsInner() {
     </div>
   );
 }
-
 export default function VpAttendanceExceptionsPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <VpAttendanceExceptionsInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['vice_principal', 'exam_branch', 'oie', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <VpAttendanceExceptionsInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

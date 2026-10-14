@@ -13,7 +13,7 @@
 // Now: ONE fetch, stage-gated buttons, plus a universal support form.
 
 import { Suspense } from "react";
-import { GuardedPage } from "@/components/shared/GuardedPage";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
@@ -25,33 +25,33 @@ const ALLOWED: Role[] = ["oie", "exam_branch", "vice_principal", "principal", "a
 
 function OicQueueInner() {
   return (
-    <GuardedPage allowedRoles={ALLOWED} minTier={75}>
-      <div className="mx-auto max-w-5xl space-y-4 p-4">
-        <header>
-          <h1 className="text-lg font-semibold text-[var(--text-primary)]">Exam Desk Queue</h1>
-          <p className="text-xs text-[var(--text-muted)]">
-            Rows at other stages are read-only. Actions apply to your stage only.
-          </p>
-        </header>
+    <div className="mx-auto max-w-5xl space-y-4 p-4">
+      <header>
+        <h1 className="text-lg font-semibold text-[var(--text-primary)]">Exam Desk Queue</h1>
+        <p className="text-xs text-[var(--text-muted)]">
+          Rows at other stages are read-only. Actions apply to your stage only.
+        </p>
+      </header>
 
-        <WidgetBoundary title="Queue">
-          <OieQueuePanel title="Exam Permissions" />
-        </WidgetBoundary>
+      <WidgetBoundary title="Queue">
+        <OieQueuePanel title="Exam Permissions" />
+      </WidgetBoundary>
 
-        <WidgetBoundary title="Support">
-          <UniversalSupportForm />
-        </WidgetBoundary>
+      <WidgetBoundary title="Support">
+        <UniversalSupportForm />
+      </WidgetBoundary>
 
-        <DevContactStrip />
-      </div>
-    </GuardedPage>
+      <DevContactStrip />
+    </div>
   );
 }
 
 export default function OicQueuePage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <OicQueueInner />
-    </Suspense>
+    <AuthGuard allowedRoles={ALLOWED}>
+      <Suspense fallback={<PageLoading />}>
+        <OicQueueInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

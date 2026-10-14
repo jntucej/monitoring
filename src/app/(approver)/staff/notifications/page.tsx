@@ -11,6 +11,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { Loader2, ShieldCheck, AlertTriangle, ArrowRight } from "lucide-react";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 /* response shapes */
 
@@ -126,11 +127,12 @@ function StaffNotificationsInner() {
     </div>
   );
 }
-
 export default function StaffNotificationsPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <StaffNotificationsInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['staff', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <StaffNotificationsInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

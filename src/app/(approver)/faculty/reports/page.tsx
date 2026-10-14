@@ -10,6 +10,7 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
   ShieldCheck,
   Loader2,
@@ -179,11 +180,12 @@ function FacultyReportsInner() {
     </div>
   );
 }
-
 export default function FacultyReportsPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <FacultyReportsInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['faculty', 'hod', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <FacultyReportsInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

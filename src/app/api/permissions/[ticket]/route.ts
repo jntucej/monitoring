@@ -270,10 +270,8 @@ async function handlePatch(req: NextRequest): Promise<Response> {
     updateFields.biometric_hostel_at = new Date().toISOString();
   } else if (normalizedAction === "BIOMETRIC_GATE") {
     updateFields.biometric_gate_at = new Date().toISOString();
-    if (request.current_stage === "main_gate") {
-      nextStage = "completed";
-      nextStatus = "COMPLETED";
-    }
+    nextStage = "completed";
+    nextStatus = "COMPLETED";
   } else if (normalizedAction === "SIGN") {
     if (!digitalSignature) {
       return NextResponse.json(
