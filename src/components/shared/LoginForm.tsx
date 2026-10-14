@@ -280,7 +280,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
         </div>
       )}
 
-      <form onSubmit={handleFormSubmit} className="space-y-4">
+      <form onSubmit={handleFormSubmit} className="space-y-4" autoComplete="off">
         <div className="space-y-1.5">
           <label className="block text-xs font-semibold text-[var(--text-secondary)]">
             User ID / Identifier
@@ -288,6 +288,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
           <div className="relative">
             <input
               type="text"
+              autoComplete="username"
               value={loginIdentifier}
               onChange={(e) => { setLoginIdentifier(e.target.value); if (errorMsg) setErrorMsg(""); }}
               placeholder="Enter ID"
@@ -341,6 +342,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
+              autoComplete={loginMode === "pin" ? "off" : "current-password"}
               value={passwordOrPin}
               onChange={(e) => { setPasswordOrPin(e.target.value); if (errorMsg) setErrorMsg(""); }}
               placeholder={loginMode === "pin" ? "4-8 digit PIN" : "Enter password"}
