@@ -518,7 +518,7 @@ export async function getScopedTicket(
     .select(
       `
       *,
-      student:student_user_id (
+      student:requester_user_id (
         id,
         name,
         email,

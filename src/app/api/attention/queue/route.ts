@@ -124,7 +124,7 @@ async function fetchRequestsForRole(
 
   const select =
     "id, ticket_number, workflow_type, current_stage, status, sla_deadline, created_at, " +
-    "student:student_user_id(id, name, student_details(roll))";
+    "student:requester_user_id(id, name, student_details(roll))";
 
   let query = db
     .from("permission_requests")
@@ -154,9 +154,9 @@ async function fetchOpenRequestsByStudentId(
     .from("permission_requests")
     .select(
       "id, ticket_number, workflow_type, current_stage, status, sla_deadline, created_at, " +
-        "student:student_user_id(id, name, student_details(roll))"
+        "student:requester_user_id(id, name, student_details(roll))"
     )
-    .eq("student_user_id", studentId)
+    .eq("requester_user_id", studentId)
     .in("status", ["PENDING", "ESCALATED"])
     .order("created_at", { ascending: false })
     .limit(5);
@@ -272,7 +272,7 @@ async function fetchPrincipalStageRequests(
     .from("permission_requests")
     .select(
       "id, ticket_number, workflow_type, current_stage, status, sla_deadline, created_at, " +
-        "student:student_user_id(id, name, student_details(roll))"
+        "student:requester_user_id(id, name, student_details(roll))"
     )
     .or("current_stage.eq.principal,current_stage.eq.warden_or_principal")
     .in("status", ["PENDING", "ESCALATED"])
@@ -406,10 +406,10 @@ async function fetchStaffItems(
     .from("permission_requests")
     .select(
       "id, ticket_number, workflow_type, current_stage, status, sla_deadline, created_at, " +
-        "student:student_user_id(id, name, student_details(roll))"
+        "student:requester_user_id(id, name, student_details(roll))"
     )
     .eq("workflow_type", "staff_leave")
-    .eq("student_user_id", userId)
+    .eq("requester_user_id", userId)
     .in("status", ["PENDING", "ESCALATED"])
     .order("created_at", { ascending: false })
     .limit(3);
@@ -580,11 +580,11 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }): Pr
         if (stages.length === 0) break;
         const { data, error } = await db
           .from("permission_requests")
-          .select(
-            "id, ticket_number, workflow_type, current_stage, status, sla_deadline, created_at, " +
-              "student:student_user_id(id, name, student_details(roll))"
-          )
-          .in("current_stage", stages)
+    .select(
+      "id, ticket_number, workflow_type, current_stage, status, sla_deadline, created_at, " +
+        "student:requester_user_id(id, name, student_details(roll))"
+    )
+    .in("current_stage", stages)
           .in("status", ["PENDING", "ESCALATED"])
           .order("sla_deadline", { ascending: true, nullsFirst: false })
           .limit(5);

@@ -51,8 +51,8 @@ async function handleGet(
   if (childIds.length > 0) {
     const { data: reqs, error: reqErr } = await db
       .from("permission_requests")
-      .select("student_user_id, status")
-      .in("student_user_id", childIds)
+    .select("requester_user_id, status")
+    .in("requester_user_id", childIds)
       .eq("status", "PENDING")
       .limit(500);
     if (reqErr) {
@@ -60,7 +60,7 @@ async function handleGet(
       return NextResponse.json(body, { status });
     }
     for (const r of reqs ?? []) {
-      const sid = String((r as { student_user_id: unknown }).student_user_id ?? "");
+      const sid = String((r as { requester_user_id: unknown }).requester_user_id ?? "");
       openByChild.set(sid, (openByChild.get(sid) ?? 0) + 1);
     }
     totalOpenRequests = childIds.reduce((sum, id) => sum + (openByChild.get(id) ?? 0), 0);

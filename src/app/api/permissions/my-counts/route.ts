@@ -12,7 +12,7 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
   const { data, error } = await svc
     .from("permission_requests")
     .select("status")
-    .eq("student_user_id", auth.userId);
+    .eq("requester_user_id", auth.userId);
 
   if (error) {
     return NextResponse.json(

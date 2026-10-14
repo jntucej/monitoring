@@ -119,7 +119,7 @@ async function handleGet(
     .from("permission_requests")
     .select(
       "id, ticket_number, workflow_type, current_stage, status, sla_deadline, created_at, " +
-        "student:student_user_id(id, name, student_details(roll))"
+        "student:requester_user_id(id, name, student_details(roll))"
     )
     .eq("workflow_type", "exam")
     .in("current_stage", stagesForRole(role))

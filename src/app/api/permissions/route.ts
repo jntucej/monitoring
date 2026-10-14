@@ -127,16 +127,16 @@ async function handleGet(req: NextRequest, context: any) {
   }
 
   if (role === "student") {
-    query = query.eq("student_user_id", userId);
+    query = query.eq("requester_user_id", userId);
   } else if (["parent", "guardian"].includes(role)) {
     const children = await getLinkedPersons(userId);
     const childIds = children.map((c: any) => c.child_id);
     if (!childIds.length) return NextResponse.json({ success: true, data: [], total: 0 });
     if (sid) {
-      if (childIds.includes(sid)) query = query.eq("student_user_id", sid);
+      if (childIds.includes(sid)) query = query.eq("requester_user_id", sid);
       else return NextResponse.json({ success: false, error: "Not your child" }, { status: 403 });
     } else {
-      query = query.in("student_user_id", childIds);
+      query = query.in("requester_user_id", childIds);
     }
   } else if (["caretaker", "deputy_warden", "hostel_manager", "faculty", "hod", "oie", "vice_principal"].includes(role)) {
     query = query.eq("current_stage", role);
@@ -146,7 +146,7 @@ async function handleGet(req: NextRequest, context: any) {
     // any other workflow requests currently at the principal stage.
     query = query.or("current_stage.eq.warden_or_principal,current_stage.eq.principal");
   } else if (["admin", "sysadmin"].includes(role)) {
-    if (sid) query = query.eq("student_user_id", sid);
+    if (sid) query = query.eq("requester_user_id", sid);
   } else if (role === "operator") {
     query = query.eq("current_stage", "hostel_manager");
   } else {

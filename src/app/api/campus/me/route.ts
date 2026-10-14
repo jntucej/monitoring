@@ -29,7 +29,7 @@ async function handleGet(_req: NextRequest, context: { auth: AuthContext }) {
   const { data: pendingRows, count: pendingCount, error: pendingErr } = await supabase
     .from("permission_requests")
     .select("id", { count: "exact", head: true })
-    .eq("student_user_id", userId)
+    .eq("requester_user_id", userId)
     .eq("status", "PENDING");
   if (pendingErr) {
     return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: pendingErr.message } }, { status: 500 });

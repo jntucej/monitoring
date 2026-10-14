@@ -33,7 +33,7 @@ async function handleGet(
     .from("permission_requests")
     .select(
       "ticket_number, workflow_type, status, sla_deadline, created_at, " +
-        "student:student_user_id(id, name, student_details(roll))"
+        "student:requester_user_id(id, name, student_details(roll))"
     )
     .in("current_stage", [...STAGES])
     .in("status", ["PENDING", "ESCALATED"])
