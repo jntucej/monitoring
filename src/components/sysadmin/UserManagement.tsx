@@ -153,7 +153,7 @@ export function UserManagement() {
       const res = await fetch("/api/users", {
         method: "POST",
         headers: authHeaders(),
-        body: JSON.stringify({ name, email, role, uniqueId: customUniqueId.trim() || undefined, gateId: role === "operator" ? gateId || undefined : undefined, hostelScope: ["caretaker", "deputy_warden", "hostel_manager", "warden"].includes(role) ? hostelScope || undefined : undefined, isActive: true }),
+        body: JSON.stringify({ name, email, role, uniqueId: customUniqueId.trim() || undefined, gateId: role === "operator" ? gateId || undefined : undefined, hostelScope: ["caretaker", "deputy_warden", "hostel_manager"].includes(role) ? hostelScope || undefined : undefined, isActive: true }),
       });
       const j = await res.json();
       if (res.ok && j.success) {
@@ -406,7 +406,7 @@ export function UserManagement() {
                   onChange={(e) => changeRole(user, e.target.value)}
                   className="text-xs rounded-full bg-sky-500/10 text-sky-300 px-2 py-1 border border-sky-500/20"
                 >
-                  {["operator", "admin", "student", "parent", "warden", "faculty", "staff", "sysadmin", "caretaker", "deputy_warden", "hostel_manager", "principal", "vice_principal", "oie", "exam_branch"].map((r) => (
+                  {["operator", "admin", "student", "parent", "faculty", "staff", "sysadmin", "caretaker", "deputy_warden", "hostel_manager", "principal", "vice_principal", "oie", "exam_branch"].map((r) => (
                     <option key={r} value={r}>{r}</option>
                   ))}
                 </select>

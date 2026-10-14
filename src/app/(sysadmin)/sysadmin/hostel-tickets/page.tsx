@@ -24,7 +24,7 @@ export default function HostelTicketsAdminPage() {
   );
 
   return (
-    <AuthGuard allowedRoles={["sysadmin", "admin", "warden", "principal"] as never}>
+    <AuthGuard allowedRoles={["sysadmin", "admin", "principal"] as never}>
       <div className="space-y-4 p-4">
         <h1 className="flex items-center gap-2 text-fluid-lg font-semibold">
           <ClipboardList className="h-5 w-5" />

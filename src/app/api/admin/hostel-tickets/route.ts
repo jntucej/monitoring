@@ -9,7 +9,7 @@ import type { Role } from "@/lib/types";
 import type { AuthContext } from "@/lib/authContext";
 
 const VIEW_ROLES: Role[] = [
-  "sysadmin", "admin", "principal", "warden",
+  "sysadmin", "admin", "principal",
 ] as Role[];
 
 async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {

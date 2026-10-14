@@ -27,7 +27,7 @@ assert.throws(
 
 const r3 = applyPermissionAction(
   baseReq({ current_stage: "hostel_biometric", biometric_hostel_at: null }),
-  { ...actor, role: "warden" },
+  { ...actor, role: "principal" },
   { action: "APPROVE" },
 );
 assert.strictEqual(r3.updates.current_stage, "main_gate");
