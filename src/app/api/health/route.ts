@@ -1,26 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkSystemHealth } from "@/lib/health";
-import { query } from "@/lib/postgres";
 
 async function handleGet(req: NextRequest) {
   const startTime = Date.now();
   const health = await checkSystemHealth();
   const duration = Math.round(Date.now() - startTime);
 
-  // Log this request's actual response time if DB is reachable
-  if (health.components.database.status !== 'unhealthy') {
-    try {
-      const result = await query(
-        `INSERT INTO api_metrics (path, method, response_time, status_code, timestamp)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING id`,
-        ['/api/health', 'GET', duration, 200, new Date().toISOString()]
-      );
-      console.log(`[health] metric inserted: ${duration}ms, id=${result.rows?.[0]?.id}`);
-    } catch (e) {
-      console.error('[health] metric insert FAILED:', e);
-    }
-  }
+  // NOTE: /api/health deliberately does NOT write to api_metrics here.
+  // The metrics middleware already skips health endpoints (to avoid a
+  // self-reinforcing loop), and the dashboard polls this endpoint on an
+  // interval — every poll inserting a row used to inflate the
+  // "requests per minute" card with its own traffic. The measured
+  // duration is still surfaced via the X-Response-Time header below.
 
   const statusCodes = {
     healthy: 200,

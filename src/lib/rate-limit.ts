@@ -105,10 +105,11 @@ export async function checkRateLimit(
       const remaining = Math.max(0, effectiveMaxRequests - currentCount);
       const resetTime = new Date(Date.now() + windowMs);
 
-      void query(
-        `INSERT INTO api_metrics (path, method, response_time, status_code, timestamp) VALUES ($1, $2, $3, $4, $5)`,
-        [key, 'LIMITER', 0, limited ? 429 : 200, new Date().toISOString()]
-      ).catch(() => {});
+      // NOTE: no LIMITER bookkeeping row is written here. The count above is
+      // computed from real request rows only, so writing our own row just
+      // bloated the append-only api_metrics table (~90 rows/min) without
+      // affecting the limit. That pollution is what made the dashboard's
+      // "requests per minute" climb.
 
       return {
         limited,
