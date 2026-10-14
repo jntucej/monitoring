@@ -105,9 +105,13 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
   try {
     const oneMinuteAgo = new Date(Date.now() - 60 * 1000).toISOString();
 
-    // Count all requests in last minute
+    // Count real traffic only. Exclude the rate limiter's own bookkeeping
+    // rows (method='LIMITER') — otherwise the limiter writes a row on every
+    // check, so RPS the dashboard reports inflates over time even when real
+    // request volume is flat. This is what made "requests per minute" look
+    // like it was steadily increasing / fluctuating.
     const totalResult = await query(
-      `SELECT COUNT(*) as count FROM api_metrics WHERE timestamp >= $1`,
+      `SELECT COUNT(*) as count FROM api_metrics WHERE timestamp >= $1 AND method != 'LIMITER'`,
       [oneMinuteAgo]
     );
     health.metrics.requestsPerMinute = parseInt(totalResult.rows?.[0]?.count || '0', 10);
@@ -129,7 +133,7 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
 
     // Error rate
     const errorResult = await query(
-      `SELECT COUNT(*) as count FROM api_metrics WHERE timestamp >= $1 AND status_code >= 500`,
+      `SELECT COUNT(*) as count FROM api_metrics WHERE timestamp >= $1 AND method != 'LIMITER' AND status_code >= 500`,
       [oneMinuteAgo]
     );
     const errors = parseInt(errorResult.rows?.[0]?.count || '0', 10);

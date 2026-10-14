@@ -202,6 +202,45 @@ export function ScanConfirmation({
   // The config's `applicableTo` is a person-type (e.g. "student"), but
   // `student.studentType` is a sub-category (HM/HF/DM/DF). A reason that
   // applies to "student" therefore applies to every student sub-type.
+  // Constraint helpers. A student's sub-type + live campus status decide which
+  // moves are even legal before a single button is offered:
+  //   - DM/DF (day scholar)  -> can only move daily_outing (in & out). They do
+  //     not live on campus, so home_in / home_out / day_pass never apply.
+  //   - HM/HF (hosteller)    -> daily_outing (in & out), home_out (out, needs
+  //     pass), home_in (in, return from home), day_pass (out, needs pass).
+  //   - Already IN  -> do not re-record an entry; only exits are meaningful.
+  //   - Already OUT -> do not re-record an exit; only entries are meaningful.
+  // When campusStatus is unknown, fall back to type-only filtering.
+  const isDayScholar = student.studentType === "DM" || student.studentType === "DF";
+  const isHosteller = student.studentType === "HM" || student.studentType === "HF";
+
+  // Type gate: is this reason legally available for this sub-type?
+  const typeAllows = (cfg: ActionEntry) => {
+    if (!cfg.applicableTo || cfg.applicableTo.length === 0) return true;
+    if (!student.studentType) return true; // unknown type -> don't over-restrict
+    return cfg.applicableTo.includes(student.studentType);
+  };
+
+  // Occupancy gate: skip moves that duplicate the current state.
+  // "IN" means currently on campus -> an OUT makes sense, an IN does not.
+  // "OUT" means currently off campus -> an IN makes sense, an OUT does not.
+  // Unknown status -> allow everything (let the operator decide).
+  const occupancyAllows = (cfg: ActionEntry) => {
+    if (campusStatus === "IN" && cfg.direction === "IN") return false;
+    if (campusStatus === "OUT" && cfg.direction === "OUT") return false;
+    return true;
+  };
+
+  // Home In is only meaningful for hostelers (day scholars have no home to
+  // return from) and is an entry move.
+  const isHomeIn = (cfg: ActionEntry) =>
+    cfg.code === "home_in" || cfg.name === "Home In";
+
+  const allowed = (cfg: ActionEntry) =>
+    typeAllows(cfg) &&
+    occupancyAllows(cfg) &&
+    (!isHomeIn(cfg) || isHosteller);
+
   const studentAppliesTo = (cfg: ExitReasonConfig) => {
     if (!student.studentType) return true;
     const applicable = cfg.applicableTo as string[];
@@ -226,14 +265,14 @@ export function ScanConfirmation({
     name: student.personType && student.personType !== "student" ? "Exit" : config.name,
     direction: "OUT" as ScanDirection,
     icon: reasonIcons[config.code] || Briefcase,
-  }));
+  })).filter(allowed);
 
   // Entry (IN) options. Only two reasons exist for coming in:
   //   - Daily Outing: day scholars entering for the day (24h window).
   //     Also permitted for hostelers doing a short day trip out.
-  //   - Home In: return to campus from a home visit.
+  //   - Home In: return to campus from a home visit (hostellers only).
   // IN never requires a gate pass (server returns early on direction "IN").
-  const inActions: ActionEntry[] = [
+  const inActions: ActionEntry[] = ([
     {
       code: "daily_outing",
       name: "Daily Outing",
@@ -248,11 +287,11 @@ export function ScanConfirmation({
       name: "Home In",
       direction: "IN",
       icon: Home,
-      applicableTo: ["HM", "HF", "DM", "DF"],
+      applicableTo: ["HM", "HF"],
       requiresApproval: false,
       parentNotification: false,
     },
-  ];
+  ] as ActionEntry[]).filter(allowed);
 
   const handleConfirmClick = async (direction: ScanDirection, reason?: ExitReason) => {
     if (!photoVerified || isFlagged) {
@@ -280,6 +319,11 @@ export function ScanConfirmation({
   };
 
   const renderActionButtons = (actions: ActionEntry[]) => (
+    actions.length === 0 ? (
+      <p className="text-[11px] text-[var(--text-muted)] italic px-3 py-2 text-center">
+        No valid {actions.length === 0 ? "moves" : ""} available for this student's current state.
+      </p>
+    ) : (
     <div className={cn("grid gap-2", actions.length > 2 ? "grid-cols-3" : "grid-cols-2")}>
       {actions.map(({ code, name, icon: Icon, direction, requiresApproval }) => {
         const isSelected = selectedDirection === direction && selectedReason === code;
@@ -327,6 +371,7 @@ export function ScanConfirmation({
         );
       })}
     </div>
+    )
   );
 
   const content = (
