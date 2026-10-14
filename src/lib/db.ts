@@ -64,7 +64,6 @@ export async function resolveAlert(alertId: string, userId: string): Promise<boo
 }
 
 export const DEPARTMENTS: Department[] = [
-  { code: "CIVIL", name: "Civil Engineering", hod: "Dr. A. Kumar" },
   { code: "CSE", name: "Computer Science & Engineering", hod: "Dr. K. Sridhar" },
   { code: "IT",  name: "Information Technology",        hod: "Dr. P. Sreedhar" },
   { code: "ECE", name: "Electronics & Communication Engineering", hod: "Dr. M. Srinivas" },
@@ -154,7 +153,6 @@ export function mPerson(r: any): Person {
     course: r.student_details?.course || r.course || undefined,
     department: (() => {
       const deptCodeMap: Record<string, string> = {
-        "01": "CIVIL",
         "02": "EEE",
         "03": "MECH",
         "04": "ECE",
@@ -246,7 +244,6 @@ function mScan(r: any): Scan {
   const personType = user?.role || r.person_type || "student";
   const department = (() => {
     const deptCodeMap: Record<string, string> = {
-      "01": "CIVIL",
       "02": "EEE",
       "03": "MECH",
       "04": "ECE",

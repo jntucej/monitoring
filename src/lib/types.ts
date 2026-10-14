@@ -480,7 +480,6 @@ export interface ExitReasonConfig {
 }
 
 export const DEPARTMENT_CODES: Record<string, string> = {
-  "01": "CIVIL",
   "02": "EEE",
   "03": "MECH",
   "04": "ECE",
@@ -489,7 +488,6 @@ export const DEPARTMENT_CODES: Record<string, string> = {
 };
 
 export const DEPARTMENT_CODE_TO_NAME: Record<string, string> = {
-  "01": "Civil Engineering",
   "02": "Electrical & Electronics Engineering",
   "03": "Mechanical Engineering",
   "04": "Electronics & Communication Engineering",

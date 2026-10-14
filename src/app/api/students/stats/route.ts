@@ -58,7 +58,7 @@ async function handleGet(req: NextRequest) {
       const callerDeptId: string = callerRow?.department_id ?? "";
       if (callerDeptId) {
         const DEPT_CODE_MAP: Record<string, string> = {
-          "01": "CIVIL", "02": "EEE", "03": "MECH", "04": "ECE",
+          "02": "EEE", "03": "MECH", "04": "ECE",
           "05": "CSE", "12": "IT",
         };
         effectiveDeptFilter = DEPT_CODE_MAP[callerDeptId] || callerDeptId;
@@ -81,7 +81,6 @@ async function handleGet(req: NextRequest) {
     const detailsMap = new Map((detailsRes.data || []).map((sd: any) => [sd.user_id, sd]));
 
     const deptCodeMap: Record<string, string> = {
-      "01": "CIVIL",
       "02": "EEE",
       "03": "MECH",
       "04": "ECE",

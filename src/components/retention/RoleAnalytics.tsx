@@ -134,7 +134,7 @@ export function RoleAnalytics() {
                 aria-label="Department"
               >
                 <option value="">All depts</option>
-                {["CSE", "ECE", "EEE", "MECH", "CIVIL", "IT"].map((d) => (
+                {["CSE", "ECE", "EEE", "MECH", "IT"].map((d) => (
                   <option key={d} value={d}>
                     {d}
                   </option>
