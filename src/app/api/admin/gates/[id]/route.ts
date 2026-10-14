@@ -30,12 +30,9 @@ async function handleGet(req: NextRequest, ctx: { auth: AuthContext }): Promise<
       location: string;
       type: string;
       is_active: boolean;
-      latitude: number | null;
-      longitude: number | null;
-      allowed_radius_meters: number | null;
+      audience: string | null;
     }>(
-      `SELECT id, gate_code, name, location, type, is_active,
-              latitude, longitude, allowed_radius_meters
+      `SELECT id, gate_code, name, location, type, is_active, audience
          FROM public.gates WHERE id = $1`,
       [id]
     );
@@ -57,9 +54,7 @@ async function handleGet(req: NextRequest, ctx: { auth: AuthContext }): Promise<
         location: gate.location,
         type: gate.type,
         isActive: gate.is_active,
-        latitude: gate.latitude,
-        longitude: gate.longitude,
-        allowedRadiusMeters: gate.allowed_radius_meters,
+        audience: gate.audience,
       },
     });
   } catch (err) {
