@@ -23,6 +23,7 @@ export const RATE_LIMITS = {
   mutation:  { windowMs:      60_000, maxRequests: 60  },
   read:      { windowMs:      60_000, maxRequests: 300 },
   sensitive: { windowMs: 60 * 60_000, maxRequests: 20  },
+  admin:     { windowMs:      60_000, maxRequests: 120 },
 } as const;
 
 export const LIMITS = {
