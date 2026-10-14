@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query, addAudit } from "@/lib/db";
-import { withAuthorization } from "@/middleware/authorization";
-import { withRateLimit } from "@/lib/rate-limit";
+import { withAdminMutation } from "@/server/http/mutation-guard";
 import { ok, fail } from "@/server/http/response";
 import type { AuthContext } from "@/lib/authContext";
 
@@ -15,8 +14,9 @@ async function handlePatch(req: NextRequest, { auth }: { auth: AuthContext }) {
     const dayId = getDayId(req);
     if (!dayId) return fail("MISSING_PARAM", "Mess day id required", 400);
 
-    const existing = await query(`SELECT id FROM mess_days WHERE id::text = $1`, [dayId]);
+    const existing = await query(`SELECT * FROM mess_days WHERE id::text = $1`, [dayId]);
     if (existing.rows.length === 0) return fail("NOT_FOUND", "Mess day not found", 404);
+    const prev: any = existing.rows[0];
 
     const body = await req.json().catch(() => null);
     const windowOpens: string | null | undefined =
@@ -60,10 +60,17 @@ async function handlePatch(req: NextRequest, { auth }: { auth: AuthContext }) {
     );
 
     await addAudit({
-      action: cancel ? "MESS_DAY_CANCELLED" : "MESS_DAY_UPDATED",
+      action: cancel ? "MESS_DAY_CANCELLED" : "MESS_DAY_CREATED",
       userId: auth.userId,
       role: auth.role,
-      details: { dayId, windowOpens, windowCloses, cancel: !!cancel },
+      details: {
+        dayId,
+        mealDate: prev.meal_date,
+        dayType: prev.day_type,
+        windowOpens,
+        windowCloses,
+        cancel: !!cancel,
+      },
     });
 
     return ok(updated.rows[0]);
@@ -104,12 +111,10 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
   }
 }
 
-export const PATCH = withRateLimit(
-  withAuthorization(async (req, ctx) => handlePatch(req, ctx), { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "mess_days_patch", maxRequests: 20 }
-);
+export const PATCH = withAdminMutation(handlePatch, {
+  rateLimit: { windowMs: 60_000, maxRequests: 20 },
+});
 
-export const DELETE = withRateLimit(
-  withAuthorization(async (req, ctx) => handleDelete(req, ctx), { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "mess_days_delete", maxRequests: 20 }
-);
+export const DELETE = withAdminMutation(handleDelete, {
+  rateLimit: { windowMs: 60_000, maxRequests: 20 },
+});

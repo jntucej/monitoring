@@ -4,6 +4,7 @@ import { DataTable } from "@/components/ui/DataTable";
 import { CalendarDays, CheckCircle2, XCircle, Clock } from "lucide-react";
 import type { Scan, Student } from "@/lib/types";
 import { useApi } from "@/hooks/useApi";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 interface Row {
   roll: string;
@@ -120,7 +121,8 @@ const api = useApi();
   };
 
   return (
-    <div className="space-y-6">
+    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+      <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <p className="text-2xl font-bold">Attendance</p>
@@ -187,6 +189,7 @@ const api = useApi();
         keyExtractor={(r) => r.roll}
       />
       </div>
-    </div>
+      </div>
+    </AuthGuard>
   );
 }

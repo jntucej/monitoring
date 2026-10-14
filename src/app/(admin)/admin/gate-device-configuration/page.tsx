@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 /* ── response shape (mirrors /api/admin/gate-device-configuration) ────────── */
 
@@ -294,8 +295,10 @@ function AdminGateDeviceConfigurationInner() {
 
 export default function AdminGateDeviceConfigurationPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <AdminGateDeviceConfigurationInner />
-    </Suspense>
+    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+      <Suspense fallback={<PageLoading />}>
+        <AdminGateDeviceConfigurationInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

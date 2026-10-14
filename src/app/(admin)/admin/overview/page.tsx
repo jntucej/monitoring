@@ -1,7 +1,26 @@
 "use client";
 
-import { Shield, AlertTriangle, Clock, Info, ArrowRight, Activity, GraduationCap, UserCheck, Briefcase, HardHat, Zap, Database } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  Shield,
+  AlertTriangle,
+  Info,
+  ArrowRight,
+  Activity,
+  GraduationCap,
+  UserCheck,
+  Briefcase,
+  HardHat,
+  Zap,
+  Database,
+  Users,
+  Ticket,
+  Clock,
+} from "lucide-react";
 import Link from "next/link";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { getAuthHeaders } from "@/lib/utils";
 
 const iconMap: Record<string, any> = {
   Activity,
@@ -18,7 +37,66 @@ const iconMap: Record<string, any> = {
   Database,
 };
 
-export default function AdminOverviewPage() {
+interface OverviewData {
+  counts: {
+    users: number;
+    gatesActive: number;
+    announcements: number;
+    openSupportTickets: number;
+    openAlerts: number;
+  };
+  recentAuditEvents: {
+    id: string;
+    action: string;
+    userName: string | null;
+    userRole: string | null;
+    details: unknown;
+    timestamp: string;
+  }[];
+  occupancy: { onCampusNow: number };
+}
+
+function fmt(n: number): string {
+  return n.toLocaleString("en-IN");
+}
+
+function AdminOverviewInner() {
+  const [data, setData] = useState<OverviewData | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/admin/overview", { headers: getAuthHeaders(), cache: "no-store" });
+        const json = await res.json();
+        if (cancelled) return;
+        if (json.success) {
+          setData(json.data);
+          setError(null);
+        } else {
+          setError(typeof json.error === "string" ? json.error : json.error?.message ?? "Failed to load overview");
+        }
+      } catch (err) {
+        if (!cancelled) setError(err instanceof Error ? err.message : "Failed to load overview");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const statCards = data
+    ? [
+        { icon: Users, label: "Users", value: data.counts.users, href: "/admin/users" },
+        { icon: Shield, label: "Gates Active", value: data.counts.gatesActive, href: "/admin/gates" },
+        { icon: Info, label: "Announcements", value: data.counts.announcements, href: "/admin/announcements" },
+        { icon: Ticket, label: "Open Support Tickets", value: data.counts.openSupportTickets, href: "/admin/support" },
+        { icon: AlertTriangle, label: "Open Alerts", value: data.counts.openAlerts, href: "/admin/alerts" },
+        { icon: Zap, label: "On Campus Now", value: data.occupancy?.onCampusNow ?? 0, href: "/admin/occupancy" },
+      ]
+    : [];
+
   return (
     <div className="space-y-8">
       {/* Hero */}
@@ -29,12 +107,78 @@ export default function AdminOverviewPage() {
           </div>
           <div className="flex-1">
             <p className="text-sm sm:text-base text-[var(--text-muted)] leading-relaxed max-w-2xl">
-              Central command for campus access control. Monitor real-time gate telemetry, track student/faculty/staff/worker movement,
-              manage security alerts, and enforce lockdown protocols across all entry points.
+              Central command for campus access control. Monitor real-time gate telemetry, track
+              student/faculty/staff/worker movement, manage security alerts, and enforce lockdown
+              protocols across all entry points.
             </p>
           </div>
         </div>
       </div>
+
+      {/* Live Overview */}
+      <WidgetBoundary title="Overview">
+        <div>
+          <h2 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-4">
+            Live Overview
+          </h2>
+          {error ? (
+            <div className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-4 text-sm text-rose-300">
+              {error}
+            </div>
+          ) : !data ? (
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 text-sm text-[var(--text-muted)]">
+              Loading overview…
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              {statCards.map((card) => {
+                const Icon = card.icon;
+                return (
+                  <Link
+                    key={card.label}
+                    href={card.href}
+                    className="group rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-all"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-emerald-400 group-hover:translate-x-1 transition-all" />
+                    </div>
+                    <p className="mt-3 text-2xl font-black text-[var(--text-primary)]">{fmt(card.value)}</p>
+                    <p className="text-xs text-[var(--text-muted)] mt-0.5">{card.label}</p>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+
+          {data && data.recentAuditEvents.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3 flex items-center gap-2">
+                <Clock className="w-3.5 h-3.5" /> Recent Campus Events
+              </h3>
+              <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] divide-y divide-[var(--border)]">
+                {data.recentAuditEvents.map((e) => (
+                  <div key={e.id} className="px-4 py-3 flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <code className="text-xs bg-[var(--bg-elevated)] border border-[var(--border)] rounded px-1.5 py-0.5 text-emerald-400">
+                        {e.action}
+                      </code>
+                      <p className="text-xs text-[var(--text-muted)] mt-1 truncate">
+                        {e.userName || e.userRole || "system"}
+                      </p>
+                    </div>
+                    <span className="text-[11px] text-[var(--text-muted)] whitespace-nowrap shrink-0">
+                      {e.timestamp ? new Date(e.timestamp).toLocaleString("en-IN") : "—"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </WidgetBoundary>
 
       {/* Module Cards */}
       <div>
@@ -84,10 +228,19 @@ export default function AdminOverviewPage() {
         <div>
           <p className="text-xs font-semibold text-amber-400">Command Overview</p>
           <p className="text-[11px] text-amber-300/70 mt-0.5">
-            All modules pull from the same live telemetry feed. The Dashboard page shows real-time status; drill into individual modules for deeper management.
+            All modules pull from the same live telemetry feed. The Dashboard page shows real-time
+            status; drill into individual modules for deeper management.
           </p>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AdminOverviewPage() {
+  return (
+    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+      <AdminOverviewInner />
+    </AuthGuard>
   );
 }

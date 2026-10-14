@@ -1,13 +1,120 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { Activity } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { PageLoading } from "@/components/shared/LoadingStates";
 import { HealthDashboard } from "@/components/sysadmin/HealthDashboard";
+import { getAuthHeaders } from "@/lib/utils";
+
+type ComponentStatus = "healthy" | "degraded" | "unhealthy" | "unknown";
+
+interface HealthSnapshot {
+  status: ComponentStatus;
+  components: {
+    database: { status: ComponentStatus; latency?: number };
+    redis?: { status: ComponentStatus; latency?: number };
+    gateways: { status: ComponentStatus; online?: number; offline?: number; total?: number };
+  };
+}
+
+const DOT: Record<ComponentStatus, string> = {
+  healthy: "bg-emerald-400",
+  degraded: "bg-amber-400",
+  unhealthy: "bg-rose-400",
+  unknown: "bg-slate-500",
+};
+
+function StatusDot({ status, label, detail }: { status: ComponentStatus; label: string; detail?: string }) {
+  return (
+    <div className="flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2">
+      <span className={`h-2.5 w-2.5 rounded-full ${DOT[status]} ${status === "healthy" ? "animate-pulse" : ""}`} />
+      <div>
+        <p className="text-xs font-medium text-[var(--text-primary)]">{label}</p>
+        {detail && <p className="text-[11px] text-[var(--text-muted)]">{detail}</p>}
+      </div>
+    </div>
+  );
+}
+
+function HealthSnapshotBar() {
+  const [snap, setSnap] = useState<HealthSnapshot | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/health", { headers: getAuthHeaders(), cache: "no-store" });
+        if (!res.ok && res.status !== 503) throw new Error("health unavailable");
+        const data: HealthSnapshot = await res.json();
+        if (cancelled) return;
+        setSnap(data);
+      } catch {
+        /* snapshot is optional; the full dashboard below still renders */
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (loading || !snap) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <PageLoading />
+      </div>
+    );
+  }
+
+  const gateways = snap.components?.gateways;
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <StatusDot
+        status={snap.status}
+        label="Overall"
+        detail={snap.status === "healthy" ? "All systems nominal" : `Status: ${snap.status}`}
+      />
+      <StatusDot
+        status={snap.components?.database?.status ?? "unknown"}
+        label="Database"
+        detail={typeof snap.components?.database?.latency === "number" ? `${snap.components.database.latency}ms` : undefined}
+      />
+      <StatusDot
+        status={gateways?.status ?? "unknown"}
+        label="Gateways"
+        detail={typeof gateways?.online === "number" ? `${gateways.online} online / ${gateways?.offline ?? 0} offline` : undefined}
+      />
+    </div>
+  );
+}
 
 export default function SystemHealthPage() {
   return (
     <AuthGuard allowedRoles={["admin", "sysadmin"]}>
       <div className="max-w-6xl mx-auto space-y-6">
-        <HealthDashboard />
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+            <Activity className="w-5 h-5 text-emerald-400" />
+          </div>
+          <div>
+            <h1 className="text-lg font-semibold text-[var(--text-primary)]">System Health</h1>
+            <p className="text-xs text-[var(--text-muted)]">
+              Live infrastructure status — database, redis, gateways and services.
+            </p>
+          </div>
+        </div>
+
+        <WidgetBoundary title="Health Snapshot">
+          <HealthSnapshotBar />
+        </WidgetBoundary>
+
+        <WidgetBoundary title="Health Dashboard">
+          <HealthDashboard />
+        </WidgetBoundary>
       </div>
     </AuthGuard>
   );

@@ -4,6 +4,7 @@ import React, { useMemo, useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
   LayoutDashboard, Bell, Megaphone, CalendarCheck, GraduationCap,
   QrCode, MapPin, FileSpreadsheet, UtensilsCrossed, Users, Briefcase,
@@ -107,7 +108,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [q]);
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)]">
+    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+      <div className="min-h-[100dvh] flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)]">
       <header className="sticky top-0 z-40 flex flex-col gap-3 border-b border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3 md:px-6 pt-safe">
         {/* Role-context chip + search */}
         <div className="flex items-center justify-between gap-3">
@@ -215,6 +217,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <main className="flex-1 p-4 sm:p-6 md:p-8 pb-24 md:pb-8">
         <div className="mx-auto w-full max-w-7xl">{children}</div>
       </main>
-    </div>
+      </div>
+    </AuthGuard>
   );
 }

@@ -6,6 +6,7 @@ import { WorkerShiftTracker, WorkerShift } from "@/components/admin/WorkerShiftT
 import { useApi } from "@/hooks/useApi";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh"
 import { CampusStatusBar } from "@/components/admin/CampusStatusBar";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 export default function AdminWorkersPage() {
 const api = useApi();
@@ -49,7 +50,8 @@ const api = useApi();
   useLiveRefresh(fetchShifts, { intervalMs: 30000 });
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+      <div className="min-h-screen bg-[var(--bg)]">
       <CampusStatusBar />
       <div className="p-6 space-y-6">
       {/* Header */}
@@ -76,7 +78,8 @@ const api = useApi();
         <WorkerShiftTracker shifts={shifts} summary={summary} />
       )}
     </div>
-    </div>
+      </div>
+    </AuthGuard>
   );
 }
 

@@ -7,6 +7,7 @@ import { FacultyMemberAttendance, DepartmentAttendanceSummary } from "@/lib/type
 import { useApi } from "@/hooks/useApi";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh"
 import { CampusStatusBar } from "@/components/admin/CampusStatusBar";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 export default function AdminFacultyPage() {
 const api = useApi();
@@ -54,7 +55,8 @@ const api = useApi();
   useLiveRefresh(fetchFacultyAttendance, { intervalMs: 30000 });
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+      <div className="min-h-screen bg-[var(--bg)]">
       <CampusStatusBar />
       <div className="p-6 space-y-6">
       {/* Page Header */}
@@ -85,6 +87,7 @@ const api = useApi();
         />
       )}
     </div>
-    </div>
+      </div>
+    </AuthGuard>
   );
 }

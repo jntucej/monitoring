@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 /* ── response shape (mirrors /api/admin/workflow-configuration) ───────────── */
 
@@ -248,8 +249,10 @@ function AdminWorkflowConfigurationInner() {
 
 export default function AdminWorkflowConfigurationPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <AdminWorkflowConfigurationInner />
-    </Suspense>
+    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+      <Suspense fallback={<PageLoading />}>
+        <AdminWorkflowConfigurationInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

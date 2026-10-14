@@ -23,6 +23,7 @@ import { DashboardCustomizer } from "@/components/engagement/DashboardCustomizer
 import { AttentionQueue } from "@/components/engagement/AttentionQueue";
 import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
 import { useAuthStore } from "@/stores/authStore";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import { fmtInt, fmtRelative, fmtBytes } from "@/lib/formatters";
 import {
   AlertCircle, Flame, ShieldAlert, X,
@@ -315,7 +316,8 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <motion.div initial="hidden" animate="visible" variants={fadeInUp} className="space-y-6">
+    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+      <motion.div initial="hidden" animate="visible" variants={fadeInUp} className="space-y-6">
       {/* ── F: Active Lockdown Banner ── */}
       <AnimatePresence>
         {activeLockdown && (
@@ -616,5 +618,6 @@ export default function AdminDashboardPage() {
         <NotificationCenter />
       </div>
     </motion.div>
+    </AuthGuard>
   );
 }

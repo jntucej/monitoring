@@ -1,20 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Shield, GraduationCap, Briefcase, UserCheck, Grid, Search, ArrowRight, Lock } from "lucide-react";
+import { Shield, GraduationCap, Briefcase, Grid, Lock, ArrowRight } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+import { UserManagementPanel } from "@/components/admin/UserManagementPanel";
 import Link from "next/link";
-
-interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  status: string;
-  department?: string;
-  isHod?: boolean;
-}
 
 interface DepartmentData {
   code: string;
@@ -26,37 +18,9 @@ interface DepartmentData {
 }
 
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState<UserProfile[]>([]);
   const [departments, setDepartments] = useState<DepartmentData[]>([]);
-  const [loading, setLoading] = useState(true);
   const [loadingDepts, setLoadingDepts] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"roles" | "heatmap">("roles");
-  const [query, setQuery] = useState("");
-  const [searching, setSearching] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
-
-  const loadUsers = async (q = "") => {
-    setLoading(true);
-    setSearching(!!q.trim());
-    setError(null);
-    try {
-      const url = q.trim() ? `/api/users?q=${encodeURIComponent(q.trim())}` : "/api/users";
-      const res = await fetch(url, { headers: getAuthHeaders(), cache: "no-store" });
-      const json = await res.json();
-      if (json.success && Array.isArray(json.data)) {
-        setUsers(json.data);
-        setHasSearched(!!q.trim());
-      } else {
-        const msg = typeof json.error === "string" ? json.error : json.error?.message || "Failed to load user roles";
-        setError(msg);
-      }
-    } catch (e: any) {
-      setError(e?.message || "Network error");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const loadDepartments = async () => {
     setLoadingDepts(true);
@@ -78,24 +42,13 @@ export default function AdminUsersPage() {
   }
 
   useEffect(() => {
-    loadUsers();
     loadDepartments();
   }, []);
-
-  const handleSearch = (value: string) => {
-    setQuery(value);
-    if (value.trim()) loadUsers(value);
-    else loadUsers();
-  };
 
   const totalStudentCount = useMemo(
     () => departments.reduce((acc, curr) => acc + (curr.totalStudents || 0), 0),
     [departments]
   );
-
-  const studentAccounts = useMemo(() => users.filter((u) => u.role?.toLowerCase() === "student"), [users]);
-  const nonStudentAccounts = useMemo(() => users.filter((u) => u.role?.toLowerCase() !== "student"), [users]);
-  const shownAccounts = hasSearched ? users : nonStudentAccounts;
 
   const getHeatmapColor = (count: number) => {
     if (count > 100) return "bg-blue-600 text-white font-bold";
@@ -106,7 +59,8 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+      <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <p className="text-[var(--text-muted)]">
@@ -227,125 +181,43 @@ export default function AdminUsersPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {!hasSearched && (
-            <div className="bg-[var(--bg-surface)] p-4 rounded-xl border border-[var(--border)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-blue-500/15 text-blue-400 flex items-center justify-center">
-                  <GraduationCap className="w-4.5 h-4.5" />
-                </div>
-                <div>
-                  <div className="text-sm font-semibold text-[var(--text-primary)]">
-                    {loadingDepts ? "..." : totalStudentCount.toLocaleString()} students on roster
-                  </div>
-                  <div className="text-xs text-[var(--text-muted)]">
-                    Student accounts are hidden from this view — the full roster lives at /admin/students
-                  </div>
-                </div>
+          <div className="bg-[var(--bg-surface)] p-4 rounded-xl border border-[var(--border)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-blue-500/15 text-blue-400 flex items-center justify-center">
+                <GraduationCap className="w-4.5 h-4.5" />
               </div>
-              <Link
-                href="/admin/students"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)] hover:bg-white/5 transition"
-              >
-                Open student roster
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-          )}
-
-          <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] overflow-hidden">
-            <div className="p-4 border-b border-[var(--border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <h3 className="font-semibold flex items-center gap-2">
-                <UserCheck className="w-5 h-5 text-purple-400" />
-                {hasSearched ? "Search Results" : "Staff & Admin Accounts"}
-              </h3>
-              <div className="relative w-full sm:w-72">
-                <Search className="w-4 h-4 text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  value={query}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  placeholder="Search name, roll, email, or role…"
-                  className="w-full bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg pl-9 pr-9 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-purple-500/50"
-                />
-                {(query || searching) && (
-                  <button
-                    onClick={() => {
-                      setQuery("");
-                      setHasSearched(false);
-                      loadUsers();
-                    }}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] text-xs font-bold"
-                    title="Clear search"
-                  >
-                    ✕
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {hasSearched && !searching && (
-              <div className="px-4 py-2 text-xs text-[var(--text-muted)] bg-white/5">
-                {users.length} account{users.length === 1 ? "" : "s"} matching “{query}”
-              </div>
-            )}
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm min-w-[700px]">
-                <thead>
-                  <tr className="border-b border-[var(--border)] text-left text-[var(--text-muted)] bg-white/5">
-                    <th className="p-4 font-medium">User Profile</th>
-                    <th className="p-4 font-medium">Assigned Role</th>
-                    <th className="p-4 font-medium">Department</th>
-                    <th className="p-4 font-medium">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[var(--border)]">
-                  {error ? (
-                    <tr><td colSpan={4} className="p-8 text-center text-red-400">{error}</td></tr>
-                  ) : searching ? (
-                    <tr><td colSpan={4} className="p-8 text-center text-[var(--text-muted)]">Searching…</td></tr>
-                  ) : hasSearched && users.length === 0 ? (
-                    <tr><td colSpan={4} className="p-8 text-center text-[var(--text-muted)]">No accounts match “{query}”</td></tr>
-                  ) : loading && !hasSearched ? (
-                    <tr><td colSpan={4} className="p-8 text-center text-[var(--text-muted)]">Loading users…</td></tr>
-                  ) : !hasSearched && shownAccounts.length === 0 ? (
-                    <tr><td colSpan={4} className="p-8 text-center text-[var(--text-muted)]">No non-student accounts found</td></tr>
-                  ) : (
-                    shownAccounts.map((u) => (
-                      <tr key={u.id} className="hover:bg-white/5">
-                        <td className="p-4 font-medium">
-                          {u.name || u.email}
-                          {u.email && u.name && u.email !== u.name && (
-                            <span className="block text-xs text-[var(--text-muted)]">{u.email}</span>
-                          )}
-                        </td>
-                        <td className="p-4 uppercase text-xs font-semibold text-purple-400">{u.role}</td>
-                        <td className="p-4 text-xs text-[var(--text-muted)]">{u.department || "All Campus"}</td>
-                        <td className="p-4">
-                          <span className="px-2 py-0.5 rounded-full text-xs bg-emerald-500/10 text-emerald-400 font-medium">
-                            {u.status || "ACTIVE"}
-                          </span>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Role-change guidance — grant/revoke lives on the sysadmin
-                console (/api/admin/users/[id]/roles). Admins can view
-                assignments but privilege changes are sysadmin-gated. */}
-            <div className="m-4 mt-0 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] p-4 flex items-start gap-3">
-              <Lock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-semibold text-amber-300">Role changes require sysadmin</p>
-                <p className="mt-1 text-xs text-slate-400">
-                  Granting or revoking roles (including <code className="text-[11px]">sysadmin</code>
-                  escalation) runs through the sysadmin console — <Link href="/admin/roles" className="text-emerald-400 hover:underline">view the role hierarchy</Link>{" "}
-                  for the assignment map. If an account's role looks out of date, contact the platform team.
-                </p>
+                <div className="text-sm font-semibold text-[var(--text-primary)]">
+                  {loadingDepts ? "..." : totalStudentCount.toLocaleString()} students on roster
+                </div>
+                <div className="text-xs text-[var(--text-muted)]">
+                  Student accounts are hidden from this view — the full roster lives at /admin/students
+                </div>
               </div>
+            </div>
+            <Link
+              href="/admin/students"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)] hover:bg-white/5 transition"
+            >
+              Open student roster
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <UserManagementPanel />
+
+          {/* Role-change guidance — grant/revoke lives on the sysadmin
+              console (/api/admin/users/[id]/roles). Admins can view
+              assignments but privilege changes are sysadmin-gated. */}
+          <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.06] p-4 flex items-start gap-3">
+            <Lock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-amber-300">Role changes require sysadmin</p>
+              <p className="mt-1 text-xs text-slate-400">
+                Granting or revoking roles (including <code className="text-[11px]">sysadmin</code>
+                escalation) runs through the sysadmin console — <Link href="/admin/roles" className="text-emerald-400 hover:underline">view the role hierarchy</Link>{" "}
+                for the assignment map. If an account's role looks out of date, contact the platform team.
+              </p>
             </div>
           </div>
 
@@ -353,5 +225,6 @@ export default function AdminUsersPage() {
         </div>
       )}
     </div>
+    </AuthGuard>
   );
 }

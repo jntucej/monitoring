@@ -12,6 +12,7 @@ import { useUIStore } from "@/stores/uiStore";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { OccupancyStats, DailyStats, VisitorAnalytics, EnhancedAnalytics } from "@/lib/analytics-types";
 import { useApi } from "@/hooks/useApi";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 const COLORS = ["#10b981", "#3b82f6", "#8b5cf6", "#f59e0b", "#ef4444", "#06b6d4"];
 
@@ -146,7 +147,8 @@ const api = useApi();
   ] : [];
 
   return (
-    <div className="space-y-6 p-6">
+    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+      <div className="space-y-6 p-6">
       <div className="flex items-center justify-end flex-wrap gap-4">
         <div className="flex items-center gap-2 flex-wrap">
           <input
@@ -580,5 +582,6 @@ const api = useApi();
         </>
       )}
     </div>
+    </AuthGuard>
   );
 }

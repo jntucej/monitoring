@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { query, addAudit } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
+import { withAdminMutation } from "@/server/http/mutation-guard";
 import { ok, fail } from "@/server/http/response";
 import type { AuthContext } from "@/lib/authContext";
 
@@ -44,7 +45,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
     }
 
     const menuItemIds = items.filter((v) => typeof v === "string");
-    let itemIds: string[] = menuItemIds;
+    const itemIds: string[] = menuItemIds;
     if (menuItemIds.length > 0) {
       const placeholders = menuItemIds.map((_, i) => `$${i + 1}`).join(", ");
       const check = await query(
@@ -99,7 +100,6 @@ export const GET = withRateLimit(
   { keyPrefix: "mess_days_get" }
 );
 
-export const POST = withRateLimit(
-  withAuthorization(async (req, ctx) => handlePost(req, ctx), { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "mess_days_post", maxRequests: 20 }
-);
+export const POST = withAdminMutation(handlePost, {
+  rateLimit: { windowMs: 60_000, maxRequests: 20 },
+});
