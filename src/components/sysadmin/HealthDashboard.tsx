@@ -46,14 +46,16 @@ export function HealthDashboard() {
   }, []);
 
   // Initial load + visibility-aware polling (no raw setInterval).
-  // Faster cadence when the global Live stream toggle is on (5s vs 30s).
+  // A SINGLE poller drives /api/health. The previous version ran BOTH
+  // usePolling and useLiveRefresh on the same fetch, so every poll fired
+  // twice (mount double-fetch + overlapping timers), doubling requests to the
+  // health endpoint and inflating the "requests per minute" dashboard number.
+  // Slower cadence (15s live / 60s idle) keeps telemetry fresh without a
+  // request spike.
   useEffect(() => {
     fetchHealth(true);
   }, [fetchHealth]);
-  usePolling(() => { fetchHealth(); }, { intervalMs: isLiveStream ? 5000 : 30000 });
-
-  // Live toggle transition also fires a health re-check.
-  useLiveRefresh(() => fetchHealth(), {});
+  usePolling(() => { fetchHealth(); }, { intervalMs: isLiveStream ? 15000 : 60000 });
 
   const getStatusBadge = (status?: "healthy" | "degraded" | "unhealthy") => {
     switch (status) {
@@ -108,7 +110,7 @@ export function HealthDashboard() {
           </div>
           <p className="text-xs text-[var(--text-muted)] flex items-center gap-2">
             <Clock className="w-3.5 h-3.5 text-gray-400" />
-            {lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString()}` : "Fetching..."} (Auto-refreshes every {isLiveStream ? '5' : '30'}s)
+            {lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString()}` : "Fetching..."} (Auto-refreshes every {isLiveStream ? '15' : '60'}s)
           </p>
         </div>
       </div>

@@ -8,14 +8,14 @@ import { useAuthStore } from "@/stores/authStore";
 import { useApiResource } from "@/hooks/useApiResource";
 import { getAuthHeaders } from "@/lib/utils";
 import {
+  ShieldCheck,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
   User,
   Mail,
   Phone,
-  ShieldCheck,
-  Loader2,
-  Save,
-  CheckCircle2,
-  AlertCircle,
+  Save
 } from "lucide-react";
 
 /* ── shape ── */

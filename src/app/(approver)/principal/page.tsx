@@ -15,7 +15,6 @@ import {
   Inbox,
   Siren,
   Clock,
-  RefreshCw,
   AlertTriangle,
 } from "lucide-react";
 import {
@@ -46,6 +45,8 @@ import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { ContributionPortfolio } from "@/components/retention/ContributionPortfolio";
 import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
+import { AttentionQueue } from "@/components/engagement/AttentionQueue";
+import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
 
 function PrincipalDashboardInner() {
   const user = useAuthStore((s) => s.user);
@@ -182,15 +183,6 @@ function PrincipalDashboardInner() {
             )}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => void refresh()}
-          disabled={refreshing}
-          className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] disabled:opacity-50 flex items-center gap-2 self-start sm:self-auto"
-        >
-          <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-          {refreshing ? "Refreshing…" : "Refresh"}
-        </button>
       </div>
 
       {/* Global error banner */}
@@ -303,6 +295,9 @@ function PrincipalDashboardInner() {
           <NotificationCenter />
         </div>
       </WidgetBoundary>
+
+      <AttentionQueue />
+      <ActivityTimeline />
 
       {/* Campus services */}
       <WidgetBoundary title="Campus Services">

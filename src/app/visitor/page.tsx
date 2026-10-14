@@ -9,6 +9,8 @@ import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { CampusKnowledgeCentre } from "@/components/retention/CampusKnowledgeCentre";
+import { AttentionQueue } from "@/components/engagement/AttentionQueue";
+import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
 import { useAuthStore } from "@/stores/authStore";
 import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role } from "@/lib/types";
@@ -17,7 +19,6 @@ import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import {
   Inbox,
-  Clock,
   Loader2,
   ShieldCheck,
   UserCheck,
@@ -129,25 +130,14 @@ function VisitorInner() {
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => void refreshAll()}
-          disabled={busy}
-          className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700 disabled:opacity-50 shrink-0"
-        >
-          {busy ? (
-            <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" />
-          ) : (
-            <Clock className="w-4 h-4" />
-          )}
-          {busy ? "Refreshing…" : "Refresh"}
-        </button>
       </div>
 
       {/* Shared + engagement panels */}
       <QuickActions />
       <NotificationCenter />
       <PersonalizedCampusHome />
+      <AttentionQueue />
+      <ActivityTimeline />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <CampusKnowledgeCentre />
         <TaskContinuity />

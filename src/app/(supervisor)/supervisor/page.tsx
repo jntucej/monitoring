@@ -19,8 +19,10 @@ import { ContributionPortfolio } from "@/components/retention/ContributionPortfo
 import { DigitalHandover } from "@/components/retention/DigitalHandover";
 import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
+import { AttentionQueue } from "@/components/engagement/AttentionQueue";
+import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
 import Link from "next/link";
-import { ArrowRight, Loader2, Clock, AlertTriangle, ShieldCheck, Lock, Users } from "lucide-react";
+import { ArrowRight, Loader2, AlertTriangle, ShieldCheck, Lock, Users } from "lucide-react";
 
 /* ── response shapes ── */
 
@@ -118,14 +120,6 @@ function SupervisorOverviewInner() {
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
-        <button type="button"
-                    onClick={() => void refreshAll()}
-          disabled={anyLoading}
-          className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-primary)] hover:opacity-90 disabled:opacity-50 shrink-0"
-        >
-          {anyLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Clock className="w-4 h-4" />}
-          {anyLoading ? "Refreshing…" : "Refresh"}
-        </button>
       </div>
 
       {/* KPI row */}
@@ -228,6 +222,9 @@ function SupervisorOverviewInner() {
         <QuickActions />
         <NotificationCenter />
       </div>
+
+      <AttentionQueue />
+      <ActivityTimeline />
 
       {/* Approval & live activity (shift-based ops) */}
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 min-w-0">

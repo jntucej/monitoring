@@ -1,23 +1,22 @@
 "use client";
 
 import { Suspense, useCallback } from "react";
+import Link from "next/link";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
+import {
+  Loader2,
+  UserCheck,
+  Inbox,
+  AlertTriangle,
+  FileText,
+} from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
-import Link from "next/link";
-import {
-  Clock,
-  Loader2,
-  Inbox,
-  UserCheck,
-  AlertTriangle,
-  FileText,
-} from "lucide-react";
 import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
@@ -25,6 +24,8 @@ import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { ContributionPortfolio } from "@/components/retention/ContributionPortfolio";
 import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
 import { DigitalHandover } from "@/components/retention/DigitalHandover";
+import { AttentionQueue } from "@/components/engagement/AttentionQueue";
+import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
 
 /* response shapes */
 
@@ -132,19 +133,6 @@ function FacultyInner() {
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => void refreshAll()}
-          disabled={busy}
-          className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700 disabled:opacity-50 shrink-0"
-        >
-          {busy ? (
-            <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" />
-          ) : (
-            <Clock className="w-4 h-4" />
-          )}
-          {busy ? "Refreshing…" : "Refresh"}
-        </button>
       </div>
 
       {/* KPI row */}
@@ -178,6 +166,9 @@ function FacultyInner() {
           <NotificationCenter />
         </div>
       </WidgetBoundary>
+
+      <AttentionQueue />
+      <ActivityTimeline />
 
       {/* Campus services */}
       <WidgetBoundary title="Campus Services">

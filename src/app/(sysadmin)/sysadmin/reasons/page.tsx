@@ -18,7 +18,6 @@ import {
   Search,
   Trash2,
   Edit2,
-  RefreshCw,
   Tag,
   Building2,
   FileCheck2,
@@ -195,10 +194,6 @@ const api = useApi();
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="secondary" size="sm" onClick={() => fetchReasons()} disabled={loading} className="gap-1.5">
-              <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
-              Refresh
-            </Button>
             <Button variant="primary" size="sm" onClick={openCreateModal} className="gap-1.5">
               <Plus className="w-4 h-4" />
               Add Reason

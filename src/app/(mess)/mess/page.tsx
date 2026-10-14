@@ -6,7 +6,6 @@ import {
   UtensilsCrossed,
   Building2,
   CalendarDays,
-  Clock,
   Loader2,
   AlertTriangle,
   Inbox,
@@ -28,6 +27,8 @@ import { DigitalHandover } from "@/components/retention/DigitalHandover";
 import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { CampusFeed } from "@/components/engagement/CampusFeed";
+import { AttentionQueue } from "@/components/engagement/AttentionQueue";
+import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
 
 /* ── response shapes ──────────────────────────────────────────────────────── */
 
@@ -218,18 +219,6 @@ function MessDashboardInner() {
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
-        <button type="button"
-                    onClick={() => void refreshAll()}
-          disabled={deptLoading || lockdownLoading || menuLoading}
-          className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700 disabled:opacity-50 shrink-0"
-        >
-          {deptLoading || lockdownLoading || menuLoading ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Clock className="w-4 h-4" />
-          )}
-          {deptLoading || lockdownLoading || menuLoading ? "Refreshing…" : "Refresh"}
-        </button>
       </div>
 
       {/* global error banner */}
@@ -308,6 +297,9 @@ function MessDashboardInner() {
         <QuickActions />
         <NotificationCenter />
       </div>
+
+      <AttentionQueue />
+      <ActivityTimeline />
 
       {/* Campus engagement feed */}
       <CampusFeed />

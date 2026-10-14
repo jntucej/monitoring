@@ -10,7 +10,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { DockerFleetPanel } from "@/components/sysadmin/monitoring/DockerFleetPanel";
-import { Clock, Loader2, AlertTriangle, Container } from "lucide-react";
+import { AlertTriangle, Container } from "lucide-react";
 
 interface ServicesData {
   status?: string;
@@ -71,15 +71,6 @@ function DockerServicesInner() {
         <p className="text-sm text-slate-400">
           Signed in as <span className="font-mono text-slate-300">{role}</span>
         </p>
-        <button
-          type="button"
-          onClick={() => void refreshAll()}
-          disabled={busy}
-          className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs text-slate-200 hover:bg-slate-700 disabled:opacity-50"
-        >
-          {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin motion-reduce:animate-none" /> : <Clock className="w-3.5 h-3.5" />}
-          {busy ? "Refreshing…" : "Refresh"}
-        </button>
       </div>
 
       {error && (

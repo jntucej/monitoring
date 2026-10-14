@@ -11,6 +11,8 @@ import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { CampusFeed } from "@/components/engagement/CampusFeed";
+import { AttentionQueue } from "@/components/engagement/AttentionQueue";
+import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
 import { EventsPanel } from "@/components/engagement/EventsPanel";
 import { Achievements } from "@/components/engagement/Achievements";
 import { PersonalGoals } from "@/components/engagement/PersonalGoals";
@@ -131,6 +133,8 @@ function StudentDashboardInner() {
       <QuickActions />
       <NotificationCenter />
       <PersonalizedCampusHome />
+      <AttentionQueue />
+      <ActivityTimeline />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <CampusFeed />
         <EventsPanel />

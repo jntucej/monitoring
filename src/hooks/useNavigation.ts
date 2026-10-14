@@ -49,6 +49,12 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         ],
       },
       {
+        groupLabel: "Campus Life",
+        items: [
+          { href: "/campus", label: "My Campus", icon: "Sparkles" },
+        ],
+      },
+      {
         groupLabel: "General & Support",
         items: [
           { href: "/profile", label: "My Profile", icon: "User" },
@@ -126,6 +132,12 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
             { href: "/principal", label: "Principal Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
             { href: "/principal/permissions", label: "Principal Approvals", icon: "CheckSquare", badge: "PENDING" },
             { href: "/supervisor?tab=alerts", label: "Security Radar", icon: "ShieldAlert", badge: "ALERTS" },
+          ],
+        },
+        {
+          groupLabel: "Campus Life",
+          items: [
+            { href: "/campus", label: "My Campus", icon: "Sparkles" },
           ],
         },
         {
@@ -341,6 +353,12 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
             { href: "/about", label: "About Campus", icon: "HelpCircle" },
           ],
         },
+        {
+          groupLabel: "Campus Life",
+          items: [
+            { href: "/campus", label: "My Campus", icon: "Sparkles" },
+          ],
+        },
       ];
       break;
 
@@ -389,6 +407,12 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
         {
+          groupLabel: "Campus Life",
+          items: [
+            { href: "/campus", label: "My Campus", icon: "Sparkles" },
+          ],
+        },
+        {
           groupLabel: "General & Support",
           items: [
             { href: "/profile", label: "My Profile", icon: "User" },
@@ -428,6 +452,12 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
         {
+          groupLabel: "Campus Life",
+          items: [
+            { href: "/campus", label: "My Campus", icon: "Sparkles" },
+          ],
+        },
+        {
           groupLabel: "General",
           items: [
             { href: "/profile", label: "My Profile", icon: "User" },
@@ -447,6 +477,12 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
         {
+          groupLabel: "Campus Life",
+          items: [
+            { href: "/campus", label: "My Campus", icon: "Sparkles" },
+          ],
+        },
+        {
           groupLabel: "General",
           items: [
             { href: "/profile", label: "My Profile", icon: "User" },
@@ -462,6 +498,12 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           groupLabel: "Worker Portal",
           items: [
             { href: "/worker", label: "Worker Gate Pass", icon: "HardHat", badge: "SHIFT" },
+          ],
+        },
+        {
+          groupLabel: "Campus Life",
+          items: [
+            { href: "/campus", label: "My Campus", icon: "Sparkles" },
           ],
         },
         {
@@ -487,6 +529,12 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           ],
         },
         {
+          groupLabel: "Campus Life",
+          items: [
+            { href: "/campus", label: "My Campus", icon: "Sparkles" },
+          ],
+        },
+        {
           groupLabel: "General & Support",
           items: [
             { href: "/support", label: "Help & Support", icon: "LifeBuoy" },
@@ -506,6 +554,12 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
             { href: "/parent", label: "Child Movement Tracker", icon: "Users", badge: "LIVE" },
             { href: "/parent/child", label: "Gate Movement Logs", icon: "Clock" },
             { href: "/parent/passes", label: "Outpass Approvals", icon: "CheckSquare" },
+          ],
+        },
+        {
+          groupLabel: "Campus Life",
+          items: [
+            { href: "/campus", label: "My Campus", icon: "Sparkles" },
           ],
         },
         {

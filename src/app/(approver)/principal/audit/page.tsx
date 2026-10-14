@@ -11,7 +11,6 @@ import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { clearCache } from "@/hooks/useApiResource";
 import Link from "next/link";
 import {
-  RefreshCw,
   ArrowLeft,
   ScrollText,
   ClipboardCheck,
@@ -196,15 +195,6 @@ function AuditInner() {
             )}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => void refresh()}
-          disabled={refreshing}
-          className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] disabled:opacity-50 flex items-center gap-2 self-start sm:self-auto"
-        >
-          <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-          {refreshing ? "Refreshing…" : "Refresh"}
-        </button>
       </div>
 
       <AuditContent

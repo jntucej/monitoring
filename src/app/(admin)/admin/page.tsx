@@ -20,6 +20,8 @@ import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { ContributionPortfolio } from "@/components/retention/ContributionPortfolio";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { DashboardCustomizer } from "@/components/engagement/DashboardCustomizer";
+import { AttentionQueue } from "@/components/engagement/AttentionQueue";
+import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
 import { useAuthStore } from "@/stores/authStore";
 import { fmtInt, fmtRelative, fmtBytes } from "@/lib/formatters";
 import {
@@ -360,6 +362,9 @@ export default function AdminDashboardPage() {
         {/* C: Last Updated timestamp */}
         <LockdownDialog />
       </div>
+
+      <AttentionQueue />
+      <ActivityTimeline />
 
             {/* ── A: Expanded Status Bar with all person types ── */}
       <CampusStatusCards

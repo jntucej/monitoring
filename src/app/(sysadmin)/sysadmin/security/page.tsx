@@ -10,7 +10,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { SecurityManagement } from "@/components/sysadmin/SecurityManagement";
-import { Clock, Loader2, ShieldCheck, KeyRound, Landmark, Lock, ArrowUpRight, AlertTriangle } from "lucide-react";
+import { ShieldCheck, KeyRound, Landmark, Lock, ArrowUpRight, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 
 interface SecHealth {
@@ -75,15 +75,6 @@ function SecurityReinforcedInner() {
         <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
           <div className="px-4 py-3 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2">
             <span className="text-sm font-semibold text-white">Trust Layer Services</span>
-            <button
-              type="button"
-              onClick={() => void refreshAll()}
-              disabled={busy}
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs text-slate-200 hover:bg-slate-700 disabled:opacity-50"
-            >
-              {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin motion-reduce:animate-none" /> : <Clock className="w-3.5 h-3.5" />}
-              {busy ? "Refreshing…" : "Refresh"}
-            </button>
           </div>
           {busy ? (
             <div className="p-4 grid grid-cols-2 sm:grid-cols-3 gap-3">

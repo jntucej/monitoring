@@ -9,12 +9,12 @@ import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
 import type { Person, Scan } from "@/lib/types";
 import {
+  Loader2,
   ArrowRight,
+  Repeat,
   CheckCircle2,
   XCircle,
-  Loader2,
-  AlertCircle,
-  Repeat,
+  AlertCircle
 } from "lucide-react";
 
 /* ── shapes ── */
@@ -133,15 +133,6 @@ function MovementInfoInner() {
             Recent authorised entry and exit activity recorded at the gates for your wards
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => void refresh()}
-          disabled={personsLoading || historyLoading}
-          className="inline-flex items-center gap-2 self-start rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-secondary)] hover:opacity-90 disabled:opacity-50 shrink-0"
-        >
-          {(personsLoading || historyLoading) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Repeat className="w-4 h-4" />}
-          {personsLoading || historyLoading ? "Refreshing…" : "Refresh"}
-        </button>
       </div>
 
       {personsError && (

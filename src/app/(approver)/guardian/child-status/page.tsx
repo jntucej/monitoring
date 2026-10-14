@@ -9,11 +9,11 @@ import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
 import type { Person, Scan } from "@/lib/types";
 import {
-  MapPin,
+  Loader2,
   CheckCircle2,
   XCircle,
-  Loader2,
   AlertCircle,
+  MapPin
 } from "lucide-react";
 
 /* ── shapes ── */

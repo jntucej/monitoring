@@ -11,7 +11,6 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import {
-  Clock,
   Loader2,
   Inbox,
   UserCheck,
@@ -26,6 +25,8 @@ import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { ContributionPortfolio } from "@/components/retention/ContributionPortfolio";
 import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
+import { AttentionQueue } from "@/components/engagement/AttentionQueue";
+import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
 
 interface DataResponse {
   success: boolean;
@@ -133,19 +134,6 @@ function HodInner() {
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => void refreshAll()}
-          disabled={busy}
-          className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700 disabled:opacity-50 shrink-0"
-        >
-          {busy ? (
-            <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" />
-          ) : (
-            <Clock className="w-4 h-4" />
-          )}
-          {busy ? "Refreshing…" : "Refresh"}
-        </button>
       </div>
 
       {/* KPI row */}
@@ -179,6 +167,9 @@ function HodInner() {
           <NotificationCenter />
         </div>
       </WidgetBoundary>
+
+      <AttentionQueue />
+      <ActivityTimeline />
 
       {/* Campus services */}
       <WidgetBoundary title="Campus Services">

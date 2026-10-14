@@ -7,13 +7,13 @@ import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
 import {
+  Loader2,
+  AlertTriangle,
   Calendar,
   ChevronLeft,
   ChevronRight,
-  Loader2,
-  AlertTriangle,
   Check,
-  Bell,
+  Bell
 } from "lucide-react";
 
 /* ── shapes (mirror /api/campus-extra/calendar response) ── */
@@ -131,15 +131,6 @@ function VisitScheduleInner() {
             Planned campus events, deadlines and visits
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => void refreshAll()}
-          disabled={loading}
-          className="inline-flex items-center gap-2 self-start rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-secondary)] hover:opacity-90 disabled:opacity-50 shrink-0"
-        >
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Bell className="w-4 h-4" />}
-          {loading ? "Refreshing…" : "Refresh"}
-        </button>
       </div>
 
       {error && (

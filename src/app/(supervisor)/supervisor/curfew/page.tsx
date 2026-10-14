@@ -6,11 +6,11 @@ import { PageLoading } from "@/components/shared/LoadingStates";
 import { useAuthStore } from "@/stores/authStore";
 import { getAuthHeaders } from "@/lib/utils";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
-import { useApiResource, clearCache } from "@/hooks/useApiResource";
+import { useApiResource } from "@/hooks/useApiResource";
 import { getPassTypeName } from "@/hooks/usePassTypes";
 import type { GatePass, Role } from "@/lib/types";
 import { getRoleTier } from "@/lib/alert-hierarchy";
-import { Loader2, MapPin, DoorOpen, Users, CheckSquare, Zap } from "lucide-react";
+import { Loader2, MapPin, DoorOpen, CheckSquare, Zap } from "lucide-react";
 
 /* ── helpers ── */
 
@@ -402,13 +402,6 @@ function CurfewRosterInner() {
           Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {getRoleTier(role)}
         </p>
         <div className="flex items-center gap-2 shrink-0">
-          <button type="button"
-                        onClick={() => void clearCache()}
-            className="px-3 py-2 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-xs font-bold hover:bg-indigo-500/20 transition-all flex items-center gap-1.5"
-          >
-            <Users className="w-4 h-4" />
-            <span className="hidden sm:inline">Refresh Cache</span>
-          </button>
           <button type="button"
                         onClick={exportMovementCSV}
             className="px-3 py-2 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-xs font-bold hover:bg-indigo-500/20 transition-all flex items-center gap-1.5"

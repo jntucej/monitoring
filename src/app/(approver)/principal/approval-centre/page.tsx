@@ -87,15 +87,6 @@ function ApprovalCentreInner() {
             Signed in as <span className="font-mono">{role}</span> · tier {tier} · campus-wide oversight
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => void manualRefresh()}
-          disabled={refreshing}
-          className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] disabled:opacity-50 self-start sm:self-auto"
-        >
-          <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin motion-reduce:animate-none" : ""}`} />
-          {refreshing ? "Refreshing…" : "Refresh"}
-        </button>
       </div>
 
       {/* Tab bar — status / SLA views over /api/permissions */}

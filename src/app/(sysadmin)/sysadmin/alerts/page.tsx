@@ -11,7 +11,7 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import Link from "next/link";
-import { Clock, Loader2, AlertTriangle, Bell, ArrowUpRight, ShieldAlert } from "lucide-react";
+import { AlertTriangle, Bell, ArrowUpRight, ShieldAlert } from "lucide-react";
 
 interface AlertsData {
   success: boolean;
@@ -69,15 +69,6 @@ function AlertsInner() {
           >
             Manage Rules <ArrowUpRight className="w-3 h-3" />
           </Link>
-          <button
-            type="button"
-            onClick={() => void refreshAll()}
-            disabled={busy}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs text-slate-200 hover:bg-slate-700 disabled:opacity-50"
-          >
-            {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin motion-reduce:animate-none" /> : <Clock className="w-3.5 h-3.5" />}
-            {busy ? "Refreshing…" : "Refresh"}
-          </button>
         </div>
       </div>
 

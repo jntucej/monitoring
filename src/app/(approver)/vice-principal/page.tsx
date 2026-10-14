@@ -4,7 +4,6 @@ import { Suspense, useCallback, useMemo } from "react";
 import Link from "next/link";
 import {
   Loader2,
-  Clock,
   ArrowRight,
   Inbox,
   AlertTriangle,
@@ -29,6 +28,8 @@ import { ContributionPortfolio } from "@/components/retention/ContributionPortfo
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { CampusKnowledgeCentre } from "@/components/retention/CampusKnowledgeCentre";
 import { DigitalHandover } from "@/components/retention/DigitalHandover";
+import { AttentionQueue } from "@/components/engagement/AttentionQueue";
+import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
 
 /* ── response shapes ── */
 
@@ -176,19 +177,6 @@ function VicePrincipalDashboardInner() {
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => void refreshAll()}
-          disabled={queueLoading || alertsProbe.loading}
-          className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700 disabled:opacity-50 shrink-0"
-        >
-          {queueLoading || alertsProbe.loading ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Clock className="w-4 h-4" />
-          )}
-          {queueLoading || alertsProbe.loading ? "Refreshing…" : "Refresh"}
-        </button>
       </div>
 
       {queueError && (
@@ -271,6 +259,9 @@ function VicePrincipalDashboardInner() {
           <NotificationCenter />
         </div>
       </WidgetBoundary>
+
+      <AttentionQueue />
+      <ActivityTimeline />
 
       {/* Campus services */}
       <WidgetBoundary title="Campus Services">

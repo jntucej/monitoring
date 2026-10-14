@@ -17,9 +17,10 @@ import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampu
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { DigitalHandover } from "@/components/retention/DigitalHandover";
+import { AttentionQueue } from "@/components/engagement/AttentionQueue";
+import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
 import {
   Inbox,
-  Clock,
   Loader2,
   ShieldCheck,
   UserCheck,
@@ -159,19 +160,6 @@ function ExamBranchInner() {
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => void refreshAll()}
-          disabled={busy}
-          className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700 disabled:opacity-50 shrink-0"
-        >
-          {busy ? (
-            <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" />
-          ) : (
-            <Clock className="w-4 h-4" />
-          )}
-          {busy ? "Refreshing…" : "Refresh"}
-        </button>
       </div>
 
       {/* KPI row */}
@@ -200,6 +188,8 @@ function ExamBranchInner() {
 
       {/* Campus home & retention panels */}
       <PersonalizedCampusHome />
+      <AttentionQueue />
+      <ActivityTimeline />
       <ApprovalInbox />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 min-w-0">
         <TaskContinuity />

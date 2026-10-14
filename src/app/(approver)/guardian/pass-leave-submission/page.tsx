@@ -12,11 +12,10 @@ import { usePassTypes } from "@/hooks/usePassTypes";
 import { getAuthHeaders } from "@/lib/utils";
 import type { Person } from "@/lib/types";
 import {
-  Send,
   Loader2,
   CheckCircle2,
-  Info,
-  Inbox,
+  Send,
+  Info
 } from "lucide-react";
 
 /* ── shapes ── */
@@ -186,15 +185,6 @@ function PassLeaveSubmissionInner() {
             Submit a pass or leave request for a linked ward
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => void refresh()}
-          disabled={personsLoading || permsLoading}
-          className="inline-flex items-center gap-2 self-start rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-secondary)] hover:opacity-90 disabled:opacity-50 shrink-0"
-        >
-          {personsLoading || permsLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Inbox className="w-4 h-4" />}
-          {personsLoading || permsLoading ? "Refreshing…" : "Refresh"}
-        </button>
       </div>
 
       <div className="rounded-xl border border-amber-400/25 bg-amber-400/10 p-3 text-sm text-amber-200 flex items-start gap-2.5">

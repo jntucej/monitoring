@@ -10,13 +10,13 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   Sparkles,
-  Copy,
   CheckCircle2,
   CalendarDays,
   Award,
   Target,
   Loader2,
   Share2,
+  Download,
 } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
@@ -54,6 +54,100 @@ function buildShareText(r: RecapData): string {
   lines.push("");
   lines.push("No attendance, movement or disciplinary details included.");
   return lines.join("\n");
+}
+
+function drawRecapCanvas(r: RecapData): string {
+  const W = 800;
+  const H = 600;
+  const canvas = document.createElement("canvas");
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return "";
+
+  // Gradient background
+  const grad = ctx.createLinearGradient(0, 0, W, H);
+  grad.addColorStop(0, "#312e81");
+  grad.addColorStop(1, "#1e1b4b");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+
+  // Period label
+  ctx.fillStyle = "rgba(165,180,252,0.8)";
+  ctx.font = "600 13px sans-serif";
+  ctx.fillText(r.periodLabel, 48, 40);
+
+  // Name + role
+  ctx.fillStyle = "#e0e7ff";
+  ctx.font = "bold 28px sans-serif";
+  ctx.fillText(r.userName, 48, 68);
+  ctx.font = "500 14px sans-serif";
+  ctx.fillStyle = "rgba(199,210,254,0.8)";
+  ctx.fillText(r.role.toUpperCase(), 48, 104);
+
+  // Stat tiles row
+  const tiles: Array<{ label: string; value: string; accent: string }> = [
+    { label: "Events joined", value: String(r.eventsRegistered), accent: "#38bdf8" },
+    { label: "Badges earned", value: String(r.earnedAchievements.length), accent: "#fbbf24" },
+    {
+      label: "Goals done",
+      value: `${r.completedGoals}/${r.totalGoals}`,
+      accent: "#a78bfa",
+    },
+  ];
+  const tileW = (W - 96) / 3;
+  const tileY = 160;
+  tiles.forEach((t, i) => {
+    const x = 48 + i * tileW;
+    ctx.fillStyle = "rgba(99,102,241,0.15)";
+    ctx.beginPath();
+    ctx.roundRect(x, tileY, tileW - 12, 80, 12);
+    ctx.fill();
+    ctx.fillStyle = t.accent;
+    ctx.font = "bold 22px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(t.value, x + (tileW - 12) / 2, tileY + 16);
+    ctx.font = "500 11px sans-serif";
+    ctx.fillStyle = "rgba(199,210,254,0.7)";
+    ctx.fillText(t.label.toUpperCase(), x + (tileW - 12) / 2, tileY + 52);
+    ctx.textAlign = "left";
+  });
+
+  // Events list (up to 5)
+  const listY = 270;
+  if (r.completedEvents.length > 0) {
+    ctx.fillStyle = "rgba(165,180,252,0.6)";
+    ctx.font = "600 12px sans-serif";
+    ctx.fillText("EVENTS", 48, listY);
+    ctx.font = "14px sans-serif";
+    ctx.fillStyle = "#c7d2fe";
+    r.completedEvents.slice(0, 5).forEach((ev, i) => {
+      ctx.fillText("• " + ev, 56, listY + 24 + i * 24);
+    });
+  }
+
+  // Badges list (up to 5)
+  const badgeStartY = 270 + (r.completedEvents.length > 0 ? 40 + r.completedEvents.slice(0, 5).length * 24 : 0);
+  if (r.earnedAchievements.length > 0) {
+    ctx.fillStyle = "rgba(165,180,252,0.6)";
+    ctx.font = "600 12px sans-serif";
+    ctx.fillText("BADGES", 48, badgeStartY);
+    ctx.font = "14px sans-serif";
+    ctx.fillStyle = "#c7d2fe";
+    r.earnedAchievements.slice(0, 5).forEach((a, i) => {
+      ctx.fillText("🏆 " + a.title, 56, badgeStartY + 24 + i * 24);
+    });
+  }
+
+  // Footer
+  ctx.fillStyle = "rgba(148,163,200,0.6)";
+  ctx.font = "11px sans-serif";
+  ctx.fillText("No attendance, movement or disciplinary details included.", 48, H - 32);
+
+  return canvas.toDataURL("image/png");
 }
 
 export function SemesterRecap() {
@@ -97,6 +191,22 @@ export function SemesterRecap() {
     }
   }
 
+  async function handleDownload() {
+    if (!data || typeof document === "undefined") return;
+    try {
+      const dataUrl = drawRecapCanvas(data);
+      if (!dataUrl) throw new Error("canvas unavailable");
+      const a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = "recap-card.png";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch {
+      setError("Couldn't download card");
+    }
+  }
+
   const shareable =
     (data?.completedEvents.length ?? 0) > 0 ||
     (data?.earnedAchievements.length ?? 0) > 0 ||
@@ -135,6 +245,15 @@ export function SemesterRecap() {
               <Share2 className="h-3.5 w-3.5" aria-hidden />
             )}
             {copied ? "Copied" : "Share"}
+          </button>
+          <button
+            type="button"
+            onClick={() => void handleDownload()}
+            disabled={!data}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-500/40 bg-indigo-500/15 px-2.5 py-1.5 text-[11px] font-semibold text-indigo-200 hover:bg-indigo-500/25 motion-safe:transition-colors motion-reduce:transition-none disabled:opacity-50"
+          >
+            <Download className="h-3.5 w-3.5" aria-hidden />
+            Download card
           </button>
         </div>
 

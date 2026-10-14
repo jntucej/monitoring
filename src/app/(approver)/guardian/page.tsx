@@ -5,15 +5,6 @@ import Link from "next/link";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
-import { QuickActions } from "@/components/shared/QuickActions";
-import { NotificationCenter } from "@/components/shared/NotificationCenter";
-import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
-import { TaskContinuity } from "@/components/retention/TaskContinuity";
-import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
-import { useApiResource } from "@/hooks/useApiResource";
-import { usePolling } from "@/hooks/usePolling";
-import { useAuthStore } from "@/stores/authStore";
-import type { GatePass, Person } from "@/lib/types";
 import {
   ShieldCheck,
   Users,
@@ -23,8 +14,19 @@ import {
   ArrowRight,
   Clock,
   Repeat,
-  FileText,
+  FileText
 } from "lucide-react";
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
+import { AttentionQueue } from "@/components/engagement/AttentionQueue";
+import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
+import { useApiResource } from "@/hooks/useApiResource";
+import { usePolling } from "@/hooks/usePolling";
+import { useAuthStore } from "@/stores/authStore";
+import type { GatePass, Person } from "@/lib/types";
 
 /* ── response shapes ── */
 
@@ -189,15 +191,6 @@ function GuardianOverviewInner() {
             {" — submission only, no approval authority"}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => void refresh()}
-          disabled={loading}
-          className="inline-flex items-center gap-2 self-start rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-secondary)] hover:opacity-90 disabled:opacity-50"
-        >
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Clock className="w-4 h-4" />}
-          {loading ? "Refreshing…" : "Refresh"}
-        </button>
       </div>
 
       {/* KPI row */}
@@ -282,6 +275,8 @@ function GuardianOverviewInner() {
         <NotificationCenter />
       </div>
       <PersonalizedCampusHome />
+      <AttentionQueue />
+      <ActivityTimeline />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <TaskContinuity />
         <UnifiedCampusCalendar />

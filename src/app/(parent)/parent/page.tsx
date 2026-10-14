@@ -11,6 +11,8 @@ import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampu
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { CampusFeed } from "@/components/engagement/CampusFeed";
+import { AttentionQueue } from "@/components/engagement/AttentionQueue";
+import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
 import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { useAuthStore } from "@/stores/authStore";
@@ -147,6 +149,8 @@ export default function ParentDashboardPage() {
       <QuickActions />
       <NotificationCenter />
       <PersonalizedCampusHome />
+      <AttentionQueue />
+      <ActivityTimeline />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <CampusFeed />
         <TaskContinuity />

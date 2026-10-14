@@ -8,6 +8,8 @@ import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampu
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { CampusKnowledgeCentre } from "@/components/retention/CampusKnowledgeCentre";
+import { AttentionQueue } from "@/components/engagement/AttentionQueue";
+import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
 
 export default function SysadminPage() {
   return (
@@ -19,6 +21,9 @@ export default function SysadminPage() {
       </div>
 
       <SysAdminControlPanel />
+
+      <AttentionQueue />
+      <ActivityTimeline />
 
       {/* Campus home & retention panels */}
       <PersonalizedCampusHome />

@@ -3,18 +3,15 @@
 import { Suspense, useCallback, useMemo } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
+import {
+  Loader2,
+  Inbox,
+  AlertTriangle,
+  Ticket
+} from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
-import {
-  Inbox,
-  Clock,
-  Loader2,
-  CheckCircle2,
-  XCircle,
-  AlertTriangle,
-  Ticket,
-} from "lucide-react";
 
 /* ── shapes ── */
 
@@ -103,15 +100,6 @@ function ChildRequestsInner() {
             Pending pass and leave requests from your wards
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => void refreshAll()}
-          disabled={loading}
-          className="inline-flex items-center gap-2 self-start rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-secondary)] hover:opacity-90 disabled:opacity-50 shrink-0"
-        >
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Clock className="w-4 h-4" />}
-          {loading ? "Refreshing…" : "Refresh"}
-        </button>
       </div>
 
       {error && (

@@ -95,15 +95,6 @@ function FacultyAttendanceInner() {
         </div>
         <div className="flex items-center gap-3 text-xs text-slate-500">
           {user?.name && <span className="truncate max-w-[220px]">{user.name}</span>}
-          <button
-            type="button"
-            onClick={() => fetchFacultyAttendance()}
-            disabled={loading}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-slate-200 hover:bg-slate-700 disabled:opacity-50 transition-colors"
-          >
-            <RotateCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-            Refresh
-          </button>
         </div>
       </div>
 

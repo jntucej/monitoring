@@ -14,8 +14,6 @@ import {
   ArrowRight,
   CalendarClock,
   ShieldCheck,
-  Loader2,
-  Clock,
   AlertTriangle,
   Inbox,
 } from "lucide-react";
@@ -176,19 +174,6 @@ function ExaminationDayAccessInner() {
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => void refresh()}
-          disabled={loading}
-          className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700 disabled:opacity-50 shrink-0"
-        >
-          {loading ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Clock className="w-4 h-4" />
-          )}
-          {loading ? "Refreshing…" : "Refresh"}
-        </button>
       </div>
 
       {error && (

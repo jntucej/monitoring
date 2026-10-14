@@ -15,7 +15,6 @@ import {
   AlertTriangle,
   ArrowDownLeft,
   ArrowUpRight,
-  RefreshCw,
 } from "lucide-react";
 
 /* ── response shapes (mirror src/app/api/operator/transactions/route.ts) ── */
@@ -100,15 +99,6 @@ function OperatorTransactionsInner() {
             {counts ? `${counts.total} records` : "loading"}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => void refreshAll()}
-          disabled={busy}
-          className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface)] disabled:opacity-50 shrink-0"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${busy ? "animate-spin motion-reduce:animate-none" : ""}`} />
-          {busy ? "Refreshing…" : "Refresh"}
-        </button>
       </div>
 
       {error && (

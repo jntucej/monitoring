@@ -1,9 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Sun, Moon, Sparkles, Radio, MessageSquare } from "lucide-react";
+import { Sun, Moon, Sparkles, MessageSquare } from "lucide-react";
 import { useUIStore } from "@/stores/uiStore";
-import { useGlass } from "@/context/GlassContext";
 import { useState, useEffect } from "react";
 import { FeedbackModal } from "./FeedbackModal";
 
@@ -18,7 +17,6 @@ const FEEDBACK_THEME_STORAGE_KEY = "gate_monitor_theme_feedback_last";
 
 export function GlassThemeToggle({ className = "" }: GlassThemeToggleProps) {
   const store = useUIStore();
-  const { isLiveStream, toggleLiveStream, triggerLiveRefresh } = useGlass();
   const currentTheme = store.theme || "dark";
   const [showFeedback, setShowFeedback] = useState(false);
   const [lastTheme, setLastTheme] = useState<string | null>(null);
@@ -90,23 +88,6 @@ export function GlassThemeToggle({ className = "" }: GlassThemeToggleProps) {
             );
           })}
         </div>
-
-        {/* Live Data Telemetry Refresh Toggle Pill - Visible on all screen sizes */}
-        <button
-          onClick={() => {
-            toggleLiveStream();
-            triggerLiveRefresh();
-          }}
-          className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold uppercase tracking-wider transition-all border cursor-pointer shrink-0 ${
-            isLiveStream
-              ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.25)] hover:bg-emerald-500/25"
-              : "bg-[var(--bg-elevated)] text-[var(--text-muted)] border-[var(--border)] hover:text-[var(--text-primary)]"
-          }`}
-          title="Toggle Real-Time Live Data Telemetry (Click to trigger sine wave loading & metric refresh)"
-        >
-          <Radio className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${isLiveStream ? "text-emerald-400" : ""}`} />
-          <span className="hidden md:inline">{isLiveStream ? "Live Data" : "Paused"}</span>
-        </button>
 
         {/* Feedback / Report Option */}
         <button

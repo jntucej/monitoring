@@ -26,6 +26,8 @@ import { ContributionPortfolio } from "@/components/retention/ContributionPortfo
 import { DigitalHandover } from "@/components/retention/DigitalHandover";
 import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
 import { CampusFeed } from "@/components/engagement/CampusFeed";
+import { AttentionQueue } from "@/components/engagement/AttentionQueue";
+import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
 
 const MIN_TIER = 40; // worker tier
 
@@ -203,6 +205,9 @@ function WorkerDashboardInner() {
         <QuickActions />
         <NotificationCenter />
       </div>
+
+      <AttentionQueue />
+      <ActivityTimeline />
 
       {/* Campus engagement feed */}
       <CampusFeed />

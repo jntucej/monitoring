@@ -14,13 +14,11 @@ import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
 import type { PermissionItem } from "@/components/approver/PermissionRow";
 import {
-
   ShieldCheck,
   UserCheck,
   AlertTriangle,
   Loader2,
   Inbox,
-  Clock,
 } from "lucide-react";
 
 /* ── response shapes (mirror /api/permissions) ── */
@@ -182,18 +180,6 @@ function ExamPermissionsInner() {
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
-        <button
-          onClick={() => void refresh()}
-          disabled={oieLoading || vpLoading}
-          className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700 disabled:opacity-50"
-        >
-          {(oieLoading || vpLoading) ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Clock className="w-4 h-4" />
-          )}
-          {(oieLoading || vpLoading) ? "Refreshing…" : "Refresh"}
-        </button>
       </div>
 
       {/* error banner */}

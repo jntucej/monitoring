@@ -4,7 +4,9 @@ import { Suspense } from "react";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { Bell } from "lucide-react";
+import {
+  Bell
+} from "lucide-react";
 
 function NotificationsInner() {
   return (

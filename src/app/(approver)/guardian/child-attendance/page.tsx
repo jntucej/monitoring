@@ -5,7 +5,9 @@ import { ChildWeeklyActivity } from "@/components/parent/ChildWeeklyActivity";
 import { ChildStatus } from "@/components/parent/ChildStatus";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { BarChart3, Clock } from "lucide-react";
+import {
+  BarChart3
+} from "lucide-react";
 
 function ChildAttendanceInner() {
   return (

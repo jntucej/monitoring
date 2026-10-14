@@ -4,16 +4,15 @@ import { Suspense, useCallback, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
+import {
+  Loader2,
+  Inbox
+} from "lucide-react";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { RequestTimeline } from "@/components/shared/RequestTimeline";
 import { useAuthStore } from "@/stores/authStore";
 import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
-import {
-  Inbox,
-  Loader2,
-  Clock,
-} from "lucide-react";
 
 /* ── shapes ── */
 
@@ -98,15 +97,6 @@ function RequestStatusContent({ ticketParam }: { ticketParam: string }) {
             Track the approval timeline of pass and leave requests for your wards
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => void refreshAll()}
-          disabled={loading}
-          className="inline-flex items-center gap-2 self-start rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-secondary)] hover:opacity-90 disabled:opacity-50 shrink-0"
-        >
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Clock className="w-4 h-4" />}
-          {loading ? "Refreshing…" : "Refresh"}
-        </button>
       </div>
 
       {error && (

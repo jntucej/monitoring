@@ -16,7 +16,6 @@ import {
   KeyRound,
   Flag,
   DoorOpen,
-  Loader2,
   ArrowRight,
 } from "lucide-react";
 import {
@@ -125,17 +124,6 @@ function OperatorOverviewInner() {
             Signed in as <span className="font-mono">{role}</span> · tier {tier}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => void refreshAll()}
-          disabled={busy}
-          className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-surface)] disabled:opacity-50 self-start sm:self-auto"
-        >
-          {busy ? (
-            <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" />
-          ) : null}
-          {busy ? "Refreshing…" : "Refresh"}
-        </button>
       </div>
 
       {/* KPI row */}

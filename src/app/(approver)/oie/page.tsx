@@ -16,7 +16,6 @@ import {
   AlertTriangle,
   Loader2,
   Inbox,
-  Clock,
   ArrowRight,
 } from "lucide-react";
 import { QuickActions } from "@/components/shared/QuickActions";
@@ -28,6 +27,8 @@ import { ContributionPortfolio } from "@/components/retention/ContributionPortfo
 import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { CampusKnowledgeCentre } from "@/components/retention/CampusKnowledgeCentre";
+import { AttentionQueue } from "@/components/engagement/AttentionQueue";
+import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
 
 /* ── response shapes ── */
 
@@ -249,18 +250,6 @@ function OieDashboardInner() {
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
-        <button
-          onClick={() => void refreshAll()}
-          disabled={queueLoading || presenceLoading}
-          className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700 disabled:opacity-50 shrink-0"
-        >
-          {queueLoading || presenceLoading ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Clock className="w-4 h-4" />
-          )}
-          {queueLoading || presenceLoading ? "Refreshing…" : "Refresh"}
-        </button>
       </div>
 
       {/* global error banner */}
@@ -323,6 +312,9 @@ function OieDashboardInner() {
           <NotificationCenter />
         </div>
       </WidgetBoundary>
+
+      <AttentionQueue />
+      <ActivityTimeline />
 
       {/* Campus services */}
       <WidgetBoundary title="Campus Services">

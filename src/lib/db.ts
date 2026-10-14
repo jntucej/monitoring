@@ -1394,7 +1394,7 @@ export async function createUser(userData: {
   }
 
   // Insert/upsert auxiliary employee_details if applicable
-  if (['faculty', 'staff', 'worker', 'operator', 'admin', 'sysadmin', 'caretaker', 'deputy_warden', 'hostel_manager', 'principal', 'vice_principal', 'oie', 'exam_branch', 'warden'].includes(userData.role) || userData.employeeId || userData.isHod) {
+  if (['faculty', 'staff', 'worker', 'operator', 'admin', 'sysadmin', 'caretaker', 'deputy_warden', 'hostel_manager', 'principal', 'vice_principal', 'oie', 'exam_branch'].includes(userData.role) || userData.employeeId || userData.isHod) {
     const finalEmployeeId =
       (userData.employeeId && userData.employeeId.trim()) ||
       (uniqueId && String(uniqueId).trim()) ||
