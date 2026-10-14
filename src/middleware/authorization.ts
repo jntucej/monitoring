@@ -24,6 +24,7 @@ import {
 } from "@/lib/authContext";
 import { isPrivileged } from "@/lib/roles";
 import { getRequestBody, setupBodyCaching } from "@/lib/body-cache";
+import { signTrustedHeaders } from "@/server/http/trusted-headers";
 
 /**
  * Typed error for authorization failures. Carries a stable `code` and HTTP
@@ -176,6 +177,22 @@ export function withAuthorization(
       req.headers.set('x-user-role', authContext.role);
       req.headers.set('x-user-email', authContext.email);
 
+      // Sign the trusted identity headers so downstream handlers can verify
+      // via requireTrustedHeaders(req) that the identity was set by the
+      // authorization layer and not spoofed by a client.
+      try {
+        const nowMs = Date.now();
+        const sig = signTrustedHeaders(
+          { userId: authContext.userId, role: authContext.role, email: authContext.email },
+          nowMs
+        );
+        req.headers.set('x-mw-signature', sig);
+        req.headers.set('x-mw-timestamp', String(nowMs));
+      } catch {
+        // INTERNAL_MW_SECRET not configured — degrade gracefully;
+        // routes that call requireTrustedHeaders will reject with 401.
+      }
+
       // If all checks pass, continue to the handler with auth context.
       // MUST await: without it, a handler rejection escapes the try/catch
       // and becomes an unhandled rejection instead of a JSON 500.
@@ -309,16 +326,20 @@ export async function logAuditEvent(
   eventType: string,
   userId: string,
   details: unknown,
-  ipAddress: string | null = null
+  ipAddress: string | null = null,
+  userRole: string | null = null,
+  userName: string | null = null
 ) {
   try {
     await query(
-      `INSERT INTO audit_logs (id, event_type, user_id, details, ip_address, created_at)
-       VALUES ($1, $2, $3, $4, $5, NOW())`,
+      `INSERT INTO audit_logs (id, action, user_id, user_name, user_role, details, ip_address, timestamp)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())`,
       [
         randomUUID(),
         eventType,
         userId,
+        userName,
+        userRole,
         typeof details === "object" ? JSON.stringify(details) : details,
         ipAddress || null,
       ],

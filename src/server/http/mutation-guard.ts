@@ -31,15 +31,49 @@ type Handler = (req: NextRequest, ctx: { auth: AuthContext }) => Promise<Respons
 
 export function withMutationGuard(handler: Handler, options: MutationGuardOptions = {}) {
   const { rateLimit, csrf = true, ...authOptions } = options;
+  const effectiveRateLimit: RateLimitConfig = rateLimit ?? { windowMs: 60_000, maxRequests: 60 };
 
-  return withAuthorization(async (req, ctx) => {
-    // assertCsrf is a no-op for safe verbs; kept here for defence in depth.
+  // Chain: withAuthorization → withRateLimitByUser → assertCsrf → handler
+  const csrfGuard: Handler = async (req, ctx) => {
     if (csrf) {
       const blocked = assertCsrf(req);
       if (blocked) return blocked;
     }
     return handler(req, ctx);
-  }, authOptions);
+  };
+
+  const rateLimited: Handler = async (req, ctx) => {
+    const key = `user:${ctx.auth.userId}`;
+    const result = await checkRateLimit(key, effectiveRateLimit);
+    if (result.limited) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "RATE_LIMIT_EXCEEDED",
+            message: "Too many requests. Please try again later.",
+            resetAt: result.resetTime.toISOString(),
+          },
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": (result.retryAfter || 60).toString(),
+            "X-RateLimit-Limit": (effectiveRateLimit.maxRequests || 60).toString(),
+            "X-RateLimit-Remaining": "0",
+            "X-RateLimit-Reset": result.resetTime.toISOString(),
+          },
+        },
+      );
+    }
+    const response = await csrfGuard(req, ctx);
+    response.headers.set("X-RateLimit-Limit", (effectiveRateLimit.maxRequests || 60).toString());
+    response.headers.set("X-RateLimit-Remaining", result.remaining.toString());
+    response.headers.set("X-RateLimit-Reset", result.resetTime.toISOString());
+    return response;
+  };
+
+  return withAuthorization(rateLimited, authOptions);
 }
 
 /** Rate-limit a mutating route keyed by the authenticated user id. */
