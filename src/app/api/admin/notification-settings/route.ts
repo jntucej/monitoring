@@ -22,8 +22,8 @@ async function handleGet(_req: NextRequest, _ctx: { auth: AuthContext }): Promis
     ] = await Promise.all([
       query<{ channel: string; count: number }>(
         `SELECT c.channel AS channel, COUNT(*)::int AS count
-           FROM public.notifications n,
-                jsonb_array_elements_text(n.channels) AS c(channel)
+            FROM public.notifications n,
+                 unnest(n.channels) AS c(channel)
           GROUP BY c.channel
           ORDER BY COUNT(*) DESC`
       ),

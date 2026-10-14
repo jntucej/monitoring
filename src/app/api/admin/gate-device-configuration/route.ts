@@ -27,7 +27,7 @@ async function handleGet(_req: NextRequest, _ctx: { auth: AuthContext }): Promis
         allowed_radius_meters: number | null;
       }>(
         `SELECT id, gate_code, name, location, type, is_active,
-                latitude, longitude, allowed_radius_meters
+                NULL AS latitude, NULL AS longitude, NULL AS allowed_radius_meters
            FROM public.gates ORDER BY gate_code`
       ),
       query<{ gate_code: string; day_of_week: number; open_time: string; close_time: string; is_active: boolean }>(

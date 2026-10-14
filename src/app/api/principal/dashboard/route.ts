@@ -22,7 +22,7 @@ async function handleGet(req: NextRequest) {
       .from("alerts")
       .select("*")
       .eq("resolved", false)
-      .order("created_at", { ascending: false })
+      .order("timestamp", { ascending: false })
       .limit(5);
 
     if (aError) throw aError;

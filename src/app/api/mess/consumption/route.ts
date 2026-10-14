@@ -32,7 +32,7 @@ async function handleGet(req: NextRequest, _ctx: { auth: AuthContext }) {
          FROM mess_days d
          LEFT JOIN mess_meal_served s ON s.mess_day_id = d.id
          LEFT JOIN mess_tokens t ON t.id = s.token_id
-        WHERE d.meal_date >= CURRENT_DATE - ($1 || ' days')::interval
+        WHERE d.meal_date >= CURRENT_DATE - make_interval(days => $1)
         GROUP BY d.id, d.meal_date, d.meal_type, d.is_active
         ORDER BY d.meal_date DESC
         LIMIT $1`,

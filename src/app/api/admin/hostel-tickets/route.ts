@@ -25,7 +25,7 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
     .from("permission_requests")
     .select(
       "ticket_number, workflow_type, current_stage, status, student_user_id, created_at, " +
-        "student:student_user_id(id, name, unique_id)",
+        "student:users(id, name, unique_id)",
     )
     .order("created_at", { ascending: false })
     .limit(500);

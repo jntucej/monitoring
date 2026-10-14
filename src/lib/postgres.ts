@@ -566,6 +566,7 @@ export class PostgresQueryBuilder<T = any> {
       else if (parentTable === "student_details" && targetTable === "users") joinCondition = `users.id = ${parentTable}.user_id`;
       else if (parentTable === "users" && targetTable === "student_details") joinCondition = `student_details.user_id = ${parentTable}.id`;
       else if (parentTable === "users" && targetTable === "employee_details") joinCondition = `employee_details.user_id = ${parentTable}.id`;
+      else if ((parentTable === "permission_requests" || parentTable === "permissions") && targetTable === "users") joinCondition = `users.id = ${parentTable}.student_user_id`;
       else joinCondition = `${targetTable}.id = ${parentTable}.${targetTable.replace(/s$/, "")}_id`;
 
       const selectColsList = fields.includes("*") ? `${targetTable}.*` : fields.map((f) => `${targetTable}."${f}"`).join(", ");
