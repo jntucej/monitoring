@@ -5,6 +5,7 @@ import type { GatePass } from "@/lib/types";
 import { getPassTypeName } from "@/hooks/usePassTypes";
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
+import { useAuthStore } from "@/stores/authStore";
 
 function expiryLabel(to: string, status: string): string {
   if (status === "REJECTED") return "Rejected";
@@ -27,27 +28,32 @@ function statusStyle(s: string) {
 export function ActivePasses() {
   const [passes, setPasses] = useState<GatePass[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const user = useAuthStore((s) => s.user);
 
   const load = useCallback(async () => {
+    const roll = user?.uniqueId ?? user?.studentDetails?.roll ?? null;
+    if (!roll) {
+      setLoading(false);
+      return;
+    }
     try {
-      const authRaw = sessionStorage.getItem("gate-monitor-auth");
-      const auth = authRaw ? JSON.parse(authRaw) : null;
-      const roll = auth?.state?.user?.uniqueId ?? auth?.state?.user?.roll ?? auth?.state?.user?.studentRoll ?? auth?.user?.uniqueId ?? auth?.user?.roll ?? auth?.user?.studentRoll;
-      if (!roll) {
-        setLoading(false);
-        return;
-      }
-      const res = await fetch(`/api/passes?roll=${encodeURIComponent(roll)}`, { 
+      const res = await fetch(`/api/passes?roll=${encodeURIComponent(roll)}`, {
         headers: getAuthHeaders(),
-        cache: "no-store" 
+        cache: "no-store",
       });
-      const json = await res.json();
+      if (!res.ok) {
+        setError(`HTTP ${res.status}`);
+      }
+      const json = await res.json().catch(() => ({}));
       setPasses(Array.isArray(json.data) ? json.data : []);
+      setError(null);
       setLoading(false);
     } catch {
+      setError("Request failed");
       setLoading(false);
     }
-  }, []);
+  }, [user?.uniqueId, user?.studentDetails?.roll]);
 
   // Initial load + visibility-aware polling (no raw setInterval)
   useEffect(() => {
@@ -61,6 +67,16 @@ export function ActivePasses() {
       {loading ? (
         <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
           <Loader2 className="w-4 h-4 animate-spin" /> Loading…
+        </div>
+      ) : error ? (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 p-3 rounded-lg bg-rose-500/10 border border-rose-500/30">
+          <p className="text-sm text-rose-300">Could not load passes: {error}</p>
+          <button
+            onClick={load}
+            className="px-3 py-1 rounded-lg bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs font-bold hover:bg-rose-500/30 transition shrink-0"
+          >
+            Retry
+          </button>
         </div>
       ) : passes.length === 0 ? (
         <p className="text-sm text-[var(--text-muted)] text-center py-4">No passes yet.</p>

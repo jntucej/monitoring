@@ -31,14 +31,15 @@ function ReportsContent({
   students: Person[] | null;
   loading: boolean;
 }) {
-  const s = attendance?.summary;
+    const s = attendance?.summary;
   const studentCount = students?.length ?? 0;
+  const absent = s ? Math.max(0, s.totalStaff - s.presentToday) : 0;
 
   const reports = [
     {
       label: "Staff Attendance Summary",
       value: s ? `${s.presentToday}/${s.totalStaff} present` : "—",
-      sub: `${s?.onLeave ?? 0} on leave`,
+      sub: `${absent} absent today`,
     },
     {
       label: "Active Student Population",
@@ -107,12 +108,12 @@ function ReportsContent({
               <p className="text-xs text-[var(--text-muted)]">Present Today</p>
             </div>
             <div>
-              <p className="text-xl sm:text-2xl font-bold text-rose-400">{s.absentToday}</p>
+              <p className="text-xl sm:text-2xl font-bold text-rose-400">{absent}</p>
               <p className="text-xs text-[var(--text-muted)]">Absent Today</p>
             </div>
             <div>
-              <p className="text-xl sm:text-2xl font-bold text-amber-400">{s.onLeave}</p>
-              <p className="text-xs text-[var(--text-muted)]">On Leave</p>
+              <p className="text-xl sm:text-2xl font-bold text-amber-400">{s?.currentlyOutside ?? 0}</p>
+              <p className="text-xs text-[var(--text-muted)]">Currently Out</p>
             </div>
           </div>
         )}
@@ -139,7 +140,7 @@ function ReportsInner() {
       fetchJson("/api/staff/attendance"),
       fetchJson("/api/students?scope=active"),
     ]);
-    setAttendance(attR.success ? ((attR.data as StaffAttendanceResp) ?? null) : null);
+    setAttendance(attR.success ? ((attR as unknown as StaffAttendanceResp) ?? null) : null);
     setStudents(stuR.success ? ((stuR.data as Person[]) ?? []) : null);
     setError(
       attR.success ? null : attR.error?.message ?? "Unknown error",

@@ -44,18 +44,34 @@ const APPROVER_ROLES = new Set([
   "sysadmin",
 ]);
 
+/** Canonical home + approvals inbox per approver role. */
+const APPROVER_HOMES: Record<string, { home: string; inbox: string; escalated?: string }> = {
+  principal: { home: "/principal", inbox: "/principal/permissions", escalated: "/principal/permissions?status=ESCALATED" },
+  admin: { home: "/admin", inbox: "/admin/permissions", escalated: "/admin/permissions?status=ESCALATED" },
+  sysadmin: { home: "/sysadmin", inbox: "/sysadmin", escalated: "/sysadmin?tab=approvals" },
+  faculty: { home: "/faculty", inbox: "/faculty/permissions", escalated: "/faculty/permissions?status=ESCALATED" },
+  hod: { home: "/hod", inbox: "/hod/pending-approvals", escalated: "/hod/escalation-centre" },
+  vice_principal: { home: "/vice-principal", inbox: "/vice-principal/permissions", escalated: "/vice-principal/permissions?status=ESCALATED" },
+  oie: { home: "/oie", inbox: "/oie/permissions", escalated: "/oie/permissions?status=ESCALATED" },
+  exam_branch: { home: "/exam-branch", inbox: "/exam/permissions", escalated: "/exam/permissions?status=ESCALATED" },
+  exam_superintendent: { home: "/exam/superintendent", inbox: "/exam/permissions", escalated: "/exam/permissions?status=ESCALATED" },
+  caretaker: { home: "/hostel/permissions", inbox: "/hostel/permissions", escalated: "/hostel/permissions?status=ESCALATED" },
+  deputy_warden: { home: "/deputy-warden", inbox: "/deputy-warden/permissions", escalated: "/deputy-warden/permissions?status=ESCALATED" },
+  hostel_manager: { home: "/hostel-manager", inbox: "/hostel-manager/permissions", escalated: "/hostel-manager/permissions?status=ESCALATED" },
+};
+
 function actionsForRole(role: string | null, userGateId?: string | null): QuickAction[] {
   if (!role) return [];
 
   // Approvers (including admin/sysadmin)
   if (APPROVER_ROLES.has(role)) {
-    const home = role === "principal" ? "/principal" : role === "admin" ? "/admin" : "/sysadmin";
+    const target = APPROVER_HOMES[role] ?? { home: "/", inbox: "/", escalated: "/" };
     return [
-      { label: "Open Approval Inbox", icon: Inbox, href: home === "/admin" ? "/admin/permissions" : home },
-      { label: "View Escalated", icon: ArrowUpRight, href: home === "/admin" ? "/admin/permissions?status=ESCALATED" : `${home}/approvals` },
-      { label: "New Request", icon: FilePlus2, href: "/student/permissions/new" },
-      { label: "All Pending", icon: Ticket, href: home === "/admin" ? "/admin/permissions" : `${home}/approvals` },
-      { label: "Dashboard", icon: LayoutDashboard, href: home },
+      { label: "Open Approval Inbox", icon: Inbox, href: target.inbox },
+      { label: "View Escalated", icon: ArrowUpRight, href: target.escalated ?? target.inbox },
+      { label: "New Request", icon: FilePlus2, href: role === "admin" ? "/admin/permissions/new" : target.inbox },
+      { label: "All Pending", icon: Ticket, href: target.inbox },
+      { label: "Dashboard", icon: LayoutDashboard, href: target.home },
     ];
   }
 

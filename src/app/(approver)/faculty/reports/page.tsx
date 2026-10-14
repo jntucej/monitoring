@@ -14,10 +14,30 @@ import { Inbox, Clock, Loader2, ShieldCheck, AlertTriangle, ArrowRight } from "l
 
 /* response shapes */
 
-interface DataResponse {
+interface FacultyAttendanceReport {
   success: boolean;
-  data: unknown;
-  total?: number;
+  summary?: {
+    totalFaculty?: number;
+    presentToday?: number;
+    currentlyInside?: number;
+    currentlyOutside?: number;
+    lateArrivals?: number;
+    absentCount?: number;
+    overallAttendanceRate?: number;
+  };
+  departmentSummaries?: Array<{
+    department: string;
+    totalFaculty: number;
+    presentToday: number;
+    attendanceRate: number;
+  }>;
+  records?: Array<{
+    id: string;
+    fullName: string;
+    designation: string;
+    status: string;
+    firstInTime?: string;
+  }>;
 }
 
 function FacultyReportsInner() {
@@ -30,7 +50,7 @@ function FacultyReportsInner() {
     loading,
     error,
     refresh,
-  } = useApiResource<DataResponse>("/api/students/stats", { ttlMs: 30_000 });
+  } = useApiResource<FacultyAttendanceReport>("/api/faculty/attendance", { ttlMs: 30_000 });
 
   const refreshAll = useCallback(async () => {
     clearCache();
@@ -98,7 +118,7 @@ function FacultyReportsInner() {
               <span className="text-sm font-semibold text-white truncate">Faculty Reports</span>
             </div>
             <span className="text-xs text-slate-500 shrink-0">
-              {(data as DataResponse | null)?.total ?? 0} item(s)
+              {data?.summary?.totalFaculty ?? 0} faculty · {data?.records?.length ?? 0} record(s)
             </span>
           </div>
           {busy ? (
@@ -109,27 +129,55 @@ function FacultyReportsInner() {
             <div className="p-4 min-w-0">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
                 <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Status</p>
-                  <p className="mt-1 text-lg font-bold text-emerald-400">Live</p>
-                  <p className="text-xs text-slate-500">Faculty Reports data streams from the campus gate network.</p>
+                  <p className="text-xs text-slate-500 uppercase tracking-wide">Attendance Rate</p>
+                  <p className="mt-1 text-lg font-bold text-emerald-400">
+                    {data?.summary?.overallAttendanceRate !== undefined ? `${data.summary.overallAttendanceRate}%` : "—"}
+                  </p>
+                  <p className="text-xs text-slate-500">Department-wide today.</p>
                 </div>
                 <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Last Updated</p>
+                  <p className="text-xs text-slate-500 uppercase tracking-wide">Present / Absent</p>
                   <p className="mt-1 text-lg font-bold text-sky-400">
-                    {new Date().toLocaleString([], { hour: "2-digit", minute: "2-digit" })}
+                    {data?.summary?.presentToday ?? 0} / {data?.summary?.absentCount ?? 0}
                   </p>
-                  <p className="text-xs text-slate-500">Auto-refreshes every 30 seconds.</p>
+                  <p className="text-xs text-slate-500">{data?.summary?.lateArrivals ?? 0} late arrival(s) today.</p>
                 </div>
                 <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Records</p>
+                  <p className="text-xs text-slate-500 uppercase tracking-wide">Currently On Campus</p>
                   <p className="mt-1 text-lg font-bold text-amber-400">
-                    {Array.isArray((data as unknown as { data?: unknown[] })?.data)
-                      ? (data as unknown as { data?: unknown[] }).data!.length
-                      : 0}
+                    {data?.summary?.currentlyInside ?? 0} inside · {data?.summary?.currentlyOutside ?? 0} out
                   </p>
-                  <p className="text-xs text-slate-500">Entries currently visible in this view.</p>
+                  <p className="text-xs text-slate-500">Live presence snapshot.</p>
                 </div>
               </div>
+
+              {data?.departmentSummaries && data.departmentSummaries.length > 0 && (
+                <div className="mt-4 min-w-0">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Department Breakdown</p>
+                  <div className="overflow-x-auto -mx-4 px-4">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-slate-800 text-left text-xs text-slate-500">
+                          <th className="py-1.5 pr-4">Department</th>
+                          <th className="py-1.5 pr-4">Total</th>
+                          <th className="py-1.5 pr-4">Present</th>
+                          <th className="py-1.5">Rate</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.departmentSummaries.map((d) => (
+                          <tr key={d.department} className="border-b border-slate-800/50 last:border-0">
+                            <td className="py-2 pr-4 text-slate-200">{d.department}</td>
+                            <td className="py-2 pr-4 text-slate-400">{d.totalFaculty}</td>
+                            <td className="py-2 pr-4 text-slate-400">{d.presentToday}</td>
+                            <td className="py-2 text-emerald-400">{d.attendanceRate}%</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

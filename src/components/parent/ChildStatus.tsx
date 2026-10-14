@@ -4,6 +4,7 @@ import { CheckCircle, XCircle, Loader2, AlertCircle } from "lucide-react";
 import type { Student } from "@/lib/types";
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
+import { useAuthStore } from "@/stores/authStore";
 
 export function ChildStatus() {
   const [children, setChildren] = useState<Student[]>([]);
@@ -15,10 +16,14 @@ export function ChildStatus() {
     setLoading(true);
     setError(false);
     try {
-      // Get parent ID from auth (demo)
-      const authRaw = sessionStorage.getItem("gate-monitor-auth");
-      const auth = authRaw ? JSON.parse(authRaw) : null;
-      const parentId = auth?.state?.user?.id ?? auth?.user?.id ?? "pa-1";
+      // Get parent ID from the canonical auth store (localStorage-backed, not sessionStorage).
+      // Read via getState so `load` stays referentially stable (React Compiler).
+      const authUser = useAuthStore.getState().user;
+      const parentId = authUser?.id ?? null;
+      if (!parentId) {
+        setLoading(false);
+        return;
+      }
 
       const res = await fetch(`/api/students?parentId=${parentId}`, { headers: getAuthHeaders(), cache: "no-store" });
       if (!res.ok) {

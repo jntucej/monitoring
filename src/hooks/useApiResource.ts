@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import { getAuthHeaders } from "@/lib/utils";
 
 interface CachedEntry<T> {
   data: T;
@@ -10,9 +11,9 @@ const memoryCache = new Map<string, CachedEntry<unknown>>();
 
 export async function cachedFetch<T>(
   url: string,
-  options: { ttlMs?: number; headers?: Record<string, string> } = {}
+  options: { ttlMs?: number; headers?: Record<string, string>; auth?: boolean } = {}
 ): Promise<T> {
-  const { ttlMs = 15_000, headers } = options;
+  const { ttlMs = 15_000, headers, auth = true } = options;
   const now = Date.now();
   const cached = memoryCache.get(url) as CachedEntry<T> | undefined;
 
@@ -23,6 +24,7 @@ export async function cachedFetch<T>(
   const res = await fetch(url, {
     headers: {
       "Content-Type": "application/json",
+      ...(auth ? getAuthHeaders() : {}),
       ...headers,
     },
     credentials: "include",

@@ -14,10 +14,15 @@ import { Inbox, Clock, Loader2, ShieldCheck, AlertTriangle, ArrowRight } from "l
 
 /* response shapes */
 
-interface DataResponse {
+interface StudentsStatsResponse {
   success: boolean;
-  data: unknown;
-  total?: number;
+  data: {
+    total: number;
+    active: number;
+    onCampusToday: number;
+    todayEntries: number;
+    todayExits: number;
+  };
 }
 
 function HodReportsInner() {
@@ -30,7 +35,7 @@ function HodReportsInner() {
     loading,
     error,
     refresh,
-  } = useApiResource<DataResponse>("/api/students/stats", { ttlMs: 30_000 });
+  } = useApiResource<StudentsStatsResponse>("/api/students/stats", { ttlMs: 30_000 });
 
   const refreshAll = useCallback(async () => {
     clearCache();
@@ -98,7 +103,7 @@ function HodReportsInner() {
               <span className="text-sm font-semibold text-white truncate">Reports</span>
             </div>
             <span className="text-xs text-slate-500 shrink-0">
-              {(data as DataResponse | null)?.total ?? 0} item(s)
+              {data?.data?.total ?? 0} student(s)
             </span>
           </div>
           {busy ? (
@@ -107,27 +112,26 @@ function HodReportsInner() {
             </div>
           ) : (
             <div className="p-4 min-w-0">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 min-w-0">
                 <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Status</p>
-                  <p className="mt-1 text-lg font-bold text-emerald-400">Live</p>
-                  <p className="text-xs text-slate-500">Reports data streams from the campus gate network.</p>
+                  <p className="text-xs text-slate-500 uppercase tracking-wide">On Campus Today</p>
+                  <p className="mt-1 text-lg font-bold text-emerald-400">{data?.data?.onCampusToday ?? 0}</p>
+                  <p className="text-xs text-slate-500">Currently on premises.</p>
                 </div>
                 <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Last Updated</p>
-                  <p className="mt-1 text-lg font-bold text-sky-400">
-                    {new Date().toLocaleString([], { hour: "2-digit", minute: "2-digit" })}
-                  </p>
-                  <p className="text-xs text-slate-500">Auto-refreshes every 30 seconds.</p>
+                  <p className="text-xs text-slate-500 uppercase tracking-wide">Entries Today</p>
+                  <p className="mt-1 text-lg font-bold text-sky-400">{data?.data?.todayEntries ?? 0}</p>
+                  <p className="text-xs text-slate-500">IN movements logged today.</p>
                 </div>
                 <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Records</p>
-                  <p className="mt-1 text-lg font-bold text-amber-400">
-                    {Array.isArray((data as unknown as { data?: unknown[] })?.data)
-                      ? (data as unknown as { data?: unknown[] }).data!.length
-                      : 0}
-                  </p>
-                  <p className="text-xs text-slate-500">Entries currently visible in this view.</p>
+                  <p className="text-xs text-slate-500 uppercase tracking-wide">Exits Today</p>
+                  <p className="mt-1 text-lg font-bold text-amber-400">{data?.data?.todayExits ?? 0}</p>
+                  <p className="text-xs text-slate-500">OUT movements logged today.</p>
+                </div>
+                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
+                  <p className="text-xs text-slate-500 uppercase tracking-wide">Active Students</p>
+                  <p className="mt-1 text-lg font-bold text-white">{data?.data?.active ?? 0}</p>
+                  <p className="text-xs text-slate-500">Not checked out / suspended.</p>
                 </div>
               </div>
             </div>

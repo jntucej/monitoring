@@ -16,14 +16,17 @@ export interface StaffAttendanceResp {
   summary?: {
     totalStaff: number;
     presentToday: number;
-    absentToday: number;
-    onLeave: number;
+    currentlyInside: number;
+    currentlyOutside: number;
+    warningCount: number;
+    overallAttendanceRate: number;
   };
-  data?: Array<{
-    name: string;
-    role: string;
-    department?: string;
-    present: boolean;
+  records?: Array<{
+    id: string;
+    fullName: string;
+    designation: string;
+    status: string;
+    firstInTime?: string | null;
   }>;
 }
 

@@ -14,10 +14,13 @@ import { Inbox, Clock, Loader2, ShieldCheck, AlertTriangle, ArrowRight } from "l
 
 /* response shapes */
 
-interface DataResponse {
+interface VisitorsMineResponse {
   success: boolean;
-  data: unknown;
-  total?: number;
+  data: {
+    logs: unknown[];
+    active: { status: string; log: unknown } | null;
+    lastCompleted: unknown | null;
+  };
 }
 
 function VisitorHistoryInner() {
@@ -30,7 +33,7 @@ function VisitorHistoryInner() {
     loading,
     error,
     refresh,
-  } = useApiResource<DataResponse>("/api/visitors/mine", { ttlMs: 30_000 });
+  } = useApiResource<VisitorsMineResponse>("/api/visitors/mine", { ttlMs: 30_000 });
 
   const refreshAll = useCallback(async () => {
     clearCache();
@@ -45,10 +48,10 @@ function VisitorHistoryInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       {/* Back link */}
       <Link
-        href="/visitor/registration"
+        href="/visitor"
         className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
       >
-        <ArrowRight className="w-3 h-3 rotate-180" /> Back to Registration
+        <ArrowRight className="w-3 h-3 rotate-180" /> Back to Visitor Portal
       </Link>
 
       {/* Page toolbar */}
@@ -98,7 +101,7 @@ function VisitorHistoryInner() {
               <span className="text-sm font-semibold text-white truncate">History</span>
             </div>
             <span className="text-xs text-slate-500 shrink-0">
-              {(data as DataResponse | null)?.total ?? 0} item(s)
+              {data?.data?.logs?.length ?? 0} log(s)
             </span>
           </div>
           {busy ? (
@@ -123,11 +126,9 @@ function VisitorHistoryInner() {
                 <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
                   <p className="text-xs text-slate-500 uppercase tracking-wide">Records</p>
                   <p className="mt-1 text-lg font-bold text-amber-400">
-                    {Array.isArray((data as unknown as { data?: unknown[] })?.data)
-                      ? (data as unknown as { data?: unknown[] }).data!.length
-                      : 0}
+                    {data?.data?.logs?.length ?? 0}
                   </p>
-                  <p className="text-xs text-slate-500">Entries currently visible in this view.</p>
+                  <p className="text-xs text-slate-500">Your visitor logs on record.</p>
                 </div>
               </div>
             </div>

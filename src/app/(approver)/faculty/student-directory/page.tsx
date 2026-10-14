@@ -14,15 +14,25 @@ import { Clock, Loader2, ShieldCheck, AlertTriangle, ArrowRight } from "lucide-r
 
 /* response shapes */
 
-interface DataResponse {
+interface FacultyRoster {
   success: boolean;
-  data: unknown;
-  total?: number;
+  records?: Array<{
+    id: string;
+    fullName: string;
+    designation: string;
+    status: string;
+    firstInTime?: string;
+    department?: string;
+  }>;
+  summary?: {
+    totalFaculty?: number;
+    presentToday?: number;
+  };
 }
 
 function FacultyStudentDirectoryInner() {
   const user = useAuthStore((s) => s.user);
-  const role = (user?.role ?? "Faculty") as Role;
+  const role = (user?.role ?? "faculty") as Role;
   const tier = getRoleTier(role);
 
   const {
@@ -30,7 +40,7 @@ function FacultyStudentDirectoryInner() {
     loading,
     error,
     refresh,
-  } = useApiResource<DataResponse>("/api/students/stats", { ttlMs: 30_000 });
+  } = useApiResource<FacultyRoster>("/api/faculty/attendance", { ttlMs: 30_000 });
 
   const refreshAll = useCallback(async () => {
     clearCache();
@@ -98,38 +108,43 @@ function FacultyStudentDirectoryInner() {
               <span className="text-sm font-semibold text-white truncate">Student Directory</span>
             </div>
             <span className="text-xs text-slate-500 shrink-0">
-              {(data as DataResponse | null)?.total ?? 0} item(s)
+              {data?.summary?.totalFaculty ?? 0} on roster · {data?.summary?.presentToday ?? 0} present
             </span>
           </div>
           {busy ? (
             <div className="p-4 flex items-center gap-2 text-sm text-slate-500 min-w-0">
-              <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" /> Loading Student Directory…
+              <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" /> Loading roster…
+            </div>
+          ) : data && data.records && data.records.length > 0 ? (
+            <div className="overflow-x-auto -mx-4 px-4">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-800 text-left text-xs text-slate-500">
+                    <th className="py-2 pr-4">Name</th>
+                    <th className="py-2 pr-4">Designation</th>
+                    <th className="py-2 pr-4">Status</th>
+                    <th className="py-2">First In</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.records.map((r) => (
+                    <tr key={r.id} className="border-b border-slate-800/50 last:border-0">
+                      <td className="py-2 pr-4 text-slate-200">{r.fullName}</td>
+                      <td className="py-2 pr-4 text-slate-400">{r.designation}</td>
+                      <td className="py-2 pr-4">
+                        <span className={`text-xs font-semibold ${r.status === "PRESENT" ? "text-emerald-400" : r.status === "ABSENT" ? "text-rose-400" : "text-slate-400"}`}>
+                          {r.status}
+                        </span>
+                      </td>
+                      <td className="py-2 text-slate-400">{r.firstInTime ?? "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           ) : (
-            <div className="p-4 min-w-0">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Status</p>
-                  <p className="mt-1 text-lg font-bold text-emerald-400">Live</p>
-                  <p className="text-xs text-slate-500">Roster of students under your supervision.</p>
-                </div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Last Updated</p>
-                  <p className="mt-1 text-lg font-bold text-sky-400">
-                    {new Date().toLocaleString([], { hour: "2-digit", minute: "2-digit" })}
-                  </p>
-                  <p className="text-xs text-slate-500">Auto-refreshes every 30 seconds.</p>
-                </div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Records</p>
-                  <p className="mt-1 text-lg font-bold text-amber-400">
-                    {Array.isArray((data as unknown as { data?: unknown[] })?.data)
-                      ? (data as unknown as { data?: unknown[] }).data!.length
-                      : 0}
-                  </p>
-                  <p className="text-xs text-slate-500">Students visible in this view.</p>
-                </div>
-              </div>
+            <div className="p-6 text-center text-sm text-slate-500 min-w-0">
+              No roster records available yet.
             </div>
           )}
         </div>

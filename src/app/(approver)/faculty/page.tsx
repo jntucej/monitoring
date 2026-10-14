@@ -40,7 +40,7 @@ interface FacultyAttendanceSummary {
   overallAttendanceRate?: number;
 }
 
-type FacultyAttendanceData = { data?: { summary?: FacultyAttendanceSummary } };
+type FacultyAttendanceData = { summary?: FacultyAttendanceSummary };
 
 function StatCard({
   icon: Icon,
@@ -119,7 +119,7 @@ function FacultyInner() {
   }, [refreshAttendance, refreshLeaves]);
   usePolling(refreshAll, { intervalMs: 30_000, enabled: !!user });
   const busy = attendanceLoading && !attendance || leavesLoading && !leaves;
-  const attendanceSummary = (attendance as FacultyAttendanceData | null)?.data?.summary;
+  const attendanceSummary = (attendance as FacultyAttendanceData | null)?.summary;
   const leavesTotal = (leaves as { total?: number } | null)?.total ?? 0;
 
   return (

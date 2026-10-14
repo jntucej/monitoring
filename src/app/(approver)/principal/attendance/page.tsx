@@ -30,7 +30,8 @@ function AttendanceContent({ data, loading, error }: AttendanceInnerProps) {
   const s = data?.summary;
   const total = s?.totalStaff ?? 0;
   const present = s?.presentToday ?? 0;
-  const pct = total > 0 ? Math.round((present / total) * 100) : 0;
+  const absent = Math.max(0, total - present);
+  const pct = s?.overallAttendanceRate ?? (total > 0 ? Math.round((present / total) * 100) : 0);
 
   return (
     <WidgetBoundary title="Institutional Attendance">
@@ -55,12 +56,12 @@ function AttendanceContent({ data, loading, error }: AttendanceInnerProps) {
               <p className="text-xs text-[var(--text-muted)]">Present</p>
             </div>
             <div className="min-w-0">
-              <p className="text-2xl sm:text-3xl font-bold text-rose-400">{s?.absentToday ?? 0}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-rose-400">{absent}</p>
               <p className="text-xs text-[var(--text-muted)]">Absent</p>
             </div>
             <div className="min-w-0">
-              <p className="text-2xl sm:text-3xl font-bold text-amber-400">{s?.onLeave ?? 0}</p>
-              <p className="text-xs text-[var(--text-muted)]">On Leave</p>
+              <p className="text-2xl sm:text-3xl font-bold text-amber-400">{s?.currentlyOutside ?? 0}</p>
+              <p className="text-xs text-[var(--text-muted)]">Currently Out</p>
             </div>
             <div className="min-w-0">
               <p className="text-2xl sm:text-3xl font-bold text-[var(--text-primary)]">{pct}%</p>
@@ -69,7 +70,7 @@ function AttendanceContent({ data, loading, error }: AttendanceInnerProps) {
           </div>
         )}
 
-        {data?.data && data.data.length > 0 && (
+        {data?.records && data.records.length > 0 && (
           <div className="mt-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] mb-2">
               Staff Breakdown
@@ -79,27 +80,31 @@ function AttendanceContent({ data, loading, error }: AttendanceInnerProps) {
                 <thead>
                   <tr className="text-left text-[var(--text-muted)] border-b border-[var(--border)]">
                     <th className="py-2 pr-4 font-medium">Name</th>
-                    <th className="py-2 pr-4 font-medium">Role</th>
-                    <th className="py-2 pr-4 font-medium">Department</th>
-                    <th className="py-2 font-medium">Status</th>
+                    <th className="py-2 pr-4 font-medium">Designation</th>
+                    <th className="py-2 pr-4 font-medium">Status</th>
+                    <th className="py-2 font-medium">First In</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border)]">
-                  {data.data.map((row, i) => (
-                    <tr key={i}>
-                      <td className="py-2 pr-4 text-[var(--text-primary)]">{row.name}</td>
-                      <td className="py-2 pr-4 text-[var(--text-muted)] capitalize">{row.role}</td>
-                      <td className="py-2 pr-4 text-[var(--text-muted)]">{row.department ?? "—"}</td>
-                      <td className="py-2">
+                  {data.records.map((row) => (
+                    <tr key={row.id}>
+                      <td className="py-2 pr-4 text-[var(--text-primary)]">{row.fullName}</td>
+                      <td className="py-2 pr-4 text-[var(--text-muted)]">{row.designation}</td>
+                      <td className="py-2 pr-4">
                         <span
                           className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${
-                            row.present
+                            row.status !== "ABSENT"
                               ? "bg-emerald-500/15 text-emerald-300"
                               : "bg-rose-500/15 text-rose-300"
                           }`}
                         >
-                          {row.present ? "Present" : "Absent"}
+                          {row.status}
                         </span>
+                      </td>
+                      <td className="py-2 text-[var(--text-muted)]">
+                        {row.firstInTime
+                          ? new Date(row.firstInTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                          : "—"}
                       </td>
                     </tr>
                   ))}
@@ -128,7 +133,14 @@ function AttendanceInner() {
     clearCache();
     const [attR] = [fetchJson("/api/staff/attendance")];
     const att = await attR;
-    setData(att.success ? ((att.data as StaffAttendanceResp) ?? null) : null);
+    if (att.success) {
+      // The staff attendance API returns summary/records at the top level of the
+      // JSON body (not nested under a `data` key). Re-cast the raw payload.
+      const raw = att as unknown as StaffAttendanceResp;
+      setData(raw);
+    } else {
+      setData(null);
+    }
     setError(att.success ? null : att.error?.message ?? "Unknown error");
     setLastRefresh(new Date());
     setRefreshing(false);

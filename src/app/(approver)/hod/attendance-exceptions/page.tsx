@@ -14,15 +14,25 @@ import { Clock, Loader2, ShieldCheck, AlertTriangle, ArrowRight } from "lucide-r
 
 /* response shapes */
 
-interface DataResponse {
+interface FacultyAttendanceResponse {
   success: boolean;
-  data: unknown;
-  total?: number;
+  records?: Array<{
+    id: string;
+    fullName: string;
+    designation: string;
+    status: string;
+    firstInTime?: string;
+  }>;
+  summary?: {
+    totalFaculty?: number;
+    absentCount?: number;
+    lateArrivals?: number;
+  };
 }
 
 function HodAttendanceExceptionsInner() {
   const user = useAuthStore((s) => s.user);
-  const role = (user?.role ?? "Hod") as Role;
+  const role = (user?.role ?? "hod") as Role;
   const tier = getRoleTier(role);
 
   const {
@@ -30,7 +40,7 @@ function HodAttendanceExceptionsInner() {
     loading,
     error,
     refresh,
-  } = useApiResource<DataResponse>("/api/faculty/attendance", { ttlMs: 30_000 });
+  } = useApiResource<FacultyAttendanceResponse>("/api/faculty/attendance", { ttlMs: 30_000 });
 
   const refreshAll = useCallback(async () => {
     clearCache();
@@ -98,7 +108,7 @@ function HodAttendanceExceptionsInner() {
               <span className="text-sm font-semibold text-white truncate">Attendance Exceptions</span>
             </div>
             <span className="text-xs text-slate-500 shrink-0">
-              {(data as DataResponse | null)?.total ?? 0} item(s)
+              {data?.summary?.absentCount ?? 0} exception(s)
             </span>
           </div>
           {busy ? (
@@ -109,27 +119,52 @@ function HodAttendanceExceptionsInner() {
             <div className="p-4 min-w-0">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
                 <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Status</p>
-                  <p className="mt-1 text-lg font-bold text-emerald-400">Live</p>
-                  <p className="text-xs text-slate-500">Anomalies and flagged absences in department attendance.</p>
+                  <p className="text-xs text-slate-500 uppercase tracking-wide">Absent Today</p>
+                  <p className="mt-1 text-lg font-bold text-rose-400">{data?.summary?.absentCount ?? 0}</p>
+                  <p className="text-xs text-slate-500">Faculty marked absent today.</p>
                 </div>
                 <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Last Updated</p>
-                  <p className="mt-1 text-lg font-bold text-sky-400">
-                    {new Date().toLocaleString([], { hour: "2-digit", minute: "2-digit" })}
-                  </p>
-                  <p className="text-xs text-slate-500">Auto-refreshes every 30 seconds.</p>
+                  <p className="text-xs text-slate-500 uppercase tracking-wide">Late Arrivals</p>
+                  <p className="mt-1 text-lg font-bold text-amber-400">{data?.summary?.lateArrivals ?? 0}</p>
+                  <p className="text-xs text-slate-500">Faculty arriving past the window.</p>
                 </div>
                 <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Records</p>
-                  <p className="mt-1 text-lg font-bold text-amber-400">
-                    {Array.isArray((data as unknown as { data?: unknown[] })?.data)
-                      ? (data as unknown as { data?: unknown[] }).data!.length
-                      : 0}
-                  </p>
-                  <p className="text-xs text-slate-500">Exceptions queued for follow-up today.</p>
+                  <p className="text-xs text-slate-500 uppercase tracking-wide">Roster Size</p>
+                  <p className="mt-1 text-lg font-bold text-white">{data?.summary?.totalFaculty ?? 0}</p>
+                  <p className="text-xs text-slate-500">Total faculty on roster.</p>
                 </div>
               </div>
+
+              {data?.records && data.records.length > 0 ? (
+                <div className="mt-4 overflow-x-auto -mx-4 px-4">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-slate-800 text-left text-xs text-slate-500">
+                        <th className="py-2 pr-4">Name</th>
+                        <th className="py-2 pr-4">Designation</th>
+                        <th className="py-2 pr-4">Status</th>
+                        <th className="py-2">First In</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {data.records.map((r) => (
+                        <tr key={r.id} className="border-b border-slate-800/50 last:border-0">
+                          <td className="py-2 pr-4 text-slate-200">{r.fullName}</td>
+                          <td className="py-2 pr-4 text-slate-400">{r.designation}</td>
+                          <td className="py-2 pr-4">
+                            <span className={`text-xs font-semibold ${r.status === "PRESENT" ? "text-emerald-400" : r.status === "ABSENT" ? "text-rose-400" : "text-slate-400"}`}>
+                              {r.status}
+                            </span>
+                          </td>
+                          <td className="py-2 text-slate-400">{r.firstInTime ?? "—"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="mt-4 text-sm text-slate-500">No attendance exceptions queued today.</p>
+              )}
             </div>
           )}
         </div>
