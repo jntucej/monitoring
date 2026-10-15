@@ -23,7 +23,8 @@ jobs:
           cd /opt/monitoring/compose
 
           echo "=== Pull latest code ==="
-          git pull origin main
+          git fetch origin
+          git reset --hard origin/main
 
           echo "=== Rsync src/ only ==="
           rsync -av --delete \
