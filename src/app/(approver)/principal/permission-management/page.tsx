@@ -134,9 +134,9 @@ function PermissionManagementInner() {
           <PermissionList
             title="Hostel & Leave"
             subtitle="Outpass and staff-leave requests escalated to the principal"
-            workflowType="outpass"
+            workflowType="hostel"
             stageFilter="principal"
-            fetchUrl="/api/permissions?workflow_type=outpass&stage=principal&status=PENDING"
+            fetchUrl="/api/permissions?workflow_type=hostel&stage=principal&status=PENDING"
           />
         </WidgetBoundary>
 

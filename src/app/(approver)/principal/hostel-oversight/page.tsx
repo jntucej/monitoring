@@ -45,7 +45,7 @@ function HostelOversightInner() {
     setRefreshing(true);
     setError(null);
     const [outR, leaveR, escR, matR, stuR] = await Promise.all([
-      fetchJson("/api/permissions?workflow_type=outpass&status=PENDING&limit=100"),
+      fetchJson("/api/permissions?workflow_type=hostel&status=PENDING&limit=100"),
       fetchJson("/api/permissions?workflow_type=staff_leave&status=PENDING&limit=100"),
       fetchJson("/api/permissions?status=ESCALATED&limit=50"),
       fetchJson("/api/occupancy/presence-matrix"),
@@ -121,7 +121,7 @@ function HostelOversightInner() {
 
       {/* Occupancy summary */}
       <HostelOverviewPanel matrix={matrix} pendingApprovals={pendingHostel} />
-      <HostelOccupancyPanel roster={students as Parameters<typeof HostelOccupancyPanel>[0]["roster"]} />
+      <HostelOccupancyPanel />
 
       {/* Pending + escalated hostel requests */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 min-w-0">

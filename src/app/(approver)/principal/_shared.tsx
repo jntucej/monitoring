@@ -7,8 +7,8 @@
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { clearCache, cachedFetch } from "@/hooks/useApiResource";
 import { getAuthHeaders } from "@/hooks/useAuthHeaders";
-import type { Alert, Person } from "@/lib/types";
-import { Building2, Users } from "lucide-react";
+import type { Alert } from "@/lib/types";
+import { Building2, LogIn, ShieldCheck, MapPin, Users } from "lucide-react";
 
 /* ── response types ── */
 
@@ -33,9 +33,10 @@ export interface StaffAttendanceResp {
 export interface AuditRecord {
   id: string;
   action: string;
-  user?: { name: string };
+  user_name?: string;
+  user_role?: string;
   userId?: string;
-  details?: string;
+  details?: Record<string, unknown> | string | null;
   timestamp: string;
 }
 
@@ -44,21 +45,6 @@ export interface DepartmentRow {
   name: string;
   hod?: string;
   staffCount?: number;
-}
-
-export interface AttendanceRecordRow {
-  user_id?: string;
-  user_role?: string;
-  gate_id?: string;
-  gate_name?: string;
-  direction?: string;
-  first_in_time?: string | null;
-  last_seen_at?: string | null;
-  checked_in_at?: string | null;
-  status?: string;
-  student_name?: string;
-  roll_no?: string;
-  [key: string]: unknown;
 }
 
 export interface OutpassRow {
@@ -116,6 +102,23 @@ export function fmtDate(iso: string | null | undefined): string {
   return d.toLocaleDateString([], { day: "2-digit", month: "short", year: "numeric" });
 }
 
+/** Render an audit `details` field (JSONB object, string, or null) compactly. */
+export function fmtDetails(details: AuditRecord["details"]): string {
+  if (!details) return "";
+  if (typeof details === "string") {
+    try {
+      const parsed = JSON.parse(details);
+      if (parsed && typeof parsed === "object") return JSON.stringify(parsed);
+      return String(parsed ?? details);
+    } catch {
+      return details;
+    }
+  }
+  const summary = Object.values(details);
+  if (summary.length === 0) return "";
+  return JSON.stringify(details).slice(0, 120);
+}
+
 /* ── building blocks reused across pages ── */
 
 export { WidgetBoundary, clearCache };
@@ -170,55 +173,20 @@ export function hostelRowFor(code: string, count: number): HostelRow {
 
 /* ── Hostel occupancy panel (reused on root + attendance page) ── */
 
-import { useMemo } from "react";
 
-export function HostelOccupancyPanel({ roster }: { roster: Person[] | null }) {
-  const rows: HostelRow[] | null = useMemo(() => {
-    if (!roster) return null;
-    const counts: Record<string, number> = {};
-    for (const code of HOSTEL_CODES) counts[code] = 0;
-    for (const p of roster) {
-      const block = (p.hostelBlock || p.studentDetails?.hostelBlock || "").toUpperCase();
-      if (block in counts) counts[block] += 1;
-    }
-    return HOSTEL_CODES.map((code) => hostelRowFor(code, counts[code] ?? 0));
-  }, [roster]);
-
+export function HostelOccupancyPanel() {
   return (
     <WidgetBoundary title="Hostel Occupancy">
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5">
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
         <div className="flex items-center gap-2 text-[var(--text-muted)] mb-4">
           <Building2 className="w-4 h-4" />
           <span className="text-xs font-semibold uppercase tracking-wide">Hostel Occupancy</span>
         </div>
-        {rows === null ? (
-          <p className="text-sm text-[var(--text-muted)]">Loading…</p>
-        ) : (
-          <ul className="space-y-4">
-            {rows.map((r) => {
-              const pct = r.capacity > 0 ? Math.min(100, Math.round((r.count / r.capacity) * 100)) : 0;
-              const full = r.capacity > 0 && r.count >= r.capacity;
-              return (
-                <li key={r.hostel} className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-mono font-semibold text-[var(--text-primary)]">{r.hostel}</span>
-                    <span className="text-[var(--text-muted)]">
-                      {r.count} in / {r.capacity} · out of campus {Math.max(r.capacity - r.count, 0)}
-                    </span>
-                  </div>
-                  <div className="h-2 rounded-full bg-[var(--bg-elevated)] overflow-hidden border border-[var(--border)]">
-                    <div
-                      className={`h-full rounded-full transition-all ${
-                        full ? "bg-rose-500" : pct > 80 ? "bg-amber-400" : "bg-indigo-500"
-                      }`}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        )}
+        <div className="rounded-lg border border-slate-600/40 bg-slate-700/20 p-3 text-xs text-slate-400 flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-slate-500 shrink-0" />
+          Block-level occupancy detail is maintained by the hostel manager.
+          Gate-level presence is shown in the Live Gate Presence panel above.
+        </div>
       </div>
     </WidgetBoundary>
   );
@@ -245,7 +213,7 @@ export function AlertsPanel({
   };
   return (
     <WidgetBoundary title="Active Alerts">
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5">
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
         <div className="flex items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-2">
             <Siren className="w-4 h-4" />
@@ -294,7 +262,6 @@ export function AlertsPanel({
 
 /* ── Presence matrix panel (reused on root + gate-activity page) ── */
 
-import { MapPin, ShieldCheck } from "lucide-react";
 
 export function PresenceMatrixPanel({
   matrixData,
@@ -311,7 +278,7 @@ export function PresenceMatrixPanel({
 
   return (
     <WidgetBoundary title="Live Gate Presence">
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5">
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
         <div className="flex items-center gap-2 text-[var(--text-muted)] mb-4">
           <MapPin className="w-4 h-4" />
           <span className="text-xs font-semibold uppercase tracking-wide">Live Gate Presence</span>
@@ -430,15 +397,7 @@ export function HostelOverviewPanel({
 
 /* ── Resident directory panel (used on root) ── */
 
-export function ResidentDirectoryPanel({
-  records,
-  loading,
-  error,
-}: {
-  records: AttendanceRecordRow[] | null;
-  loading: boolean;
-  error: string | null;
-}) {
+export function ResidentDirectoryPanel() {
   return (
     <WidgetBoundary title="Resident Directory">
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
@@ -446,42 +405,10 @@ export function ResidentDirectoryPanel({
           <Users className="w-4 h-4 text-violet-400" />
           <span className="text-xs font-semibold uppercase tracking-wide">Resident Directory</span>
         </div>
-        {loading && !records ? (
-          <p className="text-sm text-[var(--text-muted)]">Loading…</p>
-        ) : error ? (
-          <div className="rounded-lg border border-slate-600/40 bg-slate-700/20 p-3 text-xs text-slate-400 flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-slate-500 shrink-0" />
-            Resident directory is managed by the hostel manager. No dedicated resident feed is exposed at this tier.
-          </div>
-        ) : records && records.length > 0 ? (
-          <div className="overflow-x-auto min-w-0">
-            <table className="w-full text-sm min-w-[400px]">
-              <thead>
-                <tr className="text-[var(--text-muted)] text-xs uppercase tracking-wide border-b border-[var(--border)]">
-                  <th className="text-left px-3 py-2">Gate</th>
-                  <th className="text-left px-3 py-2">Direction</th>
-                  <th className="text-left px-3 py-2">First In</th>
-                  <th className="text-left px-3 py-2">Last Seen</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--border)]">
-                {records.slice(0, 20).map((r, i) => (
-                  <tr key={i} className="hover:bg-[var(--bg-elevated)]">
-                    <td className="px-3 py-2 text-[var(--text-primary)]">{r.gate_name || r.gate_id?.slice(0, 8) || "—"}</td>
-                    <td className="px-3 py-2 text-[var(--text-muted)] capitalize">{r.direction || "—"}</td>
-                    <td className="px-3 py-2 text-[var(--text-muted)]">{r.first_in_time ? fmtTime(r.first_in_time) : "—"}</td>
-                    <td className="px-3 py-2 text-[var(--text-muted)]">{r.last_seen_at ? fmtTime(r.last_seen_at) : "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {records.length > 20 && (
-              <p className="text-xs text-[var(--text-muted)] mt-2">Showing first 20 of {records.length} records.</p>
-            )}
-          </div>
-        ) : (
-          <p className="text-sm text-[var(--text-muted)] py-4 text-center">No attendance records on file.</p>
-        )}
+        <div className="rounded-lg border border-slate-600/40 bg-slate-700/20 p-3 text-xs text-slate-400 flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-slate-500 shrink-0" />
+          Resident lookup is an operator-facing tool. Block &amp; room occupancy is maintained by the hostel manager.
+        </div>
       </div>
     </WidgetBoundary>
   );
@@ -574,8 +501,6 @@ export function OutpassLeavePanel({
         </div>
         {loading && !outpasses && !leaves ? (
           <p className="text-sm text-[var(--text-muted)]">Loading…</p>
-        ) : error ? (
-          <p className="text-xs text-amber-300">{error}</p>
         ) : all.length === 0 ? (
           <p className="text-sm text-[var(--text-muted)] py-4 text-center">No pending outpass or leave requests.</p>
         ) : (
@@ -620,15 +545,15 @@ export function OutpassLeavePanel({
 
 export function EntryExitLogsPanel() {
   return (
-    <WidgetBoundary title="Entry/Exit Logs">
+    <WidgetBoundary title="Entry & Exit Log">
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
         <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
-          <MapPin className="w-4 h-4 text-sky-400" />
-          <span className="text-xs font-semibold uppercase tracking-wide">Entry / Exit Logs</span>
+          <LogIn className="w-4 h-4 text-cyan-400" />
+          <span className="text-xs font-semibold uppercase tracking-wide">Entry &amp; Exit Log</span>
         </div>
         <div className="rounded-lg border border-slate-600/40 bg-slate-700/20 p-3 text-xs text-slate-400 flex items-center gap-2">
           <ShieldCheck className="w-4 h-4 text-slate-500 shrink-0" />
-          Entry/exit detail is restricted at the principal tier. Gate-level presence is available in the Gate Activity panel above.
+          Gate-level presence is shown in the Live Gate Presence panel. Detailed scan logs are operator-scoped.
         </div>
       </div>
     </WidgetBoundary>
@@ -637,15 +562,7 @@ export function EntryExitLogsPanel() {
 
 /* ── Hostel incidents panel (restricted) ── */
 
-export function HostelIncidentsPanel({
-  alerts,
-  loading,
-  error,
-}: {
-  alerts: Alert[] | null;
-  loading: boolean;
-  error: string | null;
-}) {
+export function HostelIncidentsPanel() {
   return (
     <WidgetBoundary title="Hostel Incidents">
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
@@ -653,32 +570,10 @@ export function HostelIncidentsPanel({
           <Siren className="w-4 h-4 text-rose-400" />
           <span className="text-xs font-semibold uppercase tracking-wide">Hostel Incidents</span>
         </div>
-        {loading && !alerts ? (
-          <p className="text-sm text-[var(--text-muted)]">Loading…</p>
-        ) : error ? (
-          <div className="rounded-lg border border-slate-600/40 bg-slate-700/20 p-3 text-xs text-slate-400 flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-slate-500 shrink-0" />
-            Incident feeds are admin-scoped. No hostel incidents are exposed at the principal tier.
-          </div>
-        ) : alerts && alerts.length === 0 ? (
-          <p className="text-sm text-[var(--text-muted)] py-4 text-center">No hostel incidents on record. All clear.</p>
-        ) : alerts && alerts.length > 0 ? (
-          <ul className="space-y-2 min-w-0 max-h-48 overflow-y-auto">
-            {alerts.slice(0, 8).map((a) => (
-              <li key={a.id} className="flex items-center gap-2 min-w-0 text-sm hover:bg-[var(--bg-elevated)] rounded-lg px-2 py-1.5">
-                <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
-                  a.severity === "critical" ? "bg-rose-500/20 text-rose-400" : "bg-amber-500/20 text-amber-400"
-                }`}>
-                  {a.severity}
-                </span>
-                <span className="text-[var(--text-primary)] truncate min-w-0 flex-1">{a.title}</span>
-                <span className="text-[10px] text-[var(--text-muted)] shrink-0">{fmtTime(a.timestamp)}</span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-[var(--text-muted)] py-4 text-center">No hostel incidents on record.</p>
-        )}
+        <div className="rounded-lg border border-slate-600/40 bg-slate-700/20 p-3 text-xs text-slate-400 flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-slate-500 shrink-0" />
+          Incident feeds are admin-scoped. No hostel incidents are exposed at the principal tier.
+        </div>
       </div>
     </WidgetBoundary>
   );
@@ -696,7 +591,9 @@ export function RoomOccupancyPanel() {
         </div>
         <div className="rounded-lg border border-slate-600/40 bg-slate-700/20 p-3 text-xs text-slate-400 flex items-center gap-2">
           <ShieldCheck className="w-4 h-4 text-slate-500 shrink-0" />
-          Room-level occupancy data is managed by the hostel manager and not exposed at the principal tier.
+          Room-level occupancy is maintained by the hostel manager. Block-level
+          occupancy is shown in the Hostel Occupancy panel above; per-room detail
+          is not exposed at the principal tier.
         </div>
       </div>
     </WidgetBoundary>

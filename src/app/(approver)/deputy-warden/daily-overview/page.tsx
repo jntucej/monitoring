@@ -207,7 +207,7 @@ function DeputyWardenDailyOverviewInner() {
             icon={Inbox}
             label="Pending at Warden Stage"
             value={pendingTotal}
-            sub="Hostel / outpass requests awaiting warden review"
+            sub="Hostel / outpass requests awaiting principal review"
             accent="text-amber-400"
             loading={outpassLoading && !outpassQueue}
           />

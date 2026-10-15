@@ -199,7 +199,7 @@ function DeputyWardenDelegatedApprovalsInner() {
             icon={Inbox}
             label="Pending at Warden Stage"
             value={total}
-            sub="Hostel / outpass requests awaiting warden review"
+            sub="Hostel / outpass requests awaiting principal review"
             accent="text-amber-400"
             loading={loading && !data}
           />

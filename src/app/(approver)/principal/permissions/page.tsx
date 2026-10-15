@@ -53,9 +53,9 @@ function PrincipalPermissionsInner() {
           <PermissionList
             title="Outpass Requests"
             subtitle="Outpass clearances pending final principal approval"
-            workflowType="outpass"
+            workflowType="hostel"
             stageFilter="principal"
-            fetchUrl="/api/permissions?workflow_type=outpass&stage=principal&status=PENDING"
+            fetchUrl="/api/permissions?workflow_type=hostel&stage=principal&status=PENDING"
           />
         </WidgetBoundary>
       </div>

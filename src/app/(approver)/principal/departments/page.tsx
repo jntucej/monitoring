@@ -67,7 +67,7 @@ function DepartmentContent({
         ) : rows.length === 0 ? (
           <p className="text-xs text-[var(--text-muted)]">No department data available.</p>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto min-w-0">
             <table className="w-full text-sm min-w-full">
               <thead>
                 <tr className="text-left text-[var(--text-muted)] border-b border-[var(--border)]">

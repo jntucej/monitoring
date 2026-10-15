@@ -109,7 +109,33 @@ async function handleGet(req: NextRequest, context: any) {
   const hscope = searchParams.get("hostel_scope") || searchParams.get("hostelScope");
   const status = searchParams.get("status");
 
-  let query = db.from("permission_requests").select("*", { count: "exact" });
+  let query = db.from("permissions").select(
+    `
+    *,
+    student:requester_user_id (
+      id,
+      name,
+      email,
+      phone,
+      role,
+      student_details (
+        roll,
+        year,
+        section,
+        hostel_block,
+        room_number,
+        gender
+      )
+    ),
+    document_signatures (
+      id,
+      signed_by,
+      signed_at,
+      signature_hash
+    )
+    `,
+    { count: "exact" }
+  );
   if (type) query = query.eq("workflow_type", type);
   if (status) query = query.eq("status", status);
   // Explicit stage filter (used by UI PermissionList: ?stage=principal etc.)

@@ -703,7 +703,7 @@ export async function correctScan(
  * Derive which gate UUIDs currently have a live activity signal.
  *
  * A gate counts as "operational" when ANY of these is true:
- *   1. A session row exists for a gate-desk role (operator/supervisor/warden)
+ *   1. A session row exists for a gate-desk role (operator/supervisor)
  *      assigned to (or supervising) the gate. Sessions are written on
  *      refresh-token rotation, so this captures operators that are actively
  *      using their desk app. We do NOT count sysadmin/admin sessions —
@@ -1760,7 +1760,7 @@ export async function addScan(input: {
   // Enforce server-side student exit gate-pass requirements. Manual entries
   // are NOT exempt (spec §11): the operator has manually verified the person,
   // but the pass requirement still applies — a missing pass must be rejected
-  // or escalated to a warden/admin for a correction.
+  // or escalated to a principal/admin for a correction.
   const isStudent = person.role === "student" || person.personType === "student" || !!person.studentDetails;
   if (isStudent && input.direction === "OUT") {
     const { validateStudentExitFlow } = await import("./student-exit-flow");

@@ -14,7 +14,7 @@ export default function PeopleHubPage() {
       <div>
         <p className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">People & Identity Hub</p>
         <p className="text-sm text-[var(--text-secondary)] mt-1">
-          Unified management of students, faculty, staff, wardens, and bulk CSV ingestion.
+          Unified management of students, faculty, staff, hostel managers, and bulk CSV ingestion.
         </p>
       </div>
 

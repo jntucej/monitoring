@@ -33,7 +33,6 @@ interface PermissionRow {
 
 const WORKFLOW_LABELS: Record<string, string> = {
   hostel: "Hostel",
-  outpass: "Outpass",
   exam: "Examination",
   staff_leave: "Staff Leave",
   memo: "Memo",

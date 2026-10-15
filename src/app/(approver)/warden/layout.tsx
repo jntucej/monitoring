@@ -1,9 +1,7 @@
-import React from "react";
+"use client";
 
-export default function WardenRedirectLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return <>{children}</>;
+import { redirect } from "next/navigation";
+
+export default function WardenRedirectLayout() {
+  redirect("/principal");
 }

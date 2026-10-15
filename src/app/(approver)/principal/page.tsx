@@ -6,7 +6,7 @@ import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { useAuthStore } from "@/stores/authStore";
 import { getRoleTier } from "@/lib/alert-hierarchy";
-import type { Role, GatePass, Alert, Person } from "@/lib/types";
+import type { Role, GatePass } from "@/lib/types";
 import { usePolling } from "@/hooks/usePolling";
 import { clearCache } from "@/hooks/useApiResource";
 import Link from "next/link";
@@ -20,7 +20,6 @@ import {
 import {
   fetchJson,
   StatCard,
-  AlertsPanel,
   PresenceMatrixPanel,
   HostelOccupancyPanel,
   HostelOverviewPanel,
@@ -33,7 +32,6 @@ import {
   HostelReportsPanel,
   PresenceMatrixData,
   OutpassRow,
-  AttendanceRecordRow,
   AuditRecord,
 } from "./_shared";
 import { QuickActions } from "@/components/shared/QuickActions";
@@ -59,40 +57,41 @@ function PrincipalDashboardInner() {
 
   const [passes, setPasses] = useState<GatePass[] | null>(null);
   const [passesError, setPassesError] = useState<string | null>(null);
-  const [students, setStudents] = useState<Person[] | null>(null);
-  const [alerts, setAlerts] = useState<Alert[] | null>(null);
-  const [alertsError, setAlertsError] = useState<string | null>(null);
   const [matrix, setMatrix] = useState<PresenceMatrixData | null>(null);
   const [matrixError, setMatrixError] = useState<string | null>(null);
   const [auditRecords, setAuditRecords] = useState<AuditRecord[] | null>(null);
-  const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecordRow[] | null>(null);
-  const [attendanceRecordsError, setAttendanceRecordsError] = useState<string | null>(null);
   const [outpasses, setOutpasses] = useState<OutpassRow[] | null>(null);
   const [leaves, setLeaves] = useState<OutpassRow[] | null>(null);
+
+  const onCampusNow = useMemo(() => {
+    if (!matrix) return null;
+    const gates = matrix.gates ?? [];
+    const roles = matrix.roles ?? [];
+    const m = matrix.matrix ?? {};
+    return gates.reduce((sum, g) => sum + roles.reduce((s, r) => s + (m[g.id]?.[r] ?? 0), 0), 0);
+  }, [matrix]);
 
   const refresh = useCallback(async () => {
     setRefreshing(true);
     clearCache();
-    const [passesR, studentsR, alertsR, matrixR, auditR, attRecR, outR, leaveR] = await Promise.all([
+    const [
+      passesR,
+      matrixR,
+      auditR,
+      outR,
+      leaveR,
+    ] = await Promise.all([
       fetchJson("/api/passes?status=PENDING&limit=100"),
-      fetchJson("/api/students?scope=active"),
-      fetchJson("/api/alerts?resolved=false"),
       fetchJson("/api/occupancy/presence-matrix"),
       fetchJson("/api/principal/audit"),
-      fetchJson("/api/attendance_records?limit=50"),
-      fetchJson("/api/permissions?workflow_type=outpass&status=PENDING"),
+      fetchJson("/api/permissions?workflow_type=hostel&status=PENDING"),
       fetchJson("/api/permissions?workflow_type=staff_leave&status=PENDING"),
     ]);
     setPasses(passesR.success ? ((passesR.data as GatePass[]) ?? []) : null);
     setPassesError(passesR.success ? null : passesR.error?.message ?? "Unknown error");
-    setStudents(studentsR.success ? ((studentsR.data as Person[]) ?? []) : null);
-    setAlerts(alertsR.success ? ((alertsR.data as Alert[]) ?? []) : null);
-    setAlertsError(alertsR.success ? null : alertsR.error?.message ?? "Unknown error");
     setMatrix(matrixR.success ? ((matrixR.data as PresenceMatrixData) ?? null) : null);
     setMatrixError(matrixR.success ? null : matrixR.error?.message ?? "Unknown error");
     setAuditRecords(auditR.success ? ((auditR.data as AuditRecord[]) ?? []) : null);
-    setAttendanceRecords(attRecR.success ? ((attRecR.data as AttendanceRecordRow[]) ?? []) : null);
-    setAttendanceRecordsError(attRecR.success ? null : attRecR.error?.message ?? "Unknown error");
     setOutpasses(outR.success ? ((outR.data as OutpassRow[]) ?? []) : null);
     setLeaves(leaveR.success ? ((leaveR.data as OutpassRow[]) ?? []) : null);
     setLastRefresh(new Date());
@@ -105,20 +104,7 @@ function PrincipalDashboardInner() {
 
   usePolling(refresh, { intervalMs: 30_000, enabled: !!user });
 
-  const onCampusNow = students?.length ?? 0;
   const pendingPasses = passes?.length ?? 0;
-  const activeAlerts = alerts?.length ?? 0;
-
-  const lastBreach = useMemo(() => {
-    if (!alerts || alerts.length === 0) return null;
-    const curfew = alerts.filter((a) => {
-      const t = `${a.title} ${a.message}`.toLowerCase();
-      return t.includes("curfew") || t.includes("late night") || a.severity === "critical";
-    });
-    const src = curfew.length > 0 ? curfew : alerts;
-    const sorted = [...src].sort((a, b) => (b.timestamp ?? "").localeCompare(a.timestamp ?? ""));
-    return sorted[0] ?? null;
-  }, [alerts]);
 
   const fmtTime = (iso: string | null | undefined): string => {
     if (!iso) return "—";
@@ -137,8 +123,8 @@ function PrincipalDashboardInner() {
     {
       icon: UserCheck,
       label: "On-Campus Now",
-      value: students === null ? "…" : onCampusNow,
-      sub: "Active students not checked out",
+      value: onCampusNow === null ? "…" : onCampusNow,
+      sub: "Live gate presence (all roles)",
       accent: "text-emerald-400",
     },
     {
@@ -150,23 +136,22 @@ function PrincipalDashboardInner() {
     },
     {
       icon: Siren,
-      label: "Active Alerts",
-      value: alerts === null ? "…" : activeAlerts,
-      sub: "Unresolved campus alerts",
-      accent: activeAlerts > 0 ? "text-rose-400" : "text-emerald-400",
+      label: "Pending Hostel Approvals",
+      value: outpasses === null && leaves === null ? "…" : (outpasses?.length ?? 0) + (leaves?.length ?? 0),
+      sub: "Outpass & staff leave at your stage",
+      accent: (outpasses?.length ?? 0) + (leaves?.length ?? 0) > 0 ? "text-rose-400" : "text-emerald-400",
     },
     {
       icon: Clock,
-      label: "Last Curfew Breach",
-      value: lastBreach ? fmtTime(lastBreach.timestamp) : "None",
-      sub: lastBreach
-        ? `${lastBreach.title}${lastBreach.studentRoll ? ` · ${lastBreach.studentRoll}` : ""}`
-        : "No curfew alerts on record",
-      accent: lastBreach ? "text-rose-400" : "text-emerald-400",
+      label: "Last Matrix Refresh",
+      value: matrix?.lastUpdated ? fmtTime(matrix.lastUpdated) : "—",
+      sub: matrix ? "Live gate presence signal" : "Waiting for gate data",
+      accent: "text-sky-400",
     },
   ];
 
-  const anyError = passesError || alertsError || matrixError;
+  const anyError = passesError || matrixError;
+
 
   const pendingHostelApprovals = (outpasses?.length ?? 0) + (leaves?.length ?? 0);
 
@@ -203,8 +188,10 @@ function PrincipalDashboardInner() {
         </div>
       )}
 
-      {/* KPI row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
+      {/* KPI row — 2×2 at desktop: the 4th KPI carries long variable text
+          (curfew breach + roll), so lg:grid-cols-2 prevents the sub line
+          wrapping into a 3rd line and changing card height */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 min-w-0">
         {kpis.map((k) => (
           <StatCard key={k.label} icon={k.icon} label={k.label} value={k.value} sub={k.sub} accent={k.accent} />
         ))}
@@ -213,10 +200,9 @@ function PrincipalDashboardInner() {
       {/* Live gate presence */}
       <PresenceMatrixPanel matrixData={matrix} loading={matrix === null && !matrixError} error={matrixError} />
 
-      {/* Hostel occupancy + active alerts side by side */}
+      {/* Hostel occupancy */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 min-w-0">
-        <HostelOccupancyPanel roster={students} />
-        <AlertsPanel alerts={alerts} loading={alerts === null && !alertsError} error={alertsError} />
+        <HostelOccupancyPanel />
       </div>
 
       {/* Hostel & Residents cluster */}
@@ -226,11 +212,7 @@ function PrincipalDashboardInner() {
         </p>
         <HostelOverviewPanel matrix={matrix} pendingApprovals={pendingHostelApprovals} />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 min-w-0">
-          <ResidentDirectoryPanel
-            records={attendanceRecords}
-            loading={attendanceRecords === null && !attendanceRecordsError}
-            error={attendanceRecordsError}
-          />
+          <ResidentDirectoryPanel />
           <HostelAttendancePanel matrix={matrix} />
         </div>
         <OutpassLeavePanel
@@ -241,7 +223,7 @@ function PrincipalDashboardInner() {
         />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 min-w-0">
           <EntryExitLogsPanel />
-          <HostelIncidentsPanel alerts={alerts} loading={alerts === null && !alertsError} error={alertsError} />
+          <HostelIncidentsPanel />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 min-w-0">
           <RoomOccupancyPanel />

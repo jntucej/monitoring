@@ -193,7 +193,7 @@ function PassLeaveSubmissionInner() {
         <p>
           <strong className="font-semibold text-amber-100">Submission only — no approval authority.</strong>{" "}
           You may submit pass/leave requests on behalf of your wards, but approval is handled by
-          the designated campus approval chain (caregiver → warden → principal).
+          the designated campus approval chain (caregiver → principal).
         </p>
       </div>
 

@@ -42,7 +42,7 @@ function GateActivityInner() {
     clearCache();
     const [matR, outR, leaveR] = await Promise.all([
       fetchJson("/api/occupancy/presence-matrix"),
-      fetchJson("/api/permissions?workflow_type=outpass&status=PENDING"),
+      fetchJson("/api/permissions?workflow_type=hostel&status=PENDING"),
       fetchJson("/api/permissions?workflow_type=staff_leave&status=PENDING"),
     ]);
     setMatrix(matR.success ? ((matR.data as PresenceMatrixData) ?? null) : null);
@@ -155,7 +155,7 @@ function GateActivityInner() {
           ) : gateSummary.length === 0 ? (
             <p className="text-xs text-[var(--text-muted)]">No gates registered.</p>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto min-w-0">
               <table className="w-full text-sm min-w-full">
                 <thead>
                   <tr className="text-left text-[var(--text-muted)] border-b border-[var(--border)]">

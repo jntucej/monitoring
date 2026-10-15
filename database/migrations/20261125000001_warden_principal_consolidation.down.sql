@@ -8,11 +8,12 @@
 --   * original is_warden() body (role='warden' only)
 --   * original users_role_check INCLUDING 'warden'
 --
--- NOTE: this cannot perfectly recover the ORIGINAL user id that was warden
--- because step 2 of the up-migration re-mapped it by id. The down script
--- restores by re-mapping hostel_manager accounts that carry a
--- _was_warden marker. In this deployment there is exactly one such account,
--- so the target is unambiguous. If more exist, restore each and re-run.
+-- NOTE: this recovers the user that was warden by anchoring on the
+-- audit_logs ROLE_CHANGED trail (old_role='warden',
+-- new_role='hostel_manager') written by the up-migration's reassignment.
+-- In this deployment exactly one such account exists, so the target is
+-- unambiguous; on a fresh DB (no audit trail) the reversal is a no-op.
+-- If more exist, each is restored.
 -- ============================================================================
 
 BEGIN;
@@ -22,13 +23,19 @@ UPDATE public.config_roles_registry SET is_active = TRUE WHERE code = 'warden';
 
 -- Reverse role reassignment: hostel_manager accounts that were warden.
 -- (The up-migration set role='hostel_manager' for users whose role was 'warden'.
---  We mark the reversal by restoring the role to 'warden' where the account
---  is a hostel_manager whose audit trail shows a prior warden assignment.
---  In this 1-warden deployment, re-promote the hostel_manager that has no
---  legitimate hostel_manager seeding and carried over assigned_hostel.)
-UPDATE public.users SET role = 'warden'
- WHERE role = 'hostel_manager'
-   AND assigned_hostel IS NOT NULL;
+--  Those accounts are identified by the audit_logs trail: the role-change
+--  trigger (create_audit_log_on_user_change) records action 'ROLE_CHANGED'
+--  with details {user_id, old_role, new_role}. In this 1-warden deployment
+--  exactly one such row exists. If none exist (fresh DB, or no audit trail),
+--  this is a no-op.)
+UPDATE public.users u
+   SET role = 'warden'
+  FROM public.audit_logs a
+ WHERE a.action = 'ROLE_CHANGED'
+   AND a.details->>'old_role' = 'warden'
+   AND a.details->>'new_role' = 'hostel_manager'
+   AND (a.details->>'user_id')::uuid = u.id
+   AND u.role = 'hostel_manager';
 
 -- Reverse exit-reason approval target.
 UPDATE public.config_exit_reasons SET approval_by = 'warden'

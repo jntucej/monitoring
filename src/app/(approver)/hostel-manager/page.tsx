@@ -153,7 +153,7 @@ function HostelManagerInner() {
             <p className="text-sm text-slate-300 min-w-0">
               The hostel manager owns <span className="font-semibold text-sky-300">resources and facilities</span> — rooms, beds, utilities and stock. This role
               does <span className="font-semibold text-rose-300">not</span> carry hostel-disciplinary authority or final outpass power; outpass and
-              disciplinary decisions route through the warden/principal chain.
+              disciplinary decisions route through the hostel-manager/principal chain.
             </p>
           </div>
         </div>

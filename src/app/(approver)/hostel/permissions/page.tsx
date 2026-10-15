@@ -316,7 +316,7 @@ function HostelPermissionsInner() {
 }
 export default function HostelPermissionsPage() {
   return (
-    <AuthGuard allowedRoles={['hostel', 'hostel_manager', 'deputy_warden', 'admin', 'sysadmin']}>
+    <AuthGuard allowedRoles={['principal', 'hostel_manager', 'deputy_warden', 'caretaker', 'admin', 'sysadmin']}>
       <Suspense fallback={<PageLoading />}>
         <HostelPermissionsInner />
       </Suspense>

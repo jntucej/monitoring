@@ -15,7 +15,7 @@ import {
   ScrollText,
   ClipboardCheck,
 } from "lucide-react";
-import { fetchJson, fmtDate, fmtTime, AuditRecord } from "../_shared";
+import { fetchJson, fmtDate, fmtTime, fmtDetails, AuditRecord } from "../_shared";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 
 function AuditContent({
@@ -73,8 +73,8 @@ function AuditContent({
                   </span>
                 </div>
                 <p className="text-xs text-[var(--text-muted)] mt-0.5 pl-5 min-w-0">
-                  {r.user?.name || "System"} · {fmtDate(r.timestamp)} {fmtTime(r.timestamp)}
-                  {r.details ? ` · ${r.details}` : ""}
+                  {r.user_name || "System"} · {fmtDate(r.timestamp)} {fmtTime(r.timestamp)}
+                  {fmtDetails(r.details) ? ` · ${fmtDetails(r.details)}` : ""}
                 </p>
               </li>
             ))}
@@ -140,8 +140,8 @@ function AuditContent({
                   </span>
                 </div>
                 <p className="text-xs text-[var(--text-muted)] mt-1 pl-1 min-w-0">
-                  {r.user?.name || "System"} · {fmtDate(r.timestamp)} {fmtTime(r.timestamp)}
-                  {r.details ? ` · ${r.details}` : ""}
+                  {r.user_name || "System"} · {fmtDate(r.timestamp)} {fmtTime(r.timestamp)}
+                  {fmtDetails(r.details) ? ` · ${fmtDetails(r.details)}` : ""}
                 </p>
               </li>
             ))}

@@ -30,7 +30,7 @@ export interface GateGeo {
 
 /**
  * Operators can only scan at their assigned gate.
- * Admins, sysadmins, and wardens are exempt.
+ * Admins, sysadmins, and principals are exempt.
  * Supervisors may scan at any of their supervised gates.
  */
 export function assertOperatorGateMatch(

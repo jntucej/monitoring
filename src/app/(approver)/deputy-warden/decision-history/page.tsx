@@ -184,7 +184,7 @@ function DeputyWardenDecisionHistoryInner() {
             icon={History}
             label="Decided"
             value={decidedCount}
-            sub="Records moved on from the warden stage"
+            sub="Records moved on from the principal stage"
             accent="text-sky-400"
             loading={busy}
           />
@@ -192,7 +192,7 @@ function DeputyWardenDecisionHistoryInner() {
             icon={CheckCircle2}
             label="Approved"
             value={approvedCount}
-            sub="Approved or completed at warden stage"
+            sub="Approved or completed at principal stage"
             accent="text-emerald-400"
             loading={busy}
           />
@@ -200,7 +200,7 @@ function DeputyWardenDecisionHistoryInner() {
             icon={AlertTriangle}
             label="Rejected / Escalated"
             value={rejectedCount}
-            sub="Rejected or escalated out of warden stage"
+            sub="Rejected or escalated out of principal stage"
             accent="text-rose-400"
             loading={busy}
           />
