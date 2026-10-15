@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
+import { hashPassword } from "@/server/lib/crypto";
 import { withAdminMutation } from "@/server/http/mutation-guard";
 import { query } from "@/lib/postgres";
 import { getSupabaseServiceClient, invalidateAllUserSessions } from "@/lib/dbClient";
@@ -75,7 +75,7 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }) {
       );
     }
 
-    const hash = await bcrypt.hash(password, 10);
+    const hash = await hashPassword(password);
     const svc = getSupabaseServiceClient();
     const { error } = await svc
       .from("users")
