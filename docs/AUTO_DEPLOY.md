@@ -79,3 +79,4 @@ gh run list --repo jntucej/monitoring --branch main
 # View logs for a specific run
 gh run view <run-id> --log-failed
 ```
+# test deploy
