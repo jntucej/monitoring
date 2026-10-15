@@ -242,10 +242,14 @@ export type ExitReason =
   | "Regular" | "Leave" | "Outing" | "Emergency"          // legacy
   | "Home Out" | "Day Out"                                 // legacy labels
   | "Daily Outing" | "Day Pass" | "Home In"                // new labels
-  | "daily_outing" | "home_in" | "home_out" | "day_pass";  // canonical codes
+  | "Special Leave" | "Day Scholar Out"                     // hostel-permission additions
+  | "daily_outing" | "home_in" | "home_out" | "day_pass"   // canonical codes
+  | "emergency" | "special_leave" | "day_scholar_out";     // hostel-permission canonical codes
 
 /** Canonical exit-reason codes the config table is keyed on. */
-export type ReasonCode = "daily_outing" | "home_in" | "home_out" | "day_pass";
+export type ReasonCode =
+  | "daily_outing" | "home_in" | "home_out" | "day_pass"
+  | "emergency" | "special_leave" | "day_scholar_out";
 
 // ---- Operator dashboard: category breakdown & outing tracking -------------
 export type PersonCategoryKey =

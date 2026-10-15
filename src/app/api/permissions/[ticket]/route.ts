@@ -8,7 +8,15 @@ import {
   resolveNextStage,
   appendStageHistory,
   getScopedTicket,
+  requiresStepup,
 } from "@/lib/permission-workflow";
+import {
+  prepareHostelForward,
+  applyHostelForward,
+  prepareEscalateUp,
+  applyEscalateUp,
+  checkStepupPassword,
+} from "@/lib/permission-forward";
 import { addAudit, addNotification } from "@/lib/db";
 import type { WorkflowType, Role } from "@/lib/types";
 
@@ -71,11 +79,13 @@ async function handlePatch(req: NextRequest): Promise<Response> {
     );
   }
 
-  const { action, comment, digitalSignature, targetStage } = (body || {}) as {
+  const { action, comment, digitalSignature, targetStage, stepupPassword, targetRole } = (body || {}) as {
     action?: string;
     comment?: string;
     digitalSignature?: string;
     targetStage?: string;
+    stepupPassword?: string;
+    targetRole?: string;
   };
 
   const normalizedAction = (action || "").toUpperCase();
@@ -83,6 +93,7 @@ async function handlePatch(req: NextRequest): Promise<Response> {
     "APPROVE",
     "REJECT",
     "ESCALATE",
+    "ESCALATE_UP",
     "FORWARD",
     "REQUEST_INFO",
     "COMPLETE",
@@ -129,6 +140,55 @@ async function handlePatch(req: NextRequest): Promise<Response> {
       { success: false, error: { code: "NOT_FOUND", message: "Permission request not found" } },
       { status: 404 }
     );
+  }
+
+  // FORWARD: delegate to the shared hostel-forward helper (L2 layering).
+  if (normalizedAction === "FORWARD") {
+    const { data: actorRow } = await supabase.from("users").select("name").eq("id", authUserId).maybeSingle();
+    const prep = await prepareHostelForward({
+      ticketParam,
+      authUserId,
+      authUserRole,
+      authUserEmail,
+      actorName: actorRow?.name || authUserEmail || "Approver",
+      body: { targetRole, comment, stepupPassword },
+    });
+    if (!prep.ok || prep.response) {
+      return prep.response ?? NextResponse.json(
+        { success: false, error: { code: "BAD_REQUEST", message: "Forward could not be prepared" } },
+        { status: 400 },
+      );
+    }
+    const result = await applyHostelForward({
+      ticket: prep.ticket as NonNullable<typeof prep.ticket>,
+      actor: prep.actor as NonNullable<typeof prep.actor>,
+      targetRole: prep.targetRole as string,
+      comment: prep.comment as string,
+      stepupVerified: Boolean(prep.stepupVerified),
+      authUserRole,
+      authUserEmail,
+      authUserId,
+    });
+    return result.response;
+  }
+
+  // ESCALATE_UP: student-initiated move to the next hostel level after a rejection.
+  if (normalizedAction === "ESCALATE_UP") {
+    const { data: actorRow } = await supabase.from("users").select("name").eq("id", authUserId).maybeSingle();
+    const prep = await prepareEscalateUp({ ticketParam, authUserId, authUserRole });
+    if (!prep.ok || prep.response) {
+      return prep.response ?? NextResponse.json(
+        { success: false, error: { code: "BAD_REQUEST", message: "Escalation could not be prepared" } },
+        { status: 400 },
+      );
+    }
+    const result = await applyEscalateUp({
+      ticket: prep.ticket as NonNullable<typeof prep.ticket>,
+      nextStage: prep.nextStage as string,
+      actor: { id: authUserId, name: actorRow?.name || authUserEmail || "Approver", role: authUserRole },
+      authUserEmail,
+    });
+    return result.response;
   }
 
   if (normalizedAction === "CANCEL") {
@@ -263,6 +323,9 @@ async function handlePatch(req: NextRequest): Promise<Response> {
   } else if (normalizedAction === "ESCALATE") {
     nextStatus = "ESCALATED";
     if (targetStage) nextStage = targetStage;
+  } else if (normalizedAction === "ESCALATE_UP") {
+    // Handled above via the shared helper; defensive fallback only.
+    nextStatus = "PENDING";
   } else if (normalizedAction === "COMPLETE") {
     nextStage = "completed";
     nextStatus = "COMPLETED";
@@ -300,6 +363,35 @@ async function handlePatch(req: NextRequest): Promise<Response> {
   updateFields.status = nextStatus;
   updateFields.stage_history = updatedHistory;
 
+  // APPROVE step-up gate: when the approval is flagged (reason emergency or
+  // special_leave) the actor must verify the approval password. Verifies with
+  // the shared lockout helper; audits PERMISSION_STEPUP_VERIFIED on success.
+  if (normalizedAction === "APPROVE" && request.workflow_type === "hostel") {
+    const ticketReason = typeof request.reason === "string" ? request.reason : undefined;
+    const stepupNeeded = requiresStepup({
+      actorRole: authUserRole,
+      action: "approve",
+      reason: ticketReason,
+    });
+    if (stepupNeeded) {
+      const check = await checkStepupPassword(authUserId, authUserRole, stepupPassword);
+      if (!check.ok) {
+        return NextResponse.json(
+          { success: false, error: { code: check.code, message: check.message } },
+          { status: 403 },
+        );
+      }
+      updateFields.stepup_verified_at = new Date().toISOString();
+      updateFields.stepup_verified_by = authUserId;
+      addAudit({
+        action: "PERMISSION_STEPUP_VERIFIED",
+        userId: authUserId,
+        role: authUserRole as Role,
+        details: { ticketNumber: request.ticket_number, reason: ticketReason },
+      }).catch((err) => console.error("[Permission Ticket API] addAudit error:", err));
+    }
+  }
+
   const { data: updated, error: updateErr } = await supabase
     .from("permission_requests")
     .update(updateFields)
@@ -320,6 +412,7 @@ async function handlePatch(req: NextRequest): Promise<Response> {
     normalizedAction === "REJECT" ? "PERMISSION_REQUEST_REJECTED" :
     normalizedAction === "FORWARD" ? "PERMISSION_REQUEST_FORWARDED" :
     normalizedAction === "ESCALATE" ? "PERMISSION_REQUEST_ESCALATED" :
+    normalizedAction === "ESCALATE_UP" ? "PERMISSION_REQUEST_ESCALATED" :
     normalizedAction === "COMPLETE" ? "PERMISSION_REQUEST_COMPLETED" :
     normalizedAction === "SIGN" ? "PERMISSION_DOCUMENT_SIGNED" :
     normalizedAction.startsWith("BIOMETRIC_") ? "PERMISSION_BIOMETRIC_VERIFIED" :
