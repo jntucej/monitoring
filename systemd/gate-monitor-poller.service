@@ -1,0 +1,17 @@
+[Unit]
+Description=Gate Monitor Auto-Deploy Poller
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/monitoring/compose
+ExecStart=/bin/bash /opt/monitoring/compose/scripts/auto-poll-deploy.sh
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
