@@ -50,6 +50,33 @@ Wait for healthy
 Telegram notification
 ```
 
-### Manual Trigger
+### Troubleshooting
 
-Go to: Repository → Actions → Auto Deploy to Production → Run workflow
+**Workflow failing due to missing secrets?**
+The workflow requires these GitHub Secrets to be configured:
+- `SERVER_HOST` - Your server IP (192.168.1.36)
+- `SERVER_USER` - SSH username (root)
+- `SSH_PRIVATE_KEY` - Private key content from `~/.ssh/myrepo_deploy`
+- `TELEGRAM_BOT_TOKEN` - From `.env`
+- `TELEGRAM_CHAT_ID` - `1926342151`
+
+Add them at: Repository → Settings → Secrets and variables → Actions
+
+**Cannot push to main?**
+```bash
+# Check branch protection status
+gh api repos/jntucej/monitoring/branches/main/protection
+
+# To temporarily disable (emergency only)
+gh api repos/jntucej/monitoring/branches/main/protection -X DELETE
+```
+
+**Workflow failed?**
+```bash
+# View recent runs
+gh run list --repo jntucej/monitoring --branch main
+
+# View logs for a specific run
+gh run view <run-id> --log-failed
+```
+# test deploy

@@ -1,0 +1,56 @@
+name: Manual Deploy (Trusted)
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "deploy" to confirm'
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    if: github.event.inputs.confirm == 'deploy'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Deploy via SSH
+      uses: appleboy/ssh-action@v1
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          set -e
+          cd /opt/monitoring/compose
+          git fetch origin
+          git reset --hard origin/main
+          rsync -av --delete \
+            --exclude='.git' --exclude='node_modules' --exclude='.next' \
+            --exclude='.env' --exclude='.env.*' \
+            src/ /opt/monitoring/compose/src/
+          docker compose build web --no-cache
+          docker compose up -d --remove-orphans
+          for i in $(seq 1 20); do
+            STATUS=$(docker inspect --format="{{.State.Health.Status}}" gate_web 2>/dev/null || echo "missing")
+            if [ "$STATUS" = "healthy" ]; then
+              echo "Container is healthy!"
+              break
+            fi
+            sleep 5
+          done
+          docker logs gate_web --tail 10
+
+    - name: Notify Telegram
+      if: success()
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_CHAT_ID }}
+        token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        message: |
+          ✅ Manual Deploy Success
+          Branch: ${{ github.ref_name }}
+          Commit: ${{ github.sha }}
+          Confirmed by: ${{ github.actor }}
