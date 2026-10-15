@@ -112,11 +112,16 @@ async function handleGet(req: NextRequest, context: any) {
   let query = db.from("permissions").select(
     `
     *,
-    student:requester_user_id (
+    requester:requester_user_id (
       id,
       name,
       email,
       phone,
+      role
+    ),
+    student:student_user_id (
+      id,
+      name,
       role,
       student_details (
         roll,
