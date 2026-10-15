@@ -215,10 +215,15 @@ export function ScanConfirmation({
   const isHosteller = student.studentType === "HM" || student.studentType === "HF";
 
   // Type gate: is this reason legally available for this sub-type?
+  // The config's `applicableTo` may be the person-type ("student") or a
+  // sub-category (HM/HF/DM/DF).  A person-type entry applies to every
+  // sub-category, so we must not just do a straight `includes` check.
   const typeAllows = (cfg: ActionEntry) => {
-    if (!cfg.applicableTo || cfg.applicableTo.length === 0) return true;
+    const applicable = cfg.applicableTo as string[];
+    if (!applicable || applicable.length === 0) return true;
     if (!student.studentType) return true; // unknown type -> don't over-restrict
-    return cfg.applicableTo.includes(student.studentType);
+    if (applicable.includes("student")) return true; // "student" = all sub-types
+    return applicable.includes(student.studentType);
   };
 
   // Occupancy gate: skip moves that duplicate the current state.
@@ -514,12 +519,18 @@ export function ScanConfirmation({
               ) : (
                 <Briefcase className="w-3.5 h-3.5" />
               )}
-              {campusStatus === "IN" ? "Inside Campus" : "Outside Campus"}
+              {campusStatus === "IN"
+                ? isDayScholar ? "At College" : "Inside Campus"
+                : isHosteller  ? "At Home"    : "Outside Campus"}
             </span>
             <span className="text-[11px] text-[var(--text-secondary)]">
               {campusStatus === "IN"
-                ? "Currently on campus — an exit can be recorded."
-                : "Currently off campus — an entry can be recorded."}
+                ? isDayScholar
+                  ? "Day scholar — currently on campus, an exit can be recorded."
+                  : "Currently on campus — an exit can be recorded."
+                : isHosteller
+                  ? "Hosteller — currently at home, an entry can be recorded."
+                  : "Currently off campus — an entry can be recorded."}
             </span>
           </div>
         ) : (
