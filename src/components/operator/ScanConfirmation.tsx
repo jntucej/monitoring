@@ -1,22 +1,38 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
 import { User, CheckCircle2, LogIn, Home, Sun, Clock, X, Briefcase, ShieldAlert, Flag } from "lucide-react";
-import { ExitReason, StudentType, Student, ScanDirection, ExitReasonConfig } from "@/lib/types";
+import { ExitReason, Student, ScanDirection } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { PersonBadge } from "@/components/shared/PersonBadge";
 import { useAuthStore } from "@/stores/authStore";
-import { useCampusConfig } from "@/hooks/useCampusConfig";
+
+/**
+ * Canonical entry-type selection: the operator's choice of who the student is
+ * (hosteller or day_scholar). Drives which IN/OUT buttons are offered and is
+ * persisted via POST /api/operator/entry-type.
+ */
+export type EntryType = "hosteller" | "day_scholar";
 
 interface ScanConfirmationProps {
   student: Student;
-  onConfirm: (direction: ScanDirection, reason?: ExitReason) => void | Promise<void>;
+  /**
+   * Backwards-compatible: an optional third argument carries the entry type
+   * when the operator confirms an IN scan (hosteller vs day_scholar). OUT
+   * scans carry a reason instead; entryType is ignored for them.
+   */
+  onConfirm: (direction: ScanDirection, reason?: ExitReason, entryType?: EntryType) => void | Promise<void>;
   onCancel: () => void;
   suggestedDirection?: ScanDirection;
   /** Authoritative current IN/OUT condition of the scanned person. */
   campusStatus?: "IN" | "OUT" | null;
+  /**
+   * Live entry-type selection read from student_details.current_entry_type.
+   * When null the operator has not yet chosen a type; an OUT + null state
+   * defaults to hosteller (per spec) and is logged.
+   */
+  currentEntryType?: EntryType | null;
   isInline?: boolean;
 }
 
@@ -25,26 +41,18 @@ type ActionEntry = {
   name: string;
   direction: ScanDirection;
   icon: React.ElementType;
-  applicableTo: StudentType[];
   requiresApproval: boolean;
-  parentNotification: boolean | string;
+  /** Entry-type this button sets/preserves (IN buttons only). */
+  entryType?: EntryType;
 };
 
-const reasonIcons: Record<string, React.ElementType> = {
-  "Regular": Briefcase,
-  "Home Out": Home,
-  "Day Out": Sun,
-  "Leave": Clock,
-  "Daily Outing": Briefcase,
-  "Day Pass": Sun,
-  "Home In": Home,
-  "daily_outing": Briefcase,
-  "home_in": Home,
-  "home_out": Home,
-  "day_pass": Sun,
-  "Outing": Briefcase,
-  "Emergency": Clock,
-};
+function normalizeEntryType(value: unknown): EntryType | null {
+  if (typeof value !== "string") return null;
+  const s = value.trim().toLowerCase();
+  if (s === "hosteller" || s === "hostel" || s === "hm" || s === "hf") return "hosteller";
+  if (s === "day_scholar" || s === "day scholar" || s === "day_scholars" || s === "dm" || s === "df") return "day_scholar";
+  return null;
+}
 
 export function ScanConfirmation({
   student,
@@ -52,49 +60,21 @@ export function ScanConfirmation({
   onCancel,
   suggestedDirection = "IN",
   campusStatus = null,
+  currentEntryType = null,
   isInline = false,
 }: ScanConfirmationProps) {
-  const { exitReasons } = useCampusConfig();
-  const validExitReasons = exitReasons.length > 0 ? exitReasons : [];
+  // Live entry type: the prop wins, falling back to the stored
+  // studentDetails.current_entry_type on the person.
+  const effectiveEntryType =
+    normalizeEntryType(currentEntryType) ??
+    normalizeEntryType(student.studentDetails?.currentEntryType ?? student.currentEntryType);
 
-  // Fallback OUT options so the operator always has a path even when the
-  // campus exit-reason config fails to load (empty array) or returns no
-  // reasons applicable to this student. Mirrors the canonical exit-flow
-  // codes in src/lib/student-exit-flow.ts.
-  const FALLBACK_EXIT_REASONS: ExitReasonConfig[] = [
-    {
-      code: "daily_outing",
-      name: "Daily Outing",
-      description: "Standard local daily outing (no pass required)",
-      applicableTo: ["HM", "HF", "DM", "DF"],
-      requiresApproval: false,
-      parentNotification: "silent",
-    },
-    {
-      code: "home_out",
-      name: "Home Out",
-      description: "Weekend/overnight leave (requires principal-approved pass)",
-      applicableTo: ["HM", "HF"],
-      requiresApproval: true,
-      approvalBy: "principal",
-      parentNotification: "sms",
-    },
-    {
-      code: "day_pass",
-      name: "Day Pass",
-      description: "Full day leave (requires principal-approved pass)",
-      applicableTo: ["DM", "DF"],
-      requiresApproval: true,
-      approvalBy: "principal",
-      parentNotification: "sms",
-    },
-  ];
-  
   // Photo verification state
   const [photoVerified, setPhotoVerified] = useState(false);
   const [countdown, setCountdown] = useState(2);
   const [selectedDirection, setSelectedDirection] = useState<ScanDirection | null>(null);
   const [selectedReason, setSelectedReason] = useState<ExitReason | null>(null);
+  const [selectedEntryType, setSelectedEntryType] = useState<EntryType | null>(null);
   const [approvedPasses, setApprovedPasses] = useState<any[]>([]);
   const [loadingPasses, setLoadingPasses] = useState(false);
   const [isFlagged, setIsFlagged] = useState(
@@ -134,6 +114,7 @@ export function ScanConfirmation({
     setCountdown(2);
     setSelectedDirection(null);
     setSelectedReason(null);
+    setSelectedEntryType(null);
     setApprovedPasses([]);
 
     const timer = setInterval(() => {
@@ -167,7 +148,7 @@ export function ScanConfirmation({
           headers["X-Session-Token"] = sessionToken;
         }
         const res = await fetch(`/api/passes?roll=${encodeURIComponent(rollNum)}&status=APPROVED`, { headers });
-        
+
         if (!res.ok) {
           console.warn(`Pass API returned status ${res.status}`);
           setApprovedPasses([]);
@@ -199,203 +180,226 @@ export function ScanConfirmation({
     fetchApprovedPasses();
   }, [student.id, student.uniqueId, student.roll]);
 
-  // The config's `applicableTo` is a person-type (e.g. "student"), but
-  // `student.studentType` is a sub-category (HM/HF/DM/DF). A reason that
-  // applies to "student" therefore applies to every student sub-type.
-  // Constraint helpers. A student's sub-type + live campus status decide which
-  // moves are even legal before a single button is offered:
-  //   - DM/DF (day scholar)  -> can only move daily_outing (in & out). They do
-  //     not live on campus, so home_in / home_out / day_pass never apply.
-  //   - HM/HF (hosteller)    -> daily_outing (in & out), home_out (out, needs
-  //     pass), home_in (in, return from home), day_pass (out, needs pass).
-  //   - Already IN  -> do not re-record an entry; only exits are meaningful.
-  //   - Already OUT -> do not re-record an exit; only entries are meaningful.
-  // When campusStatus is unknown, fall back to type-only filtering.
-  const isDayScholar = student.studentType === "DM" || student.studentType === "DF";
-  const isHosteller = student.studentType === "HM" || student.studentType === "HF";
-
-  // Type gate: is this reason legally available for this sub-type?
-  // The config's `applicableTo` may be the person-type ("student") or a
-  // sub-category (HM/HF/DM/DF).  A person-type entry applies to every
-  // sub-category, so we must not just do a straight `includes` check.
-  const typeAllows = (cfg: ActionEntry) => {
-    const applicable = cfg.applicableTo as string[];
-    if (!applicable || applicable.length === 0) return true;
-    if (!student.studentType) return true; // unknown type -> don't over-restrict
-    if (applicable.includes("student")) return true; // "student" = all sub-types
-    return applicable.includes(student.studentType);
-  };
-
-  // Occupancy gate: skip moves that duplicate the current state.
-  // "IN" means currently on campus -> an OUT makes sense, an IN does not.
-  // "OUT" means currently off campus -> an IN makes sense, an OUT does not.
-  // Unknown status -> allow everything (let the operator decide).
-  const occupancyAllows = (cfg: ActionEntry) => {
-    if (campusStatus === "IN" && cfg.direction === "IN") return false;
-    if (campusStatus === "OUT" && cfg.direction === "OUT") return false;
-    return true;
-  };
-
-  // Home In is only meaningful for hostelers (day scholars have no home to
-  // return from) and is an entry move.
-  const isHomeIn = (cfg: ActionEntry) =>
-    cfg.code === "home_in" || cfg.name === "Home In";
-
-  // Sub-type exit gate: day scholars only do daily_outing;
-  // hostelers additionally do home_out and day_pass.
-  const subtypeExitAllows = (cfg: ActionEntry) => {
-    if (!isDayScholar && !isHosteller) return true; // unknown type -> allow all
-    if (isDayScholar) {
-      // Day scholar: only daily_outing is a valid exit reason
-      return cfg.code === "daily_outing" || cfg.name === "Daily Outing";
+  // Whether a stored entry type is missing for an IN student (log once).
+  const inWithUnknownType = campusStatus === "IN" && !effectiveEntryType;
+  useEffect(() => {
+    if (inWithUnknownType) {
+      console.warn(
+        `[ScanConfirmation] IN student with no stored entry type; defaulting to hosteller scope.`,
+      );
     }
-    // Hosteller: all four exit reasons are valid
-    return true;
-  };
+  }, [inWithUnknownType]);
 
-  const allowed = (cfg: ActionEntry) =>
-    typeAllows(cfg) &&
-    occupancyAllows(cfg) &&
-    (!isHomeIn(cfg) || isHosteller) &&
-    subtypeExitAllows(cfg);
+  // A stored entry type missing on OUT means the operator will pick now.
+  const outWithUnknownType = campusStatus === "OUT" && !effectiveEntryType;
 
-  const studentAppliesTo = (cfg: ExitReasonConfig) => {
-    if (!student.studentType) return true;
-    const applicable = cfg.applicableTo as string[];
-    if (applicable.includes(student.studentType)) return true;
-    if (applicable.includes("student")) return true;
-    return false;
-  };
-
-  const baseExitReasons = (student.personType && student.personType !== "student")
-    ? [validExitReasons.find((cfg) => cfg.code === "Regular") || validExitReasons[0]].filter(Boolean)
-    : validExitReasons.filter(studentAppliesTo);
-
-  // If the live config produced no usable options (config fetch failed, or
-  // none apply to this student), fall back to the canonical exit reasons so
-  // the operator is never left with an empty OUT section.
-  const applicableReasons = baseExitReasons.length > 0
-    ? baseExitReasons
-    : FALLBACK_EXIT_REASONS.filter(studentAppliesTo);
-
-  const outActions: ActionEntry[] = applicableReasons.map((config) => ({
-    ...config,
-    name: student.personType && student.personType !== "student" ? "Exit" : config.name,
-    direction: "OUT" as ScanDirection,
-    icon: reasonIcons[config.code] || Briefcase,
-  })).filter(allowed);
-
-  // Entry (IN) options.
-  //   Day scholar OUT:  "College In" (daily_outing) only
-  //   Hosteller OUT:    "Home In" (home_in) + "Outing In" (daily_outing)
-  // IN never requires a gate pass (server returns early on direction "IN").
-  const inActions: ActionEntry[] = ([
-    {
-      code: "daily_outing",
-      name: isDayScholar ? "College In" : "Outing In",
-      direction: "IN",
-      icon: Sun,
-      applicableTo: ["HM", "HF", "DM", "DF"],
-      requiresApproval: false,
-      parentNotification: false,
-    },
-    // Home In: hostellers only (day scholars have no hostel to return from)
-    {
-      code: "home_in",
-      name: "Home In",
-      direction: "IN",
-      icon: Home,
-      applicableTo: ["HM", "HF"],
-      requiresApproval: false,
-      parentNotification: false,
-    },
-  ] as ActionEntry[]).filter((cfg) => {
-    if (!allowed(cfg)) return false;
-    // Day scholar: never show "Home In" (they have no hostel)
-    if (isDayScholar && cfg.code === "home_in") return false;
-    return true;
-  });
-
-  const handleConfirmClick = async (direction: ScanDirection, reason?: ExitReason) => {
+  const handleConfirmClick = async (
+    direction: ScanDirection,
+    reason?: ExitReason,
+    entryType?: EntryType,
+  ) => {
     if (!photoVerified || isFlagged) {
       return;
     }
     setSelectedDirection(direction);
-    setSelectedReason(reason || null);
-    await onConfirm(direction, reason);
+    setSelectedReason(reason ?? null);
+    setSelectedEntryType(entryType ?? null);
+    await onConfirm(direction, reason, entryType);
   };
 
-  // Map a reason value (canonical code or legacy/label form) to a stable
-  // token so pass-reason matching is consistent across the config, the
-  // passed reason, and the canonical exit-flow codes.
+  // Map a reason value to a stable token so pass-reason matching is consistent.
   const normalizeReason = (r?: string) => {
     if (!r) return "";
     const s = r.trim().toLowerCase().replace(/[\s_-]+/g, "");
-    // Canonical exit-flow codes (src/lib/student-exit-flow.ts)
     if (s === "dailyouting" || s === "outing" || s === "dayout") return "daily_outing";
     if (s === "homein") return "home_in";
     if (s === "homeout" || s === "leave") return "home_out";
     if (s === "daypass") return "day_pass";
     if (s === "emergency") return "daily_outing";
     if (s === "regular") return "regular";
+    if (s === "dayscholarout") return "day_scholar_out";
     return s;
   };
 
-  const renderActionButtons = (actions: ActionEntry[]) => (
-    actions.length === 0 ? (
-      <p className="text-[11px] text-[var(--text-muted)] italic px-3 py-2 text-center">
-        No valid {actions.length === 0 ? "moves" : ""} available for this student's current state.
-      </p>
-    ) : (
-    <div className={cn("grid gap-2", actions.length > 2 ? "grid-cols-3" : "grid-cols-2")}>
-      {actions.map(({ code, name, icon: Icon, direction, requiresApproval }) => {
-        const isSelected = selectedDirection === direction && selectedReason === code;
-        const passRequired = direction === "OUT" && requiresApproval;
-        const hasApprovedPass = approvedPasses.some((p) => {
-          if (!p.reason) return false;
-          if (p.reason === code || p.reason === name) return true;
-          if (p.reason.toLowerCase() === code.toLowerCase() || p.reason.toLowerCase() === name.toLowerCase()) return true;
-          return normalizeReason(p.reason) === normalizeReason(code) || normalizeReason(p.reason) === normalizeReason(name);
-        });
-        const isDisabled = !photoVerified || isFlagged || (passRequired && !hasApprovedPass);
-        return (
-          <button
-            key={`${direction}-${code}`}
-            type="button"
-            onClick={() => handleConfirmClick(direction, code)}
-            disabled={isDisabled}
-            className={cn(
-              "py-3 px-2 min-h-[44px] rounded-xl border font-bold text-[11px] flex flex-col items-center justify-center gap-1 transition-all active:scale-95",
-              isSelected
-                ? "bg-[var(--action-primary)] border-[var(--action-primary)] text-white"
-                : photoVerified && !isDisabled
-                  ? "bg-[var(--bg-base)] border-[var(--border)] text-[var(--text-primary)] hover:border-emerald-500/50 hover:bg-[var(--bg-elevated)]"
-                  : "bg-[var(--bg-base)] border-[var(--border)] text-[var(--text-muted)] opacity-50 cursor-not-allowed"
-            )}
-          >
-            <Icon
+  const hasApprovedPassFor = (code: ExitReason, name: string) =>
+    approvedPasses.some((p) => {
+      if (!p.reason) return false;
+      if (p.reason === code || p.reason === name) return true;
+      if (p.reason.toLowerCase() === code.toLowerCase() || p.reason.toLowerCase() === name.toLowerCase())
+        return true;
+      return normalizeReason(p.reason) === normalizeReason(code) || normalizeReason(p.reason) === normalizeReason(name);
+    });
+
+  // ── Build the action menu from (campusStatus, entryType) ──────────────────
+  // OUT + any/unknown type: exactly two IN buttons (Home In, Day Scholar In).
+  // IN + hosteller (or null default): three OUT buttons
+  //   (Daily Outing, Home Out, Day Pass).
+  // IN + day_scholar: one OUT button (Day Scholar Out).
+  // Unknown status: fall back to type-only filtering.
+  const inButtons: ActionEntry[] =
+    campusStatus === "OUT"
+      ? [
+          {
+            code: "home_in",
+            name: "Home In",
+            direction: "IN",
+            icon: Home,
+            requiresApproval: false,
+            entryType: "hosteller",
+          },
+          {
+            code: "daily_outing",
+            name: "Day Scholar In",
+            direction: "IN",
+            icon: Sun,
+            requiresApproval: false,
+            entryType: "day_scholar",
+          },
+        ]
+      : [];
+
+  const outButtons: ActionEntry[] =
+    campusStatus === "IN"
+      ? effectiveEntryType === "day_scholar"
+        ? [
+            {
+              code: "day_scholar_out",
+              name: "Day Scholar Out",
+              direction: "OUT",
+              icon: Sun,
+              requiresApproval: false,
+            },
+          ]
+        : [
+            {
+              code: "daily_outing",
+              name: "Daily Outing",
+              direction: "OUT",
+              icon: Briefcase,
+              requiresApproval: false,
+            },
+            {
+              code: "home_out",
+              name: "Home Out",
+              direction: "OUT",
+              icon: Home,
+              requiresApproval: true,
+            },
+            {
+              code: "day_pass",
+              name: "Day Pass",
+              direction: "OUT",
+              icon: Sun,
+              requiresApproval: true,
+            },
+          ]
+      : [];
+
+  // Unknown status: offer both IN and OUT moves so the operator can proceed.
+  if (campusStatus === null) {
+    inButtons.push(
+      {
+        code: "home_in",
+        name: "Home In",
+        direction: "IN",
+        icon: Home,
+        requiresApproval: false,
+        entryType: "hosteller",
+      },
+      {
+        code: "daily_outing",
+        name: "Day Scholar In",
+        direction: "IN",
+        icon: Sun,
+        requiresApproval: false,
+        entryType: "day_scholar",
+      },
+    );
+    outButtons.push(
+      {
+        code: "daily_outing",
+        name: "Daily Outing",
+        direction: "OUT",
+        icon: Briefcase,
+        requiresApproval: false,
+      },
+      {
+        code: "home_out",
+        name: "Home Out",
+        direction: "OUT",
+        icon: Home,
+        requiresApproval: true,
+      },
+      {
+        code: "day_pass",
+        name: "Day Pass",
+        direction: "OUT",
+        icon: Sun,
+        requiresApproval: true,
+      },
+    );
+  }
+
+  const renderActionButtons = (actions: ActionEntry[], label: string) => {
+    if (actions.length === 0) {
+      return (
+        <p className="text-[11px] text-[var(--text-muted)] italic px-3 py-2 text-center">
+          No valid {label} moves available for this student's current state.
+        </p>
+      );
+    }
+    return (
+      <div className={cn("grid gap-2", actions.length > 2 ? "grid-cols-3" : "grid-cols-2")}>
+        {actions.map(({ code, name, icon: Icon, direction, requiresApproval, entryType }) => {
+          const isSelected =
+            selectedDirection === direction &&
+            (direction === "IN" ? selectedEntryType === entryType : selectedReason === code);
+          const passRequired = direction === "OUT" && requiresApproval;
+          const hasPass = passRequired ? hasApprovedPassFor(code, name) : true;
+          const isDisabled = !photoVerified || isFlagged || (passRequired && !hasPass);
+          return (
+            <button
+              key={`${direction}-${code}`}
+              type="button"
+              onClick={() => handleConfirmClick(direction, code, entryType)}
+              disabled={isDisabled}
               className={cn(
-                "w-4 h-4",
-                isSelected ? "text-white" : direction === "IN" ? "text-emerald-400" : "text-amber-400"
+                "py-3 px-2 min-h-[44px] rounded-xl border font-bold text-[11px] flex flex-col items-center justify-center gap-1 transition-all active:scale-95",
+                isSelected
+                  ? "bg-[var(--action-primary)] border-[var(--action-primary)] text-white"
+                  : photoVerified && !isDisabled
+                    ? "bg-[var(--bg-base)] border-[var(--border)] text-[var(--text-primary)] hover:border-emerald-500/50 hover:bg-[var(--bg-elevated)]"
+                    : "bg-[var(--bg-base)] border-[var(--border)] text-[var(--text-muted)] opacity-50 cursor-not-allowed",
               )}
-            />
-            <span>{name}</span>
-            {passRequired && (
-              <span className={cn(
-                "text-[8px] font-extrabold mt-1 px-1 rounded border scale-90",
-                hasApprovedPass 
-                  ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" 
-                  : "bg-rose-500/20 text-rose-400 border-rose-500/30"
-              )}>
-                {hasApprovedPass ? "Pass Active" : "No Pass"}
-              </span>
-            )}
-          </button>
-        );
-      })}
-    </div>
-    )
-  );
+            >
+              <Icon
+                className={cn(
+                  "w-4 h-4",
+                  isSelected ? "text-white" : direction === "IN" ? "text-emerald-400" : "text-amber-400",
+                )}
+              />
+              <span>{name}</span>
+              {passRequired && (
+                <span
+                  className={cn(
+                    "text-[8px] font-extrabold mt-1 px-1 rounded border scale-90",
+                    hasPass
+                      ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+                      : "bg-rose-500/20 text-rose-400 border-rose-500/30",
+                  )}
+                >
+                  {hasPass ? "Pass Active" : "No Pass"}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const showIn = inButtons.length > 0;
+  const showOut = outButtons.length > 0;
 
   const content = (
     <motion.div
@@ -454,6 +458,31 @@ export function ScanConfirmation({
           <p className="text-xs text-[var(--text-muted)] mt-0.5">
             {student.department || student.designation} {student.year && `- Year ${student.year}`}
           </p>
+
+          {/* Live entry-type badge */}
+          <div className="mt-2">
+            {effectiveEntryType === "hosteller" ? (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wide bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                <User className="w-3 h-3" />
+                Hosteller
+              </span>
+            ) : effectiveEntryType === "day_scholar" ? (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wide bg-sky-500/15 text-sky-400 border border-sky-500/30">
+                <User className="w-3 h-3" />
+                Day Scholar
+              </span>
+            ) : (
+              campusStatus === "OUT" ? (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide text-[var(--text-muted)] border border-[var(--border)] bg-[var(--bg-base)]">
+                  Select entry type below
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide text-amber-400 border border-amber-500/30 bg-amber-500/10">
+                  Defaulting to Hosteller
+                </span>
+              )
+            )}
+          </div>
         </div>
 
         {/* Account Security Flagging & Alert Controls */}
@@ -501,7 +530,7 @@ export function ScanConfirmation({
                   <div>
                     <span className="font-bold text-emerald-400">{pass.reason}</span>
                     <span className="text-[9px] text-[var(--text-muted)] ml-2">
-                       until {new Date(pass.to_datetime).toLocaleDateString()}
+                      until {new Date(pass.to_datetime).toLocaleDateString()}
                     </span>
                   </div>
                   <span className="font-extrabold text-[8px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
@@ -516,8 +545,7 @@ export function ScanConfirmation({
         </div>
       )}
 
-      {/* Current condition banner: shows the scanned person's live IN/OUT status
-          and which operations are available, before the operator picks an action */}
+      {/* Current condition banner */}
       <div className="bg-[var(--bg-base)] border border-[var(--border)] rounded-2xl p-3 space-y-2 text-left">
         <span className="text-[10px] font-extrabold uppercase tracking-wide text-[var(--text-muted)] block">
           Current Status
@@ -529,7 +557,7 @@ export function ScanConfirmation({
                 "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-extrabold border",
                 campusStatus === "IN"
                   ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
-                  : "bg-amber-500/15 text-amber-400 border-amber-500/30"
+                  : "bg-amber-500/15 text-amber-400 border-amber-500/30",
               )}
             >
               {campusStatus === "IN" ? (
@@ -537,18 +565,12 @@ export function ScanConfirmation({
               ) : (
                 <Briefcase className="w-3.5 h-3.5" />
               )}
-              {campusStatus === "IN"
-                ? isDayScholar ? "At College" : "Inside Campus"
-                : isHosteller  ? "At Home"    : "Outside Campus"}
+              {campusStatus === "IN" ? "Inside Campus" : "Outside Campus"}
             </span>
             <span className="text-[11px] text-[var(--text-secondary)]">
               {campusStatus === "IN"
-                ? isDayScholar
-                  ? "Day scholar — currently on campus, an exit can be recorded."
-                  : "Currently on campus — an exit can be recorded."
-                : isHosteller
-                  ? "Hosteller — currently at home, an entry can be recorded."
-                  : "Currently off campus — an entry can be recorded."}
+                ? "Currently on campus — an exit can be recorded."
+                : "Currently off campus — an entry can be recorded."}
             </span>
           </div>
         ) : (
@@ -565,29 +587,33 @@ export function ScanConfirmation({
 
       {/* Action Movement Category Selection */}
       <div className="space-y-4 pt-1">
-        <div>
-          <label className="text-[11px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] block text-center mb-2">
-            Confirm Entry
-            {suggestedDirection === "IN" && (
-              <span className="ml-2 inline-block text-[9px] font-extrabold uppercase tracking-wide px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 align-middle">
-                Suggested
-              </span>
-            )}
-          </label>
-          {renderActionButtons(inActions)}
-        </div>
+        {showIn && (
+          <div>
+            <label className="text-[11px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] block text-center mb-2">
+              Confirm Entry
+              {suggestedDirection === "IN" && (
+                <span className="ml-2 inline-block text-[9px] font-extrabold uppercase tracking-wide px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 align-middle">
+                  Suggested
+                </span>
+              )}
+            </label>
+            {renderActionButtons(inButtons, "entry")}
+          </div>
+        )}
 
-        <div>
-          <label className="text-[11px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] block text-center mb-2">
-            Confirm Exit
-            {suggestedDirection === "OUT" && (
-              <span className="ml-2 inline-block text-[9px] font-extrabold uppercase tracking-wide px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30 align-middle">
-                Suggested
-              </span>
-            )}
-          </label>
-          {renderActionButtons(outActions)}
-        </div>
+        {showOut && (
+          <div>
+            <label className="text-[11px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] block text-center mb-2">
+              Confirm Exit
+              {suggestedDirection === "OUT" && (
+                <span className="ml-2 inline-block text-[9px] font-extrabold uppercase tracking-wide px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30 align-middle">
+                  Suggested
+                </span>
+              )}
+            </label>
+            {renderActionButtons(outButtons, "exit")}
+          </div>
+        )}
       </div>
 
       <button

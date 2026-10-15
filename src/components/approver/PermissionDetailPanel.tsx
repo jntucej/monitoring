@@ -16,11 +16,17 @@ import {
   RefreshCw,
   ArrowLeft,
   FileText,
+  Zap,
+  CornerUpRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatDateTime } from "@/lib/utils";
 import { useApi } from "@/hooks/useApi";
 import { useUIStore } from "@/stores/uiStore";
+import { useAuthStore } from "@/stores/authStore";
+import { levelsAbove, requiresStepup, L4_ROLE, L1_ROLE, L2_ROLE, L3_ROLE } from "@/lib/permission-workflow-pure";
+import { HostelForwardModal } from "./HostelForwardModal";
+import { DirectGenerateModal } from "./DirectGenerateModal";
 import type { PermissionItem } from "./PermissionRow";
 import { DocumentUploadPanel } from "@/components/student/DocumentUploadPanel";
 import { DigitalSignPanel } from "@/components/approver/DigitalSignPanel";
@@ -61,6 +67,25 @@ export function PermissionDetailPanel({
   const [comment, setComment] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
   const addToast = useUIStore((s) => s.addToast);
+  const currentUser = useAuthStore((s) => s.user);
+  const currentRole = currentUser?.role;
+
+  const [forwardOpen, setForwardOpen] = useState(false);
+  const [directGenOpen, setDirectGenOpen] = useState(false);
+
+  // L1..L3 approvers can forward; principal/L4 and anyone above the chain top
+  // cannot (levelsAbove is empty for L4). The Forward button is shown only
+  // when the caller is in that band AND there is a strictly-higher level.
+  const canForward =
+    !!currentRole &&
+    [L1_ROLE, L2_ROLE, L3_ROLE].includes(currentRole) &&
+    levelsAbove(currentRole).length > 0;
+
+  // L2+ (deputy_warden, hostel_manager, principal) plus sysadmin/admin may
+  // direct-generate. The server re-checks the same DIRECT_GENERATE_ROLES list.
+  const canDirectGenerate =
+    !!currentRole &&
+    [L2_ROLE, L3_ROLE, L4_ROLE, "sysadmin", "admin"].includes(currentRole);
 
   // Exam/memo requests carry an uploaded document + digital signature (Step 7).
   const isExamMemo = data?.workflow_type === "exam" || data?.workflow_type === "memo";
@@ -431,6 +456,28 @@ export function PermissionDetailPanel({
                     <AlertTriangle className="w-3.5 h-3.5 mr-1" />
                     Escalate
                   </Button>
+
+                  {canForward && (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => setForwardOpen(true)}
+                    >
+                      <CornerUpRight className="w-3.5 h-3.5 mr-1" />
+                      Forward
+                    </Button>
+                  )}
+
+                  {canDirectGenerate && (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => setDirectGenOpen(true)}
+                    >
+                      <Zap className="w-3.5 h-3.5 mr-1" />
+                      Generate Pass
+                    </Button>
+                  )}
                 </div>
               )}
             </div>
@@ -491,7 +538,16 @@ export function PermissionDetailPanel({
                       <span className="text-[10px] text-[var(--text-muted)] font-mono">
                         ({log.actorRole || "System"})
                       </span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--bg-elevated)] border border-[var(--border)] font-semibold text-[var(--action-primary)] uppercase">
+                      {log.action === "FORWARDED" && (
+                        <CornerUpRight className="w-3.5 h-3.5 text-amber-500" aria-label="Forwarded" />
+                      )}
+                      <span
+                        className={`text-[10px] px-1.5 py-0.5 rounded font-semibold uppercase ${
+                          log.action === "FORWARDED"
+                            ? "bg-amber-500/10 text-amber-500 border border-amber-500/20"
+                            : "bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--action-primary)]"
+                        }`}
+                      >
                         {log.action}
                       </span>
                     </div>
@@ -508,6 +564,25 @@ export function PermissionDetailPanel({
               </div>
             )}
           </div>
+
+          {forwardOpen && ticket && (
+            <HostelForwardModal
+              isOpen={forwardOpen}
+              onClose={() => setForwardOpen(false)}
+              ticket={ticket}
+              actorRole={currentRole || ""}
+              onForwarded={fetchDetail}
+            />
+          )}
+
+          {directGenOpen && (
+            <DirectGenerateModal
+              isOpen={directGenOpen}
+              onClose={() => setDirectGenOpen(false)}
+              actorRole={currentRole || ""}
+              onGenerated={onActionComplete}
+            />
+          )}
         </div>
       )}
     </div>

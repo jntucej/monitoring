@@ -159,17 +159,16 @@ function OperatorPageInner() {
   const [cameraScannerMode, setCameraScannerMode] = useState<"qr" | "barcode">("qr");
   const [manualRollInput, setManualRollInput] = useState("");
 
-  // Derive effective sub-mode: when a scan flow is active, force the
-  // "entry" tab so the user sees the confirmation/success/error UI.
+  // Derive effective sub-mode: when a scan flow is active (any non-idle
+  // state), force the "entry" tab so the user sees the confirmation/success/
+  // error UI regardless of which tab was previously selected.
   const effectiveSubMode =
-    state === "confirming" || state === "success" || state === "error"
-      ? ("entry" as const)
-      : operatorSubMode;
+    state !== "idle" ? ("entry" as const) : operatorSubMode;
 
   // When a scan is active, redirect away from query param tabs to keep
   // the URL clean and consistent with the visible desk view.
   useEffect(() => {
-    if ((state === "confirming" || state === "success" || state === "error") && searchParams?.get("tab")) {
+    if (state !== "idle" && searchParams?.get("tab")) {
       const url = new URL(window.location.href);
       url.searchParams.delete("tab");
       window.history.replaceState({}, "", url.toString());
@@ -536,7 +535,7 @@ function OperatorPageInner() {
                               type="button"
                               id="retry-btn"
                               onClick={() => {
-                                if (currentStudent) { confirmScan(addToast); } else if (lastRollRef.current) { startScan(lastRollRef.current); } else { reset(); }
+                                if (currentStudent) { confirmScan(addToast, undefined, undefined, operatorStore.entryType ?? undefined); } else if (lastRollRef.current) { startScan(lastRollRef.current); } else { reset(); }
                               }}
                               className="px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs hover:bg-emerald-400 transition-colors active:scale-[0.98] flex items-center gap-1.5"
                             >
@@ -566,7 +565,10 @@ function OperatorPageInner() {
                     <ScanConfirmation
                       student={currentStudent}
                       campusStatus={currentCampusStatus}
-                      onConfirm={async (dir, reason) => await confirmScan(addToast, dir, reason)}
+                      currentEntryType={operatorStore.entryType}
+                      onConfirm={async (dir, reason, entryType) =>
+                        await confirmScan(addToast, dir, reason, entryType)
+                      }
                       onCancel={cancelScan}
                       isInline={true}
                     />
@@ -688,7 +690,7 @@ function OperatorPageInner() {
                 setOperatorSubMode("manual");
                 setManualRollInput(cmd.roll_number);
               } else if (cmd.action === "EXIT") {
-                if (currentStudent) confirmScan(addToast, "OUT");
+                if (currentStudent) confirmScan(addToast, "OUT", undefined, operatorStore.entryType ?? undefined);
               } else if (cmd.action === "UNKNOWN") {
                 cancelScan();
               }

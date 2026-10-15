@@ -1,7 +1,13 @@
-import { query } from "@/lib/postgres";
 import type { Role, WorkflowType } from "@/lib/types";
-import { getSupabaseServiceClient } from "@/lib/dbClient";
-import { getParentChildren } from "@/lib/db";
+import type {
+  StageHistoryEntry,
+  RequestSnapshot,
+  ActorContext,
+} from "@/lib/permission-workflow-core";
+import {
+  appendStageHistory,
+  PermissionRuleError,
+} from "@/lib/permission-workflow-core";
 export type { WorkflowType };
 
 export const ROLE_STAGE_PERMISSIONS: Record<string, readonly string[]> = {
@@ -59,6 +65,10 @@ export async function generateTicketNumber(workflowType: WorkflowType): Promise<
   };
   const { seq, prefix } = map[workflowType];
 
+  // Lazy-import the pg-based query helper so this pure-logic module stays
+  // client-safe (permission-workflow is imported from client components; a
+  // top-level `@/lib/postgres` import would drag `pg` into the browser bundle).
+  const { query } = await import("@/lib/postgres");
   const result = await query<{ nextval: string }>(`SELECT nextval('${seq}')`);
   const nextVal = (result.rows && result.rows.length > 0) ? result.rows[0].nextval : null;
   if (!nextVal) {
@@ -132,46 +142,11 @@ export function canApproveAtStageWithBranch(
   return canApproveAtStageWithBranchResult(role, workflowType, currentStage, actorBranch, requesterBranch).allowed;
 }
 
-export interface StageHistoryEntry {
-  stage?: string;
-  actor_id?: string;
-  actor?: string | { id: string; name?: string; role?: string };
-  action: string;
-  comment?: string | null;
-  timestamp: string;
-  transition?: { from?: string; to?: string };
-}
-
-/**
- * Returns a new history array with the appended entry (does not mutate input).
- */
-export function appendStageHistory(
-  existing: StageHistoryEntry[] | unknown,
-  actor: string | { id: string; name?: string; role?: string },
-  action: string,
-  comment?: string | null,
-  transition?: { from?: string; to?: string }
-): StageHistoryEntry[] {
-  const rawArray = (Array.isArray(existing) ? existing : []) as StageHistoryEntry[];
-  const currentStage =
-    transition?.to ??
-    transition?.from ??
-    (rawArray.length > 0 ? (rawArray[rawArray.length - 1].stage ?? "initial") : "initial");
-  const actorId = typeof actor === "string" ? actor : actor.id;
-  const newEntry: StageHistoryEntry = {
-    stage: currentStage,
-    actor_id: actorId,
-    actor: typeof actor === "object" ? actor : undefined,
-    action,
-    comment: comment ?? undefined,
-    timestamp: new Date().toISOString(),
-    ...(transition ? { transition } : {}),
-  };
-  return [...rawArray, newEntry];
-}
-
 // ──────────────────────────────────────────────────────────────────────
 // Pure decision engine — no DB, no HTTP, no side effects.
+// (Shared types StageHistoryEntry / RequestSnapshot / ActorContext and the
+//  appendStageHistory helper are now re-exported from permission-workflow-core;
+//  see the top-of-file re-export block.)
 
 export type PermissionAction =
   | "APPROVE"
@@ -184,30 +159,6 @@ export type PermissionAction =
   | "BIOMETRIC_HOSTEL"
   | "BIOMETRIC_GATE"
   | "CANCEL";
-
-export interface RequestSnapshot {
-  id: string;
-  ticket_number: string;
-  workflow_type: WorkflowType;
-  current_stage: string;
-  status: string;
-  hostel_scope?: string | null;
-  student_user_id: string;
-  stage_history: StageHistoryEntry[] | null;
-  document_required?: boolean;
-  document_url?: string | null;
-  biometric_hostel_at?: string | null;
-  biometric_gate_at?: string | null;
-  digital_signature?: string | null;
-  branch?: string | null;
-  requester_user_id?: string;
-}
-
-export interface ActorContext {
-  id: string;
-  name: string;
-  role: string;
-}
 
 export interface DecisionInput {
   action: PermissionAction;
@@ -239,13 +190,13 @@ export interface DecisionResult {
   };
 }
 
-export class PermissionRuleError extends Error {
-  code: string;
-  constructor(code: string, message: string) {
-    super(message);
-    this.code = code;
-  }
-}
+// PermissionRuleError, StageHistoryEntry, RequestSnapshot, ActorContext and
+// appendStageHistory now live in permission-workflow-core.ts (the single,
+// shared, client-safe home for the pure primitives). Re-export them so the
+// pre-existing import path (`from "@/lib/permission-workflow"`) keeps working
+// and so there is exactly ONE class identity for `instanceof` checks.
+export { PermissionRuleError, appendStageHistory } from "./permission-workflow-core";
+export type { StageHistoryEntry, RequestSnapshot, ActorContext } from "./permission-workflow-core";
 
 export function applyPermissionAction(
   req: RequestSnapshot,
@@ -510,6 +461,9 @@ export async function getScopedTicket(
 > {
   if (!ticketParam) return { notFound: true };
 
+  // Lazy-import so this module stays client-safe (dbClient drags the pg pool
+  // into the browser bundle; getScopedTicket is server-only).
+  const { getSupabaseServiceClient } = await import("@/lib/dbClient");
   const supabase = getSupabaseServiceClient();
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(ticketParam);
 
@@ -557,6 +511,10 @@ export async function getScopedTicket(
   }
 
   if (authUserRole === "parent" || authUserRole === "guardian") {
+    // Lazy-import so this pure-logic module stays client-safe: db.ts drags the
+    // pg pool into the bundle at its top level, but getScopedTicket is
+    // server-only and is the sole consumer of getParentChildren here.
+    const { getParentChildren } = await import("@/lib/db");
     const children = await getParentChildren(authUserId);
     const isChild = (children || []).some((c: { id?: string }) => c.id === request.student_user_id);
     if (!isChild) return { forbidden: true };
@@ -582,284 +540,14 @@ export async function getScopedTicket(
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// Hostel-permission hierarchy — pure decision engine (additive).
-// Order (low → high): caretaker < deputy_warden < hostel_manager < principal.
-// These strings mirror ROLES in roles.ts; we keep them literal here so the
-// pure layer stays self-contained and DB/HTTP-free.
-
-export const L1_ROLE = "caretaker";
-export const L2_ROLE = "deputy_warden";
-export const L3_ROLE = "hostel_manager";
-export const L4_ROLE = "principal";
-
-export const DAILY_OUTING_MAX_HOURS = 1;
-export const DAY_PASS_MAX_HOURS = 12;
-export const HOME_OUT_MAX_HOURS: number | null = null; // unlimited
-export const STEPUP_REQUIRED_AT_LEVEL = 3;
-export const BULK_THRESHOLD = 5;
-
-/** Ordered hostel approval chain, lowest tier first. */
-export const HOSTEL_CHAIN: readonly string[] = [L1_ROLE, L2_ROLE, L3_ROLE, L4_ROLE];
-
-/**
- * Returns the first stage for a new hostel request.
- */
-export function resolveInitialHostelStage(): string {
-  return L1_ROLE;
-}
-
-/**
- * Returns the next hostel level above `current`, or `null` when already at the
- * top of the chain (L4 -> null). Unknown roles return null.
- */
-export function nextHostelLevel(current: string): string | null {
-  const idx = HOSTEL_CHAIN.indexOf(current);
-  if (idx === -1) return null;
-  if (idx === HOSTEL_CHAIN.length - 1) return null; // already at L4
-  return HOSTEL_CHAIN[idx + 1] as string;
-}
-
-/**
- * Returns all hostel levels strictly above `current`, in chain order.
- * For L4 (principal) this is []. Unknown roles return the full chain.
- */
-export function levelsAbove(current: string): string[] {
-  const idx = HOSTEL_CHAIN.indexOf(current);
-  const base = idx === -1 ? 0 : idx + 1;
-  return HOSTEL_CHAIN.slice(base) as string[];
-}
-
-/**
- * Reason-code -> minimum hostel role required to resolve it.
- * (L1 routes can be opened at caretaker; L3 reasons require hostel_manager.)
- */
-export const REASON_LEVEL_MAP = {
-  daily_outing: L1_ROLE,
-  home_out: L1_ROLE,
-  day_pass: L1_ROLE,
-  emergency: L3_ROLE,
-  special_leave: L3_ROLE,
-} as const;
-
-/**
- * Pure step-up predicate. Returns true when ANY of the listed conditions hold:
- *  - forward to the top level (L4 / principal)
- *  - direct-generate from L3 or L4
- *  - override a rejection
- *  - reason is emergency or special_leave
- *  - the student has >= 3 prior violations
- *  - the actor has already performed >= BULK_THRESHOLD (5) bulk approvals today
- */
-export function requiresStepup(args: {
-  actorRole: string;
-  action: "forward" | "direct_generate" | "override_rejection" | "approve";
-  reason?: string;
-  targetRole?: string;
-  studentPriorViolations?: number;
-  dailyBulkCount?: number;
-}): boolean {
-  const {
-    actorRole,
-    action,
-    reason,
-    targetRole,
-    studentPriorViolations = 0,
-    dailyBulkCount = 0,
-  } = args;
-
-  if (action === "forward" && targetRole === L4_ROLE) return true;
-  if (action === "direct_generate" && (actorRole === L3_ROLE || actorRole === L4_ROLE)) return true;
-  if (action === "override_rejection") return true;
-  if (reason === "emergency" || reason === "special_leave") return true;
-  if (studentPriorViolations >= 3) return true;
-  if (dailyBulkCount >= BULK_THRESHOLD) return true;
-  return false;
-}
-
-/** Typed update fields produced by a hostel forward (superset of the routing fields). */
-export interface HostelForwardUpdates {
-  current_stage: string;
-  stage_history: StageHistoryEntry[];
-  routed_to_role: string;
-  forwarded_from_role: string;
-  forward_comment: string;
-  /** ISO timestamp recorded when the actor verified the step-up password. */
-  stepup_verified_at?: string;
-}
-
-export interface ForwardInput {
-  ticket: RequestSnapshot;
-  actor: ActorContext;
-  targetRole: string;
-  comment: string;
-  stepupVerified: boolean;
-}
-
-export interface ForwardTicketResult {
-  updates: HostelForwardUpdates;
-  effects: {
-    auditAction: string;
-    notifyUserId?: string;
-    notifyMessage?: string;
-  };
-}
-
-/**
- * Pure forward of a hostel ticket to a target role.
- * Throws {@link PermissionRuleError} when:
- *  - targetRole is not strictly above the actor's role (and the actor is not sysadmin)
- *  - the comment is empty / whitespace-only
- *  - step-up is required for this forward but not verified
- */
-export function forwardTicket(input: ForwardInput): ForwardTicketResult {
-  const { ticket, actor, targetRole, comment, stepupVerified } = input;
-
-  const isSysadmin = actor.role === "sysadmin";
-  const allowedTargets = isSysadmin
-    ? [L1_ROLE, L2_ROLE, L3_ROLE, L4_ROLE]
-    : levelsAbove(actor.role);
-
-  if (!allowedTargets.includes(targetRole)) {
-    throw new PermissionRuleError(
-      "FORWARD_TARGET_INVALID",
-      `Role ${actor.role} cannot forward to ${targetRole} (not a strictly-higher hostel level and actor is not sysadmin)`,
-    );
-  }
-
-  if (!comment || comment.trim().length === 0) {
-    throw new PermissionRuleError(
-      "FORWARD_COMMENT_REQUIRED",
-      "A forward comment is required",
-    );
-  }
-
-  const stepupNeeded = requiresStepup({
-    actorRole: actor.role,
-    action: "forward",
-    targetRole,
-  });
-  if (stepupNeeded && !stepupVerified) {
-    throw new PermissionRuleError(
-      "STEPUP_REQUIRED",
-      "Step-up password verification is required for this forward",
-    );
-  }
-
-  const now = new Date().toISOString();
-  const stageHistory = appendStageHistory(
-    ticket.stage_history,
-    { id: actor.id, name: actor.name, role: actor.role },
-    "FORWARDED",
-    comment,
-    { from: ticket.current_stage, to: targetRole },
-  );
-
-  const updates: HostelForwardUpdates = {
-    current_stage: targetRole,
-    stage_history: stageHistory,
-    routed_to_role: targetRole,
-    forwarded_from_role: actor.role,
-    forward_comment: comment,
-    ...(stepupVerified ? { stepup_verified_at: now } : {}),
-  };
-
-  return {
-    updates,
-    effects: {
-      auditAction: "PERMISSION_HOSTEL_FORWARDED",
-      notifyUserId: ticket.student_user_id,
-      notifyMessage: `Ticket ${ticket.ticket_number} forwarded to ${targetRole} by ${actor.role}.`,
-    },
-  };
-}
-
-export interface DirectGenInput {
-  actor: ActorContext;
-  studentUserId: string;
-  reason: "home_out" | "day_pass" | "emergency" | "special_leave";
-  from: string;
-  to: string | null;
-  note?: string;
-  stepupVerified: boolean;
-}
-
-/** Updates payload for a direct-generate action (DecisionResult-shaped + extra fields). */
-export interface DirectGenUpdates {
-  status: "APPROVED";
-  current_stage: "completed";
-  direct_generated: true;
-  reason?: string;
-  from?: string;
-  to?: string | null;
-  note?: string;
-  stepup_verified_at?: string;
-  stage_history: StageHistoryEntry[];
-}
-
-export interface DirectGenResult {
-  updates: DirectGenUpdates;
-  effects: {
-    auditAction: string;
-    notifyUserId?: string;
-    notifyMessage?: string;
-  };
-}
-
-/**
- * Pure direct-generate of a permission pass (bypasses the staged chain).
- * Throws {@link PermissionRuleError} when:
- *  - the actor is L1 (caretaker) — caretakers cannot direct-generate
- *  - step-up is required for this direct-generate but not verified
- */
-export function directGeneratePass(input: DirectGenInput): DirectGenResult {
-  const { actor, studentUserId, reason, from, to, note, stepupVerified } = input;
-
-  if (actor.role === L1_ROLE) {
-    throw new PermissionRuleError(
-      "DIRECT_GEN_FORBIDDEN",
-      "Caretaker (L1) cannot direct-generate a pass",
-    );
-  }
-
-  const stepupNeeded = requiresStepup({
-    actorRole: actor.role,
-    action: "direct_generate",
-    reason,
-  });
-  if (stepupNeeded && !stepupVerified) {
-    throw new PermissionRuleError(
-      "STEPUP_REQUIRED",
-      "Step-up password verification is required for this direct-generate",
-    );
-  }
-
-  const now = new Date().toISOString();
-  const stageHistory = appendStageHistory(
-    null,
-    { id: actor.id, name: actor.name, role: actor.role },
-    "DIRECT_GENERATED",
-    note ?? null,
-    { from: "completed", to: "completed" },
-  );
-
-  const updates: DirectGenUpdates = {
-    status: "APPROVED",
-    current_stage: "completed",
-    direct_generated: true,
-    reason,
-    from,
-    to,
-    ...(note ? { note } : {}),
-    ...(stepupVerified ? { stepup_verified_at: now } : {}),
-    stage_history: stageHistory,
-  };
-
-  return {
-    updates,
-    effects: {
-      auditAction: "PERMISSION_DIRECT_GENERATED",
-      notifyUserId: studentUserId,
-      notifyMessage: `Direct pass generated (${reason}) by ${actor.role}.`,
-    },
-  };
-}
+// Hostel-permission hierarchy — re-exported from the client-safe pure module
+// so that server-side callers keep their import path unchanged, while
+// "use client" components can import the pure functions directly from
+// permission-workflow-pure.ts without pulling the pg driver into the
+// browser bundle.
+//
+// This re-export is safe under a circular import because every exported
+// value is only accessed at call-time (inside forwardTicket / directGeneratePass
+// / requiresStepup), never at module-eval time.
+// ──────────────────────────────────────────────────────────────────────
+export * from "./permission-workflow-pure";

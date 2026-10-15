@@ -60,6 +60,7 @@ export function useScanQueueSync(): ScanQueueSyncState {
               roll: s.roll,
               direction: s.direction,
               reason: s.reason,
+              entryType: s.entryType,
               gateId: s.gateId,
               isManual: false,
               clientEventId: s.clientEventId,

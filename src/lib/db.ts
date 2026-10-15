@@ -114,6 +114,7 @@ export function mPerson(r: any): Person {
     studentName: r.student_details.student_name,
     identificationMarks1: r.student_details.identification_marks_1,
     identificationMarks2: r.student_details.identification_marks_2,
+    currentEntryType: r.student_details.current_entry_type ?? null,
     mobile: r.student_details.mobile,
     email: r.student_details.email,
     bloodGroup: r.student_details.blood_group,
@@ -201,6 +202,7 @@ export function mPerson(r: any): Person {
     completed: studentDetails?.completed,
     completedAt: studentDetails?.completedAt,
     wardenId: (studentDetails as any)?.warden_id || studentDetails?.wardenId || r.warden_id,
+    currentEntryType: studentDetails?.currentEntryType ?? r.current_entry_type ?? null,
   };
 }
 

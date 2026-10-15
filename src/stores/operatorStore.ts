@@ -14,6 +14,18 @@ import { validateRollNumber } from "@/lib/rollNumber";
 import { getClientLocation, getClientSysTag } from "@/lib/geo";
 
 /**
+ * Canonicalize any stored entry-type form to the two lowercase values the
+ * server accepts ("hosteller" | "day_scholar"), or null when absent.
+ */
+function normalizeEntryType(value: unknown): "hosteller" | "day_scholar" | null {
+  if (typeof value !== "string") return null;
+  const s = value.trim().toLowerCase();
+  if (s === "hosteller" || s === "hostel" || s === "hm" || s === "hf") return "hosteller";
+  if (s === "day_scholar" || s === "day scholar" || s === "dm" || s === "df") return "day_scholar";
+  return null;
+}
+
+/**
  * Fetch today's operator gate stats from the server.
  *
  * The browser's anon Supabase client is blocked by RLS from reading the
@@ -89,6 +101,12 @@ interface OperatorState {
   currentCampusStatus: "IN" | "OUT" | null;
   selectedDirection: ScanDirection;
   selectedReason: ExitReason | null;
+  /**
+   * Live entry-type selection carried through the scan flow. Populated from the
+   * person's stored student_details.current_entry_type in startScan, and set
+   * by the operator on IN-scan confirmations. Reset to null in reset/cancelScan.
+   */
+  entryType: "hosteller" | "day_scholar" | null;
   photoVerificationDone: boolean;
   error: ScanError | null;
 
@@ -106,9 +124,10 @@ interface OperatorState {
   startScan: (roll: string) => void;
   setDirection: (direction: ScanDirection) => void;
   setReason: (reason: ExitReason | null) => void;
+  setEntryType: (entryType: "hosteller" | "day_scholar" | null) => void;
   clearError: () => void;
   
-  confirmScan: (addToast: (toast: Omit<ToastData, "id">) => void, overrideDirection?: ScanDirection, overrideReason?: ExitReason | string) => Promise<void>;
+  confirmScan: (addToast: (toast: Omit<ToastData, "id">) => void, overrideDirection?: ScanDirection, overrideReason?: ExitReason | string, overrideEntryType?: "hosteller" | "day_scholar") => Promise<void>;
     cancelScan: () => void;
   reset: () => void;
   loadStats: () => void;
@@ -135,6 +154,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
   currentCampusStatus: null,
   selectedDirection: "IN",
   selectedReason: null,
+  entryType: null,
   photoVerificationDone: false,
   error: null,
 
@@ -239,6 +259,9 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
           campusStatus === "IN" || campusStatus === "OUT" ? campusStatus : null,
         selectedDirection: direction,
         selectedReason: null,
+        entryType: normalizeEntryType(
+          person.studentDetails?.currentEntryType ?? person.currentEntryType
+        ),
         photoVerificationDone: false,
         error: null,
       });
@@ -270,12 +293,16 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
     set({ selectedReason: reason, state: "confirming" });
   },
 
+  setEntryType: (entryType: "hosteller" | "day_scholar" | null) => {
+    set({ entryType });
+  },
+
   
 
   // Clears only the error field, leaving other state intact
   clearError: () => set({ error: null }),
 
-  confirmScan: async (addToast: (toast: Omit<ToastData, "id">) => void, overrideDirection?: ScanDirection, overrideReason?: string) => {
+  confirmScan: async (addToast: (toast: Omit<ToastData, "id">) => void, overrideDirection?: ScanDirection, overrideReason?: string, overrideEntryType?: "hosteller" | "day_scholar") => {
     const { currentStudent } = get();
     if (!currentStudent) return;
 
@@ -283,6 +310,15 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
     set({ _scanGeneration: gen });
     const directionToUse = overrideDirection || get().selectedDirection;
     const reasonToUse = (overrideReason as ExitReason) || get().selectedReason;
+    // Resolve the entry type: explicit override (operator tapped a specific
+    // entry/exit button) wins over the stored value; IN scans default to
+    // the stored type when the operator did not pick a button.
+    const entryTypeToUse: "hosteller" | "day_scholar" | null =
+      overrideEntryType ?? get().entryType ??
+      normalizeEntryType(
+        currentStudent.studentDetails?.currentEntryType ?? currentStudent.currentEntryType
+      ) ??
+      (directionToUse === "IN" ? "hosteller" : null);
     const clientEventId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
       ? crypto.randomUUID()
       : `ev-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
@@ -298,6 +334,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
         gateId: get().gate?.id || get().gateId || "",
         queuedAt: Date.now(),
         status: "queued",
+        entryType: entryTypeToUse ?? undefined,
       });
       addToast({
         variant: "warning",
@@ -311,6 +348,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
           retryable: false,
           queued: true,
         },
+        entryType: entryTypeToUse,
       });
       return;
     }
@@ -346,12 +384,28 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
       if (sessionToken) headers["X-Session-Token"] = sessionToken;
 
       try {
+        // IN scans: persist the entry-type selection first (POST
+        // /api/operator/entry-type) so the later OUT-scan scope check reads
+        // the freshly stored type, then record the movement. The entry-type
+        // write is non-fatal by design — a failure here never blocks the scan.
+        if (directionToUse === "IN" && entryTypeToUse) {
+          await fetchWithTimeout("/api/operator/entry-type", {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+              roll: uniqueId,
+              entryType: entryTypeToUse,
+              gateId: resolvedGateId,
+            }),
+          }, 10_000).catch(() => { /* non-fatal: proceed to record the scan */ });
+        }
         const res = await fetchWithTimeout("/api/gate/scan", {
           method: "POST",
           headers,
           body: JSON.stringify({ clientEventId, roll: uniqueId,
             direction: directionToUse,
             reason: reasonToUse || (directionToUse === "OUT" ? "daily_outing" : undefined),
+            entryType: entryTypeToUse ?? undefined,
             gateId: resolvedGateId,
             operatorId,
             isManual: false,
@@ -420,6 +474,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
             state: "success",
             lastScan: dupScan ?? get().lastScan,
             error: null,
+            entryType: entryTypeToUse,
           });
           return;
         }
@@ -471,6 +526,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
           todaysStats: newStats,
           recentScans: scan ? [scan, ...get().recentScans.slice(0, 4)] : get().recentScans,
           error: null,
+          entryType: entryTypeToUse,
         });
       })
       .catch((err: unknown) => {
@@ -486,6 +542,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
           gateId: resolvedGateId,
           queuedAt: Date.now(),
           status: "queued",
+          entryType: entryTypeToUse ?? undefined,
         });
         playAudioFeedback(isNetwork ? "warning" : "error");
         addToast({
@@ -521,6 +578,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
       currentCampusStatus: null,
       selectedDirection: "IN",
       selectedReason: null,
+      entryType: null,
       photoVerificationDone: false,
       error: null,
     });
@@ -551,6 +609,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
       currentCampusStatus: null,
       selectedDirection: "IN",
       selectedReason: null,
+      entryType: null,
       photoVerificationDone: false,
       error: null,
       todaysStats: stats

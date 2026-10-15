@@ -8,7 +8,7 @@ const nextConfig = {
     // Keep strict -- do NOT set to true, it hides real bugs.
     ignoreBuildErrors: false,
   },
-  serverExternalPackages: ['bcryptjs', 'jose'],
+  serverExternalPackages: ['bcryptjs', 'jose', 'pg', 'pg-connection-string', 'pgpass'],
   experimental: {
     serverActions: {
       bodySizeLimit: '2mb',
