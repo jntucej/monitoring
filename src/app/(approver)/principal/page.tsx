@@ -324,7 +324,7 @@ function PrincipalDashboardInner() {
 }
 export default function PrincipalDashboardPage() {
   return (
-    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+    <AuthGuard allowedRoles={['principal', 'admin', 'sysadmin']}>
       <Suspense fallback={<PageLoading />}>
         <PrincipalDashboardInner />
       </Suspense>

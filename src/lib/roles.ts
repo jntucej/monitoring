@@ -12,8 +12,10 @@ export const ROLES = {
   PARENT:          "parent",
   HOD:             "hod",
   STUDENT:         "student",
-  // warden was folded into principal — principal carries its privileges
-  WARDEN:          "warden",
+  // WARDEN removed 2026-11: its hostel-management responsibilities were
+  // consolidated into PRINCIPAL. The "warden" string value is no longer a
+  // valid Role; existing DB rows carrying it are reassigned by migration
+  // 20261125000001. deputy_warden / hostel_manager are kept.
   FACULTY:         "faculty",
   STAFF:           "staff",
   WORKER:          "worker",

@@ -29,7 +29,7 @@ const DEFAULT_EXIT_REASONS = [
   {
     code: "day_pass",
     name: "Day Pass",
-    description: "Full day leave (requires warden approved pass)",
+    description: "Full day leave (requires principal approved pass)",
     applicableTo: ["student"],
     requiresApproval: true,
     approvalBy: "principal",
@@ -39,7 +39,7 @@ const DEFAULT_EXIT_REASONS = [
   {
     code: "home_out",
     name: "Home Out",
-    description: "Weekend overnight leave (requires warden approved pass)",
+    description: "Weekend overnight leave (requires principal approved pass)",
     applicableTo: ["student"],
     requiresApproval: true,
     approvalBy: "principal",

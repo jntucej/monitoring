@@ -217,7 +217,7 @@ function GateActivityInner() {
 }
 export default function GateActivityPage() {
   return (
-    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+    <AuthGuard allowedRoles={['principal', 'admin', 'sysadmin']}>
       <Suspense fallback={<PageLoading />}>
         <GateActivityInner />
       </Suspense>

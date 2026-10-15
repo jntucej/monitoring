@@ -232,7 +232,7 @@ function ApprovalCentreInner() {
 }
 export default function ApprovalCentrePage() {
   return (
-    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+    <AuthGuard allowedRoles={['principal', 'admin', 'sysadmin']}>
       <Suspense fallback={<PageLoading />}>
         <ApprovalCentreInner />
       </Suspense>

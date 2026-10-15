@@ -184,7 +184,7 @@ function AttendanceInner() {
 }
 export default function AttendancePage() {
   return (
-    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+    <AuthGuard allowedRoles={['principal', 'admin', 'sysadmin']}>
       <Suspense fallback={<PageLoading />}>
         <AttendanceInner />
       </Suspense>

@@ -163,7 +163,7 @@ function DepartmentsInner() {
 }
 export default function DepartmentsPage() {
   return (
-    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+    <AuthGuard allowedRoles={['principal', 'admin', 'sysadmin']}>
       <Suspense fallback={<PageLoading />}>
         <DepartmentsInner />
       </Suspense>

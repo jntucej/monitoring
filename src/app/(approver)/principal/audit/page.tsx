@@ -210,7 +210,7 @@ function AuditInner() {
 }
 export default function AuditPage() {
   return (
-    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+    <AuthGuard allowedRoles={['principal', 'admin', 'sysadmin']}>
       <Suspense fallback={<PageLoading />}>
         <AuditInner />
       </Suspense>

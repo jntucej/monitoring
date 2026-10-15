@@ -329,7 +329,7 @@ function GrantedTickets({ onRevoke }: { onRevoke: (t: RevokeTarget) => void }) {
 }
 export default function PermissionManagementPage() {
   return (
-    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+    <AuthGuard allowedRoles={['principal', 'admin', 'sysadmin']}>
       <Suspense fallback={<PageLoading />}>
         <PermissionManagementInner />
       </Suspense>

@@ -79,7 +79,7 @@ function ApprovalsInner() {
 }
 export default function ApprovalsPage() {
   return (
-    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+    <AuthGuard allowedRoles={['principal', 'admin', 'sysadmin']}>
       <Suspense fallback={<PageLoading />}>
         <ApprovalsInner />
       </Suspense>

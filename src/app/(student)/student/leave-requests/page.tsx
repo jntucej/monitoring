@@ -91,7 +91,7 @@ function StudentLeaveRequestsInner() {
       </div>
 
       <p className="text-xs text-[var(--text-muted)]">
-        Apply for leave through the permission workflow. Each request goes to the warden and
+        Apply for leave through the permission workflow. Each request goes to the principal
         relevant staff for approval before it is active.
       </p>
 

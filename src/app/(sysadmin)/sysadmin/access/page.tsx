@@ -27,7 +27,7 @@ export default function AccessHubPage() {
           <div>
             <h3 className="font-semibold text-base text-[var(--text-primary)]">Role & Permission Matrix</h3>
             <p className="text-xs text-[var(--text-secondary)] mt-1">
-              Configure fine-grained access control across sysadmin, admin, warden, operator, faculty, and student roles.
+              Configure fine-grained access control across sysadmin, admin, principal, operator, faculty, and student roles.
             </p>
           </div>
         </Link>

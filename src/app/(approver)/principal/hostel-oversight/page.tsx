@@ -161,7 +161,7 @@ function HostelOversightInner() {
 }
 export default function HostelOversightPage() {
   return (
-    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+    <AuthGuard allowedRoles={['principal', 'admin', 'sysadmin']}>
       <Suspense fallback={<PageLoading />}>
         <HostelOversightInner />
       </Suspense>

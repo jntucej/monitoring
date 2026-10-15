@@ -718,7 +718,7 @@ export async function correctScan(
  * that's how the old implementation marked dormant gates "Online" for
  * hours after the last scan of the day.
  */
-const GATE_OPERATOR_ROLES: string[] = ['operator', 'supervisor', 'warden'];
+const GATE_OPERATOR_ROLES: string[] = ['operator', 'supervisor'];
 const ACTIVE_SESSION_WINDOW_MIN = 5;
 
 async function getGateOnlineIds(client: ReturnType<typeof getDbClient>): Promise<Set<string>> {

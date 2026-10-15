@@ -187,7 +187,7 @@ function DepartmentAnalyticsInner() {
 }
 export default function DepartmentAnalyticsPage() {
   return (
-    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+    <AuthGuard allowedRoles={['principal', 'admin', 'sysadmin']}>
       <Suspense fallback={<PageLoading />}>
         <DepartmentAnalyticsInner />
       </Suspense>

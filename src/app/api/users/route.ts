@@ -20,7 +20,7 @@ import { isMfaRequiredForPrivileged } from "@/lib/authContext";
 
 // Roles assignable via this API. Intersection of src/lib/types.ts `Role`
 // and the CHECK constraint on public.users.role in consolidated_clean_schema.sql.
-const VALID_ROLES: (Role | string)[] = ["operator", "admin", "sysadmin", "supervisor", "guardian", "parent", "hod", "student", "warden", "faculty", "staff", "worker", "visitor", "caretaker", "deputy_warden", "hostel_manager", "principal", "vice_principal", "oie", "exam_branch", "mess_incharge"];
+const VALID_ROLES: (Role | string)[] = ["operator", "admin", "sysadmin", "supervisor", "guardian", "parent", "hod", "student", "faculty", "staff", "worker", "visitor", "caretaker", "deputy_warden", "hostel_manager", "principal", "vice_principal", "oie", "exam_branch", "mess_incharge"];
 const VALID_STATUSES = ['ACTIVE', 'LOCKED', 'SUSPENDED', 'DISABLED', 'DEPROVISIONED'];
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -266,7 +266,7 @@ async function handlePost(req: NextRequest) {
     // Insert employee_details for staff-like roles — never let this block
     // user creation. If employee_id is empty, auto-generate one from the
     // freshly minted user id so the UNIQUE/NOT NULL constraint is satisfied.
-    if (["faculty", "staff", "operator", "admin", "sysadmin", "worker", "caretaker", "deputy_warden", "hostel_manager", "principal", "vice_principal", "oie", "exam_branch", "warden"].includes(role)) {
+    if (["faculty", "staff", "operator", "admin", "sysadmin", "worker", "caretaker", "deputy_warden", "hostel_manager", "principal", "vice_principal", "oie", "exam_branch"].includes(role)) {
       const finalEmployeeId =
         (employeeId && String(employeeId).trim()) ||
         (resolvedUniqueId && String(resolvedUniqueId).trim()) ||

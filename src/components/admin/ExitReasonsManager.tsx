@@ -30,7 +30,7 @@ interface Props {
   onChanged: () => void;
 }
 
-const APPROVAL_TARGETS = ["none", "warden", "principal", "admin", "sysadmin"];
+const APPROVAL_TARGETS = ["none", "principal", "admin", "sysadmin"];
 const NOTIFICATION_OPTIONS = ["silent", "sms", "email", "both"];
 const APPLICABLE_OPTIONS = ["student", "faculty", "staff", "worker", "visitor"];
 

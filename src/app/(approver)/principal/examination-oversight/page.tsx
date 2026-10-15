@@ -206,7 +206,7 @@ function ExaminationOversightInner() {
 }
 export default function ExaminationOversightPage() {
   return (
-    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+    <AuthGuard allowedRoles={['principal', 'admin', 'sysadmin']}>
       <Suspense fallback={<PageLoading />}>
         <ExaminationOversightInner />
       </Suspense>

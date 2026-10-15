@@ -378,9 +378,10 @@ export async function validateStudentAccess(token: string, studentId: string): P
     return context;
   }
 
-  // Admins and system admins can access students based on RLS
-  // 'warden' kept for legacy rows — the role is folded into principal
-  if (['admin', 'sysadmin', 'principal', 'warden'].includes(context.role)) {
+  // Admins and system admins can access students based on RLS. Principal
+  // (and its former warden responsibilities, now consolidated into it) may
+  // also access student records for hostel oversight.
+  if (['admin', 'sysadmin', 'principal'].includes(context.role)) {
     return context;
   }
 

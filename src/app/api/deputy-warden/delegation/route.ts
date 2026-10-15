@@ -43,7 +43,7 @@ async function handleGet(
     data: {
       active: false,
       scopes: FALLBACK_SCOPES,
-      note: "No recorded delegation from the principal/warden. Review actions are read-only and escalated to the warden stage.",
+      note: "No recorded delegation from the principal. Review actions are read-only and escalated to the principal stage.",
     },
   });
 }

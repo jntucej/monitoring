@@ -66,7 +66,7 @@ function PrincipalPermissionsInner() {
 }
 export default function PrincipalPermissionsPage() {
   return (
-    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+    <AuthGuard allowedRoles={['principal', 'admin', 'sysadmin']}>
       <Suspense fallback={<PageLoading />}>
         <PrincipalPermissionsInner />
       </Suspense>

@@ -52,7 +52,7 @@ export interface RecordScanResult {
   };
 }
 
-const OVERRIDING_ROLES = new Set(["admin", "sysadmin", "warden"]);
+const OVERRIDING_ROLES = new Set(["admin", "sysadmin", "principal"]);
 
 export async function recordScan(input: RecordScanInput): Promise<RecordScanResult> {
   // 1. Lockdown gate

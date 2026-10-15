@@ -122,7 +122,7 @@ for (const c of created) if (verify[c.role]?.id) verifyOk++;
 console.log(`DB verify: ${verifyOk}/${created.length} rows present`);
 
 // ---------- 4) existing-role report ----------
-const EXISTING_ROLES = ["admin", "faculty", "guardian", "hod", "operator", "staff", "student", "supervisor", "sysadmin", "visitor", "warden", "worker"];
+const EXISTING_ROLES = ["admin", "faculty", "guardian", "hod", "operator", "staff", "student", "supervisor", "sysadmin", "visitor", "worker"];
 const existing: Record<string, { total: number; withPin: boolean; sampleUid: string | null; sampleName: string | null }> = {};
 for (const role of EXISTING_ROLES) {
   const r = q(`SELECT count(*), count(unique_id) FILTER (WHERE unique_id IS NOT NULL), count(*) FILTER (WHERE pin_hash IS NOT NULL), count(*) FILTER (WHERE initial_pin_hash IS NOT NULL), (array_agg(unique_id ORDER BY updated_at DESC NULLS LAST))[1], (array_agg(name ORDER BY updated_at DESC NULLS LAST))[1] FROM users WHERE deleted_at IS NULL AND role = ${lit(role)}`)[0] || [];

@@ -22,7 +22,7 @@ test.describe("admin /admin/test", () => {
     await page.getByLabel(/login id|email/i).fill(process.env.SMOKE_USER!);
     await page.getByLabel(/password/i).fill(process.env.SMOKE_PASS!);
     await page.getByRole("button", { name: /sign in|log in/i }).click();
-    await page.waitForURL(/\/(admin|sysadmin|supervisor|operator|student|parent|warden|staff)/);
+    await page.waitForURL(/\/(admin|sysadmin|supervisor|operator|student|parent|principal|staff)/);
 
     await page.goto("/admin/test");
     // A visible heading proves the page rendered past Suspense.

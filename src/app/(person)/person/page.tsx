@@ -73,7 +73,7 @@ function PersonDashboardInner() {
         </p>
         <p className="text-xs text-[var(--text-muted)]">
           {currentTab === "idcard" && "Your permanent digital identity card & boarding passes"}
-          {currentTab === "passes" && "Track permissions, request leaves, and review warden status"}
+          {currentTab === "passes" && "Track permissions, request leaves, and review approval status"}
           {currentTab === "history" && "Complete audit trail of your campus entries and exits"}
           {currentTab === "profile" && "Manage theme settings, local details, and credentials"}
         </p>

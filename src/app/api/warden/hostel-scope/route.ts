@@ -8,13 +8,13 @@ import type { AuthContext } from "@/lib/authContext";
  * GET /api/warden/hostel-scope
  *
  * Thin, read-only scope endpoint for the warden workspace: returns the
- * warden's authority surface so the UI can display scope in headers
+ * principal's authority surface so the UI can display scope in headers
  * ("within assigned hostel + delegated scope").
  *
  *   - warden_user: row from public.users (id, name, role, assigned_hostel,
- *     supervised_gates) — the accounts whose role is warden/deputy_warden.
+ *     supervised_gates) — the accounts whose role is principal/deputy_warden.
  *   - active_delegations: rows from public.delegation_logs where
- *     delegate_role IN ('warden','deputy_warden','hostel_manager') and
+ *     delegate_role IN ('principal','deputy_warden','hostel_manager') and
  *     status = 'ACTIVE'.
  *
  * All values are derived server-side from the trusted auth context; no
@@ -44,7 +44,7 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
   const { rows: wardenRows } = await poolQuery<WardenUserRow>(
     `SELECT id, name, role, assigned_hostel, supervised_gates
        FROM public.users
-      WHERE role IN ('warden', 'deputy_warden')
+       WHERE role IN ('principal', 'deputy_warden')
         AND status = 'ACTIVE'
       LIMIT 25`
   );
@@ -52,7 +52,7 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
   const { rows: delegations } = await poolQuery<DelegationRow>(
     `SELECT id, delegator_id, delegate_role, scope, expires_at, status, note, created_at
        FROM public.delegation_logs
-      WHERE delegate_role IN ('warden', 'deputy_warden', 'hostel_manager')
+       WHERE delegate_role IN ('principal', 'deputy_warden', 'hostel_manager')
         AND status = 'ACTIVE'
       ORDER BY created_at DESC
       LIMIT 25`

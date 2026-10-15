@@ -410,7 +410,7 @@ function DelegationManagerInner() {
 }
 export default function DelegationManagerPage() {
   return (
-    <AuthGuard allowedRoles={['principal', 'warden', 'admin', 'sysadmin']}>
+    <AuthGuard allowedRoles={['principal', 'admin', 'sysadmin']}>
       <Suspense fallback={<PageLoading />}>
         <DelegationManagerInner />
       </Suspense>

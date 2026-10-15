@@ -485,7 +485,7 @@ function ManualEntryInner() {
                 <div className="min-w-0">
                   {recordError.code === "NO_GATE_PASS" && (
                     <p className="font-bold mb-1">
-                      No approved gate pass — reject or escalate to warden/admin
+                      No approved gate pass — reject or escalate to principal/admin
                     </p>
                   )}
                   {recordError.code === "CONFLICT" && (
