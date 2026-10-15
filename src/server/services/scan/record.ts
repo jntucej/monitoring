@@ -6,11 +6,18 @@ import {
   checkBackGateGeo,
   type GeoInput,
 } from "@/server/policy/gate-access";
-import { validateStudentExitFlow } from "@/lib/student-exit-flow";
+import {
+  normalizeExitReason,
+  validateStudentExitFlow,
+} from "@/lib/student-exit-flow";
 import { findActiveLockdown } from "@/server/repositories/lockdown/findActive";
 import { findGateById } from "@/server/repositories/gates/findById";
 import { findByUniqueId } from "@/server/repositories/users/findByUniqueId";
 import { findOccupancyByUserId } from "@/server/repositories/occupancy/findByUserId";
+import {
+  findStudentDetailsByUserId,
+  updateEntryType,
+} from "@/server/repositories/studentDetails/findByUserId";
 import { createScan } from "@/server/repositories/scans/create";
 import { findScanById } from "@/server/repositories/scans/findById";
 import { validateRollNumber } from "@/lib/rollNumber";
@@ -27,6 +34,13 @@ export interface RecordScanInput {
   personId?: string;
   direction: "IN" | "OUT";
   reason?: string;
+  /**
+   * Entry-type selection for a student's IN scan (hosteller vs day_scholar).
+   * Optional and backward-compatible: when omitted, existing callers are
+   * unaffected. For an IN scan on a student it MUST be present; for OUT scans
+   * the scope check reads the stored current_entry_type instead.
+   */
+  entryType?: "hosteller" | "day_scholar";
   gateId: string;
   isManual?: boolean;
   clientEventId?: string;
@@ -53,6 +67,44 @@ export interface RecordScanResult {
 }
 
 const OVERRIDING_ROLES = new Set(["admin", "sysadmin", "principal"]);
+
+/**
+ * Entry-type scope for OUT scans. A hosteller may use any of these exit
+ * reasons; a day scholar may use day_scholar_out ONLY. A hosteller's
+ * unrestricted regular/regular-day outing is left open (no restriction), so
+ * only day scholars are narrowed to the single allowed code.
+ */
+const OUT_REASONS_BY_ENTRY_TYPE: Record<
+  "hosteller" | "day_scholar",
+  readonly (ReturnType<typeof normalizeExitReason>)[]
+> = {
+  hosteller: ["daily_outing", "home_out", "day_pass", "emergency"],
+  day_scholar: ["day_scholar_out"],
+};
+
+/**
+ * Enforce the entry-type OUT-scope. Normalizes the chosen reason, resolves
+ * the effective entry type (a null/unknown stored type defaults to
+ * hosteller with a warning), and throws ConflictError (code
+ * HOSTEL_SCOPE_MISMATCH) when the reason is not permitted for that type.
+ *
+ * Called only for student OUT scans; non-students skip it entirely.
+ */
+function enforceOutScopeByEntryType(
+  effectiveEntryType: "hosteller" | "day_scholar",
+  rawReason: string | null | undefined,
+): void {
+  const normalized = normalizeExitReason(rawReason);
+  const allowed = OUT_REASONS_BY_ENTRY_TYPE[effectiveEntryType];
+  if (!allowed.includes(normalized)) {
+    throw new ConflictError(
+      `Reason "${normalized}" is not permitted for ${effectiveEntryType} exits. ` +
+        `Allowed: ${allowed.join(", ")}.`,
+      "HOSTEL_SCOPE_MISMATCH",
+      { code: "HOSTEL_SCOPE_MISMATCH", entryType: effectiveEntryType },
+    );
+  }
+}
 
 export async function recordScan(input: RecordScanInput): Promise<RecordScanResult> {
   // 1. Lockdown gate
@@ -127,6 +179,34 @@ export async function recordScan(input: RecordScanInput): Promise<RecordScanResu
   // 9. Student exit-flow enforcement (only for students). Manual entries are
   // subject to the SAME pass check as regular scans (spec §11 overrides §7).
   if (person.role === "student") {
+    // 9a. IN scans: the operator MUST have selected an entry type. Reject
+    //     early (before recording anything) with a clear 400.
+    if (input.direction === "IN" && !input.entryType) {
+      throw new BadRequestError(
+        "Entry type must be selected for an IN scan: choose 'hosteller' or 'day_scholar'.",
+        "ENTRY_TYPE_REQUIRED",
+        { code: "ENTRY_TYPE_REQUIRED" },
+      );
+    }
+
+    // 9b. OUT scans: read the stored entry type and enforce the scope.
+    //     A null/unknown stored type defaults to hosteller (with a warning).
+    let effectiveOutEntryType: "hosteller" | "day_scholar" | null = null;
+    if (input.direction === "OUT") {
+      const details = await findStudentDetailsByUserId(person.id);
+      const storedType = details?.current_entry_type ?? null;
+      if (storedType === "hosteller" || storedType === "day_scholar") {
+        effectiveOutEntryType = storedType;
+      } else {
+        effectiveOutEntryType = "hosteller";
+        console.warn(
+          `[scan] current_entry_type null/unknown for student ${person.id} ` +
+            `(stored=${String(storedType)}); defaulting to hosteller scope on OUT.`,
+        );
+      }
+      enforceOutScopeByEntryType(effectiveOutEntryType, input.reason);
+    }
+
     const flow = await validateStudentExitFlow(
       person.unique_id,
       input.direction,
@@ -191,6 +271,37 @@ export async function recordScan(input: RecordScanInput): Promise<RecordScanResu
         gateName: gate.name,
       },
     });
+
+    // 12. Persist the entry-type choice on student_details and audit the
+    //     change. Only for a real student IN scan that actually carried an
+    //     entry type. The type update is non-fatal (a failure cannot roll
+    //     back the already-recorded scan) and the audit write is also
+    //     self-contained (auditWrite swallows errors).
+    if (
+      input.direction === "IN" &&
+      person.role === "student" &&
+      input.entryType
+    ) {
+      await updateEntryType({
+        userId: person.id,
+        entryType: input.entryType,
+        gateId: gate.id,
+        chosenAt: new Date().toISOString(),
+      });
+      await auditWrite({
+        action: "STUDENT_TYPE_CHANGED_AT_ENTRY",
+        userId: input.operatorId,
+        role: input.operatorRole,
+        details: {
+          personId: person.id,
+          personUniqueId: person.unique_id,
+          entryType: input.entryType,
+          gateId: gate.id,
+          gateName: gate.name,
+          scanId,
+        },
+      });
+    }
   }
 
   return {
