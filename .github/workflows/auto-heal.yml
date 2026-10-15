@@ -93,15 +93,13 @@ jobs:
         git push origin "fix/auto-heal-$(date +%s)"
         gh pr create --title "Auto Heal Diagnostic" --body "Diagnostic report for deployment issues"
       
-    - name: Notify on Telegram
-      if: always()
+    - name: Notify on Telegram (only on actual failure with fix)
+      if: failure() && steps.diagnose.outputs.FIXES != ''
       uses: appleboy/telegram-action@master
       with:
         to: ${{ secrets.TELEGRAM_CHAT_ID }}
         token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         message: |
-          🤖 Auto Heal Agent
-          Status: ${{ github.event.workflow_run.conclusion }}
-          Run: ${{ github.event.workflow_run.id }}
-          
-          Review logs and apply fixes as needed.
+          🤖 Auto Heal: Fixed
+          Run: #${{ github.event.workflow_run.id }}
+          Fix: ${{ steps.diagnose.outputs.FIXES }}
