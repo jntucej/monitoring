@@ -285,21 +285,21 @@ export function ScanConfirmation({
     icon: reasonIcons[config.code] || Briefcase,
   })).filter(allowed);
 
-  // Entry (IN) options. Only two reasons exist for coming in:
-  //   - Daily Outing: day scholars entering for the day (24h window).
-  //     Also permitted for hostelers doing a short day trip out.
-  //   - Home In: return to campus from a home visit (hostellers only).
+  // Entry (IN) options.
+  //   Day scholar OUT:  "College In" (daily_outing) only
+  //   Hosteller OUT:    "Home In" (home_in) + "Outing In" (daily_outing)
   // IN never requires a gate pass (server returns early on direction "IN").
   const inActions: ActionEntry[] = ([
     {
       code: "daily_outing",
-      name: "Daily Outing",
+      name: isDayScholar ? "College In" : "Outing In",
       direction: "IN",
       icon: Sun,
       applicableTo: ["HM", "HF", "DM", "DF"],
       requiresApproval: false,
       parentNotification: false,
     },
+    // Home In: hostellers only (day scholars have no hostel to return from)
     {
       code: "home_in",
       name: "Home In",
@@ -309,7 +309,12 @@ export function ScanConfirmation({
       requiresApproval: false,
       parentNotification: false,
     },
-  ] as ActionEntry[]).filter(allowed);
+  ] as ActionEntry[]).filter((cfg) => {
+    if (!allowed(cfg)) return false;
+    // Day scholar: never show "Home In" (they have no hostel)
+    if (isDayScholar && cfg.code === "home_in") return false;
+    return true;
+  });
 
   const handleConfirmClick = async (direction: ScanDirection, reason?: ExitReason) => {
     if (!photoVerified || isFlagged) {
