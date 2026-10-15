@@ -2,7 +2,7 @@ name: Auto Heal Agent
 
 on:
   workflow_run:
-    workflows: ["Auto Deploy to Production"]
+    workflows: ["Auto Deploy to Production", "Manual Deploy (Trusted)"]
     types: [completed]
   workflow_dispatch:
 
