@@ -145,11 +145,14 @@ export async function checkSchemaDrift(minIntervalMs = 5 * 60 * 1000): Promise<D
 
   const missing: string[] = [];
   for (const f of files) {
-    const version = f.slice(0, f.indexOf("_") > 0 ? f.indexOf("_") : undefined) || f;
-    // Some files use a bare numeric prefix with no underscore
-    // (e.g. "20261027000001_gates_geo_columns.sql" -> "20261027000001").
     const v = f.match(/^(\d+)/)?.[1];
-    if (v && !seen.has(v)) missing.push(f);
+    if (!v) continue;
+    // A migration is "recorded" if either the bare version OR the full
+    // filename appears in schema_migrations. Some historical rows use
+    // one format, later rows use the other — treat both as valid
+    // evidence that the file was applied.
+    if (seen.has(v) || seen.has(f)) continue;
+    missing.push(f);
   }
 
   lastCheckAt = now;
