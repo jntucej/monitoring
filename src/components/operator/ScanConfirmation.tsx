@@ -241,10 +241,23 @@ export function ScanConfirmation({
   const isHomeIn = (cfg: ActionEntry) =>
     cfg.code === "home_in" || cfg.name === "Home In";
 
+  // Sub-type exit gate: day scholars only do daily_outing;
+  // hostelers additionally do home_out and day_pass.
+  const subtypeExitAllows = (cfg: ActionEntry) => {
+    if (!isDayScholar && !isHosteller) return true; // unknown type -> allow all
+    if (isDayScholar) {
+      // Day scholar: only daily_outing is a valid exit reason
+      return cfg.code === "daily_outing" || cfg.name === "Daily Outing";
+    }
+    // Hosteller: all four exit reasons are valid
+    return true;
+  };
+
   const allowed = (cfg: ActionEntry) =>
     typeAllows(cfg) &&
     occupancyAllows(cfg) &&
-    (!isHomeIn(cfg) || isHosteller);
+    (!isHomeIn(cfg) || isHosteller) &&
+    subtypeExitAllows(cfg);
 
   const studentAppliesTo = (cfg: ExitReasonConfig) => {
     if (!student.studentType) return true;
