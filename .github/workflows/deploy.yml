@@ -3,7 +3,7 @@ name: Auto Deploy to Production
 on:
   push:
     branches: [main]
-  workflow_dispatch:  # 允许手动触发
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -21,10 +21,10 @@ jobs:
         script: |
           set -e
           cd /root/monitoring
-          
+
           echo "=== Pull latest code ==="
           git pull origin main
-          
+
           echo "=== Rsync to compose directory ==="
           rsync -av --delete \
             --exclude='.git' \
@@ -43,23 +43,23 @@ jobs:
             --exclude='.idea/' \
             --exclude='node_modules/.cache/' \
             src/ /opt/monitoring/compose/src/
-          
+
           echo "=== Build and deploy ==="
           cd /opt/monitoring/compose
           docker compose build web --no-cache
           docker compose up -d --remove-orphans
-          
+
           echo "=== Waiting for healthy ==="
           for i in $(seq 1 20); do
-            STATUS=\$(docker inspect --format="{{.State.Health.Status}}" gate_web 2>/dev/null || echo "missing")
-            if [ "\$STATUS" = "healthy" ]; then
+            STATUS=$(docker inspect --format="{{.State.Health.Status}}" gate_web 2>/dev/null || echo "missing")
+            if [ "$STATUS" = "healthy" ]; then
               echo "Container is healthy!"
               break
             fi
-            echo "Waiting... (\$i/20)"
+            echo "Waiting... ($i/20)"
             sleep 5
           done
-          
+
           echo "=== Deploy log ==="
           docker logs gate_web --tail 10
 
