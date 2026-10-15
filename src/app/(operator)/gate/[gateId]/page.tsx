@@ -5,7 +5,7 @@ import { usePolling } from "@/hooks/usePolling";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { normalizeScannedPayload } from "@/lib/barcode";
 import { motion } from "framer-motion";
-import { RefreshCw, AlertCircle, Scan, KeyRound, UserCheck, LayoutDashboard, Clock, User as UserIcon, Mic, ShieldAlert } from "lucide-react";
+import { RefreshCw, AlertCircle, Scan, KeyRound, UserCheck, LayoutDashboard, Clock, User as UserIcon, Mic, ShieldAlert, Hourglass } from "lucide-react";
 import { useOperatorStore } from "@/stores/operatorStore";
 import { useAuth } from "@/hooks/useAuth";
 import { useKioskOperator } from "@/hooks/useKioskOperator";
@@ -25,6 +25,8 @@ import type { Scan as ScanRecord } from "@/lib/types";
 import { useCollegeInfo } from "@/hooks/useCollegeInfo";
 import { useUIStore } from "@/stores/uiStore";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
+import { useScanQueueSync } from "@/hooks/useScanQueueSync";
+import { QueuedScansBanner } from "@/components/operator/QueuedScansBanner";
 
 function OperatorPageInner() {
   const params = useParams<{ gateId: string }>();
@@ -63,10 +65,10 @@ function OperatorPageInner() {
   } = operatorStore;
   const confirmScan = operatorStore.confirmScan;
 
-  // Log detail modal selection
   const [selectedScan, setSelectedScan] = useState<ScanRecord | null>(null);
   const [activeLockdown, setActiveLockdown] = useState<any>(null);
   const [showVoiceModal, setShowVoiceModal] = useState(false);
+  const scanQueueSync = useScanQueueSync();
 
   // Local active tab for the desk panel: scan, manual, entry
   const [operatorSubMode, setOperatorSubMode] = useState<"scan" | "manual" | "entry">("scan");
@@ -491,18 +493,25 @@ function OperatorPageInner() {
                     const canRetry = error.retryable === true;
                     const isNetworkError =
                       error.code === "NETWORK_ERROR" || error.code === "TIMEOUT" || error.code === "OFFLINE_BLOCKED";
+                    const isQueued = error.queued === true;
                     return (
                       <motion.div
                         initial={{ opacity: 0, scale: 0.96 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="scan-error p-5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-center space-y-3"
+                        className={`scan-error p-5 rounded-2xl text-center space-y-3 ${
+                          isQueued ? "bg-amber-500/10 border border-amber-500/30" : "bg-rose-500/10 border border-rose-500/30"
+                        }`}
                       >
-                        <div className="w-10 h-10 rounded-full bg-rose-500/20 text-rose-500 flex items-center justify-center mx-auto">
-                          <AlertCircle className="w-5 h-5" />
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center mx-auto ${
+                          isQueued ? "bg-amber-500/20 text-amber-400" : "bg-rose-500/20 text-rose-500"
+                        }`}>
+                          {isQueued ? <Hourglass className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
                         </div>
                         <div className="space-y-1">
-                          <h3 className="font-bold text-sm text-[var(--action-danger)]">
-                            {isAuthError
+                          <h3 className={`font-bold text-sm ${isQueued ? "text-amber-400" : "text-[var(--action-danger)]"}`}>
+                            {isQueued
+                              ? "Scan Queued"
+                              : isAuthError
                               ? "Verification Failed"
                               : error.code === "NOT_FOUND"
                               ? "Person Not Found"
@@ -522,7 +531,7 @@ function OperatorPageInner() {
                           )}
                         </div>
                         <div className="flex justify-center gap-2">
-                          {canRetry && (
+                          {canRetry && !isQueued && (
                             <button
                               type="button"
                               id="retry-btn"
@@ -614,6 +623,12 @@ function OperatorPageInner() {
   return (
     <div className="min-h-[85vh] flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] pb-safe min-w-0">
       <main className="flex-1 w-full max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto p-2 sm:p-4 space-y-4">
+        <QueuedScansBanner
+          queuedCount={scanQueueSync.queuedCount}
+          replaying={scanQueueSync.replaying}
+          onReplay={() => void scanQueueSync.replayNow()}
+          onClear={scanQueueSync.clearQueue}
+        />
         {/* Emergency Lockdown Active Alert Header Banner */}
         {activeLockdown && (
           <div className="bg-rose-600 text-white p-4 rounded-xl border border-rose-700 shadow-lg flex items-center justify-between animate-pulse">

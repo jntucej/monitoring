@@ -1,7 +1,9 @@
 import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
+import { withRateLimit } from "@/lib/rate-limit";
 import { recordScan } from "@/server/services/scan/record";
 import { ok, fail } from "@/server/http/response";
+import { AppError } from "@/server/http/errors";
 import { TIER } from "@/server/policy/roles";
 import { assertCsrf } from "@/lib/csrf";
 import type { AuthContext } from "@/lib/authContext";
@@ -17,42 +19,56 @@ interface ScanBody {
   geo?: { latitude?: number | null; longitude?: number | null; accuracy?: number | null };
 }
 
-export const POST = withAuthorization(
-  async (req: NextRequest, { auth }: { auth: AuthContext }) => {
-    const csrf = assertCsrf(req);
-    if (csrf) return csrf;
+export const POST = withRateLimit(
+  withAuthorization(
+    async (req: NextRequest, { auth }: { auth: AuthContext }) => {
+      const csrf = assertCsrf(req);
+      if (csrf) return csrf;
 
-    const body = (await req.json().catch(() => null)) as ScanBody | null;
-    if (!body?.gateId || !body?.direction) {
-      return fail("BAD_REQUEST", "gateId and direction are required", 400);
-    }
+      const body = (await req.json().catch(() => null)) as ScanBody | null;
+      if (!body?.direction) {
+        return fail("BAD_REQUEST", "direction is required", 400);
+      }
 
-    // clientEventId must be a UUID for the Postgres process_gate_scan
-    // function; normalise non-UUID values (e.g. test IDs) to a fresh UUID.
-    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    const clientEventId = UUID_RE.test(body.clientEventId || "")
-      ? body.clientEventId
-      : crypto.randomUUID();
+      // gateId is a hint: when absent, fall back to the caller's bound gate.
+      const gateId = body.gateId ?? auth.gateId ?? null;
+      if (!gateId) {
+        return fail("BAD_REQUEST", "gateId is required", 400);
+      }
 
-    const result = await recordScan({
-      roll: body.roll,
-      personId: body.personId,
-      direction: body.direction,
-      reason: body.reason,
-      gateId: body.gateId,
-      isManual: body.isManual,
-      clientEventId,
-      geo: body.geo,
-      operatorId: auth.userId,
-      operatorName: auth.email,
-      operatorRole: auth.role,
-      operatorGateId: auth.gateId ??
-        (auth.role === "operator" && !auth.gateId
-          ? "5f2183c9-51ae-4677-8f38-52a17bbe0538" // unassigned operator: default gate binding
-          : null),
-    });
+      // clientEventId must be a UUID for the Postgres process_gate_scan
+      // function; normalise non-UUID values (e.g. test IDs) to a fresh UUID.
+      const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      const clientEventId = UUID_RE.test(body.clientEventId || "")
+        ? body.clientEventId
+        : crypto.randomUUID();
 
-    return ok({ ...result, scan: result.log });
-  },
-  { requiredRole: TIER.OPERATOR },
+      try {
+        const result = await recordScan({
+          roll: body.roll,
+          personId: body.personId,
+          direction: body.direction,
+          reason: body.reason,
+          gateId,
+          isManual: body.isManual,
+          clientEventId,
+          geo: body.geo,
+          operatorId: auth.userId,
+          operatorName: auth.email,
+          operatorRole: auth.role,
+          operatorGateId: auth.gateId ?? null,
+          supervisedGates: auth.supervisedGates,
+        });
+        return ok({ ...result, scan: result.log });
+      } catch (err) {
+        if (err instanceof AppError) {
+          return fail(err.code, err.message, err.status, err.details);
+        }
+        console.error("recordScan unexpected error:", err);
+        return fail("INTERNAL_ERROR", "Failed to record scan", 500);
+      }
+    },
+    { requiredRole: TIER.OPERATOR },
+  ),
+  { keyPrefix: "gate_scan", maxRequests: 30, windowMs: 60_000 },
 );

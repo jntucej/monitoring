@@ -5,6 +5,7 @@ import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { useAuthStore } from "@/stores/authStore";
+import { useToast } from "@/components/ui/toast";
 import { getAuthHeaders } from "@/lib/utils";
 import {
   KeyRound,
@@ -14,6 +15,7 @@ import {
   XCircle,
   User,
   AlertTriangle,
+  ArrowRightLeft,
 } from "lucide-react";
 
 /* ── response shapes (mirror /api/operator/lookup) ── */
@@ -38,6 +40,23 @@ interface LookupResponse {
 
 type LookupState = "idle" | "loading" | "found" | "notfound" | "error";
 
+const REASON_OPTIONS = [
+  { value: "daily_outing", label: "Daily Outing" },
+  { value: "home_out", label: "Home Out (pass required)" },
+  { value: "day_pass", label: "Day Pass (pass required)" },
+  { value: "home_in", label: "Home In" },
+  { value: "regular", label: "Regular/Other" },
+] as const;
+
+type RecordState = "idle" | "submitting" | "success" | "error";
+
+interface RecordError {
+  code: string;
+  status: number;
+  message: string;
+}
+
+
 function ManualEntryInner() {
   const user = useAuthStore((s) => s.user);
 
@@ -49,6 +68,79 @@ function ManualEntryInner() {
   const [result, setResult] = useState<LookupPerson | null>(null);
   const [lookupError, setLookupError] = useState<string | null>(null);
 
+  const { addToast } = useToast();
+
+  // Record form (rendered below a successful lookup)
+  const [recordState, setRecordState] = useState<RecordState>("idle");
+  const [recordDirection, setRecordDirection] = useState<"IN" | "OUT">("IN");
+  const [recordReason, setRecordReason] = useState("");
+  const [recordReasonText, setRecordReasonText] = useState("");
+  const [recordError, setRecordError] = useState<RecordError | null>(null);
+
+  const resetRecordForm = useCallback(() => {
+    setRecordState("idle");
+    setRecordReason("");
+    setRecordReasonText("");
+    setRecordError(null);
+  }, []);
+
+  const submitRecord = useCallback(async () => {
+    if (!result || !result.uniqueId) return;
+    const reason = recordReasonText.trim() || recordReason;
+    if (!reason) {
+      setRecordState("error");
+      setRecordError({ code: "BAD_REQUEST", status: 400, message: "Reason is required for manual entry." });
+      return;
+    }
+
+    setRecordState("submitting");
+    setRecordError(null);
+
+    try {
+      const res = await fetch("/api/operator/manual-entry", {
+        method: "POST",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({
+          roll: result.uniqueId,
+          direction: recordDirection,
+          reason,
+          gateId: user?.gateId,
+        }),
+        cache: "no-store",
+      });
+      const json = await res.json().catch(() => null);
+
+      if (res.ok) {
+        setRecordState("success");
+        addToast({
+          variant: "success",
+          title: "Manual Entry Recorded",
+          message: `${result.name} (${result.uniqueId}) recorded ${recordDirection === "IN" ? "in" : "out"} at the gate.`,
+        });
+        // Return to the lookup idle state.
+        setLookupState("idle");
+        setResult(null);
+        setName("");
+        setIdNumber("");
+        setLastQuery("");
+        resetRecordForm();
+        return;
+      }
+
+      const code = json?.error?.code ?? "ERROR";
+      const message = json?.error?.message ?? `HTTP ${res.status}`;
+      setRecordState("error");
+      setRecordError({ code, status: res.status, message });
+    } catch (err) {
+      setRecordState("error");
+      setRecordError({
+        code: "NETWORK_ERROR",
+        status: 0,
+        message: err instanceof Error ? err.message : "Failed to record scan",
+      });
+    }
+  }, [result, recordDirection, recordReason, recordReasonText, user?.gateId, addToast, resetRecordForm]);
+
   const runLookup = useCallback(async () => {
     const id = idNumber.trim().toUpperCase();
     if (!id) return;
@@ -57,6 +149,7 @@ function ManualEntryInner() {
     setLookupState("loading");
     setResult(null);
     setLookupError(null);
+    resetRecordForm();
 
     try {
       const res = await fetch(
@@ -70,8 +163,10 @@ function ManualEntryInner() {
         return;
       }
       if (json.data?.found && json.data?.person) {
-        setResult(json.data.person as LookupPerson);
+        const person = json.data.person as LookupPerson;
+        setResult(person);
         setLookupState("found");
+        onFound(person);
       } else {
         setLookupState("notfound");
       }
@@ -79,7 +174,12 @@ function ManualEntryInner() {
       setLookupState("error");
       setLookupError(err instanceof Error ? err.message : "Lookup failed");
     }
-  }, [idNumber]);
+  }, [idNumber, resetRecordForm]);
+
+  // Default direction after a successful lookup: on campus → OUT, else IN.
+  const onFound = (person: LookupPerson) => {
+    setRecordDirection(person.onCampus ? "OUT" : "IN");
+  };
 
   const statusTone = (status: string | undefined) => {
     const s = (status ?? "").toUpperCase();
@@ -295,6 +395,133 @@ function ManualEntryInner() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Record form — rendered below a successful lookup */}
+      {lookupState === "found" && result && (
+        <WidgetBoundary title="Record Scan">
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-4 space-y-3 min-w-0">
+            {/* Direction toggle */}
+            <div className="space-y-1.5 min-w-0">
+              <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
+                Direction
+              </span>
+              <div className="grid grid-cols-2 gap-2">
+                {(["IN", "OUT"] as const).map((d) => (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => setRecordDirection(d)}
+                    disabled={recordState === "submitting"}
+                    className={`px-3 py-2 rounded-lg border text-sm font-bold transition disabled:opacity-50 ${
+                      recordDirection === d
+                        ? "bg-[var(--action-primary)] border-[var(--action-primary)] text-slate-950"
+                        : "border-[var(--border)] bg-[var(--bg-base)] text-[var(--text-primary)] hover:border-[var(--border)]"
+                    }`}
+                  >
+                    {d === "IN" ? "Entry (IN)" : "Exit (OUT)"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Reason select */}
+            <div className="space-y-1.5 min-w-0">
+              <label
+                htmlFor="manual-reason"
+                className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide"
+              >
+                Reason
+              </label>
+              <select
+                id="manual-reason"
+                value={recordReason}
+                onChange={(e) => setRecordReason(e.target.value)}
+                disabled={recordState === "submitting"}
+                className="w-full px-3 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-base)] text-sm text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
+              >
+                <option value="" disabled>
+                  Select a reason…
+                </option>
+                {REASON_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Free-text reason (optional) */}
+            <div className="space-y-1.5 min-w-0">
+              <label
+                htmlFor="manual-reason-text"
+                className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide"
+              >
+                Additional details (optional)
+              </label>
+              <input
+                id="manual-reason-text"
+                type="text"
+                value={recordReasonText}
+                onChange={(e) => setRecordReasonText(e.target.value)}
+                placeholder="e.g. returning from doctor visit"
+                disabled={recordState === "submitting"}
+                className="w-full px-3 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-base)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
+              />
+            </div>
+
+            {/* Error banner (400 / 403 NO_GATE_PASS / 409 / 423 / network) */}
+            {recordState === "error" && recordError && (
+              <div
+                className={`rounded-lg border p-3 text-xs flex items-start gap-2 min-w-0 ${
+                  recordError.code === "NO_GATE_PASS"
+                    ? "border-rose-500/40 bg-rose-500/10 text-rose-300"
+                    : recordError.code === "CONFLICT"
+                      ? "border-amber-500/40 bg-amber-500/10 text-amber-300"
+                      : "border-rose-500/30 bg-rose-500/10 text-rose-300"
+                }`}
+              >
+                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                <div className="min-w-0">
+                  {recordError.code === "NO_GATE_PASS" && (
+                    <p className="font-bold mb-1">
+                      No approved gate pass — reject or escalate to warden/admin
+                    </p>
+                  )}
+                  {recordError.code === "CONFLICT" && (
+                    <p className="font-bold mb-1">Duplicate or direction conflict</p>
+                  )}
+                  {recordError.status === 423 && (
+                    <p className="font-bold mb-1">Lockdown active — scans blocked</p>
+                  )}
+                  <p>{recordError.message}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Success card */}
+            {recordState === "success" && (
+              <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-300 flex items-center gap-2 min-w-0">
+                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+                <span>Scan recorded successfully.</span>
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={() => void submitRecord()}
+              disabled={recordState === "submitting"}
+              className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--action-primary)] px-4 py-2.5 text-sm font-bold text-slate-950 hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
+            >
+              {recordState === "submitting" ? (
+                <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" />
+              ) : (
+                <ArrowRightLeft className="w-4 h-4" />
+              )}
+              Record Scan
+            </button>
+          </div>
+        </WidgetBoundary>
       )}
 
       <DevContactStrip />

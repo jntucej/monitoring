@@ -42,7 +42,7 @@ export const CANONICAL_EXIT_FLOWS: Record<
 };
 
 export function normalizeExitReason(reason?: string | null): ReasonCode | "regular" {
-  if (!reason) return "daily_outing";
+  if (!reason) return "regular";
   const r = reason.trim().toLowerCase().replace(/\s+/g, "_");
   if (r === "daily_outing" || r === "outing") return "daily_outing";
   if (r === "home_in") return "home_in";
@@ -50,7 +50,7 @@ export function normalizeExitReason(reason?: string | null): ReasonCode | "regul
   if (r === "day_pass" || r === "day_out") return "day_pass";
   if (r === "emergency") return "daily_outing";
   if (r === "regular") return "regular";
-  return "daily_outing";
+  return "regular";
 }
 
 export function requiresGatePass(reason?: string | null): boolean {

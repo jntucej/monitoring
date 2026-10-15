@@ -108,7 +108,9 @@ async function handlePinLogin(req: NextRequest) {
 
     const user = userRes.rows[0];
 
-    // Ensure privileged roles can NEVER authenticate via PIN login
+    // Ensure privileged roles can NEVER authenticate via PIN login — this
+    // rejection is the defensive MFA guarantee: privileged users are refused
+    // outright rather than relying on a 2FA check that could be bypassed.
     if (user && isPrivileged(user.role)) {
       await recordFailedAttempt(cleanId, "pin");
       return NextResponse.json(INVALID_CREDENTIALS, { status: 401 });
@@ -141,7 +143,7 @@ async function handlePinLogin(req: NextRequest) {
 
     // 5. Handle Failure
     if (!user || !pinValid) {
-      await recordFailedAttempt(normalizedId, 'pin-login');
+      await recordFailedAttempt(normalizedId, 'pin');
 
       // Increment per-user account failed login count if user exists
       if (user) {

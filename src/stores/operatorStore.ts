@@ -4,6 +4,8 @@
  */
 import { create } from "zustand";
 import { playAudioFeedback } from "@/lib/sound";
+import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
+import { addScan } from "@/lib/scan-queue";
 import type { Scan, Person, Student, Gate, ScanDirection, ExitReason, CategoryBreakdown, OutingEntry } from "@/lib/types";
 import type { ToastData } from "@/components/ui/toast";
 import { useAuthStore } from "@/stores/authStore";
@@ -66,6 +68,8 @@ interface ScanError {
   code?: string;
   /** True when pressing Retry can realistically recover (network issues, timeouts, duplicates). */
   retryable?: boolean;
+  /** True when the scan was captured locally and will sync when the network returns. */
+  queued?: boolean;
 }
 
 export interface TodayStatsResult {
@@ -147,6 +151,11 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
     const cleanRoll = roll.trim().toUpperCase();
     if (!cleanRoll) return;
 
+    // Increment generation so any in-flight startScan/confirmScan callbacks
+    // for the previous scan are dropped once we hit a stale check.
+    const gen = get()._scanGeneration + 1;
+    set({ _scanGeneration: gen });
+
     if (scanAbortController) {
       scanAbortController.abort();
     }
@@ -168,7 +177,9 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
 
     try {
       const res = await fetch(`/api/persons/${encodeURIComponent(cleanRoll)}`, { headers, signal });
+      if (get()._scanGeneration !== gen) return;
       const result = await res.json().catch(() => null);
+      if (get()._scanGeneration !== gen) return;
 
       if (res.status === 401 || result?.error?.code === "SESSION_EXPIRED" || result?.error?.code === "UNAUTHORIZED") {
         authStore.logout();
@@ -185,6 +196,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
             ? `Person with ID "${cleanRoll}" not found in database.`
             : "Failed to fetch person details.");
         const errorCode = result?.error?.code || (res.status === 404 ? "NOT_FOUND" : "ERROR");
+        if (get()._scanGeneration !== gen) return;
         set({
           state: "error",
           error: { message: errorMsg, code: errorCode },
@@ -196,6 +208,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
 
       // Check account status — do not allow inactive/suspended accounts to proceed
       if (person.status && person.status.toUpperCase() !== "ACTIVE") {
+        if (get()._scanGeneration !== gen) return;
         set({
           state: "error",
           error: {
@@ -218,6 +231,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
         direction = "IN";
       }
 
+      if (get()._scanGeneration !== gen) return;
       set({
         state: "confirming",
         currentStudent: person,
@@ -233,6 +247,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
         return;
       }
       console.error("Network or fetch error during scan start:", err);
+      if (get()._scanGeneration !== gen) return;
       set({
         state: "error",
         error: {
@@ -266,24 +281,39 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
 
     const gen = get()._scanGeneration + 1;
     set({ _scanGeneration: gen });
+    const directionToUse = overrideDirection || get().selectedDirection;
+    const reasonToUse = (overrideReason as ExitReason) || get().selectedReason;
+    const clientEventId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : `ev-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+    // Offline path: capture locally; the queue hook replays it when the network returns.
     if (typeof navigator !== "undefined" && !navigator.onLine) {
-      playAudioFeedback("error");
+      playAudioFeedback("warning");
+      addScan({
+        clientEventId,
+        roll: currentStudent.uniqueId || currentStudent.roll || "",
+        direction: directionToUse,
+        reason: reasonToUse ?? (directionToUse === "OUT" ? "daily_outing" : undefined),
+        gateId: get().gate?.id || get().gateId || "",
+        queuedAt: Date.now(),
+        status: "queued",
+      });
       addToast({
-        variant: "error",
-        title: "Server Connection Required",
-        message: "Action blocked: Active live server API connection is strictly required.",
+        variant: "warning",
+        title: "Scan Queued Offline",
+        message: "No network — this scan was saved locally and will sync automatically when the connection returns.",
       });
       set({
         error: {
-          message: "100% Strict Online Policy: Active server connection required to process scans.",
-          code: "OFFLINE_BLOCKED",
+          message: "Scan queued locally — will sync when the network returns.",
+          code: "QUEUED_OFFLINE",
+          retryable: false,
+          queued: true,
         },
       });
       return;
     }
-
-    const directionToUse = overrideDirection || get().selectedDirection;
-    const reasonToUse = (overrideReason as ExitReason) || get().selectedReason;
     const uniqueId = currentStudent.uniqueId || currentStudent.roll || "";
     const authState = useAuthStore.getState();
     const operatorId = authState.user?.id || "op-1";
@@ -304,7 +334,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
       return;
     }
 
-    // Async execution with GPS geolocation & sysTag telemetry with strict 5s timeout
+    // Async execution with GPS geolocation & sysTag telemetry, 15s fetch timeout
     return (async () => {
       const geo = await getClientLocation();
       const sysTag = getClientSysTag();
@@ -315,15 +345,11 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
       if (token) headers["Authorization"] = `Bearer ${token}`;
       if (sessionToken) headers["X-Session-Token"] = sessionToken;
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-
       try {
-        const res = await fetch("/api/gate/scan", {
+        const res = await fetchWithTimeout("/api/gate/scan", {
           method: "POST",
           headers,
-          signal: controller.signal,
-          body: JSON.stringify({ clientEventId: crypto.randomUUID(), roll: uniqueId,
+          body: JSON.stringify({ clientEventId, roll: uniqueId,
             direction: directionToUse,
             reason: reasonToUse || (directionToUse === "OUT" ? "daily_outing" : undefined),
             gateId: resolvedGateId,
@@ -332,13 +358,11 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
             sysTag,
             geo,
           }),
-        });
-        clearTimeout(timeoutId);
+        }, 15_000);
         return res;
       } catch (e: any) {
-        clearTimeout(timeoutId);
-        if (e.name === "AbortError") {
-          throw new Error("Scan request timed out (5s). Network connection may be slow.");
+        if (e?.name === "AbortError") {
+          throw new Error("Scan request timed out (15s). Network connection may be slow.");
         }
         throw e;
       }
@@ -452,24 +476,46 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
       .catch((err: unknown) => {
         const msg = err instanceof Error ? err.message : "An unexpected error occurred during scan confirmation.";
         const isTimeout = err instanceof Error && err.message.includes("timed out");
+        const isNetwork = isTimeout || err instanceof Error && (err.name === "TypeError" || err.name === "NetworkError");
+        // A failed request must not lose the scan: capture it locally and replay on reconnect.
+        addScan({
+          clientEventId,
+          roll: uniqueId,
+          direction: directionToUse,
+          reason: reasonToUse ?? (directionToUse === "OUT" ? "daily_outing" : undefined),
+          gateId: resolvedGateId,
+          queuedAt: Date.now(),
+          status: "queued",
+        });
+        playAudioFeedback(isNetwork ? "warning" : "error");
         addToast({
-          variant: "error",
-          title: "Scan Failed",
-          message: msg,
+          variant: isNetwork ? "warning" : "error",
+          title: isNetwork ? "Scan Queued" : "Scan Failed",
+          message: isNetwork
+            ? "Scan could not be delivered — saved locally and will sync when the network returns."
+            : msg,
         });
         set({
           state: "error",
-          error: {
-            message: msg,
-            code: isTimeout ? "TIMEOUT" : "UNKNOWN",
-            retryable: isTimeout,
-          },
+          error: isNetwork
+            ? {
+                message: "Scan queued locally — will sync when the network returns.",
+                code: isTimeout ? "TIMEOUT" : "NETWORK_ERROR",
+                retryable: false,
+                queued: true,
+              }
+            : {
+                message: msg,
+                code: "UNKNOWN",
+                retryable: false,
+              },
         });
       });
   },
 
     cancelScan: () => {
     set({
+      _scanGeneration: get()._scanGeneration + 1,
       state: "idle",
       currentStudent: null,
       currentCampusStatus: null,
@@ -499,6 +545,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
   reset: async () => {
     const stats = await get()._fetchTodayStats();
     set({
+      _scanGeneration: get()._scanGeneration + 1,
       state: "idle",
       currentStudent: null,
       currentCampusStatus: null,

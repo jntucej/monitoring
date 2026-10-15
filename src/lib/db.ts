@@ -1757,7 +1757,10 @@ export async function addScan(input: {
     throw new Error(`Access Denied: Account status is ${person.status}. Gate access denied.`);
   }
 
-  // Enforce server-side student exit gate-pass requirements
+  // Enforce server-side student exit gate-pass requirements. Manual entries
+  // are NOT exempt (spec §11): the operator has manually verified the person,
+  // but the pass requirement still applies — a missing pass must be rejected
+  // or escalated to a warden/admin for a correction.
   const isStudent = person.role === "student" || person.personType === "student" || !!person.studentDetails;
   if (isStudent && input.direction === "OUT") {
     const { validateStudentExitFlow } = await import("./student-exit-flow");
@@ -1831,41 +1834,36 @@ export async function addScan(input: {
   const ts = new Date().toISOString();
   const id = (input.clientEventId && isUuid(input.clientEventId)) ? input.clientEventId : crypto.randomUUID();
 
-  // Attempt atomic database scan insertion via stored RPC with row lock
+  // Attempt atomic database scan insertion via Postgres RPC with the GUC-set
+  // caller identity (app.current_user_id). The Supabase service client does
+  // not set the GUC, so process_gate_scan would raise FORBIDDEN and fall
+  // through to the unsafe direct-insert path below. The direct Postgres
+  // path is the primary mechanism for this bulk offline-sync function.
   try {
-    const { data: rpcRes, error: rpcErr } = await client.rpc('process_gate_scan', {
-      p_scan_id: id,
-      p_user_id: person.id,
-      p_direction: input.direction,
-      p_reason: input.reason || null,
-      p_gate_id: gate.id,
-      p_gate_name: gate.name,
-      p_operator_id: op.id,
-      p_operator_name: op.name,
-      p_timestamp: ts,
-      p_is_manual: !!input.isManual,
-      p_dup_window_minutes: 5,
-    });
-
-    if (!rpcErr && rpcRes && rpcRes.length > 0) {
-      const res = rpcRes[0];
+    const { query: pgQuery } = await import('./postgres');
+    const { rows: rpcRes } = await pgQuery<{ inserted_log: Record<string, unknown>; is_duplicate: boolean }>(
+      `SELECT inserted_log, is_duplicate
+         FROM process_gate_scan($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+      [
+        id,
+        person.id,
+        input.direction,
+        input.reason || null,
+        gate.id,
+        gate.name,
+        op.id,
+        op.name,
+        ts,
+        !!input.isManual,
+        5,
+      ],
+      { currentUserId: op.id },
+    );
+    const res = rpcRes[0];
+    if (res) {
       const logData = res.inserted_log;
       const isDup = !!res.is_duplicate;
       return { scan: mScan({ ...logData, users: person }), duplicate: isDup };
-    }
-    // ponytail: silent fallthrough here hides a broken RPC (missing fn, type
-    // drift) and the slow path skips FOR UPDATE dedup — log + audit so the
-    // drift query in the runbook catches it before occupancy diverges.
-    if (rpcErr) {
-      console.error("[addScan] process_gate_scan RPC failed — falling back:", rpcErr);
-      await addAudit({
-        action: "SCAN_RPC_FALLBACK",
-        userId: op.id,
-        userName: op.name,
-        role: op.role as Role,
-        details: `RPC fallback: ${rpcErr.message}`,
-        gateId: gate.id,
-      });
     }
   } catch (err: any) {
     console.error("[addScan] process_gate_scan RPC failed, falling back:", err);
@@ -1877,6 +1875,17 @@ export async function addScan(input: {
       details: `RPC fallback: ${String(err?.message || err)}`,
       gateId: gate.id,
     }).catch(() => {});
+  }
+
+  // Fallback direct insert (Supabase client). When Postgres RPC is
+  // unavailable the caller identity GUC cannot be set, so re-apply the
+  // operator↔gate binding check in JS to prevent an unassigned or
+  // mismatched operator from writing via this slow path.
+  const ForbiddenError = await import("@/server/http/errors").then((m) => m.ForbiddenError);
+  if (op.role === "operator" && op.gateId && op.gateId !== gate.id) {
+    throw new ForbiddenError(
+      `Operator ${op.name} is not assigned to gate ${gate.name}`,
+    );
   }
 
   const duplicate = await isDuplicate(uniqueId, input.direction);

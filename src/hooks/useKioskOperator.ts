@@ -11,7 +11,8 @@ export interface KioskSessionState {
   pending: boolean;
   /** True when the endpoint issued a default-operator session. */
   kioskSession: boolean;
-  /** True when the endpoint reported no kiosk operator is configured (404). */
+  /** True when the endpoint reported no kiosk operator is configured (404)
+   *  or the kiosk operator config is invalid (503 KIOSK_OPERATOR_MISCONFIGURED). */
   notConfigured: boolean;
   /** True on network error / rate-limit / malformed response. */
   error: boolean;
@@ -73,13 +74,16 @@ export function useKioskOperator(gateIdParam?: string | null) {
     }
 
     if (!res.ok) {
-      // 404 = no kiosk operator configured; 429 = rate-limited. Either way
-      // the kiosk cannot auto-sign in — caller falls back to manual login.
+      // 404 = no kiosk operator configured; 503 = kiosk operator
+      // misconfigured (zero or multiple kiosk-default operators) — both
+      // mean "not configured", show the not-configured panel, fall back
+      // to manual login. 429 = rate-limited: treat as error.
+      const notConfigured = res.status === 404 || res.status === 503;
       setState({
         pending: false,
         kioskSession: false,
-        notConfigured: res.status === 404,
-        error: res.status !== 404,
+        notConfigured,
+        error: !notConfigured,
       });
       return;
     }
