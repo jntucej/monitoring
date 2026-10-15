@@ -29,6 +29,34 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      // Collapse 5 approval pages → 1
+      { source: '/principal/approvals',              destination: '/principal/approvals?tab=mine',      permanent: false },
+      { source: '/principal/permissions',            destination: '/principal/approvals?tab=mine',      permanent: false },
+      { source: '/principal/all-pass-requests',      destination: '/principal/approvals?tab=all',       permanent: false },
+      { source: '/principal/permission-management',  destination: '/principal/approvals?tab=all',       permanent: false },
+      { source: '/principal/approval-centre',        destination: '/principal/approvals?tab=escalated', permanent: false },
+
+      // Oversight (audit + incidents merged)
+      { source: '/principal/audit',                  destination: '/principal/oversight?tab=audit',      permanent: false },
+      { source: '/principal/incidents',              destination: '/principal/oversight?tab=incidents',  permanent: false },
+
+      // Campus (attendance + hostel + gates + exams)
+      { source: '/principal/attendance',             destination: '/principal/campus?tab=people',        permanent: false },
+      { source: '/principal/hostel-oversight',       destination: '/principal/campus?tab=places',        permanent: false },
+      { source: '/principal/gate-activity',          destination: '/principal/campus?tab=places',        permanent: false },
+      { source: '/principal/examination-oversight',  destination: '/principal/campus?tab=exams',         permanent: false },
+
+      // Departments
+      { source: '/principal/department-analytics',   destination: '/principal/departments',              permanent: false },
+
+      // Drawers
+      { source: '/principal/delegation-manager',     destination: '/principal/approvals?action=delegate', permanent: false },
+      { source: '/principal/emergency-decisions',    destination: '/principal?playbook=1',                permanent: false },
+
+      // Reports → Command Center export
+      { source: '/principal/reports',                destination: '/principal?action=export',            permanent: false },
+
+      // Existing profile redirects
       { source: '/admin/profile',      destination: '/profile', permanent: false },
       { source: '/principal/profile',  destination: '/profile', permanent: false },
       { source: '/hod/profile',        destination: '/profile', permanent: false },

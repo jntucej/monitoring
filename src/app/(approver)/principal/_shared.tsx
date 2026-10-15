@@ -8,7 +8,13 @@ import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { clearCache, cachedFetch } from "@/hooks/useApiResource";
 import { getAuthHeaders } from "@/hooks/useAuthHeaders";
 import type { Alert } from "@/lib/types";
-import { Building2, LogIn, ShieldCheck, MapPin, Users } from "lucide-react";
+import { Building2, LogIn, ShieldCheck, MapPin, Users, AlertTriangle, Check, X, UserPlus, ExternalLink, Clock, ArrowRight, ArrowUpRight, ArrowDownRight, Minus, Siren } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Line, LineChart } from "recharts";
+import { cn, getTimeAgo } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 /* ── response types ── */
 
@@ -194,7 +200,6 @@ export function HostelOccupancyPanel() {
 
 /* ── Alerts panel (reused on root + incidents page) ── */
 
-import { Siren, AlertTriangle } from "lucide-react";
 
 export function AlertsPanel({
   alerts,
@@ -649,5 +654,275 @@ export function HostelReportsPanel({
         </a>
       </div>
     </WidgetBoundary>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────── *
+ * Principal Command Center primitives (NEW — does not affect existing)
+ * ────────────────────────────────────────────────────────────────── */
+
+/* 1. PrincipalShell */
+export function PrincipalShell({
+  title, subtitle, actions, children,
+}: {
+  title: string;
+  subtitle?: string;
+  actions?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="mx-auto w-full max-w-[1400px] px-4 py-6 md:px-8 md:py-10">
+      <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-fluid-2xl font-semibold tracking-tight text-[var(--text-primary)]">{title}</h1>
+          {subtitle && <p className="mt-1 text-fluid-sm text-[var(--text-muted)]">{subtitle}</p>}
+        </div>
+        {actions && <div className="flex items-center gap-2">{actions}</div>}
+      </header>
+      <div className="space-y-8">{children}</div>
+    </div>
+  );
+}
+
+/* 2. PulseTile */
+type PulseTone = "neutral" | "positive" | "warning" | "critical";
+const PULSE_TONE: Record<PulseTone, { text: string; dot: string }> = {
+  neutral:  { text: "text-[var(--text-primary)]", dot: "bg-slate-400" },
+  positive: { text: "text-emerald-500",           dot: "bg-emerald-500" },
+  warning:  { text: "text-amber-500",             dot: "bg-amber-500" },
+  critical: { text: "text-rose-500",              dot: "bg-rose-500" },
+};
+
+export function PulseTile({
+  label, value, delta, deltaLabel, tone = "neutral", href, spark, loading,
+}: {
+  label: string;
+  value: string | number;
+  delta?: number | null;
+  deltaLabel?: string;
+  tone?: PulseTone;
+  href?: string;
+  spark?: { v: number }[];
+  loading?: boolean;
+}) {
+  const t = PULSE_TONE[tone];
+  const body = (
+    <div
+      className={cn(
+        "group relative flex h-full flex-col justify-between rounded-2xl border border-[var(--border)]",
+        "bg-[var(--bg-surface)] p-5 transition-shadow hover:shadow-card-hover",
+        href && "cursor-pointer",
+      )}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <span className="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">{label}</span>
+        {href && <ArrowUpRight className="h-4 w-4 text-[var(--text-muted)] opacity-0 transition-opacity group-hover:opacity-100" />}
+      </div>
+      {loading ? (
+        <Skeleton className="mt-3 h-9 w-24" />
+      ) : (
+        <div className={cn("mt-3 text-3xl font-semibold tabular-nums tracking-tight", t.text)}>{value}</div>
+      )}
+      <div className="mt-2 flex items-center justify-between text-xs">
+        <span className="inline-flex items-center gap-1 text-[var(--text-muted)]">
+          {delta == null ? <Minus className="h-3 w-3" /> : delta >= 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+          {delta != null && (
+            <span className={delta >= 0 ? "text-emerald-500" : "text-rose-500"}>
+              {delta >= 0 ? "+" : ""}{delta}%
+            </span>
+          )}
+          {deltaLabel && <span className="ml-1">{deltaLabel}</span>}
+        </span>
+        {spark && spark.length > 1 && (
+          <div className="h-6 w-16">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={spark}>
+                <Line type="monotone" dataKey="v" stroke="currentColor" strokeWidth={1.5} dot={false} className={t.text} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+  return href ? <Link href={href} className="block h-full">{body}</Link> : body;
+}
+
+/* 3. StoryChart */
+export function StoryChart({
+  title, description, data, series, height = 280, loading, error,
+}: {
+  title: string;
+  description?: string;
+  data: any[];
+  series: { key: string; label: string; color: string }[];
+  height?: number;
+  loading?: boolean;
+  error?: string | null;
+}) {
+  return (
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div>
+          <h3 className="text-sm font-semibold text-[var(--text-primary)]">{title}</h3>
+          {description && <p className="mt-0.5 text-xs text-[var(--text-muted)]">{description}</p>}
+        </div>
+        <span className="rounded-full bg-[var(--bg-subtle)] px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-[var(--text-muted)]">
+          vs last week
+        </span>
+      </div>
+      <WidgetBoundary title={title}>
+        {loading ? (
+          <Skeleton className="w-full" style={{ height }} />
+        ) : error ? (
+          <EmptyState title="Couldn't load" description={error} />
+        ) : (
+          <div style={{ height }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={data} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
+                <defs>
+                  {series.map((s) => (
+                    <linearGradient key={s.key} id={`grad-${s.key}`} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={s.color} stopOpacity={0.28} />
+                      <stop offset="100%" stopColor={s.color} stopOpacity={0} />
+                    </linearGradient>
+                  ))}
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                <XAxis dataKey="label" tick={{ fontSize: 11, fill: "var(--text-muted)" }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: "var(--text-muted)" }} axisLine={false} tickLine={false} width={40} />
+                <Tooltip contentStyle={{ background: "var(--bg-surface)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12 }} />
+                <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
+                {series.map((s) => (
+                  <Area key={s.key} type="monotone" dataKey={s.key} name={s.label} stroke={s.color} fill={`url(#grad-${s.key})`} strokeWidth={2} />
+                ))}
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </WidgetBoundary>
+    </div>
+  );
+}
+
+/* 4. DecisionCard */
+export function DecisionCard({
+  ticket, title, subtitle, reason, urgency = "due",
+  slaDeadline, onApprove, onReject, onDelegate, onOpen, busy,
+}: {
+  ticket: string;
+  title: string;
+  subtitle?: string;
+  reason?: string;
+  urgency?: "overdue" | "due" | "info";
+  slaDeadline?: string | null;
+  onApprove?: () => void;
+  onReject?: () => void;
+  onDelegate?: () => void;
+  onOpen?: () => void;
+  busy?: boolean;
+}) {
+  const accent = { overdue: "border-l-rose-500", due: "border-l-amber-500", info: "border-l-slate-300" }[urgency];
+  return (
+    <div className={cn(
+      "group flex items-start gap-4 rounded-xl border border-[var(--border)] border-l-4 bg-[var(--bg-surface)] p-4",
+      "transition-shadow hover:shadow-card-hover", accent,
+    )}>
+      <div className="min-w-0 flex-1">
+        <button onClick={onOpen} className="block w-full text-left">
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs text-[var(--text-muted)]">{ticket}</span>
+            {urgency === "overdue" && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/10 px-2 py-0.5 text-[10px] font-medium text-rose-500">
+                <AlertTriangle className="h-3 w-3" /> Overdue
+              </span>
+            )}
+            {slaDeadline && urgency === "due" && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-500">
+                <Clock className="h-3 w-3" /> Due soon
+              </span>
+            )}
+          </div>
+          <div className="mt-1 truncate text-sm font-medium text-[var(--text-primary)]">{title}</div>
+          {subtitle && <div className="mt-0.5 truncate text-xs text-[var(--text-muted)]">{subtitle}</div>}
+          {reason && <div className="mt-2 line-clamp-2 text-xs text-[var(--text-muted)]">{reason}</div>}
+        </button>
+      </div>
+      <div className="flex shrink-0 items-center gap-1">
+        {onApprove && (
+          <button onClick={onApprove} disabled={busy}
+            className="rounded-lg bg-emerald-500/10 p-2 text-emerald-500 transition-colors hover:bg-emerald-500/20 disabled:opacity-50">
+            <Check className="h-4 w-4" />
+          </button>
+        )}
+        {onReject && (
+          <button onClick={onReject} disabled={busy}
+            className="rounded-lg bg-rose-500/10 p-2 text-rose-500 transition-colors hover:bg-rose-500/20 disabled:opacity-50">
+            <X className="h-4 w-4" />
+          </button>
+        )}
+        {onDelegate && (
+          <button onClick={onDelegate} disabled={busy}
+            className="rounded-lg bg-[var(--bg-subtle)] p-2 text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-subtle-hover)] disabled:opacity-50">
+            <UserPlus className="h-4 w-4" />
+          </button>
+        )}
+        {onOpen && (
+          <button onClick={onOpen}
+            className="rounded-lg bg-[var(--bg-subtle)] p-2 text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-subtle-hover)]">
+            <ExternalLink className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* 5. SectionHeader */
+export function SectionHeader({
+  title, description, href, hrefLabel = "View all",
+}: {
+  title: string;
+  description?: string;
+  href?: string;
+  hrefLabel?: string;
+}) {
+  return (
+    <div className="mb-4 flex items-end justify-between gap-4">
+      <div>
+        <h2 className="text-fluid-md font-semibold tracking-tight text-[var(--text-primary)]">{title}</h2>
+        {description && <p className="mt-0.5 text-fluid-sm text-[var(--text-muted)]">{description}</p>}
+      </div>
+      {href && (
+        <Link href={href} className="inline-flex items-center gap-1 text-xs font-medium text-[var(--action-primary)] hover:underline">
+          {hrefLabel} <ArrowRight className="h-3 w-3" />
+        </Link>
+      )}
+    </div>
+  );
+}
+
+/* 6. SinceLastVisitCard */
+export function SinceLastVisitCard({ lastVisitAt }: { lastVisitAt: string }) {
+  const [s, setS] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    fetch(`/api/principal/audit?since=${encodeURIComponent(lastVisitAt)}&summary=1`, { headers: getAuthHeaders() })
+      .then(r => r.json()).then(d => { setS(d?.data ?? null); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, [lastVisitAt]);
+  if (loading || !s) return null;
+  const lines: string[] = [];
+  if (s.approvals_cleared) lines.push(`${s.approvals_cleared} approvals cleared`);
+  if (s.emergencies)       lines.push(`${s.emergencies} emergencies`);
+  if (s.new_incidents)     lines.push(`${s.new_incidents} new incidents`);
+  if (s.delegations)       lines.push(`${s.delegations} delegation updates`);
+  if (!lines.length) return null;
+  return (
+    <div className="rounded-2xl border border-[var(--action-primary)]/20 bg-[var(--action-primary)]/5 p-5">
+      <p className="text-xs font-medium uppercase tracking-wide text-[var(--action-primary)]">Since your last visit</p>
+      <p className="mt-1 text-sm text-[var(--text-primary)]">{lines.join(" · ")}</p>
+      <p className="mt-1 text-xs text-[var(--text-muted)]">Last seen {getTimeAgo(lastVisitAt)}</p>
+    </div>
   );
 }
