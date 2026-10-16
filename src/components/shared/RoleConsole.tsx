@@ -118,6 +118,8 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
       [key: string]: unknown;
       pendingTickets?: GridTicket[];
       pendingCount?: number;
+      /** The caller's assigned hostel, as resolved server-side (authoritative). */
+      assignedHostel?: string | null;
     };
   }
   const gridSource = isGrid ? config?.board?.source ?? null : null;
@@ -127,6 +129,10 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
     const raw = gridData?.data?.pendingTickets;
     return Array.isArray(raw) ? raw : [];
   }, [gridData]);
+
+  // Prefer the server-resolved assignedHostel (authoritative, from the
+  // trusted auth context) over the client store value.
+  const caretakerHostel = gridData?.data?.assignedHostel ?? assignedHostel ?? null;
 
   const caretakerCounts: CaretakerCounts | null = useMemo(() => {
     if (!isCaretaker) return null;
@@ -140,12 +146,12 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
     }
     void lastUpdate;
     return {
-      hostel: assignedHostel,
+      hostel: caretakerHostel,
       open,
       urgent,
       lastUpdate: gridData ? new Date().toISOString() : null,
     };
-  }, [isCaretaker, caretakerTickets, assignedHostel, gridData]);
+  }, [isCaretaker, caretakerTickets, caretakerHostel, gridData]);
   const caretakerLoading = isCaretaker ? gridLoading : false;
 
   // For kanban, fetch the permission items directly so the status strip can
