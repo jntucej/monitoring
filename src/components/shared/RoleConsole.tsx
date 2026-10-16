@@ -30,6 +30,9 @@ import { CaretakerCommandBar } from "@/components/approver/CaretakerCommandBar";
 import { StaffStatusBar, type StaffCounts } from "@/components/approver/StaffStatusBar";
 import { HostelManagerStatusBar, type HostelManagerCounts } from "@/components/approver/HostelManagerStatusBar";
 import { HostelManagerCommandBar } from "@/components/approver/HostelManagerCommandBar";
+import { OieStatusBar, type OieCounts } from "@/components/approver/OieStatusBar";
+import { OieCommandBar } from "@/components/approver/OieCommandBar";
+import { ExamDayPanel } from "@/components/approver/ExamDayPanel";
 import { AllocationPanel } from "@/components/approver/AllocationPanel";
 import type { PermissionItem } from "@/components/approver/PermissionRow";
 import { useAuthStore } from "@/stores/authStore";
@@ -102,7 +105,9 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
   const isStaff = role === "staff";
   const isCaretaker = role === "caretaker";
   const isHostelManager = role === "hostel_manager";
+  const isOie = role === "oie";
   const showAllocationPanel = config?.extraPanels?.includes("AllocationPanel") ?? false;
+  const showExamDayPanel = config?.extraPanels?.includes("ExamDayPanel") ?? false;
 
   // The caller's assigned hostel, used for the caretaker status strip.
   const assignedHostel = useAuthStore((s) => s.user?.assignedHostel ?? null);
@@ -267,11 +272,64 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
     };
   }, [isHostelManager, assignedHostel, hmData, hmTickets]);
 
+  // For the OIE exam-desk console, derive the status-strip counts from the
+  // oie queue (pending), the access-exceptions feed, and the exam-day gate
+  // state. The kanbanSource fetch (which for oie is /api/oie/queue) is
+  // reused for pending; two small extra fetches supply exceptions + gate.
+  interface OieExceptionsResponse {
+    success?: boolean;
+    data: unknown[];
+    total?: number;
+  }
+  interface OieExamAccessResponse {
+    success?: boolean;
+    data: {
+      authorised: Array<{ status: string }>;
+      stageSummary: unknown[];
+    };
+  }
+  const oieExceptionsSource = isOie ? "/api/exam/access-exceptions" : null;
+  const oieExamAccessSource = isOie ? "/api/exam/access" : null;
+  const {
+    data: oieExceptionsData,
+    refresh: refreshOieExceptions,
+    loading: oieExceptionsLoading,
+  } = useApiResource<OieExceptionsResponse>(oieExceptionsSource, { ttlMs: 15_000 });
+  const {
+    data: oieExamAccessData,
+    refresh: refreshOieExamAccess,
+    loading: oieExamAccessLoading,
+  } = useApiResource<OieExamAccessResponse>(oieExamAccessSource, { ttlMs: 15_000 });
+
+  const refreshOie = useCallback(() => {
+    void refreshOieExceptions();
+    void refreshOieExamAccess();
+  }, [refreshOieExceptions, refreshOieExamAccess]);
+
+  const oieCounts: OieCounts | null = useMemo(() => {
+    if (!isOie) return null;
+    const pending = permissionItems.filter((i) => i.status === "PENDING").length;
+    const exceptions = Array.isArray(oieExceptionsData?.data)
+      ? oieExceptionsData.data.length
+      : oieExceptionsData?.total ?? 0;
+    const authorised = oieExamAccessData?.data?.authorised ?? [];
+    const examDay: "open" | "closed" | null =
+      authorised.length === 0
+        ? null
+        : authorised.some((r) => r.status === "APPROVED")
+          ? "open"
+          : "closed";
+    return { pending, exceptions, examDay };
+  }, [isOie, permissionItems, oieExceptionsData, oieExamAccessData]);
+
+  const oieLoading = isOie ? oieExceptionsLoading || oieExamAccessLoading || kanbanLoading : false;
+
   const handleKanbanRefresh = useCallback(() => {
     void refreshKanban();
     void refreshGrid();
     void refreshHm();
-  }, [refreshKanban, refreshGrid, refreshHm]);
+    void refreshOie();
+  }, [refreshKanban, refreshGrid, refreshHm, refreshOie]);
 
   const handleCloseContext = useCallback(() => {
     setSelectedRow(null);
@@ -369,6 +427,7 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
               alongside the board when the console config lists them. Desktop:
               a side section below the board; mobile: full-width. */}
           {showAllocationPanel ? <AllocationPanel /> : null}
+          {showExamDayPanel ? <ExamDayPanel /> : null}
         </main>
 
         {selectedRow ? (
@@ -390,7 +449,13 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
 
       {/* Status bar — full width, sticky at the bottom of the shell */}
       <div className="sticky bottom-0 z-30">
-        {isCaretaker ? (
+        {isOie ? (
+          <OieStatusBar
+            counts={oieCounts}
+            lastScan={lastKanbanScan}
+            refreshing={oieLoading}
+          />
+        ) : isCaretaker ? (
           <CaretakerStatusBar counts={caretakerCounts} refreshing={caretakerLoading} />
         ) : isHostelManager ? (
           <HostelManagerStatusBar counts={hmCounts} refreshing={hmLoading} />
@@ -407,7 +472,13 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
         )}
       </div>
 
-      {isCaretaker ? (
+      {isOie ? (
+        <OieCommandBar
+          role={role}
+          open={commandBarOpen}
+          onClose={closeCommandBar}
+        />
+      ) : isCaretaker ? (
         <CaretakerCommandBar
           role={role}
           open={commandBarOpen}

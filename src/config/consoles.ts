@@ -32,7 +32,9 @@ export type ConsoleCommand =
   | "resolve"
   | "view-assets"
   | "allocate"
-  | "view-residents";
+  | "view-residents"
+  | "day-access"
+  | "exceptions";
 
 export type ConsoleStatusField =
   | "gate"
@@ -52,7 +54,10 @@ export type ConsoleStatusField =
   | "gateStatus"
   | "openTickets"
   | "occupancy"
-  | "maintenance";
+  | "maintenance"
+  | "queue"
+  | "exceptions"
+  | "examDay";
 
 export interface RoleConsoleConfig {
   role: string;
@@ -208,6 +213,29 @@ export const CONSOLES: Record<string, RoleConsoleConfig> = {
     commands: ["assign", "resolve", "allocate", "escalate", "view-residents"],
     statusFields: ["hostel", "openTickets", "occupancy", "maintenance"],
     extraPanels: ["AllocationPanel"],
+  },
+  oie: {
+    role: "oie",
+    nav: ["queue", "candidates", "access", "exceptions", "records"],
+    statusStrip: false,
+    recentSheet: false,
+    board: {
+      kind: "kanban",
+      // Role-scoped source: /api/oie/queue is the OIE exam-desk feed. It
+      // self-filters to workflow_type=exam and to the caller's viewable exam
+      // stages (oie / vice_principal / principal / completed for the oie role),
+      // so the board is exam-scoped only (no hostel, no department).
+      // Response shape: { success, data: FeedRow[], total, chain, myStage } —
+      // the records live flat directly under `data` (like /api/permissions),
+      // so the board items use the flat "permission" itemKey.
+      source: "/api/oie/queue",
+      itemKey: "permission",
+      columns: ["PENDING", "ESCALATED", "APPROVED"],
+    },
+    contextEntity: "permission",
+    commands: ["approve", "reject", "forward", "day-access", "exceptions"],
+    statusFields: ["queue", "pending", "exceptions", "examDay"],
+    extraPanels: ["ExamDayPanel"],
   },
 };
 

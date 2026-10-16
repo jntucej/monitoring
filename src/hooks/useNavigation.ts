@@ -146,19 +146,19 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       break;
 
     case "oie":
+      // OIE is migrated to the RoleConsole shell (kanban:exam queue via
+      // /api/oie/queue, exam-scoped). Single console group of exactly 5 items
+      // so the IconRail stays lean. No "Exam Branch" / "General & Support"
+      // groups.
       groups = [
         {
-          groupLabel: "Exam Branch",
+          groupLabel: "OIE Console",
           items: [
-            { href: "/oie", label: "OIE Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
-            { href: "/exam/permissions", label: "OIE Approvals", icon: "CheckSquare", badge: "PENDING" },
-          ],
-        },
-        {
-          groupLabel: "General & Support",
-          items: [
-            { href: "/profile", label: "My Profile", icon: "User" },
-            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+            { href: "/oie", label: "Exam Queue", icon: "CheckSquare", badge: "PENDING" },
+            { href: "/oie/candidate-attendance", label: "Candidates", icon: "Users" },
+            { href: "/oie/examination-day-access", label: "Access", icon: "DoorOpen" },
+            { href: "/oie/access-exceptions", label: "Exceptions", icon: "ShieldAlert" },
+            { href: "/oie/records", label: "Records", icon: "FileSpreadsheet" },
           ],
         },
       ];
@@ -568,7 +568,8 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
     roleCode === "faculty" ||
     roleCode === "caretaker" ||
     roleCode === "deputy_warden" ||
-    roleCode === "hostel_manager"
+    roleCode === "hostel_manager" ||
+    roleCode === "oie"
   ) {
     return filteredGroups;
   }
