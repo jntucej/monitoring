@@ -362,24 +362,21 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       break;
 
     case "worker":
+      // Worker is migrated to the RoleConsole shell (digest board via
+      // /api/workers/my-work: tasks / completedLastWeek / todayShift, plus
+      // MyWorkPanel). Single console group of exactly 5 items so the IconRail
+      // stays lean. No Account / Campus Life / General groups. All 5 commands
+      // are navigation to the worker root — today only the root sub-page
+      // (/worker/page.tsx) exists on disk, so every item targets /worker.
       groups = [
         {
-          groupLabel: "Worker Portal",
+          groupLabel: "Worker Console",
           items: [
-            { href: "/worker", label: "Worker Gate Pass", icon: "HardHat", badge: "SHIFT" },
-          ],
-        },
-        {
-          groupLabel: "Campus Life",
-          items: [
-            { href: "/campus", label: "My Campus", icon: "Sparkles" },
-          ],
-        },
-        {
-          groupLabel: "General",
-          items: [
-            { href: "/profile", label: "My Profile", icon: "User" },
-            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+            { href: "/worker", label: "My Work", icon: "ClipboardList", badge: "TASKS" },
+            { href: "/worker", label: "Shifts", icon: "CalendarClock" },
+            { href: "/worker", label: "Work Orders", icon: "Wrench" },
+            { href: "/worker", label: "History", icon: "History" },
+            { href: "/worker", label: "Records", icon: "FileSpreadsheet" },
           ],
         },
       ];
@@ -508,7 +505,8 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
     roleCode === "sysadmin" ||
     roleCode === "principal" ||
     roleCode === "admin" ||
-    roleCode === "vice_principal"
+    roleCode === "vice_principal" ||
+    roleCode === "worker"
   ) {
     return filteredGroups;
   }

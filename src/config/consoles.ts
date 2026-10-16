@@ -71,7 +71,12 @@ export type ConsoleCommand =
   | "count"
   | "menu"
   | "issue"
-  | "handover";
+  | "handover"
+  | "my-work"
+  | "shifts"
+  | "work-orders"
+  | "history"
+  | "records";
 
 export type ConsoleStatusField =
   | "gate"
@@ -113,7 +118,8 @@ export type ConsoleStatusField =
   | "alerts"
   | "delegations"
   | "pending"
-  | "active";
+  | "active"
+  | "records";
 
 export interface RoleConsoleConfig {
   role: string;
@@ -461,6 +467,25 @@ export const CONSOLES: Record<string, RoleConsoleConfig> = {
     commands: ["alerts", "announcements", "audit", "backup", "reports"],
     statusFields: ["alerts", "pending", "active", "records"],
     extraPanels: ["AdminAlertsPanel"],
+  },
+  worker: {
+    role: "worker",
+    nav: ["my-work", "shifts", "work-orders", "history", "records"],
+    statusStrip: false,
+    recentSheet: false,
+    board: {
+      kind: "digest",
+      // Digest-shaped endpoint: /api/workers/my-work returns data as a
+      // named-key object (tasks / completedLastWeek / todayShift), NOT a
+      // flat array. The DigestBoard renders these keys generically; the
+      // WorkerStatusBar + MyWorkPanel read the same digest fields directly.
+      source: "/api/workers/my-work",
+      itemKey: "work",
+    },
+    contextEntity: "ticket",
+    commands: ["my-work", "shifts", "work-orders", "history", "records"],
+    statusFields: ["pending", "active", "records", "lastUpdate"],
+    extraPanels: ["MyWorkPanel"],
   },
 };
 

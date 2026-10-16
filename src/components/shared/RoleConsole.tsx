@@ -70,6 +70,9 @@ import { PrincipalDashboardPanel } from "@/components/approver/PrincipalDashboar
 import { VpStatusBar, type VpCounts } from "@/components/approver/VpStatusBar";
 import { VpCommandBar } from "@/components/approver/VpCommandBar";
 import { VpDashboardPanel } from "@/components/approver/VpDashboardPanel";
+import { MyWorkPanel } from "@/components/approver/MyWorkPanel";
+import { WorkerStatusBar, type WorkerCounts } from "@/components/approver/WorkerStatusBar";
+import { WorkerCommandBar } from "@/components/approver/WorkerCommandBar";
 import type { PermissionItem } from "@/components/approver/PermissionRow";
 import { useAuthStore } from "@/stores/authStore";
 import { StatusBar } from "@/components/shared/StatusBar";
@@ -152,6 +155,7 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
   const isPrincipal = role === "principal";
   const isAdmin = role === "admin";
   const isVicePrincipal = role === "vice_principal";
+  const isWorker = role === "worker";
   const showAllocationPanel = config?.extraPanels?.includes("AllocationPanel") ?? false;
   const showExamDayPanel = config?.extraPanels?.includes("ExamDayPanel") ?? false;
   const showHandoffPanel = config?.extraPanels?.includes("HandoffPanel") ?? false;
@@ -171,6 +175,8 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
     config?.extraPanels?.includes("AdminAlertsPanel") ?? false;
   const showVpDashboardPanel =
     config?.extraPanels?.includes("VpDashboardPanel") ?? false;
+  const showMyWorkPanel =
+    config?.extraPanels?.includes("MyWorkPanel") ?? false;
 
   // The caller's assigned hostel, used for the caretaker status strip.
   const assignedHostel = useAuthStore((s) => s.user?.assignedHostel ?? null);
@@ -806,6 +812,40 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
     void refreshBoard();
   }, [refreshBoard]);
 
+  // For the worker console, the board source is the digest
+  // /api/workers/my-work (itemKey "work"), which returns
+  // { success, data: { tasks, completedLastWeek, todayShift } }. The digest
+  // board renders those keys generically; the WorkerStatusBar + MyWorkPanel
+  // read the same digest fields directly. Derive the status-bar counts from
+  // the same boardData fetch: tasks = open work items, active = open items
+  // in a non-PENDING stage, workOrders = total open tasks (the worker's own
+  // work-order view). A last-update proxy is the newest task createdAt.
+  interface WorkerWorkFeed {
+    tasks?: Array<{ status?: string; createdAt?: string; stage?: string }>;
+    completedLastWeek?: number;
+    todayShift?: { checkIn?: string | null } | null;
+  }
+  const workerFeed =
+    (boardData?.data as unknown as WorkerWorkFeed | null) ?? null;
+  const workerCounts: WorkerCounts | null = useMemo(() => {
+    if (!isWorker) return null;
+    const tasks = Array.isArray(workerFeed?.tasks) ? workerFeed!.tasks! : [];
+    const active = tasks.filter((t) => (t.status ?? "PENDING").toUpperCase() !== "PENDING").length;
+    return {
+      tasks: tasks.length,
+      active,
+      workOrders: tasks.length,
+    };
+  }, [isWorker, workerFeed]);
+  const workerLoading = isWorker ? !workerFeed : false;
+
+  // Refresh wiring for the worker console: the digest board source
+  // (/api/workers/my-work) supplies both the MyWorkPanel and the status-bar
+  // counts. Reuse the shared useApiResource cache, no duplicate request.
+  const refreshWorker = useCallback(() => {
+    void refreshBoard();
+  }, [refreshBoard]);
+
   const handleKanbanRefresh = useCallback(() => {
     void refreshKanban();
     void refreshGrid();
@@ -819,7 +859,8 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
     void refreshAdmin();
     void refreshVp();
     void refreshSupervisor();
-  }, [refreshKanban, refreshGrid, refreshHm, refreshOie, refreshEs, refreshExamBranch, refreshMessIncharge, refreshSysadmin, refreshPrincipal, refreshAdmin, refreshVp, refreshSupervisor]);
+    void refreshWorker();
+  }, [refreshKanban, refreshGrid, refreshHm, refreshOie, refreshEs, refreshExamBranch, refreshMessIncharge, refreshSysadmin, refreshPrincipal, refreshAdmin, refreshVp, refreshSupervisor, refreshWorker]);
 
   const handleCloseContext = useCallback(() => {
     setSelectedRow(null);
@@ -933,6 +974,7 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
           {showPrincipalDashboardPanel ? <PrincipalDashboardPanel /> : null}
           {showAdminAlertsPanel ? <AdminAlertsPanel /> : null}
           {showVpDashboardPanel ? <VpDashboardPanel onRefresh={refreshVp} /> : null}
+          {showMyWorkPanel ? <MyWorkPanel /> : null}
         </main>
 
         {selectedRow ? (
@@ -1026,6 +1068,12 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
           />
         ) : isStaff ? (
           <StaffStatusBar counts={staffCounts} refreshing={staffLoading} />
+        ) : isWorker ? (
+          <WorkerStatusBar
+            counts={workerCounts}
+            lastScan={lastScan}
+            refreshing={workerLoading}
+          />
         ) : (
           <StatusBar counts={counts} lastScan={lastScan} />
         )}
@@ -1111,6 +1159,12 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
         />
       ) : isStaff ? (
         <PermissionCommandBar
+          role={role}
+          open={commandBarOpen}
+          onClose={closeCommandBar}
+        />
+      ) : isWorker ? (
+        <WorkerCommandBar
           role={role}
           open={commandBarOpen}
           onClose={closeCommandBar}
