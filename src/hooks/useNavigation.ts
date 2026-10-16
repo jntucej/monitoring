@@ -138,8 +138,8 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
             { href: "/vice-principal/pending-approvals", label: "Approvals", icon: "CheckSquare", badge: "PENDING" },
             { href: "/vice-principal/delegated-responsibilities", label: "Delegations", icon: "KeyRound" },
             { href: "/vice-principal/decision-history", label: "Audit", icon: "History" },
-            { href: "/vice-principal/reports", label: "Reports", icon: "FileSpreadsheet" },
-            { href: "/vice-principal/decision-history", label: "Records", icon: "ClipboardList" },
+            { href: "/vice-principal/examination-coordination", label: "Reports", icon: "FileSpreadsheet" },
+            { href: "/vice-principal/hostel-security-summaries", label: "Records", icon: "ClipboardList" },
           ],
         },
       ];

@@ -9,7 +9,7 @@
  *   approvals    → /vice-principal/pending-approvals
  *   delegations  → /vice-principal/delegated-responsibilities
  *   audit        → /vice-principal/decision-history
- *   reports      → /vice-principal/reports
+ *   reports      → /vice-principal/examination-coordination
  *   records      → /vice-principal/records
  *
  * The sub-page routes mirror the on-disk directory names under
@@ -67,7 +67,7 @@ const COMMAND_DEFS: CommandDef[] = [
     label: "Reports",
     hint: "reports — Institutional reports",
     icon: FileSpreadsheet,
-    href: "/vice-principal/reports",
+    href: "/vice-principal/examination-coordination",
   },
   {
     id: "records",
