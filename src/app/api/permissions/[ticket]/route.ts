@@ -79,7 +79,18 @@ async function handlePatch(req: NextRequest): Promise<Response> {
     );
   }
 
-  const { action, comment, digitalSignature, targetStage, stepupPassword, targetRole, reason } = (body || {}) as {
+  const {
+    action,
+    comment,
+    digitalSignature,
+    targetStage,
+    stepupPassword,
+    targetRole,
+    reason,
+    pendingHostelBlock,
+    pendingRoomNumber,
+    pendingWardenId,
+  } = (body || {}) as {
     action?: string;
     comment?: string;
     digitalSignature?: string;
@@ -87,6 +98,9 @@ async function handlePatch(req: NextRequest): Promise<Response> {
     stepupPassword?: string;
     targetRole?: string;
     reason?: string;
+    pendingHostelBlock?: string;
+    pendingRoomNumber?: string;
+    pendingWardenId?: string;
   };
 
   const normalizedAction = (action || "").toUpperCase();
@@ -320,6 +334,14 @@ async function handlePatch(req: NextRequest): Promise<Response> {
       nextStage = resolvedNext;
       nextStatus = "PENDING";
     }
+    // Persist the pre-assigned hostel room / warden fields when the
+    // approver supplied them (day-scholar home_out approval flow).
+    // These are written to the pending_* columns so the operator
+    // entry-type write flow can move them onto student_details when the
+    // student actually enters.
+    if (pendingHostelBlock) updateFields.pending_hostel_block = pendingHostelBlock;
+    if (pendingRoomNumber) updateFields.pending_room_number = pendingRoomNumber;
+    if (pendingWardenId) updateFields.pending_warden_id = pendingWardenId;
   } else if (normalizedAction === "REJECT") {
     nextStatus = "REJECTED";
   } else if (normalizedAction === "ESCALATE") {
