@@ -20,6 +20,7 @@ import {
   CornerUpRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { formatDateTime } from "@/lib/utils";
 import { useApi } from "@/hooks/useApi";
 import { useUIStore } from "@/stores/uiStore";
@@ -72,6 +73,29 @@ export function PermissionDetailPanel({
 
   const [forwardOpen, setForwardOpen] = useState(false);
   const [directGenOpen, setDirectGenOpen] = useState(false);
+
+  // Room-assignment fields for the day_scholar home_out approval flow.
+  const [pendingHostelBlock, setPendingHostelBlock] = useState("");
+  const [pendingRoomNumber, setPendingRoomNumber] = useState("");
+  const [pendingWardenId, setPendingWardenId] = useState("");
+  const [roomFieldError, setRoomFieldError] = useState<string | null>(null);
+
+  // The student is a day_scholar when their live entry type says so. A
+  // student who already has an assigned hostel_block/room_number is a
+  // hosteller (not a day scholar), so the room-field gate does not apply.
+  const studentEntryType =
+    data?.student?.student_details?.current_entry_type ??
+    data?.student?.student_details?.currentEntryType ??
+    null;
+  const studentIsDayScholar =
+    studentEntryType === "day_scholar" &&
+    !data?.student?.student_details?.hostel_block &&
+    !data?.student?.student_details?.room_number;
+  // A day_scholar home_out ticket (the room fields are required to approve it).
+  const isDayScholarHomeOut =
+    data?.workflow_type === "hostel" &&
+    data?.reason === "home_out" &&
+    studentIsDayScholar;
 
   // L1..L3 approvers can forward; principal/L4 and anyone above the chain top
   // cannot (levelsAbove is empty for L4). The Forward button is shown only
@@ -143,12 +167,32 @@ export function PermissionDetailPanel({
 
   const handleAction = async (action: "APPROVE" | "REJECT" | "FORWARD" | "ESCALATE") => {
     if (!ticket) return;
+
+    // Day-scholar home_out approval requires all three room-assignment fields.
+    if (action === "APPROVE" && isDayScholarHomeOut) {
+      if (!pendingHostelBlock.trim() || !pendingRoomNumber.trim() || !pendingWardenId.trim()) {
+        setRoomFieldError("All three room fields are required for day scholar home-out approval");
+        return;
+      }
+      setRoomFieldError(null);
+    }
+
     setActionLoading(true);
+    setRoomFieldError(null);
     try {
+      const body: Record<string, unknown> = {
+        action,
+        comment: comment.trim() || undefined,
+      };
+      if (action === "APPROVE" && isDayScholarHomeOut) {
+        body.pendingHostelBlock = pendingHostelBlock.trim();
+        body.pendingRoomNumber = pendingRoomNumber.trim();
+        body.pendingWardenId = pendingWardenId.trim();
+      }
       const res = await fetch(`/api/permissions/${encodeURIComponent(ticket)}`, {
         method: "PATCH",
         headers: api.getHeaders(),
-        body: JSON.stringify({ action, comment: comment.trim() || undefined }),
+        body: JSON.stringify(body),
       });
       const json = await res.json();
       if (json.success) {
@@ -158,9 +202,17 @@ export function PermissionDetailPanel({
         });
         setActiveAction(null);
         setComment("");
+        setPendingHostelBlock("");
+        setPendingRoomNumber("");
+        setPendingWardenId("");
         await fetchDetail();
         if (onActionComplete) onActionComplete();
       } else {
+        // Surface the room-field requirement inline when the server rejects
+        // a missing room assignment (HOSTEL_ROOM_REQUIRED).
+        if (json.error?.code === "HOSTEL_ROOM_REQUIRED") {
+          setRoomFieldError("All three room fields are required for day scholar home-out approval");
+        }
         addToast({
           message: json.error?.message || `Failed to process ${action}`,
           variant: "error",
@@ -398,6 +450,51 @@ export function PermissionDetailPanel({
                     className="w-full text-xs p-2 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--action-primary)]"
                   />
 
+                  {/* Room-assignment fields: required to approve a day_scholar home_out ticket */}
+                  {activeAction === "APPROVE" && isDayScholarHomeOut && (
+                    <div className="space-y-2 p-2.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)]">
+                      <p className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wide">
+                        Hostel Room Assignment
+                        <span className="ml-1 text-[var(--action-danger)]">* required</span>
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <div>
+                          <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">
+                            Hostel Block
+                          </label>
+                          <Input
+                            value={pendingHostelBlock}
+                            onChange={(e) => setPendingHostelBlock(e.target.value)}
+                            placeholder="e.g. A"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">
+                            Room Number
+                          </label>
+                          <Input
+                            value={pendingRoomNumber}
+                            onChange={(e) => setPendingRoomNumber(e.target.value)}
+                            placeholder="e.g. 12"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">
+                            Warden ID
+                          </label>
+                          <Input
+                            value={pendingWardenId}
+                            onChange={(e) => setPendingWardenId(e.target.value)}
+                            placeholder="Warden user id"
+                          />
+                        </div>
+                      </div>
+                      {roomFieldError && (
+                        <p className="text-xs text-[var(--action-danger)]">{roomFieldError}</p>
+                      )}
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-end gap-2">
                     <Button
                       size="sm"
@@ -581,6 +678,10 @@ export function PermissionDetailPanel({
               onClose={() => setDirectGenOpen(false)}
               actorRole={currentRole || ""}
               onGenerated={onActionComplete}
+              defaultStudentUserId={data?.student_user_id}
+              defaultStudentName={data?.student?.name}
+              defaultStudentEntryType={studentEntryType}
+              ticketNumber={ticket}
             />
           )}
         </div>

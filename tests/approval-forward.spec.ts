@@ -183,3 +183,100 @@ test.describe("Hostel approval forwarding (hierarchy + step-up + audit)", () => 
     expect(LEVELS_ABOVE_L2).toEqual(["hostel_manager", "principal"]);
   });
 });
+
+// ── Room-assignment gate for day_scholar home_out approvals ───────────────
+//
+// A day_scholar student's home_out ticket cannot be approved (or
+// direct-generated) until all three room-assignment fields are supplied:
+// pending_hostel_block, pending_room_number, pending_warden_id. The approval
+// endpoint rejects a missing room assignment with 400 HOSTEL_ROOM_REQUIRED and
+// persists the three fields on the permission row when provided.
+test.describe("Day scholar home_out room-assignment gate", () => {
+  const adminCreds = {
+    login: process.env.ADMIN_USER || "",
+    pass: process.env.ADMIN_PASS || "",
+  };
+
+  // These room-gate tests need a running app + admin fixture; skip when the
+  // admin credentials are not provided (the forward tests above are gated on
+  // caretaker/deputy_warden creds instead).
+  if (!(adminCreds.login && adminCreds.pass)) {
+    test.fixme(true, "ADMIN_USER / ADMIN_PASS must be set to run the room-gate e2e");
+  }
+
+  const ROOM_FIELDS = {
+    pendingHostelBlock: "B",
+    pendingRoomNumber: "204",
+    pendingWardenId: "warden-test-1",
+  };
+
+  /** Seed a home_out hostel ticket owned by the given student user id. */
+  async function seedDayScholarHomeOutTicket(request: any, studentUserId: string): Promise<string> {
+    const { token } = await login(request, adminCreds.login, adminCreds.pass);
+    const res = await request.post("/api/permissions", {
+      headers: { Authorization: `Bearer ${token}` },
+      data: {
+        workflow_type: "hostel",
+        reason: "home_out",
+        ticketNumber: `${RUN_ID}-room`,
+        student_user_id: studentUserId,
+        note: `Task 6.3 room fixture ${RUN_ID}`,
+      },
+    });
+    expect([200, 201, 409]).toContain(res.status());
+    const body = await res.json();
+    return (body.data?.ticket_number || body.data?.id) as string;
+  }
+
+  async function approve(
+    request: any,
+    token: string,
+    ticket: string,
+    roomFields?: Record<string, string>,
+  ) {
+    return request.patch(`/api/permissions/${encodeURIComponent(ticket)}`, {
+      headers: { Authorization: `Bearer ${token}` },
+      data: {
+        action: "APPROVE",
+        comment: "fixture approval",
+        ...(roomFields ?? {}),
+      },
+    });
+  }
+
+  async function readTicket(request: any, token: string, ticket: string) {
+    const res = await request.get(`/api/permissions/${encodeURIComponent(ticket)}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    expect(res.status()).toBe(200);
+    return (await res.json()).data;
+  }
+
+  test("Approving a day_scholar home_out without room fields → 400 HOSTEL_ROOM_REQUIRED", async ({ request }) => {
+    const { token } = await login(request, adminCreds.login, adminCreds.pass);
+    // The day_scholar student user id is the fixture's requester; for this
+    // e2e the room gate applies to the day_scholar home_out ticket. Seed it and
+    // attempt an approval with NO room fields.
+    const ticket = await seedDayScholarHomeOutTicket(request, "day-scholar-fixture");
+    const res = await approve(request, token, ticket);
+    expect(res.status()).toBe(400);
+    const body = await res.json().catch(() => ({}));
+    expect(body.error?.code, "expected HOSTEL_ROOM_REQUIRED").toBe("HOSTEL_ROOM_REQUIRED");
+  });
+
+  test("Approving a day_scholar home_out with all three room fields → 200 + pending fields stored", async ({ request }) => {
+    const { token } = await login(request, adminCreds.login, adminCreds.pass);
+    const ticket = await seedDayScholarHomeOutTicket(request, "day-scholar-fixture");
+
+    const res = await approve(request, token, ticket, ROOM_FIELDS);
+    expect(res.status()).toBe(200);
+    const body = await res.json();
+    expect(body.success).toBe(true);
+
+    // The three room-assignment fields must now be persisted on the row.
+    const row = await readTicket(request, token, ticket);
+    expect(row.pending_hostel_block).toBe(ROOM_FIELDS.pendingHostelBlock);
+    expect(row.pending_room_number).toBe(ROOM_FIELDS.pendingRoomNumber);
+    expect(row.pending_warden_id).toBe(ROOM_FIELDS.pendingWardenId);
+  });
+});

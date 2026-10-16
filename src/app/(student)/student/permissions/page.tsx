@@ -20,14 +20,27 @@ const FILTERS: StatusFilter[] = ["ALL", "PENDING", "APPROVED", "REJECTED", "COMP
 
 /**
  * Fixed escalation reasons a student may cite when asking a rejected ticket to
- * move to the next hostel level (TASK 5, 5.3).
+ * move to the next hostel level (TASK 5, 5.3). The API agent validates this
+ * closed set on the server (ESCALATE_REASON_INVALID otherwise); the reason is
+ * recorded verbatim in the stage history + audit.
  */
 const ESCALATION_REASONS: readonly string[] = [
-  "Warden unavailable",
-  "Medical urgency",
-  "Clerical error",
-  "Family emergency",
+  "emergency",
+  "special_leave",
+  "daily_outing",
+  "day_pass",
+  "home_out",
+  "day_scholar_out",
 ];
+
+const ESCALATION_REASON_LABELS: Record<string, string> = {
+  emergency: "Emergency",
+  special_leave: "Special leave",
+  daily_outing: "Daily outing",
+  day_pass: "Day pass",
+  home_out: "Home out",
+  day_scholar_out: "Day scholar out",
+};
 
 /**
  * My Permissions — the student's personal ticket list (Step 6). Fetches the
@@ -94,7 +107,7 @@ const api = useApi();
       const res = await fetch(`/api/permissions/${encodeURIComponent(ticketNumber)}`, {
         method: "PATCH",
         headers: { ...api.getHeaders(), "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "ESCALATE_UP", comment: escalationReason }),
+        body: JSON.stringify({ action: "ESCALATE_UP", reason: escalationReason }),
       });
       const json = await res.json().catch(() => ({}));
       if (res.status === 403) {
@@ -275,7 +288,7 @@ const api = useApi();
                         : "border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:bg-[var(--bg-surface)]"
                     }`}
                   >
-                    <span>{reason}</span>
+                    <span>{ESCALATION_REASON_LABELS[reason] ?? reason}</span>
                     {escalationReason === reason && <Check className="w-4 h-4" />}
                   </button>
                 ))}

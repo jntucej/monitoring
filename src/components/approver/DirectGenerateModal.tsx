@@ -33,6 +33,14 @@ export interface DirectGenerateModalProps {
   actorRole: string;
   /** Fired after a pass is generated so the caller can refresh. */
   onGenerated?: () => void;
+  /** Pre-fill the student user id (from the open ticket). */
+  defaultStudentUserId?: string;
+  /** Pre-fill the student display name (from the open ticket). */
+  defaultStudentName?: string;
+  /** Pre-fill the student's live entry type (day_scholar home_out gate). */
+  defaultStudentEntryType?: "hosteller" | "day_scholar" | null;
+  /** Ticket number to surface in the success toast. */
+  ticketNumber?: string;
 }
 
 /**
@@ -47,15 +55,21 @@ export function DirectGenerateModal({
   onClose,
   actorRole,
   onGenerated,
+  defaultStudentUserId,
+  defaultStudentName,
+  defaultStudentEntryType,
+  ticketNumber,
 }: DirectGenerateModalProps) {
   const api = useApi();
   const addToast = useUIStore((s) => s.addToast);
 
   const [studentQuery, setStudentQuery] = useState("");
-  const [studentUserId, setStudentUserId] = useState("");
-  const [studentName, setStudentName] = useState("");
+  const [studentUserId, setStudentUserId] = useState(defaultStudentUserId ?? "");
+  const [studentName, setStudentName] = useState(defaultStudentName ?? "");
   /** Live entry type of the looked-up student (drives the room-field gate). */
-  const [studentEntryType, setStudentEntryType] = useState<"hosteller" | "day_scholar" | null>(null);
+  const [studentEntryType, setStudentEntryType] = useState<"hosteller" | "day_scholar" | null>(
+    defaultStudentEntryType ?? null,
+  );
   const [reason, setReason] = useState<DirectGenReason>("home_out");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -136,6 +150,9 @@ export function DirectGenerateModal({
           match.student_details?.current_entry_type ??
           null;
         setStudentEntryType(entryType);
+        setPendingHostelBlock("");
+        setPendingRoomNumber("");
+        setPendingWardenId("");
       } else if (json.success && Array.isArray(rows) && rows.length === 0) {
         setError(`No student found for ${q}`);
       } else {
@@ -161,6 +178,10 @@ export function DirectGenerateModal({
       setError("To timestamp is required for this reason");
       return;
     }
+    if (roomFieldsRequired && (!pendingHostelBlock.trim() || !pendingRoomNumber.trim() || !pendingWardenId.trim())) {
+      setError("All three room fields are required for day scholar home-out approval");
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {
@@ -174,6 +195,13 @@ export function DirectGenerateModal({
           to: toRequired ? to : null,
           ...(note.trim() ? { note: note.trim() } : {}),
           ...(stepupRequired ? { stepupPassword } : {}),
+          ...(roomFieldsRequired
+            ? {
+                pendingHostelBlock: pendingHostelBlock.trim(),
+                pendingRoomNumber: pendingRoomNumber.trim(),
+                pendingWardenId: pendingWardenId.trim(),
+              }
+            : {}),
         }),
       });
       const json = await res.json();
@@ -187,7 +215,7 @@ export function DirectGenerateModal({
       }
       if (json.success) {
         addToast({
-          message: `Direct ${REASON_LABELS[reason]} pass generated for ${studentName || studentUserId}`,
+          message: `Direct ${REASON_LABELS[reason]} pass generated for ${studentName || studentUserId}${ticketNumber ? ` (${ticketNumber})` : ""}`,
           variant: "success",
         });
         onClose();
@@ -231,6 +259,51 @@ export function DirectGenerateModal({
           <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
             <span className="font-semibold text-[var(--text-primary)]">{studentName || "Student"}</span>
             <span className="text-[var(--text-muted)] font-mono">({studentUserId})</span>
+            {studentEntryType === "day_scholar" && (
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                Day Scholar
+              </span>
+            )}
+          </div>
+        )}
+
+        {roomFieldsRequired && (
+          <div className="p-3 rounded-lg bg-[var(--bg-surface)] border border-[var(--border)] space-y-2">
+            <p className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wide">
+              Hostel Room Assignment (required for day scholar home out)
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div>
+                <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">
+                  Hostel Block
+                </label>
+                <Input
+                  value={pendingHostelBlock}
+                  onChange={(e) => setPendingHostelBlock(e.target.value)}
+                  placeholder="e.g. A"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">
+                  Room Number
+                </label>
+                <Input
+                  value={pendingRoomNumber}
+                  onChange={(e) => setPendingRoomNumber(e.target.value)}
+                  placeholder="e.g. 12"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">
+                  Warden ID
+                </label>
+                <Input
+                  value={pendingWardenId}
+                  onChange={(e) => setPendingWardenId(e.target.value)}
+                  placeholder="Warden user id"
+                />
+              </div>
+            </div>
           </div>
         )}
 

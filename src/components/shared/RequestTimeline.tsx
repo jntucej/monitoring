@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   XCircle,
   ArrowUpRight,
+  Forward,
   FileText,
   Send,
   Circle,
@@ -109,7 +110,7 @@ const NODE_ICON_CLASS: Record<NodeTone, string> = {
 function entryTone(entry: TimelineEntry): NodeTone {
   const a = entry.action?.toUpperCase() ?? "";
   if (a === "REJECTED" || a === "CANCELLED") return "negative";
-  if (a === "ESCALATED") return "escalation";
+  if (a === "ESCALATED" || a === "FORWARDED") return "escalation";
   if (a === "APPROVED" || a === "SIGNED" || a === "COMPLETED" || a.includes("BIOMETRIC"))
     return "positive";
   return "neutral";
@@ -128,6 +129,8 @@ function nextStepHint(entry: TimelineEntry, isLast: boolean, status: string): st
   if (status === "COMPLETED") return "Request complete";
   if (isLast && status === "ESCALATED")
     return "Escalated — awaiting next stage decision";
+  if (entry.action?.toUpperCase() === "FORWARDED" && entry.transition?.to)
+    return `Forwarded to ${STAGE_LABELS[entry.transition.to] ?? entry.transition.to} for review`;
   if (entry.transition?.to)
     return `Next step: ${STAGE_LABELS[entry.transition.to] ?? entry.transition.to} to review`;
   return "Awaiting next stage";
@@ -160,6 +163,10 @@ function TimelineNode({
     Icon = CheckCircle2;
   } else if (action === "REJECTED") {
     Icon = XCircle;
+  } else if (action === "FORWARDED") {
+    // Distinct forward icon (separate from the escalation arrow) so a
+    // hand-off between hostel levels reads clearly in the timeline.
+    Icon = Forward;
   } else if (action === "ESCALATED") {
     Icon = ArrowUpRight;
   } else if (action === "REQUEST_INFO" || action.includes("BIOMETRIC")) {

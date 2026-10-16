@@ -59,6 +59,9 @@ export interface PermissionItem {
       hostel_block?: string;
       room_number?: string;
       gender?: string;
+      /** Live entry-type selection (student_details.current_entry_type). */
+      current_entry_type?: "hosteller" | "day_scholar" | null;
+      currentEntryType?: "hosteller" | "day_scholar" | null;
     };
   } | null;
   document_signatures?: Array<{
