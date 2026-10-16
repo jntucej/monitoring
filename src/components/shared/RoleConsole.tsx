@@ -23,6 +23,7 @@ import { ContextPanel } from "@/components/shared/ContextPanel";
 import { PermissionContextPanel } from "@/components/approver/PermissionContextPanel";
 import { PermissionStatusBar, type PermissionCounts } from "@/components/approver/PermissionStatusBar";
 import { PermissionCommandBar } from "@/components/approver/PermissionCommandBar";
+import { StaffStatusBar, type StaffCounts } from "@/components/approver/StaffStatusBar";
 import type { PermissionItem } from "@/components/approver/PermissionRow";
 import { StatusBar } from "@/components/shared/StatusBar";
 import { CommandBar } from "@/components/shared/CommandBar";
@@ -30,7 +31,6 @@ import { IconRail } from "@/components/shared/IconRail";
 import { useApiResource } from "@/hooks/useApiResource";
 import { useKeyboardShortcuts, type Shortcut } from "@/hooks/useKeyboardShortcuts";
 import { getConsoleConfig } from "@/config/consoles";
-
 /**
  * The response shape for the board source endpoint. Mirrors BoardResponse in
  * Board.tsx but re-declared here because Board does not export the raw
@@ -89,6 +89,7 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
   const isKanban = config?.board?.kind === "kanban";
   const isPermission = config?.contextEntity === "permission";
   const isHod = role === "hod";
+  const isStaff = role === "staff";
 
   // Fetch the board source so we can derive counts + lastScan for the status
   // bar. The fetch is cached by useApiResource, so a duplicate call from
@@ -139,6 +140,31 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
     () => boardData?.data?.counts ?? null,
     [boardData],
   );
+
+  // For the staff console, the board source is /api/staff/my-day, which
+  // returns data: { myRecent, openRequests, dutyRoster } — not a flat
+  // itemKey array. Derive the status strip counts from the same feed fetch.
+  interface StaffFeedData {
+    myRecent?: unknown[];
+    openRequests?: unknown[];
+    dutyRoster?: unknown[];
+  }
+  const staffFeed = (boardData?.data as unknown as { myRecent?: unknown[]; openRequests?: unknown[]; dutyRoster?: unknown[] } | null) ?? null;
+  const staffCounts: StaffCounts | null = useMemo(() => {
+    if (!isStaff || !staffFeed) return null;
+    const open = Array.isArray(staffFeed.openRequests) ? staffFeed.openRequests.length : 0;
+    const tasks = Array.isArray(staffFeed.myRecent) ? staffFeed.myRecent.length : 0;
+    let lastScan: string | null = null;
+    if (Array.isArray(staffFeed.myRecent)) {
+      for (const r of staffFeed.myRecent as Array<{ timestamp?: string; created_at?: string }>) {
+        const t = r.timestamp ?? r.created_at;
+        if (t && (!lastScan || new Date(t).getTime() > new Date(lastScan).getTime())) lastScan = t;
+      }
+    }
+    void (staffFeed as unknown as StaffFeedData);
+    return { shift: null, tasks, leavesPending: open, lastScan };
+  }, [isStaff, staffFeed]);
+  const staffLoading = isStaff ? !staffFeed : false;
 
   const lastScan = useMemo(() => {
     if (!boardSource || !config) return null;
@@ -273,12 +299,20 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
             lastScan={lastKanbanScan}
             refreshing={kanbanLoading}
           />
+        ) : isStaff ? (
+          <StaffStatusBar counts={staffCounts} refreshing={staffLoading} />
         ) : (
           <StatusBar counts={counts} lastScan={lastScan} />
         )}
       </div>
 
       {isHod ? (
+        <PermissionCommandBar
+          role={role}
+          open={commandBarOpen}
+          onClose={closeCommandBar}
+        />
+      ) : isStaff ? (
         <PermissionCommandBar
           role={role}
           open={commandBarOpen}

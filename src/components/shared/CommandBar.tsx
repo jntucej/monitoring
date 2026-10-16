@@ -29,7 +29,11 @@ interface CommandDef {
 function buildCommands(role: string): CommandDef[] {
   const config = getConsoleConfig(role);
   if (!config) return [];
-  const defs: Record<ConsoleCommand, CommandDef> = {
+  // Not every role defines every command; the operator + HOD nav commands
+  // have explicit defs, while staff/faculty console commands (clock-in,
+  // request-leave, attendance, ...) fall through to a generic def so the
+  // palette still lists them.
+  const defs: Partial<Record<ConsoleCommand, CommandDef>> = {
     scan: {
       id: "scan",
       label: "Scan badge",
@@ -87,7 +91,16 @@ function buildCommands(role: string): CommandDef[] {
       href: "/hod/department-reports",
     },
   };
-  return (config.commands ?? []).map((c) => defs[c]);
+  const roleRoot =
+    role === "staff" ? "/staff" : role === "hod" ? "/hod" : "/operator";
+  return (config.commands ?? [])
+    .map((c) => defs[c])
+    .filter((d): d is CommandDef => Boolean(d))
+    .map((d) =>
+      // Unknown console commands (staff/faculty) fall back to the role root
+      // so the palette still navigates somewhere sensible.
+      defs[d.id] ? d : { ...d, href: d.href || roleRoot },
+    );
 }
 
 export interface CommandBarProps {

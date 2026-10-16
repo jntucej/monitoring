@@ -18,7 +18,14 @@ export type ConsoleCommand =
   | "approve"
   | "reject"
   | "escalate"
-  | "department-stats";
+  | "department-stats"
+  | "attendance"
+  | "mark-all-present"
+  | "view-roster"
+  | "clock-in"
+  | "clock-out"
+  | "request-leave"
+  | "view-tasks";
 
 export type ConsoleStatusField =
   | "gate"
@@ -28,7 +35,9 @@ export type ConsoleStatusField =
   | "lastScan"
   | "pending"
   | "escalated"
-  | "department-attendance";
+  | "department-attendance"
+  | "tasks"
+  | "leaves";
 
 export interface RoleConsoleConfig {
   role: string;
@@ -78,6 +87,49 @@ export const CONSOLES: Record<string, RoleConsoleConfig> = {
     contextEntity: "permission",
     commands: ["approve", "reject", "escalate", "department-stats"],
     statusFields: ["pending", "escalated", "department-attendance"],
+  },
+  class_teacher: {
+    role: "class_teacher",
+    nav: ["approvals", "class", "attendance", "reports"],
+    statusStrip: false,
+    recentSheet: false,
+    board: {
+      kind: "kanban",
+      source: "/api/permissions?status=PENDING&stage=hod",
+      itemKey: "permission",
+      columns: ["PENDING", "APPROVED", "REJECTED"],
+    },
+    contextEntity: "permission",
+    commands: ["approve", "reject", "attendance", "lookup"],
+    statusFields: ["pending", "department-attendance"],
+  },
+  subject_faculty: {
+    role: "subject_faculty",
+    nav: ["my-subject", "roster", "attendance"],
+    statusStrip: false,
+    recentSheet: false,
+    board: {
+      kind: "feed",
+      source: "/api/permissions?status=PENDING",
+      itemKey: "permission",
+    },
+    contextEntity: "permission",
+    commands: ["attendance", "mark-all-present", "view-roster"],
+    statusFields: ["tasks", "department-attendance"],
+  },
+  staff: {
+    role: "staff",
+    nav: ["my-day", "duties", "leaves", "history"],
+    statusStrip: false,
+    recentSheet: false,
+    board: {
+      kind: "feed",
+      source: "/api/staff/my-day",
+      itemKey: "task",
+    },
+    contextEntity: "person",
+    commands: ["clock-in", "clock-out", "request-leave", "view-tasks"],
+    statusFields: ["shift", "tasks", "leaves"],
   },
 };
 

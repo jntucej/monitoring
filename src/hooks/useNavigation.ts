@@ -447,23 +447,12 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
     case "staff":
       groups = [
         {
-          groupLabel: "Staff Portal",
+          groupLabel: "Staff Console",
           items: [
-            { href: "/admin/staff", label: "Staff Attendance Desk", icon: "Briefcase", badge: "STAFF" },
-            { href: "/person", label: "Digital Gate Pass", icon: "QrCode" },
-          ],
-        },
-        {
-          groupLabel: "Campus Life",
-          items: [
-            { href: "/campus", label: "My Campus", icon: "Sparkles" },
-          ],
-        },
-        {
-          groupLabel: "General",
-          items: [
-            { href: "/profile", label: "My Profile", icon: "User" },
-            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+            { href: "/staff", label: "My Day", icon: "ClipboardList", badge: "MY DAY" },
+            { href: "/staff/duties", label: "Duties", icon: "CalendarClock" },
+            { href: "/staff/leaves", label: "Leaves", icon: "CalendarDays", badge: "PENDING" },
+            { href: "/staff/history", label: "History", icon: "History" },
           ],
         },
       ];
@@ -574,6 +563,18 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
   // HOD is also on the RoleConsole shell, so it skips the Account group too —
   // mirroring the operator pattern above.
   if (roleCode === "hod" || isHod) {
+    return filteredGroups;
+  }
+
+  // Staff + the faculty console roles (class_teacher / subject_faculty) run on
+  // the RoleConsole shell with a compact icon rail — skip the Account group so
+  // the nav stays to the role's console items only.
+  if (
+    roleCode === "staff" ||
+    roleCode === "class_teacher" ||
+    roleCode === "subject_faculty" ||
+    roleCode === "faculty"
+  ) {
     return filteredGroups;
   }
 
