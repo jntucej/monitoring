@@ -164,20 +164,38 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       ];
       break;
 
-    case "exam_branch":
+    case "exam_superintendent":
+      // Exam superintendent is migrated to the RoleConsole shell (kanban via
+      // /api/exam/access, PENDING/ACTIVE/CLOSED columns). Single console group
+      // of exactly 5 items so the IconRail stays lean. No Account group.
       groups = [
         {
-          groupLabel: "Exam Branch",
+          groupLabel: "Exam Superintendent Console",
           items: [
-            { href: "/exam-branch", label: "Exam Branch Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
-            { href: "/exam/permissions", label: "Exam Documents", icon: "FileText", badge: "PENDING" },
+            { href: "/exam/superintendent/access", label: "Access", icon: "DoorOpen", badge: "PENDING" },
+            { href: "/exam/superintendent/schedule", label: "Schedule", icon: "CalendarClock" },
+            { href: "/exam/superintendent/incidents", label: "Incidents", icon: "ShieldAlert" },
+            { href: "/exam/superintendent/reports", label: "Reports", icon: "FileSpreadsheet" },
+            { href: "/exam/superintendent/access", label: "Candidates", icon: "Users" },
           ],
         },
+      ];
+      break;
+
+    case "exam_branch":
+      // Exam branch is migrated to the RoleConsole shell (kanban: exam
+      // permissions self-scoped to the caller's own branch via
+      // /api/permissions?workflow_type=exam&branch=:self). Single console
+      // group of exactly 5 items so the IconRail stays lean. No Account.
+      groups = [
         {
-          groupLabel: "General & Support",
+          groupLabel: "Exam Branch Console",
           items: [
-            { href: "/profile", label: "My Profile", icon: "User" },
-            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+            { href: "/exam-branch/pass-queue", label: "Pass Queue", icon: "ClipboardList", badge: "PENDING" },
+            { href: "/exam-branch/oie-handoff", label: "OIE Handoff", icon: "ArrowLeftRight" },
+            { href: "/exam-branch/discrepancies", label: "Discrepancies", icon: "ShieldAlert" },
+            { href: "/exam-branch/records", label: "Records", icon: "FileSpreadsheet" },
+            { href: "/exam-branch/reports", label: "Reports", icon: "BarChart3" },
           ],
         },
       ];
@@ -357,53 +375,38 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       break;
 
     case "supervisor":
+      // Supervisor is migrated to the RoleConsole shell (feed:escalations
+      // via /api/supervisor/escalations). Single console group of exactly
+      // 5 items so the IconRail stays lean. No "Campus Radar" / "General &
+      // Support" groups.
       groups = [
         {
-          groupLabel: "Supervisor Desk",
+          groupLabel: "Supervisor Console",
           items: [
-            { href: "/supervisor", label: "Supervisor Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
-            { href: "/supervisor?tab=approvals", label: "Outpass Approvals", icon: "CheckSquare", badge: "PENDING" },
-            { href: "/supervisor?tab=curfew", label: "Curfew & Wards Roster", icon: "Clock" },
-            { href: "/gate/active", label: "Gate Terminal Desk", icon: "QrCode" },
-          ],
-        },
-        {
-          groupLabel: "Campus Radar & Directory",
-          items: [
-            { href: "/supervisor?tab=alerts", label: "Security Radar", icon: "ShieldAlert", badge: "ALERTS" },
-            { href: "/supervisor?tab=curfew", label: "Students Roster", icon: "GraduationCap" },
-          ],
-        },
-        {
-          groupLabel: "Campus Life",
-          items: [
-            { href: "/campus", label: "My Campus", icon: "Sparkles" },
-          ],
-        },
-        {
-          groupLabel: "General & Support",
-          items: [
-            { href: "/profile", label: "My Profile", icon: "User" },
-            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+            { href: "/supervisor", label: "Activity", icon: "CheckSquare", badge: "PENDING" },
+            { href: "/supervisor/escalation-centre", label: "Escalations", icon: "ShieldAlert" },
+            { href: "/supervisor/shifts", label: "Teams", icon: "Users" },
+            { href: "/supervisor/reports", label: "Records", icon: "FileSpreadsheet" },
+            { href: "/supervisor/approvals", label: "Approvals", icon: "CheckSquare" },
           ],
         },
       ];
       break;
 
     case "mess_incharge":
+      // Mess In-charge is migrated to the RoleConsole shell (feed:mess days
+      // via /api/mess/days). Single console group of exactly 5 items so the
+      // IconRail stays lean. No "General & Support" group. The five commands
+      // are pure navigation to the real mess sub-pages under /mess/.
       groups = [
         {
-          groupLabel: "Mess Operations",
+          groupLabel: "Mess Console",
           items: [
-            { href: "/mess", label: "Mess Dashboard", icon: "LayoutDashboard", badge: "LIVE" },
-            { href: "/mess/scan", label: "Token Scanner", icon: "QrCode", badge: "SCAN" },
-          ],
-        },
-        {
-          groupLabel: "General & Support",
-          items: [
-            { href: "/profile", label: "My Profile", icon: "User" },
-            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+            { href: "/mess/menu-management", label: "Meals", icon: "UtensilsCrossed", badge: "PENDING" },
+            { href: "/mess/inventory-stock", label: "Inventory", icon: "Package" },
+            { href: "/mess/operational-requests", label: "Requests", icon: "Send" },
+            { href: "/mess/meal-attendance", label: "Records", icon: "FileSpreadsheet" },
+            { href: "/mess/consumption-reports", label: "Reports", icon: "BarChart3" },
           ],
         },
       ];
@@ -503,6 +506,24 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       break;
 
     case "parent":
+      // Parent is migrated to the RoleConsole shell (feed:child-activity
+      // timeline via /api/parents/me). Single console group of exactly 5 items
+      // so the IconRail stays lean. No "Account" group. All 5 commands are
+      // navigation (parent is a read-only role).
+      groups = [
+        {
+          groupLabel: "Parent Console",
+          items: [
+            { href: "/parent", label: "Timeline", icon: "History", badge: "PENDING" },
+            { href: "/parent/settings", label: "Notifications", icon: "Bell" },
+            { href: "/parent/passes", label: "Fees", icon: "CreditCard" },
+            { href: "/parent/child", label: "Records", icon: "FileSpreadsheet" },
+            { href: "/support", label: "Contact", icon: "MessageSquare" },
+          ],
+        },
+      ];
+      break;
+
     case "guardian":
       groups = [
         {
@@ -569,7 +590,12 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
     roleCode === "caretaker" ||
     roleCode === "deputy_warden" ||
     roleCode === "hostel_manager" ||
-    roleCode === "oie"
+    roleCode === "oie" ||
+    roleCode === "exam_superintendent" ||
+    roleCode === "supervisor" ||
+    roleCode === "parent" ||
+    roleCode === "exam_branch" ||
+    roleCode === "mess_incharge"
   ) {
     return filteredGroups;
   }

@@ -1,80 +1,47 @@
 "use client";
 
 import React from "react";
-import { usePathname } from "next/navigation";
-import { AuthGuard } from "@/components/shared/AuthGuard";
-import { PageLoading } from "@/components/shared/LoadingStates";
-import Link from "next/link";
 import { Suspense } from "react";
+import { PageLoading } from "@/components/shared/LoadingStates";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+import { RoleConsole } from "@/components/shared/RoleConsole";
 import type { Role } from "@/lib/types";
 
-const ALLOWED_ROLES: Role[] = [
-  "exam_superintendent",
-  "exam_branch",
-  "oie",
-  "vice_principal",
-  "admin",
-  "sysadmin",
-];
-
-/* Spec sections: Overview (home) + 4 exam-ops sections */
-const TABS = [
-  { href: "/exam/superintendent", label: "Overview" },
-  { href: "/exam/superintendent/schedule", label: "Exam Schedule" },
-  { href: "/exam/superintendent/access", label: "Exam Access" },
-  { href: "/exam/superintendent/incidents", label: "Exam Incidents" },
-  { href: "/exam/superintendent/reports", label: "Exam Reports" },
-] as const;
-
-function SuperintendentTabs({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-
-  return (
-    <div className="min-w-0">
-      <nav className="sticky top-0 z-30 border-b border-[var(--border)] bg-[var(--bg-base)]/95 backdrop-blur-md">
-        <div className="mx-auto max-w-7xl px-4 py-3 md:px-6">
-          <ol className="flex flex-wrap items-center gap-1 text-sm" aria-label="Exam superintendent sections">
-            {TABS.map((tab) => {
-              const isActive =
-                tab.href === "/exam/superintendent"
-                  ? pathname === tab.href
-                  : pathname === tab.href || pathname.startsWith(tab.href + "/");
-              return (
-                <li key={tab.href}>
-                  {isActive ? (
-                    <span className="inline-flex items-center px-3 py-2 text-emerald-400 font-semibold border-b-2 border-emerald-400">
-                      {tab.label}
-                    </span>
-                  ) : (
-                    <Link
-                      href={tab.href}
-                      className="inline-flex items-center px-3 py-2 text-slate-400 hover:text-slate-200 transition-colors"
-                    >
-                      {tab.label}
-                    </Link>
-                  )}
-                </li>
-              );
-            })}
-          </ol>
-        </div>
-      </nav>
-
-      <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6">{children}</div>
-
-    </div>
-  );
-}
-
-export default function SuperintendentTabbedLayout({
+/**
+ * Exam superintendent console layout — mirrors the oie mount pattern.
+ *
+ * The local sticky tab bar / KPI cards / charts are removed. The shell is the
+ * RoleConsole: IconRail + KanbanBoard (via /api/exam/access, columns
+ * PENDING/ACTIVE/CLOSED) + permission ContextPanel +
+ * ExamSuperintendentStatusBar + ExamSuperintendentCommandBar, plus the
+ * IncidentPanel (exam-day access exceptions) as an extra panel in the main
+ * column. Sub-pages pass their content through `children`.
+ */
+export default function ExamSuperintendentConsoleLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <AuthGuard allowedRoles={ALLOWED_ROLES}>
+    <AuthGuard
+      allowedRoles={[
+        "exam_superintendent",
+        "exam_branch",
+        "oie",
+        "vice_principal",
+        "principal",
+        "admin",
+        "sysadmin",
+      ] as Role[]}
+    >
       <Suspense fallback={<PageLoading />}>
-        <SuperintendentTabs>{children}</SuperintendentTabs>
+        <div className="min-w-0">
+          <RoleConsole role="exam_superintendent" roleRoot="/exam/superintendent">
+            {children}
+          </RoleConsole>
+          <DevContactStrip />
+        </div>
       </Suspense>
     </AuthGuard>
   );

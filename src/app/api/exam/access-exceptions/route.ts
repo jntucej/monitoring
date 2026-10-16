@@ -84,9 +84,81 @@ async function handleGet(
   }
 }
 
+/**
+ * POST /api/exam/access-exceptions
+ * Create a new access exception (incident) for the current exam day.
+ * Body: { severity: "critical"|"warning"|"info", candidate?, roll?, hall?, description? }
+ */
+async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
+  try {
+    const body = await req.json().catch(() => ({}));
+    const severity = ["critical", "warning", "info"].includes(body.severity) ? body.severity : "info";
+    await query(
+      `INSERT INTO exam_access_exceptions (day, severity, candidate, roll, hall, description, resolved)
+       VALUES (CURRENT_DATE, $1, $2, $3, $4, $5, FALSE)`,
+      [
+        severity,
+        body.candidate ?? null,
+        body.roll ?? null,
+        body.hall ?? null,
+        body.description ?? null,
+      ]
+    );
+    return NextResponse.json({ success: true, data: { severity } });
+  } catch (error) {
+    console.error("Exam access-exception create error:", error);
+    return NextResponse.json(
+      { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to create access exception" } },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * PATCH /api/exam/access-exceptions
+ * Mark an access exception as resolved.
+ * Body: { id: string, resolved: true }
+ */
+async function handlePatch(req: NextRequest, { auth }: { auth: AuthContext }) {
+  try {
+    const body = await req.json().catch(() => ({}));
+    if (typeof body.id !== "string" || body.id.length === 0) {
+      return NextResponse.json(
+        { success: false, error: { code: "BAD_REQUEST", message: "id is required" } },
+        { status: 400 }
+      );
+    }
+    await query(
+      `UPDATE exam_access_exceptions SET resolved = TRUE, resolved_at = NOW() WHERE id = $1`,
+      [body.id]
+    );
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Exam access-exception resolve error:", error);
+    return NextResponse.json(
+      { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to resolve access exception" } },
+      { status: 500 }
+    );
+  }
+}
+
 export const GET = withRateLimit(
   withAuthorization(handleGet, {
-    requiredRole: ["oie", "admin", "sysadmin", "principal", "vice_principal"],
+    requiredRole: ["oie", "exam_superintendent", "exam_branch", "admin", "sysadmin", "principal", "vice_principal"],
   }),
   { keyPrefix: "exam_access_exceptions", maxRequests: 60 }
+);
+
+export const POST = withRateLimit(
+  withAuthorization(handlePost, {
+    requiredRole: ["exam_superintendent", "oie", "exam_branch", "admin", "sysadmin", "principal", "vice_principal"],
+  }),
+  { keyPrefix: "exam_access_exceptions_post", maxRequests: 20 }
+);
+
+export const PATCH = withRateLimit(
+  withAuthorization(handlePatch, {
+    requiredRole: ["exam_superintendent", "oie", "exam_branch", "admin", "sysadmin", "principal", "vice_principal"],
+  }),
+  { keyPrefix: "exam_access_exceptions_patch", maxRequests: 20 }
 );

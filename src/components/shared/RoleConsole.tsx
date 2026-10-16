@@ -34,6 +34,27 @@ import { OieStatusBar, type OieCounts } from "@/components/approver/OieStatusBar
 import { OieCommandBar } from "@/components/approver/OieCommandBar";
 import { ExamDayPanel } from "@/components/approver/ExamDayPanel";
 import { AllocationPanel } from "@/components/approver/AllocationPanel";
+import { SupervisorStatusBar, type SupervisorCounts } from "@/components/approver/SupervisorStatusBar";
+import { SupervisorCommandBar } from "@/components/approver/SupervisorCommandBar";
+import { LiveActivityPanel } from "@/components/approver/LiveActivityPanel";
+import { IncidentPanel } from "@/components/approver/IncidentPanel";
+import {
+  ExamSuperintendentStatusBar,
+  type ExamSuperintendentCounts,
+} from "@/components/approver/ExamSuperintendentStatusBar";
+import { ExamSuperintendentCommandBar } from "@/components/approver/ExamSuperintendentCommandBar";
+import { ParentStatusBar, type ParentCounts } from "@/components/approver/ParentStatusBar";
+import { ParentCommandBar } from "@/components/approver/ParentCommandBar";
+import { ChildActivityPanel } from "@/components/approver/ChildActivityPanel";
+import { TodayMealsPanel } from "@/components/approver/TodayMealsPanel";
+import { MessInchargeStatusBar, type MessInchargeCounts } from "@/components/approver/MessInchargeStatusBar";
+import { MessInchargeCommandBar } from "@/components/approver/MessInchargeCommandBar";
+import { HandoffPanel } from "@/components/approver/HandoffPanel";
+import {
+  ExamBranchStatusBar,
+  type ExamBranchCounts,
+} from "@/components/approver/ExamBranchStatusBar";
+import { ExamBranchCommandBar } from "@/components/approver/ExamBranchCommandBar";
 import type { PermissionItem } from "@/components/approver/PermissionRow";
 import { useAuthStore } from "@/stores/authStore";
 import { StatusBar } from "@/components/shared/StatusBar";
@@ -106,8 +127,22 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
   const isCaretaker = role === "caretaker";
   const isHostelManager = role === "hostel_manager";
   const isOie = role === "oie";
+  const isExamSuperintendent = role === "exam_superintendent";
+  const isSupervisor = role === "supervisor";
+  const isParent = role === "parent" || role === "guardian";
+  const isMessIncharge = role === "mess_incharge";
+  const isExamBranch = role === "exam_branch";
   const showAllocationPanel = config?.extraPanels?.includes("AllocationPanel") ?? false;
   const showExamDayPanel = config?.extraPanels?.includes("ExamDayPanel") ?? false;
+  const showHandoffPanel = config?.extraPanels?.includes("HandoffPanel") ?? false;
+  const showTodayMealsPanel =
+    config?.extraPanels?.includes("TodayMealsPanel") ?? false;
+  const showLiveActivityPanel =
+    config?.extraPanels?.includes("LiveActivityPanel") ?? false;
+  const showIncidentPanel =
+    config?.extraPanels?.includes("IncidentPanel") ?? false;
+  const showChildActivityPanel =
+    config?.extraPanels?.includes("ChildActivityPanel") ?? false;
 
   // The caller's assigned hostel, used for the caretaker status strip.
   const assignedHostel = useAuthStore((s) => s.user?.assignedHostel ?? null);
@@ -117,9 +152,17 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
   // Board itself does not cause a second network request. Skipped for kanban
   // (its status strip is permission-specific and derives counts elsewhere).
   const boardSource = isKanban || isGrid ? null : (config?.board?.source ?? null);
-  const { data: boardData } = useApiResource<ConsoleBoardResponse>(boardSource, {
+  const { data: boardData, refresh: refreshBoard } = useApiResource<ConsoleBoardResponse>(boardSource, {
     ttlMs: 15_000,
   });
+
+  // For the mess In-charge console, keep the status bar / TodayMealsPanel live
+  // by re-fetching the mess days feed on demand (e.g. after the context panel
+  // refreshes). The feed is the shared board source, so the same useApiResource
+  // cache is reused — no duplicate network request.
+  const refreshMessIncharge = useCallback(() => {
+    void refreshBoard();
+  }, [refreshBoard]);
 
   // For the caretaker grid board, fetch the summary so the status strip can
   // derive open/urgent counts. Reuses the same useApiResource cache as
@@ -324,12 +367,225 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
 
   const oieLoading = isOie ? oieExceptionsLoading || oieExamAccessLoading || kanbanLoading : false;
 
+  // For the exam-branch console, derive the status-strip counts from the
+  // self-scoped /api/permissions?workflow_type=exam&branch=:self fetch
+  // (kanbanData). pending = PENDING rows; handoff = rows currently at the
+  // exam_branch_forwarded stage (or flagged for OIE handoff); discrepancies
+  // has no source yet → 0 placeholder. branch = the caller's department.
+  const examBranchCounts: ExamBranchCounts | null = useMemo(() => {
+    if (!isExamBranch) return null;
+    const pending = permissionItems.filter((i) => i.status === "PENDING").length;
+    const handoff = permissionItems.filter(
+      (i) =>
+        i.current_stage === "exam_branch_forwarded" ||
+        i.routed_to_role === "oie" ||
+        i.forwarded_from_role === "exam_branch",
+    ).length;
+    const discrepancies = 0; // no discrepancies source yet — placeholder
+    return {
+      branch: useAuthStore.getState().user?.departmentId ?? null,
+      pending,
+      handoff,
+      discrepancies,
+    };
+  }, [isExamBranch, permissionItems]);
+  const examBranchLoading = isExamBranch ? kanbanLoading : false;
+
+  // For the exam superintendent console, derive the status-strip counts from
+  // /api/exam/access (authorised rows + gate state) and the
+  // /api/exam/access-exceptions feed (unresolved incident count). Two small
+  // fetches supply the status bar; the kanbanSource fetch is not reused
+  // because /api/exam/access returns an object under data (authorised +
+  // stageSummary), not a flat permission array.
+  interface ExamSuperintendentExceptionsResponse {
+    success?: boolean;
+    data: unknown[];
+    total?: number;
+  }
+  interface ExamSuperintendentAccessResponse {
+    success?: boolean;
+    data: {
+      authorised: Array<{ status: string; ticket_number?: string; id?: string }>;
+      stageSummary: unknown[];
+    };
+    total?: number;
+  }
+  const esExceptionsSource = isExamSuperintendent ? "/api/exam/access-exceptions" : null;
+  const esExamAccessSource = isExamSuperintendent ? "/api/exam/access" : null;
+  const {
+    data: esExceptionsData,
+    refresh: refreshEsExceptions,
+    loading: esExceptionsLoading,
+  } = useApiResource<ExamSuperintendentExceptionsResponse>(esExceptionsSource, { ttlMs: 15_000 });
+  const {
+    data: esExamAccessData,
+    refresh: refreshEsExamAccess,
+    loading: esExamAccessLoading,
+  } = useApiResource<ExamSuperintendentAccessResponse>(esExamAccessSource, { ttlMs: 15_000 });
+
+  const refreshEs = useCallback(() => {
+    void refreshEsExceptions();
+    void refreshEsExamAccess();
+  }, [refreshEsExceptions, refreshEsExamAccess]);
+
+  // Refresh wiring for the exam-branch console: the self-scoped kanban fetch
+  // (board source /api/permissions?workflow_type=exam&branch=:self) supplies
+  // both the status-bar counts and the KanbanBoard. Reuse the same
+  // useApiResource cache as KanbanBoard — no duplicate network request. The
+  // HandoffPanel issues its own self-scoped fetch, so re-fire that too.
+  const refreshExamBranch = useCallback(() => {
+    void refreshKanban();
+  }, [refreshKanban]);
+
+  const esCounts: ExamSuperintendentCounts | null = useMemo(() => {
+    if (!isExamSuperintendent) return null;
+    const authorised = esExamAccessData?.data?.authorised ?? [];
+    const exceptions = Array.isArray(esExceptionsData?.data)
+      ? esExceptionsData.data.length
+      : esExceptionsData?.total ?? 0;
+    const examDay: "active" | "closed" | null =
+      authorised.length === 0
+        ? null
+        : authorised.some((r) => r.status === "APPROVED")
+          ? "active"
+          : "closed";
+    return {
+      examDay,
+      halls: authorised.length,
+      incidents: exceptions,
+      candidates: authorised.length,
+    };
+  }, [isExamSuperintendent, esExceptionsData, esExamAccessData]);
+
+  const esLoading = isExamSuperintendent
+    ? esExceptionsLoading || esExamAccessLoading
+    : false;
+
+  // Shared by IncidentPanel's onResolved so the status bar count stays live.
+  const refreshExamIncidents = useCallback(() => {
+    void refreshEsExceptions();
+  }, [refreshEsExceptions]);
+
+  // For the parent/guardian console, the board source is the feed
+  // /api/parents/me, which self-scopes to the caller's own linked children.
+  // Response shape: { success, data: { children: ChildRow[], totalOpenRequests } }.
+  // Derive the status-strip counts (children / recent activities / unread /
+  // feesDue) from the same feed fetch so the bar stays live without a second
+  // network request. feesDue has no authoritative billing source on this
+  // endpoint yet, so it stays null (rendered as "none").
+  interface ParentFeedData {
+    children?: Array<{
+      childId?: string;
+      openRequests?: number;
+      lastMovement?: { at?: string } | null;
+      nextEvent?: unknown | null;
+    }>;
+    totalOpenRequests?: number;
+  }
+  const parentFeed =
+    (boardData?.data as unknown as ParentFeedData | null) ?? null;
+  const parentCounts: ParentCounts | null = useMemo(() => {
+    if (!isParent || !parentFeed) return null;
+    const children = Array.isArray(parentFeed.children) ? parentFeed.children : [];
+    // "Recent activities" = the most recent movement log across children
+    // (each child's lastMovement is one chronological feed row).
+    const activities = children.filter((c) => c.lastMovement?.at).length;
+    // Unread: no authoritative notification source on /api/parents/me yet —
+    // surface 0 until one lands.
+    const unread = 0;
+    return {
+      children: children.length,
+      activities,
+      unread,
+      feesDue: null,
+    };
+  }, [isParent, parentFeed]);
+  const parentLoading = isParent ? !parentFeed : false;
+
+  // For the supervisor console, derive status-strip counts from the
+  // escalation feed (/api/supervisor/escalations). The feed response nests
+  // its counts under data.counts (escalated / alerts / decisions), so we
+  // read those directly. "critical" counts alerts whose severity is
+  // critical; "pending" reuses the active-alert count as the proxy.
+  interface SupervisorEscalationsFeed {
+    escalatedPermissions?: Array<{ status: string; sla_deadline: string | null }>;
+    activeAlerts?: Array<{ severity: string }>;
+    counts?: { escalated?: number; alerts?: number; decisions?: number };
+  }
+  const supervisorFeed =
+    (boardData?.data as unknown as { data?: SupervisorEscalationsFeed } | null)?.data ??
+    null;
+  const supervisorCounts: SupervisorCounts | null = useMemo(() => {
+    if (!isSupervisor) return null;
+    const escalated =
+      Array.isArray(supervisorFeed?.escalatedPermissions)
+        ? supervisorFeed.escalatedPermissions.length
+        : supervisorFeed?.counts?.escalated ?? 0;
+    const active =
+      Array.isArray(supervisorFeed?.activeAlerts)
+        ? supervisorFeed.activeAlerts.length
+        : supervisorFeed?.counts?.alerts ?? 0;
+    const critical = Array.isArray(supervisorFeed?.activeAlerts)
+      ? supervisorFeed.activeAlerts.filter((a) => a.severity === "critical").length
+      : 0;
+    return { escalations: escalated, pending: active, critical };
+  }, [isSupervisor, supervisorFeed]);
+  const supervisorLoading = isSupervisor ? !supervisorFeed : false;
+
+  // For the mess In-charge console, the board source is the feed
+  // /api/mess/days (the mess schedule, itemKey "day"), which returns
+  // { success, data: { days: MessDayRow[] } }. Derive the status-strip
+  // counts from that same feed fetch (days scheduled + the active day's
+  // window), plus a second fetch for today's meal counts. The
+  // "pending requests" figure reuses the operational-requests proxy (0)
+  // until a dedicated pending-request source lands.
+  interface MessDaysFeed {
+    days?: Array<{
+      id: string;
+      isActive: boolean;
+      windowOpensAt?: string | null;
+      windowClosesAt?: string | null;
+    }>;
+  }
+  interface MessMealCountsFeed {
+    declaredPresent?: number;
+    confirmed?: number;
+  }
+  const messDaysFeed =
+    (boardData?.data as unknown as { days?: unknown[] } | null) ?? null;
+  const messDays = Array.isArray(messDaysFeed?.days)
+    ? (messDaysFeed.days as unknown as NonNullable<MessDaysFeed["days"]>)
+    : [];
+  const activeMessDay = messDays.find((d) => d.isActive) ?? messDays[0] ?? null;
+  const messCounts: MessInchargeCounts | null = useMemo(() => {
+    if (!isMessIncharge) return null;
+    const now = Date.now();
+    const active =
+      activeMessDay !== null &&
+      (activeMessDay.windowOpensAt
+        ? new Date(activeMessDay.windowOpensAt).getTime() <= now
+        : true) &&
+      (activeMessDay.windowClosesAt
+        ? new Date(activeMessDay.windowClosesAt).getTime() >= now
+        : true);
+    return {
+      daysScheduled: messDays.length,
+      mealsToday: messDays.length, // one service per scheduled day; proxy until meal-counts wire-in
+      pendingRequests: 0,
+      active,
+    };
+  }, [isMessIncharge, activeMessDay, messDays]);
+  const messLoading = isMessIncharge ? !messDaysFeed : false;
+
   const handleKanbanRefresh = useCallback(() => {
     void refreshKanban();
     void refreshGrid();
     void refreshHm();
     void refreshOie();
-  }, [refreshKanban, refreshGrid, refreshHm, refreshOie]);
+    void refreshEs();
+    void refreshExamBranch();
+    void refreshMessIncharge();
+  }, [refreshKanban, refreshGrid, refreshHm, refreshOie, refreshEs, refreshExamBranch, refreshMessIncharge]);
 
   const handleCloseContext = useCallback(() => {
     setSelectedRow(null);
@@ -428,6 +684,13 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
               a side section below the board; mobile: full-width. */}
           {showAllocationPanel ? <AllocationPanel /> : null}
           {showExamDayPanel ? <ExamDayPanel /> : null}
+          {showHandoffPanel ? <HandoffPanel onForwarded={refreshExamBranch} /> : null}
+          {showTodayMealsPanel ? <TodayMealsPanel /> : null}
+          {showIncidentPanel ? (
+            <IncidentPanel onResolved={refreshExamIncidents} />
+          ) : null}
+          {showChildActivityPanel ? <ChildActivityPanel /> : null}
+          {showLiveActivityPanel ? <LiveActivityPanel /> : null}
         </main>
 
         {selectedRow ? (
@@ -449,11 +712,41 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
 
       {/* Status bar — full width, sticky at the bottom of the shell */}
       <div className="sticky bottom-0 z-30">
-        {isOie ? (
+        {isExamBranch ? (
+          <ExamBranchStatusBar
+            counts={examBranchCounts}
+            lastScan={lastKanbanScan}
+            refreshing={examBranchLoading}
+          />
+        ) : isParent ? (
+          <ParentStatusBar
+            counts={parentCounts}
+            lastScan={lastScan}
+            refreshing={parentLoading}
+          />
+        ) : isMessIncharge ? (
+          <MessInchargeStatusBar
+            counts={messCounts}
+            lastScan={lastScan}
+            refreshing={messLoading}
+          />
+        ) : isSupervisor ? (
+          <SupervisorStatusBar
+            counts={supervisorCounts}
+            lastScan={lastScan}
+            refreshing={supervisorLoading}
+          />
+        ) : isOie ? (
           <OieStatusBar
             counts={oieCounts}
             lastScan={lastKanbanScan}
             refreshing={oieLoading}
+          />
+        ) : isExamSuperintendent ? (
+          <ExamSuperintendentStatusBar
+            counts={esCounts}
+            lastScan={lastKanbanScan}
+            refreshing={esLoading}
           />
         ) : isCaretaker ? (
           <CaretakerStatusBar counts={caretakerCounts} refreshing={caretakerLoading} />
@@ -472,8 +765,38 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
         )}
       </div>
 
-      {isOie ? (
+      {isExamBranch ? (
+        <ExamBranchCommandBar
+          role={role}
+          open={commandBarOpen}
+          onClose={closeCommandBar}
+        />
+      ) : isParent ? (
+        <ParentCommandBar
+          role={role}
+          open={commandBarOpen}
+          onClose={closeCommandBar}
+        />
+      ) : isMessIncharge ? (
+        <MessInchargeCommandBar
+          role={role}
+          open={commandBarOpen}
+          onClose={closeCommandBar}
+        />
+      ) : isSupervisor ? (
+        <SupervisorCommandBar
+          role={role}
+          open={commandBarOpen}
+          onClose={closeCommandBar}
+        />
+      ) : isOie ? (
         <OieCommandBar
+          role={role}
+          open={commandBarOpen}
+          onClose={closeCommandBar}
+        />
+      ) : isExamSuperintendent ? (
+        <ExamSuperintendentCommandBar
           role={role}
           open={commandBarOpen}
           onClose={closeCommandBar}

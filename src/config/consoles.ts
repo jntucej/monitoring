@@ -34,7 +34,23 @@ export type ConsoleCommand =
   | "allocate"
   | "view-residents"
   | "day-access"
-  | "exceptions";
+  | "exceptions"
+  | "incident"
+  | "candidates"
+  | "teams"
+  | "records"
+  | "timeline"
+  | "notifications"
+  | "fees"
+  | "contact"
+  | "meals"
+  | "inventory"
+  | "requests"
+  | "records"
+  | "reports"
+  | "verify"
+  | "oie-handoff"
+  | "discrepancies";
 
 export type ConsoleStatusField =
   | "gate"
@@ -57,7 +73,22 @@ export type ConsoleStatusField =
   | "maintenance"
   | "queue"
   | "exceptions"
-  | "examDay";
+  | "examDay"
+  | "halls"
+  | "incidents"
+  | "candidates"
+  | "escalations"
+  | "critical"
+  | "active"
+  | "children"
+  | "activities"
+  | "unread"
+  | "feesDue"
+  | "meals"
+  | "branch"
+  | "handoff"
+  | "discrepancies"
+  | "records";
 
 export interface RoleConsoleConfig {
   role: string;
@@ -81,7 +112,7 @@ export interface RoleConsoleConfig {
     groupBy?: string;
   };
   /** Entity type the ContextPanel renders on row click. */
-  contextEntity?: "scan" | "person" | "ticket" | "permission";
+  contextEntity?: "scan" | "person" | "ticket" | "permission" | "escalation" | "activity";
   /** Command palette actions. */
   commands?: ConsoleCommand[];
   /** Status-bar fields, rendered left-to-right. */
@@ -236,6 +267,96 @@ export const CONSOLES: Record<string, RoleConsoleConfig> = {
     commands: ["approve", "reject", "forward", "day-access", "exceptions"],
     statusFields: ["queue", "pending", "exceptions", "examDay"],
     extraPanels: ["ExamDayPanel"],
+  },
+  exam_superintendent: {
+    role: "exam_superintendent",
+    nav: ["access", "schedule", "incidents", "reports", "candidates"],
+    statusStrip: false,
+    recentSheet: false,
+    board: {
+      kind: "kanban",
+      source: "/api/exam/access",
+      itemKey: "permission",
+      columns: ["PENDING", "ACTIVE", "CLOSED"],
+    },
+    contextEntity: "permission",
+    commands: ["approve", "reject", "day-access", "incident", "candidates"],
+    statusFields: ["examDay", "halls", "incidents", "candidates"],
+    extraPanels: ["IncidentPanel"],
+  },
+  supervisor: {
+    role: "supervisor",
+    nav: ["activity", "escalations", "teams", "records", "reports"],
+    statusStrip: false,
+    recentSheet: false,
+    board: {
+      kind: "feed",
+      source: "/api/supervisor/escalations",
+      itemKey: "escalation",
+    },
+    contextEntity: "escalation",
+    commands: ["approve", "reject", "escalate", "teams", "records"],
+    statusFields: ["escalations", "pending", "critical", "active"],
+    extraPanels: ["LiveActivityPanel"],
+  },
+  parent: {
+    role: "parent",
+    nav: ["timeline", "notifications", "fees", "records", "contact"],
+    statusStrip: false,
+    recentSheet: false,
+    board: {
+      kind: "feed",
+      // Role-scoped source: /api/parents/me self-scopes to the caller's own
+      // linked children (getLinkedPersons(userId, "children_of")). Response
+      // shape: { success, data: { children: ChildRow[], totalOpenRequests } }
+      // so the feed items live under data.children. A child-activity timeline
+      // is a chronologically-rendered feed variant; the `feed` kind already
+      // sorts rows newest-first, so no dedicated timeline renderer is needed.
+      source: "/api/parents/me",
+      itemKey: "activity",
+    },
+    contextEntity: "activity",
+    commands: ["timeline", "notifications", "fees", "records", "contact"],
+    statusFields: ["children", "activities", "unread", "feesDue"],
+    extraPanels: ["ChildActivityPanel"],
+  },
+  mess_incharge: {
+    role: "mess_incharge",
+    nav: ["meals", "inventory", "requests", "records", "reports"],
+    statusStrip: false,
+    recentSheet: false,
+    board: {
+      kind: "feed",
+      // The mess days feed is the console's source of truth for the mess
+      // schedule. /api/mess/days returns the recent 60 mess days (newest
+      // first) — the board renders that as a feed with itemKey "day".
+      source: "/api/mess/days",
+      itemKey: "day",
+    },
+    contextEntity: "ticket",
+    commands: ["meals", "inventory", "requests", "records", "reports"],
+    statusFields: ["meals", "pending", "active", "records"],
+    extraPanels: ["TodayMealsPanel"],
+  },
+  exam_branch: {
+    role: "exam_branch",
+    nav: ["queue", "oie-handoff", "discrepancies", "records", "reports"],
+    statusStrip: false,
+    recentSheet: false,
+    board: {
+      kind: "kanban",
+      // Self-scoped exam-branch source: /api/permissions self-resolves the
+      // caller's own branch (employee_details.department_id / users.department_id)
+      // and returns only exam workflow tickets in that branch. `:self` is a
+      // placeholder token; the server guards against cross-branch reads.
+      source: "/api/permissions?workflow_type=exam&branch=:self",
+      itemKey: "permission",
+      columns: ["PENDING", "FORWARDED", "APPROVED"],
+    },
+    contextEntity: "permission",
+    commands: ["verify", "forward", "oie-handoff", "records", "discrepancies"],
+    statusFields: ["branch", "pending", "handoff", "discrepancies"],
+    extraPanels: ["HandoffPanel"],
   },
 };
 
