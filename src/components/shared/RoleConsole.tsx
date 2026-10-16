@@ -19,12 +19,16 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react
 import { Command } from "lucide-react";
 import { Board, type BoardRow } from "@/components/shared/Board";
 import { KanbanBoard } from "@/components/shared/KanbanBoard";
+import { GridBoard, type GridTicket } from "@/components/shared/GridBoard";
 import { ContextPanel } from "@/components/shared/ContextPanel";
 import { PermissionContextPanel } from "@/components/approver/PermissionContextPanel";
 import { PermissionStatusBar, type PermissionCounts } from "@/components/approver/PermissionStatusBar";
+import { CaretakerStatusBar, type CaretakerCounts } from "@/components/approver/CaretakerStatusBar";
 import { PermissionCommandBar } from "@/components/approver/PermissionCommandBar";
+import { CaretakerCommandBar } from "@/components/approver/CaretakerCommandBar";
 import { StaffStatusBar, type StaffCounts } from "@/components/approver/StaffStatusBar";
 import type { PermissionItem } from "@/components/approver/PermissionRow";
+import { useAuthStore } from "@/stores/authStore";
 import { StatusBar } from "@/components/shared/StatusBar";
 import { CommandBar } from "@/components/shared/CommandBar";
 import { IconRail } from "@/components/shared/IconRail";
@@ -87,18 +91,62 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
   const config = useMemo(() => getConsoleConfig(role), [role]);
 
   const isKanban = config?.board?.kind === "kanban";
+  const isGrid = config?.board?.kind === "grid";
   const isPermission = config?.contextEntity === "permission";
   const isHod = role === "hod";
   const isStaff = role === "staff";
+  const isCaretaker = role === "caretaker";
+
+  // The caller's assigned hostel, used for the caretaker status strip.
+  const assignedHostel = useAuthStore((s) => s.user?.assignedHostel ?? null);
 
   // Fetch the board source so we can derive counts + lastScan for the status
   // bar. The fetch is cached by useApiResource, so a duplicate call from
   // Board itself does not cause a second network request. Skipped for kanban
   // (its status strip is permission-specific and derives counts elsewhere).
-  const boardSource = isKanban ? null : (config?.board?.source ?? null);
+  const boardSource = isKanban || isGrid ? null : (config?.board?.source ?? null);
   const { data: boardData } = useApiResource<ConsoleBoardResponse>(boardSource, {
     ttlMs: 15_000,
   });
+
+  // For the caretaker grid board, fetch the summary so the status strip can
+  // derive open/urgent counts. Reuses the same useApiResource cache as
+  // GridBoard itself, so no extra network request.
+  interface CaretakerSummaryResponse {
+    success?: boolean;
+    data: {
+      [key: string]: unknown;
+      pendingTickets?: GridTicket[];
+      pendingCount?: number;
+    };
+  }
+  const gridSource = isGrid ? config?.board?.source ?? null : null;
+  const { data: gridData, refresh: refreshGrid, loading: gridLoading } = useApiResource<CaretakerSummaryResponse>(gridSource, { ttlMs: 15_000 });
+
+  const caretakerTickets = useMemo<GridTicket[]>(() => {
+    const raw = gridData?.data?.pendingTickets;
+    return Array.isArray(raw) ? raw : [];
+  }, [gridData]);
+
+  const caretakerCounts: CaretakerCounts | null = useMemo(() => {
+    if (!isCaretaker) return null;
+    let open = 0;
+    let urgent = 0;
+    let lastUpdate: string | null = null;
+    for (const t of caretakerTickets) {
+      const s = (t.status ?? "").toUpperCase();
+      if (s !== "APPROVED" && s !== "RESOLVED" && s !== "REJECTED") open += 1;
+      if (t.sla_deadline && new Date(t.sla_deadline).getTime() < Date.now()) urgent += 1;
+    }
+    void lastUpdate;
+    return {
+      hostel: assignedHostel,
+      open,
+      urgent,
+      lastUpdate: gridData ? new Date().toISOString() : null,
+    };
+  }, [isCaretaker, caretakerTickets, assignedHostel, gridData]);
+  const caretakerLoading = isCaretaker ? gridLoading : false;
 
   // For kanban, fetch the permission items directly so the status strip can
   // derive live counts. Reuses the same useApiResource cache as KanbanBoard.
@@ -186,7 +234,8 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
 
   const handleKanbanRefresh = useCallback(() => {
     void refreshKanban();
-  }, [refreshKanban]);
+    void refreshGrid();
+  }, [refreshKanban, refreshGrid]);
 
   const handleCloseContext = useCallback(() => {
     setSelectedRow(null);
@@ -265,6 +314,13 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
                 columns={config?.board?.columns ?? ["PENDING", "APPROVED", "REJECTED"]}
                 onSelect={handleSelect}
               />
+            ) : isGrid ? (
+              <GridBoard
+                source={config?.board?.source ?? ""}
+                groupBy={config?.board?.groupBy ?? "status"}
+                columns={["Open", "In Progress", "Resolved"]}
+                onSelect={handleSelect}
+              />
             ) : (
               <Board
                 source={config?.board?.source ?? ""}
@@ -293,7 +349,9 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
 
       {/* Status bar — full width, sticky at the bottom of the shell */}
       <div className="sticky bottom-0 z-30">
-        {isPermission ? (
+        {isCaretaker ? (
+          <CaretakerStatusBar counts={caretakerCounts} refreshing={caretakerLoading} />
+        ) : isPermission ? (
           <PermissionStatusBar
             counts={permissionCounts}
             lastScan={lastKanbanScan}
@@ -306,7 +364,13 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
         )}
       </div>
 
-      {isHod ? (
+      {isCaretaker ? (
+        <CaretakerCommandBar
+          role={role}
+          open={commandBarOpen}
+          onClose={closeCommandBar}
+        />
+      ) : isHod ? (
         <PermissionCommandBar
           role={role}
           open={commandBarOpen}

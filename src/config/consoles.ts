@@ -25,7 +25,10 @@ export type ConsoleCommand =
   | "clock-in"
   | "clock-out"
   | "request-leave"
-  | "view-tasks";
+  | "view-tasks"
+  | "assign"
+  | "resolve"
+  | "view-assets";
 
 export type ConsoleStatusField =
   | "gate"
@@ -37,7 +40,11 @@ export type ConsoleStatusField =
   | "escalated"
   | "department-attendance"
   | "tasks"
-  | "leaves";
+  | "leaves"
+  | "hostel"
+  | "open"
+  | "urgent"
+  | "lastUpdate";
 
 export interface RoleConsoleConfig {
   role: string;
@@ -52,11 +59,13 @@ export interface RoleConsoleConfig {
    * drives a Board feed, KanbanBoard, or StatusBar from this endpoint.
    */
   board?: {
-    kind: "feed" | "kanban";
+    kind: "feed" | "kanban" | "grid";
     source: string;
     itemKey: string;
     /** Kanban columns, e.g. ["PENDING", "APPROVED", "REJECTED"]. */
     columns?: string[];
+    /** Group-by field, used when kind === "grid". */
+    groupBy?: string;
   };
   /** Entity type the ContextPanel renders on row click. */
   contextEntity?: "scan" | "person" | "ticket" | "permission";
@@ -130,6 +139,21 @@ export const CONSOLES: Record<string, RoleConsoleConfig> = {
     contextEntity: "person",
     commands: ["clock-in", "clock-out", "request-leave", "view-tasks"],
     statusFields: ["shift", "tasks", "leaves"],
+  },
+  caretaker: {
+    role: "caretaker",
+    nav: ["work-orders", "facilities", "faults", "history"],
+    statusStrip: false,
+    recentSheet: false,
+    board: {
+      kind: "grid",
+      source: "/api/caretaker/summary",
+      itemKey: "ticket",
+      groupBy: "status",
+    },
+    contextEntity: "ticket",
+    commands: ["assign", "resolve", "escalate", "view-assets"],
+    statusFields: ["hostel", "open", "urgent", "lastUpdate"],
   },
 };
 

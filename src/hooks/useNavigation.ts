@@ -53,17 +53,12 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
     case "caretaker":
       groups = [
         {
-          groupLabel: "Hostel Permissions",
+          groupLabel: "Caretaker Console",
           items: [
-            { href: "/hostel/permissions", label: "Pending Approvals", icon: "ClipboardList", badge: "PENDING" },
-            { href: "/hostel-manager/tickets", label: "My Tickets", icon: "FileText" },
-            { href: "/profile", label: "My Profile", icon: "User" },
-          ],
-        },
-        {
-          groupLabel: "General",
-          items: [
-            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+            { href: "/caretaker/work-orders", label: "Work Orders", icon: "Wrench", badge: "OPEN" },
+            { href: "/caretaker/facilities", label: "Facilities", icon: "Building2" },
+            { href: "/caretaker/faults", label: "Faults", icon: "ShieldAlert", badge: "FAULTS" },
+            { href: "/caretaker/history", label: "History", icon: "History" },
           ],
         },
       ];
@@ -568,12 +563,14 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
 
   // Staff + the faculty console roles (class_teacher / subject_faculty) run on
   // the RoleConsole shell with a compact icon rail — skip the Account group so
-  // the nav stays to the role's console items only.
+  // the nav stays to the role's console items only. Caretaker is on the same
+  // shell (grid:facilities board), so it skips Account too.
   if (
     roleCode === "staff" ||
     roleCode === "class_teacher" ||
     roleCode === "subject_faculty" ||
-    roleCode === "faculty"
+    roleCode === "faculty" ||
+    roleCode === "caretaker"
   ) {
     return filteredGroups;
   }
