@@ -164,7 +164,31 @@ async function handleGet(req: NextRequest, context: any) {
     }
   } else if (["caretaker", "deputy_warden", "hostel_manager", "faculty", "hod", "oie", "vice_principal"].includes(role)) {
     query = query.eq("current_stage", role);
-    if (hscope) query = query.eq("hostel_scope", hscope);
+    if (hscope) {
+      query = query.eq("hostel_scope", hscope);
+    } else {
+      // Hostel-scoped roles: when the client does not pass an explicit
+      // hostel_scope, auto-derive it from the caller's own users.hostel_scope
+      // so the board is scoped to the caller's hostel (fail-closed: a user
+      // with no hostel_scope sees no hostel-scoped tickets). This mirrors
+      // the caretaker assigned_hostel self-scoping fix.
+      const isHostelScopedRole = ["caretaker", "deputy_warden", "hostel_manager"].includes(role);
+      if (isHostelScopedRole) {
+        const { data: profile } = await db
+          .from("users")
+          .select("hostel_scope, assigned_hostel")
+          .eq("id", userId)
+          .maybeSingle();
+        const callerScope = profile?.hostel_scope ?? null;
+        if (callerScope) {
+          query = query.eq("hostel_scope", callerScope);
+        } else {
+          // No hostel scope on file → return an empty, scoped result rather
+          // than the unscoped full queue (safe fail-closed).
+          return NextResponse.json({ success: true, data: [], total: 0 });
+        }
+      }
+    }
   } else if (role === "principal") {
     // Principal sees hostel requests at warden_or_principal stage AND
     // any other workflow requests currently at the principal stage.

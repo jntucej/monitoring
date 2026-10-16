@@ -165,7 +165,12 @@ export const CONSOLES: Record<string, RoleConsoleConfig> = {
     recentSheet: false,
     board: {
       kind: "kanban",
-      source: "/api/permissions?stage=deputy_warden",
+      // Role-scoped source (NO explicit ?stage= param): the /api/permissions
+      // role-based path sets current_stage = role (deputy_warden) AND
+      // auto-derives the caller's users.hostel_scope, so the board is
+      // scoped to the caller's hostel. An explicit ?stage= would bypass the
+      // role-based hostel scoping (returns early before it runs).
+      source: "/api/permissions",
       itemKey: "permission",
       columns: ["PENDING", "ESCALATED", "APPROVED"],
     },
