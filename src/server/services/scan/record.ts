@@ -10,6 +10,7 @@ import {
   normalizeExitReason,
   validateStudentExitFlow,
 } from "@/lib/student-exit-flow";
+import { resolveEntryOptions } from "@/lib/permission-workflow";
 import { findActiveLockdown } from "@/server/repositories/lockdown/findActive";
 import { findGateById } from "@/server/repositories/gates/findById";
 import { findByUniqueId } from "@/server/repositories/users/findByUniqueId";
@@ -20,6 +21,7 @@ import {
 } from "@/server/repositories/studentDetails/findByUserId";
 import { createScan } from "@/server/repositories/scans/create";
 import { findScanById } from "@/server/repositories/scans/findById";
+import { findLastMovementByUserId } from "@/server/repositories/scans/findLastByUserId";
 import { validateRollNumber } from "@/lib/rollNumber";
 import { auditWrite } from "@/server/services/audit/write";
 import {
@@ -28,6 +30,17 @@ import {
   ForbiddenError,
   NotFoundError,
 } from "@/server/http/errors";
+
+/**
+ * Duration caps for OUT-scan enforcement (hours from last IN to now).
+ * daily_outing: 1 hour. day_pass: 12 hours. A student who has been out
+ * longer than the cap is rejected (400) rather than warned, matching the
+ * existing ConflictError/overdue pattern.
+ */
+const OUT_DURATION_CAPS_HOURS: Record<string, number> = {
+  daily_outing: 1,
+  day_pass: 12,
+};
 
 export interface RecordScanInput {
   roll?: string;
@@ -70,16 +83,16 @@ const OVERRIDING_ROLES = new Set(["admin", "sysadmin", "principal"]);
 
 /**
  * Entry-type scope for OUT scans. A hosteller may use any of these exit
- * reasons; a day scholar may use day_scholar_out ONLY. A hosteller's
- * unrestricted regular/regular-day outing is left open (no restriction), so
- * only day scholars are narrowed to the single allowed code.
+ * reasons; a day scholar may use day_scholar_out OR home_out (both are
+ * legal day-scholar exits; home_out for a day scholar requires the
+ * pre-assigned hostel room handled by the entry-type write flow).
  */
 const OUT_REASONS_BY_ENTRY_TYPE: Record<
   "hosteller" | "day_scholar",
   readonly (ReturnType<typeof normalizeExitReason>)[]
 > = {
   hosteller: ["daily_outing", "home_out", "day_pass", "emergency"],
-  day_scholar: ["day_scholar_out"],
+  day_scholar: ["day_scholar_out", "home_out"],
 };
 
 /**
@@ -102,6 +115,46 @@ function enforceOutScopeByEntryType(
         `Allowed: ${allowed.join(", ")}.`,
       "HOSTEL_SCOPE_MISMATCH",
       { code: "HOSTEL_SCOPE_MISMATCH", entryType: effectiveEntryType },
+    );
+  }
+}
+
+/**
+ * Enforce OUT-scan duration caps.
+ *
+ * For a student's OUT scan, the OUT window starts from the last IN scan. If
+ * the reason has a duration cap (daily_outing: 1h, day_pass: 12h) and the
+ * elapsed time from last IN to now exceeds the cap, the scan is rejected
+ * with a ConflictError carrying the OVERDUE code.
+ *
+ * home_out and day_scholar_out have no cap and are skipped.
+ */
+async function enforceOutDurationCap(
+  userId: string,
+  reason: string | null | undefined,
+): Promise<void> {
+  const normalized = normalizeExitReason(reason);
+  const capHours = OUT_DURATION_CAPS_HOURS[normalized];
+  if (capHours === undefined) return; // no cap for this reason
+
+  const lastMove = await findLastMovementByUserId(userId);
+  if (!lastMove || lastMove.direction !== "IN") {
+    // No recorded IN scan: cannot compute elapsed; skip the cap check.
+    return;
+  }
+
+  const lastInMs = Date.parse(lastMove.timestamp);
+  if (Number.isNaN(lastInMs)) return;
+
+  const elapsedHours = (Date.now() - lastInMs) / (60 * 60 * 1000);
+  if (elapsedHours > capHours) {
+    const code =
+      normalized === "daily_outing" ? "DAILY_OUTING_OVERDUE" : "DAY_PASS_OVERDUE";
+    throw new ConflictError(
+      `${normalized} exit overdue: student has been out for ${elapsedHours.toFixed(1)}h ` +
+        `(cap ${capHours}h from last IN at ${lastMove.timestamp}).`,
+      code,
+      { code, reason: normalized, capHours, elapsedHours: Number(elapsedHours.toFixed(1)) },
     );
   }
 }
@@ -180,13 +233,53 @@ export async function recordScan(input: RecordScanInput): Promise<RecordScanResu
   // subject to the SAME pass check as regular scans (spec §11 overrides §7).
   if (person.role === "student") {
     // 9a. IN scans: the operator MUST have selected an entry type. Reject
-    //     early (before recording anything) with a clear 400.
-    if (input.direction === "IN" && !input.entryType) {
-      throw new BadRequestError(
-        "Entry type must be selected for an IN scan: choose 'hosteller' or 'day_scholar'.",
-        "ENTRY_TYPE_REQUIRED",
-        { code: "ENTRY_TYPE_REQUIRED" },
-      );
+    //     early (before recording anything) with a clear 400. Additionally,
+    //     the chosen entry type must be present in the resolved entry-options
+    //     button set returned by resolveEntryOptions for the student's last
+    //     OUT reason and current stored entry type; a mismatch is rejected
+    //     with ENTRY_TYPE_MISMATCH (400).
+    if (input.direction === "IN") {
+      if (!input.entryType) {
+        throw new BadRequestError(
+          "Entry type must be selected for an IN scan: choose 'hosteller' or 'day_scholar'.",
+          "ENTRY_TYPE_REQUIRED",
+          { code: "ENTRY_TYPE_REQUIRED" },
+        );
+      }
+
+      // resolveEntryOptions(lastOutReason, currentType) returns an EntryOptions
+      // object with a `buttons` array of button IDs (return_to_hostel / home_in /
+      // day_scholar_in). Each button maps to an entry type; the chosen entry
+      // type must be offered by one of the returned buttons. A mismatch is
+      // rejected with ENTRY_TYPE_MISMATCH (400).
+      const detailsForOptions = await findStudentDetailsByUserId(person.id);
+      const currentType =
+        detailsForOptions?.current_entry_type === "hosteller" ||
+        detailsForOptions?.current_entry_type === "day_scholar"
+          ? detailsForOptions.current_entry_type
+          : null;
+      // lastOutReason: read from the most recent movement log for this user.
+      const lastMoveForOptions = await findLastMovementByUserId(person.id);
+      const lastOutReason =
+        lastMoveForOptions?.direction === "OUT" ? lastMoveForOptions.reason : null;
+
+      const entryOptions = resolveEntryOptions(lastOutReason, currentType);
+      // Map button IDs to entry types so the chosen entryType can be checked
+      // against the returned button set.
+      const BUTTON_TO_ENTRY_TYPE: Record<string, "hosteller" | "day_scholar"> = {
+        return_to_hostel: "hosteller",
+        home_in: "hosteller",
+        day_scholar_in: "day_scholar",
+      };
+      const allowedEntryTypes: string[] = entryOptions.buttons.map((b) => BUTTON_TO_ENTRY_TYPE[b] ?? "hosteller");
+      if (!allowedEntryTypes.includes(input.entryType)) {
+        throw new BadRequestError(
+          `Entry type "${input.entryType}" is not offered for this re-entry. ` +
+            `Allowed: ${allowedEntryTypes.join(", ")}.`,
+          "ENTRY_TYPE_MISMATCH",
+          { code: "ENTRY_TYPE_MISMATCH", entryType: input.entryType, allowed: allowedEntryTypes },
+        );
+      }
     }
 
     // 9b. OUT scans: read the stored entry type and enforce the scope.
@@ -205,6 +298,10 @@ export async function recordScan(input: RecordScanInput): Promise<RecordScanResu
         );
       }
       enforceOutScopeByEntryType(effectiveOutEntryType, input.reason);
+
+      // 9c. OUT-scan duration cap: reject if the student has been out longer
+      //     than the reason's cap (daily_outing: 1h, day_pass: 12h).
+      await enforceOutDurationCap(person.id, input.reason);
     }
 
     const flow = await validateStudentExitFlow(

@@ -10,6 +10,22 @@
 // in the shared @/lib/permission-forward helpers.
 //
 // Body: { targetRole: string, comment: string, stepupPassword?: string }
+//
+// ── Verification (task §4): ─────────────────────────────────────────
+//  - targetRole in levelsAbove(actor.role): enforced by forwardTicket in
+//    permission-workflow-pure (FORWARD_TARGET_INVALID when not strictly
+//    higher and actor is not sysadmin).
+//  - non-empty comment: enforced by forwardTicket (FORWARD_COMMENT_REQUIRED).
+//  - step-up gate: requiresStepup({action:"forward", actorRole, targetRole})
+//    is called in prepareHostelForward; when true, checkStepupPassword is
+//    run (bcrypt against users.approval_password_hash, increments
+//    approval_password_failed_count, 15-min lockout after 5 consecutive
+//    failures, audits PERMISSION_STEPUP_FAILED on failure, 403 on failure).
+//  - on success: forwardTicket is called, the returned updates are persisted
+//    (current_stage, stage_history, routed_to_role, forwarded_from_role,
+//    forward_comment, stepup_verified_at/stepup_verified_by when required),
+//    and PERMISSION_FORWARDED_TO_LEVEL is audited.
+// All §4 requirements are already satisfied; no code changes were needed.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { NextRequest, NextResponse } from "next/server";

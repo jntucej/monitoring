@@ -1,12 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { User, CheckCircle2, LogIn, Home, Sun, Clock, X, Briefcase, ShieldAlert, Flag } from "lucide-react";
-import { ExitReason, Student, ScanDirection } from "@/lib/types";
+import {
+  User, CheckCircle2, LogIn, Home, Sun, Clock, X, Briefcase, ShieldAlert, Flag,
+} from "lucide-react";
+import { ExitReason, Student, ScanDirection, GatePass } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { PersonBadge } from "@/components/shared/PersonBadge";
 import { useAuthStore } from "@/stores/authStore";
+import { resolveEntryOptions } from "@/lib/permission-workflow-core";
 
 /**
  * Canonical entry-type selection: the operator's choice of who the student is
@@ -21,8 +24,13 @@ interface ScanConfirmationProps {
    * Backwards-compatible: an optional third argument carries the entry type
    * when the operator confirms an IN scan (hosteller vs day_scholar). OUT
    * scans carry a reason instead; entryType is ignored for them.
+   *
+   * The fourth argument is the raw IN button id the operator tapped
+   * (return_to_hostel / home_in / day_scholar_in). The caller forwards it to
+   * the operator store so the entry-type route can decide whether to write
+   * the canonical entry type. Ignored for OUT scans.
    */
-  onConfirm: (direction: ScanDirection, reason?: ExitReason, entryType?: EntryType) => void | Promise<void>;
+  onConfirm: (direction: ScanDirection, reason?: ExitReason, entryType?: EntryType, buttonId?: EntryButtonId) => void | Promise<void>;
   onCancel: () => void;
   suggestedDirection?: ScanDirection;
   /** Authoritative current IN/OUT condition of the scanned person. */
@@ -42,14 +50,37 @@ interface ScanConfirmationProps {
   isInline?: boolean;
 }
 
+/** IN-movement button ids produced by resolveEntryOptions (gate-operator
+ *  entry button matrix). Mapped to an entry type + a stable label. */
+type EntryButtonId = "return_to_hostel" | "home_in" | "day_scholar_in";
+export type ActionButtonCode = EntryButtonId | ExitReason;
+
+const ENTRY_BUTTON_META: Record<EntryButtonId, {
+  name: string;
+  icon: React.ElementType;
+  entryType: EntryType;
+}> = {
+  // Came out on a daily outing or day pass → pinned single re-entry to the
+  // hostel, hosteller, no type choice.
+  return_to_hostel: { name: "Return to Hostel", icon: Sun, entryType: "hosteller" },
+  // Came out for home / no prior OUT → hosteller home re-entry.
+  home_in: { name: "Home In", icon: Home, entryType: "hosteller" },
+  // Day scholar re-entry. Labeled "Outing In" (current UI convention; the
+  // spec's "Day Scholar In" wording maps to this same code).
+  day_scholar_in: { name: "Outing In", icon: Sun, entryType: "day_scholar" },
+};
+
 type ActionEntry = {
-  code: ExitReason;
+  /** Stable button id (entry button code, or the exit-reason code for OUT). */
+  code: ActionButtonCode;
   name: string;
   direction: ScanDirection;
   icon: React.ElementType;
   requiresApproval: boolean;
   /** Entry-type this button sets/preserves (IN buttons only). */
   entryType?: EntryType;
+  /** Exit reason to send to /api/gate/scan (OUT buttons only). */
+  reason?: ExitReason;
 };
 
 function normalizeEntryType(value: unknown): EntryType | null {
@@ -210,6 +241,7 @@ export function ScanConfirmation({
     direction: ScanDirection,
     reason?: ExitReason,
     entryType?: EntryType,
+    buttonId?: EntryButtonId,
   ) => {
     if (!photoVerified || isFlagged) {
       return;
@@ -217,7 +249,7 @@ export function ScanConfirmation({
     setSelectedDirection(direction);
     setSelectedReason(reason ?? null);
     setSelectedEntryType(entryType ?? null);
-    await onConfirm(direction, reason, entryType);
+    await onConfirm(direction, reason, entryType, buttonId);
   };
 
   // Map a reason value to a stable token so pass-reason matching is consistent.
@@ -234,7 +266,7 @@ export function ScanConfirmation({
     return s;
   };
 
-  const hasApprovedPassFor = (code: ExitReason, name: string) =>
+  const hasApprovedPassFor = (code: string, name: string) =>
     approvedPasses.some((p) => {
       if (!p.reason) return false;
       if (p.reason === code || p.reason === name) return true;
@@ -243,57 +275,34 @@ export function ScanConfirmation({
       return normalizeReason(p.reason) === normalizeReason(code) || normalizeReason(p.reason) === normalizeReason(name);
     });
 
-  // ── Build the action menu from (campusStatus, entryType) ──────────────────
-  // OUT + day_scholar: only "Outing In" — they came out via outing and must
-  //   re-enter the outing flow, not home.
-  // OUT + hosteller (or no stored type): offer "Home In" and, when the type
-  //   is unknown, "Outing In" so the operator can choose.
-  // IN + hosteller (or null default): three OUT buttons
-  //   (Daily Outing, Home Out, Day Pass).
-  // IN + day_scholar: one OUT button (Day Scholar Out).
-  // Unknown status: fall back to type-only filtering.
+  // ── Build the action menu from (campusStatus, entryType, lastOutReason) ──
+  // Entry (IN) buttons are produced by the shared pure resolver
+  // resolveEntryOptions(lastOutReason, currentType) so the gate operator and
+  // the approval engine agree on the button matrix:
+  //   OUT + daily_outing / day_pass  → [return_to_hostel]      (pinned)
+  //   OUT + day_scholar_out          → [day_scholar_in]        (pinned)
+  //   OUT + home_out / null / other  → [home_in, day_scholar_in] (type choice)
+  // Exit (OUT) buttons are scoped by the live entry type:
+  //   IN + day_scholar  → [day_scholar_out, home_out]
+  //   IN + hosteller    → [daily_outing, day_pass, home_out]
+  const entryOptions = resolveEntryOptions(
+    lastOutReason ?? null,
+    effectiveEntryType,
+  );
+
   const inButtons: ActionEntry[] =
     campusStatus === "OUT"
-      ? effectiveEntryType === "day_scholar"
-        ? [
-            {
-              code: "daily_outing",
-              name: "Outing In",
-              direction: "IN",
-              icon: Sun,
-              requiresApproval: false,
-              entryType: "day_scholar",
-            },
-          ]
-        : effectiveEntryType === "hosteller"
-          ? [
-              {
-                code: lastOutWasOuting ? "daily_outing" : "home_in",
-                name: lastOutWasOuting ? "Return to Hostel" : "Home In",
-                direction: "IN",
-                icon: lastOutWasOuting ? Sun : Home,
-                requiresApproval: false,
-                entryType: "hosteller",
-              },
-            ]
-          : [
-              {
-                code: "home_in",
-                name: "Home In",
-                direction: "IN",
-                icon: Home,
-                requiresApproval: false,
-                entryType: "hosteller",
-              },
-              {
-                code: "daily_outing",
-                name: "Outing In",
-                direction: "IN",
-                icon: Sun,
-                requiresApproval: false,
-                entryType: "day_scholar",
-              },
-            ]
+      ? entryOptions.buttons.map((code) => {
+          const meta = ENTRY_BUTTON_META[code];
+          return {
+            code,
+            name: meta.name,
+            direction: "IN" as const,
+            icon: meta.icon,
+            requiresApproval: false,
+            entryType: meta.entryType,
+          };
+        })
       : [];
 
   const outButtons: ActionEntry[] =
@@ -306,6 +315,15 @@ export function ScanConfirmation({
               direction: "OUT",
               icon: Sun,
               requiresApproval: false,
+              reason: "day_scholar_out",
+            },
+            {
+              code: "home_out",
+              name: "Home Out",
+              direction: "OUT",
+              icon: Home,
+              requiresApproval: true,
+              reason: "home_out",
             },
           ]
         : [
@@ -315,13 +333,7 @@ export function ScanConfirmation({
               direction: "OUT",
               icon: Briefcase,
               requiresApproval: false,
-            },
-            {
-              code: "home_out",
-              name: "Home Out",
-              direction: "OUT",
-              icon: Home,
-              requiresApproval: true,
+              reason: "daily_outing",
             },
             {
               code: "day_pass",
@@ -329,6 +341,15 @@ export function ScanConfirmation({
               direction: "OUT",
               icon: Sun,
               requiresApproval: true,
+              reason: "day_pass",
+            },
+            {
+              code: "home_out",
+              name: "Home Out",
+              direction: "OUT",
+              icon: Home,
+              requiresApproval: true,
+              reason: "home_out",
             },
           ]
       : [];
@@ -345,7 +366,7 @@ export function ScanConfirmation({
         entryType: "hosteller",
       },
       {
-        code: "daily_outing",
+        code: "day_scholar_in",
         name: "Outing In",
         direction: "IN",
         icon: Sun,
@@ -360,6 +381,7 @@ export function ScanConfirmation({
         direction: "OUT",
         icon: Briefcase,
         requiresApproval: false,
+        reason: "daily_outing",
       },
       {
         code: "home_out",
@@ -367,6 +389,7 @@ export function ScanConfirmation({
         direction: "OUT",
         icon: Home,
         requiresApproval: true,
+        reason: "home_out",
       },
       {
         code: "day_pass",
@@ -374,9 +397,39 @@ export function ScanConfirmation({
         direction: "OUT",
         icon: Sun,
         requiresApproval: true,
+        reason: "day_pass",
       },
     );
   }
+
+  // ── Overdue pass strip (amber; hosteller IN only) ────────────────────────
+  // When a hosteller has an APPROVED daily_outing or day_pass pass whose window
+  // has lapsed, surface how long it has been overdue. home_out never overdue.
+  const overdueInfo = useMemo(() => {
+    if (campusStatus !== "IN" || effectiveEntryType !== "hosteller") return null;
+    const now = Date.now();
+    const normReason = (r?: string) => normalizeReason(r);
+    const fmtDur = (ms: number) => {
+      const totalMin = Math.max(0, Math.round(ms / 60000));
+      const h = Math.floor(totalMin / 60);
+      const m = totalMin % 60;
+      return `${h}h ${m}m`;
+    };
+    for (const p of approvedPasses as Array<{ reason?: string; to?: string; from?: string }>) {
+      const code = normReason(p.reason);
+      if (code !== "daily_outing" && code !== "day_pass") continue;
+      const toMs = p.to ? Date.parse(p.to) : NaN;
+      const fromMs = p.from ? Date.parse(p.from) : NaN;
+      // "in window" means the pass was active at some point (from <= now) and
+      // is now past its end (overdue). A not-yet-started pass is not overdue.
+      const started = Number.isNaN(fromMs) || fromMs <= now;
+      if (!started || Number.isNaN(toMs) || toMs >= now) continue;
+      const overdueMs = now - toMs;
+      const label = code === "daily_outing" ? "Overdue Daily Outing" : "Overdue Day Pass";
+      return { label: `${label} — ${fmtDur(overdueMs)}`, code };
+    }
+    return null;
+  }, [campusStatus, effectiveEntryType, approvedPasses, normalizeReason]);
 
   const renderActionButtons = (actions: ActionEntry[], label: string) => {
     if (actions.length === 0) {
@@ -388,18 +441,24 @@ export function ScanConfirmation({
     }
     return (
       <div className={cn("grid gap-2", actions.length > 2 ? "grid-cols-3" : "grid-cols-2")}>
-        {actions.map(({ code, name, icon: Icon, direction, requiresApproval, entryType }) => {
+        {actions.map(({ code, name, icon: Icon, direction, requiresApproval, entryType, reason }) => {
           const isSelected =
             selectedDirection === direction &&
-            (direction === "IN" ? selectedEntryType === entryType : selectedReason === code);
+            (direction === "IN" ? selectedEntryType === entryType : selectedReason === reason);
           const passRequired = direction === "OUT" && requiresApproval;
-          const hasPass = passRequired ? hasApprovedPassFor(code, name) : true;
+          const hasPass = passRequired ? hasApprovedPassFor((reason ?? code) as string, name) : true;
           const isDisabled = !photoVerified || isFlagged || (passRequired && !hasPass);
+          // For IN buttons the code is the entry-button id (return_to_hostel /
+          // home_in / day_scholar_in) — forward it so the entry-type route can
+          // decide whether to write the canonical type. For OUT buttons the
+          // code is an exit reason and there is no entry-button id to send.
+          const buttonId: EntryButtonId | undefined =
+            direction === "IN" ? (code as EntryButtonId) : undefined;
           return (
             <button
               key={`${direction}-${code}`}
               type="button"
-              onClick={() => handleConfirmClick(direction, code, entryType)}
+              onClick={() => handleConfirmClick(direction, reason, entryType, buttonId)}
               disabled={isDisabled}
               className={cn(
                 "py-3 px-2 min-h-[44px] rounded-xl border font-bold text-[11px] flex flex-col items-center justify-center gap-1 transition-all active:scale-95",
@@ -470,6 +529,23 @@ export function ScanConfirmation({
           </span>
         )}
       </div>
+
+      {/* Live entry-type badge (top of card) */}
+      {effectiveEntryType === "hosteller" ? (
+        <div className="flex items-center justify-center">
+          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+            <User className="w-3.5 h-3.5" />
+            Hosteller
+          </span>
+        </div>
+      ) : effectiveEntryType === "day_scholar" ? (
+        <div className="flex items-center justify-center">
+          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-sky-500/15 text-sky-400 border border-sky-500/30">
+            <User className="w-3.5 h-3.5" />
+            Day Scholar
+          </span>
+        </div>
+      ) : null}
 
       {/* Student Avatar & Basic Info */}
       <div className="text-center space-y-2">
@@ -622,6 +698,14 @@ export function ScanConfirmation({
           </div>
         )}
       </div>
+
+      {/* Overdue pass strip — amber, hosteller IN only */}
+      {overdueInfo && (
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl px-3 py-2 flex items-center gap-2">
+          <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+          <span className="text-[11px] font-semibold text-amber-400">{overdueInfo.label}</span>
+        </div>
+      )}
 
       {/* Action Movement Category Selection */}
       <div className="space-y-4 pt-1">
