@@ -18,6 +18,8 @@ export type ConsoleCommand =
   | "approve"
   | "reject"
   | "escalate"
+  | "forward"
+  | "delegate"
   | "department-stats"
   | "attendance"
   | "mark-all-present"
@@ -44,7 +46,8 @@ export type ConsoleStatusField =
   | "hostel"
   | "open"
   | "urgent"
-  | "lastUpdate";
+  | "lastUpdate"
+  | "gateStatus";
 
 export interface RoleConsoleConfig {
   role: string;
@@ -154,6 +157,21 @@ export const CONSOLES: Record<string, RoleConsoleConfig> = {
     contextEntity: "ticket",
     commands: ["assign", "resolve", "escalate", "view-assets"],
     statusFields: ["hostel", "open", "urgent", "lastUpdate"],
+  },
+  deputy_warden: {
+    role: "deputy_warden",
+    nav: ["approvals", "gate-movement", "attendance", "shifts", "history"],
+    statusStrip: false,
+    recentSheet: false,
+    board: {
+      kind: "kanban",
+      source: "/api/permissions?stage=deputy_warden",
+      itemKey: "permission",
+      columns: ["PENDING", "ESCALATED", "APPROVED"],
+    },
+    contextEntity: "permission",
+    commands: ["approve", "reject", "forward", "escalate", "delegate"],
+    statusFields: ["hostel", "pending", "escalated", "gateStatus"],
   },
 };
 

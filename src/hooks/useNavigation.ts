@@ -85,20 +85,18 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       break;
 
     case "deputy_warden":
+      // Deputy warden is migrated to the RoleConsole shell (kanban:pending
+      // hostel permissions at the deputy_warden stage). The nav is a single
+      // console group of exactly 5 items so the IconRail stays lean.
       groups = [
         {
-          groupLabel: "Hostel Permissions",
+          groupLabel: "Deputy Warden Console",
           items: [
-            { href: "/deputy-warden", label: "Deputy Warden Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
-            { href: "/hostel/permissions", label: "Pending Approvals", icon: "ClipboardList", badge: "PENDING" },
-            { href: "/hostel-manager/tickets", label: "My Tickets", icon: "FileText" },
-          ],
-        },
-        {
-          groupLabel: "General",
-          items: [
-            { href: "/profile", label: "My Profile", icon: "User" },
-            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+            { href: "/deputy-warden", label: "Approvals", icon: "CheckSquare", badge: "PENDING" },
+            { href: "/deputy-warden/gate-movement", label: "Gate Movement", icon: "DoorOpen" },
+            { href: "/deputy-warden/resident-attendance", label: "Attendance", icon: "UserCheck" },
+            { href: "/deputy-warden/shift-handover", label: "Shifts", icon: "CalendarClock" },
+            { href: "/deputy-warden/decision-history", label: "History", icon: "History" },
           ],
         },
       ];
@@ -570,7 +568,8 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
     roleCode === "class_teacher" ||
     roleCode === "subject_faculty" ||
     roleCode === "faculty" ||
-    roleCode === "caretaker"
+    roleCode === "caretaker" ||
+    roleCode === "deputy_warden"
   ) {
     return filteredGroups;
   }

@@ -25,6 +25,7 @@ import { PermissionContextPanel } from "@/components/approver/PermissionContextP
 import { PermissionStatusBar, type PermissionCounts } from "@/components/approver/PermissionStatusBar";
 import { CaretakerStatusBar, type CaretakerCounts } from "@/components/approver/CaretakerStatusBar";
 import { PermissionCommandBar } from "@/components/approver/PermissionCommandBar";
+import { DeputyWardenCommandBar } from "@/components/approver/DeputyWardenCommandBar";
 import { CaretakerCommandBar } from "@/components/approver/CaretakerCommandBar";
 import { StaffStatusBar, type StaffCounts } from "@/components/approver/StaffStatusBar";
 import type { PermissionItem } from "@/components/approver/PermissionRow";
@@ -384,6 +385,12 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
         />
       ) : isStaff ? (
         <PermissionCommandBar
+          role={role}
+          open={commandBarOpen}
+          onClose={closeCommandBar}
+        />
+      ) : role === "deputy_warden" ? (
+        <DeputyWardenCommandBar
           role={role}
           open={commandBarOpen}
           onClose={closeCommandBar}
