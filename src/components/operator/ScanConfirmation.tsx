@@ -231,31 +231,56 @@ export function ScanConfirmation({
     });
 
   // ── Build the action menu from (campusStatus, entryType) ──────────────────
-  // OUT + any/unknown type: exactly two IN buttons (Home In, Day Scholar In).
+  // OUT + day_scholar: only "Day Scholar In" — they came out via Day Scholar
+  //   Out / outing and must re-enter as a day scholar, not home.
+  // OUT + hosteller (or no stored type): offer "Home In" and, when the type
+  //   is unknown, "Day Scholar In" so the operator can choose.
   // IN + hosteller (or null default): three OUT buttons
   //   (Daily Outing, Home Out, Day Pass).
   // IN + day_scholar: one OUT button (Day Scholar Out).
   // Unknown status: fall back to type-only filtering.
   const inButtons: ActionEntry[] =
     campusStatus === "OUT"
-      ? [
-          {
-            code: "home_in",
-            name: "Home In",
-            direction: "IN",
-            icon: Home,
-            requiresApproval: false,
-            entryType: "hosteller",
-          },
-          {
-            code: "daily_outing",
-            name: "Day Scholar In",
-            direction: "IN",
-            icon: Sun,
-            requiresApproval: false,
-            entryType: "day_scholar",
-          },
-        ]
+      ? effectiveEntryType === "day_scholar"
+        ? [
+            {
+              code: "daily_outing",
+              name: "Day Scholar In",
+              direction: "IN",
+              icon: Sun,
+              requiresApproval: false,
+              entryType: "day_scholar",
+            },
+          ]
+        : effectiveEntryType === "hosteller"
+          ? [
+              {
+                code: "home_in",
+                name: "Home In",
+                direction: "IN",
+                icon: Home,
+                requiresApproval: false,
+                entryType: "hosteller",
+              },
+            ]
+          : [
+              {
+                code: "home_in",
+                name: "Home In",
+                direction: "IN",
+                icon: Home,
+                requiresApproval: false,
+                entryType: "hosteller",
+              },
+              {
+                code: "daily_outing",
+                name: "Day Scholar In",
+                direction: "IN",
+                icon: Sun,
+                requiresApproval: false,
+                entryType: "day_scholar",
+              },
+            ]
       : [];
 
   const outButtons: ActionEntry[] =
