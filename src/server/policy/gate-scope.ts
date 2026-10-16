@@ -1,11 +1,11 @@
 import { ForbiddenError } from "@/server/http/errors";
-import { assertOperatorHasGate } from "@/server/policy/gate-access";
 import type { AuthContext } from "@/lib/authContext";
 
 /**
  * Resolves the effective gate scope for operator-scoped endpoints.
  *
- * - operator: hard binding to auth.gateId (403 when unassigned).
+ * - operator: binding to auth.gateId; unassigned operators get null scope
+ *   (falls through to all-gate / default gate downstream).
  * - supervisor (or anyone with supervised_gates): the ?gateId= hint must be
  *   one of their supervised gates; without a hint, fall back to the first
  *   supervised gate or auth.gateId.
@@ -17,7 +17,8 @@ export function resolveOperatorGateScope(
   hintedGateId?: string | null,
 ): string | null {
   if (auth.role === "operator") {
-    assertOperatorHasGate(auth.role, auth.gateId);
+    // Unassigned operators fall back to default-gate scope (null = all gates
+    // for stats; the scan API handles its own default-gate gate-match check).
     return auth.gateId ?? null;
   }
 

@@ -162,15 +162,10 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }): Promise
 
   // 2. Operator gate assignment. Operators must hold a gate; supervisors may
   //    work any of their supervised gates; admins/sysadmins are exempt.
+  //    Unassigned operators fall back to the default gate (handled by
+  //    assertOperatorGateMatch below); no hard-throw here.
   const supervisedGates = auth.supervisedGates ?? null;
-  try {
-    assertOperatorHasGate(auth.role, auth.gateId);
-  } catch {
-    return NextResponse.json(
-      { success: false, error: { code: "FORBIDDEN", message: "No gate assigned to operator" } },
-      { status: 403 },
-    );
-  }
+  await assertOperatorHasGate(auth.role, auth.gateId);
 
   // 3. Gate must exist.
   const gate = await findGateById(gateId);

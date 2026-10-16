@@ -22,7 +22,7 @@ function mapRoleToPersonType(role: string | null | undefined): PersonType {
 }
 
 export async function getOperatorStats(input: OperatorStatsInput) {
-  assertOperatorHasGate(input.role, input.gateId);
+  await assertOperatorHasGate(input.role, input.gateId);
   const scope = input.gateId ?? undefined;
 
   const [logs, occupancy] = await Promise.all([

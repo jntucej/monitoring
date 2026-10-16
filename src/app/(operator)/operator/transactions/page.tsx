@@ -173,76 +173,118 @@ function OperatorTransactionsInner() {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto min-w-0">
-              <table className="w-full text-sm min-w-[640px]">
-                <thead>
-                  <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-xs uppercase tracking-wide">
-                    <th className="text-left px-3 py-2 font-semibold">Time</th>
-                    <th className="text-left px-3 py-2 font-semibold">Person</th>
-                    <th className="text-left px-3 py-2 font-semibold">Direction</th>
-                    <th className="text-left px-3 py-2 font-semibold">Reason</th>
-                    <th className="text-left px-3 py-2 font-semibold">Gate</th>
-                    <th className="text-left px-3 py-2 font-semibold">Type</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[var(--border)]">
-                  {filtered.map((r) => (
-                    <tr key={r.id} className="hover:bg-[var(--bg-surface)] transition-colors">
-                      <td className="px-3 py-2.5 text-[var(--text-muted)] text-xs whitespace-nowrap">
-                        {fmtTime(r.timestamp)}
-                      </td>
-                      <td className="px-3 py-2.5 text-[var(--text-primary)] min-w-0">
-                        <span className="font-semibold">{r.name || "—"}</span>
-                        {r.roll && (
-                          <span className="ml-1.5 font-mono text-xs text-[var(--text-muted)]">
-                            {r.roll}
-                          </span>
-                        )}
-                        {r.person_type && (
-                          <span className="ml-1.5 rounded-full border border-[var(--border)] px-1.5 py-0.5 text-[10px] text-[var(--text-muted)] uppercase">
-                            {r.person_type}
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-3 py-2.5 whitespace-nowrap">
+            <>
+              {/* Mobile: stacked cards — no horizontal scroll */}
+              <ul className="sm:hidden divide-y divide-[var(--border)]">
+                {filtered.map((r) => (
+                  <li key={r.id} className="px-3 py-3 space-y-1.5">
+                    <div className="flex items-center justify-between gap-2 min-w-0">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
+                          {r.name || "—"}
+                          {r.roll && (
+                            <span className="ml-1.5 font-mono text-xs text-[var(--text-muted)]">{r.roll}</span>
+                          )}
+                        </p>
+                        <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
+                          {fmtTime(r.timestamp)} · {r.gate_name || r.gate_id || "—"}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
                         {r.direction === "IN" ? (
                           <span className="inline-flex items-center gap-1 text-emerald-400 text-xs font-semibold">
-                            <ArrowDownLeft className="w-3.5 h-3.5" /> Entry
+                            <ArrowDownLeft className="w-3.5 h-3.5" /> In
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 text-rose-400 text-xs font-semibold">
-                            <ArrowUpRight className="w-3.5 h-3.5" /> Exit
+                            <ArrowUpRight className="w-3.5 h-3.5" /> Out
                           </span>
                         )}
-                      </td>
-                      <td className="px-3 py-2.5 text-[var(--text-muted)] text-xs">
-                        {r.reason || "—"}
-                      </td>
-                      <td className="px-3 py-2.5 text-[var(--text-muted)] text-xs">
-                        {r.gate_name || r.gate_id || "—"}
-                      </td>
-                      <td className="px-3 py-2.5 text-xs">
                         {r.scan_type ? (
-                          <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-amber-400 font-medium">
-                            Manual
-                          </span>
+                          <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-1.5 py-0.5 text-[10px] text-amber-400">Manual</span>
                         ) : r.is_correction ? (
-                          <span className="rounded-full border border-rose-400/30 bg-rose-400/10 px-2 py-0.5 text-rose-400 font-medium">
-                            Correction
-                          </span>
-                        ) : (
-                          <span className="text-[var(--text-muted)]">Scan</span>
-                        )}
-                      </td>
+                          <span className="rounded-full border border-rose-400/30 bg-rose-400/10 px-1.5 py-0.5 text-[10px] text-rose-400">Correction</span>
+                        ) : null}
+                      </div>
+                    </div>
+                    {r.reason && <p className="text-xs text-[var(--text-muted)]">Reason: {r.reason}</p>}
+                  </li>
+                ))}
+              </ul>
+
+              {/* Desktop: table */}
+              <div className="hidden sm:block overflow-x-auto min-w-0">
+                <table className="w-full text-sm min-w-[640px]">
+                  <thead>
+                    <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-xs uppercase tracking-wide">
+                      <th className="text-left px-3 py-2 font-semibold">Time</th>
+                      <th className="text-left px-3 py-2 font-semibold">Person</th>
+                      <th className="text-left px-3 py-2 font-semibold">Direction</th>
+                      <th className="text-left px-3 py-2 font-semibold">Reason</th>
+                      <th className="text-left px-3 py-2 font-semibold">Gate</th>
+                      <th className="text-left px-3 py-2 font-semibold">Type</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--border)]">
+                    {filtered.map((r) => (
+                      <tr key={r.id} className="hover:bg-[var(--bg-surface)] transition-colors">
+                        <td className="px-3 py-2.5 text-[var(--text-muted)] text-xs whitespace-nowrap">
+                          {fmtTime(r.timestamp)}
+                        </td>
+                        <td className="px-3 py-2.5 text-[var(--text-primary)] min-w-0">
+                          <span className="font-semibold">{r.name || "—"}</span>
+                          {r.roll && (
+                            <span className="ml-1.5 font-mono text-xs text-[var(--text-muted)]">
+                              {r.roll}
+                            </span>
+                          )}
+                          {r.person_type && (
+                            <span className="ml-1.5 rounded-full border border-[var(--border)] px-1.5 py-0.5 text-[10px] text-[var(--text-muted)] uppercase">
+                              {r.person_type}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-3 py-2.5 whitespace-nowrap">
+                          {r.direction === "IN" ? (
+                            <span className="inline-flex items-center gap-1 text-emerald-400 text-xs font-semibold">
+                              <ArrowDownLeft className="w-3.5 h-3.5" /> Entry
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-rose-400 text-xs font-semibold">
+                              <ArrowUpRight className="w-3.5 h-3.5" /> Exit
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-3 py-2.5 text-[var(--text-muted)] text-xs">
+                          {r.reason || "—"}
+                        </td>
+                        <td className="px-3 py-2.5 text-[var(--text-muted)] text-xs">
+                          {r.gate_name || r.gate_id || "—"}
+                        </td>
+                        <td className="px-3 py-2.5 text-xs">
+                          {r.scan_type ? (
+                            <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-amber-400 font-medium">
+                              Manual
+                            </span>
+                          ) : r.is_correction ? (
+                            <span className="rounded-full border border-rose-400/30 bg-rose-400/10 px-2 py-0.5 text-rose-400 font-medium">
+                              Correction
+                            </span>
+                          ) : (
+                            <span className="text-[var(--text-muted)]">Scan</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
               <div className="px-3 py-2.5 border-t border-[var(--border)] text-xs text-[var(--text-muted)] flex items-center gap-1.5 min-w-0">
                 <Clock className="w-3.5 h-3.5 shrink-0" />
                 Auto-refreshes every 30 seconds.
               </div>
-            </div>
+            </>
           )}
         </div>
       </WidgetBoundary>

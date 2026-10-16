@@ -165,7 +165,7 @@ export async function recordScan(input: RecordScanInput): Promise<RecordScanResu
   assertNotLockedOut(lockdown, input.gateId);
 
   // 2. Operator must hold a gate (supervisors via supervised_gates are exempt)
-  assertOperatorHasGate(input.operatorRole, input.operatorGateId);
+  await assertOperatorHasGate(input.operatorRole, input.operatorGateId);
 
   // 3. Roll identifier must be present and well-formed
   const identifier = (input.roll ?? input.personId ?? "").trim();
