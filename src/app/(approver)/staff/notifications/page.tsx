@@ -23,15 +23,19 @@ interface DataResponse {
 
 function StaffNotificationsInner() {
   const user = useAuthStore((s) => s.user);
-  const role = (user?.role ?? "Staff") as Role;
+  const role = (user?.role ?? "staff") as Role;
   const tier = getRoleTier(role);
+
+  const profileUrl = user?.id
+    ? `/api/notifications?type=${encodeURIComponent(role)}&id=${encodeURIComponent(user.id)}`
+    : null;
 
   const {
     data,
     loading,
     error,
     refresh,
-  } = useApiResource<DataResponse>("/api/announcements/active", { ttlMs: 30_000 });
+  } = useApiResource<DataResponse>(profileUrl ?? "/api/staff/my-day", { ttlMs: 30_000, enabled: !!profileUrl });
 
   const refreshAll = useCallback(async () => {
     clearCache();

@@ -31,7 +31,7 @@ function StaffHistoryInner() {
     loading,
     error,
     refresh,
-  } = useApiResource<DataResponse>("/api/staff/attendance", { ttlMs: 30_000 });
+  } = useApiResource<DataResponse>("/api/staff/history", { ttlMs: 30_000 });
 
   const refreshAll = useCallback(async () => {
     clearCache();

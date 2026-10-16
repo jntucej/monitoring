@@ -9,6 +9,26 @@ interface CachedEntry<T> {
 
 const memoryCache = new Map<string, CachedEntry<unknown>>();
 
+/**
+ * Structural equality for JSON-shaped API payloads (plain objects, arrays,
+ * strings, numbers, booleans, null). Used to gate setData so a poll that
+ * returns *identical* data does not mint a new object reference and force a
+ * re-render of every consuming panel. Fast path: same reference => equal.
+ */
+function deepEqual(a: unknown, b: unknown): boolean {
+  if (Object.is(a, b)) return true;
+  if (a === null || b === null) return false;
+  if (typeof a !== "object" || typeof b !== "object") return false;
+  const ka = Object.keys(a as object);
+  const kb = Object.keys(b as object);
+  if (ka.length !== kb.length) return false;
+  for (const k of ka) {
+    if (!Object.prototype.hasOwnProperty.call(b, k)) return false;
+    if (!deepEqual((a as Record<string, unknown>)[k], (b as Record<string, unknown>)[k])) return false;
+  }
+  return true;
+}
+
 export async function cachedFetch<T>(
   url: string,
   options: { ttlMs?: number; headers?: Record<string, string>; auth?: boolean } = {}
@@ -69,7 +89,11 @@ export function useApiResource<T>(
     setLoading(true);
     setError(null);
     try {
-      setData(await cachedFetch<T>(url, { ttlMs }));
+      const next = await cachedFetch<T>(url, { ttlMs });
+      // Only re-render when the payload actually changed. A poll that returns
+      // identical data keeps the previous object reference, so downstream
+      // memoized panels (useMemo / React.memo) do not re-run.
+      setData((prev) => (prev !== null && deepEqual(prev, next) ? prev : next));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Request failed");
     } finally {

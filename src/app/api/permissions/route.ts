@@ -149,8 +149,7 @@ async function handleGet(req: NextRequest, context: any) {
           `
           *,
           requester:users!permissions_requester_user_id_fkey (id, name, email, phone, role),
-          student:users!permissions_student_user_id_fkey (id, name, role, unique_id),
-          document_signatures (id, signed_by, signed_at, signature_hash)
+          student:users!permissions_student_user_id_fkey (id, name, role, unique_id)
           `,
           { count: "exact" }
         )
@@ -178,12 +177,6 @@ async function handleGet(req: NextRequest, context: any) {
       name,
       role,
       unique_id
-    ),
-    document_signatures (
-      id,
-      signed_by,
-      signed_at,
-      signature_hash
     )
     `,
     { count: "exact" }

@@ -11,7 +11,7 @@ import { withRateLimit } from "@/lib/rate-limit";
  * newest dump, its age in hours, and a staleness flag (>24h).
  *
  * On non-host environments the directory may be absent — the endpoint then
- * reports source=unavailable and the UI shows the DevContactStrip note.
+ * reports source=unavailable.
  *
  * SysAdmin + admin only, read-only.
  */

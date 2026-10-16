@@ -13,7 +13,7 @@
  *                                   { hostelBlock: room, hostelRoom: "<room>-<bed>" }
  *   escalate <ticket>            PATCH /api/permissions/<ticket>
  *                                { action: "ESCALATE" }
- *   residents                    router.push("/hostel-manager/resident-service-requests")
+ *   residents                    router.push("/hostel-manager/housekeeping-tasks")
  *
  * Ticket actions flow through the same /api/permissions/[ticket] PATCH the
  * caretaker command bar uses; the allocate command targets the student room-
@@ -197,7 +197,7 @@ export function HostelManagerCommandBar({ role, open, onClose }: HostelManagerCo
     async (parsed: ParsedCommand) => {
       // ── residents: navigate to resident service requests ──
       if (parsed.action === "VIEW_RESIDENTS") {
-        router.push("/hostel-manager/resident-service-requests");
+        router.push("/hostel-manager/housekeeping-tasks");
         addToast({ variant: "info", message: "Opening resident service requests" });
         onClose();
         return;

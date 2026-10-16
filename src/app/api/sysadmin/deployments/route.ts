@@ -15,8 +15,7 @@ import { withRateLimit } from "@/lib/rate-limit";
  *   • "✓ Compiled successfully" / build failures           → build outcome
  *
  * Read-only; the log file may not exist on non-host dev environments —
- * in that case the endpoint returns an empty list with source=unavailable
- * and the UI falls back to the DevContactStrip note.
+ * in that case the endpoint returns an empty list with source=unavailable.
  *
  * SysAdmin + admin only.
  */

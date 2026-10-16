@@ -55,10 +55,9 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "Caretaker Console",
           items: [
-            { href: "/caretaker/work-orders", label: "Work Orders", icon: "Wrench", badge: "OPEN" },
-            { href: "/caretaker/facilities", label: "Facilities", icon: "Building2" },
-            { href: "/caretaker/faults", label: "Faults", icon: "ShieldAlert", badge: "FAULTS" },
-            { href: "/caretaker/history", label: "History", icon: "History" },
+            { href: "/caretaker", label: "Overview", icon: "LayoutDashboard", badge: "OVERVIEW" },
+            { href: "/caretaker/maintenance", label: "Maintenance", icon: "Wrench", badge: "OPEN" },
+            { href: "/caretaker/workers", label: "Workers", icon: "Users" },
           ],
         },
       ];
@@ -68,15 +67,19 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       // Hostel manager is migrated to the RoleConsole shell (kanban:tickets
       // of hostel tickets, scoped by hostel_scope). Single console group of
       // exactly 5 items so the IconRail stays lean.
+      // maintenance-requests, occupancy-reports, operational-reports,
+      // resident-service-requests, room-bed-allocation deleted (redundant
+      // stubs — data is served by /api/hostel-manager/summary +
+      // /api/occupancy/presence-matrix + /api/campus-extra/analytics,
+      // already rendered by the RoleConsole panels and remaining pages).
       groups = [
         {
           groupLabel: "Hostel Manager Console",
           items: [
             { href: "/hostel-manager", label: "Tickets", icon: "Ticket", badge: "OPEN" },
-            { href: "/hostel-manager/room-bed-allocation", label: "Allocation", icon: "Home" },
-            { href: "/hostel-manager/resident-service-requests", label: "Residents", icon: "Users" },
-            { href: "/hostel-manager/resource-management", label: "Resources", icon: "Wrench" },
-            { href: "/hostel-manager/occupancy-reports", label: "Reports", icon: "FileSpreadsheet" },
+            { href: "/hostel-manager/housekeeping-tasks", label: "Housekeeping", icon: "Wrench" },
+            { href: "/hostel-manager/resource-management", label: "Resources", icon: "Package" },
+            { href: "/hostel-manager/tickets", label: "My Tickets", icon: "ClipboardList" },
           ],
         },
       ];
@@ -136,7 +139,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
             { href: "/vice-principal/delegated-responsibilities", label: "Delegations", icon: "KeyRound" },
             { href: "/vice-principal/decision-history", label: "Audit", icon: "History" },
             { href: "/vice-principal/reports", label: "Reports", icon: "FileSpreadsheet" },
-            { href: "/vice-principal/analytics", label: "Records", icon: "ClipboardList" },
+            { href: "/vice-principal/decision-history", label: "Records", icon: "ClipboardList" },
           ],
         },
       ];

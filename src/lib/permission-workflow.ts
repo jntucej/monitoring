@@ -495,12 +495,6 @@ export async function getScopedTicket(
           room_number,
           gender
         )
-      ),
-      document_signatures (
-        id,
-        signed_by,
-        signed_at,
-        signature_hash
       )
     `
     );

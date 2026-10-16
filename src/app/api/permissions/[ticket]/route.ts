@@ -234,16 +234,20 @@ async function handlePatch(req: NextRequest): Promise<Response> {
     const isOwner =
       authUserId === request.requester_user_id ||
       authUserId === request.student_user_id ||
-      ["admin", "sysadmin"].includes(authUserRole);
+      ["admin", "sysadmin", "principal"].includes(authUserRole);
     if (!isOwner) {
       return NextResponse.json(
         { success: false, error: { code: "FORBIDDEN", message: "Only the requester or student may cancel this request" } },
         { status: 403 }
       );
     }
-    if (request.status !== "PENDING") {
+    // Principal/admin/sysadmin can revoke approved-but-not-completed tickets;
+    // owner can only cancel their own still-pending request.
+    const canCancelFromApproved = ["admin", "sysadmin", "principal"].includes(authUserRole);
+    const cancellable = request.status === "PENDING" || (canCancelFromApproved && request.status === "APPROVED");
+    if (!cancellable) {
       return NextResponse.json(
-        { success: false, error: { code: "BAD_REQUEST", message: `Cannot cancel request with status ${request.status}. Only PENDING requests can be cancelled.` } },
+        { success: false, error: { code: "BAD_REQUEST", message: `Cannot cancel request with status ${request.status}. Only PENDING requests (or APPROVED for principal) can be cancelled.` } },
         { status: 400 }
       );
     }

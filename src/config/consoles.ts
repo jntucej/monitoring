@@ -222,7 +222,7 @@ export const CONSOLES: Record<string, RoleConsoleConfig> = {
   },
   caretaker: {
     role: "caretaker",
-    nav: ["work-orders", "facilities", "faults", "history"],
+    nav: ["overview", "maintenance", "workers"],
     statusStrip: false,
     recentSheet: false,
     board: {

@@ -31,7 +31,7 @@ function HostelManagerHousekeepingInner() {
     loading,
     error,
     refresh,
-  } = useApiResource<DataResponse>("/api/occupancy/presence-matrix", { ttlMs: 30_000 });
+  } = useApiResource<DataResponse>("/api/hostel-manager/housekeeping-tasks", { ttlMs: 30_000 });
 
   const refreshAll = useCallback(async () => {
     clearCache();
