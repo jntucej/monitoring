@@ -367,22 +367,11 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "Gate Operations Desk",
           items: [
-            { href: "/gate/active", label: "Scanner Desk", icon: "QrCode", badge: "ACTIVE" },
-            { href: "/gate/history", label: "Gate Scan Logs", icon: "Clock" },
-            { href: "/gate/manual", label: "Manual Entry Override", icon: "CheckSquare" },
-          ],
-        },
-        {
-          groupLabel: "Security & Radar",
-          items: [
-            { href: "/supervisor?tab=alerts", label: "Security Radar", icon: "ShieldAlert", badge: "WRN" },
-          ],
-        },
-        {
-          groupLabel: "General",
-          items: [
-            { href: "/profile", label: "My Profile", icon: "User" },
-            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+            { href: "/operator", label: "Overview", icon: "LayoutDashboard", badge: "OVERVIEW" },
+            { href: "/operator/scan", label: "Scan", icon: "QrCode", badge: "ACTIVE" },
+            { href: "/operator/transactions", label: "Transactions", icon: "Clock" },
+            { href: "/operator/manual-entry", label: "Manual Entry", icon: "CheckSquare" },
+            { href: "/operator/pass-verification", label: "Pass Verification", icon: "ShieldCheck" },
           ],
         },
       ];
@@ -587,6 +576,12 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
 
   // Filter out any existing "General" group that overlaps with Account group (to avoid duplicates)
   const filteredGroups = groups.filter(g => g.groupLabel !== "General" && g.groupLabel !== "General & Information" && g.groupLabel !== "General & Support");
+
+  // The operator role uses the console shell (RoleConsole + IconRail), so the
+  // Account group is intentionally omitted to keep the nav set to 5 items.
+  if (roleCode === "operator") {
+    return filteredGroups;
+  }
 
   return [...filteredGroups, accountGroup];
 }
