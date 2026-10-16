@@ -49,12 +49,29 @@ import { ChildActivityPanel } from "@/components/approver/ChildActivityPanel";
 import { TodayMealsPanel } from "@/components/approver/TodayMealsPanel";
 import { MessInchargeStatusBar, type MessInchargeCounts } from "@/components/approver/MessInchargeStatusBar";
 import { MessInchargeCommandBar } from "@/components/approver/MessInchargeCommandBar";
+import {
+  AdminAlertsPanel,
+} from "@/components/approver/AdminAlertsPanel";
+import { AdminStatusBar, type AdminCounts } from "@/components/approver/AdminStatusBar";
+import { AdminCommandBar } from "@/components/approver/AdminCommandBar";
 import { HandoffPanel } from "@/components/approver/HandoffPanel";
 import {
   ExamBranchStatusBar,
   type ExamBranchCounts,
 } from "@/components/approver/ExamBranchStatusBar";
 import { ExamBranchCommandBar } from "@/components/approver/ExamBranchCommandBar";
+import { SysadminStatusBar, type SysadminCounts } from "@/components/approver/SysadminStatusBar";
+import { SysadminCommandBar } from "@/components/approver/SysadminCommandBar";
+import { SysadminHealthPanel } from "@/components/approver/SysadminHealthPanel";
+import { PrincipalStatusBar, type PrincipalCounts } from "@/components/approver/PrincipalStatusBar";
+import { PrincipalCommandBar } from "@/components/approver/PrincipalCommandBar";
+import { PrincipalDashboardPanel } from "@/components/approver/PrincipalDashboardPanel";
+import { VisitorStatusBar, type VisitorCounts } from "@/components/approver/VisitorStatusBar";
+import { VisitorCommandBar } from "@/components/approver/VisitorCommandBar";
+import { VisitorActivityPanel } from "@/components/approver/VisitorActivityPanel";
+import { VpStatusBar, type VpCounts } from "@/components/approver/VpStatusBar";
+import { VpCommandBar } from "@/components/approver/VpCommandBar";
+import { VpDashboardPanel } from "@/components/approver/VpDashboardPanel";
 import type { PermissionItem } from "@/components/approver/PermissionRow";
 import { useAuthStore } from "@/stores/authStore";
 import { StatusBar } from "@/components/shared/StatusBar";
@@ -132,6 +149,11 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
   const isParent = role === "parent" || role === "guardian";
   const isMessIncharge = role === "mess_incharge";
   const isExamBranch = role === "exam_branch";
+  const isSysadmin = role === "sysadmin";
+  const isPrincipal = role === "principal";
+  const isVisitor = role === "visitor";
+  const isAdmin = role === "admin";
+  const isVicePrincipal = role === "vice_principal";
   const showAllocationPanel = config?.extraPanels?.includes("AllocationPanel") ?? false;
   const showExamDayPanel = config?.extraPanels?.includes("ExamDayPanel") ?? false;
   const showHandoffPanel = config?.extraPanels?.includes("HandoffPanel") ?? false;
@@ -143,6 +165,16 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
     config?.extraPanels?.includes("IncidentPanel") ?? false;
   const showChildActivityPanel =
     config?.extraPanels?.includes("ChildActivityPanel") ?? false;
+  const showSysadminHealthPanel =
+    config?.extraPanels?.includes("SysadminHealthPanel") ?? false;
+  const showPrincipalDashboardPanel =
+    config?.extraPanels?.includes("PrincipalDashboardPanel") ?? false;
+  const showVisitorActivityPanel =
+    config?.extraPanels?.includes("VisitorActivityPanel") ?? false;
+  const showAdminAlertsPanel =
+    config?.extraPanels?.includes("AdminAlertsPanel") ?? false;
+  const showVpDashboardPanel =
+    config?.extraPanels?.includes("VpDashboardPanel") ?? false;
 
   // The caller's assigned hostel, used for the caretaker status strip.
   const assignedHostel = useAuthStore((s) => s.user?.assignedHostel ?? null);
@@ -437,6 +469,101 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
     void refreshKanban();
   }, [refreshKanban]);
 
+  // For the sysadmin console, the board source is the feed
+  // /api/sysadmin/application-health (itemKey "health"). That endpoint returns
+  // an object under `data` ({ status, timestamp, services, database,
+  // gateways, recentAlerts }) rather than a flat itemKey array, so the Board
+  // feed renders empty by design — the meaningful surface is the
+  // SysadminHealthPanel + SysadminStatusBar. Derive the status-bar
+  // up/degraded/down counts from the same boardData fetch (no second request)
+  // by scanning the named service entries, the database component, and the
+  // gateways component.
+  const sysadminCounts: SysadminCounts | null = useMemo(() => {
+    if (!isSysadmin) return null;
+    const d = boardData?.data as
+      | {
+          services?: { status?: string; [key: string]: unknown };
+          database?: { status?: string };
+          gateways?: { status?: string };
+        }
+      | undefined;
+    const countsOut: SysadminCounts = { up: 0, degraded: 0, down: 0 };
+    const tally = (s: string | undefined, bucket: "up" | "degraded" | "down") => {
+      const norm = String(s ?? "").toLowerCase();
+      if (norm === "healthy" || norm === "up" || norm === "ok") {
+        countsOut.up += 1;
+        return;
+      }
+      if (norm === "degraded" || norm === "warn" || norm === "warning") {
+        countsOut.degraded += 1;
+        return;
+      }
+      if (bucket === "down") {
+        // Only count explicit down for a named component when we know it was
+        // checked; the overall "unhealthy" is surfaced via down below.
+      }
+      countsOut.down += 1;
+    };
+    if (d?.services) {
+      for (const [key, value] of Object.entries(d.services)) {
+        if (key === "status") continue;
+        const entry = value as { status?: string };
+        if (entry && typeof entry.status === "string") tally(entry.status, "down");
+      }
+    }
+    tally(d?.database?.status, "down");
+    tally(d?.gateways?.status, "down");
+    // If the overall status is down and nothing has been tallied, surface a
+    // single "down" so the bar never reads 0/0/0 while unhealthy.
+    if (countsOut.up === 0 && countsOut.degraded === 0 && countsOut.down === 0) {
+      const overall = (boardData?.data as { status?: string } | undefined)?.status?.toLowerCase();
+      if (overall === "unhealthy") countsOut.down = 1;
+    }
+    return countsOut;
+  }, [isSysadmin, boardData]);
+  const sysadminLoading = isSysadmin ? !boardData : false;
+
+  const refreshSysadmin = useCallback(() => {
+    void refreshBoard();
+  }, [refreshBoard]);
+
+  // For the admin console, the board source is the feed /api/admin/alerts
+  // (itemKey "alert"). That endpoint returns { success, data: { items,
+  // unresolvedCount } } — an object under `data` rather than a flat itemKey
+  // array, so the Board feed renders empty by design (the meaningful surface
+  // is the AdminAlertsPanel + AdminStatusBar). Derive the status-bar
+  // active/pending/records counts from the same boardData fetch (no second
+  // request): active = all open alerts; pending = open alerts at
+  // high/critical severity; records = total items in the feed (open +
+  // recently resolved).
+  interface AdminAlertsFeed {
+    items?: Array<{ severity?: string; resolved?: boolean; timestamp?: string }>;
+    unresolvedCount?: number;
+  }
+  const adminFeed =
+    (boardData?.data as unknown as { data?: AdminAlertsFeed } | null)?.data ??
+    (boardData?.data as unknown as AdminAlertsFeed | null) ??
+    null;
+  const adminCounts: AdminCounts | null = useMemo(() => {
+    if (!isAdmin) return null;
+    const items = Array.isArray(adminFeed?.items) ? adminFeed.items : [];
+    const open = items.filter((i) => !i.resolved);
+    const active = adminFeed?.unresolvedCount ?? open.length;
+    const pending = open.filter(
+      (i) => i.severity === "critical" || i.severity === "high",
+    ).length;
+    return { active, pending, records: items.length };
+  }, [isAdmin, adminFeed]);
+  const adminLoading = isAdmin ? !adminFeed : false;
+
+  // Refresh wiring for the admin console: the board source
+  // (/api/admin/alerts) supplies both the AdminAlertsPanel and the status-bar
+  // counts — reuse the same useApiResource cache as Board, no duplicate
+  // network request.
+  const refreshAdmin = useCallback(() => {
+    void refreshBoard();
+  }, [refreshBoard]);
+
   const esCounts: ExamSuperintendentCounts | null = useMemo(() => {
     if (!isExamSuperintendent) return null;
     const authorised = esExamAccessData?.data?.authorised ?? [];
@@ -577,6 +704,92 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
   }, [isMessIncharge, activeMessDay, messDays]);
   const messLoading = isMessIncharge ? !messDaysFeed : false;
 
+  // For the principal console, the board source is the feed
+  // /api/principal/dashboard (itemKey "item"), which returns
+  // { success, data: { pendingApprovals, recentAlerts, campusOccupancy } }.
+  // The board feed has no rows to render as items, so the status-bar
+  // counts are derived from the same feed fetch: pending = pendingApprovals,
+  // active = recentAlerts.length, records = 0 (no audit-records source yet).
+  // A second refresh callback keeps the status bar live on context-panel
+  // actions, reusing the shared useApiResource cache (no duplicate request).
+  interface PrincipalDashboardFeed {
+    pendingApprovals?: number;
+    recentAlerts?: unknown[];
+  }
+  const principalFeed =
+    (boardData?.data as unknown as PrincipalDashboardFeed | null) ?? null;
+  const principalCounts: PrincipalCounts | null = useMemo(() => {
+    if (!isPrincipal) return null;
+    const pending = principalFeed?.pendingApprovals ?? 0;
+    const active = Array.isArray(principalFeed?.recentAlerts)
+      ? principalFeed!.recentAlerts!.length
+      : 0;
+    return { pending, active, records: 0 };
+  }, [isPrincipal, principalFeed]);
+  const principalLoading = isPrincipal ? !principalFeed : false;
+
+  const refreshPrincipal = useCallback(() => {
+    void refreshBoard();
+  }, [refreshBoard]);
+
+  // For the visitor console, the board source is the feed
+  // /api/visitors/mine (itemKey "logs"), which returns
+  // { success, data: { logs, active, lastCompleted } }. Derive the
+  // status-strip counts (activities / pending / records / active) from the
+  // same boardData fetch so the bar stays live without a second request.
+  // "activities" = total visit logs; "pending" = unresolved (active or
+  // awaiting, no check-out yet); "records" = completed logs (with check-out);
+  // "active" = whether an active check-in is in progress.
+  interface VisitorFeedData {
+    logs?: Array<{ status?: string; check_out_at?: string | null }>;
+    active?: { status?: string } | null;
+  }
+  const visitorFeed =
+    (boardData?.data as unknown as VisitorFeedData | null) ?? null;
+  const visitorCounts: VisitorCounts | null = useMemo(() => {
+    if (!isVisitor || !visitorFeed) return null;
+    const logs = Array.isArray(visitorFeed.logs) ? visitorFeed.logs : [];
+    const pending = logs.filter(
+      (l) => l.status === "active" && !l.check_out_at
+    ).length;
+    const records = logs.filter((l) => !!l.check_out_at).length;
+    return {
+      activities: logs.length,
+      pending,
+      records,
+      active: !!(visitorFeed.active?.status === "ACTIVE" || pending > 0),
+    };
+  }, [isVisitor, visitorFeed]);
+  const visitorLoading = isVisitor ? !visitorFeed : false;
+
+  const refreshVisitor = useCallback(() => {
+    void refreshBoard();
+  }, [refreshBoard]);
+
+  // For the vice-principal console, the board source is the feed
+  // /api/principal/dashboard (itemKey "item"), same as the principal console.
+  // The VP is a delegated/oversight role with no hostel/branch filter, so the
+  // counts are derived from the same feed fetch: pending = pendingApprovals,
+  // active = recentAlerts.length (unresolved alerts currently active),
+  // records = pendingApprovals + recentAlerts.length (audit proxy).
+  interface VpDashboardFeed {
+    pendingApprovals?: number;
+    recentAlerts?: unknown[];
+  }
+  const vpFeed =
+    (boardData?.data as unknown as VpDashboardFeed | null) ?? null;
+  const vpCounts: VpCounts | null = useMemo(() => {
+    if (!isVicePrincipal) return null;
+    const pending = vpFeed?.pendingApprovals ?? 0;
+    const alerts = Array.isArray(vpFeed?.recentAlerts) ? vpFeed.recentAlerts : [];
+    return { pending, active: alerts.length, records: pending + alerts.length };
+  }, [isVicePrincipal, vpFeed]);
+  const vpLoading = isVicePrincipal ? !vpFeed : false;
+
+  const refreshVp = useCallback(() => {
+    void refreshBoard();
+  }, [refreshBoard]);
+
   const handleKanbanRefresh = useCallback(() => {
     void refreshKanban();
     void refreshGrid();
@@ -585,7 +798,12 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
     void refreshEs();
     void refreshExamBranch();
     void refreshMessIncharge();
-  }, [refreshKanban, refreshGrid, refreshHm, refreshOie, refreshEs, refreshExamBranch, refreshMessIncharge]);
+    void refreshSysadmin();
+    void refreshPrincipal();
+    void refreshVisitor();
+    void refreshAdmin();
+    void refreshVp();
+  }, [refreshKanban, refreshGrid, refreshHm, refreshOie, refreshEs, refreshExamBranch, refreshMessIncharge, refreshSysadmin, refreshPrincipal, refreshVisitor, refreshAdmin, refreshVp]);
 
   const handleCloseContext = useCallback(() => {
     setSelectedRow(null);
@@ -691,6 +909,11 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
           ) : null}
           {showChildActivityPanel ? <ChildActivityPanel /> : null}
           {showLiveActivityPanel ? <LiveActivityPanel /> : null}
+          {showSysadminHealthPanel ? <SysadminHealthPanel /> : null}
+          {showPrincipalDashboardPanel ? <PrincipalDashboardPanel /> : null}
+          {showVisitorActivityPanel ? <VisitorActivityPanel onRefresh={refreshVisitor} /> : null}
+          {showAdminAlertsPanel ? <AdminAlertsPanel /> : null}
+          {showVpDashboardPanel ? <VpDashboardPanel onRefresh={refreshVp} /> : null}
         </main>
 
         {selectedRow ? (
@@ -712,7 +935,37 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
 
       {/* Status bar — full width, sticky at the bottom of the shell */}
       <div className="sticky bottom-0 z-30">
-        {isExamBranch ? (
+        {isAdmin ? (
+          <AdminStatusBar
+            counts={adminCounts}
+            lastScan={lastScan}
+            refreshing={adminLoading}
+          />
+        ) : isVicePrincipal ? (
+          <VpStatusBar
+            counts={vpCounts}
+            lastScan={lastScan}
+            refreshing={vpLoading}
+          />
+        ) : isVisitor ? (
+          <VisitorStatusBar
+            counts={visitorCounts}
+            lastScan={lastScan}
+            refreshing={visitorLoading}
+          />
+        ) : isSysadmin ? (
+          <SysadminStatusBar
+            counts={sysadminCounts}
+            lastScan={lastScan}
+            refreshing={sysadminLoading}
+          />
+        ) : isPrincipal ? (
+          <PrincipalStatusBar
+            counts={principalCounts}
+            lastScan={lastScan}
+            refreshing={principalLoading}
+          />
+        ) : isExamBranch ? (
           <ExamBranchStatusBar
             counts={examBranchCounts}
             lastScan={lastKanbanScan}
@@ -765,8 +1018,38 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
         )}
       </div>
 
-      {isExamBranch ? (
+      {isAdmin ? (
+        <AdminCommandBar
+          role={role}
+          open={commandBarOpen}
+          onClose={closeCommandBar}
+        />
+      ) : isVicePrincipal ? (
+        <VpCommandBar
+          role={role}
+          open={commandBarOpen}
+          onClose={closeCommandBar}
+        />
+      ) : isVisitor ? (
+        <VisitorCommandBar
+          role={role}
+          open={commandBarOpen}
+          onClose={closeCommandBar}
+        />
+      ) : isSysadmin ? (
+        <SysadminCommandBar
+          role={role}
+          open={commandBarOpen}
+          onClose={closeCommandBar}
+        />
+      ) : isExamBranch ? (
         <ExamBranchCommandBar
+          role={role}
+          open={commandBarOpen}
+          onClose={closeCommandBar}
+        />
+      ) : isPrincipal ? (
+        <PrincipalCommandBar
           role={role}
           open={commandBarOpen}
           onClose={closeCommandBar}

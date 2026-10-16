@@ -50,7 +50,28 @@ export type ConsoleCommand =
   | "reports"
   | "verify"
   | "oie-handoff"
-  | "discrepancies";
+  | "discrepancies"
+  | "health"
+  | "services"
+  | "deployments"
+  | "backup"
+  | "audit"
+  | "dashboard"
+  | "delegations"
+  | "approvals"
+  | "checkin"
+  | "approval"
+  | "history"
+  | "host"
+  | "request"
+  | "alerts"
+  | "announcements"
+  | "finalize"
+  | "revoke"
+  | "count"
+  | "menu"
+  | "issue"
+  | "handover";
 
 export type ConsoleStatusField =
   | "gate"
@@ -88,7 +109,11 @@ export type ConsoleStatusField =
   | "branch"
   | "handoff"
   | "discrepancies"
-  | "records";
+  | "records"
+  | "alerts"
+  | "delegations"
+  | "pending"
+  | "active";
 
 export interface RoleConsoleConfig {
   role: string;
@@ -286,7 +311,7 @@ export const CONSOLES: Record<string, RoleConsoleConfig> = {
   },
   supervisor: {
     role: "supervisor",
-    nav: ["activity", "escalations", "teams", "records", "reports"],
+    nav: ["live", "escalations", "gates", "shifts", "reports"],
     statusStrip: false,
     recentSheet: false,
     board: {
@@ -295,9 +320,9 @@ export const CONSOLES: Record<string, RoleConsoleConfig> = {
       itemKey: "escalation",
     },
     contextEntity: "escalation",
-    commands: ["approve", "reject", "escalate", "teams", "records"],
+    commands: ["approve", "escalate", "assign", "resolve", "handover"],
     statusFields: ["escalations", "pending", "critical", "active"],
-    extraPanels: ["LiveActivityPanel"],
+    extraPanels: ["EscalationPanel"],
   },
   parent: {
     role: "parent",
@@ -322,21 +347,26 @@ export const CONSOLES: Record<string, RoleConsoleConfig> = {
   },
   mess_incharge: {
     role: "mess_incharge",
-    nav: ["meals", "inventory", "requests", "records", "reports"],
+    nav: ["today", "menu", "counts", "inventory", "issues"],
     statusStrip: false,
     recentSheet: false,
     board: {
       kind: "feed",
-      // The mess days feed is the console's source of truth for the mess
-      // schedule. /api/mess/days returns the recent 60 mess days (newest
-      // first) — the board renders that as a feed with itemKey "day".
-      source: "/api/mess/days",
-      itemKey: "day",
+      // The digest board source is the mess analytics endpoint. /api/mess/analytics
+      // returns a per-day digest (declared present / confirmed / veg / non-veg
+      // + by-hostel-block breakdown) — the board renders that as a feed with
+      // itemKey "summary". The board-kind union doesn't have "digest" yet, so
+      // "feed" stands in for now (a future board-kind addition would use
+      // "digest").
+      source: "/api/mess/analytics",
+      itemKey: "summary",
     },
+    // The contextEntity union doesn't include "messDay" yet — "ticket" stands
+    // in for now so the ticket ContextPanel renders on row click.
     contextEntity: "ticket",
-    commands: ["meals", "inventory", "requests", "records", "reports"],
+    commands: ["finalize", "revoke", "count", "menu", "issue"],
     statusFields: ["meals", "pending", "active", "records"],
-    extraPanels: ["TodayMealsPanel"],
+    extraPanels: ["MealServePanel"],
   },
   exam_branch: {
     role: "exam_branch",
@@ -357,6 +387,86 @@ export const CONSOLES: Record<string, RoleConsoleConfig> = {
     commands: ["verify", "forward", "oie-handoff", "records", "discrepancies"],
     statusFields: ["branch", "pending", "handoff", "discrepancies"],
     extraPanels: ["HandoffPanel"],
+  },
+  principal: {
+    role: "principal",
+    nav: ["dashboard", "delegations", "audit", "reports", "approvals"],
+    statusStrip: false,
+    recentSheet: false,
+    board: {
+      kind: "feed",
+      source: "/api/principal/dashboard",
+      itemKey: "item",
+    },
+    contextEntity: "ticket",
+    commands: ["dashboard", "delegations", "audit", "reports", "approvals"],
+    statusFields: ["alerts", "pending", "active", "records"],
+    extraPanels: ["PrincipalDashboardPanel"],
+  },
+  sysadmin: {
+    role: "sysadmin",
+    nav: ["health", "services", "deployments", "backup", "audit"],
+    statusStrip: false,
+    recentSheet: false,
+    board: {
+      kind: "feed",
+      source: "/api/sysadmin/application-health",
+      itemKey: "health",
+    },
+    contextEntity: "ticket",
+    commands: ["health", "services", "deployments", "backup", "audit"],
+    statusFields: ["alerts", "pending", "active", "records"],
+    extraPanels: ["SysadminHealthPanel"],
+  },
+  vice_principal: {
+    role: "vice_principal",
+    nav: ["approvals", "delegations", "audit", "reports", "records"],
+    statusStrip: false,
+    recentSheet: false,
+    board: {
+      kind: "feed",
+      source: "/api/principal/dashboard",
+      itemKey: "item",
+    },
+    contextEntity: "ticket",
+    commands: ["approvals", "delegations", "audit", "reports", "records"],
+    statusFields: ["alerts", "pending", "active", "records"],
+    extraPanels: ["VpDashboardPanel"],
+  },
+  visitor: {
+    role: "visitor",
+    nav: ["checkin", "approval", "history", "host", "request"],
+    statusStrip: false,
+    recentSheet: false,
+    board: {
+      kind: "feed",
+      // Self-scoped visitor source: /api/visitors/mine returns only the
+      // calling visitor's own visitor_logs rows (no hostel/branch filter —
+      // scoped by the caller's user_id server-side). Response shape:
+      //   { success, data: { logs, active, lastCompleted } }
+      // so the visit-activity feed items live under data.logs.
+      source: "/api/visitors/mine",
+      itemKey: "logs",
+    },
+    contextEntity: "activity",
+    commands: ["checkin", "approval", "history", "host", "request"],
+    statusFields: ["activities", "pending", "active", "records"],
+    extraPanels: ["VisitorActivityPanel"],
+  },
+  admin: {
+    role: "admin",
+    nav: ["alerts", "announcements", "audit", "backup", "reports"],
+    statusStrip: false,
+    recentSheet: false,
+    board: {
+      kind: "feed",
+      source: "/api/admin/alerts",
+      itemKey: "alert",
+    },
+    contextEntity: "ticket",
+    commands: ["alerts", "announcements", "audit", "backup", "reports"],
+    statusFields: ["alerts", "pending", "active", "records"],
+    extraPanels: ["AdminAlertsPanel"],
   },
 };
 

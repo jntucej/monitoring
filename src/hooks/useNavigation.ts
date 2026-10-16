@@ -101,45 +101,42 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       break;
 
     case "principal":
+      // Principal is migrated to the RoleConsole shell (feed:dashboard via
+      // /api/principal/dashboard). Principal is a top authority role — scope
+      // is all workflows, no hostel/branch filter. Single console group of
+      // exactly 5 items so the IconRail stays lean. No "Campus Life" /
+      // "General & Support" groups. All 5 commands are pure navigation to the
+      // real principal sub-pages under /principal/.
       groups = [
         {
-          groupLabel: "Principal Desk",
+          groupLabel: "Principal Console",
           items: [
-            { href: "/principal", label: "Principal Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
-            { href: "/principal/permissions", label: "Principal Approvals", icon: "CheckSquare", badge: "PENDING" },
-            { href: "/supervisor?tab=alerts", label: "Security Radar", icon: "ShieldAlert", badge: "ALERTS" },
-          ],
-        },
-        {
-          groupLabel: "Campus Life",
-          items: [
-            { href: "/campus", label: "My Campus", icon: "Sparkles" },
-          ],
-        },
-        {
-          groupLabel: "General & Support",
-          items: [
-            { href: "/profile", label: "My Profile", icon: "User" },
-            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+            { href: "/principal", label: "Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
+            { href: "/principal/delegation-manager", label: "Delegations", icon: "UserCog" },
+            { href: "/principal/audit", label: "Audit", icon: "ScrollText" },
+            { href: "/principal/reports", label: "Reports", icon: "FileSpreadsheet" },
+            { href: "/principal/approvals", label: "Approvals", icon: "CheckSquare", badge: "PENDING" },
           ],
         },
       ];
       break;
 
     case "vice_principal":
+      // Vice Principal is migrated to the RoleConsole shell (feed:
+      // /api/principal/dashboard, itemKey "item", VP scope = delegated
+      // oversight, no hostel/branch filter). Single console group of exactly
+      // 5 items so the IconRail stays lean. No "General & Support" group.
+      // All 5 commands are pure navigation to the real VP sub-pages under
+      // /vice-principal/.
       groups = [
         {
-          groupLabel: "Vice Principal Desk",
+          groupLabel: "VP Console",
           items: [
-            { href: "/vice-principal", label: "VP Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
-            { href: "/exam/permissions", label: "VP Approvals", icon: "CheckSquare", badge: "PENDING" },
-          ],
-        },
-        {
-          groupLabel: "General & Support",
-          items: [
-            { href: "/profile", label: "My Profile", icon: "User" },
-            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+            { href: "/vice-principal/pending-approvals", label: "Approvals", icon: "CheckSquare", badge: "PENDING" },
+            { href: "/vice-principal/delegated-responsibilities", label: "Delegations", icon: "KeyRound" },
+            { href: "/vice-principal/decision-history", label: "Audit", icon: "History" },
+            { href: "/vice-principal/reports", label: "Reports", icon: "FileSpreadsheet" },
+            { href: "/vice-principal/analytics", label: "Records", icon: "ClipboardList" },
           ],
         },
       ];
@@ -227,130 +224,42 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       break;
 
     case "sysadmin":
+      // SysAdmin is migrated to the RoleConsole shell (feed:application-health
+      // via /api/sysadmin/application-health). Single console group of exactly
+      // 5 items so the IconRail stays lean. No "System Governance" / "Security
+      // & Policy" / "General & Information" groups. All 5 commands are pure
+      // navigation to the real sysadmin sub-pages under /sysadmin/.
       groups = [
         {
-          groupLabel: "System Governance",
+          groupLabel: "SysAdmin Console",
           items: [
-            { href: "/sysadmin", label: "System Overview", icon: "LayoutDashboard", badge: "SYSADMIN" },
-            { href: "/sysadmin/students", label: "Students Management", icon: "GraduationCap" },
-            { href: "/sysadmin/staff", label: "Staff Management", icon: "Briefcase" },
-            { href: "/sysadmin/roles", label: "Roles & Permissions", icon: "ShieldCheck" },
-            { href: "/sysadmin/audit", label: "SysAdmin Audit Telemetry", icon: "ShieldAlert" },
-            { href: "/sysadmin/departments", label: "Department & HOD Desk", icon: "Building2" },
-            { href: "/sysadmin/promotions", label: "Role Promotions", icon: "UserCheck" },
-            { href: "/sysadmin/sessions", label: "Active Sessions", icon: "Users" },
-            { href: "/sysadmin/health", label: "System Health", icon: "Activity" },
-            { href: "/sysadmin/infrastructure", label: "Infrastructure Monitoring", icon: "Server" },
-          ],
-        },
-        {
-          groupLabel: "Records & Alumni",
-          items: [
-            { href: "/sysadmin/alumni", label: "Alumni & Deprovision", icon: "GraduationCap", badge: "NEW" },
-          ],
-        },
-        {
-          groupLabel: "Integrations & Automation",
-          items: [
-            { href: "/sysadmin/sso", label: "SSO Configuration", icon: "Shield" },
-            { href: "/sysadmin/integrations", label: "Integration Hub", icon: "Database" },
-            { href: "/sysadmin/jobs", label: "Scheduled Background Jobs", icon: "Clock" },
-            { href: "/sysadmin/scheduling", label: "Smart Scheduling", icon: "Sparkles" },
-          ],
-        },
-        {
-          groupLabel: "Security & Policy",
-          items: [
-            { href: "/sysadmin/security", label: "Zero-Trust Security", icon: "Lock" },
-            { href: "/security", label: "Security Status", icon: "ShieldCheck" },
-            { href: "/sysadmin/compliance", label: "Compliance & Retention", icon: "ShieldCheck" },
-            { href: "/sysadmin/exit-reasons", label: "Exit Reasons & Outpass", icon: "DoorOpen" },
-            { href: "/sysadmin/reasons", label: "Custom Reasons", icon: "MessageSquarePlus" },
-            { href: "/sysadmin/devices", label: "Device Verification", icon: "Cpu" },
-            { href: "/sysadmin/alerts/rules", label: "Alert Rules", icon: "Bell" },
-            { href: "/sysadmin/navigation", label: "Navigation Editor", icon: "Layout" },
-            { href: "/help", label: "Help & Docs", icon: "BookOpen" },
-          ],
-        },
-        {
-          groupLabel: "General & Information",
-          items: [
-            { href: "/sysadmin/profile", label: "SysAdmin Profile", icon: "UserCog" },
-            { href: "/profile", label: "My Profile", icon: "User" },
-            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+            { href: "/sysadmin/application-health", label: "Health", icon: "Activity", badge: "LIVE" },
+            { href: "/sysadmin/docker-services", label: "Services", icon: "Server" },
+            { href: "/sysadmin/deployments", label: "Deployments", icon: "Rocket" },
+            { href: "/sysadmin/backup", label: "Backup", icon: "HardDrive" },
+            { href: "/sysadmin/audit", label: "Audit", icon: "ShieldAlert" },
           ],
         },
       ];
       break;
 
     case "admin":
+      // Admin is migrated to the RoleConsole shell (feed:admin alerts via
+      // /api/admin/alerts). Single console group of exactly 5 items so the
+      // IconRail stays lean. No "Executive Command" / "Hostel & Mess" /
+      // "Analytics & Intelligence" / "Administration & Settings" groups. All
+      // 5 commands are pure navigation to the real admin sub-pages under
+      // /admin/ (backup maps to /admin/health, the closest existing
+      // admin sub-page, since a dedicated /admin/backup page does not exist).
       groups = [
         {
-          groupLabel: "Executive Command",
+          groupLabel: "Admin Console",
           items: [
-            { href: "/admin", label: "Campus Dashboard", icon: "LayoutDashboard", badge: "LIVE" },
-            { href: "/admin/overview", label: "Overview", icon: "Info" },
-            { href: "/supervisor?tab=alerts", label: "Security Alerts", icon: "ShieldAlert", badge: "SECURE" },
-          ],
-        },
-        {
-          groupLabel: "Hostel & Mess",
-          items: [
-            { href: "/admin/mess", label: "Mess Configuration", icon: "UtensilsCrossed", badge: "MESS" },
-          ],
-        },
-        {
-          groupLabel: "Institutional Rosters",
-          items: [
-            { href: "/admin/students", label: "Student Master Roster", icon: "GraduationCap" },
-            { href: "/admin/faculty", label: "Faculty Attendance", icon: "UserCheck" },
-            { href: "/admin/staff", label: "Staff Oversight", icon: "Briefcase" },
-            { href: "/admin/workers", label: "Worker Shift Tracker", icon: "HardHat" },
-          ],
-        },
-        {
-          groupLabel: "Analytics & Intelligence",
-          items: [
-            { href: "/admin/reports", label: "Gate Reports", icon: "FileSpreadsheet" },
-            { href: "/admin/analytics", label: "Occupancy & Audit", icon: "Activity" },
-            { href: "/admin/analytics/advanced", label: "Advanced Analytics & Reports", icon: "BarChart3" },
-            { href: "/admin/analytics/predictive", label: "AI Predictive Analytics", icon: "Brain", badge: "AI" },
-            { href: "/admin/occupancy", label: "Density Heatmap & Digital Twin", icon: "MapPin", badge: "2D LIVE" },
-            { href: "/admin/analytics/users", label: "User Behavioral Analytics", icon: "Users" },
-            { href: "/admin/sustainability", label: "Green IT & Sustainability", icon: "Leaf" },
-          ],
-        },
-        {
-          groupLabel: "Mess Management",
-          items: [
-            { href: "/admin/mess", label: "Mess Food Preferences", icon: "UtensilsCrossed", badge: "NEW" },
-          ],
-        },
-        {
-          groupLabel: "Administration & Settings",
-          items: [
-            { href: "/admin/users", label: "User Accounts & Roles", icon: "UserCog" },
-            { href: "/admin/roles", label: "Roles & Hierarchy", icon: "ShieldCheck", badge: "LIVE" },
-            { href: "/admin/announcements", label: "Broadcast Announcements", icon: "Megaphone" },
-            { href: "/admin/support", label: "Support Desk Triage", icon: "LifeBuoy" },
-            { href: "/admin/gates", label: "Gate Hardware Desk", icon: "QrCode" },
-            { href: "/admin/gates/schedule", label: "Gate Access Rules", icon: "Clock" },
-            { href: "/admin/health", label: "System Health & Ops", icon: "Activity" },
-            { href: "/security", label: "Security Status", icon: "ShieldCheck" },
-            { href: "/admin/settings", label: "System Settings", icon: "Settings" },
-          ],
-        },
-        {
-          groupLabel: "General & Information",
-          items: [
-            { href: "/profile", label: "My Profile", icon: "User" },
-            { href: "/about", label: "About Campus", icon: "HelpCircle" },
-          ],
-        },
-        {
-          groupLabel: "Campus Life",
-          items: [
-            { href: "/campus", label: "My Campus", icon: "Sparkles" },
+            { href: "/admin/alerts", label: "Alerts", icon: "Bell", badge: "ACTIVE" },
+            { href: "/admin/announcements", label: "Announcements", icon: "Megaphone" },
+            { href: "/admin/audit-logs", label: "Audit", icon: "ScrollText" },
+            { href: "/admin/health", label: "Backup", icon: "Activity" },
+            { href: "/admin/reports", label: "Reports", icon: "FileSpreadsheet" },
           ],
         },
       ];
@@ -407,6 +316,26 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
             { href: "/mess/operational-requests", label: "Requests", icon: "Send" },
             { href: "/mess/meal-attendance", label: "Records", icon: "FileSpreadsheet" },
             { href: "/mess/consumption-reports", label: "Reports", icon: "BarChart3" },
+          ],
+        },
+      ];
+      break;
+
+    case "visitor":
+      // Visitor is migrated to the RoleConsole shell (feed: own visit
+      // activities via /api/visitors/mine, self-scoped by user_id — no
+      // hostel/branch filter). Single console group of exactly 5 items so
+      // the IconRail stays lean. No "Account" group. All 5 commands are
+      // navigation to the real visitor sub-pages under /visitor/.
+      groups = [
+        {
+          groupLabel: "Visitor Console",
+          items: [
+            { href: "/visitor/checkin-out", label: "Check-in", icon: "DoorOpen", badge: "PENDING" },
+            { href: "/visitor/approval-status", label: "Approval", icon: "CheckSquare" },
+            { href: "/visitor/history", label: "History", icon: "History" },
+            { href: "/visitor/host-info", label: "Host", icon: "Building2" },
+            { href: "/visitor/request", label: "Request", icon: "Send" },
           ],
         },
       ];
@@ -595,7 +524,12 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
     roleCode === "supervisor" ||
     roleCode === "parent" ||
     roleCode === "exam_branch" ||
-    roleCode === "mess_incharge"
+    roleCode === "mess_incharge" ||
+    roleCode === "sysadmin" ||
+    roleCode === "principal" ||
+    roleCode === "visitor" ||
+    roleCode === "admin" ||
+    roleCode === "vice_principal"
   ) {
     return filteredGroups;
   }
