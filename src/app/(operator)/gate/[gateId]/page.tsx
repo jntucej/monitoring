@@ -23,6 +23,7 @@ import type { Scan as ScanRecord } from "@/lib/types";
 import { useCollegeInfo } from "@/hooks/useCollegeInfo";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { useScanQueueSync } from "@/hooks/useScanQueueSync";
+import { primeAudio } from "@/lib/sound";
 
 function OperatorPageInner() {
   const params = useParams<{ gateId: string }>();
@@ -171,8 +172,15 @@ function OperatorPageInner() {
     }
   }, [authenticated, user, gateId, defaultGateId]);
 
-  // Dynamic periodic sync of stats: 5s on desktop, 15s on mobile (width < 768)
-  usePolling(loadStats, { intervalMs: 5000 });
+  // Fix #3: suppress stats polling while the camera scanner is open or a scan
+  // is in-flight. Only poll when idle AND the scanner modal is closed.
+  const pollEnabled = state === "idle" && !showCameraScanner;
+  usePolling(loadStats, { intervalMs: 15_000, enabled: pollEnabled });
+
+  // Fix #1: the Scanner's decode loop should only run while idle or actively
+  // detecting. Once confirming / success / error, stop decoding so jsQR CPU
+  // isn't wasted on a frozen frame.
+  const scannerActive = state === "idle" || state === "detecting";
   const [showCameraScanner, setShowCameraScanner] = useState(false);
   const [manualRollInput, setManualRollInput] = useState("");
 
@@ -290,7 +298,18 @@ function OperatorPageInner() {
 
   const showWebAuthn = false;
 
-  
+  // Fix #5: prime the AudioContext on the Scan QR / Scan Barcode button tap
+  // so the success beep is audible on the very first scan (browsers keep
+  // AudioContext suspended until a user gesture fires).
+  const handleScanQrClick = () => {
+    primeAudio();
+    setShowCameraScanner(true);
+  };
+  const handleScanBarcodeClick = () => {
+    primeAudio();
+    setShowCameraScanner(true);
+  };
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       (window as any).__handleQRScannedForTesting = handleQRScanned;
@@ -467,12 +486,8 @@ function OperatorPageInner() {
                 <>
                   {effectiveSubMode === "scan" && (
                     <ScanViewfinder
-                      onScanQr={() => {
-                        setShowCameraScanner(true);
-                      }}
-                      onScanBarcode={() => {
-                        setShowCameraScanner(true);
-                      }}
+                      onScanQr={handleScanQrClick}
+                      onScanBarcode={handleScanBarcodeClick}
                       onManualEntry={() => setOperatorSubMode("manual")}
                       scanning={state === "detecting"}
                       lastScanRoll={lastScan?.roll}
@@ -635,22 +650,8 @@ function OperatorPageInner() {
                     </div>
                   )}
 
-                  {/* Scan Confirmation Verification Interface */}
-                  {state === "confirming" && currentStudent && (
-                    <ScanConfirmation
-                      student={currentStudent}
-                      campusStatus={currentCampusStatus}
-                      currentEntryType={operatorStore.entryType}
-                      lastOutReason={operatorStore.lastOutReason}
-                      onConfirm={async (dir, reason, entryType, buttonId) =>
-                        await confirmScan(addToast, dir, reason, entryType, buttonId)
-                      }
-                      onCancel={cancelScan}
-                      isInline={true}
-                    />
-                  )}
-
-                  {/* Empty State */}
+                  {/* Empty State — confirmation now lives in the
+                      AnimatePresence below the status strip */}
                   {state !== "confirming" && state !== "success" && state !== "error" && (
                     <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 text-center space-y-3">
                       <div className="w-12 h-12 rounded-full bg-slate-800/10 text-[var(--text-muted)] flex items-center justify-center mx-auto">
@@ -791,17 +792,52 @@ function OperatorPageInner() {
       {/* Person overview modal opened by tapping a log */}
       <ScanDetailModal scan={selectedScan} onClose={() => setSelectedScan(null)} />
 
-      {/* Live Camera Scanner Dialog/Component — auto-detects format */}
-      <Scanner
-        isOpen={showCameraScanner}
-        onClose={() => setShowCameraScanner(false)}
-        onScan={handleQRScanned}
-        onManualEntryClick={() => {
-          setShowCameraScanner(false);
-          setOperatorSubMode("manual");
-        }}
-        gateId={gateId || user?.gateId}
-      />
+      {/* Fix #4: single AnimatePresence mode="wait" so the scanner fully
+          unmounts (releasing MediaStream + RAF) before the confirmation
+          slides in. No overlap, no double-camera contention. */}
+      <AnimatePresence mode="wait">
+        {showCameraScanner && scannerActive ? (
+          <motion.div
+            key="scanner"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+          >
+            <Scanner
+              isOpen={showCameraScanner}
+              active={scannerActive}
+              onClose={() => setShowCameraScanner(false)}
+              onScan={handleQRScanned}
+              onManualEntryClick={() => {
+                setShowCameraScanner(false);
+                setOperatorSubMode("manual");
+              }}
+              gateId={gateId || user?.gateId}
+            />
+          </motion.div>
+        ) : state === "confirming" && currentStudent ? (
+          <motion.div
+            key="confirm"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.18 }}
+          >
+            <ScanConfirmation
+              student={currentStudent}
+              campusStatus={currentCampusStatus}
+              currentEntryType={operatorStore.entryType}
+              lastOutReason={operatorStore.lastOutReason}
+              onConfirm={async (dir, reason, entryType, buttonId) =>
+                await confirmScan(addToast, dir, reason, entryType, buttonId)
+              }
+              onCancel={cancelScan}
+              isInline={true}
+            />
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }

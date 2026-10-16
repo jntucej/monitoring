@@ -592,7 +592,9 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
           state: "success",
           lastScan: scan,
           todaysStats: newStats,
-          recentScans: scan ? [scan, ...get().recentScans.slice(0, 4)] : get().recentScans,
+          // Keep up to 20 recent scans in memory (slice(0, 20) on the
+          // remainder means the array never grows past ~21 entries total).
+          recentScans: scan ? [scan, ...get().recentScans.slice(0, 20)] : get().recentScans,
           error: null,
           entryType: entryTypeToUse,
         });

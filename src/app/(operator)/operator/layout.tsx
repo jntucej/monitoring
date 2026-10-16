@@ -17,6 +17,7 @@ import {
   Bell,
   type LucideIcon,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { getConsoleConfig } from "@/config/consoles";
 
 /**
@@ -150,26 +151,31 @@ export default function OperatorSectionLayout({
           >
             <ICONS.more className="w-4 h-4" />
           </button>
-          {moreOpen && (
-            <div
-              role="menu"
-              aria-label="More actions"
-              className="absolute right-full top-0 mr-2 w-44 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] shadow-lg py-1 z-50"
-            >
-              {moreMenuItems.map((item) => (
-                <button
-                  key={item.label}
-                  role="menuitem"
-                  type="button"
-                  onClick={item.action}
-                  className="w-full px-3 py-2 text-left text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] flex items-center gap-2 transition-colors"
-                >
-                  <item.icon className="w-3.5 h-3.5 shrink-0" />
-                  <span>{item.label}</span>
-                </button>
-              ))}
-            </div>
-          )}
+          {/* Fix #6: permanently mounted; CSS opacity + pointer-events toggle.
+              No JS re-render on open/close — just a class flip. */}
+          <div
+            role="menu"
+            aria-label="More actions"
+            aria-hidden={!moreOpen}
+            className={cn(
+              "absolute right-full top-0 mr-2 w-44 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] shadow-lg py-1 z-50",
+              "transition-opacity duration-150",
+              moreOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+            )}
+          >
+            {moreMenuItems.map((item) => (
+              <button
+                key={item.label}
+                role="menuitem"
+                type="button"
+                onClick={item.action}
+                className="w-full px-3 py-2 text-left text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] flex items-center gap-2 transition-colors"
+              >
+                <item.icon className="w-3.5 h-3.5 shrink-0" />
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       );
     }
