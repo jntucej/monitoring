@@ -9,33 +9,30 @@
 -- overwrite with real metered values via the admin API.
 
 DO $$
+DECLARE
+  v_day date;
+  v_count int;
 BEGIN
-  -- Only seed when the table is completely empty so we don't double-count
-  -- on re-runs of this migration.
   IF NOT EXISTS (SELECT 1 FROM public.sustainability_metrics LIMIT 1) THEN
-    INSERT INTO public.sustainability_metrics (
-      metric_date,
-      paperless_passes_count,
-      carbon_saved_kg
-    )
-    SELECT
-      CURRENT_DATE - d.offset_days,
-      COALESCE((
+    FOR v_day IN SELECT d.offset_days FROM generate_series(0, 30, 1) AS d(offset_days) LOOP
+      v_count := (
         SELECT COUNT(*)
         FROM public.permission_requests p
         WHERE p.workflow_type = 'exam'
           AND p.status IN ('APPROVED', 'COMPLETED')
-          AND (p.created_at::date) = (CURRENT_DATE - d.offset_days)
-      ), 0),
-      COALESCE((
-        SELECT COUNT(*)
-        FROM public.permission_requests p
-        WHERE p.workflow_type = 'exam'
-          AND p.status IN ('APPROVED', 'COMPLETED')
-          AND (p.created_at::date) = (CURRENT_DATE - d.offset_days)
-      ), 0) * 0.4,  -- kg CO2e saved per paperless pass (industry median)
-    FROM generate_series(0, 30, 1) AS d(offset_days)
-  ON CONFLICT DO NOTHING;
+          AND p.created_at::date = (CURRENT_DATE - v_day)
+      );
+      INSERT INTO public.sustainability_metrics (
+        metric_date,
+        paperless_passes_count,
+        carbon_saved_kg
+      )
+      VALUES (
+        CURRENT_DATE - v_day,
+        v_count,
+        v_count * 0.4
+      );
+    END LOOP;
   END IF;
 END
 $$;

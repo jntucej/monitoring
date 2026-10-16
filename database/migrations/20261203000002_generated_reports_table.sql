@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS public.generated_reports (
   source TEXT NOT NULL DEFAULT 'manual' CHECK (source IN ('auto','manual')),
   csv_body TEXT,
   payload JSONB,
-  created_by UUID REFERENCES public.users(id) ON DELETE SET NULL,
+  created_by UUID,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
