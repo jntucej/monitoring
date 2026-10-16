@@ -330,6 +330,10 @@ export async function recordScan(input: RecordScanInput): Promise<RecordScanResu
     operatorName: input.operatorName,
     timestamp: new Date().toISOString(),
     isManual: input.isManual ?? false,
+    // Dedup window disabled (0): same-direction rescans are no longer
+    // rejected by the time window. The occupancy same-direction check above
+    // still guards against true double-records; manual corrections override.
+    dupWindowMinutes: 0,
   });
 
   // If duplicate, the RPC returned the pre-existing row, not the one we sent.

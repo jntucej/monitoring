@@ -123,14 +123,7 @@ async function handleGet(req: NextRequest, context: any) {
       id,
       name,
       role,
-      student_details (
-        roll,
-        year,
-        section,
-        hostel_block,
-        room_number,
-        gender
-      )
+      unique_id
     ),
     document_signatures (
       id,

@@ -51,7 +51,7 @@ interface PermissionsResponse {
     workflow_type?: string;
     status?: string;
     created_at?: string;
-    student?: { name?: string; student_details?: { roll?: string } | null } | null;
+    student?: { name?: string; unique_id?: string } | null;
   }>;
   total?: number;
 }
@@ -358,9 +358,9 @@ function ExceptionsInner() {
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
                       {p.student?.name || "Unknown applicant"}
-                      {p.student?.student_details?.roll && (
+                      {p.student?.unique_id && (
                         <span className="ml-1.5 font-mono text-xs text-[var(--text-muted)]">
-                          {p.student.student_details.roll}
+                          {p.student.unique_id}
                         </span>
                       )}
                     </p>
