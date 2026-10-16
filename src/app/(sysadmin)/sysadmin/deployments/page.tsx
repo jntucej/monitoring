@@ -19,7 +19,7 @@ interface DeploymentRow {
 }
 
 interface DeploymentsData {
-  source: "host-deploy-log" | "unavailable";
+  source: "host-deploy-log" | "unavailable" | "log-unavailable" | "deployments-db";
   deployments: DeploymentRow[];
 }
 
@@ -98,9 +98,9 @@ function DeploymentsInner() {
                 No deployment records available in this environment.
               </p>
               <p className="text-xs text-slate-600 max-w-md mx-auto mt-1">
-                Deployment events are read from the host watchdog log under /opt/monitoring.
-                In a dev or CI container without that file the history will be empty — contact
-                the operations contact in the strip below.
+                {d?.source === "deployments-db"
+                  ? "The deployments table is empty. CI writes deployment events via POST /api/admin/deployments."
+                  : "Deployment events are read from the host watchdog log under /opt/monitoring. In a dev or CI container without that file the history will be empty — contact the operations contact in the strip below."}
               </p>
             </div>
           ) : (

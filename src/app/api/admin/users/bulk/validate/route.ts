@@ -8,6 +8,8 @@ import type { Role } from "@/lib/types";
 
 /**
  * POST /api/admin/users/bulk/validate
+ * LIVE: called by UserManagementPanel (admin console).
+ * (The parallel /api/users/bulk/* set is used by CsvBulkImporter + BulkUserImportModal.)
  *
  * Dry-run validation of a bulk import: no DB writes, no audit.
  * Body: { rows: Array<Record<string, string|number|undefined>> }

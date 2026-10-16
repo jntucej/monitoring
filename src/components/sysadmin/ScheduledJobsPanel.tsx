@@ -32,8 +32,6 @@ import { useAuthStore } from "@/stores/authStore";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { useApi } from "@/hooks/useApi";
 import {
-  SEED_SCHEDULED_JOBS,
-  SEED_SCHEDULED_JOBS_RUNS,
   describeCron,
   CRON_PRESETS,
   type ScheduledJobSeed,
@@ -309,7 +307,6 @@ const api = useApi();
   const [rows, setRows] = useState<Row[]>([]);
   const [runs, setRuns] = useState<Run[]>([]);
   const [loading, setLoading] = useState(true);
-  const [usingSeed, setUsingSeed] = useState(false);
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"ALL" | "ENABLED" | "DISABLED">("ALL");
@@ -328,37 +325,38 @@ const api = useApi();
       const apiRows: ApiRow[] = body?.rows ?? body?.jobs ?? body?.data ?? [];
 
       if (apiRows.length === 0) {
-        setRows(SEED_SCHEDULED_JOBS);
-        setRuns(SEED_SCHEDULED_JOBS_RUNS);
-        setUsingSeed(true);
+        // No scheduled jobs in the database. Show a proper empty state instead
+        // of seeding fake jobs that would 404 on "Run Now".
+        setRows([]);
+        setRuns([]);
       } else {
-        const merged: Row[] = apiRows.map((j) => {
-          const seed = SEED_SCHEDULED_JOBS.find((s) => s.id === j.id);
-          return {
-            ...(seed ?? {
-              id: j.id,
-              category: "maintenance" as ScheduledJobCategory,
-              priority: "medium" as Row["priority"],
-              owner: "—",
-              tags: [],
-              avg_duration_ms: 0,
-              success_rate: 100,
-              runs_total: 0,
-              runs_failed: 0,
-              last_status: "SUCCESS" as ScheduledJobStatus,
-            }),
-            ...j,
-          };
-        });
-        setRows(merged);
+        const mapped: Row[] = apiRows.map((j) => ({
+          id: j.id,
+          name: j.name,
+          description: j.description,
+          cron_expression: j.cron_expression,
+          enabled: j.enabled,
+          last_run: j.last_run,
+          next_run: j.next_run,
+          // Fields the API does not yet return; fill with safe defaults so the
+          // UI renders without seeding rows that don't exist in the DB.
+          category: "maintenance" as ScheduledJobCategory,
+          priority: "medium" as Row["priority"],
+          owner: "—",
+          tags: [],
+          avg_duration_ms: 0,
+          success_rate: 100,
+          runs_total: 0,
+          runs_failed: 0,
+          last_status: "SUCCESS" as ScheduledJobStatus,
+        }));
+        setRows(mapped);
         const apiRuns: Run[] = body?.runs ?? [];
-        setRuns(apiRuns.length ? apiRuns : SEED_SCHEDULED_JOBS_RUNS);
-        setUsingSeed(apiRuns.length === 0);
+        setRuns(apiRuns);
       }
     } catch {
-      setRows(SEED_SCHEDULED_JOBS);
-      setRuns(SEED_SCHEDULED_JOBS_RUNS);
-      setUsingSeed(true);
+      setRows([]);
+      setRuns([]);
     } finally {
       setLoading(false);
     }
@@ -411,14 +409,12 @@ const api = useApi();
     setBusy((b) => ({ ...b, [row.id]: true }));
     setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, enabled: !r.enabled } : r)));
     try {
-      if (!usingSeed) {
-        const res = await fetch(`/api/admin/jobs/${row.id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json", ...getHeaders() },
-          body: JSON.stringify({ enabled: !row.enabled }),
-        });
-        if (!res.ok) throw new Error("toggle failed");
-      }
+      const res = await fetch(`/api/admin/jobs/${row.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", ...getHeaders() },
+        body: JSON.stringify({ enabled: !row.enabled }),
+      });
+      if (!res.ok) throw new Error("toggle failed");
       addToast({ variant: "success", message: `${row.name} ${row.enabled ? "paused" : "resumed"}.` });
     } catch {
       setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, enabled: row.enabled } : r)));
@@ -496,14 +492,12 @@ const api = useApi();
   const saveCron = async (row: Row, cron: string) => {
     setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, cron_expression: cron } : r)));
     try {
-      if (!usingSeed) {
-        const res = await fetch(`/api/admin/jobs/${row.id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json", ...getHeaders() },
-          body: JSON.stringify({ cron_expression: cron }),
-        });
-        if (!res.ok) throw new Error("schedule update failed");
-      }
+      const res = await fetch(`/api/admin/jobs/${row.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", ...getHeaders() },
+        body: JSON.stringify({ cron_expression: cron }),
+      });
+      if (!res.ok) throw new Error("schedule update failed");
       addToast({ variant: "success", message: `Updated schedule for ${row.name}.` });
     } catch {
       setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, cron_expression: row.cron_expression } : r)));
@@ -516,15 +510,14 @@ const api = useApi();
   /* ── Render ───────────────────────────────────────────────────────── */
   return (
     <div className="space-y-6">
-      {usingSeed && !loading && (
-        <div className="flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 text-sm">
-          <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-300" />
-          <div className="text-amber-200/90">
-            <p className="font-medium">Showing seed data</p>
+      {!loading && rows.length === 0 && (
+        <div className="flex items-start gap-3 rounded-xl border border-slate-500/20 bg-slate-500/5 p-4 text-sm">
+          <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-slate-400" />
+          <div className="text-slate-400/90">
+            <p className="font-medium">No scheduled jobs configured</p>
             <p className="text-xs opacity-80">
-              The <code>scheduled_jobs</code> table is empty. Seed rows from{" "}
-              <code>src/lib/scheduled-jobs-data.ts</code> are displayed so you can
-              explore the interface. Populate the table to go live.
+              The <code>scheduled_jobs</code> table is empty. Add a job via the admin console
+              to enable automated maintenance, backups, and sync tasks.
             </p>
           </div>
         </div>

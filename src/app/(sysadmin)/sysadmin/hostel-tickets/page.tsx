@@ -13,7 +13,7 @@ interface Row {
   current_stage: string;
   status: string;
   student_user_id: string;
-  requester_name: string;
+  requester_name: string | null;
   created_at: string;
 }
 
@@ -34,7 +34,7 @@ export default function HostelTicketsAdminPage() {
           columns={[
             { header: "Ticket", accessor: (r) => <span className="font-mono text-xs">{r.ticket_number}</span> },
             { header: "Type", accessor: (r) => r.workflow_type },
-            { header: "Requester", accessor: (r) => r.requester_name },
+            { header: "Requester", accessor: (r) => r.requester_name ?? "Unknown" },
             { header: "Stage", accessor: (r) => r.current_stage },
             { header: "Status", accessor: (r) => r.status },
             { header: "Created", accessor: (r) => new Date(r.created_at).toLocaleString() },

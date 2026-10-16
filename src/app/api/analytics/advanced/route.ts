@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { randomInt } from "crypto";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 
@@ -30,32 +29,58 @@ async function handleGet(req: NextRequest) {
           : d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
         seriesMap[key] = (seriesMap[key] || 0) + 1;
       });
-    } else {
-      const hours = ["08:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00"];
-      hours.forEach((h) => { seriesMap[h] = randomInt(20, 100); });
     }
 
     const timeSeries = Object.entries(seriesMap).map(([time, count]) => ({ time, count }));
 
+    // Honest summary: computed from the logs we actually have. When there are
+    // fewer than 7 samples we do NOT fabricate a forecast; we surface the
+    // empty series and let the UI label the panel "model unavailable".
+    const totalScans = dataPoints;
+    let peakHour = "—";
+    let busiestGate = "—";
+    let avgOccupancy = 0;
+    if (logs && logs.length > 0) {
+      const counts = Object.values(seriesMap);
+      const total = counts.reduce((a, b) => a + b, 0);
+      avgOccupancy = total;
+      const peak = counts.reduce((a, b) => Math.max(a, b), 0);
+      if (peak > 0) {
+        const peakKey = Object.entries(seriesMap).find(([, v]) => v === peak)?.[0];
+        if (peakKey) peakHour = peakKey;
+      }
+      // busiest gate: count by source if the log has one
+      const byGate: Record<string, number> = {};
+      logs.forEach((log: any) => {
+        const g = log.gate_name || log.source || "Unknown";
+        byGate[g] = (byGate[g] || 0) + 1;
+      });
+      if (Object.keys(byGate).length > 0) {
+        busiestGate = Object.entries(byGate).reduce((a, b) => (b[1] > a[1] ? b : a))[0];
+      }
+    }
+
+    const hasRealData = logs && logs.length >= 7;
+    const model = hasRealData ? "historical-ma" : "unavailable";
+    const reason = hasRealData
+      ? (confidence === "low" ? `Small sample (${dataPoints} scans); trend is indicative only.` : undefined)
+      : "Insufficient history (fewer than 7 movement-log samples). No forecast is generated.";
+
     return NextResponse.json({
       success: true,
       data: {
+        model,
         confidence,
         dataPoints,
-        reason: confidence === "low" ? `Insufficient history (${dataPoints} samples). At least 7 required.` : undefined,
+        reason,
         summary: {
-          totalScans: logs?.length || 450,
-          peakHour: "10:00 AM",
-          busiestGate: "Main Gate",
-          avgOccupancy: 320,
+          totalScans,
+          peakHour,
+          busiestGate,
+          avgOccupancy,
         },
         timeSeries,
-        breakdown: [
-          { category: "Students", count: 280 },
-          { category: "Faculty", count: 85 },
-          { category: "Staff", count: 50 },
-          { category: "Visitors", count: 35 },
-        ],
+        breakdown: [],
       },
     });
   } catch (error: any) {

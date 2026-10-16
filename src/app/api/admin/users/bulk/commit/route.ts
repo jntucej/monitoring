@@ -6,6 +6,8 @@ import { addAudit } from "@/lib/db";
 import type { AuthContext } from "@/lib/authContext";
 import type { Role } from "@/lib/types";
 
+// LIVE: called by UserManagementPanel (admin console).
+// (The parallel /api/users/bulk/* set is used by CsvBulkImporter + BulkUserImportModal.)
 /**
  * Roles an admin may grant through the admin bulk-commit path.
  * The `user_roles` table lets an admin grant operational roles, but the

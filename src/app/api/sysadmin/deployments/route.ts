@@ -1,106 +1,79 @@
+// src/app/api/sysadmin/deployments/route.ts
+// Reads deployment history from the `deployments` DB table.
+// CI writes to this table via POST /api/admin/deployments.
+// The response shape is preserved so the sysadmin UI needs no changes.
+
 import { NextRequest, NextResponse } from "next/server";
-import { promises as fs } from "fs";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
+import { getSupabaseServiceClient } from "@/lib/dbClient";
 
 /**
  * GET /api/sysadmin/deployments?limit=N
  *
- * Deployment history parsed from /var/log/monitoring-deploy.log
- * (written by the host deploy watchdog under /opt/monitoring).
- *
- * Events returned (newest first):
- *   • "Update detected. Synced to <commit>. Deploying..."  → deploy attempt
- *   • "skipping deploy" / fatal git errors                 → skip/failure
- *   • "✓ Compiled successfully" / build failures           → build outcome
- *
- * Read-only; the log file may not exist on non-host dev environments —
- * in that case the endpoint returns an empty list with source=unavailable.
+ * Returns recent deployment events from the `deployments` table, newest first.
+ * Falls back to source=unavailable when the table does not exist yet
+ * (e.g. the migration has not been applied).
  *
  * SysAdmin + admin only.
  */
-const DEPLOY_LOG = "/var/log/monitoring-deploy.log";
+
+interface DeploymentRow {
+  timestamp: string | null;
+  commit: string | null;
+  status: "deploying" | "skipped" | "failed" | "git_error";
+  detail: string;
+}
 
 async function handleGet(req: NextRequest, _context: unknown) {
   const limit = Math.min(parseInt(req.nextUrl.searchParams.get("limit") || "50", 10), 200);
 
-  let content: string;
-  try {
-    content = await fs.readFile(/* turbopackIgnore: true */ DEPLOY_LOG, "utf-8");
-  } catch {
+  const svc = getSupabaseServiceClient();
+  const { data, error } = await svc
+    .from("deployments")
+    .select("id, version, deployed_at, message, source, commit")
+    .order("deployed_at", { ascending: false })
+    .limit(limit);
+
+  // Table missing (migration not applied) → return empty with a clear source.
+  if (error) {
     return NextResponse.json({
       success: true,
-      data: { source: "unavailable", deployments: [] },
+      data: { source: "log-unavailable", deployments: [] },
     });
   }
 
-  const lines = content.split("\n");
-  const deployments: Array<{
-    timestamp: string | null;
-    commit: string | null;
-    status: "deploying" | "skipped" | "failed" | "git_error";
-    detail: string;
-  }> = [];
+  const rows: DeploymentRow[] = (data ?? []).map((r) => {
+    const rec = r as Record<string, unknown>;
+    const commit = (rec.commit as string | null) ?? null;
+    const version = (rec.version as string | null) ?? null;
+    const detail = (rec.message as string | null)
+      ?? (version ? `Deployed version ${version}` : "Deployment");
+    const src = (rec.source as string | null) ?? "ci";
+    // Map the DB source to the UI status enum.
+    // CI rows are "deploying" unless the message suggests failure.
+    let status: DeploymentRow["status"] = "deploying";
+    const msg = (rec.message as string | null) ?? "";
+    if (/fail|error|fatal/i.test(msg)) status = "failed";
+    else if (/skip/i.test(msg)) status = "skipped";
+    else if (/git/i.test(msg) || /diverg/i.test(msg)) status = "git_error";
+    void src;
 
-  let ts: string | null = null;
-  for (const line of lines) {
-    const tsMatch = line.match(/^\[(.+ IST)\] (.*)$/);
-    if (tsMatch) {
-      ts = tsMatch[1];
-      const rest = tsMatch[2];
-      const commitMatch = rest.match(/Synced to ([0-9a-f]{40})/);
-      if (commitMatch) {
-        deployments.push({
-          timestamp: ts,
-          commit: commitMatch[1].slice(0, 12),
-          status: "deploying",
-          detail: "Update detected — deploying",
-        });
-      } else if (/skipping deploy/i.test(rest)) {
-        deployments.push({
-          timestamp: ts,
-          commit: null,
-          status: "skipped",
-          detail: rest.trim(),
-        });
-      } else if (/fatal: (Not possible to fast-forward|Diverging)/i.test(line)) {
-        deployments.push({
-          timestamp: ts,
-          commit: null,
-          status: "git_error",
-          detail: rest.trim(),
-        });
-      }
-    } else if (/did not complete successfully: exit code: 1/.test(line)) {
-      deployments.push({
-        timestamp: ts,
-        commit: null,
-        status: "failed",
-        detail: "Build failed (npm run build exit 1)",
-      });
-      ts = null;
-    }
-  }
-
-  // Newest first, de-duped, capped
-  const seen = new Set<string>();
-  const out: typeof deployments = [];
-  for (let i = deployments.length - 1; i >= 0; i--) {
-    const d = deployments[i];
-    const id = `${d.timestamp}|${d.status}|${d.commit ?? d.detail}`;
-    if (seen.has(id)) continue;
-    seen.add(id);
-    out.push(d);
-    if (out.length >= limit) break;
-  }
+    return {
+      timestamp: (rec.deployed_at as string | null) ?? null,
+      commit: commit ? commit.slice(0, 12) : null,
+      status,
+      detail,
+    };
+  });
 
   return NextResponse.json({
     success: true,
-    data: { source: "host-deploy-log", deployments: out },
+    data: { source: "deployments-db", deployments: rows },
   });
 }
 
 export const GET = withRateLimit(
   withAuthorization(handleGet, { requiredRole: ["sysadmin", "admin"] }),
-  { keyPrefix: "sysadmin_deployments", maxRequests: 60 }
+  { keyPrefix: "sysadmin_deployments", maxRequests: 60 },
 );
