@@ -60,7 +60,7 @@ function buildCommands(role: string): CommandDef[] {
       label: "Look up person",
       hint: "Search a person by roll number or name",
       icon: Search,
-      href: "/operator/lookup",
+      href: "/operator/manual-entry",
     },
   };
   return config.commands.map((c) => defs[c]);
@@ -79,7 +79,7 @@ export function CommandBar({ role, open, onClose }: CommandBarProps) {
   const [active, setActive] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const commands = useMemo(() => buildCommands(role), [role]);
-  const lookupHref = commands.find((c) => c.id === "lookup")?.href ?? "/operator/lookup";
+  const lookupHref = commands.find((c) => c.id === "lookup")?.href ?? "/operator/manual-entry";
 
   const filtered = useMemo(() => {
     if (!query.trim()) return commands;
@@ -99,9 +99,10 @@ export function CommandBar({ role, open, onClose }: CommandBarProps) {
   const handleSelect = useCallback(
     (cmd: CommandDef) => {
       if (cmd.id === "lookup") {
-        // Carry the free-text query into the lookup page if the user typed.
+        // Carry the free-text query into the manual-entry (person lookup) page
+        // as an initial id so the operator can continue without retyping.
         const params = new URLSearchParams();
-        if (query.trim()) params.set("q", query.trim());
+        if (query.trim()) params.set("id", query.trim());
         const qs = params.toString();
         router.push(qs ? `${lookupHref}?${qs}` : lookupHref);
       } else {
