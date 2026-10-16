@@ -22,8 +22,7 @@ const FORCE = process.argv.includes("--force");
 
 // ── Read-route stub (GET) ────────────────────────────────────────────────
 function readRouteStub({ path, roles, rateKey }) {
-  return `"use client";
-import { NextRequest } from "next/server";
+  return `import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok, fail } from "@/server/http/response";

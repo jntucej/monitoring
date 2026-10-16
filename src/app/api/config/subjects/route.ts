@@ -1,4 +1,3 @@
-"use client";
 import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
