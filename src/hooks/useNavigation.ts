@@ -31,34 +31,19 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
   let groups: NavGroup[] = [];
 
   if (isHod || roleCode === "hod") {
+    // HOD is migrated to the RoleConsole shell (Ops Console / Kanban). The nav
+    // is intentionally a single "HOD Console" group of <=6 items so the IconRail
+    // stays lean. No "Campus Life" / "General & Support" groups for HOD.
     groups = [
       {
-        groupLabel: "Department Workspace",
+        groupLabel: "HOD Console",
         items: [
-          { href: "/hod", label: "HOD Dashboard", icon: "LayoutDashboard", badge: dept || "HOD" },
-          { href: "/admin/faculty", label: "Department Faculty", icon: "UserCheck" },
-          { href: "/supervisor?tab=curfew", label: "Branch Students", icon: "GraduationCap" },
-        ],
-      },
-      {
-        groupLabel: "Approvals & Reports",
-        items: [
-          { href: "/hod/permissions", label: "HOD Approvals", icon: "CheckSquare", badge: "PENDING" },
-          { href: "/hod?tab=approvals", label: "Outpass Approvals", icon: "CheckSquare", badge: "PENDING" },
-          { href: "/admin/reports", label: "Branch Reports", icon: "FileSpreadsheet" },
-        ],
-      },
-      {
-        groupLabel: "Campus Life",
-        items: [
-          { href: "/campus", label: "My Campus", icon: "Sparkles" },
-        ],
-      },
-      {
-        groupLabel: "General & Support",
-        items: [
-          { href: "/profile", label: "My Profile", icon: "User" },
-          { href: "/about", label: "About Campus", icon: "HelpCircle" },
+          { href: "/hod", label: "Approvals", icon: "CheckSquare", badge: "PENDING" },
+          { href: "/hod/department-attendance", label: "Department", icon: "UserCheck" },
+          { href: "/hod/faculty-overview", label: "Faculty", icon: "Building2" },
+          { href: "/hod/department-reports", label: "Reports", icon: "FileSpreadsheet" },
+          { href: "/hod/escalation-centre", label: "Escalations", icon: "ShieldAlert" },
+          { href: "/hod/student-directory", label: "Directory", icon: "GraduationCap" },
         ],
       },
     ];
@@ -583,6 +568,12 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
   // The operator role uses the console shell (RoleConsole + IconRail), so the
   // Account group is intentionally omitted to keep the nav set to 5 items.
   if (roleCode === "operator") {
+    return filteredGroups;
+  }
+
+  // HOD is also on the RoleConsole shell, so it skips the Account group too —
+  // mirroring the operator pattern above.
+  if (roleCode === "hod" || isHod) {
     return filteredGroups;
   }
 

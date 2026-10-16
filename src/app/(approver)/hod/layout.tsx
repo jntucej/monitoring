@@ -1,66 +1,35 @@
 "use client";
 
-import React from "react";
-import { usePathname } from "next/navigation";
+import type { ReactNode } from "react";
+import { Suspense } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
-import Link from "next/link";
-import { Suspense } from "react";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+import { RoleConsole } from "@/components/shared/RoleConsole";
 
-const TABS = [
-  { href: "/hod", label: "Department Overview" },
-  { href: "/hod/student-directory", label: "Student Directory" },
-  { href: "/hod/department-attendance", label: "Attendance" },
-  { href: "/hod/attendance-exceptions", label: "Exceptions" },
-  { href: "/hod/faculty-overview", label: "Faculty" },
-  { href: "/hod/department-pass-requests", label: "Pass Requests" },
-  { href: "/hod/pending-approvals", label: "Approvals" },
-  { href: "/hod/department-reports", label: "Reports" },
-  { href: "/hod/escalation-centre", label: "Escalations" },
-] as const;
-
-function HodTabs({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-
+/**
+ * HOD layout — the RoleConsole (Ops Console) shell for the HOD role.
+ *
+ * Migrated off the local sticky tab bar. The full shell (IconRail + main
+ * column + ContextPanel + StatusBar + CommandBar) is provided by RoleConsole.
+ * Sub-pages pass their content through `children`, which RoleConsole renders
+ * into the main column; the HOD root page contributes nothing so the default
+ * Board / Kanban fallback shows through.
+ *
+ * The `getConsoleConfig("hod")` entry (and the KanbanBoard + permission
+ * components) are landed by other agents in parallel; this layout simply
+ * mounts `<RoleConsole role="hod" roleRoot="/hod">` and will light up once
+ * that config + board support is in place.
+ */
+export default function HodConsoleLayout({ children }: { children?: ReactNode }) {
   return (
-    <div className="min-w-0">
-      <nav className="sticky top-0 z-30 border-b border-[var(--border)] bg-[var(--bg-base)]/95 backdrop-blur-md">
-        <div className="mx-auto max-w-7xl px-4 py-3 md:px-6">
-          <ol className="flex flex-wrap items-center gap-1 text-sm">
-            {TABS.map((tab) => {
-              const isActive = pathname === tab.href || pathname.startsWith(tab.href + "/");
-              return (
-                <li key={tab.href}>
-                  {isActive ? (
-                    <span className="inline-flex items-center px-3 py-2 text-emerald-400 font-semibold border-b-2 border-emerald-400">
-                      {tab.label}
-                    </span>
-                  ) : (
-                    <Link
-                      href={tab.href}
-                      className="inline-flex items-center px-3 py-2 text-slate-400 hover:text-slate-200 transition-colors"
-                    >
-                      {tab.label}
-                    </Link>
-                  )}
-                </li>
-              );
-            })}
-          </ol>
-        </div>
-      </nav>
-
-      <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6">{children}</div>
-
-      <DevContactStrip />
-    </div>
-  );
-}
-
-export default function HodTabbedLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <Suspense fallback={<PageLoading />}>
-      <HodTabs>{children}</HodTabs>
-    </Suspense>
+    <AuthGuard allowedRoles={["hod", "admin", "sysadmin"]}>
+      <Suspense fallback={<PageLoading />}>
+        <RoleConsole role="hod" roleRoot="/hod">
+          {children}
+        </RoleConsole>
+        <DevContactStrip />
+      </Suspense>
+    </AuthGuard>
   );
 }

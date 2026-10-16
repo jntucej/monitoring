@@ -18,7 +18,12 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Command } from "lucide-react";
 import { Board, type BoardRow } from "@/components/shared/Board";
+import { KanbanBoard } from "@/components/shared/KanbanBoard";
 import { ContextPanel } from "@/components/shared/ContextPanel";
+import { PermissionContextPanel } from "@/components/approver/PermissionContextPanel";
+import { PermissionStatusBar, type PermissionCounts } from "@/components/approver/PermissionStatusBar";
+import { PermissionCommandBar } from "@/components/approver/PermissionCommandBar";
+import type { PermissionItem } from "@/components/approver/PermissionRow";
 import { StatusBar } from "@/components/shared/StatusBar";
 import { CommandBar } from "@/components/shared/CommandBar";
 import { IconRail } from "@/components/shared/IconRail";
@@ -52,6 +57,17 @@ function boardRowsOf(resp: ConsoleBoardResponse | null, itemKey: string): BoardR
   return Array.isArray(raw) ? (raw as BoardRow[]) : [];
 }
 
+/**
+ * The response shape for a kanban board source (e.g. /api/permissions).
+ * The array of records lives directly under `data`, not under a dynamic
+ * itemKey like the feed Board response.
+ */
+interface KanbanPermissionsResponse {
+  success?: boolean;
+  data: PermissionItem[];
+  total?: number;
+}
+
 export interface RoleConsoleProps {
   /** The role code (must match a key in CONSOLES). */
   role: string;
@@ -70,13 +86,54 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
 
   const config = useMemo(() => getConsoleConfig(role), [role]);
 
+  const isKanban = config?.board?.kind === "kanban";
+  const isPermission = config?.contextEntity === "permission";
+  const isHod = role === "hod";
+
   // Fetch the board source so we can derive counts + lastScan for the status
   // bar. The fetch is cached by useApiResource, so a duplicate call from
-  // Board itself does not cause a second network request.
-  const boardSource = config?.board?.source ?? null;
+  // Board itself does not cause a second network request. Skipped for kanban
+  // (its status strip is permission-specific and derives counts elsewhere).
+  const boardSource = isKanban ? null : (config?.board?.source ?? null);
   const { data: boardData } = useApiResource<ConsoleBoardResponse>(boardSource, {
     ttlMs: 15_000,
   });
+
+  // For kanban, fetch the permission items directly so the status strip can
+  // derive live counts. Reuses the same useApiResource cache as KanbanBoard.
+  const kanbanSource = isKanban ? config?.board?.source ?? null : null;
+  const { data: kanbanData, refresh: refreshKanban, loading: kanbanLoading } = useApiResource<KanbanPermissionsResponse>(kanbanSource, { ttlMs: 15_000 });
+  const permissionItems: PermissionItem[] = useMemo(
+    () => (kanbanData && Array.isArray(kanbanData.data) ? kanbanData.data : []),
+    [kanbanData],
+  );
+
+  // Derive the permission-specific counts for the HOD status strip from the
+  // same kanban fetch. attendancePct is not part of the /api/permissions
+  // payload, so it stays null until a department-attendance source is wired.
+  const permissionCounts: PermissionCounts | null = useMemo(() => {
+    if (!isPermission || (isKanban && !kanbanData)) return null;
+    let pending = 0;
+    let escalated = 0;
+    for (const item of permissionItems) {
+      if (item.status === "PENDING") pending += 1;
+      if (item.status === "ESCALATED" || item.routed_to_role) escalated += 1;
+    }
+    return { pending, escalated, attendancePct: null, total: permissionItems.length };
+  }, [isPermission, isKanban, kanbanData, permissionItems]);
+
+  const lastKanbanScan = useMemo(() => {
+    if (permissionItems.length === 0) return null;
+    let newest: string | null = null;
+    for (const item of permissionItems) {
+      const t = item.updated_at || item.created_at;
+      if (!t) continue;
+      if (!newest || new Date(t).getTime() > new Date(newest).getTime()) {
+        newest = t;
+      }
+    }
+    return newest;
+  }, [permissionItems]);
 
   const counts = useMemo(
     () => boardData?.data?.counts ?? null,
@@ -100,6 +157,10 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
   const handleSelect = useCallback((row: BoardRow) => {
     setSelectedRow(row);
   }, []);
+
+  const handleKanbanRefresh = useCallback(() => {
+    void refreshKanban();
+  }, [refreshKanban]);
 
   const handleCloseContext = useCallback(() => {
     setSelectedRow(null);
@@ -170,30 +231,62 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
         <IconRail role={role} roleRoot={roleRoot} />
 
         <main className="flex-1 min-w-0 overflow-y-auto custom-scrollbar">
-          {children ?? (
-            <Board
-              source={config?.board?.source ?? ""}
-              itemKey={config?.board?.itemKey ?? ""}
-              onSelect={handleSelect}
-            />
-          )}
+          {children ??
+            (isKanban ? (
+              <KanbanBoard
+                source={config?.board?.source ?? ""}
+                itemKey={config?.board?.itemKey ?? ""}
+                columns={config?.board?.columns ?? ["PENDING", "APPROVED", "REJECTED"]}
+                onSelect={handleSelect}
+              />
+            ) : (
+              <Board
+                source={config?.board?.source ?? ""}
+                itemKey={config?.board?.itemKey ?? ""}
+                onSelect={handleSelect}
+              />
+            ))}
         </main>
 
         {selectedRow ? (
-          <ContextPanel
-            row={selectedRow}
-            onClose={handleCloseContext}
-            historyHref={`${roleRoot}/transactions`}
-          />
+          isPermission ? (
+            <PermissionContextPanel
+              row={selectedRow}
+              onClose={handleCloseContext}
+              onActionComplete={handleKanbanRefresh}
+            />
+          ) : (
+            <ContextPanel
+              row={selectedRow}
+              onClose={handleCloseContext}
+              historyHref={`${roleRoot}/transactions`}
+            />
+          )
         ) : null}
       </div>
 
       {/* Status bar — full width, sticky at the bottom of the shell */}
       <div className="sticky bottom-0 z-30">
-        <StatusBar counts={counts} lastScan={lastScan} />
+        {isPermission ? (
+          <PermissionStatusBar
+            counts={permissionCounts}
+            lastScan={lastKanbanScan}
+            refreshing={kanbanLoading}
+          />
+        ) : (
+          <StatusBar counts={counts} lastScan={lastScan} />
+        )}
       </div>
 
-      <CommandBar role={role} open={commandBarOpen} onClose={closeCommandBar} />
+      {isHod ? (
+        <PermissionCommandBar
+          role={role}
+          open={commandBarOpen}
+          onClose={closeCommandBar}
+        />
+      ) : (
+        <CommandBar role={role} open={commandBarOpen} onClose={closeCommandBar} />
+      )}
     </div>
   );
 }

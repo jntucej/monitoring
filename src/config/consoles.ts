@@ -14,14 +14,21 @@ export type ConsoleCommand =
   | "scan"
   | "manual-entry"
   | "pass-verify"
-  | "lookup";
+  | "lookup"
+  | "approve"
+  | "reject"
+  | "escalate"
+  | "department-stats";
 
 export type ConsoleStatusField =
   | "gate"
   | "entries"
   | "exits"
   | "shift"
-  | "lastScan";
+  | "lastScan"
+  | "pending"
+  | "escalated"
+  | "department-attendance";
 
 export interface RoleConsoleConfig {
   role: string;
@@ -32,20 +39,21 @@ export interface RoleConsoleConfig {
   /** Render RecentScans as a swipe-up / swipe-down bottom sheet. */
   recentSheet: boolean;
   /**
-   * Board feed source (optional, legacy). When present the RoleConsole shell
-   * drives a Board feed + StatusBar from this endpoint; the lean operator
-   * kiosk does not set it and the rail falls back to children.
+   * Board source (optional, legacy). When present the RoleConsole shell
+   * drives a Board feed, KanbanBoard, or StatusBar from this endpoint.
    */
   board?: {
-    kind: "feed";
+    kind: "feed" | "kanban";
     source: string;
     itemKey: string;
+    /** Kanban columns, e.g. ["PENDING", "APPROVED", "REJECTED"]. */
+    columns?: string[];
   };
-  /** Entity type the ContextPanel renders on row click (legacy). */
-  contextEntity?: "scan" | "person" | "ticket";
-  /** Command palette actions (legacy Cmd+K CommandBar). */
+  /** Entity type the ContextPanel renders on row click. */
+  contextEntity?: "scan" | "person" | "ticket" | "permission";
+  /** Command palette actions. */
   commands?: ConsoleCommand[];
-  /** Status-bar fields, rendered left-to-right (legacy). */
+  /** Status-bar fields, rendered left-to-right. */
   statusFields?: ConsoleStatusField[];
 }
 
@@ -55,6 +63,21 @@ export const CONSOLES: Record<string, RoleConsoleConfig> = {
     nav: ["scan", "log", "flags", "more"],
     statusStrip: true,
     recentSheet: true,
+  },
+  hod: {
+    role: "hod",
+    nav: ["approvals", "department", "faculty", "reports", "escalations", "directory"],
+    statusStrip: false,
+    recentSheet: false,
+    board: {
+      kind: "kanban",
+      source: "/api/permissions",
+      itemKey: "permission",
+      columns: ["PENDING", "APPROVED", "REJECTED"],
+    },
+    contextEntity: "permission",
+    commands: ["approve", "reject", "escalate", "department-stats"],
+    statusFields: ["pending", "escalated", "department-attendance"],
   },
 };
 

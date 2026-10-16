@@ -58,6 +58,34 @@ function buildCommands(role: string): CommandDef[] {
       icon: Search,
       href: "/operator/manual-entry",
     },
+    approve: {
+      id: "approve",
+      label: "Approve request",
+      hint: "Approve a pending permission request",
+      icon: BadgeCheck,
+      href: "/hod/pending-approvals",
+    },
+    reject: {
+      id: "reject",
+      label: "Reject request",
+      hint: "Reject a pending permission request",
+      icon: Search,
+      href: "/hod/pending-approvals",
+    },
+    escalate: {
+      id: "escalate",
+      label: "Escalate request",
+      hint: "Escalate a permission request to a higher stage",
+      icon: Search,
+      href: "/hod/escalation-centre",
+    },
+    "department-stats": {
+      id: "department-stats",
+      label: "Department stats",
+      hint: "Open department reports and analytics",
+      icon: Search,
+      href: "/hod/department-reports",
+    },
   };
   return (config.commands ?? []).map((c) => defs[c]);
 }
