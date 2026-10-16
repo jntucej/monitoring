@@ -322,6 +322,51 @@ async function handlePatch(req: NextRequest): Promise<Response> {
   let nextStatus = request.status;
   const updateFields: Record<string, unknown> = {};
 
+  // ── Day-scholar home_out room-assignment gate (task 3.3) ──────────
+  // When APPROVE is called on a ticket whose requester is a day scholar
+  // AND the ticket reason is home_out, all three pending room/warden
+  // fields must be supplied. Missing any rejects with 400
+  // HOSTEL_ROOM_REQUIRED (the same code used by the direct-generate
+  // route). For hosteller approvers and non-home_out reasons the fields
+  // are optional and ignored when absent.
+  let homeOutRoomRequired = false;
+  if (normalizedAction === "APPROVE") {
+    const ticketReason =
+      typeof (request as { reason?: unknown }).reason === "string"
+        ? ((request as { reason?: unknown }).reason as string)
+        : "";
+    if (ticketReason === "home_out") {
+      const studentId = request.student_user_id || request.requester_user_id;
+      if (studentId) {
+        const { data: stuDetails } = await supabase
+          .from("student_details")
+          .select("current_entry_type")
+          .eq("user_id", studentId)
+          .maybeSingle();
+        homeOutRoomRequired = stuDetails?.current_entry_type === "day_scholar";
+        if (homeOutRoomRequired) {
+          const missing: string[] = [];
+          if (!pendingHostelBlock) missing.push("pendingHostelBlock");
+          if (!pendingRoomNumber) missing.push("pendingRoomNumber");
+          if (!pendingWardenId) missing.push("pendingWardenId");
+          if (missing.length > 0) {
+            return NextResponse.json(
+              {
+                success: false,
+                error: {
+                  code: "HOSTEL_ROOM_REQUIRED",
+                  message:
+                    "Day scholar home-out requires pre-assigned hostel block, room, and warden.",
+                },
+              },
+              { status: 400 },
+            );
+          }
+        }
+      }
+    }
+  }
+
   if (normalizedAction === "CANCEL") {
     nextStage = "cancelled";
     nextStatus = "CANCELLED";
@@ -342,6 +387,28 @@ async function handlePatch(req: NextRequest): Promise<Response> {
     if (pendingHostelBlock) updateFields.pending_hostel_block = pendingHostelBlock;
     if (pendingRoomNumber) updateFields.pending_room_number = pendingRoomNumber;
     if (pendingWardenId) updateFields.pending_warden_id = pendingWardenId;
+
+    // When the room-assignment gate was triggered (day_scholar home_out),
+    // additionally audit the hostel room assignment so the approval chain
+    // is traceable. Mirrors the direct-generate route's dual-audit pattern.
+    if (homeOutRoomRequired) {
+      addAudit({
+        action: "HOSTEL_ROOM_ASSIGNED_ON_HOME_OUT",
+        userId: authUserId,
+        userName: authUserEmail,
+        role: authUserRole as Role,
+        details: {
+          ticketNumber: request.ticket_number,
+          studentUserId: request.student_user_id,
+          reason: (request as { reason?: string }).reason ?? "",
+          wardenId: pendingWardenId ?? "",
+          hostelBlock: pendingHostelBlock ?? "",
+          roomNumber: pendingRoomNumber ?? "",
+        },
+      }).catch((err) =>
+        console.error("[Permission Ticket] addAudit HOSTEL_ROOM_ASSIGNED_ON_HOME_OUT error:", err),
+      );
+    }
   } else if (normalizedAction === "REJECT") {
     nextStatus = "REJECTED";
   } else if (normalizedAction === "ESCALATE") {
