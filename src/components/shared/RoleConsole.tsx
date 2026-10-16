@@ -18,6 +18,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Command } from "lucide-react";
 import { Board, type BoardRow } from "@/components/shared/Board";
+import { DigestBoard } from "@/components/shared/DigestBoard";
 import { KanbanBoard } from "@/components/shared/KanbanBoard";
 import { GridBoard, type GridTicket } from "@/components/shared/GridBoard";
 import { ContextPanel } from "@/components/shared/ContextPanel";
@@ -36,7 +37,7 @@ import { ExamDayPanel } from "@/components/approver/ExamDayPanel";
 import { AllocationPanel } from "@/components/approver/AllocationPanel";
 import { SupervisorStatusBar, type SupervisorCounts } from "@/components/approver/SupervisorStatusBar";
 import { SupervisorCommandBar } from "@/components/approver/SupervisorCommandBar";
-import { LiveActivityPanel } from "@/components/approver/LiveActivityPanel";
+import { EscalationPanel } from "@/components/approver/EscalationPanel";
 import { IncidentPanel } from "@/components/approver/IncidentPanel";
 import {
   ExamSuperintendentStatusBar,
@@ -46,7 +47,7 @@ import { ExamSuperintendentCommandBar } from "@/components/approver/ExamSuperint
 import { ParentStatusBar, type ParentCounts } from "@/components/approver/ParentStatusBar";
 import { ParentCommandBar } from "@/components/approver/ParentCommandBar";
 import { ChildActivityPanel } from "@/components/approver/ChildActivityPanel";
-import { TodayMealsPanel } from "@/components/approver/TodayMealsPanel";
+import { MealServePanel } from "@/components/approver/MealServePanel";
 import { MessInchargeStatusBar, type MessInchargeCounts } from "@/components/approver/MessInchargeStatusBar";
 import { MessInchargeCommandBar } from "@/components/approver/MessInchargeCommandBar";
 import {
@@ -66,9 +67,6 @@ import { SysadminHealthPanel } from "@/components/approver/SysadminHealthPanel";
 import { PrincipalStatusBar, type PrincipalCounts } from "@/components/approver/PrincipalStatusBar";
 import { PrincipalCommandBar } from "@/components/approver/PrincipalCommandBar";
 import { PrincipalDashboardPanel } from "@/components/approver/PrincipalDashboardPanel";
-import { VisitorStatusBar, type VisitorCounts } from "@/components/approver/VisitorStatusBar";
-import { VisitorCommandBar } from "@/components/approver/VisitorCommandBar";
-import { VisitorActivityPanel } from "@/components/approver/VisitorActivityPanel";
 import { VpStatusBar, type VpCounts } from "@/components/approver/VpStatusBar";
 import { VpCommandBar } from "@/components/approver/VpCommandBar";
 import { VpDashboardPanel } from "@/components/approver/VpDashboardPanel";
@@ -137,6 +135,7 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
 
   const isKanban = config?.board?.kind === "kanban";
   const isGrid = config?.board?.kind === "grid";
+  const isDigest = config?.board?.kind === "digest";
   const isPermission = config?.contextEntity === "permission";
   const isTicket = config?.contextEntity === "ticket";
   const isHod = role === "hod";
@@ -151,16 +150,15 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
   const isExamBranch = role === "exam_branch";
   const isSysadmin = role === "sysadmin";
   const isPrincipal = role === "principal";
-  const isVisitor = role === "visitor";
   const isAdmin = role === "admin";
   const isVicePrincipal = role === "vice_principal";
   const showAllocationPanel = config?.extraPanels?.includes("AllocationPanel") ?? false;
   const showExamDayPanel = config?.extraPanels?.includes("ExamDayPanel") ?? false;
   const showHandoffPanel = config?.extraPanels?.includes("HandoffPanel") ?? false;
-  const showTodayMealsPanel =
-    config?.extraPanels?.includes("TodayMealsPanel") ?? false;
-  const showLiveActivityPanel =
-    config?.extraPanels?.includes("LiveActivityPanel") ?? false;
+  const showMealServePanel =
+    config?.extraPanels?.includes("MealServePanel") ?? false;
+  const showEscalationPanel =
+    config?.extraPanels?.includes("EscalationPanel") ?? false;
   const showIncidentPanel =
     config?.extraPanels?.includes("IncidentPanel") ?? false;
   const showChildActivityPanel =
@@ -169,8 +167,6 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
     config?.extraPanels?.includes("SysadminHealthPanel") ?? false;
   const showPrincipalDashboardPanel =
     config?.extraPanels?.includes("PrincipalDashboardPanel") ?? false;
-  const showVisitorActivityPanel =
-    config?.extraPanels?.includes("VisitorActivityPanel") ?? false;
   const showAdminAlertsPanel =
     config?.extraPanels?.includes("AdminAlertsPanel") ?? false;
   const showVpDashboardPanel =
@@ -188,10 +184,12 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
     ttlMs: 15_000,
   });
 
-  // For the mess In-charge console, keep the status bar / TodayMealsPanel live
-  // by re-fetching the mess days feed on demand (e.g. after the context panel
-  // refreshes). The feed is the shared board source, so the same useApiResource
-  // cache is reused — no duplicate network request.
+  // For the mess In-charge console, keep the digest board + status bar live by
+  // re-fetching the board source (/api/mess/analytics) on demand (e.g. after
+  // the context panel or the MealServePanel mutates). The board feed is the
+  // shared useApiResource cache — no duplicate network request. The separate
+  // /api/mess/days fetch (window-close time) self-refreshes on its own 15s
+  // TTL, so it does not need to be coupled here.
   const refreshMessIncharge = useCallback(() => {
     void refreshBoard();
   }, [refreshBoard]);
@@ -631,12 +629,18 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
 
   // For the supervisor console, derive status-strip counts from the
   // escalation feed (/api/supervisor/escalations). The feed response nests
-  // its counts under data.counts (escalated / alerts / decisions), so we
-  // read those directly. "critical" counts alerts whose severity is
-  // critical; "pending" reuses the active-alert count as the proxy.
+  // its counts under data.counts (escalated / alerts / decisions). The
+  // “gates online” figure is derived from the distinct gate count in the
+  // activeAlerts array (no second /api/gates request). The shift label has
+  // no authoritative source on this endpoint yet and stays null (rendered
+  // as “—”).
+  //
+  // Supervised-gates scoping note: the /api/supervisor/escalations route
+  // should self-scope to the caller's users.supervised_gates array.
+  // Follow-up: add server-side scoping when the route is extended.
   interface SupervisorEscalationsFeed {
     escalatedPermissions?: Array<{ status: string; sla_deadline: string | null }>;
-    activeAlerts?: Array<{ severity: string }>;
+    activeAlerts?: Array<{ severity: string; gate_id: string | null; gate_name: string | null }>;
     counts?: { escalated?: number; alerts?: number; decisions?: number };
   }
   const supervisorFeed =
@@ -648,61 +652,107 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
       Array.isArray(supervisorFeed?.escalatedPermissions)
         ? supervisorFeed.escalatedPermissions.length
         : supervisorFeed?.counts?.escalated ?? 0;
-    const active =
-      Array.isArray(supervisorFeed?.activeAlerts)
-        ? supervisorFeed.activeAlerts.length
-        : supervisorFeed?.counts?.alerts ?? 0;
-    const critical = Array.isArray(supervisorFeed?.activeAlerts)
-      ? supervisorFeed.activeAlerts.filter((a) => a.severity === "critical").length
+    const activeAlerts = supervisorFeed?.activeAlerts ?? [];
+    const incidents = Array.isArray(activeAlerts)
+      ? activeAlerts.length
+      : supervisorFeed?.counts?.alerts ?? 0;
+    // Distinct gate count from the active-alerts array.
+    const gateSet = new Set<string>();
+    if (Array.isArray(activeAlerts)) {
+      for (const a of activeAlerts) {
+        if (a.gate_name) gateSet.add(a.gate_name);
+        else if (a.gate_id) gateSet.add(a.gate_id);
+      }
+    }
+    const critical = Array.isArray(activeAlerts)
+      ? activeAlerts.filter((a) => a.severity === "critical").length
       : 0;
-    return { escalations: escalated, pending: active, critical };
+    return {
+      gatesOnline: gateSet.size,
+      escalations: escalated,
+      incidents,
+      shift: null, // no shift source on this endpoint yet
+      critical,
+    };
   }, [isSupervisor, supervisorFeed]);
   const supervisorLoading = isSupervisor ? !supervisorFeed : false;
 
-  // For the mess In-charge console, the board source is the feed
-  // /api/mess/days (the mess schedule, itemKey "day"), which returns
-  // { success, data: { days: MessDayRow[] } }. Derive the status-strip
-  // counts from that same feed fetch (days scheduled + the active day's
-  // window), plus a second fetch for today's meal counts. The
-  // "pending requests" figure reuses the operational-requests proxy (0)
-  // until a dedicated pending-request source lands.
-  interface MessDaysFeed {
-    days?: Array<{
-      id: string;
-      isActive: boolean;
-      windowOpensAt?: string | null;
-      windowClosesAt?: string | null;
-    }>;
-  }
-  interface MessMealCountsFeed {
+  // Refresh wiring for the supervisor console: the board source
+  // (/api/supervisor/escalations) supplies both the EscalationPanel and the
+  // status-bar counts. Reuse the same useApiResource cache as Board, no
+  // duplicate network request.
+  const refreshSupervisor = useCallback(() => {
+    void refreshBoard();
+  }, [refreshBoard]);
+
+  // For the mess In-charge console, the digest board source is the feed
+  // /api/mess/analytics (itemKey "summary"), which returns a per-day digest:
+  // { messDayId, mealDate, totalHostellers, selectedCount, declaredPresent,
+  // confirmedPresent, byPrimary: { VEG, NON_VEG }, byHostelBlock }. The board
+  // itself renders this digest; the status bar derives served / no-shows from
+  // the same boardData fetch (no second request). A small extra
+  // /api/mess/days fetch supplies the active day's meal window label and the
+  // window-close time (the analytics digest does not carry window fields).
+  interface MessAnalyticsFeed {
+    messDayId?: string;
+    mealDate?: string;
     declaredPresent?: number;
-    confirmed?: number;
+    confirmedPresent?: number;
+    byPrimary?: { VEG?: number; NON_VEG?: number };
+    byHostelBlock?: Record<string, { total?: number; declaredPresent?: number; confirmedPresent?: number; veg?: number; nonVeg?: number }>;
   }
-  const messDaysFeed =
-    (boardData?.data as unknown as { days?: unknown[] } | null) ?? null;
-  const messDays = Array.isArray(messDaysFeed?.days)
-    ? (messDaysFeed.days as unknown as NonNullable<MessDaysFeed["days"]>)
-    : [];
-  const activeMessDay = messDays.find((d) => d.isActive) ?? messDays[0] ?? null;
+  interface MessDayWindowRow {
+    id: string;
+    mealDate: string;
+    mealType?: string;
+    windowOpensAt?: string | null;
+    windowClosesAt?: string | null;
+    isActive?: boolean;
+  }
+  const messAnalytics =
+    (boardData?.data as unknown as MessAnalyticsFeed | null) ?? null;
+
+  // The days fetch supplies the window-close time + meal-window label for the
+  // active day. Only fetched for the mess In-charge role (null for others,
+  // so useApiResource skips it).
+  const messDaysSource = isMessIncharge ? "/api/mess/days" : null;
+  const { data: messDaysResp } = useApiResource<{
+    success?: boolean;
+    data: { days: MessDayWindowRow[] };
+  }>(messDaysSource, { ttlMs: 15_000 });
+
+  const messDays = useMemo<MessDayWindowRow[]>(
+    () => (Array.isArray(messDaysResp?.data?.days) ? messDaysResp!.data!.days! : []),
+    [messDaysResp]
+  );
+  const activeMessDay =
+    messDays.find((d) => d.isActive) ?? messDays[0] ?? null;
+
   const messCounts: MessInchargeCounts | null = useMemo(() => {
     if (!isMessIncharge) return null;
     const now = Date.now();
+    const declared = messAnalytics?.declaredPresent ?? 0;
+    const confirmed = messAnalytics?.confirmedPresent ?? 0;
+    const noShows = Math.max(0, declared - confirmed);
+    const windowOpens = activeMessDay?.windowOpensAt;
+    const windowCloses = activeMessDay?.windowClosesAt ?? null;
     const active =
-      activeMessDay !== null &&
-      (activeMessDay.windowOpensAt
-        ? new Date(activeMessDay.windowOpensAt).getTime() <= now
+      (windowOpens
+        ? new Date(windowOpens).getTime() <= now
         : true) &&
-      (activeMessDay.windowClosesAt
-        ? new Date(activeMessDay.windowClosesAt).getTime() >= now
-        : true);
-    return {
-      daysScheduled: messDays.length,
-      mealsToday: messDays.length, // one service per scheduled day; proxy until meal-counts wire-in
-      pendingRequests: 0,
-      active,
-    };
-  }, [isMessIncharge, activeMessDay, messDays]);
-  const messLoading = isMessIncharge ? !messDaysFeed : false;
+      (windowCloses ? new Date(windowCloses).getTime() >= now : true);
+    // Meal-window label: prefer the active day's meal type; fall back to a
+    // time-of-day heuristic.
+    let mealWindow: string | null = null;
+    if (activeMessDay?.mealType) {
+      mealWindow = activeMessDay.mealType;
+    } else if (windowOpens) {
+      const h = new Date(windowOpens).getHours();
+      mealWindow = h < 11 ? "Breakfast" : h < 15 ? "Lunch" : h < 21 ? "Dinner" : "Service";
+    }
+    return { mealWindow, served: confirmed, noShows, active, windowCloses };
+  }, [isMessIncharge, messAnalytics, activeMessDay]);
+  const messLoading = isMessIncharge ? !messAnalytics : false;
 
   // For the principal console, the board source is the feed
   // /api/principal/dashboard (itemKey "item"), which returns
@@ -729,40 +779,6 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
   const principalLoading = isPrincipal ? !principalFeed : false;
 
   const refreshPrincipal = useCallback(() => {
-    void refreshBoard();
-  }, [refreshBoard]);
-
-  // For the visitor console, the board source is the feed
-  // /api/visitors/mine (itemKey "logs"), which returns
-  // { success, data: { logs, active, lastCompleted } }. Derive the
-  // status-strip counts (activities / pending / records / active) from the
-  // same boardData fetch so the bar stays live without a second request.
-  // "activities" = total visit logs; "pending" = unresolved (active or
-  // awaiting, no check-out yet); "records" = completed logs (with check-out);
-  // "active" = whether an active check-in is in progress.
-  interface VisitorFeedData {
-    logs?: Array<{ status?: string; check_out_at?: string | null }>;
-    active?: { status?: string } | null;
-  }
-  const visitorFeed =
-    (boardData?.data as unknown as VisitorFeedData | null) ?? null;
-  const visitorCounts: VisitorCounts | null = useMemo(() => {
-    if (!isVisitor || !visitorFeed) return null;
-    const logs = Array.isArray(visitorFeed.logs) ? visitorFeed.logs : [];
-    const pending = logs.filter(
-      (l) => l.status === "active" && !l.check_out_at
-    ).length;
-    const records = logs.filter((l) => !!l.check_out_at).length;
-    return {
-      activities: logs.length,
-      pending,
-      records,
-      active: !!(visitorFeed.active?.status === "ACTIVE" || pending > 0),
-    };
-  }, [isVisitor, visitorFeed]);
-  const visitorLoading = isVisitor ? !visitorFeed : false;
-
-  const refreshVisitor = useCallback(() => {
     void refreshBoard();
   }, [refreshBoard]);
 
@@ -800,10 +816,10 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
     void refreshMessIncharge();
     void refreshSysadmin();
     void refreshPrincipal();
-    void refreshVisitor();
     void refreshAdmin();
     void refreshVp();
-  }, [refreshKanban, refreshGrid, refreshHm, refreshOie, refreshEs, refreshExamBranch, refreshMessIncharge, refreshSysadmin, refreshPrincipal, refreshVisitor, refreshAdmin, refreshVp]);
+    void refreshSupervisor();
+  }, [refreshKanban, refreshGrid, refreshHm, refreshOie, refreshEs, refreshExamBranch, refreshMessIncharge, refreshSysadmin, refreshPrincipal, refreshAdmin, refreshVp, refreshSupervisor]);
 
   const handleCloseContext = useCallback(() => {
     setSelectedRow(null);
@@ -889,6 +905,8 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
                 columns={["Open", "In Progress", "Resolved"]}
                 onSelect={handleSelect}
               />
+            ) : isDigest ? (
+              <DigestBoard source={config?.board?.source ?? ""} />
             ) : (
               <Board
                 source={config?.board?.source ?? ""}
@@ -903,15 +921,16 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
           {showAllocationPanel ? <AllocationPanel /> : null}
           {showExamDayPanel ? <ExamDayPanel /> : null}
           {showHandoffPanel ? <HandoffPanel onForwarded={refreshExamBranch} /> : null}
-          {showTodayMealsPanel ? <TodayMealsPanel /> : null}
+          {showMealServePanel ? <MealServePanel onRefresh={refreshMessIncharge} /> : null}
           {showIncidentPanel ? (
             <IncidentPanel onResolved={refreshExamIncidents} />
           ) : null}
           {showChildActivityPanel ? <ChildActivityPanel /> : null}
-          {showLiveActivityPanel ? <LiveActivityPanel /> : null}
+          {showEscalationPanel ? (
+            <EscalationPanel onRefresh={refreshSupervisor} />
+          ) : null}
           {showSysadminHealthPanel ? <SysadminHealthPanel /> : null}
           {showPrincipalDashboardPanel ? <PrincipalDashboardPanel /> : null}
-          {showVisitorActivityPanel ? <VisitorActivityPanel onRefresh={refreshVisitor} /> : null}
           {showAdminAlertsPanel ? <AdminAlertsPanel /> : null}
           {showVpDashboardPanel ? <VpDashboardPanel onRefresh={refreshVp} /> : null}
         </main>
@@ -946,12 +965,6 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
             counts={vpCounts}
             lastScan={lastScan}
             refreshing={vpLoading}
-          />
-        ) : isVisitor ? (
-          <VisitorStatusBar
-            counts={visitorCounts}
-            lastScan={lastScan}
-            refreshing={visitorLoading}
           />
         ) : isSysadmin ? (
           <SysadminStatusBar
@@ -1026,12 +1039,6 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
         />
       ) : isVicePrincipal ? (
         <VpCommandBar
-          role={role}
-          open={commandBarOpen}
-          onClose={closeCommandBar}
-        />
-      ) : isVisitor ? (
-        <VisitorCommandBar
           role={role}
           open={commandBarOpen}
           onClose={closeCommandBar}

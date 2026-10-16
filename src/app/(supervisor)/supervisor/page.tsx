@@ -9,7 +9,7 @@ import type { Role } from "@/lib/types";
  * Supervisor root page — Board-only.
  *
  * The layout already mounts the RoleConsole shell, which renders the
- * escalation Board feed in the main column plus the LiveActivityPanel,
+ * escalation Board feed in the main column plus the EscalationPanel,
  * the escalation ContextPanel, SupervisorStatusBar, and SupervisorCommandBar.
  * This page renders nothing so the default board fallback is used. No KPI
  * cards, no section links, no retention/engagement widgets. No horizontal

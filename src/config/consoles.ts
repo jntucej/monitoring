@@ -128,7 +128,7 @@ export interface RoleConsoleConfig {
    * drives a Board feed, KanbanBoard, or StatusBar from this endpoint.
    */
   board?: {
-    kind: "feed" | "kanban" | "grid";
+    kind: "feed" | "kanban" | "grid" | "digest";
     source: string;
     itemKey: string;
     /** Kanban columns, e.g. ["PENDING", "APPROVED", "REJECTED"]. */
@@ -315,7 +315,7 @@ export const CONSOLES: Record<string, RoleConsoleConfig> = {
     statusStrip: false,
     recentSheet: false,
     board: {
-      kind: "feed",
+      kind: "digest",
       source: "/api/supervisor/escalations",
       itemKey: "escalation",
     },
@@ -351,13 +351,12 @@ export const CONSOLES: Record<string, RoleConsoleConfig> = {
     statusStrip: false,
     recentSheet: false,
     board: {
-      kind: "feed",
-      // The digest board source is the mess analytics endpoint. /api/mess/analytics
-      // returns a per-day digest (declared present / confirmed / veg / non-veg
-      // + by-hostel-block breakdown) — the board renders that as a feed with
-      // itemKey "summary". The board-kind union doesn't have "digest" yet, so
-      // "feed" stands in for now (a future board-kind addition would use
-      // "digest").
+      kind: "digest",
+      // Digest-shaped endpoint: /api/mess/analytics returns data as a
+      // named-key object (notSelected/declaredPresent/confirmedPresent/
+      // byPrimary/byHostelBlock), NOT a flat array. The DigestBoard renders
+      // these keys generically; the status bar + MealServePanel read the
+      // same digest fields directly.
       source: "/api/mess/analytics",
       itemKey: "summary",
     },
@@ -394,7 +393,12 @@ export const CONSOLES: Record<string, RoleConsoleConfig> = {
     statusStrip: false,
     recentSheet: false,
     board: {
-      kind: "feed",
+      kind: "digest",
+      // Digest-shaped endpoint: /api/principal/dashboard returns data as a
+      // named-key object (pendingApprovals/recentAlerts/campusOccupancy),
+      // NOT a flat array. The DigestBoard renders these keys generically;
+      // the PrincipalDashboardPanel + status bar read the same digest
+      // fields directly.
       source: "/api/principal/dashboard",
       itemKey: "item",
     },
@@ -409,7 +413,12 @@ export const CONSOLES: Record<string, RoleConsoleConfig> = {
     statusStrip: false,
     recentSheet: false,
     board: {
-      kind: "feed",
+      kind: "digest",
+      // Digest-shaped endpoint: /api/sysadmin/application-health returns
+      // data as a named-key object (status/timestamp/uptimeSeconds/metrics/
+      // services/database), NOT a flat array. The DigestBoard renders these
+      // keys generically; the SysadminHealthPanel + status bar read the same
+      // digest fields directly.
       source: "/api/sysadmin/application-health",
       itemKey: "health",
     },
@@ -424,7 +433,12 @@ export const CONSOLES: Record<string, RoleConsoleConfig> = {
     statusStrip: false,
     recentSheet: false,
     board: {
-      kind: "feed",
+      kind: "digest",
+      // Digest-shaped endpoint: /api/principal/dashboard returns data as a
+      // named-key object (pendingApprovals/recentAlerts/campusOccupancy),
+      // NOT a flat array. The DigestBoard renders these keys generically;
+      // the VpDashboardPanel + status bar read the same digest fields
+      // directly.
       source: "/api/principal/dashboard",
       itemKey: "item",
     },
@@ -432,26 +446,6 @@ export const CONSOLES: Record<string, RoleConsoleConfig> = {
     commands: ["approvals", "delegations", "audit", "reports", "records"],
     statusFields: ["alerts", "pending", "active", "records"],
     extraPanels: ["VpDashboardPanel"],
-  },
-  visitor: {
-    role: "visitor",
-    nav: ["checkin", "approval", "history", "host", "request"],
-    statusStrip: false,
-    recentSheet: false,
-    board: {
-      kind: "feed",
-      // Self-scoped visitor source: /api/visitors/mine returns only the
-      // calling visitor's own visitor_logs rows (no hostel/branch filter —
-      // scoped by the caller's user_id server-side). Response shape:
-      //   { success, data: { logs, active, lastCompleted } }
-      // so the visit-activity feed items live under data.logs.
-      source: "/api/visitors/mine",
-      itemKey: "logs",
-    },
-    contextEntity: "activity",
-    commands: ["checkin", "approval", "history", "host", "request"],
-    statusFields: ["activities", "pending", "active", "records"],
-    extraPanels: ["VisitorActivityPanel"],
   },
   admin: {
     role: "admin",

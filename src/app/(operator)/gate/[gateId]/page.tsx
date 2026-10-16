@@ -172,17 +172,17 @@ function OperatorPageInner() {
     }
   }, [authenticated, user, gateId, defaultGateId]);
 
-  // Fix #3: suppress stats polling while the camera scanner is open or a scan
-  // is in-flight. Only poll when idle AND the scanner modal is closed.
-  const pollEnabled = state === "idle" && !showCameraScanner;
-  usePolling(loadStats, { intervalMs: 15_000, enabled: pollEnabled });
-
   // Fix #1: the Scanner's decode loop should only run while idle or actively
   // detecting. Once confirming / success / error, stop decoding so jsQR CPU
   // isn't wasted on a frozen frame.
   const scannerActive = state === "idle" || state === "detecting";
   const [showCameraScanner, setShowCameraScanner] = useState(false);
   const [manualRollInput, setManualRollInput] = useState("");
+
+  // Fix #3: suppress stats polling while the camera scanner is open or a scan
+  // is in-flight. Only poll when idle AND the scanner modal is closed.
+  const pollEnabled = state === "idle" && !showCameraScanner;
+  usePolling(loadStats, { intervalMs: 15_000, enabled: pollEnabled });
 
   // Open the bottom sheet on mount when ?tab=history is present
   useEffect(() => {

@@ -285,57 +285,37 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
 
     case "supervisor":
       // Supervisor is migrated to the RoleConsole shell (feed:escalations
-      // via /api/supervisor/escalations). Single console group of exactly
-      // 5 items so the IconRail stays lean. No "Campus Radar" / "General &
-      // Support" groups.
+      // via /api/supervisor/escalations, scoped to the caller's supervised_gates).
+      // Single console group of exactly 5 items so the IconRail stays lean.
+      // No "Campus Radar" / "General & Support" groups. No Account group.
       groups = [
         {
           groupLabel: "Supervisor Console",
           items: [
-            { href: "/supervisor", label: "Activity", icon: "CheckSquare", badge: "PENDING" },
+            { href: "/supervisor", label: "Live", icon: "Activity", badge: "PENDING" },
             { href: "/supervisor/escalation-centre", label: "Escalations", icon: "ShieldAlert" },
-            { href: "/supervisor/shifts", label: "Teams", icon: "Users" },
-            { href: "/supervisor/reports", label: "Records", icon: "FileSpreadsheet" },
-            { href: "/supervisor/approvals", label: "Approvals", icon: "CheckSquare" },
+            { href: "/supervisor/gates", label: "Gates", icon: "DoorOpen" },
+            { href: "/supervisor/shifts", label: "Shifts", icon: "CalendarClock" },
+            { href: "/supervisor/reports", label: "Reports", icon: "FileSpreadsheet" },
           ],
         },
       ];
       break;
 
     case "mess_incharge":
-      // Mess In-charge is migrated to the RoleConsole shell (feed:mess days
-      // via /api/mess/days). Single console group of exactly 5 items so the
-      // IconRail stays lean. No "General & Support" group. The five commands
-      // are pure navigation to the real mess sub-pages under /mess/.
+      // Mess In-charge is migrated to the RoleConsole shell (digest board via
+      // /api/mess/analytics + MealServePanel). Single console group of exactly
+      // 5 items so the IconRail stays lean. No "General & Support" group. The
+      // five items route to the real mess sub-pages under /mess/.
       groups = [
         {
           groupLabel: "Mess Console",
           items: [
-            { href: "/mess/menu-management", label: "Meals", icon: "UtensilsCrossed", badge: "PENDING" },
+            { href: "/mess", label: "Today", icon: "Utensils", badge: "PENDING" },
+            { href: "/mess/menu-management", label: "Menu", icon: "Salad" },
+            { href: "/mess/daily-meal-counts", label: "Counts", icon: "BarChart3" },
             { href: "/mess/inventory-stock", label: "Inventory", icon: "Package" },
-            { href: "/mess/operational-requests", label: "Requests", icon: "Send" },
-            { href: "/mess/meal-attendance", label: "Records", icon: "FileSpreadsheet" },
-            { href: "/mess/consumption-reports", label: "Reports", icon: "BarChart3" },
-          ],
-        },
-      ];
-      break;
-
-    case "visitor":
-      // Visitor is migrated to the RoleConsole shell (feed: own visit
-      // activities via /api/visitors/mine, self-scoped by user_id — no
-      // hostel/branch filter). Single console group of exactly 5 items so
-      // the IconRail stays lean. No "Account" group. All 5 commands are
-      // navigation to the real visitor sub-pages under /visitor/.
-      groups = [
-        {
-          groupLabel: "Visitor Console",
-          items: [
-            { href: "/visitor/checkin-out", label: "Check-in", icon: "DoorOpen", badge: "PENDING" },
-            { href: "/visitor/approval-status", label: "Approval", icon: "CheckSquare" },
-            { href: "/visitor/history", label: "History", icon: "History" },
-            { href: "/visitor/host-info", label: "Host", icon: "Building2" },
-            { href: "/visitor/request", label: "Request", icon: "Send" },
+            { href: "/mess/mess-issues", label: "Issues", icon: "ShieldAlert" },
           ],
         },
       ];
@@ -527,7 +507,6 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
     roleCode === "mess_incharge" ||
     roleCode === "sysadmin" ||
     roleCode === "principal" ||
-    roleCode === "visitor" ||
     roleCode === "admin" ||
     roleCode === "vice_principal"
   ) {

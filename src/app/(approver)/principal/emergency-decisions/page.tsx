@@ -71,7 +71,7 @@ function EmergencyDecisionsInner() {
     { enabled: !!user, ttlMs: 15_000 }
   );
 
-  usePolling(refresh, { intervalMs: 60_000, enabled: !!user });
+  usePolling(refresh, { intervalMs: 60_000, enabled: !!user && !submitting });
 
   const flagged = (data?.data ?? []).filter(
     (r) =>

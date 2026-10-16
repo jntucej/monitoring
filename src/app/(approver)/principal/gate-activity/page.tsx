@@ -8,7 +8,6 @@ import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role } from "@/lib/types";
 import { usePolling } from "@/hooks/usePolling";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { clearCache } from "@/hooks/useApiResource";
 import { fetchJson } from "../_shared";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
@@ -39,7 +38,6 @@ function GateActivityInner() {
 
   const refresh = useCallback(async () => {
     setRefreshing(true);
-    clearCache();
     const [matR, outR, leaveR] = await Promise.all([
       fetchJson("/api/occupancy/presence-matrix"),
       fetchJson("/api/permissions?workflow_type=hostel&status=PENDING"),

@@ -4,11 +4,11 @@
  * SupervisorCommandBar — Cmd/Ctrl+K command palette for the Supervisor console.
  *
  * 5-command free-text parser:
- *   approve <ticket>          PATCH /api/permissions/<ticket> { action: APPROVE }
- *   reject <ticket> [reason] PATCH /api/permissions/<ticket> { action: REJECT, comment }
- *   escalate <ticket>        PATCH /api/permissions/<ticket> { action: ESCALATE }
- *   teams                    navigate /supervisor/teams
- *   records                  navigate /supervisor/records
+ *   approve <ticket>              PATCH /api/permissions/<ticket> { action: APPROVE }
+ *   escalate <ticket> to <role>  PATCH /api/permissions/<ticket> { action: ESCALATE, targetRole }
+ *   assign <alert> to <user>     POST /api/alerts/assign { alert_id, assignee_user_id }
+ *   resolve <alert>              PATCH /api/alerts/<alert>
+ *   handover shift <text>        POST /api/campus-extra/handover { toRole, items, notes }
  *
  * Keyboard: up/down to navigate, Enter to execute, Escape to close.
  */
@@ -16,10 +16,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   CheckCircle,
-  XCircle,
   AlertTriangle,
-  Users,
-  FileSpreadsheet,
+  UserPlus,
+  ShieldCheck,
+  ArrowRight,
   Search,
   ChevronRight,
 } from "lucide-react";
@@ -37,74 +37,115 @@ interface CommandDef {
 const COMMAND_DEFS: CommandDef[] = [
   {
     id: "approve",
-    label: "Approve an escalation",
-    hint: "approve <ticket> — Approve a pending escalation",
+    label: "Approve a ticket",
+    hint: "approve <ticket> — Approve a pending escalation ticket",
     icon: CheckCircle,
   },
   {
-    id: "reject",
-    label: "Reject an escalation",
-    hint: "reject <ticket> [reason] — Reject with optional reason",
-    icon: XCircle,
-  },
-  {
     id: "escalate",
-    label: "Escalate to next stage",
-    hint: "escalate <ticket> — Escalate to the next stage",
+    label: "Escalate a ticket",
+    hint: "escalate <ticket> to <role> — Escalate to a target role",
     icon: AlertTriangle,
   },
   {
-    id: "teams",
-    label: "View teams",
-    hint: "teams — Go to the teams view",
-    icon: Users,
+    id: "assign",
+    label: "Assign an alert",
+    hint: "assign <alert> to <user> — Assign an alert to an operator",
+    icon: UserPlus,
   },
   {
-    id: "records",
-    label: "View records",
-    hint: "records — Go to the records view",
-    icon: FileSpreadsheet,
+    id: "resolve",
+    label: "Resolve an alert",
+    hint: "resolve <alert> — Resolve an active alert",
+    icon: ShieldCheck,
+  },
+  {
+    id: "handover",
+    label: "Shift handover",
+    hint: "handover shift <text> — Create a shift handover note",
+    icon: ArrowRight,
   },
 ];
 
-type Action = "APPROVE" | "REJECT" | "ESCALATE" | "TEAMS" | "RECORDS" | "UNKNOWN";
+type Action =
+  | "APPROVE"
+  | "ESCALATE"
+  | "ASSIGN"
+  | "RESOLVE"
+  | "HANDOVER"
+  | "UNKNOWN";
 
 interface ParsedCommand {
   action: Action;
+  /** Ticket number (approve / escalate). */
   ticket: string;
-  reason: string;
+  /** Alert ID (assign / resolve). */
+  alertId: string;
+  /** Target role for escalate. */
+  targetRole: string;
+  /** Assignee user id for assign. */
+  assignee: string;
+  /** Free-text handover note. */
+  handoverText: string;
 }
 
 /**
  * Parse a supervisor free-text command.
  *
  *   approve <ticket>
- *   reject <ticket> [reason...]
- *   escalate <ticket>
- *   teams
- *   records
+ *   escalate <ticket> to <role>
+ *   assign <alert> to <user>
+ *   resolve <alert>
+ *   handover shift <text...>
  */
 function parseCommand(input: string): ParsedCommand {
   const tokens = input.trim().split(/\s+/);
   const first = (tokens[0] || "").toLowerCase();
-  const empty: ParsedCommand = { action: "UNKNOWN", ticket: "", reason: "" };
+  const empty: ParsedCommand = {
+    action: "UNKNOWN",
+    ticket: "",
+    alertId: "",
+    targetRole: "",
+    assignee: "",
+    handoverText: "",
+  };
 
   if (first === "approve") {
     return { ...empty, action: "APPROVE", ticket: tokens[1] ?? "" };
   }
-  if (first === "reject") {
-    const rest = tokens.slice(2).join(" ");
-    return { ...empty, action: "REJECT", ticket: tokens[1] ?? "", reason: rest };
-  }
+
   if (first === "escalate") {
-    return { ...empty, action: "ESCALATE", ticket: tokens[1] ?? "" };
+    // escalate <ticket> to <role>
+    const ticket = tokens[1] ?? "";
+    // Find "to" token and take the next token as the target role.
+    const toIdx = tokens.findIndex((t) => t.toLowerCase() === "to");
+    const targetRole = toIdx >= 0 ? (tokens[toIdx + 1] ?? "") : "";
+    return { ...empty, action: "ESCALATE", ticket, targetRole };
   }
-  if (first === "teams") {
-    return { ...empty, action: "TEAMS" };
+
+  if (first === "assign") {
+    // assign <alert> to <user>
+    const alertId = tokens[1] ?? "";
+    const toIdx = tokens.findIndex((t, i) => i > 0 && t.toLowerCase() === "to");
+    const assignee = toIdx >= 0 ? (tokens[toIdx + 1] ?? "") : "";
+    return { ...empty, action: "ASSIGN", alertId, assignee };
   }
-  if (first === "records") {
-    return { ...empty, action: "RECORDS" };
+
+  if (first === "resolve") {
+    return { ...empty, action: "RESOLVE", alertId: tokens[1] ?? "" };
   }
+
+  if (first === "handover") {
+    // handover shift <text...>
+    // Drop "handover" and "shift" keywords, keep the rest as the note.
+    const noteTokens = tokens.slice(1);
+    // Skip a leading "shift" token if present.
+    const startIdx =
+      noteTokens[0]?.toLowerCase() === "shift" ? 1 : 0;
+    const handoverText = noteTokens.slice(startIdx).join(" ");
+    return { ...empty, action: "HANDOVER", handoverText };
+  }
+
   return { ...empty, action: "UNKNOWN" };
 }
 
@@ -147,50 +188,138 @@ export function SupervisorCommandBar({ role, open, onClose }: SupervisorCommandB
 
   const executeCommand = useCallback(
     async (parsed: ParsedCommand) => {
-      // ── teams / records: navigate ──
-      if (parsed.action === "TEAMS" || parsed.action === "RECORDS") {
-        // teams → the operator & shifts roster (closest existing surface).
-        // records → the reports/export surface.
-        const target =
-          parsed.action === "TEAMS" ? "/supervisor/shifts" : "/supervisor/reports";
-        window.location.href = target;
-        onClose();
-        return;
-      }
-
       if (parsed.action === "UNKNOWN") {
         addToast({ variant: "error", message: "Unknown command. Type a command from the list below." });
         return;
       }
 
-      // ── approve / reject / escalate: PATCH /api/permissions/<ticket> ──
-      if (!parsed.ticket) {
-        addToast({ variant: "error", message: "Usage: <action> <ticket>" });
-        return;
-      }
-
-      const body: Record<string, string> = { action: parsed.action };
-      if (parsed.reason) body.comment = parsed.reason;
-
       setBusy(true);
       try {
-        const res = await fetch(`/api/permissions/${encodeURIComponent(parsed.ticket)}`, {
-          method: "PATCH",
-          headers: getAuthHeaders(),
-          body: JSON.stringify(body),
-        });
-        const json = await res.json().catch(() => null);
-        if (res.ok && json?.success) {
-          addToast({
-            variant: parsed.action === "REJECT" ? "info" : "success",
-            message: `${parsed.action} processed for ${parsed.ticket}`,
+        /* ── approve: PATCH /api/permissions/<ticket> ─────────────── */
+        if (parsed.action === "APPROVE") {
+          if (!parsed.ticket) {
+            addToast({ variant: "error", message: "Usage: approve <ticket>" });
+            return;
+          }
+          const res = await fetch(
+            `/api/permissions/${encodeURIComponent(parsed.ticket)}`,
+            {
+              method: "PATCH",
+              headers: getAuthHeaders(),
+              body: JSON.stringify({ action: "APPROVE" }),
+            }
+          );
+          const json = await res.json().catch(() => null);
+          if (res.ok && json?.success) {
+            addToast({ variant: "success", message: `Approved ${parsed.ticket}` });
+            onClose();
+          } else {
+            addToast({ variant: "error", message: json?.error?.message || `Failed to approve ${parsed.ticket}` });
+          }
+          return;
+        }
+
+        /* ── escalate: PATCH /api/permissions/<ticket> ────────────── */
+        if (parsed.action === "ESCALATE") {
+          if (!parsed.ticket) {
+            addToast({ variant: "error", message: "Usage: escalate <ticket> to <role>" });
+            return;
+          }
+          const body: Record<string, string> = { action: "ESCALATE" };
+          if (parsed.targetRole) body.targetRole = parsed.targetRole;
+          const res = await fetch(
+            `/api/permissions/${encodeURIComponent(parsed.ticket)}`,
+            {
+              method: "PATCH",
+              headers: getAuthHeaders(),
+              body: JSON.stringify(body),
+            }
+          );
+          const json = await res.json().catch(() => null);
+          if (res.ok && json?.success) {
+            addToast({
+              variant: "success",
+              message: `Escalated ${parsed.ticket}${parsed.targetRole ? ` to ${parsed.targetRole}` : ""}`,
+            });
+            onClose();
+          } else {
+            addToast({ variant: "error", message: json?.error?.message || `Failed to escalate ${parsed.ticket}` });
+          }
+          return;
+        }
+
+        /* ── assign: POST /api/alerts/assign ──────────────────────── */
+        if (parsed.action === "ASSIGN") {
+          if (!parsed.alertId || !parsed.assignee) {
+            addToast({ variant: "error", message: "Usage: assign <alert> to <user>" });
+            return;
+          }
+          const res = await fetch("/api/alerts/assign", {
+            method: "POST",
+            headers: getAuthHeaders(),
+            body: JSON.stringify({
+              alert_id: parsed.alertId,
+              assignee_user_id: parsed.assignee,
+            }),
           });
-          onClose();
-        } else {
-          addToast({
-            variant: "error",
-            message: json?.error?.message || `Failed to ${parsed.action} ${parsed.ticket}`,
+          const json = await res.json().catch(() => null);
+          if (res.ok && json?.success) {
+            addToast({ variant: "success", message: `Assigned alert ${parsed.alertId} to ${parsed.assignee}` });
+            onClose();
+          } else {
+            addToast({ variant: "error", message: json?.error?.message || `Failed to assign alert ${parsed.alertId}` });
+          }
+          return;
+        }
+
+        /* ── resolve: PATCH /api/alerts/<alert> ───────────────────── */
+        if (parsed.action === "RESOLVE") {
+          if (!parsed.alertId) {
+            addToast({ variant: "error", message: "Usage: resolve <alert>" });
+            return;
+          }
+          const res = await fetch(
+            `/api/alerts/${encodeURIComponent(parsed.alertId)}`,
+            {
+              method: "PATCH",
+              headers: getAuthHeaders(),
+            }
+          );
+          const json = await res.json().catch(() => null);
+          if (res.ok && json?.success) {
+            addToast({ variant: "success", message: `Resolved alert ${parsed.alertId}` });
+            onClose();
+          } else {
+            addToast({ variant: "error", message: json?.error?.message || `Failed to resolve alert ${parsed.alertId}` });
+          }
+          return;
+        }
+
+        /* ── handover: POST /api/campus-extra/handover ────────────── */
+        if (parsed.action === "HANDOVER") {
+          const res = await fetch("/api/campus-extra/handover", {
+            method: "POST",
+            headers: getAuthHeaders(),
+            body: JSON.stringify({
+              toRole: "operator",
+              items: [
+                {
+                  type: "shift_note",
+                  title: "Shift handover",
+                  details: parsed.handoverText || "(no note)",
+                },
+              ],
+              notes: parsed.handoverText || undefined,
+            }),
           });
+          const json = await res.json().catch(() => null);
+          if (res.ok && json?.success) {
+            addToast({ variant: "success", message: "Shift handover created" });
+            onClose();
+          } else {
+            addToast({ variant: "error", message: json?.error?.message || "Failed to create handover" });
+          }
+          return;
         }
       } catch {
         addToast({ variant: "error", message: "Network error while processing command" });
@@ -210,8 +339,27 @@ export function SupervisorCommandBar({ role, open, onClose }: SupervisorCommandB
     const parsed = parseCommand(query);
     const first = query.trim().toLowerCase();
     // Bare keywords that need more tokens: keep focus so the user can finish.
-    if (["approve", "reject", "escalate"].includes(first)) {
-      if (parsed.action === "UNKNOWN" || !parsed.ticket) {
+    if (["approve", "escalate", "assign", "resolve"].includes(first)) {
+      if (parsed.action === "UNKNOWN") {
+        inputRef.current?.focus();
+        return;
+      }
+      // For assign, require both alert and user.
+      if (parsed.action === "ASSIGN" && (!parsed.alertId || !parsed.assignee)) {
+        inputRef.current?.focus();
+        return;
+      }
+      // For escalate, ticket is required; targetRole is optional.
+      if (parsed.action === "ESCALATE" && !parsed.ticket) {
+        inputRef.current?.focus();
+        return;
+      }
+      // For approve / resolve, the id is required.
+      if (parsed.action === "APPROVE" && !parsed.ticket) {
+        inputRef.current?.focus();
+        return;
+      }
+      if (parsed.action === "RESOLVE" && !parsed.alertId) {
         inputRef.current?.focus();
         return;
       }
@@ -281,19 +429,54 @@ export function SupervisorCommandBar({ role, open, onClose }: SupervisorCommandB
             <span className="font-mono font-bold text-[var(--action-primary)]">
               {parsedPreview.action}
             </span>
-            {parsedPreview.action === "APPROVE" || parsedPreview.action === "REJECT" || parsedPreview.action === "ESCALATE" ? (
+            {parsedPreview.action === "APPROVE" ? (
+              parsedPreview.ticket ? (
+                <span className="ml-1.5 font-mono">{parsedPreview.ticket}</span>
+              ) : (
+                <span className="ml-1.5 text-[var(--text-muted)] italic">[ticket required]</span>
+              )
+            ) : null}
+            {parsedPreview.action === "ESCALATE" ? (
               <>
                 {parsedPreview.ticket ? (
                   <span className="ml-1.5 font-mono">{parsedPreview.ticket}</span>
                 ) : (
                   <span className="ml-1.5 text-[var(--text-muted)] italic">[ticket required]</span>
                 )}
-                {parsedPreview.action === "REJECT" ? (
-                  parsedPreview.reason ? (
-                    <span className="ml-1.5 text-[var(--text-muted)] italic">reason: {parsedPreview.reason}</span>
-                  ) : null
+                {parsedPreview.targetRole ? (
+                  <span className="ml-1.5 text-[var(--text-muted)]">to {parsedPreview.targetRole}</span>
                 ) : null}
               </>
+            ) : null}
+            {parsedPreview.action === "ASSIGN" ? (
+              <>
+                {parsedPreview.alertId ? (
+                  <span className="ml-1.5 font-mono">{parsedPreview.alertId}</span>
+                ) : (
+                  <span className="ml-1.5 text-[var(--text-muted)] italic">[alert required]</span>
+                )}
+                {parsedPreview.assignee ? (
+                  <span className="ml-1.5 text-[var(--text-muted)]">to {parsedPreview.assignee}</span>
+                ) : (
+                  <span className="ml-1.5 text-[var(--text-muted)] italic">[user required]</span>
+                )}
+              </>
+            ) : null}
+            {parsedPreview.action === "RESOLVE" ? (
+              parsedPreview.alertId ? (
+                <span className="ml-1.5 font-mono">{parsedPreview.alertId}</span>
+              ) : (
+                <span className="ml-1.5 text-[var(--text-muted)] italic">[alert required]</span>
+              )
+            ) : null}
+            {parsedPreview.action === "HANDOVER" ? (
+              parsedPreview.handoverText ? (
+                <span className="ml-1.5 text-[var(--text-muted)] italic truncate">
+                  "{parsedPreview.handoverText}"
+                </span>
+              ) : (
+                <span className="ml-1.5 text-[var(--text-muted)] italic">[shift note]</span>
+              )
             ) : null}
             {busy ? <span className="ml-2 text-[var(--text-muted)]">processing…</span> : null}
           </div>
