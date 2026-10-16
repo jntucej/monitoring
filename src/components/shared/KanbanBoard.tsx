@@ -21,8 +21,27 @@ import { SlaBadge } from "@/components/approver/SlaBadge";
 
 interface PermissionsResponse {
   success?: boolean;
-  data: PermissionItem[];
+  data: unknown;
   total?: number;
+}
+
+/** Narrow the dynamic itemKey array back to PermissionItem[] when it is
+ *  present under `data` (e.g. /api/hostel-manager/summary nests tickets
+ *  under `data.pendingTickets`). */
+function nestedItemsOf(
+  data: { data: unknown; [key: string]: unknown } | null,
+  itemKey: string,
+): PermissionItem[] | null {
+  if (!data) return null;
+  const nested = data.data;
+  if (Array.isArray(nested)) return nested as PermissionItem[];
+  if (nested && typeof nested === "object") {
+    const dyn = (nested as Record<string, unknown>)[itemKey];
+    if (Array.isArray(dyn)) return dyn as PermissionItem[];
+  }
+  const top = data[itemKey];
+  if (Array.isArray(top)) return top as PermissionItem[];
+  return null;
 }
 
 /** Convert a PermissionItem into a BoardRow-compatible shape for selection. */
@@ -60,15 +79,11 @@ export interface KanbanBoardProps {
 export function KanbanBoard({ source, itemKey, columns, onSelect }: KanbanBoardProps) {
   const { data, loading, error } = useApiResource<PermissionsResponse>(source, { ttlMs: 15_000 });
 
-  // The /api/permissions response puts the array under `data` directly, not
-  // under a dynamic itemKey. Honor itemKey when it is present but fall back
-  // to the top-level `data` array.
-  const items = useMemo<PermissionItem[]>(() => {
-    if (!data) return [];
-    if (Array.isArray(data.data)) return data.data;
-    const dyn = (data as unknown as Record<string, unknown>)[itemKey];
-    return Array.isArray(dyn) ? (dyn as PermissionItem[]) : [];
-  }, [data, itemKey]);
+  // /api/permissions puts the array directly under `data`; the summary
+  // endpoints (e.g. /api/hostel-manager/summary) nest it under
+  // `data.pendingTickets`. nestedItemsOf handles both, plus a top-level
+  // dynamic itemKey fallback.
+  const items = useMemo<PermissionItem[]>(() => nestedItemsOf(data as { data: unknown; [key: string]: unknown } | null, itemKey) ?? [], [data, itemKey]);
 
   const byColumn = useMemo(() => {
     const map: Record<string, PermissionItem[]> = {};
