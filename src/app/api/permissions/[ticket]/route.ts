@@ -79,13 +79,14 @@ async function handlePatch(req: NextRequest): Promise<Response> {
     );
   }
 
-  const { action, comment, digitalSignature, targetStage, stepupPassword, targetRole } = (body || {}) as {
+  const { action, comment, digitalSignature, targetStage, stepupPassword, targetRole, reason } = (body || {}) as {
     action?: string;
     comment?: string;
     digitalSignature?: string;
     targetStage?: string;
     stepupPassword?: string;
     targetRole?: string;
+    reason?: string;
   };
 
   const normalizedAction = (action || "").toUpperCase();
@@ -187,6 +188,7 @@ async function handlePatch(req: NextRequest): Promise<Response> {
       nextStage: prep.nextStage as string,
       actor: { id: authUserId, name: actorRow?.name || authUserEmail || "Approver", role: authUserRole },
       authUserEmail,
+      reason,
     });
     return result.response;
   }

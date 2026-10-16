@@ -447,15 +447,23 @@ export async function applyEscalateUp(args: {
   nextStage: string;
   actor: { id: string; name: string; role: string };
   authUserEmail: string;
+  /**
+   * Optional escalation reason chosen by the student in the escalation modal
+   * (emergency / special_leave / daily_outing / day_pass / home_out /
+   * day_scholar_out). Recorded on the audit entry so the reviewer knows why
+   * the escalation was requested. The escalation target stage is still
+   * computed by the caller (nextHostelLevel), not by the reason.
+   */
+  reason?: string;
 }): Promise<{ response: Response; updated?: unknown }> {
-  const { ticket, nextStage, actor, authUserEmail } = args;
+  const { ticket, nextStage, actor, authUserEmail, reason } = args;
   const supabase = getSupabaseServiceClient();
 
   const updatedHistory: StageHistoryEntry[] = appendStageHistory(
     (ticket.stage_history as StageHistoryEntry[] | null) ?? null,
     actor,
     "ESCALATE_UP",
-    null,
+    reason ?? null,
     { from: ticket.current_stage, to: nextStage },
   );
 
@@ -485,6 +493,7 @@ export async function applyEscalateUp(args: {
       action: "ESCALATE_UP",
       fromStage: ticket.current_stage,
       toStage: nextStage,
+      ...(reason ? { reason } : {}),
     },
   }).catch((err) => console.error("[Escalate Up] addAudit error:", err));
 
