@@ -83,3 +83,50 @@ export function appendStageHistory(
   };
   return [...rawArray, newEntry];
 }
+
+// ── Entry-option resolver (gate operator button matrix) ───────────────────────
+
+/**
+ * Result of {@link resolveEntryOptions}.
+ *
+ * `buttons` is the set of IN-moves the gate operator console should offer for a
+ * student who was last scanned OUT (or has no prior OUT). `allowsTypeChoice`
+ * signals whether the operator may freely pick the entry type (hosteller vs
+ * day scholar) rather than being pinned to a single button that mirrors the
+ * prior OUT reason.
+ */
+export interface EntryOptions {
+  buttons: ("return_to_hostel" | "home_in" | "day_scholar_in")[];
+  allowsTypeChoice: boolean;
+}
+
+/**
+ * Pure resolver for the gate-operator IN-moves offered after a student's last
+ * known OUT reason. Fully client-safe (no DB / pg / Node builtins).
+ *
+ * Rules:
+ * - prior `daily_outing` / `day_pass`  → pinned to `[return_to_hostel]`, no type choice.
+ * - prior `day_scholar_out`            → pinned to `[day_scholar_in]`, no type choice.
+ * - prior `home_out` (or unknown)      → `[home_in, day_scholar_in]`, type choice.
+ * - no prior OUT (`null`) / first scan → `[home_in, day_scholar_in]`, type choice.
+ */
+export function resolveEntryOptions(
+  lastOutReason: string | null,
+  currentType: "hosteller" | "day_scholar" | null,
+): EntryOptions {
+  // `currentType` is part of the public contract but does not change the
+  // button set today; it is reserved so callers can pass it forward without
+  // the signature ever needing to break. (Unused by design → no lint noise
+  // because it is a named param.)
+  void currentType;
+
+  if (lastOutReason === "daily_outing" || lastOutReason === "day_pass") {
+    return { buttons: ["return_to_hostel"], allowsTypeChoice: false };
+  }
+  if (lastOutReason === "day_scholar_out") {
+    return { buttons: ["day_scholar_in"], allowsTypeChoice: false };
+  }
+  // home_out, null (no prior OUT / first scan), and any unknown reason all
+  // open the type choice between Home In and Day Scholar In.
+  return { buttons: ["home_in", "day_scholar_in"], allowsTypeChoice: true };
+}

@@ -219,13 +219,22 @@ On `permissions`:
 - `stepup_verified_at TIMESTAMPTZ` - when a step-up check passed for this
   ticket.
 - `stepup_verified_by UUID REFERENCES users(id)` - who verified it.
+- `pending_hostel_block TEXT` - Option A pre-assignment: hostel block to
+  write to `student_details` on a Home In return (see below).
+- `pending_room_number TEXT` - Option A pre-assignment: room number to write
+  to `student_details` on a Home In return.
+- `pending_warden_id UUID REFERENCES users(id)` - Option A pre-assignment:
+  the warden who owns the pre-assigned block/room; enforced as
+  `HOSTEL_ROOM_REQUIRED` when missing on a Home In.
 
-Two partial indexes are added to support the routing queries:
+Three partial indexes are added to support the routing queries:
 `idx_permissions_routed_to` on `(routed_to_role, status) WHERE status =
-'PENDING'` and `idx_permissions_direct_generated` on
-`permissions(direct_generated) WHERE direct_generated`.
+'PENDING'`, `idx_permissions_direct_generated` on
+`permissions(direct_generated) WHERE direct_generated`, and
+`idx_student_details_entry_type` on
+`student_details(current_entry_type) WHERE current_entry_type IS NOT NULL`.
 
-Seven new audit actions are spliced into the
+Eight new audit actions are spliced into the
 `audit_logs_action_known` CHECK constraint:
 
 - `PERMISSION_FORWARDED_TO_LEVEL`
@@ -235,6 +244,7 @@ Seven new audit actions are spliced into the
 - `STUDENT_TYPE_CHANGED_AT_ENTRY`
 - `APPROVAL_PASSWORD_ROTATED`
 - `APPROVAL_PASSWORD_SET`
+- `HOSTEL_ROOM_ASSIGNED_ON_HOME_OUT`
 
 ## API surface
 
@@ -286,3 +296,68 @@ point in the code:
 | A12 | 5 consecutive step-up failures lock the password for 15 minutes | `applyStepupFailure` in `permission-forward.ts` |
 | A13 | Student can escalate a rejected hostel ticket one level up | `prepareEscalateUp` / `applyEscalateUp` + `nextHostelLevel` |
 | A14 | `HOME_OUT_MAX_HOURS = null` (unlimited); `DAILY_OUTING_MAX_HOURS = 1`; `DAY_PASS_MAX_HOURS = 12` | Constants in `permission-workflow.ts` + `maxDurationForReason` in the direct-generate route |
+
+## Option A — Day Scholar Home Out Room Pre-Assignment
+
+A day scholar (or a hosteller who took a `home_out` and intends to return as
+a day scholar) may pre-assign a hostel block / room / warden before they come
+in. This lets the operator skip "which block?" at the gate and land the
+student directly into a warden's block when they return Home In.
+
+### The three new `permissions` columns
+
+The Option A pre-assignment is persisted on the permission ticket itself, not
+on `student_details`, so it is only applied when the student actually comes
+in:
+
+- `pending_hostel_block TEXT` - the hostel block code the warden pre-assigned.
+- `pending_room_number TEXT` - the room number within that block.
+- `pending_warden_id UUID REFERENCES users(id)` - the warden who owns the
+  block/room; lets the UI attribute the assignment and lets the gate reject
+  a stale pre-assignment if the warden has been rotated.
+
+All three are nullable, additive-only, and only meaningful on tickets whose
+reason allows a day-scholar Home In return. The `direct-generate` flow and the
+`FORWARD` flow both PATCH these columns when the operator (or an L2+ reviewer
+on their behalf) pre-assigns a room.
+
+### Home In return → write to `student_details`
+
+When the student scans IN at the gate and chooses `home_in` (or
+`return_to_hostel` on a hosteller OUT), the gate `record` path reads the
+three `pending_*` columns off the most recent APPROVED ticket for that
+student and, in a single transaction:
+
+1. Writes `student_details.hostel_block` = `pending_hostel_block` and
+   `student_details.room_number` = `pending_room_number`.
+2. Clears the three `pending_*` columns on the ticket so the pre-assignment
+   is not re-applied on a subsequent IN.
+3. Audits `HOSTEL_ROOM_ASSIGNED_ON_HOME_OUT` (the 8th new audit action in
+   this migration) with the `pending_warden_id` as the attribution.
+4. Records `student_details.current_entry_type = 'hosteller'` and
+   `type_chosen_at` / `type_chosen_at_gate` for this IN.
+
+### Day Scholar In → discard
+
+When the student instead chooses `day_scholar_in` (the type-choice button
+matrix from `resolveEntryOptions`), the pending pre-assignment is discarded:
+the three `pending_*` columns are cleared on the ticket and no write to
+`student_details.hostel_block` / `room_number` happens. The student's
+effective type is still recorded as `day_scholar` via the entry-type
+selection flow, but the block/room pre-assignment is dropped because the
+student is not landing in a warden's block for this IN.
+
+### `HOSTEL_ROOM_REQUIRED` rejection
+
+If a student scans `home_in` and the most recent APPROVED ticket is missing
+the pre-assignment (any of `pending_hostel_block`, `pending_room_number`, or
+`pending_warden_id` is NULL), the gate `record` path rejects the scan with
+a `HOSTEL_ROOM_REQUIRED` 409/400 conflict. The operator is expected to fix
+the pre-assignment via the approval modal (or by letting an L2+ reviewer
+forward / direct-generate with the block/room filled in) and re-scan.
+
+The pure button matrix lives in `resolveEntryOptions` in
+`src/lib/permission-workflow-core.ts`; it is re-exported through
+`src/lib/permission-workflow.ts` and `src/lib/permission-workflow-pure.ts`
+so "use client" gate-operator components can import it without pulling the
+`pg` driver into the browser bundle.

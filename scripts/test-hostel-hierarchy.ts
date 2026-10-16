@@ -26,6 +26,7 @@ import {
   forwardTicket,
   directGeneratePass,
   requiresStepup,
+  resolveEntryOptions,
   PermissionRuleError,
   type RequestSnapshot,
   type ActorContext,
@@ -106,6 +107,10 @@ c("REASON_LEVEL_MAP maps L1 and L3 reasons", () => {
   assert.equal(REASON_LEVEL_MAP.day_pass, L1_ROLE);
   assert.equal(REASON_LEVEL_MAP.emergency, L3_ROLE);
   assert.equal(REASON_LEVEL_MAP.special_leave, L3_ROLE);
+});
+
+c("REASON_LEVEL_MAP routes day_scholar_out to 'auto'", () => {
+  assert.equal(REASON_LEVEL_MAP.day_scholar_out, "auto");
 });
 
 // ── forwardTicket ───────────────────────────────────────────────────────
@@ -227,6 +232,49 @@ c("requiresStepup FALSE: L1 routine approve of daily_outing (no violations, no b
 c("requiresStepup boundary: studentPriorViolations=2 and dailyBulkCount=4 stay FALSE", () => {
   assert.equal(requiresStepup({ actorRole: L2_ROLE, action: "approve", studentPriorViolations: 2 }), false);
   assert.equal(requiresStepup({ actorRole: L2_ROLE, action: "approve", dailyBulkCount: 4 }), false);
+});
+
+// ── resolveEntryOptions (gate operator button matrix) ───────────────────
+c("resolveEntryOptions('daily_outing','hosteller') pins return_to_hostel", () => {
+  assert.deepEqual(
+    resolveEntryOptions("daily_outing", "hosteller"),
+    { buttons: ["return_to_hostel"], allowsTypeChoice: false },
+  );
+});
+
+c("resolveEntryOptions('day_pass','hosteller') pins return_to_hostel", () => {
+  assert.deepEqual(
+    resolveEntryOptions("day_pass", "hosteller"),
+    { buttons: ["return_to_hostel"], allowsTypeChoice: false },
+  );
+});
+
+c("resolveEntryOptions('home_out','hosteller') offers home_in/day_scholar_in with type choice", () => {
+  assert.deepEqual(
+    resolveEntryOptions("home_out", "hosteller"),
+    { buttons: ["home_in", "day_scholar_in"], allowsTypeChoice: true },
+  );
+});
+
+c("resolveEntryOptions('day_scholar_out','day_scholar') pins day_scholar_in", () => {
+  assert.deepEqual(
+    resolveEntryOptions("day_scholar_out", "day_scholar"),
+    { buttons: ["day_scholar_in"], allowsTypeChoice: false },
+  );
+});
+
+c("resolveEntryOptions(null,'hosteller') offers home_in/day_scholar_in with type choice", () => {
+  assert.deepEqual(
+    resolveEntryOptions(null, "hosteller"),
+    { buttons: ["home_in", "day_scholar_in"], allowsTypeChoice: true },
+  );
+});
+
+c("resolveEntryOptions unknown reason defaults to home_in/day_scholar_in with type choice", () => {
+  assert.deepEqual(
+    resolveEntryOptions("some_unknown_reason", "hosteller"),
+    { buttons: ["home_in", "day_scholar_in"], allowsTypeChoice: true },
+  );
 });
 
 // ── Run the runner ──────────────────────────────────────────────────────

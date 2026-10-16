@@ -2,7 +2,7 @@
 -- Migration: 20261201000000_hostel_hierarchy_and_type_selection
 -- Purpose: Add hostel-permission-hierarchy routing columns, student
 --          entry-type-selection tracking, approval-password tracking on
---          users, and extend the audit_logs action allowlist with 7 new
+--          users, and extend the audit_logs action allowlist with 8 new
 --          actions for the new feature.
 --
 -- Additive-only: every DDL is IF NOT EXISTS / ON CONFLICT DO NOTHING.
@@ -73,7 +73,10 @@ ALTER TABLE public.permissions
   ADD COLUMN IF NOT EXISTS forward_comment        TEXT,
   ADD COLUMN IF NOT EXISTS direct_generated       BOOLEAN NOT NULL DEFAULT FALSE,
   ADD COLUMN IF NOT EXISTS stepup_verified_at     TIMESTAMPTZ,
-  ADD COLUMN IF NOT EXISTS stepup_verified_by     UUID REFERENCES public.users(id);
+  ADD COLUMN IF NOT EXISTS stepup_verified_by     UUID REFERENCES public.users(id),
+  ADD COLUMN IF NOT EXISTS pending_hostel_block   TEXT,
+  ADD COLUMN IF NOT EXISTS pending_room_number    TEXT,
+  ADD COLUMN IF NOT EXISTS pending_warden_id      UUID REFERENCES public.users(id);
 
 COMMENT ON COLUMN public.permissions.routed_to_role IS 'Role this permission request is currently routed to in the hostel hierarchy';
 COMMENT ON COLUMN public.permissions.forwarded_from_role IS 'Role that forwarded this request to the next approval level';
@@ -81,6 +84,9 @@ COMMENT ON COLUMN public.permissions.forward_comment IS 'Free-text annotation at
 COMMENT ON COLUMN public.permissions.direct_generated IS 'TRUE when the request was generated directly, bypassing the multi-stage chain';
 COMMENT ON COLUMN public.permissions.stepup_verified_at IS 'When a step-up approval was confirmed';
 COMMENT ON COLUMN public.permissions.stepup_verified_by IS 'UUID of the user who confirmed the step-up approval';
+COMMENT ON COLUMN public.permissions.pending_hostel_block IS 'Option A pre-assignment: hostel block to write to student_details on Home In return (day-scholar home-out); discarded on Day Scholar In';
+COMMENT ON COLUMN public.permissions.pending_room_number IS 'Option A pre-assignment: room number to write to student_details on Home In return; discarded on Day Scholar In';
+COMMENT ON COLUMN public.permissions.pending_warden_id IS 'Option A pre-assignment: warden (users.id) owning the pre-assigned block/room; enforced as HOSTEL_ROOM_REQUIRED when missing on Home In';
 
 -- ----------------------------------------------------------------------------
 -- 1.4 audit_logs_action_known: append 7 new action strings
@@ -101,6 +107,9 @@ COMMENT ON COLUMN public.permissions.stepup_verified_by IS 'UUID of the user who
 --   APPROVAL_PASSWORD_ROTATED       - a user rotated their approval password
 --   APPROVAL_PASSWORD_SET           - a user set their approval password for
 --                                     the first time
+--   HOSTEL_ROOM_ASSIGNED_ON_HOME_OUT- Option A: a day-scholar Home In return
+--                                     wrote the pre-assigned block/room to
+--                                     student_details
 DO $$
 DECLARE
   cdef   TEXT;
@@ -118,15 +127,16 @@ BEGIN
     RETURN;
   END IF;
 
-  -- Already fully patched: all 7 new actions present.
+  -- Already fully patched: all 8 new actions present.
   IF cdef LIKE '%PERMISSION_FORWARDED_TO_LEVEL%'
      AND cdef LIKE '%PERMISSION_DIRECT_GENERATED%'
      AND cdef LIKE '%PERMISSION_STEPUP_VERIFIED%'
      AND cdef LIKE '%PERMISSION_STEPUP_FAILED%'
      AND cdef LIKE '%STUDENT_TYPE_CHANGED_AT_ENTRY%'
      AND cdef LIKE '%APPROVAL_PASSWORD_ROTATED%'
-     AND cdef LIKE '%APPROVAL_PASSWORD_SET%' THEN
-    RAISE NOTICE 'audit_logs_action_known: all 7 new actions already present, nothing to do';
+     AND cdef LIKE '%APPROVAL_PASSWORD_SET%'
+     AND cdef LIKE '%HOSTEL_ROOM_ASSIGNED_ON_HOME_OUT%' THEN
+    RAISE NOTICE 'audit_logs_action_known: all 8 new actions already present, nothing to do';
     RETURN;
   END IF;
 
@@ -140,7 +150,8 @@ BEGIN
       ('PERMISSION_STEPUP_FAILED'),
       ('STUDENT_TYPE_CHANGED_AT_ENTRY'),
       ('APPROVAL_PASSWORD_ROTATED'),
-      ('APPROVAL_PASSWORD_SET')
+      ('APPROVAL_PASSWORD_SET'),
+      ('HOSTEL_ROOM_ASSIGNED_ON_HOME_OUT')
     ) v(val)
   )
   SELECT string_agg(lit || a.val || lit || '::character varying', ', ' ORDER BY a.val)
@@ -168,7 +179,7 @@ BEGIN
 
   EXECUTE 'ALTER TABLE public.audit_logs DROP CONSTRAINT audit_logs_action_known';
   EXECUTE 'ALTER TABLE public.audit_logs ADD CONSTRAINT audit_logs_action_known ' || newdef;
-  RAISE NOTICE 'audit_logs_action_known: appended 7 new actions (missing subset: %)', extra;
+  RAISE NOTICE 'audit_logs_action_known: appended 8 new actions (missing subset: %)', extra;
 END
 $$;
 
@@ -182,6 +193,11 @@ CREATE INDEX IF NOT EXISTS idx_permissions_routed_to ON public.permissions (rout
 -- Partial index: fast lookup of directly-generated requests, used by the
 -- application to distinguish direct requests from forwarded ones.
 CREATE INDEX IF NOT EXISTS idx_permissions_direct_generated ON public.permissions (direct_generated) WHERE direct_generated;
+
+-- Partial index: fast lookup of students whose current entry type is set,
+-- used by the entry-type / day-scholar routing engine to find students
+-- currently entered as a specific type without a full table scan.
+CREATE INDEX IF NOT EXISTS idx_student_details_entry_type ON public.student_details (current_entry_type) WHERE current_entry_type IS NOT NULL;
 
 -- ----------------------------------------------------------------------------
 -- 1.6 Insert the four hostel-hierarchy roles into config_roles_registry

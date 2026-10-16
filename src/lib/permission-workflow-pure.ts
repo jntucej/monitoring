@@ -54,13 +54,17 @@ export function levelsAbove(current: string): string[] {
 }
 
 // ── Reason → minimum-level map ──────────────────────────────────────────
-export const REASON_LEVEL_MAP = {
+// `day_scholar_out` routes to "auto": a day scholar going OUT on a
+// day-scholar reason never needs a hostel-chain approval; the gate pass is
+// granted automatically. It is intentionally NOT a hostel level.
+export const REASON_LEVEL_MAP: Record<string, string> = {
   daily_outing: L1_ROLE,
-  home_out: L1_ROLE,
   day_pass: L1_ROLE,
+  home_out: L1_ROLE,
+  day_scholar_out: "auto",
   emergency: L3_ROLE,
   special_leave: L3_ROLE,
-} as const;
+};
 
 // ── Step-up predicate ───────────────────────────────────────────────────
 export function requiresStepup(args: {

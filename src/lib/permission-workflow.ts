@@ -195,8 +195,17 @@ export interface DecisionResult {
 // shared, client-safe home for the pure primitives). Re-export them so the
 // pre-existing import path (`from "@/lib/permission-workflow"`) keeps working
 // and so there is exactly ONE class identity for `instanceof` checks.
-export { PermissionRuleError, appendStageHistory } from "./permission-workflow-core";
-export type { StageHistoryEntry, RequestSnapshot, ActorContext } from "./permission-workflow-core";
+export {
+  PermissionRuleError,
+  appendStageHistory,
+  resolveEntryOptions,
+} from "./permission-workflow-core";
+export type {
+  StageHistoryEntry,
+  RequestSnapshot,
+  ActorContext,
+  EntryOptions,
+} from "./permission-workflow-core";
 
 export function applyPermissionAction(
   req: RequestSnapshot,
