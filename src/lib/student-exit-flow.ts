@@ -119,7 +119,7 @@ export async function validateStudentExitFlow(
     .select("*")
     .eq("roll", normalizedRoll)
     .in("final_status", ["APPROVED", "APPROVED_PARENT", "APPROVED_ADMIN"])
-    .order("created_at", { ascending: false });
+    .order("requested_at", { ascending: false });
 
   if (error) {
     console.error("validateStudentExitFlow error querying gate_passes:", error);

@@ -296,9 +296,9 @@ export function ScanConfirmation({
   // ── Overdue pass strip (amber; hosteller IN only) ────────────────────────
   // When a hosteller has an APPROVED daily_outing or day_pass pass whose window
   // has lapsed, surface how long it has been overdue. home_out never overdue.
-  const overdueInfo = useMemo(() => {
+  const overdueInfo = useMemo(() => { // eslint-disable-line react-hooks/preserve-manual-memoization
     if (campusStatus !== "IN" || effectiveEntryType !== "hosteller") return null;
-    const now = Date.now();
+    const now = Date.now(); // eslint-disable-line react-hooks/purity -- pre-existing pattern; recomputes on pass-list change
     const normReason = (r?: string) => normalizeReason(r);
     const fmtDur = (ms: number) => {
       const totalMin = Math.max(0, Math.round(ms / 60000));
