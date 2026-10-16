@@ -6,6 +6,7 @@
 // each having to re-derive the hierarchy.
 
 import { Forward } from "lucide-react";
+import { L1_ROLE, L2_ROLE, L3_ROLE, L4_ROLE } from "@/lib/permission-workflow-pure";
 
 /**
  * The NEW optional routing/forward fields the DB now carries on `permissions`
@@ -25,11 +26,19 @@ export interface HostelTicketRow {
 }
 
 const ROLE_LABELS: Record<string, string> = {
-  caretaker: "Caretaker",
-  deputy_warden: "Deputy Warden",
-  hostel_manager: "Hostel Manager",
+  [L1_ROLE]: "Caretaker",
+  [L2_ROLE]: "Deputy Warden",
+  [L3_ROLE]: "Hostel Manager",
   warden_or_principal: "Warden / Principal",
-  principal: "Principal",
+  [L4_ROLE]: "Principal",
+};
+
+/** Map a hostel role to its 1-based chain level label (L1..L4). */
+const ROLE_LEVELS: Record<string, string> = {
+  [L1_ROLE]: "L1",
+  [L2_ROLE]: "L2",
+  [L3_ROLE]: "L3",
+  [L4_ROLE]: "L4",
 };
 
 /**
@@ -41,12 +50,13 @@ export function LevelBadge({ row, fallbackStage }: { row: HostelTicketRow; fallb
   const stage = row.routed_to_role || fallbackStage || "";
   if (!stage) return null;
   const label = ROLE_LABELS[stage] || stage;
+  const level = ROLE_LEVELS[stage];
   return (
     <span
       className="px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--action-primary)]"
       title={`Current level: ${stage}`}
     >
-      {label}
+      {level ? `${level} · ${label}` : label}
     </span>
   );
 }
@@ -58,13 +68,15 @@ export function LevelBadge({ row, fallbackStage }: { row: HostelTicketRow; fallb
 export function ForwardedFromChip({ row }: { row: HostelTicketRow }) {
   if (!row.forwarded_from_role) return null;
   const from = ROLE_LABELS[row.forwarded_from_role] || row.forwarded_from_role;
+  const fromLevel = ROLE_LEVELS[row.forwarded_from_role];
+  const fromLabel = fromLevel ? `${fromLevel} · ${from}` : from;
   return (
     <span
       className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20"
       title={row.forward_comment ? `Forward comment: ${row.forward_comment}` : undefined}
     >
       <Forward className="w-3 h-3" aria-hidden />
-      Forwarded from {from}
+      Forwarded from {fromLabel}
     </span>
   );
 }

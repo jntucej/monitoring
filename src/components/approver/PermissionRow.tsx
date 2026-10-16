@@ -14,6 +14,20 @@ export interface PermissionItem {
   hostel_scope?: "boys" | "girls" | null;
   current_stage: string;
   status: PermissionStatus;
+  /** Request reason (e.g. home_out, day_pass, daily_outing, day_scholar_out). */
+  reason?: string | null;
+  /** True when the pass was generated directly, bypassing the staged chain. */
+  direct_generated?: boolean | null;
+  /** Pending hostel room-assignment fields (day_scholar home_out flow). */
+  pending_hostel_block?: string | null;
+  pending_room_number?: string | null;
+  pending_warden_id?: string | null;
+  /** Current hostel level the ticket is routed to (forward target / stage). */
+  routed_to_role?: string | null;
+  /** Set when this ticket was forwarded from a lower level. */
+  forwarded_from_role?: string | null;
+  /** Forwarder's comment explaining the handoff. */
+  forward_comment?: string | null;
   stage_history: Array<{
     actorId: string;
     actorName: string;

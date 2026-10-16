@@ -54,6 +54,8 @@ export function DirectGenerateModal({
   const [studentQuery, setStudentQuery] = useState("");
   const [studentUserId, setStudentUserId] = useState("");
   const [studentName, setStudentName] = useState("");
+  /** Live entry type of the looked-up student (drives the room-field gate). */
+  const [studentEntryType, setStudentEntryType] = useState<"hosteller" | "day_scholar" | null>(null);
   const [reason, setReason] = useState<DirectGenReason>("home_out");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -62,6 +64,10 @@ export function DirectGenerateModal({
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [looking, setLooking] = useState(false);
+  // Room-assignment fields (day_scholar home_out flow).
+  const [pendingHostelBlock, setPendingHostelBlock] = useState("");
+  const [pendingRoomNumber, setPendingRoomNumber] = useState("");
+  const [pendingWardenId, setPendingWardenId] = useState("");
 
   const reasonOptions: SelectOption[] = DIRECT_GEN_REASONS.map((r) => ({
     value: r,
@@ -70,6 +76,11 @@ export function DirectGenerateModal({
 
   // home_out needs no `to`; the server enforces this too.
   const toRequired = reason !== "home_out";
+
+  // The three room-assignment fields are required only for a day_scholar
+  // student requesting a home_out pass (the direct-generate route enforces the
+  // same rule and rejects with HOSTEL_ROOM_REQUIRED when any is missing).
+  const roomFieldsRequired = reason === "home_out" && studentEntryType === "day_scholar";
 
   const stepupRequired = useMemo(
     () => requiresStepup({ actorRole, action: "direct_generate", reason }),
@@ -103,7 +114,8 @@ export function DirectGenerateModal({
         uniqueId?: string;
         roll?: string;
         name?: string;
-        student_details?: { roll?: string } | null;
+        student_details?: { roll?: string; current_entry_type?: "hosteller" | "day_scholar" | null } | null;
+        studentDetails?: { roll?: string; currentEntryType?: "hosteller" | "day_scholar" | null } | null;
       }> | undefined = json.data;
       if (json.success && Array.isArray(rows) && rows.length > 0) {
         // Prefer a match whose roll or id equals the query.
@@ -117,6 +129,13 @@ export function DirectGenerateModal({
         setStudentName(
           match.name || match.student_details?.roll || match.roll || q,
         );
+        // Capture the live entry type so the room-field gate can apply. The
+        // mPerson mapping exposes it camelCased on studentDetails.
+        const entryType =
+          match.studentDetails?.currentEntryType ??
+          match.student_details?.current_entry_type ??
+          null;
+        setStudentEntryType(entryType);
       } else if (json.success && Array.isArray(rows) && rows.length === 0) {
         setError(`No student found for ${q}`);
       } else {
