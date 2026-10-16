@@ -12,7 +12,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowDownLeft, ArrowUpRight, Inbox, Loader2, Flag } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Loader2, Flag } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";

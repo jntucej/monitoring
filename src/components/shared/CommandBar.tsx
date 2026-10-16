@@ -14,13 +14,9 @@ import {
   UserPlus,
   BadgeCheck,
   Search,
-  Loader2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useKeyboardShortcuts, type Shortcut } from "@/hooks/useKeyboardShortcuts";
-import { useAuthStore } from "@/stores/authStore";
 import { getConsoleConfig, type ConsoleCommand } from "@/config/consoles";
-import { useOperatorStore } from "@/stores/operatorStore";
 
 interface CommandDef {
   id: ConsoleCommand;
