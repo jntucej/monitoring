@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
   User, CheckCircle2, LogIn, Home, Sun, Clock, X, Briefcase, ShieldAlert, Flag,
 } from "lucide-react";
-import { ExitReason, Student, ScanDirection, GatePass } from "@/lib/types";
+import { ExitReason, Student, ScanDirection } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useState, useEffect, useMemo } from "react";
 import { PersonBadge } from "@/components/shared/PersonBadge";
@@ -106,12 +106,6 @@ export function ScanConfirmation({
   const effectiveEntryType =
     normalizeEntryType(currentEntryType) ??
     normalizeEntryType(student.studentDetails?.currentEntryType ?? student.currentEntryType);
-
-  // Whether the hosteller's most recent OUT was an outing (daily_outing) —
-  // drives the re-entry button label: "Return to Hostel" vs "Home In".
-  const lastOutWasOuting =
-    lastOutReason?.toLowerCase().replace(/[\s_-]+/g, "") === "dailyouting" ||
-    lastOutReason?.toLowerCase().replace(/[\s_-]+/g, "") === "outing";
 
   // Photo verification state
   const [photoVerified, setPhotoVerified] = useState(false);
@@ -415,11 +409,11 @@ export function ScanConfirmation({
       const m = totalMin % 60;
       return `${h}h ${m}m`;
     };
-    for (const p of approvedPasses as Array<{ reason?: string; to?: string; from?: string }>) {
+    for (const p of approvedPasses as Array<{ reason?: string; to_datetime?: string; from_datetime?: string }>) {
       const code = normReason(p.reason);
       if (code !== "daily_outing" && code !== "day_pass") continue;
-      const toMs = p.to ? Date.parse(p.to) : NaN;
-      const fromMs = p.from ? Date.parse(p.from) : NaN;
+      const toMs = p.to_datetime ? Date.parse(p.to_datetime) : NaN;
+      const fromMs = p.from_datetime ? Date.parse(p.from_datetime) : NaN;
       // "in window" means the pass was active at some point (from <= now) and
       // is now past its end (overdue). A not-yet-started pass is not overdue.
       const started = Number.isNaN(fromMs) || fromMs <= now;

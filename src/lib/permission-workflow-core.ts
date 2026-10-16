@@ -127,6 +127,6 @@ export function resolveEntryOptions(
     return { buttons: ["day_scholar_in"], allowsTypeChoice: false };
   }
   // home_out, null (no prior OUT / first scan), and any unknown reason all
-  // open the type choice between Home In and Day Scholar In.
+  // open the type choice between Home In and Outing In (day_scholar_in).
   return { buttons: ["home_in", "day_scholar_in"], allowsTypeChoice: true };
 }

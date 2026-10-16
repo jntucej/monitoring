@@ -567,8 +567,8 @@ function OperatorPageInner() {
                       campusStatus={currentCampusStatus}
                       currentEntryType={operatorStore.entryType}
                       lastOutReason={operatorStore.lastOutReason}
-                      onConfirm={async (dir, reason, entryType) =>
-                        await confirmScan(addToast, dir, reason, entryType)
+                      onConfirm={async (dir, reason, entryType, buttonId) =>
+                        await confirmScan(addToast, dir, reason, entryType, buttonId)
                       }
                       onCancel={cancelScan}
                       isInline={true}

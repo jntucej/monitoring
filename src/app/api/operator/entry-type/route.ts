@@ -104,8 +104,25 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }): Promise
   }
 
   const roll = typeof body.roll === "string" ? body.roll.trim() : "";
-  const entryType = body.entryType;
   const gateId = typeof body.gateId === "string" ? body.gateId : "";
+
+  // The operator UI now sends the raw button id (return_to_hostel / home_in /
+  // day_scholar_in) in `buttonId` alongside the canonical `entryType`
+  // (hosteller / day_scholar). `return_to_hostel` is a round-trip re-entry that
+  // must NOT write to student_details.current_entry_type (identity unchanged);
+  // `home_in` and `day_scholar_in` do. We keep the legacy `entryType` field as
+  // the primary input for backward compatibility and use `buttonId` only to
+  // suppress the type write when it is `return_to_hostel`.
+  const buttonId: string | undefined =
+    typeof body.buttonId === "string" ? body.buttonId : undefined;
+  const entryType = body.entryType;
+
+  // When buttonId is `return_to_hostel`, the route still validates + persists
+  // occupancy, runs the pending-room write/discard logic, and clears the
+  // pending fields — but it does NOT write current_entry_type /
+  // type_chosen_at / type_chosen_at_gate on student_details, and does NOT
+  // audit STUDENT_TYPE_CHANGED_AT_ENTRY.
+  const skipTypeWrite = buttonId === "return_to_hostel";
 
   if (!roll) {
     return NextResponse.json(
@@ -124,6 +141,20 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }): Promise
       {
         success: false,
         error: { code: "BAD_REQUEST", message: "entryType must be one of: hosteller, day_scholar" },
+      },
+      { status: 400 },
+    );
+  }
+  // buttonId is optional; when present it must be one of the three entry-button codes.
+  const VALID_BUTTON_IDS = ["return_to_hostel", "home_in", "day_scholar_in"] as const;
+  if (buttonId && !(VALID_BUTTON_IDS as readonly string[]).includes(buttonId)) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: "BAD_REQUEST",
+          message: `buttonId must be one of: ${VALID_BUTTON_IDS.join(", ")}`,
+        },
       },
       { status: 400 },
     );
@@ -217,25 +248,33 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }): Promise
 
   // Detect whether the stored entry type actually changes (for the audit gate).
   const previousEntryType: string | null = existing?.current_entry_type ?? null;
-  const entryTypeChanged = previousEntryType !== entryType;
+  const entryTypeChanged = !skipTypeWrite && previousEntryType !== entryType;
 
-  // Build the student_details update / insert payload.
-  const sdPayload: Record<string, unknown> = {
-    current_entry_type: entryType,
-    type_chosen_at: nowIso,
-    type_chosen_at_gate: gate.id,
-  };
+  // Build the student_details update / insert payload. When the operator
+  // tapped "Return to Hostel" (buttonId === "return_to_hostel") the
+  // round-trip re-entry does NOT write current_entry_type, so the type
+  // columns are omitted from the payload and the pending-room write/discard
+  // still applies based on the last OUT reason.
+  const sdPayload: Record<string, unknown> = skipTypeWrite
+    ? {}
+    : {
+        current_entry_type: entryType,
+        type_chosen_at: nowIso,
+        type_chosen_at_gate: gate.id,
+      };
 
-  if (entryType === "hosteller" && pending) {
-    // The student is entering as a hosteller: move the pre-assigned
-    // hostel room / warden onto student_details. warden_id is the
-    // corresponding column on student_details (added by the DB migration).
+  if (entryType === "hosteller" && pending && !skipTypeWrite) {
+    // The student is entering as a hosteller (home_in button): move the
+    // pre-assigned hostel room / warden onto student_details. warden_id is
+    // the corresponding column on student_details (added by the DB migration).
     if (pending.pending_hostel_block) sdPayload.hostel_block = pending.pending_hostel_block;
     if (pending.pending_room_number) sdPayload.room_number = pending.pending_room_number;
     if (pending.pending_warden_id) sdPayload.warden_id = pending.pending_warden_id;
   }
-  // entryType === "day_scholar": discard. Do NOT write room/warden to
-  // student_details; only the pending fields are cleared below.
+  // entryType === "day_scholar" (day_scholar_in button): discard. Do NOT
+  // write room/warden to student_details; only the pending fields are cleared
+  // below. When skipTypeWrite is true (return_to_hostel) the pending-room
+  // write is also skipped — round-trip re-entry does not change identity.
 
   let updatedRow;
   if (existing) {

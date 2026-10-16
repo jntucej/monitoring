@@ -14,6 +14,15 @@ import { validateRollNumber } from "@/lib/rollNumber";
 import { getClientLocation, getClientSysTag } from "@/lib/geo";
 
 /**
+ * IN-movement button ids the gate operator can tap (from the
+ * resolveEntryOptions matrix). Distinct from the canonical entry type:
+ * `return_to_hostel` is a round-trip re-entry that must NOT rewrite the
+ * student's stored `current_entry_type`, whereas `home_in` / `day_scholar_in`
+ * do. The API agent maps these to type writes on the entry-type route.
+ */
+export type EntryButtonId = "return_to_hostel" | "home_in" | "day_scholar_in";
+
+/**
  * Canonicalize any stored entry-type form to the two lowercase values the
  * server accepts ("hosteller" | "day_scholar"), or null when absent.
  */
@@ -132,7 +141,7 @@ interface OperatorState {
   setEntryType: (entryType: "hosteller" | "day_scholar" | null) => void;
   clearError: () => void;
   
-  confirmScan: (addToast: (toast: Omit<ToastData, "id">) => void, overrideDirection?: ScanDirection, overrideReason?: ExitReason | string, overrideEntryType?: "hosteller" | "day_scholar") => Promise<void>;
+  confirmScan: (addToast: (toast: Omit<ToastData, "id">) => void, overrideDirection?: ScanDirection, overrideReason?: ExitReason | string, overrideEntryType?: "hosteller" | "day_scholar", overrideEntryButton?: EntryButtonId) => Promise<void>;
     cancelScan: () => void;
   reset: () => void;
   loadStats: () => void;
@@ -317,7 +326,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
   // Clears only the error field, leaving other state intact
   clearError: () => set({ error: null }),
 
-  confirmScan: async (addToast: (toast: Omit<ToastData, "id">) => void, overrideDirection?: ScanDirection, overrideReason?: string, overrideEntryType?: "hosteller" | "day_scholar") => {
+  confirmScan: async (addToast: (toast: Omit<ToastData, "id">) => void, overrideDirection?: ScanDirection, overrideReason?: string, overrideEntryType?: "hosteller" | "day_scholar", overrideEntryButton?: EntryButtonId) => {
     const { currentStudent } = get();
     if (!currentStudent) return;
 
@@ -403,6 +412,10 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
         // /api/operator/entry-type) so the later OUT-scan scope check reads
         // the freshly stored type, then record the movement. The entry-type
         // write is non-fatal by design — a failure here never blocks the scan.
+        // We send the operator's chosen button id (return_to_hostel /
+        // home_in / day_scholar_in) so the route can decide whether to write
+        // the canonical entry type; the existing `entryType` field is kept for
+        // backward compatibility with record.ts consumers.
         if (directionToUse === "IN" && entryTypeToUse) {
           await fetchWithTimeout("/api/operator/entry-type", {
             method: "POST",
@@ -410,6 +423,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
             body: JSON.stringify({
               roll: uniqueId,
               entryType: entryTypeToUse,
+              ...(overrideEntryButton ? { buttonId: overrideEntryButton } : {}),
               gateId: resolvedGateId,
             }),
           }, 10_000).catch(() => { /* non-fatal: proceed to record the scan */ });
