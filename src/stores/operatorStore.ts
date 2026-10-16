@@ -682,11 +682,14 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
       });
       return;
     }
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(gateId);
-    const normalizedGateId = !isUuid && /^\d+$/.test(gateId) ? `gate-${gateId}` : gateId;
+    // Keep the gate identifier exactly as the URL supplied it (UUID, code,
+    // or bare digit). findGateById resolves both UUID ids and gate codes, so
+    // normalising a bare "1" to "gate-1" here would hide the real code from
+    // the fallback lookup and break scans against gates whose code is not
+    // literally "gate-1".
     set({
-      gate: { id: normalizedGateId, name: normalizedGateId, location: "Main Gate", type: "ENTRY_EXIT" as const, isActive: true },
-      gateId: normalizedGateId,
+      gate: { id: gateId, name: gateId, location: "Main Gate", type: "ENTRY_EXIT" as const, isActive: true },
+      gateId,
     });
   },
 }));
