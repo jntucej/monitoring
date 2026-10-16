@@ -212,72 +212,120 @@ function ExceptionsInner() {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto min-w-0">
-              <table className="w-full text-sm min-w-[640px]">
-                <thead>
-                  <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-xs uppercase tracking-wide">
-                    <th className="text-left px-3 py-2 font-semibold">Time</th>
-                    <th className="text-left px-3 py-2 font-semibold">Person</th>
-                    <th className="text-left px-3 py-2 font-semibold">Tag</th>
-                    <th className="text-left px-3 py-2 font-semibold">Reason</th>
-                    <th className="text-left px-3 py-2 font-semibold">Gate</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[var(--border)]">
-                  {filtered.map((r) => {
-                    const tags: string[] = [];
-                    if (isDenied(r)) tags.push("Denied");
-                    if (isFlagged(r)) tags.push("Flagged");
-                    if (isManual(r)) tags.push("Manual");
-                    if (Boolean(r.is_correction))
-                      tags.push("Correction");
-                    return (
-                      <tr key={r.id} className="hover:bg-[var(--bg-surface)] transition-colors">
-                        <td className="px-3 py-2.5 text-[var(--text-muted)] text-xs whitespace-nowrap">
-                          {fmtTime(r.timestamp)}
-                        </td>
-                        <td className="px-3 py-2.5 text-[var(--text-primary)] min-w-0">
-                          <span className="font-semibold">{r.name || "—"}</span>
-                          {r.roll && (
-                            <span className="ml-1.5 font-mono text-xs text-[var(--text-muted)]">
-                              {r.roll}
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-3 py-2.5 min-w-0">
-                          <div className="flex flex-wrap gap-1">
-                            {tags.length ? (
-                              tags.map((t) => (
-                                <span
-                                  key={t}
-                                  className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${
-                                    t === "Denied"
-                                      ? "border-rose-500/30 bg-rose-500/10 text-rose-400"
-                                      : t === "Flagged"
-                                        ? "border-amber-500/30 bg-amber-500/10 text-amber-400"
-                                        : "border-sky-500/30 bg-sky-500/10 text-sky-400"
-                                  }`}
-                                >
-                                  {t}
-                                </span>
-                              ))
-                            ) : (
-                              <span className="text-[var(--text-muted)] text-xs">—</span>
+            <>
+              {/* Mobile: stacked cards — no horizontal scroll */}
+              <ul className="sm:hidden divide-y divide-[var(--border)]">
+                {filtered.map((r) => {
+                  const tags: string[] = [];
+                  if (isDenied(r)) tags.push("Denied");
+                  if (isFlagged(r)) tags.push("Flagged");
+                  if (isManual(r)) tags.push("Manual");
+                  if (Boolean(r.is_correction)) tags.push("Correction");
+                  return (
+                    <li key={r.id} className="px-3 py-3 space-y-1.5">
+                      <div className="flex items-center justify-between gap-2 min-w-0">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
+                            {r.name || "—"}
+                            {r.roll && (
+                              <span className="ml-1.5 font-mono text-xs text-[var(--text-muted)]">{r.roll}</span>
                             )}
-                          </div>
-                        </td>
-                        <td className="px-3 py-2.5 text-[var(--text-muted)] text-xs max-w-[220px] truncate">
-                          {r.reason || "—"}
-                        </td>
-                        <td className="px-3 py-2.5 text-[var(--text-muted)] text-xs whitespace-nowrap">
-                          {safeText(r.gate_name ?? r.gate_id)}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                          </p>
+                          <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
+                            {fmtTime(r.timestamp)} · {safeText(r.gate_name ?? r.gate_id)}
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap gap-1 shrink-0">
+                          {tags.map((t) => (
+                            <span
+                              key={t}
+                              className={`rounded-full border px-1.5 py-0.5 text-[10px] font-medium ${
+                                t === "Denied"
+                                  ? "border-rose-500/30 bg-rose-500/10 text-rose-400"
+                                  : t === "Flagged"
+                                    ? "border-amber-500/30 bg-amber-500/10 text-amber-400"
+                                    : "border-sky-500/30 bg-sky-500/10 text-sky-400"
+                              }`}
+                            >
+                              {t}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      {r.reason && <p className="text-xs text-[var(--text-muted)]">Reason: {r.reason}</p>}
+                    </li>
+                  );
+                })}
+              </ul>
+
+              {/* Desktop: table */}
+              <div className="hidden sm:block overflow-x-auto min-w-0">
+                <table className="w-full text-sm min-w-[640px]">
+                  <thead>
+                    <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-xs uppercase tracking-wide">
+                      <th className="text-left px-3 py-2 font-semibold">Time</th>
+                      <th className="text-left px-3 py-2 font-semibold">Person</th>
+                      <th className="text-left px-3 py-2 font-semibold">Tag</th>
+                      <th className="text-left px-3 py-2 font-semibold">Reason</th>
+                      <th className="text-left px-3 py-2 font-semibold">Gate</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--border)]">
+                    {filtered.map((r) => {
+                      const tags: string[] = [];
+                      if (isDenied(r)) tags.push("Denied");
+                      if (isFlagged(r)) tags.push("Flagged");
+                      if (isManual(r)) tags.push("Manual");
+                      if (Boolean(r.is_correction))
+                        tags.push("Correction");
+                      return (
+                        <tr key={r.id} className="hover:bg-[var(--bg-surface)] transition-colors">
+                          <td className="px-3 py-2.5 text-[var(--text-muted)] text-xs whitespace-nowrap">
+                            {fmtTime(r.timestamp)}
+                          </td>
+                          <td className="px-3 py-2.5 text-[var(--text-primary)] min-w-0">
+                            <span className="font-semibold">{r.name || "—"}</span>
+                            {r.roll && (
+                              <span className="ml-1.5 font-mono text-xs text-[var(--text-muted)]">
+                                {r.roll}
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-3 py-2.5 min-w-0">
+                            <div className="flex flex-wrap gap-1">
+                              {tags.length ? (
+                                tags.map((t) => (
+                                  <span
+                                    key={t}
+                                    className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${
+                                      t === "Denied"
+                                        ? "border-rose-500/30 bg-rose-500/10 text-rose-400"
+                                        : t === "Flagged"
+                                          ? "border-amber-500/30 bg-amber-500/10 text-amber-400"
+                                          : "border-sky-500/30 bg-sky-500/10 text-sky-400"
+                                    }`}
+                                  >
+                                    {t}
+                                  </span>
+                                ))
+                              ) : (
+                                <span className="text-[var(--text-muted)] text-xs">—</span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-3 py-2.5 text-[var(--text-muted)] text-xs max-w-[220px] truncate">
+                            {r.reason || "—"}
+                          </td>
+                          <td className="px-3 py-2.5 text-[var(--text-muted)] text-xs whitespace-nowrap">
+                            {safeText(r.gate_name ?? r.gate_id)}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </div>
       </WidgetBoundary>
