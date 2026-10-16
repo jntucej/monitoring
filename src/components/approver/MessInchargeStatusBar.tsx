@@ -1,28 +1,31 @@
 "use client";
 
 /**
- * MessInchargeStatusBar — bottom status strip for the mess In-charge console.
+ * MessInchargeStatusBar — bottom status strip for the mess In-charge console
+ * (digest-board spec).
  *
- * Renders the compact mess summary:
- *   ● Mess: N days scheduled · M meals today · K pending requests
+ * Renders the compact mess service summary:
+ *   ● <Meal window label> open · N served · M no-shows · window closes HH:MM
  *
  * Counts are passed in from RoleConsole, which derives them from the
- * /api/mess/days (days scheduled) and /api/mess/meal-counts (meals today)
- * fetches. The "pending requests" figure reuses the operational-requests
- * proxy until a dedicated pending-request source lands.
+ * /api/mess/analytics digest (served = confirmedPresent, no-shows =
+ * declaredPresent - confirmedPresent) plus the /api/mess/days window-close
+ * time. The meal-window label is derived from the active day's meal type.
  */
 
-import { Clock, Loader2, UtensilsCrossed, CalendarDays } from "lucide-react";
+import { Clock, Loader2, UtensilsCrossed } from "lucide-react";
 
 export interface MessInchargeCounts {
-  /** Number of scheduled mess days visible in the feed. */
-  daysScheduled: number;
-  /** Meals/selections expected today (declared present for the active day). */
-  mealsToday: number;
-  /** Pending operational requests awaiting the mess In-charge. */
-  pendingRequests: number;
+  /** The meal window label (e.g. "Lunch", "Dinner", "Breakfast"). */
+  mealWindow: string | null;
+  /** Number of confirmed-served meals (from the analytics digest). */
+  served: number;
+  /** Number of no-shows (declared present but not confirmed). */
+  noShows: number;
   /** Whether an active service window is open right now. */
   active: boolean;
+  /** The active day's window-close timestamp (ISO), or null. */
+  windowCloses: string | null;
 }
 
 export interface MessInchargeStatusBarProps {
@@ -31,6 +34,18 @@ export interface MessInchargeStatusBarProps {
   lastScan?: string | null;
   /** Whether a refresh is in progress. */
   refreshing?: boolean;
+}
+
+function fmtWindow(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  try {
+    return new Date(iso).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return "—";
+  }
 }
 
 export function MessInchargeStatusBar({
@@ -51,40 +66,43 @@ export function MessInchargeStatusBar({
     }
   };
 
+  const windowLabel = counts?.mealWindow ?? "Service";
+
   return (
     <footer
       className="flex items-center justify-between gap-4 px-4 py-2 border-t border-[var(--border)] bg-[var(--bg-surface)]/95 backdrop-blur-md text-[11px] text-[var(--text-secondary)] select-none"
       aria-label="Mess status bar"
     >
-      {/* Left: days scheduled · meals today · pending requests */}
+      {/* Left: <window> open · N served · M no-shows · window closes HH:MM */}
       <div className="flex items-center gap-4 min-w-0 overflow-x-auto custom-scrollbar">
-        <span className="inline-flex items-center gap-1.5 min-w-0">
-          <span className="w-1.5 h-1.5 rounded-full bg-[var(--action-primary)] shrink-0" />
-          <span className="text-[var(--text-muted)]">Mess</span>
-        </span>
-
-        <span className="inline-flex items-center gap-1.5 min-w-0 shrink">
-          <CalendarDays className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+        <span className="inline-flex items-center gap-1.5 min-w-0 shrink-0">
+          <span
+            className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+              counts?.active ? "bg-emerald-400" : "bg-[var(--text-muted)]"
+            }`}
+          />
           <span className="text-[var(--text-muted)]">
-            {counts?.daysScheduled ?? 0} days scheduled
+            {windowLabel} {counts?.active ? "open" : "closed"}
           </span>
         </span>
 
-        <span className="inline-flex items-center gap-1.5 min-w-0 shrink">
+        <span className="inline-flex items-center gap-1.5 min-w-0 shrink-0">
           <UtensilsCrossed className="w-3.5 h-3.5 text-[var(--text-muted)]" />
           <span className="text-[var(--text-muted)]">
-            {counts?.mealsToday ?? 0} meals today
+            {counts?.served ?? 0} served
           </span>
         </span>
 
-        <span className="inline-flex items-center gap-1.5 min-w-0 shrink">
-          {counts?.active ? (
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-          ) : (
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--text-muted)]" />
-          )}
+        <span className="inline-flex items-center gap-1.5 min-w-0 shrink-0">
           <span className="text-[var(--text-muted)]">
-            {counts?.pendingRequests ?? 0} pending requests
+            {counts?.noShows ?? 0} no-shows
+          </span>
+        </span>
+
+        <span className="inline-flex items-center gap-1.5 min-w-0 shrink-0">
+          <Clock className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+          <span className="text-[var(--text-muted)]">
+            window closes {fmtWindow(counts?.windowCloses)}
           </span>
         </span>
       </div>
