@@ -10,7 +10,7 @@
 
 DO $$
 DECLARE
-  v_day date;
+  v_day int;
   v_count int;
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM public.sustainability_metrics LIMIT 1) THEN
