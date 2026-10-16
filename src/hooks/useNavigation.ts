@@ -65,20 +65,18 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       break;
 
     case "hostel_manager":
+      // Hostel manager is migrated to the RoleConsole shell (kanban:tickets
+      // of hostel tickets, scoped by hostel_scope). Single console group of
+      // exactly 5 items so the IconRail stays lean.
       groups = [
         {
-          groupLabel: "Hostel Permissions",
+          groupLabel: "Hostel Manager Console",
           items: [
-            { href: "/hostel-manager", label: "Hostel Manager Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
-            { href: "/hostel/permissions", label: "Pending Approvals", icon: "ClipboardList", badge: "PENDING" },
-            { href: "/hostel-manager/tickets", label: "My Tickets", icon: "FileText" },
-          ],
-        },
-        {
-          groupLabel: "General",
-          items: [
-            { href: "/profile", label: "My Profile", icon: "User" },
-            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+            { href: "/hostel-manager", label: "Tickets", icon: "Ticket", badge: "OPEN" },
+            { href: "/hostel-manager/room-bed-allocation", label: "Allocation", icon: "Home" },
+            { href: "/hostel-manager/resident-service-requests", label: "Residents", icon: "Users" },
+            { href: "/hostel-manager/resource-management", label: "Resources", icon: "Wrench" },
+            { href: "/hostel-manager/occupancy-reports", label: "Reports", icon: "FileSpreadsheet" },
           ],
         },
       ];
@@ -569,7 +567,8 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
     roleCode === "subject_faculty" ||
     roleCode === "faculty" ||
     roleCode === "caretaker" ||
-    roleCode === "deputy_warden"
+    roleCode === "deputy_warden" ||
+    roleCode === "hostel_manager"
   ) {
     return filteredGroups;
   }

@@ -28,6 +28,9 @@ import { PermissionCommandBar } from "@/components/approver/PermissionCommandBar
 import { DeputyWardenCommandBar } from "@/components/approver/DeputyWardenCommandBar";
 import { CaretakerCommandBar } from "@/components/approver/CaretakerCommandBar";
 import { StaffStatusBar, type StaffCounts } from "@/components/approver/StaffStatusBar";
+import { HostelManagerStatusBar, type HostelManagerCounts } from "@/components/approver/HostelManagerStatusBar";
+import { HostelManagerCommandBar } from "@/components/approver/HostelManagerCommandBar";
+import { AllocationPanel } from "@/components/approver/AllocationPanel";
 import type { PermissionItem } from "@/components/approver/PermissionRow";
 import { useAuthStore } from "@/stores/authStore";
 import { StatusBar } from "@/components/shared/StatusBar";
@@ -94,9 +97,12 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
   const isKanban = config?.board?.kind === "kanban";
   const isGrid = config?.board?.kind === "grid";
   const isPermission = config?.contextEntity === "permission";
+  const isTicket = config?.contextEntity === "ticket";
   const isHod = role === "hod";
   const isStaff = role === "staff";
   const isCaretaker = role === "caretaker";
+  const isHostelManager = role === "hostel_manager";
+  const showAllocationPanel = config?.extraPanels?.includes("AllocationPanel") ?? false;
 
   // The caller's assigned hostel, used for the caretaker status strip.
   const assignedHostel = useAuthStore((s) => s.user?.assignedHostel ?? null);
@@ -239,10 +245,33 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
     setSelectedRow(row);
   }, []);
 
+  // For the hostel manager, fetch the summary so the status strip can derive
+  // open-ticket / occupancy counts. The summary response nests its data under
+  // `data.pendingTickets` (not a flat array), so the status-bar derivation
+  // reads `pendingCount` directly. The KanbanBoard itself gets the same
+  // `useApiResource` cache — no extra network request.
+  const hmBoardSource = isHostelManager ? config?.board?.source ?? null : null;
+  const { data: hmData, refresh: refreshHm, loading: hmLoading } = useApiResource<{ success?: boolean; data: { [key: string]: unknown; pendingCount?: number; } }>(hmBoardSource, { ttlMs: 15_000 });
+  const hmTickets = useMemo<PermissionItem[]>(() => {
+    const raw = hmData?.data?.pendingTickets;
+    return Array.isArray(raw) ? (raw as unknown as PermissionItem[]) : [];
+  }, [hmData]);
+  const hmCounts: HostelManagerCounts | null = useMemo(() => {
+    if (!isHostelManager) return null;
+    return {
+      hostel: assignedHostel,
+      openTickets: hmData?.data?.pendingCount ?? hmTickets.length,
+      occupancy: null, // occupancy source not yet wired
+      maintenance: 0,  // maintenance source not yet wired
+      lastUpdate: hmData ? new Date().toISOString() : null,
+    };
+  }, [isHostelManager, assignedHostel, hmData, hmTickets]);
+
   const handleKanbanRefresh = useCallback(() => {
     void refreshKanban();
     void refreshGrid();
-  }, [refreshKanban, refreshGrid]);
+    void refreshHm();
+  }, [refreshKanban, refreshGrid, refreshHm]);
 
   const handleCloseContext = useCallback(() => {
     setSelectedRow(null);
@@ -335,10 +364,15 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
                 onSelect={handleSelect}
               />
             ))}
+
+          {/* Extra panels (e.g. the hostel manager's AllocationPanel). Rendered
+              alongside the board when the console config lists them. Desktop:
+              a side section below the board; mobile: full-width. */}
+          {showAllocationPanel ? <AllocationPanel /> : null}
         </main>
 
         {selectedRow ? (
-          isPermission ? (
+          isPermission || isTicket ? (
             <PermissionContextPanel
               row={selectedRow}
               onClose={handleCloseContext}
@@ -358,6 +392,8 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
       <div className="sticky bottom-0 z-30">
         {isCaretaker ? (
           <CaretakerStatusBar counts={caretakerCounts} refreshing={caretakerLoading} />
+        ) : isHostelManager ? (
+          <HostelManagerStatusBar counts={hmCounts} refreshing={hmLoading} />
         ) : isPermission ? (
           <PermissionStatusBar
             counts={permissionCounts}
@@ -373,6 +409,12 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
 
       {isCaretaker ? (
         <CaretakerCommandBar
+          role={role}
+          open={commandBarOpen}
+          onClose={closeCommandBar}
+        />
+      ) : isHostelManager ? (
+        <HostelManagerCommandBar
           role={role}
           open={commandBarOpen}
           onClose={closeCommandBar}

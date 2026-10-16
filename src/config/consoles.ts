@@ -30,7 +30,9 @@ export type ConsoleCommand =
   | "view-tasks"
   | "assign"
   | "resolve"
-  | "view-assets";
+  | "view-assets"
+  | "allocate"
+  | "view-residents";
 
 export type ConsoleStatusField =
   | "gate"
@@ -47,7 +49,10 @@ export type ConsoleStatusField =
   | "open"
   | "urgent"
   | "lastUpdate"
-  | "gateStatus";
+  | "gateStatus"
+  | "openTickets"
+  | "occupancy"
+  | "maintenance";
 
 export interface RoleConsoleConfig {
   role: string;
@@ -76,6 +81,11 @@ export interface RoleConsoleConfig {
   commands?: ConsoleCommand[];
   /** Status-bar fields, rendered left-to-right. */
   statusFields?: ConsoleStatusField[];
+  /**
+   * Extra panels rendered in the main column alongside the board
+   * (e.g. "AllocationPanel" for the hostel manager's room-bed surface).
+   */
+  extraPanels?: string[];
 }
 
 export const CONSOLES: Record<string, RoleConsoleConfig> = {
@@ -177,6 +187,27 @@ export const CONSOLES: Record<string, RoleConsoleConfig> = {
     contextEntity: "permission",
     commands: ["approve", "reject", "forward", "escalate", "delegate"],
     statusFields: ["hostel", "pending", "escalated", "gateStatus"],
+  },
+  hostel_manager: {
+    role: "hostel_manager",
+    nav: ["tickets", "allocation", "residents", "resources", "reports"],
+    statusStrip: false,
+    recentSheet: false,
+    board: {
+      kind: "kanban",
+      // Role-scoped source: /api/hostel-manager/summary self-scopes open
+      // tickets by the caller's hostel_scope (boys/girls/both) and the
+      // hostel_manager stage. Response shape:
+      //   { success, data: { role, pendingCount, pendingTickets, hostelScope, notes } }
+      // so the board items live under data.pendingTickets.
+      source: "/api/hostel-manager/summary",
+      itemKey: "pendingTickets",
+      columns: ["OPEN", "IN_PROGRESS", "RESOLVED"],
+    },
+    contextEntity: "ticket",
+    commands: ["assign", "resolve", "allocate", "escalate", "view-residents"],
+    statusFields: ["hostel", "openTickets", "occupancy", "maintenance"],
+    extraPanels: ["AllocationPanel"],
   },
 };
 
