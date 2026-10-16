@@ -66,7 +66,11 @@ async function fetchTodayStats(gateId?: string, signal?: AbortSignal): Promise<{
     const res = await fetch(url, { headers, cache: "no-store", signal });
     if (!res.ok) return null;
     const result = await res.json();
-    if (!result?.success || !result?.data) return null;
+    // /api/operator/stats returns { data: {...} } (the `ok()` helper), NOT
+    // { success: true, data: {...} }. Guard on the presence of `data` only;
+    // a missing/undefined `success` field must not cause us to discard a
+    // valid response, or the panel falls back to an empty local stat.
+    if (!result?.data) return null;
     return {
       entries: result.data.entries ?? 0,
       exits: result.data.exits ?? 0,
