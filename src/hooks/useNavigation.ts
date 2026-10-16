@@ -39,7 +39,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         groupLabel: "HOD Console",
         items: [
           { href: "/hod", label: "Approvals", icon: "CheckSquare", badge: "PENDING" },
-          { href: "/hod/department-attendance", label: "Department", icon: "UserCheck" },
+          { href: "/hod/attendance-exceptions", label: "Department", icon: "UserCheck" },
           { href: "/hod/faculty-overview", label: "Faculty", icon: "Building2" },
           { href: "/hod/department-reports", label: "Reports", icon: "FileSpreadsheet" },
           { href: "/hod/escalation-centre", label: "Escalations", icon: "ShieldAlert" },
@@ -95,7 +95,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           items: [
             { href: "/deputy-warden", label: "Approvals", icon: "CheckSquare", badge: "PENDING" },
             { href: "/deputy-warden/gate-movement", label: "Gate Movement", icon: "DoorOpen" },
-            { href: "/deputy-warden/resident-attendance", label: "Attendance", icon: "UserCheck" },
+            { href: "/deputy-warden/outpass-queue", label: "Attendance", icon: "UserCheck" },
             { href: "/deputy-warden/shift-handover", label: "Shifts", icon: "CalendarClock" },
             { href: "/deputy-warden/decision-history", label: "History", icon: "History" },
           ],
@@ -330,7 +330,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           groupLabel: "Faculty Portal",
           items: [
             { href: "/faculty/permissions", label: "Student Permissions", icon: "CheckSquare", badge: "PENDING" },
-            { href: "/faculty/attendance", label: "Faculty Attendance Desk", icon: "UserCheck", badge: "MY DEPT" },
+            { href: "/faculty", label: "Faculty Attendance Desk", icon: "UserCheck", badge: "MY DEPT" },
             { href: "/person", label: "Digital Gate Pass", icon: "QrCode" },
           ],
         },

@@ -15,15 +15,23 @@ import {
   ShieldCheck,
   Loader2,
   ArrowRight,
-  AlertTriangle
+  AlertTriangle,
+  Inbox
 } from "lucide-react";
 
 /* response shapes */
 
-interface DataResponse {
+interface AlertItem {
+  id: string;
+  title: string;
+  severity: string;
+  status: string;
+  created_at?: string | null;
+}
+
+interface AlertsResponse {
   success: boolean;
-  data: unknown;
-  total?: number;
+  data: AlertItem[];
 }
 
 function DeputyWardenIncidentsInner() {
@@ -36,7 +44,10 @@ function DeputyWardenIncidentsInner() {
     loading,
     error,
     refresh,
-  } = useApiResource<DataResponse>("/api/occupancy/presence-matrix", { ttlMs: 30_000 });
+  } = useApiResource<AlertsResponse>("/api/alerts", { ttlMs: 30_000 });
+
+  const alerts = data?.data ?? [];
+  const openCount = alerts.filter((a) => a.status !== "RESOLVED" && a.status !== "DISMISSED").length;
 
   const refreshAll = useCallback(async () => {
     clearCache();
@@ -90,39 +101,45 @@ function DeputyWardenIncidentsInner() {
               <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
               <span className="text-sm font-semibold text-white truncate">Incident Reporting</span>
             </div>
-            <span className="text-xs text-slate-500 shrink-0">
-              {(data as DataResponse | null)?.total ?? 0} item(s)
-            </span>
+            <span className="text-xs text-slate-500 shrink-0">{openCount} open alert(s)</span>
           </div>
           {busy ? (
             <div className="p-4 flex items-center gap-2 text-sm text-slate-500 min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" /> Loading Incidents…
             </div>
+          ) : alerts.length === 0 ? (
+            <div className="p-6 text-center min-w-0">
+              <Inbox className="w-6 h-6 text-slate-600 mx-auto mb-2" />
+              <p className="text-sm text-slate-500">No open alerts or incidents are visible to your role. The campus is nominal.</p>
+            </div>
           ) : (
-            <div className="p-4 min-w-0">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Status</p>
-                  <p className="mt-1 text-lg font-bold text-emerald-400">Live</p>
-                  <p className="text-xs text-slate-500">Gate-state snapshots feed incident triage; recording and escalation flow through the warden-stage escalation path.</p>
-                </div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Last Updated</p>
-                  <p className="mt-1 text-lg font-bold text-sky-400">
-                    {new Date().toLocaleString([], { hour: "2-digit", minute: "2-digit" })}
-                  </p>
-                  <p className="text-xs text-slate-500">Auto-refreshes every 30 seconds.</p>
-                </div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Records</p>
-                  <p className="mt-1 text-lg font-bold text-amber-400">
-                    {Array.isArray((data as unknown as { data?: unknown[] })?.data)
-                      ? (data as unknown as { data?: unknown[] }).data!.length
-                      : 0}
-                  </p>
-                  <p className="text-xs text-slate-500">Entries currently visible in this view.</p>
-                </div>
-              </div>
+            <div className="overflow-x-auto min-w-0">
+              <table className="w-full text-sm min-w-[480px]">
+                <thead>
+                  <tr className="border-b border-slate-800 text-left text-xs text-slate-500">
+                    <th className="py-2 pr-4">Title</th>
+                    <th className="py-2 pr-4">Severity</th>
+                    <th className="py-2 pr-4">Status</th>
+                    <th className="py-2">Created</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {alerts.slice(0, 20).map((a) => (
+                    <tr key={a.id} className="border-b border-slate-800/50 last:border-0">
+                      <td className="py-2 pr-4 text-slate-200">{a.title}</td>
+                      <td className="py-2 pr-4">
+                        <span className={`text-xs font-semibold ${a.severity === "critical" || a.severity === "high" ? "text-rose-400" : a.severity === "medium" ? "text-amber-400" : "text-slate-400"}`}>
+                          {a.severity}
+                        </span>
+                      </td>
+                      <td className="py-2 pr-4 text-slate-400">{a.status}</td>
+                      <td className="py-2 text-slate-400">
+                        {a.created_at ? new Date(a.created_at).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
