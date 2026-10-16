@@ -35,9 +35,28 @@ function OperatorPageInner() {
   const isSpecialPath = gateIdParam === "history" || gateIdParam === "manual";
   
   const { authenticated, user, logout } = useAuth();
-  
-  // No hardcoded default gate: unassigned operators must be assigned by sysadmin first.
-  const gateId = isSpecialPath ? (user?.gateId || "") : (gateIdParam || user?.gateId || "");
+
+  // Unassigned operators fall back to a default gate (resolved below from
+  // /api/gates, preferring the Main Campus Gate) instead of a dead-end.
+  const [defaultGateId, setDefaultGateId] = useState<string | null>(null);
+  useEffect(() => {
+    if (user?.gateId) return; // assigned operator — no default needed
+    fetch("/api/gates")
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data?.success || !Array.isArray(data.data)) return;
+        const active = data.data.filter((g: any) => g.is_active !== false);
+        if (active.length === 0) return;
+        const main =
+          active.find((g: any) => /main/i.test(g.name || "")) || active[0];
+        setDefaultGateId(main.id || main.gate_code || main.gateCode || null);
+      })
+      .catch(() => {});
+  }, [user?.gateId]);
+
+  const gateId = isSpecialPath
+    ? (user?.gateId || defaultGateId || "")
+    : (gateIdParam || user?.gateId || defaultGateId || "");
   const currentTab = isSpecialPath && gateIdParam === "history" ? "history" : (searchParams?.get("tab") || "scandesk");
   
   const { addToast } = useToast();
@@ -110,18 +129,19 @@ function OperatorPageInner() {
   // Redirect special routing path shortcuts (/gate/history & /gate/manual) to operators dynamic gate path
   useEffect(() => {
     if (isSpecialPath) {
-      if (user?.gateId) {
+      const targetGate = user?.gateId || defaultGateId;
+      if (targetGate) {
         if (gateIdParam === "history") {
-          router.replace(`/gate/${user.gateId}?tab=history`);
+          router.replace(`/gate/${targetGate}?tab=history`);
         } else {
-          router.replace(`/gate/${user.gateId}?tab=scandesk&mode=manual`);
+          router.replace(`/gate/${targetGate}?tab=scandesk&mode=manual`);
         }
       } else {
-        // No gate assigned yet — send to operator dashboard, not a hardcoded gate
+        // No gate assigned and no default gate available — send to operator dashboard
         router.replace("/operator");
       }
     }
-  }, [isSpecialPath, gateIdParam, user?.gateId, router]);
+  }, [isSpecialPath, gateIdParam, user?.gateId, defaultGateId, router]);
 
   // Adjust operatorSubMode when URL parameters change (mode=manual → manual desk)
   useEffect(() => {
@@ -135,13 +155,13 @@ function OperatorPageInner() {
     if (targetMode) setOperatorSubMode(targetMode);
   }, [searchParams, isSpecialPath, gateIdParam]);
 
-  // Unassigned operators (no gate_id) land on /gate/<empty> — show a
-  // "waiting for assignment" panel instead of a broken gate view.
+  // Unassigned operators fall back to the default gate; if none is available,
+  // they see the "no gate" waiting panel (needsAssignment stays true).
   const [needsAssignment, setNeedsAssignment] = useState(false);
   useEffect(() => {
     if (!authenticated || !user) return;
     if (gateId === "" || gateId === "history" || gateId === "manual") {
-      if (user.gateId) {
+      if (user.gateId || defaultGateId) {
         setNeedsAssignment(false);
       } else {
         setNeedsAssignment(true);
@@ -149,7 +169,7 @@ function OperatorPageInner() {
     } else {
       setNeedsAssignment(false);
     }
-  }, [authenticated, user, gateId]);
+  }, [authenticated, user, gateId, defaultGateId]);
 
   // Dynamic periodic sync of stats: 5s on desktop, 15s on mobile (width < 768)
   usePolling(loadStats, { intervalMs: 5000 });
@@ -411,11 +431,11 @@ function OperatorPageInner() {
                 <div className="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-400 flex items-center justify-center mx-auto border border-amber-500/30">
                   <AlertCircle className="w-6 h-6" />
                 </div>
-                <h3 className="font-bold text-sm text-[var(--text-primary)]">No gate assigned yet</h3>
+                <h3 className="font-bold text-sm text-[var(--text-primary)]">No active gate available</h3>
                 <p className="text-xs text-[var(--text-secondary)] max-w-sm mx-auto leading-relaxed">
-                  You are not linked to a gate. Ask a system administrator to assign you to a gate
-                  (SysAdmin → Gates → Assign operator). Once assigned, your gate dashboard will open
-                  automatically.
+                  You have no gate assigned and no active gate was found. Ask a system administrator
+                  to enable a gate or assign you to one (SysAdmin → Gates). The kiosk will resolve a
+                  default gate automatically once one is active.
                 </p>
                 <button
                   onClick={() => router.push("/operator")}
