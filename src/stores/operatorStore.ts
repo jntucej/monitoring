@@ -99,6 +99,11 @@ interface OperatorState {
   currentStudent: Student | null;
   /** Authoritative current IN/OUT condition of the scanned person (from campus_occupancy). */
   currentCampusStatus: "IN" | "OUT" | null;
+  /**
+   * Reason recorded on the person's most recent OUT scan. Drives the hosteller
+   * re-entry button label: daily_outing → "Return to Hostel", else "Home In".
+   */
+  lastOutReason: ExitReason | null;
   selectedDirection: ScanDirection;
   selectedReason: ExitReason | null;
   /**
@@ -152,6 +157,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
   state: "idle",
   currentStudent: null,
   currentCampusStatus: null,
+  lastOutReason: null,
   selectedDirection: "IN",
   selectedReason: null,
   entryType: null,
@@ -252,11 +258,20 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
       }
 
       if (get()._scanGeneration !== gen) return;
+      // Derive the most recent OUT reason when occupancy is OUT, so the
+      // hosteller re-entry button can distinguish "Return to Hostel" (came out
+      // for an outing) from "Home In" (came out for home / day pass).
+      const lastScanData: any = result.data.lastScan ?? null;
+      const lastOutReason: ExitReason | null =
+        campusStatus === "OUT" && lastScanData?.direction === "OUT" && lastScanData.reason
+          ? (lastScanData.reason as ExitReason)
+          : null;
       set({
         state: "confirming",
         currentStudent: person,
         currentCampusStatus:
           campusStatus === "IN" || campusStatus === "OUT" ? campusStatus : null,
+        lastOutReason,
         selectedDirection: direction,
         selectedReason: null,
         entryType: normalizeEntryType(
@@ -576,6 +591,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
       state: "idle",
       currentStudent: null,
       currentCampusStatus: null,
+      lastOutReason: null,
       selectedDirection: "IN",
       selectedReason: null,
       entryType: null,
@@ -607,6 +623,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
       state: "idle",
       currentStudent: null,
       currentCampusStatus: null,
+      lastOutReason: null,
       selectedDirection: "IN",
       selectedReason: null,
       entryType: null,

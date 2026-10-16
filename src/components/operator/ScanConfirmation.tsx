@@ -28,6 +28,12 @@ interface ScanConfirmationProps {
   /** Authoritative current IN/OUT condition of the scanned person. */
   campusStatus?: "IN" | "OUT" | null;
   /**
+   * Reason recorded on the person's most recent OUT scan (null when they're IN
+   * or the occupancy is unknown). Drives the hosteller re-entry button label:
+   * daily_outing → "Return to Hostel"; home_out / day_pass → "Home In".
+   */
+  lastOutReason?: string | null;
+  /**
    * Live entry-type selection read from student_details.current_entry_type.
    * When null the operator has not yet chosen a type; an OUT + null state
    * defaults to hosteller (per spec) and is logged.
@@ -61,6 +67,7 @@ export function ScanConfirmation({
   suggestedDirection = "IN",
   campusStatus = null,
   currentEntryType = null,
+  lastOutReason = null,
   isInline = false,
 }: ScanConfirmationProps) {
   // Live entry type: the prop wins, falling back to the stored
@@ -68,6 +75,12 @@ export function ScanConfirmation({
   const effectiveEntryType =
     normalizeEntryType(currentEntryType) ??
     normalizeEntryType(student.studentDetails?.currentEntryType ?? student.currentEntryType);
+
+  // Whether the hosteller's most recent OUT was an outing (daily_outing) —
+  // drives the re-entry button label: "Return to Hostel" vs "Home In".
+  const lastOutWasOuting =
+    lastOutReason?.toLowerCase().replace(/[\s_-]+/g, "") === "dailyouting" ||
+    lastOutReason?.toLowerCase().replace(/[\s_-]+/g, "") === "outing";
 
   // Photo verification state
   const [photoVerified, setPhotoVerified] = useState(false);
@@ -231,10 +244,10 @@ export function ScanConfirmation({
     });
 
   // ── Build the action menu from (campusStatus, entryType) ──────────────────
-  // OUT + day_scholar: only "Day Scholar In" — they came out via Day Scholar
-  //   Out / outing and must re-enter as a day scholar, not home.
+  // OUT + day_scholar: only "Outing In" — they came out via outing and must
+  //   re-enter the outing flow, not home.
   // OUT + hosteller (or no stored type): offer "Home In" and, when the type
-  //   is unknown, "Day Scholar In" so the operator can choose.
+  //   is unknown, "Outing In" so the operator can choose.
   // IN + hosteller (or null default): three OUT buttons
   //   (Daily Outing, Home Out, Day Pass).
   // IN + day_scholar: one OUT button (Day Scholar Out).
@@ -245,7 +258,7 @@ export function ScanConfirmation({
         ? [
             {
               code: "daily_outing",
-              name: "Day Scholar In",
+              name: "Outing In",
               direction: "IN",
               icon: Sun,
               requiresApproval: false,
@@ -255,10 +268,10 @@ export function ScanConfirmation({
         : effectiveEntryType === "hosteller"
           ? [
               {
-                code: "home_in",
-                name: "Home In",
+                code: lastOutWasOuting ? "daily_outing" : "home_in",
+                name: lastOutWasOuting ? "Return to Hostel" : "Home In",
                 direction: "IN",
-                icon: Home,
+                icon: lastOutWasOuting ? Sun : Home,
                 requiresApproval: false,
                 entryType: "hosteller",
               },
@@ -274,7 +287,7 @@ export function ScanConfirmation({
               },
               {
                 code: "daily_outing",
-                name: "Day Scholar In",
+                name: "Outing In",
                 direction: "IN",
                 icon: Sun,
                 requiresApproval: false,
@@ -333,7 +346,7 @@ export function ScanConfirmation({
       },
       {
         code: "daily_outing",
-        name: "Day Scholar In",
+        name: "Outing In",
         direction: "IN",
         icon: Sun,
         requiresApproval: false,

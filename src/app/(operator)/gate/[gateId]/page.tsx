@@ -566,6 +566,7 @@ function OperatorPageInner() {
                       student={currentStudent}
                       campusStatus={currentCampusStatus}
                       currentEntryType={operatorStore.entryType}
+                      lastOutReason={operatorStore.lastOutReason}
                       onConfirm={async (dir, reason, entryType) =>
                         await confirmScan(addToast, dir, reason, entryType)
                       }
