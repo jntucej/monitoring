@@ -189,6 +189,29 @@ async function handlePatch(req: NextRequest): Promise<Response> {
 
   // ESCALATE_UP: student-initiated move to the next hostel level after a rejection.
   if (normalizedAction === "ESCALATE_UP") {
+    // Validate the escalation reason against the closed enum.
+    const ESCALATE_UP_REASONS = [
+      "emergency",
+      "special_leave",
+      "daily_outing",
+      "day_pass",
+      "home_out",
+      "day_scholar_out",
+    ] as const;
+    if (reason && !(ESCALATE_UP_REASONS as readonly string[]).includes(reason)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "ESCALATE_REASON_INVALID",
+            message:
+              "reason must be one of: emergency, special_leave, daily_outing, day_pass, home_out, day_scholar_out",
+          },
+        },
+        { status: 400 },
+      );
+    }
+
     const { data: actorRow } = await supabase.from("users").select("name").eq("id", authUserId).maybeSingle();
     const prep = await prepareEscalateUp({ ticketParam, authUserId, authUserRole });
     if (!prep.ok || prep.response) {
