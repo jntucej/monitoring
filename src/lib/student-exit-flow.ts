@@ -70,7 +70,7 @@ export function normalizeExitReason(reason?: string | null): ReasonCode | "regul
   if (r === "home_out" || r === "leave") return "home_out";
   if (r === "day_pass" || r === "day_out") return "day_pass";
   if (r === "emergency") return "emergency";
-  if (r === "special_leave" || r === "special_leave") return "special_leave";
+  if (r === "special_leave") return "home_out";
   if (r === "day_scholar_out" || r === "day_scholar") return "day_scholar_out";
   if (r === "regular") return "regular";
   return "regular";

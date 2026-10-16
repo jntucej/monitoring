@@ -21,6 +21,7 @@ import {
   ShieldAlert,
   User,
   HelpCircle,
+  MoreHorizontal,
   type LucideIcon,
 } from "lucide-react";
 import { useNavigation } from "@/hooks/useNavigation";
@@ -35,6 +36,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   ShieldAlert,
   User,
   HelpCircle,
+  MoreHorizontal,
   GraduationCap: QrCode,
   FileSpreadsheet: QrCode,
   Sparkles: Clock,

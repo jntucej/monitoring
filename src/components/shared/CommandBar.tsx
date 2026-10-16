@@ -59,7 +59,7 @@ function buildCommands(role: string): CommandDef[] {
       href: "/operator/manual-entry",
     },
   };
-  return config.commands.map((c) => defs[c]);
+  return (config.commands ?? []).map((c) => defs[c]);
 }
 
 export interface CommandBarProps {

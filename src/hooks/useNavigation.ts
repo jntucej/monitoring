@@ -363,15 +363,18 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       break;
 
     case "operator":
+      // Lean gate-desk nav: exactly 4 items (Scan, Log, Flags, More).
+      // Scan → operator root (kiosk scanner). Log → transactions log.
+      // Flags → exceptions/flagged scans. More → secondary commands.
+      // No Account, no Reports, no Stats rows.
       groups = [
         {
           groupLabel: "Gate Operations Desk",
           items: [
-            { href: "/operator", label: "Overview", icon: "LayoutDashboard", badge: "OVERVIEW" },
-            { href: "/operator/scan", label: "Scan", icon: "QrCode", badge: "ACTIVE" },
-            { href: "/operator/transactions", label: "Transactions", icon: "Clock" },
-            { href: "/operator/manual-entry", label: "Manual Entry", icon: "CheckSquare" },
-            { href: "/operator/pass-verification", label: "Pass Verification", icon: "ShieldCheck" },
+            { href: "/operator", label: "Scan", icon: "QrCode", badge: "ACTIVE" },
+            { href: "/operator/transactions", label: "Log", icon: "Clock" },
+            { href: "/operator/exceptions", label: "Flags", icon: "ShieldAlert" },
+            { href: "/operator/manual-entry", label: "More", icon: "MoreHorizontal" },
           ],
         },
       ];

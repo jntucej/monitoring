@@ -12,6 +12,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 import { validateRollNumber } from "@/lib/rollNumber";
 import { getClientLocation, getClientSysTag } from "@/lib/geo";
+import { recommend, type Recommendation } from "@/lib/operator-recommend";
 
 /**
  * IN-movement button ids the gate operator can tap (from the
@@ -85,7 +86,7 @@ async function fetchTodayStats(gateId?: string, signal?: AbortSignal): Promise<{
 }
 
 
-type ScanState = "idle" | "detecting" | "confirming" | "selecting_reason" | "success" | "error";
+type ScanState = "idle" | "detecting" | "confirming" | "success" | "error";
 
 // Error info returned from the store on failed scans
 interface ScanError {
@@ -104,6 +105,21 @@ export interface TodayStatsResult {
   recentScans: Scan[];
   breakdown: CategoryBreakdown | null;
   outing: OutingEntry[] | null;
+}
+
+export interface OperatorStatusStrip {
+  gate: string;
+  entries: number;
+  exits: number;
+  /** Live shift window, e.g. "07:42 AM" (now) — the gate desk's on-duty span. */
+  shift: string;
+  /** Human "last scan N ago" (e.g. "42s", "5m", "1h"); "—" when no scan. */
+  lastScanAgo: string;
+  queuedCount: number;
+  /** Number of distinct flagged/denied scans in the recent log (red signals). */
+  flagCount: number;
+  /** Gate health: healthy when online + no flags, caution when flagged, critical when offline. */
+  health: "healthy" | "caution" | "critical";
 }
 
 interface OperatorState {
@@ -151,6 +167,25 @@ interface OperatorState {
   loadStats: () => void;
   setGate: (gateId: string) => void;
   _fetchTodayStats: () => Promise<TodayStatsResult>;
+  /**
+   * Lean status strip for the gate kiosk header: gate name + today's
+   * in/out + current shift window + "last scan N ago" + locally queued scans.
+   * Pure read of existing store fields — no logic changes to the scan flow.
+   * `queuedCount` is passed in (from useScanQueueSync) because the queue
+   * lives in hook-local state, not the store.
+   */
+  getStatusStrip: (queuedCount: number) => OperatorStatusStrip;
+  /**
+   * Lean recommendation for the current scanned student (principle 3: auto-
+   * recommend). Pure read of store fields + a pass count passed in from the
+   * caller (approved passes are fetched in ScanConfirmation, not the store).
+   * No logic changes to the scan flow — it only produces the suggested
+   * direction/reason/entry + alternatives for the 1-button + 2-alternatives UI.
+   */
+  getRecommendation: (
+    currentStudent: Student | null,
+    approvedPassCount: number,
+  ) => Recommendation;
 }
 
 let activeStatsFetchCtrl: AbortController | null = null;
@@ -694,6 +729,54 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
     set({
       gate: { id: gateId, name: gateId, location: "Main Gate", type: "ENTRY_EXIT" as const, isActive: true },
       gateId,
+    });
+  },
+
+  // Lean status-strip read for the gate kiosk header. Pure — no writes.
+  getStatusStrip: (queuedCount: number) => {
+    const s = get();
+    const now = new Date();
+    const shift = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    let lastScanAgo = "—";
+    if (s.lastScan?.timestamp) {
+      const diffMs = now.getTime() - new Date(s.lastScan.timestamp).getTime();
+      const sec = Math.max(0, Math.floor(diffMs / 1000));
+      lastScanAgo = sec < 5 ? "now" : sec < 60 ? `${sec}s` : Math.floor(sec / 60) < 60 ? `${Math.floor(sec / 60)}m` : `${Math.floor(sec / 3600)}h`;
+    }
+    // Red flags = recent operator-correction scans (principle 5: red = critical).
+    const flagCount = s.recentScans.filter((sc) => sc.isCorrection).length;
+    const online = s.gate?.isOnline ?? true;
+    const health: OperatorStatusStrip["health"] = !online ? "critical" : flagCount > 0 ? "caution" : "healthy";
+    return {
+      gate: s.gate?.name || s.gateId || "Gate",
+      entries: s.todaysStats?.entries ?? 0,
+      exits: s.todaysStats?.exits ?? 0,
+      shift,
+      lastScanAgo,
+      queuedCount,
+      flagCount,
+      health,
+    };
+  },
+
+  // Auto-recommendation for the current scanned student (principle 3).
+  getRecommendation: (currentStudent: Student | null, approvedPassCount: number) => {
+    const s = get();
+    let curfewMinutes: number | null = null;
+    const curfewStr = currentStudent?.hostelCurfewTime;
+    if (curfewStr) {
+      const curfew = new Date(curfewStr);
+      if (!Number.isNaN(curfew.getTime())) {
+        curfewMinutes = Math.floor((curfew.getTime() - Date.now()) / 60000);
+      }
+    }
+    return recommend({
+      campusStatus: s.currentCampusStatus,
+      lastReason: s.lastOutReason ?? null,
+      currentEntryType: s.entryType,
+      hasApprovedPass: approvedPassCount > 0,
+      curfewMinutes,
+      biometricReady: Boolean(currentStudent?.hasThumbprint),
     });
   },
 }));

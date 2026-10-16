@@ -73,7 +73,7 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
   // Fetch the board source so we can derive counts + lastScan for the status
   // bar. The fetch is cached by useApiResource, so a duplicate call from
   // Board itself does not cause a second network request.
-  const boardSource = config?.board.source ?? null;
+  const boardSource = config?.board?.source ?? null;
   const { data: boardData } = useApiResource<ConsoleBoardResponse>(boardSource, {
     ttlMs: 15_000,
   });
@@ -85,7 +85,7 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
 
   const lastScan = useMemo(() => {
     if (!boardSource || !config) return null;
-    const rows = boardRowsOf(boardData, config.board.itemKey);
+    const rows = boardRowsOf(boardData, config?.board?.itemKey ?? "");
     let newest: string | null = null;
     for (const r of rows) {
       const t = r.timestamp ?? r.created_at;
@@ -172,8 +172,8 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
         <main className="flex-1 min-w-0 overflow-y-auto custom-scrollbar">
           {children ?? (
             <Board
-              source={config?.board.source ?? ""}
-              itemKey={config?.board.itemKey ?? ""}
+              source={config?.board?.source ?? ""}
+              itemKey={config?.board?.itemKey ?? ""}
               onSelect={handleSelect}
             />
           )}

@@ -1,12 +1,13 @@
 /**
- * Role console configurations for the Ops Console shell.
+ * Role console configurations for the lean gate-desk shell.
  *
- * Each entry describes how a role's root dashboard renders inside the shared
- * <RoleConsole />: the feed source (board), the context entity opened on row
- * click, the command palette actions, and the status-bar fields.
+ * Each entry describes how a role's scanner/ops surface renders:
+ *   - nav: the small set of top-level destinations (rendered as an icon rail)
+ *   - statusStrip: show the 28px live status strip above the kiosk viewfinder
+ *   - recentSheet: render RecentScans as a swipe-up bottom sheet, not a tab
  *
- * Only the `operator` role is migrated to the console shell in this PR; other
- * roles keep their existing dashboard layouts until they are migrated too.
+ * Only the `operator` role is configured here; it drives the gate kiosk.
+ * Other roles keep their existing dashboard layouts.
  */
 
 export type ConsoleCommand =
@@ -24,39 +25,36 @@ export type ConsoleStatusField =
 
 export interface RoleConsoleConfig {
   role: string;
-  board: {
+  /** Top-level nav destinations (icons only, no labels in the rail). */
+  nav: string[];
+  /** Render the 28px live status strip above the scanner viewfinder. */
+  statusStrip: boolean;
+  /** Render RecentScans as a swipe-up / swipe-down bottom sheet. */
+  recentSheet: boolean;
+  /**
+   * Board feed source (optional, legacy). When present the RoleConsole shell
+   * drives a Board feed + StatusBar from this endpoint; the lean operator
+   * kiosk does not set it and the rail falls back to children.
+   */
+  board?: {
     kind: "feed";
-    /**
-     * The API endpoint that returns today's records for this role. The
-     * response shape is `{ data: { transactions: T[] } }` (the ok() helper),
-     * where `T` is the itemKey shape below.
-     */
     source: string;
-    /**
-     * The nested key inside `data` that holds the record array.
-     * "transactions" for /api/operator/transactions.
-     */
     itemKey: string;
   };
-  /** The entity type the ContextPanel renders on row click. */
-  contextEntity: "scan" | "person" | "ticket";
-  /** Command palette actions available to this role. */
-  commands: ConsoleCommand[];
-  /** Status-bar fields, rendered left-to-right. */
-  statusFields: ConsoleStatusField[];
+  /** Entity type the ContextPanel renders on row click (legacy). */
+  contextEntity?: "scan" | "person" | "ticket";
+  /** Command palette actions (legacy Cmd+K CommandBar). */
+  commands?: ConsoleCommand[];
+  /** Status-bar fields, rendered left-to-right (legacy). */
+  statusFields?: ConsoleStatusField[];
 }
 
 export const CONSOLES: Record<string, RoleConsoleConfig> = {
   operator: {
     role: "operator",
-    board: {
-      kind: "feed",
-      source: "/api/operator/transactions",
-      itemKey: "transactions",
-    },
-    contextEntity: "scan",
-    commands: ["scan", "manual-entry", "pass-verify", "lookup"],
-    statusFields: ["gate", "entries", "exits", "shift", "lastScan"],
+    nav: ["scan", "log", "flags", "more"],
+    statusStrip: true,
+    recentSheet: true,
   },
 };
 
