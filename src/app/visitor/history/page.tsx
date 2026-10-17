@@ -10,17 +10,21 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
-import { Inbox, Loader2, ShieldCheck, AlertTriangle, ArrowRight } from "lucide-react";
+import { Loader2, History, AlertTriangle, ArrowRight } from "lucide-react";
+import type { VisitorsMineResponse, VisitorLogRow } from "../types";
 
-/* response shapes */
-
-interface VisitorsMineResponse {
-  success: boolean;
-  data: {
-    logs: unknown[];
-    active: { status: string; log: unknown } | null;
-    lastCompleted: unknown | null;
-  };
+function fmtRange(l: VisitorLogRow): string {
+  const inAt = l.check_in_at
+    ? new Date(l.check_in_at).toLocaleString("en-IN", {
+        day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
+      })
+    : "—";
+  const outAt = l.check_out_at
+    ? new Date(l.check_out_at).toLocaleString("en-IN", {
+        day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
+      })
+    : "in progress";
+  return `${inAt} → ${outAt}`;
 }
 
 function VisitorHistoryInner() {
@@ -43,10 +47,10 @@ function VisitorHistoryInner() {
   usePolling(refreshAll, { intervalMs: 30_000, enabled: !!user });
 
   const busy = loading && !data;
+  const history = data?.data?.history ?? [];
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
-      {/* Back link */}
       <Link
         href="/visitor"
         className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
@@ -54,9 +58,9 @@ function VisitorHistoryInner() {
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Visitor Portal
       </Link>
 
-      {/* Page toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
+          <h1 className="text-base font-semibold text-white">History</h1>
           <p className="mt-1 text-sm text-slate-400 min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
@@ -68,7 +72,7 @@ function VisitorHistoryInner() {
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
-            <span className="truncate">History data unavailable: {error}</span>
+            <span className="truncate">History unavailable: {error}</span>
           </span>
           <button
             type="button"
@@ -84,79 +88,43 @@ function VisitorHistoryInner() {
         <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
           <div className="px-4 py-3 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
-              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span className="text-sm font-semibold text-white truncate">History</span>
+              <History className="w-4 h-4 text-sky-400 shrink-0" />
+              <span className="text-sm font-semibold text-white truncate">Completed visits</span>
             </div>
-            <span className="text-xs text-slate-500 shrink-0">
-              {data?.data?.logs?.length ?? 0} log(s)
-            </span>
+            <span className="text-xs text-slate-500 shrink-0">{history.length} visit(s)</span>
           </div>
           {busy ? (
             <div className="p-4 flex items-center gap-2 text-sm text-slate-500 min-w-0">
-              <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" /> Loading History…
+              <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" /> Loading…
+            </div>
+          ) : history.length === 0 ? (
+            <div className="p-4 min-w-0">
+              <p className="text-sm text-slate-500">No completed visits yet. Your visit history will appear here.</p>
             </div>
           ) : (
-            <div className="p-4 min-w-0">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Status</p>
-                  <p className="mt-1 text-lg font-bold text-emerald-400">Live</p>
-                  <p className="text-xs text-slate-500">History data streams from the campus gate network.</p>
+            <div className="divide-y divide-slate-800 min-w-0">
+              {history.map((l) => (
+                <div key={l.id} className="px-4 py-3 flex flex-wrap items-center gap-3 min-w-0">
+                  <span className="text-xs text-slate-400 w-40 shrink-0">{fmtRange(l)}</span>
+                  <div className="flex-1 min-w-0">
+                    {l.host?.name ? (
+                      <p className="text-sm text-slate-200 truncate">Visiting <span className="font-semibold">{l.host.name}</span></p>
+                    ) : (
+                      <p className="text-sm text-slate-500">Host not recorded</p>
+                    )}
+                    {l.purpose && (
+                      <p className="text-xs text-slate-500 truncate">Purpose: {l.purpose}</p>
+                    )}
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full text-[11px] bg-slate-700/40 text-slate-300 shrink-0">completed</span>
                 </div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Last Updated</p>
-                  <p className="mt-1 text-lg font-bold text-sky-400">
-                    {new Date().toLocaleString([], { hour: "2-digit", minute: "2-digit" })}
-                  </p>
-                  <p className="text-xs text-slate-500">Auto-refreshes every 30 seconds.</p>
-                </div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Records</p>
-                  <p className="mt-1 text-lg font-bold text-amber-400">
-                    {data?.data?.logs?.length ?? 0}
-                  </p>
-                  <p className="text-xs text-slate-500">Your visitor logs on record.</p>
-                </div>
-              </div>
+              ))}
             </div>
           )}
         </div>
       </WidgetBoundary>
 
-      {/* Access expiry */}
-      <WidgetBoundary title="Access Expiry">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
-          <div className="flex flex-col gap-2 min-w-0">
-            <p className="text-sm font-semibold text-white min-w-0">Time-bound, host-linked visitor access</p>
-            <p className="text-xs text-slate-400 min-w-0">
-              Visitor passes are granted for the approved visit window and tied to your host&apos;s department.
-              Unchecked-out passes auto-expire when the approved window ends, after which gate scans are refused.
-            </p>
-            {(() => {
-              const logs = (data as { data?: { logs?: Array<{ check_in_at?: string; check_out_at?: string | null; status?: string; expires_at?: string | null }> } } | null)?.data?.logs ?? [];
-              const active = logs.find((l) => l.status === "active" && !l.check_out_at);
-              const expAt = active?.expires_at;
-              if (expAt) {
-                const ms = new Date(expAt).getTime() - Date.now();
-                const expired = ms < 0;
-                const hours = Math.max(1, Math.ceil(Math.abs(ms) / 3_600_000));
-                return (
-                  <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${expired ? "bg-rose-500/15 text-rose-300" : "bg-emerald-500/15 text-emerald-300"}`}>
-                    {expired ? "Pass expired" : `Expires in ~${hours}h`}
-                  </span>
-                );
-              }
-              return (
-                <span className="inline-flex items-center gap-1 rounded-full bg-slate-700/40 px-2.5 py-1 text-xs text-slate-300">
-                  Expiry set by approved visit window
-                </span>
-              );
-            })()}
-          </div>
-        </div>
-      </WidgetBoundary>
-
-<DevContactStrip />
+      <DevContactStrip />
     </div>
   );
 }
