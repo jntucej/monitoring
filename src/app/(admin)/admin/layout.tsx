@@ -3,7 +3,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { AdminSidebar, type AdminOverviewPayload } from "@/components/admin/AdminSidebar";
 import { Menu, X } from "lucide-react";
@@ -18,12 +17,11 @@ import type { Role } from "@/lib/types";
  *   <div flex h-screen overflow-hidden>
  *     <AdminSidebar />             ← fixed 16rem manifest rail
  *     <main flex-1 overflow-y-auto>
- *       <DevContactStrip />
  *       {children} in a max-w-7xl column
  *
  * Mobile (<md):
  *   <div h-dvh overflow-hidden flex flex-col>
- *     <mobile top bar>            ← brand + hamburger that opens the rail
+ *     <floating hamburger>        ← small nav trigger (no full-width band)
  *     <div flex-1 overflow-y-auto>
  *       {children}
  *     <AdminSidebar as a slide-in drawer (off-canvas, behind a scrim)>
@@ -93,10 +91,7 @@ export default function AdminConsoleLayout({
   }, [pathname]);
 
   const main = (
-    <>
-      <DevContactStrip />
-      <div className="mx-auto max-w-7xl p-4 sm:p-6">{children}</div>
-    </>
+    <div className="mx-auto max-w-7xl p-4 sm:p-6">{children}</div>
   );
 
   return (
@@ -109,21 +104,23 @@ export default function AdminConsoleLayout({
             <main className="flex-1 overflow-y-auto">{main}</main>
           </div>
 
-          {/* ── Mobile shell: top bar + scrollable main + drawer ──────── */}
-          <div className="flex h-full flex-col md:hidden">
-            <header className="flex items-center justify-between gap-2 border-b border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3 pt-safe">
-              <span className="truncate text-sm font-semibold tracking-tight">
-                Campus Admin
-              </span>
-              <button
-                type="button"
-                onClick={() => setMobileOpen(true)}
-                aria-label="Open navigation"
-                className="inline-flex items-center justify-center rounded-md p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"
-              >
-                <Menu className="h-5 w-5" />
-              </button>
-            </header>
+          {/* ── Mobile shell: floating hamburger + scrollable main + drawer ─ */}
+          <div className="relative flex h-full flex-col md:hidden">
+            {/* Minimal floating nav trigger — no full-width header band, so the
+                admin console never shows two stacked headers on mobile. */}
+            <button
+              type="button"
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open navigation"
+              className={cn(
+                "absolute left-3 top-3 z-30 inline-flex h-10 w-10 items-center justify-center rounded-lg",
+                "border border-[var(--border)] bg-[var(--bg-surface)]/90 backdrop-blur",
+                "text-[var(--text-muted)] hover:text-[var(--text-primary)]",
+                "shadow-sm pt-safe"
+              )}
+            >
+              <Menu className="h-5 w-5" />
+            </button>
 
             <main className="flex-1 overflow-y-auto">{main}</main>
 

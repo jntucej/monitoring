@@ -11,7 +11,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   MiniSparkline, MiniStackedBar,
-} from "@/components/sysadmin/kit/sidebar";
+} from "@/components/admin/kit";
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
 import type { User } from "@/lib/types";

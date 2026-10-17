@@ -5,7 +5,7 @@ import { Activity } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { HealthDashboard } from "@/components/sysadmin/HealthDashboard";
+import { HealthDashboard } from "@/components/admin/HealthDashboard";
 import { getAuthHeaders } from "@/lib/utils";
 
 type ComponentStatus = "healthy" | "degraded" | "unhealthy" | "unknown";

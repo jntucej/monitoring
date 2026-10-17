@@ -10,9 +10,11 @@
  * payload is polled at the layout level and threaded down, so every sidebar
  * mini stays live without its own fetch.
  *
- * Shares the same `Mini*` kit primitives as sysadmin (pure presentational),
- * but reads the *admin* overview payload shape (`/api/admin/overview`), which
- * adds `operations.*` and `analytics.*` slices the sysadmin payload lacks.
+ * Uses admin-owned `Mini*` kit primitives (in `@/components/admin/kit`),
+ * so the admin shell has no dependency on the sysadmin kit. The minis are
+ * presentational and mirror the sysadmin ones; the infographic reads the
+ * *admin* overview payload shape (`/api/admin/overview`), which adds
+ * `operations.*` and `analytics.*` slices the sysadmin payload lacks.
  */
 import {
   MiniDotCluster,
@@ -23,7 +25,7 @@ import {
   MiniStackedBar,
   MiniDriftPill,
   MiniCountPills,
-} from "@/components/sysadmin/kit/sidebar";
+} from "@/components/admin/kit";
 import type { AdminOverviewPayload } from "./AdminSidebar";
 
 export interface AdminInfographicSpec {

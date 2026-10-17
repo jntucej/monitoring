@@ -293,9 +293,6 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
         </button>
         {!isCollapsed && (
           <>
-            <span className="text-sm font-semibold tracking-tight flex-1 min-w-0 truncate">
-              Campus Admin
-            </span>
             <button
               type="button"
               onClick={collapseAll}
