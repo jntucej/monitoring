@@ -29,7 +29,10 @@
         { "id": "reports", "route": "reports", "title": "Reports", "kind": "list", "pollMs": 120000 },
         { "id": "attendance", "route": "attendance", "title": "Attendance", "kind": "table", "pollMs": 60000 },
         { "id": "announcements", "route": "announcements", "title": "Announcements", "kind": "list", "pollMs": 60000 },
-        { "id": "support", "route": "support", "title": "Support Desk", "kind": "table", "pollMs": 30000 }
+        { "id": "support", "route": "support", "title": "Support Desk", "kind": "table", "pollMs": 30000 },
+        { "id": "events", "route": "events", "title": "Campus Events", "kind": "list", "pollMs": 60000 },
+        { "id": "achievements", "route": "achievements", "title": "Achievements", "kind": "table", "pollMs": 120000 },
+        { "id": "communities", "route": "communities", "title": "Communities", "kind": "table", "pollMs": 120000 }
       ]
     },
     {
@@ -159,6 +162,20 @@
           "title": "Devices",
           "kind": "cards",
           "pollMs": 30000
+        },
+        {
+          "id": "gate-schedule",
+          "route": "gate-schedule",
+          "title": "Gate Schedule",
+          "kind": "table",
+          "pollMs": 60000
+        },
+        {
+          "id": "exam-day",
+          "route": "exam-day",
+          "title": "Exam Day Ops",
+          "kind": "cockpit",
+          "pollMs": 30000
         }
       ]
     },
@@ -262,6 +279,13 @@
           "title": "Maintenance",
           "kind": "calendar",
           "pollMs": 60000
+        },
+        {
+          "id": "cron",
+          "route": "cron",
+          "title": "Cron / Scheduled Jobs",
+          "kind": "table",
+          "pollMs": 30000
         }
       ]
     },
@@ -320,6 +344,34 @@
           "title": "Hostel tickets",
           "kind": "table",
           "pollMs": 30000
+        },
+        {
+          "id": "classes",
+          "route": "classes",
+          "title": "Classes",
+          "kind": "table",
+          "pollMs": 120000
+        },
+        {
+          "id": "subjects",
+          "route": "subjects",
+          "title": "Subjects",
+          "kind": "table",
+          "pollMs": 120000
+        },
+        {
+          "id": "faculty-assignments",
+          "route": "faculty-assignments",
+          "title": "Faculty Assignments",
+          "kind": "table",
+          "pollMs": 120000
+        },
+        {
+          "id": "mess",
+          "route": "mess",
+          "title": "Mess Management",
+          "kind": "tabbed",
+          "pollMs": 60000
         }
       ]
     },
@@ -410,6 +462,20 @@
           "id": "compliance",
           "route": "compliance",
           "title": "Compliance",
+          "kind": "tabbed",
+          "pollMs": 120000
+        },
+        {
+          "id": "retention-policies",
+          "route": "retention-policies",
+          "title": "Retention Policies",
+          "kind": "table",
+          "pollMs": 120000
+        },
+        {
+          "id": "consent",
+          "route": "consent",
+          "title": "Consent Management",
           "kind": "tabbed",
           "pollMs": 120000
         }
