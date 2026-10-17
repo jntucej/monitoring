@@ -52,6 +52,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AdminSidebarInfographic } from "./AdminSidebarInfographic";
+import { ProfileMenuButton } from "@/components/shared/ProfileMenuButton";
 import manifest from "../../../packages/admin-console-kit/manifest/ia.json";
 
 // ── Admin overview payload shape (subset the infographic reads) ───────────
@@ -445,6 +446,11 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
           </div>
         )}
       </nav>
+
+      {/* Account footer: profile button + appearance + sign out */}
+      <div className="shrink-0 border-t border-[var(--border)] p-2">
+        <ProfileMenuButton consoleRoot="/admin" compact={isCollapsed} />
+      </div>
     </aside>
   );
 }

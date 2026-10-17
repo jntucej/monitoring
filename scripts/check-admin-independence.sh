@@ -19,7 +19,10 @@ fi
 
 # 2. No imports from @/components/shared/* EXCEPT the allowed infrastructure set
 #    (auth, global singletons, UI primitives, and a few role-agnostic utilities).
-ALLOWED_SHARED="AuthGuard|DevContactStrip|PersonBadge|Board|NotificationCenter|FloatingBot|AnnouncementBanner|IconRail|Sidebar|RoleConsole|DynamicHeader|SafeAreaAppShell|NetworkStatusBanner|FloatingOrbs|AppLoadingScreen|ToastProvider|useToast|Modal|Button|Input|Select|Badge|Card|Tabs|Table|DataTable|Skeleton"
+#    ProfileMenuButton is deliberately shared: it is the single account/profile
+#    button (avatar + appearance + sign-out) both consoles mount, so it stays in
+#    shared rather than being copied per-role.
+ALLOWED_SHARED="AuthGuard|DevContactStrip|PersonBadge|Board|NotificationCenter|FloatingBot|AnnouncementBanner|IconRail|Sidebar|RoleConsole|DynamicHeader|SafeAreaAppShell|NetworkStatusBanner|FloatingOrbs|AppLoadingScreen|ToastProvider|useToast|Modal|Button|Input|Select|Badge|Card|Tabs|Table|DataTable|Skeleton|ProfileMenuButton"
 SHARED=$(grep -rhoE "@/components/shared/[A-Za-z]+" "src/app/(admin)" "src/components/admin" 2>/dev/null \
   | sed 's|@/components/shared/||' | sort -u \
   | grep -vE "^($ALLOWED_SHARED)$" || true)

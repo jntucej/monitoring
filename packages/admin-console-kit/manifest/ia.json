@@ -128,5 +128,8 @@
         { "label": "System Health", "href": "/admin/health", "icon": "Activity" }
       ]
     }
+  ],
+  "personal": [
+    { "id": "profile", "label": "My Profile", "href": "/admin/profile", "icon": "UserCog" }
   ]
 }

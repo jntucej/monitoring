@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SidebarInfographic } from "./SidebarInfographic";
+import { ProfileMenuButton } from "@/components/shared/ProfileMenuButton";
 import manifest from "../../../packages/sysadmin-console-kit/manifest/ia.json";
 
 // ── Payload shape ─────────────────────────────────────────────────────────
@@ -433,6 +434,11 @@ export function Sidebar({ overview }: SidebarProps) {
           </div>
         )}
       </nav>
+
+      {/* Account footer: profile button + appearance + sign out */}
+      <div className="shrink-0 border-t border-[var(--border)] p-2">
+        <ProfileMenuButton consoleRoot="/sysadmin" compact={collapsed} />
+      </div>
     </aside>
   );
 }
