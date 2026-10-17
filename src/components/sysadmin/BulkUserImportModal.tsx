@@ -163,7 +163,7 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
-      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 w-full space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto" style={{ maxWidth: report ? "38rem" : "2rem" }}>
+      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 sm:p-6 w-full space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto" style={{ maxWidth: report ? "38rem" : "56rem" }}>
         <div className="flex justify-between items-center border-b border-[var(--border)] pb-3">
           <h3 className="font-bold text-lg text-white flex items-center gap-2">
             <Upload className="w-5 h-5 text-sky-400" /> Bulk Student Import
