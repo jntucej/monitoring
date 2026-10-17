@@ -1,0 +1,315 @@
+{
+  "version": "1.0.0",
+  "categories": [
+    {
+      "id": "command",
+      "label": "Command Center",
+      "icon": "LayoutDashboard",
+      "order": 1,
+      "infographic": { "kind": "dots", "source": "command.health" },
+      "pages": [
+        {
+          "id": "command-center",
+          "route": "",
+          "title": "Command Center",
+          "kind": "cockpit",
+          "pollMs": 10000,
+          "sse": "/api/admin/alerts/stream"
+        }
+      ]
+    },
+    {
+      "id": "identity",
+      "label": "Identity",
+      "icon": "Users",
+      "order": 2,
+      "infographic": { "kind": "stacked-bar", "source": "identity" },
+      "pages": [
+        {
+          "id": "people",
+          "route": "people",
+          "title": "People",
+          "kind": "faceted-table",
+          "pollMs": 60000,
+          "api": { "overview": "GET /api/admin/people/overview" },
+          "drawer": {
+            "entity": "person",
+            "sections": ["profile", "roles", "sessions", "audit", "links"]
+          }
+        },
+        {
+          "id": "promotions",
+          "route": "promotions",
+          "title": "Promotions",
+          "kind": "kanban",
+          "pollMs": 30000
+        }
+      ]
+    },
+    {
+      "id": "access",
+      "label": "Access & Auth",
+      "icon": "ShieldCheck",
+      "order": 3,
+      "infographic": { "kind": "gauge", "source": "access.mfaCoverage" },
+      "pages": [
+        {
+          "id": "access",
+          "route": "access",
+          "title": "Access",
+          "kind": "tabbed",
+          "pollMs": 30000,
+          "tabs": [
+            "roles",
+            { "id": "sessions", "sse": "/api/admin/sessions/stream" },
+            "mfa",
+            "sso",
+            "codes"
+          ]
+        },
+        {
+          "id": "sso",
+          "route": "sso",
+          "title": "SSO",
+          "kind": "form",
+          "pollMs": 60000
+        }
+      ]
+    },
+    {
+      "id": "gates",
+      "label": "Gates & Devices",
+      "icon": "DoorOpen",
+      "order": 4,
+      "infographic": { "kind": "dots", "source": "gates.status" },
+      "pages": [
+        {
+          "id": "gates",
+          "route": "gates",
+          "title": "Gates",
+          "kind": "cards+map",
+          "pollMs": 15000
+        },
+        {
+          "id": "devices",
+          "route": "devices",
+          "title": "Devices",
+          "kind": "cards",
+          "pollMs": 30000
+        }
+      ]
+    },
+    {
+      "id": "monitoring",
+      "label": "Monitoring",
+      "icon": "Activity",
+      "order": 5,
+      "infographic": {
+        "kind": "sparkline",
+        "source": "monitoring.errorRate24h",
+        "color": "var(--action-warning)"
+      },
+      "pages": [
+        {
+          "id": "health",
+          "route": "health",
+          "title": "Health",
+          "kind": "tabbed",
+          "pollMs": 30000,
+          "tabs": ["app", "database", "infra", "redis"]
+        }
+      ]
+    },
+    {
+      "id": "alerts",
+      "label": "Alerts & Incidents",
+      "icon": "Bell",
+      "order": 6,
+      "infographic": { "kind": "severity", "source": "alerts" },
+      "pages": [
+        {
+          "id": "alerts",
+          "route": "alerts",
+          "title": "Alerts",
+          "kind": "feed+rules",
+          "pollMs": 10000,
+          "sse": "/api/admin/alerts/stream"
+        },
+        {
+          "id": "safety",
+          "route": "safety",
+          "title": "Safety",
+          "kind": "cockpit",
+          "pollMs": 15000
+        },
+        {
+          "id": "runbooks",
+          "route": "runbooks",
+          "title": "Runbooks",
+          "kind": "list",
+          "pollMs": 120000
+        }
+      ]
+    },
+    {
+      "id": "automation",
+      "label": "Automation",
+      "icon": "Clock",
+      "order": 7,
+      "infographic": { "kind": "heat", "source": "automation.runs14d" },
+      "pages": [
+        {
+          "id": "jobs",
+          "route": "jobs",
+          "title": "Jobs",
+          "kind": "cards",
+          "pollMs": 30000
+        },
+        {
+          "id": "deployments",
+          "route": "deployments",
+          "title": "Deployments",
+          "kind": "timeline",
+          "pollMs": 60000
+        },
+        {
+          "id": "maintenance",
+          "route": "maintenance",
+          "title": "Maintenance",
+          "kind": "calendar",
+          "pollMs": 60000
+        }
+      ]
+    },
+    {
+      "id": "data",
+      "label": "Data & Recovery",
+      "icon": "Database",
+      "order": 8,
+      "infographic": {
+        "kind": "gauge",
+        "source": "data.backupFreshness",
+        "color": "var(--action-info)"
+      },
+      "pages": [
+        {
+          "id": "data",
+          "route": "data",
+          "title": "Data lifecycle",
+          "kind": "tabbed",
+          "pollMs": 60000,
+          "tabs": ["retention", "exports", "anonymize", "restores", "backups"]
+        }
+      ]
+    },
+    {
+      "id": "reference",
+      "label": "Reference Data",
+      "icon": "Layers",
+      "order": 9,
+      "infographic": { "kind": "counts", "source": "reference" },
+      "pages": [
+        {
+          "id": "departments",
+          "route": "departments",
+          "title": "Departments",
+          "kind": "tree",
+          "pollMs": 120000
+        },
+        {
+          "id": "hostel-tickets",
+          "route": "hostel-tickets",
+          "title": "Hostel tickets",
+          "kind": "table",
+          "pollMs": 30000
+        }
+      ]
+    },
+    {
+      "id": "platform",
+      "label": "Platform Config",
+      "icon": "Settings",
+      "order": 10,
+      "infographic": { "kind": "drift", "source": "platform" },
+      "pages": [
+        {
+          "id": "reasons",
+          "route": "reasons",
+          "title": "Reason catalog",
+          "kind": "tabbed",
+          "pollMs": 120000
+        },
+        {
+          "id": "integrations",
+          "route": "integrations",
+          "title": "Integrations",
+          "kind": "cards",
+          "pollMs": 60000
+        },
+        {
+          "id": "webhooks",
+          "route": "webhooks",
+          "title": "Webhooks",
+          "kind": "table",
+          "pollMs": 60000
+        },
+        {
+          "id": "notifications",
+          "route": "notifications",
+          "title": "Notifications",
+          "kind": "table",
+          "pollMs": 60000
+        },
+        {
+          "id": "feature-flags",
+          "route": "feature-flags",
+          "title": "Feature flags",
+          "kind": "table",
+          "pollMs": 60000
+        },
+        {
+          "id": "system",
+          "route": "system",
+          "title": "System",
+          "kind": "tabbed",
+          "pollMs": 60000
+        }
+      ]
+    },
+    {
+      "id": "governance",
+      "label": "Governance",
+      "icon": "Scale",
+      "order": 11,
+      "infographic": {
+        "kind": "sparkline",
+        "source": "governance.events7d",
+        "color": "var(--action-info)"
+      },
+      "pages": [
+        {
+          "id": "audit",
+          "route": "audit",
+          "title": "Audit",
+          "kind": "timeline+table",
+          "pollMs": 60000
+        },
+        {
+          "id": "compliance",
+          "route": "compliance",
+          "title": "Compliance",
+          "kind": "tabbed",
+          "pollMs": 120000
+        }
+      ]
+    }
+  ],
+  "personal": [
+    {
+      "id": "profile",
+      "route": "profile",
+      "title": "Profile",
+      "kind": "form"
+    }
+  ]
+}
