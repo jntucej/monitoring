@@ -38,6 +38,34 @@
           }
         },
         {
+          "id": "students",
+          "route": "students",
+          "title": "Students",
+          "kind": "table",
+          "pollMs": 60000
+        },
+        {
+          "id": "staff",
+          "route": "staff",
+          "title": "Staff",
+          "kind": "table",
+          "pollMs": 60000
+        },
+        {
+          "id": "parents",
+          "route": "parents",
+          "title": "Parents",
+          "kind": "table",
+          "pollMs": 60000
+        },
+        {
+          "id": "alumni",
+          "route": "alumni",
+          "title": "Alumni",
+          "kind": "table",
+          "pollMs": 120000
+        },
+        {
           "id": "promotions",
           "route": "promotions",
           "title": "Promotions",
@@ -66,6 +94,27 @@
             "sso",
             "codes"
           ]
+        },
+        {
+          "id": "roles",
+          "route": "roles",
+          "title": "Roles",
+          "kind": "table",
+          "pollMs": 60000
+        },
+        {
+          "id": "sessions",
+          "route": "sessions",
+          "title": "Sessions",
+          "kind": "table",
+          "pollMs": 30000
+        },
+        {
+          "id": "access-keys",
+          "route": "access-keys",
+          "title": "Access Keys",
+          "kind": "table",
+          "pollMs": 60000
         },
         {
           "id": "sso",
@@ -148,6 +197,13 @@
           "title": "Runbooks",
           "kind": "list",
           "pollMs": 120000
+        },
+        {
+          "id": "alert-rules",
+          "route": "alerts/rules",
+          "title": "Alert Rules",
+          "kind": "table",
+          "pollMs": 60000
         }
       ]
     },
@@ -164,6 +220,20 @@
           "title": "Jobs",
           "kind": "cards",
           "pollMs": 30000
+        },
+        {
+          "id": "scheduled-jobs",
+          "route": "scheduled-jobs",
+          "title": "Scheduled Jobs",
+          "kind": "cards",
+          "pollMs": 30000
+        },
+        {
+          "id": "scheduling",
+          "route": "scheduling",
+          "title": "Scheduling",
+          "kind": "cards",
+          "pollMs": 60000
         },
         {
           "id": "deployments",
@@ -199,6 +269,13 @@
           "kind": "tabbed",
           "pollMs": 60000,
           "tabs": ["retention", "exports", "anonymize", "restores", "backups"]
+        },
+        {
+          "id": "backup",
+          "route": "backup",
+          "title": "Backup",
+          "kind": "cards",
+          "pollMs": 60000
         }
       ]
     },
@@ -214,6 +291,13 @@
           "route": "departments",
           "title": "Departments",
           "kind": "tree",
+          "pollMs": 120000
+        },
+        {
+          "id": "exit-reasons",
+          "route": "exit-reasons",
+          "title": "Exit Reasons",
+          "kind": "table",
           "pollMs": 120000
         },
         {
@@ -273,6 +357,13 @@
           "title": "System",
           "kind": "tabbed",
           "pollMs": 60000
+        },
+        {
+          "id": "navigation",
+          "route": "navigation",
+          "title": "Navigation",
+          "kind": "table",
+          "pollMs": 120000
         }
       ]
     },
@@ -287,6 +378,13 @@
         "color": "var(--action-info)"
       },
       "pages": [
+        {
+          "id": "security",
+          "route": "security",
+          "title": "Security",
+          "kind": "cockpit",
+          "pollMs": 30000
+        },
         {
           "id": "audit",
           "route": "audit",
