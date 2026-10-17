@@ -1,12 +1,12 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useState } from "react";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { PageHeader } from "@/components/shared/PageHeader";
+import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
-import { PageLoading } from "@/components/shared/LoadingStates";
+import { PageLoading } from "@/components/admin/shared/LoadingStates";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { ConfirmDialog } from "@/components/admin/shared/ConfirmDialog";
 import { CollegeInfoForm } from "@/components/admin/CollegeInfoForm";
 import { PassTypesForm } from "@/components/admin/PassTypesForm";
 import { ExitReasonsManager } from "@/components/admin/ExitReasonsManager";

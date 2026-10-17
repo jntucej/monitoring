@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { Upload, FileSpreadsheet, Download, Loader2, ShieldAlert } from "lucide-react";
-import { PageHeader } from "@/components/shared/PageHeader";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { PageHeader } from "@/components/admin/shared/PageHeader";
+import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { CsvValidationPreview } from "@/components/admin/CsvValidationPreview";
 import { useApi } from "@/hooks/useApi";

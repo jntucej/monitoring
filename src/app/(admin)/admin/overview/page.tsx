@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { getAuthHeaders } from "@/lib/utils";
 
 const iconMap: Record<string, any> = {

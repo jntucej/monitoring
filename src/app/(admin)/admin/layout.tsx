@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { PageLoading } from "@/components/shared/LoadingStates";
+import { PageLoading } from "@/components/admin/shared/LoadingStates";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { AdminSidebar, type AdminOverviewPayload } from "@/components/admin/AdminSidebar";
 import { Menu, X } from "lucide-react";

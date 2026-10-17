@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { LucideIcon, ArrowUpRight, Activity } from "lucide-react";
 import { motion } from "framer-motion";
-import { CountUp, SineWaveLoader } from "@/components/shared/CountUp";
-import { GlossyFloatingContainer } from "@/components/shared/GlossyFloatingContainer";
+import { CountUp, SineWaveLoader } from "@/components/admin/shared/CountUp";
+import { GlossyFloatingContainer } from "@/components/admin/shared/GlossyFloatingContainer";
 import { Modal } from "@/components/ui/modal";
 import { useGlass } from "@/context/GlassContext";
 

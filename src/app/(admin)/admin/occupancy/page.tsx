@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { PageHeader } from "@/components/shared/PageHeader";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { PageHeader } from "@/components/admin/shared/PageHeader";
+import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { OccupancyHeatmap } from "@/components/admin/OccupancyHeatmap";
 import { CampusDigitalTwin } from "@/components/admin/CampusDigitalTwin";

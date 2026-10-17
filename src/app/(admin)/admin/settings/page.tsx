@@ -1,8 +1,8 @@
 "use client";
 
 import { Settings } from "lucide-react";
-import { PageHeader } from "@/components/shared/PageHeader";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { PageHeader } from "@/components/admin/shared/PageHeader";
+import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { CollegeInfoForm } from "@/components/admin/CollegeInfoForm";
 import { PassTypesForm } from "@/components/admin/PassTypesForm";

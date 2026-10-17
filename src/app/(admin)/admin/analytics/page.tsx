@@ -5,12 +5,12 @@ import {
   Activity, TrendingUp, Users, AlertTriangle, Download, RefreshCw,
 } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { PageHeader } from "@/components/shared/PageHeader";
+import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { PageHeader } from "@/components/admin/shared/PageHeader";
 import {
   ChartRenderer, type ChartType, type SeriesDef,
-} from "@/components/shared/ChartRenderer";
-import { ChartTypeSwitcher } from "@/components/shared/ChartTypeSwitcher";
+} from "@/components/admin/shared/ChartRenderer";
+import { ChartTypeSwitcher } from "@/components/admin/shared/ChartTypeSwitcher";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";

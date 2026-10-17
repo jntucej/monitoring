@@ -6,8 +6,8 @@ import {
   ChevronRight, GraduationCap, Wrench,
 } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { PageHeader } from "@/components/shared/PageHeader";
+import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   MiniSparkline, MiniStackedBar,

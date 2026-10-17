@@ -2,7 +2,7 @@
 
 import React, { Suspense } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import { PageLoading } from "@/components/shared/LoadingStates";
+import { PageLoading } from "@/components/admin/shared/LoadingStates";
 import type { Role } from "@/lib/types";
 
 /**

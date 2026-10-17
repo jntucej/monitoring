@@ -1,7 +1,7 @@
 "use client";
 
-import { PageHeader } from "@/components/shared/PageHeader";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { PageHeader } from "@/components/admin/shared/PageHeader";
+import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { SustainabilityDashboard } from "@/components/admin/SustainabilityDashboard";
 
