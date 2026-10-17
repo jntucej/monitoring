@@ -156,9 +156,13 @@ function loadCollapsed(): boolean {
 // ── Component ─────────────────────────────────────────────────────────────
 export interface AdminSidebarProps {
   overview: AdminOverviewPayload | null;
+  /** When true, force the rail to its expanded (label-visible) width and ignore
+   *  the localStorage collapsed state. Used by the mobile off-canvas drawer,
+   *  which is always wide enough to show labels. */
+  forceExpanded?: boolean;
 }
 
-export function AdminSidebar({ overview }: AdminSidebarProps) {
+export function AdminSidebar({ overview, forceExpanded }: AdminSidebarProps) {
   const pathname = usePathname();
 
   const categories = useMemo(() => ia.categories, []);
@@ -170,6 +174,9 @@ export function AdminSidebar({ overview }: AdminSidebarProps) {
   const [hydratedOpen, setHydratedOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [hydratedCollapsed, setHydratedCollapsed] = useState(false);
+
+  // Effective collapsed state: forceExpanded overrides the stored value.
+  const isCollapsed = forceExpanded ? false : collapsed;
 
   useEffect(() => {
     setOpen((prev) => {
@@ -254,7 +261,7 @@ export function AdminSidebar({ overview }: AdminSidebarProps) {
 
   const personalRoutes = useMemo(() => ia.personal ?? [], []);
 
-  const widthClass = collapsed ? "w-16" : "w-64";
+  const widthClass = isCollapsed ? "w-16" : "w-64";
 
   return (
     <aside
@@ -269,9 +276,9 @@ export function AdminSidebar({ overview }: AdminSidebarProps) {
       <div className="flex items-center gap-2 px-3 py-3 border-b border-[var(--border)]">
         <button
           type="button"
-          onClick={() => setCollapsed((v) => !v)}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          aria-expanded={!collapsed}
+          onClick={() => (forceExpanded ? undefined : setCollapsed((v) => !v))}
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-expanded={!isCollapsed}
           className={cn(
             "inline-flex items-center justify-center rounded-md p-1.5",
             "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]",
@@ -279,9 +286,9 @@ export function AdminSidebar({ overview }: AdminSidebarProps) {
             "transition-colors"
           )}
         >
-          {collapsed ? <Menu className="h-4 w-4" /> : <ChevronsDownUp className="h-4 w-4" />}
+          {isCollapsed ? <Menu className="h-4 w-4" /> : <ChevronsDownUp className="h-4 w-4" />}
         </button>
-        {!collapsed && (
+        {!isCollapsed && (
           <>
             <span className="text-sm font-semibold tracking-tight flex-1 min-w-0 truncate">
               Campus Admin
@@ -310,16 +317,16 @@ export function AdminSidebar({ overview }: AdminSidebarProps) {
         {categories.map((cat) => {
           const Icon = iconFor(cat.icon);
           const isOpen = open[cat.id] ?? false;
-          const isCollapsed = collapsed;
+          const isCollapsedInner = isCollapsed;
 
-          if (isCollapsed) {
+          if (isCollapsedInner) {
             return (
               <div key={cat.id} className="px-1 py-1">
                 <Link
                   href={cat.pages[0]?.href ?? "/admin"}
                   aria-label={cat.label}
                   title={cat.label}
-                  onClick={() => setCollapsed(false)}
+                  onClick={() => (!forceExpanded ? setCollapsed(false) : undefined)}
                   className="flex items-center justify-center rounded-md h-9 w-full text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
                 >
                   <Icon className="h-4 w-4" />
@@ -404,7 +411,7 @@ export function AdminSidebar({ overview }: AdminSidebarProps) {
         })}
 
         {/* Personal footer routes (manifest `personal`) */}
-        {!collapsed && personalRoutes.length > 0 && (
+        {!isCollapsed && personalRoutes.length > 0 && (
           <div className="border-t border-[var(--border)] mt-2 pt-2 px-1">
             {personalRoutes.map((p) => {
               const href = p.href || "/admin";

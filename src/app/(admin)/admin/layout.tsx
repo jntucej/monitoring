@@ -1,30 +1,35 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { AdminSidebar, type AdminOverviewPayload } from "@/components/admin/AdminSidebar";
+import { Menu, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { Role } from "@/lib/types";
 
 /**
  * Admin console layout — the manifest-driven Sidebar shell (Phase 1 parity
- * with the sysadmin console).
+ * with the sysadmin console) made fully responsive.
  *
- * The old RoleConsole chrome (IconRail + Board feed + status/command bars) is
- * gone for the admin role. The shell is now:
+ * Desktop (md+):
+ *   <div flex h-screen overflow-hidden>
+ *     <AdminSidebar />             ← fixed 16rem manifest rail
+ *     <main flex-1 overflow-y-auto>
+ *       <DevContactStrip />
+ *       {children} in a max-w-7xl column
  *
- *   <AuthGuard allowedRoles={admin|sysadmin}>
- *     flex h-screen overflow-hidden
- *       <AdminSidebar overview={...} />   ← 11-category manifest rail (collapsible)
- *       <main flex-1 overflow-y-auto>
- *         <DevContactStrip />
- *         {children} in a centered max-w-7xl column
+ * Mobile (<md):
+ *   <div h-dvh overflow-hidden flex flex-col>
+ *     <mobile top bar>            ← brand + hamburger that opens the rail
+ *     <div flex-1 overflow-y-auto>
+ *       {children}
+ *     <AdminSidebar as a slide-in drawer (off-canvas, behind a scrim)>
  *
  * The live overview payload (gates, alerts, traffic, audit, occupancy, …) is
  * polled every 30s here and threaded down to the sidebar so its per-category
- * minis stay live without each mini fetching on its own. Sub-pages keep
- * their own fetches; this layout owns only the sidebar's data.
+ * minis stay live without each mini fetching on its own.
  */
 const OVERVIEW_URL = "/api/admin/overview";
 const OVERVIEW_POLL_MS = 30_000;
@@ -35,6 +40,7 @@ export default function AdminConsoleLayout({
   children: React.ReactNode;
 }) {
   const [overview, setOverview] = useState<AdminOverviewPayload | null>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   // Poll the aggregator; every successful refresh replaces the whole payload so
   // the sidebar minis + badges re-derive live. `json.data ?? null` because the
@@ -63,15 +69,91 @@ export default function AdminConsoleLayout({
     };
   }, []);
 
+  // Close the mobile drawer on route change + Esc. Lock body scroll while open.
+  const closeMobile = useCallback(() => setMobileOpen(false), []);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMobileOpen(false);
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [mobileOpen]);
+
+  const main = (
+    <>
+      <DevContactStrip />
+      <div className="mx-auto max-w-7xl p-4 sm:p-6">{children}</div>
+    </>
+  );
+
   return (
     <AuthGuard allowedRoles={["admin", "sysadmin"] as Role[]}>
       <React.Suspense fallback={<PageLoading />}>
-        <div className="flex h-screen overflow-hidden">
-          <AdminSidebar overview={overview} />
-          <main className="flex-1 overflow-y-auto">
-            <DevContactStrip />
-            <div className="mx-auto max-w-7xl p-6">{children}</div>
-          </main>
+        <div className="h-dvh overflow-hidden bg-[var(--bg-base)]">
+          {/* ── Desktop shell: fixed rail + scrollable main ───────────── */}
+          <div className="hidden md:flex md:h-full">
+            <AdminSidebar overview={overview} />
+            <main className="flex-1 overflow-y-auto">{main}</main>
+          </div>
+
+          {/* ── Mobile shell: top bar + scrollable main + drawer ──────── */}
+          <div className="flex h-full flex-col md:hidden">
+            <header className="flex items-center justify-between gap-2 border-b border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3 pt-safe">
+              <span className="truncate text-sm font-semibold tracking-tight">
+                Campus Admin
+              </span>
+              <button
+                type="button"
+                onClick={() => setMobileOpen(true)}
+                aria-label="Open navigation"
+                className="inline-flex items-center justify-center rounded-md p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"
+              >
+                <Menu className="h-5 w-5" />
+              </button>
+            </header>
+
+            <main className="flex-1 overflow-y-auto">{main}</main>
+
+            {/* Scrim + off-canvas drawer */}
+            {mobileOpen && (
+              <div className="fixed inset-0 z-50 md:hidden">
+                <div
+                  className="absolute inset-0 bg-black/50"
+                  onClick={closeMobile}
+                  aria-hidden="true"
+                />
+                <div
+                  className={cn(
+                    "absolute right-0 top-0 h-full w-[85%] max-w-xs shadow-2xl",
+                    "bg-[var(--bg-surface)]"
+                  )}
+                  role="dialog"
+                  aria-label="Navigation"
+                >
+                  <div className="flex items-center justify-end p-2">
+                    <button
+                      type="button"
+                      onClick={closeMobile}
+                      aria-label="Close navigation"
+                      className="inline-flex items-center justify-center rounded-md p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                  {/* Drawer reuses the same manifest rail; force expanded so
+                      labels are readable in the off-canvas panel. */}
+                  <div className="h-[calc(100%-3rem)] overflow-y-auto">
+                    <AdminSidebar overview={overview} forceExpanded />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </React.Suspense>
     </AuthGuard>
