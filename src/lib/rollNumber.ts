@@ -18,7 +18,7 @@
  * ------------------------------------------------------------------ */
 
 export type CollegeCode = "JJ"; // JNTUH University College of Engineering Jagtial (UCEJ)
-export type EntryModeCode = "1A" | "5A"; // Regular B.Tech | Lateral Entry B.Tech / M.Tech
+export type EntryModeCode = "1A" | "5A" | "1D"; // Regular B.Tech | Lateral B.Tech | M.Tech (PG)
 
 export interface CourseType {
   name: string;
@@ -40,7 +40,7 @@ export const COURSE_TYPES: Record<string, CourseType> = {
     name: "M.Tech",
     shortName: "M.Tech",
     durationYears: 2,
-    lateralEntryMode: "5A",
+    lateralEntryMode: "1D",
   },
 };
 
@@ -54,7 +54,10 @@ export function resolveCourseType(
   entryModeCode?: EntryModeCode
 ): CourseType {
   const norm = (courseLabel || "").trim().toUpperCase();
-  if (norm === "M.TECH" || norm === "MTECH") return COURSE_TYPES["M.Tech"];
+  // M.Tech is authoritative when the label says so, or when the entry mode is 1D.
+  if (norm === "M.TECH" || norm === "MTECH" || norm === "PG" || entryModeCode === "1D") {
+    return COURSE_TYPES["M.Tech"];
+  }
   if (norm === "B.TECH" || norm === "BTECH") return COURSE_TYPES["B.Tech"];
   // Fallback: B.Tech is the default programme at this college.
   return COURSE_TYPES["B.Tech"];
@@ -141,6 +144,12 @@ export const ENTRY_MODE_CODES: Record<string, EntryModeInfo> = {
     label: "Lateral Entry B.Tech",
     description: "Lateral Entry B.Tech (Joined directly into 2nd year / 3rd semester)",
     durationYears: 3,
+  },
+  "1D": {
+    code: "1D",
+    label: "M.Tech (PG)",
+    description: "2-year postgraduate M.Tech programme",
+    durationYears: 2,
   },
 };
 

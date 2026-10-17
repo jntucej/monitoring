@@ -383,6 +383,63 @@ export async function commitImport(
   skipErrors: boolean = true
 ): Promise<CommitResult> {
   const supabase = getSupabaseServiceClient();
+
+  // Defense in depth: re-verify that no row targets an existing student. The
+  // validate route already rejects these, but a stale validate response (or a
+  // direct commit call) could still carry colliding rows. Bulk import must
+  // only ever INSERT new students — never UPDATE / re-create an existing one.
+  // So if ANY row's email / roll / unique_id / employee_id already exists,
+  // refuse the entire batch rather than risk overwriting a student's roll.
+  const emailSet = new Set(
+    rows.map((r) => (r.email ? String(r.email).toLowerCase() : "")).filter(Boolean)
+  );
+  const rollSet = new Set(
+    rows
+      .map((r) => (r.roll ? String(r.roll).toUpperCase() : r.uniqueId ? String(r.uniqueId).toUpperCase() : ""))
+      .filter(Boolean)
+  );
+  const empSet = new Set(
+    rows.map((r) => (r.employeeId ? String(r.employeeId).toUpperCase() : "")).filter(Boolean)
+  );
+
+  if (emailSet.size || rollSet.size || empSet.size) {
+    let collided = false;
+    for (const email of emailSet) {
+      const { data } = await supabase.from("users").select("id").eq("email", email).maybeSingle();
+      if (data) { collided = true; break; }
+    }
+    if (!collided) {
+      for (const roll of rollSet) {
+        const { data } = await supabase.from("student_details").select("user_id").eq("roll", roll).limit(1);
+        if (data && data.length > 0) { collided = true; break; }
+        // unique_id also stores the roll for students.
+        const { data: uq } = await supabase.from("users").select("id").eq("unique_id", roll).limit(1);
+        if (uq && uq.length > 0) { collided = true; break; }
+      }
+    }
+    if (!collided) {
+      for (const emp of empSet) {
+        const { data } = await supabase.from("employee_details").select("user_id").eq("employee_id", emp).limit(1);
+        if (data && data.length > 0) { collided = true; break; }
+      }
+    }
+    if (collided) {
+      return {
+        success: false,
+        importedCount: 0,
+        failedCount: rows.length,
+        errors: [
+          {
+            row: 0,
+            error:
+              "refusing to commit — one or more roll / email / unique / employee IDs already exist; " +
+              "bulk import only creates new students and never overwrites existing ones",
+          },
+        ],
+      };
+    }
+  }
+
   const limit = pLimit(5);
   const tasks = rows.map((row, i) => limit(() => processSingleRow(row, i + 1, supabase, actorId)));
   const rowResults = await Promise.all(tasks);
@@ -440,19 +497,13 @@ async function processSingleRow(
     let targetUserId: string;
 
     if (existing) {
-      targetUserId = existing.id;
-      const updates: Record<string, any> = {
-        name: row.name,
-        role: row.role,
-        phone: row.phone || null,
-        status: row.status || "ACTIVE",
-        updated_at: new Date().toISOString(),
+      // Bulk import must never update / overwrite an existing student. The
+      // commitImport pre-check should have rejected the whole batch already,
+      // but if we get here (race / stale data), fail the row explicitly.
+      return {
+        row: rowNum,
+        error: `email '${row.email}' already exists in the database — bulk import cannot update existing students`,
       };
-      if (row.uniqueId) updates.unique_id = row.uniqueId;
-      if (row.dob) updates.dob = row.dob;
-
-      const { error: updErr } = await supabase.from("users").update(updates).eq("id", targetUserId);
-      if (updErr) throw new Error(updErr.message);
     } else {
       const newId = crypto.randomUUID();
       targetUserId = newId;

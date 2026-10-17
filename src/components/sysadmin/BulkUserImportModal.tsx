@@ -23,6 +23,14 @@ interface PreviewSummary {
   invalid: number;
 }
 
+interface PreviewState {
+  summary: PreviewSummary;
+  errors: PreviewError[];
+  rows: unknown[];
+  /** Rows in this file that already exist in the DB (re-upload / collisions). */
+  importedBefore: number;
+}
+
 // 35-column college bulk-import sheet. H.T NO. (roll) drives year / batch /
 // branch / course — everything else is captured as-is; year is calculated,
 // never typed.
@@ -62,11 +70,7 @@ const api = useApi();
   const [csvText, setCsvText] = useState("");
   const [busy, setBusy] = useState<"idle" | "validate" | "commit">("idle");
   const [resultMsg, setResultMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  const [preview, setPreview] = useState<{
-    summary: PreviewSummary;
-    errors: PreviewError[];
-    rows: unknown[];
-  } | null>(null);
+  const [preview, setPreview] = useState<PreviewState | null>(null);
 
   const downloadTemplate = () => {
     const blob = new Blob([TEMPLATE_CSV], { type: "text/csv;charset=utf-8;" });
@@ -108,6 +112,7 @@ const api = useApi();
       summary: data.summary ?? { total: data.totalRows ?? 0, valid: data.validRows?.length ?? 0, invalid: data.errors?.length ?? 0 },
       errors: data.errors ?? [],
       rows: data.validRows ?? [],
+      importedBefore: data.importedBefore ?? 0,
     });
     return data.validRows;
   };
@@ -202,6 +207,14 @@ const api = useApi();
 
         {preview && preview.summary.total > 0 && (
           <div className="p-3 rounded-lg text-xs space-y-2 bg-[var(--bg-base)] border border-[var(--border)]">
+            {preview.importedBefore > 0 && (
+              <div className="rounded border border-amber-500/40 bg-amber-500/10 p-3 text-amber-200">
+                <strong>{preview.importedBefore}</strong> row(s) in this file match existing
+                students in the database. Bulk import never updates or overwrites existing
+                students — those rows were rejected. Only the{" "}
+                <strong>{preview.summary.valid}</strong> new row(s) can be imported.
+              </div>
+            )}
             <div className="flex gap-4 font-semibold">
               <span>{preview.summary.total} rows</span>
               <span className="text-emerald-400">{preview.summary.valid} valid</span>

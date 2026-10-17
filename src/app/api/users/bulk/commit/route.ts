@@ -11,8 +11,11 @@ async function handlePost(req: NextRequest, context: { auth: AuthContext }) {
   try {
     const body = await req.json().catch(() => ({}));
     let rows = body.rows;
-    if (!rows && body.csv) {
-      const val = await validateImport(body.csv);
+    // Accept all three CSV payload keys the UIs send: csv (BulkUserImportModal),
+    // csvText (CsvBulkImporter), or rows (pre-validated array).
+    const rawCsv = body.rows ? null : (body.csv || body.csvText || body.content || null);
+    if (!rows && rawCsv) {
+      const val = await validateImport(rawCsv);
       rows = val.validRows;
     }
     if (!rows || !Array.isArray(rows)) {
