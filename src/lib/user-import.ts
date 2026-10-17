@@ -250,7 +250,14 @@ export async function validateImport(csvInput: string | ImportRow[]): Promise<Va
     const dob = normalizeDate(pick(r, "dob", "DOB", "DATE OF BIRTH"));
     const fatherName = pick(r, "fatherName", "FATHER NAME", "FATHERNAME", "GUARDIAN NAME");
     const landlineNumber = pick(r, "LAND LINE 0R PARENT NUMBER", "LANDLINE", "LAND LINE", "PARENT NUMBER", "LANDLINE_NUMBER");
-    const course = pick(r, "COURSE", "course", "PROGRAM", "DEGREE");
+    // The sheet's COURSE column is commonly used for the DEPARTMENT/branch
+    // (e.g. "CSE", "IT", "ECE", "EEE", "MECH", "ME") rather than the
+    // programme label (B.Tech / M.Tech). Route department-like values to
+    // `department` so the Course field stays clean.
+    const courseRaw = pick(r, "COURSE", "course", "PROGRAM", "DEGREE");
+    const DEPT_LIKE = /^(CSE|IT|ECE|EEE|MECH|ME|CS|DA)$/i;
+    const courseIsDept = DEPT_LIKE.test(courseRaw.trim());
+    const course = courseIsDept ? "" : courseRaw;
 
     // New student_details columns (all optional, case-insensitive header match).
     const branch = pick(r, "branch", "BRANCH");
@@ -342,16 +349,16 @@ export async function validateImport(csvInput: string | ImportRow[]): Promise<Va
       dob,
       fatherName,
       landlineNumber,
-      course,
+      course: course || undefined,
       // Fallback course from the roll's branch code, used when the sheet's
-      // COURSE cell is empty.
+      // COURSE cell is empty (or held a department value).
       courseFromRoll: rollCourse,
       // year / batch are CALCULATED from the roll (Indian AY, July start).
       year: derivedYear,
       batch: derivedBatch,
       section: pick(r, "section", "SECTION") || "A",
       employeeId: pick(r, "employeeId", "EMPLOYEE ID") || rollRaw || email.split("@")[0],
-      department: pick(r, "department", "DEPARTMENT") || rollCourse,
+      department: pick(r, "department", "DEPARTMENT") || (courseIsDept ? courseRaw : "") || rollCourse,
       departmentId: pick(r, "departmentId", "DEPARTMENT ID"),
       designation: pick(r, "designation", "DESIGNATION"),
       hostelBlock: pick(r, "hostelBlock", "HOSTEL", "assignedHostel"),

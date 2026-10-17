@@ -168,6 +168,12 @@ export const ROLL_DEPT_CODES: Record<string, { short: string; full: string }> = 
   "04": { short: "ECE", full: "Electronics & Communication Engineering" },
   "05": { short: "CSE", full: "Computer Science & Engineering" },
   "12": { short: "IT",  full: "Information Technology" },
+  // M.Tech (1D) specializations — dept slot uses these codes for PG students.
+  "06": { short: "DSCE", full: "Data Science & AI (M.Tech)" },
+  "07": { short: "EPS",  full: "Electrical & Power Systems (M.Tech)" },
+  "58": { short: "CSE",  full: "Computer Science & Engineering (M.Tech)" },
+  "95": { short: "ED",   full: "Electrical (M.Tech)" },
+  "A3": { short: "CYS",  full: "Cyber Security (M.Tech)" },
 };
 
 /**
@@ -177,11 +183,15 @@ export const ROLL_DEPT_CODES: Record<string, { short: string; full: string }> = 
  *   ^(\d{2})       – YY: 2 digits (year)
  *   ([A-Z]{2})     – CC: 2 uppercase letters (college)
  *   ([0-9A-Z]{2})  – ED: 2 alphanumeric (entry/degree)
- *   (\d{2})        – BB: 2 digits (department)
+ *   ([0-9A-Z]{2})  – BB: 2 alphanumeric (department / specialization)
  *   ([0-9A-Z]{2})  – SS: 2 alphanumeric (serial)
  *   $
+ *
+ * The department slot accepts alphanumeric codes so that M.Tech / PG
+ * specializations (e.g. "A3") pass. B.Tech uses pure-numeric dept codes
+ * (02, 03, 04, 05, 12).
  */
-export const ROLL_NUMBER_REGEX = /^(\d{2})([A-Z]{2})([0-9A-Z]{2})(\d{2})([0-9A-Z]{2})$/;
+export const ROLL_NUMBER_REGEX = /^(\d{2})([A-Z]{2})([0-9A-Z]{2})([0-9A-Z]{2})([0-9A-Z]{2})$/;
 
 /* ------------------------------------------------------------------ *
  *  CORE FUNCTIONS
@@ -227,9 +237,17 @@ export function parseRollNumber(roll: string | null | undefined): RollNumberDeco
   const entryInfo = ENTRY_MODE_CODES[entryModeCode as EntryModeCode];
   if (!entryInfo) return null;
 
-  // Validate department code
+  // Validate department code. B.Tech (1A/5A) rolls use the known 5-programme
+  // dept codes (02/03/04/05/12). M.Tech (1D) rolls carry a specialization
+  // code in the same slot (e.g. 58, 59, …) that is NOT in the B.Tech table.
+  // For 1D we accept any well-formed 2-digit code and fall back to the sheet's
+  // declared course (default CSE) rather than rejecting the whole row.
+  const isMtechEntry = entryModeCode === "1D";
   const deptInfo = ROLL_DEPT_CODES[deptCode];
-  if (!deptInfo) return null;
+  if (!deptInfo && !isMtechEntry) return null;
+
+  const deptShort = deptInfo ? deptInfo.short : "M.Tech";
+  const deptFull = deptInfo ? deptInfo.full : "M.Tech / PG Specialization";
 
   // Compute full admission year (2000–2099 range)
   const yearNum = parseInt(yearCode, 10);
@@ -249,9 +267,11 @@ export function parseRollNumber(roll: string | null | undefined): RollNumberDeco
     entryMode: entryInfo.label,
     entryModeDescription: entryInfo.description,
     departmentCode: deptCode,
-    department: deptInfo.short,
-    departmentFullName: deptInfo.full,
-    branch: `${deptInfo.short} — ${entryInfo.label}`,
+    department: deptShort,
+    departmentFullName: deptFull,
+    branch: isMtechEntry
+      ? `M.Tech (PG) — ${deptCode}`
+      : `${deptShort} — ${entryInfo.label}`,
     serial,
     serialNumber,
   };

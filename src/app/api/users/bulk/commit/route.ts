@@ -11,16 +11,21 @@ async function handlePost(req: NextRequest, context: { auth: AuthContext }) {
   try {
     const body = await req.json().catch(() => ({}));
     const rawCsv = body.csv || body.csvText || body.content || null;
-    if (!rawCsv) {
+    const preRows = Array.isArray(body.rows) ? body.rows : null;
+
+    // Accept either raw CSV text (fresh from the modal / importer) or a
+    // pre-validated row array (older CsvBulkImporter path). runBulkImport
+    // handles both via its csvInput union type.
+    const payload: string | unknown[] = preRows ? preRows : rawCsv;
+    if (payload == null || (typeof payload === "string" && !payload.trim())) {
       return NextResponse.json({ success: false, error: { message: "No CSV content supplied" } }, { status: 400 });
     }
 
-    // runBulkImport:
-    //   - validates fields (empty/required checks)
-    //   - classifies existing-roll rows as 'skipped' (never updated)
-    //   - commits only the genuinely-new rows
-    //   - returns a per-row report the UI renders + downloads
-    const { report, committedRows } = await runBulkImport(rawCsv, context.auth.userId, body.skipErrors !== false);
+    const { report, committedRows } = await runBulkImport(
+      payload as string | Array<import("@/lib/user-import").ImportRow>,
+      context.auth.userId,
+      body.skipErrors !== false
+    );
 
     // A per-row outcome that maps the commit result back onto the report for
     // any row that errored during the actual insert.
