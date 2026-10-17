@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { useBotStore } from "./store";
@@ -8,12 +8,94 @@ import { BotPanel } from "./BotPanel";
 import { useAuthStore } from "@/stores/authStore";
 import { playAudioFeedback } from "@/lib/sound";
 
+const DRAG_POS_KEY = "gate-harbor-bot-position";
+
+/**
+ * Freely-movable floating "Harbor" assistant.
+ * - Drag anywhere on screen (free movement, clamped to the viewport).
+ * - Single click (no drag) opens/closes the panel.
+ * - Position persists in localStorage so it survives navigation.
+ */
 export function FloatingBot() {
   const user = useAuthStore((s) => s.user);
   const open = useBotStore((s) => s.open);
   const toggleOpen = useBotStore((s) => s.toggleOpen);
   const setOpen = useBotStore((s) => s.setOpen);
   const messages = useBotStore((s) => s.messages);
+
+  // ── Movable position ───────────────────────────────────────────────────────
+  // Persisted as {x, y} from the top-left of the viewport. A null position
+  // means "pin bottom-right" (the default). We track a `pos` that is either
+  // null (default) or a concrete offset.
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const dragRef = useRef<{ startX: number; startY: number; baseX: number; baseY: number } | null>(null);
+
+  // Restore persisted position on mount.
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DRAG_POS_KEY);
+      if (raw) {
+        const p = JSON.parse(raw);
+        if (typeof p.x === "number" && typeof p.y === "number") setPos({ x: p.x, y: p.y });
+      }
+    } catch {
+      /* ignore malformed storage */
+    }
+  }, []);
+
+  const clamp = (x: number, y: number) => {
+    const size = 56; // 14 × 56px icon
+    const maxX = Math.max(0, window.innerWidth - size);
+    const maxY = Math.max(0, window.innerHeight - size);
+    return { x: Math.min(Math.max(0, x), maxX), y: Math.min(Math.max(0, y), maxY) };
+  };
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    if (e.button !== 0) return;
+    (e.target as Element).setPointerCapture?.(e.pointerId);
+    const base = pos ?? { x: 0, y: 0 };
+    dragRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      baseX: base.x,
+      baseY: base.y,
+    };
+    setDragging(true);
+  };
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!dragging || !dragRef.current) return;
+    const dx = e.clientX - dragRef.current.startX;
+    const dy = e.clientY - dragRef.current.startY;
+    setPos(clamp(dragRef.current.baseX + dx, dragRef.current.baseY + dy));
+  };
+
+  const onPointerUp = (e: React.PointerEvent) => {
+    const ref = dragRef.current;
+    const moved = ref
+      ? Math.abs(e.clientX - ref.startX) + Math.abs(e.clientY - ref.startY)
+      : 0;
+    const wasDragging = dragging;
+    if (wasDragging && pos) {
+      try {
+        localStorage.setItem(DRAG_POS_KEY, JSON.stringify(pos));
+      } catch {
+        /* storage may be unavailable */
+      }
+    }
+    setDragging(false);
+    dragRef.current = null;
+    if (moved < 6) {
+      toggleOpen();
+      playAudioFeedback("success");
+    }
+  };
+
+  const onPointerCancel = () => {
+    setDragging(false);
+    dragRef.current = null;
+  };
 
   // Fix 7: hide FloatingBot when modal/sheet is open
   useEffect(() => {
@@ -48,18 +130,29 @@ export function FloatingBot() {
         type="button"
         aria-label={open ? "Close Harbor" : "Open Harbor assistant"}
         aria-expanded={open}
-        onClick={() => { toggleOpen(); playAudioFeedback("success"); }}
-        className="fixed z-floating-bot bottom-5 right-5 h-14 w-14 rounded-full
+        style={{
+          // Default: pinned bottom-right. Once dragged, position is absolute.
+          left: pos ? pos.x : undefined,
+          top: pos ? pos.y : undefined,
+          right: pos ? undefined : 20,
+          bottom: pos ? undefined : 20,
+          boxShadow: "0 10px 30px -10px rgba(16,185,129,0.7)",
+          cursor: dragging ? "grabbing" : "grab",
+        }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerCancel}
+        className="fixed z-floating-bot h-14 w-14 rounded-full
                    bg-gradient-to-br from-emerald-500 to-cyan-600 shadow-2xl
                    ring-1 ring-white/20 flex items-center justify-center
-                   active:scale-95 transition
-                   pointer-events-auto floating-bot-root"
-        animate={{ y: open ? 0 : [0, -3, 0], scale: open ? 0.96 : 1 }}
+                   transition
+                   pointer-events-auto floating-bot-root touch-none select-none"
+        animate={{ y: open ? 0 : [0, -3, 0], scale: dragging ? 1.08 : open ? 0.96 : 1 }}
         transition={{
-          y: { duration: 3.2, repeat: open ? 0 : Infinity, ease: "easeInOut" },
+          y: { duration: 3.2, repeat: dragging ? 0 : open ? 0 : Infinity, ease: "easeInOut" },
           scale: { type: "spring" as const, stiffness: 340, damping: 22 },
         }}
-        style={{ boxShadow: "0 10px 30px -10px rgba(16,185,129,0.7)" }}
       >
         <AnimatePresence mode="wait" initial={false}>
           {open ? (
