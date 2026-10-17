@@ -160,9 +160,12 @@ export interface AdminSidebarProps {
    *  the localStorage collapsed state. Used by the mobile off-canvas drawer,
    *  which is always wide enough to show labels. */
   forceExpanded?: boolean;
+  /** Fire after any nav link is activated. The mobile drawer uses this to
+   *  close itself on successful navigation. */
+  onNavigate?: () => void;
 }
 
-export function AdminSidebar({ overview, forceExpanded }: AdminSidebarProps) {
+export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSidebarProps) {
   const pathname = usePathname();
 
   const categories = useMemo(() => ia.categories, []);
@@ -326,7 +329,10 @@ export function AdminSidebar({ overview, forceExpanded }: AdminSidebarProps) {
                   href={cat.pages[0]?.href ?? "/admin"}
                   aria-label={cat.label}
                   title={cat.label}
-                  onClick={() => (!forceExpanded ? setCollapsed(false) : undefined)}
+                  onClick={() => {
+                    if (!forceExpanded) setCollapsed(false);
+                    onNavigate?.();
+                  }}
                   className="flex items-center justify-center rounded-md h-9 w-full text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
                 >
                   <Icon className="h-4 w-4" />
@@ -378,6 +384,7 @@ export function AdminSidebar({ overview, forceExpanded }: AdminSidebarProps) {
                         <Link
                           href={href}
                           aria-current={isActive ? "page" : undefined}
+                          onClick={onNavigate}
                           className={cn(
                             "flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm",
                             "transition-colors",
@@ -422,6 +429,7 @@ export function AdminSidebar({ overview, forceExpanded }: AdminSidebarProps) {
                   key={p.href}
                   href={href}
                   aria-current={isActive ? "page" : undefined}
+                  onClick={onNavigate}
                   className={cn(
                     "flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm transition-colors",
                     isActive

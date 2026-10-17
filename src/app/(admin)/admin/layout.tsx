@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { AuthGuard } from "@/components/shared/AuthGuard";
@@ -70,6 +71,7 @@ export default function AdminConsoleLayout({
   }, []);
 
   // Close the mobile drawer on route change + Esc. Lock body scroll while open.
+  const pathname = usePathname();
   const closeMobile = useCallback(() => setMobileOpen(false), []);
 
   useEffect(() => {
@@ -83,6 +85,12 @@ export default function AdminConsoleLayout({
       document.body.style.overflow = prev;
     };
   }, [mobileOpen]);
+
+  // Close the drawer on any route change (covers router.back / child nav that
+  // doesn't go through a sidebar <Link>).
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   const main = (
     <>
@@ -148,7 +156,11 @@ export default function AdminConsoleLayout({
                   {/* Drawer reuses the same manifest rail; force expanded so
                       labels are readable in the off-canvas panel. */}
                   <div className="h-[calc(100%-3rem)] overflow-y-auto">
-                    <AdminSidebar overview={overview} forceExpanded />
+                    <AdminSidebar
+                      overview={overview}
+                      forceExpanded
+                      onNavigate={closeMobile}
+                    />
                   </div>
                 </div>
               </div>
