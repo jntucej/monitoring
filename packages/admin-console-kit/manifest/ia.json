@@ -22,7 +22,8 @@
       "role": "admin",
       "pages": [
         { "label": "Student Roster", "href": "/admin/students", "icon": "GraduationCap" },
-        { "label": "Bulk Import", "href": "/admin/students/import", "icon": "FileSpreadsheet" }
+        { "label": "Bulk Import", "href": "/admin/students/import", "icon": "FileSpreadsheet" },
+        { "label": "Alumni", "href": "/admin/alumni", "icon": "GraduationCap" }
       ]
     },
     {
@@ -69,7 +70,10 @@
       "pages": [
         { "label": "Gate Devices", "href": "/admin/gates", "icon": "QrCode" },
         { "label": "Occupancy & Twin", "href": "/admin/occupancy", "icon": "MapPin" },
-        { "label": "Device Configuration", "href": "/admin/gate-device-configuration", "icon": "SlidersHorizontal" }
+        { "label": "Device Configuration", "href": "/admin/gate-device-configuration", "icon": "SlidersHorizontal" },
+        { "label": "Visitors", "href": "/admin/visitors", "icon": "MapPin" },
+        { "label": "Gate Passes", "href": "/admin/passes", "icon": "FileSpreadsheet" },
+        { "label": "Emergency Lockdown", "href": "/admin/lockdown", "icon": "Shield" }
       ]
     },
     {
@@ -79,6 +83,7 @@
       "role": "admin",
       "pages": [
         { "label": "Users & Roles", "href": "/admin/users", "icon": "UserCog" },
+        { "label": "Parents & Guardians", "href": "/admin/parents", "icon": "Users" },
         { "label": "Permission Policies", "href": "/admin/permission-policies", "icon": "Shield" },
         { "label": "Roles & Hierarchy", "href": "/admin/roles", "icon": "Shield" }
       ]
@@ -90,7 +95,9 @@
       "role": "admin",
       "pages": [
         { "label": "Campus Announcements", "href": "/admin/announcements", "icon": "Megaphone" },
-        { "label": "Notification Settings", "href": "/admin/notification-settings", "icon": "BellRing" }
+        { "label": "Notification Settings", "href": "/admin/notification-settings", "icon": "BellRing" },
+        { "label": "Campus Events", "href": "/admin/events", "icon": "CalendarCheck" },
+        { "label": "Departments", "href": "/admin/departments", "icon": "Building2" }
       ]
     },
     {
@@ -112,7 +119,8 @@
       "pages": [
         { "label": "Analytics Dashboard", "href": "/admin/analytics", "icon": "Activity" },
         { "label": "Reports", "href": "/admin/reports", "icon": "FileSpreadsheet" },
-        { "label": "Sustainability", "href": "/admin/sustainability", "icon": "Leaf" }
+        { "label": "Sustainability", "href": "/admin/sustainability", "icon": "Leaf" },
+        { "label": "Sessions", "href": "/admin/sessions", "icon": "Activity" }
       ]
     },
     {
@@ -135,6 +143,7 @@
         { "label": "Audit Logs", "href": "/admin/audit-logs", "icon": "ScrollText" },
         { "label": "Institutional Config", "href": "/admin/institutional-configuration", "icon": "Building2" },
         { "label": "Workflow Configuration", "href": "/admin/workflow-configuration", "icon": "GitBranch" },
+        { "label": "Knowledge Base", "href": "/admin/kb", "icon": "BookOpen" },
         { "label": "Settings", "href": "/admin/settings", "icon": "Settings" },
         { "label": "System Health", "href": "/admin/health", "icon": "Activity" }
       ]
