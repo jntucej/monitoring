@@ -29,8 +29,13 @@ const nextConfig = {
   },
   async redirects() {
     return [
-      // Collapse 5 approval pages → 1
-      { source: '/principal/approvals',              destination: '/principal/approvals?tab=mine',      permanent: false },
+      // Collapse legacy alias pages → the single approvals page.
+      // The approvals page reads ?tab= on mount and defaults to "mine", so we
+      // deliberately do NOT add a "/principal/approvals -> /principal/approvals?tab=mine"
+      // redirect: Next.js redirects match the path regardless of query string, so a
+      // self-referencing redirect loops into an infinite 307 when the URL already
+      // carries the query. The alias paths below are safe because their source
+      // path differs from the destination path.
       { source: '/principal/permissions',            destination: '/principal/approvals?tab=mine',      permanent: false },
       { source: '/principal/all-pass-requests',      destination: '/principal/approvals?tab=all',       permanent: false },
       { source: '/principal/permission-management',  destination: '/principal/approvals?tab=all',       permanent: false },
