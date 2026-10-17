@@ -64,3 +64,12 @@ export interface SystemEntity extends Entity {
   id: string;
   [k: string]: unknown;
 }
+
+// ── ok() envelope aliases ────────────────────────────────────────────────────
+// ok() from @/server/http/response wraps the payload in `{ data: T }`.
+// useDashboardData should be typed as the envelope; the page passes `data.data`
+// to the content component.
+export type WebhooksEnvelope = { data: WebhooksData };
+export type NotificationsEnvelope = { data: NotificationsData };
+export type FeatureFlagsEnvelope = { data: FeatureFlagsData };
+export type SystemEnvelope = { data: SystemData };
