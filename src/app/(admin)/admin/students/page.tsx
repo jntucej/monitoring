@@ -15,7 +15,7 @@ import {
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
 import { parseRollNumber } from "@/lib/rollNumber";
-import type { Person } from "@/lib/types";
+import type { Person, StudentDetails } from "@/lib/types";
 
 /**
  * Admin Students — faceted student directory.
@@ -85,7 +85,7 @@ async function fetchStudents(): Promise<StudentsData> {
   const arr = (body?.data ?? body ?? []) as Person[];
 
   const rows: StudentRow[] = arr.map((p) => {
-    const sd = p.studentDetails ?? {};
+    const sd: Partial<StudentDetails> = p.studentDetails ?? {};
     const roll = (p.roll ?? p.uniqueId ?? sd.roll ?? "").toString();
     const decoded = roll ? parseRollNumber(roll) : null;
     return {
@@ -239,12 +239,12 @@ function AdminStudentsInner() {
           <p className="text-2xl font-bold text-[var(--text-primary)] tabular-nums">
             {data?.total ?? 0}
           </p>
-          <MiniSparkline
+          {data && <MiniSparkline
             label=""
-            values={[data?.total * 0.85, data?.total * 0.9, data?.total * 0.88, data?.total * 0.95, data?.total ?? 0]}
+            values={[data.total * 0.85, data.total * 0.9, data.total * 0.88, data.total * 0.95, data.total]}
             width={140}
             height={24}
-          />
+          />}
         </div>
         <div className="glass-card p-4">
           <p className="text-xs text-[var(--text-muted)]">Active</p>

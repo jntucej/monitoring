@@ -1,40 +1,79 @@
 "use client";
 
-import React, { Suspense } from "react";
+import React, { useEffect, useState } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import { RoleConsole } from "@/components/shared/RoleConsole";
+import { AdminSidebar, type AdminOverviewPayload } from "@/components/admin/AdminSidebar";
 import type { Role } from "@/lib/types";
 
 /**
- * Admin console layout — mirrors the oie/supervisor/sysadmin mount pattern.
+ * Admin console layout — the manifest-driven Sidebar shell (Phase 1 parity
+ * with the sysadmin console).
  *
- * The local KPI cards / campus dashboard / gate-charts chrome is dropped from
- * the root page. The shell is the RoleConsole: IconRail (5 nav items: alerts,
- * announcements, audit, backup, reports) + a Board feed from /api/admin/alerts
- * (the open-alerts feed, itemKey "alert") + the AdminAlertsPanel (open
- * alerts list) as an extra panel in the main column + AdminStatusBar
- * ("Admin: N active alerts · M pending · K records") + AdminCommandBar
- * (alerts / announcements / audit / backup / reports, each a free-text
- * navigation command to the real admin sub-page). Sub-pages pass their
- * content through `children`.
+ * The old RoleConsole chrome (IconRail + Board feed + status/command bars) is
+ * gone for the admin role. The shell is now:
+ *
+ *   <AuthGuard allowedRoles={admin|sysadmin}>
+ *     flex h-screen overflow-hidden
+ *       <AdminSidebar overview={...} />   ← 11-category manifest rail (collapsible)
+ *       <main flex-1 overflow-y-auto>
+ *         <DevContactStrip />
+ *         {children} in a centered max-w-7xl column
+ *
+ * The live overview payload (gates, alerts, traffic, audit, occupancy, …) is
+ * polled every 30s here and threaded down to the sidebar so its per-category
+ * minis stay live without each mini fetching on its own. Sub-pages keep
+ * their own fetches; this layout owns only the sidebar's data.
  */
+const OVERVIEW_URL = "/api/admin/overview";
+const OVERVIEW_POLL_MS = 30_000;
+
 export default function AdminConsoleLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const [overview, setOverview] = useState<AdminOverviewPayload | null>(null);
+
+  // Poll the aggregator; every successful refresh replaces the whole payload so
+  // the sidebar minis + badges re-derive live. `json.data ?? null` because the
+  // envelope is ok(payload) but we tolerate a bare payload too.
+  useEffect(() => {
+    let alive = true;
+    let timer: ReturnType<typeof setInterval> | undefined;
+
+    const fetchOnce = () => {
+      fetch(OVERVIEW_URL, { credentials: "include" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((json) => {
+          if (!alive || !json) return;
+          setOverview(json.data ?? null);
+        })
+        .catch(() => {
+          /* transient fetch errors are non-fatal for the shell */
+        });
+    };
+
+    fetchOnce();
+    timer = setInterval(fetchOnce, OVERVIEW_POLL_MS);
+    return () => {
+      alive = false;
+      if (timer) clearInterval(timer);
+    };
+  }, []);
+
   return (
     <AuthGuard allowedRoles={["admin", "sysadmin"] as Role[]}>
-      <Suspense fallback={<PageLoading />}>
-        <div className="min-w-0">
-          <RoleConsole role="admin" roleRoot="/admin">
-            {children}
-          </RoleConsole>
-          <DevContactStrip />
+      <React.Suspense fallback={<PageLoading />}>
+        <div className="flex h-screen overflow-hidden">
+          <AdminSidebar overview={overview} />
+          <main className="flex-1 overflow-y-auto">
+            <DevContactStrip />
+            <div className="mx-auto max-w-7xl p-6">{children}</div>
+          </main>
         </div>
-      </Suspense>
+      </React.Suspense>
     </AuthGuard>
   );
 }

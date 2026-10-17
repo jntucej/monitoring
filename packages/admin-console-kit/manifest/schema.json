@@ -1,0 +1,135 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "sysadmin-console-kit IA manifest",
+  "type": "object",
+  "required": ["version", "categories"],
+  "properties": {
+    "version": { "type": "string" },
+    "categories": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "icon", "order", "pages"],
+        "properties": {
+          "id": { "type": "string" },
+          "label": { "type": "string" },
+          "icon": { "type": "string" },
+          "order": { "type": "integer" },
+          "infographic": {
+            "type": "object",
+            "required": ["kind", "source"],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "dots",
+                  "stacked-bar",
+                  "gauge",
+                  "sparkline",
+                  "heat",
+                  "severity",
+                  "drift",
+                  "counts"
+                ]
+              },
+              "source": { "type": "string" },
+              "color": { "type": "string" }
+            }
+          },
+          "pages": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["id", "route", "title", "kind"],
+              "properties": {
+                "id": { "type": "string" },
+                "route": { "type": "string" },
+                "title": { "type": "string" },
+                "kind": {
+                  "enum": [
+                    "cockpit",
+                    "tabbed",
+                    "faceted-table",
+                    "table",
+                    "cards",
+                    "cards+map",
+                    "timeline",
+                    "timeline+table",
+                    "kanban",
+                    "form",
+                    "tree",
+                    "calendar",
+                    "list",
+                    "feed+rules"
+                  ]
+                },
+                "pollMs": { "type": "integer", "minimum": 0 },
+                "sse": { "type": "string" },
+                "tabs": {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      { "type": "string" },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string" },
+                          "sse": { "type": "string" }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "api": {
+                  "type": "object",
+                  "additionalProperties": { "type": "string" }
+                },
+                "drawer": {
+                  "type": "object",
+                  "properties": {
+                    "entity": { "type": "string" },
+                    "sections": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "personal": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "route", "title", "kind"],
+        "properties": {
+          "id": { "type": "string" },
+          "route": { "type": "string" },
+          "title": { "type": "string" },
+          "kind": {
+            "enum": [
+              "cockpit",
+              "tabbed",
+              "faceted-table",
+              "table",
+              "cards",
+              "cards+map",
+              "timeline",
+              "timeline+table",
+              "kanban",
+              "form",
+              "tree",
+              "calendar",
+              "list",
+              "feed+rules"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
