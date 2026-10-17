@@ -51,7 +51,11 @@ function PermissionManagementInner() {
           method: "PATCH",
           headers: { "Content-Type": "application/json", ...getAuthHeaders() },
           body: JSON.stringify({
-            action: "reject",
+            // CANCEL (not REJECT): the API's CANCEL path explicitly permits
+            // APPROVED → CANCELLED for principal/admin/sysadmin, whereas the
+            // state machine blocks APPROVED → REJECTED. This is the correct
+            // "revoke an already-granted permission" transition.
+            action: "cancel",
             reason: revokeReason,
             comment: `Institutional revocation by principal: ${revokeReason}`,
           }),
