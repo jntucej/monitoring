@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { PageLoading } from "@/components/admin/shared/LoadingStates";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { MobileNavDrawer } from "@/components/shared/MobileNavDrawer";
 import { AdminSidebar, type AdminOverviewPayload } from "@/components/admin/AdminSidebar";
-import { Menu, X } from "lucide-react";
+import { ScrollEdgeBlue } from "@/components/shared/ScrollEdgeBlue";
+import { Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Role } from "@/lib/types";
 
@@ -40,6 +42,7 @@ export default function AdminConsoleLayout({
 }) {
   const [overview, setOverview] = useState<AdminOverviewPayload | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const hamburgerRef = useRef<HTMLButtonElement | null>(null);
 
   // Poll the aggregator; every successful refresh replaces the whole payload so
   // the sidebar minis + badges re-derive live. `json.data ?? null` because the
@@ -72,18 +75,6 @@ export default function AdminConsoleLayout({
   const pathname = usePathname();
   const closeMobile = useCallback(() => setMobileOpen(false), []);
 
-  useEffect(() => {
-    if (!mobileOpen) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMobileOpen(false);
-    document.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
-    };
-  }, [mobileOpen]);
-
   // Close the drawer on any route change (covers router.back / child nav that
   // doesn't go through a sidebar <Link>).
   useEffect(() => {
@@ -91,7 +82,9 @@ export default function AdminConsoleLayout({
   }, [pathname]);
 
   const main = (
-    <div className="mx-auto max-w-7xl p-4 sm:p-6">{children}</div>
+    <ScrollEdgeBlue className="h-full">
+      <div className="mx-auto max-w-7xl p-4 sm:p-6">{children}</div>
+    </ScrollEdgeBlue>
   );
 
   return (
@@ -109,9 +102,11 @@ export default function AdminConsoleLayout({
             {/* Minimal floating nav trigger — no full-width header band, so the
                 admin console never shows two stacked headers on mobile. */}
             <button
+              ref={hamburgerRef}
               type="button"
               onClick={() => setMobileOpen(true)}
               aria-label="Open navigation"
+              aria-expanded={mobileOpen}
               className={cn(
                 "absolute left-3 top-3 z-30 inline-flex h-10 w-10 items-center justify-center rounded-lg",
                 "border border-[var(--border)] bg-[var(--bg-surface)]/90 backdrop-blur",
@@ -124,44 +119,19 @@ export default function AdminConsoleLayout({
 
             <main className="flex-1 overflow-y-auto">{main}</main>
 
-            {/* Scrim + off-canvas drawer */}
-            {mobileOpen && (
-              <div className="fixed inset-0 z-50 md:hidden">
-                <div
-                  className="absolute inset-0 bg-black/50"
-                  onClick={closeMobile}
-                  aria-hidden="true"
-                />
-                <div
-                  className={cn(
-                    "absolute right-0 top-0 h-full w-[85%] max-w-xs shadow-2xl",
-                    "bg-[var(--bg-surface)]"
-                  )}
-                  role="dialog"
-                  aria-label="Navigation"
-                >
-                  <div className="flex items-center justify-end p-2">
-                    <button
-                      type="button"
-                      onClick={closeMobile}
-                      aria-label="Close navigation"
-                      className="inline-flex items-center justify-center rounded-md p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                  {/* Drawer reuses the same manifest rail; force expanded so
-                      labels are readable in the off-canvas panel. */}
-                  <div className="h-[calc(100%-3rem)] overflow-y-auto">
-                    <AdminSidebar
-                      overview={overview}
-                      forceExpanded
-                      onNavigate={closeMobile}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* Left-anchored off-canvas drawer (shared component) */}
+            <MobileNavDrawer
+              open={mobileOpen}
+              onClose={closeMobile}
+              triggerRef={hamburgerRef}
+              label="Admin navigation"
+            >
+              <AdminSidebar
+                overview={overview}
+                forceExpanded
+                onNavigate={closeMobile}
+              />
+            </MobileNavDrawer>
           </div>
         </div>
       </React.Suspense>

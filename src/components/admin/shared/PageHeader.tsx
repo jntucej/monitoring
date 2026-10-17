@@ -36,7 +36,7 @@ export function PageHeader({
   }, [pathOverride, pathname]);
 
   return (
-    <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
+    <header className="sticky top-0 z-20 -mx-4 -mt-4 mb-6 flex flex-wrap items-start justify-between gap-4 bg-[var(--bg-base)]/95 px-4 pt-4 pb-4 backdrop-blur-sm sm:-mx-6 sm:-mt-6 sm:px-6 sm:pt-6 sm:pb-4 border-b border-[var(--border)]">
       <div className="min-w-0 flex-1">
         {breadcrumb && breadcrumb.length > 0 && (
           <nav className="mb-1 flex items-center gap-1 text-xs text-[var(--text-muted)]" aria-label="Breadcrumb">

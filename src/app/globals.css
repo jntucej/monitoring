@@ -1294,3 +1294,111 @@ html[data-device-profile="legacy"] .glass-card {
   }
 }
 
+/* ============================================================
+   PROGRESSIVE VARIABLE BLUE EDGE-BLUR — premium scroll veil
+   ============================================================
+   A soft blue veil sits at the top & bottom of the scroll container.
+   Intensity is tied to scroll position (0 at the exact edge, ramps to
+   ~15% opacity over ~140px, fades again near the opposite edge), so
+   the eye is gently guided to the sharp-focus zone in the center.
+   Pure CSS composites the blur; a scroll listener only writes two
+   CSS variables (never animates blur-radius, which is the perf trap).
+   Reduced-motion disables the scroll-linked ramp + transitions.
+   ============================================================ */
+.scroll-edge-blue {
+  --edge-blue: 59, 130, 246;     /* blue-500 */
+  --edge-size: 72px;
+  --edge-top: 0;                 /* 0..1, written by ScrollEdgeBlue */
+  --edge-bottom: 0;             /* 0..1, written by ScrollEdgeBlue */
+  position: relative;
+}
+
+/* Top progressive blue veil — pinned to the container's top edge */
+.scroll-edge-blue > .edge-blue-veil.top,
+.scroll-edge-blue::before {
+  content: "";
+  position: sticky;
+  top: 0;
+  z-index: 15;
+  display: block;
+  height: var(--edge-size);
+  margin-bottom: calc(-1 * var(--edge-size));
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(var(--edge-blue), calc(0.30 * var(--edge-top))),
+    rgba(var(--edge-blue), calc(0.08 * var(--edge-top)))
+  );
+  -webkit-backdrop-filter: blur(calc(14px * var(--edge-top))) saturate(130%);
+  backdrop-filter: blur(calc(14px * var(--edge-top))) saturate(130%);
+  -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+  transition: backdrop-filter 120ms linear, background 120ms linear;
+}
+
+/* Bottom progressive blue veil — pinned to the container's bottom edge */
+.scroll-edge-blue > .edge-blue-veil.bottom,
+.scroll-edge-blue::after {
+  content: "";
+  position: sticky;
+  bottom: 0;
+  z-index: 15;
+  display: block;
+  height: var(--edge-size);
+  margin-top: calc(-1 * var(--edge-size));
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(var(--edge-blue), calc(0.30 * var(--edge-bottom))),
+    rgba(var(--edge-blue), calc(0.08 * var(--edge-bottom)))
+  );
+  -webkit-backdrop-filter: blur(calc(14px * var(--edge-bottom))) saturate(130%);
+  backdrop-filter: blur(calc(14px * var(--edge-bottom))) saturate(130%);
+  -webkit-mask-image: linear-gradient(to top, black 40%, transparent 100%);
+  mask-image: linear-gradient(to top, black 40%, transparent 100%);
+  transition: backdrop-filter 120ms linear, background 120ms linear;
+}
+
+/* Banded stacked-blur variant: three masked layers instead of one heavy blur
+   (lighter + more premium on mid-range devices). Opt in via .scroll-edge-blue-banded.
+   The banded layers live inside the sticky pseudo-elements above via ::before/::after
+   on the wrapper; when .banded is present we cap the blur radius so stacking is cheap. */
+.scroll-edge-blue-banded::before,
+.scroll-edge-blue-banded::after {
+  --edge-size: 96px;
+  background: rgba(var(--edge-blue), 0.14);
+  -webkit-backdrop-filter: blur(6px) saturate(120%);
+  backdrop-filter: blur(6px) saturate(120%);
+}
+
+/* Reduced-motion: no scroll-linked ramp, no transitions, constant subtle veil */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-edge-blue::before,
+  .scroll-edge-blue::after {
+    --edge-top: 0.5;
+    --edge-bottom: 0.5;
+    transition: none;
+  }
+  .scroll-edge-blue-banded::before,
+  .scroll-edge-blue-banded::after {
+    transition: none;
+  }
+}
+
+/* ============================================================
+   DRAWER SLIDE-IN — left-anchored sheet entrance
+   ============================================================ */
+@keyframes drawer-in {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+.animate-drawer-in {
+  animation: drawer-in 220ms cubic-bezier(0.2, 0, 0, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-drawer-in {
+    animation: none;
+  }
+}
+
+

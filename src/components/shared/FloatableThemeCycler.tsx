@@ -1,7 +1,7 @@
 "use client";
 
 import { useUIStore } from "@/stores/uiStore";
-import { Sun, Moon, Sparkles, ChevronRight } from "lucide-react";
+import { Sun, Moon, Sparkles } from "lucide-react";
 
 /**
  * A small floatable button that cycles the app theme (dark → light → glass).
@@ -39,14 +39,13 @@ export function FloatableThemeCycler() {
       type="button"
       onClick={cycle}
       aria-label={`Theme: ${current.label}. Click to switch to ${nextTheme}.`}
-      title={`${current.label} theme — click for ${nextTheme}`}
-      className="group fixed bottom-20 left-4 z-30 flex items-center gap-1.5 px-2.5 py-2 rounded-full bg-[var(--bg-surface)]/80 backdrop-blur border border-[var(--border-strong)] shadow-lg text-[var(--text-primary)] hover:shadow-xl active:scale-95 transition-all md:bottom-4"
+      title={`Switch to ${nextTheme} theme`}
+      className="group fixed bottom-20 left-4 z-30 flex items-center justify-center rounded-full bg-[var(--bg-surface)]/80 backdrop-blur border border-[var(--border-strong)] shadow-lg text-[var(--text-primary)] hover:shadow-xl active:scale-95 transition-all h-9 w-9 md:bottom-4"
     >
+      {/* Icon-only — the symbol communicates state; the accessible name stays
+          for screen readers and a tooltip covers sighted users. */}
       <ActiveIcon className="w-4 h-4 text-[var(--action-primary)]" />
-      <span className="text-[11px] font-semibold tracking-wide opacity-70 group-hover:opacity-100 transition-opacity">
-        {nextTheme === "dark" ? "Dark" : nextTheme === "light" ? "Light" : "Glossy"}
-      </span>
-      <ChevronRight className="w-3.5 h-3.5 opacity-40 group-hover:opacity-100" />
+      <span className="sr-only">{current.label} theme. Next: {nextTheme}.</span>
     </button>
   );
 }
