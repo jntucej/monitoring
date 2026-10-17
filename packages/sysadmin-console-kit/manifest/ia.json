@@ -19,6 +19,20 @@
       ]
     },
     {
+      "id": "analytics",
+      "label": "Analytics & Reports",
+      "icon": "Activity",
+      "order": 1.5,
+      "infographic": { "kind": "heat", "source": "analytics.traffic7d" },
+      "pages": [
+        { "id": "analytics", "route": "analytics", "title": "Analytics", "kind": "charts", "pollMs": 60000 },
+        { "id": "reports", "route": "reports", "title": "Reports", "kind": "list", "pollMs": 120000 },
+        { "id": "attendance", "route": "attendance", "title": "Attendance", "kind": "table", "pollMs": 60000 },
+        { "id": "announcements", "route": "announcements", "title": "Announcements", "kind": "list", "pollMs": 60000 },
+        { "id": "support", "route": "support", "title": "Support Desk", "kind": "table", "pollMs": 30000 }
+      ]
+    },
+    {
       "id": "identity",
       "label": "Identity",
       "icon": "Users",

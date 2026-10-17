@@ -48,6 +48,9 @@ import {
   ChevronsDownUp,
   ChevronsUpDown,
   ArrowUpRight,
+  BookOpen,
+  Layers,
+  Link2,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -124,6 +127,9 @@ const ICONS: Record<string, LucideIcon> = {
   HelpCircle,
   Leaf,
   Menu,
+  BookOpen,
+  Layers,
+  Link2,
 };
 
 function iconFor(name?: string): LucideIcon {

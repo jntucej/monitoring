@@ -26,6 +26,17 @@
       ]
     },
     {
+      "id": "academics",
+      "label": "Academics",
+      "icon": "BookOpen",
+      "role": "admin",
+      "pages": [
+        { "label": "Classes", "href": "/admin/classes", "icon": "Layers" },
+        { "label": "Subjects", "href": "/admin/subjects", "icon": "BookOpen" },
+        { "label": "Faculty Assignments", "href": "/admin/faculty-assignments", "icon": "Link2" }
+      ]
+    },
+    {
       "id": "faculty",
       "label": "Faculty",
       "icon": "Users",

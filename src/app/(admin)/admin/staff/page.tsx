@@ -372,7 +372,7 @@ function AdminStaffInner() {
                   {filtered.map((r) => (
                     <tr
                       key={r.id}
-                      onClick={() => setActive(r)}
+                      onClick={() => window.location.href = `/admin/staff/${r.id}`}
                       className="border-t border-[var(--border)] hover:bg-[var(--bg-surface)]/40 cursor-pointer"
                     >
                       <td className="px-4 py-2.5">
