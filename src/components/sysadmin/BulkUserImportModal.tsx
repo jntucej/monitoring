@@ -31,12 +31,23 @@ interface PreviewState {
   importedBefore: number;
 }
 
-// 35-column college bulk-import sheet. H.T NO. (roll) drives year / batch /
-// branch / course — everything else is captured as-is; year is calculated,
-// never typed.
-const TEMPLATE_CSV =
-  "COURSE,DEPARTMENT,BRANCH,SEMESTER,REGULATION,YEAR,HTNO,STUDENT_NAME,GENDER,MOBILE,EMAIL,DOB,IDENTIFICATION_MARKS_1,IDENTIFICATION_MARKS_2,BLOOD_GROUP,NATIONALITY,RELIGION,CASTE,SUBCASTE,PH_STATUS,FATHER_GUARDIAN_NAME,MOTHER_NAME,PARENT_MOBILE,PARENT_EMAIL,ADDRESS,CITY,DISTRICT,STATE,PINCODE,FATHER_OCCUPATION,INCOME_PER_ANNUM,EAMCET_HTNO,EAMCET_ECET_RANK,ADMISSION_DATE,ADMISSION_CATEGORY\n" +
-  "B-Tech,CS,CSE,3,1,2,25JJ1A0501,AADITH KUMAR,male,9876543210,aadith.k@jntuhcej.ac.in,12-05-2005,Left mole,Scars,None,Indian,Hindu,BC,Other,none,Prakash Rao,Lakshmi Rao,9440123456,rao.prakash@example.com,123 Main Road,Hyderabad,Hyderabad,TS,500001,Teacher,250000,EAM250001,4523,01-07-2025,Open\n";
+// 8-column minimal sheet. Covers the common fast-path import: the user's
+// exact headers map 1:1 to the DB fields the importer already understands
+// via the pick() alias system in validateImport. No other columns required.
+const MINIMAL_CSV =
+  "HTNO,STUDENT_NAME,FATHER_GUARDIAN_NAME,GENDER,MOBILE,DOB,EMAIL,PARENT_MOBILE\n" +
+  "25JJ1A0501,AADITH KUMAR,Prakash Rao,male,9876543210,12-05-2005,aadith.k@jntuhcej.ac.in,9440123456\n";
+
+const MINIMAL_HINTS: Array<[string, string]> = [
+  ["HTNO", "Required — the 10-char hall-ticket/roll number (yyJJVVBBNN). Drives year, batch and branch automatically."],
+  ["STUDENT_NAME", "Required — full name."],
+  ["FATHER_GUARDIAN_NAME", "Optional — father / guardian name."],
+  ["GENDER", "male / female (M, F accepted)."],
+  ["MOBILE", "Student 10-digit mobile."],
+  ["DOB", "DD-MM-YYYY or YYYY-MM-DD."],
+  ["EMAIL", "Required — valid email. Used for login + de-dup."],
+  ["PARENT_MOBILE", "Optional — parent contact number."],
+];
 
 const TEMPLATE_HINTS: Array<[string, string]> = [
   // Academic
@@ -73,7 +84,7 @@ const api = useApi();
   const [preview, setPreview] = useState<PreviewState | null>(null);
 
   const downloadTemplate = () => {
-    const blob = new Blob([TEMPLATE_CSV], { type: "text/csv;charset=utf-8;" });
+    const blob = new Blob([MINIMAL_CSV], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
@@ -169,7 +180,7 @@ const api = useApi();
 
         <div className="text-xs text-[var(--text-muted)] space-y-1">
           <p>
-            Upload the college sheet (<code>35 columns</code>).
+            Upload the college sheet (<code>8 columns</code> minimal, or up to 35).
             HTNO drives year, batch and branch — <b>everything else is captured as-is.</b>
           </p>
         </div>
@@ -190,7 +201,7 @@ const api = useApi();
 
           <button
             type="button"
-            onClick={() => setCsvText(TEMPLATE_CSV)}
+            onClick={() => setCsvText(MINIMAL_CSV)}
             className="px-3 py-1.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-xs font-semibold hover:bg-[var(--bg-base)] text-purple-400 flex items-center gap-1.5"
           >
             <ScrollText className="w-3.5 h-3.5" /> Load Sample
@@ -199,7 +210,7 @@ const api = useApi();
 
         <textarea
           rows={7}
-          placeholder={"COURSE,DEPARTMENT,BRANCH,SEMESTER,REGULATION,YEAR,HTNO,STUDENT_NAME,GENDER,MOBILE,EMAIL,DOB,…\nB-Tech,CS,CSE,3,1,2,25JJ1A0501,AADITH KUMAR,male,9876543210,aadith.k@jntuhcej.ac.in,12-05-2005,…"}
+          placeholder={"HTNO,STUDENT_NAME,FATHER_GUARDIAN_NAME,GENDER,MOBILE,DOB,EMAIL,PARENT_MOBILE\n25JJ1A0501,AADITH KUMAR,Prakash Rao,male,9876543210,12-05-2005,aadith.k@jntuhcej.ac.in,9440123456"}
           value={csvText}
           onChange={(e) => { setCsvText(e.target.value); setPreview(null); }}
           className="w-full font-mono text-xs p-3 bg-[var(--bg-base)] border border-[var(--border)] rounded-xl text-white focus:outline-none"
@@ -245,6 +256,10 @@ const api = useApi();
           <div className="mt-2 space-y-3">
             {(() => {
               const groups: Record<string, Array<[string, string]>> = {};
+              for (const [k, v] of MINIMAL_HINTS) {
+                const section = "Minimal 8-column sheet";
+                (groups[section] ??= []).push([k, v]);
+              }
               for (const [k, v] of TEMPLATE_HINTS) {
                 const section = k.split(" — ")[0];
                 (groups[section] ??= []).push([k, v]);
