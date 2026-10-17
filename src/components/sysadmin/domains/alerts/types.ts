@@ -85,6 +85,7 @@ export interface RunbooksEntity extends Entity {
 }
 
 // ok() wraps the payload in { data: T } — use these envelopes with useDashboardData.
+export type AlertsEnvelope = { data: AlertsData };
 export type SafetyEnvelope = { data: SafetyData };
 export type RunbooksEnvelope = { data: RunbooksData };
 
