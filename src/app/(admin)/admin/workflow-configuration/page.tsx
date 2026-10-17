@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { PageHeader } from "@/components/shared/PageHeader";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
@@ -83,6 +84,10 @@ function AdminWorkflowConfigurationInner() {
 
   return (
     <div className="space-y-4">
+      <PageHeader
+        title="Workflow Configuration"
+        subtitle="Pass types, pending requests, and approval routing"
+      />
       {/* KPI cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <WidgetBoundary title="Pass Types">

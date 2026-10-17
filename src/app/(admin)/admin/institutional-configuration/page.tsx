@@ -2,6 +2,7 @@
 
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { PageHeader } from "@/components/shared/PageHeader";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { AuthGuard } from "@/components/shared/AuthGuard";
@@ -182,12 +183,10 @@ function InstitutionalConfigurationInner() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <p className="text-2xl font-bold">Institutional Configuration</p>
-        <p className="text-sm text-[var(--text-secondary)]">
-          Manage institutional settings. Sysadmin-only sections are read-only here.
-        </p>
-      </div>
+      <PageHeader
+        title="Institutional Configuration"
+        subtitle="Manage institutional settings. Sysadmin-only sections are read-only here."
+      />
 
       {/* ── Editable sections (admin) ────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

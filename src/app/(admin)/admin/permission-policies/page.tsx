@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { PageHeader } from "@/components/shared/PageHeader";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
@@ -76,6 +77,10 @@ function AdminPermissionPoliciesInner() {
 
   return (
     <div className="space-y-4">
+      <PageHeader
+        title="Permission Policies"
+        subtitle="Workflow stage definitions, SLAs, and open approval requests"
+      />
       {/* KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <WidgetBoundary title="Workflow Types">
