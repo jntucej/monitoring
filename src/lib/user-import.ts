@@ -545,7 +545,7 @@ export async function runBulkImport(
       if (rep) { rep.status = "invalid"; rep.reason = `commit failed: ${failRow}`; }
     } else {
       const rep = reportRows.find((x) => x.email && x.email.toLowerCase() === String(r.email).toLowerCase());
-      if (rep) rep.reason = "imported";
+      if (rep) rep.reason = "imported as new";
     }
   }
 
