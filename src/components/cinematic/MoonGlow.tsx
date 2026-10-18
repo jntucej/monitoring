@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 
 export type MoonHue =
   | "indigo"
@@ -21,8 +21,6 @@ const HUE_COLORS: Record<MoonHue, string> = {
   gold: "rgba(251,191,36,0.12)",
   slate: "rgba(148,163,184,0.08)",
 };
-
-const BASE_GRADIENT = "linear-gradient(180deg, #070B14 0%, #0F172A 100%)";
 
 interface MoonGlowProps {
   hue?: MoonHue;
@@ -47,6 +45,21 @@ const TWINKLE_KEYFRAMES = `@keyframes moonGlowTwinkle {
 export function MoonGlow({ hue = "indigo", stars = 0 }: MoonGlowProps) {
   const reduce = useReducedMotion();
   const [mounted, setMounted] = useState(false);
+  const { scrollYProgress } = useScroll();
+
+  // As user scrolls deeper into the story, darken base and fade moon light (moving away from moonlight into deep night)
+  const baseGrad = useTransform(
+    scrollYProgress,
+    [0, 0.2, 0.6, 1],
+    [
+      "linear-gradient(180deg, #070B14 0%, #0F172A 100%)",
+      "linear-gradient(180deg, #04060B 0%, #090D16 100%)",
+      "linear-gradient(180deg, #020306 0%, #05070C 100%)",
+      "linear-gradient(180deg, #010204 0%, #020306 100%)",
+    ]
+  );
+
+  const moonOpacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.35, 0.1]);
 
   useEffect(() => {
     setMounted(true);
@@ -76,11 +89,12 @@ export function MoonGlow({ hue = "indigo", stars = 0 }: MoonGlowProps) {
     <>
       <style dangerouslySetInnerHTML={{ __html: TWINKLE_KEYFRAMES }} />
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute inset-0" style={{ background: BASE_GRADIENT }} />
-        <div
+        <motion.div className="absolute inset-0" style={{ background: baseGrad }} />
+        <motion.div
           className="absolute inset-0"
           style={{
             background: `radial-gradient(circle at top, ${HUE_COLORS[hue]}, transparent 40%)`,
+            opacity: moonOpacity,
           }}
         />
       </div>

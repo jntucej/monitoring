@@ -42,10 +42,10 @@ export function Chapter({
   showTapHint = false,
 }: ChapterProps) {
   const ref = useRef<HTMLElement | null>(null);
-  const inView = useInView(ref, { once: true, margin: "-20% 0px -20% 0px" });
+  const inView = useInView(ref, { once: true, margin: "-15% 0px -15% 0px" });
   const reduce = useReducedMotion();
   const visible = inView || !!reduce;
-  const dim = !isActive && !reduce ? 0.4 : 1;
+  const dim = !isActive && !reduce ? 0.3 : 1;
 
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -65,16 +65,21 @@ export function Chapter({
       id={id}
       data-chapter-index={index}
       aria-labelledby={`${id}-heading`}
-      className="relative flex min-h-[60vh] items-center justify-center px-6 py-20"
+      className="relative flex min-h-[65vh] items-center justify-center px-6 py-24"
     >
       <motion.div
         animate={{ opacity: dim }}
         transition={{ duration: 1.4, ease: EASE.gentle }}
         className="flex flex-col items-center text-center"
       >
-        <span className="mb-6 text-[10px] tabular-nums tracking-[0.4em] text-white/25">
-          {String(index).padStart(2, "0")}
-        </span>
+        <motion.span
+          initial={reduce ? false : { opacity: 0, y: -10 }}
+          animate={visible ? { opacity: 0.35, y: 0 } : {}}
+          transition={{ duration: DURATION.chapter, ease: EASE.gentle }}
+          className="mb-8 text-[11px] tabular-nums tracking-[0.5em] text-white/35"
+        >
+          CHAPTER {String(index).padStart(2, "0")}
+        </motion.span>
 
         <motion.button
           type="button"
@@ -85,39 +90,46 @@ export function Chapter({
           onBlur={() => setHovered(false)}
           aria-expanded={revealed}
           aria-label={revealed ? "Hide chapter detail" : "Show chapter detail"}
-          className="group mb-8 h-28 w-36 cursor-pointer rounded-2xl p-2 text-inherit transition-colors hover:bg-white/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60 focus-visible:ring-offset-4 focus-visible:ring-offset-[#070B14]"
+          className="group mb-10 h-32 w-40 cursor-pointer rounded-2xl p-2 text-inherit transition-colors hover:bg-white/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60 focus-visible:ring-offset-4 focus-visible:ring-offset-[#070B14]"
         >
           {visual({ progress, hovered, clicked: revealed, accent })}
           {showTapHint && !revealed && (
-            <span className="mt-1 block text-[10px] uppercase tracking-[0.3em] text-white/30">
-              Tap
-            </span>
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0.3, 0.7, 0.3] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              className="mt-2 block text-[10px] uppercase tracking-[0.35em] text-cyan-300/60"
+            >
+              Tap to inspect
+            </motion.span>
           )}
         </motion.button>
 
-        <motion.h2
-          id={`${id}-heading`}
-          initial={reduce ? false : { y: 14 }}
-          animate={visible ? { y: 0 } : {}}
-          transition={{
-            duration: DURATION.chapter,
-            ease: EASE.gentle,
-            delay: 0.1,
-          }}
-          className="max-w-2xl text-balance text-2xl font-light leading-snug tracking-tight text-white md:text-3xl"
-        >
-          {poetic}
-        </motion.h2>
+        <div className="overflow-hidden">
+          <motion.h2
+            id={`${id}-heading`}
+            initial={reduce ? false : { y: "100%", opacity: 0 }}
+            animate={visible ? { y: "0%", opacity: 1 } : {}}
+            transition={{
+              duration: DURATION.chapter,
+              ease: EASE.gentle,
+              delay: 0.15,
+            }}
+            className="max-w-2xl text-balance text-2xl font-light leading-snug tracking-tight text-white md:text-4xl"
+          >
+            {poetic}
+          </motion.h2>
+        </div>
 
         <motion.p
-          initial={reduce ? false : { opacity: 0 }}
-          animate={visible ? { opacity: 1 } : {}}
+          initial={reduce ? false : { opacity: 0, y: 15 }}
+          animate={visible ? { opacity: 1, y: 0 } : {}}
           transition={{
             duration: DURATION.chapter,
             ease: EASE.gentle,
             delay: 0.35,
           }}
-          className="mt-4 max-w-md text-sm leading-relaxed text-white/60 md:text-base"
+          className="mt-5 max-w-lg text-base leading-relaxed text-white/65 md:text-lg"
         >
           {plain}
         </motion.p>
@@ -128,14 +140,16 @@ export function Chapter({
           animate={{
             height: revealed ? "auto" : 0,
             opacity: revealed ? 1 : 0,
-            marginTop: revealed ? 14 : 0,
+            marginTop: revealed ? 16 : 0,
           }}
           transition={{ duration: 0.6, ease: EASE.gentle }}
           className="overflow-hidden"
         >
-          <p className="mx-auto max-w-md text-sm italic leading-relaxed text-white/45">
-            {detail}
-          </p>
+          <div className="mx-auto max-w-md rounded-2xl border border-white/10 bg-white/[0.03] p-4 backdrop-blur">
+            <p className="text-sm italic leading-relaxed text-cyan-200/80">
+              {detail}
+            </p>
+          </div>
         </motion.div>
       </motion.div>
     </section>
