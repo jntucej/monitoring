@@ -10,12 +10,6 @@ export interface EmotionalQuoteProps {
   className?: string;
 }
 
-/**
- * Word-by-word reveal. Each word springs in with SPRING_STORY,
- * staggered 60ms apart. Triggers on entering the viewport, once.
- *
- * Reduced motion: renders the whole text at once.
- */
 export function EmotionalQuote({
   text,
   subtext,

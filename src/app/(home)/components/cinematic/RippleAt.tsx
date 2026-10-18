@@ -9,11 +9,6 @@ export interface RippleAtProps {
   onDone: () => void;
 }
 
-/**
- * A single expanding ripple at a screen-space (x, y) coordinate.
- * Used by PerspectiveSelector and LoginGateway on click/tap.
- * Fires onDone after the animation so the parent can drop the id.
- */
 export function RippleAt({
   x,
   y,
