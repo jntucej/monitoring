@@ -5,6 +5,72 @@
    Apple-Inspired HIG Design System: Calm, Restrained, Precise
    ============================================================ */
 
+[data-home] {
+  --home-accent-amber: #F59E0B;
+  --home-accent-indigo: #6366F1;
+  --home-accent-steel: #0EA5E9;
+  --home-accent-crimson: #EF4444;
+  --home-accent-navy: #1E3A5F;
+
+  --home-text-primary: #F3F4F6;
+  --home-text-secondary: #9CA3AF;
+  --home-text-muted: #6B7280;
+
+  --home-bg-base: #070B14;
+  --home-bg-elev-1: #0F172A;
+  --home-bg-elev-2: #131C2E;
+
+  --home-border-soft: rgba(255, 255, 255, 0.08);
+  --home-border-hard: rgba(255, 255, 255, 0.18);
+
+  --home-blur-xs: 4px;
+  --home-blur-sm: 8px;
+  --home-blur-md: 16px;
+  --home-blur-lg: 24px;
+  --home-blur-xl: 40px;
+
+  --home-radius-sm: 6px;
+  --home-radius-md: 12px;
+  --home-radius-lg: 20px;
+  --home-radius-pill: 9999px;
+
+  --home-shadow-glow: 0 0 60px -20px rgba(99, 102, 241, 0.25);
+  --home-shadow-deep: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+
+  --home-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --home-duration-slow: 0.6s;
+  --home-duration-cinema: 1.2s;
+}
+
+[data-home] .glass-cinema {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(var(--home-blur-md));
+  -webkit-backdrop-filter: blur(var(--home-blur-md));
+  border: 1px solid var(--home-border-soft);
+  box-shadow: var(--home-shadow-deep);
+}
+
+[data-home] .glass-cinema-strong {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(var(--home-blur-lg));
+  -webkit-backdrop-filter: blur(var(--home-blur-lg));
+  border: 1px solid var(--home-border-hard);
+  box-shadow: var(--home-shadow-glow);
+}
+
+[data-home] .glass-frosted {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(var(--home-blur-sm));
+  -webkit-backdrop-filter: blur(var(--home-blur-sm));
+  border: 1px solid var(--home-border-soft);
+}
+
+[data-home] .glass-clear {
+  background: transparent;
+  backdrop-filter: none;
+  border: none;
+}
+
 :root {
   /* Base Temperatures — DIRECTION 1: Cold Forge */
   --hue-primary: 213;
