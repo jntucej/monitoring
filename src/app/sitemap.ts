@@ -19,7 +19,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/contact", changeFrequency: "yearly", priority: 0.7 },
     { path: "/privacy", changeFrequency: "yearly", priority: 0.4 },
     { path: "/terms", changeFrequency: "yearly", priority: 0.4 },
-    { path: "/login", changeFrequency: "yearly", priority: 0.5 },
+    // /login is a utility route, not marketing — keep it discoverable for
+    // "gate monitor login" queries but below the content pages.
+    { path: "/login", changeFrequency: "yearly", priority: 0.3 },
   ];
 
   return routes.map((r) => ({
