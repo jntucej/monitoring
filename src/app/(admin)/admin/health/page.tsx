@@ -6,6 +6,8 @@ import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageLoading } from "@/components/admin/shared/LoadingStates";
 import { HealthDashboard } from "@/components/admin/HealthDashboard";
 import { getAuthHeaders } from "@/lib/utils";
+import { usePolling } from "@/hooks/usePolling";
+import { useGlass } from "@/context/GlassContext";
 
 type ComponentStatus = "healthy" | "degraded" | "unhealthy" | "unknown";
 
@@ -38,28 +40,28 @@ function StatusDot({ status, label, detail }: { status: ComponentStatus; label: 
 }
 
 function HealthSnapshotBar() {
+  const { isLiveStream } = useGlass();
   const [snap, setSnap] = useState<HealthSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const loadSnapshot = async (isInitial: boolean) => {
+    if (isInitial) setLoading(true);
+    try {
+      const res = await fetch("/api/health", { headers: getAuthHeaders(), cache: "no-store" });
+      if (!res.ok && res.status !== 503) throw new Error("health unavailable");
+      setSnap(await res.json());
+    } catch {
+      /* snapshot is optional; the full dashboard below still renders */
+    } finally {
+      if (isInitial) setLoading(false);
+    }
+  };
+
+  /* Initial load + realtime poller so the bar tracks the live dashboard. */
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch("/api/health", { headers: getAuthHeaders(), cache: "no-store" });
-        if (!res.ok && res.status !== 503) throw new Error("health unavailable");
-        const data: HealthSnapshot = await res.json();
-        if (cancelled) return;
-        setSnap(data);
-      } catch {
-        /* snapshot is optional; the full dashboard below still renders */
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+    loadSnapshot(true);
   }, []);
+  usePolling(() => { loadSnapshot(false); }, { intervalMs: isLiveStream ? 15_000 : 60_000 });
 
   if (loading || !snap) {
     return (
