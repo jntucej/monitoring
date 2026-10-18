@@ -8,6 +8,8 @@ export { FilmGrain } from "./FilmGrain";
 export { BreathingVignette } from "./BreathingVignette";
 export { HorizonGlow } from "./HorizonGlow";
 export { CinematicLoader } from "./CinematicLoader";
+export { MoonGlow } from "./MoonGlow";
+export type { MoonHue } from "./MoonGlow";
 export { useTimeGreeting } from "./useTimeGreeting";
 export type { TimeGreeting } from "./useTimeGreeting";
 export {

@@ -13,6 +13,7 @@ import {
   CursorHalo,
   Fireflies,
   CinematicLoader,
+  MoonGlow,
   useAtmosphereTheme,
   useTimeGreeting,
   fadeIn,
@@ -179,12 +180,8 @@ export function LandingPage() {
 
   return (
     <>
-      <main className="relative min-h-screen overflow-hidden bg-[#070B14] text-white">
-        <div
-          aria-hidden
-          className="absolute inset-0"
-          style={{ background: t.vignette }}
-        />
+      <main className="relative min-h-screen overflow-hidden text-white">
+        <MoonGlow hue="indigo" stars={55} disc />
         <BreathingVignette glow={t.glow} />
         <ParticleField color={t.accent} />
         <AmbientGlow color={t.glow} />
