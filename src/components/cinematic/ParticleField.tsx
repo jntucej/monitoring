@@ -3,7 +3,6 @@
 import { useEffect, useRef } from "react";
 
 interface ParticleFieldProps {
-  count?: number;
   color?: string;
   className?: string;
 }
@@ -17,11 +16,14 @@ interface Particle {
   a: number;
 }
 
-export function ParticleField({
-  count = 60,
-  color = "#67e8f9",
-  className = "",
-}: ParticleFieldProps) {
+/** Three depth layers — far / mid / near — for cinematic parallax without overwhelm. */
+const LAYERS = [
+  { count: 24, rMin: 0.4, rMax: 0.8, aMin: 0.06, aMax: 0.12, speed: 0.02 },
+  { count: 14, rMin: 0.8, rMax: 1.2, aMin: 0.12, aMax: 0.20, speed: 0.035 },
+  { count:  8, rMin: 1.2, rMax: 2.0, aMin: 0.20, aMax: 0.32, speed: 0.055 },
+];
+
+export function ParticleField({ color = "#67e8f9", className = "" }: ParticleFieldProps) {
   const ref = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -33,22 +35,24 @@ export function ParticleField({
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    let w = 0;
-    let h = 0;
+    let w = 0, h = 0;
     let particles: Particle[] = [];
     let raf: number | null = null;
-    let paused = false;
 
     const seed = () => {
-      const cap = Math.min(count, Math.max(20, Math.floor((w * h) / 40000)));
-      particles = Array.from({ length: cap }, () => ({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        r: 0.6 + Math.random() * 1.4,
-        vx: (Math.random() - 0.5) * 0.08,
-        vy: (Math.random() - 0.5) * 0.08,
-        a: 0.15 + Math.random() * 0.35,
-      }));
+      particles = [];
+      for (const layer of LAYERS) {
+        for (let i = 0; i < layer.count; i++) {
+          particles.push({
+            x: Math.random() * w,
+            y: Math.random() * h,
+            r: layer.rMin + Math.random() * (layer.rMax - layer.rMin),
+            vx: (Math.random() - 0.5) * layer.speed,
+            vy: (Math.random() - 0.5) * layer.speed,
+            a: layer.aMin + Math.random() * (layer.aMax - layer.aMin),
+          });
+        }
+      }
     };
 
     const resize = () => {
@@ -62,11 +66,12 @@ export function ParticleField({
     };
 
     const tick = () => {
-      if (paused) {
+      if (document.hidden) {
         raf = null;
         return;
       }
       ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = color;
       for (const p of particles) {
         p.x += p.vx;
         p.y += p.vy;
@@ -75,9 +80,8 @@ export function ParticleField({
         if (p.y < -10) p.y = h + 10;
         if (p.y > h + 10) p.y = -10;
 
-        ctx.beginPath();
-        ctx.fillStyle = color;
         ctx.globalAlpha = p.a;
+        ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
         ctx.fill();
       }
@@ -90,12 +94,10 @@ export function ParticleField({
 
     const onVis = () => {
       if (document.hidden) {
-        paused = true;
         if (raf) cancelAnimationFrame(raf);
         raf = null;
-      } else {
-        paused = false;
-        if (!raf) raf = requestAnimationFrame(tick);
+      } else if (!raf) {
+        raf = requestAnimationFrame(tick);
       }
     };
 
@@ -108,7 +110,7 @@ export function ParticleField({
       document.removeEventListener("visibilitychange", onVis);
       ro.disconnect();
     };
-  }, [count, color]);
+  }, [color]);
 
   return (
     <canvas

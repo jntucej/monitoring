@@ -1,12 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const BOOT_KEY = "campus-booted";
 const MIN_BOOT_MS = 900;
 
 export function useBootSequence() {
   const [booted, setBooted] = useState(false);
+
+  const skip = useCallback(() => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem(BOOT_KEY, "1");
+    }
+    setBooted(true);
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -23,5 +30,5 @@ export function useBootSequence() {
     return () => clearTimeout(t);
   }, []);
 
-  return booted;
+  return { booted, skip };
 }

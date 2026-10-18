@@ -1,21 +1,13 @@
 import type { MetadataRoute } from "next";
 
-const BASE = "https://monitor.cej.in";
-
 export default function sitemap(): MetadataRoute.Sitemap {
-  const lastModified = new Date();
+  const base = process.env.NEXT_PUBLIC_APP_URL || "https://monitor.cej.in";
+  const now = new Date();
   return [
-    {
-      url: `${BASE}/about`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 1.0,
-    },
-    {
-      url: `${BASE}/login`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
+    { url: `${base}/`,       lastModified: now, changeFrequency: "weekly",  priority: 1.0 },
+    { url: `${base}/login`,  lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${base}/about`,  lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/help`,   lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/support`,lastModified: now, changeFrequency: "monthly", priority: 0.5 },
   ];
 }

@@ -25,6 +25,7 @@ import { LoginBubbleField } from "./LoginBubbleField";
 import { LiveStatePill } from "./LiveStatePill";
 import { Chapter } from "./Chapter";
 import { NarrativeProgress } from "./NarrativeProgress";
+import { ReadingProgress } from "./ReadingProgress";
 import { ScrollHint } from "./ScrollHint";
 import { useBootSequence } from "./useBootSequence";
 import {
@@ -44,49 +45,67 @@ const CHAPTERS = [
   {
     id: "ch-gate",
     index: 1,
+    label: "The Gate",
     poetic: "Every gate remembers everyone who passed.",
     plain:
       "When you step onto campus, the gate records the crossing — one line in a quiet ledger that never forgets.",
+    detail:
+      "Every row stores who, when, which gate, and which direction — visible to the campus admin in real time.",
     Visual: GateVisual,
   },
   {
     id: "ch-scan",
     index: 2,
+    label: "The Scan",
     poetic: "A single card. A single second.",
     plain:
       "You show your ID. The operator's desk reads it, records the direction, and puts you inside — no paperwork, no waiting.",
+    detail:
+      "The desk works offline too — the browser queues the scan and replays it the moment the network returns.",
     Visual: ScanVisual,
   },
   {
     id: "ch-pass",
     index: 3,
+    label: "The Pass",
     poetic: "When you need to leave, the pass travels ahead of you.",
     plain:
       "Students, faculty, and hostel residents request permission here. The request moves through the right hands — class teacher, warden, principal — in the right order.",
+    detail:
+      "Each step notifies the next approver within seconds, so no pass sits unnoticed.",
     Visual: PassVisual,
   },
   {
     id: "ch-approval",
     index: 4,
+    label: "The Approval",
     poetic: "A yes is kept. Signed. Hashed. Unalterable.",
     plain:
       "Every approval is digitally signed and stored with a tamper-evident hash. Nobody can change a decision after the fact — not even the person who made it.",
+    detail:
+      "The signed PDF lives in the ticket. It can be checked years later with a single hash comparison.",
     Visual: ApprovalVisual,
   },
   {
     id: "ch-return",
     index: 5,
+    label: "The Return",
     poetic: "You come back. The gate remembers that too.",
     plain:
       "When you re-enter campus, the pass closes, the curfew score updates, and your parents see a quiet line: safely back.",
+    detail:
+      "Parents see the return in the same channel as the original notification — SMS or app, their choice.",
     Visual: ReturnVisual,
   },
   {
     id: "ch-quiet",
     index: 6,
+    label: "The Quiet",
     poetic: "When nothing happens, the instrument is still listening.",
     plain:
       "Overnight, the systems watch for what shouldn't happen — an unusual gate, a pass that never returned, a batch of failed logins. Silence is not absence. It is attention.",
+    detail:
+      "Alerts reach the on-call admin in under a second — a push, an SMS, or a quiet bell in the corner.",
     Visual: QuietVisual,
   },
 ];
@@ -96,7 +115,7 @@ export function LandingPage() {
   const reduce = useReducedMotion();
   const greeting = useTimeGreeting();
   const router = useRouter();
-  const booted = useBootSequence();
+  const { booted, skip } = useBootSequence();
   const [activeChapterIdx, setActiveChapterIdx] = useState(0);
   const [narrativeInView, setNarrativeInView] = useState(false);
   const narrativeRef = useCallback((el: HTMLDivElement | null) => {
@@ -108,7 +127,7 @@ export function LandingPage() {
     observer.observe(el);
   }, []);
 
-  // Enter → /login (skip when a focusable element is active)
+  // Enter → /login (skip when focusable element is active)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Enter") return;
@@ -126,7 +145,7 @@ export function LandingPage() {
     return () => window.removeEventListener("keydown", onKey);
   }, [router]);
 
-  // Track active chapter
+  // Track active chapter via IntersectionObserver
   useEffect(() => {
     const els = document.querySelectorAll("[data-chapter-index]");
     if (!els.length) return;
@@ -161,7 +180,6 @@ export function LandingPage() {
   return (
     <>
       <main className="relative min-h-screen overflow-hidden bg-[#070B14] text-white">
-        {/* atmosphere */}
         <div
           aria-hidden
           className="absolute inset-0"
@@ -174,11 +192,10 @@ export function LandingPage() {
         <CursorHalo />
         <FilmGrain />
         <Fireflies />
+        <ReadingProgress />
 
         <div className="relative z-10 flex min-h-screen flex-col">
-          {/* ══════════════════════════════════════════════════════════
-              SCREEN 1 · THE DOOR — sign in first, everything else
-              ══════════════════════════════════════════════════════════ */}
+          {/* ── SCREEN 1 · THE DOOR ── */}
           <section
             aria-labelledby="hero-heading"
             className="flex min-h-screen flex-col items-center justify-center px-6 pb-20 pt-20 text-center"
@@ -215,7 +232,6 @@ export function LandingPage() {
               {SUB}
             </motion.p>
 
-            {/* Ambient status — small, does not compete with the bubble */}
             <motion.div
               variants={fadeUp}
               initial={reduce ? false : "hidden"}
@@ -233,7 +249,6 @@ export function LandingPage() {
               <LiveStatePill />
             </motion.div>
 
-            {/* ── THE DOOR — Sign In bubble is the focal point ── */}
             <motion.div
               variants={fadeUp}
               initial={reduce ? false : "hidden"}
@@ -259,14 +274,9 @@ export function LandingPage() {
             </motion.p>
           </section>
 
-          {/* ══════════════════════════════════════════════════════════
-              TRANSITION — explicit "how it works" cue
-              ══════════════════════════════════════════════════════════ */}
           <ScrollHint />
 
-          {/* ══════════════════════════════════════════════════════════
-              THE STORY — 6 chapters
-              ══════════════════════════════════════════════════════════ */}
+          {/* ── THE STORY ── */}
           <div ref={narrativeRef} className="relative">
             {CHAPTERS.map(({ Visual, ...c }) => (
               <Chapter
@@ -275,8 +285,11 @@ export function LandingPage() {
                 index={c.index}
                 poetic={c.poetic}
                 plain={c.plain}
-                visual={(active) => <Visual active={active} accent={t.accent} />}
+                detail={c.detail}
+                accent={t.accent}
+                visual={(opts) => <Visual {...opts} />}
                 isActive={activeChapterIdx === c.index - 1}
+                showTapHint={c.index === 1}
               />
             ))}
           </div>
@@ -284,13 +297,12 @@ export function LandingPage() {
           <NarrativeProgress
             total={CHAPTERS.length}
             activeIndex={activeChapterIdx}
+            labels={CHAPTERS.map((c) => c.label)}
             onJump={jumpTo}
             visible={narrativeInView}
           />
 
-          {/* ══════════════════════════════════════════════════════════
-              QUIET CLOSE — text only, no competing bubble
-              ══════════════════════════════════════════════════════════ */}
+          {/* ── QUIET CLOSE ── */}
           <motion.section
             aria-labelledby="cta-heading"
             initial={reduce ? false : { opacity: 0.6, y: 24 }}
@@ -322,7 +334,6 @@ export function LandingPage() {
             </Link>
           </motion.section>
 
-          {/* FOOTER */}
           <footer className="relative z-10 border-t border-white/[0.06] px-6 py-8 text-center">
             <nav
               aria-label="Footer"
@@ -360,7 +371,6 @@ export function LandingPage() {
         </div>
       </main>
 
-      {/* Boot overlay — once per tab */}
       <AnimatePresence>
         {!booted && !reduce && (
           <motion.div
@@ -370,7 +380,7 @@ export function LandingPage() {
             transition={{ duration: 0.9, ease: EASE.gentle }}
             className="fixed inset-0 z-[100]"
           >
-            <CinematicLoader mode="welcoming" />
+            <CinematicLoader mode="welcoming" onSkip={skip} />
           </motion.div>
         )}
       </AnimatePresence>
