@@ -7,7 +7,6 @@ import { PageLoading } from "@/components/admin/shared/LoadingStates";
 import { HealthDashboard } from "@/components/admin/HealthDashboard";
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
-import { useGlass } from "@/context/GlassContext";
 
 type ComponentStatus = "healthy" | "degraded" | "unhealthy" | "unknown";
 
@@ -40,7 +39,6 @@ function StatusDot({ status, label, detail }: { status: ComponentStatus; label: 
 }
 
 function HealthSnapshotBar() {
-  const { isLiveStream } = useGlass();
   const [snap, setSnap] = useState<HealthSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -57,11 +55,11 @@ function HealthSnapshotBar() {
     }
   };
 
-  /* Initial load + realtime poller so the bar tracks the live dashboard. */
+  /* Initial load + realtime poller so the bar updates every second. */
   useEffect(() => {
     loadSnapshot(true);
   }, []);
-  usePolling(() => { loadSnapshot(false); }, { intervalMs: isLiveStream ? 15_000 : 60_000 });
+  usePolling(() => { loadSnapshot(false); }, { intervalMs: 1000 });
 
   if (loading || !snap) {
     return (

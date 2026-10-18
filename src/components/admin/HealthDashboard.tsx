@@ -15,13 +15,11 @@ import {
   Zap,
 } from "lucide-react";
 import { SystemHealth } from "@/lib/health";
-import { useLiveRefresh } from "@/hooks/useLiveRefresh";
+import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
-import { useGlass } from "@/context/GlassContext";
 
 export function HealthDashboard() {
   const router = useRouter();
-  const { isLiveStream } = useGlass();
   const [health, setHealth] = useState<SystemHealth | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +29,7 @@ export function HealthDashboard() {
     if (isManual) setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/health", { cache: "no-store" });
+      const res = await fetch("/api/health", { headers: getAuthHeaders(), cache: "no-store" });
       if (!res.ok && res.status !== 503) {
         throw new Error(`Failed to fetch health data (status ${res.status})`);
       }
@@ -55,7 +53,8 @@ export function HealthDashboard() {
   useEffect(() => {
     fetchHealth(true);
   }, [fetchHealth]);
-  usePolling(() => { fetchHealth(); }, { intervalMs: isLiveStream ? 15000 : 60000 });
+  /* Realtime: poll the health endpoint every second. */
+  usePolling(() => { fetchHealth(); }, { intervalMs: 1000 });
 
   const getStatusBadge = (status?: "healthy" | "degraded" | "unhealthy") => {
     switch (status) {
@@ -110,7 +109,7 @@ export function HealthDashboard() {
           </div>
           <p className="text-xs text-[var(--text-muted)] flex items-center gap-2">
             <Clock className="w-3.5 h-3.5 text-gray-400" />
-            {lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString()}` : "Fetching..."} (Auto-refreshes every {isLiveStream ? '15' : '60'}s)
+            {lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString()}` : "Fetching..."} (Auto-refreshes every 1s)
           </p>
         </div>
       </div>
