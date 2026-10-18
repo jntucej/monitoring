@@ -1,57 +1,42 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Suspense } from "react";
+import { PageLoading } from "@/components/shared/LoadingStates";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+import { RoleConsole } from "@/components/shared/RoleConsole";
+import type { Role } from "@/lib/types";
 
-const TABS = [
-  { href: "/vice-principal", label: "Institutional Overview", exact: true },
-  { href: "/vice-principal/department-performance", label: "Department Performance" },
-  { href: "/vice-principal/pending-approvals", label: "Pending Approvals" },
-  { href: "/vice-principal/escalated-requests", label: "Escalated Requests" },
-  { href: "/vice-principal/attendance-exceptions", label: "Attendance Exceptions" },
-  { href: "/vice-principal/hostel-security-summaries", label: "Hostel & Security" },
-  { href: "/vice-principal/examination-coordination", label: "Examination" },
-  { href: "/vice-principal/delegated-responsibilities", label: "Delegated Duties" },
-  { href: "/vice-principal/decision-history", label: "Decision History" },
-] as const;
-
-function tabActive(tab: (typeof TABS)[number], pathname: string): boolean {
-  if ("exact" in tab && tab.exact) return pathname === tab.href;
-  return pathname === tab.href || pathname.startsWith(tab.href + "/");
-}
-
-export default function VicePrincipalLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
+/**
+ * Vice Principal console layout — mirrors the oie/supervisor mount pattern.
+ *
+ * The local 9-tab sticky nav is removed. The shell is the RoleConsole:
+ * IconRail + Board feed (/api/principal/dashboard, itemKey "item") +
+ * PermissionContextPanel + VpStatusBar + VpCommandBar (approvals /
+ * delegations / audit / reports / records — all pure navigation to the real
+ * VP sub-pages), plus the VpDashboardPanel (top-priority alerts + pending
+ * counts) as an extra panel in the main column. VP scope = delegated
+ * oversight; no hostel/branch filter. Sub-pages pass their content through
+ * `children`.
+ */
+export default function VicePrincipalConsoleLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <div className="min-w-0">
-      <nav
-        className="sticky top-14 sm:top-16 z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 bg-[var(--bg-base)]/80 backdrop-blur-md border-b border-[var(--border)]"
-        aria-label="Vice Principal sections"
-      >
-        <ol className="flex overflow-x-auto no-scrollbar gap-1 text-sm py-2 whitespace-nowrap">
-          {TABS.map((tab) => {
-            const isActive = tabActive(tab, pathname);
-            return (
-              <li key={tab.href} className="shrink-0">
-                {isActive ? (
-                  <span className="inline-flex items-center rounded-lg bg-[var(--action-primary)]/15 px-3 py-1.5 text-[var(--action-primary)] font-semibold text-xs sm:text-sm">
-                    {tab.label}
-                  </span>
-                ) : (
-                  <Link
-                    href={tab.href}
-                    className="inline-flex items-center rounded-lg px-3 py-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors text-xs sm:text-sm"
-                  >
-                    {tab.label}
-                  </Link>
-                )}
-              </li>
-            );
-          })}
-        </ol>
-      </nav>
-      {children}
-    </div>
+    <AuthGuard
+      allowedRoles={["vice_principal", "exam_branch", "oie", "admin", "sysadmin"] as Role[]}
+    >
+      <Suspense fallback={<PageLoading />}>
+        <div className="min-w-0">
+          <RoleConsole role="vice_principal" roleRoot="/vice-principal">
+            {children}
+          </RoleConsole>
+          <DevContactStrip />
+        </div>
+      </Suspense>
+    </AuthGuard>
   );
 }

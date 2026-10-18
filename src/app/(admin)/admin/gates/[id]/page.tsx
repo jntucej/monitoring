@@ -16,9 +16,9 @@ import {
 } from "lucide-react";
 import { StatCard } from "@/components/admin/StatCard";
 import { useApi } from "@/hooks/useApi";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { PageLoading } from "@/components/shared/LoadingStates";
-import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { PageLoading } from "@/components/admin/shared/LoadingStates";
+import { ConfirmDialog } from "@/components/admin/shared/ConfirmDialog";
 
 interface GateMetrics {
   gateId: string;

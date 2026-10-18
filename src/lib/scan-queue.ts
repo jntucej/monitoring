@@ -9,6 +9,11 @@ export interface QueuedScan {
   gateId: string;
   queuedAt: number;
   status: "queued" | "replaying";
+  /**
+   * Entry-type selection carried with IN scans so the replayed record keeps
+   * the correct hostel-permission scope (hosteller vs day_scholar).
+   */
+  entryType?: "hosteller" | "day_scholar";
 }
 
 const QUEUE_KEY = "operator_scan_queue_v1";

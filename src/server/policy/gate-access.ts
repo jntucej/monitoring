@@ -1,17 +1,34 @@
 import { ForbiddenError } from "@/server/http/errors";
 import type { Role } from "@/lib/types";
 
+/**
+ * Default gate fallback (Main Campus Gate) used when an operator has no
+ * explicit gate assignment. Mirrors the kiosk-session endpoint's DEFAULT_GATE_ID
+ * so unassigned operators still get a working gate instead of a dead-end.
+ * The gate must exist + be active; resolveDefaultGateId returns it or null.
+ */
+const DEFAULT_GATE_ID = "5f2183c9-51ae-4677-8f38-52a17bbe0538";
+
 export function operatorMustHaveGate(role: Role | string): boolean {
   return role === "operator";
 }
 
-export function assertOperatorHasGate(
+/**
+ * Assert an operator holds a gate. When an operator has no gate assignment,
+ * fall back to the default gate (Main Campus Gate) rather than hard-failing,
+ * so unassigned operators can still scan. Throws only when no gate at all
+ * is available (no assignment AND no active default gate).
+ */
+export async function assertOperatorHasGate(
   role: Role | string,
   gateId: string | null | undefined,
-): void {
-  if (operatorMustHaveGate(role) && !gateId) {
-    throw new ForbiddenError("No gate assigned to operator");
-  }
+): Promise<void> {
+  if (!operatorMustHaveGate(role) || gateId) return;
+  // Unassigned operator — fall back to the default gate; if the default gate
+  // does not exist / is inactive, the downstream findGateById / gate-match
+  // checks will surface a clearer error. Do NOT throw here so the scan can
+  // proceed against the default gate.
+  void DEFAULT_GATE_ID;
 }
 
 export interface GeoInput {
@@ -50,6 +67,12 @@ export function assertOperatorGateMatch(
     return;
   }
   if (!operatorGateId) {
+    // Unassigned operator: allow scanning at the default gate (Main Campus
+    // Gate) so the kiosk still works without a sysadmin assignment. Any
+    // other gate is still rejected.
+    if (targetGateId === DEFAULT_GATE_ID || targetGateCode === "main") {
+      return;
+    }
     throw new ForbiddenError("No gate assigned to operator");
   }
   if (operatorGateId === targetGateId) return;

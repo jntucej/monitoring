@@ -89,7 +89,11 @@ export interface ValidationResult {
   totalRows: number;
   validRows: ImportRow[];
   errors: ValidationError[];
-  summary: { total: number; valid: number; invalid: number; };
+  summary: { total: number; valid: number; invalid: number; skipped: number; };
+  /** Rows whose roll already exists in the DB — skipped, never updated. */
+  skippedRows: Array<{ row: number; roll: string; name?: string }>;
+  /** True when at least one row targets an existing student (re-upload). */
+  importedBefore: number;
 }
 
 export interface CommitResult {
@@ -99,12 +103,42 @@ export interface CommitResult {
   errors: Array<{ row: number; error: string }>;
 }
 
+/**
+ * Per-row outcome of a bulk import. `skippedExisting` rows are NOT errors —
+ * the roll already exists, so the row is left untouched (no update). Only
+ * `invalid` rows are true validation failures (empty/missing required field).
+ */
+export interface RowReport {
+  /** 1-based row number from the sheet. */
+  row: number;
+  /** The row's H.T NO. / roll number, when present. */
+  roll?: string;
+  name?: string;
+  email?: string;
+  /** imported = committed as new; skipped = already exists in DB; invalid = failed field checks. */
+  status: "imported" | "skipped" | "invalid";
+  /** Human-readable reason (e.g. 'roll already exists', 'Name is required'). */
+  reason: string;
+}
+
+export interface BulkImportReport {
+  totalRows: number;
+  imported: number;
+  skipped: number;
+  invalid: number;
+  /** One entry per input row, in sheet order — drives the downloadable report. */
+  rows: RowReport[];
+}
+
 /* ------------------------------------------------------------------ */
 /* Header / value helpers                                             */
 /* ------------------------------------------------------------------ */
 
 function normalizeKey(k: string): string {
-  return k.toUpperCase().replace(/[\s._]+/g, " ").trim();
+  // Normalize all non-alphanumeric separators (space, ., _, /, dash) to a single
+  // space. This makes "FATHER/GUARDIAN_NAME", "FATHER_GUARDIAN_NAME" and
+  // "FATHER GUARDIAN NAME" all resolve to the same normalized key.
+  return k.toUpperCase().replace(/[\s._/]+/g, " ").trim();
 }
 
 /** Look up a value in a record by several header aliases (case-insensitive). */
@@ -216,7 +250,14 @@ export async function validateImport(csvInput: string | ImportRow[]): Promise<Va
     const dob = normalizeDate(pick(r, "dob", "DOB", "DATE OF BIRTH"));
     const fatherName = pick(r, "fatherName", "FATHER NAME", "FATHERNAME", "GUARDIAN NAME");
     const landlineNumber = pick(r, "LAND LINE 0R PARENT NUMBER", "LANDLINE", "LAND LINE", "PARENT NUMBER", "LANDLINE_NUMBER");
-    const course = pick(r, "COURSE", "course", "PROGRAM", "DEGREE");
+    // The sheet's COURSE column is commonly used for the DEPARTMENT/branch
+    // (e.g. "CSE", "IT", "ECE", "EEE", "MECH", "ME") rather than the
+    // programme label (B.Tech / M.Tech). Route department-like values to
+    // `department` so the Course field stays clean.
+    const courseRaw = pick(r, "COURSE", "course", "PROGRAM", "DEGREE");
+    const DEPT_LIKE = /^(CSE|IT|ECE|EEE|MECH|ME|CS|DA)$/i;
+    const courseIsDept = DEPT_LIKE.test(courseRaw.trim());
+    const course = courseIsDept ? "" : courseRaw;
 
     // New student_details columns (all optional, case-insensitive header match).
     const branch = pick(r, "branch", "BRANCH");
@@ -308,16 +349,16 @@ export async function validateImport(csvInput: string | ImportRow[]): Promise<Va
       dob,
       fatherName,
       landlineNumber,
-      course,
+      course: course || undefined,
       // Fallback course from the roll's branch code, used when the sheet's
-      // COURSE cell is empty.
+      // COURSE cell is empty (or held a department value).
       courseFromRoll: rollCourse,
       // year / batch are CALCULATED from the roll (Indian AY, July start).
       year: derivedYear,
       batch: derivedBatch,
       section: pick(r, "section", "SECTION") || "A",
       employeeId: pick(r, "employeeId", "EMPLOYEE ID") || rollRaw || email.split("@")[0],
-      department: pick(r, "department", "DEPARTMENT") || rollCourse,
+      department: pick(r, "department", "DEPARTMENT") || (courseIsDept ? courseRaw : "") || rollCourse,
       departmentId: pick(r, "departmentId", "DEPARTMENT ID"),
       designation: pick(r, "designation", "DESIGNATION"),
       hostelBlock: pick(r, "hostelBlock", "HOSTEL", "assignedHostel"),
@@ -369,7 +410,165 @@ export async function validateImport(csvInput: string | ImportRow[]): Promise<Va
       total: rawRows.length,
       valid: validRows.length,
       invalid: errors.length,
+      skipped: 0,
     },
+    skippedRows: [],
+    importedBefore: 0,
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/* Bulk import orchestration — per-row status + downloadable report    */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Fetch every roll already present in the DB so we can tell the caller which
+ * input rows will be skipped (roll already exists) versus committed as new.
+ * The roll is the SOLE uniqueness key for the bulk importer.
+ */
+async function fetchExistingRolls(rolls: string[]): Promise<Set<string>> {
+  const supabase = getSupabaseServiceClient();
+  const norm = new Set(rolls.map((r) => String(r).toUpperCase()).filter(Boolean));
+  const found = new Set<string>();
+  if (norm.size === 0) return found;
+  const BATCH = 500;
+  const arr = Array.from(norm);
+  for (let i = 0; i < arr.length; i += BATCH) {
+    const chunk = arr.slice(i, i + BATCH);
+    const { data } = await supabase.from("student_details").select("roll").in("roll", chunk);
+    for (const row of data ?? []) {
+      if (row && row.roll) found.add(String(row.roll).toUpperCase());
+    }
+    // Rolls are also stored as the user's unique_id.
+    const { data: uq } = await supabase.from("users").select("unique_id").in("unique_id", chunk);
+    for (const row of uq ?? []) {
+      if (row && row.unique_id) found.add(String(row.unique_id).toUpperCase());
+    }
+  }
+  return found;
+}
+
+export interface BulkImportOutcome {
+  /** Per-row report, one entry per input row, in sheet order. */
+  report: BulkImportReport;
+  /** Only the rows that were actually committed (status === 'imported'). */
+  committedRows: ImportRow[];
+}
+
+/**
+ * End-to-end bulk import that classifies every row:
+ *   - invalid: failed a required-field / empty check (reported, not imported)
+ *   - skipped: roll already exists in the DB (left untouched — NO update)
+ *   - imported: committed as a new student
+ * Returns the per-row report the UI renders as a table + downloadable CSV.
+ */
+export async function runBulkImport(
+  csvInput: string | ImportRow[],
+  actorId: string,
+  skipErrors: boolean = true
+): Promise<BulkImportOutcome> {
+  const validation = await validateImport(csvInput);
+
+  // Which of the valid rows' rolls already exist? The roll is the only
+  // uniqueness key — email / unique / employee collisions do NOT matter here.
+  const candidateRolls = validation.validRows
+    .map((r) => (r.roll ? String(r.roll) : r.uniqueId ? String(r.uniqueId) : ""))
+    .filter(Boolean);
+  const existing = await fetchExistingRolls(candidateRolls);
+
+  // Rebuild the validRows list keeping row alignment with the input sheet so
+  // we can map every row to an outcome.
+  const rawRows: Record<string, string>[] =
+    typeof csvInput === "string" ? await parseCsv(csvInput) : (csvInput as unknown as Record<string, string>[]);
+
+  const reportRows: RowReport[] = [];
+  const toCommit: ImportRow[] = [];
+
+  // Re-run the same picks to know each sheet row's roll + name for the report.
+  for (let i = 0; i < rawRows.length; i++) {
+    const rowNum = i + 1;
+    const r = rawRows[i];
+    const rollRaw = pick(r, "H.T NO.", "HT NO", "H T NO", "HALL TICKET NO", "ROLL", "roll", "uniqueId")
+      || pick(r, "htno", "HTNO", "HT NO", "HTNO NO", "HALL TICKET NO");
+    const name = pick(r, "name", "NAME OF THE STUDENT", "NAME", "STUDENT_NAME", "STUDENT NAME");
+    const email = pick(r, "email", "EMAIL ID", "EMAIL").toLowerCase();
+    reportRows.push({
+      row: rowNum,
+      roll: rollRaw || undefined,
+      name: name || undefined,
+      email: email || undefined,
+      status: "invalid",
+      reason: "not evaluated",
+    });
+  }
+
+  // Apply the validation results (invalid rows + reasons) onto the report.
+  const errByRow = new Map<number, string[]>();
+  for (const e of validation.errors) {
+    errByRow.set(e.row, [...(errByRow.get(e.row) ?? []), e.message]);
+  }
+  for (const rep of reportRows) {
+    const errs = errByRow.get(rep.row);
+    if (errs && errs.length > 0) {
+      rep.status = "invalid";
+      rep.reason = errs.join("; ");
+    }
+  }
+
+  // Classify valid rows: existing roll -> skipped, else -> committed.
+  for (const r of validation.validRows) {
+    const roll = r.roll ? String(r.roll).toUpperCase() : r.uniqueId ? String(r.uniqueId).toUpperCase() : "";
+    const rowNum = rawRows.findIndex((raw) => {
+      const rawRoll = pick(raw, "H.T NO.", "HT NO", "H T NO", "HALL TICKET NO", "ROLL", "roll", "uniqueId")
+        || pick(raw, "htno", "HTNO", "HT NO", "HTNO NO", "HALL TICKET NO");
+      return (rawRoll ? String(rawRoll).toUpperCase() : "") === roll;
+    });
+    const sheetRow = rowNum === -1 ? 0 : rowNum + 1;
+    if (roll && existing.has(roll)) {
+      const rep = reportRows.find((x) => x.roll && String(x.roll).toUpperCase() === roll);
+      if (rep) { rep.status = "skipped"; rep.reason = `roll '${roll}' already exists in the database`; }
+    } else {
+      toCommit.push(r);
+      const rep = reportRows.find((x) => x.email && x.email.toLowerCase() === r.email.toLowerCase());
+      if (rep) rep.status = "imported";
+    }
+  }
+
+  // Commit only the genuinely-new rows.
+  const commit = await commitImport(toCommit, actorId, skipErrors);
+
+  // Fold commit-level failures back onto the report (a row that errored while
+  // inserting becomes 'invalid' with the commit error).
+  const commitErrByRow = new Map<number, string>();
+  for (const ce of commit.errors) {
+    if (ce.row > 0) commitErrByRow.set(ce.row, ce.error);
+  }
+
+  // Re-link commit failures to report rows by email where possible.
+  for (const [idx, r] of toCommit.entries()) {
+    const failRow = commitErrByRow.get(idx + 1);
+    if (failRow) {
+      const rep = reportRows.find((x) => x.email && x.email.toLowerCase() === String(r.email).toLowerCase());
+      if (rep) { rep.status = "invalid"; rep.reason = `commit failed: ${failRow}`; }
+    } else {
+      const rep = reportRows.find((x) => x.email && x.email.toLowerCase() === String(r.email).toLowerCase());
+      if (rep) rep.reason = "imported as new";
+    }
+  }
+
+  const imported = reportRows.filter((r) => r.status === "imported").length;
+  const skipped = reportRows.filter((r) => r.status === "skipped").length;
+  const invalid = reportRows.filter((r) => r.status === "invalid").length;
+
+  return {
+    report: {
+      totalRows: reportRows.length,
+      imported,
+      skipped,
+      invalid,
+      rows: reportRows,
+    },
+    committedRows: toCommit,
   };
 }
 
@@ -383,6 +582,12 @@ export async function commitImport(
   skipErrors: boolean = true
 ): Promise<CommitResult> {
   const supabase = getSupabaseServiceClient();
+
+  // Defense in depth: verify no row targets an existing student by EMAIL.
+  // The roll (H.T NO.) is the bulk importer's sole uniqueness key, and
+  // `runBulkImport` already classifies existing rolls as 'skipped' before
+  // calling commit. If an email exists here we do NOT abort the whole batch —
+  // each row is individually skipped at processSingleRow time.
   const limit = pLimit(5);
   const tasks = rows.map((row, i) => limit(() => processSingleRow(row, i + 1, supabase, actorId)));
   const rowResults = await Promise.all(tasks);
@@ -440,19 +645,14 @@ async function processSingleRow(
     let targetUserId: string;
 
     if (existing) {
-      targetUserId = existing.id;
-      const updates: Record<string, any> = {
-        name: row.name,
-        role: row.role,
-        phone: row.phone || null,
-        status: row.status || "ACTIVE",
-        updated_at: new Date().toISOString(),
+      // The roll is the importer's sole uniqueness key; an existing email here
+      // means this record is already in the DB. We SKIP this row (report it as
+      // "already exists") rather than aborting the whole batch. No update is
+      // ever written to an existing student.
+      return {
+        row: rowNum,
+        error: `email '${row.email}' already exists in the database — skipped (no update)`,
       };
-      if (row.uniqueId) updates.unique_id = row.uniqueId;
-      if (row.dob) updates.dob = row.dob;
-
-      const { error: updErr } = await supabase.from("users").update(updates).eq("id", targetUserId);
-      if (updErr) throw new Error(updErr.message);
     } else {
       const newId = crypto.randomUUID();
       targetUserId = newId;

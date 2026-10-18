@@ -83,20 +83,80 @@ export default function AdminReportsPage() {
     };
   }, []);
 
-  const generate = (type: GeneratedReport["type"]) => {
+  // Load persisted generated reports so the list survives a refresh.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/admin/reports?limit=20", { headers: getAuthHeaders(), cache: "no-store" });
+        const json = await res.json();
+        if (!cancelled && json.success && Array.isArray(json.data)) {
+          setGenerated(
+            json.data.map((r: any) => ({
+              id: r.id,
+              title: r.title,
+              range: r.range_label,
+              type: r.type,
+              generatedAt: r.created_at,
+              source: r.source,
+            }))
+          );
+        }
+      } catch {
+        /* fall back to in-memory only */
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const generate = async (type: GeneratedReport["type"]) => {
     setBusy(type);
-    setTimeout(() => {
-      const rep: GeneratedReport = {
-        id: `rpt-${Date.now()}`,
-        title: `${type} Gate Activity Report`,
-        range: rangeFor(type),
-        type,
-        generatedAt: new Date().toISOString(),
-        source: "manual",
-      };
-      setGenerated((prev) => [rep, ...prev]);
+    const title = `${type} Gate Activity Report`;
+    const range = rangeFor(type);
+
+    // Snapshot the current dashboard numbers into the report so the CSV we
+    // persist reflects the real data at generation time, not whatever the
+    // dashboard happens to show later.
+    const payload = data
+      ? {
+          onCampus: data.onCampus,
+          totalScans: data.totalScans,
+          todayIn: data.todayIn,
+          todayOut: data.todayOut,
+          activeAlerts: data.activeAlerts,
+          deptBreakdown: data.deptBreakdown,
+        }
+      : null;
+    const csvBody = payload
+      ? [
+          ["Date", range].join(","),
+          ["Metric", "Value"].join(","),
+          ["Total Students (on campus)", String(payload.onCampus)],
+          ["Total Scans (today)", String(payload.totalScans)],
+          ["Entries (today)", String(payload.todayIn)],
+          ["Exits (today)", String(payload.todayOut)],
+          ["Active Alerts", String(payload.activeAlerts)],
+          "",
+          ["Department", "In", "Out", "% of Activity"].join(","),
+          ...payload.deptBreakdown.map((d) => [d.dept, d.in, d.out, `${d.pct}%`].join(",")),
+        ].join("\n")
+      : null;
+
+    try {
+      await fetch("/api/admin/reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify({ title, range, type, source: "manual", csvBody, payload }),
+      });
+    } catch {
+      /* persist best-effort; still show it in the session list */
+    } finally {
+      setGenerated((prev) => [
+        { id: `rpt-${Date.now()}`, title, range, type, generatedAt: new Date().toISOString(), source: "manual" },
+        ...prev,
+      ]);
       setBusy(null);
-    }, 500);
+    }
   };
 
   const exportAll = async () => {

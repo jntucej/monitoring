@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { CountUp } from "@/components/shared/CountUp";
+import { CountUp } from "@/components/admin/shared/CountUp";
 import {
   Users,
   CheckCircle2,
@@ -412,6 +412,13 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                         {selectedFaculty.phone}
                       </span>
                     )}
+                    <a
+                      href={`/admin/faculty/${selectedFaculty.uniqueId}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--action-primary)] hover:underline"
+                    >
+                      Full profile <ChevronRight className="w-3 h-3" />
+                    </a>
                   </div>
                 </div>
               </div>

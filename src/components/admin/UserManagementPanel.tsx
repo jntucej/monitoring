@@ -15,9 +15,9 @@ import {
   Loader2,
 } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
-import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { PageLoading } from "@/components/shared/LoadingStates";
+import { ConfirmDialog } from "@/components/admin/shared/ConfirmDialog";
+import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { PageLoading } from "@/components/admin/shared/LoadingStates";
 import type { User, AccountStatus, Role } from "@/lib/types";
 
 export interface UserManagementPanelProps {

@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { usePolling } from "@/hooks/usePolling";
 import { DataTable } from "@/components/ui/DataTable";
-import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { ConfirmDialog } from "@/components/admin/shared/ConfirmDialog";
 import { AlertTriangle, Bell, CheckCircle, Check, RefreshCw } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { getAuthHeaders } from "@/lib/utils";
 import type { Alert } from "@/lib/types";
 

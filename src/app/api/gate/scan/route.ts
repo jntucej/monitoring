@@ -17,6 +17,13 @@ interface ScanBody {
   isManual?: boolean;
   clientEventId?: string;
   geo?: { latitude?: number | null; longitude?: number | null; accuracy?: number | null };
+  /**
+   * Chosen entry type for an IN scan (hosteller | day_scholar). Required by
+   * recordScan on IN scans; the operator UI sends the canonical type after the
+   * operator picks an entry button. Omitted on OUT scans (the scope check
+   * reads the stored current_entry_type instead).
+   */
+  entryType?: "hosteller" | "day_scholar";
 }
 
 export const POST = withRateLimit(
@@ -53,6 +60,7 @@ export const POST = withRateLimit(
           isManual: body.isManual,
           clientEventId,
           geo: body.geo,
+          entryType: body.entryType,
           operatorId: auth.userId,
           operatorName: auth.email,
           operatorRole: auth.role,

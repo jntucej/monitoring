@@ -8,7 +8,7 @@ const nextConfig = {
     // Keep strict -- do NOT set to true, it hides real bugs.
     ignoreBuildErrors: false,
   },
-  serverExternalPackages: ['bcryptjs', 'jose'],
+  serverExternalPackages: ['bcryptjs', 'jose', 'pg', 'pg-connection-string', 'pgpass'],
   experimental: {
     serverActions: {
       bodySizeLimit: '2mb',
@@ -29,32 +29,18 @@ const nextConfig = {
   },
   async redirects() {
     return [
-      // Collapse 5 approval pages → 1
-      { source: '/principal/approvals',              destination: '/principal/approvals?tab=mine',      permanent: false },
+      // Legacy alias paths → the single approvals page. These source paths
+      // are NOT real pages on disk (they're old route names), so the redirect
+      // is safe: the destination path (/principal/approvals) is a real page and
+      // the source path differs from the destination path, so no 307 loop.
       { source: '/principal/permissions',            destination: '/principal/approvals?tab=mine',      permanent: false },
       { source: '/principal/all-pass-requests',      destination: '/principal/approvals?tab=all',       permanent: false },
       { source: '/principal/permission-management',  destination: '/principal/approvals?tab=all',       permanent: false },
       { source: '/principal/approval-centre',        destination: '/principal/approvals?tab=escalated', permanent: false },
 
-      // Oversight (audit + incidents merged)
-      { source: '/principal/audit',                  destination: '/principal/oversight?tab=audit',      permanent: false },
-      { source: '/principal/incidents',              destination: '/principal/oversight?tab=incidents',  permanent: false },
-
-      // Campus (attendance + hostel + gates + exams)
-      { source: '/principal/attendance',             destination: '/principal/campus?tab=people',        permanent: false },
-      { source: '/principal/hostel-oversight',       destination: '/principal/campus?tab=places',        permanent: false },
-      { source: '/principal/gate-activity',          destination: '/principal/campus?tab=places',        permanent: false },
-      { source: '/principal/examination-oversight',  destination: '/principal/campus?tab=exams',         permanent: false },
-
-      // Departments
+      // Legacy alias: department-analytics page existed on disk but was
+      // superseded by the departments page. Safe redirect (different path).
       { source: '/principal/department-analytics',   destination: '/principal/departments',              permanent: false },
-
-      // Drawers
-      { source: '/principal/delegation-manager',     destination: '/principal/approvals?action=delegate', permanent: false },
-      { source: '/principal/emergency-decisions',    destination: '/principal?playbook=1',                permanent: false },
-
-      // Reports → Command Center export
-      { source: '/principal/reports',                destination: '/principal?action=export',            permanent: false },
 
       // Existing profile redirects
       { source: '/admin/profile',      destination: '/profile', permanent: false },

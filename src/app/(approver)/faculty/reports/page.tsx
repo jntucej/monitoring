@@ -50,7 +50,6 @@ function FacultyReportsInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "faculty") as Role;
   const tier = getRoleTier(role);
-
   const {
     data,
     loading,

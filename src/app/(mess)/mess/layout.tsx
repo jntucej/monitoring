@@ -1,63 +1,47 @@
 "use client";
 
 import React from "react";
+import { Suspense } from "react";
+import { PageLoading } from "@/components/shared/LoadingStates";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { RoleConsole } from "@/components/shared/RoleConsole";
 import type { Role } from "@/lib/types";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 
-const MESS_ALLOWED_ROLES: Role[] = ["mess_incharge", "principal", "admin", "sysadmin"];
+/**
+ * Mess In-charge console layout — mirrors the oie/supervisor mount pattern.
+ *
+ * The local sticky tab bar (MessLayout / TABS) + KPI cards are dropped. The
+ * shell is the RoleConsole: IconRail + digest board (the per-day mess
+ * analytics digest, driven by /api/mess/analytics with itemKey "summary") +
+ * ticket ContextPanel + MessInchargeStatusBar + MessInchargeCommandBar
+ * (finalize / revoke / count / menu / issue commands), plus the
+ * MealServePanel as an extra panel in the main column. The 5 console
+ * destinations point at the real mess sub-pages under /mess/* in this same
+ * route group. Sub-pages pass their content through `children`.
+ */
+const MESS_ALLOWED_ROLES: Role[] = [
+  "mess_incharge",
+  "principal",
+  "admin",
+  "sysadmin",
+];
 
-const TABS = [
-  { href: "/mess", label: "Mess Overview", exact: true },
-  { href: "/mess/daily-meal-counts", label: "Daily Meal Counts" },
-  { href: "/mess/meal-attendance", label: "Meal Attendance" },
-  { href: "/mess/menu-management", label: "Menu Management" },
-  { href: "/mess/inventory-stock", label: "Inventory & Stock" },
-  { href: "/mess/consumption-reports", label: "Consumption Reports" },
-  { href: "/mess/mess-issues", label: "Mess Issues" },
-  { href: "/mess/operational-requests", label: "Operational Requests" },
-  { href: "/mess/scan", label: "Token Scanner" },
-] as const;
-
-function tabActive(tab: (typeof TABS)[number], pathname: string): boolean {
-  if ("exact" in tab && tab.exact) return pathname === tab.href;
-  return pathname === tab.href || pathname.startsWith(tab.href + "/");
-}
-
-export default function MessLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
+export default function MessConsoleLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <AuthGuard allowedRoles={MESS_ALLOWED_ROLES}>
-      <div className="min-h-screen bg-[#0f172a]">
-        <div className="mx-auto max-w-7xl px-4 py-4 md:px-6">
-          {/* Tab navigation */}
-          <nav className="mb-6 border-b border-slate-700" aria-label="Mess sections">
-            <ol className="flex flex-wrap items-center gap-1 text-sm">
-              {TABS.map((tab) => {
-                const isActive = tabActive(tab, pathname);
-                return (
-                  <li key={tab.href}>
-                    {isActive ? (
-                      <span className="inline-flex items-center px-3 py-2 text-emerald-400 font-semibold border-b-2 border-emerald-400">
-                        {tab.label}
-                      </span>
-                    ) : (
-                      <Link
-                        href={tab.href}
-                        className="inline-flex items-center px-3 py-2 text-slate-400 hover:text-slate-200 transition-colors"
-                      >
-                        {tab.label}
-                      </Link>
-                    )}
-                  </li>
-                );
-              })}
-            </ol>
-          </nav>
-          {children}
+      <Suspense fallback={<PageLoading />}>
+        <div className="min-w-0">
+          <RoleConsole role="mess_incharge" roleRoot="/mess">
+            {children}
+          </RoleConsole>
+          <DevContactStrip />
         </div>
-      </div>
+      </Suspense>
     </AuthGuard>
   );
 }

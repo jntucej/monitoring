@@ -15,15 +15,28 @@ import {
   ShieldCheck,
   Loader2,
   ArrowRight,
-  AlertTriangle
+  AlertTriangle,
+  Inbox
 } from "lucide-react";
 
 /* response shapes */
 
-interface DataResponse {
+interface GateInfo {
+  id: string;
+  name: string;
+  code: string;
+  audience: string;
+  type: string;
+}
+
+interface PresenceMatrixResponse {
   success: boolean;
-  data: unknown;
-  total?: number;
+  data: {
+    gates: GateInfo[];
+    roles: string[];
+    matrix: Record<string, Record<string, number>>;
+    lastUpdated: string;
+  };
 }
 
 function DeputyWardenGatemovementInner() {
@@ -36,7 +49,14 @@ function DeputyWardenGatemovementInner() {
     loading,
     error,
     refresh,
-  } = useApiResource<DataResponse>("/api/occupancy/presence-matrix", { ttlMs: 30_000 });
+  } = useApiResource<PresenceMatrixResponse>("/api/occupancy/presence-matrix", { ttlMs: 30_000 });
+
+  const gates = data?.data?.gates ?? [];
+  const matrix = data?.data?.matrix ?? {};
+  const onCampusTotal = gates.reduce(
+    (sum, g) => sum + Object.values(matrix[g.id] ?? {}).reduce((a, b) => a + b, 0),
+    0
+  );
 
   const refreshAll = useCallback(async () => {
     clearCache();
@@ -91,38 +111,43 @@ function DeputyWardenGatemovementInner() {
               <span className="text-sm font-semibold text-white truncate">Gate Movement</span>
             </div>
             <span className="text-xs text-slate-500 shrink-0">
-              {(data as DataResponse | null)?.total ?? 0} item(s)
+              {onCampusTotal} person(s) on campus across {gates.length} gate(s)
             </span>
           </div>
           {busy ? (
             <div className="p-4 flex items-center gap-2 text-sm text-slate-500 min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" /> Loading Gate Movement…
             </div>
+          ) : gates.length === 0 ? (
+            <div className="p-6 text-center min-w-0">
+              <Inbox className="w-6 h-6 text-slate-600 mx-auto mb-2" />
+              <p className="text-sm text-slate-500">No active gates are feeding the presence matrix.</p>
+            </div>
           ) : (
-            <div className="p-4 min-w-0">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Status</p>
-                  <p className="mt-1 text-lg font-bold text-emerald-400">Live</p>
-                  <p className="text-xs text-slate-500">Gate Movement data streams from the campus gate network.</p>
-                </div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Last Updated</p>
-                  <p className="mt-1 text-lg font-bold text-sky-400">
-                    {new Date().toLocaleString([], { hour: "2-digit", minute: "2-digit" })}
-                  </p>
-                  <p className="text-xs text-slate-500">Auto-refreshes every 30 seconds.</p>
-                </div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Records</p>
-                  <p className="mt-1 text-lg font-bold text-amber-400">
-                    {Array.isArray((data as unknown as { data?: unknown[] })?.data)
-                      ? (data as unknown as { data?: unknown[] }).data!.length
-                      : 0}
-                  </p>
-                  <p className="text-xs text-slate-500">Entries currently visible in this view.</p>
-                </div>
-              </div>
+            <div className="overflow-x-auto min-w-0">
+              <table className="w-full text-sm min-w-[480px]">
+                <thead>
+                  <tr className="border-b border-slate-800 text-left text-xs text-slate-500">
+                    <th className="py-2 pr-4">Gate</th>
+                    <th className="py-2 pr-4">Audience</th>
+                    <th className="py-2 pr-4">Type</th>
+                    <th className="py-2">On Campus</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {gates.map((g) => {
+                    const count = Object.values(matrix[g.id] ?? {}).reduce((a, b) => a + b, 0);
+                    return (
+                      <tr key={g.id} className="border-b border-slate-800/50 last:border-0">
+                        <td className="py-2 pr-4 font-mono text-xs text-slate-300 whitespace-nowrap">{g.name || g.code}</td>
+                        <td className="py-2 pr-4 text-slate-400">{g.audience}</td>
+                        <td className="py-2 pr-4 text-slate-400">{g.type}</td>
+                        <td className="py-2 text-emerald-400 font-semibold">{count}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
         </div>

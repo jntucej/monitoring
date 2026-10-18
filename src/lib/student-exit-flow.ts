@@ -39,6 +39,27 @@ export const CANONICAL_EXIT_FLOWS: Record<
     requiresPass: true,
     maxDurationHours: 12,
   },
+  emergency: {
+    code: "emergency",
+    name: "Emergency",
+    description: "Emergency departure (requires pass)",
+    requiresPass: true,
+    maxDurationHours: 12,
+  },
+  special_leave: {
+    code: "special_leave",
+    name: "Special Leave",
+    description: "Special leave (requires pass)",
+    requiresPass: true,
+    maxDurationHours: 24,
+  },
+  day_scholar_out: {
+    code: "day_scholar_out",
+    name: "Day Scholar Out",
+    description: "Day-scholar-only exit (normalizes to the daily-outing family)",
+    requiresPass: false,
+    maxDurationHours: 1,
+  },
 };
 
 export function normalizeExitReason(reason?: string | null): ReasonCode | "regular" {
@@ -48,14 +69,16 @@ export function normalizeExitReason(reason?: string | null): ReasonCode | "regul
   if (r === "home_in") return "home_in";
   if (r === "home_out" || r === "leave") return "home_out";
   if (r === "day_pass" || r === "day_out") return "day_pass";
-  if (r === "emergency") return "daily_outing";
+  if (r === "emergency") return "emergency";
+  if (r === "special_leave") return "home_out";
+  if (r === "day_scholar_out" || r === "day_scholar") return "day_scholar_out";
   if (r === "regular") return "regular";
   return "regular";
 }
 
 export function requiresGatePass(reason?: string | null): boolean {
   const norm = normalizeExitReason(reason);
-  if (norm === "home_out" || norm === "day_pass") {
+  if (norm === "home_out" || norm === "day_pass" || norm === "emergency" || norm === "special_leave") {
     return true;
   }
   return false;
@@ -96,7 +119,7 @@ export async function validateStudentExitFlow(
     .select("*")
     .eq("roll", normalizedRoll)
     .in("final_status", ["APPROVED", "APPROVED_PARENT", "APPROVED_ADMIN"])
-    .order("created_at", { ascending: false });
+    .order("requested_at", { ascending: false });
 
   if (error) {
     console.error("validateStudentExitFlow error querying gate_passes:", error);

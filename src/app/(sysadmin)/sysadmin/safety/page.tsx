@@ -1,73 +1,65 @@
 "use client";
 
-import Link from "next/link";
-import { ShieldCheck, Bell, DoorOpen, ShieldAlert, ArrowUpRight, AlertOctagon } from "lucide-react";
+import { Suspense } from "react";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { PageLoading } from "@/components/shared/LoadingStates";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
+import { useDashboardData } from "@/hooks/useDashboardData";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+import { SafetyContent } from "@/components/sysadmin/domains/alerts/SafetyContent";
+import type { SafetyEnvelope } from "@/components/sysadmin/domains/alerts/types";
+
+function SafetyInner() {
+  const { data, loading, error, refresh } = useDashboardData<SafetyEnvelope>(
+    "/api/admin/safety/overview",
+    {
+      ttlMs: 45_000,
+      pollMs: 15_000,
+    }
+  );
+  // ok() wraps the payload in { data: SafetyData } — unwrap for the content.
+  const payload = data?.data ?? null;
+
+  const busy = loading && !payload;
+
+  return (
+    <div className="space-y-4 min-w-0">
+      <PageHeader
+        title="Safety & Security Control"
+        subtitle="Gate lockdown cockpit: secure / elevated / critical states plus the incident timeline"
+        onRefresh={refresh}
+        refreshing={loading && data != null}
+      />
+
+      {error && (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-700">
+          Safety state unavailable: {error}
+        </div>
+      )}
+
+      <WidgetBoundary title="Safety">
+        {busy ? (
+          <div className="grid gap-3">
+            <div className="h-40 rounded-xl bg-slate-100 animate-pulse" />
+            <div className="h-64 rounded-xl bg-slate-100 animate-pulse" />
+          </div>
+        ) : (
+          payload && <SafetyContent data={payload} />
+        )}
+      </WidgetBoundary>
+
+      <DevContactStrip />
+    </div>
+  );
+}
 
 export default function SafetyHubPage() {
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
-      <div>
-        <p className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">Safety & Security Control</p>
-        <p className="text-sm text-[var(--text-secondary)] mt-1">
-          Zero-trust gate enforcement, real-time alert rules, perimeter lockdown, and standardized exit codes.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Link
-          href="/sysadmin/security"
-          className="p-5 rounded-xl bg-[var(--surface-default)] border border-[var(--border-subtle)] hover:border-[var(--primary)] transition group shadow-sm flex flex-col justify-between h-44"
-        >
-          <div className="flex items-start justify-between">
-            <div className="p-3 rounded-lg bg-emerald-500/10 text-emerald-500">
-              <ShieldCheck className="w-6 h-6" />
-            </div>
-            <ArrowUpRight className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[var(--primary)] transition" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-sm text-[var(--text-primary)]">Zero-Trust Gate Security</h3>
-            <p className="text-xs text-[var(--text-secondary)] mt-1">
-              QR anti-replay windows, biometric dual-factor checks, and gate bypass policies.
-            </p>
-          </div>
-        </Link>
-
-        <Link
-          href="/sysadmin/alerts/rules"
-          className="p-5 rounded-xl bg-[var(--surface-default)] border border-[var(--border-subtle)] hover:border-[var(--primary)] transition group shadow-sm flex flex-col justify-between h-44"
-        >
-          <div className="flex items-start justify-between">
-            <div className="p-3 rounded-lg bg-red-500/10 text-red-500">
-              <Bell className="w-6 h-6" />
-            </div>
-            <ArrowUpRight className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[var(--primary)] transition" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-sm text-[var(--text-primary)]">Automated Alert Rules</h3>
-            <p className="text-xs text-[var(--text-secondary)] mt-1">
-              Thresholds for curfew violations, tailgating, unapproved passes, and rapid notifications.
-            </p>
-          </div>
-        </Link>
-
-        <Link
-          href="/sysadmin/exit-reasons"
-          className="p-5 rounded-xl bg-[var(--surface-default)] border border-[var(--border-subtle)] hover:border-[var(--primary)] transition group shadow-sm flex flex-col justify-between h-44"
-        >
-          <div className="flex items-start justify-between">
-            <div className="p-3 rounded-lg bg-blue-500/10 text-blue-500">
-              <DoorOpen className="w-6 h-6" />
-            </div>
-            <ArrowUpRight className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[var(--primary)] transition" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-sm text-[var(--text-primary)]">Exit Reason Master Data</h3>
-            <p className="text-xs text-[var(--text-secondary)] mt-1">
-              Standardized campus departure categorizations (medical, official, weekend, day-out).
-            </p>
-          </div>
-        </Link>
-      </div>
-    </div>
+    <AuthGuard allowedRoles={["sysadmin", "admin"]}>
+      <Suspense fallback={<PageLoading />}>
+        <SafetyInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

@@ -15,9 +15,19 @@ import { AuthGuard } from "@/components/shared/AuthGuard";
 
 /* response shapes */
 
-interface DataResponse {
+interface PermissionRow {
+  id: string;
+  ticket_number: string;
+  workflow_type: string;
+  current_stage: string;
+  status: string;
+  sla_deadline?: string | null;
+  requester?: { id: string; name: string; role: string } | null;
+}
+
+interface PermissionsResponse {
   success: boolean;
-  data: unknown;
+  data: PermissionRow[];
   total?: number;
 }
 
@@ -31,7 +41,10 @@ function HodEscalationsInner() {
     loading,
     error,
     refresh,
-  } = useApiResource<DataResponse>("/api/permissions?workflowType=exam&status=PENDING&stage=vice_principal", { ttlMs: 30_000 });
+  } = useApiResource<PermissionsResponse>("/api/permissions?status=ESCALATED", { ttlMs: 30_000 });
+
+  const rows = data?.data ?? [];
+  const total = data?.total ?? rows.length;
 
   const refreshAll = useCallback(async () => {
     clearCache();
@@ -85,39 +98,43 @@ function HodEscalationsInner() {
               <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
               <span className="text-sm font-semibold text-white truncate">Escalations</span>
             </div>
-            <span className="text-xs text-slate-500 shrink-0">
-              {(data as DataResponse | null)?.total ?? 0} item(s)
-            </span>
+            <span className="text-xs text-slate-500 shrink-0">{total} escalated request(s)</span>
           </div>
           {busy ? (
             <div className="p-4 flex items-center gap-2 text-sm text-slate-500 min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" /> Loading Escalations…
             </div>
+          ) : rows.length === 0 ? (
+            <div className="p-6 text-center min-w-0">
+              <Inbox className="w-6 h-6 text-slate-600 mx-auto mb-2" />
+              <p className="text-sm text-slate-500">No escalated requests visible to your role. Escalations will appear here when the gate or approval chain flags them.</p>
+            </div>
           ) : (
-            <div className="p-4 min-w-0">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Status</p>
-                  <p className="mt-1 text-lg font-bold text-emerald-400">Live</p>
-                  <p className="text-xs text-slate-500">Escalations data streams from the campus gate network.</p>
-                </div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Last Updated</p>
-                  <p className="mt-1 text-lg font-bold text-sky-400">
-                    {new Date().toLocaleString([], { hour: "2-digit", minute: "2-digit" })}
-                  </p>
-                  <p className="text-xs text-slate-500">Auto-refreshes every 30 seconds.</p>
-                </div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Records</p>
-                  <p className="mt-1 text-lg font-bold text-amber-400">
-                    {Array.isArray((data as unknown as { data?: unknown[] })?.data)
-                      ? (data as unknown as { data?: unknown[] }).data!.length
-                      : 0}
-                  </p>
-                  <p className="text-xs text-slate-500">Entries currently visible in this view.</p>
-                </div>
-              </div>
+            <div className="overflow-x-auto min-w-0">
+              <table className="w-full text-sm min-w-[560px]">
+                <thead>
+                  <tr className="border-b border-slate-800 text-left text-xs text-slate-500">
+                    <th className="py-2 pr-4">Ticket</th>
+                    <th className="py-2 pr-4">Workflow</th>
+                    <th className="py-2 pr-4">Stage</th>
+                    <th className="py-2 pr-4">SLA</th>
+                    <th className="py-2">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((r) => (
+                    <tr key={r.id} className="border-b border-slate-800/50 last:border-0">
+                      <td className="py-2 pr-4 font-mono text-xs text-slate-300 whitespace-nowrap">{r.ticket_number}</td>
+                      <td className="py-2 pr-4 text-slate-300">{r.workflow_type}</td>
+                      <td className="py-2 pr-4 text-slate-400">{r.current_stage}</td>
+                      <td className="py-2 pr-4 text-slate-400">
+                        {r.sla_deadline ? new Date(r.sla_deadline).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "—"}
+                      </td>
+                      <td className="py-2 text-slate-400">{r.status}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>

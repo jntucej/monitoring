@@ -1,7 +1,13 @@
-import { query } from "@/lib/postgres";
 import type { Role, WorkflowType } from "@/lib/types";
-import { getSupabaseServiceClient } from "@/lib/dbClient";
-import { getParentChildren } from "@/lib/db";
+import type {
+  StageHistoryEntry,
+  RequestSnapshot,
+  ActorContext,
+} from "@/lib/permission-workflow-core";
+import {
+  appendStageHistory,
+  PermissionRuleError,
+} from "@/lib/permission-workflow-core";
 export type { WorkflowType };
 
 export const ROLE_STAGE_PERMISSIONS: Record<string, readonly string[]> = {
@@ -59,6 +65,10 @@ export async function generateTicketNumber(workflowType: WorkflowType): Promise<
   };
   const { seq, prefix } = map[workflowType];
 
+  // Lazy-import the pg-based query helper so this pure-logic module stays
+  // client-safe (permission-workflow is imported from client components; a
+  // top-level `@/lib/postgres` import would drag `pg` into the browser bundle).
+  const { query } = await import("@/lib/postgres");
   const result = await query<{ nextval: string }>(`SELECT nextval('${seq}')`);
   const nextVal = (result.rows && result.rows.length > 0) ? result.rows[0].nextval : null;
   if (!nextVal) {
@@ -132,46 +142,11 @@ export function canApproveAtStageWithBranch(
   return canApproveAtStageWithBranchResult(role, workflowType, currentStage, actorBranch, requesterBranch).allowed;
 }
 
-export interface StageHistoryEntry {
-  stage?: string;
-  actor_id?: string;
-  actor?: string | { id: string; name?: string; role?: string };
-  action: string;
-  comment?: string | null;
-  timestamp: string;
-  transition?: { from?: string; to?: string };
-}
-
-/**
- * Returns a new history array with the appended entry (does not mutate input).
- */
-export function appendStageHistory(
-  existing: StageHistoryEntry[] | unknown,
-  actor: string | { id: string; name?: string; role?: string },
-  action: string,
-  comment?: string | null,
-  transition?: { from?: string; to?: string }
-): StageHistoryEntry[] {
-  const rawArray = (Array.isArray(existing) ? existing : []) as StageHistoryEntry[];
-  const currentStage =
-    transition?.to ??
-    transition?.from ??
-    (rawArray.length > 0 ? (rawArray[rawArray.length - 1].stage ?? "initial") : "initial");
-  const actorId = typeof actor === "string" ? actor : actor.id;
-  const newEntry: StageHistoryEntry = {
-    stage: currentStage,
-    actor_id: actorId,
-    actor: typeof actor === "object" ? actor : undefined,
-    action,
-    comment: comment ?? undefined,
-    timestamp: new Date().toISOString(),
-    ...(transition ? { transition } : {}),
-  };
-  return [...rawArray, newEntry];
-}
-
 // ──────────────────────────────────────────────────────────────────────
 // Pure decision engine — no DB, no HTTP, no side effects.
+// (Shared types StageHistoryEntry / RequestSnapshot / ActorContext and the
+//  appendStageHistory helper are now re-exported from permission-workflow-core;
+//  see the top-of-file re-export block.)
 
 export type PermissionAction =
   | "APPROVE"
@@ -184,30 +159,6 @@ export type PermissionAction =
   | "BIOMETRIC_HOSTEL"
   | "BIOMETRIC_GATE"
   | "CANCEL";
-
-export interface RequestSnapshot {
-  id: string;
-  ticket_number: string;
-  workflow_type: WorkflowType;
-  current_stage: string;
-  status: string;
-  hostel_scope?: string | null;
-  student_user_id: string;
-  stage_history: StageHistoryEntry[] | null;
-  document_required?: boolean;
-  document_url?: string | null;
-  biometric_hostel_at?: string | null;
-  biometric_gate_at?: string | null;
-  digital_signature?: string | null;
-  branch?: string | null;
-  requester_user_id?: string;
-}
-
-export interface ActorContext {
-  id: string;
-  name: string;
-  role: string;
-}
 
 export interface DecisionInput {
   action: PermissionAction;
@@ -239,13 +190,22 @@ export interface DecisionResult {
   };
 }
 
-export class PermissionRuleError extends Error {
-  code: string;
-  constructor(code: string, message: string) {
-    super(message);
-    this.code = code;
-  }
-}
+// PermissionRuleError, StageHistoryEntry, RequestSnapshot, ActorContext and
+// appendStageHistory now live in permission-workflow-core.ts (the single,
+// shared, client-safe home for the pure primitives). Re-export them so the
+// pre-existing import path (`from "@/lib/permission-workflow"`) keeps working
+// and so there is exactly ONE class identity for `instanceof` checks.
+export {
+  PermissionRuleError,
+  appendStageHistory,
+  resolveEntryOptions,
+} from "./permission-workflow-core";
+export type {
+  StageHistoryEntry,
+  RequestSnapshot,
+  ActorContext,
+  EntryOptions,
+} from "./permission-workflow-core";
 
 export function applyPermissionAction(
   req: RequestSnapshot,
@@ -510,6 +470,9 @@ export async function getScopedTicket(
 > {
   if (!ticketParam) return { notFound: true };
 
+  // Lazy-import so this module stays client-safe (dbClient drags the pg pool
+  // into the browser bundle; getScopedTicket is server-only).
+  const { getSupabaseServiceClient } = await import("@/lib/dbClient");
   const supabase = getSupabaseServiceClient();
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(ticketParam);
 
@@ -532,12 +495,6 @@ export async function getScopedTicket(
           room_number,
           gender
         )
-      ),
-      document_signatures (
-        id,
-        signed_by,
-        signed_at,
-        signature_hash
       )
     `
     );
@@ -557,6 +514,10 @@ export async function getScopedTicket(
   }
 
   if (authUserRole === "parent" || authUserRole === "guardian") {
+    // Lazy-import so this pure-logic module stays client-safe: db.ts drags the
+    // pg pool into the bundle at its top level, but getScopedTicket is
+    // server-only and is the sole consumer of getParentChildren here.
+    const { getParentChildren } = await import("@/lib/db");
     const children = await getParentChildren(authUserId);
     const isChild = (children || []).some((c: { id?: string }) => c.id === request.student_user_id);
     if (!isChild) return { forbidden: true };
@@ -580,3 +541,16 @@ export async function getScopedTicket(
 
   return { request: request as unknown as ScopedTicketRow };
 }
+
+// ──────────────────────────────────────────────────────────────────────
+// Hostel-permission hierarchy — re-exported from the client-safe pure module
+// so that server-side callers keep their import path unchanged, while
+// "use client" components can import the pure functions directly from
+// permission-workflow-pure.ts without pulling the pg driver into the
+// browser bundle.
+//
+// This re-export is safe under a circular import because every exported
+// value is only accessed at call-time (inside forwardTicket / directGeneratePass
+// / requiresStepup), never at module-eval time.
+// ──────────────────────────────────────────────────────────────────────
+export * from "./permission-workflow-pure";

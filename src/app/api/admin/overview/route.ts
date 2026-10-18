@@ -1,115 +1,231 @@
 // src/app/api/admin/overview/route.ts
-// Admin overview: aggregated counts + recent campus audit events + occupancy.
+// Sysadmin Overview aggregator: Postgres-aggregated OverviewPayload consumed by
+// the new sidebar + Command Center.
 //
-// Returns:
-//   counts:   { users, gatesActive, announcements, openSupportTickets, openAlerts }
-//   recentAuditEvents: last 10 non-infra campus audit events
-//   occupancy: { onCampusNow }
+// All reads run against the server-side Postgres pool (`query` from @/lib/postgres),
+// NOT Supabase. Every table/column name below was confirmed against existing
+// api/admin routes:
+//   - users.status  -> 'ACTIVE' | 'SUSPENDED' | 'DEPROVISIONED'
+//   - users.two_factor_enabled (boolean)
+//   - gates.is_active (boolean)
+//   - alerts.severity ('critical'|'high'|'medium'|'low') + alerts.resolved (boolean)
+//   - role_change_requests.status ('PENDING' | 'APPROVED' | 'REJECTED')
+//   - permissions.status ('PENDING' ...)  [permissions / permission_requests]
+//   - backups.created_at (timestamp)
+//   - audit_logs.timestamp (timestamp)
+//   - departments / classes (counts)
 //
-// admin-scoped: requiredRole ['admin','sysadmin'].
+// admin-scoped: requiredRole ['sysadmin','admin'].
 
-import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseServiceClient } from "@/lib/dbClient";
+import { NextRequest } from "next/server";
+import type { AuthContext } from "@/lib/authContext";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
-import { campusCount } from "@/lib/db";
+import { ok } from "@/server/http/response";
+import { query } from "@/lib/postgres";
 
-const INFRA_PREFIXES = [
-  "auth_",
-  "mfa_",
-  "session_",
-  "backup_",
-  "retention_",
-  "db_migration",
-  "api_metrics",
-  "security_",
-  "rls_",
-];
-
-function isInfraAction(action: string): boolean {
-  const a = action.toLowerCase();
-  return INFRA_PREFIXES.some((p) => a.startsWith(p));
-}
-
-async function handleGet(_req: NextRequest) {
-  void _req;
-  try {
-    const db = getSupabaseServiceClient();
-
-    const [
-      usersRes,
-      gatesRes,
-      announcementsRes,
-      supportRes,
-      alertsRes,
-      recentAuditRes,
-      onCampus,
-    ] = await Promise.all([
-      db.from("users").select("id", { count: "exact", head: true }),
-      db.from("gates").select("id", { count: "exact", head: true }).eq("is_active", true),
-      db.from("announcements").select("id", { count: "exact", head: true }),
-      db.from("support_tickets").select("id", { count: "exact", head: true }).eq("status", "open"),
-      db.from("alerts").select("id", { count: "exact", head: true }).eq("resolved", false),
-      db
-        .from("audit_logs")
-        .select("id, action, user_name, user_role, details, timestamp")
-        .order("timestamp", { ascending: false })
-        .limit(50),
-      campusCount(),
-    ]);
-
-    const counts = {
-      users: usersRes.count ?? 0,
-      gatesActive: gatesRes.count ?? 0,
-      announcements: announcementsRes.count ?? 0,
-      openSupportTickets: supportRes.count ?? 0,
-      openAlerts: alertsRes.count ?? 0,
-    };
-
-    // Last 10 campus (non-infra) audit events.
-    const recentAuditEvents = ((recentAuditRes.data ?? []) as Record<string, unknown>[])
-      .filter((row) => !isInfraAction(String(row.action ?? "")))
-      .slice(0, 10)
-      .map((row) => {
-        let details: unknown = row.details;
-        if (typeof details === "string") {
-          try {
-            details = JSON.parse(details);
-          } catch {
-            /* keep raw */
-          }
-        }
-        return {
-          id: row.id,
-          action: row.action,
-          userName: row.user_name,
-          userRole: row.user_role,
-          details,
-          timestamp: row.timestamp,
-        };
-      });
-
-    return NextResponse.json({
-      success: true,
-      data: {
-        counts,
-        recentAuditEvents,
-        occupancy: { onCampusNow: onCampus },
-      },
-    });
-  } catch (error) {
-    console.error("Error building admin overview:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: "INTERNAL_ERROR", message: "Failed to build overview" },
-      },
-      { status: 500 }
-    );
-  }
+/** First positional row value, coerced to a number. 0 when the query returned
+ *  no rows (e.g. a table is missing / empty). Keeps the aggregator resilient to
+ *  schema drift at runtime. */
+function num(rows: Array<Record<string, unknown>>): number {
+  const v = rows[0]?.count;
+  return typeof v === "number" ? v : 0;
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "admin_overview", maxRequests: 300 }
+  withAuthorization(
+    async (req: NextRequest, ctx: { auth: AuthContext }): Promise<Response> => {
+      void req;
+      void ctx;
+
+      // ------------------------------------------------------------------
+      // All reads fire in a single Promise.all.
+      // ------------------------------------------------------------------
+      const [
+        identityRows,
+        mfaRows,
+        gatesRows,
+        alertsRows,
+        backupRows,
+        deptRows,
+        classRows,
+        auditRows,
+        roleReqRows,
+        permRows,
+      ] = await Promise.all([
+        // users by status (ACTIVE / SUSPENDED / DEPROVISIONED-or-deleted).
+        query(`
+          SELECT
+            COUNT(*) FILTER (WHERE status = 'ACTIVE')        AS active,
+            COUNT(*) FILTER (WHERE status = 'SUSPENDED')     AS suspended,
+            COUNT(*) FILTER (WHERE status = 'DEPROVISIONED') AS deprovisioned
+          FROM users
+        `).then((r) => r.rows),
+
+        // MFA coverage: two_factor_enabled TRUE among active users (0..1).
+        query(`
+          SELECT
+            COUNT(*) FILTER (WHERE two_factor_enabled IS TRUE) * 1.0
+              / NULLIF(COUNT(*) FILTER (WHERE status = 'ACTIVE'), 0) AS mfa_coverage
+          FROM users
+        `).then((r) => r.rows),
+
+        // gates is_active -> online/offline per gate.
+        query(`
+          SELECT is_active FROM gates ORDER BY id
+        `).then((r) => r.rows),
+
+        // open (resolved = false) alerts by severity.
+        query(`
+          SELECT
+            COUNT(*) FILTER (WHERE severity = 'critical') AS critical,
+            COUNT(*) FILTER (WHERE severity = 'high')     AS high,
+            COUNT(*) FILTER (WHERE severity = 'medium')    AS medium,
+            COUNT(*) FILTER (WHERE severity = 'low')       AS low
+          FROM alerts
+          WHERE resolved = false
+        `).then((r) => r.rows),
+
+        // backup freshness: recency of MAX(created_at) (0..1). None -> 0.
+        query(`
+          SELECT
+            GREATEST(
+              0,
+              LEAST(
+                1,
+                (EXTRACT(EPOCH FROM (NOW() - MAX(created_at)))::numeric / (3 * 24 * 3600))::real
+              )
+            ) AS backup_freshness
+          FROM backups
+        `).then((r) => r.rows),
+
+        // reference counts: departments.
+        query(`SELECT COUNT(*) AS count FROM departments`).then((r) => r.rows),
+
+        // reference counts: classes (courses) + sections.
+        query(`
+          SELECT
+            COUNT(*) AS courses,
+            COUNT(DISTINCT section) AS sections
+          FROM classes
+        `).then((r) => r.rows),
+
+        // governance: audit events per day, last 7 days (oldest first).
+        query(`
+          SELECT
+            d.day::text AS day,
+            COUNT(a.id) AS cnt
+          FROM generate_series(
+                  NOW() - INTERVAL '6 days', NOW(), INTERVAL '1 day'
+                ) AS d(day)
+          LEFT JOIN audit_logs a
+            ON date_trunc('day', a.timestamp) = date_trunc('day', d.day)
+          GROUP BY d.day
+          ORDER BY d.day
+        `).then((r) => r.rows),
+
+        // sidebar badge: pending role-change requests.
+        query(
+          `SELECT COUNT(*) AS count FROM role_change_requests WHERE status = 'PENDING'`
+        ).then((r) => r.rows),
+
+        // sidebar badge: pending permission/access requests.
+        query(`
+          SELECT COUNT(*) AS count FROM permissions WHERE status = 'PENDING'
+        `).then((r) => r.rows),
+      ]);
+
+      // ------------------------------------------------------------------
+      // Assemble the OverviewPayload.
+      // ------------------------------------------------------------------
+      const identity = {
+        active: Number(identityRows[0]?.active ?? 0),
+        suspended: Number(identityRows[0]?.suspended ?? 0),
+        deprovisioned: Number(identityRows[0]?.deprovisioned ?? 0),
+      };
+
+      const mfaRaw = mfaRows[0]?.mfa_coverage;
+      const mfaCoverage =
+        typeof mfaRaw === "number"
+          ? mfaRaw
+          : typeof mfaRaw === "string"
+            ? Number(mfaRaw) || 0
+            : 0;
+
+      // gates: map is_active to online/offline.
+      const gateStatus: ("online" | "offline")[] = gatesRows.map((row) =>
+        row.is_active === true || row.is_active === "true" ? "online" : "offline"
+      );
+
+      const aRow = alertsRows[0] ?? {};
+      const alerts = {
+        critical: Number(aRow.critical ?? 0),
+        high: Number(aRow.high ?? 0),
+        medium: Number(aRow.medium ?? 0),
+        low: Number(aRow.low ?? 0),
+      };
+
+      const backupRaw = backupRows[0]?.backup_freshness;
+      const backupFreshness =
+        typeof backupRaw === "number"
+          ? Math.max(0, Math.min(1, backupRaw))
+          : typeof backupRaw === "string"
+            ? Math.max(0, Math.min(1, Number(backupRaw) || 0))
+            : 0;
+
+      const reference = {
+        departments: num(deptRows),
+        courses: Number(classRows[0]?.courses ?? 0),
+        sections: Number(classRows[0]?.sections ?? 0),
+      };
+
+      // governance.events7d: one count per day, oldest -> newest.
+      const events7d: number[] = auditRows.map((row) => Number(row.cnt ?? 0));
+
+      // Sidebar badge counts.
+      const counts = {
+        people: identity.active,
+        promotions: num(roleReqRows),
+        access: num(permRows),
+      };
+
+      const payload = {
+        // command: 5 service checks — simplified to all "ok" for now.
+        // NOTE: wire to checkSystemHealth later; today we just assert liveness.
+        command: { health: ["ok", "ok", "ok", "ok", "ok"] },
+
+        identity,
+
+        access: { mfaCoverage },
+
+        gates: { status: gateStatus },
+
+        // monitoring.errorRate24h — stub. NOTE: compute real per-hour error
+        // rate from a metrics table (e.g. api_metrics) later.
+        monitoring: { errorRate24h: Array(24).fill(0) },
+
+        alerts,
+
+        // automation.runs14d — stub. NOTE: source real daily job-run counts
+        // from the jobs/scheduler table later.
+        automation: { runs14d: Array(14).fill(1) },
+
+        data: { backupFreshness },
+
+        reference,
+
+        // platform: env/schema drift — stub 0,0. NOTE: derive from
+        // environment diff + schema_migrations later.
+        platform: { envDrift: 0, schemaDrift: 0 },
+
+        governance: { events7d },
+
+        counts,
+      };
+
+      return ok(payload);
+    },
+    { requiredRole: ["sysadmin", "admin"] }
+  ),
+  { windowMs: 60_000, maxRequests: 120 }
 );

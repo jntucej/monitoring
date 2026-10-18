@@ -102,12 +102,42 @@ async function main() {
         checksum    TEXT NOT NULL
       )
     `);
-
-    // 2. Fetch already applied migrations
-    const res = await client.query<{ filename: string; checksum: string }>(
-      "SELECT filename, checksum FROM schema_migrations"
+    // Older installs created schema_migrations with only (version, applied_at).
+    // CREATE TABLE IF NOT EXISTS above is a no-op there, so add the columns this
+    // runner needs if they're absent. A migration may itself be self-transactional
+    // (BEGIN/COMMIT), so these DDL statements must run outside any wrapping tx.
+    await client.query(
+      `ALTER TABLE schema_migrations ADD COLUMN IF NOT EXISTS filename TEXT`
     );
-    const already = new Map(res.rows.map((r) => [r.filename, r.checksum]));
+    await client.query(
+      `ALTER TABLE schema_migrations ADD COLUMN IF NOT EXISTS checksum TEXT`
+    );
+    // Backfill filename from version for legacy rows so checksum-drift detection
+    // can map file -> recorded row. checksum stays NULL for those (never hashed),
+    // which is treated below as "unknown checksum" rather than drift.
+    await client.query(
+      `UPDATE schema_migrations SET filename = version WHERE filename IS NULL`
+    );
+
+    // 2. Fetch already applied migrations. Recorded rows use three historical
+    //    formats: bare version only, filename without .sql, or full filename.
+    //    Resolve all of them into one "seen" set of tokens so a file counts as
+    //    applied if either its bare version OR its full filename was recorded —
+    //    the same rule schema-drift-guard uses (which correctly reports the
+    //    real gaps).
+    const res = await client.query<{ version: string; filename: string | null; checksum: string | null }>(
+      "SELECT version, filename, checksum FROM schema_migrations"
+    );
+    const seen = new Set<string>();
+    // filename -> checksum, for files that were recorded WITH a checksum.
+    const checksums = new Map<string, string>();
+    for (const r of res.rows) {
+      seen.add(r.version);
+      if (r.filename) {
+        seen.add(r.filename);
+        if (r.checksum) checksums.set(r.filename, r.checksum);
+      }
+    }
 
     // 3. Scan and deduplicate migration files
     const fileMap = new Map<string, { dir: string; name: string; path: string }>();
@@ -133,14 +163,31 @@ async function main() {
     for (const f of files) {
       const sql = await readFile(f.path, "utf8");
       const sum = sha256(sql);
-      const prev = already.get(f.name);
+      const version = f.name.replace(/_.*/, "");
 
-      if (prev === sum) {
+      // Applied if either the bare version or the full filename was recorded
+      // (mirrors schema-drift-guard). Checksum is only compared when we have a
+      // recorded one; legacy rows (version-only, no checksum) are trusted as-is.
+      const recorded = seen.has(version) || seen.has(f.name);
+      const prev =
+        checksums.get(f.name) ??
+        // fall back to a checksum recorded under the extension-less filename form
+        checksums.get(f.name.replace(/\.sql$/, ""));
+
+      if (recorded && prev === sum) {
         console.log(`✓ ${f.name} (already applied)`);
         skipped++;
         continue;
       }
-      if (prev && prev !== sum) {
+      if (recorded && !prev) {
+        // Recorded by the legacy version-only runner: no checksum to compare.
+        // Trust the existing row rather than re-running a possibly destructive
+        // migration or flagging false drift.
+        console.log(`✓ ${f.name} (already applied, legacy row — no checksum)`);
+        skipped++;
+        continue;
+      }
+      if (recorded && prev !== sum) {
         console.error(`✗ ${f.name} — content changed since last apply (checksum drift). Aborting.`);
         drifted++;
         continue;
@@ -159,7 +206,6 @@ async function main() {
       try {
         if (!selfTx) await client.query("BEGIN");
         await client.query(sql);
-        const version = f.name.replace(/_.*/, "");
         await client.query(
           "INSERT INTO schema_migrations (version, filename, checksum) VALUES ($1, $2, $3)",
           [version, f.name, sum]

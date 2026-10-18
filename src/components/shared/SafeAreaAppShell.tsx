@@ -38,11 +38,16 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
     }
   }, [performanceTier]);
 
-  // The System Administrator workspace owns a full-screen, standalone shell
-  // (own sidebar/header via the (sysadmin) route layout). Hide the shared
-  // navigation chrome so there is no doubled sidebar/header for maximum
-  // visual distinction and a tighter security surface.
-  const isStandaloneSysadmin = pathname?.startsWith("/sysadmin") ?? false;
+  // Standalone console routes own their full-screen shell (their own sidebar +
+  // header via the route layout). The shared nav chrome (global Sidebar +
+  // DynamicHeader + bottom tabs) is hidden for these so it never double-renders
+  // over the console's own shell. Both /sysadmin and /admin are full consoles
+  // with their own manifest-driven sidebar; everything else uses the shared
+  // SafeAreaAppShell navigation.
+  const isStandaloneConsole =
+    pathname?.startsWith("/sysadmin") ?? false
+      ? true
+      : (pathname?.startsWith("/admin") ?? false);
 
   // Initialize theme from localStorage on client-side mount
   useEffect(() => {
@@ -57,7 +62,7 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
     }
   }, [setTheme]);
 
-  const showNav = _hasHydrated && authenticated && !isStandaloneSysadmin;
+  const showNav = _hasHydrated && authenticated && !isStandaloneConsole;
 
   return (
     <div className="relative min-h-[100dvh] flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] antialiased selection:bg-[var(--action-primary)] selection:text-white pt-safe pb-safe pl-safe pr-safe">
@@ -83,7 +88,7 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
 
           <main
             className={
-              isStandaloneSysadmin
+              isStandaloneConsole
                 ? "flex-1 w-full"
                 : "flex-1 p-3 sm:p-5 md:p-6 pb-24 md:pb-6 max-w-7xl mx-auto w-full"
             }

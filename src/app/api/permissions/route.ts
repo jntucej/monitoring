@@ -109,34 +109,74 @@ async function handleGet(req: NextRequest, context: any) {
   const hscope = searchParams.get("hostel_scope") || searchParams.get("hostelScope");
   const status = searchParams.get("status");
 
+  // ── exam_branch: self-scoped branch guard ────────────────────────────
+  // exam_branch is not a stage name in the /api/permissions role→stage map, so
+  // without this guard the caller falls into the final `else` and gets an
+  // empty list. Resolve the caller's own branch/department (authoritative,
+  // server-side — the client never supplies it) and scope exam requests to
+  // that branch. Fail-closed: no resolvable branch → empty scoped list.
+  if (role === "exam_branch") {
+    // Resolve the caller's branch from employee_details.department_id (the
+    // staff/employee layer) with a fallback to users.department_id (the
+    // user row). Mirrors the HOD/caretaker self-scoping above.
+    const { data: empRow } = await db
+      .from("employee_details")
+      .select("department_id")
+      .eq("user_id", userId)
+      .maybeSingle();
+    const { data: userRow } = await db
+      .from("users")
+      .select("department_id")
+      .eq("id", userId)
+      .maybeSingle();
+    const callerBranch: string | null =
+      empRow?.department_id || userRow?.department_id || null;
+
+    const branchParam = searchParams.get("branch");
+    const wantsSelfBranch = !branchParam || branchParam === ":self";
+    if (wantsSelfBranch) {
+      if (!callerBranch) {
+        // Fail-closed: no resolvable branch/department on file → empty list,
+        // not a 500 and not the unscoped full queue.
+        return NextResponse.json({ success: true, data: [], total: 0 });
+      }
+      // exam-scoped branch guard: only exam workflow tickets in the caller's
+      // branch. (Explicit `?branch=<code>` is ignored for exam_branch so a
+      // caller cannot read another branch's exam queue.)
+      const { data: branchData, count: branchCount, error: branchErr } = await db
+        .from("permissions")
+        .select(
+          `
+          *,
+          requester:users!permissions_requester_user_id_fkey (id, name, email, phone, role),
+          student:users!permissions_student_user_id_fkey (id, name, role, unique_id)
+          `,
+          { count: "exact" }
+        )
+        .eq("workflow_type", "exam")
+        .eq("branch", callerBranch);
+      if (branchErr) {
+        return NextResponse.json({ success: false, error: branchErr.message }, { status: 500 });
+      }
+      return NextResponse.json({ success: true, data: branchData, total: branchCount || 0 });
+    }
+  }
+
   let query = db.from("permissions").select(
     `
     *,
-    requester:requester_user_id (
+    requester:users!permissions_requester_user_id_fkey (
       id,
       name,
       email,
       phone,
       role
     ),
-    student:student_user_id (
+    student:users!permissions_student_user_id_fkey (
       id,
       name,
       role,
-      student_details (
-        roll,
-        year,
-        section,
-        hostel_block,
-        room_number,
-        gender
-      )
-    ),
-    document_signatures (
-      id,
-      signed_by,
-      signed_at,
-      signature_hash
+      unique_id
     )
     `,
     { count: "exact" }
@@ -171,7 +211,31 @@ async function handleGet(req: NextRequest, context: any) {
     }
   } else if (["caretaker", "deputy_warden", "hostel_manager", "faculty", "hod", "oie", "vice_principal"].includes(role)) {
     query = query.eq("current_stage", role);
-    if (hscope) query = query.eq("hostel_scope", hscope);
+    if (hscope) {
+      query = query.eq("hostel_scope", hscope);
+    } else {
+      // Hostel-scoped roles: when the client does not pass an explicit
+      // hostel_scope, auto-derive it from the caller's own users.hostel_scope
+      // so the board is scoped to the caller's hostel (fail-closed: a user
+      // with no hostel_scope sees no hostel-scoped tickets). This mirrors
+      // the caretaker assigned_hostel self-scoping fix.
+      const isHostelScopedRole = ["caretaker", "deputy_warden", "hostel_manager"].includes(role);
+      if (isHostelScopedRole) {
+        const { data: profile } = await db
+          .from("users")
+          .select("hostel_scope, assigned_hostel")
+          .eq("id", userId)
+          .maybeSingle();
+        const callerScope = profile?.hostel_scope ?? null;
+        if (callerScope) {
+          query = query.eq("hostel_scope", callerScope);
+        } else {
+          // No hostel scope on file → return an empty, scoped result rather
+          // than the unscoped full queue (safe fail-closed).
+          return NextResponse.json({ success: true, data: [], total: 0 });
+        }
+      }
+    }
   } else if (role === "principal") {
     // Principal sees hostel requests at warden_or_principal stage AND
     // any other workflow requests currently at the principal stage.

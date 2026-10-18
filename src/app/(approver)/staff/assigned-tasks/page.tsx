@@ -12,18 +12,11 @@ import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { Loader2, ShieldCheck, AlertTriangle, ArrowRight } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-
-/* response shapes */
-
-interface DataResponse {
-  success: boolean;
-  data: unknown;
-  total?: number;
-}
+import type { StaffMyDayResponse } from "../types";
 
 function StaffAssignedTasksInner() {
   const user = useAuthStore((s) => s.user);
-  const role = (user?.role ?? "Staff") as Role;
+  const role = (user?.role ?? "staff") as Role;
   const tier = getRoleTier(role);
 
   const {
@@ -31,7 +24,7 @@ function StaffAssignedTasksInner() {
     loading,
     error,
     refresh,
-  } = useApiResource<DataResponse>("/api/staff/my-day", { ttlMs: 30_000 });
+  } = useApiResource<StaffMyDayResponse>("/api/staff/my-day", { ttlMs: 30_000 });
 
   const refreshAll = useCallback(async () => {
     clearCache();
@@ -41,10 +34,10 @@ function StaffAssignedTasksInner() {
   usePolling(refreshAll, { intervalMs: 30_000, enabled: !!user });
 
   const busy = loading && !data;
+  const slice = data?.data?.assignedTasks;
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
-      {/* Back link */}
       <Link
         href="/staff"
         className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
@@ -52,9 +45,9 @@ function StaffAssignedTasksInner() {
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Staff Overview
       </Link>
 
-      {/* Page toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
+          <h1 className="text-base font-semibold text-white">Assigned Tasks</h1>
           <p className="mt-1 text-sm text-slate-400 min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
@@ -83,10 +76,10 @@ function StaffAssignedTasksInner() {
           <div className="px-4 py-3 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
               <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span className="text-sm font-semibold text-white truncate">Assigned Tasks</span>
+              <span className="text-sm font-semibold text-white truncate">Open staff-leave requests</span>
             </div>
             <span className="text-xs text-slate-500 shrink-0">
-              {(data as DataResponse | null)?.total ?? 0} item(s)
+              {slice?.totalOpen ?? 0} open
             </span>
           </div>
           {busy ? (
@@ -94,30 +87,36 @@ function StaffAssignedTasksInner() {
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" /> Loading Assigned Tasks…
             </div>
           ) : (
-            <div className="p-4 min-w-0">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Status</p>
-                  <p className="mt-1 text-lg font-bold text-emerald-400">Live</p>
-                  <p className="text-xs text-slate-500">Duties and open requests assigned to you.</p>
+            <div className="p-4 min-w-0 space-y-3">
+              {slice && slice.openRequests.length > 0 ? (
+                <div className="space-y-2 min-w-0">
+                  {slice.openRequests.map((r) => (
+                    <div key={r.id} className="flex flex-wrap items-center gap-3 rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
+                      <span className="text-xs text-slate-500 font-mono shrink-0">{r.ticket_number ?? r.id.slice(0, 8)}</span>
+                      <span className="flex-1 text-sm text-slate-200">{r.workflow_type}</span>
+                      <span className="px-2 py-0.5 rounded-full text-[11px] bg-slate-700/40 text-slate-300 shrink-0 capitalize">
+                        {r.current_stage ?? r.status}
+                      </span>
+                      <span className="text-xs text-slate-500 shrink-0">
+                        {new Date(r.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Last Updated</p>
-                  <p className="mt-1 text-lg font-bold text-sky-400">
-                    {new Date().toLocaleString([], { hour: "2-digit", minute: "2-digit" })}
-                  </p>
-                  <p className="text-xs text-slate-500">Auto-refreshes every 30 seconds.</p>
-                </div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Records</p>
-                  <p className="mt-1 text-lg font-bold text-amber-400">
-                    {Array.isArray((data as unknown as { data?: unknown[] })?.data)
-                      ? (data as unknown as { data?: unknown[] }).data!.length
-                      : 0}
-                  </p>
-                  <p className="text-xs text-slate-500">Tasks and requests visible in this view.</p>
-                </div>
-              </div>
+              ) : (
+                <p className="text-sm text-slate-500">No open staff-leave requests assigned to you.</p>
+              )}
+              {slice?.lastMovement && (
+                <p className="text-xs text-slate-500">
+                  Most recent movement:{" "}
+                  <span className="text-slate-300">{slice.lastMovement.direction}</span> at{" "}
+                  <span className="text-slate-300">
+                    {new Date(slice.lastMovement.timestamp).toLocaleString("en-IN", {
+                      day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
+                    })}
+                  </span>
+                </p>
+              )}
             </div>
           )}
         </div>

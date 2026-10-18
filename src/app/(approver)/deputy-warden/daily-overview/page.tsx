@@ -152,7 +152,6 @@ function DeputyWardenDailyOverviewInner() {
   }).length;
 
   const SECTIONS = [
-    { href: "/deputy-warden/resident-attendance", title: "Resident Attendance", sub: "Resident attendance by gate" },
     { href: "/deputy-warden/outpass-queue", title: "Outpass Queue", sub: "Outpass and hostel pass requests at warden stage" },
     { href: "/deputy-warden/leave-requests", title: "Leave Requests", sub: "Staff-leave requests awaiting review" },
     { href: "/deputy-warden/gate-movement", title: "Gate Movement", sub: "Live gate presence and movement" },

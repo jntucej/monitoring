@@ -15,13 +15,20 @@ import { AuthGuard } from "@/components/shared/AuthGuard";
 
 /* response shapes */
 
+interface StudentsStatsData {
+  total: number;
+  active: number;
+  suspended: number;
+  flagged: number;
+  onCampusToday: number;
+  todayEntries: number;
+  todayExits: number;
+  byDepartment?: Array<{ code: string; name: string; count: number }>;
+}
+
 interface StudentsStatsResponse {
   success: boolean;
-  data: {
-    total: number;
-    active: number;
-    onCampusToday: number;
-  };
+  data: StudentsStatsData;
 }
 
 function HodStudentsInner() {
@@ -88,9 +95,7 @@ function HodStudentsInner() {
               <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
               <span className="text-sm font-semibold text-white truncate">Students</span>
             </div>
-            <span className="text-xs text-slate-500 shrink-0">
-              {data?.data?.total ?? 0} student(s)
-            </span>
+            <span className="text-xs text-slate-500 shrink-0">{data?.data?.total ?? 0} student(s) in your department</span>
           </div>
           {busy ? (
             <div className="p-4 flex items-center gap-2 text-sm text-slate-500 min-w-0">
@@ -98,27 +103,42 @@ function HodStudentsInner() {
             </div>
           ) : (
             <div className="p-4 min-w-0">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 min-w-0">
                 <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Status</p>
-                  <p className="mt-1 text-lg font-bold text-emerald-400">Live</p>
-                  <p className="text-xs text-slate-500">Students data streams from the campus gate network.</p>
+                  <p className="text-xs text-slate-500 uppercase tracking-wide">On Campus Today</p>
+                  <p className="mt-1 text-lg font-bold text-emerald-400">{data?.data?.onCampusToday ?? 0}</p>
+                  <p className="text-xs text-slate-500">Currently on premises.</p>
                 </div>
                 <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Last Updated</p>
-                  <p className="mt-1 text-lg font-bold text-sky-400">
-                    {new Date().toLocaleString([], { hour: "2-digit", minute: "2-digit" })}
-                  </p>
-                  <p className="text-xs text-slate-500">Auto-refreshes every 30 seconds.</p>
+                  <p className="text-xs text-slate-500 uppercase tracking-wide">Entries / Exits</p>
+                  <p className="mt-1 text-lg font-bold text-sky-400">{data?.data?.todayEntries ?? 0} / {data?.data?.todayExits ?? 0}</p>
+                  <p className="text-xs text-slate-500">Gate movements logged today.</p>
                 </div>
                 <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Records</p>
-                  <p className="mt-1 text-lg font-bold text-amber-400">
-                    {data?.data?.total ?? 0}
-                  </p>
-                  <p className="text-xs text-slate-500">Students on record in your department.</p>
+                  <p className="text-xs text-slate-500 uppercase tracking-wide">Active</p>
+                  <p className="mt-1 text-lg font-bold text-white">{data?.data?.active ?? 0}</p>
+                  <p className="text-xs text-slate-500">Not suspended or checked out.</p>
+                </div>
+                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
+                  <p className="text-xs text-slate-500 uppercase tracking-wide">Roster Size</p>
+                  <p className="mt-1 text-lg font-bold text-amber-400">{data?.data?.total ?? 0}</p>
+                  <p className="text-xs text-slate-500">Total students on record.</p>
                 </div>
               </div>
+
+              {data?.data?.byDepartment && data.data.byDepartment.length > 0 && (
+                <div className="mt-4 min-w-0">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">By Department</p>
+                  <div className="flex flex-wrap gap-2 min-w-0">
+                    {data.data.byDepartment.map((d) => (
+                      <span key={d.code} className="inline-flex items-center gap-1.5 rounded-full border border-slate-700 bg-slate-800/50 px-2.5 py-1 text-xs text-slate-300">
+                        <span className="font-mono text-slate-400">{d.name}</span>
+                        <span className="text-slate-500">{d.count}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

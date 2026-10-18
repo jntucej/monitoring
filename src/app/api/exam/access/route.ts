@@ -77,9 +77,42 @@ async function handleGet(
   }
 }
 
+/**
+ * POST /api/exam/access  — set the exam-day gate state.
+ * Body: { open: boolean } → access_state = open ? "open" : "closed".
+ * Role-gated (same allowlist as GET). Persists to exam_day_state.
+ */
+async function handlePost(_req: NextRequest, context: { auth: AuthContext }) {
+  try {
+    const open = Boolean(_req && (_req as any).open);
+    const state = open ? "open" : "closed";
+    await query(
+      `INSERT INTO exam_day_state (day, access_state, updated_by, updated_at)
+       VALUES (CURRENT_DATE, $1, $2, NOW())
+       ON CONFLICT (day) DO UPDATE SET access_state = EXCLUDED.access_state,
+         updated_by = EXCLUDED.updated_by, updated_at = NOW()`,
+      [state, context.auth?.userId ?? null]
+    );
+    return NextResponse.json({ success: true, data: { day: state } });
+  } catch (error) {
+    console.error("Exam access state update error:", error);
+    return NextResponse.json(
+      { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to update exam day state" } },
+      { status: 500 }
+    );
+  }
+}
+
 export const GET = withRateLimit(
   withAuthorization(handleGet, {
     requiredRole: ["exam_superintendent", "exam_branch", "oie", "vice_principal", "principal", "admin", "sysadmin"],
   }),
   { keyPrefix: "exam_access", maxRequests: 60 }
+);
+
+export const POST = withRateLimit(
+  withAuthorization(handlePost, {
+    requiredRole: ["exam_superintendent", "exam_branch", "oie", "vice_principal", "principal", "admin", "sysadmin"],
+  }),
+  { keyPrefix: "exam_access_set", maxRequests: 20 }
 );

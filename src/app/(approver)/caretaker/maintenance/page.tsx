@@ -31,7 +31,7 @@ function CaretakerMaintenanceInner() {
     loading,
     error,
     refresh,
-  } = useApiResource<DataResponse>("/api/permissions?workflowType=staff_leave&status=PENDING&stage=caretaker", { ttlMs: 30_000 });
+  } = useApiResource<DataResponse>("/api/caretaker/maintenance", { ttlMs: 30_000 });
 
   const refreshAll = useCallback(async () => {
     clearCache();

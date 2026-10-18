@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { Activity } from "lucide-react";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { PageLoading } from "@/components/shared/LoadingStates";
-import { HealthDashboard } from "@/components/sysadmin/HealthDashboard";
+import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { PageLoading } from "@/components/admin/shared/LoadingStates";
+import { HealthDashboard } from "@/components/admin/HealthDashboard";
 import { getAuthHeaders } from "@/lib/utils";
 
 type ComponentStatus = "healthy" | "degraded" | "unhealthy" | "unknown";

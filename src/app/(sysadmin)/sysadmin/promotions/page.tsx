@@ -1,15 +1,28 @@
 "use client";
+// src/app/(sysadmin)/sysadmin/promotions/page.tsx
+// PROMOTIONS sysadmin page (kind: kanban, pollMs 30000).
+//
+// Wrapper: the sysadmin layout already enforces withAuthorization
+// (requiredRole ['sysadmin','admin']) + withRateLimit. This client page pulls
+// the aggregated dashboard payload via useDashboardData from
+// /api/admin/promotions/overview, and renders the PENDING/APPROVED/REJECTED
+// kanban with per-column mini donuts, per-card SLA arcs, and the
+// from-role → to-role Sankey.
+//
+// "use client" tsx; cn from @/lib/utils; viz from kit/viz; minis from
+// kit/sidebar; query from @/lib/postgres on the server (NOT Supabase).
 
-import { AuthGuard } from "@/components/shared/AuthGuard";
-import { PromotionRequests } from "@/components/sysadmin/PromotionRequests";
+import { useDashboardData } from "@/hooks/useDashboardData";
+import { PromotionsContent } from "@/components/sysadmin/domains/identity/PromotionsContent";
+import type { PromotionsEnvelope } from "@/components/sysadmin/domains/identity/types";
 
-export default function RolePromotionsPage() {
-  return (
-    <AuthGuard allowedRoles={["sysadmin", "admin", "faculty"]}>
-      <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-6">
-        <PromotionRequests />
-      </div>
-    </AuthGuard>
+export default function PromotionsPage() {
+  const { data, loading, error } = useDashboardData<PromotionsEnvelope>(
+    "/api/admin/promotions/overview",
+    { ttlMs: 90_000, pollMs: 30_000 },
   );
-}
+  // ok() wraps the payload in { data: PromotionsData } — unwrap for the content.
+  const payload = data?.data ?? null;
 
+  return <PromotionsContent data={payload} loading={loading} error={error} />;
+}

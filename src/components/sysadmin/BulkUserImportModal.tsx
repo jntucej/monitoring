@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import {
-  Upload, X, CheckCircle2, AlertTriangle, FileText, Loader2, ScrollText,
+  Upload, X, CheckCircle2, AlertTriangle, FileText, Loader2, ScrollText, Download,
 } from "lucide-react";
 import { useApi } from "@/hooks/useApi";
 
@@ -17,142 +17,153 @@ interface PreviewError {
   message: string;
 }
 
-interface PreviewSummary {
-  total: number;
-  valid: number;
-  invalid: number;
+interface RowReport {
+  row: number;
+  roll?: string;
+  name?: string;
+  email?: string;
+  status: "imported" | "skipped" | "invalid";
+  reason: string;
 }
 
-// 35-column college bulk-import sheet. H.T NO. (roll) drives year / batch /
-// branch / course — everything else is captured as-is; year is calculated,
-// never typed.
-const TEMPLATE_CSV =
-  "COURSE,DEPARTMENT,BRANCH,SEMESTER,REGULATION,YEAR,HTNO,STUDENT_NAME,GENDER,MOBILE,EMAIL,DOB,IDENTIFICATION_MARKS_1,IDENTIFICATION_MARKS_2,BLOOD_GROUP,NATIONALITY,RELIGION,CASTE,SUBCASTE,PH_STATUS,FATHER_GUARDIAN_NAME,MOTHER_NAME,PARENT_MOBILE,PARENT_EMAIL,ADDRESS,CITY,DISTRICT,STATE,PINCODE,FATHER_OCCUPATION,INCOME_PER_ANNUM,EAMCET_HTNO,EAMCET_ECET_RANK,ADMISSION_DATE,ADMISSION_CATEGORY\n" +
-  "B-Tech,CS,CSE,3,1,2,25JJ1A0501,AADITH KUMAR,male,9876543210,aadith.k@jntuhcej.ac.in,12-05-2005,Left mole,Scars,None,Indian,Hindu,BC,Other,none,Prakash Rao,Lakshmi Rao,9440123456,rao.prakash@example.com,123 Main Road,Hyderabad,Hyderabad,TS,500001,Teacher,250000,EAM250001,4523,01-07-2025,Open\n";
+interface BulkImportReport {
+  totalRows: number;
+  imported: number;
+  skipped: number;
+  invalid: number;
+  rows: RowReport[];
+}
 
-const TEMPLATE_HINTS: Array<[string, string]> = [
-  // Academic
-  ["Academic — COURSE", "B-Tech (4-year programme) or M-Tech (2-year programme). Year is capped at the course duration; if blank, it falls back to the branch code in HTNO (05 CSE, 12 IT, 04 ECE, 02 EEE, 03 MECH)."],
-  ["Academic — DEPARTMENT / BRANCH", "Department abbreviation (CS, IT, ECE, EEE, MECH) and branch code (CSE, CDA, IT, ECE, EEE, MECH, CSE-AI)."],
-  ["Academic — SEMESTER / REGULATION / YEAR", "Semester number (1–8), academic regulation code, and academic year. Computed from HTNO when omitted."],
-  ["Academic — HTNO", "Required student field — yyJJVVBBNN. Year, batch and branch are calculated from it (1A = regular, 5A = lateral)."],
-  // Identity
-  ["Identity — STUDENT_NAME", "Full name as on the degree certificate. Required."],
-  ["Identity — GENDER", "male / female (M, F also accepted)."],
-  ["Identity — MOBILE", "10-digit student mobile number."],
-  ["Identity — EMAIL", "Required. Missing or invalid email = row is reported and skipped."],
-  ["Identity — DOB", "DD-MM-YYYY or YYYY-MM-DD."],
-  ["Identity — BLOOD_GROUP / NATIONALITY / RELIGION / CASTE / SUBCASTE / PH_STATUS", "All optional. CASTE: SC / ST / BC / Other. PH_STATUS: Y / N or description."],
-  // Identification marks
-  ["Identification marks — IDENTIFICATION_MARKS_1 / _2", "Physical identification details (left mole, scar, etc.). Optional."],
-  // Family
-  ["Family — FATHER_GUARDIAN_NAME / MOTHER_NAME", "Full names. Required for registration."],
-  ["Family — PARENT_MOBILE / PARENT_EMAIL", "Primary parent contact. PARENT_MOBILE required; PARENT_EMAIL optional."],
-  ["Family — FATHER_OCCUPATION / INCOME_PER_ANNUM", "Occupation and annual family income in INR. Required for fee waivers / categories."],
-  // Address
-  ["Address — ADDRESS / CITY / DISTRICT / STATE / PINCODE", "Residential address. STATE is a 2-letter code (TS, AP, …). PINCODE is a 6-digit code."],
-  // Admission
-  ["Admission — ADMISSION_DATE / ADMISSION_CATEGORY", "Date of admission (DD-MM-YYYY) and category (Open / SC / ST / BC / EWS / Minorities)."],
-  ["Admission — EAMCET_HTNO / EAMCET_ECET_RANK", "EAMCET hall-ticket number and ECET rank. Optional; used for counselling audit."],
+interface PreviewState {
+  summary: { total: number; valid: number; invalid: number; skipped: number };
+  errors: PreviewError[];
+  skippedRows: Array<{ row: number; roll: string; name?: string }>;
+  importedBefore: number;
+}
+
+// 8-column minimal sheet — the exact headers the college sheet uses.
+// FATHER/GUARDIAN_NAME (with the slash) normalizes to the same key the
+// importer's pick() alias system resolves, so it maps to fatherGuardianName.
+const MINIMAL_CSV =
+  "HTNO,STUDENT_NAME,FATHER/GUARDIAN_NAME,GENDER,MOBILE,DOB,EMAIL,PARENT_MOBILE\n" +
+  "25JJ1A0501,AADITH KUMAR,Prakash Rao,male,9876543210,12-05-2005,aadith.k@jntuhcej.ac.in,9440123456\n";
+
+const MINIMAL_HINTS: Array<[string, string]> = [
+  ["HTNO", "Required — the 10-char hall-ticket/roll number (yyJJVVBBNN). Drives year, batch and branch automatically."],
+  ["STUDENT_NAME", "Required — full name."],
+  ["FATHER/GUARDIAN_NAME", "Optional — father / guardian name (the slash in the header is fine)."],
+  ["GENDER", "male / female (M, F accepted)."],
+  ["MOBILE", "Student 10-digit mobile."],
+  ["DOB", "DD-MM-YYYY or YYYY-MM-DD."],
+  ["EMAIL", "Required — valid email. Used for login + de-dup."],
+  ["PARENT_MOBILE", "Optional — parent contact number."],
 ];
 
+function downloadCsv(text: string, filename: string) {
+  const blob = new Blob([text], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
 export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalProps) {
-const api = useApi();
+  const api = useApi();
 
   const [csvText, setCsvText] = useState("");
-  const [busy, setBusy] = useState<"idle" | "validate" | "commit">("idle");
-  const [resultMsg, setResultMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  const [preview, setPreview] = useState<{
-    summary: PreviewSummary;
-    errors: PreviewError[];
-    rows: unknown[];
-  } | null>(null);
+  const [busy, setBusy] = useState<"idle" | "commit">("idle");
+  const [preview, setPreview] = useState<PreviewState | null>(null);
+  /** The final per-row report, kept so the modal stays open and shows the outcome. */
+  const [report, setReport] = useState<BulkImportReport | null>(null);
 
-  const downloadTemplate = () => {
-    const blob = new Blob([TEMPLATE_CSV], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", "student_import_template.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const content = event.target?.result as string;
-      setCsvText(content);
-      setPreview(null);
-      setResultMsg(null);
-    };
-    reader.readAsText(file);
-  };
-
-  const runValidate = async (): Promise<unknown[] | null> => {
+  const runValidate = async (): Promise<PreviewState | null> => {
     const res = await fetch("/api/users/bulk/validate", {
       method: "POST",
       headers: { "Content-Type": "application/json", ...api.getHeaders() },
       body: JSON.stringify({ csv: csvText }),
     });
     const json = await res.json();
-    if (!res.ok || !json.success) {
-      setResultMsg({ type: "error", text: json.error?.message || "Validation request failed." });
-      return null;
-    }
-    const data = json.data ?? json;
-    setPreview({
-      summary: data.summary ?? { total: data.totalRows ?? 0, valid: data.validRows?.length ?? 0, invalid: data.errors?.length ?? 0 },
-      errors: data.errors ?? [],
-      rows: data.validRows ?? [],
-    });
-    return data.validRows;
+    if (!res.ok || !json.success) return null;
+    const d = json.data ?? json;
+    return {
+      summary: {
+        total: d.summary?.total ?? 0,
+        valid: d.summary?.valid ?? 0,
+        invalid: d.summary?.invalid ?? 0,
+        skipped: d.summary?.skipped ?? 0,
+      },
+      errors: (d.errors ?? []) as PreviewError[],
+      skippedRows: d.skippedRows ?? [],
+      importedBefore: d.importedBefore ?? 0,
+    };
   };
 
   const handleImport = async () => {
-    setBusy("validate");
-    setResultMsg(null);
+    setBusy("commit");
     try {
-      const validRows = await runValidate();
-      if (validRows === null) {
-        // Validation itself failed (shown in resultMsg) — abort commit.
-        setBusy("idle");
-        return;
-      }
-      setBusy("commit");
       const res = await fetch("/api/users/bulk/commit", {
         method: "POST",
         headers: { "Content-Type": "application/json", ...api.getHeaders() },
-        body: JSON.stringify({ rows: validRows, skipErrors: true }),
+        body: JSON.stringify({ csv: csvText, skipErrors: true }),
       });
       const json = await res.json();
       if (res.ok && json.success) {
         const d = json.data ?? json;
-        const errs: string[] = (d.errors ?? []).map((x: any) => `row ${x.row}: ${x.error}`).slice(0, 5);
-        setResultMsg({
-          type: "success",
-          text: `Import complete — ${d.importedCount} imported, ${d.failedCount} failed.` +
-            (errs.length ? ` ${errs.join(" • ")}` : ""),
-        });
-        setTimeout(() => {
-          onSuccess();
-        }, 2500);
+        const rpt: BulkImportReport = d.report ?? { totalRows: 0, imported: 0, skipped: 0, invalid: 0, rows: [] };
+        setReport(rpt);
+        setPreview(null);
+        onSuccess();
       } else {
-        setResultMsg({ type: "error", text: json.error?.message || "Commit failed." });
+        setReport({
+          totalRows: 0,
+          imported: 0,
+          skipped: 0,
+          invalid: 0,
+          rows: [{ row: 0, status: "invalid", reason: json.error?.message || "Import failed" }],
+        });
       }
     } catch (err: any) {
-      setResultMsg({ type: "error", text: err.message || "Network error during bulk import" });
+      setReport({
+        totalRows: 0,
+        imported: 0,
+        skipped: 0,
+        invalid: 0,
+        rows: [{ row: 0, status: "invalid", reason: err.message || "Network error during bulk import" }],
+      });
     } finally {
       setBusy("idle");
     }
   };
 
+  const buildReportCsv = (r: BulkImportReport): string => {
+    const header = ["row", "roll", "name", "email", "status", "reason"];
+    const lines = [header.join(",")];
+    for (const row of r.rows) {
+      const cells = [
+        String(row.row),
+        row.roll ?? "",
+        row.name ?? "",
+        row.email ?? "",
+        row.status,
+        row.reason,
+      ];
+      lines.push(cells.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","));
+    }
+    return lines.join("\n");
+  };
+
+  const downloadReport = () => {
+    if (!report) return;
+    downloadCsv(buildReportCsv(report), `bulk_import_report_${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.csv`);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
-      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 max-w-2xl w-full space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 sm:p-6 w-full space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto" style={{ maxWidth: report ? "38rem" : "56rem" }}>
         <div className="flex justify-between items-center border-b border-[var(--border)] pb-3">
           <h3 className="font-bold text-lg text-white flex items-center gap-2">
             <Upload className="w-5 h-5 text-sky-400" /> Bulk Student Import
@@ -162,108 +173,174 @@ const api = useApi();
           </button>
         </div>
 
-        <div className="text-xs text-[var(--text-muted)] space-y-1">
-          <p>
-            Upload the college sheet (<code>35 columns</code>).
-            HTNO drives year, batch and branch — <b>everything else is captured as-is.</b>
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <label className="cursor-pointer px-3 py-1.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-xs font-semibold hover:bg-[var(--bg-base)] flex items-center gap-2">
-            <FileText className="w-4 h-4 text-sky-400" /> Choose CSV File
-            <input type="file" accept=".csv" onChange={handleFileUpload} className="hidden" />
-          </label>
-
-          <button
-            type="button"
-            onClick={downloadTemplate}
-            className="px-3 py-1.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-xs font-semibold hover:bg-[var(--bg-base)] text-sky-400 flex items-center gap-1.5"
-          >
-            <Upload className="w-3.5 h-3.5 rotate-180" /> Download Template
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setCsvText(TEMPLATE_CSV)}
-            className="px-3 py-1.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-xs font-semibold hover:bg-[var(--bg-base)] text-purple-400 flex items-center gap-1.5"
-          >
-            <ScrollText className="w-3.5 h-3.5" /> Load Sample
-          </button>
-        </div>
-
-        <textarea
-          rows={7}
-          placeholder={"COURSE,DEPARTMENT,BRANCH,SEMESTER,REGULATION,YEAR,HTNO,STUDENT_NAME,GENDER,MOBILE,EMAIL,DOB,…\nB-Tech,CS,CSE,3,1,2,25JJ1A0501,AADITH KUMAR,male,9876543210,aadith.k@jntuhcej.ac.in,12-05-2005,…"}
-          value={csvText}
-          onChange={(e) => { setCsvText(e.target.value); setPreview(null); }}
-          className="w-full font-mono text-xs p-3 bg-[var(--bg-base)] border border-[var(--border)] rounded-xl text-white focus:outline-none"
-        />
-
-        {preview && preview.summary.total > 0 && (
-          <div className="p-3 rounded-lg text-xs space-y-2 bg-[var(--bg-base)] border border-[var(--border)]">
-            <div className="flex gap-4 font-semibold">
-              <span>{preview.summary.total} rows</span>
-              <span className="text-emerald-400">{preview.summary.valid} valid</span>
-              <span className={preview.summary.invalid ? "text-rose-400" : ""}>{preview.summary.invalid} invalid</span>
+        {!report && (
+          <>
+            <div className="text-xs text-[var(--text-muted)] space-y-1">
+              <p>
+                Upload the college sheet (<code>8 columns</code> minimal, or up to 35).
+                HTNO drives year, batch and branch — <b>everything else is captured as-is.</b>
+              </p>
+              <p>
+                <b>New / re-upload:</b> rows whose roll already exists are <span className="text-amber-400">skipped</span> (never updated).
+                Only empty-field / required-field problems mark a row as <span className="text-rose-400">invalid</span>.
+              </p>
             </div>
-            {preview.errors.length > 0 && (
-              <div className="max-h-32 overflow-y-auto space-y-1">
-                {preview.errors.slice(0, 10).map((er, i) => (
-                  <div key={i} className="text-rose-400">
-                    Row {er.row}{er.field ? ` (${er.field})` : ""}: {er.message}
+
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="cursor-pointer px-3 py-1.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-xs font-semibold hover:bg-[var(--bg-base)] flex items-center gap-2">
+                <FileText className="w-4 h-4 text-sky-400" /> Choose CSV File
+                <input type="file" accept=".csv" onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = (ev) => { setCsvText(ev.target?.result as string); setPreview(null); };
+                  reader.readAsText(file);
+                }} className="hidden" />
+              </label>
+
+              <button
+                type="button"
+                onClick={() => downloadCsv(MINIMAL_CSV, "student_import_template.csv")}
+                className="px-3 py-1.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-xs font-semibold hover:bg-[var(--bg-base)] text-sky-400 flex items-center gap-1.5"
+              >
+                <Download className="w-3.5 h-3.5" /> Download Template
+              </button>
+
+              <button
+                type="button"
+                onClick={() => { setCsvText(MINIMAL_CSV); setPreview(null); }}
+                className="px-3 py-1.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-xs font-semibold hover:bg-[var(--bg-base)] text-purple-400 flex items-center gap-1.5"
+              >
+                <ScrollText className="w-3.5 h-3.5" /> Load Sample
+              </button>
+            </div>
+
+            <textarea
+              rows={7}
+              placeholder={"HTNO,STUDENT_NAME,FATHER/GUARDIAN_NAME,GENDER,MOBILE,DOB,EMAIL,PARENT_MOBILE\n25JJ1A0501,AADITH KUMAR,Prakash Rao,male,9876543210,12-05-2005,aadith.k@jntuhcej.ac.in,9440123456"}
+              value={csvText}
+              onChange={(e) => { setCsvText(e.target.value); setPreview(null); }}
+              className="w-full font-mono text-xs p-3 bg-[var(--bg-base)] border border-[var(--border)] rounded-xl text-white focus:outline-none"
+            />
+
+            {preview && preview.summary.total > 0 && (
+              <div className="p-3 rounded-lg text-xs space-y-2 bg-[var(--bg-base)] border border-[var(--border)]">
+                <div className="flex gap-4 font-semibold">
+                  <span>{preview.summary.total} rows</span>
+                  <span className="text-emerald-400">{preview.summary.valid} importable</span>
+                  <span className="text-amber-400">{preview.summary.skipped} already in DB</span>
+                  <span className={preview.summary.invalid ? "text-rose-400" : ""}>{preview.summary.invalid} invalid</span>
+                </div>
+                {preview.skippedRows.length > 0 && (
+                  <div className="rounded border border-amber-500/40 bg-amber-500/10 p-2 text-amber-200">
+                    <b>{preview.skippedRows.length}</b> row(s) match existing students — they will be skipped (no update).
+                    {preview.skippedRows.slice(0, 5).map((s) => (
+                      <div key={s.roll} className="pl-2 text-amber-300/80">row {s.row} · {s.roll}{s.name ? ` (${s.name})` : ""}</div>
+                    ))}
+                    {preview.skippedRows.length > 5 && <div className="pl-2 text-amber-300/60">… and {preview.skippedRows.length - 5} more</div>}
                   </div>
-                ))}
-                {preview.errors.length > 10 && <div className="text-[var(--text-muted)]">… and {preview.errors.length - 10} more</div>}
+                )}
+                {preview.errors.length > 0 && (
+                  <div className="max-h-28 overflow-y-auto space-y-1">
+                    {preview.errors.slice(0, 10).map((er, i) => (
+                      <div key={i} className="text-rose-400">
+                        Row {er.row}{er.field ? ` (${er.field})` : ""}: {er.message}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-[var(--border)]">
+              <button onClick={onClose} className="px-3 py-1.5 text-xs text-[var(--text-muted)] hover:text-white font-medium">Cancel</button>
+              <button
+                type="button"
+                onClick={handleImport}
+                disabled={busy !== "idle" || !csvText.trim()}
+                className="px-4 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-lg disabled:opacity-50 flex items-center gap-2"
+              >
+                {busy === "commit" ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Importing…</> : "Run Import"}
+              </button>
+            </div>
+          </>
+        )}
+
+        {report && (
+          <div className="space-y-3">
+            <div className="text-xs text-[var(--text-muted)]">
+              Import finished. The modal stays open so you can review and download the report.
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 text-center text-xs font-semibold">
+              <div className="rounded-lg p-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">{report.imported} imported</div>
+              <div className="rounded-lg p-2 bg-amber-500/10 border border-amber-500/20 text-amber-400">{report.skipped} skipped (already in DB)</div>
+              <div className="rounded-lg p-2 bg-rose-500/10 border border-rose-500/20 text-rose-400">{report.invalid} invalid</div>
+            </div>
+
+            <button
+              type="button"
+              onClick={downloadReport}
+              className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-xs font-semibold hover:bg-[var(--bg-base)] text-sky-400 flex items-center justify-center gap-2"
+            >
+              <Download className="w-4 h-4" /> Download Report CSV (imported + not-imported)
+            </button>
+
+            <div className="max-h-64 overflow-y-auto rounded-lg border border-[var(--border)]">
+              <table className="w-full text-xs">
+                <thead className="sticky top-0 bg-[var(--bg-base)] text-[var(--text-muted)]">
+                  <tr>
+                    <th className="p-2 text-left">Row</th>
+                    <th className="p-2 text-left">Roll</th>
+                    <th className="p-2 text-left">Name</th>
+                    <th className="p-2 text-left">Status</th>
+                    <th className="p-2 text-left">Reason</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {report.rows.map((r) => (
+                    <tr key={r.row} className="border-t border-[var(--border)]">
+                      <td className="p-2 text-[var(--text-muted)]">{r.row}</td>
+                      <td className="p-2 font-mono">{r.roll || "—"}</td>
+                      <td className="p-2">{r.name || "—"}</td>
+                      <td className="p-2">
+                        {r.status === "imported" && <span className="text-emerald-400 font-semibold">Imported</span>}
+                        {r.status === "skipped" && <span className="text-amber-400 font-semibold">Already in DB</span>}
+                        {r.status === "invalid" && <span className="text-rose-400 font-semibold">Invalid</span>}
+                      </td>
+                      <td className="p-2 text-[var(--text-muted)]">{r.reason}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <button onClick={onClose} className="px-3 py-1.5 text-xs text-[var(--text-muted)] hover:text-white font-medium">Close</button>
+              <button
+                type="button"
+                onClick={() => { setReport(null); setPreview(null); setCsvText(""); }}
+                className="px-4 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-lg"
+              >
+                Import Another File
+              </button>
+            </div>
           </div>
         )}
 
-        {resultMsg && (
-          <div className={`p-3 rounded-lg text-xs font-medium flex items-center gap-2 ${resultMsg.type === "success" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-rose-500/10 text-rose-400 border border-rose-500/20"}`}>
-            {resultMsg.type === "success" ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <AlertTriangle className="w-4 h-4 shrink-0" />}
-            <span>{resultMsg.text}</span>
-          </div>
+        {!report && (
+          <details className="text-xs text-[var(--text-muted)]">
+            <summary className="cursor-pointer font-semibold">Column reference</summary>
+            <div className="mt-2 space-y-2">
+              <p className="font-semibold text-[var(--text)]">Minimal 8-column sheet</p>
+              <ul className="space-y-1 pl-4 list-disc">
+                {MINIMAL_HINTS.map(([k, v]) => (
+                  <li key={k}><b>{k}</b> — {v}</li>
+                ))}
+              </ul>
+            </div>
+          </details>
         )}
-
-        <details className="text-xs text-[var(--text-muted)]">
-          <summary className="cursor-pointer font-semibold">Column reference</summary>
-          <div className="mt-2 space-y-3">
-            {(() => {
-              const groups: Record<string, Array<[string, string]>> = {};
-              for (const [k, v] of TEMPLATE_HINTS) {
-                const section = k.split(" — ")[0];
-                (groups[section] ??= []).push([k, v]);
-              }
-              return Object.entries(groups).map(([section, hints]) => (
-                <div key={section}>
-                  <p className="font-semibold text-[var(--text)] mb-1">{section}</p>
-                  <ul className="space-y-1 pl-4 list-disc">
-                    {hints.map(([k, v]) => (
-                      <li key={k}><b>{k}</b> — {v}</li>
-                    ))}
-                  </ul>
-                </div>
-              ));
-            })()}
-          </div>
-        </details>
-
-        <div className="flex justify-end gap-2 pt-2 border-t border-[var(--border)]">
-          <button onClick={onClose} className="px-3 py-1.5 text-xs text-[var(--text-muted)] hover:text-white font-medium">
-            Cancel
-          </button>
-          <button
-            onClick={handleImport}
-            disabled={busy !== "idle" || !csvText.trim() || (preview !== null && preview.summary.valid === 0)}
-            className="px-4 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-lg disabled:opacity-50 flex items-center gap-2"
-          >
-            {busy === "commit" ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Importing…</> :
-             busy === "validate" ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Validating…</> :
-             `Import ${preview ? `${preview.summary.valid} students` : ""}`}
-          </button>
-        </div>
       </div>
     </div>
   );

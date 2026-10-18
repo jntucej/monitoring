@@ -31,7 +31,7 @@ function StaffRequestStatusInner() {
     loading,
     error,
     refresh,
-  } = useApiResource<DataResponse>("/api/permissions?workflowType=staff_leave", { ttlMs: 30_000 });
+  } = useApiResource<DataResponse>("/api/staff/requests-status?workflow_type=staff_leave", { ttlMs: 30_000 });
 
   const refreshAll = useCallback(async () => {
     clearCache();

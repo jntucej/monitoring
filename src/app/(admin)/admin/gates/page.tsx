@@ -5,8 +5,8 @@ import { GateDeviceTracker, GateDevice } from "@/components/admin/GateDeviceTrac
 import { AlertCircle, Plus, CheckCircle2, Lock } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { PageLoading } from "@/components/shared/LoadingStates";
+import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { PageLoading } from "@/components/admin/shared/LoadingStates";
 
 interface AdminGate {
   id: string;

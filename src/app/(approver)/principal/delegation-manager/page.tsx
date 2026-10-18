@@ -100,7 +100,7 @@ function DelegationManagerInner() {
     { enabled: !!user, ttlMs: 15_000 }
   );
 
-  usePolling(refresh, { intervalMs: 60_000, enabled: !!user });
+  usePolling(refresh, { intervalMs: 60_000, enabled: !!user && !creating });
 
   const manualRefresh = useCallback(async () => {
     await refresh();

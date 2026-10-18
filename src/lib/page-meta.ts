@@ -7,7 +7,6 @@ export const PAGE_META: Record<string, { title: string; description?: string }> 
   "/admin/analytics/predictive": { title: "Predictive Analytics", description: "AI-powered predictions and forecasting" },
   "/admin/analytics/users": { title: "User Analytics", description: "User engagement and behavior metrics" },
   "/admin/announcements": { title: "Announcements", description: "Campus announcements and broadcasts" },
-  "/admin/dashboard": { title: "Admin Dashboard", description: "Admin dashboard redirect" },
   "/admin/faculty": { title: "Faculty", description: "Faculty management and attendance" },
   "/admin/gates": { title: "Gates", description: "Gate hardware and status management" },
   "/admin/gates/schedule": { title: "Gate Schedules", description: "Gate access schedules and rules" },

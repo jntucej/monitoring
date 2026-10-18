@@ -1,6 +1,7 @@
 "use client";
 
-import { Suspense, useCallback, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
@@ -65,6 +66,14 @@ function ManualEntryInner() {
   const [lastQuery, setLastQuery] = useState("");
 
   const [lookupState, setLookupState] = useState<LookupState>("idle");
+
+  // Prefill the lookup id from the ?id= query param (set by the command
+  // palette's "Look up person" command) so the operator doesn't retype it.
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const qid = searchParams.get("id");
+    if (qid) setIdNumber(qid);
+  }, [searchParams]);
   const [result, setResult] = useState<LookupPerson | null>(null);
   const [lookupError, setLookupError] = useState<string | null>(null);
 

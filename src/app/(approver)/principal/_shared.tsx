@@ -10,7 +10,7 @@ import { getAuthHeaders } from "@/hooks/useAuthHeaders";
 import type { Alert } from "@/lib/types";
 import { Building2, LogIn, ShieldCheck, MapPin, Users, AlertTriangle, Check, X, UserPlus, ExternalLink, Clock, ArrowRight, ArrowUpRight, ArrowDownRight, Minus, Siren } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, memo } from "react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Line, LineChart } from "recharts";
 import { cn, getTimeAgo } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -76,20 +76,37 @@ export interface PresenceMatrixData {
   lastUpdated?: string;
 }
 
+/* ── in-flight dedup for fetchJson ── */
+const inflight = new Map<string, Promise<Resp>>();
+
 /* ── fetch helper ── */
 
 export type Resp = { success: boolean; data?: unknown; error?: { message?: string } };
 
-export async function fetchJson(url: string): Promise<Resp> {
-  try {
-    const d = await cachedFetch<Resp>(url, {
-      ttlMs: 10_000,
-      headers: getAuthHeaders(),
-    });
-    return d ?? { success: false, error: { message: "Empty response" } };
-  } catch (e) {
-    return { success: false, error: { message: e instanceof Error ? e.message : "Request failed" } };
-  }
+export function fetchJson(url: string): Promise<Resp> {
+  const existing = inflight.get(url);
+  if (existing) return existing;
+  const p = (async (): Promise<Resp> => {
+    try {
+      const d = await cachedFetch<Resp>(url, {
+        ttlMs: 10_000,
+        headers: getAuthHeaders(),
+      });
+      return d ?? { success: false, error: { message: "Empty response" } };
+    } catch (e) {
+      return { success: false, error: { message: e instanceof Error ? e.message : "Request failed" } };
+    } finally {
+      inflight.delete(url);
+    }
+  })();
+  inflight.set(url, p);
+  return p;
+}
+
+/* ── cell class lookup (module-level to avoid per-render string allocation) ── */
+const CELL_BG = ["", "bg-emerald-500/10", "bg-emerald-500/20", "bg-emerald-500/40"] as const;
+function cellClass(n: number): string {
+  return `px-2 py-1 text-[10px] ${CELL_BG[Math.min(n, 3)]}`;
 }
 
 /* ── formatters ── */
@@ -131,7 +148,7 @@ export { WidgetBoundary, clearCache };
 
 /* ── StatCard (shared KPI card) ── */
 
-export function StatCard({
+export const StatCard = memo(function StatCard({
   icon: Icon,
   label,
   value,
@@ -154,7 +171,7 @@ export function StatCard({
       {sub && <p className="text-xs text-[var(--text-muted)]">{sub}</p>}
     </div>
   );
-}
+});
 
 /* ── Hostel constants & panels that appear in multiple places ── */
 
@@ -180,7 +197,7 @@ export function hostelRowFor(code: string, count: number): HostelRow {
 /* ── Hostel occupancy panel (reused on root + attendance page) ── */
 
 
-export function HostelOccupancyPanel() {
+export const HostelOccupancyPanel = memo(function HostelOccupancyPanel() {
   return (
     <WidgetBoundary title="Hostel Occupancy">
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
@@ -196,12 +213,12 @@ export function HostelOccupancyPanel() {
       </div>
     </WidgetBoundary>
   );
-}
+});
 
 /* ── Alerts panel (reused on root + incidents page) ── */
 
 
-export function AlertsPanel({
+export const AlertsPanel = memo(function AlertsPanel({
   alerts,
   loading,
   error,
@@ -263,12 +280,12 @@ export function AlertsPanel({
       </div>
     </WidgetBoundary>
   );
-}
+});
 
 /* ── Presence matrix panel (reused on root + gate-activity page) ── */
 
 
-export function PresenceMatrixPanel({
+export const PresenceMatrixPanel = memo(function PresenceMatrixPanel({
   matrixData,
   loading,
   error,
@@ -331,7 +348,7 @@ export function PresenceMatrixPanel({
                                     ? "bg-emerald-500/30 text-emerald-300"
                                     : "bg-indigo-500/25 text-indigo-300"
                                   : "text-[var(--text-muted)]"
-                              }`}
+                              } ${cellClass(v)}`}
                             >
                               {v}
                             </span>
@@ -352,11 +369,11 @@ export function PresenceMatrixPanel({
       </div>
     </WidgetBoundary>
   );
-}
+});
 
 /* ── Hostel overview (used on root + gate-activity) ── */
 
-export function HostelOverviewPanel({
+export const HostelOverviewPanel = memo(function HostelOverviewPanel({
   matrix,
   pendingApprovals,
 }: {
@@ -398,11 +415,11 @@ export function HostelOverviewPanel({
       </div>
     </WidgetBoundary>
   );
-}
+});
 
 /* ── Resident directory panel (used on root) ── */
 
-export function ResidentDirectoryPanel() {
+export const ResidentDirectoryPanel = memo(function ResidentDirectoryPanel() {
   return (
     <WidgetBoundary title="Resident Directory">
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
@@ -417,13 +434,13 @@ export function ResidentDirectoryPanel() {
       </div>
     </WidgetBoundary>
   );
-}
+});
 
 /* ── Hostel attendance panel ── */
 
 import { CheckCircle2 } from "lucide-react";
 
-export function HostelAttendancePanel({ matrix }: { matrix: PresenceMatrixData | null }) {
+export const HostelAttendancePanel = memo(function HostelAttendancePanel({ matrix }: { matrix: PresenceMatrixData | null }) {
   const gates = matrix?.gates ?? [];
   const m = matrix?.matrix ?? {};
   const roles = matrix?.roles ?? [];
@@ -478,13 +495,13 @@ export function HostelAttendancePanel({ matrix }: { matrix: PresenceMatrixData |
       </div>
     </WidgetBoundary>
   );
-}
+});
 
 /* ── Outpass/Leave panel ── */
 
 import { ClipboardCheck } from "lucide-react";
 
-export function OutpassLeavePanel({
+export const OutpassLeavePanel = memo(function OutpassLeavePanel({
   outpasses,
   leaves,
   loading,
@@ -544,11 +561,11 @@ export function OutpassLeavePanel({
       </div>
     </WidgetBoundary>
   );
-}
+});
 
 /* ── Entry/Exit logs panel (restricted) ── */
 
-export function EntryExitLogsPanel() {
+export const EntryExitLogsPanel = memo(function EntryExitLogsPanel() {
   return (
     <WidgetBoundary title="Entry & Exit Log">
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
@@ -563,11 +580,11 @@ export function EntryExitLogsPanel() {
       </div>
     </WidgetBoundary>
   );
-}
+});
 
 /* ── Hostel incidents panel (restricted) ── */
 
-export function HostelIncidentsPanel() {
+export const HostelIncidentsPanel = memo(function HostelIncidentsPanel() {
   return (
     <WidgetBoundary title="Hostel Incidents">
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
@@ -582,11 +599,11 @@ export function HostelIncidentsPanel() {
       </div>
     </WidgetBoundary>
   );
-}
+});
 
 /* ── Room occupancy panel (restricted) ── */
 
-export function RoomOccupancyPanel() {
+export const RoomOccupancyPanel = memo(function RoomOccupancyPanel() {
   return (
     <WidgetBoundary title="Room Occupancy">
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
@@ -603,13 +620,13 @@ export function RoomOccupancyPanel() {
       </div>
     </WidgetBoundary>
   );
-}
+});
 
 /* ── Hostel reports panel ── */
 
 import { FileText } from "lucide-react";
 
-export function HostelReportsPanel({
+export const HostelReportsPanel = memo(function HostelReportsPanel({
   auditRecords,
   loading,
   error,
@@ -655,14 +672,14 @@ export function HostelReportsPanel({
       </div>
     </WidgetBoundary>
   );
-}
+});
 
 /* ────────────────────────────────────────────────────────────────── *
  * Principal Command Center primitives (NEW — does not affect existing)
  * ────────────────────────────────────────────────────────────────── */
 
 /* 1. PrincipalShell */
-export function PrincipalShell({
+export const PrincipalShell = memo(function PrincipalShell({
   title, subtitle, actions, children,
 }: {
   title: string;
@@ -682,7 +699,7 @@ export function PrincipalShell({
       <div className="space-y-8">{children}</div>
     </div>
   );
-}
+});
 
 /* 2. PulseTile */
 type PulseTone = "neutral" | "positive" | "warning" | "critical";
@@ -693,7 +710,7 @@ const PULSE_TONE: Record<PulseTone, { text: string; dot: string }> = {
   critical: { text: "text-rose-500",              dot: "bg-rose-500" },
 };
 
-export function PulseTile({
+export const PulseTile = memo(function PulseTile({
   label, value, delta, deltaLabel, tone = "neutral", href, spark, loading,
 }: {
   label: string;
@@ -746,10 +763,10 @@ export function PulseTile({
     </div>
   );
   return href ? <Link href={href} className="block h-full">{body}</Link> : body;
-}
+});
 
 /* 3. StoryChart */
-export function StoryChart({
+export const StoryChart = memo(function StoryChart({
   title, description, data, series, height = 280, loading, error,
 }: {
   title: string;
@@ -803,10 +820,10 @@ export function StoryChart({
       </WidgetBoundary>
     </div>
   );
-}
+});
 
 /* 4. DecisionCard */
-export function DecisionCard({
+export const DecisionCard = memo(function DecisionCard({
   ticket, title, subtitle, reason, urgency = "due",
   slaDeadline, onApprove, onReject, onDelegate, onOpen, busy,
 }: {
@@ -876,10 +893,10 @@ export function DecisionCard({
       </div>
     </div>
   );
-}
+});
 
 /* 5. SectionHeader */
-export function SectionHeader({
+export const SectionHeader = memo(function SectionHeader({
   title, description, href, hrefLabel = "View all",
 }: {
   title: string;
@@ -900,10 +917,10 @@ export function SectionHeader({
       )}
     </div>
   );
-}
+});
 
 /* 6. SinceLastVisitCard */
-export function SinceLastVisitCard({ lastVisitAt }: { lastVisitAt: string }) {
+export const SinceLastVisitCard = memo(function SinceLastVisitCard({ lastVisitAt }: { lastVisitAt: string }) {
   const [s, setS] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
@@ -925,4 +942,4 @@ export function SinceLastVisitCard({ lastVisitAt }: { lastVisitAt: string }) {
       <p className="mt-1 text-xs text-[var(--text-muted)]">Last seen {getTimeAgo(lastVisitAt)}</p>
     </div>
   );
-}
+});

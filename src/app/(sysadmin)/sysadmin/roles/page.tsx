@@ -91,9 +91,25 @@ function buildTreeFromGraph(graph: RolesGraphPayload | null, roles: SystemRole[]
       childrenByParent.set(e.parent, [...(childrenByParent.get(e.parent) || []), e.child]);
     }
     const known = new Set(graph.nodes.map((n) => n.code));
+    // Guard against cycles in the DAG (e.g. principal -> vice_principal ->
+    // hod -> principal): track the current recursion stack so a node already
+    // on the stack is rendered as a leaf rather than recursed into, which
+    // would otherwise throw "Maximum call stack size exceeded".
+    const visiting = new Set<string>();
     const build = (code: string): HierarchyNode => ({
       code,
-      children: (childrenByParent.get(code) || []).filter((c) => known.has(c)).map(build),
+      children: visiting.has(code)
+        ? []
+        : (
+            (() => {
+              visiting.add(code);
+              const kids = (childrenByParent.get(code) || [])
+                .filter((c) => known.has(c))
+                .map(build);
+              visiting.delete(code);
+              return kids;
+            })()
+          ),
     });
     return [graph.root].filter((c) => known.has(c)).map(build);
   }

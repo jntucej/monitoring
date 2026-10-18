@@ -1,69 +1,40 @@
 "use client";
 
 import React from "react";
-import { usePathname } from "next/navigation";
+import { Suspense } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
-import Link from "next/link";
-import { Suspense } from "react";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+import { RoleConsole } from "@/components/shared/RoleConsole";
+import type { Role } from "@/lib/types";
 
-const TABS = [
-  { href: "/hostel-manager", label: "Operations Overview" },
-  { href: "/hostel-manager/room-bed-allocation", label: "Room & Bed Allocation" },
-  { href: "/hostel-manager/occupancy-reports", label: "Occupancy Reports" },
-  { href: "/hostel-manager/maintenance-requests", label: "Maintenance Requests" },
-  { href: "/hostel-manager/housekeeping-tasks", label: "Housekeeping Tasks" },
-  { href: "/hostel-manager/resident-service-requests", label: "Resident Service Requests" },
-  { href: "/hostel-manager/resource-management", label: "Resource Management" },
-  { href: "/hostel-manager/operational-reports", label: "Operational Reports" },
-] as const;
-
-function HostelManagerTabs({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-
-  return (
-    <div className="min-w-0">
-      <nav className="sticky top-0 z-30 border-b border-[var(--border)] bg-[var(--bg-base)]/95 backdrop-blur-md">
-        <div className="mx-auto max-w-7xl px-4 py-3 md:px-6">
-          <ol className="flex flex-wrap items-center gap-1 text-sm">
-            {TABS.map((tab) => {
-              const isActive = pathname === tab.href || pathname.startsWith(tab.href + "/");
-              return (
-                <li key={tab.href}>
-                  {isActive ? (
-                    <span className="inline-flex items-center px-3 py-2 text-emerald-400 font-semibold border-b-2 border-emerald-400">
-                      {tab.label}
-                    </span>
-                  ) : (
-                    <Link
-                      href={tab.href}
-                      className="inline-flex items-center px-3 py-2 text-slate-400 hover:text-slate-200 transition-colors"
-                    >
-                      {tab.label}
-                    </Link>
-                  )}
-                </li>
-              );
-            })}
-          </ol>
-        </div>
-      </nav>
-
-      <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6">{children}</div>
-
-      <DevContactStrip />
-    </div>
-  );
-}
-
-export default function HostelManagerTabbedLayout({
+/**
+ * Hostel Manager console layout — mirrors the deputy-warden/caretaker mount
+ * pattern.
+ *
+ * The local sticky tab bar (TABS / HostelManagerTabs) is removed. The shell is
+ * the RoleConsole: IconRail + KanbanBoard (hostel tickets at the
+ * hostel_manager stage, scoped by hostel_scope) + ticket ContextPanel +
+ * HostelManagerStatusBar + HostelManagerCommandBar (assign / resolve /
+ * allocate / escalate / view-residents), plus the AllocationPanel (room-bed
+ * drag-drop) as an extra panel in the main column. Sub-pages pass their
+ * content through `children`.
+ */
+export default function HostelManagerConsoleLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <HostelManagerTabs>{children}</HostelManagerTabs>
-    </Suspense>
+    <AuthGuard allowedRoles={["hostel_manager", "principal", "admin", "sysadmin"] as Role[]}>
+      <Suspense fallback={<PageLoading />}>
+        <div className="min-w-0">
+          <RoleConsole role="hostel_manager" roleRoot="/hostel-manager">
+            {children}
+          </RoleConsole>
+          <DevContactStrip />
+        </div>
+      </Suspense>
+    </AuthGuard>
   );
 }

@@ -41,6 +41,11 @@ const gateStreamCache: Record<string, MediaStream> = {};
 
 interface ScannerModalProps {
   isOpen: boolean;
+  /**
+   * When false the decode loop pauses early (no jsQR work per frame).
+   * The parent uses this to stop decoding while a scan is being confirmed.
+   */
+  active?: boolean;
   onClose: () => void;
   onScan: (roll: string) => void;
   onManualEntryClick?: () => void;
@@ -52,6 +57,7 @@ interface ScannerModalProps {
 
 export function Scanner({
   isOpen,
+  active = true,
   onClose,
   onScan,
   onManualEntryClick,
@@ -66,6 +72,8 @@ export function Scanner({
   const isScanningRef = useRef<boolean>(false);
   const hasScannedRef = useRef<boolean>(false);
   const processFrameRef = useRef<() => void>(() => {});
+  const lastDecodeRef = useRef<number>(0);
+  const activeRef = useRef<boolean>(active);
 
   const [cameraState, setCameraState] = useState<"idle" | "requesting" | "active" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -332,6 +340,14 @@ export function Scanner({
     }
   }, [handleSuccessScan]);
 
+  // Keep activeRef in sync so the decode tick always sees the latest value.
+  useEffect(() => {
+    activeRef.current = active;
+    if (!active) {
+      lastDecodeRef.current = 0;
+    }
+  }, [active]);
+
   // Keep ref in sync so setInterval always calls latest version
   useEffect(() => {
     processFrameRef.current = processFrame;
@@ -339,21 +355,30 @@ export function Scanner({
 
   const startDecodeLoop = useCallback(() => {
     if (!videoRef.current) return;
-    // ponytail: throttle decode to ~10fps + downscale to 640px wide.
+    // ponytail: throttle decode to ~5fps (200ms) + downscale to 640px wide.
     // QR codes don't move fast enough to need 60fps; full-res jsQR costs
-    // 40-80ms/frame. 10fps keeps CPU + battery manageable.
-    const lastTick = { current: 0 };
+    // 40-80ms/frame. 5fps keeps CPU + battery manageable.
     const tick = () => {
-      if (!isScanningRef.current) return;
-      const elapsed = performance.now() - lastTick.current;
-      if (elapsed >= 100) {
-        lastTick.current = performance.now();
+      if (!isScanningRef.current) {
+        animationFrameRef.current = null;
+        return;
+      }
+      // When the parent disables decoding (active=false) bail out early and
+      // release the RAF so no frame work happens.
+      if (!activeRef.current) {
+        animationFrameRef.current = null;
+        return;
+      }
+      const now = performance.now();
+      if (now - lastDecodeRef.current >= 200) {
+        lastDecodeRef.current = now;
         processFrameRef.current();
       }
       animationFrameRef.current = requestAnimationFrame(tick);
     };
     // Fire the first tick immediately so the first frame is processed the
     // moment it arrives — no debounce delay on startup.
+    lastDecodeRef.current = 0;
     processFrameRef.current();
     animationFrameRef.current = requestAnimationFrame(tick);
   }, []);

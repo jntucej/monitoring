@@ -36,6 +36,12 @@ export interface StudentDetails {
   /** Guardian (parent/ward caretaker) user id */
   guardianId?: string;
   studentType?: StudentType;
+  /**
+   * Live entry-type selection for the hostel-permission flow
+   * (student_details.current_entry_type). Populated at each IN scan via
+   * POST /api/operator/entry-type; read on OUT scans to enforce scope.
+   */
+  currentEntryType?: "hosteller" | "day_scholar" | null;
   course?: string;
   fatherName?: string;
   landlineNumber?: string;
@@ -183,6 +189,12 @@ export interface Person {
   hostelBlock?: string;
   roomNumber?: string;
   hostelCurfewTime?: string;
+  /**
+   * Live entry-type selection for the hostel-permission flow. Mirrors
+   * `studentDetails.currentEntryType`; sourced from
+   * student_details.current_entry_type on the persons lookup.
+   */
+  currentEntryType?: "hosteller" | "day_scholar" | null;
   /** Graduation flag — true when the student has completed the programme. */
   completed?: boolean;
   /** ISO timestamp when the student was marked graduated. */
@@ -242,10 +254,14 @@ export type ExitReason =
   | "Regular" | "Leave" | "Outing" | "Emergency"          // legacy
   | "Home Out" | "Day Out"                                 // legacy labels
   | "Daily Outing" | "Day Pass" | "Home In"                // new labels
-  | "daily_outing" | "home_in" | "home_out" | "day_pass";  // canonical codes
+  | "Special Leave" | "Day Scholar Out"                     // hostel-permission additions
+  | "daily_outing" | "home_in" | "home_out" | "day_pass"   // canonical codes
+  | "emergency" | "special_leave" | "day_scholar_out";     // hostel-permission canonical codes
 
 /** Canonical exit-reason codes the config table is keyed on. */
-export type ReasonCode = "daily_outing" | "home_in" | "home_out" | "day_pass";
+export type ReasonCode =
+  | "daily_outing" | "home_in" | "home_out" | "day_pass"
+  | "emergency" | "special_leave" | "day_scholar_out";
 
 // ---- Operator dashboard: category breakdown & outing tracking -------------
 export type PersonCategoryKey =

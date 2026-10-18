@@ -22,6 +22,9 @@ fi
 for f in "${FILES[@]}"; do
   fname=$(basename "$f")
   if [[ "$fname" == _* ]]; then continue; fi
+  # Rollback files (*.down.sql) intentionally share the version prefix of their
+  # forward migration; they are not part of the forward replay chain.
+  if [[ "$fname" == *.down.sql ]]; then continue; fi
 
   ver="${fname%%_*}"
   if [[ -n "${SEEN_VERSIONS[$ver]}" && "${SEEN_VERSIONS[$ver]}" != "$fname" ]]; then
