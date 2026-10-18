@@ -4,7 +4,6 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { AuthGuard } from "@/components/shared/AuthGuard";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { CollegeInfoForm } from "@/components/admin/CollegeInfoForm";
 import { PassTypesForm } from "@/components/admin/PassTypesForm";
@@ -358,10 +357,12 @@ function InstitutionalConfigurationInner() {
 
 export default function AdminInstitutionalConfigurationPage() {
   return (
-    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+    
       <Suspense fallback={<PageLoading />}>
         <InstitutionalConfigurationInner />
       </Suspense>
-    </AuthGuard>
+    
+    
+
   );
 }

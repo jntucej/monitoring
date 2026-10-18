@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { StatCard } from "@/components/admin/StatCard";
 import { useApi } from "@/hooks/useApi";
-import { AuthGuard } from "@/components/shared/AuthGuard";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
@@ -111,7 +110,7 @@ export default function GateDetailPage() {
   };
 
   return (
-    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+    
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -351,6 +350,8 @@ export default function GateDetailPage() {
           onConfirm={() => toggleActive(false)}
         />
       </motion.div>
-    </AuthGuard>
+    
+    
+
   );
 }

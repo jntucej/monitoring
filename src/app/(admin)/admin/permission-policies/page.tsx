@@ -7,8 +7,6 @@ import { PageLoading } from "@/components/shared/LoadingStates";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { ShieldCheck, GitBranch, FileCheck, Clock, Users, Search, X, Lock } from "lucide-react";
-import { AuthGuard } from "@/components/shared/AuthGuard";
-
 /* ── response shape (mirrors /api/admin/permission-policies) ─────────────── */
 
 interface PolicyWorkflow {
@@ -255,14 +253,16 @@ function AdminPermissionPoliciesInner() {
 
 export default function AdminPermissionPoliciesPage() {
   return (
-    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+    
       <div className="p-2 sm:p-0">
         <PageLoading />
         <SuspenseFallback>
           <AdminPermissionPoliciesInner />
         </SuspenseFallback>
       </div>
-    </AuthGuard>
+    
+    
+
   );
 }
 

@@ -27,7 +27,6 @@ import {
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
-import { AuthGuard } from "@/components/shared/AuthGuard";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { getAuthHeaders } from "@/lib/utils";
@@ -1431,7 +1430,7 @@ function AdminMessInner() {
 
 export default function AdminMessPage() {
   return (
-    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+    
       <Suspense
         fallback={
           <div className="p-8 flex items-center justify-center min-h-[50vh]">
@@ -1441,6 +1440,8 @@ export default function AdminMessPage() {
       >
         <AdminMessInner />
       </Suspense>
-    </AuthGuard>
+    
+    
+
   );
 }

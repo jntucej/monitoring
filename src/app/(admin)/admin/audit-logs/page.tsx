@@ -6,7 +6,6 @@ import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { AdminAuditLogViewer } from "@/components/admin/AdminAuditLogViewer";
 import { History, ShieldAlert } from "lucide-react";
-import { AuthGuard } from "@/components/shared/AuthGuard";
 import { useAuthStore } from "@/stores/authStore";
 
 function AdminAuditLogsInner() {
@@ -61,10 +60,12 @@ function AdminAuditLogsInner() {
 
 export default function AdminAuditLogsPage() {
   return (
-    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+    
       <Suspense fallback={<PageLoading />}>
         <AdminAuditLogsInner />
       </Suspense>
-    </AuthGuard>
+    
+    
+
   );
 }

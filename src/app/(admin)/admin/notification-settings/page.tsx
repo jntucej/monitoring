@@ -17,8 +17,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
-import { AuthGuard } from "@/components/shared/AuthGuard";
-
 /* ── response shape (mirrors /api/admin/notification-settings) ────────────── */
 
 interface ChannelStat {
@@ -219,10 +217,12 @@ function AdminNotificationSettingsInner() {
 
 export default function AdminNotificationSettingsPage() {
   return (
-    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+    
       <Suspense fallback={<PageLoading />}>
         <AdminNotificationSettingsInner />
       </Suspense>
-    </AuthGuard>
+    
+    
+
   );
 }

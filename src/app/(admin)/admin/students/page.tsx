@@ -3,11 +3,9 @@
 import { CampusStatusBar } from "@/components/admin/CampusStatusBar";
 import { StudentInfographics } from "@/components/admin/StudentInfographics";
 import { UserManagementPanel } from "@/components/admin/UserManagementPanel";
-import { AuthGuard } from "@/components/shared/AuthGuard";
-
 export default function AdminStudentsPage() {
   return (
-    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+    
       <div className="min-h-screen bg-[var(--bg)]">
         <CampusStatusBar />
         <div className="space-y-6 p-6">
@@ -22,6 +20,8 @@ export default function AdminStudentsPage() {
           <UserManagementPanel initialRole="student" role="student" />
         </div>
       </div>
-    </AuthGuard>
+    
+    
+
   );
 }

@@ -8,7 +8,6 @@ import { AlertTriangle, Bell, CheckCircle, Check, RefreshCw } from "lucide-react
 import { useToast } from "@/components/ui/toast";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { getAuthHeaders } from "@/lib/utils";
-import { AuthGuard } from "@/components/shared/AuthGuard";
 import type { Alert } from "@/lib/types";
 
 const SEVERITY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
@@ -238,8 +237,10 @@ function AdminAlertsInner() {
 
 export default function AdminAlertsPage() {
   return (
-    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+    
       <AdminAlertsInner />
-    </AuthGuard>
+    
+    
+
   );
 }

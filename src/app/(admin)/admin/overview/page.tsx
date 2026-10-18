@@ -18,7 +18,6 @@ import {
   Clock,
 } from "lucide-react";
 import Link from "next/link";
-import { AuthGuard } from "@/components/shared/AuthGuard";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { getAuthHeaders } from "@/lib/utils";
 
@@ -239,8 +238,10 @@ function AdminOverviewInner() {
 
 export default function AdminOverviewPage() {
   return (
-    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+    
       <AdminOverviewInner />
-    </AuthGuard>
+    
+    
+
   );
 }

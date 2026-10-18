@@ -4,8 +4,6 @@ import { DataTable } from "@/components/ui/DataTable";
 import { CalendarDays, CheckCircle2, XCircle, Clock } from "lucide-react";
 import type { Scan, Student } from "@/lib/types";
 import { useApi } from "@/hooks/useApi";
-import { AuthGuard } from "@/components/shared/AuthGuard";
-
 interface Row {
   roll: string;
   name: string;
@@ -121,7 +119,7 @@ const api = useApi();
   };
 
   return (
-    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+    
       <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
@@ -190,6 +188,8 @@ const api = useApi();
       />
       </div>
       </div>
-    </AuthGuard>
+    
+    
+
   );
 }

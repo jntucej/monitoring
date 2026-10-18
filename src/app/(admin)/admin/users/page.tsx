@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Shield, GraduationCap, Briefcase, Grid, Lock, ArrowRight } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
-import { AuthGuard } from "@/components/shared/AuthGuard";
 import { UserManagementPanel } from "@/components/admin/UserManagementPanel";
 import Link from "next/link";
 
@@ -59,7 +58,7 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+    
       <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -225,6 +224,8 @@ export default function AdminUsersPage() {
         </div>
       )}
     </div>
-    </AuthGuard>
+    
+    
+
   );
 }

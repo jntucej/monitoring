@@ -6,8 +6,6 @@ import { StaffTracking, StaffMember } from "@/components/admin/StaffTracking";
 import { useApi } from "@/hooks/useApi";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh"
 import { CampusStatusBar } from "@/components/admin/CampusStatusBar";
-import { AuthGuard } from "@/components/shared/AuthGuard";
-
 export default function AdminStaffPage() {
 const api = useApi();
 
@@ -51,7 +49,7 @@ const api = useApi();
   useLiveRefresh(fetchStaffData, { intervalMs: 30000 });
 
   return (
-    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+    
       <div className="min-h-screen bg-[var(--bg)]">
       <CampusStatusBar />
       <div className="p-6 space-y-6">
@@ -80,6 +78,8 @@ const api = useApi();
       )}
     </div>
       </div>
-    </AuthGuard>
+    
+    
+
   );
 }

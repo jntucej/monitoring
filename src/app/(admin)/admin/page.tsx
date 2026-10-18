@@ -22,7 +22,6 @@ import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { DashboardCustomizer } from "@/components/engagement/DashboardCustomizer";
 import { AttentionQueue } from "@/components/engagement/AttentionQueue";
 import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
-import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
   AlertCircle, Flame, ShieldAlert, X,
   RefreshCw, Shield, Zap, Sparkles, Database, ArrowRight,
@@ -314,7 +313,7 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+    
       <motion.div initial="hidden" animate="visible" variants={fadeInUp} className="space-y-6">
       {/* ── F: Active Lockdown Banner ── */}
       <AnimatePresence>
@@ -616,6 +615,8 @@ export default function AdminDashboardPage() {
         <NotificationCenter />
       </div>
     </motion.div>
-    </AuthGuard>
+    
+    
+
   );
 }

@@ -4,8 +4,6 @@ import { FileText, Download, BarChart3, Loader2, ClipboardList, Clock } from "lu
 import { getAuthHeaders } from "@/lib/utils";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import type { DashboardData } from "@/lib/types";
-import { AuthGuard } from "@/components/shared/AuthGuard";
-
 interface GeneratedReport {
   id: string;
   title: string;
@@ -127,7 +125,7 @@ export default function AdminReportsPage() {
     : 0;
 
   return (
-    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+    
       <div className="space-y-6">
       <div>
         <p className="text-2xl font-bold">Reports</p>
@@ -253,6 +251,8 @@ export default function AdminReportsPage() {
 
       <DevContactStrip />
     </div>
-    </AuthGuard>
+    
+    
+
   );
 }

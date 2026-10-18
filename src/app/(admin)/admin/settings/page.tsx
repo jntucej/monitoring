@@ -1,13 +1,12 @@
 "use client";
 
 import { Component } from "lucide-react";
-import { AuthGuard } from "@/components/shared/AuthGuard";
 import { CollegeInfoForm } from "@/components/admin/CollegeInfoForm";
 import { PassTypesForm } from "@/components/admin/PassTypesForm";
 
 export default function AdminSettingsPage() {
   return (
-    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+    
       <div className="space-y-6">
         <div>
           <p className="text-2xl font-bold">Settings</p>
@@ -30,6 +29,8 @@ export default function AdminSettingsPage() {
           </div>
         </div>
       </div>
-    </AuthGuard>
+    
+    
+
   );
 }

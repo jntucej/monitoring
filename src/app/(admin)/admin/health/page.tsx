@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Activity } from "lucide-react";
-import { AuthGuard } from "@/components/shared/AuthGuard";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { HealthDashboard } from "@/components/sysadmin/HealthDashboard";
@@ -94,7 +93,7 @@ function HealthSnapshotBar() {
 
 export default function SystemHealthPage() {
   return (
-    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+    
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
@@ -116,6 +115,8 @@ export default function SystemHealthPage() {
           <HealthDashboard />
         </WidgetBoundary>
       </div>
-    </AuthGuard>
+    
+    
+
   );
 }

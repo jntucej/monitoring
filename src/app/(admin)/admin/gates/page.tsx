@@ -5,7 +5,6 @@ import { GateDeviceTracker, GateDevice } from "@/components/admin/GateDeviceTrac
 import { AlertCircle, Plus, CheckCircle2, Lock } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
-import { AuthGuard } from "@/components/shared/AuthGuard";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 
@@ -110,7 +109,7 @@ export default function AdminGatesPage() {
   };
 
   return (
-    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+    
       <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -300,6 +299,8 @@ export default function AdminGatesPage() {
           )}
         </WidgetBoundary>
       </div>
-    </AuthGuard>
+    
+    
+
   );
 }
