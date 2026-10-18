@@ -16,6 +16,7 @@ export interface LoginBubbleProps {
   href?: string;
   onClick?: () => void;
   tone?: BubbleTone;
+  primary?: boolean;
   onRipple?: (x: number, y: number) => void;
 }
 
@@ -28,6 +29,7 @@ export function LoginBubble({
   href = "/login",
   onClick,
   tone = "solid",
+  primary = false,
   onRipple,
 }: LoginBubbleProps) {
   const router = useRouter();
@@ -36,8 +38,8 @@ export function LoginBubble({
 
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
-  const sx = useSpring(mx, { stiffness: 220, damping: 18, mass: 0.5 });
-  const sy = useSpring(my, { stiffness: 220, damping: 18, mass: 0.5 });
+  const sx = useSpring(mx, { stiffness: 220, damping: 22, mass: 0.6 });
+  const sy = useSpring(my, { stiffness: 220, damping: 22, mass: 0.6 });
 
   const handlePointerMove = (e: React.PointerEvent) => {
     if (reduce || !ref.current) return;
@@ -46,9 +48,9 @@ export function LoginBubble({
     const dx = e.clientX - (r.left + r.width / 2);
     const dy = e.clientY - (r.top + r.height / 2);
     const dist = Math.hypot(dx, dy);
-    const influence = r.width * 0.65;
+    const influence = r.width * 0.7;
     if (dist < influence) {
-      const pull = (1 - dist / influence) * 10;
+      const pull = (1 - dist / influence) * 6; // gentler
       mx.set((dx / (dist || 1)) * pull);
       my.set((dy / (dist || 1)) * pull);
     } else {
@@ -71,13 +73,13 @@ export function LoginBubble({
   const surface =
     tone === "solid"
       ? {
-          background: `radial-gradient(circle at 30% 30%, ${accent}22, rgba(255,255,255,0.04) 60%)`,
-          border: `1px solid ${accent}33`,
-          boxShadow: `0 0 60px -20px ${accent}66, inset 0 1px 0 rgba(255,255,255,0.08)`,
+          background: `radial-gradient(circle at 30% 30%, ${accent}26, rgba(255,255,255,0.05) 60%)`,
+          border: `1px solid ${accent}40`,
+          boxShadow: `0 0 70px -20px ${accent}80, inset 0 1px 0 rgba(255,255,255,0.10)`,
         }
       : {
           background: "rgba(255,255,255,0.02)",
-          border: `1px solid ${accent}30`,
+          border: `1px solid ${accent}35`,
           boxShadow: `inset 0 0 40px -30px ${accent}44`,
         };
 
@@ -94,28 +96,36 @@ export function LoginBubble({
         onPointerMove={handlePointerMove}
         onPointerLeave={handlePointerLeave}
         aria-label={sublabel ? `${label} — ${sublabel}` : label}
-        initial={reduce ? false : { opacity: 0, scale: 0.9 }}
+        initial={reduce ? false : { opacity: 0, scale: 0.94 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{
           duration: DURATION.card,
           ease: EASE.gentle,
-          delay: seed * 0.06,
+          delay: seed * 0.08,
         }}
-        whileHover={reduce ? undefined : { scale: 1.04 }}
+        whileHover={reduce ? undefined : { scale: 1.03 }}
         whileTap={reduce ? undefined : { scale: 0.97 }}
         style={{ x: sx, y: sy, width: "100%", height: "100%", ...surface }}
-        className="group relative flex flex-col items-center justify-center rounded-full text-white/90 backdrop-blur focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#070B14]"
+        className="group relative flex min-h-[44px] min-w-[44px] cursor-pointer flex-col items-center justify-center rounded-full text-white backdrop-blur transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-cyan-300/70 focus-visible:ring-offset-4 focus-visible:ring-offset-[#070B14]"
       >
-        <span className="text-sm font-medium tracking-wide">{label}</span>
+        <span
+          className={
+            primary
+              ? "text-lg font-medium tracking-wide"
+              : "text-base font-medium tracking-wide"
+          }
+        >
+          {label}
+        </span>
         {sublabel && (
-          <span className="mt-1 max-w-[80%] text-center text-[10px] leading-tight text-white/40">
+          <span className="mt-1 max-w-[85%] text-center text-xs leading-tight text-white/55">
             {sublabel}
           </span>
         )}
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 rounded-full opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-          style={{ boxShadow: `inset 0 0 40px ${accent}22` }}
+          className="pointer-events-none absolute inset-0 rounded-full opacity-0 transition-opacity duration-700 group-hover:opacity-100"
+          style={{ boxShadow: `inset 0 0 50px ${accent}26` }}
         />
       </motion.button>
     </motion.div>

@@ -52,7 +52,7 @@ export function LiveStatePill() {
           className={`relative inline-flex h-2 w-2 rounded-full ${DOT[state]}`}
         />
       </span>
-      <span className="text-xs tracking-wide text-white/65">
+      <span className="text-sm tracking-wide text-white/80">
         {LABEL[state]}
       </span>
     </div>
