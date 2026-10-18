@@ -1,36 +1,40 @@
-"use client";
-
 import { Suspense } from "react";
-import { PageLoading } from "@/components/shared/LoadingStates";
+import { ScanEye } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { PageLoading } from "@/components/shared/LoadingStates";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { AttentionQueue } from "@/components/engagement/AttentionQueue";
+import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
+import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 
-/**
- * Exam superintendent root page — Board-only.
- *
- * The layout already mounts the RoleConsole shell, which renders the
- * KanbanBoard (via /api/exam/access, columns PENDING/ACTIVE/CLOSED) in the
- * main column plus the IncidentPanel, the permission ContextPanel,
- * ExamSuperintendentStatusBar and ExamSuperintendentCommandBar. This page
- * renders nothing so the default board fallback is used. No KPI cards, no
- * section links, no retention/engagement widgets, no "Signed in as" toolbar.
- * No horizontal scroll.
- */
 export default function ExamSuperintendentPage() {
   return (
-    <AuthGuard
-      allowedRoles={[
-        "exam_superintendent",
-        "exam_branch",
-        "oie",
-        "vice_principal",
-        "principal",
-        "admin",
-        "sysadmin",
-      ]}
-    >
-      <Suspense fallback={<PageLoading />}>
-        {null}
-      </Suspense>
-    </AuthGuard>
+    <Suspense fallback={<PageLoading />}>
+      <AuthGuard allowedRoles={["exam_superintendent"]}>
+        <div className="space-y-6">
+          <DevContactStrip />
+          <WidgetBoundary>
+            <RoleDashboardPanel
+              title="Exam Superintendent dashboard"
+              icon={ScanEye}
+              endpoint="/api/exam/superintendent"
+            />
+          </WidgetBoundary>
+          <WidgetBoundary><AttentionQueue /></WidgetBoundary>
+          <WidgetBoundary><PersonalizedCampusHome /></WidgetBoundary>
+          <WidgetBoundary><TaskContinuity /></WidgetBoundary>
+          <WidgetBoundary><UnifiedCampusCalendar /></WidgetBoundary>
+          <WidgetBoundary><ActivityTimeline /></WidgetBoundary>
+          <WidgetBoundary><QuickActions /></WidgetBoundary>
+          <WidgetBoundary><NotificationCenter /></WidgetBoundary>
+        </div>
+      </AuthGuard>
+    </Suspense>
   );
 }

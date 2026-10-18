@@ -1,28 +1,40 @@
-"use client";
-
 import { Suspense } from "react";
-import { PageLoading } from "@/components/shared/LoadingStates";
+import { FileSpreadsheet } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { PageLoading } from "@/components/shared/LoadingStates";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { AttentionQueue } from "@/components/engagement/AttentionQueue";
+import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
+import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 
-/**
- * Exam Branch root page — Board-only.
- *
- * The layout already mounts the RoleConsole shell, which renders the
- * KanbanBoard (exam permissions self-scoped to the caller's own branch via
- * /api/permissions?workflow_type=exam&branch=:self) in the main column plus
- * the HandoffPanel, the permission ContextPanel, ExamBranchStatusBar and
- * ExamBranchCommandBar. This page renders nothing so the default board
- * fallback is used. No KPI cards, no charts, no retention/engagement
- * widgets, no tab scroll. No horizontal scroll.
- */
 export default function ExamBranchPage() {
   return (
-    <AuthGuard
-      allowedRoles={["exam_branch", "oie", "vice_principal", "principal", "admin", "sysadmin"]}
-    >
-      <Suspense fallback={<PageLoading />}>
-        {null}
-      </Suspense>
-    </AuthGuard>
+    <Suspense fallback={<PageLoading />}>
+      <AuthGuard allowedRoles={["exam_branch"]}>
+        <div className="space-y-6">
+          <DevContactStrip />
+          <WidgetBoundary>
+            <RoleDashboardPanel
+              title="Exam Branch dashboard"
+              icon={FileSpreadsheet}
+              endpoint={null}
+            />
+          </WidgetBoundary>
+          <WidgetBoundary><AttentionQueue /></WidgetBoundary>
+          <WidgetBoundary><PersonalizedCampusHome /></WidgetBoundary>
+          <WidgetBoundary><TaskContinuity /></WidgetBoundary>
+          <WidgetBoundary><UnifiedCampusCalendar /></WidgetBoundary>
+          <WidgetBoundary><ActivityTimeline /></WidgetBoundary>
+          <WidgetBoundary><QuickActions /></WidgetBoundary>
+          <WidgetBoundary><NotificationCenter /></WidgetBoundary>
+        </div>
+      </AuthGuard>
+    </Suspense>
   );
 }

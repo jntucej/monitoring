@@ -1,61 +1,92 @@
-const isDockerBuild = process.env.DOCKER_BUILD === 'true';
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
-  reactStrictMode: true,
-  typescript: {
-    // Keep strict -- do NOT set to true, it hides real bugs.
-    ignoreBuildErrors: false,
-  },
-  serverExternalPackages: ['bcryptjs', 'jose', 'pg', 'pg-connection-string', 'pgpass'],
   experimental: {
-    serverActions: {
-      bodySizeLimit: '2mb',
-    },
+    optimizePackageImports: [
+      "lucide-react",
+      "recharts",
+      "framer-motion",
+      "date-fns",
+      "@simplewebauthn/browser",
+      "qrcode.react",
+      "react-qrcode-logo",
+      "remotion",
+      "@remotion/player",
+    ],
   },
+
+  compress: true,
+  poweredByHeader: false,
+  reactStrictMode: true,
+  productionBrowserSourceMaps: false,
+
   images: {
-    unoptimized: true,
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 86400,
   },
-  async headers() {
-    return [{
-      source: '/(.*)',
-      headers: [
-        { key: 'X-Frame-Options', value: 'DENY' },
-        { key: 'X-Content-Type-Options', value: 'nosniff' },
-        { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-      ],
-    }];
-  },
+
   async redirects() {
     return [
-      // Legacy alias paths → the single approvals page. These source paths
-      // are NOT real pages on disk (they're old route names), so the redirect
-      // is safe: the destination path (/principal/approvals) is a real page and
-      // the source path differs from the destination path, so no 307 loop.
-      { source: '/principal/permissions',            destination: '/principal/approvals?tab=mine',      permanent: false },
-      { source: '/principal/all-pass-requests',      destination: '/principal/approvals?tab=all',       permanent: false },
-      { source: '/principal/permission-management',  destination: '/principal/approvals?tab=all',       permanent: false },
-      { source: '/principal/approval-centre',        destination: '/principal/approvals?tab=escalated', permanent: false },
+      { source: "/features", destination: "/login",   permanent: true },
+      { source: "/trust",    destination: "/login",   permanent: true },
+      { source: "/privacy",  destination: "/login",   permanent: true },
+      { source: "/terms",    destination: "/login",   permanent: true },
+      { source: "/contact",  destination: "/about",   permanent: true },
+    ];
+  },
 
-      // Legacy alias: department-analytics page existed on disk but was
-      // superseded by the departments page. Safe redirect (different path).
-      { source: '/principal/department-analytics',   destination: '/principal/departments',              permanent: false },
+  async headers() {
+    const isProd = process.env.NODE_ENV === "production";
 
-      // Existing profile redirects
-      { source: '/admin/profile',      destination: '/profile', permanent: false },
-      { source: '/principal/profile',  destination: '/profile', permanent: false },
-      { source: '/hod/profile',        destination: '/profile', permanent: false },
-      { source: '/exam/profile',       destination: '/profile', permanent: false },
-      { source: '/hostel/profile',     destination: '/profile', permanent: false },
-      { source: '/staff/profile',      destination: '/profile', permanent: false },
-      { source: '/faculty/profile',    destination: '/profile', permanent: false },
-      { source: '/parent/profile',     destination: '/profile', permanent: false },
-      { source: '/supervisor/profile', destination: '/profile', permanent: false },
-      { source: '/warden/profile',     destination: '/profile', permanent: false },
-      { source: '/visitor/profile',    destination: '/profile', permanent: false },
-      { source: '/worker/profile',     destination: '/profile', permanent: false },
-      { source: '/operator/profile',   destination: '/profile', permanent: false },
+    const securityHeaders = [
+      { key: "X-Frame-Options", value: "DENY" },
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+      {
+        key: "Permissions-Policy",
+        value: "camera=(self), microphone=(self), geolocation=(self)",
+      },
+      ...(isProd
+        ? [{ key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" }]
+        : []),
+    ];
+
+    return [
+      { source: "/:path*", headers: securityHeaders },
+
+      {
+        source: "/about",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800" },
+        ],
+      },
+      {
+        source: "/login",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400" },
+        ],
+      },
+      {
+        source: "/help",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=600, s-maxage=7200, stale-while-revalidate=86400" },
+        ],
+      },
+      {
+        source: "/support",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400" },
+        ],
+      },
+
+      {
+        source: "/api/:path*",
+        headers: [{ key: "Cache-Control", value: "no-store, must-revalidate" }],
+      },
+
+      {
+        source: "/_next/static/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
     ];
   },
 };
