@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import {
   UtensilsCrossed,
   Plus,
@@ -17,7 +16,6 @@ import {
   Check,
   Clock,
   AlertTriangle,
-  ChevronRight,
   Leaf,
   Beef,
   Lock,
@@ -1387,12 +1385,6 @@ function AdminMessInner() {
               </p>
             </div>
           </div>
-          <Link
-            href="/mess"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-[11px] font-bold transition shrink-0"
-          >
-            Incharge dashboard <ChevronRight className="w-3.5 h-3.5" />
-          </Link>
         </div>
       </div>
 
