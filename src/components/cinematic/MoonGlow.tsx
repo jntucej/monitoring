@@ -1,18 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
+import { useReducedMotion } from "framer-motion";
 
-/**
- * Moon + Contrast Contract — the canonical night-sky primitive.
- *
- * Layer A (fixed, always rendered):
- *   - deep base: linear-gradient(180deg, #070B14, #0F172A)
- *   - moon radial: radial-gradient(circle at top, <hue>, transparent 40%)
- *
- * Layer B (optional, hero-scoped, scrolls with the page):
- *   - stars + moon disc — only enabled on the landing page.
- */
 export type MoonHue =
   | "indigo"
   | "cyan"
@@ -37,7 +27,6 @@ const BASE_GRADIENT = "linear-gradient(180deg, #070B14 0%, #0F172A 100%)";
 interface MoonGlowProps {
   hue?: MoonHue;
   stars?: number;
-  disc?: boolean;
 }
 
 interface Star {
@@ -55,14 +44,13 @@ const TWINKLE_KEYFRAMES = `@keyframes moonGlowTwinkle {
   50% { opacity: var(--mg-star-max, 0.9); }
 }`;
 
-export function MoonGlow({
-  hue = "indigo",
-  stars = 0,
-  disc = false,
-}: MoonGlowProps) {
+export function MoonGlow({ hue = "indigo", stars = 0 }: MoonGlowProps) {
   const reduce = useReducedMotion();
-  const { scrollY } = useScroll();
-  const discFade = useTransform(scrollY, [0, 900], [1, 0]);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const starList = useMemo<Star[]>(() => {
     if (stars <= 0) return [];
@@ -82,7 +70,7 @@ export function MoonGlow({
     }));
   }, [stars]);
 
-  const hasHeroDecor = stars > 0 || disc;
+  const hasHeroDecor = stars > 0;
 
   return (
     <>
@@ -97,7 +85,7 @@ export function MoonGlow({
         />
       </div>
 
-      {hasHeroDecor && (
+      {hasHeroDecor && mounted && (
         <div
           aria-hidden="true"
           className="pointer-events-none absolute left-0 right-0 top-0 z-0 h-[100svh] overflow-hidden"
@@ -126,77 +114,6 @@ export function MoonGlow({
               }
             />
           ))}
-          {disc && (
-            <motion.div
-              className="absolute right-[10%] top-[10%]"
-              style={{ opacity: reduce ? 1 : discFade }}
-            >
-              <div
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
-                style={{
-                  width: 240,
-                  height: 240,
-                  background:
-                    "radial-gradient(circle, rgba(220,230,255,0.16) 0%, rgba(103,232,249,0.06) 35%, transparent 70%)",
-                  filter: "blur(24px)",
-                }}
-              />
-              <div
-                className="relative"
-                style={{
-                  width: 88,
-                  height: 88,
-                  borderRadius: "50%",
-                  background:
-                    "radial-gradient(circle at 38% 32%, #fbfdff 0%, #dfe6fa 40%, #a9b3d3 100%)",
-                  boxShadow:
-                    "0 0 32px rgba(210,225,255,0.35), 0 0 80px rgba(210,225,255,0.18), inset -8px -10px 18px rgba(90,100,150,0.35), inset 6px 8px 14px rgba(255,255,255,0.6)",
-                }}
-              >
-                <span
-                  className="absolute rounded-full"
-                  style={{
-                    width: 13,
-                    height: 13,
-                    top: "30%",
-                    left: "32%",
-                    background: "rgba(150,160,200,0.32)",
-                    boxShadow: "inset -1px -1px 2px rgba(80,90,140,0.45)",
-                  }}
-                />
-                <span
-                  className="absolute rounded-full"
-                  style={{
-                    width: 8,
-                    height: 8,
-                    top: "58%",
-                    left: "56%",
-                    background: "rgba(150,160,200,0.28)",
-                  }}
-                />
-                <span
-                  className="absolute rounded-full"
-                  style={{
-                    width: 6,
-                    height: 6,
-                    top: "42%",
-                    left: "68%",
-                    background: "rgba(150,160,200,0.24)",
-                  }}
-                />
-                <span
-                  className="absolute rounded-full"
-                  style={{
-                    width: 5,
-                    height: 5,
-                    top: "72%",
-                    left: "32%",
-                    background: "rgba(150,160,200,0.22)",
-                  }}
-                />
-              </div>
-            </motion.div>
-          )}
         </div>
       )}
     </>

@@ -15,16 +15,33 @@ const COPY = {
   welcoming: { label: "CAMPUS ACCESS", line: "The campus is waking…" },
 };
 
-export function CinematicLoader({ mode = "checking", onSkip }: CinematicLoaderProps) {
+export function CinematicLoader({
+  mode = "checking",
+  onSkip,
+}: CinematicLoaderProps) {
   const reduce = useReducedMotion();
   const [canSkip, setCanSkip] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const t = setTimeout(() => setCanSkip(true), 350);
     return () => clearTimeout(t);
   }, []);
 
-  if (reduce) return null;
+  if (reduce || !mounted) {
+    return (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-[#070B14] text-white">
+        <div className="relative z-10 flex flex-col items-center">
+          <p className="mb-12 text-[10px] uppercase tracking-[0.4em] text-white/40">
+            {COPY[mode].label}
+          </p>
+          <div className="relative mb-10 h-16 w-16 rounded-full bg-cyan-300/20" />
+          <p className="text-sm text-white/55">{COPY[mode].line}</p>
+        </div>
+      </div>
+    );
+  }
 
   const copy = COPY[mode];
   const skippable = canSkip && !!onSkip;

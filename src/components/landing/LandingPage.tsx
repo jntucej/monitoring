@@ -181,7 +181,7 @@ export function LandingPage() {
   return (
     <>
       <main className="relative min-h-screen overflow-hidden text-white">
-        <MoonGlow hue="indigo" stars={55} disc />
+        <MoonGlow hue="indigo" stars={55} />
         <BreathingVignette glow={t.glow} />
         <ParticleField color={t.accent} />
         <AmbientGlow color={t.glow} />
