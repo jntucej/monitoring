@@ -2,11 +2,11 @@
 
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { useState, useEffect } from "react";
-import { 
-  PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, Legend
+import {
+  Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, Legend
 } from "recharts";
-import { 
-  Download, FileText, FileSpreadsheet, UserCheck, HardHat, Clock, Building2, Calendar, TrendingUp
+import {
+  FileText, FileSpreadsheet, UserCheck, HardHat, Clock, Building2, Calendar, TrendingUp
 } from "lucide-react";
 import { useUIStore } from "@/stores/uiStore";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";

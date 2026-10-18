@@ -108,12 +108,18 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           const result = await response.json().catch(() => null);
 
           if (response.ok && result?.success && result.data) {
-            const { token, refreshToken, user: rawUser } = result.data;
+            const { token, user: rawUser } = result.data;
             const user = toUser(rawUser);
             set({
               user,
               token,
-              refreshToken: refreshToken ?? null,
+              // Refresh token is delivered to the browser only via the
+              // httpOnly `refresh_token` cookie set by /api/auth/login. It is
+              // NOT stored in this client-side store: keeping it out of
+              // localStorage means an XSS payload cannot read a long-lived
+              // session credential. The browser auto-sends the cookie on
+              // same-origin refresh/session calls, so no header is needed.
+              refreshToken: null,
               role: user.role as Role,
               authenticated: true,
               loading: false,
@@ -171,12 +177,14 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           const result = await response.json().catch(() => null);
 
           if (response.ok && result?.success && result?.data) {
-            const { token, refreshToken, user: rawUser } = result.data;
+            const { token, user: rawUser } = result.data;
             const user = toUser(rawUser);
             set({
               user,
               token,
-              refreshToken: refreshToken ?? get().refreshToken ?? null,
+              // See login(): the refresh credential lives only in the
+              // httpOnly refresh_token cookie, never in this store.
+              refreshToken: null,
               role: user.role as Role,
               authenticated: true,
               loading: false,
@@ -220,16 +228,17 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       },
 
       checkSession: async () => {
-        const { token, refreshToken, user, authenticated } = get();
+        const { token, user, authenticated } = get();
         if (!token || !user || !authenticated) return false;
 
         try {
           const headers: Record<string, string> = {
             Authorization: `Bearer ${token}`,
           };
-          if (refreshToken) {
-            headers["X-Refresh-Token"] = refreshToken;
-          }
+          // Refresh credentials come from the httpOnly `refresh_token` cookie
+          // that the browser attaches automatically to same-origin requests —
+          // we deliberately do NOT echo an X-Refresh-Token header, because we
+          // no longer hold the refresh token in JS memory.
           if (user.currentSessionToken) {
             headers["X-Session-Token"] = user.currentSessionToken;
           }
@@ -249,17 +258,15 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           const payload = result?.data ?? result;
           if (res.ok && result?.success && payload?.user) {
             const newToken = payload.token ?? result?.accessToken;
-            const newRefreshToken = payload.refreshToken ?? result?.refreshToken;
             const updatedUser = toUser(payload.user);
             const current = get();
             const userChanged = JSON.stringify(current.user) !== JSON.stringify(updatedUser);
-            const tokenChanged = (newToken && newToken !== current.token) || (newRefreshToken && newRefreshToken !== current.refreshToken);
+            const tokenChanged = Boolean(newToken && newToken !== current.token);
 
             if (userChanged || tokenChanged || !current.authenticated) {
               set({
                 user: updatedUser,
                 token: newToken || token,
-                refreshToken: newRefreshToken || refreshToken,
                 role: updatedUser.role as Role,
                 authenticated: true,
               });
@@ -383,7 +390,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       partialize: (state) => ({
         user: state.user,
         token: state.token,
-        refreshToken: state.refreshToken,
         role: state.role,
         authenticated: state.authenticated,
       }),

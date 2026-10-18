@@ -22,15 +22,13 @@ import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { DashboardCustomizer } from "@/components/engagement/DashboardCustomizer";
 import { AttentionQueue } from "@/components/engagement/AttentionQueue";
 import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
-import { useAuthStore } from "@/stores/authStore";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import { fmtInt, fmtRelative, fmtBytes } from "@/lib/formatters";
 import {
   AlertCircle, Flame, ShieldAlert, X,
   RefreshCw, Shield, Zap, Sparkles, Database, ArrowRight,
+  Radio as RadioIcon,
   Building2,
   ChevronRight, Bell,
-  Radio as RadioIcon
 } from "lucide-react";
 import type { DashboardData } from "@/lib/types";
 import { getAuthHeaders } from "@/hooks/useAuthHeaders";

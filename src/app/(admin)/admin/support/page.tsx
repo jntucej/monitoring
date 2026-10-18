@@ -2,7 +2,6 @@
 
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { PageLoading } from "@/components/shared/LoadingStates";
 import { SupportDashboard } from "@/components/admin/SupportDashboard";
 
 export default function AdminSupportPage() {

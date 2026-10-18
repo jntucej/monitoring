@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { OccupancyHeatmap } from "@/components/admin/OccupancyHeatmap";
 import { CampusDigitalTwin } from "@/components/admin/CampusDigitalTwin";
-import { Button } from "@/components/ui/button";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 
 export default function OccupancyPage() {
