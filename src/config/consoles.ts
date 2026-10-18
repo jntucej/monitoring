@@ -353,7 +353,7 @@ export const CONSOLES: Record<string, RoleConsoleConfig> = {
   },
   mess_incharge: {
     role: "mess_incharge",
-    nav: ["today", "menu", "counts", "inventory", "issues"],
+    nav: ["today", "menu", "counts", "inventory", "issues", "special-events", "verify-token", "reviews"],
     statusStrip: false,
     recentSheet: false,
     board: {

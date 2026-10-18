@@ -22,6 +22,9 @@ import {
   User,
   HelpCircle,
   MoreHorizontal,
+  CalendarDays,
+  ScanLine,
+  UtensilsCrossed,
   type LucideIcon,
 } from "lucide-react";
 import { useNavigation } from "@/hooks/useNavigation";
@@ -40,6 +43,9 @@ const ICON_MAP: Record<string, LucideIcon> = {
   GraduationCap: QrCode,
   FileSpreadsheet: QrCode,
   Sparkles: Clock,
+  CalendarDays,
+  ScanLine,
+  UtensilsCrossed,
 };
 
 function LocalTooltip({ label, children }: { label: string; children: React.ReactNode }) {

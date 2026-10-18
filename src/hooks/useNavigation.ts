@@ -319,6 +319,9 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
             { href: "/mess/daily-meal-counts", label: "Counts", icon: "BarChart3" },
             { href: "/mess/inventory-stock", label: "Inventory", icon: "Package" },
             { href: "/mess/mess-issues", label: "Issues", icon: "ShieldAlert" },
+            { href: "/mess/special-events", label: "Special Events", icon: "CalendarDays" },
+            { href: "/mess/verify-token", label: "Verify Token", icon: "ScanLine" },
+            { href: "/mess/reviews", label: "Meal Reviews", icon: "UtensilsCrossed" },
           ],
         },
       ];
