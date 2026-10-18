@@ -192,15 +192,24 @@ export function LandingPage() {
         <ReadingProgress />
 
         <div className="relative z-10 flex min-h-screen flex-col">
-          {/* ── SCREEN 1 · THE DOOR ── */}
-          <section
+          {/* ── SCREEN 1 · THE DOOR (Cascading Flow) ── */}
+          <motion.section
             aria-labelledby="hero-heading"
+            initial="hidden"
+            animate={heroAnimate}
+            variants={{
+              hidden: {},
+              show: {
+                transition: {
+                  staggerChildren: 0.22,
+                  delayChildren: 0.15,
+                },
+              },
+            }}
             className="flex min-h-screen flex-col items-center justify-center px-6 pb-20 pt-20 text-center"
           >
             <motion.p
               variants={fadeIn}
-              initial={reduce ? false : "hidden"}
-              animate={heroAnimate}
               className="mb-6 text-sm uppercase tracking-[0.28em] text-white/55"
             >
               Campus Access · Gate Monitor for JNTUCEJ
@@ -210,9 +219,6 @@ export function LandingPage() {
               <motion.h1
                 id="hero-heading"
                 variants={slideUp}
-                initial={reduce ? false : "hidden"}
-                animate={heroAnimate}
-                transition={{ delay: 0.1 }}
                 className="max-w-3xl text-balance text-4xl font-light leading-tight tracking-tight md:text-6xl"
               >
                 {HERO}
@@ -221,9 +227,6 @@ export function LandingPage() {
 
             <motion.p
               variants={fadeUp}
-              initial={reduce ? false : "hidden"}
-              animate={heroAnimate}
-              transition={{ delay: 0.3 }}
               className="mt-6 max-w-xl text-base leading-relaxed text-white/70 md:text-lg"
             >
               {SUB}
@@ -231,9 +234,6 @@ export function LandingPage() {
 
             <motion.div
               variants={fadeUp}
-              initial={reduce ? false : "hidden"}
-              animate={heroAnimate}
-              transition={{ delay: 0.5 }}
               className="mt-8 flex flex-wrap items-center justify-center gap-3"
             >
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-1.5 backdrop-blur">
@@ -246,30 +246,18 @@ export function LandingPage() {
               <LiveStatePill />
             </motion.div>
 
-            <motion.div
-              variants={fadeUp}
-              initial={reduce ? false : "hidden"}
-              animate={heroAnimate}
-              transition={{ delay: 0.8 }}
-              className="mt-20 w-full"
-            >
+            <motion.div variants={fadeUp} className="mt-20 w-full">
               <LoginBubbleField />
             </motion.div>
 
-            <motion.p
-              variants={fadeIn}
-              initial={reduce ? false : "hidden"}
-              animate={heroAnimate}
-              transition={{ delay: 1.2 }}
-              className="mt-14 text-sm text-white/55"
-            >
+            <motion.p variants={fadeIn} className="mt-14 text-sm text-white/55">
               Press{" "}
               <kbd className="rounded border border-white/20 bg-white/5 px-1.5 py-0.5 font-mono text-xs text-white/80">
                 Enter
               </kbd>{" "}
               to sign in
             </motion.p>
-          </section>
+          </motion.section>
 
           <ScrollHint />
 
