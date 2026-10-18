@@ -18,7 +18,10 @@ export const metadata: Metadata = {
     title: "Contact | Gate Monitor",
     description: "Get in touch with the team behind Gate Monitor.",
     url: `${SITE.url}/contact`,
-  },
+  images: [
+        { url: "/og-marketing.png", width: 1200, height: 630, alt: "Gate Monitor" },
+      ],
+      },
 };
 
 const ROUTES = [

@@ -37,7 +37,10 @@ export const metadata: Metadata = {
     description:
       "Student safety data is held to a higher standard. Row-level security, MFA, immutable audit, DPDP Act 2023 alignment.",
     url: `${SITE.url}/trust`,
-  },
+  images: [
+        { url: "/og-marketing.png", width: 1200, height: 630, alt: "Gate Monitor" },
+      ],
+      },
 };
 
 const PILLARS = [

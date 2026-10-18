@@ -45,6 +45,14 @@ export const metadata: Metadata = {
     description:
       "Every capability of Gate Monitor's campus access platform, from gate scans to exam-day access control.",
     url: `${SITE.url}/features`,
+    images: [
+      {
+        url: "/og-marketing.png",
+        width: 1200,
+        height: 630,
+        alt: "Gate Monitor features",
+      },
+    ],
   },
 };
 

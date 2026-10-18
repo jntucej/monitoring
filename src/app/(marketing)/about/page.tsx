@@ -20,7 +20,10 @@ export const metadata: Metadata = {
     description:
       "Built by the team at JNTUCEJ to give Indian campuses a single, secure source of truth for student movement and safety.",
     url: `${SITE.url}/about`,
-  },
+  images: [
+        { url: "/og-marketing.png", width: 1200, height: 630, alt: "Gate Monitor" },
+      ],
+      },
 };
 
 const TIMELINE = [
