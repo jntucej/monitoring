@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Login | Gate Monitoring",
-  description: "Login to the Gate Monitoring System",
-};
-
-export default function LoginLayout({
-  children,
-}: {
-  children: React.ReactNode;
+  title: "Sign in · JNTUHCEJ",
+  description:
+    "Sign in to JNTUHCEJ Gate Monitoring System. Students, faculty, staff, wardens and admi    "Sign in to JNTUHCEJ Gate Monitoring System. Students, faculty, staff, wardens and admi    "Sign in to JNTUHCEJ Gate Monitoring System. Students, faculty, staff, wardens and admi    "Sign in to JNTUHCEJ Gate Monitoring System. Students, faculty, staff, wardens and admi    "Sign in to JNTUHCEJ Gate Monitoring System. Students, faculty, staf.ReactNode;
 }) {
-  return <main className="min-h-[100dvh] flex flex-col">{children}</main>;
+  return <>{children}</>;
 }

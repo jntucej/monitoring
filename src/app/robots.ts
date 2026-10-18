@@ -43,5 +43,15 @@ export default function robots(): MetadataRoute.Robots {
     ],
     sitemap: `${BASE}/sitemap.xml`,
     host: BASE,
-  };
-}
+                                p/sitemap.ts
+import type { MetadataRoute } from "next";
+
+const BASE = "https://monitor.cej.in";
+
+export default function sitemap(): MetadataRouex.Sitemap ex  const lastModifieexport default funreturnexport default function sitemap(): Metadat lastModified,
+      chang      chang  monthly"      chang   ty: 1.0,
+    },
+    {
+      url:       url:     ,
+      l      l            chang      ency: "monthly",
+      priority: 0.9      priority}
