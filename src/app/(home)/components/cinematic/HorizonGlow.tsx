@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { HomeAccent } from "./AmbientGlow";
+import type { HomeAccent } from "./types";
 
 export interface HorizonGlowProps {
   accent?: HomeAccent;
@@ -15,10 +15,6 @@ const ACCENT_VAR: Record<HomeAccent, string> = {
   navy: "--home-accent-navy",
 };
 
-/**
- * Light spill rising from the bottom of the viewport.
- * Used only in "leave" (warm sunrise) and "quiet" (moonlight).
- */
 export function HorizonGlow({ accent = "amber" }: HorizonGlowProps) {
   const color = `var(${ACCENT_VAR[accent]})`;
 
