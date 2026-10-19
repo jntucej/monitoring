@@ -1455,34 +1455,23 @@ html[data-device-profile="legacy"] .glass-card {
    DRAWER SLIDE-IN — left-anchored sheet entrance
    ============================================================ */
 /* ==========================================================================
-   HOMEPAGE ISOLATION — kill global chrome bleed
+   HOMEPAGE ISOLATION — hide global chrome without forcing background
    Only active on /. Every other page is untouched.
    ========================================================================== */
 
-/* 1. Body itself — kill global bg + overscroll bounce bleed */
+/* 1. Body overscroll bounce prevention */
 body.is-home,
 html:has([data-home]) body {
-  background-color: var(--home-bg-base, #050816) !important;
-  background-image: none !important;
   overflow-x: hidden;
   overscroll-behavior: none;
 }
 
-/* 2. Fixed opaque base — covers any gap, sticky offset, or overscroll */
+/* 2. Isolation container */
 [data-home] {
   position: relative;
   isolation: isolate;
   min-height: 100vh;
   z-index: 1;
-}
-
-[data-home]::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: var(--home-bg-base, #050816);
-  z-index: -1;
-  pointer-events: none;
 }
 
 /* 3. Hide app chrome (header, sidebar, orbs, floating bot, dev strip) */
