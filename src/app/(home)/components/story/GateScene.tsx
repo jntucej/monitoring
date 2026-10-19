@@ -9,8 +9,8 @@ export function GateScene() {
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
 
   return (
-    <section ref={ref} className="relative" style={{ height: "160vh" }}>
-      <div className="sticky top-0 h-screen overflow-hidden">
+    <section ref={ref} className="relative bg-black" style={{ height: "160vh" }}>
+      <div className="sticky top-0 h-screen overflow-hidden bg-black">
         <Stage fallback={<StaticHero accent="amber" />}>
           <HeroScene accent="amber" />
           <ParticleField accent="amber" />
