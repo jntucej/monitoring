@@ -19,6 +19,7 @@ const nextConfig = {
   reactStrictMode: true,
   productionBrowserSourceMaps: false,
   output: 'standalone',
+  serverExternalPackages: ["bcryptjs", "pg"],
 
   images: {
     formats: ["image/avif", "image/webp"],

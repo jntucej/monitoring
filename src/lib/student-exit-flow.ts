@@ -1,5 +1,6 @@
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import type { ReasonCode, ExitReason } from "@/lib/types";
+import { findByUniqueId } from "@/server/repositories/users/findByUniqueId";
 
 export const CANONICAL_EXIT_FLOWS: Record<
   ReasonCode,
@@ -113,7 +114,23 @@ export async function validateStudentExitFlow(
   const normalizedRoll = rollNumber.trim().toUpperCase();
   const now = new Date().toISOString();
 
-  // Look for an APPROVED pass matching this student roll
+  // Check modern permissions table (primary source).
+  // Use the UUID directly — permissions.requester_user_id is a FK to users.id.
+  const actor = await findByUniqueId(rollNumber.trim().toUpperCase());
+  const { data: perms, error: permErr } = await client
+    .from("permissions")
+    .select("*")
+    .eq("requester_user_id", actor?.id ?? "")
+    .in("status", ["APPROVED"])
+    .eq("workflow_type", "hostel")
+    .not("reason", "is", null)
+    .order("created_at", { ascending: false });
+
+  if (permErr) {
+    console.error("validateStudentExitFlow error querying permission_requests:", permErr);
+  }
+
+  // Check legacy gate_passes table (fallback).
   const { data: passes, error } = await client
     .from("gate_passes")
     .select("*")
@@ -135,6 +152,25 @@ export async function validateStudentExitFlow(
     };
   }
 
+  // Try modern pass first; fall back to legacy.
+  const modernPass = (perms || []).find((p: any) => {
+    const passReason = normalizeExitReason(p.reason);
+    if (passReason !== canonicalReason) return false;
+    // Validity window: from_date <= NOW() and to_date >= NOW().
+    if (!p.from_date || !p.to_date) return false;
+    const fromDate = new Date(p.from_date).getTime();
+    const toDate = new Date(p.to_date).getTime();
+    const currentTime = new Date(now).getTime();
+    // Allow a 2-hour buffer before departure.
+    const earlyBuffer = 2 * 60 * 60 * 1000;
+    return currentTime >= fromDate - earlyBuffer && currentTime <= toDate;
+  });
+
+  if (modernPass) {
+    return { allowed: true, canonicalReason, requiresPass: true, passId: modernPass.id };
+  }
+
+  // Fall back to legacy gate_passes (already has validity check inline).
   const validPass = (passes || []).find((p: any) => {
     // If reason code is specified on pass, check match
     const passReason = normalizeExitReason(p.reason);

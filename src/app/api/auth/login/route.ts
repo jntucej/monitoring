@@ -342,11 +342,13 @@ async function handleLoginInner(req: NextRequest) {
     return response;
   } catch (error: unknown) {
     const requestId = getRequestId(req);
+    const errObj = error instanceof Error ? { name: error.name, message: error.message, stack: error.stack } : String(error);
+    console.error("[login] INTERNAL_ERROR:", JSON.stringify(errObj));
     log.error({
       msg: "login.error",
       route: "/api/auth/login",
       requestId,
-      err: error instanceof Error ? { name: error.name, message: error.message, stack: error.stack } : String(error),
+      err: errObj,
     });
     return NextResponse.json(
       {

@@ -30,6 +30,9 @@ RUN adduser --system --uid 1001 --home /app nextjs
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# Full deps for server.js (standalone output prunes node_modules; bcryptjs/pg
+# must be resolvable at runtime). Symlink-safe copy.
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 
 # Ensure cache/config dirs exist and are owned by nextjs before the USER switch
 RUN mkdir -p /app/.cache /app/.config && chown -R nextjs:nodejs /app

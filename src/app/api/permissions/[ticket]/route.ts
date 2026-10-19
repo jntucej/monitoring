@@ -18,7 +18,8 @@ import {
   applyEscalateUp,
   checkStepupPassword,
 } from "@/lib/permission-forward";
-import { addAudit, addNotification } from "@/lib/db";
+import { addAudit, addNotification, getStudentGuardianLink } from "@/lib/db";
+import { sendSMS } from "@/lib/integrations/sms";
 import type { WorkflowType, Role } from "@/lib/types";
 
 function getTicketFromReq(req: NextRequest): string {
@@ -561,6 +562,38 @@ async function handlePatch(req: NextRequest): Promise<Response> {
     `Permission Request ${request.ticket_number} Updated`,
     `Your request ${request.ticket_number} was marked ${normalizedAction} (Status: ${nextStatus}, Stage: ${nextStage})`
   ).catch((err) => console.error("[Permission Ticket API] addNotification error:", err));
+
+  // Home-out SMS notification: when the terminal APPROVE lands (workflow_type
+  // hostel, reason home_out), send an SMS to the student's parent/guardian so
+  // they know the pass has been approved.
+  if (
+    normalizedAction === "APPROVE" &&
+    nextStatus === "APPROVED" &&
+    request.workflow_type === "hostel" &&
+    typeof request.reason === "string" &&
+    request.reason === "home_out"
+  ) {
+    const guardianId = await getStudentGuardianLink(request.requester_user_id);
+    if (guardianId) {
+      const { data: guardianUser } = await supabase
+        .from("users")
+        .select("phone, name")
+        .eq("id", guardianId)
+        .maybeSingle();
+      const { data: studentUser } = await supabase
+        .from("users")
+        .select("name")
+        .eq("id", request.requester_user_id)
+        .maybeSingle();
+      if (guardianUser?.phone) {
+        const studentName = studentUser?.name || "the student";
+        await sendSMS({
+          to: guardianUser.phone,
+          message: `${studentName} has an approved Home Out pass for ${request.ticket_number}.`,
+        }).catch((smsErr) => console.error("[SMS] home_out notification failed:", smsErr));
+      }
+    }
+  }
 
   return NextResponse.json({ success: true, data: updated });
 }
