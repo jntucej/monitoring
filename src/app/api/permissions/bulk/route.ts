@@ -227,6 +227,8 @@ async function handlePost(req: NextRequest): Promise<Response> {
           ? "not_pending"
           : applyRes.conflict === "notAllowed"
           ? "not_allowed"
+          : applyRes.conflict === "concurrentModification"
+          ? "skipped"  // G18: ticket was modified by another approver mid-batch
           : "error";
 
       results.push({
