@@ -9,7 +9,7 @@ import {
   ScanScene,
   ShieldScene,
   WholeCampusScene,
-} from "./components/story/scenes";
+} from "./components/story/scenes/index";
 import { BootSequence } from "./components/story/BootSequence";
 import { GateScene } from "./components/story/GateScene";
 import { LoginGateway } from "./components/story/LoginGateway";
