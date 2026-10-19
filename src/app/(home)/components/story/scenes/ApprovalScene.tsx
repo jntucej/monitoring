@@ -7,36 +7,43 @@ import { useReducedMotionSafe } from "../../hooks/useReducedMotionSafe";
 import { usePerformanceTier } from "../../hooks/usePerformanceTier";
 import { SPRING_STORY } from "../../hooks/useSpringConfig";
 
-const NODES = ["HOD", "Warden", "Principal", "Gate"];
+const STEPS = [
+  { key: "intent", label: "Intent", icon: "◇" },
+  { key: "request", label: "Pass requested", icon: "◈" },
+  { key: "confirm", label: "Confirmed", icon: "◆" },
+];
 
 export function ApprovalScene() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.4 });
   const reduced = useReducedMotionSafe();
   const tier = usePerformanceTier();
-  const [active, setActive] = useState<number>(reduced ? NODES.length : -1);
+  const [active, setActive] = useState<number>(reduced ? STEPS.length : -1);
 
   useEffect(() => {
-    if (reduced || tier === "static") { setActive(NODES.length); return; }
+    if (reduced || tier === "static") {
+      setActive(STEPS.length);
+      return;
+    }
     if (!inView) return;
     setActive(-1);
     let i = -1;
     const timer = setInterval(() => {
       i += 1;
       setActive(i);
-      if (i >= NODES.length) clearInterval(timer);
-    }, 700);
+      if (i >= STEPS.length) clearInterval(timer);
+    }, 850);
     return () => clearInterval(timer);
   }, [inView, reduced, tier]);
 
-  const done = active >= NODES.length;
+  const done = active >= STEPS.length;
 
   return (
     <div ref={ref} className="relative">
       <GlassPanel variant="cinema" className="overflow-hidden p-6">
         <div className="mb-6 flex items-center justify-between">
           <div className="text-xs font-medium uppercase tracking-widest text-[var(--home-text-muted)]">
-            Approval chain
+            Request lifecycle
           </div>
           <motion.div
             key={done ? "done" : "pending"}
@@ -48,41 +55,49 @@ export function ApprovalScene() {
                 : "border-[#F59E0B]/40 bg-[#F59E0B]/10 text-[#F59E0B]"
             }`}
           >
-            {done ? "approved" : "in progress"}
+            {done ? "confirmed" : "in progress"}
           </motion.div>
         </div>
-        <div className="relative flex items-center justify-between px-2">
-          {/* Connection line */}
-          <div className="absolute left-6 right-6 top-1/2 -z-0 h-px -translate-y-1/2 bg-[var(--home-border-soft)]" />
+        <div className="relative flex items-start justify-between px-4">
+          <div className="absolute left-10 right-10 top-5 -z-0 h-px bg-[var(--home-border-soft)]" />
           {!reduced && (
             <motion.div
-              className="absolute left-6 top-1/2 h-px -translate-y-1/2 bg-[#10B981]"
+              className="absolute left-10 top-5 h-px -translate-y-0 bg-[#10B981]"
               initial={{ width: 0 }}
-              animate={{ width: active >= 0 ? `${Math.min(active, NODES.length - 1) * 100 / (NODES.length - 1)}%` : 0 }}
+              animate={{
+                width:
+                  active >= 0
+                    ? `${Math.min(active, STEPS.length - 1) * 100 / (STEPS.length - 1)}%`
+                    : 0,
+              }}
               transition={SPRING_STORY}
-              style={{ right: undefined }}
+              style={{ maxWidth: "calc(100% - 80px)" }}
             />
           )}
-          {NODES.map((label, i) => {
+          {STEPS.map((step, i) => {
             const lit = i < active || done;
             const current = i === active && !done;
             return (
-              <div key={label} className="relative z-10 flex flex-col items-center gap-2">
+              <div key={step.key} className="relative z-10 flex flex-col items-center gap-2">
                 <motion.div
-                  animate={{
-                    scale: current ? [1, 1.15, 1] : 1,
-                  }}
-                  transition={current ? { duration: 0.7, repeat: Infinity, ease: "easeInOut" } : {}}
-                  className={`flex h-10 w-10 items-center justify-center rounded-full border-2 text-xs font-bold ${
+                  animate={current ? { scale: [1, 1.12, 1] } : { scale: 1 }}
+                  transition={
+                    current ? { duration: 0.8, repeat: Infinity, ease: "easeInOut" } : {}
+                  }
+                  className={`flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-bold ${
                     lit
                       ? "border-[#10B981] bg-[#10B981]/15 text-[#10B981]"
                       : "border-[var(--home-border-soft)] bg-[var(--home-glass-subtle-bg)] text-[var(--home-text-muted)]"
                   }`}
                 >
-                  {lit ? "✓" : i + 1}
+                  {lit ? "✓" : step.icon}
                 </motion.div>
-                <div className={`text-[10px] uppercase tracking-wider ${lit ? "text-[#10B981]" : "text-[var(--home-text-muted)]"}`}>
-                  {label}
+                <div
+                  className={`text-center text-[10px] uppercase tracking-wider ${
+                    lit ? "text-[#10B981]" : "text-[var(--home-text-muted)]"
+                  }`}
+                >
+                  {step.label}
                 </div>
               </div>
             );
@@ -94,7 +109,7 @@ export function ApprovalScene() {
           transition={{ duration: 0.4 }}
           className="mt-6 rounded-lg border border-[#10B981]/30 bg-[#10B981]/5 px-4 py-3 text-center text-sm text-[#10B981]"
         >
-          Pass generated · QR ready · 3.2s total
+          Pass generated · ready to scan
         </motion.div>
       </GlassPanel>
     </div>

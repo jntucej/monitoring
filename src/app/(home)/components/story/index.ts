@@ -1,18 +1,12 @@
-export { SCENES } from "./scenes";
-export type { Scene, SceneId, SceneAccent } from "./scenes";
+import { SCENES } from "./scenes/scenesData";
+export type { Scene, SceneId, SceneAccent } from "./scenes/scenesData";
 export { SceneFrame } from "./SceneFrame";
-export { PerspectiveSelector } from "./PerspectiveSelector";
 export { LoginGateway } from "./LoginGateway";
 export { SoundToggle } from "./SoundToggle";
 export { BootSequence } from "./BootSequence";
 export { GateScene } from "./GateScene";
-export { RequestScene } from "./scenes/RequestScene";
-export { ApprovalScene } from "./scenes/ApprovalScene";
-export { ScanScene } from "./scenes/ScanScene";
-export { ShieldScene } from "./scenes/ShieldScene";
-export { WholeCampusScene } from "./scenes/WholeCampusScene";
+export { RequestScene, ApprovalScene, ScanScene, ShieldScene, WholeCampusScene } from "./scenes";
 
-import { SCENES } from "./scenes";
 export const CHAPTERS = SCENES;
 export type Chapter = any;
 export type ChapterId = string;

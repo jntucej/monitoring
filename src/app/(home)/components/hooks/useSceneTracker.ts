@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SCENES, type SceneId, type SceneAccent } from "../story/scenes";
+import { SCENES, type SceneId, type SceneAccent } from "../story/scenes/scenesData";
 
 const ACCENT_VAR: Record<SceneAccent, string> = {
   amber:   "var(--home-accent-amber)",
