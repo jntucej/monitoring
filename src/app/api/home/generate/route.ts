@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import type { ChapterId } from "@/app/(home)/components/story/data";
+import type { ChapterId } from "@/app/(home)/components/story";
 
 export const runtime = "nodejs";
 export const revalidate = 3600;
@@ -10,7 +10,7 @@ interface Payload {
 }
 
 const DEFAULT: Payload = {
-  chapterOrder: ["leave", "wait", "scan", "alert", "quiet"],
+  chapterOrder: ["request", "approval", "scan", "shield", "wholecampus"],
   tone: "calm",
 };
 

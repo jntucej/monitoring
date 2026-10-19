@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { assertCsrf } from "@/lib/csrf";
 import { createDatabaseBackup, listBackups, restoreDatabaseBackup } from "@/lib/backup";
 import { addAudit } from "@/lib/db";
 import { Role } from "@/lib/types";
@@ -35,6 +36,9 @@ async function handleGet(req: NextRequest) {
  * Body format for restore: { action: "restore", backupData: Record<string, any[]>, truncate?: boolean }
  */
 async function handlePost(req: NextRequest) {
+  const csrfFail = assertCsrf(req);
+  if (csrfFail) return csrfFail;
+
   const actorId = req.headers.get("x-user-id");
   const actorRole = req.headers.get("x-user-role");
 

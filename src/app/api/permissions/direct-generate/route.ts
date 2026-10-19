@@ -16,6 +16,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { NextRequest, NextResponse } from "next/server";
+import { assertCsrf } from "@/lib/csrf";
 import withAuthorization from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import type { AuthContext } from "@/lib/authContext";
@@ -114,6 +115,9 @@ function resolvedTo_OrNull(to: string | null): string | null {
 }
 
 async function handlePost(req: NextRequest, ctx: { auth: AuthContext }): Promise<Response> {
+  const csrfFail = assertCsrf(req);
+  if (csrfFail) return csrfFail;
+
   const auth = ctx.auth;
   const authUserRole = auth.role;
 

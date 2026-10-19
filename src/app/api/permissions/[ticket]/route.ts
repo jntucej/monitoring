@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { assertCsrf } from "@/lib/csrf";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -57,6 +58,9 @@ async function handleGet(req: NextRequest): Promise<Response> {
 }
 
 async function handlePatch(req: NextRequest): Promise<Response> {
+  const csrfFail = assertCsrf(req);
+  if (csrfFail) return csrfFail;
+
   const ticketParam = getTicketFromReq(req);
   const authUserId = req.headers.get("x-user-id") || "";
   const authUserRole = req.headers.get("x-user-role") || "";

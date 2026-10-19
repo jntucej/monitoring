@@ -7,8 +7,8 @@ import { usePerformanceTier } from "../hooks/usePerformanceTier";
 import { useReducedMotionSafe } from "../hooks/useReducedMotionSafe";
 
 interface MagneticReturn {
-  x: MotionValue<number> | number;
-  y: MotionValue<number> | number;
+  x: MotionValue<number>;
+  y: MotionValue<number>;
   disabled: boolean;
 }
 
@@ -59,6 +59,5 @@ export function useMagneticCursor(
     };
   }, [ref, strength, x, y, disabled]);
 
-  if (disabled) return { x: 0, y: 0, disabled: true };
-  return { x, y, disabled: false };
+  return { x, y, disabled };
 }

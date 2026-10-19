@@ -10,7 +10,7 @@ import { addAudit } from "@/lib/db";
 import { log, getRequestId } from "@/lib/log";
 import { assertCsrf } from "@/lib/csrf";
 import type { Role } from "@/lib/types";
-import { compareSync } from "@/server/lib/crypto";
+import { compare as compareBcrypt } from "@/server/lib/crypto";
 import { checkLockout, recordFailedAttempt, clearLockout } from "@/lib/login-lockout";
 
 const GENERIC_FAILURE = {
@@ -224,7 +224,7 @@ async function handleLoginInner(req: NextRequest) {
           : [];
         let matchIdx = -1;
         for (let i = 0; i < codes.length; i++) {
-          if (compareSync(presentedRecovery, codes[i])) {
+          if (await compareBcrypt(presentedRecovery, codes[i])) {
             matchIdx = i;
             break;
           }

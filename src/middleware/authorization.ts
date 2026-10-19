@@ -25,6 +25,7 @@ import {
 import { isPrivileged } from "@/lib/roles";
 import { getRequestBody, setupBodyCaching } from "@/lib/body-cache";
 import { signTrustedHeaders } from "@/server/http/trusted-headers";
+import { metricsMiddleware } from "@/middleware/metrics";
 
 /**
  * Typed error for authorization failures. Carries a stable `code` and HTTP
@@ -193,10 +194,10 @@ export function withAuthorization(
         // routes that call requireTrustedHeaders will reject with 401.
       }
 
-      // If all checks pass, continue to the handler with auth context.
+      // If all checks pass, continue to the handler with auth context wrapped in metrics.
       // MUST await: without it, a handler rejection escapes the try/catch
       // and becomes an unhandled rejection instead of a JSON 500.
-      return await handler(req, { auth: authContext });
+      return await metricsMiddleware(req, () => handler(req, { auth: authContext }));
     } catch (error) {
       // Handle different types of errors
       if (error instanceof AuthError) {

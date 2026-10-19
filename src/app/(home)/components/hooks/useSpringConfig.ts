@@ -1,4 +1,5 @@
 import type { Transition } from "framer-motion";
+import type { PerformanceTier } from "./usePerformanceTier";
 
 // ─── Springs — ordered by weight ─────────────────────────────
 export const SPRING_SNAP:     Transition = { type: "spring", stiffness: 500, damping: 30, mass: 0.3 };
@@ -29,6 +30,6 @@ export const DRAG_TRANSITION = { bounceStiffness: 400, bounceDamping: 28 } as co
 // ─── Reduced-motion fallback ────────────────────────────────
 export const STATIC_TRANSITION: Transition = { duration: 0 };
 
-export function springForTier(tier: "high" | "mid" | "low"): Transition {
-  return tier === "low" ? STATIC_TRANSITION : SPRING_STORY;
+export function springForTier(tier: PerformanceTier | "high" | "mid" | "low"): Transition {
+  return tier === "low" || tier === "static" ? STATIC_TRANSITION : SPRING_STORY;
 }
