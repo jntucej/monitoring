@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Stage, HeroScene, ParticleField, StaticHero } from "./components/webgl";
 import { FilmGrain, BreathingVignette, AmbientGlow } from "./components/cinematic";
@@ -34,6 +34,13 @@ export function HomeStoryClient() {
   const tier = usePerformanceTier();
   useChapterTracker();
   const returning = useReturningVisitor();
+
+  useEffect(() => {
+    document.body.classList.add("is-home");
+    return () => {
+      document.body.classList.remove("is-home");
+    };
+  }, []);
 
   return (
     <main data-home data-tier={tier} className="relative min-h-screen">
