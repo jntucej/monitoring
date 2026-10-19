@@ -357,6 +357,8 @@ async function handleLoginInner(req: NextRequest) {
           code: "INTERNAL_ERROR",
           message: "Internal server error during authentication.",
           requestId,
+          // DEBUG: surface the real cause until this is removed
+          ...(process.env.NODE_ENV !== "production" ? { cause: errObj } : {}),
         },
       },
       { status: 500 }

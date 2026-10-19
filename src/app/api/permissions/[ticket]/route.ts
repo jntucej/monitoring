@@ -407,6 +407,32 @@ async function handlePatch(req: NextRequest): Promise<Response> {
     if (!resolvedNext || resolvedNext === "completed") {
       nextStage = "completed";
       nextStatus = "APPROVED";
+
+      // G20: reject terminal APPROVE if the pass validity window has already
+      // closed — a dead-on-arrival pass creates a false promise in the UI.
+      if (request.workflow_type === "hostel" && typeof request.reason === "string" && request.reason === "home_out") {
+        const toDateStr = (request as { to_date?: string }).to_date;
+        if (toDateStr && new Date(toDateStr).getTime() < Date.now()) {
+          return NextResponse.json(
+            { success: false, error: { code: "WINDOW_EXPIRED", message: "This pass's validity window has already closed." } },
+            { status: 422 }
+          );
+        }
+      }
+
+      // G19: notify student of late approval (window was already active when approved).
+      if (request.workflow_type === "hostel" && typeof request.reason === "string" && request.reason === "home_out") {
+        const fromDateStr = (request as { from_date?: string }).from_date;
+        if (fromDateStr && new Date(fromDateStr).getTime() < Date.now()) {
+          await addNotification(
+            "user",
+            request.requester_user_id,
+            "warning",
+            "Home Out pass approved with truncated window",
+            `Your Home Out pass was approved after the planned from_date. Your approved window starts now and ends at ${new Date(request.to_date ?? 0).toLocaleString()}.`,
+          ).catch((err) => console.error("[Permission Ticket API] addNotification error:", err));
+        }
+      }
     } else {
       nextStage = resolvedNext;
       nextStatus = "PENDING";
@@ -519,6 +545,11 @@ async function handlePatch(req: NextRequest): Promise<Response> {
     .from("permission_requests")
     .update(updateFields)
     .eq("id", request.id)
+    // G16: CAS guard — only apply if the row is still at the stage we read.
+    // If two approvers hit this simultaneously, one write wins and the other
+    // gets 0 affected rows, causing a 409 CONCURRENT_MODIFICATION so the UI
+    // reloads and shows the true current state instead of silently clobbering.
+    .eq("current_stage", request.current_stage)
     .select()
     .single();
 
@@ -526,6 +557,14 @@ async function handlePatch(req: NextRequest): Promise<Response> {
     return NextResponse.json(
       { success: false, error: { code: "UPDATE_ERROR", message: updateErr.message } },
       { status: 500 }
+    );
+  }
+
+  // G16: zero-row update → concurrent modification detected
+  if (!updated) {
+    return NextResponse.json(
+      { success: false, error: { code: "CONCURRENT_MODIFICATION", message: "This ticket was modified by another approver. Please refresh." } },
+      { status: 409 }
     );
   }
 
@@ -557,11 +596,28 @@ async function handlePatch(req: NextRequest): Promise<Response> {
 
   addNotification(
     "user",
-    request.student_user_id,
+    request.requester_user_id || request.student_user_id,
     "permission",
     `Permission Request ${request.ticket_number} Updated`,
     `Your request ${request.ticket_number} was marked ${normalizedAction} (Status: ${nextStatus}, Stage: ${nextStage})`
   ).catch((err) => console.error("[Permission Ticket API] addNotification error:", err));
+
+  // G22: send rejection notification with reason to the student.
+  if (
+    normalizedAction === "REJECT" &&
+    request.workflow_type === "hostel"
+  ) {
+    const studentId = request.requester_user_id || request.student_user_id;
+    if (studentId) {
+      await addNotification(
+        "user",
+        studentId,
+        "warning",
+        `Your Home Out pass was rejected`,
+        comment ? `Reason: ${comment}` : "Your request has been rejected. Please contact the caretaker for details.",
+      ).catch((err) => console.error("[Permission Ticket API] rejection notification error:", err));
+    }
+  }
 
   // Home-out SMS notification: when the terminal APPROVE lands (workflow_type
   // hostel, reason home_out), send an SMS to the student's parent/guardian so
