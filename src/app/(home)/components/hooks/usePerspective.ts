@@ -2,7 +2,8 @@
 
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import type { Perspective } from "../story/data";
+
+export type Perspective = "student" | "parent" | "guard" | "warden" | "admin";
 
 interface PerspectiveState {
   perspective: Perspective;

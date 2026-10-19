@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CHAPTERS, type ChapterId } from "../story/data";
+import { SCENES as CHAPTERS } from "../story/scenes";
+type ChapterId = string;
 
 export interface GenerativePayload {
   chapterOrder: ChapterId[];
@@ -16,13 +17,7 @@ const DEFAULT_PAYLOAD: GenerativePayload = {
 };
 
 function isValidChapterId(x: unknown): x is ChapterId {
-  return (
-    x === "leave" ||
-    x === "wait" ||
-    x === "scan" ||
-    x === "alert" ||
-    x === "quiet"
-  );
+  return typeof x === "string";
 }
 
 function isValidTone(x: unknown): x is GenerativePayload["tone"] {

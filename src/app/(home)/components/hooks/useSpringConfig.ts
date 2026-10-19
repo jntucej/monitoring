@@ -42,6 +42,12 @@ export const SPRING_CURSOR: Transition = {
   mass: 0.3,
 };
 
+export const DUR_FAST = 0.6;
+export const DUR_BASE = 1.2;
+export const DUR_SLOW = 2.4;
+export const DUR_CINEMA = 3.0;
+export const EASE_DRIFT = [0.16, 1, 0.3, 1] as const;
+
 export function springForTier(tier: "full" | "reduced" | "static"): Transition {
   if (tier === "static") {
     return { duration: 0 };

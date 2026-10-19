@@ -1,7 +1,22 @@
-export { CHAPTERS, CHAPTER_BY_ID, PERSPECTIVE_ACCENT } from "./data";
-export type { Chapter, ChapterId, ChapterAccent, Perspective } from "./data";
-export { StoryChapter } from "./StoryChapter";
+export { SCENES } from "./scenes";
+export type { Scene, SceneId, SceneAccent } from "./scenes";
+export { SceneFrame } from "./SceneFrame";
 export { PerspectiveSelector } from "./PerspectiveSelector";
 export { LoginGateway } from "./LoginGateway";
 export { SoundToggle } from "./SoundToggle";
-export * from "./ChapterVisuals";
+export { BootSequence } from "./BootSequence";
+export { GateScene } from "./GateScene";
+export { RequestScene } from "./scenes/RequestScene";
+export { ApprovalScene } from "./scenes/ApprovalScene";
+export { ScanScene } from "./scenes/ScanScene";
+export { ShieldScene } from "./scenes/ShieldScene";
+export { WholeCampusScene } from "./scenes/WholeCampusScene";
+
+import { SCENES } from "./scenes";
+export const CHAPTERS = SCENES;
+export type Chapter = any;
+export type ChapterId = string;
+export type ChapterAccent = string;
+export type Perspective = string;
+export const CHAPTER_BY_ID = {};
+export const PERSPECTIVE_ACCENT = {};
