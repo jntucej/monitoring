@@ -238,12 +238,19 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
 
   // Return the validated context
   
-  const rolesRes = await query<{ role: string }>(
-    "SELECT role FROM user_roles WHERE user_id = $1",
-    [profile.id]
-  );
-  const roles = rolesRes.rows.map(r => r.role as Role);
-  if (!roles.includes(profile.role as Role)) roles.push(profile.role as Role);
+  let roles: Role[] = [profile.role as Role];
+  try {
+    const rolesRes = await query<{ role: string }>(
+      "SELECT role FROM user_roles WHERE user_id = $1",
+      [profile.id]
+    );
+    const dbRoles = rolesRes.rows.map(r => r.role as Role);
+    for (const r of dbRoles) {
+      if (!roles.includes(r)) roles.push(r);
+    }
+  } catch {
+    // user_roles table may not exist yet in certain test/bootstrap states
+  }
 
   return {
     authUserId: userId || profile.id,
