@@ -101,7 +101,7 @@ export default async function HomePage() {
               href="/login"
               className="w-full rounded-lg bg-emerald-500 px-6 py-3 text-sm font-semibold text-zinc-950 shadow-lg shadow-emerald-500/20 transition-colors hover:bg-emerald-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 sm:w-auto"
             >
-              Sign in with your college ID
+              Sign in with college id
             </Link>
             <a
               href="#live"

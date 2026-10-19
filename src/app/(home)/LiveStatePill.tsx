@@ -4,57 +4,52 @@ import { useEffect, useState } from "react";
 
 type Health = "healthy" | "degraded" | "unhealthy" | "unknown";
 
+const POLL_MS = 30_000;
+
 const LABEL: Record<Health, string> = {
-  healthy: "All systems listening",
-  degraded: "Some systems quiet",
-  unhealthy: "The instrument is resting",
-  unknown: "Awaiting the first signal",
+  healthy: "Operational",
+  degraded: "Degraded",
+  unhealthy: "Down",
+  unknown: "Unknown",
 };
 
 const DOT: Record<Health, string> = {
-  healthy: "bg-cyan-300",
-  degraded: "bg-amber-300",
-  unhealthy: "bg-rose-300",
+  healthy: "bg-emerald-400",
+  degraded: "bg-amber-400",
+  unhealthy: "bg-rose-500",
   unknown: "bg-slate-400",
 };
 
 export function LiveStatePill() {
-  const [state, setState] = useState<Health>("unknown");
+  const [health, setHealth] = useState<Health>("unknown");
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/health", { cache: "no-store" })
-      .then((r) => r.json())
-      .then((d) => {
-        if (cancelled) return;
-        const s = d?.status ?? d?.data?.status;
-        setState(
-          s === "healthy" || s === "degraded" || s === "unhealthy"
-            ? s
-            : "unknown",
-        );
-      })
-      .catch(() => {
-        if (!cancelled) setState("unknown");
-      });
+    const tick = async () => {
+      try {
+        const r = await fetch("/api/health", { cache: "no-store" });
+        const data = await r.json().catch(() => null);
+        if (!cancelled) setHealth((data?.status as Health) ?? "unknown");
+      } catch {
+        if (!cancelled) setHealth("unknown");
+      }
+    };
+    tick();
+    const id = setInterval(tick, POLL_MS);
     return () => {
       cancelled = true;
+      clearInterval(id);
     };
   }, []);
 
   return (
-    <div className="inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 backdrop-blur">
-      <span className="relative flex h-2 w-2">
-        <span
-          className={`absolute inline-flex h-full w-full animate-ping rounded-full ${DOT[state]} opacity-50 motion-reduce:hidden`}
-        />
-        <span
-          className={`relative inline-flex h-2 w-2 rounded-full ${DOT[state]}`}
-        />
-      </span>
-      <span className="text-sm tracking-wide text-white/80">
-        {LABEL[state]}
-      </span>
-    </div>
+    <span
+      role="status"
+      aria-live="polite"
+      className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-3 py-1 text-xs text-white/70 backdrop-blur"
+    >
+      <span className={`h-1.5 w-1.5 rounded-full ${DOT[health]}`} />
+      <span>{LABEL[health]}</span>
+    </span>
   );
 }
