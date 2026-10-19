@@ -15,10 +15,7 @@ VALUES (
   crypt(COALESCE(NULLIF(current_setting('app.seed_pin', true), ''), '654321'), gen_salt('bf', 10)),
   false,
   true
-) ON CONFLICT (unique_id) DO UPDATE SET
-  password_hash = EXCLUDED.password_hash,
-  initial_pin_hash = EXCLUDED.initial_pin_hash,
-  pin_must_change = true;
+) ON CONFLICT (unique_id) DO NOTHING;
 
 -- Insert other role users with random UUIDs
 INSERT INTO users (unique_id, name, role, email, status, password_hash, initial_pin_hash, two_factor_enabled, pin_must_change)
@@ -45,10 +42,7 @@ VALUES
    crypt('student_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
   ('VISITOR', 'Demo Visitor', 'visitor', 'visitor@college.edu', 'ACTIVE',
    crypt('visitor_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true)
-ON CONFLICT (unique_id) DO UPDATE SET
-  password_hash = EXCLUDED.password_hash,
-  initial_pin_hash = EXCLUDED.initial_pin_hash,
-  pin_must_change = true;
+ON CONFLICT (unique_id) DO NOTHING;
 
 -- Insert config roles
 INSERT INTO config_roles (code, display_name, permissions, is_active)

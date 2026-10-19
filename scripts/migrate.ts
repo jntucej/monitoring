@@ -146,7 +146,7 @@ async function main() {
       const fullDir = join(rootDir, dir);
       const entries = await readdir(fullDir).catch(() => []);
       for (const name of entries) {
-        if (name.endsWith(".sql") && !name.startsWith("_")) {
+        if (name.endsWith(".sql") && !name.startsWith("_") && /^\d{14}_/.test(name)) {
           if (!fileMap.has(name)) {
             fileMap.set(name, { dir, name, path: join(fullDir, name) });
           }
@@ -184,6 +184,16 @@ async function main() {
         // Trust the existing row rather than re-running a possibly destructive
         // migration or flagging false drift.
         console.log(`✓ ${f.name} (already applied, legacy row — no checksum)`);
+        skipped++;
+        continue;
+      }
+      const isLegacyChecksum = prev === "replayed" || (typeof prev === "string" && prev.length === 32);
+      if (recorded && isLegacyChecksum) {
+        console.log(`✓ ${f.name} (already applied, upgrading legacy checksum)`);
+        await client.query(
+          "UPDATE schema_migrations SET checksum = $1 WHERE version = $2 OR filename = $3",
+          [sum, version, f.name]
+        ).catch(() => {});
         skipped++;
         continue;
       }
