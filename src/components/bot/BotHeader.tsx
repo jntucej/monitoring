@@ -1,6 +1,6 @@
 "use client";
 import { memo } from "react";
-import { Volume2, VolumeX, Trash2, Minimize2 } from "lucide-react";
+import { Volume2, VolumeX, Trash2, X } from "lucide-react";
 import { BotBoat } from "./BotBoat";
 import { VoiceWave } from "./VoiceWave";
 import { LanguageToggle } from "./LanguageToggle";
@@ -36,8 +36,7 @@ export const BotHeader = memo(function BotHeader({
     t.subtitle;
 
   return (
-    <header className="flex items-center gap-3 px-3 py-3 border-b border-[var(--border)]
-                       bg-[var(--bg-surface)]/85 backdrop-blur-md">
+    <header className="relative z-10 flex items-center gap-2 p-3 border-b border-[var(--border)] bg-[var(--bg-elevated)]/95 backdrop-blur-sm">
       <div className="h-9 w-9 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-600
                       flex items-center justify-center shrink-0">
         <BotBoat phase={phase} size={26} />
@@ -78,11 +77,12 @@ export const BotHeader = memo(function BotHeader({
       )}
 
       <button
+        type="button"
         onClick={onClose}
         aria-label={t.close}
-        className="hidden sm:flex p-1.5 rounded-lg hover:bg-[var(--bg-elevated)] active:scale-95 transition"
+        className="p-2 rounded-lg hover:bg-[var(--bg-surface-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors active:scale-95"
       >
-        <Minimize2 className="h-4 w-4 text-[var(--text-muted)]" />
+        <X size={16} />
       </button>
     </header>
   );

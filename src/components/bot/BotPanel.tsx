@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useBotStore } from "./store";
@@ -14,14 +15,14 @@ import { useAuthStore } from "@/stores/authStore";
 import { BotHeader } from "./BotHeader";
 import { BotMessages } from "./BotMessages";
 import { BotComposer } from "./BotComposer";
+import { ListeningParticles } from "./ListeningParticles";
 
 export function BotPanel() {
-const api = useApi();
-
+  const api = useApi();
   const isMobile = useIsMobile();
   const vv = useVisualViewport();
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const spokenRef = useRef<string>("");
+  const lastSpokenRef = useRef<string | null>(null);
   const lastUserQuestionRef = useRef<string>("");
 
   const open = useBotStore((s) => s.open);
@@ -30,6 +31,8 @@ const api = useApi();
   const setLang = useBotStore((s) => s.setLang);
   const voiceReplies = useBotStore((s) => s.voiceReplies);
   const setVoiceReplies = useBotStore((s) => s.setVoiceReplies);
+  const voiceMode = useBotStore((s) => s.voiceMode);
+  const clearVoiceMode = useBotStore((s) => s.clearVoiceMode);
   const messages = useBotStore((s) => s.messages);
   const streaming = useBotStore((s) => s.streaming);
   const error = useBotStore((s) => s.error);
@@ -38,54 +41,72 @@ const api = useApi();
   const t = BOT_STRINGS[lang];
   const { send, cancel, setFeedback } = useBotChat();
   const tts = useSpeechSynthesis(lang);
-
   const [input, setInput] = useState("");
 
   const stt = useSpeechRecognition({
     lang,
     onPartial: () => {},
     onFinal: (text) => {
+      const trimmed = text.trim();
+      if (!trimmed) return;
       playAudioFeedback("success");
-      void send(text, lang, (full) => {
+      lastUserQuestionRef.current = trimmed;
+      void send(trimmed, "auto", (full) => {
         if (voiceReplies) tts.speak(full);
       });
+      clearVoiceMode();
     },
   });
 
-  const last = messages[messages.length - 1];
+  // Auto-start listening when long-press voice mode fires
   useEffect(() => {
-    if (!voiceReplies) return;
-    if (!last || last.role !== "assistant") return;
-    if (streaming) return;
-    if (last.status !== "done") return;
-    if (!last.content.trim()) return;
-    if (spokenRef.current === last.id) return;
-    spokenRef.current = last.id;
-    tts.speak(last.content);
-  }, [last, streaming, voiceReplies, tts]);
+    if (voiceMode && open && !stt.listening && stt.supported) {
+      stt.start();
+      playAudioFeedback("warning");
+    }
+  }, [voiceMode, open, stt.listening, stt.supported, stt.start]);
 
+  // Auto-speak assistant responses when voiceReplies is on
+  const lastAssistant = [...messages].reverse().find(
+    (m) => m.role === "assistant" && m.status === "done"
+  );
+  useEffect(() => {
+    if (!voiceReplies || !lastAssistant || tts.speaking) return;
+    if (lastSpokenRef.current === lastAssistant.id) return;
+    lastSpokenRef.current = lastAssistant.id;
+    if (lastAssistant.content.trim()) {
+      tts.speak(lastAssistant.content);
+    }
+  }, [voiceReplies, lastAssistant, tts.speaking, tts.speak]);
+
+  // Stop TTS if user speaks
   useEffect(() => {
     if (stt.listening && tts.speaking) tts.stop();
   }, [stt.listening, tts]);
 
+  // Auto-focus input on desktop
   useEffect(() => {
-    if (open && !isMobile) {
+    if (open && !isMobile && !voiceMode) {
       setTimeout(() => inputRef.current?.focus(), 220);
     }
-  }, [open, isMobile]);
+  }, [open, isMobile, voiceMode]);
 
+  // Escape key closes and clears speech
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.stopPropagation();
+        if (stt.listening) stt.stop();
+        clearVoiceMode();
         setOpen(false);
       }
     };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, setOpen]);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, stt.listening, stt.stop, clearVoiceMode, setOpen]);
 
+  // Persist language and voice settings
   useEffect(() => {
     const user = useAuthStore.getState().user;
     if (!user) return;
@@ -94,9 +115,10 @@ const api = useApi();
       headers: { "content-type": "application/json", ...api.getHeaders() },
       body: JSON.stringify({ bot_lang: lang, bot_voice_replies: voiceReplies }),
     }).catch(() => {});
-  }, [lang, voiceReplies]);
+  }, [lang, voiceReplies, api]);
 
   const handleSend = () => {
+    if (voiceMode) clearVoiceMode();
     const text = input.trim();
     if (!text) return;
     playAudioFeedback("success");
@@ -106,12 +128,14 @@ const api = useApi();
   };
 
   const handleChip = (prompt: string) => {
+    if (voiceMode) clearVoiceMode();
     playAudioFeedback("success");
     lastUserQuestionRef.current = prompt;
     void send(prompt, "auto", (full) => { if (voiceReplies) tts.speak(full); });
   };
 
   const handleRetry = (text: string) => {
+    if (voiceMode) clearVoiceMode();
     const q = text || lastUserQuestionRef.current;
     if (!q) return;
     void send(q, "auto", (full) => { if (voiceReplies) tts.speak(full); });
@@ -120,6 +144,7 @@ const api = useApi();
   const handleToggleMic = () => {
     if (stt.listening) {
       stt.stop();
+      clearVoiceMode();
     } else {
       if (!stt.supported) return;
       playAudioFeedback("warning");
@@ -135,6 +160,13 @@ const api = useApi();
     if (!next) tts.stop();
   };
 
+  const handleClose = () => {
+    if (stt.listening) stt.stop();
+    tts.stop();
+    clearVoiceMode();
+    setOpen(false);
+  };
+
   const phase = stt.listening ? "listening"
               : tts.speaking   ? "speaking"
               : streaming      ? "thinking"
@@ -143,8 +175,8 @@ const api = useApi();
   const keyboardOffset = isMobile ? vv.keyboardOffset : 0;
 
   const desktopVariants = {
-    closed: { opacity: 0, y: 16, scale: 0.98, transition: { duration: 0.18 } },
-    open:   { opacity: 1, y: 0,  scale: 1,    transition: { type: "spring" as const, stiffness: 340, damping: 30 } },
+    closed: { opacity: 0, y: 20, scale: 0.96, transition: { duration: 0.18 } },
+    open:   { opacity: 1, y: 0,  scale: 1,    transition: { type: "spring" as const, stiffness: 320, damping: 30 } },
   };
   const mobileVariants = {
     closed: { opacity: 0, y: "100%", transition: { duration: 0.22 } },
@@ -170,20 +202,23 @@ const api = useApi();
       variants={variants}
       style={panelStyle}
       className={[
-        "fixed z-[70] flex flex-col overflow-hidden",
-        "bg-[var(--bg-surface)] border border-[var(--border)] shadow-2xl",
+        "fixed z-[100] flex flex-col overflow-hidden",
+        "bg-[var(--bg-elevated)]/98 backdrop-blur-2xl border border-[var(--border)] shadow-[0_24px_64px_rgba(0,0,0,0.5)]",
+        "mb-[env(safe-area-inset-bottom)]",
         isMobile
           ? "inset-x-0 bottom-0 rounded-t-2xl"
-          : "right-5 bottom-24 w-[min(420px,calc(100vw-2.5rem))] h-[min(640px,calc(100vh-7rem))] rounded-2xl",
+          : "right-4 bottom-4 w-[380px] max-w-[calc(100vw-2rem)] h-[min(640px,80vh)] rounded-2xl",
         open ? "" : "pointer-events-none",
-        "backdrop-blur-xl",
       ].join(" ")}
       role="dialog"
-      aria-label="Harbor assistant"
+      aria-modal="true"
+      aria-label={t.title}
       aria-hidden={!open}
     >
+      <ListeningParticles active={stt.listening} />
+
       {isMobile && (
-        <div className="pt-2 pb-1 flex justify-center" aria-hidden>
+        <div className="pt-2 pb-1 flex justify-center relative z-10" aria-hidden>
           <div className="h-1 w-10 rounded-full bg-[var(--border)]" />
         </div>
       )}
@@ -201,11 +236,11 @@ const api = useApi();
         ttsSupported={tts.supported}
         onToggleVoiceReplies={handleToggleVoiceReplies}
         onNewChat={() => { reset(); tts.stop(); }}
-        onClose={() => setOpen(false)}
+        onClose={handleClose}
       />
 
       {(error || stt.error === "permission") && (
-        <div className="px-3 py-2 text-[11px] bg-rose-500/10 text-rose-500 border-b border-[var(--border)]">
+        <div className="relative z-10 px-3 py-2 text-[11px] bg-rose-500/10 text-rose-500 border-b border-[var(--border)]">
           {stt.error === "permission"
             ? "Microphone permission denied. Enable it in your browser settings to use voice."
             : error?.startsWith("HTTP 401")
@@ -217,7 +252,7 @@ const api = useApi();
       )}
 
       {!stt.supported && isMobile && (
-        <div className="px-3 py-1.5 text-[10px] text-[var(--text-muted)] bg-[var(--bg-elevated)] border-b border-[var(--border)]">
+        <div className="relative z-10 px-3 py-1.5 text-[10px] text-[var(--text-muted)] bg-[var(--bg-elevated)] border-b border-[var(--border)]">
           {t.micUnsupported}
         </div>
       )}

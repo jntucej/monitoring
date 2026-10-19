@@ -5,4 +5,5 @@ export { HorizonGlow } from "./HorizonGlow";
 export { MoonGlow } from "./MoonGlow";
 export { EmotionalQuote } from "./EmotionalQuote";
 export { RippleAt } from "./RippleAt";
-export type { HomeAccent } from "./types";
+export { ParallaxParadox } from "./ParallaxParadox";
+export * from "./types";

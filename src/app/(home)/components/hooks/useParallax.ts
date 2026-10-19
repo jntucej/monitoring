@@ -48,7 +48,7 @@ export function useSectionParallax(): {
   });
   const smoothed = useSpring(scrollYProgress, { stiffness: 90, damping: 26, mass: 1 });
   const layer = (rate: number, axis: "y" | "x" = "y") => {
-    const values = [rate * 100, rate * -100];
+    const values = [rate * 1.35 * 100, rate * 1.35 * -100];
     return useTransform(smoothed, [0, 1], values);
   };
   const fade = (inStart: number, inEnd: number, outStart: number, outEnd: number) =>

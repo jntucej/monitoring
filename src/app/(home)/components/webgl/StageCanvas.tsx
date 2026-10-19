@@ -4,7 +4,7 @@ import { Canvas } from "@react-three/fiber";
 import type { ReactNode } from "react";
 import { usePerformanceTier } from "../hooks/usePerformanceTier";
 
-export default function StageCanvas({ children }: { children: ReactNode }) {
+export function StageCanvas({ children }: { children: ReactNode }) {
   const tier = usePerformanceTier();
   const dpr = tier === "reduced" ? 1.5 : 2;
   const antialias = tier !== "reduced";
@@ -30,3 +30,5 @@ export default function StageCanvas({ children }: { children: ReactNode }) {
     </div>
   );
 }
+
+export default StageCanvas;

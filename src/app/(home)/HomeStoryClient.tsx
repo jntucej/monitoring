@@ -14,7 +14,7 @@ import { BootSequence } from "./components/story/BootSequence";
 import { GateScene } from "./components/story/GateScene";
 import { LoginGateway } from "./components/story/LoginGateway";
 import { SoundToggle } from "./components/story/SoundToggle";
-import { FilmGrain, BreathingVignette, AmbientGlow } from "./components/cinematic";
+import { FilmGrain, BreathingVignette, AmbientGlow, ParallaxParadox } from "./components/cinematic";
 import { ScrollProgress } from "./components/ui/ScrollProgress";
 import { SignInButton } from "./components/ui/SignInButton";
 import { GateBackdrop } from "./components/ui/GateBackdrop";
@@ -46,6 +46,7 @@ export function HomeStoryClient() {
 
   return (
     <main data-home data-tier={tier} className="relative min-h-screen bg-black text-white">
+      <ParallaxParadox />
       {!returning && !booted && <BootSequence onDone={() => setBooted(true)} />}
       <GateBackdrop />
       <ScrollProgress />
