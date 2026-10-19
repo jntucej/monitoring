@@ -6,6 +6,7 @@
    ============================================================ */
 
 [data-home] {
+  background-color: #000000;
   --home-accent-amber: #F59E0B;
   --home-accent-indigo: #6366F1;
   --home-accent-steel: #0EA5E9;
@@ -16,7 +17,7 @@
   --home-text-secondary: #9CA3AF;
   --home-text-muted: #6B7280;
 
-  --home-bg-base: transparent;
+  --home-bg-base: #000000;
   --home-bg-elev-1: #0F172A;
   --home-bg-elev-2: #131C2E;
 
