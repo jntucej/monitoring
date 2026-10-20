@@ -50,21 +50,20 @@ export interface RateLimitResult {
 }
 
 export function extractClientIp(req: NextRequest): string {
-  const realIp = req.headers.get('x-real-ip')?.trim();
-  if (realIp) return realIp;
-
-  const cfIp = req.headers.get('cf-connecting-ip')?.trim();
-  if (cfIp) return cfIp;
-
-  const xForwardedFor = req.headers.get('x-forwarded-for');
-  if (xForwardedFor) {
-    const ips = xForwardedFor.split(',').map((s) => s.trim()).filter(Boolean);
-    if (ips.length > 0) {
-      return ips[ips.length - 1];
-    }
+  // 1. Trusted proxy (Caddy) sets this from {remote_host}. It has already
+  //    stripped any client-supplied value in the same header.
+  const xcip = req.headers.get("x-client-ip");
+  if (xcip && xcip.trim()) return xcip.trim();
+  // 2. Caddy appends to X-Forwarded-For; first entry is the true peer.
+  const xff = req.headers.get("x-forwarded-for");
+  if (xff) {
+    const first = xff.split(",")[0].trim();
+    if (first) return first;
   }
-
-  return 'unknown';
+  // 3. Fallback for local/dev.
+  const realIp = req.headers.get("x-real-ip");
+  if (realIp && realIp.trim()) return realIp.trim();
+  return "unknown";
 }
 
 export async function checkRateLimit(

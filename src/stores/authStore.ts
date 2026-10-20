@@ -1,39 +1,42 @@
-/**
- * Zustand auth store — holds the Supabase Auth session for the web app.
- * The access token (`token`) is a genuine Supabase JWT issued by
- * /api/auth/login | /api/auth/pin-login; send it as
- * `Authorization: Bearer <token>` on API calls.
- */
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { useCallback, useSyncExternalStore } from "react";
 import type { User, Role } from "@/lib/types";
 
-// ponytail: one normalizer at the store boundary — servers mix snake_case
-// (login, pin-login) and camelCase (session, refresh). Accept both, store
-// canonical User so consumers (gateId, departmentId, uniqueId) never see undefined.
 function toUser(raw: any): User {
   return {
-    id: String(raw?.id ?? ""),
-    uniqueId: raw?.uniqueId ?? raw?.unique_id,
-    handle: raw?.handle,
-    currentSessionToken: raw?.currentSessionToken ?? raw?.current_session_token,
-    name: raw?.name ?? raw?.fullName ?? "",
-    role: raw?.role as Role,
-    roles: raw?.roles ?? (raw?.role ? [raw.role] : []),
-    gateId: raw?.gateId ?? raw?.gate_id,
-    employeeId: raw?.employeeId ?? raw?.employee_id,
-    email: raw?.email,
-    phone: raw?.phone,
-    supervisedGates: raw?.supervisedGates ?? raw?.supervised_gates,
-    assignedHostel: raw?.assignedHostel ?? raw?.assigned_hostel,
-    isHod: raw?.isHod ?? raw?.is_hod,
-    departmentId: raw?.departmentId ?? raw?.department_id ?? raw?.department,
-    photoUrl: raw?.photoUrl ?? raw?.photo_url,
-    avatarUrl: raw?.avatarUrl ?? raw?.avatar_url,
-    status: raw?.status,
+    id: raw.id,
+    name: raw.name,
+    role: raw.role,
+    email: raw.email,
+    phone: raw.phone ?? undefined,
+    uniqueId: raw.uniqueId ?? raw.unique_id ?? undefined,
+    departmentId: raw.departmentId ?? raw.department_id ?? undefined,
+    photoUrl: raw.photoUrl ?? raw.photo_url ?? undefined,
+    status: raw.status ?? "ACTIVE",
+    studentDetails: raw.studentDetails ?? raw.student_details ?? undefined,
+    employeeDetails: raw.employeeDetails ?? raw.employee_details ?? undefined,
   } as User;
 }
+
+export const tokenStorage = {
+  get: () => ({
+    token: typeof window !== "undefined" ? sessionStorage.getItem("auth.token") : null,
+    refreshToken: typeof window !== "undefined" ? sessionStorage.getItem("auth.refresh") : null,
+  }),
+  set: (t: { token: string | null; refreshToken: string | null }) => {
+    if (typeof window === "undefined") return;
+    if (t.token) sessionStorage.setItem("auth.token", t.token);
+    else sessionStorage.removeItem("auth.token");
+    if (t.refreshToken) sessionStorage.setItem("auth.refresh", t.refreshToken);
+    else sessionStorage.removeItem("auth.refresh");
+  },
+  clear: () => {
+    if (typeof window === "undefined") return;
+    sessionStorage.removeItem("auth.token");
+    sessionStorage.removeItem("auth.refresh");
+  },
+};
 
 interface MfaChallenge {
   id: string;
@@ -53,21 +56,27 @@ interface AuthState {
   _hasHydrated: boolean;
 }
 
+interface LoginResult {
+  success: boolean;
+  error?: string;
+  code?: string;
+  mfaRequired?: boolean;
+  mfaChallenge?: MfaChallenge;
+  mfaEnrollmentRequired?: boolean;
+  enrollToken?: string;
+}
+
 interface AuthActions {
   login: (
     login: string,
     password: string,
     mfa?: { challenge?: MfaChallenge; totpCode?: string }
-  ) => Promise<{
-    success: boolean;
-    error?: string;
-    code?: string;
-    mfaRequired?: boolean;
-    mfaChallenge?: MfaChallenge;
-    mfaEnrollmentRequired?: boolean;
-    enrollToken?: string;
-  }>;
-  pinLogin: (employeeId: string, pin: string, mfa?: { challenge?: MfaChallenge; totpCode?: string }) => Promise<{ success: boolean; error?: string; code?: string; mfaRequired?: boolean; mfaChallenge?: MfaChallenge; mfaEnrollmentRequired?: boolean; enrollToken?: string }>;
+  ) => Promise<LoginResult>;
+  pinLogin: (
+    employeeId: string,
+    pin: string,
+    mfa?: { challenge?: MfaChallenge; totpCode?: string }
+  ) => Promise<LoginResult>;
   logout: () => Promise<void>;
   checkSession: () => Promise<boolean>;
   setRole: (role: Role) => void;
@@ -85,327 +94,173 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       role: null,
       authenticated: false,
       loading: false,
+      mfaChallenge: null,
+      mfaPending: false,
+      enrollToken: null,
       _hasHydrated: false,
-
-      setHasHydrated: (hydrated: boolean) => set({ _hasHydrated: hydrated }),
-
-      login: async (login, password, mfa) => {
-        set({ loading: true, mfaPending: false, mfaChallenge: null });
-        try {
-          // Convert to uppercase for consistency
-          const cleanLogin = login.trim().toUpperCase();
-          const response = await fetch("/api/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              login: cleanLogin,
-              password,
-              mfa_challenge: mfa?.challenge,
-              totp_code: mfa?.totpCode,
-            }),
-          });
-
-          const result = await response.json().catch(() => null);
-
-          if (response.ok && result?.success && result.data) {
-            const { token, user: rawUser } = result.data;
-            const user = toUser(rawUser);
-            set({
-              user,
-              token,
-              // Refresh token is delivered to the browser only via the
-              // httpOnly `refresh_token` cookie set by /api/auth/login. It is
-              // NOT stored in this client-side store: keeping it out of
-              // localStorage means an XSS payload cannot read a long-lived
-              // session credential. The browser auto-sends the cookie on
-              // same-origin refresh/session calls, so no header is needed.
-              refreshToken: null,
-              role: user.role as Role,
-              authenticated: true,
-              loading: false,
-            });
-            return { success: true };
-          }
-
-          // Leg 1 of two-leg MFA login: password ok, TOTP required
-          if (response.ok && result?.success && result.mfa_required) {
-            set({ loading: false });
-            return {
-              success: false,
-              mfaRequired: true,
-              mfaChallenge: result.mfa_challenge,
-            };
-          }
-
-          // Admin must enroll 2FA first — no session issued
-          if (response.ok && result?.success && result.mfa_enrollment_required) {
-            set({ loading: false });
-            return { success: false, mfaEnrollmentRequired: true, enrollToken: result.enroll_token as string | undefined };
-          }
-
-          set({ loading: false });
-          return {
-            success: false,
-            error: result?.error?.message || "Invalid credentials",
-            code: result?.error?.code,
-          };
-        } catch (error) {
-          console.error("Login error:", error);
-        }
-
-        set({ loading: false });
-        return { success: false, error: "Invalid credentials" };
-      },
-
-      pinLogin: async (employeeId, pin, mfa) => {
-        const cleanEmployeeId = employeeId.trim();
-        if (!cleanEmployeeId) return { success: false, error: "Employee ID is required" };
-        
+      login: async (loginIdentifier, password, mfa) => {
         set({ loading: true });
         try {
-          const response = await fetch("/api/auth/pin-login", {
+          const res = await fetch("/api/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              employeeId: cleanEmployeeId.toUpperCase(),
-              pin,
-              mfa_challenge: mfa?.challenge,
-              totp_code: mfa?.totpCode,
-            }),
+            body: JSON.stringify({ login: loginIdentifier.toUpperCase(), password, mfa }),
           });
-
-          const result = await response.json().catch(() => null);
-
-          if (response.ok && result?.success && result?.data) {
-            const { token, user: rawUser } = result.data;
-            const user = toUser(rawUser);
-            set({
-              user,
-              token,
-              // See login(): the refresh credential lives only in the
-              // httpOnly refresh_token cookie, never in this store.
-              refreshToken: null,
-              role: user.role as Role,
-              authenticated: true,
-              loading: false,
-            });
-            return { success: true };
-          }
-
-          // Leg 1 of two-leg MFA login: PIN ok, TOTP required.
-          // ponytail: mirror the password leg so the challenge actually reaches
-          // the UI — without this the MFA response was dropped (Bug 103).
-          if (response.ok && result?.success && result.mfa_required) {
+          const body = await res.json();
+          if (!body.success) {
             set({ loading: false });
-            return {
-              success: false,
-              mfaRequired: true,
-              mfaChallenge: result.mfa_challenge,
-            };
+            return { success: false, error: body.error?.message, code: body.error?.code };
           }
-
-          if (response.ok && result?.success && result.mfa_enrollment_required) {
-            set({ loading: false });
-            return {
-              success: false,
-              mfaEnrollmentRequired: true,
-              enrollToken: result.enroll_token as string | undefined,
-            };
+          const d = body.data ?? {};
+          if (d.mfaRequired) {
+            set({ loading: false, mfaPending: true, mfaChallenge: d.mfaChallenge });
+            return { success: true, mfaRequired: true, mfaChallenge: d.mfaChallenge };
           }
-
-          set({ loading: false });
-          return {
-            success: false,
-            error: result?.error?.message || "Invalid PIN",
-            code: result?.error?.code,
-          };
-        } catch (error) {
-          console.error("PIN login error:", error);
-        }
-
-        set({ loading: false });
-        return { success: false, error: "Invalid PIN" };
-      },
-
-      checkSession: async () => {
-        const { token, user, authenticated } = get();
-        if (!token || !user || !authenticated) return false;
-
-        try {
-          const headers: Record<string, string> = {
-            Authorization: `Bearer ${token}`,
-          };
-          // Refresh credentials come from the httpOnly `refresh_token` cookie
-          // that the browser attaches automatically to same-origin requests —
-          // we deliberately do NOT echo an X-Refresh-Token header, because we
-          // no longer hold the refresh token in JS memory.
-          if (user.currentSessionToken) {
-            headers["X-Session-Token"] = user.currentSessionToken;
+          if (d.mfaEnrollmentRequired) {
+            set({ loading: false, enrollToken: d.enrollToken });
+            return { success: true, mfaEnrollmentRequired: true, enrollToken: d.enrollToken };
           }
-
-          // Issue #404: React strict-mode double-invokes effects. Wrapping this
-          // fetch with an AbortController means the first invocation is cancelled
-          // by the cleanup before the second fires — net result: one real request
-          // in both dev (strict) and prod. Store the controller on the function
-          // scope so cleanup can reach it.
-          const controller = new AbortController();
-          const res = await fetch("/api/auth/session", { method: "GET", headers, signal: controller.signal });
-          const result = await res.json().catch(() => null);
-
-          // ponytail: session route returns top-level { user, accessToken,
-          // refreshToken } (no data wrapper) — accept both shapes so token
-          // rotation + role/status updates actually reach the store.
-          const payload = result?.data ?? result;
-          if (res.ok && result?.success && payload?.user) {
-            const newToken = payload.token ?? result?.accessToken;
-            const updatedUser = toUser(payload.user);
-            const current = get();
-            const userChanged = JSON.stringify(current.user) !== JSON.stringify(updatedUser);
-            const tokenChanged = Boolean(newToken && newToken !== current.token);
-
-            if (userChanged || tokenChanged || !current.authenticated) {
-              set({
-                user: updatedUser,
-                token: newToken || token,
-                role: updatedUser.role as Role,
-                authenticated: true,
-              });
-            }
-            return true;
-          } else if (res.status === 401 || res.status === 403) {
-            // Session expired or invalid on server
-            await get().logout();
-            return false;
-          }
+          tokenStorage.set({ token: d.accessToken, refreshToken: d.refreshToken });
+          set({
+            token: d.accessToken,
+            refreshToken: d.refreshToken,
+            user: toUser(d.user),
+            role: d.user.role,
+            authenticated: true,
+            loading: false,
+            mfaPending: false,
+            mfaChallenge: null,
+          });
+          return { success: true };
         } catch (err) {
-          // Issue #404: AbortError is expected in strict-mode dev (cleanup cancels
-          // the first of the two effect invocations). Ignore it silently.
-          if (err instanceof Error && err.name === 'AbortError') return true;
-          console.error("Session revalidation warning:", err);
-          // On network error/offline, maintain current session state gracefully
+          set({ loading: false });
+          return { success: false, error: err instanceof Error ? err.message : "Network error" };
         }
-        return true;
       },
-
-      logout: async () => {
-        const { token, authenticated } = get();
-        if (!token && !authenticated) {
-          if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
-            window.location.href = "/login";
+      pinLogin: async (employeeId, pin, mfa) => {
+        set({ loading: true });
+        try {
+          const res = await fetch("/api/auth/pin-login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ employeeId, pin, mfa }),
+          });
+          const body = await res.json();
+          if (!body.success) {
+            set({ loading: false });
+            return { success: false, error: body.error?.message, code: body.error?.code };
           }
-          return;
+          const d = body.data ?? {};
+          if (d.mustChangePin) {
+            set({ loading: false });
+            return { success: false, code: "PIN_MUST_CHANGE", error: "PIN rotation required" };
+          }
+          if (d.mfaRequired) {
+            set({ loading: false, mfaPending: true, mfaChallenge: d.mfaChallenge });
+            return { success: true, mfaRequired: true, mfaChallenge: d.mfaChallenge };
+          }
+          if (d.mfaEnrollmentRequired) {
+            set({ loading: false, enrollToken: d.enrollToken });
+            return { success: true, mfaEnrollmentRequired: true, enrollToken: d.enrollToken };
+          }
+          tokenStorage.set({ token: d.accessToken, refreshToken: d.refreshToken });
+          set({
+            token: d.accessToken,
+            refreshToken: d.refreshToken,
+            user: toUser(d.user),
+            role: d.user.role,
+            authenticated: true,
+            loading: false,
+            mfaPending: false,
+            mfaChallenge: null,
+          });
+          return { success: true };
+        } catch (err) {
+          set({ loading: false });
+          return { success: false, error: err instanceof Error ? err.message : "Network error" };
         }
-
-        // Clear auth store state FIRST to prevent concurrent re-triggers
+      },
+      logout: async () => {
+        const token = get().token;
+        tokenStorage.clear();
         set({
-          user: null,
           token: null,
           refreshToken: null,
+          user: null,
           role: null,
           authenticated: false,
-          loading: false,
-          mfaChallenge: null,
           mfaPending: false,
+          mfaChallenge: null,
           enrollToken: null,
         });
-
-        // Best-effort server-side revocation of the Supabase session.
         if (token) {
           try {
             await fetch("/api/auth/logout", {
               method: "POST",
               headers: { Authorization: `Bearer ${token}` },
             });
-          } catch (error) {
-            console.error("Logout request error:", error);
-          }
-        }
-
-        // Reset operator store state
-        try {
-          const { useOperatorStore } = await import("@/stores/operatorStore");
-          useOperatorStore.setState({
-            state: "idle",
-            currentStudent: null,
-            selectedDirection: "IN",
-            selectedReason: null,
-            photoVerificationDone: false,
-            error: null,
-            lastScan: null,
-            todaysStats: null,
-            recentScans: [],
-            gate: null,
-          });
-        } catch (e) {
-          console.error("Failed to reset operator store on logout:", e);
-        }
-
-        // Reset admin store state
-        try {
-          const { useAdminStore } = await import("@/stores/adminStore");
-          useAdminStore.setState({
-            dashboardData: null,
-            alerts: [],
-            unreadNotifications: 0,
-            liveActivity: [],
-            activeGate: null,
-            loading: false,
-          });
-        } catch (e) {
-          console.error("Failed to reset admin store on logout:", e);
-        }
-
-        // Clear storage and hard-redirect to login if not already on login page
-        if (typeof window !== "undefined") {
-          try {
-            localStorage.removeItem("gate-monitor-auth");
-            localStorage.removeItem("gate-monitor-token");
-            localStorage.removeItem("gate-monitor-auth");
-            localStorage.removeItem("gate-monitor-role");
-            localStorage.removeItem("gate-monitor-user");
-          } catch (e) {
-            console.error("Error clearing storage on logout:", e);
-          }
-          if (!window.location.pathname.startsWith("/login")) {
-            window.location.href = "/login";
+          } catch {
+            /* server-side logout is best-effort */
           }
         }
       },
-
+      checkSession: async () => {
+        const token = get().token || tokenStorage.get().token;
+        if (!token) {
+          set({ authenticated: false, user: null, role: null });
+          return false;
+        }
+        try {
+          const res = await fetch("/api/auth/session", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const body = await res.json();
+          if (!body.success || !body.data?.user) {
+            tokenStorage.clear();
+            set({ authenticated: false, user: null, role: null, token: null, refreshToken: null });
+            return false;
+          }
+          set({
+            token,
+            refreshToken: get().refreshToken ?? tokenStorage.get().refreshToken,
+            user: toUser(body.data.user),
+            role: body.data.user.role,
+            authenticated: true,
+          });
+          return true;
+        } catch {
+          return false;
+        }
+      },
       setRole: (role) => set({ role }),
       setUser: (user) => set({ user }),
       setLoading: (loading) => set({ loading }),
+      setHasHydrated: (hydrated) => set({ _hasHydrated: hydrated }),
     }),
     {
-      name: "gate-monitor-auth",
-      storage: createJSONStorage(() => (typeof window !== "undefined" ? localStorage : {
-        getItem: () => null,
-        setItem: () => {},
-        removeItem: () => {},
-      })),
-      skipHydration: true,
-      onRehydrateStorage: () => (state) => {
-        state?.setHasHydrated(true);
-      },
-      partialize: (state) => ({
-        user: state.user,
-        token: state.token,
-        role: state.role,
-        authenticated: state.authenticated,
+      name: "mycampus-auth",
+      storage: createJSONStorage(() => localStorage),
+      partialize: (s) => ({
+        user: s.user,
+        role: s.role,
+        authenticated: s.authenticated,
       }),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          const t = tokenStorage.get();
+          state.token = t.token;
+          state.refreshToken = t.refreshToken;
+          state.authenticated = Boolean(t.token && state.authenticated);
+        }
+      },
     }
   )
 );
 
 export function useHasHydrated() {
-  // useSyncExternalStore is the canonical way to read external store state —
-  // no setState-in-effect, no cascading renders, SSR-safe (renders false on server).
-  const subscribe = useCallback(
-    (onStoreChange: () => void) => {
-      const unsubFinish = useAuthStore.persist.onFinishHydration(onStoreChange);
-      return () => unsubFinish();
-    },
-    []
+  return useSyncExternalStore(
+    (cb) => useAuthStore.subscribe(cb),
+    () => useAuthStore.getState()._hasHydrated,
+    () => false
   );
-  return useSyncExternalStore(subscribe, () => useAuthStore.persist.hasHydrated(), () => false);
 }

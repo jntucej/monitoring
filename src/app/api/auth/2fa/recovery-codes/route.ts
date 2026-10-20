@@ -4,7 +4,7 @@
 
 import { NextRequest } from "next/server";
 import { randomBytes, createHash } from "crypto";
-import { compare } from "bcryptjs";
+import { verifyPassword } from "@/lib/auth-token";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
@@ -53,7 +53,7 @@ async function handlePost(
     .select("password_hash")
     .eq("id", auth.userId)
     .maybeSingle();
-  if (!row?.password_hash || !(await compare(password, row.password_hash))) {
+  if (!row?.password_hash || !(await verifyPassword(password, row.password_hash))) {
     return fail("INVALID_PASSWORD", "Wrong password", 401);
   }
 

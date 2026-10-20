@@ -78,6 +78,10 @@ services:
     tmpfs:
       - /tmp:size=128m
       - /app/.next/cache:size=512m
+      - /app/.cache:size=64m
+      - /app/.config:size=64m
+    volumes:
+      - uploads_data:/app/data/uploads:rw
     cap_drop: [ALL]
     security_opt:
       - no-new-privileges:true
@@ -103,6 +107,7 @@ services:
       - MONITORING_PROM_URL=${MONITORING_PROM_URL:-}
       - MONITORING_LOKI_URL=${MONITORING_LOKI_URL:-}
       - MONITORING_GRAFANA_URL=${MONITORING_GRAFANA_URL:-}
+      - CRON_SECRET=${CRON_SECRET:?CRON_SECRET must be set for worker}
     depends_on:
       postgres:
         condition: service_healthy
@@ -144,6 +149,7 @@ volumes:
   redisdata:
   caddy_data:
   caddy_config:
+  uploads_data:
 
 networks:
   gate-net:

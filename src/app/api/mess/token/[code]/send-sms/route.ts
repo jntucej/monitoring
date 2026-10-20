@@ -1,63 +1,106 @@
-// src/app/api/mess/token/[code]/send-sms/route.ts
-// POST — a student asks us to SMS their mess token code to their on-file
-// phone number (E10). Rate-limited; requires the token to be theirs, unused,
-// and unexpired.
-
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
-import { ok, fail } from "@/server/http/response";
 import { query } from "@/lib/postgres";
 import { addAudit } from "@/lib/db";
 import { sendSMS } from "@/lib/integrations/sms";
 import type { AuthContext } from "@/lib/authContext";
 
 function getCode(req: NextRequest): string {
-  const s = new URL(req.url).pathname.split("/").filter(Boolean);
-  return s[s.length - 2] ?? "";
+  const parts = new URL(req.url).pathname.split("/").filter(Boolean);
+  const idx = parts.indexOf("token");
+  return idx >= 0 ? parts[idx + 1] ?? "" : "";
 }
 
-async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
+async function handlePost(
+  req: NextRequest,
+  { auth }: { auth: AuthContext }
+): Promise<Response> {
   const csrf = assertCsrf(req);
   if (csrf) return csrf;
 
-  const code = getCode(req);
-  if (!code) return fail("VALIDATION_ERROR", "code required", 400);
+  const tokenCode = getCode(req);
+  if (!tokenCode) {
+    return NextResponse.json(
+      { success: false, error: { code: "MISSING_TOKEN", message: "token code required" } },
+      { status: 400 }
+    );
+  }
 
-  const { rows } = await query<{ user_id: string; expires_at: string; used_at: string | null }>(
-    `SELECT user_id, expires_at, used_at
-       FROM public.mess_tokens WHERE token_code = $1 LIMIT 1`,
-    [code],
+  const { rows } = await query<{
+    id: string;
+    user_id: string;
+    phone: string | null;
+    name: string | null;
+    used_at: string | null;
+    revoked_at: string | null;
+    expires_at: string;
+  }>(
+    `SELECT t.id, t.user_id, u.phone, u.name,
+            t.used_at, t.revoked_at, t.expires_at
+       FROM mess_tokens t
+       JOIN users u ON u.id = t.user_id
+      WHERE t.token_code = $1
+      LIMIT 1`,
+    [tokenCode]
   );
-  const t = rows[0];
-  if (!t || t.user_id !== auth.userId) return fail("FORBIDDEN", "Not your token", 403);
-  if (t.used_at) return fail("TOKEN_USED", "Already used", 409);
-  if (new Date(t.expires_at).getTime() <= Date.now()) return fail("TOKEN_EXPIRED", "Expired", 410);
 
-  const { rows: phone } = await query<{ phone: string | null }>(
-    `SELECT phone FROM public.users WHERE id = $1`,
-    [auth.userId],
-  );
-  if (!phone[0]?.phone) return fail("NO_PHONE", "No phone on file", 400);
+  const row = rows[0];
+  if (!row) {
+    return NextResponse.json(
+      { success: false, error: { code: "TOKEN_NOT_FOUND", message: "Token not found" } },
+      { status: 404 }
+    );
+  }
 
-  await sendSMS({
-    to: phone[0].phone,
-    message: `Your mess token: ${code}. Expires ${new Date(t.expires_at).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}.`,
-  });
+  if (row.used_at) {
+    return NextResponse.json(
+      { success: false, error: { code: "TOKEN_USED", message: "Token is already used" } },
+      { status: 409 }
+    );
+  }
+  if (row.revoked_at) {
+    return NextResponse.json(
+      { success: false, error: { code: "TOKEN_REVOKED", message: "Token is revoked" } },
+      { status: 409 }
+    );
+  }
+  if (Date.parse(row.expires_at) < Date.now()) {
+    return NextResponse.json(
+      { success: false, error: { code: "TOKEN_EXPIRED", message: "Token has expired" } },
+      { status: 409 }
+    );
+  }
+  if (!row.phone) {
+    return NextResponse.json(
+      { success: false, error: { code: "NO_PHONE", message: "No phone on file for this student" } },
+      { status: 400 }
+    );
+  }
+
+  const message = `Your mess token code is ${tokenCode}. Valid until ${new Date(row.expires_at).toLocaleString()}. Do not share.`;
+  const sms = await sendSMS({ to: row.phone, message });
 
   await addAudit({
     action: "MESS_TOKEN_SMS_SENT",
     userId: auth.userId,
+    userName: auth.email ?? auth.userId,
     role: auth.role,
-    details: { tokenCode: code },
+    details: JSON.stringify({ tokenCode, studentUserId: row.user_id, smsId: sms?.id ?? null }),
   });
 
-  return ok({ sent: true });
+  return NextResponse.json({
+    success: true,
+    data: {
+      tokenCode,
+      smsId: sms?.id ?? null,
+      delivered: Boolean(sms),
+    },
+  });
 }
 
 export const POST = withRateLimit(withAuthorization(handlePost), {
   windowMs: 60_000,
-  maxRequests: 3,
-  keyPrefix: "mess_sms",
+  maxRequests: 10,
 });

@@ -1,90 +1,94 @@
-// src/app/api/emergency/sos/route.ts
-// POST /api/emergency/sos — raise an emergency beacon (rate-limited).
-// GET  /api/emergency/sos — list open (unresolved) alarms; approvers only.
-
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
-import { ok } from "@/server/http/response";
+import { assertCsrf } from "@/lib/csrf";
 import { query, addAudit, addNotification } from "@/lib/db";
 import type { AuthContext } from "@/lib/authContext";
-import type { Role } from "@/lib/types";
-
-const RESPONDER_ROLES = [
-  "supervisor",
-  "principal",
-  "deputy_warden",
-  "hostel_manager",
-  "admin",
-  "sysadmin",
-];
 
 async function handlePost(
   req: NextRequest,
-  { auth }: { auth: AuthContext },
+  { auth }: { auth: AuthContext }
 ): Promise<Response> {
-  const { latitude, longitude, message } = (await req.json().catch(() => ({}))) as {
-    latitude?: number;
-    longitude?: number;
-    message?: string;
-  };
+  const csrf = assertCsrf(req);
+  if (csrf) return csrf;
 
-  const { rows } = await query<{ id: string }>(
-    `INSERT INTO public.emergency_sos (user_id, latitude, longitude, message)
+  const body = await req.json().catch(() => ({}));
+  const latitude = typeof body.latitude === "number" ? body.latitude : null;
+  const longitude = typeof body.longitude === "number" ? body.longitude : null;
+  const message = String(body.message ?? "").slice(0, 500) || null;
+
+  const { rows } = await query<{ id: string; created_at: string }>(
+    `INSERT INTO emergency_sos (user_id, latitude, longitude, message)
      VALUES ($1, $2, $3, $4)
-     RETURNING id`,
-    [auth.userId, latitude ?? null, longitude ?? null, message?.slice(0, 500) ?? null],
+     RETURNING id, created_at`,
+    [auth.userId, latitude, longitude, message]
   );
-  const sosId = rows[0]?.id ?? null;
+  const sos = rows[0];
 
-  const coords =
-    latitude != null && longitude != null ? ` at (${latitude}, ${longitude})` : "";
-  await addNotification(
-    "role",
-    "supervisor",
-    "sos",
-    "🚨 SOS ALERT",
-    `Emergency beacon raised${coords} by user ${auth.email ?? auth.userId}`,
+  const { rows: recipients } = await query<{ id: string; role: string }>(
+    `SELECT id, role FROM users
+      WHERE role IN ('supervisor','principal','admin','deputy_warden')
+        AND status = 'ACTIVE'`
   );
-  await addNotification(
-    "role",
-    "principal",
-    "sos",
-    "🚨 SOS ALERT",
-    `Emergency beacon raised${coords} by ${auth.email ?? auth.userId}`,
+
+  await Promise.all(
+    recipients.map((r) =>
+      addNotification(
+        "user",
+        r.id,
+        "emergency",
+        "SOS Raised",
+        `SOS from ${auth.email ?? auth.userId}${message ? `: ${message}` : ""}`
+      )
+    )
   );
+
   await addAudit({
     action: "SOS_RAISED",
     userId: auth.userId,
-    role: auth.role as Role,
-    details: { sosId, latitude, longitude },
+    userName: auth.email ?? auth.userId,
+    role: auth.role,
+    details: JSON.stringify({ sosId: sos.id, latitude, longitude, message }),
   });
 
-  return ok({ sosId });
+  return NextResponse.json({
+    success: true,
+    data: {
+      id: sos.id,
+      createdAt: sos.created_at,
+      notified: recipients.length,
+    },
+  });
 }
 
 async function handleGet(
   _req: NextRequest,
-  { auth }: { auth: AuthContext },
+  { auth }: { auth: AuthContext }
 ): Promise<Response> {
-  if (!RESPONDER_ROLES.includes(auth.role)) return ok({ alarms: [] });
-
-  const { rows } = await query(
-    `SELECT s.id, s.user_id AS user_id, u.name, u.unique_id AS unique_id,
-            s.latitude, s.longitude, s.message, s.created_at AS created_at,
-            s.responded_by, s.responded_at, s.resolved_at
-       FROM public.emergency_sos s
-       JOIN public.users u ON u.id = s.user_id
-      WHERE s.resolved_at IS NULL
-      ORDER BY s.created_at DESC
-      LIMIT 50`,
+  const { rows } = await query<{
+    id: string;
+    user_id: string;
+    latitude: number | null;
+    longitude: number | null;
+    message: string | null;
+    responded_at: string | null;
+    resolved_at: string | null;
+    created_at: string;
+  }>(
+    `SELECT id, user_id, latitude, longitude, message,
+            responded_at, resolved_at, created_at
+       FROM emergency_sos
+      WHERE user_id = $1 OR $2 IN ('admin','sysadmin','principal','supervisor','deputy_warden')
+      ORDER BY created_at DESC
+      LIMIT 100`,
+    [auth.userId, auth.role]
   );
-
-  return ok({ alarms: rows });
+  return NextResponse.json({ success: true, data: rows });
 }
 
-export const GET = withAuthorization(handleGet);
 export const POST = withRateLimit(withAuthorization(handlePost), {
   windowMs: 60_000,
-  maxRequests: 3,
+  maxRequests: 10,
 });
+
+export const GET = withAuthorization(handleGet);

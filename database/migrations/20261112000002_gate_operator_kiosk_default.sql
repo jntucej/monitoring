@@ -59,7 +59,8 @@ UPDATE public.users u
 -- hashed differently). Sysadmin MUST rotate it via PATCH /api/users/:id
 -- (body { pin: '...' }) after first use.
 UPDATE public.users
-   SET initial_pin_hash = '$2b$10$Z7l/ZN3k5xsOma77gO9mmeKCk3IlE2/9PI54eRy/SkzykUqGvB0rq'
+   SET initial_pin_hash = '$2b$10$Z7l/ZN3k5xsOma77gO9mmeKCk3IlE2/9PI54eRy/SkzykUqGvB0rq',
+       pin_must_change = TRUE
  WHERE unique_id = 'OPERATOR'
    AND role = 'operator'
    AND initial_pin_hash IS NULL;

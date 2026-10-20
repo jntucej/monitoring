@@ -1,98 +1,63 @@
-import { SignJWT, jwtVerify, type JWTPayload } from 'jose';
-import { requireSecret } from '@/lib/env';
-import { randomUUID } from 'crypto';
-import { query } from '@/lib/postgres';
-
-let cachedKey: Uint8Array | null = null;
-let cachedKeySource = '';
+import { SignJWT, jwtVerify, type JWTPayload } from "jose";
+import { randomUUID } from "crypto";
+import { requireSecret } from "@/lib/env";
+import { query } from "@/lib/postgres";
 
 export function getSigningKey(): Uint8Array {
-  const secret = requireSecret('QR_TOKEN_SECRET', 32);
-  if (cachedKey && cachedKeySource === secret) return cachedKey;
-
-  if (!secret || secret.length < 32) {
-    throw new Error(
-      'QR_TOKEN_SECRET must be at least 32 characters. ' +
-      'Generate with: openssl rand -hex 32',
-    );
-  }
-
-  cachedKey = new TextEncoder().encode(secret);
-  cachedKeySource = secret;
-  return cachedKey;
+  return new TextEncoder().encode(requireSecret("QR_TOKEN_SECRET", 32));
 }
 
 export interface QrTokenClaims extends JWTPayload {
-  sub: string;        // user id
+  sub: string;
   roll: string;
-  purpose: 'qr_verification';
+  purpose: "qr_verification";
   jti: string;
 }
 
 export async function generateQrToken(
   roll: string,
   userId: string,
-  ttlSeconds = 300,   // 5 minutes
+  ttlSeconds = 300,
 ): Promise<string> {
-  const now = Math.floor(Date.now() / 1000);
   const jti = randomUUID();
-  return new SignJWT({
-    sub: userId,
-    roll: roll.toUpperCase().trim(),
-    purpose: 'qr_verification',
-  })
-    .setProtectedHeader({ alg: "HS256", kid: "qr-v1" })
-    .setJti(jti)
-    .setIssuedAt(now)
-    .setExpirationTime(now + ttlSeconds)
-    .setIssuer('gate-monitor')
-    .setAudience('gate-scanner')
+  return new SignJWT({ roll, purpose: "qr_verification", jti })
+    .setProtectedHeader({ alg: "HS256" })
+    .setSubject(userId)
+    .setIssuer("gate-monitor")
+    .setAudience("qr-verification")
+    .setIssuedAt()
+    .setExpirationTime(Math.floor(Date.now() / 1000) + ttlSeconds)
     .sign(getSigningKey());
 }
 
-const inMemoryNonces = new Set<string>();
-
-export async function validateQrToken(token: string): Promise<QrTokenClaims | null> {
+export async function validateQrToken(
+  token: string,
+): Promise<QrTokenClaims | null> {
+  let claims: QrTokenClaims;
   try {
     const { payload } = await jwtVerify(token, getSigningKey(), {
-      issuer: 'gate-monitor',
-      audience: 'gate-scanner',
-      algorithms: ['HS256'],
+      issuer: "gate-monitor",
+      audience: "qr-verification",
     });
-
-    if (payload.purpose !== 'qr_verification') {
-      console.warn('[qr-token] Wrong purpose:', payload.purpose);
-      return null;
-    }
-    if (typeof payload.sub !== 'string' || typeof payload.roll !== 'string' || typeof payload.jti !== 'string') {
-      return null;
-    }
-
-    const expTime = payload.exp ? new Date(payload.exp * 1000) : new Date(Date.now() + 300_000);
-
-    // Atomically burn nonce to prevent replay
-try {
-    const res = await query(
-      `INSERT INTO public.scan_nonces (jti, expires_at) VALUES ($1, $2) ON CONFLICT (jti) DO NOTHING`,
-      [payload.jti, expTime]
-    );
-
-    if (res && typeof res.rowCount === "number" && res.rowCount === 0) {
-      console.warn('[qr-token] Replay detected for jti:', payload.jti);
-      return null;
-    }
-  } catch (dbErr) {
-    if (inMemoryNonces.has(payload.jti)) {
-      console.warn('[qr-token] Replay detected for jti (in-memory):', payload.jti);
-      return null;
-    }
-    inMemoryNonces.add(payload.jti);
-  }
-return payload as QrTokenClaims;
-  } catch (err) {
-    const name = (err as Error).name;
-    if (name === 'JWTExpired') console.warn('[qr-token] Expired token used');
-    else if (name === 'JWSSignatureVerificationFailed') console.warn('[qr-token] Signature failed');
+    claims = payload as QrTokenClaims;
+  } catch {
     return null;
   }
+  if (claims.purpose !== "qr_verification") return null;
+  if (!claims.jti || !claims.exp) return null;
+  // Atomic single-use nonce insert. rowCount === 0 means this jti
+  // was already consumed — treat as replay.
+  try {
+    const insert = await query<{ jti: string }>(
+      `INSERT INTO scan_nonces (jti, expires_at)
+       VALUES ($1, to_timestamp($2))
+       ON CONFLICT (jti) DO NOTHING
+       RETURNING jti`,
+      [claims.jti, claims.exp],
+    );
+    if (insert.rowCount === 0) return null;
+  } catch {
+    return null;
+  }
+  return claims;
 }

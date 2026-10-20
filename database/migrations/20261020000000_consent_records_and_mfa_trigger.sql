@@ -1,11 +1,8 @@
--- database/migrations/20261020000000_consent_records_and_mfa_trigger.sql
--- Implements consent records (BA5), idempotency store (AY3), and privileged MFA DB check (BB5).
 SET lock_timeout = '5s';
 SET statement_timeout = '60s';
 
 BEGIN;
 
--- 1. Consent Records Table (DPDP compliance)
 CREATE TABLE IF NOT EXISTS public.consent_records (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
@@ -15,10 +12,9 @@ CREATE TABLE IF NOT EXISTS public.consent_records (
   version TEXT NOT NULL DEFAULT '1.0'
 );
 
-CREATE INDEX IF NOT EXISTS idx_consent_records_user ON public.consent_records(user_id);
+CREATE INDEX IF NOT EXISTS idx_consent_records_user  ON public.consent_records(user_id);
 CREATE INDEX IF NOT EXISTS idx_consent_records_scope ON public.consent_records(scope);
 
--- 2. Idempotency Keys Table (AY3)
 CREATE TABLE IF NOT EXISTS public.idempotency_keys (
   key TEXT PRIMARY KEY,
   user_id UUID NOT NULL,
@@ -30,27 +26,17 @@ CREATE TABLE IF NOT EXISTS public.idempotency_keys (
 );
 
 CREATE INDEX IF NOT EXISTS idx_idempotency_user_endpoint ON public.idempotency_keys(user_id, endpoint);
-CREATE INDEX IF NOT EXISTS idx_idempotency_expires_at ON public.idempotency_keys(expires_at);
+CREATE INDEX IF NOT EXISTS idx_idempotency_expires_at    ON public.idempotency_keys(expires_at);
 
--- 3. Reject privileged sessions without MFA function & trigger (BB5)
+-- No-op placeholder. The guarded implementation is installed by
+-- 20261201000001_fix_mfa_privileged_trigger.sql, which reads the
+-- `mfaRequiredForAdmin` system setting before enforcing.
 CREATE OR REPLACE FUNCTION public.reject_privileged_without_mfa()
 RETURNS TRIGGER AS $$
-DECLARE
-  v_role TEXT;
-  v_mfa BOOLEAN;
 BEGIN
-  SELECT role, COALESCE(two_factor_enabled, false)
-    INTO v_role, v_mfa
-    FROM public.users
-   WHERE id = NEW.user_id;
-
-  IF v_role IN ('admin', 'sysadmin') AND NOT v_mfa THEN
-    RAISE EXCEPTION 'MFA required for privileged role session creation';
-  END IF;
-
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 DO $$
 BEGIN
