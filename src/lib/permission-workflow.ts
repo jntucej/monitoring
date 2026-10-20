@@ -14,11 +14,13 @@ export const ROLE_STAGE_PERMISSIONS: Record<string, readonly string[]> = {
   caretaker: ["caretaker"],
   deputy_warden: ["deputy_warden"],
   hostel_manager: ["hostel_manager"],
+  warden: ["hostel_manager", "warden_or_principal", "principal"],
   principal: ["warden_or_principal", "principal"],
   faculty: ["faculty"],
   hod: ["hod"],
   oie: ["oie"],
-  vice_principal: [],
+  vice_principal: ["vice_principal"],
+  principal_or_vp: ["principal", "vice_principal"],
   exam_superintendent: ["exam_superintendent"],
   sysadmin: ["*"],
   admin: ["*"],
@@ -26,11 +28,11 @@ export const ROLE_STAGE_PERMISSIONS: Record<string, readonly string[]> = {
 
 
 export const WORKFLOW_STAGES: Record<WorkflowType, string[]> = {
-  hostel: ["caretaker", "deputy_warden", "hostel_manager", "warden_or_principal", "completed"],
-  exam: ["hod", "oie", "vice_principal", "principal", "completed"],
+  hostel: ["caretaker", "deputy_warden", "hostel_manager", "principal", "completed"],
+  exam: ["hod", "oie", "exam_branch", "vice_principal", "principal", "completed"],
   memo: ["faculty", "hod", "vice_principal", "principal", "completed"],
   staff_leave: ["hod", "vice_principal", "principal", "completed"],
-  lab_access: ["lab_incharge", "hod", "completed"],
+  lab_access: ["faculty", "hod", "principal", "completed"],
 };
 
 /**
@@ -83,7 +85,8 @@ export async function generateTicketNumber(workflowType: WorkflowType): Promise<
  */
 export function canApproveAtStage(role: string, workflowType: WorkflowType, currentStage: string): boolean {
   if (role === "admin" || role === "sysadmin") return true;
-  return ROLE_STAGE_PERMISSIONS[role]?.includes(currentStage) ?? false;
+  const normalized = role === "warden" ? "hostel_manager" : role;
+  return ROLE_STAGE_PERMISSIONS[normalized]?.includes(currentStage) ?? false;
 }
 
 /**
