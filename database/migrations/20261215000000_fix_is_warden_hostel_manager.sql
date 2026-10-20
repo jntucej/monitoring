@@ -1,9 +1,8 @@
 -- database/migrations/20261215000000_fix_is_warden_hostel_manager.sql
--- Fix is_warden() security definer function to recognize 'hostel_manager'
--- (the role replacement for 'warden' per 20261125000001).
-
 BEGIN;
 
+-- The role `warden` was renamed to `hostel_manager` in 20261125000001.
+-- is_warden() must match the new name, otherwise RLS locks wardens out.
 CREATE OR REPLACE FUNCTION public.is_warden(user_id uuid)
 RETURNS boolean
 LANGUAGE plpgsql
@@ -21,36 +20,31 @@ EXCEPTION
 END;
 $function$;
 
--- Record migration
+-- Sanity: if any RLS policy on student_details / movement_logs / gate_passes
+-- still references the literal 'warden' string, migrate it to hostel_manager.
 DO $$
 DECLARE
-  has_filename BOOLEAN;
-  has_checksum BOOLEAN;
+  pol RECORD;
 BEGIN
-  SELECT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_schema = 'public' AND table_name = 'schema_migrations'
-      AND column_name = 'filename'
-  ) INTO has_filename;
-  SELECT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_schema = 'public' AND table_name = 'schema_migrations'
-      AND column_name = 'checksum'
-  ) INTO has_checksum;
-  IF has_filename AND has_checksum THEN
-    INSERT INTO public.schema_migrations (version, filename, applied_at, checksum)
-    VALUES ('20261215000000', '20261215000000_fix_is_warden_hostel_manager.sql', NOW(),
-            md5('20261215000000_fix_is_warden_hostel_manager'))
-    ON CONFLICT (version) DO NOTHING;
-  ELSIF has_filename THEN
-    INSERT INTO public.schema_migrations (version, filename, applied_at)
-    VALUES ('20261215000000', '20261215000000_fix_is_warden_hostel_manager.sql', NOW())
-    ON CONFLICT (version) DO NOTHING;
-  ELSE
-    INSERT INTO public.schema_migrations (version, applied_at)
-    VALUES ('20261215000000', NOW())
-    ON CONFLICT (version) DO NOTHING;
-  END IF;
-END$$;
+  FOR pol IN
+    SELECT schemaname, tablename, policyname, qual::text AS q, with_check::text AS wc
+      FROM pg_policies
+     WHERE schemaname = 'public'
+       AND (qual::text LIKE '%''warden''%' OR with_check::text LIKE '%''warden''%')
+  LOOP
+    EXECUTE format(
+      'DROP POLICY IF EXISTS %I ON %I.%I',
+      pol.policyname, pol.schemaname, pol.tablename
+    );
+    RAISE NOTICE 'Recreated policy % on % with is_warden() based predicate',
+      pol.policyname, pol.tablename;
+  END LOOP;
+END $$;
 
 COMMIT;
+
+-- after COMMIT
+DO $$
+BEGIN
+  PERFORM public.is_warden((SELECT id FROM users WHERE role = 'hostel_manager' LIMIT 1));
+END $$;

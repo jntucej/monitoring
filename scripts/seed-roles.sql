@@ -1,29 +1,95 @@
--- Seed demo role accounts (bcrypt-hashed; regenerate with: node scripts/generate-seed-roles.mjs)
--- Non-destructive: ON CONFLICT (unique_id) DO NOTHING.
 BEGIN;
-INSERT INTO users (id, unique_id, name, role, email, status, password_hash, initial_pin_hash, two_factor_enabled, pin_must_change)
+
+-- ─── 1. Sysadmin (bootstrap, matches original seed) ─────────────────────────
+INSERT INTO users (id, unique_id, name, role, email, status,
+                   password_hash, initial_pin_hash,
+                   two_factor_enabled, pin_must_change)
+VALUES (
+  '80eb29e3-7e71-48cb-a44c-6e0caa7f83f5',
+  'SYSADMIN',
+  'System Admin',
+  'sysadmin',
+  'sysadmin@college.edu',
+  'ACTIVE',
+  crypt(COALESCE(NULLIF(current_setting('app.seed_password', true), ''),
+                 'sysadmin_secure_change_me'), gen_salt('bf', 10)),
+  crypt(COALESCE(NULLIF(current_setting('app.seed_pin', true), ''),
+                 '654321'), gen_salt('bf', 10)),
+  false,
+  true
+) ON CONFLICT (unique_id) DO NOTHING;
+
+-- ─── 2. Every other role ─────────────────────────────────────────────────────
+INSERT INTO users (id, unique_id, name, role, email, status,
+                   password_hash, initial_pin_hash,
+                   two_factor_enabled, pin_must_change)
 VALUES
-  ('80eb29e3-7e71-48cb-a44c-6e0caa7f83f5', 'SYSADMIN', 'System Admin', 'sysadmin', 'sysadmin@college.edu', 'ACTIVE', '$2b$10$RGJcdSAkt1CmWhFulmbVj.KnuqxRvUZ7VYYg5C.vEMu5BKhZBAXhm', '$2b$10$aTzYldmTHFjvAV7uJsaZo..cQQAnhba.Tw/s3sWIayYvohNyDcPRy', false, false),
-  ('a0eb29e3-7e71-48cb-a44c-6e0caa7f83f1', 'ADMIN', 'Campus Admin', 'admin', 'admin@college.edu', 'ACTIVE', '$2b$10$hqAYZWrxDe7z5.yzrHIXzeJVK48zktmp3vikc2el0ZehkDCH2pzdm', '$2b$10$6tUgvBS2gZZtUHK9DjYlj.q8RL7944WK0gzeWGzHx/EZkRviAXw8m', false, false),
-  ('30eb29e3-7e71-48cb-a44c-6e0caa7f83fa', 'PRINCIPAL', 'Principal', 'principal', 'principal@college.edu', 'ACTIVE', '$2b$10$RGJcdSAkt1CmWhFulmbVj.KnuqxRvUZ7VYYg5C.vEMu5BKhZBAXhm', '$2b$10$aTzYldmTHFjvAV7uJsaZo..cQQAnhba.Tw/s3sWIayYvohNyDcPRy', false, true),
-  ('b0eb29e3-7e71-48cb-a44c-6e0caa7f83f2', 'VICE_PRINCIPAL', 'Vice Principal', 'vice_principal', 'viceprincipal@college.edu', 'ACTIVE', '$2b$10$ik73OPAcyPFgntsoUund3e8RCS2Ma5o0JLFJBUE5qWXT9rq8XHiUG', '$2b$10$DQ8GWDSUj5PzOeRnYahZK.BvjiqnJ5ttvQ03Eh/XSyV1MQQhhXFa.', false, true),
-  ('c0eb29e3-7e71-48cb-a44c-6e0caa7f83f3', 'HOD', 'Head of Department', 'hod', 'hod@college.edu', 'ACTIVE', '$2b$10$ptSt9r3x6SFKqmRQnSViy.mFJGWC9YF4jrgXOZ/hSUDucm0Q2TJLC', '$2b$10$w38/N0rfsG9BRyY4FLlJzumEMPvAoq5/7tUI/jpXW21hH0qc/CUPK', false, false),
-  ('40eb29e3-7e71-48cb-a44c-6e0caa7f83fb', 'CARETAKER', 'Hostel Caretaker', 'caretaker', 'caretaker@college.edu', 'ACTIVE', '$2b$10$RGJcdSAkt1CmWhFulmbVj.KnuqxRvUZ7VYYg5C.vEMu5BKhZBAXhm', '$2b$10$aTzYldmTHFjvAV7uJsaZo..cQQAnhba.Tw/s3sWIayYvohNyDcPRy', false, true),
-  ('50eb29e3-7e71-48cb-a44c-6e0caa7f83fc', 'DEPUTY_WARDEN', 'Deputy Warden', 'deputy_warden', 'deputywarden@college.edu', 'ACTIVE', '$2b$10$RGJcdSAkt1CmWhFulmbVj.KnuqxRvUZ7VYYg5C.vEMu5BKhZBAXhm', '$2b$10$aTzYldmTHFjvAV7uJsaZo..cQQAnhba.Tw/s3sWIayYvohNyDcPRy', false, true),
-  ('60eb29e3-7e71-48cb-a44c-6e0caa7f83fd', 'HOSTEL_MANAGER', 'Hostel Manager', 'hostel_manager', 'hostelmanager@college.edu', 'ACTIVE', '$2b$10$RGJcdSAkt1CmWhFulmbVj.KnuqxRvUZ7VYYg5C.vEMu5BKhZBAXhm', '$2b$10$aTzYldmTHFjvAV7uJsaZo..cQQAnhba.Tw/s3sWIayYvohNyDcPRy', false, true),
-  ('70eb29e3-7e71-48cb-a44c-6e0caa7f83fe', 'OIE', 'OIE Officer', 'oie', 'oie@college.edu', 'ACTIVE', '$2b$10$RGJcdSAkt1CmWhFulmbVj.KnuqxRvUZ7VYYg5C.vEMu5BKhZBAXhm', '$2b$10$aTzYldmTHFjvAV7uJsaZo..cQQAnhba.Tw/s3sWIayYvohNyDcPRy', false, true),
-  ('80eb29e3-7e71-48cb-a44c-6e0caa7f83ff', 'EXAM_BRANCH', 'Exam Branch', 'exam_branch', 'exambranch@college.edu', 'ACTIVE', '$2b$10$RGJcdSAkt1CmWhFulmbVj.KnuqxRvUZ7VYYg5C.vEMu5BKhZBAXhm', '$2b$10$aTzYldmTHFjvAV7uJsaZo..cQQAnhba.Tw/s3sWIayYvohNyDcPRy', false, true),
-  ('90eb29e3-7e71-48cb-a44c-6e0caa7f83fa', 'EXAM_SUPERINTENDENT', 'Exam Superintendent', 'exam_superintendent', 'examsuperintendent@college.edu', 'ACTIVE', '$2b$10$RGJcdSAkt1CmWhFulmbVj.KnuqxRvUZ7VYYg5C.vEMu5BKhZBAXhm', '$2b$10$aTzYldmTHFjvAV7uJsaZo..cQQAnhba.Tw/s3sWIayYvohNyDcPRy', false, true),
-  ('d0eb29e3-7e71-48cb-a44c-6e0caa7f83f4', 'OPERATOR', 'Gate Operator', 'operator', 'operator@college.edu', 'ACTIVE', '$2b$10$hqAYZWrxDe7z5.yzrHIXzeJVK48zktmp3vikc2el0ZehkDCH2pzdm', '$2b$10$Z7l/ZN3k5xsOma77gO9mmeKCk3IlE2/9PI54eRy/SkzykUqGvB0rq', false, true),
-  ('e0eb29e3-7e71-48cb-a44c-6e0caa7f83f5', 'SUPERVISOR', 'Security Supervisor', 'supervisor', 'supervisor@college.edu', 'ACTIVE', '$2b$10$hqAYZWrxDe7z5.yzrHIXzeJVK48zktmp3vikc2el0ZehkDCH2pzdm', '$2b$10$6tUgvBS2gZZtUHK9DjYlj.q8RL7944WK0gzeWGzHx/EZkRviAXw8m', false, false),
-  ('f0eb29e3-7e71-48cb-a44c-6e0caa7f83f6', 'MESS_INCHARGE', 'Mess Incharge', 'mess_incharge', 'mess@college.edu', 'ACTIVE', '$2b$10$RGJcdSAkt1CmWhFulmbVj.KnuqxRvUZ7VYYg5C.vEMu5BKhZBAXhm', '$2b$10$aTzYldmTHFjvAV7uJsaZo..cQQAnhba.Tw/s3sWIayYvohNyDcPRy', false, true),
-  ('11eb29e3-7e71-48cb-a44c-6e0caa7f83f7', 'EMO', 'Electrical Maintenance Officer', 'emo', 'emo@college.edu', 'ACTIVE', '$2b$10$RGJcdSAkt1CmWhFulmbVj.KnuqxRvUZ7VYYg5C.vEMu5BKhZBAXhm', '$2b$10$aTzYldmTHFjvAV7uJsaZo..cQQAnhba.Tw/s3sWIayYvohNyDcPRy', false, true),
-  ('22eb29e3-7e71-48cb-a44c-6e0caa7f83f8', 'PARENT', 'Parent', 'parent', 'parent@college.edu', 'ACTIVE', '$2b$10$RGJcdSAkt1CmWhFulmbVj.KnuqxRvUZ7VYYg5C.vEMu5BKhZBAXhm', '$2b$10$aTzYldmTHFjvAV7uJsaZo..cQQAnhba.Tw/s3sWIayYvohNyDcPRy', false, false),
-  ('33eb29e3-7e71-48cb-a44c-6e0caa7f83f9', 'STUDENT', 'Student Demo', 'student', 'student@college.edu', 'ACTIVE', '$2b$10$hqAYZWrxDe7z5.yzrHIXzeJVK48zktmp3vikc2el0ZehkDCH2pzdm', '$2b$10$6tUgvBS2gZZtUHK9DjYlj.q8RL7944WK0gzeWGzHx/EZkRviAXw8m', false, false),
-  ('44eb29e3-7e71-48cb-a44c-6e0caa7f83fa', 'VISITOR', 'Visitor Demo', 'visitor', 'visitor@college.edu', 'ACTIVE', '$2b$10$hqAYZWrxDe7z5.yzrHIXzeJVK48zktmp3vikc2el0ZehkDCH2pzdm', '$2b$10$6tUgvBS2gZZtUHK9DjYlj.q8RL7944WK0gzeWGzHx/EZkRviAXw8m', false, false)
-ON CONFLICT (unique_id) DO UPDATE
-  SET role = EXCLUDED.role,
-      name = EXCLUDED.name,
-      email = EXCLUDED.email,
-      status = EXCLUDED.status;
+  -- Tier 0: admin
+  (gen_random_uuid(), 'ADMIN',              'Campus Admin',          'admin',              'admin@college.edu',              'ACTIVE', crypt('admin_change_me',        gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
+
+  -- Tier 1: executive
+  (gen_random_uuid(), 'PRINCIPAL',          'Principal',             'principal',          'principal@college.edu',          'ACTIVE', crypt('principal_change_me',    gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
+  (gen_random_uuid(), 'VICE_PRINCIPAL',     'Vice Principal',        'vice_principal',     'viceprincipal@college.edu',      'ACTIVE', crypt('vp_change_me',           gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
+
+  -- Tier 2: hostel hierarchy
+  (gen_random_uuid(), 'CARETAKER',          'Hostel Caretaker',      'caretaker',          'caretaker@college.edu',          'ACTIVE', crypt('caretaker_change_me',    gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
+  (gen_random_uuid(), 'DEPUTY_WARDEN',      'Deputy Warden',         'deputy_warden',      'deputywarden@college.edu',       'ACTIVE', crypt('deputy_change_me',       gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
+  (gen_random_uuid(), 'HOSTEL_MANAGER',     'Hostel Manager',        'hostel_manager',     'hostelmanager@college.edu',      'ACTIVE', crypt('hm_change_me',           gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
+  (gen_random_uuid(), 'WARDEN',             'Legacy Warden',         'hostel_manager',     'warden@college.edu',             'ACTIVE', crypt('warden_change_me',       gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
+
+  -- Tier 2: exam hierarchy
+  (gen_random_uuid(), 'OIE',                'OIE Officer',           'oie',                'oie@college.edu',                'ACTIVE', crypt('oie_change_me',          gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
+  (gen_random_uuid(), 'EXAM_BRANCH',        'Exam Branch',           'exam_branch',        'exambranch@college.edu',         'ACTIVE', crypt('eb_change_me',           gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
+  (gen_random_uuid(), 'EXAM_SUPERINTENDENT','Exam Superintendent',   'exam_superintendent','examsuperintendent@college.edu', 'ACTIVE', crypt('es_change_me',           gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
+
+  -- Tier 2: faculty / staff
+  (gen_random_uuid(), 'HOD',                'Head of Department',    'hod',                'hod@college.edu',                'ACTIVE', crypt('hod_change_me',          gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
+  (gen_random_uuid(), 'FACULTY',            'Faculty Member',        'faculty',            'faculty@college.edu',            'ACTIVE', crypt('faculty_change_me',      gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
+  (gen_random_uuid(), 'STAFF',              'Office Staff',          'staff',              'staff@college.edu',              'ACTIVE', crypt('staff_change_me',        gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
+
+  -- Tier 2: mess + maintenance
+  (gen_random_uuid(), 'MESS_INCHARGE',      'Mess Incharge',         'mess_incharge',      'messincharge@college.edu',       'ACTIVE', crypt('mess_change_me',         gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
+  (gen_random_uuid(), 'EMO',                'Electrical Officer',    'emo',                'emo@college.edu',                'ACTIVE', crypt('emo_change_me',          gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
+
+  -- Tier 3: gate / supervisor
+  (gen_random_uuid(), 'SUPERVISOR',         'Gate Supervisor',       'supervisor',         'supervisor@college.edu',         'ACTIVE', crypt('supervisor_change_me',   gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
+  (gen_random_uuid(), 'OPERATOR',           'Gate Operator',         'operator',           'operator@college.edu',           'ACTIVE', crypt('operator_change_me',     gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
+
+  -- Tier 4: end-users
+  (gen_random_uuid(), 'STUDENT',            'Demo Student',          'student',            'student@college.edu',            'ACTIVE', crypt('student_change_me',      gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
+  (gen_random_uuid(), 'PARENT',             'Demo Parent',           'parent',             'parent@college.edu',             'ACTIVE', crypt('parent_change_me',       gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
+  (gen_random_uuid(), 'GUARDIAN',           'Demo Guardian',         'guardian',           'guardian@college.edu',           'ACTIVE', crypt('guardian_change_me',     gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
+  (gen_random_uuid(), 'WORKER',             'Support Worker',        'worker',             'worker@college.edu',             'ACTIVE', crypt('worker_change_me',       gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
+  (gen_random_uuid(), 'VISITOR',            'Demo Visitor',          'visitor',            'visitor@college.edu',            'ACTIVE', crypt('visitor_change_me',      gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true)
+ON CONFLICT (unique_id) DO NOTHING;
+
+-- ─── 3. Role registry entries (must exist for validate_user_role trigger) ───
+INSERT INTO config_roles_registry (code, display_name, is_privileged, is_super)
+VALUES
+  ('sysadmin',           'System Administrator',         true,  true),
+  ('admin',              'Administrator',                true,  false),
+  ('principal',          'Principal',                    false, false),
+  ('vice_principal',     'Vice Principal',               false, false),
+  ('caretaker',          'Caretaker',                    false, false),
+  ('deputy_warden',      'Deputy Warden',                false, false),
+  ('hostel_manager',     'Hostel Manager',               false, false),
+  ('oie',                'Officer Incharge Examinations',false, false),
+  ('exam_branch',        'Exam Branch',                  false, false),
+  ('exam_superintendent','Exam Superintendent',          false, false),
+  ('hod',                'Head of Department',           false, false),
+  ('faculty',            'Faculty',                      false, false),
+  ('staff',              'Staff',                        false, false),
+  ('mess_incharge',      'Mess Incharge',                false, false),
+  ('emo',                'Electrical Maintenance Officer',false,false),
+  ('supervisor',         'Gate Supervisor',              false, false),
+  ('operator',           'Gate Operator',                false, false),
+  ('student',            'Student',                      false, false),
+  ('parent',             'Parent',                       false, false),
+  ('guardian',           'Guardian',                     false, false),
+  ('worker',             'Worker',                       false, false),
+  ('visitor',            'Visitor',                      false, false)
+ON CONFLICT (code) DO NOTHING;
+
+-- ─── 4. Summary ──────────────────────────────────────────────────────────────
+SELECT 'roles_seeded' AS status, COUNT(*) AS total FROM users WHERE status = 'ACTIVE';
 COMMIT;
