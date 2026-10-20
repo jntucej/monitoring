@@ -8,6 +8,7 @@ import { assertCsrf } from "@/lib/csrf";
 import { ok, fail } from "@/server/http/response";
 import { query } from "@/lib/postgres";
 import { addAudit } from "@/lib/db";
+import { isCleanComment } from "@/lib/profanity";
 import type { AuthContext } from "@/lib/authContext";
 
 const EDIT_WINDOW_MS = 2 * 3_600_000;
@@ -55,6 +56,12 @@ async function handlePatch(req: NextRequest, { auth }: { auth: AuthContext }) {
   const satisfaction = body.satisfaction ?? null;
   const comment =
     body.comment != null ? String(body.comment).slice(0, 280) : null;
+
+  // R11: same constructive-feedback screen as the submit path.
+  const profanity = comment ? isCleanComment(comment) : null;
+  if (profanity && !profanity.clean) {
+    return fail("COMMENT_FLAGGED", "Please keep your feedback constructive.", 422);
+  }
 
   await query(
     `UPDATE public.mess_meal_reviews

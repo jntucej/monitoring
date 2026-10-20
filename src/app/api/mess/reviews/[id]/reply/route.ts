@@ -7,6 +7,7 @@ import { assertCsrf } from "@/lib/csrf";
 import { ok, fail } from "@/server/http/response";
 import { query } from "@/lib/postgres";
 import { addAudit, addNotification } from "@/lib/db";
+import { isCleanComment } from "@/lib/profanity";
 import type { AuthContext } from "@/lib/authContext";
 
 const STAFF = new Set(["mess_incharge", "hostel_manager", "admin", "sysadmin"]);
@@ -24,6 +25,10 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   const id = getId(req);
   const { body } = (await req.json().catch(() => ({}))) as { body?: string };
   if (!body || !body.trim()) return fail("VALIDATION_ERROR", "body required", 400);
+  const profanity = isCleanComment(body);
+  if (!profanity.clean) {
+    return fail("COMMENT_FLAGGED", "Please keep your response constructive.", 422);
+  }
 
   const { rows: rev } = await query<{ user_id: string }>(
     `SELECT user_id FROM public.mess_meal_reviews WHERE id = $1 AND deleted_at IS NULL LIMIT 1`,

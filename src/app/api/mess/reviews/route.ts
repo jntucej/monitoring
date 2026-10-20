@@ -8,6 +8,7 @@ import { addAudit } from "@/lib/db";
 import { getIstDateString } from "@/server/policy/dates";
 import type { AuthContext } from "@/lib/authContext";
 import { MEAL_TYPES, SATISFACTION_LEVELS, type MealType, type Satisfaction } from "@/lib/mess-reviews";
+import { isCleanComment } from "@/lib/profanity";
 
 const IN_CHARGE = new Set(["mess_incharge", "admin", "sysadmin"]);
 const MEAL_SET = new Set(MEAL_TYPES);
@@ -66,6 +67,17 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
     return fail("VALIDATION_ERROR", "mealType must be BREAKFAST|LUNCH|DINNER", 400);
   if (!SAT_SET.has(satisfaction))
     return fail("VALIDATION_ERROR", "Invalid satisfaction level", 400);
+
+  // R11: keep the comment box constructive. The check is substring-based and
+  // case-insensitive; only blocks on a hit, never rewrites.
+  const profanity = comment ? isCleanComment(comment) : null;
+  if (profanity && !profanity.clean) {
+    return fail(
+      "COMMENT_FLAGGED",
+      "Please keep your feedback constructive.",
+      422,
+    );
+  }
 
   const today = getIstDateString();
   const minDate = getIstDateString(new Date(Date.now() - REVIEW_WINDOW_DAYS * 86_400_000));
