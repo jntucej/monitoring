@@ -194,6 +194,31 @@ function fail(code: VerifyFailure["code"], message: string): VerifyFailure {
   return { ok: false, code, message };
 }
 
+/**
+ * M4: audit an event-token verification/consumption failure. Fire-and-forget
+ * so a failed audit write never blocks the verification path. Writes to
+ * audit_logs directly (service-role pool), not addAudit (which uses RLS).
+ */
+export async function auditEventTokenEvent(
+  event: string,
+  tokenId: string,
+  details: Record<string, unknown>,
+): Promise<void> {
+  try {
+    await query(
+      `INSERT INTO public.audit_logs (action, user_id, user_name, user_role, details)
+       SELECT $1, t.user_id, u.name, u.role,
+              jsonb_build_object('token_id', t.id, 'event_id', t.event_id, $2::jsonb)
+         FROM public.mess_event_tokens t
+         JOIN public.users u ON u.id = t.user_id
+        WHERE t.id = $3`,
+      [event, JSON.stringify(details), tokenId],
+    );
+  } catch (err) {
+    console.error(`[mess-event-token] audit ${event} failed:`, err);
+  }
+}
+
 interface VerifyRow {
   id: string; user_id: string; event_id: string;
   used_at: string | null; revoked_at: string | null; expires_at: string;
@@ -317,7 +342,16 @@ export async function verifyManualCode(
   }
   const match = await checkManualCode(code, row.manual_code_hash);
   if (!match) {
-    await recordFailedAttempt(row.id);
+    // M5: only count a failure when the code was well-formed AND a real
+    // token exists for this roll. A typos in the roll / code don't lock
+    // out a legit student.
+    if (code.length === CODE_LENGTH) {
+      await recordFailedAttempt(row.id);
+      await auditEventTokenEvent("MESS_TOKEN_VERIFY_FAILED", row.id, {
+        method: "MANUAL",
+        reason: "code_mismatch",
+      });
+    }
     return fail("INVALID_CODE", "Wrong code");
   }
   return evaluateRow(row, "MANUAL");
@@ -341,6 +375,10 @@ export async function serveToken(
   );
   const row = rows[0];
   if (!row) return fail("TOKEN_USED", "Token already used or expired");
+  await auditEventTokenEvent("MESS_EVENT_TOKEN_SERVED", row.id, {
+    servedBy: servedByUserId,
+    method,
+  });
   const { rows: userRows } = await query<{ name: string; unique_id: string }>(
     `SELECT name, unique_id FROM public.users WHERE id = $1`,
     [row.user_id],
@@ -382,3 +420,29 @@ export async function revokeToken(
 }
 
 export type { MealType };
+
+// M15: regenerate the manual code for an existing event token when the student
+// lost it. The QR is re-derivable (it's a JWT), but the manual code is stored
+// as a bcrypt hash so we can reissue a fresh one without minting a new token.
+export async function regenerateManualCode(
+  tokenId: string,
+  userId: string,
+): Promise<{ ok: true; manualCode: string } | { ok: false; error: string }> {
+  const { rows } = await query<{ manual_code_hash: string; used_at: string | null; revoked_at: string | null }>(
+    `SELECT manual_code_hash, used_at, revoked_at
+       FROM public.mess_event_tokens WHERE id = $1 LIMIT 1`,
+    [tokenId],
+  );
+  const row = rows[0];
+  if (!row || row.used_at || row.revoked_at) {
+    return { ok: false, error: "Token not found, used, or revoked" };
+  }
+  const code = generateManualCode();
+  const hash = await hashManualCode(code);
+  await query(
+    `UPDATE public.mess_event_tokens SET manual_code_hash = $2 WHERE id = $1`,
+    [tokenId, hash],
+  );
+  await auditEventTokenEvent("MESS_EVENT_TOKEN_MANUAL_CODE_REGEN", tokenId, { by: userId });
+  return { ok: true, manualCode: code };
+}

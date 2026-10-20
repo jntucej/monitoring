@@ -92,6 +92,35 @@ cron.schedule('*/15 * * * *', async () => {
   }
 });
 
+cron.schedule('*/30 * * * *', async () => {
+  console.log('[Worker] Running scheduled job: mess_token_cleanup');
+  try {
+    await postCronEndpoint('/api/cron/mess-token-cleanup');
+    HEALTH_STATE.lastJobAt = Date.now();
+    HEALTH_STATE.lastJobName = 'mess_token_cleanup';
+    HEALTH_STATE.jobsProcessed++;
+  } catch (err) {
+    console.error('[Worker] mess_token_cleanup failed:', err);
+  }
+});
+
+// Mess review digest: 30 min after each meal window closes (IST).
+const REVIEW_DIGEST_SCHEDULES = ['09:30', '14:30', '21:30'];
+for (const time of REVIEW_DIGEST_SCHEDULES) {
+  const [h, m] = time.split(':').map(Number);
+  cron.schedule(`${m} ${h} * * *`, async () => {
+    console.log(`[Worker] Running scheduled job: mess_review_digest (${time} IST)`);
+    try {
+      await postCronEndpoint('/api/cron/mess-review-digest');
+      HEALTH_STATE.lastJobAt = Date.now();
+      HEALTH_STATE.lastJobName = 'mess_review_digest';
+      HEALTH_STATE.jobsProcessed++;
+    } catch (err) {
+      console.error('[Worker] mess_review_digest failed:', err);
+    }
+  }, { timezone: 'Asia/Kolkata' });
+}
+
 cron.schedule('*/15 * * * *', async () => {
   console.log('[Worker] Running scheduled job: cleanup_ephemeral');
   try {

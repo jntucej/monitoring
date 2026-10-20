@@ -443,6 +443,59 @@ export async function recordScan(input: RecordScanInput): Promise<RecordScanResu
             personId: person.id,
           },
         });
+
+        // M18: a home_out student is off-campus for the pass window, so any
+        // mess token + "will be present" preference inside that window is
+        // wasted food. Auto-revoke the tokens and clear the preferences.
+        // Non-fatal: a mess-table failure must not roll back the scan.
+        if (normReason === "home_out") {
+          try {
+            const fromDate = new Date().toISOString().slice(0, 10);
+            const { rows: passEnd } = await query<{ to_date: string | null }>(
+              `SELECT to_date FROM public.permissions
+                WHERE id = $1 AND to_date IS NOT NULL LIMIT 1`,
+              [consumedPassId],
+            );
+            const toDate = passEnd[0]?.to_date?.slice(0, 10) ?? fromDate;
+
+            const { rowCount: revokedCount } = await query(
+              `UPDATE public.mess_tokens t
+                  SET revoked_at = NOW(), revoked_by = $2::uuid
+                FROM public.mess_days d
+               WHERE t.mess_day_id = d.id
+                 AND t.user_id = $1
+                 AND t.used_at IS NULL
+                 AND t.revoked_at IS NULL
+                 AND d.meal_date BETWEEN $3::date AND $4::date`,
+              [person.id, input.operatorId, fromDate, toDate],
+            );
+            // Clear their mess preferences for the covered window so they
+            // aren't counted as "present" for analytics.
+            await query(
+              `UPDATE public.mess_preferences p
+                  SET will_be_present = FALSE
+                FROM public.mess_days d
+               WHERE p.mess_day_id = d.id
+                 AND p.user_id = $1
+                 AND d.meal_date BETWEEN $2::date AND $3::date`,
+              [person.id, fromDate, toDate],
+            );
+            await auditWrite({
+              action: "MESS_TOKENS_REVOKED_HOME_OUT",
+              userId: input.operatorId,
+              role: input.operatorRole,
+              details: {
+                personId: person.id,
+                passId: consumedPassId,
+                window: { fromDate, toDate },
+                revokedTokens: revokedCount ?? 0,
+              },
+            });
+          } catch (err) {
+            // Best-effort: log but do not fail the scan.
+            console.error("[recordScan] M18 mess auto-revoke failed:", err);
+          }
+        }
       }
     }
   }
