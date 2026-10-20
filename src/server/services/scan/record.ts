@@ -78,6 +78,13 @@ export interface RecordScanInput {
 export interface RecordScanResult {
   log: Record<string, unknown>;
   isDuplicate: boolean;
+  /**
+   * Id of the modern permission pass consumed by this OUT scan, when one was
+   * matched and marked COMPLETED/used. Null when no pass was consumed (no
+   * match, duplicate scan, or IN direction). Used by the gate UI to surface
+   * the ticket number the operator just cleared.
+   */
+  consumedPassId: string | null;
   person: {
     id: string;
     uniqueId: string;
@@ -395,20 +402,48 @@ export async function recordScan(input: RecordScanInput): Promise<RecordScanResu
   // 10b. Consume the linked modern permission pass on a successful OUT scan.
   //      This prevents the same approved pass from being reused.
   const normReason = normalizeExitReason(input.reason);
+  let consumedPassId: string | null = null;
   if (!isDuplicate && input.direction === "OUT") {
     if (["home_out", "day_pass", "special_leave", "emergency"].includes(normReason)) {
-      // Use a lenient match: require reason + status + workflow type; date
-      // window is best-effort (not all tickets store from_date/to_date).
-      await query(
-        `UPDATE permissions
-           SET status = 'COMPLETED', current_stage = 'completed', updated_at = NOW()
-         WHERE requester_user_id = $1
-           AND workflow_type = 'hostel'
-           AND status = 'APPROVED'
-           AND reason = $2
-         RETURNING id`,
-        [person.id, normReason],
+      // Consume the most recent unused approved pass for this reason. Track
+      // consumption (used_at / used_at_gate / used_at_scan) so the gate UI and
+      // the returns timeline can distinguish "used" from "expired".
+      const { rows: consumed } = await query<{ id: string; ticket_number: string }>(
+        `UPDATE public.permissions
+            SET status = 'COMPLETED',
+                current_stage = 'completed',
+                used_at = NOW(),
+                used_at_gate = $3,
+                used_at_scan = $4,
+                updated_at = NOW()
+          WHERE id = (
+            SELECT p.id FROM public.permissions p
+             WHERE p.requester_user_id = $1
+               AND p.workflow_type = 'hostel'
+               AND p.status = 'APPROVED'
+               AND p.reason = $2
+               AND p.used_at IS NULL
+             ORDER BY p.created_at DESC
+             LIMIT 1
+          )
+          RETURNING id, ticket_number`,
+        [person.id, normReason, gate.id, (finalLog as { id?: string })?.id ?? null],
       );
+      if (consumed[0]) {
+        consumedPassId = consumed[0].id;
+        await auditWrite({
+          action: "PASS_CONSUMED_ON_SCAN",
+          userId: input.operatorId,
+          role: input.operatorRole,
+          details: {
+            passId: consumed[0].id,
+            ticketNumber: consumed[0].ticket_number,
+            scanId: (finalLog as { id?: string })?.id ?? null,
+            gateId: gate.id,
+            personId: person.id,
+          },
+        });
+      }
     }
   }
 
@@ -494,6 +529,7 @@ export async function recordScan(input: RecordScanInput): Promise<RecordScanResu
   return {
     log: finalLog ?? {},
     isDuplicate,
+    consumedPassId,
     person: {
       id: person.id,
       uniqueId: person.unique_id,

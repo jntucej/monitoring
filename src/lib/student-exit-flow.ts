@@ -124,6 +124,7 @@ export async function validateStudentExitFlow(
     .in("status", ["APPROVED"])
     .eq("workflow_type", "hostel")
     .not("reason", "is", null)
+    .is("used_at", null)
     .order("created_at", { ascending: false });
 
   if (permErr) {

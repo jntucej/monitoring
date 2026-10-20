@@ -45,6 +45,52 @@ healthServer.listen(HEALTH_PORT, '0.0.0.0', () => {
 
 console.log('[Worker] Starting background worker supervisor...');
 
+// Pass expiry + SLA breach: POST to the app's cron endpoints every 15 min.
+// These endpoints self-guard with CRON_SECRET; a missing secret on the server
+// side returns 503 and is logged here but does not crash the worker.
+async function postCronEndpoint(path) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.APP_BASE_URL ?? 'http://localhost:3000';
+  const cronSecret = process.env.CRON_SECRET ?? '';
+  if (!cronSecret) {
+    console.warn(`[Worker] ${path} skipped: CRON_SECRET not configured on worker`);
+    return;
+  }
+  const res = await fetch(`${appUrl.replace(/\/$/, '')}${path}`, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${cronSecret}`,
+    },
+    body: '{}',
+  });
+  if (!res.ok) {
+    console.error(`[Worker] ${path} returned ${res.status}`);
+  }
+}
+
+cron.schedule('*/15 * * * *', async () => {
+  console.log('[Worker] Running scheduled job: expire_passes');
+  try {
+    await postCronEndpoint('/api/cron/expire-passes');
+    HEALTH_STATE.lastJobAt = Date.now();
+    HEALTH_STATE.lastJobName = 'expire_passes';
+    HEALTH_STATE.jobsProcessed++;
+  } catch (err) {
+    console.error('[Worker] expire_passes failed:', err);
+  }
+});
+
+cron.schedule('*/15 * * * *', async () => {
+  console.log('[Worker] Running scheduled job: sla_breach');
+  try {
+    await postCronEndpoint('/api/cron/sla-breach');
+    HEALTH_STATE.lastJobAt = Date.now();
+    HEALTH_STATE.lastJobName = 'sla_breach';
+    HEALTH_STATE.jobsProcessed++;
+  } catch (err) {
+    console.error('[Worker] sla_breach failed:', err);
+  }
+});
 
 cron.schedule('*/15 * * * *', async () => {
   console.log('[Worker] Running scheduled job: cleanup_ephemeral');
