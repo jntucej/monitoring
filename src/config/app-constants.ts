@@ -24,6 +24,14 @@ export const RATE_LIMITS = {
   read:      { windowMs:      60_000, maxRequests: 300 },
   sensitive: { windowMs: 60 * 60_000, maxRequests: 20  },
   admin:     { windowMs:      60_000, maxRequests: 120 },
+  PERMISSION_CREATE: {
+    windowMs: 60_000,
+    maxRequests: 30,
+  },
+  PERMISSION_DIRECT_GENERATE: {
+    windowMs: 60_000,
+    maxRequests: 10,
+  },
 } as const;
 
 export const LIMITS = {
