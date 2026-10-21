@@ -251,6 +251,11 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           state.token = t.token;
           state.refreshToken = t.refreshToken;
           state.authenticated = Boolean(t.token && state.authenticated);
+          // Flip the hydrated flag via the store action so Zustand subscribers
+          // (useHasHydrated) are notified immediately. A direct field write
+          // would not trigger subscribers and could leave a guarded route on
+          // the AppLoadingScreen for its first paint.
+          state.setHasHydrated(true);
         }
       },
     }
