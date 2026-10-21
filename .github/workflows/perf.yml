@@ -19,8 +19,5 @@ jobs:
 
       - run: npm ci
       - run: npm run build
-      - name: Block heavy first-load regressions
-        run: |
-          bash scripts/verify-no-heavy-first-load.sh "LucideAccessibility"
-          bash scripts/verify-no-heavy-first-load.sh "THREE.WebGLRenderer"
-          bash scripts/verify-no-heavy-first-load.sh "recharts"
+      - name: Enforce first-load performance budget
+        run: bash scripts/verify-no-heavy-first-load.sh
