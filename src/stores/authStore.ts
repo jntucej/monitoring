@@ -72,11 +72,6 @@ interface AuthActions {
     password: string,
     mfa?: { challenge?: MfaChallenge; totpCode?: string }
   ) => Promise<LoginResult>;
-  pinLogin: (
-    employeeId: string,
-    pin: string,
-    mfa?: { challenge?: MfaChallenge; totpCode?: string }
-  ) => Promise<LoginResult>;
   logout: () => Promise<void>;
   checkSession: () => Promise<boolean>;
   setRole: (role: Role) => void;
@@ -144,49 +139,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             refreshToken,
             user: toUser(d.user),
             role: d.user?.role,
-            authenticated: true,
-            loading: false,
-            mfaPending: false,
-            mfaChallenge: null,
-          });
-          return { success: true };
-        } catch (err) {
-          set({ loading: false });
-          return { success: false, error: err instanceof Error ? err.message : "Network error" };
-        }
-      },
-      pinLogin: async (employeeId, pin, mfa) => {
-        set({ loading: true });
-        try {
-          const res = await fetch("/api/auth/pin-login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ employeeId, pin, mfa }),
-          });
-          const body = await res.json();
-          if (!body.success) {
-            set({ loading: false });
-            return { success: false, error: body.error?.message, code: body.error?.code };
-          }
-          const d = body.data ?? {};
-          if (d.mustChangePin) {
-            set({ loading: false });
-            return { success: false, code: "PIN_MUST_CHANGE", error: "PIN rotation required" };
-          }
-          if (d.mfaRequired) {
-            set({ loading: false, mfaPending: true, mfaChallenge: d.mfaChallenge });
-            return { success: true, mfaRequired: true, mfaChallenge: d.mfaChallenge };
-          }
-          if (d.mfaEnrollmentRequired) {
-            set({ loading: false, enrollToken: d.enrollToken });
-            return { success: true, mfaEnrollmentRequired: true, enrollToken: d.enrollToken };
-          }
-          tokenStorage.set({ token: d.accessToken, refreshToken: d.refreshToken });
-          set({
-            token: d.accessToken,
-            refreshToken: d.refreshToken,
-            user: toUser(d.user),
-            role: d.user.role,
             authenticated: true,
             loading: false,
             mfaPending: false,

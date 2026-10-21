@@ -15,7 +15,6 @@ export function useAuth() {
   const hydrated = useHasHydrated();
 
   const login = useAuthStore((s) => s.login);
-  const pinLogin = useAuthStore((s) => s.pinLogin);
   const logout = useAuthStore((s) => s.logout);
   const router = useRouter();
 
@@ -40,7 +39,6 @@ export function useAuth() {
     loading: loading || !hydrated,
     hydrated,
     login,
-    pinLogin,
     logout,
     requireAuth,
   };

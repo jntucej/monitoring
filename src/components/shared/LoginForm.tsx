@@ -27,8 +27,6 @@ function formatLoginError(code?: string, defaultMsg?: string): string {
   switch (code) {
     case "INVALID_CREDENTIALS":
       return "Invalid username or password.";
-    case "INVALID_PIN":
-      return "Invalid PIN or user not found.";
     case "ACCOUNT_INACTIVE":
       return "Your account is inactive. Contact support.";
     case "MFA_REQUIRED":
@@ -45,7 +43,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const hasHydrated = useHasHydrated();
-  const { user, authenticated, login, pinLogin, loading } = useAuthStore();
+  const { user, authenticated, login, loading } = useAuthStore();
   const { addToast } = useUIStore();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -100,8 +98,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
   }, [hasHydrated, authenticated, user, redirectAfterLogin]);
 
   const [loginIdentifier, setLoginIdentifier] = useState("");
-  const [passwordOrPin, setPasswordOrPin] = useState("");
-  const [loginMode, setLoginMode] = useState<"password" | "pin">("password");
+  const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [isShaking, setIsShaking] = useState(false);
@@ -154,59 +151,15 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
       triggerShake("Please enter your ID.");
       return;
     }
-    if (!passwordOrPin) {
-      triggerShake(
-        loginMode === "pin"
-          ? "Please enter your Security PIN."
-          : "Please enter your Password."
-      );
-      return;
-    }
-
-    if (loginMode === "pin") {
-      const pinResult = await pinLogin(
-        identifier,
-        passwordOrPin,
-        mfaChallenge ? { challenge: mfaChallenge, totpCode } : undefined
-      );
-      if (pinResult.success) {
-        if (rememberMe) {
-          localStorage.setItem("gate-monitor-remember", "true");
-        }
-        addToast({
-          title: "Access Granted",
-          message: `Authenticated via Security PIN.`,
-          variant: "success",
-        });
-        // ponytail: no redirect here — the hasHydrated+authenticated effect
-        // below routes once persist has settled (avoids AuthGuard race).
-        return;
-      }
-
-      // PIN ok but 2FA enrolled — surface the challenge like the password leg (Bug 103).
-      if (pinResult.mfaRequired && pinResult.mfaChallenge) {
-        setMfaChallenge(pinResult.mfaChallenge);
-        triggerShake("Enter the 6-digit code from your authenticator app.");
-        return;
-      }
-
-      if (pinResult.mfaEnrollmentRequired) {
-        triggerShake(
-          pinResult.enrollToken
-            ? "MFA enrollment required. Your enroll token was issued — complete setup via POST /api/auth/2fa/setup with header x-mfa-enroll-token, then log in again."
-            : formatLoginError("MFA_REQUIRED")
-        );
-        return;
-      }
-
-      triggerShake(formatLoginError(pinResult.code, pinResult.error));
+    if (!password) {
+      triggerShake("Please enter your Password.");
       return;
     }
 
     // Password path
     const result = await login(
       identifier,
-      passwordOrPin,
+      password,
       mfaChallenge ? { challenge: mfaChallenge, totpCode } : undefined
     );
 
@@ -301,51 +254,24 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <label className="block text-xs font-semibold text-[var(--text-secondary)]">
-              {loginMode === "pin" ? "Security PIN" : "Password"}
-            </label>
-            {loginMode === "password" && (
-              <button
-                type="button"
-                onClick={() => setShowResetModal(true)}
-                className="text-[11px] font-semibold text-sky-400 hover:underline"
-              >
-                Forgot Password?
-              </button>
-            )}
-          </div>
-
-          <div className="flex gap-2 mb-2">
-            <button
-              type="button"
-              onClick={() => setLoginMode("password")}
-              className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                loginMode === "password"
-                  ? "bg-[var(--action-primary)] text-white shadow-xs"
-                  : "bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-              }`}
-            >
               Password
-            </button>
+            </label>
             <button
               type="button"
-              onClick={() => setLoginMode("pin")}
-              className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                loginMode === "pin"
-                  ? "bg-[var(--action-primary)] text-white shadow-xs"
-                  : "bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-              }`}
+              onClick={() => setShowResetModal(true)}
+              className="text-[11px] font-semibold text-sky-400 hover:underline"
             >
-              Security PIN
+              Forgot Password?
             </button>
           </div>
 
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
-              autoComplete={loginMode === "pin" ? "off" : "current-password"}
-              value={passwordOrPin}
-              onChange={(e) => { setPasswordOrPin(e.target.value); if (errorMsg) setErrorMsg(""); }}
-              placeholder={loginMode === "pin" ? "4-8 digit PIN" : "Enter password"}
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => { setPassword(e.target.value); if (errorMsg) setErrorMsg(""); }}
+              placeholder="Enter password"
               className="w-full pl-10 pr-12 py-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none transition-all"
             />
             <Lock className="w-4 h-4 absolute left-3.5 top-3.5 text-[var(--text-muted)]" />
@@ -417,7 +343,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
 
         <button
           type="submit"
-          disabled={loading || !loginIdentifier || !passwordOrPin || (!!mfaChallenge && totpCode.length < 6)}
+          disabled={loading || !loginIdentifier || !password || (!!mfaChallenge && totpCode.length < 6)}
           // Issue #394: hide when MFA form is active — it has its own submit button
           className={`w-full touch-target-primary rounded-xl bg-[var(--action-primary)] text-white font-bold text-sm hover:opacity-95 transition-all disabled:opacity-40 shadow-md flex items-center justify-center gap-2 py-3 mt-2 active:scale-[0.99] ${mfaChallenge ? 'hidden' : ''}`}
         >
