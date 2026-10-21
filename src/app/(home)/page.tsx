@@ -5,7 +5,6 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import {
   ShieldCheck,
-  GraduationCap,
   Users,
   Briefcase,
   Building2,
@@ -14,21 +13,10 @@ import {
   Settings,
   Server,
   LogIn,
-  HelpCircle,
   ArrowRight,
-  CheckCircle2,
-  Lock,
-  FileCheck,
-  Clock,
-  MapPin,
-  Mail,
-  Phone,
-  Award,
-  BookOpen,
 } from "lucide-react";
 import { createAuthContext } from "@/lib/authContext";
 import { getDefaultRouteForRole } from "@/server/policy/routes";
-import { LiveStatePill } from "./LiveStatePill";
 import { LiveStatsStrip } from "./LiveStatsStrip";
 import { COLLEGE } from "@/lib/college-config";
 import {
@@ -37,6 +25,15 @@ import {
   websiteJsonLd,
   faqJsonLd,
 } from "@/lib/seo";
+import {
+  KineticTypography,
+  ScrambleText,
+  BlurReveal,
+  PhysicsCard,
+  MagneticButton,
+} from "@/app/(home)/components/ui/index";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { HomeMotionLayer } from "./HomeMotionLayer";
 
 export const metadata: Metadata = buildPageMetadata({
   title: `Official Campus Portal | ${COLLEGE.officialName}`,
@@ -50,102 +47,47 @@ export const metadata: Metadata = buildPageMetadata({
 // auth-check Suspense boundary stays dynamic.
 export const dynamic = "auto";
 
-/* ── verified role list ─────────────────────────────────────────── */
+/* ── role list ────────────────────────────────────────────────────── */
 const ROLES = [
   {
     label: "Students",
     href: "/login?role=student",
-    icon: GraduationCap,
-    blurb:
-      "Digital ID, gate passes, permissions, attendance calendar and mess services.",
+    icon: Crown as typeof ShieldCheck,
+    blurb: "Digital ID, gate passes, permissions, attendance and mess services.",
   },
   {
     label: "Parents & Guardians",
     href: "/login?role=parent",
-    icon: Users,
+    icon: Users as typeof ShieldCheck,
     blurb: "Child status, movement timeline, pass requests and notifications.",
   },
   {
     label: "Faculty",
     href: "/login?role=faculty",
-    icon: Briefcase,
+    icon: Briefcase as typeof ShieldCheck,
     blurb: "Class attendance, subject permissions and student directory.",
   },
   {
     label: "Hostel Staff",
     href: "/login?role=hostel-manager",
-    icon: Building2,
-    blurb: "Outpass approvals, room allocation, resident tickets and handovers.",
-  },
-  {
-    label: "Administration",
-    href: "/login?role=principal",
-    icon: Crown,
-    blurb: "Approval centre, audit, department analytics and oversight.",
+    icon: Building2 as typeof ShieldCheck,
+    blurb: "Outpass approvals, room allocation, resident tickets.",
   },
   {
     label: "Gate Operators",
     href: "/login?role=operator",
-    icon: ScanLine,
-    blurb: "Scan verification, manual entry, transactions and exceptions.",
+    icon: ScanLine as typeof ShieldCheck,
+    blurb: "Scan verification, manual entry, transactions.",
   },
   {
-    label: "Campus Admin",
+    label: "Administration",
     href: "/login?role=admin",
-    icon: Settings,
-    blurb: "Users, gates, roles, configuration, reports and audit logs.",
-  },
-  {
-    label: "System Admin",
-    href: "/login?role=sysadmin",
-    icon: Server,
-    blurb: "System health, security, data lifecycle and platform configuration.",
+    icon: Settings as typeof ShieldCheck,
+    blurb: "Approval centre, audit, department analytics, oversight.",
   },
 ];
 
-/* ── verified academic content ─────────────────────────────────── */
-const UG_PROGRAMMES = [
-  "B.Tech — Electrical & Electronics Engineering (EEE)",
-  "B.Tech — Mechanical Engineering (ME)",
-  "B.Tech — Electronics & Communication Engineering (ECE)",
-  "B.Tech — Computer Science & Engineering (CSE)",
-  "B.Tech — Information Technology (IT)",
-];
-
-const PG_PROGRAMMES = [
-  "M.Tech — Electrical Power Systems (EEE)",
-  "M.Tech — Engineering Design (ME)",
-  "M.Tech — Digital Systems & Computer Electronics (ECE)",
-  "M.Tech — Computer Science & Engineering (CSE)",
-  "M.Tech — Cyber Security (new from 2024-25)",
-];
-
-const FLOW_STEPS = [
-  {
-    title: "Request",
-    body: "A student raises a permission or gate-pass request through the portal.",
-  },
-  {
-    title: "Approve",
-    body: "The correct approver stage — caretaker, warden, HOD, principal — reviews and decides.",
-  },
-  {
-    title: "Scan",
-    body: "The gate operator scans or manually enters the roll number at the assigned gate.",
-  },
-  {
-    title: "Record",
-    body: "Every movement is written to an audit-logged record with gate, direction and reason.",
-  },
-];
-
-const SECURITY_POINTS = [
-  "Role-scoped access control — every role sees only what it is authorised for.",
-  "Multi-factor sign-in available for privileged and administrative accounts.",
-  "Every permission decision, movement scan and configuration change is audit-logged.",
-  "Personal data is minimised, encrypted where required, and retained per policy.",
-];
-
+/* ── verified FAQ content ────────────────────────────────────────── */
 const FAQS = [
   {
     q: "How do I sign in to the JNTUH UCEJ campus portal?",
@@ -165,7 +107,7 @@ const FAQS = [
   },
   {
     q: "Where is JNTUH UCEJ located?",
-    a: "JNTUH University College of Engineering Jagtial is at Nachupally (Kondagattu), Kodimial Mandal, Jagtial District, Telangana – 505 501, India.",
+    a: "JNTUH University College of Engineering Jagtial is at Nachupally (Kondagattu), Kodimial Mandal, Jagtial District, Telangana – 505501, India.",
   },
   {
     q: "Who do I contact for help?",
@@ -173,7 +115,7 @@ const FAQS = [
   },
 ];
 
-/* ── auth redirect ──────────────────────────────────────────────── */
+/* ── auth redirect check (dynamic, Suspense-wrapped) ─────────────── */
 function findAuthToken(
   store: Awaited<ReturnType<typeof cookies>>,
 ): string | null {
@@ -209,17 +151,13 @@ async function resolveAuthRedirect(): Promise<string | null> {
   }
 }
 
-/* ── page ───────────────────────────────────────────────────────── */
-// The auth-redirect check is wrapped in Suspense so the SEO content below
-// can be statically cached and served instantly to anonymous visitors (the
-// majority + the SEO-critical traffic). Only the small auth-check portion
-// runs dynamically, so the page no longer blocks first paint.
 async function AuthRedirect() {
   const redirectTo = await resolveAuthRedirect();
   if (redirectTo) redirect(redirectTo);
   return null;
 }
 
+/* ── page ─────────────────────────────────────────────────────────── */
 export default async function HomePage() {
   return (
     <div data-home className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)]">
@@ -258,10 +196,9 @@ export default async function HomePage() {
             <Link href="/help" className="hover:text-[var(--action-primary)]">
               Help
             </Link>
-            <LiveStatePill />
             <Link
               href="/login"
-              className="rounded-lg bg-[var(--action-primary)] px-4 py-2 font-semibold text-white hover:opacity-90"
+              className="rounded-lg bg-[var(--action-primary)] px-4 py-2 font-semibold text-[var(--bg-base)] hover:opacity-90"
             >
               Sign in
             </Link>
@@ -269,271 +206,93 @@ export default async function HomePage() {
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="mx-auto max-w-6xl px-4 py-14 md:py-20">
-        <p className="text-xs font-semibold uppercase tracking-widest text-[var(--action-primary)]">
-          Official portal · JNTUH UCEJ · Established 2007
-        </p>
-        <h1 className="mt-3 text-4xl font-bold leading-tight md:text-6xl">
-          JNTUH University College of Engineering Jagtial — Campus Access Portal
-        </h1>
-        <p className="mt-4 max-w-3xl text-lg text-[var(--text-secondary)]">
+      {/* Hero — centered, kinetic reveal */}
+      <section className="relative flex flex-col items-center justify-center px-4 py-20 text-center">
+        <KineticTypography
+          as="h1"
+          text="JNTUH UCEJ"
+          className="text-5xl font-semibold tracking-tight md:text-7xl"
+        />
+        <ScrambleText
+          text="Campus Access Portal"
+          className="mt-3 text-sm md:text-base uppercase tracking-[0.35em] text-[var(--action-primary)]"
+        />
+        <p className="mt-6 max-w-2xl text-lg text-[var(--text-secondary)]">
           {COLLEGE.portalPurpose}
         </p>
-        <div className="mt-6 flex flex-wrap gap-2 text-xs">
-          <span className="inline-flex items-center gap-1 rounded-full border border-[var(--border)] px-3 py-1">
-            <Award className="h-3 w-3 text-[var(--action-primary)]" /> NAAC A+
-            (CGPA 3.29)
-          </span>
-          <span className="inline-flex items-center gap-1 rounded-full border border-[var(--border)] px-3 py-1">
-            <BookOpen className="h-3 w-3 text-[var(--action-primary)]" />
-            Autonomous since 2023
-          </span>
-          <span className="inline-flex items-center gap-1 rounded-full border border-[var(--border)] px-3 py-1">
-            <ShieldCheck className="h-3 w-3 text-[var(--action-primary)]" /> AICTE
-            approved · UGC 2(f) &amp; 12(B)
-          </span>
-        </div>
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-2 rounded-lg bg-[var(--action-primary)] px-5 py-3 font-semibold text-white hover:opacity-90"
+
+        <BlurReveal delay={0.15} className="mt-10 w-full">
+          <WidgetBoundary>
+            <LiveStatsStrip />
+          </WidgetBoundary>
+        </BlurReveal>
+
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <MagneticButton
+            onClick={() => (window.location.href = "/login")}
+            className="inline-flex items-center gap-2 rounded-lg bg-[var(--action-primary)] px-5 py-3 font-semibold text-[var(--bg-base)] hover:opacity-90"
           >
-            <LogIn className="h-4 w-4" /> {COLLEGE.primaryCTA}
-          </Link>
+            <LogIn className="h-4 w-4" />
+            {COLLEGE.primaryCTA}
+          </MagneticButton>
           <Link
             href="/help"
-            className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] px-5 py-3 font-semibold hover:bg-[var(--bg-elevated)]"
+            className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] px-5 py-3 font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
           >
-            <HelpCircle className="h-4 w-4" /> {COLLEGE.secondaryCTA}
+            {COLLEGE.secondaryCTA}
+            <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
-        <div className="mt-10">
-          <LiveStatsStrip />
-        </div>
       </section>
 
-      {/* Trust strip */}
-      <section className="border-y border-[var(--border)] bg-[var(--bg-surface)]/40">
-        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-4 px-4 py-6 md:grid-cols-4">
-          {[
-            { icon: ShieldCheck, label: "Role-based access" },
-            { icon: Lock, label: "MFA-ready sign-in" },
-            { icon: FileCheck, label: "Full audit trail" },
-            { icon: Clock, label: "24×7 campus records" },
-          ].map((t) => (
-            <div
-              key={t.label}
-              className="flex items-center gap-2 text-sm text-[var(--text-secondary)]"
-            >
-              <t.icon className="h-4 w-4 text-[var(--action-primary)]" />{" "}
-              {t.label}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Roles */}
+      {/* Roles — physics cards */}
       <section className="mx-auto max-w-6xl px-4 py-14">
-        <h2 className="text-2xl font-bold md:text-3xl">Who is this portal for?</h2>
-        <p className="mt-2 max-w-2xl text-[var(--text-secondary)]">
-          Every role on campus has a dedicated, permission-scoped dashboard.
-        </p>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {ROLES.map((r) => (
-            <Link
-              key={r.label}
-              href={r.href}
-              className="group rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 transition hover:border-[var(--action-primary)] hover:shadow"
-            >
-              <r.icon className="h-6 w-6 text-[var(--action-primary)]" />
-              <h3 className="mt-3 font-semibold">{r.label}</h3>
-              <p className="mt-1 text-sm text-[var(--text-muted)]">{r.blurb}</p>
-              <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[var(--action-primary)] opacity-0 transition group-hover:opacity-100">
-                Sign in <ArrowRight className="h-3 w-3" />
-              </span>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* Programmes — real UCEJ data */}
-      <section className="border-y border-[var(--border)] bg-[var(--bg-surface)]/30">
-        <div className="mx-auto max-w-6xl px-4 py-14">
-          <h2 className="text-2xl font-bold md:text-3xl">
-            Programmes offered at JNTUH UCEJ
-          </h2>
+        <div className="text-center">
+          <h2 className="text-2xl font-bold md:text-3xl">Who is this portal for?</h2>
           <p className="mt-2 text-[var(--text-secondary)]">
-            Five UG and five PG programmes across engineering disciplines.
+            Every role on campus has a dedicated, permission-scoped dashboard.
           </p>
-          <div className="mt-8 grid gap-6 md:grid-cols-2">
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
-              <h3 className="font-semibold">Undergraduate — B.Tech</h3>
-              <ul className="mt-3 space-y-1 text-sm text-[var(--text-secondary)]">
-                {UG_PROGRAMMES.map((p) => (
-                  <li key={p}>{p}</li>
-                ))}
-              </ul>
-            </div>
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
-              <h3 className="font-semibold">Postgraduate — M.Tech</h3>
-              <ul className="mt-3 space-y-1 text-sm text-[var(--text-secondary)]">
-                {PG_PROGRAMMES.map((p) => (
-                  <li key={p}>{p}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
         </div>
-      </section>
-
-      {/* How campus access works */}
-      <section className="mx-auto max-w-6xl px-4 py-14">
-        <h2 className="text-2xl font-bold md:text-3xl">How campus access works</h2>
-        <div className="mt-8 grid gap-6 md:grid-cols-4">
-          {FLOW_STEPS.map((s, i) => (
-            <div
-              key={s.title}
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {ROLES.map((r) => (
+            <PhysicsCard
+              key={r.label}
               className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-5"
             >
-              <div className="text-3xl font-bold text-[var(--action-primary)]">
-                {i + 1}
-              </div>
-              <h3 className="mt-2 font-semibold">{s.title}</h3>
-              <p className="mt-1 text-sm text-[var(--text-muted)]">{s.body}</p>
-            </div>
+              <Link href={r.href} className="group block">
+                <r.icon className="h-6 w-6 text-[var(--action-primary)]" />
+                <h3 className="mt-3 font-semibold">{r.label}</h3>
+                <p className="mt-1 text-sm text-[var(--text-muted)]">{r.blurb}</p>
+                <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[var(--action-primary)] opacity-0 transition group-hover:opacity-100">
+                  Sign in
+                  <ArrowRight className="h-3 w-3" />
+                </span>
+              </Link>
+            </PhysicsCard>
           ))}
         </div>
       </section>
 
-      {/* Security */}
-      <section className="border-y border-[var(--border)] bg-[var(--bg-surface)]/30">
-        <div className="mx-auto max-w-6xl px-4 py-14">
-          <h2 className="text-2xl font-bold md:text-3xl">Security and privacy</h2>
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            {SECURITY_POINTS.map((point) => (
-              <div
-                key={point}
-                className="flex gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4"
-              >
-                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[var(--action-primary)]" />
-                <p className="text-sm text-[var(--text-secondary)]">{point}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Campus / contact — real address */}
-      <section className="mx-auto max-w-6xl px-4 py-14">
-        <h2 className="text-2xl font-bold md:text-3xl">Campus and contact</h2>
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
-            <MapPin className="h-5 w-5 text-[var(--action-primary)]" />
-            <h3 className="mt-2 font-semibold">Address</h3>
-            <p className="mt-1 text-sm text-[var(--text-secondary)]">
-              {COLLEGE.addressLine1}
-              <br />
-              {COLLEGE.addressLine2}, {COLLEGE.city}
-              <br />
-              {COLLEGE.state} – {COLLEGE.pincode}, India
-            </p>
-          </div>
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
-            <Mail className="h-5 w-5 text-[var(--action-primary)]" />
-            <h3 className="mt-2 font-semibold">Email</h3>
-            <p className="mt-1 text-sm text-[var(--text-secondary)]">
-              {COLLEGE.email}
-              <br />
-              {COLLEGE.emailAlt}
-            </p>
-          </div>
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
-            <Phone className="h-5 w-5 text-[var(--action-primary)]" />
-            <h3 className="mt-2 font-semibold">Phone</h3>
-            <p className="mt-1 text-sm text-[var(--text-secondary)]">
-              {COLLEGE.phone}
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section className="border-y border-[var(--border)] bg-[var(--bg-surface)]/30">
-        <div className="mx-auto max-w-4xl px-4 py-14">
-          <h2 className="text-2xl font-bold md:text-3xl">
-            Frequently asked questions
-          </h2>
-          <div className="mt-6 divide-y divide-[var(--border)]">
-            {FAQS.map((f) => (
-              <details key={f.q} className="group py-4">
-                <summary className="cursor-pointer list-none font-semibold">
-                  {f.q}
-                </summary>
-                <p className="mt-2 text-sm text-[var(--text-secondary)]">{f.a}</p>
-              </details>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="mx-auto max-w-6xl px-4 py-14 text-center">
-        <h2 className="text-2xl font-bold md:text-3xl">Ready to sign in?</h2>
-        <p className="mt-2 text-[var(--text-secondary)]">
-          Use the campus account issued by your department or administrator.
-        </p>
-        <Link
-          href="/login"
-          className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[var(--action-primary)] px-6 py-3 font-semibold text-white hover:opacity-90"
-        >
-          <LogIn className="h-4 w-4" /> {COLLEGE.primaryCTA}
-        </Link>
-      </section>
+      {/* Cinematic motion layer — lazy-loaded so it stays off first-load JS */}
+      <HomeMotionLayer faqItems={FAQS} />
 
       {/* Footer */}
       <footer className="border-t border-[var(--border)] bg-[var(--bg-surface)]/60">
-        <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 md:grid-cols-3">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-6 text-xs text-[var(--text-muted)]">
           <div>
-            <div className="text-sm font-semibold">{COLLEGE.officialName}</div>
-            <div className="mt-1 text-xs text-[var(--text-muted)]">
-              {COLLEGE.addressLine1}, {COLLEGE.addressLine2}
-              <br />
-              {COLLEGE.city}, {COLLEGE.state} {COLLEGE.pincode}
-            </div>
+            © {new Date().getFullYear()} {COLLEGE.officialName}
           </div>
-          <div className="text-sm">
-            <div className="font-semibold">Portal</div>
-            <ul className="mt-2 space-y-1 text-[var(--text-muted)]">
-              <li>
-                <Link href="/about" className="hover:text-[var(--action-primary)]">
-                  About
-                </Link>
-              </li>
-              <li>
-                <Link href="/help" className="hover:text-[var(--action-primary)]">
-                  Help &amp; FAQ
-                </Link>
-              </li>
-              <li>
-                <Link href="/login" className="hover:text-[var(--action-primary)]">
-                  Sign in
-                </Link>
-              </li>
-            </ul>
-          </div>
-          <div className="text-sm">
-            <div className="font-semibold">Contact</div>
-            <ul className="mt-2 space-y-1 text-[var(--text-muted)]">
-              <li>Email: {COLLEGE.email}</li>
-              <li>Alternate: {COLLEGE.emailAlt}</li>
-              <li>Phone: {COLLEGE.phone}</li>
-            </ul>
-          </div>
-        </div>
-        <div className="border-t border-[var(--border)] py-4 text-center text-xs text-[var(--text-muted)]">
-          © {new Date().getFullYear()} {COLLEGE.officialName}. All rights
-          reserved.
+          <nav className="flex gap-4">
+            <Link href="/about" className="hover:text-[var(--action-primary)]">
+              About
+            </Link>
+            <Link href="/help" className="hover:text-[var(--action-primary)]">
+              Help
+            </Link>
+            <Link href="/login" className="hover:text-[var(--action-primary)]">
+              Sign in
+            </Link>
+          </nav>
         </div>
       </footer>
     </div>

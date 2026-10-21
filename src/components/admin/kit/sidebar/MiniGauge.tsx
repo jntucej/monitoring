@@ -10,7 +10,9 @@ export interface MiniGaugeProps extends MiniProps {
 }
 
 export function MiniGauge({ value, label, color, size = 18, onClick, className }: MiniGaugeProps) {
-  const clamped = Math.max(0, Math.min(1, value));
+  // Guard: an undefined / null / NaN value makes the dash-offset string come
+  // out as "NaN" which React logs as a path-parsing error. Clamp to 0..1.
+  const clamped = Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : 0;
   const r = (size - 4) / 2;
   const c = 2 * Math.PI * r;
   const offset = c * (1 - clamped);
