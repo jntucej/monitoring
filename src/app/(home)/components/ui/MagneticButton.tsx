@@ -13,6 +13,7 @@ export interface MagneticButtonProps extends React.ButtonHTMLAttributes<HTMLButt
 export const MagneticButton = forwardRef<HTMLButtonElement, MagneticButtonProps>(
   ({ strength = 0.6, radius = 120, children, style, ...rest }, externalRef) => {
     const localRef = useRef<HTMLButtonElement>(null);
+    const pressedRef = useRef(false);
     const reduced = useReducedMotionSafe();
     const x = useSpring(0, SPRING_MAGNETIC);
     const y = useSpring(0, SPRING_MAGNETIC);
@@ -24,6 +25,9 @@ export const MagneticButton = forwardRef<HTMLButtonElement, MagneticButtonProps>
       if (!el) return;
 
       const onMove = (e: PointerEvent) => {
+        // While a button is held down the magnet is frozen so the
+        // click always lands where the user released.
+        if (pressedRef.current) return;
         const rect = el.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
         const cy = rect.top + rect.height / 2;
@@ -49,9 +53,26 @@ export const MagneticButton = forwardRef<HTMLButtonElement, MagneticButtonProps>
         scale.set(1);
       };
 
+      const onDown = () => {
+        pressedRef.current = true;
+        // Snap to still instantly so the press registers on the button.
+        x.set(0);
+        y.set(0);
+        scale.set(1);
+      };
+      const onUp = () => {
+        pressedRef.current = false;
+      };
+
+      el.addEventListener("pointerdown", onDown);
+      el.addEventListener("pointerup", onUp);
+      el.addEventListener("pointercancel", onUp);
       window.addEventListener("pointermove", onMove);
       el.addEventListener("pointerleave", onLeave);
       return () => {
+        el.removeEventListener("pointerdown", onDown);
+        el.removeEventListener("pointerup", onUp);
+        el.removeEventListener("pointercancel", onUp);
         window.removeEventListener("pointermove", onMove);
         el.removeEventListener("pointerleave", onLeave);
       };
