@@ -2,13 +2,25 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence } from "framer-motion";
+import dynamic from "next/dynamic";
 import { useBotStore } from "./store";
 import { BotBoat } from "./BotBoat";
-import { BotPanel } from "./BotPanel";
 import { useAuthStore } from "@/stores/authStore";
 import { playAudioFeedback } from "@/lib/sound";
 
 const LONG_PRESS_MS = 420;
+
+// The chat panel is the trigger UI's heavy dependency. It transitively pulls in
+// the 3D particles (three + @react-three/fiber), speech hooks, and other
+// large modules, so it must NOT be part of the first-load bundle. The
+// floating button (~2 KB) stays static so it appears immediately; the panel
+// + its 3D/speech code download only when the user actually opens it.
+const BotPanel = dynamic(() => import("./BotPanel").then((m) => m.BotPanel), {
+  ssr: false,
+  loading: () => (
+    <div className="fixed bottom-24 right-6 h-[520px] w-[380px] rounded-2xl bg-slate-900/70 animate-pulse" />
+  ),
+});
 
 export function FloatingBot() {
   const { open, toggleOpen, requestVoiceMode } = useBotStore();

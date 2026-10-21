@@ -15,7 +15,15 @@ import { useAuthStore } from "@/stores/authStore";
 import { BotHeader } from "./BotHeader";
 import { BotMessages } from "./BotMessages";
 import { BotComposer } from "./BotComposer";
-import { ListeningParticles } from "./ListeningParticles";
+
+import dynamic from "next/dynamic";
+
+// The listening-visualisation canvas bundles three + @react-three/fiber
+// (heavy WebGL). It must not block the initial render of every page, so
+// load it only when the user actually opens the bot panel.
+const ListeningParticles = dynamic(() => import("./ListeningParticles").then((m) => m.ListeningParticles), {
+  ssr: false,
+});
 
 export function BotPanel() {
   const api = useApi();
