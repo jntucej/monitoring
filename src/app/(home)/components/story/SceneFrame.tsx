@@ -65,7 +65,7 @@ export function SceneFrame({ scene, data, visual }: SceneFrameProps) {
         ]
       : [
           { label: "On campus now", value: data?.stats.onCampusNow ?? 0 },
-          { label: "Modules connected", value: data?.modules.filter((m) => m.active).length ?? 0 },
+          { label: "Modules connected", value: data?.modules?.filter((m) => m.active).length ?? 0 },
         ];
 
   const textVariants = {

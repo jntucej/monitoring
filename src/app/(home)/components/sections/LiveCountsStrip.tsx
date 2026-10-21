@@ -26,8 +26,13 @@ export function LiveCountsStrip() {
   const live = useLiveData(30_000);
   const s = live?.stats;
 
+  // The live endpoint now returns ONLY the four aggregate counters
+  // (requests/approved/scans today + on-campus now); the richer payload
+  // (modules/requests/scans) was stripped for security. Guard against a
+  // missing `modules` array so the strip never throws and the
+  // WidgetBoundary never reports "Widget failed to load".
   const activeGates =
-    live?.modules.filter((m) => m.id === "gate").length ?? 0;
+    live?.modules?.filter((m) => m.id === "gate").length ?? 0;
 
   const items = [
     { label: "On campus now", value: s?.onCampusNow ?? 0 },

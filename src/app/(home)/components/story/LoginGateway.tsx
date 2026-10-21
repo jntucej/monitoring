@@ -61,7 +61,7 @@ export function LoginGateway({ data }: { data: LivePayload | null }) {
             {[
               { label: "On campus", value: data?.stats.onCampusNow ?? 0 },
               { label: "Scans today", value: data?.stats.scansToday ?? 0 },
-              { label: "Modules", value: data?.modules.filter((m) => m.active).length ?? 0 },
+              { label: "Modules", value: data?.modules?.filter((m) => m.active).length ?? 0 },
             ].map((s) => (
               <motion.div
                 key={s.label}

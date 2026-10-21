@@ -2,6 +2,15 @@
 
 import { useEffect, useState } from "react";
 
+/**
+ * LivePayload — the shape of /api/home/live.
+ *
+ * The endpoint returns ONLY the four aggregate counters (stats) plus a
+ * timestamp. The previously-leaked richer fields (requests / scans /
+ * modules) were removed for security; they are kept OPTIONAL here so
+ * any stale consumer that still reads them degrades gracefully instead
+ * of throwing "Cannot read properties of undefined".
+ */
 export interface LivePayload {
   stats: {
     requestsToday: number;
@@ -9,10 +18,11 @@ export interface LivePayload {
     scansToday: number;
     onCampusNow: number;
   };
-  requests: Array<{ id: string; reason: string; status: string; time: string }>;
-  scans: Array<{ id: string; gate: string; direction: string; status: string; time: string }>;
-  modules: Array<{ id: string; label: string; active: boolean; count: number }>;
   updatedAt: string;
+  // Optional, stripped fields — may be absent on the live endpoint.
+  requests?: Array<{ id: string; reason: string; status: string; time: string }>;
+  scans?: Array<{ id: string; gate: string; direction: string; status: string; time: string }>;
+  modules?: Array<{ id: string; label: string; active: boolean; count: number }>;
 }
 
 let cached: LivePayload | null = null;
