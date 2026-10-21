@@ -20,9 +20,12 @@ It starts a production Next.js server, fetches the real HTML of `/`, and enforce
   regression that adds weight, not just lucide or three. Budget: fail > 950 KB,
   warn > 900 KB. Current baseline: ~831 KB.
 - **SECONDARY — icon-path `d="M` string count across first-load chunks.** Fires
-  when an icon-heavy registry lands in first-load. Fails > 300. (Note: in this
-  build Turbopack tree-shakes the registry even under dynamic indexing, so this
-  tier is currently inert at 0; it is kept as a future-proof diagnostic.)
+  when an icon-heavy registry lands in first-load. Fails > 300. (In this build
+  Turbopack shakes the SVG path strings (`d="M…`) from unused lucide icons but
+  **retains the component shells, name strings, and module wrappers** — so a
+  registry regression still adds ~650 KB even though the `d="M` count remains 0.
+  The size budget catches this; string markers cannot. This is why the size
+  budget is the primary gate.)
 - **TERTIARY — tree-shake-resistant library markers.** `WebGLRenderer` /
   `THREE.REVISION` for three, `ResponsiveContainer` for recharts. These export
   names appear as strings only when the library is actually bundled.
