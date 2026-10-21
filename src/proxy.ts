@@ -40,37 +40,43 @@ export async function proxy(req: NextRequest) {
 
   if (SCRAPER_IPS.includes(ip)) return NextResponse.next();
 
-  // ── Server-side auth gate for protected HTML routes ─────────────────
-  // Without this, /admin, /sysadmin, /student, etc. all return 200 with
-  // the full app shell (loading spinner, title, chunk-per-role) to an
-  // anonymous curl. The client-side AuthGuard then redirects, but the
-  // shell has already leaked — an attacker can enumerate role → chunk
-  // mappings from the HTML. Doing the cookie check here (edge runtime,
-  // presence-only, no JWT validation) means an anonymous request gets
-  // a 302 → /login?next=<path> instead of 200 + 27 KB of shell.
-  const PROTECTED_HTML_PREFIXES = [
-    '/admin', '/sysadmin', '/student', '/operator', '/parent',
-    '/caretaker', '/deputy-warden', '/faculty', '/guardian', '/hod',
-    '/hostel', '/hostel-manager', '/oic', '/oie', '/permissions',
-    '/principal', '/staff', '/vice-principal', '/supervisor',
-    '/mess', '/exam', '/exam-branch', '/visitor', '/person',
-    '/campus', '/onboarding', '/settings',
-  ];
-  const isProtectedHtml = PROTECTED_HTML_PREFIXES.some(
-    (p) => pathname === p || pathname.startsWith(p + '/'),
-  );
-  if (isProtectedHtml) {
-    const token =
-      req.cookies.get('access_token')?.value ??
-      req.cookies.get('refresh_token')?.value;
-    if (!token) {
-      const url = req.nextUrl.clone();
-      url.pathname = '/login';
-      url.searchParams.set('next', pathname);
-      return NextResponse.redirect(url, 302);
+  // ── Server-side auth gate for protected HTML routes (opt-in) ────────
+  // Enabled by GATE_ON_HTML_ROUTES=1. Without it the protected role routes
+  // (/admin, /sysadmin, /student, ...) all return 200 with the full app
+  // shell to an anonymous request — an attacker can enumerate role → chunk
+  // mappings. When enabled, the edge checks for a session cookie and, if
+  // absent, 302 → /login?next=<path>. It is opt-in because the primary
+  // login flow stores the JWT in sessionStorage (authStore.ts) and only
+  // /api/auth/session mirrors it to a cookie; the operator kiosk and some
+  // client sessions may not carry the cookie, so enabling it by default
+  // would lock those flows out. The client AuthGuard + API 401s already
+  // stop data access; this gate only stops the HTML shell from leaking.
+  if (
+    process.env.GATE_ON_HTML_ROUTES === '1' &&
+    !pathname.startsWith('/api')
+  ) {
+    const PROTECTED_HTML_PREFIXES = [
+      '/admin', '/sysadmin', '/student', '/operator', '/parent',
+      '/caretaker', '/deputy-warden', '/faculty', '/guardian', '/hod',
+      '/hostel', '/hostel-manager', '/oic', '/oie', '/permissions',
+      '/principal', '/staff', '/vice-principal', '/supervisor',
+      '/mess', '/exam', '/exam-branch', '/visitor', '/person',
+      '/campus', '/onboarding', '/settings',
+    ];
+    const isProtectedHtml = PROTECTED_HTML_PREFIXES.some(
+      (p) => pathname === p || pathname.startsWith(p + '/'),
+    );
+    if (isProtectedHtml) {
+      const token =
+        req.cookies.get('access_token')?.value ??
+        req.cookies.get('refresh_token')?.value;
+      if (!token) {
+        const url = req.nextUrl.clone();
+        url.pathname = '/login';
+        url.searchParams.set('next', pathname);
+        return NextResponse.redirect(url, 302);
+      }
     }
-    // Token present — pass through; the client AuthGuard + API 401s
-    // handle the case where the token is stale/invalid.
   }
 
   if (!pathname.startsWith('/api')) {
@@ -79,7 +85,7 @@ export async function proxy(req: NextRequest) {
     return res;
   }
 
-  const limitResult = (await rateLimit(`api_global:${ip}`, 300)) as { limited: boolean };
+  const limitResult = (await rateLimit(req, { maxRequests: 300 })) as { limited: boolean };
   if (limitResult.limited) {
     const res = NextResponse.json(
       { success: false, error: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many requests. Please try again later.', requestId } },
@@ -110,5 +116,12 @@ export const middleware = proxy;
 export default proxy;
 
 export const config = {
+  // /api/* always (rate-limit + CSRF).
+  // Protected HTML role routes are only matched when GATE_ON_HTML_ROUTES=1,
+  // because the cookie-gate is opt-in — the primary login flow stores the
+  // JWT in sessionStorage, not a cookie, so enabling the gate by default
+  // would lock out client sessions and the operator kiosk that don't carry
+  // the cookie. When the flag is set, the operator adds the HTML prefixes
+  // to this list; see the gate comment above.
   matcher: ['/api/:path*'],
 };

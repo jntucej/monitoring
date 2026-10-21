@@ -43,6 +43,29 @@ html[data-theme="glass"] [data-home] {
   --bg-flat: rgba(255, 255, 255, 0.6);
 }
 
+/* ── glossy-blob gradient colours ─────────────────────────────────────── */
+/* The three drifting blobs paint radial gradients from these tokens. They
+   must be real colour values, not the `transparent` keyword, so every stop
+   fades to the SAME colour at 0 alpha (never transparent-black on dark
+   bases, which would muddy the blend). The old build referenced
+   --home-grad-a/b/c but never defined them, so the blobs painted with an
+   invalid colour and the glossy wash was effectively absent. */
+[data-home] {
+  --home-grad-a: 99, 102, 241;   /* indigo */
+  --home-grad-b: 14, 165, 233;   /* steel  */
+  --home-grad-c: 245, 158, 11;   /* amber  */
+}
+html[data-theme="light"] [data-home] {
+  --home-grad-a: 5, 150, 105;
+  --home-grad-b: 37, 99, 235;
+  --home-grad-c: 217, 119, 6;
+}
+html[data-theme="glass"] [data-home] {
+  --home-grad-a: 0, 114, 255;
+  --home-grad-b: 0, 198, 150;
+  --home-grad-c: 192, 132, 252;
+}
+
 /* ── gradient-headline tokens (used by .home-headline-gradient) ──────── */
 [data-home] {
   --home-head-a: var(--home-accent-indigo, #6366F1);
@@ -81,12 +104,12 @@ html[data-theme="glass"] [data-home] {
 /* ── Layer 1: three drifting blobs ───────────────────────────────────── */
 [data-home] .home-blob {
   position: absolute;
-  width: 140vmax;
-  height: 140vmax;
+  width: 90vmax;
+  height: 90vmax;
   border-radius: 50%;
   will-change: transform;
   z-index: 1;
-  filter: blur(60px);
+  filter: blur(32px);
 }
 [data-home] .home-blob-a {
   top: -20%;
@@ -152,9 +175,11 @@ html[data-theme="glass"] [data-home] {
 }
 
 /* ── tier overrides ───────────────────────────────────────────────────── */
+/* Low tier: the glossy blobs are the main paint cost (three large blurred,
+   continuously-transformed layers). On weak hardware we drop them entirely
+   so the page stays responsive; the flat base + accent wash remains. */
 [data-home-tier="low"] .home-blob {
-  animation: none;
-  filter: none;
+  display: none;
 }
 [data-home-tier="low"] .home-bg-base {
   background: var(--bg-flat, #0f172a);
@@ -162,6 +187,8 @@ html[data-theme="glass"] [data-home] {
 [data-home-tier="low"] .home-hero-recede {
   transform: none !important;
 }
+/* Mid tier: keep the blobs but slow the drift so it reads as ambient, not
+   busy; the blur is already reduced above. */
 [data-home-tier="mid"] .home-blob-a {
   animation-duration: 36s;
 }

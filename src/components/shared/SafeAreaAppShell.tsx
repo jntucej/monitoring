@@ -38,6 +38,12 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
     }
   }, [performanceTier]);
 
+  // The home page (/) is a public marketing surface: it streams in fast with a
+  // lean SSR shell and does not need the auth-hydration gate. Skip the global
+  // AppLoadingScreen there so opening the portal lands on content, not on a
+  // full-screen "Loading…" overlay. Guarded/role consoles keep the screen.
+  const isHome = pathname === "/" || pathname === "";
+
   // Standalone console routes own their full-screen shell (their own sidebar +
   // header via the route layout). The shared nav chrome (global Sidebar +
   // DynamicHeader + bottom tabs) is hidden for these so it never double-renders
@@ -66,8 +72,9 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
 
   return (
     <div className="relative min-h-[100dvh] flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] antialiased selection:bg-[var(--action-primary)] selection:text-white pt-safe pb-safe pl-safe pr-safe">
-      {/* Global loading overlay — covers the entire shell until auth hydrates */}
-      <AppLoadingScreen />
+      {/* Global loading overlay — covers the entire shell until auth hydrates.
+          Suppressed on the home page so / lands on content, not a loader. */}
+      {!isHome && <AppLoadingScreen />}
       {/* Ambient Desktop Mouse-Parallax Orbs Layer */}
       <FloatingOrbs />
 

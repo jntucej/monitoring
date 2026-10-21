@@ -41,6 +41,7 @@ services:
       - gate-net
 
   web:
+    image: monitoring-web:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -89,6 +90,7 @@ services:
       - gate-net
 
   worker:
+    image: monitoring-worker:latest
     build:
       context: .
       dockerfile: Dockerfile

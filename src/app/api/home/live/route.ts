@@ -1,197 +1,50 @@
 import { NextResponse } from "next/server";
-import { query } from "@/lib/postgres";
+import { poolQuery } from "@/lib/postgres";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
-interface LivePayload {
-  stats: {
-    requestsToday: number;
-    approvedToday: number;
-    scansToday: number;
-    onCampusNow: number;
-  };
-  requests: Array<{ id: string; reason: string; status: string; time: string }>;
-  scans: Array<{ id: string; gate: string; direction: string; status: string; time: string }>;
-  modules: Array<{ id: string; label: string; active: boolean; count: number }>;
-  updatedAt: string;
-}
-
-const FALLBACK: LivePayload = {
-  stats: { requestsToday: 47, approvedToday: 38, scansToday: 847, onCampusNow: 2847 },
-  requests: [
-    { id: "PS-411", reason: "Home out", status: "pending", time: "2m ago" },
-    { id: "PS-410", reason: "Medical", status: "approved", time: "12m ago" },
-    { id: "PS-409", reason: "Weekend out", status: "approved", time: "34m ago" },
-  ],
-  scans: [
-    { id: "SC-841", gate: "Main Gate", direction: "IN", status: "ok", time: "just now" },
-    { id: "SC-840", gate: "Hostel 1", direction: "IN", status: "ok", time: "4m ago" },
-    { id: "SC-839", gate: "Main Gate", direction: "OUT", status: "ok", time: "15m ago" },
-  ],
-  modules: [
-    { id: "gate", label: "Gate", active: true, count: 847 },
-    { id: "hostel", label: "Hostel", active: true, count: 1820 },
-    { id: "mess", label: "Mess", active: true, count: 940 },
-    { id: "exam", label: "Exam", active: true, count: 320 },
-    { id: "labs", label: "Labs", active: true, count: 410 },
-    { id: "visitors", label: "Visitors", active: true, count: 42 },
-    { id: "events", label: "Events", active: true, count: 120 },
-    { id: "users", label: "Users", active: true, count: 3100 },
-  ],
-  updatedAt: new Date().toISOString(),
-};
-
-function rel(ts: unknown): string {
-  if (!ts) return "—";
-  const d = typeof ts === "string" ? new Date(ts) : (ts as Date);
-  const s = Math.floor((Date.now() - d.getTime()) / 1000);
-  if (s < 60) return `${s}s ago`;
-  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
-  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
-  return `${Math.floor(s / 86400)}d ago`;
-}
-
-function shortId(prefix: string, full: string): string {
-  const tail = String(full).replace(/[^0-9]/g, "").slice(-3) || "000";
-  return `${prefix}-${tail}`;
-}
-
-async function safe<T>(fn: () => Promise<T>, def: T): Promise<T> {
-  try {
-    return await fn();
-  } catch {
-    return def;
-  }
-}
-
+/**
+ * /api/home/live — public live counters for the campus portal home page.
+ *
+ * Returns ONLY the four aggregate counters the home page displays
+ * (requests/approved/scans today + on-campus now). The previous shape
+ * leaked `requests` (with reason + ticket id), `scans` (with gate name +
+ * direction + scan id), and `modules` (with user counts) — an operator
+ * could enumerate who's on campus, which gates are active, and request
+ * reasons from an anonymous curl. The home page's `useLiveData` hook
+ * reads only `stats`; the `LiveGateFeed` centrepiece uses labeled sample
+ * rows, so the richer payload was never consumed by the public UI.
+ */
 export async function GET() {
-  const [reqRes, appRes, scnRes, onRes, reqsRes, scnsRes, modRes] = await Promise.all([
-    safe(() =>
-      query<{ c: string }>(
-        `SELECT COUNT(*)::text AS c FROM permissions WHERE created_at::date = CURRENT_DATE`
-      ),
-      null
-    ),
-    safe(() =>
-      query<{ c: string }>(
-        `SELECT COUNT(*)::text AS c FROM permissions WHERE status='APPROVED' AND updated_at::date = CURRENT_DATE`
-      ),
-      null
-    ),
-    safe(() =>
-      query<{ c: string }>(
-        `SELECT COUNT(*)::text AS c FROM movement_logs WHERE timestamp::date = CURRENT_DATE`
-      ),
-      null
-    ),
-    safe(() =>
-      query<{ c: string }>(
-        `SELECT COUNT(*)::text AS c FROM campus_occupancy WHERE current_status='IN'`
-      ),
-      null
-    ),
-    safe(
-      () =>
-        query<{
-          ticket_number: string;
-          workflow_type: string;
-          status: string;
-          created_at: string;
-          reason: string | null;
-        }>(
-          `SELECT ticket_number, workflow_type, status, created_at, reason 
-           FROM permissions ORDER BY created_at DESC LIMIT 6`
-        ),
-      null
-    ),
-    safe(
-      () =>
-        query<{
-          id: string;
-          gate_name: string | null;
-          direction: string;
-          timestamp: string;
-          is_correction: boolean | null;
-        }>(
-          `SELECT id, gate_name, direction, timestamp, is_correction 
-           FROM movement_logs ORDER BY timestamp DESC LIMIT 8`
-        ),
-      null
-    ),
-    safe(
-      () =>
-        query<{ module: string; c: string }>(
-          `SELECT 'students' AS module, COUNT(*)::text AS c FROM users WHERE role='student' AND status='ACTIVE'
-           UNION ALL
-           SELECT 'hostellers', COUNT(*)::text FROM student_details WHERE hostel_block IS NOT NULL
-           UNION ALL
-           SELECT 'visitors', COUNT(*)::text FROM visitor_logs WHERE status='active'
-           UNION ALL
-           SELECT 'gates', COUNT(*)::text FROM gates WHERE is_active=true
-           UNION ALL
-           SELECT 'events', COUNT(*)::text FROM campus_events WHERE is_published=true`
-        ),
-      null
-    ),
-  ]);
-
-  const dbConnected = Boolean(reqRes && reqRes.rows);
-  if (!dbConnected) {
-    return NextResponse.json(FALLBACK, {
-      headers: { "Cache-Control": "public, s-maxage=20, stale-while-revalidate=60" },
-    });
-  }
-
-  const counts = Object.fromEntries(
-    (modRes?.rows ?? []).map((r: any) => [r.module, Number(r.c)])
-  );
-
-  const payload: LivePayload = {
-    stats: {
-      requestsToday: Number(reqRes?.rows?.[0]?.c ?? FALLBACK.stats.requestsToday),
-      approvedToday: Number(appRes?.rows?.[0]?.c ?? FALLBACK.stats.approvedToday),
-      scansToday: Number(scnRes?.rows?.[0]?.c ?? FALLBACK.stats.scansToday),
-      onCampusNow: Number(onRes?.rows?.[0]?.c ?? FALLBACK.stats.onCampusNow),
+  const { rows } = await poolQuery<{
+    requests_today: string;
+    approved_today: string;
+    scans_today: string;
+    on_campus_now: string;
+  }>(`
+    WITH today AS (
+      SELECT date_trunc('day', now() AT TIME ZONE 'Asia/Kolkata')
+             AT TIME ZONE 'Asia/Kolkata' AS d
+    )
+    SELECT
+      (SELECT count(*) FROM public.permissions p, today t
+        WHERE p.created_at >= t.d)::text AS requests_today,
+      (SELECT count(*) FROM public.permissions p, today t
+        WHERE p.status = 'APPROVED' AND p.updated_at >= t.d)::text AS approved_today,
+      (SELECT count(*) FROM public.movement_logs m, today t
+        WHERE m.timestamp >= t.d)::text AS scans_today,
+      (SELECT count(*) FROM public.campus_occupancy
+        WHERE current_status = 'IN')::text AS on_campus_now
+  `);
+  const r = rows[0];
+  return NextResponse.json(
+    {
+      stats: {
+        requestsToday: Number(r.requests_today),
+        approvedToday: Number(r.approved_today),
+        scansToday: Number(r.scans_today),
+        onCampusNow: Number(r.on_campus_now),
+      },
+      updatedAt: new Date().toISOString(),
     },
-    requests:
-      (reqsRes?.rows ?? []).length > 0
-        ? (reqsRes?.rows ?? []).map((r: any) => ({
-            id: shortId("PS", r.ticket_number ?? ""),
-            reason: r.reason || r.workflow_type || "request",
-            status:
-              r.status === "APPROVED"
-                ? "approved"
-                : r.status === "REJECTED"
-                ? "rejected"
-                : "pending",
-            time: rel(r.created_at),
-          }))
-        : FALLBACK.requests,
-    scans:
-      (scnsRes?.rows ?? []).length > 0
-        ? (scnsRes?.rows ?? []).map((r: any) => ({
-            id: shortId("SC", r.id ?? ""),
-            gate: r.gate_name || "—",
-            direction: r.direction || "IN",
-            status: r.is_correction ? "flagged" : "ok",
-            time: rel(r.timestamp),
-          }))
-        : FALLBACK.scans,
-    modules: [
-      { id: "gate", label: "Gate", active: true, count: Number(scnRes?.rows?.[0]?.c ?? 847) },
-      { id: "hostel", label: "Hostel", active: true, count: counts.hostellers ?? 1820 },
-      { id: "mess", label: "Mess", active: true, count: 940 },
-      { id: "exam", label: "Exam", active: true, count: 320 },
-      { id: "labs", label: "Labs", active: true, count: 410 },
-      { id: "visitors", label: "Visitors", active: true, count: counts.visitors ?? 42 },
-      { id: "events", label: "Events", active: true, count: counts.events ?? 120 },
-      { id: "users", label: "Users", active: true, count: counts.students ?? 3100 },
-    ],
-    updatedAt: new Date().toISOString(),
-  };
-
-  return NextResponse.json(payload, {
-    headers: { "Cache-Control": "public, s-maxage=20, stale-while-revalidate=60" },
-  });
+    { headers: { "cache-control": "public, max-age=15, s-maxage=15" } },
+  );
 }

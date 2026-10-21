@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 /**
  * Root loading boundary.
@@ -10,14 +11,21 @@ import { useEffect, useState } from "react";
  * hydration, and with no `onSkip` it could not be dismissed — so users saw a
  * "stuck" loading page. This replaces it with a small centered spinner that
  * self-dismisses shortly after mount; the real content streams in underneath.
+ *
+ * The home page (/) opens fast with a lean SSR shell, so it shows NO loading
+ * boundary at all — the spinner is suppressed on `/`.
  */
 export default function RootLoading() {
+  const pathname = usePathname();
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setDismissed(true), 300);
     return () => clearTimeout(t);
   }, []);
+
+  // Home page: no loading overlay.
+  if (pathname === "/" || pathname === "") return null;
 
   if (dismissed) return null;
 
