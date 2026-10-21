@@ -25,8 +25,8 @@ const nextConfig = {
     return [
       {
         source: "/:path*",
-        has: [{ type: "host", value: "www.monitor.cej.in" }],
-        destination: "https://monitor.cej.in/:path*",
+        has: [{ type: "host", value: "www.monitor.ucej.in" }],
+        destination: "https://monitor.ucej.in/:path*",
         permanent: true,
       },
       {

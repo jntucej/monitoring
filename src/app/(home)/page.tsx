@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import {
   ShieldCheck,
   GraduationCap,
@@ -43,7 +44,11 @@ export const metadata: Metadata = buildPageMetadata({
   path: "/",
 });
 
-export const dynamic = "force-dynamic";
+// The auth-redirect check is wrapped in Suspense (see AuthRedirect below), so
+// the SEO content can be statically cached and served instantly to anonymous
+// visitors. `auto` lets Next cache the static shell while only the small
+// auth-check Suspense boundary stays dynamic.
+export const dynamic = "auto";
 
 /* ── verified role list ─────────────────────────────────────────── */
 const ROLES = [
@@ -205,12 +210,22 @@ async function resolveAuthRedirect(): Promise<string | null> {
 }
 
 /* ── page ───────────────────────────────────────────────────────── */
-export default async function HomePage() {
+// The auth-redirect check is wrapped in Suspense so the SEO content below
+// can be statically cached and served instantly to anonymous visitors (the
+// majority + the SEO-critical traffic). Only the small auth-check portion
+// runs dynamically, so the page no longer blocks first paint.
+async function AuthRedirect() {
   const redirectTo = await resolveAuthRedirect();
   if (redirectTo) redirect(redirectTo);
+  return null;
+}
 
+export default async function HomePage() {
   return (
     <div data-home className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)]">
+      <Suspense fallback={null}>
+        <AuthRedirect />
+      </Suspense>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }}

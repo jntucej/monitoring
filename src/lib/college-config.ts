@@ -44,8 +44,8 @@ export const COLLEGE: CollegeConfig = {
   email: "cej@jntuh.ac.in",
   emailAlt: "principal@jntuhcej.ac.in",
   phone: "6302503548",
-  domain: "monitor.cej.in",
-  baseUrl: "https://monitor.cej.in",
+  domain: "monitor.ucej.in",
+  baseUrl: "https://monitor.ucej.in",
   logoPath: "/logo.png",
   establishedYear: "2007",
   accreditation:
