@@ -57,11 +57,12 @@ async function handleLoginInner(req: NextRequest) {
     const identifier = rawIdentifier.trim();
 
     const userRes = await query(
-      `SELECT * FROM users 
-       WHERE (
-         LOWER(email) = LOWER($1) 
-         OR UPPER(unique_id) = UPPER($1) 
-         OR LOWER(login_identifier) = LOWER($1) 
+      `SELECT * FROM users
+       WHERE deleted_at IS NULL
+         AND (
+         LOWER(email) = LOWER($1)
+         OR UPPER(unique_id) = UPPER($1)
+         OR LOWER(login_identifier) = LOWER($1)
          OR LOWER(handle) = LOWER($1)
        )
        LIMIT 1`,

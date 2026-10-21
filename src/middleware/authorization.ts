@@ -208,6 +208,7 @@ export function withAuthorization(
 
       if (error instanceof Error) {
         if (error.message.includes('UNAUTHORIZED') || error.message.includes('SESSION_EXPIRED') || error.message.includes('invalid_token') || error.message.includes('expired') || error.message.includes('not authenticated')) {
+          console.error('[AUTH-MW] 401-class error:', error.message, '\n  at:', error.stack?.split('\n').slice(1, 5).join('\n  '));
           return NextResponse.json(
             { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication failed. Please sign in again.' } },
             { status: 401 }

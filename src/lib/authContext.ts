@@ -196,6 +196,7 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
   }
 
   if (!userId) {
+    console.error('[AUTH] createAuthContext: JWT verify failed, token=', token?.slice(0, 40));
     throw new Error('UNAUTHORIZED: Invalid or expired token');
   }
 
@@ -205,6 +206,7 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
   // is caught within at most USER_ROW_TTL_MS (30 s).
   const profile = await getUserRowCached(userId);
   if (!profile) {
+    console.error('[AUTH] createAuthContext: user profile not found for userId=', userId);
     throw new Error('UNAUTHORIZED: User profile not found');
   }
 

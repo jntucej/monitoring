@@ -106,6 +106,7 @@ export async function issueToken(args: {
   if (row) {
     if (row.used_at) throw new Error("TOKEN_ALREADY_USED");
     if (row.revoked_at) throw new Error("TOKEN_REVOKED");
+    if (new Date(row.expires_at).getTime() < Date.now()) throw new Error("TOKEN_EXPIRED");
     // Return existing QR (manual code is unrecoverable — it's hashed).
     const payload: TokenPayload = {
       v: 1, jti: row.jti, sub: args.userId, evt: args.eventId,

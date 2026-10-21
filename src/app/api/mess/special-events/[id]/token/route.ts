@@ -89,6 +89,8 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
       return fail("CONFLICT", "Your token has already been used", 409);
     if (msg === "TOKEN_REVOKED")
       return fail("CONFLICT", "Your token was revoked. Ask the mess in-charge to re-issue.", 409);
+    if (msg === "TOKEN_EXPIRED")
+      return fail("CONFLICT", "Your token has expired. The serving window has ended.", 409);
     return fail("INTERNAL", "Could not issue token", 500);
   }
 
