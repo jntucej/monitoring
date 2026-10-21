@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
+import { NOINDEX_METADATA } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Access denied · JNTUHCEJ",
-  robots: { index: false, follow: false },
-};
+export const metadata: Metadata = NOINDEX_METADATA;
 
 export default function ForbiddenLayout({
   children,

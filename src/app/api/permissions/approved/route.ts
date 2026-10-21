@@ -105,7 +105,10 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   }
 }
 
-export const GET = withRateLimit(handleGet, {
-  keyPrefix: "permissions_approved_get",
-  maxRequests: 100,
-});
+export const GET = withRateLimit(
+  withAuthorization(handleGet),
+  {
+    keyPrefix: "permissions_approved_get",
+    maxRequests: 100,
+  },
+);

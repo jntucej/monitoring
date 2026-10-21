@@ -33,7 +33,7 @@
   "dependencies": {
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.2",
-    "@react-three/postprocessing": "^3.2.0",
+    "@react-three/postprocessing": "^3.2.1",
     "@remotion/player": "^4.0.518",
     "@simplewebauthn/browser": "^13.3.0",
     "@simplewebauthn/server": "^13.3.3",

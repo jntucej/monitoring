@@ -1,16 +1,12 @@
 import type { Metadata } from "next";
+import { NOINDEX_METADATA } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Support · JNTUHCEJ",
-  description:
-    "File a support ticket for the JNTUHCEJ Gate Monitoring System. IT helpdesk for account, access, and technical issues.",
-  robots: { index: false, follow: false },
-};
+export const metadata: Metadata = NOINDEX_METADATA;
 
 export default function SupportLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return children;
 }
