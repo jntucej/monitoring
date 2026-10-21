@@ -106,7 +106,7 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
             <AnimatePresence mode="wait">
               <motion.div
                 key={pathname || "page"}
-                initial={{ opacity: 0, y: 4 }}
+                initial={isHome ? { opacity: 1, y: 0 } : { opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.12, ease: "easeOut" }}

@@ -112,20 +112,38 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             return { success: false, error: body.error?.message, code: body.error?.code };
           }
           const d = body.data ?? {};
-          if (d.mfaRequired) {
-            set({ loading: false, mfaPending: true, mfaChallenge: d.mfaChallenge });
-            return { success: true, mfaRequired: true, mfaChallenge: d.mfaChallenge };
+          // The /api/auth/login route returns data.token / data.refreshToken
+          // (and data.mfa_challenge / data.mfa_enrollment_required in snake
+          // case). Normalise both snake_case and camelCase here so the
+          // login never silently drops the token just because the field
+          // name doesn't match.
+          const mfaRequired = Boolean(d.mfaRequired || d.mfa_required);
+          const mfaEnrollRequired = Boolean(d.mfaEnrollmentRequired || d.mfa_enrollment_required);
+          const mfaChallenge = d.mfaChallenge ?? d.mfa_challenge;
+          const enrollToken = d.enrollToken ?? d.enroll_token;
+          const token = d.token ?? d.accessToken;
+          const refreshToken = d.refreshToken ?? d.refresh_token;
+          if (mfaRequired) {
+            set({ loading: false, mfaPending: true, mfaChallenge });
+            return { success: true, mfaRequired: true, mfaChallenge };
           }
-          if (d.mfaEnrollmentRequired) {
-            set({ loading: false, enrollToken: d.enrollToken });
-            return { success: true, mfaEnrollmentRequired: true, enrollToken: d.enrollToken };
+          if (mfaEnrollRequired) {
+            set({ loading: false, enrollToken });
+            return { success: true, mfaEnrollmentRequired: true, enrollToken };
           }
-          tokenStorage.set({ token: d.accessToken, refreshToken: d.refreshToken });
+          if (!token) {
+            // Server said success:true but gave no token — treat as a failure
+            // rather than setting the auth store to a null token (which is
+            // what produced the "logged in but redirected to /login" loop).
+            set({ loading: false });
+            return { success: false, code: "NO_TOKEN", error: "Login succeeded but no token was returned." };
+          }
+          tokenStorage.set({ token, refreshToken: refreshToken ?? null });
           set({
-            token: d.accessToken,
-            refreshToken: d.refreshToken,
+            token,
+            refreshToken,
             user: toUser(d.user),
-            role: d.user.role,
+            role: d.user?.role,
             authenticated: true,
             loading: false,
             mfaPending: false,

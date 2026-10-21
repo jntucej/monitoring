@@ -454,11 +454,10 @@ export function GlassProvider({
       dismissAlert,
       // setDisplayMode / toggleDisplayMode / setIsLiveStream / toggleLiveStream
       // / setActiveGate / setGateTraffic / setPrefersReducedMotion /
-      // setPerformanceTier / setCardsState are defined inline in the provider
-      // (not useCallback), so they are new each render; that is fine because
-      // the memo re-runs on the same deps as before, which is what prevents
-      // the full-tree re-render. Consumers that need those setters are
-      // calling the context on the same provider-render that re-created them.
+      // All exposed setters (setDisplayMode, toggleDisplayMode, setActiveGate,
+      // setGateTraffic, setCards) are now useCallback-wrapped so they are
+      // stable across provider renders, which keeps the context value memo
+      // from re-computing on every parent render.
     ],
   );
 
