@@ -97,10 +97,21 @@ async function handleGet(req: NextRequest, context: { auth: any }) {
       const emp = u.employee_details || {};
       const rawDept = emp.department_id || u.department_id || "CSE";
       const department = deptCodeToShortName[rawDept] || rawDept || "CSE";
+      // Helper: movement_logs.timestamp is a timestamptz column. Supabase
+      // returns it as a Date (not a string), so .startsWith throws TypeError
+      // and the whole route 500s. Normalise to 'YYYY-MM-DD' for day-filtering.
+      const dayKey = (t: unknown) => {
+        const d = new Date(t as string | number | Date);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const dd = String(d.getDate()).padStart(2, "0");
+        return `${y}-${m}-${dd}`;
+      };
       const uLogs = logsByUser[u.id] || [];
 
       // Filter today's movement logs
-      const todayLogs = uLogs.filter((l: any) => l.timestamp.startsWith(todayStr));
+      const todayKey = dayKey(now);
+      const todayLogs = uLogs.filter((l: any) => dayKey(l.timestamp) === todayKey);
       const firstInLog = todayLogs.find((l) => l.direction === "IN");
       const lastOutLog = [...todayLogs].reverse().find((l) => l.direction === "OUT");
       const latestLogToday = todayLogs[todayLogs.length - 1];
@@ -173,7 +184,8 @@ async function handleGet(req: NextRequest, context: { auth: any }) {
             });
           } else {
             // Weekday: check real logs for this date
-            const dateLogs = uLogs.filter((l) => l.timestamp.startsWith(dateStr));
+            const dateKey = dayKey(d);
+            const dateLogs = uLogs.filter((l) => dayKey((l as any).timestamp) === dateKey);
             if (dateLogs.length > 0) {
               presentDays++;
               const dayFirstIn = dateLogs.find((l) => l.direction === "IN");

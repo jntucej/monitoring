@@ -42,7 +42,17 @@ function resolveEnforceMfa(options: AuthorizationOptions): boolean {
 }
 
 function bearer(req: NextRequest): string {
-  return req.headers.get("authorization") || "";
+  // The Authorization header is "Bearer <jwt>" (or, from some clients, a raw
+  // JWT). Strip the scheme prefix so jwtVerify gets a clean token. Without
+  // this every authenticated request 401s ("JWT verify failed, token= Bearer
+  // eyJ...") and every role UI bounces back to /login.
+  const raw = (req.headers.get("authorization") || "").trim();
+  const m = raw.match(/^Bearer\s+(.+)$/i);
+  if (m) return m[1].trim();
+  // Fall back to the access_token cookie (set by /api/auth/login) for
+  // clients that carry the httpOnly cookie but no Authorization header.
+  const cookie = req.cookies.get("access_token")?.value;
+  return cookie || raw;
 }
 
 async function handleAuthError(err: unknown): Promise<NextResponse> {
@@ -111,12 +121,30 @@ export function withAuthorization(
             throw new AuthError("MFA_REQUIRED", "MFA required for this action", 403);
           }
         }
-        const sig = signTrustedHeaders({
-          userId: auth.userId,
-          role: auth.role,
-          email: auth.email,
-        });
+        // Audit issue #2: routes read x-user-id / x-user-role / x-user-email
+        // and TRUST them. That is only safe if withAuthorization OVERWRITES
+        // those headers from the verified JWT (not from the client) and signs
+        // them. Set the full trusted-identity set here so any route that
+        // calls requireTrustedHeaders(req) passes the HMAC check.
+        const ts = Date.now();
+        const sig = signTrustedHeaders(
+          {
+            userId: auth.userId,
+            role: auth.role,
+            email: auth.email,
+          },
+          ts,
+        );
         const headers = new Headers(req.headers);
+        // The identity values are authoritative from the verified JWT — any
+        // client-supplied versions of these headers are replaced.
+        headers.set("x-user-id", auth.userId);
+        headers.set("x-user-role", auth.role);
+        if (auth.email) headers.set("x-user-email", auth.email);
+        else headers.delete("x-user-email");
+        headers.set("x-mw-signature", sig);
+        headers.set("x-mw-timestamp", String(ts));
+        // Legacy header some routes still read — keep it in sync.
         headers.set("x-auth-signature", sig);
         const proxied = new NextRequest(req.url, {
           method: req.method,
