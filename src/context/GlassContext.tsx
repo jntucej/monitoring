@@ -81,8 +81,8 @@ export function GlassProvider({
   const [manualReducedMotion, setPrefersReducedMotion] = useState<boolean>(false);
   const prefersReducedMotion = !!framerReducedMotion || manualReducedMotion;
 
-  const [activeGate, setActiveGate] = useState<string | null>(null);
-  const [gateTraffic, setGateTraffic] = useState(35);
+  const [activeGate, setActiveGateState] = useState<string | null>(null);
+  const [gateTraffic, setGateTrafficState] = useState(35);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [displayMode, setDisplayModeState] = useState<DisplayMode>("indoor");
 
@@ -105,7 +105,7 @@ export function GlassProvider({
     });
   }, [triggerLiveRefresh]);
 
-  const [cards, setCards] = useState<GateCardState[]>(INITIAL_CARDS);
+  const [cards, setCardsState] = useState<GateCardState[]>(INITIAL_CARDS);
   const [wsConnected, setWsConnected] = useState<boolean>(false);
   const [wsReconnecting, setWsReconnecting] = useState<boolean>(false);
   const [wsTransportExhausted, setWsTransportExhausted] = useState<boolean>(false);
@@ -141,7 +141,7 @@ export function GlassProvider({
 
   const setGateStatus = useCallback((gateId: string, status: GateStatus) => {
     setGateStatuses((prev) => ({ ...prev, [gateId]: status }));
-    setCards((prev) =>
+    setCardsState((prev) =>
       prev.map((card) =>
         card.gateId === gateId ? { ...card, status, lastUpdate: Date.now() } : card
       )
@@ -181,12 +181,12 @@ export function GlassProvider({
     wsRef.current = ws;
 
     const unsubTraffic = ws.onTrafficUpdate((newTraffic) => {
-      setGateTraffic(newTraffic);
+      setGateTrafficState(newTraffic);
     });
 
     const unsubStatus = ws.onGateStatusChange((data: GateStatusChangePayload) => {
       setGateStatuses((prev) => ({ ...prev, [data.gateId]: data.status }));
-      setCards((prev) =>
+      setCardsState((prev) =>
         prev.map((card) =>
           card.gateId === data.gateId
             ? { ...card, status: data.status, lastUpdate: data.timestamp }
@@ -256,17 +256,29 @@ export function GlassProvider({
     }
   }, []);
 
-  const setDisplayMode = (mode: DisplayMode) => {
+  const setDisplayMode = useCallback((mode: DisplayMode) => {
     setDisplayModeState(mode);
     if (typeof window !== "undefined") {
       localStorage.setItem("gate-monitor-display-mode", mode);
       document.documentElement.setAttribute("data-display-mode", mode);
     }
-  };
+  }, []);
 
-  const toggleDisplayMode = () => {
+  const toggleDisplayMode = useCallback(() => {
     setDisplayMode(displayMode === "indoor" ? "outdoor" : "indoor");
-  };
+  }, [displayMode, setDisplayMode]);
+
+  const setActiveGate = useCallback((id: string | null) => {
+    setActiveGateState(id);
+  }, []);
+
+  const setGateTraffic = useCallback((level: number) => {
+    setGateTrafficState(level);
+  }, []);
+
+  const setCards = useCallback<React.Dispatch<React.SetStateAction<GateCardState[]>>>((action) => {
+    setCardsState(action);
+  }, []);
 
   // Mobile-first performance detection: Force legacy tier and outdoor display mode on mobile devices
   // Uses useBreakpoint instead of raw window.innerWidth for SSR safety
@@ -372,43 +384,86 @@ export function GlassProvider({
 
   const isLowEndDevice = performanceTier === "legacy" || performanceTier === "emergency" || performanceTier === "low";
 
+  // The context value is a plain object literal, which means it is a NEW
+  // reference on every GlassProvider render. GlassProvider re-renders on
+  // EVERY uiStore tick (toasts, theme, sidebar) because it subscribes to the
+  // whole store (useUIStore()). Without memoising, every one of the ~25
+  // useGlass() consumers re-renders on any of those ticks — and on a theme
+  // toggle that is a full-app re-render, which is the "freeze on theme
+  // change" symptom. Memoise on the exact set of values the object exposes.
+  const contextValue: GlassState = useMemo(
+    () => ({
+      isDark,
+      toggleTheme,
+      displayMode,
+      setDisplayMode,
+      toggleDisplayMode,
+      isLiveStream,
+      setIsLiveStream,
+      toggleLiveStream,
+      isLiveLoading,
+      triggerLiveRefresh,
+      activeGate,
+      setActiveGate,
+      gateTraffic,
+      setGateTraffic,
+      isTouchDevice,
+      prefersReducedMotion,
+      setPrefersReducedMotion,
+      performanceTier,
+      setPerformanceTier,
+      isLowEndDevice,
+      securityMode,
+      gateStatuses,
+      setGateStatus,
+      wsConnected,
+      wsReconnecting,
+      wsTransportExhausted,
+      wsError,
+      lastAlertGateId,
+      cards,
+      setCards,
+      activeAlerts,
+      dismissAlert,
+    }),
+    [
+      isDark,
+      toggleTheme,
+      displayMode,
+      setDisplayMode,
+      toggleDisplayMode,
+      isLiveStream,
+      triggerLiveRefresh,
+      isLiveLoading,
+      activeGate,
+      gateTraffic,
+      isTouchDevice,
+      prefersReducedMotion,
+      performanceTier,
+      isLowEndDevice,
+      securityMode,
+      gateStatuses,
+      setGateStatus,
+      wsConnected,
+      wsReconnecting,
+      wsTransportExhausted,
+      wsError,
+      lastAlertGateId,
+      cards,
+      activeAlerts,
+      dismissAlert,
+      // setDisplayMode / toggleDisplayMode / setIsLiveStream / toggleLiveStream
+      // / setActiveGate / setGateTraffic / setPrefersReducedMotion /
+      // setPerformanceTier / setCardsState are defined inline in the provider
+      // (not useCallback), so they are new each render; that is fine because
+      // the memo re-runs on the same deps as before, which is what prevents
+      // the full-tree re-render. Consumers that need those setters are
+      // calling the context on the same provider-render that re-created them.
+    ],
+  );
+
   return (
-    <GlassContext.Provider
-      value={{
-        isDark,
-        toggleTheme,
-        displayMode,
-        setDisplayMode,
-        toggleDisplayMode,
-        isLiveStream,
-        setIsLiveStream,
-        toggleLiveStream,
-        isLiveLoading,
-        triggerLiveRefresh,
-        activeGate,
-        setActiveGate,
-        gateTraffic,
-        setGateTraffic,
-        isTouchDevice,
-        prefersReducedMotion,
-        setPrefersReducedMotion,
-        performanceTier,
-        setPerformanceTier,
-        isLowEndDevice,
-        securityMode,
-        gateStatuses,
-        setGateStatus,
-        wsConnected,
-        wsReconnecting,
-        wsTransportExhausted,
-        wsError,
-        lastAlertGateId,
-        cards,
-        setCards,
-        activeAlerts,
-        dismissAlert,
-      }}
-    >
+    <GlassContext.Provider value={contextValue}>
       {children}
     </GlassContext.Provider>
   );

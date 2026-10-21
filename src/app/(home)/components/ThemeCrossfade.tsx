@@ -63,6 +63,34 @@ export function ThemeCrossfade() {
         transition={{ duration: 0.4, ease: "easeOut" }}
         onAnimationComplete={() => setFadeFrom(null)}
       />
+      <CrossfadeTimeout fadeFrom={fadeFrom} onTimeout={() => setFadeFrom(null)} />
     </AnimatePresence>
   );
+}
+
+/**
+ * Safety net: even if the exit animation never calls onAnimationComplete
+ * (framer-motion re-render race, a superseded theme change, or a reduced-
+ * motion flip mid-fade), the overlay is force-cleared after 600ms so it
+ * can never sit on top of the page and make it look "frozen".
+ */
+function CrossfadeTimeout({
+  fadeFrom,
+  onTimeout,
+}: {
+  fadeFrom: ThemeName;
+  onTimeout: () => void;
+}) {
+  // Stable ref so the 600ms timer only re-arms when the fade actually
+  // changes (fadeFrom), not on every parent re-render from a new inline
+  // onTimeout closure.
+  const onTimeoutRef = useRef(onTimeout);
+  useEffect(() => {
+    onTimeoutRef.current = onTimeout;
+  });
+  useEffect(() => {
+    const t = setTimeout(() => onTimeoutRef.current(), 600);
+    return () => clearTimeout(t);
+  }, [fadeFrom]);
+  return null;
 }
