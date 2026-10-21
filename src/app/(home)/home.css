@@ -1,0 +1,260 @@
+/* ============================================================================
+   HOMEPAGE GLOSSY LAYER — every rule is scoped under [data-home] (or a
+   [data-home] descendant). Nothing here may leak to another page.
+
+   Contents:
+     - theme accent-rgb tokens (--accent-rgb / --accent-2-rgb / --accent-3-rgb
+       / --bg-flat) defined per-theme so the blobs + gradients adapt.
+     - three drifting blobs (A/B/C) — transform-only keyframes, fade to the
+       SAME colour at 0 alpha (never the `transparent` keyword).
+     - static film-grain overlay (high tier).
+     - tier overrides (low / mid) + interaction + reduced-motion.
+     - theme-cycler restyle on home.
+   ============================================================================ */
+
+/* ── accent-rgb tokens, keyed to the active theme ─────────────────────── */
+/* Default (dark) values so the blobs always have a valid colour even before
+   the theme attribute is applied. Each theme re-overrides below. */
+[data-home] {
+  --accent-rgb: 16, 185, 129;
+  --accent-2-rgb: 244, 63, 94;
+  --accent-3-rgb: 245, 158, 11;
+  --bg-flat: #0f172a;
+}
+
+html[data-theme="dark"] [data-home] {
+  --accent-rgb: 16, 185, 129;
+  --accent-2-rgb: 244, 63, 94;
+  --accent-3-rgb: 245, 158, 11;
+  --bg-flat: #0f172a;
+}
+
+html[data-theme="light"] [data-home] {
+  --accent-rgb: 5, 150, 105;
+  --accent-2-rgb: 37, 99, 235;
+  --accent-3-rgb: 217, 119, 6;
+  --bg-flat: #ffffff;
+}
+
+html[data-theme="glass"] [data-home] {
+  --accent-rgb: 0, 114, 255;
+  --accent-2-rgb: 0, 198, 150;
+  --accent-3-rgb: 192, 132, 252;
+  --bg-flat: rgba(255, 255, 255, 0.6);
+}
+
+/* ── gradient-headline tokens (used by .home-headline-gradient) ──────── */
+[data-home] {
+  --home-head-a: var(--home-accent-indigo, #6366F1);
+  --home-head-b: var(--home-accent-steel, #0EA5E9);
+  --home-head-c: var(--home-accent-amber, #F59E0B);
+}
+[data-home] .home-headline-gradient {
+  background-image: linear-gradient(
+    90deg,
+    var(--home-head-a),
+    var(--home-head-b),
+    var(--home-head-c),
+    var(--home-head-b),
+    var(--home-head-a)
+  );
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* ── Layer 0: solid base ──────────────────────────────────────────────── */
+[data-home] .home-bg {
+  /* fixed, inset 0, overflow hidden, -z-10 are applied in the component;
+     pin the z-index here so it stays behind the content reliably. */
+  z-index: -10;
+}
+[data-home] .home-bg-base {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-surface, #0f172a);
+  z-index: 0;
+}
+
+/* ── Layer 1: three drifting blobs ───────────────────────────────────── */
+[data-home] .home-blob {
+  position: absolute;
+  width: 140vmax;
+  height: 140vmax;
+  border-radius: 50%;
+  will-change: transform;
+  z-index: 1;
+  filter: blur(60px);
+}
+[data-home] .home-blob-a {
+  top: -20%;
+  left: -10%;
+  background: radial-gradient(
+    circle at 20% 30%,
+    rgba(var(--home-grad-a), 0.55) 0%,
+    rgba(var(--home-grad-a), 0) 70%
+  );
+  animation: home-blob-a 18s ease-in-out infinite;
+}
+[data-home] .home-blob-b {
+  top: -25%;
+  right: -15%;
+  background: radial-gradient(
+    circle at 80% 20%,
+    rgba(var(--home-grad-b), 0.45) 0%,
+    rgba(var(--home-grad-b), 0) 65%
+  );
+  animation: home-blob-b 24s ease-in-out infinite;
+}
+[data-home] .home-blob-c {
+  bottom: -30%;
+  left: 50%;
+  transform: translate3d(-50%, 0, 0);
+  background: radial-gradient(
+    circle at 50% 85%,
+    rgba(var(--home-grad-c), 0.4) 0%,
+    rgba(var(--home-grad-c), 0) 70%
+  );
+  animation: home-blob-c 30s ease-in-out infinite;
+}
+
+/* Each blob drifts on its OWN loop via translate3d() ONLY.
+   The gradient is never animated, and blur radius is never animated. */
+@keyframes home-blob-a {
+  0%   { transform: translate3d(0, 0, 0); }
+  33%  { transform: translate3d(6vmax, 4vmax, 0); }
+  66%  { transform: translate3d(-4vmax, 8vmax, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+@keyframes home-blob-b {
+  0%   { transform: translate3d(0, 0, 0); }
+  50%  { transform: translate3d(-8vmax, 6vmax, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+@keyframes home-blob-c {
+  0%   { transform: translate3d(-50%, 0, 0); }
+  50%  { transform: translate3d(calc(-50% - 6vmax), -5vmax, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+
+/* ── Layer 1.5: static film-grain overlay (high tier only) ───────────── */
+[data-home] .home-grain-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.03;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='hg'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23hg)'/></svg>");
+  /* deliberately NOT animated */
+}
+
+/* ── tier overrides ───────────────────────────────────────────────────── */
+[data-home-tier="low"] .home-blob {
+  animation: none;
+  filter: none;
+}
+[data-home-tier="low"] .home-bg-base {
+  background: var(--bg-flat, #0f172a);
+}
+[data-home-tier="low"] .home-hero-recede {
+  transform: none !important;
+}
+[data-home-tier="mid"] .home-blob-a {
+  animation-duration: 36s;
+}
+[data-home-tier="mid"] .home-blob-b {
+  animation-duration: 48s;
+}
+[data-home-tier="mid"] .home-blob-c {
+  animation-duration: 60s;
+}
+
+/* interaction: pause the drift while the user is scrolling / panning */
+[data-home-interacting="true"] .home-blob {
+  animation-play-state: paused;
+}
+
+/* reduced motion: freeze everything, flat background */
+@media (prefers-reduced-motion: reduce) {
+  [data-home] .home-blob {
+    animation: none;
+  }
+  [data-home] .home-grain-overlay {
+    display: none;
+  }
+}
+
+[data-home] .home-glass-pane {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(40px) saturate(140%);
+  -webkit-backdrop-filter: blur(40px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 60px -30px rgba(0, 0, 0, 0.6);
+}
+
+/* low tier: kill the blur, use a flat surface */
+[data-home-tier="low"] .home-glass-pane {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: var(--bg-flat, rgba(15, 23, 42, 0.9));
+}
+
+/* ── CTA full-glass panel (second glass surface, below the fold) ──────── */
+[data-home] .home-cta-glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(24px) saturate(125%);
+  -webkit-backdrop-filter: blur(24px) saturate(125%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 30px 80px -40px rgba(0, 0, 0, 0.7);
+}
+[data-home-tier="low"] .home-cta-glass {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: var(--bg-flat, rgba(15, 23, 42, 0.9));
+}
+
+/* ── Role cards need perspective for the tilt to read as 3D ──────────── */
+[data-home] .home-role-card {
+  perspective: 800px;
+}
+
+/* ── Footer link underline-draw (CSS only, no motion) ───────────────── */
+[data-home] .footer-link {
+  position: relative;
+  width: fit-content;
+}
+[data-home] .footer-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  height: 1px;
+  width: 100%;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 240ms ease;
+}
+[data-home] .footer-link:hover::after {
+  transform: scaleX(1);
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-home] .footer-link::after {
+    transition: none;
+  }
+}
+
+/* ── theme cycler: glossy restyle. The cycler is a sibling of [data-home]
+     (rendered globally in ClientProviders), so it is styled by its own
+     class, not by a [data-home] descendant selector. The component adds
+     `theme-cycler-pill` only on the home page. ─────────────────────── */
+.theme-cycler-pill {
+  background: var(--bg-flat, rgba(15, 23, 42, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.5);
+}

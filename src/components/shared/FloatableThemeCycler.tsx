@@ -12,9 +12,6 @@ export function FloatableThemeCycler() {
   const theme = useUIStore((s) => s.theme) as Theme;
   const setTheme = useUIStore((s) => s.setTheme);
 
-  // Hidden on the landing page — the cinematic home composition owns its own lighting.
-  if (pathname === "/") return null;
-
   const Icon = theme === "dark" ? Moon : theme === "light" ? Sun : Sparkles;
 
   const cycle = () => {
@@ -22,12 +19,21 @@ export function FloatableThemeCycler() {
     setTheme(THEMES[(idx + 1) % THEMES.length]);
   };
 
+  // On the home page the cycler sits inside the [data-home] root, so it
+  // gets the glossy pill restyle from home.css. Elsewhere it keeps the
+  // default floating-pill look.
+  const onHome = pathname === "/";
+
   return (
     <button
       type="button"
       onClick={cycle}
       aria-label={`Switch theme (current: ${theme})`}
-      className="fixed bottom-24 right-4 z-40 rounded-full border border-white/10 bg-black/40 backdrop-blur-xl p-3 text-white shadow-lg transition hover:bg-black/60"
+      className={
+        onHome
+          ? "theme-cycler-pill fixed bottom-24 right-4 z-40 rounded-full border border-white/10 p-3 text-white shadow-lg transition hover:bg-black/60"
+          : "fixed bottom-24 right-4 z-40 rounded-full border border-white/10 bg-black/40 backdrop-blur-xl p-3 text-white shadow-lg transition hover:bg-black/60"
+      }
     >
       <Icon className="h-5 w-5" />
     </button>
