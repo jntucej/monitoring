@@ -1,5 +1,15 @@
 import { NextResponse } from "next/server";
-import type { ChapterId } from "@/app/(home)/components/story";
+
+// The (home)/components/story tree was removed (dead code — nothing on the
+// live home page imported it). The chapter ids this endpoint returns are a
+// fixed set, so define the type locally instead of importing from a dead
+// module.
+export type ChapterId =
+  | "request"
+  | "approval"
+  | "scan"
+  | "shield"
+  | "wholecampus";
 
 export const runtime = "nodejs";
 export const revalidate = 3600;

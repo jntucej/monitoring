@@ -37,6 +37,8 @@ export function HomeRoot({ children }: { children: ReactNode }) {
   }, []);
 
   // Track any pointer press on the root; release on up / cancel / blur.
+  // Also reset on tab-hide so a drag that ends off-window can't leave the
+  // flag stuck "true" forever (which would pause every blob animation).
   const pressCount = useRef(0);
   useEffect(() => {
     const root = document;
@@ -51,15 +53,28 @@ export function HomeRoot({ children }: { children: ReactNode }) {
         setInteracting(false);
       }
     };
+    const reset = () => {
+      pressCount.current = 0;
+      setInteracting(false);
+    };
+    const onVisibility = () => {
+      if (document.hidden) reset();
+    };
     root.addEventListener("pointerdown", down);
     root.addEventListener("pointerup", up);
     root.addEventListener("pointercancel", up);
     root.addEventListener("blur", up);
+    window.addEventListener("visibilitychange", onVisibility);
+    // A drag that releases off the window never fires pointerup on document;
+    // reset so the flag can't strand the blob animations in "paused".
+    window.addEventListener("pointerup", up, true);
     return () => {
       root.removeEventListener("pointerdown", down);
       root.removeEventListener("pointerup", up);
       root.removeEventListener("pointercancel", up);
       root.removeEventListener("blur", up);
+      window.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pointerup", up, true);
     };
   }, []);
 

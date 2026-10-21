@@ -75,8 +75,10 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
       {/* Global loading overlay — covers the entire shell until auth hydrates.
           Suppressed on the home page so / lands on content, not a loader. */}
       {!isHome && <AppLoadingScreen />}
-      {/* Ambient Desktop Mouse-Parallax Orbs Layer */}
-      <FloatingOrbs />
+      {/* Ambient Desktop Mouse-Parallax Orbs — skipped on / (it is a
+          pointermove-driven decorative layer; the home page has its own
+          blob background and should not double-subscribe to pointermove). */}
+      {!isHome && <FloatingOrbs />}
 
       {/* Network & Offline Status Bar */}
       <NetworkStatusBanner />

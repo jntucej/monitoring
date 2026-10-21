@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { GlassProvider } from "@/context/GlassContext";
 import { NavigationProvider } from "@/context/NavigationContext";
@@ -38,6 +39,13 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
     if (!hasHydrated) setHasHydrated(true);
   }, [hasHydrated, setHasHydrated]);
 
+  const pathname = usePathname();
+  // The home page is a marketing surface: the floating bot widget and the
+  // floating theme cycler both add corner UI that overlaps the hero CTA and
+  // mount extra listeners/canvases for no functional benefit. Guarded/role
+  // consoles keep both.
+  const isMarketing = pathname === "/" || pathname === "";
+
   return (
     <ErrorBoundary>
       <Suspense fallback={<LoadingStates />}>
@@ -45,8 +53,8 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
         <NavigationProvider>
           <ToastProvider>
             <SafeAreaAppShell>{children}</SafeAreaAppShell>
-            <FloatingBot />
-            <FloatableThemeCycler />
+            {!isMarketing && <FloatingBot />}
+            {!isMarketing && <FloatableThemeCycler />}
           </ToastProvider>
         </NavigationProvider>
       </GlassProvider>

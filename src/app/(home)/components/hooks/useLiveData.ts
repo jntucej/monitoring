@@ -47,7 +47,7 @@ export function useLiveData(pollMs = 25_000): LivePayload | null {
 
   useEffect(() => {
     let cancelled = false;
-    let timer: ReturnType<typeof setTimeout>;
+    let timer: ReturnType<typeof setTimeout> | null = null;
 
     if (cached) setData(cached);
     const sub = (d: LivePayload) => {
@@ -58,9 +58,24 @@ export function useLiveData(pollMs = 25_000): LivePayload | null {
     const tick = async () => {
       if (cancelled) return;
       const controller = new AbortController();
+      // Don't burn a DB round-trip while the tab is in the background —
+      // every hidden tab on the machine would otherwise hit /api/home/live
+      // on the same pollMs cadence. visibilitychange below wakes us up.
+      if (typeof document !== "undefined" && document.hidden) {
+        timer = setTimeout(tick, pollMs);
+        return;
+      }
       await runFetch(controller.signal);
       if (cancelled) return;
       timer = setTimeout(tick, pollMs);
+    };
+    const onVisibility = () => {
+      if (cancelled) return;
+      // Returning to the tab: refresh immediately instead of waiting out
+      // whatever remains of the current pollMs window.
+      if (timer) clearTimeout(timer);
+      timer = null;
+      tick();
     };
 
     if (!cached && !fetching) {
@@ -68,10 +83,12 @@ export function useLiveData(pollMs = 25_000): LivePayload | null {
     } else {
       timer = setTimeout(tick, pollMs);
     }
+    document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
       cancelled = true;
-      clearTimeout(timer);
+      if (timer) clearTimeout(timer);
+      document.removeEventListener("visibilitychange", onVisibility);
       subscribers.delete(sub);
     };
   }, [pollMs]);

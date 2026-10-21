@@ -84,6 +84,21 @@ export default async function RootLayout({
     >
       <head>
         <script
+          dangerouslySetInnerHTML={{
+            __html: `
+try {
+  var s = localStorage.getItem('gate-monitor-theme');
+  var t = s || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+  var d = document.documentElement;
+  d.setAttribute('data-theme', t);
+  d.classList.toggle('dark', t === 'dark');
+  d.classList.toggle('light', t === 'light');
+  d.classList.toggle('glass', t === 'glass');
+} catch (e) {}
+`,
+          }}
+        />
+        <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(organizationJsonLd()),
