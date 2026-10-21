@@ -13,7 +13,6 @@ DECLARE
   v_day int;
   v_count int;
 BEGIN
-  IF NOT EXISTS (SELECT 1 FROM public.sustainability_metrics LIMIT 1) THEN
     FOR v_day IN SELECT d.offset_days FROM generate_series(0, 30, 1) AS d(offset_days) LOOP
       v_count := (
         SELECT COUNT(*)
@@ -31,8 +30,11 @@ BEGIN
         CURRENT_DATE - v_day,
         v_count,
         v_count * 0.4
-      );
+      )
+      ON CONFLICT (metric_date) DO UPDATE
+        SET paperless_passes_count = EXCLUDED.paperless_passes_count,
+            carbon_saved_kg        = EXCLUDED.carbon_saved_kg,
+            updated_at             = NOW();
     END LOOP;
-  END IF;
 END
 $$;

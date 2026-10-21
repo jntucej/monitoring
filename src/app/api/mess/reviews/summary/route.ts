@@ -8,6 +8,10 @@ import type { AuthContext } from "@/lib/authContext";
 import { MEAL_TYPES, SATISFACTION_LEVELS, type MealType, type Satisfaction, satisfactionScore } from "@/lib/mess-reviews";
 
 const IN_CHARGE = new Set(["mess_incharge", "admin", "sysadmin"]);
+// R9: anonymity is enforced at the API layer. The mess-incharge dashboard keeps
+// identity hidden so negative feedback is more likely to be honest; only
+// sysadmin / principal retain the name for moderation.
+const IDENTITY_REVEAL = new Set(["sysadmin", "principal"]);
 
 async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   if (!IN_CHARGE.has(auth.role)) return fail("FORBIDDEN", "Not allowed", 403);
@@ -61,11 +65,22 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
        FROM public.mess_meal_reviews r
        JOIN public.users u ON u.id = r.user_id
       WHERE r.comment IS NOT NULL AND r.comment <> ''
+        AND r.deleted_at IS NULL
         AND r.review_date BETWEEN $1::date AND $2::date
       ORDER BY r.updated_at DESC
       LIMIT 50`,
     [from, to],
   );
+
+  // R9: hide identity from the dashboard unless the caller can moderate.
+  const revealIdentity = IDENTITY_REVEAL.has(auth.role);
+  const recentComments = revealIdentity
+    ? comments
+    : comments.map(({ user_name, unique_id, ...rest }) => ({
+        ...rest,
+        user_name: "Anonymous",
+        unique_id: "—",
+      }));
 
   const totalsByMeal: Record<string, { total: number; averageScore: number }> = {};
   for (const meal of MEAL_TYPES) {
@@ -75,7 +90,7 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
     totalsByMeal[meal] = { total, averageScore: total ? Number((weighted / total).toFixed(2)) : 0 };
   }
 
-  return ok({ from, to, daily, totalsByMeal, recentComments: comments });
+  return ok({ from, to, daily, totalsByMeal, recentComments, anonymous: !revealIdentity });
 }
 
 export const GET = withAuthorization(

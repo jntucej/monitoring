@@ -39,7 +39,6 @@ interface StudentRow {
   isHosteller: boolean;
   hostelBlock: string | null;
   roomNumber: string | null;
-  cohort_active_pct?: number;
 }
 
 interface StudentsData {
@@ -107,7 +106,6 @@ async function fetchStudents(): Promise<StudentsData> {
       isHosteller: !!sd.hostelBlock,
       hostelBlock: (sd.hostelBlock ?? p.hostelBlock ?? null) as string | null,
       roomNumber: (sd.roomNumber ?? p.roomNumber ?? null) as string | null,
-      cohort_active_pct: p.status === "ACTIVE" ? 100 : 0,
     };
   });
 

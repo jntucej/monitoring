@@ -40,6 +40,39 @@ export async function proxy(req: NextRequest) {
 
   if (SCRAPER_IPS.includes(ip)) return NextResponse.next();
 
+  // ── Server-side auth gate for protected HTML routes ─────────────────
+  // Without this, /admin, /sysadmin, /student, etc. all return 200 with
+  // the full app shell (loading spinner, title, chunk-per-role) to an
+  // anonymous curl. The client-side AuthGuard then redirects, but the
+  // shell has already leaked — an attacker can enumerate role → chunk
+  // mappings from the HTML. Doing the cookie check here (edge runtime,
+  // presence-only, no JWT validation) means an anonymous request gets
+  // a 302 → /login?next=<path> instead of 200 + 27 KB of shell.
+  const PROTECTED_HTML_PREFIXES = [
+    '/admin', '/sysadmin', '/student', '/operator', '/parent',
+    '/caretaker', '/deputy-warden', '/faculty', '/guardian', '/hod',
+    '/hostel', '/hostel-manager', '/oic', '/oie', '/permissions',
+    '/principal', '/staff', '/vice-principal', '/supervisor',
+    '/mess', '/exam', '/exam-branch', '/visitor', '/person',
+    '/campus', '/onboarding', '/settings',
+  ];
+  const isProtectedHtml = PROTECTED_HTML_PREFIXES.some(
+    (p) => pathname === p || pathname.startsWith(p + '/'),
+  );
+  if (isProtectedHtml) {
+    const token =
+      req.cookies.get('access_token')?.value ??
+      req.cookies.get('refresh_token')?.value;
+    if (!token) {
+      const url = req.nextUrl.clone();
+      url.pathname = '/login';
+      url.searchParams.set('next', pathname);
+      return NextResponse.redirect(url, 302);
+    }
+    // Token present — pass through; the client AuthGuard + API 401s
+    // handle the case where the token is stale/invalid.
+  }
+
   if (!pathname.startsWith('/api')) {
     const res = NextResponse.next();
     res.headers.set('x-request-id', requestId);

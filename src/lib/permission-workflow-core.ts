@@ -126,7 +126,14 @@ export function resolveEntryOptions(
   if (lastOutReason === "day_scholar_out") {
     return { buttons: ["day_scholar_in"], allowsTypeChoice: false };
   }
-  // home_out, null (no prior OUT / first scan), and any unknown reason all
-  // open the type choice between Home In and Outing In (day_scholar_in).
+  // home_out (or any known leave reason that wasn't caught above)
+  // → [home_in, day_scholar_in], type choice.
+  // null (no prior OUT / first scan): do NOT offer home_in, since there's no
+  // matching home_out to pair with — offering it would let an operator create
+  // a phantom round-trip in movement_logs. Only allow day_scholar_in for a
+  // first-scan entry.
+  if (lastOutReason === null) {
+    return { buttons: ["day_scholar_in"], allowsTypeChoice: false };
+  }
   return { buttons: ["home_in", "day_scholar_in"], allowsTypeChoice: true };
 }

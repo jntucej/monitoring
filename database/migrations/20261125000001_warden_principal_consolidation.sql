@@ -48,6 +48,14 @@ UPDATE public.config_roles_registry
    SET is_active = FALSE
  WHERE code = 'warden';
 
+-- Deactivate warden in config_roles if present
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'config_roles') THEN
+    UPDATE public.config_roles SET is_active = FALSE WHERE code = 'warden';
+  END IF;
+END $$;
+
 -- 2. Reassign existing warden accounts to hostel_manager (not principal).
 --    Carry over assigned_hostel so hostel-block scoping is preserved.
 UPDATE public.users target

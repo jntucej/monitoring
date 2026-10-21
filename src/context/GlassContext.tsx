@@ -6,6 +6,7 @@ import { useUIStore } from "@/stores/uiStore";
 import { GateMonitorWS } from "@/lib/websocket";
 import { AlertPayload, GateStatusChangePayload } from "@/lib/mockData";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
+import { usePathname } from "next/navigation";
 
 export type GateStatus = "entry" | "exit" | "idle" | "warning";
 export type PerformanceTier = "splusplus" | "performance" | "legacy" | "emergency" | "high" | "medium" | "low";
@@ -153,8 +154,17 @@ export function GlassProvider({
 
   // --- WEBSOCKET LIVE FEED SUBSCRIPTION ---
   const wsRef = useRef<GateMonitorWS | null>(null);
+  const pathname = usePathname();
+
+  // Public / landing routes never need the gate realtime stream. Opening it
+  // there would fire an SSE connection (and a console warning) that the page
+  // doesn't use. The app shell and operator kiosk still connect as before.
+  const PUBLIC_ROUTE = /^\/(login|about|help|support|campus|visitor|profile|security|settings|forbidden|bootstrap)?\/?$/;
+  const shouldConnectRealtime = !PUBLIC_ROUTE.test(pathname ?? "/");
 
   useEffect(() => {
+    if (!shouldConnectRealtime) return;
+
     const isMock = process.env.NEXT_PUBLIC_WS_MOCK === "true";
     // No dedicated WS host in this deployment — point the transport at the
     // app origin so the SSE fallback reaches /api/gate/stream (same-origin).
@@ -222,7 +232,7 @@ export function GlassProvider({
         wsRef.current = null;
       }
     };
-  }, []);
+  }, [shouldConnectRealtime]);
 
   // --- RUNTIME FPS DETECTION & REF-THROTTLED TIER ENGINE ---
   const [performanceTier, setPerformanceTierState] = useState<PerformanceTier>("splusplus");

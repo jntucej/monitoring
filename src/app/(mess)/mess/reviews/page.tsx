@@ -26,6 +26,8 @@ interface Summary {
   daily: DailyRow[];
   totalsByMeal: Record<string, { total: number; averageScore: number }>;
   recentComments: CommentRow[];
+  /** R9: true when the API has masked student identity (non-moderator viewer). */
+  anonymous?: boolean;
 }
 
 export default function MessReviewsPage() {
@@ -115,7 +117,7 @@ export default function MessReviewsPage() {
               </div>
             </SectionCard>
 
-            <SectionCard title="Recent comments" description="Latest short comments from students.">
+            <SectionCard title="Recent comments" description={data.anonymous ? "Latest short comments from students. Comments are anonymised so feedback stays honest; only moderators see names." : "Latest short comments from students."}>
               <div className="space-y-2">
                 {data.recentComments.length === 0 && <p className="text-sm text-[var(--text-muted)]">No comments yet.</p>}
                 {data.recentComments.map((c) => (

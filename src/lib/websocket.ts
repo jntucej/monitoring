@@ -47,43 +47,12 @@ export class GateMonitorWS {
       return;
     }
 
-    try {
-      this.socket = new WebSocket(this.url);
-
-      this.socket.onopen = () => {
-        this.isConnected = true;
-        this.reconnectAttempts = 0;
-        this.transportExhausted = false;
-        this.notifyConnectionChange(true);
-      };
-
-      this.socket.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          this.handleIncomingMessage(data);
-        } catch {
-          // Ignore invalid payload
-        }
-      };
-
-      this.socket.onerror = () => {
-        this.isConnected = false;
-      };
-
-      this.socket.onclose = () => {
-        this.isConnected = false;
-        this.notifyConnectionChange(false);
-        if (!this.isExplicitlyClosed) {
-          this.scheduleReconnect();
-        }
-      };
-    } catch {
-      this.isConnected = false;
-      this.notifyConnectionChange(false);
-      if (!this.isExplicitlyClosed) {
-        this.scheduleReconnect();
-      }
-    }
+    // /api/gate/stream is an SSE endpoint (Next.js ReadableStream), not a
+    // WebSocket. The original code tried `new WebSocket(...)` first, which
+    // always fails on a serverless deployment and spams the console before
+    // the SSE fallback kicks in. Skip the doomed attempt and go straight to
+    // the SSE transport.
+    this.connectSSEFallback();
   }
 
   public disconnect(): void {

@@ -29,7 +29,7 @@ export function HealthDashboard() {
     if (isManual) setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/health", { headers: getAuthHeaders(), cache: "no-store" });
+      const res = await fetch("/api/admin/health/full", { headers: getAuthHeaders(), cache: "no-store" });
       if (!res.ok && res.status !== 503) {
         throw new Error(`Failed to fetch health data (status ${res.status})`);
       }

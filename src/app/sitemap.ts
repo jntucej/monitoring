@@ -1,33 +1,13 @@
-// src/app/sitemap.ts
-//
-// SEO sitemap for the public marketing cluster.
-
 import type { MetadataRoute } from "next";
-import { SITE } from "@/lib/seo/site-config";
+import { COLLEGE } from "@/lib/college-config";
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  const base = COLLEGE.baseUrl;
   const now = new Date();
-  const routes: Array<{
-    path: string;
-    changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"];
-    priority: number;
-  }> = [
-    { path: "", changeFrequency: "weekly", priority: 1.0 },
-    { path: "/features", changeFrequency: "monthly", priority: 0.9 },
-    { path: "/trust", changeFrequency: "monthly", priority: 0.9 },
-    { path: "/about", changeFrequency: "monthly", priority: 0.7 },
-    { path: "/contact", changeFrequency: "yearly", priority: 0.7 },
-    { path: "/privacy", changeFrequency: "yearly", priority: 0.4 },
-    { path: "/terms", changeFrequency: "yearly", priority: 0.4 },
-    // /login is a utility route, not marketing — keep it discoverable for
-    // "gate monitor login" queries but below the content pages.
-    { path: "/login", changeFrequency: "yearly", priority: 0.3 },
+  return [
+    { url: `${base}/`, lastModified: now, changeFrequency: "weekly", priority: 1.0 },
+    { url: `${base}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${base}/help`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${base}/login`, lastModified: now, changeFrequency: "yearly", priority: 0.5 },
   ];
-
-  return routes.map((r) => ({
-    url: `${SITE.url}${r.path}`,
-    lastModified: now,
-    changeFrequency: r.changeFrequency,
-    priority: r.priority,
-  }));
 }

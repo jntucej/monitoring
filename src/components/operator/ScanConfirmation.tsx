@@ -187,7 +187,7 @@ export function ScanConfirmation({
         if (sessionToken) {
           headers["X-Session-Token"] = sessionToken;
         }
-        const res = await fetch(`/api/passes?roll=${encodeURIComponent(rollNum)}&status=APPROVED`, { headers });
+        const res = await fetch(`/api/permissions/approved?roll=${encodeURIComponent(rollNum)}`, { headers });
 
         if (!res.ok) {
           console.warn(`Pass API returned status ${res.status}`);

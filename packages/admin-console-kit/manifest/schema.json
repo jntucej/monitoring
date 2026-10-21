@@ -17,24 +17,18 @@
           "icon": { "type": "string" },
           "order": { "type": "integer" },
           "infographic": {
-            "type": "object",
-            "required": ["kind", "source"],
-            "properties": {
-              "kind": {
-                "enum": [
-                  "dots",
-                  "stacked-bar",
-                  "gauge",
-                  "sparkline",
-                  "heat",
-                  "severity",
-                  "drift",
-                  "counts"
-                ]
-              },
-              "source": { "type": "string" },
-              "color": { "type": "string" }
-            }
+            "oneOf": [
+              { "type": "string" },
+              {
+                "type": "object",
+                "required": ["kind", "source"],
+                "properties": {
+                  "kind": { "type": "string" },
+                  "source": { "type": "string" },
+                  "color": { "type": "string" }
+                }
+              }
+            ]
           },
           "pages": {
             "type": "array",

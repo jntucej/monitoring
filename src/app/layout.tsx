@@ -1,57 +1,104 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { COLLEGE } from "@/lib/college-config";
+import { organizationJsonLd } from "@/lib/seo";
 import { ClientProviders } from "./ClientProviders";
-import { getDbClient } from "@/lib/db";
 import { getServerTheme } from "@/lib/theme-cookie";
 
-export async function generateMetadata(): Promise<Metadata> {
-  let siteName = "Gate Monitor";
-  let description = "Student Gate Monitoring System";
-  
-  try {
-    const dbClient = getDbClient();
-    const { data, error } = await dbClient
-      .from('config_college_info')
-      .select('name, short_name')
-      .limit(1)
-      .maybeSingle();
+export const metadata: Metadata = {
+  metadataBase: new URL(COLLEGE.baseUrl),
+  title: {
+    default: `${COLLEGE.officialName} Campus Access Portal`,
+    template: `%s | ${COLLEGE.shortName}`,
+  },
+  description: COLLEGE.portalPurpose,
+  applicationName: `${COLLEGE.shortName} Campus Portal`,
+  keywords: [
+    "JNTUH UCEJ",
+    "JNTUCEJ",
+    "JNTUH University College of Engineering Jagtial",
+    "JNTUH College of Engineering Jagtial",
+    "JNTU College of Engineering Jagtial",
+    "campus portal Jagtial",
+    "gate pass JNTUH UCEJ",
+    "student portal JNTUH UCEJ",
+    "parent portal JNTUH UCEJ",
+    "Jagtial Telangana engineering college",
+  ],
+  authors: [{ name: COLLEGE.officialName }],
+  creator: COLLEGE.officialName,
+  publisher: COLLEGE.officialName,
+  alternates: { canonical: COLLEGE.baseUrl },
+  openGraph: {
+    type: "website",
+    siteName: COLLEGE.officialName,
+    url: COLLEGE.baseUrl,
+    title: `${COLLEGE.officialName} Campus Access Portal`,
+    description: COLLEGE.portalPurpose,
+    locale: "en_IN",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${COLLEGE.officialName} Campus Access Portal`,
+    description: COLLEGE.portalPurpose,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  verification: {
+    google: "pUsD_GnlIE8aG5lekStc6zJ3BYyZ1iZNGLjQ2rWeRlU",
+  },
+};
 
-    if (data && !error && data.short_name) {
-      siteName = `${data.short_name} Gate Monitor`;
-      description = `Student Gate Monitoring System — ${data.name || siteName}`;
-    }
-  } catch (err) {
-    // silently fallback
-  }
-
-  return {
-    title: siteName,
-    description: description,
-    icons: [{ rel: "icon", url: "/favicon.ico" }],
-  };
-}
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
+  ],
+};
 
 export default async function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   const theme = await getServerTheme();
-
   return (
     <html
-      lang="en"
-      data-theme={theme}
-      data-scroll-behavior="smooth"
-      className={`min-h-full antialiased ${theme}`}
+      lang="en-IN"
+      data-theme={theme ?? "dark"}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] font-[var(--font-family)]" data-user-role="">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationJsonLd()),
+          }}
+        />
+      </head>
+      <body>
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-[var(--action-primary)] focus:px-4 focus:py-2 focus:text-white"
+        >
+          Skip to main content
+        </a>
         <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
   );
 }
-
-
-

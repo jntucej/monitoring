@@ -1,3 +1,0 @@
--- This migration is now a no-op.
--- The canonical login_attempts table is defined in database/schema.sql
--- Kept as placeholder to preserve version ordering.

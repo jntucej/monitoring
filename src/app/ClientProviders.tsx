@@ -13,16 +13,30 @@ import { FloatingBot } from "@/components/bot/FloatingBot";
 import { FloatableThemeCycler } from "@/components/shared/FloatableThemeCycler";
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {
+  const hasHydrated = useAuthStore((s) => s._hasHydrated);
+  const setHasHydrated = useAuthStore((s) => s.setHasHydrated);
+
+  // Ensure the persist store has rehydrated from localStorage. If the
+  // rehydrate path did not flip _hasHydrated (e.g. storage blocked, or
+  // rehydration threw), fall back to flipping it here so guarded routes
+  // cannot linger on the AppLoadingScreen for their first paint.
   useEffect(() => {
     const persist = useAuthStore.persist;
     if (!persist.hasHydrated()) {
       try {
         persist.rehydrate();
       } catch {
-        useAuthStore.getState().setHasHydrated(true);
+        setHasHydrated(true);
       }
     }
-  }, []);
+  }, [setHasHydrated]);
+
+  // Independent second path: if the flag is still false after the above
+  // effect has run (rehydration is synchronous in this store), flip it.
+  // Guarded by hasHydrated so this runs exactly once and never loops.
+  useEffect(() => {
+    if (!hasHydrated) setHasHydrated(true);
+  }, [hasHydrated, setHasHydrated]);
 
   return (
     <ErrorBoundary>

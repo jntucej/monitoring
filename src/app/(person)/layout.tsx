@@ -1,10 +1,9 @@
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import type { ReactNode } from "react";
+import type { Metadata } from "next";
+import { NOINDEX_METADATA } from "@/lib/seo";
 
-export const metadata = {
-  title: "Person Portal",
-  description: "Campus person portal"
-};
+export const metadata: Metadata = NOINDEX_METADATA;
 
 export default function PersonLayout({ children }: { children: ReactNode }) {
   return (

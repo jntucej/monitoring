@@ -25,6 +25,8 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
+import { ParticleField } from "@/components/cinematic/ParticleField";
+import { AmbientGlow } from "@/components/cinematic/AmbientGlow";
 
 /* ------------------------------------------------------------------ *
  *  Types
@@ -268,7 +270,11 @@ function ProfileDashboard() {
     .toUpperCase();
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+    <div className="relative min-h-screen overflow-hidden bg-[#070B14] text-[var(--text-primary)]">
+      <div aria-hidden="true" className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(139,92,246,0.14), transparent 55%), radial-gradient(ellipse at 50% 100%, rgba(139,92,246,0.14), transparent 60%)" }} />
+      <ParticleField color="#c4b5fd" />
+      <AmbientGlow color="rgba(139,92,246,0.18)" />
+      <div className="relative z-10 max-w-4xl mx-auto px-4 py-8 space-y-6">
       {/* Header card */}
       <div className="glass-card p-6 flex items-center gap-5">
         <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-2xl font-bold">
@@ -603,6 +609,7 @@ function ProfileDashboard() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

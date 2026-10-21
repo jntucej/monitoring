@@ -105,6 +105,10 @@ export function PermissionDetailPanel({
     [L1_ROLE, L2_ROLE, L3_ROLE].includes(currentRole) &&
     levelsAbove(currentRole).length > 0;
 
+  // G26: L4 (principal) cannot escalate — there is no level above them.
+  // Hide the button so the operator is not confused by a 400 on click.
+  const canEscalate = !!currentRole && levelsAbove(currentRole).length > 0;
+
   // L2+ (deputy_warden, hostel_manager, principal) plus sysadmin/admin may
   // direct-generate. The server re-checks the same DIRECT_GENERATE_ROLES list.
   const canDirectGenerate =
@@ -549,6 +553,7 @@ export function PermissionDetailPanel({
                     size="sm"
                     variant="secondary"
                     onClick={() => setActiveAction("ESCALATE")}
+                    disabled={!canEscalate}
                   >
                     <AlertTriangle className="w-3.5 h-3.5 mr-1" />
                     Escalate

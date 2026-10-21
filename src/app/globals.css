@@ -5,6 +5,73 @@
    Apple-Inspired HIG Design System: Calm, Restrained, Precise
    ============================================================ */
 
+[data-home] {
+  background-color: #000000;
+  --home-accent-amber: #F59E0B;
+  --home-accent-indigo: #6366F1;
+  --home-accent-steel: #0EA5E9;
+  --home-accent-crimson: #EF4444;
+  --home-accent-navy: #1E3A5F;
+
+  --home-text-primary: #F3F4F6;
+  --home-text-secondary: #9CA3AF;
+  --home-text-muted: #6B7280;
+
+  --home-bg-base: #000000;
+  --home-bg-elev-1: #0F172A;
+  --home-bg-elev-2: #131C2E;
+
+  --home-border-soft: rgba(255, 255, 255, 0.08);
+  --home-border-hard: rgba(255, 255, 255, 0.18);
+
+  --home-blur-xs: 4px;
+  --home-blur-sm: 8px;
+  --home-blur-md: 16px;
+  --home-blur-lg: 24px;
+  --home-blur-xl: 40px;
+
+  --home-radius-sm: 6px;
+  --home-radius-md: 12px;
+  --home-radius-lg: 20px;
+  --home-radius-pill: 9999px;
+
+  --home-shadow-glow: 0 0 60px -20px rgba(99, 102, 241, 0.25);
+  --home-shadow-deep: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+
+  --home-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --home-duration-slow: 0.6s;
+  --home-duration-cinema: 1.2s;
+}
+
+[data-home] .glass-cinema {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(var(--home-blur-md));
+  -webkit-backdrop-filter: blur(var(--home-blur-md));
+  border: 1px solid var(--home-border-soft);
+  box-shadow: var(--home-shadow-deep);
+}
+
+[data-home] .glass-cinema-strong {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(var(--home-blur-lg));
+  -webkit-backdrop-filter: blur(var(--home-blur-lg));
+  border: 1px solid var(--home-border-hard);
+  box-shadow: var(--home-shadow-glow);
+}
+
+[data-home] .glass-frosted {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(var(--home-blur-sm));
+  -webkit-backdrop-filter: blur(var(--home-blur-sm));
+  border: 1px solid var(--home-border-soft);
+}
+
+[data-home] .glass-clear {
+  background: transparent;
+  backdrop-filter: none;
+  border: none;
+}
+
 :root {
   /* Base Temperatures — DIRECTION 1: Cold Forge */
   --hue-primary: 213;
@@ -1388,17 +1455,70 @@ html[data-device-profile="legacy"] .glass-card {
 /* ============================================================
    DRAWER SLIDE-IN — left-anchored sheet entrance
    ============================================================ */
-@keyframes drawer-in {
-  from { transform: translateX(-100%); }
-  to   { transform: translateX(0); }
+/* ==========================================================================
+   HOMEPAGE ISOLATION — hide global chrome without forcing background
+   Only active on /. Every other page is untouched.
+   ========================================================================== */
+
+/* 1. Body overscroll bounce prevention */
+body.is-home,
+html:has([data-home]) body {
+  overflow-x: hidden;
+  overscroll-behavior: none;
 }
-.animate-drawer-in {
-  animation: drawer-in 220ms cubic-bezier(0.2, 0, 0, 1);
+
+/* 2. Isolation container */
+[data-home] {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  z-index: 1;
 }
-@media (prefers-reduced-motion: reduce) {
-  .animate-drawer-in {
-    animation: none;
-  }
+
+/* 3. Hide app chrome (header, sidebar, orbs, floating bot, dev strip) */
+body.is-home .sidebar-desktop,
+body.is-home .header-bar,
+body.is-home .mobile-drawer,
+body.is-home .floating-bot-root,
+body.is-home [data-global-orb],
+body.is-home [data-floating-orb],
+body.is-home .orbs-root,
+body.is-home .dynamic-header,
+body.is-home [data-app-header],
+body.is-home [data-app-sidebar] {
+  display: none !important;
 }
+
+/* Belt-and-suspenders fallback for browsers without :has() */
+html:has([data-home]) .sidebar-desktop,
+html:has([data-home]) .header-bar,
+html:has([data-home]) .mobile-drawer,
+html:has([data-home]) .floating-bot-root,
+html:has([data-home]) [data-global-orb],
+html:has([data-home]) [data-floating-orb],
+html:has([data-home]) .orbs-root,
+html:has([data-home]) .dynamic-header,
+html:has([data-home]) [data-app-header],
+html:has([data-home]) [data-app-sidebar] {
+  display: none !important;
+}
+
+/* 4. Reset any shell padding/margins the SafeAreaAppShell adds for chrome */
+body.is-home [data-app-shell],
+body.is-home .safe-area-app-shell,
+html:has([data-home]) [data-app-shell],
+html:has([data-home]) .safe-area-app-shell {
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+}
+
+/* 5. Kill the global loading screen overlay when on homepage
+      (its z-index fights with our boot sequence) */
+body.is-home [data-loading-screen],
+body.is-home .app-loading-screen {
+  display: none !important;
+}
+
 
 

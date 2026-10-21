@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { recordScan } from "@/server/services/scan/record";
+import { query } from "@/lib/postgres";
 import { ok, fail } from "@/server/http/response";
 import { AppError } from "@/server/http/errors";
 import { TIER } from "@/server/policy/roles";
@@ -67,7 +68,16 @@ export const POST = withRateLimit(
           operatorGateId: auth.gateId ?? null,
           supervisedGates: auth.supervisedGates,
         });
-        return ok({ ...result, scan: result.log });
+        // Attach the consumed pass (if any) to the scan response so the gate
+        // UI can show which ticket was used by this OUT scan.
+        const pass = result.consumedPassId
+          ? await query(
+              `SELECT id, ticket_number, reason, used_at FROM public.permissions WHERE id = $1 LIMIT 1`,
+              [result.consumedPassId],
+            )
+          : null;
+        const passRow = pass?.rows[0] ?? null;
+        return ok({ ...result, scan: result.log, pass: passRow });
       } catch (err) {
         if (err instanceof AppError) {
           return fail(err.code, err.message, err.status, err.details);

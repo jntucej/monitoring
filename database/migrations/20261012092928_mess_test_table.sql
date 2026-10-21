@@ -77,12 +77,7 @@ BEGIN
       AND column_name='checksum'
   ) INTO has_checksum;
 
-  IF has_filename AND has_checksum THEN
-    INSERT INTO public.schema_migrations (version, filename, applied_at, checksum)
-    VALUES ('20261012092928', '20261012092928_mess_test_table.sql', NOW(),
-            md5('20261012092928_mess_test_table'))
-    ON CONFLICT (version) DO NOTHING;
-  ELSIF has_filename THEN
+  IF has_filename THEN
     INSERT INTO public.schema_migrations (version, filename, applied_at)
     VALUES ('20261012092928', '20261012092928_mess_test_table.sql', NOW())
     ON CONFLICT (version) DO NOTHING;

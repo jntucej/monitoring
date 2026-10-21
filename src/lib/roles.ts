@@ -29,6 +29,7 @@ export const ROLES = {
   EXAM_BRANCH:     "exam_branch",
   EXAM_SUPERINTENDENT: "exam_superintendent",
   MESS_INCHARGE:   "mess_incharge",
+  EMO:             "emo",
   // Legacy roles — folded but still recognized for approver surface compatibility
   HOSTEL:          "hostel",
 } as const;

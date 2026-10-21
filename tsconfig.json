@@ -43,6 +43,7 @@
     "gate-monitor-migration",
     "packages",
     "scripts/provision-role-accounts.mts",
-    "scripts/prov"
+    "scripts/prov",
+    "videoeditor"
   ]
 }

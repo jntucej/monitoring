@@ -27,6 +27,8 @@ for f in "${FILES[@]}"; do
   if [[ "$fname" == *.down.sql ]]; then continue; fi
 
   ver="${fname%%_*}"
+  # Require a canonical 14-digit timestamp prefix
+  if [[ ! "$ver" =~ ^[0-9]{14}$ ]]; then continue; fi
   if [[ -n "${SEEN_VERSIONS[$ver]}" && "${SEEN_VERSIONS[$ver]}" != "$fname" ]]; then
     echo "ERROR: Duplicate version prefix '$ver' detected: '$fname' and '${SEEN_VERSIONS[$ver]}'" >&2
     exit 1

@@ -78,7 +78,9 @@ export const GET = withRateLimit(
         const res = await query<JobRun>(
           `SELECT job_id, status, start_time::text AS start_time, end_time::text AS end_time
              FROM job_runs
-            WHERE start_time >= NOW() - INTERVAL '24 hours'`
+            WHERE start_time >= NOW() - INTERVAL '24 hours'
+            ORDER BY start_time DESC
+            LIMIT 5000`
         );
         runs24h = res.rows as JobRun[];
         totalRuns24h = runs24h.length;
@@ -110,7 +112,9 @@ export const GET = withRateLimit(
         const res = await query<JobRun>(
           `SELECT job_id, status, start_time::text AS start_time, end_time::text AS end_time
              FROM job_runs
-            WHERE start_time >= NOW() - INTERVAL '14 days'`
+            WHERE start_time >= NOW() - INTERVAL '14 days'
+            ORDER BY start_time DESC
+            LIMIT 5000`
         );
         runs14d = res.rows as JobRun[];
       } catch { /* leave empty */ }

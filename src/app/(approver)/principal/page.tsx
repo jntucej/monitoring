@@ -1,26 +1,48 @@
-"use client";
-
 import { Suspense } from "react";
-import { PageLoading } from "@/components/shared/LoadingStates";
+import { Crown } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { PageLoading } from "@/components/shared/LoadingStates";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { AttentionQueue } from "@/components/engagement/AttentionQueue";
+import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
+import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 
-/**
- * Principal root page — Board-only.
- *
- * The layout already mounts the RoleConsole shell, which renders the Board
- * feed (/api/principal/dashboard) in the main column plus the
- * PrincipalDashboardPanel, the ticket ContextPanel, PrincipalStatusBar and
- * PrincipalCommandBar. This page renders nothing so the default board fallback
- * is used. No KPI cards, no charts, no tab scroll.
- */
 export default function PrincipalPage() {
   return (
-    <AuthGuard
-      allowedRoles={["principal", "vice_principal", "admin", "sysadmin"]}
-    >
-      <Suspense fallback={<PageLoading />}>
-        {null}
-      </Suspense>
-    </AuthGuard>
+    <Suspense fallback={<PageLoading />}>
+      <AuthGuard allowedRoles={["principal"]}>
+        <div className="space-y-6">
+          <DevContactStrip />
+          <WidgetBoundary>
+            <RoleDashboardPanel
+              title="Principal dashboard"
+              icon={Crown}
+              endpoint="/api/principal/dashboard"
+              mapKpis={(raw: any) => {
+                const d = raw ?? {};
+                return [
+                  { label: "Pending approvals", value: d.pendingApprovals ?? 0, tone: "warn" as const },
+                  { label: "Recent alerts", value: Array.isArray(d.recentAlerts) ? d.recentAlerts.length : 0, tone: "danger" as const },
+                  { label: "Campus occupancy", value: d.campusOccupancy ?? "—" },
+                ];
+              }}
+            />
+          </WidgetBoundary>
+          <WidgetBoundary><AttentionQueue /></WidgetBoundary>
+          <WidgetBoundary><PersonalizedCampusHome /></WidgetBoundary>
+          <WidgetBoundary><TaskContinuity /></WidgetBoundary>
+          <WidgetBoundary><UnifiedCampusCalendar /></WidgetBoundary>
+          <WidgetBoundary><ActivityTimeline /></WidgetBoundary>
+          <WidgetBoundary><QuickActions /></WidgetBoundary>
+          <WidgetBoundary><NotificationCenter /></WidgetBoundary>
+        </div>
+      </AuthGuard>
+    </Suspense>
   );
 }

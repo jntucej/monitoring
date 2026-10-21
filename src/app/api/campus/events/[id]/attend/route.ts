@@ -1,3 +1,4 @@
+import { assertCsrf } from "@/lib/csrf";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
@@ -29,6 +30,9 @@ async function handlePost(
   req: NextRequest,
   { auth }: { auth: AuthContext }
 ): Promise<Response> {
+  const csrf = assertCsrf(req);
+  if (csrf) return csrf;
+
   const untrusted = requireTrustedHeaders(req);
   if (untrusted) return untrusted;
 

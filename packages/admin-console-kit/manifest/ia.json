@@ -7,8 +7,10 @@
       "label": "Command Center",
       "icon": "LayoutDashboard",
       "role": "admin",
-      "infographic": "sparkline",
-      "dataKey": "operations.traffic24h",
+      "infographic": {
+        "kind": "sparkline",
+        "source": "operations.traffic24h"
+      },
       "pages": [
         { "label": "Campus Dashboard", "href": "/admin", "icon": "LayoutDashboard", "exact": true },
         { "label": "Alerts & Radar", "href": "/admin/alerts", "icon": "Bell" },

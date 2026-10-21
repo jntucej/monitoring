@@ -1,5 +1,5 @@
 import { SignJWT, jwtVerify, JWTPayload } from "jose";
-import bcrypt from "bcryptjs";
+
 import { randomUUID } from "crypto";
 import { requireSecret } from "@/lib/env";
 
@@ -211,25 +211,9 @@ export async function verifyAuthToken(): Promise<never> {
   );
 }
 
-/**
- * Hash plain text password using bcrypt
- */
-export async function hashPassword(plain: string): Promise<string> {
-  return await bcrypt.hash(plain, 10);
-}
-
-/**
- * Compare plain text password against bcrypt hash
- */
-export async function verifyPassword(
-  plain: string,
-  hash: string
-): Promise<boolean> {
-  try {
-    return await bcrypt.compare(plain, hash);
-  } catch {
-    return false;
-  }
-}
+// ── Password hashing / verification ─────────────────────────────────────
+// Canonical implementations live in @/server/lib/crypto to keep bcryptjs in
+// the server layer.  Re-export here so existing callers don't break.
+export { hashPassword, verifyPassword } from "@/server/lib/crypto";
 
 

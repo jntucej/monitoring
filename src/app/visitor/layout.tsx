@@ -1,24 +1,13 @@
-"use client";
+import type { Metadata } from "next";
+import { NOINDEX_METADATA } from "@/lib/seo";
+import { VisitorShell } from "./VisitorShell";
 
-import { Suspense } from "react";
-import { AuthGuard } from "@/components/shared/AuthGuard";
-import { PageLoading } from "@/components/shared/LoadingStates";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
-import type { Role } from "@/lib/types";
-
-const ALLOWED_ROLES: Role[] = ["visitor", "admin", "sysadmin"];
+export const metadata: Metadata = NOINDEX_METADATA;
 
 export default function VisitorLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <AuthGuard allowedRoles={ALLOWED_ROLES}>
-      <Suspense fallback={<PageLoading />}>
-        {children}
-        <DevContactStrip />
-      </Suspense>
-    </AuthGuard>
-  );
+  return <VisitorShell>{children}</VisitorShell>;
 }

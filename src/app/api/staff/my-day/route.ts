@@ -54,9 +54,9 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
 
     // ── 2. Open staff_leave requests (shared across slices) ───────────────
     const openRequestsRes = await query<RequestRow>(
-      `SELECT pr.* FROM permission_requests pr
+      `SELECT pr.* FROM permissions pr
         WHERE pr.workflow_type = 'staff_leave'
-          AND pr.student_user_id = $1
+          AND pr.requester_user_id = $1
         ORDER BY pr.created_at DESC LIMIT 15`,
       [auth.userId]
     );

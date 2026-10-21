@@ -35,7 +35,6 @@ interface StaffRow {
   department: string | null;
   designation: string | null;
   status: string;
-  cohort_active_pct?: number;
 }
 
 interface StaffStats {
@@ -103,7 +102,6 @@ async function fetchRows(): Promise<StaffRow[]> {
               ((r.employeeDetails as Record<string, unknown>)?.designation as string) ??
               null,
             status: String(r.status ?? "ACTIVE"),
-            cohort_active_pct: (r.cohort_active_pct as number) ?? undefined,
           } as StaffRow;
         })
         .filter((r): r is StaffRow => r !== null && r.id.length > 0);

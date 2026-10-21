@@ -10,7 +10,7 @@ import { addAudit } from "@/lib/db";
 import { log, getRequestId } from "@/lib/log";
 import { assertCsrf } from "@/lib/csrf";
 import type { Role } from "@/lib/types";
-import { compareSync } from "@/server/lib/crypto";
+import { compare as compareBcrypt } from "@/server/lib/crypto";
 import { checkLockout, recordFailedAttempt, clearLockout } from "@/lib/login-lockout";
 
 const GENERIC_FAILURE = {
@@ -225,7 +225,7 @@ async function handleLoginInner(req: NextRequest) {
           : [];
         let matchIdx = -1;
         for (let i = 0; i < codes.length; i++) {
-          if (compareSync(presentedRecovery, codes[i])) {
+          if (await compareBcrypt(presentedRecovery, codes[i])) {
             matchIdx = i;
             break;
           }
@@ -343,11 +343,13 @@ async function handleLoginInner(req: NextRequest) {
     return response;
   } catch (error: unknown) {
     const requestId = getRequestId(req);
+    const errObj = error instanceof Error ? { name: error.name, message: error.message, stack: error.stack } : String(error);
+    console.error("[login] INTERNAL_ERROR:", JSON.stringify(errObj));
     log.error({
       msg: "login.error",
       route: "/api/auth/login",
       requestId,
-      err: error instanceof Error ? { name: error.name, message: error.message, stack: error.stack } : String(error),
+      err: errObj,
     });
     return NextResponse.json(
       {
@@ -356,6 +358,8 @@ async function handleLoginInner(req: NextRequest) {
           code: "INTERNAL_ERROR",
           message: "Internal server error during authentication.",
           requestId,
+          // DEBUG: surface the real cause until this is removed
+          ...(process.env.NODE_ENV !== "production" ? { cause: errObj } : {}),
         },
       },
       { status: 500 }

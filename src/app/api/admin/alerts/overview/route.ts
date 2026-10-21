@@ -58,8 +58,17 @@ async function safeQuery<T extends QueryResultRow>(
   try {
     const res = await query<T>(text, params as never[]);
     return res.rows ?? [];
-  } catch {
-    return [];
+  } catch (err: unknown) {
+    // Only swallow missing table error (42P01); re-throw real failures so connection/auth issues don't fake zero alerts
+    if (
+      err &&
+      typeof err === "object" &&
+      "code" in err &&
+      (err as { code?: string }).code === "42P01"
+    ) {
+      return [];
+    }
+    throw err;
   }
 }
 
