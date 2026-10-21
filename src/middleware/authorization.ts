@@ -52,6 +52,19 @@ async function handleAuthError(err: unknown): Promise<NextResponse> {
       { status: err.status }
     );
   }
+  // requireAuthenticatedUser (and friends) throw plain `new Error('UNAUTHORIZED: ...')`
+  // rather than an AuthError instance. Catch that prefix here so a missing or
+  // invalid token returns 401 (not 500) — 500 leaks "this endpoint exists and
+  // has auth" to external scanners; 401 is the correct, non-informative answer.
+  const plain = err instanceof Error ? err.message : "";
+  if (/^UNAUTHORIZED:|^FORBIDDEN:|^ACCOUNT_INACTIVE:/.test(plain)) {
+    const code = plain.split(":")[0].replace(/_$/, "");
+    const status = code === "FORBIDDEN" ? 403 : code === "ACCOUNT_INACTIVE" ? 403 : 401;
+    return NextResponse.json(
+      { success: false, error: { code, message: plain.replace(/^UNAUTHORIZED:\s*/i, "") } },
+      { status },
+    );
+  }
   const msg = err instanceof Error ? err.message : "Internal error";
   return NextResponse.json(
     { success: false, error: { code: "INTERNAL_ERROR", message: msg } },
