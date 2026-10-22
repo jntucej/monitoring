@@ -12,6 +12,7 @@ import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { signAccessToken, signRefreshToken } from "@/lib/auth-token";
 import { addAudit } from "@/lib/db";
 import { isMfaRequiredForAdmin } from "@/lib/authContext";
+import { secureCookieOptions } from "@/lib/cookies";
 import type { Role } from "@/lib/types";
 
 const STATE_TTL_MS = 10 * 60 * 1000; // 10 minutes
@@ -267,13 +268,7 @@ export async function GET(req: NextRequest) {
     });
 
     const response = NextResponse.redirect(`${url.origin}/auth/mfa-challenge?challenge=${challengeId}`);
-    response.cookies.set("mfa_challenge_token", challengeToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 300,
-    });
+    response.cookies.set("mfa_challenge_token", challengeToken, secureCookieOptions(req, { maxAge: 300 }));
     return response;
   }
 
@@ -304,12 +299,7 @@ export async function GET(req: NextRequest) {
     ? stateRow.redirect_to
     : "/";
   const response = NextResponse.redirect(`${url.origin}${dest}`);
-  const cookieOpts = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax" as const,
-    path: "/",
-  };
+  const cookieOpts = secureCookieOptions(req, { maxAge: 3600 });
   response.cookies.set("access_token", access_token, { ...cookieOpts, maxAge: 3600 });
   response.cookies.set("refresh_token", refresh_token, { ...cookieOpts, maxAge: 30 * 24 * 3600 });
   return response;

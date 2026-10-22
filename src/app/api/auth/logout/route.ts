@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withRateLimit } from "@/lib/rate-limit";
 import { query } from "@/lib/postgres";
+import { secureCookieOptions } from "@/lib/cookies";
 
 async function handlePost(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
@@ -24,13 +25,7 @@ async function handlePost(req: NextRequest) {
     message: "Logged out successfully.",
   });
 
-  const cookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax" as const,
-    path: "/",
-    maxAge: 0,
-  };
+  const cookieOptions = secureCookieOptions(req, { maxAge: 0 });
 
   response.cookies.set("access_token", "", cookieOptions);
   response.cookies.set("session-token", "", cookieOptions);

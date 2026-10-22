@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { withRateLimit, extractClientIp } from "@/lib/rate-limit";
 import { query } from "@/lib/postgres";
 import { signAccessToken, signRefreshToken, verifyPassword } from "@/lib/auth-token";
+import { secureCookieOptions } from "@/lib/cookies";
 import { isMfaRequiredForPrivileged } from "@/lib/authContext";
 import { ROLES } from "@/lib/roles";
 import { createEnrollToken } from "@/lib/mfa-enroll";
@@ -324,21 +325,9 @@ async function handleLoginInner(req: NextRequest) {
       },
     });
 
-    response.cookies.set("access_token", access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 3600,
-      path: "/",
-    });
+    response.cookies.set("access_token", access_token, secureCookieOptions(req, { maxAge: 3600 }));
 
-    response.cookies.set("refresh_token", refresh_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 7 * 24 * 3600,
-      path: "/",
-    });
+    response.cookies.set("refresh_token", refresh_token, secureCookieOptions(req, { maxAge: 7 * 24 * 3600 }));
 
     return response;
   } catch (error: unknown) {

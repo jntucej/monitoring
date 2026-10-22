@@ -4,6 +4,7 @@ import { query, withTransaction } from "@/lib/postgres";
 import { verifyRefreshToken, signAccessToken, signRefreshToken } from "@/lib/auth-token";
 import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
+import { secureCookieOptions } from "@/lib/cookies";
 
 async function handleRefresh(req: NextRequest) {
   const csrfError = assertCsrf(req);
@@ -144,12 +145,7 @@ async function handleRefresh(req: NextRequest) {
       );
     }
 
-    const cookieOptions = {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax" as const,
-      path: "/",
-    };
+    const cookieOptions = secureCookieOptions(req, { maxAge: 3600 });
 
     const response = NextResponse.json(
       {
