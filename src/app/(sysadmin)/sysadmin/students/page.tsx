@@ -14,7 +14,7 @@ import { useApi } from "@/hooks/useApi";
 import { useUIStore } from "@/stores/uiStore";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { BulkUserImportModal } from "@/components/sysadmin/BulkUserImportModal";
-import { ROLL_DEPT_CODES, parseRollNumber, getStudentYearFromRoll, getDepartmentFromRoll } from "@/lib/rollNumber";
+import { ROLL_DEPT_CODES, parseRollNumber, getStudentYearFromRoll, getDepartmentFromRoll, resolveCourseType } from "@/lib/rollNumber";
 
 interface StudentRecord {
   id: string;
@@ -374,30 +374,51 @@ const api = useApi();
     });
   };
 
+  // Canonical course label for a student, always "B.Tech" or "M.Tech".
+  // The raw s.course column is polluted (it stores department names like CSE/
+  // IT / M.Tech specialization labels), so we derive the programme from the
+  // roll's entry mode: 1D -> M.Tech, everything else -> B.Tech.
+  const courseOf = useCallback((s: StudentRecord): string => {
+    const decoded = s.roll ? parseRollNumber(s.roll) : null;
+    if (decoded) {
+      return resolveCourseType(undefined, decoded.entryModeCode).name;
+    }
+    const raw = (s.course || "").trim();
+    return raw === "M.Tech" || raw === "B.Tech" ? raw : "Unassigned";
+  }, []);
+
+  // Canonical branch / department label, decoded from the roll (B.Tech
+  // 5-branch table + M.Tech specialization codes) so it is never the raw
+  // polluted s.course / s.department value.
+  const branchOf = useCallback((s: StudentRecord): string => {
+    const decoded = s.roll ? parseRollNumber(s.roll) : null;
+    if (decoded && decoded.departmentCode && ROLL_DEPT_CODES[decoded.departmentCode]) {
+      return ROLL_DEPT_CODES[decoded.departmentCode].short;
+    }
+    return (s.department || s.course || "").trim() || "Unassigned";
+  }, []);
+
   const filteredStudents = useMemo(() => {
     return students.filter((s) => {
       const q = search.toLowerCase();
       const matchesSearch = !q || s.name?.toLowerCase().includes(q) || s.roll?.toLowerCase().includes(q) ||
         s.uniqueId?.toLowerCase().includes(q) || s.email?.toLowerCase().includes(q) || s.department?.toLowerCase().includes(q);
-      const deptOf = s.department || s.course;
-      const matchesBranch = branchFilter === "ALL" || deptOf === branchFilter;
-      const matchesCourse = courseFilter === "ALL" || s.course === courseFilter;
+      const matchesBranch = branchFilter === "ALL" || branchOf(s) === branchFilter;
+      const matchesCourse = courseFilter === "ALL" || courseOf(s) === courseFilter;
       const matchesYear = yearFilter === "ALL" || String(s.year ?? "") === yearFilter;
       const matchesStatus = statusFilter === "ALL" || s.status === statusFilter;
       return matchesSearch && matchesBranch && matchesCourse && matchesYear && matchesStatus;
     });
-  }, [students, search, branchFilter, courseFilter, yearFilter, statusFilter]);
+  }, [students, search, branchFilter, courseFilter, yearFilter, statusFilter, branchOf, courseOf]);
 
   const branches = useMemo(() => {
-    // Union of explicit department values and course (roll-derived branch) so
-    // imported students (which carry course, not department) are filterable.
+    // Decode the branch / department from the roll (canonical B.Tech 5-branch
+    // table + M.Tech specialization codes) so the filter options are the real
+    // department names, not the polluted s.course values.
     const set = new Set<string>();
-    students.forEach((s) => {
-      if (s.department) set.add(s.department);
-      if (s.course) set.add(s.course);
-    });
+    students.forEach((s) => set.add(branchOf(s)));
     return Array.from(set).sort();
-  }, [students]);
+  }, [branchOf]);
 
   const years = useMemo(() => {
     const set = new Set<string>();
@@ -411,11 +432,11 @@ const api = useApi();
   const byBranch = useMemo(() => {
     const map: Record<string, number> = {};
     students.forEach((s) => {
-      const k = s.department || s.course || "Unassigned";
+      const k = branchOf(s);
       map[k] = (map[k] || 0) + 1;
     });
     return Object.entries(map).sort((a, b) => b[1] - a[1]);
-  }, [students]);
+  }, [branchOf]);
 
   const byYear = useMemo(() => {
     const map: Record<string, number> = {};
@@ -437,18 +458,18 @@ const api = useApi();
 
   const courses = useMemo(() => {
     const set = new Set<string>();
-    students.forEach((s) => { if (s.course) set.add(s.course); });
+    students.forEach((s) => { set.add(courseOf(s)); });
     return Array.from(set).sort();
-  }, [students]);
+  }, [courseOf]);
 
   const byCourse = useMemo(() => {
     const map: Record<string, number> = {};
     students.forEach((s) => {
-      const k = s.course || "Unassigned";
+      const k = courseOf(s);
       map[k] = (map[k] || 0) + 1;
     });
     return Object.entries(map).sort((a, b) => b[1] - a[1]);
-  }, [students]);
+  }, [courseOf]);
 
   // --- Canonical branch card: always the 5 defined branches, decoded from roll
   const CANONICAL_BRANCHES = ["CSE", "IT", "ECE", "EEE", "MECH"] as const;
@@ -482,7 +503,7 @@ const api = useApi();
     students.forEach((s) => {
       const decoded = s.roll ? parseRollNumber(s.roll) : null;
       if (!decoded) return;
-      const course = s.course || "Unassigned";
+      const course = courseOf(s);
       const key = `${decoded.admissionYear}|${course}`;
       if (!map[key]) map[key] = { course, admissionYear: decoded.admissionYear, regular: 0, lateral: 0, liveYearRegular: 0, liveYearLateral: 0 };
       const rec = map[key];
@@ -509,7 +530,7 @@ const api = useApi();
       };
     });
     return rows.sort((a, b) => a.admissionYear - b.admissionYear || a.course.localeCompare(b.course));
-  }, [students]);
+  }, [students, courseOf]);
 
   const activeCount = useMemo(() => students.filter((s) => s.status === "ACTIVE").length, [students]);
   const totalStudents = students.length;

@@ -4,6 +4,7 @@ import { addAudit } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { invalidateAuthCache } from "@/lib/authContext";
+import { secureCookieOptions } from "@/lib/cookies";
 import type { AuthContext } from "@/lib/authContext";
 
 async function handleLogoutAll(
@@ -45,13 +46,7 @@ async function handleLogoutAll(
     message: "Logged out from all devices.",
   });
 
-  const cookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax" as const,
-    path: "/",
-    maxAge: 0,
-  };
+  const cookieOptions = secureCookieOptions(req, { maxAge: 0 });
 
   response.cookies.set("access_token", "", cookieOptions);
   response.cookies.set("session-token", "", cookieOptions);

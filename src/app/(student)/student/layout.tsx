@@ -9,6 +9,7 @@ const TABS = [
   { href: "/student/attendance-calendar", label: "Attendance" },
   { href: "/student/pass-application", label: "Passes" },
   { href: "/student/leave-requests", label: "Leave" },
+  { href: "/student/mess", label: "Mess" },
   { href: "/student/request-tracking", label: "Requests" },
   { href: "/student/history", label: "Entry / Exit" },
   { href: "/student/notifications", label: "Notifications" },

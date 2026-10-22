@@ -24,6 +24,14 @@ export const RATE_LIMITS = {
   read:      { windowMs:      60_000, maxRequests: 300 },
   sensitive: { windowMs: 60 * 60_000, maxRequests: 20  },
   admin:     { windowMs:      60_000, maxRequests: 120 },
+  PERMISSION_CREATE: {
+    windowMs: 60_000,
+    maxRequests: 30,
+  },
+  PERMISSION_DIRECT_GENERATE: {
+    windowMs: 60_000,
+    maxRequests: 10,
+  },
 } as const;
 
 export const LIMITS = {
@@ -39,8 +47,6 @@ export const LIMITS = {
 export const TIME = {
   SESSION_TTL_MS:        60 * 60 * 1000,
   REFRESH_TTL_MS:  7 * 24 * 60 * 60 * 1000,
-  MFA_CHALLENGE_TTL_MS:  5 * 60 * 1000,
-  ENROLLMENT_TTL_MS:    15 * 60 * 1000,
   PASSWORD_RESET_TTL_MS: 60 * 60 * 1000,
   LOCKOUT_DURATION_MS:  15 * 60 * 1000,
   MAX_FAILED_LOGINS:     5,

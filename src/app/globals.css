@@ -5,6 +5,73 @@
    Apple-Inspired HIG Design System: Calm, Restrained, Precise
    ============================================================ */
 
+[data-home] {
+  background-color: #000000;
+  --home-accent-amber: #F59E0B;
+  --home-accent-indigo: #6366F1;
+  --home-accent-steel: #0EA5E9;
+  --home-accent-crimson: #EF4444;
+  --home-accent-navy: #1E3A5F;
+
+  --home-text-primary: #F3F4F6;
+  --home-text-secondary: #9CA3AF;
+  --home-text-muted: #6B7280;
+
+  --home-bg-base: #000000;
+  --home-bg-elev-1: #0F172A;
+  --home-bg-elev-2: #131C2E;
+
+  --home-border-soft: rgba(255, 255, 255, 0.08);
+  --home-border-hard: rgba(255, 255, 255, 0.18);
+
+  --home-blur-xs: 4px;
+  --home-blur-sm: 8px;
+  --home-blur-md: 16px;
+  --home-blur-lg: 24px;
+  --home-blur-xl: 40px;
+
+  --home-radius-sm: 6px;
+  --home-radius-md: 12px;
+  --home-radius-lg: 20px;
+  --home-radius-pill: 9999px;
+
+  --home-shadow-glow: 0 0 60px -20px rgba(99, 102, 241, 0.25);
+  --home-shadow-deep: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+
+  --home-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --home-duration-slow: 0.6s;
+  --home-duration-cinema: 1.2s;
+}
+
+[data-home] .glass-cinema {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(var(--home-blur-md));
+  -webkit-backdrop-filter: blur(var(--home-blur-md));
+  border: 1px solid var(--home-border-soft);
+  box-shadow: var(--home-shadow-deep);
+}
+
+[data-home] .glass-cinema-strong {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(var(--home-blur-lg));
+  -webkit-backdrop-filter: blur(var(--home-blur-lg));
+  border: 1px solid var(--home-border-hard);
+  box-shadow: var(--home-shadow-glow);
+}
+
+[data-home] .glass-frosted {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(var(--home-blur-sm));
+  -webkit-backdrop-filter: blur(var(--home-blur-sm));
+  border: 1px solid var(--home-border-soft);
+}
+
+[data-home] .glass-clear {
+  background: transparent;
+  backdrop-filter: none;
+  border: none;
+}
+
 :root {
   /* Base Temperatures — DIRECTION 1: Cold Forge */
   --hue-primary: 213;
@@ -1293,4 +1360,165 @@ html[data-device-profile="legacy"] .glass-card {
     animation: none;
   }
 }
+
+/* ============================================================
+   PROGRESSIVE VARIABLE BLUE EDGE-BLUR — premium scroll veil
+   ============================================================
+   A soft blue veil sits at the top & bottom of the scroll container.
+   Intensity is tied to scroll position (0 at the exact edge, ramps to
+   ~15% opacity over ~140px, fades again near the opposite edge), so
+   the eye is gently guided to the sharp-focus zone in the center.
+   Pure CSS composites the blur; a scroll listener only writes two
+   CSS variables (never animates blur-radius, which is the perf trap).
+   Reduced-motion disables the scroll-linked ramp + transitions.
+   ============================================================ */
+.scroll-edge-blue {
+  --edge-blue: 59, 130, 246;     /* blue-500 */
+  --edge-size: 72px;
+  --edge-top: 0;                 /* 0..1, written by ScrollEdgeBlue */
+  --edge-bottom: 0;             /* 0..1, written by ScrollEdgeBlue */
+  position: relative;
+}
+
+/* Top progressive blue veil — pinned to the container's top edge */
+.scroll-edge-blue > .edge-blue-veil.top,
+.scroll-edge-blue::before {
+  content: "";
+  position: sticky;
+  top: 0;
+  z-index: 15;
+  display: block;
+  height: var(--edge-size);
+  margin-bottom: calc(-1 * var(--edge-size));
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(var(--edge-blue), calc(0.30 * var(--edge-top))),
+    rgba(var(--edge-blue), calc(0.08 * var(--edge-top)))
+  );
+  -webkit-backdrop-filter: blur(calc(14px * var(--edge-top))) saturate(130%);
+  backdrop-filter: blur(calc(14px * var(--edge-top))) saturate(130%);
+  -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+  transition: backdrop-filter 120ms linear, background 120ms linear;
+}
+
+/* Bottom progressive blue veil — pinned to the container's bottom edge */
+.scroll-edge-blue > .edge-blue-veil.bottom,
+.scroll-edge-blue::after {
+  content: "";
+  position: sticky;
+  bottom: 0;
+  z-index: 15;
+  display: block;
+  height: var(--edge-size);
+  margin-top: calc(-1 * var(--edge-size));
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(var(--edge-blue), calc(0.30 * var(--edge-bottom))),
+    rgba(var(--edge-blue), calc(0.08 * var(--edge-bottom)))
+  );
+  -webkit-backdrop-filter: blur(calc(14px * var(--edge-bottom))) saturate(130%);
+  backdrop-filter: blur(calc(14px * var(--edge-bottom))) saturate(130%);
+  -webkit-mask-image: linear-gradient(to top, black 40%, transparent 100%);
+  mask-image: linear-gradient(to top, black 40%, transparent 100%);
+  transition: backdrop-filter 120ms linear, background 120ms linear;
+}
+
+/* Banded stacked-blur variant: three masked layers instead of one heavy blur
+   (lighter + more premium on mid-range devices). Opt in via .scroll-edge-blue-banded.
+   The banded layers live inside the sticky pseudo-elements above via ::before/::after
+   on the wrapper; when .banded is present we cap the blur radius so stacking is cheap. */
+.scroll-edge-blue-banded::before,
+.scroll-edge-blue-banded::after {
+  --edge-size: 96px;
+  background: rgba(var(--edge-blue), 0.14);
+  -webkit-backdrop-filter: blur(6px) saturate(120%);
+  backdrop-filter: blur(6px) saturate(120%);
+}
+
+/* Reduced-motion: no scroll-linked ramp, no transitions, constant subtle veil */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-edge-blue::before,
+  .scroll-edge-blue::after {
+    --edge-top: 0.5;
+    --edge-bottom: 0.5;
+    transition: none;
+  }
+  .scroll-edge-blue-banded::before,
+  .scroll-edge-blue-banded::after {
+    transition: none;
+  }
+}
+
+/* ============================================================
+   DRAWER SLIDE-IN — left-anchored sheet entrance
+   ============================================================ */
+/* ==========================================================================
+   HOMEPAGE ISOLATION — hide global chrome without forcing background
+   Only active on /. Every other page is untouched.
+   ========================================================================== */
+
+/* 1. Body overscroll bounce prevention */
+body.is-home,
+html:has([data-home]) body {
+  overflow-x: hidden;
+  overscroll-behavior: none;
+}
+
+/* 2. Isolation container */
+[data-home] {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  z-index: 1;
+}
+
+/* 3. Hide app chrome (header, sidebar, orbs, floating bot, dev strip) */
+body.is-home .sidebar-desktop,
+body.is-home .header-bar,
+body.is-home .mobile-drawer,
+body.is-home .floating-bot-root,
+body.is-home [data-global-orb],
+body.is-home [data-floating-orb],
+body.is-home .orbs-root,
+body.is-home .dynamic-header,
+body.is-home [data-app-header],
+body.is-home [data-app-sidebar] {
+  display: none !important;
+}
+
+/* Belt-and-suspenders fallback for browsers without :has() */
+html:has([data-home]) .sidebar-desktop,
+html:has([data-home]) .header-bar,
+html:has([data-home]) .mobile-drawer,
+html:has([data-home]) .floating-bot-root,
+html:has([data-home]) [data-global-orb],
+html:has([data-home]) [data-floating-orb],
+html:has([data-home]) .orbs-root,
+html:has([data-home]) .dynamic-header,
+html:has([data-home]) [data-app-header],
+html:has([data-home]) [data-app-sidebar] {
+  display: none !important;
+}
+
+/* 4. Reset any shell padding/margins the SafeAreaAppShell adds for chrome */
+body.is-home [data-app-shell],
+body.is-home .safe-area-app-shell,
+html:has([data-home]) [data-app-shell],
+html:has([data-home]) .safe-area-app-shell {
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+}
+
+/* 5. Kill the global loading screen overlay when on homepage
+      (its z-index fights with our boot sequence) */
+body.is-home [data-loading-screen],
+body.is-home .app-loading-screen {
+  display: none !important;
+}
+
+
 

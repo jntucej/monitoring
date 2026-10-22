@@ -9,14 +9,11 @@
  * - Prevents client-side identity spoofing
  */
 
-import { supabase, getSupabaseServiceClient } from './dbClient';
+import { supabase } from './dbClient';
 import { Role, AccountStatus } from './types';
-import { getCached, setCached } from './cache';
 import { verifyAccessToken } from './auth-token';
 import { query } from './postgres';
-import { ROLES, isPrivileged, isSuperAdmin } from './roles';
-
-export { isMfaRequiredForPrivileged as isMfaRequiredForAdmin };
+import { isPrivileged, isSuperAdmin } from './roles';
 
 // ── Issue #382: user-level cache (not context-level) ──────────────────────
 // Never cache the full AuthContext keyed by token — that would honour stale
@@ -43,7 +40,6 @@ interface CachedUserRow {
   gate_id: string | null;
   department_id: string | null;
   employee_id: string | null;
-  two_factor_enabled: boolean;
   handle: string | null;
   supervised_gates: string[] | null;
   cachedAt: number;
@@ -59,7 +55,7 @@ async function getUserRowCached(userId: string): Promise<CachedUserRow | null> {
   const res = await query(
     `SELECT id, role, status, email, session_version, unique_id,
             login_identifier, gate_id, department_id, employee_id,
-            two_factor_enabled, handle, supervised_gates
+            handle, supervised_gates
      FROM public.users WHERE id = $1 AND deleted_at IS NULL LIMIT 1`,
     [userId],
   );
@@ -130,53 +126,15 @@ export interface AuthContext {
 
   /** The user's supervised gate IDs (uuid[]), when a supervisor/warden supervises gates */
   supervisedGates?: string[] | null;
-
-  /** Whether the user has 2FA enabled */
-  twoFactorEnabled: boolean;
 }
 
 /**
- * Whether administrators (sysadmin/admin) must have TOTP 2FA enrolled.
- * Read from system_config.global_settings.mfaRequiredForAdmin (cached 60s).
- *
- * Env override MFA_REQUIRED_FOR_ADMIN=true|false always wins (ops break-glass
- * knob that does not depend on the DB).
- *
- * On DB-read failure: FAIL-CLOSED (default true) and log loudly.
- * If MFA configuration cannot be verified, access requires MFA for safety.
- * Operations can override via MFA_REQUIRED_FOR_ADMIN environment variable.
+ * Placeholder kept for source compatibility of downstream consumers that
+ * still read `twoFactorEnabled`. MFA has been removed from the architecture;
+ * this always returns `false`.
  */
 export async function isMfaRequiredForPrivileged(): Promise<boolean> {
-  const cached = await getCached<boolean>("system_config:mfaRequiredForPrivileged");
-  if (cached !== null) return cached;
-
-  // Env override always wins — allows ops to toggle MFA without touching the DB
-  if (process.env.MFA_REQUIRED_FOR_ADMIN === "false") {
-    await setCached("system_config:mfaRequiredForAdmin", false, 60);
-    return false;
-  }
-  if (process.env.MFA_REQUIRED_FOR_ADMIN === "true") {
-    await setCached("system_config:mfaRequiredForAdmin", true, 60);
-    return true;
-  }
-
-  try {
-    const service = getSupabaseServiceClient();
-    const { data, error } = await service
-      .from("system_config")
-      .select("data")
-      .eq("key", "global_settings")
-      .maybeSingle();
-    if (error) throw error;
-    const required = !!((data?.data ?? (data as any)?.value) as any)?.mfaRequiredForAdmin;
-    await setCached("system_config:mfaRequiredForAdmin", required, 60);
-    return required;
-  } catch (err) {
-    // FAIL CLOSED: assume MFA is required when we cannot verify.
-    console.error("[auth] MFA config unreadable — failing closed (MFA required)", err);
-    // Do NOT cache — allow retry on next request.
-    return true;
-  }
+  return false;
 }
 
 // export const isMfaRequiredForAdmin = isMfaRequiredForPrivileged;
@@ -196,6 +154,7 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
   }
 
   if (!userId) {
+    console.error('[AUTH] createAuthContext: JWT verify failed, token=', token?.slice(0, 40));
     throw new Error('UNAUTHORIZED: Invalid or expired token');
   }
 
@@ -205,6 +164,7 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
   // is caught within at most USER_ROW_TTL_MS (30 s).
   const profile = await getUserRowCached(userId);
   if (!profile) {
+    console.error('[AUTH] createAuthContext: user profile not found for userId=', userId);
     throw new Error('UNAUTHORIZED: User profile not found');
   }
 
@@ -238,12 +198,19 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
 
   // Return the validated context
   
-  const rolesRes = await query<{ role: string }>(
-    "SELECT role FROM user_roles WHERE user_id = $1",
-    [profile.id]
-  );
-  const roles = rolesRes.rows.map(r => r.role as Role);
-  if (!roles.includes(profile.role as Role)) roles.push(profile.role as Role);
+  let roles: Role[] = [profile.role as Role];
+  try {
+    const rolesRes = await query<{ role: string }>(
+      "SELECT role FROM user_roles WHERE user_id = $1",
+      [profile.id]
+    );
+    const dbRoles = rolesRes.rows.map(r => r.role as Role);
+    for (const r of dbRoles) {
+      if (!roles.includes(r)) roles.push(r);
+    }
+  } catch {
+    // user_roles table may not exist yet in certain test/bootstrap states
+  }
 
   return {
     authUserId: userId || profile.id,
@@ -260,7 +227,6 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
     isActive: profile.status === 'ACTIVE',
     handle: profile.handle || undefined,
     supervisedGates: profile.supervised_gates,
-    twoFactorEnabled: profile.two_factor_enabled === true,
   };
 }
 

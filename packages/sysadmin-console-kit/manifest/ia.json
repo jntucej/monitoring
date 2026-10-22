@@ -19,6 +19,23 @@
       ]
     },
     {
+      "id": "analytics",
+      "label": "Analytics & Reports",
+      "icon": "Activity",
+      "order": 1.5,
+      "infographic": { "kind": "heat", "source": "analytics.traffic7d" },
+      "pages": [
+        { "id": "analytics", "route": "analytics", "title": "Analytics", "kind": "charts", "pollMs": 60000 },
+        { "id": "reports", "route": "reports", "title": "Reports", "kind": "list", "pollMs": 120000 },
+        { "id": "attendance", "route": "attendance", "title": "Attendance", "kind": "table", "pollMs": 60000 },
+        { "id": "announcements", "route": "announcements", "title": "Announcements", "kind": "list", "pollMs": 60000 },
+        { "id": "support", "route": "support", "title": "Support Desk", "kind": "table", "pollMs": 30000 },
+        { "id": "events", "route": "events", "title": "Campus Events", "kind": "list", "pollMs": 60000 },
+        { "id": "achievements", "route": "achievements", "title": "Achievements", "kind": "table", "pollMs": 120000 },
+        { "id": "communities", "route": "communities", "title": "Communities", "kind": "table", "pollMs": 120000 }
+      ]
+    },
+    {
       "id": "identity",
       "label": "Identity",
       "icon": "Users",
@@ -36,6 +53,34 @@
             "entity": "person",
             "sections": ["profile", "roles", "sessions", "audit", "links"]
           }
+        },
+        {
+          "id": "students",
+          "route": "students",
+          "title": "Students",
+          "kind": "table",
+          "pollMs": 60000
+        },
+        {
+          "id": "staff",
+          "route": "staff",
+          "title": "Staff",
+          "kind": "table",
+          "pollMs": 60000
+        },
+        {
+          "id": "parents",
+          "route": "parents",
+          "title": "Parents",
+          "kind": "table",
+          "pollMs": 60000
+        },
+        {
+          "id": "alumni",
+          "route": "alumni",
+          "title": "Alumni",
+          "kind": "table",
+          "pollMs": 120000
         },
         {
           "id": "promotions",
@@ -68,6 +113,27 @@
           ]
         },
         {
+          "id": "roles",
+          "route": "roles",
+          "title": "Roles",
+          "kind": "table",
+          "pollMs": 60000
+        },
+        {
+          "id": "sessions",
+          "route": "sessions",
+          "title": "Sessions",
+          "kind": "table",
+          "pollMs": 30000
+        },
+        {
+          "id": "access-keys",
+          "route": "access-keys",
+          "title": "Access Keys",
+          "kind": "table",
+          "pollMs": 60000
+        },
+        {
           "id": "sso",
           "route": "sso",
           "title": "SSO",
@@ -95,6 +161,20 @@
           "route": "devices",
           "title": "Devices",
           "kind": "cards",
+          "pollMs": 30000
+        },
+        {
+          "id": "gate-schedule",
+          "route": "gate-schedule",
+          "title": "Gate Schedule",
+          "kind": "table",
+          "pollMs": 60000
+        },
+        {
+          "id": "exam-day",
+          "route": "exam-day",
+          "title": "Exam Day Ops",
+          "kind": "cockpit",
           "pollMs": 30000
         }
       ]
@@ -148,6 +228,13 @@
           "title": "Runbooks",
           "kind": "list",
           "pollMs": 120000
+        },
+        {
+          "id": "alert-rules",
+          "route": "alerts/rules",
+          "title": "Alert Rules",
+          "kind": "table",
+          "pollMs": 60000
         }
       ]
     },
@@ -166,6 +253,20 @@
           "pollMs": 30000
         },
         {
+          "id": "scheduled-jobs",
+          "route": "scheduled-jobs",
+          "title": "Scheduled Jobs",
+          "kind": "cards",
+          "pollMs": 30000
+        },
+        {
+          "id": "scheduling",
+          "route": "scheduling",
+          "title": "Scheduling",
+          "kind": "cards",
+          "pollMs": 60000
+        },
+        {
           "id": "deployments",
           "route": "deployments",
           "title": "Deployments",
@@ -178,6 +279,13 @@
           "title": "Maintenance",
           "kind": "calendar",
           "pollMs": 60000
+        },
+        {
+          "id": "cron",
+          "route": "cron",
+          "title": "Cron / Scheduled Jobs",
+          "kind": "table",
+          "pollMs": 30000
         }
       ]
     },
@@ -199,6 +307,13 @@
           "kind": "tabbed",
           "pollMs": 60000,
           "tabs": ["retention", "exports", "anonymize", "restores", "backups"]
+        },
+        {
+          "id": "backup",
+          "route": "backup",
+          "title": "Backup",
+          "kind": "cards",
+          "pollMs": 60000
         }
       ]
     },
@@ -217,11 +332,46 @@
           "pollMs": 120000
         },
         {
+          "id": "exit-reasons",
+          "route": "exit-reasons",
+          "title": "Exit Reasons",
+          "kind": "table",
+          "pollMs": 120000
+        },
+        {
           "id": "hostel-tickets",
           "route": "hostel-tickets",
           "title": "Hostel tickets",
           "kind": "table",
           "pollMs": 30000
+        },
+        {
+          "id": "classes",
+          "route": "classes",
+          "title": "Classes",
+          "kind": "table",
+          "pollMs": 120000
+        },
+        {
+          "id": "subjects",
+          "route": "subjects",
+          "title": "Subjects",
+          "kind": "table",
+          "pollMs": 120000
+        },
+        {
+          "id": "faculty-assignments",
+          "route": "faculty-assignments",
+          "title": "Faculty Assignments",
+          "kind": "table",
+          "pollMs": 120000
+        },
+        {
+          "id": "mess",
+          "route": "mess",
+          "title": "Mess Management",
+          "kind": "tabbed",
+          "pollMs": 60000
         }
       ]
     },
@@ -273,6 +423,13 @@
           "title": "System",
           "kind": "tabbed",
           "pollMs": 60000
+        },
+        {
+          "id": "navigation",
+          "route": "navigation",
+          "title": "Navigation",
+          "kind": "table",
+          "pollMs": 120000
         }
       ]
     },
@@ -288,6 +445,13 @@
       },
       "pages": [
         {
+          "id": "security",
+          "route": "security",
+          "title": "Security",
+          "kind": "cockpit",
+          "pollMs": 30000
+        },
+        {
           "id": "audit",
           "route": "audit",
           "title": "Audit",
@@ -298,6 +462,20 @@
           "id": "compliance",
           "route": "compliance",
           "title": "Compliance",
+          "kind": "tabbed",
+          "pollMs": 120000
+        },
+        {
+          "id": "retention-policies",
+          "route": "retention-policies",
+          "title": "Retention Policies",
+          "kind": "table",
+          "pollMs": 120000
+        },
+        {
+          "id": "consent",
+          "route": "consent",
+          "title": "Consent Management",
           "kind": "tabbed",
           "pollMs": 120000
         }

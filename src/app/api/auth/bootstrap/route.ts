@@ -9,6 +9,19 @@ import { assertCsrf } from "@/lib/csrf";
 
 const UNIFORM = { success: false, error: { code: "INVALID_CODE", message: "Invalid identifier or enrollment code." } };
 
+export async function GET(_req: NextRequest) {
+  try {
+    const { rows } = await query<{ count: string }>(
+      "SELECT count(*)::text AS count FROM users",
+    );
+    const count = Number(rows[0]?.count ?? "0");
+    return NextResponse.json({ bootstrapped: count > 0 });
+  } catch {
+    return NextResponse.json({ bootstrapped: false });
+  }
+}
+
+
 async function handlePost(req: NextRequest) {
   const csrfError = assertCsrf(req);
   if (csrfError) return csrfError;

@@ -27,21 +27,10 @@ BEGIN
              WHERE table_schema = 'public'
                AND table_name   = 'schema_migrations'
                AND column_name  = 'filename') THEN
-    IF EXISTS (SELECT 1 FROM information_schema.columns
-               WHERE table_schema = 'public'
-                 AND table_name   = 'schema_migrations'
-                 AND column_name  = 'checksum') THEN
-      INSERT INTO public.schema_migrations (version, filename, checksum)
-      VALUES ('20261028000000',
-              '20261028000000_add_dob_and_student_extra_columns.sql',
-              'replayed')
-      ON CONFLICT (version) DO NOTHING;
-    ELSE
-      INSERT INTO public.schema_migrations (version, filename)
-      VALUES ('20261028000000',
-              '20261028000000_add_dob_and_student_extra_columns.sql')
-      ON CONFLICT (version) DO NOTHING;
-    END IF;
+    INSERT INTO public.schema_migrations (version, filename)
+    VALUES ('20261028000000',
+            '20261028000000_add_dob_and_student_extra_columns.sql')
+    ON CONFLICT (version) DO NOTHING;
   ELSE
     INSERT INTO public.schema_migrations (version)
     VALUES ('20261028000000')

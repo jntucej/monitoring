@@ -137,7 +137,7 @@ export function PeopleContent({ data, loading, error, onRowClick }: Props) {
             People &amp; Identity
           </h1>
           <p className="mt-1 text-sm text-[var(--text-secondary)]">
-            Faceted directory of every account with role, state, MFA coverage, and
+            Faceted directory of every account with role, state, and
             cohort retention. Click a row to open the detail drawer.
           </p>
         </div>
@@ -209,7 +209,6 @@ export function PeopleContent({ data, loading, error, onRowClick }: Props) {
                 <th className="px-3 py-2 font-medium">Email</th>
                 <th className="px-3 py-2 font-medium">Role</th>
                 <th className="px-3 py-2 font-medium">State</th>
-                <th className="px-3 py-2 font-medium">MFA</th>
                 <th className="px-3 py-2 font-medium">Cohort active</th>
                 <th className="px-3 py-2 font-medium">Created</th>
               </tr>
@@ -217,7 +216,7 @@ export function PeopleContent({ data, loading, error, onRowClick }: Props) {
             <tbody>
               {filteredRows.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-3 py-6 text-center text-[var(--text-muted)]">
+                  <td colSpan={6} className="px-3 py-6 text-center text-[var(--text-muted)]">
                     No people match the current filters.
                   </td>
                 </tr>
@@ -237,13 +236,6 @@ export function PeopleContent({ data, loading, error, onRowClick }: Props) {
                     </td>
                     <td className="px-3 py-2">
                       <StatusPill status={r.state} />
-                    </td>
-                    <td className="px-3 py-2">
-                      {r.two_factor_enabled ? (
-                        <span className="text-xs text-[var(--action-ok)]">Enabled</span>
-                      ) : (
-                        <span className="text-xs text-[var(--text-muted)]">Off</span>
-                      )}
                     </td>
                     <td className="px-3 py-2 text-[var(--text-secondary)]">
                       {r.cohort_active_pct > 0 ? `${r.cohort_active_pct}%` : "—"}

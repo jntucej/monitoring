@@ -1,15 +1,3 @@
-/**
- * Centralized Authorization Middleware for Gate Monitoring System
- *
- * `withAuthorization` is the SINGLE validation point per request:
- * it authenticates the Supabase access token exactly once, enforces account
- * status / role / permission / resource rules, and injects the trusted
- * identity headers (`x-user-id`, `x-user-role`, `x-user-email`) consumed by
- * route handlers. Handlers downstream MUST read identity only from these
- * headers — they are always overwritten here from server-validated data,
- * so client-supplied values can never spoof identity.
- */
-
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/postgres";
 import { randomUUID } from "crypto";
@@ -19,40 +7,20 @@ import {
   requirePermission as requireAuthPermission,
   validateResourceOperation as validateResourceOp,
   getGateStudentInfo,
-  isMfaRequiredForPrivileged,
   type AuthContext,
 } from "@/lib/authContext";
-import { isPrivileged } from "@/lib/roles";
 import { getRequestBody, setupBodyCaching } from "@/lib/body-cache";
 import { signTrustedHeaders } from "@/server/http/trusted-headers";
+import { metricsMiddleware } from "@/middleware/metrics";
 
-/**
- * Typed error for authorization failures. Carries a stable `code` and HTTP
- * `status` so the middleware's catch block can handle it without brittle
- * substring matching on `error.message`.
- */
 class AuthError extends Error {
-  code: string;
-  status: number;
-  constructor(code: string, message: string, status: number) {
+  constructor(code: string, message: string, public status: number) {
     super(message);
     this.name = "AuthError";
-    this.code = code;
-    this.status = status;
+    Object.defineProperty(this, "code", { value: code, enumerable: true });
   }
 }
 
-/**
- * Authorization middleware that validates:
- * - Token validity using Supabase Auth (single validation per request)
- * - User existence in public.users
- * - User account status (must be ACTIVE unless allowInactive)
- * - User role and permissions
- * - Resource access
- *
- * @param handler - The API route handler; receives (req, { auth: AuthContext })
- * @param options - Authorization options
- */
 export interface AuthorizationOptions {
   requiredRole?: Role | Role[];
   requiredPermission?: string;
@@ -60,266 +28,155 @@ export interface AuthorizationOptions {
   resourceType?: string;
   resourceIdParam?: string;
   operation?: string;
-  /** Set false for pre-MFA endpoints (2fa setup/verify/disable) so enrollment stays reachable. Default true. */
-  enforceMfa?: boolean;
+}
+
+function bearer(req: NextRequest): string {
+  // The Authorization header is "Bearer <jwt>" (or, from some clients, a raw
+  // JWT). Strip the scheme prefix so jwtVerify gets a clean token. Without
+  // this every authenticated request 401s ("JWT verify failed, token= Bearer
+  // eyJ...") and every role UI bounces back to /login.
+  const raw = (req.headers.get("authorization") || "").trim();
+  const m = raw.match(/^Bearer\s+(.+)$/i);
+  if (m) return m[1].trim();
+  // Fall back to the access_token cookie (set by /api/auth/login) for
+  // clients that carry the httpOnly cookie but no Authorization header.
+  const cookie = req.cookies.get("access_token")?.value;
+  return cookie || raw;
+}
+
+async function handleAuthError(err: unknown): Promise<NextResponse> {
+  if (err instanceof AuthError) {
+    return NextResponse.json(
+      { success: false, error: { code: (err as any).code ?? "AUTH_ERROR", message: err.message } },
+      { status: err.status }
+    );
+  }
+  // requireAuthenticatedUser (and friends) throw plain `new Error('UNAUTHORIZED: ...')`
+  // rather than an AuthError instance. Catch that prefix here so a missing or
+  // invalid token returns 401 (not 500) — 500 leaks "this endpoint exists and
+  // has auth" to external scanners; 401 is the correct, non-informative answer.
+  const plain = err instanceof Error ? err.message : "";
+  if (/^UNAUTHORIZED:|^FORBIDDEN:|^ACCOUNT_INACTIVE:/.test(plain)) {
+    const code = plain.split(":")[0].replace(/_$/, "");
+    const status = code === "FORBIDDEN" ? 403 : code === "ACCOUNT_INACTIVE" ? 403 : 401;
+    return NextResponse.json(
+      { success: false, error: { code, message: plain.replace(/^UNAUTHORIZED:\s*/i, "") } },
+      { status },
+    );
+  }
+  const msg = err instanceof Error ? err.message : "Internal error";
+  return NextResponse.json(
+    { success: false, error: { code: "INTERNAL_ERROR", message: msg } },
+    { status: 500 }
+  );
 }
 
 export function withAuthorization(
   handler: (req: NextRequest, context: { auth: AuthContext }) => Promise<Response>,
   options: AuthorizationOptions = {}
 ) {
-  return async (req: NextRequest) => {
-    try {
-      // Body Caching: fix for Issue #56
-      // Avoid req.clone() by caching the body once and passing hash as header
-      const { req: cachedReq } = await setupBodyCaching(req);
-      req = cachedReq;
-
-      // Extract token from authorization header, cookies, or session header
-      const authHeader = req.headers.get('authorization');
-      let token: string | undefined;
-
-      if (authHeader?.startsWith('Bearer ')) {
-        token = authHeader.slice(7).trim();
-      } else {
-        token =
-          req.cookies.get('access_token')?.value ||
-          req.cookies.get('session-token')?.value ||
-          req.headers.get('x-session-token') ||
-          undefined;
-      }
-
-      if (!token) {
-        return NextResponse.json(
-          { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
-          { status: 401 }
-        );
-      }
-
-      // Validate basic authentication
-      const authContext = await requireAuthUser(token);
-
-      // Check account status - must be ACTIVE unless explicitly allowed
-      if (!options.allowInactive && !authContext.isActive) {
-        return NextResponse.json(
-          { success: false, error: { code: 'ACCOUNT_INACTIVE', message: 'Account is not active' } },
-          { status: 403 }
-        );
-      }
-
-      // Check if user has the required role
-      if (options.requiredRole) {
-        const requiredRoles = Array.isArray(options.requiredRole)
-          ? options.requiredRole
-          : [options.requiredRole];
-
-        const userRoles = authContext.roles ?? [authContext.role];
-    const hasRole = requiredRoles.some(r => userRoles.includes(r));
-    if (!hasRole) {
-          return NextResponse.json(
-            { success: false, error: { code: 'FORBIDDEN', message: 'Insufficient permissions' } },
-            { status: 403 }
-          );
+  return async (req: NextRequest): Promise<Response> => {
+    return metricsMiddleware(req, async () => {
+      await setupBodyCaching(req);
+      try {
+        const auth = await requireAuthUser(bearer(req));
+        if (!options.allowInactive && !auth.isActive) {
+          throw new AuthError("ACCOUNT_INACTIVE", "Account is not active", 403);
         }
-      }
-
-      // MFA gate: admin must have 2FA enrolled when required.
-      if (options.enforceMfa !== false) {
-        const mfaRequired = await isMfaRequiredForPrivileged();
-        if (
-          mfaRequired &&
-          isPrivileged(authContext.role) &&
-          !authContext.twoFactorEnabled
-        ) {
-          throw new AuthError(
-            "MFA_REQUIRED",
-            "MFA_REQUIRED: administrator accounts must enable two-factor authentication",
-            403
-          );
-        }
-      }
-
-      // Check if user has the required permission
-      if (options.requiredPermission) {
-        await requireAuthPermission(token, options.requiredPermission);
-      }
-
-      // Validate resource access if specified.
-      if (options.resourceType && options.resourceIdParam) {
-        let resourceId: string | undefined;
-
-        if (req.nextUrl.searchParams.has(options.resourceIdParam)) {
-          resourceId = req.nextUrl.searchParams.get(options.resourceIdParam) || undefined;
-        } else if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
-          try {
-            const body = await getRequestBody<Record<string, unknown>>(req);
-            if (body && typeof body === 'object' && options.resourceIdParam in body) {
-              resourceId = body[options.resourceIdParam] as string;
-            }
-          } catch {
-            // Ignore body parsing errors
+        if (options.requiredRole) {
+          const allowed = Array.isArray(options.requiredRole)
+            ? options.requiredRole
+            : [options.requiredRole];
+          const callerRoles = auth.roles && auth.roles.length ? auth.roles : [auth.role];
+          const ok = allowed.some((r) => callerRoles.includes(r));
+          if (!ok) {
+            throw new AuthError("FORBIDDEN", "Insufficient role", 403);
           }
         }
-
-        if (resourceId) {
-          await validateResourceOp(
-            token,
-            options.resourceType,
-            resourceId,
-            options.operation || 'read'
-          );
+        if (options.requiredPermission) {
+          await requireAuthPermission(bearer(req), options.requiredPermission);
         }
+      if (options.resourceType && options.operation) {
+        const url = new URL(req.url);
+        const resourceId = options.resourceIdParam
+          ? url.pathname.split("/").filter(Boolean).pop() || ""
+          : "";
+        await validateResourceOp(bearer(req), options.resourceType, resourceId, options.operation);
       }
-
-      // Inject trusted identity headers for the handler. These ALWAYS
-      // overwrite client-supplied values with server-validated data.
-      req.headers.set('x-user-id', authContext.userId);
-      req.headers.set('x-user-role', authContext.role);
-      req.headers.set('x-user-email', authContext.email);
-
-      // Sign the trusted identity headers so downstream handlers can verify
-      // via requireTrustedHeaders(req) that the identity was set by the
-      // authorization layer and not spoofed by a client.
-      try {
-        const nowMs = Date.now();
+        // Audit issue #2: routes read x-user-id / x-user-role / x-user-email
+        // and TRUST them. That is only safe if withAuthorization OVERWRITES
+        // those headers from the verified JWT (not from the client) and signs
+        // them. Set the full trusted-identity set here so any route that
+        // calls requireTrustedHeaders(req) passes the HMAC check.
+        const ts = Date.now();
         const sig = signTrustedHeaders(
-          { userId: authContext.userId, role: authContext.role, email: authContext.email },
-          nowMs
-        );
-        req.headers.set('x-mw-signature', sig);
-        req.headers.set('x-mw-timestamp', String(nowMs));
-      } catch {
-        // INTERNAL_MW_SECRET not configured — degrade gracefully;
-        // routes that call requireTrustedHeaders will reject with 401.
-      }
-
-      // If all checks pass, continue to the handler with auth context.
-      // MUST await: without it, a handler rejection escapes the try/catch
-      // and becomes an unhandled rejection instead of a JSON 500.
-      return await handler(req, { auth: authContext });
-    } catch (error) {
-      // Handle different types of errors
-      if (error instanceof AuthError) {
-        return NextResponse.json(
-          { success: false, error: { code: error.code, message: error.message } },
-          { status: error.status }
-        );
-      }
-
-      if (error instanceof Error) {
-        if (error.message.includes('UNAUTHORIZED') || error.message.includes('SESSION_EXPIRED') || error.message.includes('invalid_token') || error.message.includes('expired') || error.message.includes('not authenticated')) {
-          return NextResponse.json(
-            { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication failed. Please sign in again.' } },
-            { status: 401 }
-          );
-        } else if (error.message.includes('ACCOUNT_INACTIVE')) {
-          return NextResponse.json(
-            { success: false, error: { code: 'ACCOUNT_INACTIVE', message: 'Account is not active' } },
-            { status: 403 }
-          );
-        } else if (error.message.includes('MFA_REQUIRED')) {
-          return NextResponse.json(
-            { success: false, error: { code: 'MFA_REQUIRED', message: 'Two-factor authentication enrollment is required for administrator accounts.' } },
-            { status: 403 }
-          );
-        } else if (error.message.includes('FORBIDDEN')) {
-          return NextResponse.json(
-            { success: false, error: { code: 'FORBIDDEN', message: 'Insufficient permissions' } },
-            { status: 403 }
-          );
-        } else if (error.message.includes('NOT_FOUND')) {
-          return NextResponse.json(
-            { success: false, error: { code: 'NOT_FOUND', message: 'Resource not found' } },
-            { status: 404 }
-          );
-        }
-      }
-
-      // Default error response — any auth-layer exception (Supabase/DB/network
-      // hiccups while verifying identity) that the checks above did not
-      // classify. Log enough context to diagnose without leaking internals.
-      const detail =
-        error instanceof Error ? `${error.name}: ${error.message}` : String(error);
-      console.error('Authorization middleware error:', error);
-      // Typed domain errors (AppError subclasses: ForbiddenError,
-      // NotFoundError, BadRequestError) carry their own code + status.
-      if (
-        error instanceof Error &&
-        (error as any).code &&
-        (error as any).status
-      ) {
-        return NextResponse.json(
-          { success: false, error: { code: (error as any).code, message: error.message } },
-          { status: (error as any).status }
-        );
-      }
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'UNAUTHORIZED',
-            message: 'Session verification failed. Please sign in again.',
+          {
+            userId: auth.userId,
+            role: auth.role,
+            email: auth.email,
           },
-        },
-        { status: 401 }
-      );
-    }
+          ts,
+        );
+        const headers = new Headers(req.headers);
+        // The identity values are authoritative from the verified JWT — any
+        // client-supplied versions of these headers are replaced.
+        headers.set("x-user-id", auth.userId);
+        headers.set("x-user-role", auth.role);
+        if (auth.email) headers.set("x-user-email", auth.email);
+        else headers.delete("x-user-email");
+        headers.set("x-mw-signature", sig);
+        headers.set("x-mw-timestamp", String(ts));
+        // Legacy header some routes still read — keep it in sync.
+        headers.set("x-auth-signature", sig);
+        const proxied = new NextRequest(req.url, {
+          method: req.method,
+          headers,
+          body: req.body,
+          duplex: "half",
+        });
+        return await handler(proxied, { auth });
+      } catch (err) {
+        return handleAuthError(err);
+      }
+    });
   };
 }
 
-/**
- * Pre-MFA authorization wrapper: identical to withAuthorization but skips the
- * MFA gate (enforceMfa: false). ONLY for 2FA enrollment/recovery endpoints
- */
-export function withAuthorizationPreMfa(
-  handler: (req: NextRequest, context: { auth: AuthContext }) => Promise<Response>,
-  options: Omit<AuthorizationOptions, "enforceMfa"> = {}
-) {
-  return withAuthorization(handler, { ...options, enforceMfa: false });
-}
+export type AuthenticatedRouteHandler = (
+  req: NextRequest,
+  context: { auth: AuthContext }
+) => Promise<Response>;
 
-export type AuthenticatedRouteHandler = (req: NextRequest, context: { auth: AuthContext }) => Promise<Response>;
-
-/**
- * Higher-order function to combine multiple middleware
- */
 export function combineMiddleware(
   handler: AuthenticatedRouteHandler,
-  ...middlewares: ((handler: AuthenticatedRouteHandler) => AuthenticatedRouteHandler)[]
+  ...middlewares: ((h: AuthenticatedRouteHandler) => AuthenticatedRouteHandler)[]
 ) {
-  return middlewares.reduceRight(
-    (acc, middleware) => middleware(acc),
-    handler
-  );
+  return middlewares.reduceRight((h, mw) => mw(h), handler);
 }
 
 export function requireRole(requiredRole: Role | Role[]) {
-  return (handler: AuthenticatedRouteHandler) => {
-    return withAuthorization(handler, { requiredRole });
-  };
+  return (handler: AuthenticatedRouteHandler) => withAuthorization(handler, { requiredRole });
 }
 
 export function requirePermission(requiredPermission: string) {
-  return (handler: AuthenticatedRouteHandler) => {
-    return withAuthorization(handler, { requiredPermission });
-  };
+  return (handler: AuthenticatedRouteHandler) => withAuthorization(handler, { requiredPermission });
 }
 
 export function withAccountStatusValidation(handler: AuthenticatedRouteHandler) {
-  return withAuthorization(handler, { allowInactive: false });
+  return async (req: NextRequest, ctx: { auth: AuthContext }) => {
+    if (!ctx.auth.isActive) {
+      throw new AuthError("ACCOUNT_INACTIVE", "Account is not active", 403);
+    }
+    return handler(req, ctx);
+  };
 }
 
-/**
- * Helper function to extract and validate user from request
- */
-export async function getAuthenticatedUser(req: NextRequest) {
-  const authHeader = req.headers.get('authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
-    throw new Error('UNAUTHORIZED: Authentication required');
+export async function getAuthenticatedUser(req: NextRequest): Promise<AuthContext | null> {
+  try {
+    return await requireAuthUser(bearer(req));
+  } catch {
+    return null;
   }
-
-  const token = authHeader.slice(7);
-  return await requireAuthUser(token);
 }
 
 export async function logAuditEvent(
@@ -330,23 +187,13 @@ export async function logAuditEvent(
   userRole: string | null = null,
   userName: string | null = null
 ) {
-  try {
-    await query(
-      `INSERT INTO audit_logs (id, action, user_id, user_name, user_role, details, ip_address, timestamp)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())`,
-      [
-        randomUUID(),
-        eventType,
-        userId,
-        userName,
-        userRole,
-        typeof details === "object" ? JSON.stringify(details) : details,
-        ipAddress || null,
-      ],
-      { currentUserId: userId }
-    );
-  } catch (err) {
-    console.error('Error logging audit event:', err);
-  }
+  await query(
+    `INSERT INTO audit_logs (id, action, user_id, user_name, user_role, details, ip_address)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+    [randomUUID(), eventType, userId, userName, userRole, JSON.stringify(details), ipAddress]
+  );
 }
+
+export { getGateStudentInfo, getRequestBody };
+export type { AuthContext };
 export default withAuthorization;

@@ -11,7 +11,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
-import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { ConfirmDialog } from "@/components/admin/shared/ConfirmDialog";
 
 interface ExitReason {
   code: string;

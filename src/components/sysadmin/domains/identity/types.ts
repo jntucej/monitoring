@@ -146,3 +146,11 @@ export interface PromotionsData {
   /** Flattened status counts for consumers preferring a keyed map. */
   counts: Record<string, number>;
 }
+
+// ── Envelope aliases ─────────────────────────────────────────────────────────
+// ok() from @/server/http/response wraps the payload in `{ data: T }`.
+// Pages that type useDashboardData with these aliases will correctly receive
+// the envelope and pass `data.data` to the content component.
+
+export type PeopleEnvelope = { data: PeopleData };
+export type PromotionsEnvelope = { data: PromotionsData };

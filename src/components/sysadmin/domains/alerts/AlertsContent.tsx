@@ -160,12 +160,18 @@ export interface AlertsContentProps {
 }
 
 export function AlertsContent({ data, sseState = "idle" }: AlertsContentProps) {
-  const { open, mttah, mttrh, snoozed, feed, rules_matrix, rule_heat } = data;
-  const totalOpen = open.critical + open.high + open.medium + open.low;
+  // Defensive: the page unwraps the ok() envelope, but a transient partial
+  // payload (or an SSE-driven refresh that lands mid-flight) must not crash
+  // the whole page. Fall back to safe defaults for any missing field.
+  const { open, mttah, mttrh, snoozed, feed, rules_matrix, rule_heat } = data ?? ({} as AlertsData);
+  const totalOpen = (open?.critical ?? 0) + (open?.high ?? 0) + (open?.medium ?? 0) + (open?.low ?? 0);
+  const feedRows = Array.isArray(feed) ? feed : [];
+  const rulesMatrix = rules_matrix ?? { rows: [], cols: [], data: [] };
+  const ruleHeat = Array.isArray(rule_heat) ? rule_heat : [];
 
   // Signature: 30-min heat strip across the whole feed (summed buckets).
   const feedHeat = Array(6).fill(0);
-  for (const row of feed) {
+  for (const row of feedRows) {
     for (let i = 0; i < 6; i++) {
       feedHeat[i] += row.heat30?.[i] ?? 0;
     }
@@ -177,14 +183,14 @@ export function AlertsContent({ data, sseState = "idle" }: AlertsContentProps) {
     { length: 24 },
     (_, i) => ({
       label: `${String(i).padStart(2, "0")}:00`,
-      critical: Math.round((open.critical / 24) * (i % 3 === 0 ? 2 : 1)),
-      high: Math.round((open.high / 24) * (i % 4 === 0 ? 2 : 1)),
-      medium: Math.round((open.medium / 24) * (i % 5 === 0 ? 1.5 : 1)),
-      low: Math.round((open.low / 24) * (i % 6 === 0 ? 1 : 0.5)),
+      critical: Math.round(((open?.critical ?? 0) / 24) * (i % 3 === 0 ? 2 : 1)),
+      high: Math.round(((open?.high ?? 0) / 24) * (i % 4 === 0 ? 2 : 1)),
+      medium: Math.round(((open?.medium ?? 0) / 24) * (i % 5 === 0 ? 1.5 : 1)),
+      low: Math.round(((open?.low ?? 0) / 24) * (i % 6 === 0 ? 1 : 0.5)),
     })
   );
 
-  const hasRules = rules_matrix.rows.length > 0;
+  const hasRules = rulesMatrix.rows.length > 0;
 
   return (
     <div className="space-y-6">
@@ -206,12 +212,12 @@ export function AlertsContent({ data, sseState = "idle" }: AlertsContentProps) {
             </span>
           </div>
           <div className="mt-2">
-            <MiniSeverityChips counts={open} label={`Open alerts: ${totalOpen}`} />
+            <MiniSeverityChips counts={open ?? { critical: 0, high: 0, medium: 0, low: 0 }} label={`Open alerts: ${totalOpen}`} />
           </div>
         </div>
-        <KpiChip label="MTTA" value={`${mttah}h`} tone="neutral" />
-        <KpiChip label="MTTR" value={`${mttrh}h`} tone="neutral" />
-        <KpiChip label="Snoozed" value={snoozed} tone={snoozed > 0 ? "warn" : "neutral"} />
+        <KpiChip label="MTTA" value={`${mttah ?? 0}h`} tone="neutral" />
+        <KpiChip label="MTTR" value={`${mttrh ?? 0}h`} tone="neutral" />
+        <KpiChip label="Snoozed" value={snoozed ?? 0} tone={(snoozed ?? 0) > 0 ? "warn" : "neutral"} />
       </div>
 
       {/* Signature visual: 24h severity stacked-area strip */}
@@ -299,7 +305,7 @@ export function AlertsContent({ data, sseState = "idle" }: AlertsContentProps) {
           </p>
           <div className="flex items-center gap-2">
             <span className="text-xs tabular-nums" style={{ color: VIZ_THEME.muted }}>
-              {feed.length} rows
+              {feedRows.length} rows
             </span>
             <span
               className="rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide"
@@ -333,13 +339,13 @@ export function AlertsContent({ data, sseState = "idle" }: AlertsContentProps) {
             className="shrink-0"
           />
         </div>
-        {feed.length === 0 ? (
+        {feedRows.length === 0 ? (
           <p className="text-xs py-4" style={{ color: VIZ_THEME.muted }}>
             No recent alerts.
           </p>
         ) : (
           <ul className="space-y-2">
-            {feed.slice(0, 20).map((row) => (
+            {feedRows.slice(0, 20).map((row) => (
               <FeedRow key={row.id} row={row} />
             ))}
           </ul>
@@ -356,14 +362,14 @@ export function AlertsContent({ data, sseState = "idle" }: AlertsContentProps) {
             Rules × 7-day heat
           </p>
           <span className="text-xs" style={{ color: VIZ_THEME.muted }}>
-            {rules_matrix.rows.length} rules · {rules_matrix.cols.length} days
+            {rulesMatrix.rows.length} rules · {rulesMatrix.cols.length} days
           </span>
         </div>
         {hasRules ? (
           <HeatMatrix
-            rows={rules_matrix.rows}
-            cols={rules_matrix.cols}
-            data={rules_matrix.data}
+            rows={rulesMatrix.rows}
+            cols={rulesMatrix.cols}
+            data={rulesMatrix.data}
             label="Fires per rule × day"
             cellSize={20}
           />
@@ -373,12 +379,12 @@ export function AlertsContent({ data, sseState = "idle" }: AlertsContentProps) {
           </p>
         )}
         {/* per-rule 7-day heat strips (signature visual alternative) */}
-        {rule_heat.length > 0 && (
+        {ruleHeat.length > 0 && (
           <div className="mt-4 space-y-1.5">
             <p className="text-[11px] font-medium uppercase tracking-wide" style={{ color: VIZ_THEME.muted }}>
               Per-rule heat strips
             </p>
-            {rule_heat.slice(0, 6).map((rule) => (
+            {ruleHeat.slice(0, 6).map((rule) => (
               <div key={rule.ruleId} className="flex items-center gap-2 min-w-0">
                 <span
                   className="text-xs w-32 truncate shrink-0"

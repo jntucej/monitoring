@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { HodIdInput } from "@/components/sysadmin/HodIdInput";
 import { Building2, Plus, Trash2, Edit3, CheckCircle2, ShieldAlert, Users, GraduationCap } from "lucide-react";
 import { useApi } from "@/hooks/useApi";
 
@@ -19,7 +20,7 @@ const api = useApi();
 
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editingDept, setEditingDept] = useState<Partial<Department> | null>(null);
+  const [editingDept, setEditingDept] = useState<Partial<Department> & { hodIdInput: string; hodUserId: string | null } | null>(null);
   const [statusMsg, setStatusMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const fetchDepts = async () => {
@@ -41,13 +42,17 @@ const api = useApi();
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingDept?.code || !editingDept?.name) return;
+    if (!editingDept?.code || !editingDept?.name || !editingDept.hodUserId) return;
+
+    const { hodIdInput, hodUserId, ...dept } = editingDept;
+    const payload = { ...dept, hodUserId } as Record<string, unknown>;
+    if (payload.hod === undefined) payload.hod = "Not Assigned";
 
     try {
       const res = await fetch("/api/departments", {
         method: "POST",
         headers: { ...api.getHeaders(), "Content-Type": "application/json" },
-        body: JSON.stringify(editingDept),
+        body: JSON.stringify(payload),
       });
       const json = await res.json();
       if (json.success) {
@@ -100,6 +105,8 @@ const api = useApi();
                 code: "",
                 name: "",
                 hod: "Not Assigned",
+                hodIdInput: "",
+                hodUserId: null,
               })
             }
             className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-xl text-xs flex items-center gap-2 transition"
@@ -169,7 +176,9 @@ const api = useApi();
                       </td>
                       <td className="p-4 text-right space-x-2">
                         <button
-                          onClick={() => setEditingDept(d)}
+                          onClick={() =>
+                            setEditingDept({ ...d, hodIdInput: "", hodUserId: null })
+                          }
                           className="p-1.5 rounded-lg bg-[var(--bg-elevated)] hover:text-emerald-400 transition"
                         >
                           <Edit3 className="w-4 h-4" />
@@ -224,6 +233,22 @@ const api = useApi();
                   />
                 </div>
 
+                <div>
+                  <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase mb-1">
+                    Head of Department
+                  </label>
+                  <div className="mt-1">
+                    <HodIdInput
+                      value={editingDept.hodIdInput || ""}
+                      onChange={(v) => setEditingDept({ ...editingDept!, hodIdInput: v })}
+                      onResolved={(id) => setEditingDept({ ...editingDept!, hodUserId: id })}
+                    />
+                  </div>
+                  <p className="mt-1 text-xs text-[var(--text-muted)]">
+                    Enter any official identifier: student roll · employee ID · unique ID · email.
+                  </p>
+                </div>
+
                 <div className="flex justify-end gap-2 pt-4 border-t border-[var(--border)]">
                   <button
                     type="button"
@@ -234,7 +259,8 @@ const api = useApi();
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-emerald-500 text-white rounded-xl text-xs font-semibold hover:bg-emerald-600 transition"
+                    disabled={!editingDept.code || !editingDept.name || !editingDept.hodUserId}
+                    className="px-4 py-2 bg-emerald-500 text-white rounded-xl text-xs font-semibold hover:bg-emerald-600 transition disabled:opacity-50 disabled:pointer-events-none"
                   >
                     Save Department
                   </button>

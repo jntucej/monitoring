@@ -1,15 +1,13 @@
-"use client";
+import type { Metadata } from "next";
+import { NOINDEX_METADATA } from "@/lib/seo";
+import { StudentShell } from "./StudentShell";
 
-import { AuthGuard } from "@/components/shared/AuthGuard";
+export const metadata: Metadata = NOINDEX_METADATA;
 
 export default function StudentLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <AuthGuard allowedRoles={["student", "admin", "sysadmin"]}>
-      {children}
-    </AuthGuard>
-  );
+  return <StudentShell>{children}</StudentShell>;
 }

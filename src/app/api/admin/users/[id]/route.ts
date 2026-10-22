@@ -59,7 +59,7 @@ async function handleGet(req: NextRequest, ctx: { auth: { userId: string; role: 
       );
     }
     // Never leak credential hashes in admin responses.
-    const { password_hash, pin_hash, initial_pin_hash, totp_secret, two_factor_secret, ...safe } = target;
+    const { password_hash, pin_hash, initial_pin_hash, ...safe } = target;
     return NextResponse.json({
       success: true,
       data: {

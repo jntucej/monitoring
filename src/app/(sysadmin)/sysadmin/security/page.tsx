@@ -55,7 +55,7 @@ function SecurityReinforcedInner() {
       <div>
         <p className="text-2xl font-bold text-[var(--text-primary)]">Infrastructure Security</p>
         <p className="text-xs text-[var(--text-secondary)]">
-          Zero-trust posture: IP allowlists, 2FA enforcement, session &amp; key management, SSO
+          Zero-trust posture: IP allowlists, session &amp; key management, SSO
           configuration. Signed in as <span className="font-mono text-slate-300">{role}</span>.
         </p>
       </div>
@@ -66,7 +66,7 @@ function SecurityReinforcedInner() {
           {linkCard("/sysadmin/sessions", Lock, "Active Sessions", "Live JWT user sessions & revocation")}
           {linkCard("/sysadmin/sso", Landmark, "SSO", "Federated sign-in provider configuration")}
           {linkCard("/sysadmin/access-keys", KeyRound, "Access Keys", "API / machine access keys")}
-          {linkCard("/sysadmin/security", ShieldCheck, "Zero-Trust", "IP allowlists & 2FA enforcement")}
+          {linkCard("/sysadmin/security", ShieldCheck, "Zero-Trust", "IP allowlists & access controls")}
         </div>
       </WidgetBoundary>
 

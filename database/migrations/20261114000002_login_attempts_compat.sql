@@ -99,6 +99,12 @@ BEGIN
   END IF;
 END $$;
 
+-- Attach trigger to pin_login_attempts
+DROP TRIGGER IF EXISTS trg_mirror_pin_attempt ON public.pin_login_attempts;
+CREATE TRIGGER trg_mirror_pin_attempt
+  AFTER INSERT OR UPDATE ON public.pin_login_attempts
+  FOR EACH ROW EXECUTE FUNCTION public.mirror_pin_attempt_to_login();
+
 -- 4. Self-record (adaptive to both schema_migrations shapes)
 DO $$
 DECLARE has_filename BOOLEAN; has_checksum BOOLEAN;

@@ -56,7 +56,7 @@ BEGIN
   ) THEN
     CREATE POLICY "user_achievements_select_owner" ON public.user_achievements
       FOR SELECT TO authenticated, postgres
-      USING (user_id = auth.uid() OR true);
+      USING (true);
   END IF;
 
   IF NOT EXISTS (

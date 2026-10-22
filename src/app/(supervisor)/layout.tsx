@@ -1,15 +1,13 @@
-"use client";
+import type { Metadata } from "next";
+import { NOINDEX_METADATA } from "@/lib/seo";
+import { SupervisorShell } from "./SupervisorShell";
 
-import { AuthGuard } from "@/components/shared/AuthGuard";
+export const metadata: Metadata = NOINDEX_METADATA;
 
 export default function SupervisorLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <AuthGuard allowedRoles={["supervisor", "principal", "admin", "sysadmin"]}>
-      {children}
-    </AuthGuard>
-  );
+  return <SupervisorShell>{children}</SupervisorShell>;
 }

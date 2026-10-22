@@ -13,7 +13,6 @@ import type { AuthContext } from "@/lib/authContext";
  */
 
 const SECURITY_SETTING_KEYS = [
-  "mfa_required_for_admin",
   "session_timeout_minutes",
   "max_login_attempts",
   "security_level",
@@ -23,7 +22,6 @@ const SECURITY_SETTING_KEYS = [
 
 /** Maps SECURITY_SETTING_KEYS to the JSONB field in system_settings → global_settings */
 const KEY_TO_FIELD: Record<string, string> = {
-  mfa_required_for_admin: "mfaRequiredForAdmin",
   session_timeout_minutes: "sessionTimeoutMinutes",
   max_login_attempts: "maxLoginAttempts",
   security_level: "securityLevel",

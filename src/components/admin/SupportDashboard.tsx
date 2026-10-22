@@ -6,8 +6,8 @@ import { getAuthHeaders } from "@/lib/utils";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
-import { WidgetLoading } from "@/components/shared/LoadingStates";
+import { ConfirmDialog } from "@/components/admin/shared/ConfirmDialog";
+import { WidgetLoading } from "@/components/admin/shared/LoadingStates";
 import { LifeBuoy, Filter } from "lucide-react";
 import type { BadgeVariant } from "@/components/ui/badge";
 

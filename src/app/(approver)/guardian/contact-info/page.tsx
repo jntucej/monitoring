@@ -140,12 +140,6 @@ function ContactInfoInner() {
                   </div>
                 </div>
               ))}
-              {p.twoFactorEnabled === false && (
-                <div className="rounded-lg border border-amber-400/30 bg-amber-400/10 p-3 text-xs text-amber-200">
-                  Two-factor authentication is not enabled on this account. You can enable it under
-                  account settings for stronger security.
-                </div>
-              )}
             </dl>
           ) : (
             <p className="text-sm text-[var(--text-muted)]">No profile data available.</p>

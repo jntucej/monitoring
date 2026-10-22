@@ -56,12 +56,12 @@ async function handleGet(
   }
 
   // Fetch open housekeeping tasks scoped to the caller's hostel_scope.
-  // Housekeeping tasks are permission_requests with workflow_type
+  // Housekeeping tasks are rows in the permissions table with workflow_type
   // "hostel" and status PENDING/ESCALATED at the hostel_manager stage.
   // We also include any standalone "housekeeping" sub-type if the schema
   // supports it, falling back gracefully.
   const { data, error } = await db
-    .from("permission_requests")
+    .from("permissions")
     .select(
       "ticket_number, description, priority, status, created_at, " +
         "assigned_to, hostel_scope"

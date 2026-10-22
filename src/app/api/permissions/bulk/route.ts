@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { assertCsrf } from "@/lib/csrf";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -116,6 +117,9 @@ function validateBulkBody(body: unknown): {
 }
 
 async function handlePost(req: NextRequest): Promise<Response> {
+  const csrfFail = assertCsrf(req);
+  if (csrfFail) return csrfFail;
+
   let body: unknown;
   try {
     body = await req.json();
@@ -223,6 +227,8 @@ async function handlePost(req: NextRequest): Promise<Response> {
           ? "not_pending"
           : applyRes.conflict === "notAllowed"
           ? "not_allowed"
+          : applyRes.conflict === "concurrentModification"
+          ? "skipped"  // G18: ticket was modified by another approver mid-batch
           : "error";
 
       results.push({

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/postgres";
 import { verifyAccessToken, verifyRefreshToken, signAccessToken, signRefreshToken } from "@/lib/auth-token";
 import { withRateLimit } from "@/lib/rate-limit";
+import { secureCookieOptions } from "@/lib/cookies";
 
 async function handleSessionCheck(req: NextRequest) {
   try {
@@ -108,22 +109,9 @@ async function handleSessionCheck(req: NextRequest) {
     });
 
     if (newToken) {
-      const isProd = process.env.NODE_ENV === "production";
-      response.cookies.set("access_token", newToken, {
-        httpOnly: true,
-        secure: isProd,
-        sameSite: "lax",
-        path: "/",
-        maxAge: 3600,
-      });
+      response.cookies.set("access_token", newToken, secureCookieOptions(req, { maxAge: 3600 }));
       if (newRefreshToken) {
-        response.cookies.set("refresh_token", newRefreshToken, {
-          httpOnly: true,
-          secure: isProd,
-          sameSite: "lax",
-          path: "/",
-          maxAge: 7 * 24 * 3600,
-        });
+        response.cookies.set("refresh_token", newRefreshToken, secureCookieOptions(req, { maxAge: 7 * 24 * 3600 }));
       }
     }
 

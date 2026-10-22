@@ -55,6 +55,10 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
           );
         }
         parentId = authUserId;
+      } else if (authRole === 'visitor') {
+        // Visitors can list the pass records they were granted today — they
+        // don't own a roll number, so they query by their own user id.
+        parentId = authUserId;
       } else {
         return NextResponse.json(
           { success: false, error: { code: "FORBIDDEN", message: "Insufficient permissions." } },
@@ -206,7 +210,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ['admin', 'sysadmin', 'operator', 'parent', 'guardian', 'student', 'supervisor', 'principal'] }),
+  withAuthorization(handleGet, { requiredRole: ['admin', 'sysadmin', 'operator', 'parent', 'guardian', 'student', 'supervisor', 'principal', 'visitor'] }),
   { keyPrefix: 'passes_list', maxRequests: 100 }
 );
 

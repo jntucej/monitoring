@@ -41,14 +41,15 @@ function KpiNumber({ label, value, hint }: { label: string; value: ReactNode; hi
   );
 }
 
-function AppSection({ data }: { data: HealthData["app"] }) {
-  const hasData = data.errorRate24h.length > 0;
-  const peak = hasData ? Math.max(...data.errorRate24h) : 0;
-  const avg = hasData ? data.errorRate24h.reduce((a, b) => a + b, 0) / data.errorRate24h.length : 0;
+function AppSection({ data }: { data: HealthData["app"] | null | undefined }) {
+  const rate = data?.errorRate24h;
+  const hasData = rate ? rate.length > 0 : false;
+  const peak = hasData ? Math.max(...rate!) : 0;
+  const avg = hasData ? rate!.reduce((a, b) => a + b, 0) / rate!.length : 0;
 
-  const cells: HeatCell[] = data.errorRate24h.map((v, i) => ({
+  const cells: HeatCell[] = (rate ?? []).map((v, i) => ({
     value: v,
-    label: `${data.errorRate24h.length - 1 - i}h ago`,
+    label: `${(rate?.length ?? 0) - 1 - i}h ago`,
     status: v > 0.05 ? "error" : v > 0.02 ? "warn" : "ok",
   }));
 
@@ -76,7 +77,8 @@ function AppSection({ data }: { data: HealthData["app"] }) {
   );
 }
 
-function DatabaseSection({ data }: { data: HealthData["database"] }) {
+function DatabaseSection({ data }: { data: HealthData["database"] | null | undefined }) {
+  if (!data) return <p className="text-xs py-4" style={{ color: VIZ_THEME.muted }}>No database metrics.</p>;
   const lastCheckLabel = data.last_check
     ? new Date(data.last_check).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     : "—";
@@ -91,7 +93,8 @@ function DatabaseSection({ data }: { data: HealthData["database"] }) {
   );
 }
 
-function InfraSection({ data }: { data: HealthData["infra"] }) {
+function InfraSection({ data }: { data: HealthData["infra"] | null | undefined }) {
+  if (!data) return <p className="text-xs py-4" style={{ color: VIZ_THEME.muted }}>No container metrics.</p>;
   const allRunning = data.containers > 0 && data.running === data.containers;
   const gaugeValue = data.containers > 0 ? data.running / data.containers : 0;
   const gaugeColor = allRunning
@@ -122,7 +125,8 @@ function InfraSection({ data }: { data: HealthData["infra"] }) {
   );
 }
 
-function RedisSection({ data }: { data: HealthData["redis"] }) {
+function RedisSection({ data }: { data: HealthData["redis"] | null | undefined }) {
+  if (!data) return <p className="text-xs py-4" style={{ color: VIZ_THEME.muted }}>No worker metrics.</p>;
   // Gauge = worker healthy? 1 : fill based on queue headroom (1 - depth/1000).
   const value = data.worker_healthy ? 1 : Math.max(0, 1 - data.queue_depth / 1000);
   const color = data.worker_healthy ? "var(--action-primary)" : "var(--action-danger)";

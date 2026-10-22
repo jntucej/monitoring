@@ -62,13 +62,10 @@ export const GET = withRateLimit(
           FROM users
         `).then((r) => r.rows),
 
-        // MFA coverage: two_factor_enabled TRUE among active users (0..1).
-        query(`
-          SELECT
-            COUNT(*) FILTER (WHERE two_factor_enabled IS TRUE) * 1.0
-              / NULLIF(COUNT(*) FILTER (WHERE status = 'ACTIVE'), 0) AS mfa_coverage
-          FROM users
-        `).then((r) => r.rows),
+        // MFA coverage removed — MFA subsystem has been removed from the
+        // architecture. Return a constant 0 so existing consumers don't
+        // break.
+        Promise.resolve([{ mfa_coverage: 0 }]),
 
         // gates is_active -> online/offline per gate.
         query(`

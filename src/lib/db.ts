@@ -1479,17 +1479,6 @@ export async function findUserByLogin(login: string): Promise<User | null> {
 // to Supabase Auth (`signInWithPassword`) — application code must never
 // authenticate users by merely looking up a row.
 
-/** Verify an operator PIN against the bcrypt-hashed `initial_pin_hash`. */
-export async function verifyPin(userId: string, pin: string): Promise<boolean> {
-  const { rows } = await query<{ pin_hash: string|null; initial_pin_hash: string|null }>(
-    `SELECT pin_hash, initial_pin_hash FROM users WHERE id = $1 AND status = 'ACTIVE'`,
-    [userId]
-  );
-  const hashes = [rows[0]?.pin_hash, rows[0]?.initial_pin_hash].filter(Boolean) as string[];
-  for (const h of hashes) if (await bcrypt.compare(pin, h)) return true;
-  return false;
-}
-
 export async function hashPin(pin: string): Promise<string> {
   return await bcrypt.hash(pin, 10);
 }

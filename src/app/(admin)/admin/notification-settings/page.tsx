@@ -1,9 +1,9 @@
 "use client";
 
 import { useMemo } from "react";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
-import { PageLoading } from "@/components/shared/LoadingStates";
+import { PageLoading } from "@/components/admin/shared/LoadingStates";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import {
@@ -17,8 +17,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
-import { AuthGuard } from "@/components/shared/AuthGuard";
-
 /* ── response shape (mirrors /api/admin/notification-settings) ────────────── */
 
 interface ChannelStat {
@@ -219,10 +217,12 @@ function AdminNotificationSettingsInner() {
 
 export default function AdminNotificationSettingsPage() {
   return (
-    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+    
       <Suspense fallback={<PageLoading />}>
         <AdminNotificationSettingsInner />
       </Suspense>
-    </AuthGuard>
+    
+    
+
   );
 }

@@ -8,18 +8,20 @@ import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { SafetyContent } from "@/components/sysadmin/domains/alerts/SafetyContent";
-import type { SafetyData } from "@/components/sysadmin/domains/alerts/types";
+import type { SafetyEnvelope } from "@/components/sysadmin/domains/alerts/types";
 
 function SafetyInner() {
-  const { data, loading, error, refresh } = useDashboardData<SafetyData>(
+  const { data, loading, error, refresh } = useDashboardData<SafetyEnvelope>(
     "/api/admin/safety/overview",
     {
       ttlMs: 45_000,
       pollMs: 15_000,
     }
   );
+  // ok() wraps the payload in { data: SafetyData } — unwrap for the content.
+  const payload = data?.data ?? null;
 
-  const busy = loading && !data;
+  const busy = loading && !payload;
 
   return (
     <div className="space-y-4 min-w-0">
@@ -43,7 +45,7 @@ function SafetyInner() {
             <div className="h-64 rounded-xl bg-slate-100 animate-pulse" />
           </div>
         ) : (
-          data && <SafetyContent data={data} />
+          payload && <SafetyContent data={payload} />
         )}
       </WidgetBoundary>
 

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { assertCsrf } from "@/lib/csrf";
 import { query } from "@/lib/postgres";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -67,6 +68,9 @@ async function handleGet(req: NextRequest, ctx: { auth: AuthContext }): Promise<
 }
 
 async function handlePatch(req: NextRequest, ctx: { auth: AuthContext }): Promise<Response> {
+  const csrfFail = assertCsrf(req);
+  if (csrfFail) return csrfFail;
+
   try {
     const id = getId(req);
     const body = await req.json().catch(() => ({}));

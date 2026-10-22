@@ -95,7 +95,6 @@ export const GET = withRateLimit(
             u.email,
             u.role,
             u.status,
-            u.two_factor_enabled,
             u.created_at::text AS created_at
           FROM users u
           ORDER BY u.created_at DESC
@@ -147,7 +146,7 @@ export const GET = withRateLimit(
         email: String(r.email ?? ""),
         role: String(r.role ?? ""),
         state: String(r.status ?? ""),
-        two_factor_enabled: r.two_factor_enabled === true || r.two_factor_enabled === "true",
+        two_factor_enabled: false,
         created_at: String(r.created_at ?? ""),
         cohort_active_pct: 0,
       }));

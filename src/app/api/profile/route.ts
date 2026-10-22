@@ -22,7 +22,7 @@ async function handleGet(_req: NextRequest, context: { auth: AuthContext }) {
     .select(`
       id, name, email, phone, role, status, unique_id,
       photo_url, department_id, login_identifier,
-      two_factor_enabled, created_at
+      created_at
     `)
     .eq("id", context.auth.userId)
     .maybeSingle();
@@ -68,7 +68,7 @@ async function handleGet(_req: NextRequest, context: { auth: AuthContext }) {
       photoUrl: user.photo_url,
       departmentId: user.department_id,
       loginIdentifier: user.login_identifier,
-      twoFactorEnabled: !!user.two_factor_enabled,
+      twoFactorEnabled: false,
       createdAt: user.created_at,
       studentDetails,
       employeeDetails,

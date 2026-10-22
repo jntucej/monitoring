@@ -1,61 +1,103 @@
-const isDockerBuild = process.env.DOCKER_BUILD === 'true';
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
+  poweredByHeader: false,
   reactStrictMode: true,
-  typescript: {
-    // Keep strict -- do NOT set to true, it hides real bugs.
-    ignoreBuildErrors: false,
-  },
-  serverExternalPackages: ['bcryptjs', 'jose', 'pg', 'pg-connection-string', 'pgpass'],
+  compress: true,
   experimental: {
-    serverActions: {
-      bodySizeLimit: '2mb',
-    },
+    optimizePackageImports: [
+      "lucide-react",
+      "recharts",
+      "framer-motion",
+      "date-fns",
+      "@simplewebauthn/browser",
+      "qrcode.react",
+      "react-qrcode-logo",
+      "remotion",
+      "@remotion/player",
+    ],
   },
+  output: "standalone",
+  serverExternalPackages: ["bcryptjs", "pg"],
   images: {
-    unoptimized: true,
-  },
-  async headers() {
-    return [{
-      source: '/(.*)',
-      headers: [
-        { key: 'X-Frame-Options', value: 'DENY' },
-        { key: 'X-Content-Type-Options', value: 'nosniff' },
-        { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-      ],
-    }];
+    formats: ["image/avif", "image/webp"],
   },
   async redirects() {
     return [
-      // Legacy alias paths → the single approvals page. These source paths
-      // are NOT real pages on disk (they're old route names), so the redirect
-      // is safe: the destination path (/principal/approvals) is a real page and
-      // the source path differs from the destination path, so no 307 loop.
-      { source: '/principal/permissions',            destination: '/principal/approvals?tab=mine',      permanent: false },
-      { source: '/principal/all-pass-requests',      destination: '/principal/approvals?tab=all',       permanent: false },
-      { source: '/principal/permission-management',  destination: '/principal/approvals?tab=all',       permanent: false },
-      { source: '/principal/approval-centre',        destination: '/principal/approvals?tab=escalated', permanent: false },
-
-      // Legacy alias: department-analytics page existed on disk but was
-      // superseded by the departments page. Safe redirect (different path).
-      { source: '/principal/department-analytics',   destination: '/principal/departments',              permanent: false },
-
-      // Existing profile redirects
-      { source: '/admin/profile',      destination: '/profile', permanent: false },
-      { source: '/principal/profile',  destination: '/profile', permanent: false },
-      { source: '/hod/profile',        destination: '/profile', permanent: false },
-      { source: '/exam/profile',       destination: '/profile', permanent: false },
-      { source: '/hostel/profile',     destination: '/profile', permanent: false },
-      { source: '/staff/profile',      destination: '/profile', permanent: false },
-      { source: '/faculty/profile',    destination: '/profile', permanent: false },
-      { source: '/parent/profile',     destination: '/profile', permanent: false },
-      { source: '/supervisor/profile', destination: '/profile', permanent: false },
-      { source: '/warden/profile',     destination: '/profile', permanent: false },
-      { source: '/visitor/profile',    destination: '/profile', permanent: false },
-      { source: '/worker/profile',     destination: '/profile', permanent: false },
-      { source: '/operator/profile',   destination: '/profile', permanent: false },
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.monitor.ucej.in" }],
+        destination: "https://monitor.ucej.in/:path*",
+        permanent: true,
+      },
+      {
+        source: "/home",
+        destination: "/",
+        permanent: true,
+      },
+    ];
+  },
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "X-Frame-Options", value: "DENY" },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(self), microphone=(self), geolocation=(self)",
+          },
+          // HSTS — tell browsers to only ever talk HTTPS to this host.
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
+          // CSP — same-origin scripts/styles, allow the app host for
+          // connects (SSE / WS / fetch), no frame-ancestors, no object.
+          {
+            key: "Content-Security-Policy",
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline'",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: https:",
+              "connect-src 'self' https://monitor.ucej.in wss://monitor.ucej.in",
+              "frame-ancestors 'none'",
+              "base-uri 'self'",
+              "object-src 'none'",
+            ].join("; "),
+          },
+        ],
+      },
+      {
+        source: "/api/:path*",
+        headers: [
+          { key: "Cache-Control", value: "no-store, must-revalidate" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+        ],
+      },
+      {
+        source: "/_next/static/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+      {
+        source: "/opengraph-image",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, s-maxage=604800",
+          },
+        ],
+      },
+      {
+        source: "/icon",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=86400, s-maxage=604800" },
+        ],
+      },
     ];
   },
 };

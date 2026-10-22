@@ -94,6 +94,7 @@ export const BotMessages = memo(function BotMessages({
             <div className="max-w-[88%] rounded-2xl rounded-br-md px-3.5 py-2.5 text-sm
                             bg-emerald-500/15 text-[var(--text-primary)] italic">
               {interim || t.listening}
+              <span className="ml-1 animate-pulse">▍</span>
             </div>
           </div>
         )}

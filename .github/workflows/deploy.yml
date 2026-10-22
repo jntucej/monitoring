@@ -6,7 +6,17 @@ on:
   workflow_dispatch:
 
 jobs:
+  verify-admin-independence:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Verify admin console independence
+      run: bash scripts/check-admin-independence.sh
+
   deploy:
+    needs: verify-admin-independence
     runs-on: ubuntu-latest
     steps:
     - name: Checkout

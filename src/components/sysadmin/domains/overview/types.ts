@@ -62,3 +62,8 @@ export interface CommandCenterData {
    */
   counts: Record<string, number>;
 }
+
+// ok() from @/server/http/response wraps the payload in { data: T }.
+// useDashboardData should be typed as CommandCenterEnvelope; the page then
+// passes `data.data` to CommandCenterContent.
+export type CommandCenterEnvelope = { data: CommandCenterData };

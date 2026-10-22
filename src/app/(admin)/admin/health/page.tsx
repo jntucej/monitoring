@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { Activity } from "lucide-react";
-import { AuthGuard } from "@/components/shared/AuthGuard";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { PageLoading } from "@/components/shared/LoadingStates";
-import { HealthDashboard } from "@/components/sysadmin/HealthDashboard";
+import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { PageLoading } from "@/components/admin/shared/LoadingStates";
+import { HealthDashboard } from "@/components/admin/HealthDashboard";
 import { getAuthHeaders } from "@/lib/utils";
+import { usePolling } from "@/hooks/usePolling";
 
 type ComponentStatus = "healthy" | "degraded" | "unhealthy" | "unknown";
 
@@ -42,25 +42,24 @@ function HealthSnapshotBar() {
   const [snap, setSnap] = useState<HealthSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const loadSnapshot = async (isInitial: boolean) => {
+    if (isInitial) setLoading(true);
+    try {
+      const res = await fetch("/api/health", { headers: getAuthHeaders(), cache: "no-store" });
+      if (!res.ok && res.status !== 503) throw new Error("health unavailable");
+      setSnap(await res.json());
+    } catch {
+      /* snapshot is optional; the full dashboard below still renders */
+    } finally {
+      if (isInitial) setLoading(false);
+    }
+  };
+
+  /* Initial load + realtime poller so the bar updates every second. */
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch("/api/health", { headers: getAuthHeaders(), cache: "no-store" });
-        if (!res.ok && res.status !== 503) throw new Error("health unavailable");
-        const data: HealthSnapshot = await res.json();
-        if (cancelled) return;
-        setSnap(data);
-      } catch {
-        /* snapshot is optional; the full dashboard below still renders */
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+    loadSnapshot(true);
   }, []);
+  usePolling(() => { loadSnapshot(false); }, { intervalMs: 1000 });
 
   if (loading || !snap) {
     return (
@@ -94,7 +93,7 @@ function HealthSnapshotBar() {
 
 export default function SystemHealthPage() {
   return (
-    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+    
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
@@ -116,6 +115,8 @@ export default function SystemHealthPage() {
           <HealthDashboard />
         </WidgetBoundary>
       </div>
-    </AuthGuard>
+    
+    
+
   );
 }

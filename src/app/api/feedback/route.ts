@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import type { AuthContext } from "@/lib/authContext";
 import { err } from "@/lib/api-response";
 import { getDbClient } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
@@ -13,9 +14,9 @@ let feedbackStore: Array<{
   timestamp: string;
 }> = [];
 
-async function handlePost(req: NextRequest) {
+async function handlePost(_req: NextRequest, _ctx: { auth: AuthContext }) {
   try {
-    const body = await req.json();
+    const body = await _req.json();
     let theme: string;
     let comment: string;
     try {
@@ -31,7 +32,7 @@ async function handlePost(req: NextRequest) {
       id: `fb-${Date.now()}`,
       theme,
       comment,
-      userAgent: req.headers.get("user-agent") || "unknown",
+      userAgent: _req.headers.get("user-agent") || "unknown",
       timestamp: new Date().toISOString(),
     };
 
@@ -70,5 +71,7 @@ async function handleGet(req: NextRequest) {
   return NextResponse.json({ success: true, data: feedbackStore });
 }
 
-export const POST = withRateLimit(handlePost, { keyPrefix: "feedback_post", maxRequests: 10, windowMs: 60 * 1000 });
+export const POST = withRateLimit(
+  withAuthorization(handlePost),
+  { keyPrefix: "feedback_post", maxRequests: 10, windowMs: 60 * 1000 });
 export const GET = withRateLimit(withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin"] }), { keyPrefix: "feedback_get", maxRequests: 30 });

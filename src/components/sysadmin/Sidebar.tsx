@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SidebarInfographic } from "./SidebarInfographic";
+import { ProfileMenuButton } from "@/components/shared/ProfileMenuButton";
 import manifest from "../../../packages/sysadmin-console-kit/manifest/ia.json";
 
 // ── Payload shape ─────────────────────────────────────────────────────────
@@ -134,9 +135,16 @@ function loadCollapsed(): boolean {
 // ── Component ─────────────────────────────────────────────────────────────
 export interface SidebarProps {
   overview: OverviewPayload | null;
+  /** Force the rail to its expanded (label-visible) width regardless of the
+   *  stored collapsed state. Used by the mobile off-canvas drawer, which is
+   *  always wide enough to show labels. */
+  forceExpanded?: boolean;
+  /** Fire after any nav link is activated. The mobile drawer uses this to
+   *  close itself on successful navigation. */
+  onNavigate?: () => void;
 }
 
-export function Sidebar({ overview }: SidebarProps) {
+export function Sidebar({ overview, forceExpanded, onNavigate }: SidebarProps) {
   const pathname = usePathname();
 
   const categories = useMemo(
@@ -150,6 +158,9 @@ export function Sidebar({ overview }: SidebarProps) {
   const [hydratedOpen, setHydratedOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [hydratedCollapsed, setHydratedCollapsed] = useState(false);
+
+  // Effective collapsed state: forceExpanded overrides the stored value.
+  const isCollapsed = forceExpanded ? false : collapsed;
 
   // Hydrate persisted state.
   useEffect(() => {
@@ -247,7 +258,7 @@ export function Sidebar({ overview }: SidebarProps) {
   // Personal footer routes (manifest `personal`).
   const personalRoutes = useMemo(() => ia.personal ?? [], []);
 
-  const widthClass = collapsed ? "w-16" : "w-64";
+  const widthClass = isCollapsed ? "w-16" : "w-64";
 
   return (
     <aside
@@ -262,9 +273,9 @@ export function Sidebar({ overview }: SidebarProps) {
       <div className="flex items-center gap-2 px-3 py-3 border-b border-[var(--border)]">
         <button
           type="button"
-          onClick={() => setCollapsed((v) => !v)}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          aria-expanded={!collapsed}
+          onClick={() => (forceExpanded ? undefined : setCollapsed((v) => !v))}
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-expanded={!isCollapsed}
           className={cn(
             "inline-flex items-center justify-center rounded-md p-1.5",
             "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]",
@@ -272,9 +283,9 @@ export function Sidebar({ overview }: SidebarProps) {
             "transition-colors"
           )}
         >
-          {collapsed ? <Menu className="h-4 w-4" /> : <ChevronsDownUp className="h-4 w-4" />}
+          {isCollapsed ? <Menu className="h-4 w-4" /> : <ChevronsDownUp className="h-4 w-4" />}
         </button>
-        {!collapsed && (
+        {!isCollapsed && (
           <>
             <span className="text-sm font-semibold tracking-tight flex-1 min-w-0 truncate">
               Sysadmin
@@ -303,18 +314,21 @@ export function Sidebar({ overview }: SidebarProps) {
         {categories.map((cat) => {
           const Icon = iconFor(cat.icon);
           const isOpen = open[cat.id] ?? false;
-          const isCollapsed = collapsed;
+          const isCollapsedInner = isCollapsed;
 
           // Collapsed rail: icon-only, clicking jumps to the category's first
           // page and also expands the sidebar for context.
-          if (isCollapsed) {
+          if (isCollapsedInner) {
             return (
               <div key={cat.id} className="px-1 py-1">
                 <Link
                   href={`/sysadmin${cat.pages[0]?.route ? "/" + cat.pages[0].route : ""}`}
                   aria-label={cat.label}
                   title={cat.label}
-                  onClick={() => setCollapsed(false)}
+                  onClick={() => {
+                    if (!forceExpanded) setCollapsed(false);
+                    onNavigate?.();
+                  }}
                   className="flex items-center justify-center rounded-md h-9 w-full text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
                 >
                   <Icon className="h-4 w-4" />
@@ -371,6 +385,7 @@ export function Sidebar({ overview }: SidebarProps) {
                         <Link
                           href={href}
                           aria-current={isActive ? "page" : undefined}
+                          onClick={onNavigate}
                           className={cn(
                             "flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm",
                             "transition-colors",
@@ -415,6 +430,7 @@ export function Sidebar({ overview }: SidebarProps) {
                   key={p.id}
                   href={href}
                   aria-current={isActive ? "page" : undefined}
+                  onClick={onNavigate}
                   className={cn(
                     "flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm transition-colors",
                     isActive
@@ -433,6 +449,11 @@ export function Sidebar({ overview }: SidebarProps) {
           </div>
         )}
       </nav>
+
+      {/* Account footer: profile button + appearance + sign out */}
+      <div className="shrink-0 border-t border-[var(--border)] p-2">
+        <ProfileMenuButton consoleRoot="/sysadmin" compact={collapsed} />
+      </div>
     </aside>
   );
 }

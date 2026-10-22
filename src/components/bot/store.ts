@@ -28,6 +28,9 @@ interface BotStore {
   conversationId: string | null;
   streaming: boolean;
   error: string | null;
+  voiceMode: boolean;
+  requestVoiceMode: () => void;
+  clearVoiceMode: () => void;
 
   setOpen: (v: boolean) => void;
   toggleOpen: () => void;
@@ -54,6 +57,9 @@ export const useBotStore = create<BotStore>((set) => ({
   conversationId: null,
   streaming: false,
   error: null,
+  voiceMode: false,
+  requestVoiceMode: () => set({ open: true, voiceMode: true, voiceReplies: true }),
+  clearVoiceMode: () => set({ voiceMode: false }),
 
   setOpen: (v) => set({ open: v }),
   toggleOpen: () => set((s) => ({ open: !s.open })),

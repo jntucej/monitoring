@@ -27,12 +27,8 @@ function formatLoginError(code?: string, defaultMsg?: string): string {
   switch (code) {
     case "INVALID_CREDENTIALS":
       return "Invalid username or password.";
-    case "INVALID_PIN":
-      return "Invalid PIN or user not found.";
     case "ACCOUNT_INACTIVE":
       return "Your account is inactive. Contact support.";
-    case "MFA_REQUIRED":
-      return "Two-factor authentication is required. Please set it up in your security settings.";
     case "SESSION_EXPIRED":
       return "Your session expired. Please log in again.";
     default:
@@ -45,7 +41,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const hasHydrated = useHasHydrated();
-  const { user, authenticated, login, pinLogin, loading } = useAuthStore();
+  const { user, authenticated, login, loading } = useAuthStore();
   const { addToast } = useUIStore();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -100,15 +96,10 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
   }, [hasHydrated, authenticated, user, redirectAfterLogin]);
 
   const [loginIdentifier, setLoginIdentifier] = useState("");
-  const [passwordOrPin, setPasswordOrPin] = useState("");
-  const [loginMode, setLoginMode] = useState<"password" | "pin">("password");
+  const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [isShaking, setIsShaking] = useState(false);
-
-  // Two-leg MFA login: set after password leg succeeds, cleared on completion
-  const [mfaChallenge, setMfaChallenge] = useState<any | null>(null);
-  const [totpCode, setTotpCode] = useState("");
 
   const [showResetModal, setShowResetModal] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
@@ -143,10 +134,6 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Issue #394: if MFA is pending, Enter must submit the TOTP form, not the
-    // password form. The TOTP input is now in a separate <form> so this guard
-    // is a fallback — if somehow the outer form fires during MFA, abort.
-    if (mfaChallenge) return;
     setErrorMsg("");
 
     const identifier = loginIdentifier.trim().toUpperCase(); // Convert to uppercase for consistency
@@ -154,89 +141,15 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
       triggerShake("Please enter your ID.");
       return;
     }
-    if (!passwordOrPin) {
-      triggerShake(
-        loginMode === "pin"
-          ? "Please enter your Security PIN."
-          : "Please enter your Password."
-      );
-      return;
-    }
-
-    if (loginMode === "pin") {
-      const pinResult = await pinLogin(
-        identifier,
-        passwordOrPin,
-        mfaChallenge ? { challenge: mfaChallenge, totpCode } : undefined
-      );
-      if (pinResult.success) {
-        if (rememberMe) {
-          localStorage.setItem("gate-monitor-remember", "true");
-        }
-        addToast({
-          title: "Access Granted",
-          message: `Authenticated via Security PIN.`,
-          variant: "success",
-        });
-        // ponytail: no redirect here — the hasHydrated+authenticated effect
-        // below routes once persist has settled (avoids AuthGuard race).
-        return;
-      }
-
-      // PIN ok but 2FA enrolled — surface the challenge like the password leg (Bug 103).
-      if (pinResult.mfaRequired && pinResult.mfaChallenge) {
-        setMfaChallenge(pinResult.mfaChallenge);
-        triggerShake("Enter the 6-digit code from your authenticator app.");
-        return;
-      }
-
-      if (pinResult.mfaEnrollmentRequired) {
-        triggerShake(
-          pinResult.enrollToken
-            ? "MFA enrollment required. Your enroll token was issued — complete setup via POST /api/auth/2fa/setup with header x-mfa-enroll-token, then log in again."
-            : formatLoginError("MFA_REQUIRED")
-        );
-        return;
-      }
-
-      triggerShake(formatLoginError(pinResult.code, pinResult.error));
+    if (!password) {
+      triggerShake("Please enter your Password.");
       return;
     }
 
     // Password path
-    const result = await login(
-      identifier,
-      passwordOrPin,
-      mfaChallenge ? { challenge: mfaChallenge, totpCode } : undefined
-    );
-
-    // SECURITY: sysadmins must complete TOTP enrollment before they can sign in.
-    // ponytail: no redirect here — user has no session yet so AuthGuard would
-    // bounce /sysadmin/security back to /login (infinite loop). Show inline
-    // step instead; POST /api/auth/2fa/setup accepts x-mfa-enroll-token.
-    if (!result.success && result.mfaEnrollmentRequired) {
-      triggerShake(
-        result.enrollToken
-          ? "MFA enrollment required. Your enroll token was issued — complete setup via POST /api/auth/2fa/setup with header x-mfa-enroll-token, then log in again."
-          : formatLoginError("MFA_REQUIRED")
-      );
-      return;
-    }
-    if (!result.success && result.code === "MFA_REQUIRED") {
-      triggerShake(formatLoginError("MFA_REQUIRED"));
-      return;
-    }
-
-    // Password leg ok — server issued an MFA challenge, prompt for TOTP
-    if (!result.success && result.mfaRequired && result.mfaChallenge) {
-      setMfaChallenge(result.mfaChallenge);
-      triggerShake("Enter the 6-digit code from your authenticator app.");
-      return;
-    }
+    const result = await login(identifier, password);
 
     if (result.success) {
-      setMfaChallenge(null);
-      setTotpCode("");
       if (rememberMe) {
         localStorage.setItem("gate-monitor-remember", "true");
       }
@@ -301,51 +214,24 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <label className="block text-xs font-semibold text-[var(--text-secondary)]">
-              {loginMode === "pin" ? "Security PIN" : "Password"}
-            </label>
-            {loginMode === "password" && (
-              <button
-                type="button"
-                onClick={() => setShowResetModal(true)}
-                className="text-[11px] font-semibold text-sky-400 hover:underline"
-              >
-                Forgot Password?
-              </button>
-            )}
-          </div>
-
-          <div className="flex gap-2 mb-2">
-            <button
-              type="button"
-              onClick={() => setLoginMode("password")}
-              className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                loginMode === "password"
-                  ? "bg-[var(--action-primary)] text-white shadow-xs"
-                  : "bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-              }`}
-            >
               Password
-            </button>
+            </label>
             <button
               type="button"
-              onClick={() => setLoginMode("pin")}
-              className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                loginMode === "pin"
-                  ? "bg-[var(--action-primary)] text-white shadow-xs"
-                  : "bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-              }`}
+              onClick={() => setShowResetModal(true)}
+              className="text-[11px] font-semibold text-sky-400 hover:underline"
             >
-              Security PIN
+              Forgot Password?
             </button>
           </div>
 
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
-              autoComplete={loginMode === "pin" ? "off" : "current-password"}
-              value={passwordOrPin}
-              onChange={(e) => { setPasswordOrPin(e.target.value); if (errorMsg) setErrorMsg(""); }}
-              placeholder={loginMode === "pin" ? "4-8 digit PIN" : "Enter password"}
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => { setPassword(e.target.value); if (errorMsg) setErrorMsg(""); }}
+              placeholder="Enter password"
               className="w-full pl-10 pr-12 py-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none transition-all"
             />
             <Lock className="w-4 h-4 absolute left-3.5 top-3.5 text-[var(--text-muted)]" />
@@ -364,70 +250,13 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
           </div>
         </div>
 
-        {mfaChallenge && (
-          // Issue #394: separate form so Enter on the TOTP input submits the
-          // MFA leg and never triggers the outer password form. The outer form
-          // now aborts in handleFormSubmit when mfaChallenge is set.
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleFormSubmit(e); // mfaChallenge is included in the login call
-            }}
-            className="space-y-1.5 animate-fadeIn"
-          >
-            <div className="flex items-center justify-between">
-              <label className="block text-xs font-semibold text-sky-400">
-                Authenticator Code (2FA)
-              </label>
-              <button
-                type="button"
-                onClick={() => {
-                  setMfaChallenge(null);
-                  setTotpCode("");
-                }}
-                className="text-[11px] font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-              >
-                Back to Password
-              </button>
-            </div>
-            <div className="relative">
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength={6}
-                value={totpCode}
-                onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                placeholder="6-digit code"
-                autoFocus
-                autoComplete="one-time-code"
-                className="w-full pl-10 pr-4 py-3 rounded-xl bg-[var(--bg-base)] border border-sky-500/50 text-sm font-mono tracking-widest text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-sky-400 outline-none transition-all"
-              />
-              <Lock className="w-4 h-4 absolute left-3.5 top-3.5 text-sky-400" />
-            </div>
-            <button
-              type="submit"
-              disabled={loading || totpCode.length < 6}
-              className="w-full touch-target-primary rounded-xl bg-sky-600 text-white font-bold text-sm hover:opacity-95 transition-all disabled:opacity-40 shadow-md flex items-center justify-center gap-2 py-3 mt-2 active:scale-[0.99]"
-            >
-              {loading ? <span>Verifying...</span> : <><span>Verify Code &amp; Sign In</span><ArrowRight className="w-4 h-4" /></>}
-            </button>
-          </form>
-        )}
-
         <button
           type="submit"
-          disabled={loading || !loginIdentifier || !passwordOrPin || (!!mfaChallenge && totpCode.length < 6)}
-          // Issue #394: hide when MFA form is active — it has its own submit button
-          className={`w-full touch-target-primary rounded-xl bg-[var(--action-primary)] text-white font-bold text-sm hover:opacity-95 transition-all disabled:opacity-40 shadow-md flex items-center justify-center gap-2 py-3 mt-2 active:scale-[0.99] ${mfaChallenge ? 'hidden' : ''}`}
+          disabled={loading || !loginIdentifier || !password}
+          className="w-full touch-target-primary rounded-xl bg-[var(--action-primary)] text-white font-bold text-sm hover:opacity-95 transition-all disabled:opacity-40 shadow-md flex items-center justify-center gap-2 py-3 mt-2 active:scale-[0.99]"
         >
           {loading ? (
             <span>Authenticating...</span>
-          ) : mfaChallenge ? (
-            <>
-              <span>Verify Code & Sign In</span>
-              <ArrowRight className="w-4 h-4" />
-            </>
           ) : (
             <>
               <span>Sign In</span>

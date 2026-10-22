@@ -50,49 +50,31 @@ export async function generateQrToken(
     .sign(getSigningKey());
 }
 
-const inMemoryNonces = new Set<string>();
-
 export async function validateQrToken(token: string): Promise<QrTokenClaims | null> {
+  let claims: QrTokenClaims;
   try {
     const { payload } = await jwtVerify(token, getSigningKey(), {
       issuer: 'gate-monitor',
       audience: 'gate-scanner',
       algorithms: ['HS256'],
     });
-
-    if (payload.purpose !== 'qr_verification') {
-      console.warn('[qr-token] Wrong purpose:', payload.purpose);
-      return null;
-    }
-    if (typeof payload.sub !== 'string' || typeof payload.roll !== 'string' || typeof payload.jti !== 'string') {
-      return null;
-    }
-
-    const expTime = payload.exp ? new Date(payload.exp * 1000) : new Date(Date.now() + 300_000);
-
-    // Atomically burn nonce to prevent replay
-try {
-    const res = await query(
-      `INSERT INTO public.scan_nonces (jti, expires_at) VALUES ($1, $2) ON CONFLICT (jti) DO NOTHING`,
-      [payload.jti, expTime]
-    );
-
-    if (res && typeof res.rowCount === "number" && res.rowCount === 0) {
-      console.warn('[qr-token] Replay detected for jti:', payload.jti);
-      return null;
-    }
-  } catch (dbErr) {
-    if (inMemoryNonces.has(payload.jti)) {
-      console.warn('[qr-token] Replay detected for jti (in-memory):', payload.jti);
-      return null;
-    }
-    inMemoryNonces.add(payload.jti);
-  }
-return payload as QrTokenClaims;
-  } catch (err) {
-    const name = (err as Error).name;
-    if (name === 'JWTExpired') console.warn('[qr-token] Expired token used');
-    else if (name === 'JWSSignatureVerificationFailed') console.warn('[qr-token] Signature failed');
+    claims = payload as QrTokenClaims;
+  } catch {
     return null;
   }
+  if (claims.purpose !== "qr_verification") return null;
+  if (!claims.jti || !claims.exp) return null;
+  try {
+    const insert = await query<{ jti: string }>(
+      `INSERT INTO scan_nonces (jti, expires_at)
+       VALUES ($1, to_timestamp($2))
+       ON CONFLICT (jti) DO NOTHING
+       RETURNING jti`,
+      [claims.jti, claims.exp],
+    );
+    if (insert.rowCount === 0) return null;   // replay
+  } catch {
+    return null;
+  }
+  return claims;
 }

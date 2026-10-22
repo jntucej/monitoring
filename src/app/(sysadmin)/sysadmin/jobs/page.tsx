@@ -7,14 +7,15 @@
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { JobsContent } from "@/components/sysadmin/domains/automation/JobsContent";
-import type { JobsData } from "@/components/sysadmin/domains/automation/types";
+import type { JobsData, JobsEnvelope } from "@/components/sysadmin/domains/automation/types";
 import { Clock } from "lucide-react";
 
 export default function JobsPage() {
-  const { data, loading, error } = useDashboardData<JobsData>("/api/admin/jobs/overview", {
+  const { data, loading, error } = useDashboardData<JobsEnvelope>("/api/admin/jobs/overview", {
     ttlMs: 90_000,
     pollMs: 30_000,
   });
+  const payload = data?.data;
 
   return (
     <AuthGuard allowedRoles={["sysadmin", "admin"]}>
@@ -30,15 +31,15 @@ export default function JobsPage() {
         </div>
         {loading && !data ? (
           <div className="h-40 animate-pulse rounded-xl bg-[var(--bg-surface)] opacity-40" />
-        ) : error && !data ? (
+        ) : error && !payload ? (
           <div
             role="alert"
             className="rounded-xl border border-[var(--action-danger)]/30 bg-[var(--action-danger)]/10 p-4 text-sm text-[var(--action-danger)]"
           >
             Failed to load job data: {error}
           </div>
-        ) : data ? (
-          <JobsContent data={data} />
+        ) : payload ? (
+          <JobsContent data={payload} />
         ) : null}
       </div>
     </AuthGuard>

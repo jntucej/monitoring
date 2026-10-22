@@ -41,7 +41,6 @@ interface SysAdminProfile {
   photoUrl: string | null;
   departmentId: string | null;
   loginIdentifier?: string | null;
-  twoFactorEnabled: boolean;
   createdAt?: string;
   employeeDetails?: {
     employee_id?: string;
@@ -131,7 +130,6 @@ const api = useApi();
             uniqueId: authUser.uniqueId || null,
             photoUrl: authUser.photoUrl || null,
             departmentId: authUser.departmentId || null,
-            twoFactorEnabled: true,
           });
         }
       }
@@ -433,9 +431,9 @@ const api = useApi();
           {/* Quick Metrics */}
           <div className="flex flex-wrap sm:flex-nowrap gap-3 pt-2 md:pt-0 w-full md:w-auto">
             <div className="px-4 py-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] text-center min-w-[100px] flex-1 sm:flex-initial">
-              <div className="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-wider">2FA Guard</div>
+              <div className="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-wider">Credential Guard</div>
               <div className="text-xs font-bold text-emerald-400 mt-0.5 flex items-center justify-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5" /> Enforced
+                <ShieldCheck className="w-3.5 h-3.5" /> Active
               </div>
             </div>
             <div className="px-4 py-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] text-center min-w-[100px] flex-1 sm:flex-initial">
@@ -742,20 +740,20 @@ const api = useApi();
 
       {/* Bottom Section: Security Governance & Recent Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* 2FA & Hardware Security Status */}
+        {/* Security Governance Status */}
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 space-y-3 shadow-lg">
           <div className="flex items-center gap-2 text-rose-400 font-bold text-sm">
-            <ShieldAlert className="w-4 h-4" /> Two-Factor Authentication
+            <ShieldAlert className="w-4 h-4" /> Credential Governance
           </div>
           <p className="text-xs text-[var(--text-secondary)]">
-            TOTP 2FA is strictly enforced on all SysAdmin accounts. Emergency recovery codes must be kept offline.
+            Password and session controls are enforced on all SysAdmin accounts.
           </p>
           <div className="pt-2">
             <Link
               href="/sysadmin/security"
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-400 hover:text-rose-300 hover:underline"
             >
-              Manage Multi-Factor Keys <ArrowRight className="w-3.5 h-3.5" />
+              Manage Security Keys <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
         </div>

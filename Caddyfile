@@ -6,9 +6,6 @@
     }
 }
 
-# Behind Cloudflare Tunnel, edge TLS terminates at Cloudflare and traffic
-# arrives here as plain HTTP — so no `tls` directive and no HSTS (which would
-# force browsers into an HTTPS loop against a plain-HTTP origin).
 :80 {
     log {
         output stdout
@@ -16,13 +13,22 @@
     }
 
     header {
-        X-Frame-Options "DENY"
+        X-Frame-Options        "DENY"
         X-Content-Type-Options "nosniff"
-        Referrer-Policy "strict-origin-when-cross-origin"
+        Referrer-Policy        "strict-origin-when-cross-origin"
+        Permissions-Policy     "camera=(self), microphone=(self), geolocation=(self)"
+        # Strip attacker-supplied identity/forwarding headers
+        -X-Client-IP
+        -X-Forwarded-For
+        -X-Real-IP
+        -X-Auth-User
+        -X-Auth-Timestamp
+        -X-Auth-Signature
     }
 
     reverse_proxy web:3000 {
         flush_interval -1
-        header_up X-Forwarded-For {remote_host}
+        header_up X-Client-IP {remote_host}
+        header_up X-Real-IP   {remote_host}
     }
 }

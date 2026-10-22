@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import {
   UtensilsCrossed,
   Plus,
@@ -17,18 +16,16 @@ import {
   Check,
   Clock,
   AlertTriangle,
-  ChevronRight,
   Leaf,
   Beef,
   Lock,
   Users,
   Ticket,
 } from "lucide-react";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { PageLoading } from "@/components/shared/LoadingStates";
+import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { PageLoading } from "@/components/admin/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
-import { AuthGuard } from "@/components/shared/AuthGuard";
-import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { ConfirmDialog } from "@/components/admin/shared/ConfirmDialog";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
@@ -1388,12 +1385,6 @@ function AdminMessInner() {
               </p>
             </div>
           </div>
-          <Link
-            href="/mess"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-[11px] font-bold transition shrink-0"
-          >
-            Incharge dashboard <ChevronRight className="w-3.5 h-3.5" />
-          </Link>
         </div>
       </div>
 
@@ -1431,7 +1422,7 @@ function AdminMessInner() {
 
 export default function AdminMessPage() {
   return (
-    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+    
       <Suspense
         fallback={
           <div className="p-8 flex items-center justify-center min-h-[50vh]">
@@ -1441,6 +1432,8 @@ export default function AdminMessPage() {
       >
         <AdminMessInner />
       </Suspense>
-    </AuthGuard>
+    
+    
+
   );
 }

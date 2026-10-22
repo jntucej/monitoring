@@ -1,14 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
-import { PageLoading } from "@/components/shared/LoadingStates";
+import { PageLoading } from "@/components/admin/shared/LoadingStates";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { ShieldCheck, GitBranch, FileCheck, Clock, Users, Search, X, Lock } from "lucide-react";
-import { AuthGuard } from "@/components/shared/AuthGuard";
-
 /* ── response shape (mirrors /api/admin/permission-policies) ─────────────── */
 
 interface PolicyWorkflow {
@@ -76,6 +75,10 @@ function AdminPermissionPoliciesInner() {
 
   return (
     <div className="space-y-4">
+      <PageHeader
+        title="Permission Policies"
+        subtitle="Workflow stage definitions, SLAs, and open approval requests"
+      />
       {/* KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <WidgetBoundary title="Workflow Types">
@@ -255,14 +258,16 @@ function AdminPermissionPoliciesInner() {
 
 export default function AdminPermissionPoliciesPage() {
   return (
-    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+    
       <div className="p-2 sm:p-0">
         <PageLoading />
         <SuspenseFallback>
           <AdminPermissionPoliciesInner />
         </SuspenseFallback>
       </div>
-    </AuthGuard>
+    
+    
+
   );
 }
 
