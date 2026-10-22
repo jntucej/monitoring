@@ -7,7 +7,7 @@ import { withAuthorization } from "@/middleware/authorization";
  * -----------------------------------------------------------------------------
  * Returns { rows, runs } for Scheduled Jobs.
  *   • `rows` come from public.scheduled_jobs when populated.
- *   • `runs` come from public.scheduled_jobs_runs when populated.
+ *   • `runs` come from public.job_runs when populated (the real runs table).
  *   • Both arrays are returned empty on a fresh install; the client then falls
  *     back to the seed dataset in src/lib/scheduled-jobs-data.ts.
  *
@@ -28,19 +28,17 @@ async function handleGet(_req: NextRequest) {
     // table may not exist yet — safe to ignore, client will use seed
   }
 
-  // 2. Recent runs
+  // 2. Recent runs — read from the real `job_runs` table when present.
   let runs: unknown[] = [];
   try {
     const { data, error } = await svc
-      .from("scheduled_jobs_runs")
-      .select(
-        "id, scheduledJobs_id, status, start_time, end_time, duration_ms, records_affected, triggered_by, error_message",
-      )
+      .from("job_runs")
+      .select("id, job_id as scheduledJobs_id, status, start_time, end_time, records_affected, error_message")
       .order("start_time", { ascending: false })
       .limit(60);
     if (!error && data) runs = data;
   } catch {
-    // optional companion table — ignore
+    // job_runs not present — optional, ignore
   }
 
   return NextResponse.json({ rows, runs });

@@ -7,6 +7,7 @@ import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { MobileNavDrawer } from "@/components/shared/MobileNavDrawer";
 import { ScrollEdgeBlue } from "@/components/shared/ScrollEdgeBlue";
+import { GlassThemeToggle } from "@/components/shared/GlassThemeToggle";
 import { Sidebar, type OverviewPayload } from "@/components/sysadmin/Sidebar";
 import { Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -90,7 +91,17 @@ export default function SysadminConsoleLayout({
           {/* ── Desktop shell: fixed rail + scrollable main ───────────── */}
           <div className="hidden md:flex md:h-full">
             <Sidebar overview={overview} />
-            <main className="flex-1 overflow-y-auto">{main}</main>
+            <main className="flex-1 overflow-y-auto">
+              <div className="flex items-center justify-between gap-3 border-b border-[var(--border)] bg-[var(--bg-surface)] px-4 py-2 sm:px-6">
+                <span className="text-xs font-semibold tracking-wide text-[var(--text-muted)]">
+                  JNTU CEEJ · SysAdmin
+                </span>
+                <div className="flex items-center gap-2">
+                  <GlassThemeToggle />
+                </div>
+              </div>
+              {main}
+            </main>
           </div>
 
           {/* ── Mobile shell: floating hamburger + scrollable main + drawer ─ */}

@@ -61,21 +61,28 @@ export const GET = withRateLimit(
       void req;
       void ctx;
 
-      // ── STUB: windows (maintenance_windows table does not exist) ──
+      // ── STUB: windows (maintenance_windows table may not exist) ──
+      // Only query when the table is present; otherwise return the documented
+      // empty structure without logging a red SQL error to the console.
       let windows: MaintenanceWindow[] = [];
       try {
-        const res = await query<MaintenanceWindow>(
-          `SELECT id, title, type, status,
-                  window_start::text AS window_start,
-                  window_end::text   AS window_end
-             FROM maintenance_windows
-            WHERE window_start >= NOW() - INTERVAL '30 days'
-               OR status IN ('upcoming', 'in_progress')
-            ORDER BY window_start ASC`
+        const existsRes = await query<{ exists: boolean }>(
+          `SELECT to_regclass('public.maintenance_windows') IS NOT NULL AS exists`
         );
-        windows = res.rows;
+        if (existsRes.rows[0]?.exists) {
+          const res = await query<MaintenanceWindow>(
+            `SELECT id, title, type, status,
+                    window_start::text AS window_start,
+                    window_end::text   AS window_end
+               FROM maintenance_windows
+              WHERE window_start >= NOW() - INTERVAL '30 days'
+                 OR status IN ('upcoming', 'in_progress')
+              ORDER BY window_start ASC`
+          );
+          windows = res.rows;
+        }
       } catch {
-        // Table does not exist — return empty documented structure.
+        // Table does not exist or query failed — return empty documented structure.
         windows = [];
       }
 

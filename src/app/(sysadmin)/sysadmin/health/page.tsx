@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { Suspense, useState, useCallback, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { PageLoading } from "@/components/shared/LoadingStates";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { cn } from "@/lib/utils";
 import { HealthContent, TABS } from "@/components/sysadmin/domains/monitoring/HealthContent";
@@ -22,8 +23,12 @@ const VALID_TABS = new Set<string>(["app", "database", "infra", "redis"]);
  * Tabs (app / database / infra / redis) are driven by `?tab=` in the URL so
  * deep-linking works. Data is fetched from /api/admin/health/overview via
  * useDashboardData (cached + visibility-aware polling).
+ *
+ * The `useSearchParams()` consumer lives in `HealthPageInner`; the default
+ * export wraps it in a `<Suspense>` boundary so Next.js can prerender the
+ * page without a hard "wrap in Suspense" build error.
  */
-export default function SysAdminHealthPage() {
+function HealthPageInner() {
   const searchParams = useSearchParams();
   const rawTab = searchParams.get("tab") ?? "app";
   const activeTab: TabId = VALID_TABS.has(rawTab) ? (rawTab as TabId) : "app";
@@ -113,5 +118,13 @@ export default function SysAdminHealthPage() {
       {/* refreshKey is exposed so callers can reset boundaries on re-fetch */}
       <div data-refresh-key={refreshKey} className="hidden" aria-hidden />
     </div>
+  );
+}
+
+export default function SysAdminHealthPage() {
+  return (
+    <Suspense fallback={<PageLoading />}>
+      <HealthPageInner />
+    </Suspense>
   );
 }
