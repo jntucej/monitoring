@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { query } from "@/lib/postgres";
+import crypto from "crypto";
+import { query, withTransaction } from "@/lib/postgres";
 import { verifyAccessToken, verifyRefreshToken, signAccessToken, signRefreshToken } from "@/lib/auth-token";
 import { withRateLimit } from "@/lib/rate-limit";
 import { secureCookieOptions } from "@/lib/cookies";
@@ -30,7 +31,10 @@ async function handleSessionCheck(req: NextRequest) {
     let newToken: string | undefined;
     let newRefreshToken: string | undefined;
 
-    // If access token is expired/invalid, try refreshing using refresh token
+    // If access token is expired/invalid, try refreshing using refresh token.
+    // MUST ROTATE: insert new session + revoke old, same as /api/auth/refresh.
+    // Without this the old refresh token's DB row stays live, and a later
+    // /refresh call with that token will trip reuse-detection and revoke ALL sessions.
     if (!payload && refreshToken) {
       const refreshPayload = await verifyRefreshToken(refreshToken);
       if (refreshPayload && refreshPayload.sub) {
@@ -45,6 +49,35 @@ async function handleSessionCheck(req: NextRequest) {
           email: refreshPayload.email,
           role: refreshPayload.role,
         });
+
+        // Atomic rotation: same pattern as /api/auth/refresh.
+        // If the old refresh token has already been revoked (race), skip the
+        // rotation rather than revoking ALL sessions — the caller is likely
+        // just re-issuing with a stale-but-not-stolen token.
+        const oldHash = crypto.createHash("sha256").update(refreshToken).digest("hex");
+        const newHash = crypto.createHash("sha256").update(newRefreshToken).digest("hex");
+        const newSessionId = crypto.randomUUID();
+        try {
+          await withTransaction(async (client) => {
+            await client.query(
+              "INSERT INTO sessions (id, user_id, refresh_hash, expires_at, created_at) VALUES ($1, $2, $3, NOW() + INTERVAL '30 days', NOW())",
+              [newSessionId, refreshPayload.sub, newHash]
+            );
+            // Revoke the old session row. If it's already revoked (concurrent
+            // rotation), this is a no-op and we do NOT trigger the revoke-all
+            // path — that is reserved for a genuine token-theft scenario.
+            await client.query(
+              "UPDATE sessions SET revoked_at = NOW() WHERE refresh_hash = $1 AND revoked_at IS NULL",
+              [oldHash]
+            );
+          });
+        } catch {
+          // Rotation failed — return the session without rotating. The user
+          // keeps their current session; worst case they hit the same expiry
+          // again and retry. Never revoke-all on a transient DB blip.
+          newToken = undefined;
+          newRefreshToken = undefined;
+        }
       }
     }
 
