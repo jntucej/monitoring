@@ -76,7 +76,7 @@ export function TaskContinuity() {
   }, [user]);
 
   useEffect(() => {
-    load();
+    load().catch(() => {});
   }, [load]);
 
   const allDrafts = useMemo(() => {

@@ -169,7 +169,7 @@ function AdminStaffInner() {
   }, []);
 
   useEffect(() => {
-    load();
+    load().catch(() => {});
   }, [load]);
   usePolling(load, { intervalMs: 60_000 });
 

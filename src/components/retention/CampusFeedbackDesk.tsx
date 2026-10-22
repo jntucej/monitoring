@@ -96,7 +96,7 @@ export function CampusFeedbackDesk() {
   }, [user]);
 
   useEffect(() => {
-    load();
+    load().catch(() => {});
   }, [load]);
 
   const handleSubmit = useCallback(async () => {

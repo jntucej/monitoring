@@ -372,7 +372,7 @@ const api = useApi();
     const disabled = total - enabled;
     const failing = rows.filter((r) => r.last_status === "FAILED").length;
     const avg = total === 0 ? 0 : rows.reduce((a, r) => a + r.success_rate, 0) / total;
-    const next = rows.filter((r) => r.enabled && r.next_run).map((r) => r.next_run!).sort()[0] ?? null;
+    const next = rows.filter((r) => r.enabled && r.next_run).map((r) => r.next_run!).sort((a, b) => a.localeCompare(b))[0] ?? null;
     return { total, enabled, disabled, failing, avg, next };
   }, [rows]);
 

@@ -113,7 +113,7 @@ export function ChildWeeklyActivity() {
 
   // Initial load + visibility-aware polling (no raw setInterval)
   useEffect(() => {
-    load();
+    load().catch(() => {});
   }, [load]);
   usePolling(load, { intervalMs: 60_000 });
 

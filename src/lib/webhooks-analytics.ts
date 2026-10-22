@@ -76,7 +76,7 @@ export function buildForecastSeries(predictions: WebhooksPrediction[], days = 14
     byDate[d].l += p.confidence_interval_low;
     byDate[d].h += p.confidence_interval_high;
   });
-  const dates = Object.keys(byDate).sort();
+  const dates = Object.keys(byDate).sort((a, b) => a.localeCompare(b));
   if (dates.length === 0) {
     const now = Date.now();
     return Array.from({ length: days }).map((_, i) => {

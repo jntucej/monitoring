@@ -62,7 +62,7 @@ export function ContributionPortfolio() {
   }, [user]);
 
   useEffect(() => {
-    load();
+    load().catch(() => {});
   }, [load]);
 
   // Group by type

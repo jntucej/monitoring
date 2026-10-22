@@ -9,7 +9,7 @@ import { assertCsrf } from "@/lib/csrf";
 import { ok, fail } from "@/server/http/response";
 import { query } from "@/lib/postgres";
 import { addAudit } from "@/lib/db";
-import { createHash, randomBytes } from "crypto";
+import { createHash, randomBytes, randomInt } from "crypto";
 import type { AuthContext } from "@/lib/authContext";
 import type { Role } from "@/lib/types";
 
@@ -37,7 +37,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   const cleanPhone = phone.replace(/\s+/g, "");
   const last4 = cleanPhone.slice(-4);
   const phoneHash = createHash("sha256").update(cleanPhone).digest("hex");
-  const otp = String(Math.floor(100_000 + Math.random() * 900_000));
+  const otp = String(randomInt(100_000, 999_999 + 1));
   const otpHard = createHash("sha256").update(otp).digest("hex");
 
   const { rows } = await query<{ id: string }>(

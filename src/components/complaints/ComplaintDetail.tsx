@@ -26,7 +26,7 @@ export function ComplaintDetail({ role }: { role: string }) {
   }, [id]);
 
   useEffect(() => {
-    load();
+    load().catch(() => {});
   }, [load]);
 
   const patchAction = async (action: string, extra = {}) => {

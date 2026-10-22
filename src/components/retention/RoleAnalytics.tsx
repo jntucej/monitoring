@@ -53,7 +53,7 @@ export function RoleAnalytics() {
   }, [user, dateRange, department, gate]);
 
   useEffect(() => {
-    load();
+    load().catch(() => {});
   }, [load]);
 
   // Derive chart config from role

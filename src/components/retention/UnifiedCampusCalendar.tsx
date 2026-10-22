@@ -74,7 +74,7 @@ export function UnifiedCampusCalendar() {
   }, [user, currentMonth, followedCategories]);
 
   useEffect(() => {
-    load();
+    load().catch(() => {});
   }, [load]);
 
   const toggleFollow = useCallback(

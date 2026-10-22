@@ -149,7 +149,7 @@ function ProfileDashboard() {
   }, [addError]);
 
   useEffect(() => {
-    load();
+    load().catch(() => {});
   }, [load]);
 
   /* -------------------- Save name/phone -------------------- */

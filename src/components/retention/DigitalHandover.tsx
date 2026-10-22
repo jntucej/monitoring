@@ -84,7 +84,7 @@ export function DigitalHandover() {
   }, [user, role, canHandover]);
 
   useEffect(() => {
-    load();
+    load().catch(() => {});
   }, [load]);
 
   const addItem = () => {

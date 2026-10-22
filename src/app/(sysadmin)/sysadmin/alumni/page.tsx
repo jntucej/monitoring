@@ -137,7 +137,7 @@ export default function AlumniPage() {
   }, [autoDetected, search]);
 
   const rosterCourses = useMemo(
-    () => Array.from(new Set(graduated.map((s) => s.courseLabel || "Unassigned"))).sort(),
+    () => Array.from(new Set(graduated.map((s) => s.courseLabel || "Unassigned"))).sort((a, b) => a.localeCompare(b)),
     [graduated]);
   const rosterYears = useMemo(
     () =>
@@ -156,7 +156,7 @@ export default function AlumniPage() {
   }, [graduated, rosterCourse, rosterYear, search]);
 
   const depRoles = useMemo(
-    () => Array.from(new Set(deprovisioned.map((u) => u.role || "unknown"))).sort(),
+    () => Array.from(new Set(deprovisioned.map((u) => u.role || "unknown"))).sort((a, b) => a.localeCompare(b)),
     [deprovisioned]);
 
   const filteredDeprovisioned = useMemo(() => {

@@ -182,7 +182,7 @@ export function PersonalizedCampusHome() {
   }, [user, role]);
 
   useEffect(() => {
-    load();
+    load().catch(() => {});
   }, [load]);
 
   const roleContext = useMemo(

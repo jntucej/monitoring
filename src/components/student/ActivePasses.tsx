@@ -57,7 +57,7 @@ export function ActivePasses() {
 
   // Initial load + visibility-aware polling (no raw setInterval)
   useEffect(() => {
-    load();
+    load().catch(() => {});
   }, [load]);
   usePolling(load, { intervalMs: 30_000 });
 

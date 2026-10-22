@@ -14,7 +14,7 @@ export default function ChainsPage() {
   }, []);
 
   useEffect(() => {
-    load();
+    load().catch(() => {});
   }, [load]);
 
   return (

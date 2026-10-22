@@ -47,7 +47,7 @@ export function ComplaintConsole({
   }, [status, mine]);
 
   useEffect(() => {
-    load();
+    load().catch(() => {});
   }, [load]);
 
   return (

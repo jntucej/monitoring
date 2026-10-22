@@ -21,7 +21,7 @@ export default function RepsPage() {
   }, []);
 
   useEffect(() => {
-    load();
+    load().catch(() => {});
   }, [load]);
 
   const create = async (e: React.FormEvent) => {

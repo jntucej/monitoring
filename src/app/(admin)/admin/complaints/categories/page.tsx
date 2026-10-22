@@ -15,7 +15,7 @@ export default function CategoriesPage() {
   }, []);
 
   useEffect(() => {
-    load();
+    load().catch(() => {});
   }, [load]);
 
   const patch = async (code: string, field: string, value: unknown) => {

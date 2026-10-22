@@ -105,7 +105,7 @@ export function ContextPanel({ row, onClose, historyHref = "/operator/transactio
   }, [row]);
 
   useEffect(() => {
-    load();
+    load().catch(() => {});
   }, [load]);
 
   const handleCorrect = async () => {

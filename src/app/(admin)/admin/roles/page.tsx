@@ -162,7 +162,7 @@ function AdminRolesInner() {
   }, []);
 
   useEffect(() => {
-    load();
+    load().catch(() => {});
   }, [load]);
   usePolling(load, { intervalMs: 60_000 });
 

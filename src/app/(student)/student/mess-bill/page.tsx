@@ -21,7 +21,7 @@ export default function MessBillPage() {
   }, [month]);
 
   useEffect(() => {
-    load();
+    load().catch(() => {});
   }, [load]);
 
   const optOut = async (e: React.FormEvent) => {

@@ -28,14 +28,14 @@ interface Props {
 /** Derive the discrete facet option lists from the roleState facet. */
 function useFacets(data: PeopleData | null) {
   return useMemo(() => {
-    const roles = data ? Object.keys(data.roleState).sort() : [];
+    const roles = data ? Object.keys(data.roleState).sort((a, b) => a.localeCompare(b)) : [];
     const states = new Set<string>();
     if (data) {
       for (const map of Object.values(data.roleState)) {
         for (const s of Object.keys(map)) states.add(s);
       }
     }
-    return { roles, states: Array.from(states).sort() };
+    return { roles, states: Array.from(states).sort((a, b) => a.localeCompare(b)) };
   }, [data]);
 }
 

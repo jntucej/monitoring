@@ -417,7 +417,7 @@ const api = useApi();
     // department names, not the polluted s.course values.
     const set = new Set<string>();
     students.forEach((s) => set.add(branchOf(s)));
-    return Array.from(set).sort();
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [branchOf]);
 
   const years = useMemo(() => {
@@ -459,7 +459,7 @@ const api = useApi();
   const courses = useMemo(() => {
     const set = new Set<string>();
     students.forEach((s) => { set.add(courseOf(s)); });
-    return Array.from(set).sort();
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [courseOf]);
 
   const byCourse = useMemo(() => {
