@@ -8,6 +8,8 @@ import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
+import { useUIStore } from "@/stores/uiStore";
+import { useAuthStore } from "@/stores/authStore";
 
 interface SessionRow {
   sessionId: string;
@@ -35,6 +37,8 @@ function AdminSessionsInner() {
   const [rows, setRows] = useState<SessionRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
+  const addToast = useUIStore((s) => s.addToast);
+  const user = useAuthStore((s) => s.user);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -48,13 +52,23 @@ function AdminSessionsInner() {
   const revoke = async (sessionId: string) => {
     setBusy(sessionId);
     try {
-      await fetch(`/api/admin/sessions/${sessionId}`, {
+      const res = await fetch(`/api/admin/sessions/${sessionId}`, {
         method: "DELETE",
         headers: getAuthHeaders(),
       });
+      if (!res.ok) {
+        const msg =
+          res.status === 403
+            ? "Session revoke requires sysadmin access — this action was not performed."
+            : `Revoke failed (HTTP ${res.status}).`;
+        addToast({ variant: "error", title: "Revoke failed", message: msg });
+        return;
+      }
+      addToast({ variant: "success", title: "Session revoked", message: `Revoked for ${user?.name ?? "user"}.` });
       load();
     } catch (e) {
       console.error("revoke", e);
+      addToast({ variant: "error", title: "Revoke failed", message: "Network error." });
     } finally {
       setBusy(null);
     }

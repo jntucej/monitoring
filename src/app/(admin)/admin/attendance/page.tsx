@@ -49,7 +49,7 @@ const api = useApi();
         const stuJson = await stuRes.json();
         if (cancelled) return;
 
-        const logs: Scan[] = logsJson?.data?.items ?? [];
+        const logs: Scan[] = logsJson?.data?.logs ?? [];
         const students: Student[] = stuJson?.data ?? [];
 
         // For each student: find first IN and last OUT of the day

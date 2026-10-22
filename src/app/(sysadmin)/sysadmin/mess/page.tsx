@@ -172,7 +172,7 @@ function MenuItemsTab() {
       const json = await res.json().catch(() => null);
       if (!res.ok || json?.success === false) {
         throw new Error(
-          typeof json?.error === "string" ? json.error : json?.error?.message ?? `HTTP ${res.status}`
+          json?.message || (typeof json?.error === "string" ? json.error : json?.error?.message) || `HTTP ${res.status}`
         );
       }
       addToast({ variant: "success", title: editing.id ? "Item updated" : "Item added", message: editing.label });
@@ -464,7 +464,7 @@ function MealDaysTab() {
       const json = await res.json().catch(() => null);
       if (!res.ok || json?.success === false) {
         throw new Error(
-          typeof json?.error === "string" ? json.error : json?.error?.message ?? `HTTP ${res.status}`
+          json?.message || (typeof json?.error === "string" ? json.error : json?.error?.message) || `HTTP ${res.status}`
         );
       }
       addToast({ variant: "success", title: "Meal day created", message: draft.mealDate });
@@ -510,7 +510,7 @@ function MealDaysTab() {
       const json = await res.json().catch(() => null);
       if (!res.ok || json?.success === false) {
         throw new Error(
-          typeof json?.error === "string" ? json.error : json?.error?.message ?? `HTTP ${res.status}`
+          json?.message || (typeof json?.error === "string" ? json.error : json?.error?.message) || `HTTP ${res.status}`
         );
       }
       addToast({ variant: "success", title: "Meal day updated", message: editingDraft.mealDate });
@@ -1118,7 +1118,7 @@ function TodayTab() {
       const json = await res.json().catch(() => null);
       if (!res.ok || json?.success === false) {
         throw new Error(
-          typeof json?.error === "string" ? json.error : json?.error?.message ?? `HTTP ${res.status}`
+          json?.message || (typeof json?.error === "string" ? json.error : json?.error?.message) || `HTTP ${res.status}`
         );
       }
       addToast({ variant: "success", title: "Day finalized", message: `Headcount ${json?.data?.finalHeadcount} locked.` });
@@ -1148,7 +1148,7 @@ function TodayTab() {
       const json = await res.json().catch(() => null);
       if (!res.ok || json?.success === false) {
         throw new Error(
-          typeof json?.error === "string" ? json.error : json?.error?.message ?? `HTTP ${res.status}`
+          json?.message || (typeof json?.error === "string" ? json.error : json?.error?.message) || `HTTP ${res.status}`
         );
       }
       addToast({

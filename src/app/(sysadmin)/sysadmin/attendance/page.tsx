@@ -47,7 +47,7 @@ export default function SysAdminAttendancePage() {
         const logsJson = await logsRes.json();
         const stuJson = await stuRes.json();
         if (cancelled) return;
-        const logs: Scan[] = logsJson?.data?.items ?? [];
+        const logs: Scan[] = logsJson?.data?.logs ?? [];
         const students: Student[] = stuJson?.data ?? [];
 
         const byRoll: Record<string, Row> = {};

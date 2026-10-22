@@ -4,7 +4,7 @@ import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
-import { ok, fail } from "@/server/http/response";
+import { fail } from "@/server/http/response";
 import { addAudit, addNotification, getLinkedPersons } from "@/lib/db";
 import { query } from "@/lib/postgres";
 import {
@@ -69,7 +69,20 @@ async function handlePost(
 ): Promise<Response> {
   const csrf = assertCsrf(req);
   if (csrf) return csrf;
-  const body = (await req.json().catch(() => ({}))) as CreatePermissionBody;
+  const raw = (await req.json().catch(() => ({}))) as Record<string, unknown>;
+  // UI forms mix casing: PermissionRequestForm posts camelCase
+  // (workflowType/fromDatetime), the student leave-requests + guardian
+  // pass-leave forms post snake_case (workflow_type/from). Accept both.
+  const body = {
+    ...raw,
+    workflowType: (raw.workflowType ?? raw.workflow_type ?? undefined) as WorkflowType,
+    studentUserId: (raw.studentUserId ?? raw.student_user_id ?? undefined) as string,
+    hostelScope: (raw.hostelScope ?? raw.hostel_scope ?? undefined) as "boys" | "girls" | undefined,
+    documentRequired: raw.documentRequired ?? raw.document_required,
+    fromDate: (raw.fromDate ?? raw.fromDatetime ?? raw.from ?? undefined) as string | undefined,
+    toDate: (raw.toDate ?? raw.toDatetime ?? raw.to ?? undefined) as string | undefined,
+    reason: (raw.reason ?? raw.description ?? undefined) as string | undefined,
+  } as CreatePermissionBody;
 
   const workflowType = body.workflowType;
   if (!workflowType || !VALID_WORKFLOWS.includes(workflowType)) {
@@ -79,27 +92,33 @@ async function handlePost(
       400,
     );
   }
+  // Historical role gate: any requester role may open a ticket.
+  if (!["student", "parent", "guardian", "admin", "sysadmin", "staff", "faculty", "oie", "exam_branch"].includes(auth.role)) {
+    return fail("FORBIDDEN", "Role may not submit permission requests", 403);
+  }
   const reason = (body.reason ?? "").trim();
-  if (!reason) return fail("MISSING_REASON", "reason is required", 400);
-  const priority = VALID_PRIORITIES.includes(body.priority ?? "medium")
+  const priority = VALID_PRIORITIES.includes((body.priority ?? "medium") as "low" | "medium" | "high" | "urgent")
     ? (body.priority ?? "medium")
     : "medium";
 
   let studentUserId: string;
-  if (body.studentUserId) {
+  if (["parent", "guardian"].includes(auth.role)) {
+    if (!body.studentUserId) {
+      return fail("MISSING_PARAM", "student_user_id is required", 400);
+    }
+    const children = await getLinkedPersons(auth.userId).catch(() => [] as unknown[]);
+    const isChild = (children as Array<Record<string, unknown>>).some(
+      (c) => c.child_id === body.studentUserId || c.id === body.studentUserId || c.uniqueId === body.studentUserId,
+    );
+    if (!isChild) return fail("NOT_YOUR_CHILD", "Not your child", 403);
+    studentUserId = body.studentUserId;
+  } else if (body.studentUserId && body.studentUserId !== auth.userId) {
     if (!["admin", "sysadmin", "principal", "vice_principal", "hod"].includes(auth.role)) {
       return fail("FORBIDDEN", "Only staff may submit on behalf of a student", 403);
     }
     studentUserId = body.studentUserId;
   } else {
-    if (auth.role !== "student") {
-      return fail(
-        "FORBIDDEN",
-        "Only students submit their own requests — pass studentUserId as staff",
-        403,
-      );
-    }
-    studentUserId = auth.userId;
+    studentUserId = body.studentUserId ?? auth.userId;
   }
 
   const { rows: studentRows } = await query<{ id: string; role: string }>(
@@ -178,15 +197,21 @@ async function handlePost(
 
   await notifyStage(initialStage, ticketNumber, workflowType, studentUserId);
 
-  return ok({
-    id: inserted.id,
-    ticketNumber,
-    workflowType,
-    currentStage: initialStage,
-    status: "PENDING",
-    hostelScope,
-    branch,
-    slaDeadline,
+  // Historical success shape: { success: true, data: {..., ticket_number} }.
+  // UI forms read json.success && json.data?.ticket_number.
+  return NextResponse.json({
+    success: true,
+    data: {
+      id: inserted.id,
+      ticket_number: ticketNumber,
+      ticketNumber,
+      workflowType,
+      currentStage: initialStage,
+      status: "PENDING",
+      hostelScope,
+      branch,
+      slaDeadline,
+    },
   });
 }
 
@@ -259,28 +284,52 @@ async function handleGet(
   }
 
   params.push(limit, offset);
+  // `student` / `requester` are scalar subquery embeds (raw SQL, not
+  // PostgREST) — the UI cards read row.student?.name / .role and
+  // row.requester?.name. student_details is nested for roll display.
   const sql = `
-    SELECT id, ticket_number, workflow_type, requester_user_id, student_user_id,
-           current_stage, status, priority, hostel_scope, branch,
-           reason, description, from_date, to_date,
-           direct_generated, routed_to_role, forwarded_from_role,
-           sla_deadline, created_at, updated_at, stage_history
-      FROM permissions
-     WHERE ${where.length ? where.join(" AND ") : "TRUE"}
+    SELECT p.id, p.ticket_number, p.workflow_type, p.requester_user_id,
+           p.student_user_id, p.current_stage, p.status, p.priority,
+           p.hostel_scope, p.branch, p.reason, p.description,
+           p.from_date, p.to_date, p.direct_generated, p.routed_to_role,
+           p.forwarded_from_role, p.sla_deadline, p.created_at,
+           p.updated_at, p.stage_history,
+           (
+             SELECT jsonb_build_object(
+               'id', u.id, 'name', COALESCE(sd.student_name, u.name),
+               'role', u.role, 'unique_id', u.unique_id,
+               'student_details', jsonb_build_object(
+                 'roll', sd.roll, 'student_name', sd.student_name,
+                 'year', sd.year, 'department', sd.department
+               )
+             )
+             FROM users u
+             LEFT JOIN student_details sd ON sd.user_id = u.id
+             WHERE u.id = p.student_user_id
+           ) AS student,
+           (
+             SELECT jsonb_build_object(
+               'id', u.id, 'name', u.name, 'email', u.email,
+               'phone', u.phone, 'role', u.role, 'unique_id', u.unique_id
+             )
+             FROM users u WHERE u.id = p.requester_user_id
+           ) AS requester
+      FROM permissions p
+     WHERE ${where.length ? where.map((w) => w.replace(/permissions\./g, "p.")).join(" AND ") : "TRUE"}
      ORDER BY
-       CASE status WHEN 'PENDING' THEN 0 WHEN 'ESCALATED' THEN 1 ELSE 2 END,
-       sla_deadline ASC NULLS LAST,
-       created_at DESC
+       CASE p.status WHEN 'PENDING' THEN 0 WHEN 'ESCALATED' THEN 1 ELSE 2 END,
+       p.sla_deadline ASC NULLS LAST,
+       p.created_at DESC
      LIMIT $${params.length - 1} OFFSET $${params.length}
   `;
 
   const { rows } = await query(sql, params);
-  return ok({
-    items: rows,
-    total: rows.length,
-    limit,
-    offset,
-  });
+  // Historical flat-array contract: every UI consumer reads
+  //   { success: true, data: PermissionRow[], total }
+  // (array directly under `data`, with `student`/`requester` embeds and a
+  // top-level `success` flag). The batch-5 rewrite briefly returned
+  // ok({ items, total, ... }) which silently broke ~84 consumers.
+  return NextResponse.json({ success: true, data: rows, total: rows.length });
 }
 
 async function notifyStage(

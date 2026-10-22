@@ -83,5 +83,5 @@ export const DELETE = withMutationGuard(
       return fail("INTERNAL_ERROR", "Internal server error", 500);
     }
   },
-  { requiredRole: ["hod", "admin"] }
+  { requiredRole: ["hod", "admin", "sysadmin"] }
 );

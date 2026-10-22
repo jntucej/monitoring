@@ -93,7 +93,7 @@ export function EntryExitChart() {
           buckets[d.toISOString().slice(0, 10)] = { entries: 0, exits: 0 };
         }
 
-        const items: any[] = json?.data?.items ?? json?.items ?? [];
+        const items: any[] = json?.data?.logs ?? json?.data?.items ?? json?.items ?? [];
         for (const it of items) {
           const day = (it.timestamp ?? "").slice(0, 10);
           if (!buckets[day]) continue;

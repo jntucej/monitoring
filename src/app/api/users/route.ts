@@ -49,16 +49,29 @@ async function handleGet(req: NextRequest) {
   try {
     const users = await findAllUsers();
 
-    // Optional client-side name/roll/email/role filter so sysadmin pages can
-    // offer a search box instead of raw UUID entry.
+    // Client-side filters so the admin/sysadmin user panels can drive their
+    // search box + department/role/status dropdowns. `q` matches
+    // name/roll/email/role; the rest are exact-match on the mapped keys.
     const q = req.nextUrl.searchParams.get("q");
+    const deptParam = req.nextUrl.searchParams.get("departmentId");
+    const statusParam = req.nextUrl.searchParams.get("status");
+    const roleParam = req.nextUrl.searchParams.get("role");
     let result = users;
     if (q && q.trim().length >= 1) {
       const needle = q.trim().toLowerCase();
-      result = users.filter((u: any) =>
+      result = result.filter((u: any) =>
         (u.name || u.email || u.uniqueId || u.unique_id || u.role || "").toString().toLowerCase().includes(needle) ||
         (u.fullname || "").toString().toLowerCase().includes(needle)
       );
+    }
+    if (deptParam && deptParam !== "ALL") {
+      result = result.filter((u: any) => (u.departmentId ?? u.department_id ?? "") === deptParam);
+    }
+    if (statusParam && statusParam !== "ALL") {
+      result = result.filter((u: any) => (u.status ?? u.flag_status ?? "") === statusParam);
+    }
+    if (roleParam && roleParam !== "ALL") {
+      result = result.filter((u: any) => (u.role ?? "") === roleParam);
     }
     return NextResponse.json({ success: true, data: result });
   } catch (error) {
