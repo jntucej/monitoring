@@ -51,8 +51,8 @@ function FilterSelect({
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">{label}</label>
-      <select
+      <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]" htmlFor="label">{label}</label>
+      <select id="label"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] text-[var(--text-primary)] text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"

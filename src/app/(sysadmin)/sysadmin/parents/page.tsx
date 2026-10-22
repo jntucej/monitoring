@@ -371,8 +371,8 @@ export default function SysAdminParentsPage() {
               </div>
               <form onSubmit={handleCreateParent} className="p-5 space-y-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-400 block mb-1">Full Name *</label>
-                  <input
+                  <label className="text-xs font-semibold text-slate-400 block mb-1" htmlFor="full-name">Full Name *</label>
+                  <input id="full-name"
                     type="text"
                     required
                     value={createForm.name}
@@ -381,8 +381,8 @@ export default function SysAdminParentsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-400 block mb-1">Email</label>
-                  <input
+                  <label className="text-xs font-semibold text-slate-400 block mb-1" htmlFor="email">Email</label>
+                  <input id="email"
                     type="email"
                     value={createForm.email}
                     onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
@@ -391,8 +391,8 @@ export default function SysAdminParentsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-400 block mb-1">Phone</label>
-                  <input
+                  <label className="text-xs font-semibold text-slate-400 block mb-1" htmlFor="phone">Phone</label>
+                  <input id="phone"
                     type="text"
                     value={createForm.phone}
                     onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })}
@@ -468,8 +468,8 @@ export default function SysAdminParentsPage() {
                 </p>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-400 block mb-1">Guardian</label>
-                  <select
+                  <label className="text-xs font-semibold text-slate-400 block mb-1" htmlFor="guardian">Guardian</label>
+                  <select id="guardian"
                     value={linkParentId}
                     onChange={(e) => setLinkParentId(e.target.value)}
                     className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-violet-500"

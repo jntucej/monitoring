@@ -238,8 +238,8 @@ export function UserManagement() {
       {showForm && (
         <form onSubmit={submit} className="mb-4 p-4 bg-[var(--bg-base)] rounded-lg space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Name</label>
-            <input
+            <label className="block text-sm font-medium text-gray-300 mb-1" htmlFor="name">Name</label>
+            <input id="name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -248,8 +248,8 @@ export function UserManagement() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
-            <input
+            <label className="block text-sm font-medium text-gray-300 mb-1" htmlFor="email">Email</label>
+            <input id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -258,8 +258,8 @@ export function UserManagement() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Role</label>
-            <select
+            <label className="block text-sm font-medium text-gray-300 mb-1" htmlFor="role">Role</label>
+            <select id="role"
               value={role}
               onChange={(e) => setRole(e.target.value as any)}
               className="block w-full rounded-md border-gray-700 bg-gray-800 text-white sm:text-sm p-2"

@@ -51,8 +51,8 @@ export function AuditFilters({
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
         <div>
-          <label className="text-[var(--text-muted)] font-medium mb-1 block">Action</label>
-          <select
+          <label className="text-[var(--text-muted)] font-medium mb-1 block" htmlFor="action">Action</label>
+          <select id="action"
             value={actionFilter}
             onChange={(e) => setActionFilter(e.target.value)}
             className="w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded px-2.5 py-1.5 focus:outline-none"
@@ -69,8 +69,8 @@ export function AuditFilters({
         </div>
 
         <div>
-          <label className="text-[var(--text-muted)] font-medium mb-1 block">User ID</label>
-          <input
+          <label className="text-[var(--text-muted)] font-medium mb-1 block" htmlFor="user-id">User ID</label>
+          <input id="user-id"
             type="text"
             placeholder="Search User ID..."
             value={userIdFilter}
@@ -80,8 +80,8 @@ export function AuditFilters({
         </div>
 
         <div>
-          <label className="text-[var(--text-muted)] font-medium mb-1 block">From Date</label>
-          <input
+          <label className="text-[var(--text-muted)] font-medium mb-1 block" htmlFor="from-date">From Date</label>
+          <input id="from-date"
             type="date"
             value={fromFilter}
             onChange={(e) => setFromFilter(e.target.value)}
@@ -90,8 +90,8 @@ export function AuditFilters({
         </div>
 
         <div>
-          <label className="text-[var(--text-muted)] font-medium mb-1 block">To Date</label>
-          <input
+          <label className="text-[var(--text-muted)] font-medium mb-1 block" htmlFor="to-date">To Date</label>
+          <input id="to-date"
             type="date"
             value={toFilter}
             onChange={(e) => setToFilter(e.target.value)}

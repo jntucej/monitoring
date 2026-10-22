@@ -145,8 +145,8 @@ export function PassTypesForm() {
             className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center border border-[var(--border)] p-3 rounded-lg bg-[var(--bg-base)]"
           >
             <div className="md:col-span-3">
-              <label className="block text-[10px] uppercase text-[var(--text-muted)] mb-1">Code</label>
-              <input
+              <label className="block text-[10px] uppercase text-[var(--text-muted)] mb-1" htmlFor="code">Code</label>
+              <input id="code"
                 type="text"
                 value={item.code}
                 onChange={(e) => updateType(i, "code", e.target.value)}
@@ -155,8 +155,8 @@ export function PassTypesForm() {
               />
             </div>
             <div className="md:col-span-3">
-              <label className="block text-[10px] uppercase text-[var(--text-muted)] mb-1">Name</label>
-              <input
+              <label className="block text-[10px] uppercase text-[var(--text-muted)] mb-1" htmlFor="name">Name</label>
+              <input id="name"
                 type="text"
                 value={item.name}
                 onChange={(e) => updateType(i, "name", e.target.value)}
@@ -165,8 +165,8 @@ export function PassTypesForm() {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-[10px] uppercase text-[var(--text-muted)] mb-1">Approval Flow</label>
-              <input
+              <label className="block text-[10px] uppercase text-[var(--text-muted)] mb-1" htmlFor="approval-flow">Approval Flow</label>
+              <input id="approval-flow"
                 type="text"
                 value={item.approvalFlow}
                 onChange={(e) => updateType(i, "approvalFlow", e.target.value)}

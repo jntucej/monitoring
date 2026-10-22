@@ -104,8 +104,8 @@ const api = useApi();
       {showForm && (
         <form onSubmit={submit} className="mb-4 p-4 bg-[var(--bg-base)] rounded-lg space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Name</label>
-            <input
+            <label className="block text-sm font-medium text-gray-300 mb-1" htmlFor="name">Name</label>
+            <input id="name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -114,8 +114,8 @@ const api = useApi();
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Location</label>
-            <input
+            <label className="block text-sm font-medium text-gray-300 mb-1" htmlFor="location">Location</label>
+            <input id="location"
               type="text"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
@@ -124,8 +124,8 @@ const api = useApi();
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Type</label>
-            <select
+            <label className="block text-sm font-medium text-gray-300 mb-1" htmlFor="type">Type</label>
+            <select id="type"
               value={type}
               onChange={(e) => setType(e.target.value as "main" | "hostel" | "back")}
               className="block w-full rounded-md border-gray-700 bg-gray-800 text-white sm:text-sm p-2"

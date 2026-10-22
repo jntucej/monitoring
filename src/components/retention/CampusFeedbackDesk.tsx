@@ -156,8 +156,8 @@ export function CampusFeedbackDesk() {
         {showForm && (
           <div className="mb-4 space-y-3 rounded-lg border border-slate-700/50 bg-slate-900/40 p-4">
             <div>
-              <label className="block text-[11px] text-slate-400 mb-1.5">Category</label>
-              <select
+              <label className="block text-[11px] text-slate-400 mb-1.5" htmlFor="category">Category</label>
+              <select id="category"
                 value={formCategory}
                 onChange={(e) => setFormCategory(e.target.value)}
                 className="w-full rounded-lg border border-slate-600/50 bg-slate-800/50 px-3 py-2 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
@@ -182,8 +182,8 @@ export function CampusFeedbackDesk() {
               />
             </div>
             <div>
-              <label className="block text-[11px] text-slate-400 mb-1.5">Details</label>
-              <textarea
+              <label className="block text-[11px] text-slate-400 mb-1.5" htmlFor="details">Details</label>
+              <textarea id="details"
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
                 rows={3}

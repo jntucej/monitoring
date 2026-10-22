@@ -422,8 +422,8 @@ const api = useApi();
           )}
 
           <div className="pt-2 border-t border-slate-800">
-            <label className="text-[10px] text-slate-400 block mb-1.5">Designate operator account</label>
-            <input
+            <label className="text-[10px] text-slate-400 block mb-1.5" htmlFor="designate-operator-account">Designate operator account</label>
+            <input id="designate-operator-account"
               value={userQuery}
               onChange={(e) => searchUsers(e.target.value)}
               placeholder="Search operator name / roll / email…"

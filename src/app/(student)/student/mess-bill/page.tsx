@@ -88,8 +88,8 @@ export default function MessBillPage() {
         <h2 className="font-semibold text-slate-900">Opt out of a upcoming meal</h2>
         <form onSubmit={optOut} className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
           <div>
-            <label className="block text-xs font-medium text-slate-700 mb-1">Date</label>
-            <input
+            <label className="block text-xs font-medium text-slate-700 mb-1" htmlFor="date">Date</label>
+            <input id="date"
               type="date"
               required
               value={optOutDate}
@@ -98,8 +98,8 @@ export default function MessBillPage() {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-700 mb-1">Meal</label>
-            <select
+            <label className="block text-xs font-medium text-slate-700 mb-1" htmlFor="meal">Meal</label>
+            <select id="meal"
               value={optOutType}
               onChange={(e) => setOptOutType(e.target.value)}
               className="w-full border rounded p-2 text-sm bg-white"
@@ -110,8 +110,8 @@ export default function MessBillPage() {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-700 mb-1">Reason (optional)</label>
-            <input
+            <label className="block text-xs font-medium text-slate-700 mb-1" htmlFor="reason-optional">Reason (optional)</label>
+            <input id="reason-optional"
               placeholder="e.g. Going home"
               value={optOutReason}
               onChange={(e) => setOptOutReason(e.target.value)}

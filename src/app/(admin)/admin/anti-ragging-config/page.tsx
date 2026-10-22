@@ -45,8 +45,8 @@ export default function AntiRaggingConfigPage() {
           <span className="font-medium text-sm">Enable anti-ragging email alerts</span>
         </label>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Extra Email Addresses (comma separated)</label>
-          <input
+          <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="extra-email-addresses-comma-separated">Extra Email Addresses (comma separated)</label>
+          <input id="extra-email-addresses-comma-separated"
             type="text"
             value={(config.extra_emails ?? []).join(", ")}
             onChange={(e) => setConfig({ ...config, extra_emails: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })}

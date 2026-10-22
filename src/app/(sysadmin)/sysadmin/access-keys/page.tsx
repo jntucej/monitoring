@@ -202,8 +202,8 @@ export default function SysAdminAccessKeysPage() {
               </div>
             </div>
             <div>
-              <label className="block text-[11px] font-semibold text-[var(--text-muted)] mb-1 uppercase tracking-wide">Purpose</label>
-              <select
+              <label className="block text-[11px] font-semibold text-[var(--text-muted)] mb-1 uppercase tracking-wide" htmlFor="purpose">Purpose</label>
+              <select id="purpose"
                 value={purpose}
                 onChange={(e) => setPurpose(e.target.value)}
                 className="px-3 py-2 bg-[var(--bg-base)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-primary)] focus:outline-none focus:border-emerald-500"

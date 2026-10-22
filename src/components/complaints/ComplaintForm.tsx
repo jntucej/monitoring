@@ -46,8 +46,8 @@ export function ComplaintForm() {
   return (
     <form onSubmit={submit} className="max-w-2xl space-y-4 p-6 bg-white border rounded shadow-sm">
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Complaint Category</label>
-        <select
+        <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="complaint-category">Complaint Category</label>
+        <select id="complaint-category"
           required
           value={selectedCode}
           onChange={(e) => setSelectedCode(e.target.value)}
@@ -69,8 +69,8 @@ export function ComplaintForm() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Title</label>
-        <input
+        <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="title">Title</label>
+        <input id="title"
           required
           placeholder="Brief summary of the issue"
           value={form.title}
@@ -80,8 +80,8 @@ export function ComplaintForm() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
-        <textarea
+        <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="description">Description</label>
+        <textarea id="description"
           required
           rows={5}
           placeholder="Provide detailed information…"
@@ -92,8 +92,8 @@ export function ComplaintForm() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Location (optional)</label>
-        <input
+        <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="location-optional">Location (optional)</label>
+        <input id="location-optional"
           placeholder="e.g. Hostel A, Room 204"
           value={form.location}
           onChange={(e) => setForm({ ...form, location: e.target.value })}

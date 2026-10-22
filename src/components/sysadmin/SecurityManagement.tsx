@@ -112,8 +112,8 @@ const api = useApi();
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Allowed Subnets / IPs</label>
-            <input
+            <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1" htmlFor="allowed-subnets-ips">Allowed Subnets / IPs</label>
+            <input id="allowed-subnets-ips"
               type="text"
               value={ipInput}
               onChange={(e) => setIpInput(e.target.value)}

@@ -64,8 +64,8 @@ export default function AntiRaggingPage() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Category</label>
-        <select
+        <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="category">Category</label>
+        <select id="category"
           value={form.category}
           onChange={(e) => setForm({ ...form, category: e.target.value })}
           className="w-full border rounded p-2 text-sm"
@@ -79,8 +79,8 @@ export default function AntiRaggingPage() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Narrative</label>
-        <textarea
+        <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="narrative">Narrative</label>
+        <textarea id="narrative"
           required
           rows={6}
           placeholder="Describe what happened in detail…"
@@ -91,8 +91,8 @@ export default function AntiRaggingPage() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Location (optional)</label>
-        <input
+        <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="location-optional">Location (optional)</label>
+        <input id="location-optional"
           placeholder="e.g. Hostel B Mess, Corridor 2"
           value={form.location}
           onChange={(e) => setForm({ ...form, location: e.target.value })}
@@ -101,8 +101,8 @@ export default function AntiRaggingPage() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Occurred at (optional)</label>
-        <input
+        <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="occurred-at-optional">Occurred at (optional)</label>
+        <input id="occurred-at-optional"
           placeholder="e.g. 2026-10-20T14:30:00Z"
           value={form.occurredAt}
           onChange={(e) => setForm({ ...form, occurredAt: e.target.value })}

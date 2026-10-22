@@ -150,8 +150,8 @@ function PassApplicationForm() {
       {/* From / To */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="space-y-1">
-          <label className="text-xs font-bold text-[var(--text-secondary)]">From (Departure)</label>
-          <input
+          <label className="text-xs font-bold text-[var(--text-secondary)]" htmlFor="from-departure">From (Departure)</label>
+          <input id="from-departure"
             type="datetime-local"
             value={fromTime}
             onChange={(e) => handleFromTimeChange(e.target.value)}
@@ -161,8 +161,8 @@ function PassApplicationForm() {
           />
         </div>
         <div className="space-y-1">
-          <label className="text-xs font-bold text-[var(--text-secondary)]">To (Return)</label>
-          <input
+          <label className="text-xs font-bold text-[var(--text-secondary)]" htmlFor="to-return">To (Return)</label>
+          <input id="to-return"
             type="datetime-local"
             value={toTime}
             onChange={(e) => setToTime(e.target.value)}
@@ -180,8 +180,8 @@ function PassApplicationForm() {
 
       {/* Reason */}
       <div className="space-y-1">
-        <label className="text-xs font-bold text-[var(--text-secondary)]">Reason for Outing</label>
-        <textarea
+        <label className="text-xs font-bold text-[var(--text-secondary)]" htmlFor="reason-for-outing">Reason for Outing</label>
+        <textarea id="reason-for-outing"
           required
           rows={3}
           value={reasonText}

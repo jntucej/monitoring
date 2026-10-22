@@ -111,8 +111,8 @@ export function CollegeInfoForm() {
           <input type="text" value={data.name} onChange={(e) => update("name", e.target.value)} className={inputCls} />
         </div>
         <div>
-          <label className="block text-sm mb-1 text-[var(--text-primary)]">Short Name</label>
-          <input
+          <label className="block text-sm mb-1 text-[var(--text-primary)]" htmlFor="short-name">Short Name</label>
+          <input id="short-name"
             type="text"
             value={data.shortName}
             onChange={(e) => update("shortName", e.target.value)}
@@ -120,8 +120,8 @@ export function CollegeInfoForm() {
           />
         </div>
         <div>
-          <label className="block text-sm mb-1 text-[var(--text-primary)]">Address</label>
-          <textarea
+          <label className="block text-sm mb-1 text-[var(--text-primary)]" htmlFor="address">Address</label>
+          <textarea id="address"
             value={data.address}
             onChange={(e) => update("address", e.target.value)}
             className={`${inputCls} min-h-[72px]`}
@@ -133,8 +133,8 @@ export function CollegeInfoForm() {
             <input type="tel" value={data.phone} onChange={(e) => update("phone", e.target.value)} className={inputCls} />
           </div>
           <div>
-            <label className="block text-sm mb-1 text-[var(--text-primary)]">Email</label>
-            <input
+            <label className="block text-sm mb-1 text-[var(--text-primary)]" htmlFor="email">Email</label>
+            <input id="email"
               type="email"
               value={data.email}
               onChange={(e) => update("email", e.target.value)}
@@ -147,8 +147,8 @@ export function CollegeInfoForm() {
           <input type="url" value={data.logo} onChange={(e) => update("logo", e.target.value)} className={inputCls} />
         </div>
         <div>
-          <label className="block text-sm mb-1 text-[var(--text-primary)]">Accreditation</label>
-          <input
+          <label className="block text-sm mb-1 text-[var(--text-primary)]" htmlFor="accreditation">Accreditation</label>
+          <input id="accreditation"
             type="text"
             value={data.accreditation}
             onChange={(e) => update("accreditation", e.target.value)}
@@ -160,8 +160,8 @@ export function CollegeInfoForm() {
           <input type="url" value={data.website} onChange={(e) => update("website", e.target.value)} className={inputCls} />
         </div>
         <div>
-          <label className="block text-sm mb-1 text-[var(--text-primary)]">Principal</label>
-          <input
+          <label className="block text-sm mb-1 text-[var(--text-primary)]" htmlFor="principal">Principal</label>
+          <input id="principal"
             type="text"
             value={data.principal}
             onChange={(e) => update("principal", e.target.value)}

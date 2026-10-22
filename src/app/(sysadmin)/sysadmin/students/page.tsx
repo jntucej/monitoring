@@ -923,8 +923,8 @@ const api = useApi();
                   No guardians yet? Create one from the <Link href="/sysadmin/parents" className="text-violet-400 hover:text-violet-300">Parents &amp; Guardians</Link> page.
                 </p>
                 <div>
-                  <label className="text-xs font-semibold text-slate-400 block mb-1">Guardian</label>
-                  <select
+                  <label className="text-xs font-semibold text-slate-400 block mb-1" htmlFor="guardian">Guardian</label>
+                  <select id="guardian"
                     value={selectedParentId}
                     onChange={(e) => setSelectedParentId(e.target.value)}
                     className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-violet-500"

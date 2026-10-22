@@ -138,8 +138,8 @@ function StudentLeaveRequestsInner() {
         {/* Dates */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="space-y-1">
-            <label className="text-xs font-bold text-[var(--text-secondary)]">Start Date</label>
-            <input
+            <label className="text-xs font-bold text-[var(--text-secondary)]" htmlFor="start-date">Start Date</label>
+            <input id="start-date"
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
@@ -149,8 +149,8 @@ function StudentLeaveRequestsInner() {
             />
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-bold text-[var(--text-secondary)]">End Date</label>
-            <input
+            <label className="text-xs font-bold text-[var(--text-secondary)]" htmlFor="end-date">End Date</label>
+            <input id="end-date"
               type="date"
               value={endDate}
               min={startDate || undefined}
@@ -164,8 +164,8 @@ function StudentLeaveRequestsInner() {
 
         {/* Reason */}
         <div className="space-y-1">
-          <label className="text-xs font-bold text-[var(--text-secondary)]">Reason / Notes</label>
-          <textarea
+          <label className="text-xs font-bold text-[var(--text-secondary)]" htmlFor="reason-notes">Reason / Notes</label>
+          <textarea id="reason-notes"
             rows={3}
             value={reason}
             onChange={(e) => setReason(e.target.value)}

@@ -256,8 +256,8 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs text-[var(--text-muted)] mb-1">Code *</label>
-                  <input
+                  <label className="block text-xs text-[var(--text-muted)] mb-1" htmlFor="code">Code *</label>
+                  <input id="code"
                     type="text"
                     value={form.code}
                     onChange={(e) => updateField("code", e.target.value)}
@@ -266,8 +266,8 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-[var(--text-muted)] mb-1">Name *</label>
-                  <input
+                  <label className="block text-xs text-[var(--text-muted)] mb-1" htmlFor="name">Name *</label>
+                  <input id="name"
                     type="text"
                     value={form.name}
                     onChange={(e) => updateField("name", e.target.value)}
@@ -277,8 +277,8 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
               </div>
 
               <div>
-                <label className="block text-xs text-[var(--text-muted)] mb-1">Description</label>
-                <textarea
+                <label className="block text-xs text-[var(--text-muted)] mb-1" htmlFor="description">Description</label>
+                <textarea id="description"
                   value={form.description}
                   onChange={(e) => updateField("description", e.target.value)}
                   className={`${inputCls} min-h-[60px]`}
@@ -304,8 +304,8 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs text-[var(--text-muted)] mb-1">Requires Approval</label>
-                  <select
+                  <label className="block text-xs text-[var(--text-muted)] mb-1" htmlFor="requires-approval">Requires Approval</label>
+                  <select id="requires-approval"
                     value={form.requiresApproval ? "true" : "false"}
                     onChange={(e) => updateField("requiresApproval", e.target.value === "true")}
                     className={inputCls}
@@ -315,8 +315,8 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs text-[var(--text-muted)] mb-1">Approval By</label>
-                  <select
+                  <label className="block text-xs text-[var(--text-muted)] mb-1" htmlFor="approval-by">Approval By</label>
+                  <select id="approval-by"
                     value={form.approvalBy}
                     onChange={(e) => updateField("approvalBy", e.target.value)}
                     className={inputCls}
@@ -329,8 +329,8 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs text-[var(--text-muted)] mb-1">Parent Notification</label>
-                  <select
+                  <label className="block text-xs text-[var(--text-muted)] mb-1" htmlFor="parent-notification">Parent Notification</label>
+                  <select id="parent-notification"
                     value={form.parentNotification}
                     onChange={(e) => updateField("parentNotification", e.target.value)}
                     className={inputCls}
@@ -343,8 +343,8 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs text-[var(--text-muted)] mb-1">Max Duration (hours)</label>
-                  <input
+                  <label className="block text-xs text-[var(--text-muted)] mb-1" htmlFor="max-duration-hours">Max Duration (hours)</label>
+                  <input id="max-duration-hours"
                     type="number"
                     value={form.maxDurationHours ?? ""}
                     onChange={(e) =>
