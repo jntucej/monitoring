@@ -134,15 +134,47 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       checkSession: async () => {
         const token = get().token || tokenStorage.get().token;
         if (!token) {
-          set({ authenticated: false, user: null, role: null });
-          return false;
+          // No in-memory / session-storage token. On a full page reload the
+          // JWT lives only in the HttpOnly access_token cookie (invisible to
+          // JS), so verify the session via that cookie instead of clearing
+          // state — clearing here is what looped users back to /login on
+          // every reload (audit blocker).
+          try {
+            const res = await fetch("/api/auth/session", {
+              credentials: "include",
+              cache: "no-store",
+            });
+            const body = await res.json();
+            const sessionUser = body.user ?? body.data?.user;
+            if (body.success && sessionUser) {
+              set({
+                user: toUser(sessionUser),
+                role: sessionUser.role,
+                authenticated: true,
+              });
+              return true;
+            }
+            set({ authenticated: false, user: null, role: null });
+            return false;
+          } catch {
+            set({ authenticated: false, user: null, role: null });
+            return false;
+          }
         }
         try {
           const res = await fetch("/api/auth/session", {
             headers: { Authorization: `Bearer ${token}` },
           });
           const body = await res.json();
-          if (!body.success || !body.data?.user) {
+          if (!body.success || !(body.data?.user ?? body.user)) {
+            tokenStorage.clear();
+            set({ authenticated: false, user: null, role: null, token: null, refreshToken: null });
+            return false;
+          }
+          // Shape: the session endpoint returns { success, user } (user at top
+          // level). Accept data.user as a defensive fallback.
+          const sessionUser = body.user ?? body.data?.user;
+          if (!sessionUser) {
             tokenStorage.clear();
             set({ authenticated: false, user: null, role: null, token: null, refreshToken: null });
             return false;
@@ -150,8 +182,8 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           set({
             token,
             refreshToken: get().refreshToken ?? tokenStorage.get().refreshToken,
-            user: toUser(body.data.user),
-            role: body.data.user.role,
+            user: toUser(sessionUser),
+            role: sessionUser.role,
             authenticated: true,
           });
           return true;

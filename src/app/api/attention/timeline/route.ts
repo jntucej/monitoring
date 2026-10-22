@@ -162,7 +162,7 @@ async function handleGet(
     if (wanted.includes("event")) {
       const { data: regs, error: regErr } = await db
         .from("event_registrations")
-        .select("id, event_id, status, registered_at, event:campus_events(id, title, category, starts_at)")
+        .select("id, event_id, status, registered_at, event:campus_events!event_id(id, title, category, starts_at)")
         .eq("user_id", userId)
         .order("registered_at", { ascending: false })
         .limit(200);

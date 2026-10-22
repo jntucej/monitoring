@@ -196,8 +196,13 @@ async function handleGet(
 ): Promise<Response> {
   const url = new URL(req.url);
   const status = url.searchParams.get("status") ?? undefined;
-  const workflow = (url.searchParams.get("workflow") as WorkflowType | null) ?? undefined;
-  const stage = url.searchParams.get("stage") ?? undefined;
+  // Callers use three param names for the workflow filter
+  // (workflowType / workflow_type / workflow) — accept all of them.
+  const workflow =
+    (url.searchParams.get("workflowType") ??
+      url.searchParams.get("workflow_type") ??
+      url.searchParams.get("workflow")) as WorkflowType | null;
+  const stage = url.searchParams.get("stage") ?? url.searchParams.get("assigned_stage") ?? undefined;
   const limit = Math.min(Number(url.searchParams.get("limit") ?? 100), 500);
   const offset = Math.max(Number(url.searchParams.get("offset") ?? 0), 0);
 
@@ -231,6 +236,11 @@ async function handleGet(
   } else if (role === "staff") {
     params.push(auth.userId);
     where.push(`(requester_user_id = $${params.length})`);
+  } else if (role === "supervisor") {
+    // Supervisors action out-pass / staff-leave escalations across the whole
+    // campus (their supervised gates are advisory, not a data filter), so
+    // they see all requests — same as principal, whose escalation chain they
+    // feed.
   } else {
     return fail("FORBIDDEN", "Role has no permission visibility", 403);
   }

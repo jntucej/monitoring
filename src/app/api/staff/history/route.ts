@@ -18,7 +18,7 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
     const limit = Math.min(Number(req.nextUrl.searchParams.get("limit") || 50), 100);
 
     const res = await query(
-      `SELECT id, user_id, direction, gate_name, timestamp, notes
+      `SELECT id, user_id, direction, gate_name, timestamp, reason, is_correction
          FROM movement_logs
         WHERE user_id = $1
         ORDER BY timestamp DESC

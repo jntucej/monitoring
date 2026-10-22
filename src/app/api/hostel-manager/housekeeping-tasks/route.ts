@@ -21,7 +21,6 @@ interface HousekeepingTask {
   priority: string | null;
   status: string;
   created_at: string | null;
-  assigned_to: string | null;
 }
 
 async function handleGet(
@@ -64,7 +63,7 @@ async function handleGet(
     .from("permissions")
     .select(
       "ticket_number, description, priority, status, created_at, " +
-        "assigned_to, hostel_scope"
+        "hostel_scope"
     )
     .in("workflow_type", ["hostel", "housekeeping"])
     .in("status", ["PENDING", "ESCALATED"])
@@ -86,7 +85,6 @@ async function handleGet(
       priority: (rec.priority as string | null) ?? null,
       status: String(rec.status ?? "PENDING"),
       created_at: (rec.created_at as string | null) ?? null,
-      assigned_to: (rec.assigned_to as string | null) ?? null,
     };
   });
 

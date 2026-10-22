@@ -100,10 +100,14 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
     };
 
     // notifications: the caller's unread notifications (mirrors /api/notifications).
+    // NOTE: the `notifications` table is keyed by recipient_type/recipient_id
+    // (role-scoped) with `message` (not `body`) — see the schema. The staff
+    // row id is auth.userId; type is the caller's role.
     const notifRes = await service
       .from("notifications")
-      .select("id, title, body, type, read, created_at, meta")
-      .eq("user_id", auth.userId)
+      .select("id, title, message, type, read, created_at, data")
+      .eq("recipient_type", "staff")
+      .eq("recipient_id", auth.userId)
       .eq("read", false)
       .order("created_at", { ascending: false })
       .limit(20);

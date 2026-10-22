@@ -77,7 +77,14 @@ export function withAuthorization(
 ) {
   return async (req: NextRequest): Promise<Response> => {
     return metricsMiddleware(req, async () => {
-      await setupBodyCaching(req);
+      // setupBodyCaching CONSUMES the original request's body stream and
+      // returns a re-wrapped request carrying the raw bytes + a
+      // x-parsed-body-hash header (used by getRequestBody). The original
+      // stream is disturbed after this, so the proxied request MUST be
+      // built from the re-wrapped one — reusing `req.body` made every
+      // handler-level `req.json()` throw "body object disturbed or locked"
+      // (500 on all POST routes: admin/kb, admin/mess-finalize, ...).
+      const { req: cachedReq } = await setupBodyCaching(req);
       try {
         const auth = await requireAuthUser(bearer(req));
         if (!options.allowInactive && !auth.isActive) {
@@ -117,7 +124,7 @@ export function withAuthorization(
           },
           ts,
         );
-        const headers = new Headers(req.headers);
+        const headers = new Headers(cachedReq.headers);
         // The identity values are authoritative from the verified JWT — any
         // client-supplied versions of these headers are replaced.
         headers.set("x-user-id", auth.userId);
@@ -128,10 +135,10 @@ export function withAuthorization(
         headers.set("x-mw-timestamp", String(ts));
         // Legacy header some routes still read — keep it in sync.
         headers.set("x-auth-signature", sig);
-        const proxied = new NextRequest(req.url, {
-          method: req.method,
+        const proxied = new NextRequest(cachedReq.url, {
+          method: cachedReq.method,
           headers,
-          body: req.body,
+          body: cachedReq.body,
           duplex: "half",
         });
         return await handler(proxied, { auth });

@@ -581,6 +581,7 @@ export class PostgresQueryBuilder<T = any> {
       else if (parentTable === "users" && targetTable === "employee_details") joinCondition = `employee_details.user_id = ${parentTable}.id`;
       else if (parentTable === "permission_requests" && targetTable === "users") joinCondition = `users.id = ${parentTable}.requester_user_id`;
       else if (parentTable === "permissions" && targetTable === "users") joinCondition = `users.id = ${parentTable}.requester_user_id`;
+      else if (parentTable === "event_registrations" && targetTable === "campus_events") joinCondition = `campus_events.id = ${parentTable}.event_id`;
       else if (fkCol) joinCondition = `${targetTable}.id = ${parentTable}.${fkCol}`;
       else joinCondition = `${targetTable}.id = ${parentTable}.${targetTable.replace(/s$/, "")}_id`;
 

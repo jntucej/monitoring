@@ -15,8 +15,6 @@ import type { AuthContext } from "@/lib/authContext";
 
 interface WorkflowConfig {
   workflow_type: string;
-  current_stage: string;
-  document_required: boolean;
   open_count: number;
   pending_count: number;
   last_seen: string | null;
@@ -35,13 +33,11 @@ async function handleGet(_req: NextRequest, _ctx: { auth: AuthContext }): Promis
       query<WorkflowConfig>(
         `SELECT
            pr.workflow_type,
-           MAX(pr.current_stage) AS current_stage,
-           MAX(pr.document_required) AS document_required,
            COUNT(*) FILTER (WHERE pr.status = 'PENDING')::int AS open_count,
            COUNT(*) FILTER (WHERE pr.status IN ('PENDING','ESCALATED'))::int AS pending_count,
            MAX(pr.created_at) AS last_seen,
            MIN(pr.created_at) AS first_seen
-          FROM public.permission_requests pr
+          FROM public.permissions pr
           GROUP BY pr.workflow_type
           ORDER BY pr.workflow_type`
       ),
@@ -50,7 +46,7 @@ async function handleGet(_req: NextRequest, _ctx: { auth: AuthContext }): Promis
            pr.workflow_type,
            pr.current_stage AS stage,
            COUNT(*)::int AS open
-          FROM public.permission_requests pr
+          FROM public.permissions pr
           WHERE pr.status IN ('PENDING', 'ESCALATED')
           GROUP BY pr.workflow_type, pr.current_stage
           ORDER BY pr.workflow_type, COUNT(*) DESC`
@@ -65,18 +61,23 @@ async function handleGet(_req: NextRequest, _ctx: { auth: AuthContext }): Promis
       stagesByWorkflow.set(row.workflow_type, list);
     }
 
-    const data = workflows.rows.map((wf) => ({
+    const data = workflows.rows.map((wf) => {
+      const wfStages = stagesByWorkflow.get(wf.workflow_type) ?? [];
+      return {
       workflow_type: wf.workflow_type,
-      current_stage: wf.current_stage,
-      document_required: wf.document_required,
       open_count: wf.open_count,
       pending_count: wf.pending_count,
       last_seen: wf.last_seen,
       first_seen: wf.first_seen,
-      stages: stagesByWorkflow.get(wf.workflow_type) ?? [],
+      stages: wfStages,
       sla_hours: 48,
       approver_roles: ["hod", "principal", "vice_principal"],
-    }));
+      // UI compatibility: the admin page renders these two cells; they are
+      // informational, not queryable per-workflow in the permissions table.
+      current_stage: (wfStages.length > 0 ? wfStages[0].stage : ""),
+      document_required: false,
+      };
+    });
 
     const roles = await query<{ code: string; permissions: unknown }>(
       `SELECT code, permissions FROM public.config_roles WHERE is_active = TRUE ORDER BY code`
