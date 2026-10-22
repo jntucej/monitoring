@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useCallback, useMemo } from "react";
+import { Suspense, useState, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
@@ -46,6 +46,12 @@ function HealthPageInner() {
   const [localTab, setLocalTab] = useState<TabId>(activeTab);
   const tab: TabId = initialised ? localTab : activeTab;
 
+  // Mark initialised after the first render so the URL-driven tab wins first.
+  useEffect(() => {
+    setLocalTab(activeTab);
+    setInitialised(true);
+  }, [activeTab]);
+
   const setActiveTab = useCallback((next: TabId) => {
     setLocalTab(next);
   }, []);
@@ -58,12 +64,6 @@ function HealthPageInner() {
     () => TABS.find((t) => t.id === tab)?.label ?? "App",
     [tab]
   );
-
-  // Mark initialised after the first render so the URL-driven tab wins first.
-  useMemo(() => {
-    setLocalTab(activeTab);
-    setInitialised(true);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-6">

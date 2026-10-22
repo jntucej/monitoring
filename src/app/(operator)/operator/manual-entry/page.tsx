@@ -93,7 +93,7 @@ function ManualEntryInner() {
     setRecordError(null);
   }, []);
 
-  const submitRecord = useCallback(async () => {
+  const submitRecord = async () => {
     if (!result || !result.uniqueId) return;
     const reason = recordReasonText.trim() || recordReason;
     if (!reason) {
@@ -148,7 +148,7 @@ function ManualEntryInner() {
         message: err instanceof Error ? err.message : "Failed to record scan",
       });
     }
-  }, [result, recordDirection, recordReason, recordReasonText, user?.gateId, addToast, resetRecordForm]);
+  };
 
   const runLookup = useCallback(async () => {
     const id = idNumber.trim().toUpperCase();

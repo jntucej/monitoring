@@ -21,11 +21,13 @@ export interface RateLimitResult {
  * rewrote it from the real TCP peer.
  */
 export function extractClientIp(req: NextRequest): string {
+  const xff = req.headers.get("x-forwarded-for");
+  const rightmostHop = xff ? xff.split(",").pop()?.trim() : undefined;
   return (
     req.headers.get("x-client-ip") ??
     req.headers.get("cf-connecting-ip") ??
     req.headers.get("x-real-ip") ??
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    rightmostHop ??
     "unknown"
   );
 }
