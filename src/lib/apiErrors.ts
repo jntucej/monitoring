@@ -31,8 +31,7 @@ export type ApiErrorCode =
   | "HOSTEL_SCOPE_MISMATCH"
   | "BRANCH_MISMATCH"
   | "CSRF_FAILED"
-  | "TRUSTED_HEADERS_MISSING"
-  | "MFA_REQUIRED";
+  | "TRUSTED_HEADERS_MISSING";
 
 const API_ERROR_MESSAGES: Record<string, string> = {
   // domain
@@ -43,7 +42,6 @@ const API_ERROR_MESSAGES: Record<string, string> = {
   DEPARTMENT_MISMATCH:      "You can only act on requests from your own department.",
   HOSTEL_SCOPE_MISMATCH:    "You can only act on requests from your own hostel scope.",
   BRANCH_MISMATCH:          "Only the HOD of the requester's branch may act on this request.",
-  MFA_REQUIRED:             "Two-factor authentication is required for this action.",
   // transport / envelope
   FORBIDDEN:                "You do not have permission to do this.",
   UNAUTHORIZED:             "Your session expired. Please sign in again.",

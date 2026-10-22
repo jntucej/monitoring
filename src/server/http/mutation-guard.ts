@@ -130,7 +130,6 @@ export function withAdminMutation(
   options: Omit<MutationGuardOptions, "requiredRole"> = {},
 ) {
   return withMutationGuard(handler, {
-    enforceMfa: true,
     ...options,
     requiredRole: ["admin", "sysadmin"],
   });

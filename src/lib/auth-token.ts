@@ -52,7 +52,7 @@ export function getAuthSigningKid(): string {
 }
 
 export type TokenType = "access" | "refresh";
-export type TokenPurpose = "password_reset" | "qr_verification" | "mfa_enroll";
+export type TokenPurpose = "password_reset" | "qr_verification";
 
 export interface BaseClaims extends JWTPayload {
   sub: string;

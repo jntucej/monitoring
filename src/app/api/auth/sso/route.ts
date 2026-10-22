@@ -11,7 +11,6 @@ import {
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { signAccessToken, signRefreshToken } from "@/lib/auth-token";
 import { addAudit } from "@/lib/db";
-import { isMfaRequiredForAdmin } from "@/lib/authContext";
 import { secureCookieOptions } from "@/lib/cookies";
 import type { Role } from "@/lib/types";
 
@@ -163,11 +162,11 @@ export async function GET(req: NextRequest) {
 
   // 2g. Look up by (provider, sub) first — stable across email changes.
   const ssoSubject = claims.sub;
-  let user: { id: string; role: Role; status: string; unique_id?: string; name?: string; email?: string; two_factor_enabled?: boolean } | null = null;
+  let user: { id: string; role: Role; status: string; unique_id?: string; name?: string; email?: string } | null = null;
 
   const { data: bySubject } = await service
     .from("users")
-    .select("id, role, status, unique_id, name, email, sso_provider, sso_subject, two_factor_enabled")
+    .select("id, role, status, unique_id, name, email, sso_provider, sso_subject")
     .eq("sso_provider", stateRow.provider_id)
     .eq("sso_subject", ssoSubject)
     .maybeSingle();
@@ -178,7 +177,7 @@ export async function GET(req: NextRequest) {
     // Fallback: match by email only if the account is not already SSO-bound.
     const { data: byEmail } = await service
       .from("users")
-      .select("id, role, status, unique_id, name, email, sso_subject, sso_provider, two_factor_enabled")
+      .select("id, role, status, unique_id, name, email, sso_subject, sso_provider")
       .eq("email", email)
       .maybeSingle();
 
@@ -244,32 +243,6 @@ export async function GET(req: NextRequest) {
   // 2i. Existing account must be ACTIVE.
   if (user.status !== "ACTIVE") {
     return NextResponse.redirect(`${url.origin}/login?sso_error=account_${user.status.toLowerCase()}`);
-  }
-
-  // Enforce MFA for privileged roles if 2FA is enrolled
-  const isPrivileged = user.role === "admin" || user.role === "sysadmin";
-  const mfaRequired = await isMfaRequiredForAdmin();
-  if (isPrivileged && mfaRequired && user.two_factor_enabled) {
-    const challengeId = crypto.randomUUID();
-    await service.from("mfa_login_challenges").insert({
-      id: challengeId,
-      user_id: user.id,
-      expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
-    });
-
-    const challengeToken = await signAccessToken({
-      sub: user.id,
-      email: user.email,
-      role: user.role,
-      account_status: user.status,
-      name: user.name,
-      mfa_pending: true,
-      challenge_id: challengeId,
-    });
-
-    const response = NextResponse.redirect(`${url.origin}/auth/mfa-challenge?challenge=${challengeId}`);
-    response.cookies.set("mfa_challenge_token", challengeToken, secureCookieOptions(req, { maxAge: 300 }));
-    return response;
   }
 
   // ── Step 3: issue OUR tokens, not the IdP's ────────────────

@@ -151,7 +151,6 @@ function KpiCard({ tile }: { tile: KpiTile }) {
 export function CommandCenterContent({ data }: CommandCenterContentProps) {
   const health = data.command?.health ?? [];
   const status = overallStatus(health);
-  const mfa = data.access?.mfaCoverage ?? 0;
   const backup = data.data?.backupFreshness ?? 0;
 
   const errorAvg = avg(data.monitoring?.errorRate24h ?? []);
@@ -307,13 +306,6 @@ export function CommandCenterContent({ data }: CommandCenterContentProps) {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-4 text-xs text-[var(--text-muted)]">
-          <span className="inline-flex items-center gap-1.5">
-            <span
-              className="inline-block size-2 rounded-full"
-              style={{ backgroundColor: mfa < 80 ? "var(--action-warning)" : "var(--action-primary)" }}
-            />
-            MFA coverage {mfa}%
-          </span>
           <span className="inline-flex items-center gap-1.5">
             <span
               className="inline-block size-2 rounded-full"

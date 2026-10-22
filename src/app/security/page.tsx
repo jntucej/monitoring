@@ -221,14 +221,14 @@ export default function SecurityPage() {
     },
     {
       id: "mfa",
-      title: "Auth & MFA Guard",
+      title: "Auth Guard",
       icon: KeyRound,
       metric: "0 Failures",
       submetric: "Brute-force Shielded",
-      badge: "ENFORCED",
+      badge: "ACTIVE",
       barColor: "bg-indigo-400",
       barWidth: "w-full",
-      tag: "Multi-Factor Lock",
+      tag: "Credential Lock",
     },
     {
       id: "privacy",

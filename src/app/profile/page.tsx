@@ -14,7 +14,6 @@ import {
   User as UserIcon,
   Mail,
   Phone,
-  Shield,
   KeyRound,
   Lock,
   Save,
@@ -41,7 +40,6 @@ interface Profile {
   uniqueId: string | null;
   photoUrl: string | null;
   departmentId: string | null;
-  twoFactorEnabled: boolean;
   studentDetails?: { roll?: string; year?: number; section?: string; hostel_block?: string; room_number?: string } | null;
   employeeDetails?: { employee_id?: string; designation?: string; department_id?: string } | null;
 }
@@ -292,11 +290,6 @@ function ProfileDashboard() {
             <Badge variant={profile.status === "ACTIVE" ? "success" : "error"}>
               {profile.status}
             </Badge>
-            {profile.twoFactorEnabled && (
-              <Badge variant="success">
-                <Shield className="w-3 h-3 mr-1" /> 2FA On
-              </Badge>
-            )}
           </div>
         </div>
       </div>
@@ -568,25 +561,7 @@ function ProfileDashboard() {
             </form>
           )}
 
-          {/* 2FA */}
-          <div className="glass-card p-6 space-y-3">
-            <h2 className="text-lg font-semibold text-[var(--text-primary)] flex items-center gap-2">
-              <Shield className="w-5 h-5" /> Two-factor authentication
-            </h2>
-            <p className="text-sm text-[var(--text-secondary)]">
-              {profile.twoFactorEnabled
-                ? "2FA is enabled on this account. You will be asked for a TOTP code at sign-in."
-                : "2FA is not enabled. System administrators are required to enable it."}
-            </p>
-            <div className="flex justify-end">
-              <a
-                href="/sysadmin/security"
-                className="text-sm text-[var(--action-primary)] hover:underline"
-              >
-                Manage 2FA →
-              </a>
-            </div>
-          </div>
+          {/* 2FA subsystem removed from the architecture */}
         </div>
       )}
 

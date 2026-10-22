@@ -7,11 +7,10 @@ import { Role } from "@/lib/types";
 async function handlePost(req: NextRequest) {
   try {
     const body = await req.json();
-    const { allowedIps, forced2FA } = body;
+    const { allowedIps } = body;
 
     const updated = await updateIpAllowlist(
-      Array.isArray(allowedIps) ? allowedIps : [],
-      forced2FA
+      Array.isArray(allowedIps) ? allowedIps : []
     );
 
     const actorId = req.headers.get("x-user-id") || "sysadmin";
@@ -22,7 +21,7 @@ async function handlePost(req: NextRequest) {
       userId: actorId,
       userName: "SysAdmin",
       role: actorRole,
-      details: `Updated security policies: IP allowlist [${updated.allowedIps.join(", ")}], Forced 2FA: ${updated.forced2FA}`,
+      details: `Updated security policies: IP allowlist [${updated.allowedIps.join(", ")}]`,
     });
 
     return NextResponse.json({ success: true, data: updated });

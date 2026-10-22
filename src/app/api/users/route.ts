@@ -16,7 +16,6 @@ import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { ROLES } from "@/lib/roles";
-import { isMfaRequiredForPrivileged } from "@/lib/authContext";
 
 // Roles assignable via this API. Intersection of src/lib/types.ts `Role`
 // and the CHECK constraint on public.users.role in consolidated_clean_schema.sql.
@@ -377,30 +376,8 @@ async function handlePatch(req: NextRequest) {
         );
       }
 
-      // Guard: if 2FA-for-admins is required, a newly promoted sysadmin who
-      // hasn't enrolled would be locked out of login AND every API route
-      // (enrollment itself needs an authenticated session). Block the
-      // promotion until they enroll, instead of stranding them.
-      if (role === ROLES.SYSADMIN && (await isMfaRequiredForPrivileged())) {
-        const service = getSupabaseServiceClient();
-        const { data: targetMfa } = await service
-          .from("users")
-          .select("two_factor_enabled")
-          .eq("id", targetUserId)
-          .maybeSingle();
-        if (!targetMfa?.two_factor_enabled) {
-          return NextResponse.json(
-            {
-              success: false,
-              error: {
-                code: "MFA_REQUIRED",
-                message: "This user must enroll in two-factor authentication (Profile → Security) before being promoted to sysadmin.",
-              },
-            },
-            { status: 403 }
-          );
-        }
-      }
+      // Guard: sysadmin promotion check removed — MFA subsystem has been
+      // removed from the architecture.
 
       // Update role (also revokes all Supabase Auth sessions)
       const success = await updateUserRole(targetUserId, role as Role, actorId);

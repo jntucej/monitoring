@@ -48,7 +48,7 @@ export const GET = withRateLimit(
           `
           SELECT
             id, name, email, phone, role, status,
-            department_id, two_factor_enabled,
+            department_id,
             last_password_change::text AS last_password_change,
             created_at::text  AS created_at,
             updated_at::text  AS updated_at
@@ -124,9 +124,7 @@ export const GET = withRateLimit(
         state: String(profile.status ?? ""),
         department_id:
           profile.department_id != null ? String(profile.department_id) : null,
-        two_factor_enabled:
-          profile.two_factor_enabled === true ||
-          profile.two_factor_enabled === "true",
+        two_factor_enabled: false,
         last_password_change:
           profile.last_password_change != null
             ? String(profile.last_password_change)

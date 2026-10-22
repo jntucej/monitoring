@@ -6,7 +6,7 @@
 
 import { NextRequest } from "next/server";
 import { createHmac, timingSafeEqual } from "crypto";
-import { withAuthorizationPreMfa } from "@/middleware/authorization";
+import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok, fail } from "@/server/http/response";
 import { query } from "@/lib/postgres";
@@ -174,5 +174,5 @@ async function handlePost(req: NextRequest, _ctx: { auth: AuthContext }): Promis
 
 const gateLimit = { windowMs: 60_000, maxRequests: 120 };
 
-export const GET = withRateLimit(withAuthorizationPreMfa(handleGet), gateLimit);
-export const POST = withRateLimit(withAuthorizationPreMfa(handlePost), gateLimit);
+export const GET = withRateLimit(withAuthorization(handleGet), gateLimit);
+export const POST = withRateLimit(withAuthorization(handlePost), gateLimit);

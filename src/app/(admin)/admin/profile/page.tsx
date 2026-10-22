@@ -549,9 +549,9 @@ function AdminProfileDashboard() {
             <InfoTile
               icon={Shield}
               tone="rose"
-              title="2FA / Multi-Factor"
-              body="TOTP enforced on privileged accounts"
-              action={{ label: "Manage 2FA", href: "/admin/users" }}
+              title="Credential Security"
+              body="Password & session controls active"
+              action={{ label: "Manage", href: "/admin/users" }}
             />
             <InfoTile
               icon={ScrollText}

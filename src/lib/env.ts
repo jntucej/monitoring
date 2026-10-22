@@ -12,7 +12,6 @@ export interface EnvConfig {
   authJwtSecret?: string;
   mobileTokenSecret?: string;
   qrTokenSecret?: string;
-  mfaEnrollSecret?: string;
   allowedOrigin?: string;
 }
 
@@ -21,7 +20,6 @@ const DEV_FALLBACKS: Record<string, string> = {
   MOBILE_TOKEN_SECRET: "dev-only-insecure-mobile-secret-32bytes-min",
   QR_TOKEN_SECRET: "dev-only-insecure-qr-secret-32bytes-min",
   MFA_ENROLL_SECRET: "dev-only-insecure-mfa-secret-32bytes-min",
-  TOTP_ENCRYPTION_KEY: "dev-insecure-totp-key-change-me-0000000000000000000000000000000000000000",
 };
 
 const secretCache = new Map<string, string>();
@@ -65,11 +63,10 @@ export function getEnv(): EnvConfig {
   const authJwtSecret = process.env.AUTH_JWT_SECRET;
   const mobileTokenSecret = process.env.MOBILE_TOKEN_SECRET;
   const qrTokenSecret = process.env.QR_TOKEN_SECRET;
-  const mfaEnrollSecret = process.env.MFA_ENROLL_SECRET;
   const allowedOrigin = process.env.ALLOWED_ORIGIN;
 
   // Critical Boot Check
-  const REQUIRED_SECRETS = ['QR_TOKEN_SECRET', 'AUTH_JWT_SECRET', 'MOBILE_TOKEN_SECRET', 'MFA_ENROLL_SECRET', 'TOTP_ENCRYPTION_KEY'];
+  const REQUIRED_SECRETS = ['QR_TOKEN_SECRET', 'AUTH_JWT_SECRET', 'MOBILE_TOKEN_SECRET'];
   if (process.env.NODE_ENV === 'production') {
     for (const key of REQUIRED_SECRETS) {
       const v = process.env[key];
@@ -88,7 +85,6 @@ export function getEnv(): EnvConfig {
     authJwtSecret,
     mobileTokenSecret,
     qrTokenSecret,
-    mfaEnrollSecret,
     allowedOrigin,
   };
 

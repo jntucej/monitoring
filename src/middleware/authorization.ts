@@ -7,10 +7,8 @@ import {
   requirePermission as requireAuthPermission,
   validateResourceOperation as validateResourceOp,
   getGateStudentInfo,
-  isMfaRequiredForPrivileged,
   type AuthContext,
 } from "@/lib/authContext";
-import { isPrivileged } from "@/lib/roles";
 import { getRequestBody, setupBodyCaching } from "@/lib/body-cache";
 import { signTrustedHeaders } from "@/server/http/trusted-headers";
 import { metricsMiddleware } from "@/middleware/metrics";
@@ -30,15 +28,6 @@ export interface AuthorizationOptions {
   resourceType?: string;
   resourceIdParam?: string;
   operation?: string;
-  enforceMfa?: boolean;
-}
-
-function resolveEnforceMfa(options: AuthorizationOptions): boolean {
-  if (options.enforceMfa !== undefined) return options.enforceMfa;
-  if (!options.requiredRole) return false;
-  return Array.isArray(options.requiredRole)
-    ? options.requiredRole.some(isPrivileged)
-    : isPrivileged(options.requiredRole);
 }
 
 function bearer(req: NextRequest): string {
@@ -86,7 +75,6 @@ export function withAuthorization(
   handler: (req: NextRequest, context: { auth: AuthContext }) => Promise<Response>,
   options: AuthorizationOptions = {}
 ) {
-  const enforceMfa = resolveEnforceMfa(options);
   return async (req: NextRequest): Promise<Response> => {
     return metricsMiddleware(req, async () => {
       await setupBodyCaching(req);
@@ -115,12 +103,6 @@ export function withAuthorization(
           : "";
         await validateResourceOp(bearer(req), options.resourceType, resourceId, options.operation);
       }
-      if (enforceMfa) {
-          const required = await isMfaRequiredForPrivileged();
-          if (required && !auth.twoFactorEnabled) {
-            throw new AuthError("MFA_REQUIRED", "MFA required for this action", 403);
-          }
-        }
         // Audit issue #2: routes read x-user-id / x-user-role / x-user-email
         // and TRUST them. That is only safe if withAuthorization OVERWRITES
         // those headers from the verified JWT (not from the client) and signs
@@ -158,13 +140,6 @@ export function withAuthorization(
       }
     });
   };
-}
-
-export function withAuthorizationPreMfa(
-  handler: (req: NextRequest, context: { auth: AuthContext }) => Promise<Response>,
-  options: Omit<AuthorizationOptions, "enforceMfa"> = {}
-) {
-  return withAuthorization(handler, { ...options, enforceMfa: false });
 }
 
 export type AuthenticatedRouteHandler = (

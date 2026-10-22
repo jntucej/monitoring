@@ -32,13 +32,13 @@ for (const u of users) {
     hash(u.pin, 10),
   ]);
   const comma = u === users[users.length - 1] ? "" : ",";
-  rows.push(`  ('${u.id}', '${u.uid}', '${u.name}', '${u.role}', '${u.email}', 'ACTIVE', '${ph}', '${pinh}', false, false)${comma}`);
+  rows.push(`  ('${u.id}', '${u.uid}', '${u.name}', '${u.role}', '${u.email}', 'ACTIVE', '${ph}', '${pinh}', false)${comma}`);
 }
 
 const sql = `-- Seed demo role accounts (bcrypt-hashed; regenerate with: node scripts/generate-seed-roles.mjs)
 -- Non-destructive: ON CONFLICT (unique_id) DO NOTHING.
 BEGIN;
-INSERT INTO users (id, unique_id, name, role, email, status, password_hash, initial_pin_hash, two_factor_enabled, pin_must_change)
+INSERT INTO users (id, unique_id, name, role, email, status, password_hash, initial_pin_hash, pin_must_change)
 VALUES
 ${rows.join('\n')}
 ON CONFLICT (unique_id) DO NOTHING;

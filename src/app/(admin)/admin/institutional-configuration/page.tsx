@@ -279,7 +279,7 @@ function InstitutionalConfigurationInner() {
           <WidgetBoundary title="Security Posture">
             <ReadOnlyCard
               title="System Settings (Security Posture)"
-              subtitle="MFA, session timeout, login limits"
+              subtitle="Session timeout, login limits, security level"
               href="/sysadmin/security"
               hrefLabel="Open in Sysadmin →"
             >

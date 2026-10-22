@@ -1,6 +1,5 @@
 import { supabase, getSupabaseServiceClient } from './dbClient';
 import { getAuthSigningKey } from './auth-token';
-import { encryptSecret, decryptSecret } from './mfa-secret';
 import { query } from './postgres';
 
 export interface SystemHealth {
@@ -150,14 +149,12 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
     const svc = getClient();
     let jwtOk = true, jwtErr: string | undefined;
     try { getAuthSigningKey(); } catch (e) { jwtOk = false; jwtErr = (e as Error).message; }
-    let totpOk = true, totpErr: string | undefined;
-    try { totpOk = decryptSecret(encryptSecret('HEALTHCHECK')) === 'HEALTHCHECK'; } catch (e) { totpOk = false; totpErr = String(e); }
     let cfgOk = true, cfgErr: string | undefined;
     try { const { error } = await svc.from('system_config').select('data').eq('key', 'global_settings').maybeSingle(); if (error) { cfgOk = false; cfgErr = error.message; } } catch (e) { cfgOk = false; cfgErr = String(e); }
     let usersOk = false;
     try { const { count } = await svc.from('users').select('id', { count: 'exact', head: true }).eq('status', 'ACTIVE'); usersOk = (count ?? 0) > 0; } catch { /* leave false */ }
-    const authOk = jwtOk && totpOk && cfgOk && usersOk;
-    (health.components.services as any).auth = { status: authOk ? 'healthy' : 'degraded', jwt_secret: { ok: jwtOk, error: jwtErr }, totp_encryption: { ok: totpOk, error: totpErr }, system_config_readable: { ok: cfgOk, error: cfgErr }, has_active_users: { ok: usersOk } };
+    const authOk = jwtOk && cfgOk && usersOk;
+    (health.components.services as any).auth = { status: authOk ? 'healthy' : 'degraded', jwt_secret: { ok: jwtOk, error: jwtErr }, system_config_readable: { ok: cfgOk, error: cfgErr }, has_active_users: { ok: usersOk } };
     if (!authOk && health.status === 'healthy') health.status = 'degraded';
   } catch (e) {
     (health.components.services as any).auth = { status: 'unhealthy', error: String(e) };

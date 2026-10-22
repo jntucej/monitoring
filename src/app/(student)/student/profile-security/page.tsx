@@ -6,7 +6,7 @@ import { UserProfileTab } from "@/components/shared/UserProfileTab";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import {
-  User, ShieldCheck, KeyRound, Bell, ArrowRight, Lock, Shield, Eye, CheckCircle2,
+  User, KeyRound, Bell, ArrowRight, Lock, Shield, Eye, CheckCircle2,
 } from "lucide-react";
 
 /* ── security overview cards (static status; link to real settings pages) ── */
@@ -54,25 +54,6 @@ function StudentProfileSecurityInner() {
               </p>
               <p className="text-[10px] font-bold text-[var(--action-primary)] mt-1.5 flex items-center gap-1">
                 Change password <ArrowRight className="w-3 h-3" />
-              </p>
-            </div>
-          </Link>
-
-          {/* 2FA */}
-          <Link
-            href="/security"
-            className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 hover:border-[var(--action-primary)]/40 hover:bg-[var(--action-primary)]/5 transition-colors flex items-start gap-3 min-w-0"
-          >
-            <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
-              <ShieldCheck className="w-4 h-4 text-emerald-500" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm font-bold text-[var(--text-primary)]">Two-Factor Authentication</p>
-              <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                Add a second sign-in step (authenticator app or TOTP) to protect your account.
-              </p>
-              <p className="text-[10px] font-bold text-emerald-500 mt-1.5 flex items-center gap-1">
-                Manage 2FA <ArrowRight className="w-3 h-3" />
               </p>
             </div>
           </Link>

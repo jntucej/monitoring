@@ -16,7 +16,6 @@ import { randomInt, randomBytes } from "crypto";
 import { assertLength, LIMITS } from "../src/lib/validation";
 import { generateMobileToken, verifyMobileToken, validateMobileToken } from "../src/lib/mobile-auth"; import { hashDeviceId } from "../src/lib/mobile-auth";
 import { generateQrToken, validateQrToken } from "../src/lib/qr-token";
-import { createEnrollToken, verifyEnrollToken } from "../src/lib/mfa-enroll";
 import {
   getAuthorizationUrl,
   mapExternalGroupToRole,
@@ -24,9 +23,6 @@ import {
   validateOIDCIdToken,
   SSOConfig,
 } from "../src/lib/sso";
-import { isMfaRequiredForAdmin } from "../src/lib/authContext";
-import { encryptSecret, decryptSecret } from "../src/lib/mfa-secret";
-import { generateBase32Secret, generateTOTPCode, verifyTOTPCode } from "../src/lib/totp";
 import { getCached, setCached, invalidateCache } from "../src/lib/cache";
 import { validateCsrf } from "../src/lib/csrf";
 import { extractClientIp } from "../src/lib/rate-limit";
@@ -35,8 +31,7 @@ import { NextRequest } from "next/server";
 process.env.AUTH_JWT_SECRET = process.env.AUTH_JWT_SECRET || "test_jwt_secret_at_least_32_characters_long_for_tests";
 process.env.MOBILE_TOKEN_SECRET = process.env.MOBILE_TOKEN_SECRET || "test_mobile_token_secret_at_least_32_chars_long";
 process.env.QR_TOKEN_SECRET = process.env.QR_TOKEN_SECRET || "test_qr_token_secret_at_least_32_characters_long";
-process.env.MFA_ENROLL_SECRET = process.env.MFA_ENROLL_SECRET || "test_mfa_enroll_secret_at_least_32_chars_long";
-process.env.TOTP_ENCRYPTION_KEY = process.env.TOTP_ENCRYPTION_KEY || "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+process.env.QR_TOKEN_SECRET = process.env.QR_TOKEN_SECRET || "test_qr_token_secret_at_least_32_characters_long";
 
 async function runTests() {
   console.log("====================================================");
@@ -247,18 +242,7 @@ async function runTests() {
   const accessAsQr = await validateQrToken(accessToken);
   assert(accessAsQr === null, "D7c: validateQrToken rejects access token");
 
-  // D8. MFA Enroll Token isolation
-  const enrollToken = await createEnrollToken(testClaims.sub);
-  const enrollHeader = decodeProtectedHeader(enrollToken);
-  assert(enrollHeader.kid === "mfa-v1", "D8-kid: MFA token has kid=mfa-v1 protected header");
-
-  const verifiedEnrollUser = await verifyEnrollToken(enrollToken);
-  assert(verifiedEnrollUser === testClaims.sub, "D8a: Verify MFA enrollment token");
-  const enrollAsAccess = await verifyAccessToken(enrollToken);
-  assert(enrollAsAccess === null, "D8b: verifyAccessToken rejects MFA enrollment token");
-
-  const accessAsEnroll = await verifyEnrollToken(accessToken);
-  assert(accessAsEnroll === null, "D8c: verifyEnrollToken rejects access token");
+  // D8. MFA Enroll Token isolation — removed along with the MFA subsystem.
 
   // D9. Deprecated verifyAuthToken throws error
   let verifyAuthTokenThrew = false;
@@ -383,51 +367,7 @@ async function runTests() {
   };
   assert(isStateValid(expiredState) === false, "Expired state is rejected");
 
-  // 2f. 2FA/MFA Cryptographic Primitives & Secret Isolation (Issue #5)
-  console.log("\n🔑 [2b/4] Testing 2FA/MFA Secret Encryption & Challenges...");
-
-  // Env override check
-  process.env.MFA_REQUIRED_FOR_ADMIN = "false";
-  invalidateCache("system_config:mfaRequiredForAdmin");
-  assert((await isMfaRequiredForAdmin()) === false, "isMfaRequiredForAdmin returns false when env override is false");
-
-  process.env.MFA_REQUIRED_FOR_ADMIN = "true";
-  invalidateCache("system_config:mfaRequiredForAdmin");
-  assert((await isMfaRequiredForAdmin()) === true, "isMfaRequiredForAdmin returns true when env override is true");
-  delete process.env.MFA_REQUIRED_FOR_ADMIN;
-  invalidateCache("system_config:mfaRequiredForAdmin");
-
-  // Secret encryption at rest
-  const rawTotpSecret = generateBase32Secret(20);
-  assert(rawTotpSecret.length === 20, "Generate 20-char base32 TOTP secret");
-  const encryptedSecret = encryptSecret(rawTotpSecret);
-  assert(encryptedSecret.startsWith("v1."), "Encrypted TOTP secret has v1. version prefix");
-  assert(encryptedSecret.split(".").length === 4, "Encrypted TOTP secret has v1.iv.enc.tag sealed structure");
-  const decryptedSecret = decryptSecret(encryptedSecret);
-  assert(decryptedSecret === rawTotpSecret, "Decrypted TOTP secret roundtrips exactly");
-
-  // TOTP code verification
-  const currentOtp = generateTOTPCode(decryptedSecret);
-  assert(currentOtp.length === 6, "Generate 6-digit TOTP code");
-  assert(verifyTOTPCode(decryptedSecret, currentOtp) === true, "Verify correct current TOTP code");
-  assert(verifyTOTPCode(decryptedSecret, "999999" === currentOtp ? "000000" : "999999") === false, "Reject invalid TOTP code");
-
-  // Recovery codes generation & consumption
-  const recoveryCodes = Array.from({ length: 10 }, () => randomBytes(4).toString("hex"));
-  const recoveryHashes = await Promise.all(recoveryCodes.map((c) => bcrypt.hash(c, 10)));
-  assert(recoveryCodes.length === 10, "Generate 10 recovery codes");
-  assert(bcrypt.compareSync(recoveryCodes[0], recoveryHashes[0]), "Recovery code matches bcrypt hash");
-  assert(!bcrypt.compareSync("WRONGCODE", recoveryHashes[0]), "Invalid recovery code rejected");
-
-  // Single-use challenge simulation
-  const challengeState = { id: "challenge-uuid-1", user_id: "user-1", used_at: null as string | null };
-  const burnChallenge = (c: typeof challengeState) => {
-    if (c.used_at !== null) return false;
-    c.used_at = new Date().toISOString();
-    return true;
-  };
-  assert(burnChallenge(challengeState) === true, "First consumption of MFA login challenge succeeds");
-  assert(burnChallenge(challengeState) === false, "Replay of consumed MFA login challenge is rejected");
+  // 2f. 2FA/MFA subsystem removed — no longer tested.
 
   // 2c. Issue #6: PIN Login Security, Lockout, CSRF & Password/Role Isolation
   console.log("\n🛡️  [2c/4] Testing PIN Login Security, Lockout & CSRF Defense...");
@@ -440,7 +380,6 @@ async function runTests() {
     password_hash: await hashPassword("ValidPassword123!"),
     pin_hash: await hashPassword("654321"),
     initial_pin_hash: null as string | null,
-    two_factor_enabled: false,
   };
 
   const verifyPinOnly = async (presentedPin: string, user: typeof testUser) => {
@@ -510,10 +449,7 @@ async function runTests() {
   resetLockout("OP001");
   assert(!isLocked("OP001"), "10f: Successful authentication resets lockout counter");
 
-  // 10g. TOTP 2FA required for 2FA-enrolled user even at PIN endpoint
-  const mfaOperator = { ...testUser, two_factor_enabled: true };
-  const requiresMfaCheck = (user: typeof mfaOperator) => Boolean(user.two_factor_enabled);
-  assert(requiresMfaCheck(mfaOperator) === true, "10g: 2FA-enrolled operator triggers MFA challenge on PIN login");
+  // 10g. MFA subsystem removed — the 2FA-enrolled operator check no longer applies.
 
     // 10h. Cross-origin POST request rejected by CSRF protection
     const origAllowedOrigin = process.env.ALLOWED_ORIGIN;
@@ -578,11 +514,7 @@ async function runTests() {
   try { assertLength("A".repeat(5001), LIMITS.FEEDBACK_COMMENT, "feedback"); } catch { threwExceeded = true; }
   assert(threwExceeded, "assertLength rejects string exceeding FEEDBACK_COMMENT limit");
 
-  // L1-02 MFA fail-closed behavior test
-  delete process.env.MFA_REQUIRED_FOR_ADMIN;
-  invalidateCache("system_config:mfaRequiredForAdmin");
-  const failClosedResult = await isMfaRequiredForAdmin();
-  assert(failClosedResult === true, "isMfaRequiredForAdmin fails closed (true) when DB unreadable and no override");
+  // L1-02 MFA fail-closed behavior — MFA subsystem removed, no longer tested.
 
   // Summary
   console.log("\n====================================================");

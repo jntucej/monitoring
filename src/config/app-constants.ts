@@ -47,8 +47,6 @@ export const LIMITS = {
 export const TIME = {
   SESSION_TTL_MS:        60 * 60 * 1000,
   REFRESH_TTL_MS:  7 * 24 * 60 * 60 * 1000,
-  MFA_CHALLENGE_TTL_MS:  5 * 60 * 1000,
-  ENROLLMENT_TTL_MS:    15 * 60 * 1000,
   PASSWORD_RESET_TTL_MS: 60 * 60 * 1000,
   LOCKOUT_DURATION_MS:  15 * 60 * 1000,
   MAX_FAILED_LOGINS:     5,

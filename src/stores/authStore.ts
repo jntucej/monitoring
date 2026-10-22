@@ -38,11 +38,6 @@ export const tokenStorage = {
   },
 };
 
-interface MfaChallenge {
-  id: string;
-  expiresAt: string;
-}
-
 interface AuthState {
   user: User | null;
   token: string | null;
@@ -50,9 +45,6 @@ interface AuthState {
   role: Role | null;
   authenticated: boolean;
   loading: boolean;
-  mfaChallenge?: MfaChallenge | null;
-  mfaPending?: boolean;
-  enrollToken?: string | null;
   _hasHydrated: boolean;
 }
 
@@ -60,18 +52,11 @@ interface LoginResult {
   success: boolean;
   error?: string;
   code?: string;
-  mfaRequired?: boolean;
-  mfaChallenge?: MfaChallenge;
-  mfaEnrollmentRequired?: boolean;
-  enrollToken?: string;
+  role?: Role;
 }
 
 interface AuthActions {
-  login: (
-    login: string,
-    password: string,
-    mfa?: { challenge?: MfaChallenge; totpCode?: string }
-  ) => Promise<LoginResult>;
+  login: (login: string, password: string) => Promise<LoginResult>;
   logout: () => Promise<void>;
   checkSession: () => Promise<boolean>;
   setRole: (role: Role) => void;
@@ -89,17 +74,14 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       role: null,
       authenticated: false,
       loading: false,
-      mfaChallenge: null,
-      mfaPending: false,
-      enrollToken: null,
       _hasHydrated: false,
-      login: async (loginIdentifier, password, mfa) => {
+      login: async (loginIdentifier, password) => {
         set({ loading: true });
         try {
           const res = await fetch("/api/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ login: loginIdentifier.toUpperCase(), password, mfa }),
+            body: JSON.stringify({ login: loginIdentifier.toUpperCase(), password }),
           });
           const body = await res.json();
           if (!body.success) {
@@ -107,29 +89,9 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             return { success: false, error: body.error?.message, code: body.error?.code };
           }
           const d = body.data ?? {};
-          // The /api/auth/login route returns data.token / data.refreshToken
-          // (and data.mfa_challenge / data.mfa_enrollment_required in snake
-          // case). Normalise both snake_case and camelCase here so the
-          // login never silently drops the token just because the field
-          // name doesn't match.
-          const mfaRequired = Boolean(d.mfaRequired || d.mfa_required);
-          const mfaEnrollRequired = Boolean(d.mfaEnrollmentRequired || d.mfa_enrollment_required);
-          const mfaChallenge = d.mfaChallenge ?? d.mfa_challenge;
-          const enrollToken = d.enrollToken ?? d.enroll_token;
           const token = d.token ?? d.accessToken;
           const refreshToken = d.refreshToken ?? d.refresh_token;
-          if (mfaRequired) {
-            set({ loading: false, mfaPending: true, mfaChallenge });
-            return { success: true, mfaRequired: true, mfaChallenge };
-          }
-          if (mfaEnrollRequired) {
-            set({ loading: false, enrollToken });
-            return { success: true, mfaEnrollmentRequired: true, enrollToken };
-          }
           if (!token) {
-            // Server said success:true but gave no token — treat as a failure
-            // rather than setting the auth store to a null token (which is
-            // what produced the "logged in but redirected to /login" loop).
             set({ loading: false });
             return { success: false, code: "NO_TOKEN", error: "Login succeeded but no token was returned." };
           }
@@ -141,10 +103,8 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             role: d.user?.role,
             authenticated: true,
             loading: false,
-            mfaPending: false,
-            mfaChallenge: null,
           });
-          return { success: true };
+          return { success: true, role: d.user?.role };
         } catch (err) {
           set({ loading: false });
           return { success: false, error: err instanceof Error ? err.message : "Network error" };
@@ -159,9 +119,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           user: null,
           role: null,
           authenticated: false,
-          mfaPending: false,
-          mfaChallenge: null,
-          enrollToken: null,
         });
         if (token) {
           try {

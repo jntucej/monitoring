@@ -257,7 +257,7 @@ export function ProfileMenuButton({
             <MenuRow
               icon={ShieldCheck}
               label="Security Center"
-              hint="2FA · sessions"
+              hint="Sessions & access"
               onClick={() => nav(securityHref)}
             />
             <div className="h-px bg-[var(--border)] my-1.5" />

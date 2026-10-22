@@ -126,7 +126,6 @@ export function PeopleDrawer({ row, personId, onClose }: Props) {
                   <Field k="Role" v={d.role} />
                   <Field k="State" v={d.state} />
                   <Field k="Phone" v={d.phone ?? "—"} />
-                  <Field k="MFA" v={d.two_factor_enabled ? "Enabled" : "Off"} />
                   <Field
                     k="Pw changed"
                     v={

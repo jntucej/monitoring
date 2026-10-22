@@ -8,9 +8,6 @@ import { log, getRequestId } from "@/lib/log";
 const defaultConfig = {
   notificationsEnabled: true,
   securityLevel: "high",
-  // Default OFF: deployments without a 2FA enrollment flow would otherwise
-  // lock every sysadmin out. Toggle ON from System Settings when ready.
-  mfaRequiredForAdmin: false,
   sessionTimeoutMinutes: 60,
   maxLoginAttempts: 5,
   auditRetentionDays: 90,
@@ -104,10 +101,8 @@ async function handlePatchInner(req: NextRequest) {
       );
     }
 
-    // The MFA gate caches this flag for 60s; flip it immediately on change.
-    if ("mfaRequiredForAdmin" in mergedValue) {
-      await invalidateCache("system_config:*");
-    }
+    // Invalidate cached config on any change so the new values take effect.
+    await invalidateCache("system_config:*");
 
     return NextResponse.json({ success: true, data: toConfig((upserted as any)?.data ?? (upserted as any)?.value) });
   } catch (err: any) {
