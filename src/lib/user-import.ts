@@ -10,7 +10,7 @@ import { Role } from "@/lib/types";
 import { addAudit } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import pLimit from "p-limit";
-import crypto from "crypto";
+import crypto, { randomInt } from "crypto";
 import {
   parseRollNumber,
   getStudentYearFromRoll,
@@ -635,7 +635,7 @@ async function processSingleRow(
   try {
     const salt = await bcrypt.genSalt(10);
     const pwHash = await bcrypt.hash(crypto.randomBytes(16).toString("hex") + "Welcome@123", salt);
-    const pinHash = await bcrypt.hash(String(Math.floor(1000 + Math.random() * 9000)), salt);
+    const pinHash = await bcrypt.hash(String(randomInt(1000, 9999 + 1)), salt);
     const { data: existing } = await supabase
       .from("users")
       .select("id, role")

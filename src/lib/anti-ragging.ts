@@ -1,9 +1,9 @@
-import { createHash } from "crypto";
+import { createHash, randomInt } from "crypto";
 import { query } from "@/lib/postgres";
 
 export function generateCaseNumber(): string {
   const y = new Date().getFullYear();
-  return `ARC-${y}-${Math.floor(Math.random() * 900_000) + 100_000}`;
+  return `ARC-${y}-${randomInt(100_000, 999_999 + 1)}`;
 }
 
 export function reporterHash(userId: string): string {

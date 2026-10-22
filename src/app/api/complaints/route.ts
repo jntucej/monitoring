@@ -3,6 +3,7 @@
 // GET  — list complaints (student = own, authority = role/department/hostel scoped).
 
 import { NextRequest } from "next/server";
+import { randomInt } from "node:crypto";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
@@ -15,7 +16,7 @@ import type { AuthContext } from "@/lib/authContext";
 
 function generateComplaintNumber(): string {
   const y = new Date().getFullYear();
-  return `CMP-${y}-${Math.floor(Math.random() * 900_000) + 100_000}`;
+  return `CMP-${y}-${randomInt(100_000, 999_999 + 1)}`;
 }
 
 async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
