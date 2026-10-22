@@ -1,6 +1,8 @@
 "use client";
 
+import { Suspense } from "react";
 import { useEffect } from "react";
+import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { GlassProvider } from "@/context/GlassContext";
@@ -8,10 +10,18 @@ import { NavigationProvider } from "@/context/NavigationContext";
 import { ToastProvider } from "@/components/ui/toast";
 import { SafeAreaAppShell } from "@/components/shared/SafeAreaAppShell";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
-import { Suspense } from "react";
 import { LoadingStates } from "@/components/shared/LoadingStates";
-import { FloatingBot } from "@/components/bot/FloatingBot";
 import { FloatableThemeCycler } from "@/components/shared/FloatableThemeCycler";
+
+// The floating bot pulls in `three` + `@react-three/fiber` (the listening
+// canvas) plus speech hooks. Loading it eagerly would bloat the shared chunk
+// that every role console ships. Split it into its own lazy chunk so it only
+// downloads when a non-marketing page actually mounts it.
+const FloatingBot = dynamic(
+  () =>
+    import("@/components/bot/FloatingBot").then((m) => m.FloatingBot),
+  { ssr: false, loading: () => null },
+);
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {
   const hasHydrated = useAuthStore((s) => s._hasHydrated);

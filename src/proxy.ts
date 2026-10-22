@@ -2,9 +2,97 @@ import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from './lib/rate-limit';
 import { validateCsrf } from './lib/csrf';
 
+/**
+ * Home-page auth redirect (UX only, not a security boundary).
+ *
+ * The marketing home page `/` is fully static (CDN-cacheable). Logged-in
+ * visitors carrying an auth cookie are bounced to their role console before
+ * routing. This mirrors the default-route table in
+ * `src/server/policy/routes.ts` (inlined here because the edge runtime
+ * cannot import server-only modules that touch the DB).
+ *
+ * Real authorization still happens server-side in `createAuthContext` /
+ * route guards — decoding the JWT here only reads the role to pick a target.
+ */
+const HOME_DEFAULT_ROUTE: Record<string, string> = {
+  operator: '/operator',
+  admin: '/admin',
+  sysadmin: '/sysadmin',
+  supervisor: '/supervisor',
+  guardian: '/parent',
+  parent: '/parent',
+  student: '/student',
+  warden: '/principal',
+  faculty: '/faculty/permissions',
+  staff: '/staff',
+  worker: '/worker',
+  visitor: '/visitor',
+  caretaker: '/hostel/permissions',
+  deputy_warden: '/deputy-warden',
+  hostel_manager: '/hostel-manager',
+  principal: '/principal/permissions',
+  vice_principal: '/vice-principal',
+  oie: '/oie',
+  exam_branch: '/exam-branch',
+  hod: '/hod',
+  exam_superintendent: '/exam/superintendent',
+  mess_incharge: '/mess',
+};
+
+function decodeRoleFromJwt(
+  token: string,
+): { role?: string; gateId?: string } | null {
+  const parts = token.split('.');
+  if (parts.length < 2) return null;
+  try {
+    const base64 = parts[1]
+      .replace(/-/g, '+')
+      .replace(/_/g, '/')
+      .padEnd(Math.ceil(parts[1].length / 4) * 4, '=');
+    const decoded = JSON.parse(atob(base64));
+    if (typeof decoded.role === 'string') {
+      return { role: decoded.role, gateId: decoded.gateId ?? decoded.gate_id };
+    }
+    if (Array.isArray(decoded.roles) && decoded.roles.length > 0) {
+      return { role: decoded.roles[0], gateId: decoded.gateId ?? decoded.gate_id };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function homeAuthRedirect(req: NextRequest): NextResponse | null {
+  const token =
+    req.cookies.get('access_token')?.value ??
+    req.cookies.get('refresh_token')?.value ??
+    req.cookies.get('auth_token')?.value;
+  if (!token) return null;
+  const payload = decodeRoleFromJwt(token);
+  if (!payload?.role) return null;
+  let target = HOME_DEFAULT_ROUTE[payload.role];
+  if (payload.role === 'operator' && payload.gateId) {
+    target = `/gate/${payload.gateId}`;
+  }
+  if (!target) return null;
+  const url = req.nextUrl.clone();
+  url.pathname = target;
+  url.search = '';
+  url.hash = '';
+  return NextResponse.redirect(url);
+}
+
 export async function proxy(req: NextRequest) {
   const requestId = req.headers.get('x-request-id') || crypto.randomUUID();
   const { pathname } = req.nextUrl;
+
+  // Home landing page: redirect authenticated visitors to their role
+  // console. Runs for everyone hitting `/` (no rate-limit / CSRF needed).
+  if (pathname === '/') {
+    const redirect = homeAuthRedirect(req);
+    if (redirect) return redirect;
+    return NextResponse.next();
+  }
 
   const BYPASS_PATHS = ['/api/health', '/metrics', '/api/metrics'];
   if (BYPASS_PATHS.some(p => pathname.startsWith(p))) {
@@ -123,5 +211,5 @@ export const config = {
   // would lock out client sessions and the operator kiosk that don't carry
   // the cookie. When the flag is set, the operator adds the HTML prefixes
   // to this list; see the gate comment above.
-  matcher: ['/api/:path*'],
+  matcher: ['/', '/api/:path*'],
 };
