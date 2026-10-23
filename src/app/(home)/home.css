@@ -110,6 +110,8 @@ html[data-theme="glass"] [data-home] {
   will-change: transform;
   z-index: 1;
   filter: blur(32px);
+  backface-visibility: hidden;
+  contain: layout paint style;
 }
 [data-home] .home-blob-a {
   top: -20%;
