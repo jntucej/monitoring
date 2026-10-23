@@ -47,8 +47,8 @@ function SysadminCronInner() {
     try {
       const res = await fetch("/api/admin/scheduled-jobs", { headers: getAuthHeaders() });
       const body = await res.json();
-      setJobs((body?.rows ?? []) as JobRow[]);
-      setRuns((body?.runs ?? []) as RunRow[]);
+      setJobs((body?.data?.rows ?? body?.rows ?? []) as JobRow[]);
+      setRuns((body?.data?.runs ?? body?.runs ?? []) as RunRow[]);
     } catch (e) {
       console.error("cron", e);
     } finally {
@@ -150,9 +150,9 @@ function SysadminCronInner() {
                     {r.records_affected != null ? ` · ${r.records_affected} records` : ""}
                     {r.duration_ms != null ? ` · ${r.duration_ms}ms` : ""}
                   </p>
-                  <p className="text-[11px] text-[var(--text-muted)] shrink-0">
-                    {r.start_time ? new Date(r.start_time).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", second: "2-digit" }) : "—"}
-                  </p>
+                  <span className="text-xs text-[var(--text-muted)] font-mono">
+                    {r.start_time ? new Date(r.start_time).toLocaleTimeString() : ""}
+                  </span>
                 </div>
               ))}
             </div>
@@ -165,7 +165,7 @@ function SysadminCronInner() {
 
 export default function SysadminCronPage() {
   return (
-    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
+    <AuthGuard allowedRoles={["sysadmin", "admin"]}>
       <SysadminCronInner />
     </AuthGuard>
   );

@@ -15,25 +15,24 @@ import {
   ShieldCheck,
   Loader2,
   ArrowRight,
-  AlertTriangle
+  AlertTriangle,
+  Inbox,
 } from "lucide-react";
 
-/* response shapes */
+interface StudentRow {
+  id: string;
+  name: string;
+  roll?: string;
+  uniqueId?: string;
+  department?: string;
+  year?: number;
+  section?: string;
+  status?: string;
+}
 
-interface FacultyRoster {
+interface StudentsResponse {
   success: boolean;
-  records?: Array<{
-    id: string;
-    fullName: string;
-    designation: string;
-    status: string;
-    firstInTime?: string;
-    department?: string;
-  }>;
-  summary?: {
-    totalFaculty?: number;
-    presentToday?: number;
-  };
+  data: StudentRow[];
 }
 
 function FacultyStudentDirectoryInner() {
@@ -46,7 +45,7 @@ function FacultyStudentDirectoryInner() {
     loading,
     error,
     refresh,
-  } = useApiResource<FacultyRoster>("/api/faculty/attendance", { ttlMs: 30_000 });
+  } = useApiResource<StudentsResponse>("/api/students", { ttlMs: 30_000 });
 
   const refreshAll = useCallback(async () => {
     clearCache();
@@ -56,10 +55,10 @@ function FacultyStudentDirectoryInner() {
   usePolling(refreshAll, { intervalMs: 30_000, enabled: !!user });
 
   const busy = loading && !data;
+  const students: StudentRow[] = Array.isArray(data?.data) ? data.data : [];
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
-      {/* Back link */}
       <Link
         href="/faculty"
         className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
@@ -67,7 +66,6 @@ function FacultyStudentDirectoryInner() {
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Faculty Overview
       </Link>
 
-      {/* Page toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <p className="mt-1 text-sm text-slate-400 min-w-0">
@@ -101,43 +99,42 @@ function FacultyStudentDirectoryInner() {
               <span className="text-sm font-semibold text-white truncate">Student Directory</span>
             </div>
             <span className="text-xs text-slate-500 shrink-0">
-              {data?.summary?.totalFaculty ?? 0} on roster · {data?.summary?.presentToday ?? 0} present
+              {students.length} student(s)
             </span>
           </div>
           {busy ? (
             <div className="p-4 flex items-center gap-2 text-sm text-slate-500 min-w-0">
-              <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" /> Loading roster…
+              <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" /> Loading students…
             </div>
-          ) : data && data.records && data.records.length > 0 ? (
-            <div className="overflow-x-auto -mx-4 px-4">
-              <table className="w-full text-sm">
+          ) : students.length === 0 ? (
+            <div className="p-6 text-center min-w-0">
+              <Inbox className="w-6 h-6 text-slate-600 mx-auto mb-2" />
+              <p className="text-sm text-slate-500">No students match your department scope.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto min-w-0">
+              <table className="w-full text-sm min-w-[560px]">
                 <thead>
                   <tr className="border-b border-slate-800 text-left text-xs text-slate-500">
-                    <th className="py-2 pr-4">Name</th>
-                    <th className="py-2 pr-4">Designation</th>
-                    <th className="py-2 pr-4">Status</th>
-                    <th className="py-2">First In</th>
+                    <th className="py-2 pr-4 px-4">Name</th>
+                    <th className="py-2 pr-4 px-4">Roll</th>
+                    <th className="py-2 pr-4 px-4">Department</th>
+                    <th className="py-2 px-4">Year / Section</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {data.records.map((r) => (
-                    <tr key={r.id} className="border-b border-slate-800/50 last:border-0">
-                      <td className="py-2 pr-4 text-slate-200">{r.fullName}</td>
-                      <td className="py-2 pr-4 text-slate-400">{r.designation}</td>
-                      <td className="py-2 pr-4">
-                        <span className={`text-xs font-semibold ${r.status === "PRESENT" ? "text-emerald-400" : r.status === "ABSENT" ? "text-rose-400" : "text-slate-400"}`}>
-                          {r.status}
-                        </span>
+                <tbody className="divide-y divide-slate-800/50">
+                  {students.map((s) => (
+                    <tr key={s.id} className="hover:bg-slate-800/30 transition-colors">
+                      <td className="py-2.5 pr-4 px-4 text-slate-200">{s.name}</td>
+                      <td className="py-2.5 pr-4 px-4 font-mono text-xs text-slate-300">{s.roll ?? s.uniqueId ?? "—"}</td>
+                      <td className="py-2.5 pr-4 px-4 text-slate-400">{s.department ?? "—"}</td>
+                      <td className="py-2.5 px-4 text-slate-400">
+                        {s.year != null ? `Y${s.year}` : "—"} / {s.section ?? "—"}
                       </td>
-                      <td className="py-2 text-slate-400">{r.firstInTime ?? "—"}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            </div>
-          ) : (
-            <div className="p-6 text-center text-sm text-slate-500 min-w-0">
-              No roster records available yet.
             </div>
           )}
         </div>
@@ -147,9 +144,10 @@ function FacultyStudentDirectoryInner() {
     </div>
   );
 }
+
 export default function FacultyStudentDirectoryPage() {
   return (
-    <AuthGuard allowedRoles={['faculty', 'hod', 'admin', 'sysadmin']}>
+    <AuthGuard allowedRoles={["faculty", "hod", "admin", "sysadmin"]}>
       <Suspense fallback={<PageLoading />}>
         <FacultyStudentDirectoryInner />
       </Suspense>

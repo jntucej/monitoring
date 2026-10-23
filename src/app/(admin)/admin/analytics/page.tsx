@@ -52,46 +52,71 @@ const CHART_PALETTE = {
 };
 
 async function fetchAnalytics(days = 14): Promise<AnalyticsData> {
-  // Build the window by walking each day in the range through /api/analytics/daily
-  // (one call per day — the endpoint is date-scoped). For 7/14/30 d we fan
-  // out in parallel and stitch the series.
   const now = new Date();
-  const dates: DailyPoint[] = [];
   const dayStr = (d: Date) => d.toISOString().slice(0, 10);
-
-  const fetchOne = async (offset: number) => {
-    const d = new Date(now);
-    d.setDate(d.getDate() - offset);
-    const res = await fetch(
-      `/api/analytics/daily?date=${dayStr(d)}`,
-      { headers: getAuthHeaders() },
-    );
-    if (!res.ok) return null;
-    const body = await res.json();
-    const payload = body?.data ?? body;
-    return {
-      date: dayStr(d),
-      entries: Number(payload?.entries ?? 0),
-      exits: Number(payload?.exits ?? 0),
-      onCampus: Number(payload?.onCampus ?? payload?.on_campus ?? 0),
-    } as DailyPoint;
-  };
-
-  await Promise.all(
-    Array.from({ length: days }, (_, i) =>
-      fetchOne(days - 1 - i).then((p) => p && dates.push(p)),
-    ),
+  const headers = getAuthHeaders();
+  // 1. Daily traffic points (parallel)
+  const dailyFetch = Promise.all(
+    Array.from({ length: days }, async (_, i) => {
+      const d = new Date(now);
+      d.setDate(d.getDate() - (days - 1 - i));
+      const res = await fetch(`/api/analytics/daily?date=${dayStr(d)}`, { headers });
+      if (!res.ok) return null;
+      const body = await res.json();
+      const payload = body?.data ?? body;
+      return {
+        date: dayStr(d),
+        entries: Number(payload?.entries ?? 0),
+        exits: Number(payload?.exits ?? 0),
+        onCampus: Number(payload?.onCampus ?? payload?.on_campus ?? 0),
+      } as DailyPoint;
+    })
   );
-  // Newest last for the chart.
-  dates.sort((a, b) => a.date.localeCompare(b.date));
-
+  // 2. Reference data for charts (parallel)
+  const refFetch = Promise.all([
+    fetch("/api/departments", { headers }).then((r) => (r.ok ? r.json() : null)).catch(() => null),
+    fetch("/api/students",    { headers }).then((r) => (r.ok ? r.json() : null)).catch(() => null),
+    fetch("/api/users",       { headers }).then((r) => (r.ok ? r.json() : null)).catch(() => null),
+  ]);
+  const [dailyRows, [deptJson, stuJson, userJson]] = await Promise.all([dailyFetch, refFetch]);
+  const dates = dailyRows.filter((p): p is DailyPoint => p !== null).sort((a, b) => a.date.localeCompare(b.date));
   const totals = {
     entries: dates.reduce((a, b) => a + b.entries, 0),
     exits: dates.reduce((a, b) => a + b.exits, 0),
     peakOnCampus: Math.max(0, ...dates.map((d) => d.onCampus)),
     peakHour: null as string | null,
   };
-
+  // 3. byDepartment — count students per department code
+  const depts: Array<{ id?: string; code?: string; name?: string }> =
+    Array.isArray(deptJson?.data) ? deptJson.data : [];
+  const students: Array<Record<string, unknown>> =
+    Array.isArray(stuJson?.data) ? stuJson.data : [];
+  const studentCountByDept = new Map<string, number>();
+  for (const s of students) {
+    const raw = (s.department ?? s.departmentId ?? s.department_id ?? "") as string;
+    const key = String(raw || "unassigned");
+    studentCountByDept.set(key, (studentCountByDept.get(key) ?? 0) + 1);
+  }
+  const byDepartment = depts
+    .map((d) => {
+      const code = String(d.code ?? d.id ?? d.name ?? "");
+      return { code, name: String(d.name ?? code), count: studentCountByDept.get(code) ?? 0 };
+    })
+    .filter((d) => d.code)
+    .sort((a, b) => b.count - a.count);
+  // 4. byRole — count active users per role
+  const users: Array<Record<string, unknown>> =
+    Array.isArray(userJson?.data) ? userJson.data : [];
+  const roleCounts = new Map<string, number>();
+  for (const u of users) {
+    if (u.status && String(u.status) !== "ACTIVE") continue;
+    const role = String(u.role ?? "");
+    if (!role) continue;
+    roleCounts.set(role, (roleCounts.get(role) ?? 0) + 1);
+  }
+  const byRole = [...roleCounts.entries()]
+    .map(([role, count]) => ({ role, count }))
+    .sort((a, b) => b.count - a.count);
   return {
     range: {
       from: dates[0]?.date ?? dayStr(now),
@@ -99,8 +124,8 @@ async function fetchAnalytics(days = 14): Promise<AnalyticsData> {
     },
     daily: dates,
     totals,
-    byDepartment: [],
-    byRole: [],
+    byDepartment,
+    byRole,
   };
 }
 
@@ -150,199 +175,238 @@ function AdminAnalyticsInner() {
 
   const deptData = useMemo(
     () =>
-      (data?.byDepartment ?? []).map((d) => ({ code: d.code, count: d.count })),
+      (data?.byDepartment ?? []).map((d) => ({
+        name: d.name,
+        count: d.count,
+      })),
+    [data],
+  );
+
+  const roleData = useMemo(
+    () =>
+      (data?.byRole ?? []).map((r) => ({
+        role: r.role,
+        count: r.count,
+      })),
     [data],
   );
 
   const exportCsv = () => {
-    if (!data) return;
-    const header = "date,entries,exits,onCampus\n";
-    const rows = data.daily
-      .map((d) => `${d.date},${d.entries},${d.exits},${d.onCampus}`)
-      .join("\n");
-    const blob = new Blob([header + rows], { type: "text/csv" });
+    if (!data || data.daily.length === 0) return;
+    const header = "Date,Entries,Exits,OnCampus\n";
+    const rows = data.daily.map((d) => `${d.date},${d.entries},${d.exits},${d.onCampus}`).join("\n");
+    const blob = new Blob([header + rows], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `analytics-${range}d.csv`;
+    a.download = `analytics-${data.range.from}-to-${data.range.to}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
-  if (!data && !error) {
-    return (
-      <div className="space-y-4 p-4 md:p-6">
-        <Skeleton className="h-10 w-64" />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-24 rounded-2xl" />
-          ))}
-        </div>
-        <Skeleton className="h-72 rounded-2xl" />
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6 p-4 md:p-6">
       <PageHeader
-        title="Analytics"
-        subtitle="Traffic, occupancy, and demographic breakdowns"
-        onRefresh={load}
-      />
+        title="Campus Analytics"
+        subtitle={`Traffic and occupancy from ${data?.range.from ?? "—"} to ${data?.range.to ?? "—"}`}
+      >
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="inline-flex rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] p-1 text-xs">
+            {(([7, 14, 30] as const)).map((days) => (
+              <button
+                key={days}
+                type="button"
+                onClick={() => setRange(days)}
+                className={`px-3 py-1 rounded-lg font-medium transition ${
+                  range === days
+                    ? "bg-[var(--action-primary)] text-white shadow"
+                    : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                }`}
+              >
+                {days}d
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={exportCsv}
+            disabled={!data || data.daily.length === 0}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] disabled:opacity-50"
+          >
+            <Download className="w-3.5 h-3.5" /> Export CSV
+          </button>
+          <button
+            type="button"
+            onClick={load}
+            className="p-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            title="Refresh"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
+        </div>
+      </PageHeader>
 
       {error && (
-        <div className="glass-card border border-[var(--action-danger)]/30 p-3 text-sm text-[var(--action-danger)]">
-          {error}
+        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/25 text-rose-300 text-sm flex items-center gap-2">
+          <AlertTriangle className="w-5 h-5 shrink-0" />
+          <span>{error}</span>
         </div>
       )}
 
-      {/* Range selector + export */}
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex gap-1 glass-card p-1">
-          {([7, 14, 30] as const).map((d) => (
-            <button
-              key={d}
-              onClick={() => setRange(d)}
-              className={`text-xs px-3 py-1 rounded-lg ${
-                range === d
-                  ? "bg-[var(--action-primary)] text-white"
-                  : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-              }`}
-            >
-              {d}d
-            </button>
-          ))}
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={exportCsv}
-            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] hover:bg-[var(--bg-surface)]/60"
-          >
-            <Download className="w-3.5 h-3.5" /> CSV
-          </button>
-          <button
-            onClick={load}
-            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] hover:bg-[var(--bg-surface)]/60"
-          >
-            <RefreshCw className="w-3.5 h-3.5" /> Refresh
-          </button>
-        </div>
-      </div>
-
       {/* KPI row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="glass-card p-4">
-          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] mb-1">
-            <TrendingUp className="w-3.5 h-3.5 text-[var(--action-primary)]" />
-            Total entries
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <WidgetBoundary title="Total Entries">
+          <div className="glass-card p-4 space-y-1">
+            <p className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
+              <TrendingUp className="w-3.5 h-3.5 text-emerald-400" /> Total Entries ({range}d)
+            </p>
+            {data ? (
+              <p className="text-2xl font-black text-[var(--text-primary)] tabular-nums">
+                {data.totals.entries.toLocaleString()}
+              </p>
+            ) : (
+              <Skeleton className="h-8 w-24" />
+            )}
           </div>
-          <p className="text-2xl font-bold text-[var(--text-primary)] tabular-nums">
-            {data?.totals.entries.toLocaleString() ?? "—"}
-          </p>
-        </div>
-        <div className="glass-card p-4">
-          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] mb-1">
-            <TrendingUp className="w-3.5 h-3.5 text-[var(--action-danger)]" />
-            Total exits
+        </WidgetBoundary>
+
+        <WidgetBoundary title="Total Exits">
+          <div className="glass-card p-4 space-y-1">
+            <p className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
+              <TrendingUp className="w-3.5 h-3.5 text-rose-400" /> Total Exits ({range}d)
+            </p>
+            {data ? (
+              <p className="text-2xl font-black text-[var(--text-primary)] tabular-nums">
+                {data.totals.exits.toLocaleString()}
+              </p>
+            ) : (
+              <Skeleton className="h-8 w-24" />
+            )}
           </div>
-          <p className="text-2xl font-bold text-[var(--text-primary)] tabular-nums">
-            {data?.totals.exits.toLocaleString() ?? "—"}
-          </p>
-        </div>
-        <div className="glass-card p-4">
-          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] mb-1">
-            <Users className="w-3.5 h-3.5 text-[var(--action-info)]" />
-            Peak on campus
+        </WidgetBoundary>
+
+        <WidgetBoundary title="Peak On-Campus">
+          <div className="glass-card p-4 space-y-1">
+            <p className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5 text-blue-400" /> Peak On-Campus
+            </p>
+            {data ? (
+              <p className="text-2xl font-black text-[var(--text-primary)] tabular-nums">
+                {data.totals.peakOnCampus.toLocaleString()}
+              </p>
+            ) : (
+              <Skeleton className="h-8 w-24" />
+            )}
           </div>
-          <p className="text-2xl font-bold text-[var(--text-primary)] tabular-nums">
-            {data?.totals.peakOnCampus ?? "—"}
-          </p>
-        </div>
-        <div className="glass-card p-4">
-          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] mb-1">
-            <Activity className="w-3.5 h-3.5 text-amber-400" />
-            Peak hour
+        </WidgetBoundary>
+
+        <WidgetBoundary title="Average Daily Volume">
+          <div className="glass-card p-4 space-y-1">
+            <p className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
+              <Activity className="w-3.5 h-3.5 text-purple-400" /> Daily Avg Volume
+            </p>
+            {data ? (
+              <p className="text-2xl font-black text-[var(--text-primary)] tabular-nums">
+                {Math.round((data.totals.entries + data.totals.exits) / Math.max(1, data.daily.length)).toLocaleString()}
+              </p>
+            ) : (
+              <Skeleton className="h-8 w-24" />
+            )}
           </div>
-          <p className="text-2xl font-bold text-[var(--text-primary)] tabular-nums">
-            {data?.totals.peakHour ?? "—"}
-          </p>
-        </div>
+        </WidgetBoundary>
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <WidgetBoundary title="Traffic">
-          <div className="glass-card p-4">
-            <header className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold">Gate traffic</h2>
-              <ChartTypeSwitcher value={trafficType} onChange={setTrafficType} compact />
-            </header>
-            <div style={{ height: 260 }}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <WidgetBoundary title="Traffic Volume">
+          <div className="glass-card p-4 sm:p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-[var(--text-primary)]">Gate Traffic Flow</h3>
+                <p className="text-xs text-[var(--text-muted)]">Entries versus exits over time</p>
+              </div>
+              <ChartTypeSwitcher current={trafficType} onChange={setTrafficType} />
+            </div>
+            {data ? (
               <ChartRenderer
                 type={trafficType}
                 data={trafficData}
                 series={trafficSeries}
-                xKey="date"
+                xAxisKey="date"
+                height={280}
               />
-            </div>
+            ) : (
+              <Skeleton className="h-[280px] w-full rounded-xl" />
+            )}
           </div>
         </WidgetBoundary>
 
-        <WidgetBoundary title="Campus occupancy">
-          <div className="glass-card p-4">
-            <header className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold">On campus over time</h2>
-              <ChartTypeSwitcher value={campusType} onChange={setCampusType} compact />
-            </header>
-            <div style={{ height: 260 }}>
+        <WidgetBoundary title="Campus Occupancy">
+          <div className="glass-card p-4 sm:p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-[var(--text-primary)]">On-Campus Occupancy</h3>
+                <p className="text-xs text-[var(--text-muted)]">Net population count present on grounds</p>
+              </div>
+              <ChartTypeSwitcher current={campusType} onChange={setCampusType} />
+            </div>
+            {data ? (
               <ChartRenderer
                 type={campusType}
                 data={trafficData}
                 series={campusSeries}
-                xKey="date"
+                xAxisKey="date"
+                height={280}
               />
-            </div>
+            ) : (
+              <Skeleton className="h-[280px] w-full rounded-xl" />
+            )}
           </div>
         </WidgetBoundary>
 
-        <WidgetBoundary title="By department">
-          <div className="glass-card p-4">
-            <header className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold">Department breakdown</h2>
-            </header>
-            <div style={{ height: 260 }}>
-              <ChartRenderer
-                type="bar"
-                data={deptData}
-                series={[
-                  {
-                    key: "count",
-                    label: "Users",
-                    color: CHART_PALETTE.primary,
-                    type: "bar",
-                  },
-                ]}
-                xKey="code"
-              />
+        <WidgetBoundary title="Department Distribution">
+          <div className="glass-card p-4 sm:p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-[var(--text-primary)]">Students by Department</h3>
+                <p className="text-xs text-[var(--text-muted)]">Active departmental headcounts</p>
+              </div>
+              <ChartTypeSwitcher current={roleType} onChange={setRoleType} />
             </div>
-          </div>
-        </WidgetBoundary>
-
-        <WidgetBoundary title="By role">
-          <div className="glass-card p-4">
-            <header className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold">Role distribution</h2>
-              <ChartTypeSwitcher value={roleType} onChange={setRoleType} compact />
-            </header>
-            <div style={{ height: 260 }}>
+            {data ? (
               <ChartRenderer
                 type={roleType}
-                data={data?.byRole ?? []}
-                series={roleSeries}
-                xKey="role"
+                data={deptData}
+                series={[{ key: "count", label: "Students", color: CHART_PALETTE.primary, type: roleType }]}
+                xAxisKey="name"
+                height={280}
               />
+            ) : (
+              <Skeleton className="h-[280px] w-full rounded-xl" />
+            )}
+          </div>
+        </WidgetBoundary>
+
+        <WidgetBoundary title="Role Distribution">
+          <div className="glass-card p-4 sm:p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-[var(--text-primary)]">Active Users by Role</h3>
+                <p className="text-xs text-[var(--text-muted)]">Breakdown of operational accounts</p>
+              </div>
+              <ChartTypeSwitcher current={roleType} onChange={setRoleType} />
             </div>
+            {data ? (
+              <ChartRenderer
+                type={roleType}
+                data={roleData}
+                series={roleSeries}
+                xAxisKey="role"
+                height={280}
+              />
+            ) : (
+              <Skeleton className="h-[280px] w-full rounded-xl" />
+            )}
           </div>
         </WidgetBoundary>
       </div>
@@ -352,10 +416,8 @@ function AdminAnalyticsInner() {
 
 export default function AdminAnalyticsPage() {
   return (
-    
+    <Suspense fallback={<PageLoading />}>
       <AdminAnalyticsInner />
-    
-    
-
+    </Suspense>
   );
 }

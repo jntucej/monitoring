@@ -90,7 +90,7 @@ const api = useApi();
       setKioskOperator(current);
       if (current?.gateId) setKioskGate(current.gateId);
     } catch { /* silent */ }
-  }, []);
+  }, [api]);
 
   const setKioskDefault = async (userId: string, gateId: string | null) => {
     setKioskBusy(true);
@@ -151,7 +151,7 @@ const api = useApi();
     } finally {
       setLoading(false);
     }
-  }, [addToast]);
+  }, [addToast, api]);
 
   useEffect(() => { loadGates(); loadKioskOperator(); }, [loadGates, loadKioskOperator]);
 
@@ -164,7 +164,7 @@ const api = useApi();
       const json = await res.json();
       setUserResults(Array.isArray(json?.data) ? json.data.slice(0, 10) : []);
     } catch { setUserResults([]); }
-  }, []);
+  }, [api]);
 
   const saveGate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -172,7 +172,7 @@ const api = useApi();
     const payload = { gateCode: form.gateCode, name: form.name, location: form.location, type: form.type, audience: form.audience };
     let ok = false;
     if (editing) {
-      const res = await fetch(`/api/gates?id=${editing.id}`, { method: "PATCH", headers, body: JSON.stringify(payload) });
+      const res = await fetch(`/api/gates/${encodeURIComponent(editing.id)}`, { method: "PATCH", headers, body: JSON.stringify(payload) });
       ok = (await res.json()).success === true;
     } else {
       const res = await fetch("/api/gates", { method: "POST", headers, body: JSON.stringify(payload) });
@@ -190,7 +190,7 @@ const api = useApi();
 
   const toggleActive = async (g: Gate) => {
     const headers = { ...api.getHeaders(), "Content-Type": "application/json" };
-    const res = await fetch(`/api/gates?id=${g.id}`, {
+    const res = await fetch(`/api/gates/${encodeURIComponent(g.id)}`, {
       method: "PATCH",
       headers,
       body: JSON.stringify({ isActive: !(g.is_active ?? true) }),
@@ -204,7 +204,7 @@ const api = useApi();
 
   const removeGate = async (g: Gate) => {
     if (!confirm(`Deactivate gate "${g.name}"? (Historical logs are kept.)`)) return;
-    const res = await fetch(`/api/gates?id=${g.id}`, { method: "DELETE", headers: api.getHeaders() });
+    const res = await fetch(`/api/gates/${encodeURIComponent(g.id)}`, { method: "DELETE", headers: api.getHeaders() });
     const json = await res.json();
     if (json.success) {
       addToast({ variant: "success", title: "Deactivated", message: `${g.name} hidden from live dashboards.` });
@@ -266,11 +266,11 @@ const api = useApi();
                 {g.audience && <span className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 capitalize">{g.audience}</span>}
               </div>
               <div className="flex items-center gap-1.5 pt-1">
-                <button onClick={() => { setEditing(g); setForm({ gateCode: gateCodeOf(g), name: g.name, location: g.location || "", type: g.type || "main", audience: g.audience || "all" }); setShowAdd(true); }}
+                <button type="button" onClick={() => { setEditing(g); setForm({ gateCode: gateCodeOf(g), name: g.name, location: g.location || "", type: g.type || "main", audience: g.audience || "all" }); setShowAdd(true); }}
                   className="p-1.5 rounded-lg hover:bg-slate-800 text-sky-400" title="Edit"><Pencil className="w-3.5 h-3.5" /></button>
-                <button onClick={() => setAssigningGate(g)} className="p-1.5 rounded-lg hover:bg-slate-800 text-emerald-400" title="Assign user to this gate"><UserCog className="w-3.5 h-3.5" /></button>
-                <button onClick={() => toggleActive(g)} className="p-1.5 rounded-lg hover:bg-slate-800 text-amber-400" title={g.is_active ? "Deactivate" : "Activate"}><Power className="w-3.5 h-3.5" /></button>
-                <button onClick={() => removeGate(g)} className="p-1.5 rounded-lg hover:bg-slate-800 text-rose-400" title="Deactivate (soft)"><Trash2 className="w-3.5 h-3.5" /></button>
+                <button type="button" onClick={() => setAssigningGate(g)} className="p-1.5 rounded-lg hover:bg-slate-800 text-emerald-400" title="Assign user to this gate"><UserCog className="w-3.5 h-3.5" /></button>
+                <button type="button" onClick={() => toggleActive(g)} className="p-1.5 rounded-lg hover:bg-slate-800 text-amber-400" title={g.is_active ? "Deactivate" : "Activate"}><Power className="w-3.5 h-3.5" /></button>
+                <button type="button" onClick={() => removeGate(g)} className="p-1.5 rounded-lg hover:bg-slate-800 text-rose-400" title="Deactivate (soft)"><Trash2 className="w-3.5 h-3.5" /></button>
               </div>
             </div>
           ))}
@@ -299,9 +299,9 @@ const api = useApi();
                     placeholder="e.g. Main Gate - Boys" className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-500" />
                 </div>
                 <div>
-                  <label className="text-slate-400 block mb-1">Location</label>
+                  <label className="text-slate-400 block mb-1">Location description</label>
                   <input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })}
-                    placeholder="e.g. Main Entrance - Boys" className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-500" />
+                    placeholder="e.g. North campus near block 3" className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-500" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
@@ -312,7 +312,7 @@ const api = useApi();
                     </select>
                   </div>
                   <div>
-                    <label className="text-slate-400 block mb-1">Audience / gender</label>
+                    <label className="text-slate-400 block mb-1">Audience scope</label>
                     <select value={form.audience} onChange={(e) => setForm({ ...form, audience: e.target.value })}
                       className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-500">
                       {AUDIENCES.map((a) => <option key={a.value} value={a.value}>{a.label}</option>)}
@@ -320,131 +320,119 @@ const api = useApi();
                   </div>
                 </div>
               </div>
-              <div className="flex justify-end gap-2 pt-1">
-                <button type="button" onClick={() => setShowAdd(false)} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700">Cancel</button>
-                <button type="submit" className="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-500">{editing ? "Save" : "Create Gate"}</button>
+              <div className="flex justify-end gap-2 pt-2">
+                <button type="button" onClick={() => setShowAdd(false)} className="px-4 py-2 rounded-xl hover:bg-slate-800 text-slate-300 text-xs font-semibold">Cancel</button>
+                <button type="submit" className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">Save Gate</button>
               </div>
             </form>
           </div>
         )}
 
-        {/* Assign-to-gate modal */}
+        {/* Assign operator modal */}
         {assigningGate && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
             <div className="bg-[#0d1220] border border-slate-800 rounded-2xl w-full max-w-md shadow-2xl p-5 space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                  <UserCog className="w-4 h-4 text-emerald-400" /> Assign to <span className="text-emerald-400">{assigningGate.name}</span>
+                  <UserCog className="w-5 h-5 text-emerald-400" /> Assign Operator → {assigningGate.name}
                 </h2>
-                <button onClick={() => { setAssigningGate(null); setUserQuery(""); setUserResults([]); }} className="text-slate-400 hover:text-white"><X className="w-5 h-5" /></button>
+                <button type="button" onClick={() => setAssigningGate(null)} className="text-slate-400 hover:text-white"><X className="w-5 h-5" /></button>
               </div>
-              <p className="text-xs text-slate-400">Search a person by name, roll or email. Assigning scopes them to <strong className="text-slate-200">only this gate</strong> for their dashboards & logs.</p>
-              <input
-                value={userQuery}
-                onChange={(e) => searchUsers(e.target.value)}
-                placeholder="Search name / roll / email…"
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500"
-              />
-              {userResults.length > 0 && (
-                <div className="border border-slate-800 rounded-xl overflow-hidden divide-y divide-slate-800 max-h-48 overflow-y-auto">
-                  {userResults.map((u) => (
-                    <button key={u.id} onClick={() => assignUserToGate(u)}
-                      className="w-full text-left px-3 py-2 text-xs hover:bg-slate-800/60 transition-colors flex items-center justify-between">
-                      <span>
-                        <span className="font-semibold text-white">{u.name || u.email}</span>
-                        <span className="text-slate-500 ml-2">{u.role}{u.uniqueId ? ` · ${u.uniqueId}` : ""}</span>
-                      </span>
-                      <span className="text-emerald-400 font-semibold">{u.gateId ? "Reassign" : "Assign"}</span>
-                    </button>
-                  ))}
+              <div className="space-y-3 text-xs">
+                <div>
+                  <label className="text-slate-400 block mb-1">Search user by name, roll or email</label>
+                  <div className="relative">
+                    <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+                    <input autoFocus value={userQuery} onChange={(e) => searchUsers(e.target.value)}
+                      placeholder="Type at least 2 chars..." className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-500" />
+                  </div>
                 </div>
-              )}
-              {userQuery.trim().length >= 1 && userResults.length === 0 && (
-                <p className="text-xs text-slate-500">No people matched.</p>
-              )}
+                <div className="max-h-60 overflow-y-auto space-y-1.5 divide-y divide-slate-800/50">
+                  {userResults.map((u) => (
+                    <div key={u.id} className="pt-2 first:pt-0 flex items-center justify-between gap-2">
+                      <div>
+                        <div className="font-semibold text-white">{u.name || u.email || u.id}</div>
+                        <div className="text-[11px] text-slate-400">{u.role} · {u.uniqueId || u.email}</div>
+                      </div>
+                      <button type="button" onClick={() => assignUserToGate(u)}
+                        className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold shrink-0">
+                        Assign
+                      </button>
+                    </div>
+                  ))}
+                  {userQuery.trim().length >= 2 && userResults.length === 0 && (
+                    <p className="text-center py-4 text-slate-500">No matching users found.</p>
+                  )}
+                </div>
+              </div>
+              <div className="flex justify-end pt-2">
+                <button type="button" onClick={() => setAssigningGate(null)} className="px-4 py-2 rounded-xl hover:bg-slate-800 text-slate-300 text-xs font-semibold">Done</button>
+              </div>
             </div>
           </div>
         )}
 
-        {/* Default Gate Operator (Kiosk) Panel */}
-        <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4 space-y-3">
-          <div className="flex items-center gap-2">
-            <Monitor className="w-4 h-4 text-emerald-400" />
-            <h3 className="text-sm font-bold text-white">Default Gate Operator (Kiosk)</h3>
-            <span className="text-[10px] text-slate-500">auto-sign-in for unattended kiosks</span>
-          </div>
-          <p className="text-xs text-slate-400">
-            The designated operator is used by <code className="text-emerald-300">/api/operator/kiosk-session</code> to mint
-            a short-lived session when the kiosk opens without credentials. Default kiosk PIN is <strong className="text-amber-400">1234</strong> —
-            rotate it after first use via the kiosk PIN reset in the user management panel.
-          </p>
-
-          {kioskOperator ? (
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-900 border border-slate-800">
-                <KeyRound className="w-4 h-4 text-emerald-400 shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="text-xs font-bold text-white truncate">
-                    {kioskOperator.name || kioskOperator.uniqueId || kioskOperator.id}
-                    {kioskOperator.uniqueId && <span className="text-slate-500 font-normal ml-2">ID: {kioskOperator.uniqueId}</span>}
-                  </div>
-                  <div className="text-[10px] text-slate-500">
-                    {kioskOperator.isKioskDefault
-                      ? "Explicitly designated as kiosk default"
-                      : "Built-in OPERATOR fallback (no explicit flag set)"}
-                  </div>
-                </div>
-                <button onClick={clearKioskDefault} disabled={kioskBusy}
-                  className="text-[10px] px-2 py-1 rounded bg-slate-800 text-slate-300 hover:bg-slate-700 disabled:opacity-50">
-                  Clear
-                </button>
+        {/* Kiosk default operator designation */}
+        <WidgetBoundary title="Gate-Kiosk Default Session">
+          <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4 sm:p-5 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Monitor className="w-4 h-4 text-emerald-400" /> Kiosk Default Operator
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Designate one operator account to act as the default identity for unattended touch-kiosks.
+                </p>
               </div>
-
-              <div className="flex items-end gap-3">
-                <div className="flex-1">
-                  <label className="text-[10px] text-slate-400 block mb-1">Kiosk gate (default for auto-session)</label>
-                  <select value={kioskGate} onChange={(e) => setKioskGate(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500">
-                    <option value="">— Operator's assigned gate —</option>
-                    {gates.filter((g) => g.is_active !== false).map((g) => (
-                      <option key={g.id} value={g.id}>{g.name}{g.gate_code ? ` (${g.gate_code})` : ""}</option>
-                    ))}
-                  </select>
-                </div>
-                <button onClick={() => setKioskDefault(kioskOperator.id, kioskGate || null)} disabled={kioskBusy}
-                  className="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-500 disabled:opacity-50 whitespace-nowrap">
-                  {kioskBusy ? "Saving…" : "Save"}
+              {kioskOperator && (
+                <button type="button" onClick={clearKioskDefault} disabled={kioskBusy}
+                  className="px-3 py-1.5 rounded-xl border border-rose-500/40 text-rose-400 hover:bg-rose-500/10 text-xs font-semibold disabled:opacity-50 self-start">
+                  Clear Designation
                 </button>
-              </div>
+              )}
             </div>
-          ) : (
-            <p className="text-xs text-slate-500 italic">No kiosk default operator found. Designate one below.</p>
-          )}
 
-          <div className="pt-2 border-t border-slate-800">
-            <label className="text-[10px] text-slate-400 block mb-1.5" htmlFor="designate-operator-account">Designate operator account</label>
-            <input id="designate-operator-account"
-              value={userQuery}
-              onChange={(e) => searchUsers(e.target.value)}
-              placeholder="Search operator name / roll / email…"
-              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500"
-            />
-            {userResults.length > 0 && (
-              <div className="mt-2 border border-slate-800 rounded-lg overflow-hidden divide-y divide-slate-800 max-h-36 overflow-y-auto">
-                {userResults.map((u) => (
-                  <button key={u.id} onClick={() => setKioskDefault(u.id, null)} disabled={kioskBusy}
-                    className="w-full text-left px-3 py-2 text-xs hover:bg-slate-800/60 transition-colors flex items-center justify-between disabled:opacity-50">
-                    <span>
-                      <span className="font-semibold text-white">{u.name || u.email}</span>
-                      <span className="text-slate-500 ml-2">{u.role}{u.uniqueId ? ` · ${u.uniqueId}` : ""}</span>
-                    </span>
-                    <span className="text-emerald-400 font-semibold">Set as default</span>
+            {kioskOperator ? (
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-white">{kioskOperator.name || kioskOperator.email || kioskOperator.id}</span>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-mono text-[10px]">Active Kiosk ID</span>
+                  </div>
+                  <div className="text-slate-400 font-mono text-[11px]">Unique ID: {kioskOperator.uniqueId || "—"}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <select value={kioskGate} onChange={(e) => setKioskGate(e.target.value)}
+                    className="px-2.5 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white text-xs focus:outline-none">
+                    <option value="">Select Default Gate…</option>
+                    {gates.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
+                  </select>
+                  <button type="button" onClick={() => setKioskDefault(kioskOperator.id, kioskGate || null)} disabled={kioskBusy || !kioskGate}
+                    className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold disabled:opacity-50">
+                    Save Gate Bind
                   </button>
-                ))}
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-xs text-amber-400/90 bg-amber-500/10 border border-amber-500/20 p-3 rounded-xl">
+                  No operator account is currently designated as the kiosk default. Choose an operator below to promote them.
+                </p>
+                <div className="flex items-center gap-2">
+                  <select id="kiosk-select" className="px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs focus:outline-none flex-1">
+                    <option value="">Select operator account…</option>
+                  </select>
+                  <button type="button" onClick={() => {
+                    const sel = (document.getElementById("kiosk-select") as HTMLSelectElement)?.value;
+                    if (sel) setKioskDefault(sel, gates[0]?.id || null);
+                  }} disabled={kioskBusy} className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">
+                    Designate as Kiosk Default
+                  </button>
+                </div>
               </div>
             )}
           </div>
-        </div>
+        </WidgetBoundary>
       </div>
     </AuthGuard>
   );
