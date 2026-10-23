@@ -391,7 +391,7 @@ function AdminStudentsInner() {
                   {filtered.map((r) => (
                     <tr
                       key={r.id}
-                      onClick={() => window.location.href = `/admin/students/${r.roll ?? r.id}`}
+                      onClick={() => setActive(r)}
                       className="border-t border-[var(--border)] hover:bg-[var(--bg-surface)]/40 cursor-pointer"
                     >
                       <td className="px-4 py-2.5">
@@ -533,6 +533,14 @@ function AdminStudentsInner() {
                 </div>
               )}
             </dl>
+            <div className="mt-6 pt-4 border-t border-[var(--border)]">
+              <a
+                href={`/admin/students/${active.roll ?? active.id}`}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--action-primary)] hover:underline"
+              >
+                View full profile <ChevronRight className="w-3.5 h-3.5" />
+              </a>
+            </div>
           </aside>
         </div>
       )}

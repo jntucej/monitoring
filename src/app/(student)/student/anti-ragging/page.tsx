@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import { getAuthHeaders } from "@/lib/utils";
+import { useUIStore } from "@/stores/uiStore";
 
 export default function AntiRaggingPage() {
   const [form, setForm] = useState({
@@ -17,6 +18,7 @@ export default function AntiRaggingPage() {
   });
   const [busy, setBusy] = useState(false);
   const [caseNumber, setCaseNumber] = useState<string | null>(null);
+  const addToast = useUIStore((s) => s.addToast);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,8 +30,12 @@ export default function AntiRaggingPage() {
     });
     const j = await r.json();
     setBusy(false);
-    if (j.success) setCaseNumber(j.data.caseNumber);
-    else alert(j.error?.message ?? "Failed");
+    if (j.success) {
+      setCaseNumber(j.data.caseNumber);
+      addToast({ variant: "success", message: "Case filed successfully" });
+    } else {
+      addToast({ variant: "error", message: j.error?.message ?? "Failed" });
+    }
   };
 
   if (caseNumber) {
@@ -100,31 +106,8 @@ export default function AntiRaggingPage() {
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="occurred-at-optional">Occurred at (optional)</label>
-        <input id="occurred-at-optional"
-          placeholder="e.g. 2026-10-20T14:30:00Z"
-          value={form.occurredAt}
-          onChange={(e) => setForm({ ...form, occurredAt: e.target.value })}
-          className="w-full border rounded p-2 text-sm font-mono text-xs"
-        />
-      </div>
-
-      <label className="flex gap-2 items-center text-sm pt-2 border-t">
-        <input
-          type="checkbox"
-          checked={form.isAnonymous}
-          onChange={(e) => setForm({ ...form, isAnonymous: e.target.checked })}
-        />
-        <span>Submit anonymously (protects your identity)</span>
-      </label>
-
-      <button
-        type="submit"
-        disabled={busy}
-        className="px-4 py-2 rounded bg-rose-600 text-white text-sm font-medium disabled:opacity-50"
-      >
-        {busy ? "Filing report…" : "File confidential report"}
+      <button type="submit" disabled={busy} className="px-4 py-2 bg-rose-600 text-white rounded text-sm font-medium disabled:opacity-50">
+        {busy ? "Filing confidential report..." : "Submit Confidential Report"}
       </button>
     </form>
   );

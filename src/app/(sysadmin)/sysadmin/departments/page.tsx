@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { HodIdInput } from "@/components/sysadmin/HodIdInput";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Building2, Plus, Trash2, Edit3, CheckCircle2, ShieldAlert, Users, GraduationCap } from "lucide-react";
 import { useApi } from "@/hooks/useApi";
 
@@ -22,6 +23,7 @@ const api = useApi();
   const [loading, setLoading] = useState(true);
   const [editingDept, setEditingDept] = useState<Partial<Department> & { hodIdInput: string; hodUserId: string | null } | null>(null);
   const [statusMsg, setStatusMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [deptToDelete, setDeptToDelete] = useState<string | null>(null);
 
   const fetchDepts = async () => {
     setLoading(true);
@@ -67,22 +69,26 @@ const api = useApi();
     }
   };
 
-  const handleDelete = async (code: string) => {
-    if (!confirm(`Are you sure you want to delete department '${code}'?`)) return;
+  const handleDelete = (code: string) => setDeptToDelete(code);
+
+  const confirmDelete = async () => {
+    if (!deptToDelete) return;
     try {
-      const res = await fetch(`/api/departments?code=${code}`, {
+      const res = await fetch(`/api/departments?code=${deptToDelete}`, {
         method: "DELETE",
         headers: api.getHeaders(),
       });
       const json = await res.json();
       if (json.success) {
-        setStatusMsg({ type: "success", text: `Deleted department ${code}` });
+        setStatusMsg({ type: "success", text: `Deleted department ${deptToDelete}` });
         fetchDepts();
       } else {
         setStatusMsg({ type: "error", text: json.error?.message || "Failed to delete department" });
       }
     } catch {
       setStatusMsg({ type: "error", text: "Network error deleting department" });
+    } finally {
+      setDeptToDelete(null);
     }
   };
 
@@ -100,6 +106,7 @@ const api = useApi();
             </p>
           </div>
           <button
+            type="button"
             onClick={() =>
               setEditingDept({
                 code: "",
@@ -176,6 +183,7 @@ const api = useApi();
                       </td>
                       <td className="p-4 text-right space-x-2">
                         <button
+                          type="button"
                           onClick={() =>
                             setEditingDept({ ...d, hodIdInput: "", hodUserId: null })
                           }
@@ -184,6 +192,7 @@ const api = useApi();
                           <Edit3 className="w-4 h-4" />
                         </button>
                         <button
+                          type="button"
                           onClick={() => handleDelete(d.code)}
                           className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition"
                         >
@@ -269,6 +278,16 @@ const api = useApi();
             </div>
           </div>
         )}
+
+        <ConfirmDialog
+          open={!!deptToDelete}
+          onClose={() => setDeptToDelete(null)}
+          title="Delete department?"
+          body={`Delete department "${deptToDelete ?? ""}"? This is audited.`}
+          confirmText="Delete"
+          variant="destructive"
+          onConfirm={confirmDelete}
+        />
       </div>
     </AuthGuard>
   );

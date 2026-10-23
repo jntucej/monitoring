@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { ScrollText, Lock, ShieldCheck } from "lucide-react";
+import { ScrollText, ShieldCheck, AlertTriangle } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
@@ -9,21 +9,33 @@ import { SectionCard } from "@/components/admin/shared/SectionCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
 
-/**
- * Sysadmin Consent Management — gate / biometric consent policy view.
- * No dedicated read API yet; shows the policy framework + a link to the
- * biometric consent settings in the sysadmin security console.
- */
-function SysadminConsentInner() {
-  const [loading, setLoading] = useState(true);
+interface ConsentStats { scope: string; granted: number; revoked: number; total: number }
 
-  useEffect(() => {
-    // Placeholder: consent state is currently managed via the DB directly.
-    // This page provides a policy framework view + a link to the security
-    // console for the actual settings.
-    const t = setTimeout(() => setLoading(false), 300);
-    return () => clearTimeout(t);
+function SysadminConsentInner() {
+  const [stats, setStats] = useState<ConsentStats[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/consent/stats", {
+        headers: getAuthHeaders(), cache: "no-store",
+      });
+      const body = await res.json().catch(() => null);
+      if (!res.ok || body?.success === false) {
+        throw new Error(body?.error?.message ?? `HTTP ${res.status}`);
+      }
+      setStats(Array.isArray(body?.data) ? body.data : []);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load consent statistics");
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => { void load(); }, [load]);
 
   if (loading) {
     return (
@@ -39,35 +51,42 @@ function SysadminConsentInner() {
       <PageHeader
         title="Consent Management"
         subtitle="Data consent framework for biometric and gate access data"
+        onRefresh={load}
       />
-
-      <WidgetBoundary title="Consent policy">
+      {error && (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          {error}
+        </div>
+      )}
+      <WidgetBoundary title="Consent by scope">
         <SectionCard
-          title="Biometric data consent"
-          description="Governance rules for student biometric enrollment"
+          title="Recorded consent"
+          description="Scope-level counts from the consent_records ledger"
           icon={ShieldCheck}
           iconTone="accent"
         >
-          <div className="space-y-4">
-            <p className="text-sm text-[var(--text-secondary)]">
-              Biometric data (face, fingerprint) is collected at gate check-in for
-              identity verification. Consent is implied by enrollment in a program
-              and explicit revocation requires written request to the institution.
-            </p>
-            <div className="rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] p-3 text-xs text-[var(--text-muted)]">
-              <strong className="text-[var(--text-secondary)]">Legal basis:</strong>{" "}
-              Institutional enrollment consent · Data minimisation (biometric
-              templates only; raw images discarded after match) · Retention
-              tied to student active status + 90-day grace period
+          {stats.length === 0 ? (
+            <p className="text-sm text-[var(--text-secondary)]">No consent records yet.</p>
+          ) : (
+            <div className="divide-y divide-[var(--border)]">
+              {stats.map((s) => (
+                <div key={s.scope} className="p-3 flex items-center gap-3">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-[var(--text-primary)]">{s.scope}</p>
+                    <p className="text-xs text-[var(--text-muted)]">
+                      {s.granted} active · {s.revoked} revoked · {s.total} total
+                    </p>
+                  </div>
+                  <span className="px-2 py-1 rounded-lg bg-[var(--action-primary)]/10 border border-[var(--action-primary)]/20 text-[11px] text-[var(--action-primary)]">
+                    {s.total > 0 ? `${Math.round((s.granted / s.total) * 100)}% active` : "—"}
+                  </span>
+                </div>
+              ))}
             </div>
-            <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
-              <Lock className="w-3.5 h-3.5" />
-              Managed via sysadmin Security Console → Biometric Settings
-            </div>
-          </div>
+          )}
         </SectionCard>
       </WidgetBoundary>
-
       <WidgetBoundary title="Consent framework">
         <SectionCard
           title="Access consent tiers"
@@ -77,10 +96,10 @@ function SysadminConsentInner() {
         >
           <div className="divide-y divide-[var(--border)]">
             {[
-              { cat: "Gate movement logs", scope: "All enrolled students", retention: "Session + 30 days" },
-              { cat: "Biometric templates", scope: "Enrolled students who enrolled biometrics", retention: "Active + 90 days" },
-              { cat: "Attendance records", scope: "All enrolled students", retention: "Academic year + 1 year" },
-              { cat: "Support tickets", scope: "All users", retention: "2 years post-resolution" },
+              { cat: "Gate movement logs",   scope: "All enrolled students",          retention: "Session + 30 days" },
+              { cat: "Biometric templates",  scope: "Students with biometric enrolled", retention: "Active + 90 days" },
+              { cat: "Attendance records",   scope: "All enrolled students",          retention: "Academic year + 1 year" },
+              { cat: "Support tickets",      scope: "All users",                      retention: "2 years post-resolution" },
             ].map((row) => (
               <div key={row.cat} className="p-3 flex items-center gap-3">
                 <div className="flex-1">

@@ -21,7 +21,7 @@ import {
   Network,
   RefreshCw,
 } from "lucide-react";
-import { getAuthHeaders } from "@/lib/utils";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { useUIStore } from "@/stores/uiStore";
 
 /** Shape of the read-only /api/roles-graph response. */
@@ -131,7 +131,7 @@ export default function RolesManagementPage() {
   const [graph, setGraph] = useState<RolesGraphPayload | null>(null);
   const [graphError, setGraphError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [editingRole, setEditingRole] = useState<Partial<SystemRole> | null>(null);
+  const [roleToDeactivate, setRoleToDeactivate] = useState<string | null>(null);
 
   // ---- role hierarchy state ----
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
@@ -409,22 +409,26 @@ export default function RolesManagementPage() {
     }
   };
 
-  const handleDelete = async (code: string) => {
-    if (!confirm(`Are you sure you want to deactivate role '${code}'?`)) return;
+  const handleDelete = (code: string) => setRoleToDeactivate(code);
+
+  const confirmDeactivateRole = async () => {
+    if (!roleToDeactivate) return;
     try {
-      const res = await fetch(`/api/config/roles?code=${code}`, {
+      const res = await fetch(`/api/config/roles?code=${roleToDeactivate}`, {
         method: "DELETE",
         headers: getAuthHeaders(),
       });
       const json = await res.json();
       if (json.success) {
-        addToast({ variant: "success", message: `Deactivated role ${code}` });
+        addToast({ variant: "success", message: `Deactivated role ${roleToDeactivate}` });
         fetchRoles();
       } else {
         addToast({ variant: "error", message: json.error?.message || "Failed to deactivate role" });
       }
     } catch {
       addToast({ variant: "error", message: "Network error deactivating role" });
+    } finally {
+      setRoleToDeactivate(null);
     }
   };
 
@@ -1028,6 +1032,15 @@ export default function RolesManagementPage() {
                     Save Role
                   </button>
                 </div>
+                <ConfirmDialog
+                  open={!!roleToDeactivate}
+                  onClose={() => setRoleToDeactivate(null)}
+                  title="Deactivate role?"
+                  body={`Deactivate role "${roleToDeactivate ?? ""}"? This is audited.`}
+                  confirmText="Deactivate"
+                  variant="destructive"
+                  onConfirm={confirmDeactivateRole}
+                />
               </form>
             </div>
           </div>

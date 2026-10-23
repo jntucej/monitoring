@@ -417,15 +417,28 @@ export const HostelOverviewPanel = memo(function HostelOverviewPanel({
   );
 });
 
+function PlaceholderBadge({ note }: { note: string }) {
+  return (
+    <span
+      className="ml-auto inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-400"
+      title={note}
+    >
+      Not connected
+    </span>
+  );
+}
+
 /* ── Resident directory panel (used on root) ── */
 
 export const ResidentDirectoryPanel = memo(function ResidentDirectoryPanel() {
   return (
+    {/* Placeholder — replace with real data source */}
     <WidgetBoundary title="Resident Directory">
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
         <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
           <Users className="w-4 h-4 text-violet-400" />
           <span className="text-xs font-semibold uppercase tracking-wide">Resident Directory</span>
+          <PlaceholderBadge note="No data source connected yet — wire to /api/students?hostel_block=… to enable" />
         </div>
         <div className="rounded-lg border border-slate-600/40 bg-slate-700/20 p-3 text-xs text-slate-400 flex items-center gap-2">
           <ShieldCheck className="w-4 h-4 text-slate-500 shrink-0" />
@@ -567,11 +580,13 @@ export const OutpassLeavePanel = memo(function OutpassLeavePanel({
 
 export const EntryExitLogsPanel = memo(function EntryExitLogsPanel() {
   return (
+    {/* Placeholder — replace with real data source */}
     <WidgetBoundary title="Entry & Exit Log">
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
         <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
           <LogIn className="w-4 h-4 text-cyan-400" />
           <span className="text-xs font-semibold uppercase tracking-wide">Entry &amp; Exit Log</span>
+          <PlaceholderBadge note="No data source connected yet — wire to /api/movement_logs to enable" />
         </div>
         <div className="rounded-lg border border-slate-600/40 bg-slate-700/20 p-3 text-xs text-slate-400 flex items-center gap-2">
           <ShieldCheck className="w-4 h-4 text-slate-500 shrink-0" />
@@ -586,11 +601,13 @@ export const EntryExitLogsPanel = memo(function EntryExitLogsPanel() {
 
 export const HostelIncidentsPanel = memo(function HostelIncidentsPanel() {
   return (
+    {/* Placeholder — replace with real data source */}
     <WidgetBoundary title="Hostel Incidents">
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
         <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
           <Siren className="w-4 h-4 text-rose-400" />
           <span className="text-xs font-semibold uppercase tracking-wide">Hostel Incidents</span>
+          <PlaceholderBadge note="No data source connected yet — wire to /api/complaints to enable" />
         </div>
         <div className="rounded-lg border border-slate-600/40 bg-slate-700/20 p-3 text-xs text-slate-400 flex items-center gap-2">
           <ShieldCheck className="w-4 h-4 text-slate-500 shrink-0" />
@@ -605,11 +622,13 @@ export const HostelIncidentsPanel = memo(function HostelIncidentsPanel() {
 
 export const RoomOccupancyPanel = memo(function RoomOccupancyPanel() {
   return (
+    {/* Placeholder — replace with real data source */}
     <WidgetBoundary title="Room Occupancy">
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
         <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
           <Building2 className="w-4 h-4 text-indigo-400" />
           <span className="text-xs font-semibold uppercase tracking-wide">Room Occupancy</span>
+          <PlaceholderBadge note="No data source connected yet — wire to room assignment service to enable" />
         </div>
         <div className="rounded-lg border border-slate-600/40 bg-slate-700/20 p-3 text-xs text-slate-400 flex items-center gap-2">
           <ShieldCheck className="w-4 h-4 text-slate-500 shrink-0" />

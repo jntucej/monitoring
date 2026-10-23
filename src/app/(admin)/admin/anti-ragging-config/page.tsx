@@ -4,10 +4,12 @@
 import { useEffect, useState } from "react";
 import { getAuthHeaders } from "@/lib/utils";
 import { SectionCard } from "@/components/admin/shared/SectionCard";
+import { useUIStore } from "@/stores/uiStore";
 
 export default function AntiRaggingConfigPage() {
   const [config, setConfig] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const addToast = useUIStore((s) => s.addToast);
 
   useEffect(() => {
     (async () => {
@@ -26,8 +28,8 @@ export default function AntiRaggingConfigPage() {
       body: JSON.stringify(config),
     });
     const j = await r.json();
-    if (j.success) alert("Saved successfully");
-    else alert(j.error?.message ?? "Failed");
+    if (j.success) addToast({ variant: "success", message: "Saved successfully" });
+    else           addToast({ variant: "error",   message: j.error?.message ?? "Failed" });
   };
 
   if (loading) return <p className="p-6 text-slate-500">Loading…</p>;

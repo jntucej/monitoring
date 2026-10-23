@@ -45,7 +45,7 @@ const CHANNEL_ICONS: Record<string, React.ReactNode> = {
 };
 
 function AdminNotificationSettingsInner() {
-  const res = useApiResource<NotificationSettingsData>("/api/admin/notification-settings", { ttlMs: 30_000 });
+  const res = useApiResource<{ success: boolean; data: NotificationSettingsData }>("/api/admin/notification-settings", { ttlMs: 30_000 });
 
   usePolling(
     () => {
@@ -55,7 +55,7 @@ function AdminNotificationSettingsInner() {
     { intervalMs: 60_000 }
   );
 
-  const d = res.data;
+  const d = res.data?.data;
   const loading = res.loading && !d;
 
   const totalQueued = useMemo(

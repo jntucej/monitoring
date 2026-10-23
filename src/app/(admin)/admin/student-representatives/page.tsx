@@ -3,9 +3,11 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { getAuthHeaders } from "@/lib/utils";
+import { useUIStore } from "@/stores/uiStore";
 
 export default function RepsPage() {
   const [rows, setRows] = useState<any[]>([]);
+  const addToast = useUIStore((s) => s.addToast);
   const [form, setForm] = useState({
     studentId: "",
     scopeType: "class",
@@ -35,7 +37,10 @@ export default function RepsPage() {
     if (j.success) {
       setForm({ ...form, studentId: "", scopeId: "" });
       await load();
-    } else alert(j.error?.message ?? "Failed");
+      addToast({ variant: "success", message: "Representative appointed successfully" });
+    } else {
+      addToast({ variant: "error", message: j.error?.message ?? "Failed" });
+    }
   };
 
   const revoke = async (id: string) => {
@@ -44,6 +49,7 @@ export default function RepsPage() {
       headers: getAuthHeaders(),
     });
     await load();
+    addToast({ variant: "success", message: "Representative revoked" });
   };
 
   return (
@@ -118,14 +124,21 @@ export default function RepsPage() {
                 <td className="p-3">{r.validTo}</td>
                 <td className="p-3 uppercase text-xs font-mono">{r.status}</td>
                 <td className="p-3 text-right">
-                  {r.status === "active" && (
-                    <button onClick={() => revoke(r.id)} className="text-xs text-rose-600 font-medium">
-                      Revoke
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => revoke(r.id)}
+                    className="text-xs text-rose-600 hover:underline font-medium"
+                  >
+                    Revoke
+                  </button>
                 </td>
               </tr>
             ))}
+            {rows.length === 0 && (
+              <tr>
+                <td colSpan={6} className="p-6 text-center text-slate-500">No student representatives appointed.</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
