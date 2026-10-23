@@ -37,26 +37,17 @@ const iconMap: Record<string, any> = {
 };
 
 interface OverviewData {
-  counts: {
-    users: number;
-    gatesActive: number;
-    announcements: number;
-    openSupportTickets: number;
-    openAlerts: number;
-  };
-  recentAuditEvents: {
-    id: string;
-    action: string;
-    userName: string | null;
-    userRole: string | null;
-    details: unknown;
-    timestamp: string;
-  }[];
-  occupancy: { onCampusNow: number };
+  command: { health: string[] };
+  identity: { active: number; suspended: number; deprovisioned: number };
+  access: { mfaCoverage: number };
+  gates: { status: string[] };
+  alerts: { critical: number; high: number; medium: number; low: number };
+  counts: Record<string, number>;
 }
 
-function fmt(n: number): string {
-  return n.toLocaleString("en-IN");
+function fmt(n: number | string | null | undefined): string {
+  if (typeof n === "string") return n;
+  return (typeof n === "number" && !Number.isNaN(n) ? n : 0).toLocaleString("en-IN");
 }
 
 function AdminOverviewInner() {
@@ -85,14 +76,18 @@ function AdminOverviewInner() {
     };
   }, []);
 
+  const activeGates = (data?.gates.status ?? []).filter((s) => s === "online").length;
+  const totalGates = data?.gates.status.length ?? 0;
+  const openAlerts = data
+    ? (data.alerts?.critical ?? 0) + (data.alerts?.high ?? 0) + (data.alerts?.medium ?? 0) + (data.alerts?.low ?? 0)
+    : 0;
   const statCards = data
     ? [
-        { icon: Users, label: "Users", value: data.counts.users, href: "/admin/users" },
-        { icon: Shield, label: "Gates Active", value: data.counts.gatesActive, href: "/admin/gates" },
-        { icon: Info, label: "Announcements", value: data.counts.announcements, href: "/admin/announcements" },
-        { icon: Ticket, label: "Open Support Tickets", value: data.counts.openSupportTickets, href: "/admin/support" },
-        { icon: AlertTriangle, label: "Open Alerts", value: data.counts.openAlerts, href: "/admin/alerts" },
-        { icon: Zap, label: "On Campus Now", value: data.occupancy?.onCampusNow ?? 0, href: "/admin/occupancy" },
+        { icon: Users, label: "Active Users", value: data.identity?.active ?? 0, href: "/admin/users" },
+        { icon: Shield, label: "Gates Online", value: `${activeGates}/${totalGates}`, href: "/admin/gates" },
+        { icon: AlertTriangle, label: "Open Alerts", value: openAlerts, href: "/admin/alerts" },
+        { icon: Ticket, label: "Pending Approvals", value: data.counts?.access ?? 0, href: "/admin/passes" },
+        { icon: Zap, label: "Suspended Users", value: data.identity?.suspended ?? 0, href: "/admin/users" },
       ]
     : [];
 
@@ -152,16 +147,18 @@ function AdminOverviewInner() {
             </div>
           )}
 
-          {data && data.recentAuditEvents.length > 0 && (
+          {typeof data === "object" && data != null && "recentAuditEvents" in data &&
+            Array.isArray((data as any).recentAuditEvents) &&
+            (data as any).recentAuditEvents.length > 0 && (
             <div className="mt-6">
               <h3 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3 flex items-center gap-2">
                 <Clock className="w-3.5 h-3.5" /> Recent Campus Events
               </h3>
               <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] divide-y divide-[var(--border)]">
-                {data.recentAuditEvents.map((e) => (
+                {(data as any).recentAuditEvents.map((e: any) => (
                   <div key={e.id} className="px-4 py-3 flex items-center justify-between gap-3">
                     <div className="min-w-0">
-                      <code className="text-xs bg-[var(--bg-elevated)] border border-[var(--border)] rounded px-1.5 py-0.5 text-emerald-400">
+                      <code className="text-xs bg-[var(--bg-elevated)] border border-[var(--border)] rounded px-1.5 py-1.5 text-emerald-400">
                         {e.action}
                       </code>
                       <p className="text-xs text-[var(--text-muted)] mt-1 truncate">
