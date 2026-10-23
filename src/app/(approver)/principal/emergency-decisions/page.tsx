@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
@@ -57,6 +58,8 @@ function EmergencyDecisionsInner() {
       : null,
     { enabled: !!user, ttlMs: 15_000 }
   );
+
+  const flagged = data?.data ?? [];
 
   usePolling(refresh, { intervalMs: 60_000, enabled: !!user && !submitting });
 

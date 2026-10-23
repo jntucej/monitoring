@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { useUIStore } from "@/stores/uiStore";
+import { getAuthHeaders } from "@/lib/utils";
 
 /** Shape of the read-only /api/roles-graph response. */
 interface RolesGraphPayload {
@@ -132,6 +133,7 @@ export default function RolesManagementPage() {
   const [graphError, setGraphError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [roleToDeactivate, setRoleToDeactivate] = useState<string | null>(null);
+  const [editingRole, setEditingRole] = useState<SystemRole | null>(null);
 
   // ---- role hierarchy state ----
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});

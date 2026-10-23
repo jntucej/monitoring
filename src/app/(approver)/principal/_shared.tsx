@@ -432,7 +432,6 @@ function PlaceholderBadge({ note }: { note: string }) {
 
 export const ResidentDirectoryPanel = memo(function ResidentDirectoryPanel() {
   return (
-    {/* Placeholder — replace with real data source */}
     <WidgetBoundary title="Resident Directory">
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
         <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
@@ -580,7 +579,6 @@ export const OutpassLeavePanel = memo(function OutpassLeavePanel({
 
 export const EntryExitLogsPanel = memo(function EntryExitLogsPanel() {
   return (
-    {/* Placeholder — replace with real data source */}
     <WidgetBoundary title="Entry & Exit Log">
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
         <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
@@ -601,7 +599,6 @@ export const EntryExitLogsPanel = memo(function EntryExitLogsPanel() {
 
 export const HostelIncidentsPanel = memo(function HostelIncidentsPanel() {
   return (
-    {/* Placeholder — replace with real data source */}
     <WidgetBoundary title="Hostel Incidents">
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
         <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
@@ -622,7 +619,6 @@ export const HostelIncidentsPanel = memo(function HostelIncidentsPanel() {
 
 export const RoomOccupancyPanel = memo(function RoomOccupancyPanel() {
   return (
-    {/* Placeholder — replace with real data source */}
     <WidgetBoundary title="Room Occupancy">
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
         <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">

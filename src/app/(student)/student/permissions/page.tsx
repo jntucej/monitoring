@@ -124,8 +124,8 @@ export default function StudentPermissionsPage() {
               return (
                 <div key={t.id} className="glass-card p-4 space-y-3">
                   <PermissionTicketCard
-                    item={t}
-                    onClick={() => setActiveTicket(ticketNum)}
+                    ticket={t}
+                    onSelect={(num) => setActiveTicket(num)}
                   />
                   {t.status === "REJECTED" && (
                     <div className="pt-2 border-t border-[var(--border)] flex justify-end">
@@ -145,8 +145,7 @@ export default function StudentPermissionsPage() {
         )}
 
         <PermissionDetailPanel
-          ticketNumber={activeTicket}
-          open={!!activeTicket}
+          ticket={activeTicket}
           onClose={() => setActiveTicket(null)}
           onActionComplete={fetchTickets}
         />

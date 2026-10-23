@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { useUIStore } from "@/stores/uiStore";
 import { useApi } from "@/hooks/useApi";
 import {

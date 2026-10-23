@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import {
   Activity, TrendingUp, Users, AlertTriangle, Download, RefreshCw,
 } from "lucide-react";
@@ -10,6 +10,7 @@ import {
   ChartRenderer, type ChartType, type SeriesDef,
 } from "@/components/admin/shared/ChartRenderer";
 import { ChartTypeSwitcher } from "@/components/admin/shared/ChartTypeSwitcher";
+import { PageLoading } from "@/components/shared/LoadingStates";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
@@ -209,42 +210,43 @@ function AdminAnalyticsInner() {
       <PageHeader
         title="Campus Analytics"
         subtitle={`Traffic and occupancy from ${data?.range.from ?? "—"} to ${data?.range.to ?? "—"}`}
-      >
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="inline-flex rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] p-1 text-xs">
-            {(([7, 14, 30] as const)).map((days) => (
-              <button
-                key={days}
-                type="button"
-                onClick={() => setRange(days)}
-                className={`px-3 py-1 rounded-lg font-medium transition ${
-                  range === days
-                    ? "bg-[var(--action-primary)] text-white shadow"
-                    : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                }`}
-              >
-                {days}d
-              </button>
-            ))}
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] p-1 text-xs">
+              {(([7, 14, 30] as const)).map((days) => (
+                <button
+                  key={days}
+                  type="button"
+                  onClick={() => setRange(days)}
+                  className={`px-3 py-1 rounded-lg font-medium transition ${
+                    range === days
+                      ? "bg-[var(--action-primary)] text-white shadow"
+                      : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  }`}
+                >
+                  {days}d
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={exportCsv}
+              disabled={!data || data.daily.length === 0}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] disabled:opacity-50"
+            >
+              <Download className="w-3.5 h-3.5" /> Export CSV
+            </button>
+            <button
+              type="button"
+              onClick={load}
+              className="p-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+              title="Refresh"
+            >
+              <RefreshCw className="w-4 h-4" />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={exportCsv}
-            disabled={!data || data.daily.length === 0}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] disabled:opacity-50"
-          >
-            <Download className="w-3.5 h-3.5" /> Export CSV
-          </button>
-          <button
-            type="button"
-            onClick={load}
-            className="p-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-            title="Refresh"
-          >
-            <RefreshCw className="w-4 h-4" />
-          </button>
-        </div>
-      </PageHeader>
+        }
+      />
 
       {error && (
         <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/25 text-rose-300 text-sm flex items-center gap-2">
@@ -325,14 +327,14 @@ function AdminAnalyticsInner() {
                 <h3 className="text-sm font-semibold text-[var(--text-primary)]">Gate Traffic Flow</h3>
                 <p className="text-xs text-[var(--text-muted)]">Entries versus exits over time</p>
               </div>
-              <ChartTypeSwitcher current={trafficType} onChange={setTrafficType} />
+              <ChartTypeSwitcher value={trafficType} onChange={setTrafficType} />
             </div>
             {data ? (
               <ChartRenderer
                 type={trafficType}
                 data={trafficData}
                 series={trafficSeries}
-                xAxisKey="date"
+                xKey="date"
                 height={280}
               />
             ) : (
@@ -348,14 +350,14 @@ function AdminAnalyticsInner() {
                 <h3 className="text-sm font-semibold text-[var(--text-primary)]">On-Campus Occupancy</h3>
                 <p className="text-xs text-[var(--text-muted)]">Net population count present on grounds</p>
               </div>
-              <ChartTypeSwitcher current={campusType} onChange={setCampusType} />
+              <ChartTypeSwitcher value={campusType} onChange={setCampusType} />
             </div>
             {data ? (
               <ChartRenderer
                 type={campusType}
                 data={trafficData}
                 series={campusSeries}
-                xAxisKey="date"
+                xKey="date"
                 height={280}
               />
             ) : (
@@ -371,14 +373,14 @@ function AdminAnalyticsInner() {
                 <h3 className="text-sm font-semibold text-[var(--text-primary)]">Students by Department</h3>
                 <p className="text-xs text-[var(--text-muted)]">Active departmental headcounts</p>
               </div>
-              <ChartTypeSwitcher current={roleType} onChange={setRoleType} />
+              <ChartTypeSwitcher value={roleType} onChange={setRoleType} />
             </div>
             {data ? (
               <ChartRenderer
-                type={roleType}
+                type={roleType === "composed" ? "bar" : roleType}
                 data={deptData}
-                series={[{ key: "count", label: "Students", color: CHART_PALETTE.primary, type: roleType }]}
-                xAxisKey="name"
+                series={[{ key: "count", label: "Students", color: CHART_PALETTE.primary, type: roleType === "composed" ? "bar" : roleType as any }]}
+                xKey="name"
                 height={280}
               />
             ) : (
@@ -394,14 +396,14 @@ function AdminAnalyticsInner() {
                 <h3 className="text-sm font-semibold text-[var(--text-primary)]">Active Users by Role</h3>
                 <p className="text-xs text-[var(--text-muted)]">Breakdown of operational accounts</p>
               </div>
-              <ChartTypeSwitcher current={roleType} onChange={setRoleType} />
+              <ChartTypeSwitcher value={roleType} onChange={setRoleType} />
             </div>
             {data ? (
               <ChartRenderer
                 type={roleType}
                 data={roleData}
                 series={roleSeries}
-                xAxisKey="role"
+                xKey="role"
                 height={280}
               />
             ) : (
