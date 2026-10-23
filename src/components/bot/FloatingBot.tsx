@@ -2,11 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence } from "framer-motion";
+import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useBotStore } from "./store";
 import { BotBoat } from "./BotBoat";
 import { useAuthStore } from "@/stores/authStore";
 import { playAudioFeedback } from "@/lib/sound";
+import { isDashboardRoot } from "./dashboard-root";
 
 const LONG_PRESS_MS = 420;
 
@@ -93,6 +95,16 @@ export function FloatingBot() {
   const onPointerCancel = () => { dragRef.current = null; clearPress(); };
 
   useEffect(() => () => clearPress(), [clearPress]);
+
+  // The bot lives on dashboard pages. If the user navigates off a dashboard
+  // root while the panel is open, close it — otherwise returning later makes
+  // it pop open unexpectedly (the `open` flag persists across navigation).
+  const pathname = usePathname();
+  useEffect(() => {
+    if (pathname && !isDashboardRoot(pathname) && useBotStore.getState().open) {
+      useBotStore.getState().setOpen(false);
+    }
+  }, [pathname]);
 
   if (!hydrated || !authed) return null;
 

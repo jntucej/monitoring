@@ -22,6 +22,7 @@ async function handleGet(_req: NextRequest, context: { auth: AuthContext }) {
     .select(`
       id, name, email, phone, role, status, unique_id,
       photo_url, department_id, login_identifier,
+      bot_lang, bot_voice_replies,
       created_at
     `)
     .eq("id", context.auth.userId)
@@ -68,6 +69,8 @@ async function handleGet(_req: NextRequest, context: { auth: AuthContext }) {
       photoUrl: user.photo_url,
       departmentId: user.department_id,
       loginIdentifier: user.login_identifier,
+      botLang: user.bot_lang ?? "en",
+      botVoiceReplies: Boolean(user.bot_voice_replies),
       twoFactorEnabled: false,
       createdAt: user.created_at,
       studentDetails,
@@ -107,6 +110,15 @@ async function handlePatch(req: NextRequest, context: { auth: AuthContext }) {
 
   if (typeof body.photoUrl === "string") {
     updates.photo_url = body.photoUrl || null;
+  }
+
+  // Floating-bot preferences: language + TTS. Persisted so a fresh tab /
+  // hard refresh re-hydrates instead of silently resetting to defaults.
+  if (typeof body.bot_lang === "string" && ["en", "te"].includes(body.bot_lang)) {
+    updates.bot_lang = body.bot_lang;
+  }
+  if (typeof body.bot_voice_replies === "boolean") {
+    updates.bot_voice_replies = body.bot_voice_replies;
   }
 
   if (Object.keys(updates).length === 0) {

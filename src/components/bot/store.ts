@@ -20,6 +20,40 @@ export interface BotMsg {
   __retryOf?: string;
 }
 
+// localStorage keys for the small non-secret prefs the bot owns. They're
+// per-browser (not per-user), which is the standard floating-assistant
+// pattern: they make a hard refresh render the correct language/voice
+// immediately instead of flashing English, and act as a sync-check cache
+// for the server-persisted values. Never store messages or conversationId
+// here — that leaks multi-user state to a shared browser.
+const LS_KEY = "mycampus-bot";
+
+function readPrefs(): { lang?: BotLang; voiceReplies?: boolean } {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.localStorage.getItem(LS_KEY);
+    if (!raw) return {};
+    const p = JSON.parse(raw);
+    const out: { lang?: BotLang; voiceReplies?: boolean } = {};
+    if (p.lang === "en" || p.lang === "te") out.lang = p.lang;
+    if (typeof p.voiceReplies === "boolean") out.voiceReplies = p.voiceReplies;
+    return out;
+  } catch {
+    return {};
+  }
+}
+
+function writePrefs(lang: BotLang, voiceReplies: boolean) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(LS_KEY, JSON.stringify({ lang, voiceReplies }));
+  } catch {
+    /* storage may be unavailable (private mode) — degrade silently */
+  }
+}
+
+const initialPrefs = typeof window !== "undefined" ? readPrefs() : {};
+
 interface BotStore {
   open: boolean;
   lang: BotLang;
@@ -46,13 +80,14 @@ interface BotStore {
   setDraftStatus: (id: string, status: BotMsg["status"]) => void;
   setFeedback: (id: string, f: -1 | 1) => void;
   setConversationId: (id: string | null) => void;
+  setMessages: (msgs: BotMsg[]) => void;
   reset: () => void;
 }
 
 export const useBotStore = create<BotStore>((set) => ({
   open: false,
-  lang: "en",
-  voiceReplies: false,
+  lang: initialPrefs.lang ?? "en",
+  voiceReplies: initialPrefs.voiceReplies ?? false,
   messages: [],
   conversationId: null,
   streaming: false,
@@ -63,8 +98,14 @@ export const useBotStore = create<BotStore>((set) => ({
 
   setOpen: (v) => set({ open: v }),
   toggleOpen: () => set((s) => ({ open: !s.open })),
-  setLang: (l) => set({ lang: l }),
-  setVoiceReplies: (v) => set({ voiceReplies: v }),
+  setLang: (l) => {
+    set({ lang: l });
+    writePrefs(l, useBotStore.getState().voiceReplies);
+  },
+  setVoiceReplies: (v) => {
+    set({ voiceReplies: v });
+    writePrefs(useBotStore.getState().lang, v);
+  },
   setStreaming: (v) => set({ streaming: v }),
   setError: (e) => set({ error: e }),
 
@@ -125,5 +166,6 @@ export const useBotStore = create<BotStore>((set) => ({
   },
 
   setConversationId: (id) => set({ conversationId: id }),
+  setMessages: (msgs) => set({ messages: msgs }),
   reset: () => set({ messages: [], conversationId: null, error: null }),
 }));

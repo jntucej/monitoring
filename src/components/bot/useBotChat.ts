@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useBotStore, type Citation } from "./store";
 import { useApi } from "@/hooks/useApi";
 import { useAuthStore } from "@/stores/authStore";
@@ -22,6 +22,23 @@ const api = useApi();
 
   const abortRef = useRef<AbortController | null>(null);
   const inflightRef = useRef<boolean>(false);
+
+  // Abort any in-flight stream on unmount and reconcile the store so a
+  // closed-mid-stream panel never leaves `streaming: true` (which would pin
+  // the composer in "Stop" mode on the next open). Also mark the abandoned
+  // draft as errored so the reopened panel shows the truth, not a ghost.
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+      const st = useBotStore.getState();
+      if (st.streaming) {
+        st.messages
+          .filter((m) => m.status === "streaming")
+          .forEach((m) => st.setDraftStatus(m.id, "error"));
+        st.setStreaming(false);
+      }
+    };
+  }, []);
 
   const send = useCallback(async (
     raw: string,

@@ -168,6 +168,54 @@ export function BotPanel() {
     if (!next) tts.stop();
   };
 
+  // Reconcile server-side state on every open:
+  //  1. hydrate lang / voiceReplies from the caller's profile (the store's
+  //     localStorage cache is only the fast-path render; the server is the
+  //     source of truth, so a shared browser / fresh tab still gets the
+  //     user's saved settings).
+  //  2. load the current conversation so a hard refresh does not wipe the
+  //     chat history — the bot "remembers" across refreshes and tabs.
+  //  3. if a stream was still in flight when the panel last closed, mark
+  //     the draft errored and clear the stuck streaming flag.
+  const hydratedRef = useRef(false);
+  useEffect(() => {
+    if (!open || hydratedRef.current) return;
+    hydratedRef.current = true;
+    let cancelled = false;
+    const user = useAuthStore.getState().user;
+    const token = useAuthStore.getState().token;
+    const headers: Record<string, string> = { "content-type": "application/json" };
+    if (token) headers.Authorization = `Bearer ${token}`;
+    if (user) {
+      fetch("/api/profile", { headers, cache: "no-store" })
+        .then((r) => r.ok ? r.json() : null)
+        .then((j) => {
+          if (cancelled || !j?.success) return;
+          const s = useBotStore.getState();
+          if (j.data?.botLang === "en" || j.data?.botLang === "te") s.setLang(j.data.botLang);
+          if (typeof j.data?.botVoiceReplies === "boolean") s.setVoiceReplies(j.data.botVoiceReplies);
+        })
+        .catch(() => {});
+    }
+    fetch("/api/bot/session/current", { headers, cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        if (cancelled || !j?.success || !Array.isArray(j.data?.messages)) return;
+        const s = useBotStore.getState();
+        s.setMessages(j.data.messages);
+        s.setConversationId(j.data.conversationId ?? null);
+      })
+      .catch(() => {});
+    const st = useBotStore.getState();
+    if (st.streaming) {
+      st.messages
+        .filter((m) => m.status === "streaming")
+        .forEach((m) => st.setDraftStatus(m.id, "error"));
+      st.setStreaming(false);
+    }
+    return () => { cancelled = true; };
+  }, [open]);
+
   const handleClose = () => {
     if (stt.listening) stt.stop();
     tts.stop();
