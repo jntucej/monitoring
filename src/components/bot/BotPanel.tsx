@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useBotStore } from "./store";
 import { useBotChat } from "./useBotChat";
+import { subscribeBot } from "./crossTab";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { useSpeechSynthesis } from "@/hooks/useSpeechSynthesis";
 import { useIsMobile } from "@/hooks/useMediaQuery";
@@ -44,12 +45,33 @@ export function BotPanel() {
   const messages = useBotStore((s) => s.messages);
   const streaming = useBotStore((s) => s.streaming);
   const error = useBotStore((s) => s.error);
-  const reset = useBotStore((s) => s.reset);
 
   const t = BOT_STRINGS[lang];
-  const { send, cancel, setFeedback } = useBotChat();
+  const { send, cancel, setFeedback, resetChat } = useBotChat();
   const tts = useSpeechSynthesis(lang);
   const [input, setInput] = useState("");
+
+  // Cross-tab sync: mirror state mutations from other tabs so two open
+  // panels on the same origin stay consistent (send / done / feedback / reset).
+  useEffect(() => {
+    return subscribeBot((evt) => {
+      const s = useBotStore.getState();
+      switch (evt.type) {
+        case "reset":
+          s.reset();
+          break;
+        case "send":
+          s.appendUser(evt.content);
+          break;
+        case "done":
+          s.setDraftStatus(evt.messageId, "done");
+          break;
+        case "feedback":
+          s.setFeedback(evt.messageId, evt.v);
+          break;
+      }
+    });
+  }, []);
 
   const stt = useSpeechRecognition({
     lang,
@@ -220,6 +242,10 @@ export function BotPanel() {
     if (stt.listening) stt.stop();
     tts.stop();
     clearVoiceMode();
+    // Blur the composer first so the iOS keyboard dismisses before the exit
+    // animation starts — otherwise the panel jump causes a visible layout
+    // shift on mobile.
+    inputRef.current?.blur();
     setOpen(false);
   };
 
@@ -291,7 +317,7 @@ export function BotPanel() {
         voiceReplies={voiceReplies}
         ttsSupported={tts.supported}
         onToggleVoiceReplies={handleToggleVoiceReplies}
-        onNewChat={() => { reset(); tts.stop(); }}
+        onNewChat={() => { resetChat(); tts.stop(); }}
         onClose={handleClose}
       />
 

@@ -55,6 +55,10 @@ export async function invalidateAllUserSessions(userId: string): Promise<boolean
   try {
     await query("UPDATE users SET session_version = session_version + 1, handle = gen_random_uuid()::text WHERE id::text = $1", [userId]);
     await query("UPDATE sessions SET revoked_at = NOW() WHERE user_id::text = $1 OR refresh_hash = $1", [userId]);
+    // P1-11: evict the short-TTL user-row cache so the bumped session_version
+    // takes effect on the next request instead of after up to USER_ROW_TTL_MS.
+    const { invalidateAuthCache } = await import("./authContext");
+    invalidateAuthCache(userId);
     return true;
   } catch (err) {
     console.error('Error in invalidateAllUserSessions:', err);

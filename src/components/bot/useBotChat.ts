@@ -3,11 +3,12 @@ import { useCallback, useEffect, useRef } from "react";
 import { useBotStore, type Citation } from "./store";
 import { useApi } from "@/hooks/useApi";
 import { useAuthStore } from "@/stores/authStore";
+import { broadcastBot } from "./crossTab";
 
 const FLUSH_MS = 33;
 
 export function useBotChat() {
-const api = useApi();
+  const api = useApi();
 
   const lang = useBotStore((s) => s.lang);
   const conversationId = useBotStore((s) => s.conversationId);
@@ -57,6 +58,7 @@ const api = useApi();
 
     appendUser(text);
     const draftId = appendDraft();
+    broadcastBot({ type: "send", content: text });
 
     const ac = new AbortController();
     abortRef.current = ac;
@@ -132,6 +134,7 @@ const api = useApi();
       flush(true);
       setDraftCitations(draftId, cites);
       setDraftStatus(draftId, "done");
+      broadcastBot({ type: "done", messageId: draftId });
 
       onDone?.(acc);
     } catch (err: any) {
@@ -162,6 +165,7 @@ const api = useApi();
     const store = useBotStore.getState();
     const msg = store.messages.find((m) => m.id === msgId);
     store.setFeedback(msgId, feedback);
+    broadcastBot({ type: "feedback", messageId: msgId, v: feedback });
     if (!msg?.dbId) return;
     try {
       await fetch("/api/bot/feedback", {
@@ -172,5 +176,10 @@ const api = useApi();
     } catch {}
   }, []);
 
-  return { send, cancel, setFeedback };
+  const resetChat = useCallback(() => {
+    useBotStore.getState().reset();
+    broadcastBot({ type: "reset" });
+  }, []);
+
+  return { send, cancel, setFeedback, resetChat };
 }
