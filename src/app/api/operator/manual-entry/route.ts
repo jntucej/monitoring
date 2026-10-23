@@ -29,6 +29,7 @@ interface ManualEntryBody {
   reason?: string;
   gateId?: string;
   isCorrection?: boolean;
+  entryType?: "hosteller" | "day_scholar";
 }
 
 interface ManualEntryRow {
@@ -129,6 +130,7 @@ async function handlePost(
       direction,
       reason,
       gateId,
+      entryType: body?.entryType,
       isManual: true,
       operatorId: auth.userId,
       operatorName: auth.email,
