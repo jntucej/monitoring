@@ -44,13 +44,14 @@ function AdminKbInner() {
         }),
       });
       const body = await res.json();
-      if (!body?.success) {
+      if (!res.ok || body?.success === false) {
         setError(body?.error?.message ?? "Ingest failed");
       } else {
+        const p = body?.data ?? body;
         setResult({
-          documentId: body.documentId,
-          chunkCount: body.chunkCount ?? 0,
-          deduped: body.deduped ?? false,
+          documentId: p.documentId,
+          chunkCount: p.chunkCount ?? 0,
+          deduped: p.deduped ?? false,
         });
         setDraft({ title: "", source: "", content: "", role: "all" });
       }

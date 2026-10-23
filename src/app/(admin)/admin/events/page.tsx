@@ -35,7 +35,9 @@ function AdminEventsInner() {
     try {
       const res = await fetch("/api/campus/events", { headers: getAuthHeaders() });
       const body = await res.json();
-      setRows((body?.data?.events ?? []) as EventRow[]);
+      const raw = body?.data ?? body;
+      const rows = Array.isArray(raw) ? raw : (raw?.events ?? []);
+      setRows(rows as EventRow[]);
     } catch (e) {
       console.error("events", e);
     } finally {

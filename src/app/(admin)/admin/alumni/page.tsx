@@ -33,12 +33,11 @@ function AdminAlumniInner() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const qs = q
-        ? `q=${encodeURIComponent(q)}`
-        : "status=DEPROVISIONED";
-      const res = await fetch(`/api/students?${qs}`, { headers: getAuthHeaders() });
+      const res = await fetch(`/api/students?${q ? `q=${encodeURIComponent(q)}` : ""}`, { headers: getAuthHeaders() });
       const body = await res.json();
-      setRows((body?.data ?? []) as AlumniRow[]);
+      const raw = body?.data ?? body ?? [];
+      const all = (Array.isArray(raw) ? raw : []) as AlumniRow[];
+      setRows(all.filter((r) => r.status === "DEPROVISIONED"));
     } catch (e) {
       console.error("alumni", e);
     } finally {
