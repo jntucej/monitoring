@@ -71,13 +71,54 @@ export function Hero() {
       {/* Eyebrow. This is NOT the LCP element; a small blur-reveal is
           allowed here. The h1 below is the LCP and stays clean. */}
       <motion.p
-        className="mb-3 text-sm uppercase tracking-[0.35em] text-[var(--home-accent-indigo,#6366F1)]"
+        className="mb-3 text-sm uppercase tracking-[0.35em] text-[var(--home-accent-gold,#FBBF24)]"
         initial={reduced ? false : { opacity: 0, filter: "blur(8px)", y: 6 }}
         animate={reduced ? undefined : { opacity: 1, filter: "blur(0px)", y: 0 }}
         transition={{ duration: 0.5, delay: 0.05 }}
       >
         {COLLEGE.shortName} · Campus Access
       </motion.p>
+
+      {/* ARCHWAY: the logo mark — the archway + scan line + dots — sits on
+          the deep navy canvas with a gold aura and a pulsing scan line. It is
+          NOT the LCP (the h1 below is), so a gentle blur-reveal is allowed. */}
+      <motion.div
+        aria-hidden="true"
+        className="home-logo-mark mb-8 flex h-28 w-28 items-center justify-center rounded-2xl border border-[var(--home-border-gold,rgba(251,191,36,0.35))]"
+        initial={reduced ? false : { opacity: 0, scale: 0.96, filter: "blur(6px)" }}
+        animate={reduced ? undefined : { opacity: 1, scale: 1, filter: "blur(0px)" }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <svg viewBox="0 0 100 100" className="h-full w-full p-2" role="img">
+          {/* Archway */}
+          <path
+            d="M28 78 V44 a22 22 0 0 1 44 0 V78"
+            fill="none"
+            stroke="#FFFFFF"
+            strokeWidth="3.5"
+            strokeLinecap="round"
+          />
+          {/* Viewfinder brackets */}
+          <path d="M14 30 v-6 h6" fill="none" stroke="var(--home-text-muted,#94A3B8)" strokeWidth="2.5" />
+          <path d="M86 30 v-6 h-6" fill="none" stroke="var(--home-text-muted,#94A3B8)" strokeWidth="2.5" />
+          <path d="M14 70 v6 h6" fill="none" stroke="var(--home-text-muted,#94A3B8)" strokeWidth="2.5" />
+          <path d="M86 70 v6 h-6" fill="none" stroke="var(--home-text-muted,#94A3B8)" strokeWidth="2.5" />
+          {/* Gold scan line with pulse */}
+          <line x1="24" y1="60" x2="76" y2="60" stroke="var(--home-accent-gold,#FBBF24)" strokeWidth="3" strokeLinecap="round">
+            {!reduced && (
+              <animate
+                attributeName="opacity"
+                values="1;0.55;1"
+                dur="2.6s"
+                repeatCount="indefinite"
+              />
+            )}
+          </line>
+          {/* Entry + exit dots */}
+          <circle cx="24" cy="60" r="3.5" fill="var(--home-accent-mint,#10B981)" />
+          <circle cx="76" cy="60" r="3.5" fill="var(--home-accent-rose,#F43F5E)" />
+        </svg>
+      </motion.div>
 
       {/* LCP: the h1. Full opacity on the first frame. Transform-only
           wrapper motion. No blur, no opacity animation on the text. */}
@@ -107,7 +148,7 @@ export function Hero() {
           onClick={() => (window.location.href = "/login")}
           strength={0.05}
           radius={80}
-          className="inline-flex items-center gap-2 rounded-xl bg-[var(--home-accent-indigo,#6366F1)] px-6 py-3 font-semibold text-white shadow-lg hover:opacity-95"
+          className="inline-flex items-center gap-2 rounded-xl bg-[var(--home-accent-gold,#FBBF24)] px-6 py-3 font-semibold text-[var(--home-accent-navy,#0A1128)] shadow-lg hover:opacity-95"
         >
           <LogIn className="h-4 w-4" />
           {COLLEGE.primaryCTA}

@@ -130,14 +130,14 @@ function TiltCard({ role, reduced, index }: { role: Role; reduced: boolean; inde
     >
       <Link
         href={role.href}
-        className="group block h-full rounded-2xl border border-[var(--home-border-soft,rgba(255,255,255,0.08))] bg-[var(--home-bg-elev-1,#0F172A)] p-5"
+        className="group home-role-card-inner block h-full rounded-2xl border border-[var(--home-border-soft,rgba(255,255,255,0.08))] bg-[var(--home-bg-elev-1,#0F172A)] p-5"
       >
-        <role.Icon className="h-7 w-7 text-[var(--home-accent-indigo,#6366F1)]" />
-        <h3 className="mt-3 text-lg font-semibold text-[var(--home-text-primary,#F3F4F6)]">
+        <role.Icon className="h-7 w-7 text-[var(--home-accent-gold,#FBBF24)]" />
+        <h3 className="mt-3 text-lg font-semibold text-[var(--home-text-primary,#FFFFFF)]">
           {role.name}
         </h3>
-        <p className="mt-1 text-sm text-[var(--home-text-muted,#6B7280)]">{role.cap}</p>
-        <span className="mt-3 inline-block text-xs font-semibold text-[var(--home-accent-steel,#0EA5E9)] opacity-0 transition group-hover:opacity-100">
+        <p className="mt-1 text-sm text-[var(--home-text-muted,#94A3B8)]">{role.cap}</p>
+        <span className="mt-3 inline-block text-xs font-semibold text-[var(--home-accent-mint,#10B981)] opacity-0 transition group-hover:opacity-100">
           Sign in →
         </span>
       </Link>

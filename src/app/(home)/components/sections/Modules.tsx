@@ -145,7 +145,7 @@ export function Modules() {
               className={
                 "rounded-2xl border p-6 transition-colors " +
                 (i === activeIndex
-                  ? "border-[var(--home-accent-indigo,#6366F1)] bg-[var(--home-bg-elev-1,#0F172A)]"
+                  ? "border-[var(--home-accent-gold,#FBBF24)] bg-[var(--home-bg-elev-1,#0F172A)]"
                   : "border-[var(--home-border-soft,rgba(255,255,255,0.08))]")
               }
             >

@@ -5,24 +5,34 @@
    Apple-Inspired HIG Design System: Calm, Restrained, Precise
    ============================================================ */
 
+/* ARCHWAY PALETTE (home page only, scoped to [data-home]):
+   Deep Navy canvas · Stark White archway · Gold scan-line primary action ·
+   Mint entry dot · Rose exit dot · Slate viewfinder brackets.
+   The legacy accent *names* are kept (the home sections' `var(--home-accent-*)`
+   references stay untouched) and remapped to the Archway colours, so the
+   recolor needs no edits to the section components. */
 [data-home] {
-  background-color: #000000;
-  --home-accent-amber: #F59E0B;
-  --home-accent-indigo: #6366F1;
-  --home-accent-steel: #0EA5E9;
-  --home-accent-crimson: #EF4444;
-  --home-accent-navy: #1E3A5F;
+  background-color: #0A1128;
+  --home-accent-gold: #FBBF24;
+  --home-accent-mint: #10B981;
+  --home-accent-rose: #F43F5E;
+  --home-accent-amber: #FBBF24;
+  --home-accent-indigo: #FBBF24;   /* primary action slot -> gold scan line */
+  --home-accent-steel: #10B981;    /* secondary slot -> mint */
+  --home-accent-crimson: #F43F5E;   /* danger slot -> rose */
+  --home-accent-navy: #0A1128;
 
-  --home-text-primary: #F3F4F6;
-  --home-text-secondary: #9CA3AF;
-  --home-text-muted: #6B7280;
+  --home-text-primary: #FFFFFF;
+  --home-text-secondary: #CBD5E1;
+  --home-text-muted: #94A3B8;
 
-  --home-bg-base: #000000;
+  --home-bg-base: #0A1128;
   --home-bg-elev-1: #0F172A;
-  --home-bg-elev-2: #131C2E;
+  --home-bg-elev-2: #111A2E;
 
   --home-border-soft: rgba(255, 255, 255, 0.08);
   --home-border-hard: rgba(255, 255, 255, 0.18);
+  --home-border-gold: rgba(251, 191, 36, 0.35);
 
   --home-blur-xs: 4px;
   --home-blur-sm: 8px;
@@ -35,7 +45,8 @@
   --home-radius-lg: 20px;
   --home-radius-pill: 9999px;
 
-  --home-shadow-glow: 0 0 60px -20px rgba(99, 102, 241, 0.25);
+  --home-shadow-glow: 0 0 40px -8px rgba(251, 191, 36, 0.3);
+  --home-shadow-gold: 0 0 40px -4px rgba(251, 191, 36, 0.35);
   --home-shadow-deep: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
 
   --home-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
@@ -226,6 +237,38 @@ html.dark {
   --unit-a-soft: rgba(56, 189, 248, 0.12);
   --unit-b-soft: rgba(52, 211, 153, 0.12);
   --unit-c-soft: rgba(232, 121, 249, 0.12);
+}
+
+
+/* A11y (PSI best-practices): the glass / glossy-liquid themes paint
+   translucent white cards while several hard-coded rules force pure
+   #ffffff text on top — an inverted, near-zero-contrast pairing on the
+   light card backgrounds. Keep dark-theme glass panels on white (dark
+   translucent base), but switch the light-glass variants to deep slate so
+   they clear WCAG AA (4.5:1) on the frosted white cards. */
+:root[data-theme="glass"] .glass-card,
+:root[data-theme="glossy-liquid"] .glass-card,
+html.glass .glass-card {
+  color: #0f172a;
+}
+:root[data-theme="glass"] .text-on-glass-primary,
+:root[data-theme="glossy-liquid"] .text-on-glass-primary,
+html.glass .text-on-glass-primary {
+  color: #0f172a;
+}
+:root[data-theme="glass"] .text-on-glass-secondary,
+:root[data-theme="glossy-liquid"] .text-on-glass-secondary,
+html.glass .text-on-glass-secondary {
+  color: rgba(15, 23, 42, 0.72);
+}
+:root[data-theme="glass"] .text-on-glass-muted,
+:root[data-theme="glossy-liquid"] .text-on-glass-muted,
+html.glass .text-on-glass-muted {
+  color: rgba(15, 23, 42, 0.55);
+}
+html.dark .glass-card,
+:root[data-theme="dark"] .glass-card {
+  color: #ffffff;
 }
 
 /* ===== LIGHT THEME — Crisp Pure White High-Contrast ===== */

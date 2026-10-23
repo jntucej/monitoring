@@ -2044,7 +2044,7 @@ export async function addAudit(entry: {
     if (userExists) targetUserId = entry.userId;
   }
 
-  const auditRow = {
+  const auditRow: any = {
     action: entry.action,
     user_id: targetUserId,
     user_name: entry.userName || "System User",
@@ -2052,6 +2052,9 @@ export async function addAudit(entry: {
     details: detailObject, // Pass as object directly to Supabase driver
     timestamp,
   };
+  // CEJ fix: audit_logs gained a gate_id column (20261222000001). Persist the
+  // gate scope when provided so gate-scoped audit entries are queryable.
+  if (entry.gateId) auditRow.gate_id = entry.gateId;
 
   let { error } = await serviceClient.from('audit_logs').insert(auditRow);
   if (error && error.code === 'PGRST204') {

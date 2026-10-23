@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { SectionCard } from "@/components/admin/shared/SectionCard";
+import { SectionCard } from "@/components/shared/SectionCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
 import {

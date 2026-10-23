@@ -13,64 +13,67 @@
    ============================================================================ */
 
 /* ── accent-rgb tokens, keyed to the active theme ─────────────────────── */
-/* Default (dark) values so the blobs always have a valid colour even before
-   the theme attribute is applied. Each theme re-overrides below. */
+/* ARCHWAY default (dark) values so the blobs always have a valid colour even
+   before the theme attribute is applied. Blob A = mint, B = rose,
+   C = gold (the hero spotlight). Each theme re-overrides below. */
 [data-home] {
   --accent-rgb: 16, 185, 129;
   --accent-2-rgb: 244, 63, 94;
-  --accent-3-rgb: 245, 158, 11;
-  --bg-flat: #0f172a;
+  --accent-3-rgb: 251, 191, 36;
+  --bg-flat: #0A1128;
 }
 
 html[data-theme="dark"] [data-home] {
   --accent-rgb: 16, 185, 129;
   --accent-2-rgb: 244, 63, 94;
-  --accent-3-rgb: 245, 158, 11;
-  --bg-flat: #0f172a;
+  --accent-3-rgb: 251, 191, 36;
+  --bg-flat: #0A1128;
 }
 
 html[data-theme="light"] [data-home] {
   --accent-rgb: 5, 150, 105;
-  --accent-2-rgb: 37, 99, 235;
+  --accent-2-rgb: 225, 29, 72;
   --accent-3-rgb: 217, 119, 6;
-  --bg-flat: #ffffff;
+  --bg-flat: #f8fafc;
 }
 
 html[data-theme="glass"] [data-home] {
-  --accent-rgb: 0, 114, 255;
-  --accent-2-rgb: 0, 198, 150;
-  --accent-3-rgb: 192, 132, 252;
-  --bg-flat: rgba(255, 255, 255, 0.6);
+  --accent-rgb: 16, 185, 129;
+  --accent-2-rgb: 244, 63, 94;
+  --accent-3-rgb: 251, 191, 36;
+  --bg-flat: rgba(10, 17, 40, 0.6);
 }
 
 /* ── glossy-blob gradient colours ─────────────────────────────────────── */
 /* The three drifting blobs paint radial gradients from these tokens. They
    must be real colour values, not the `transparent` keyword, so every stop
    fades to the SAME colour at 0 alpha (never transparent-black on dark
-   bases, which would muddy the blend). The old build referenced
-   --home-grad-a/b/c but never defined them, so the blobs painted with an
-   invalid colour and the glossy wash was effectively absent. */
+   bases, which would muddy the blend).
+   ARCHWAY mapping: A = mint (top-left), B = rose (top-right),
+   C = gold (center spotlight for the hero text). */
 [data-home] {
-  --home-grad-a: 99, 102, 241;   /* indigo */
-  --home-grad-b: 14, 165, 233;   /* steel  */
-  --home-grad-c: 245, 158, 11;   /* amber  */
+  --home-grad-a: 16, 185, 129;    /* mint  */
+  --home-grad-b: 244, 63, 94;     /* rose  */
+  --home-grad-c: 251, 191, 36;    /* gold  */
 }
 html[data-theme="light"] [data-home] {
   --home-grad-a: 5, 150, 105;
-  --home-grad-b: 37, 99, 235;
+  --home-grad-b: 225, 29, 72;
   --home-grad-c: 217, 119, 6;
 }
 html[data-theme="glass"] [data-home] {
-  --home-grad-a: 0, 114, 255;
-  --home-grad-b: 0, 198, 150;
-  --home-grad-c: 192, 132, 252;
+  --home-grad-a: 16, 185, 129;
+  --home-grad-b: 244, 63, 94;
+  --home-grad-c: 251, 191, 36;
 }
 
 /* ── gradient-headline tokens (used by .home-headline-gradient) ──────── */
+/* ARCHWAY: the headline reads as stark white archway that bleeds into the
+   gold scan line. White -> gold -> deep navy (the logo's own three anchors). */
 [data-home] {
-  --home-head-a: var(--home-accent-indigo, #6366F1);
-  --home-head-b: var(--home-accent-steel, #0EA5E9);
-  --home-head-c: var(--home-accent-amber, #F59E0B);
+  --home-head-a: #FFFFFF;
+  --home-head-b: var(--home-accent-gold, #FBBF24);
+  --home-head-c: var(--home-accent-navy, #0A1128);
 }
 [data-home] .home-headline-gradient {
   background-image: linear-gradient(
@@ -248,6 +251,104 @@ html[data-theme="glass"] [data-home] {
 /* ── Role cards need perspective for the tilt to read as 3D ──────────── */
 [data-home] .home-role-card {
   perspective: 800px;
+}
+/* ARCHWAY: role cards answer a hover with a subtle gold border-glow, tying
+   the grid back to the logo's scan line. GPU-only (box-shadow + border-color),
+   no layout work. */
+[data-home] .home-role-card .home-role-card-inner {
+  border-color: var(--home-border-soft, rgba(255, 255, 255, 0.08));
+  transition: border-color 240ms ease, box-shadow 240ms ease;
+}
+[data-home] .home-role-card:hover .home-role-card-inner,
+[data-home] .home-role-card:focus-within .home-role-card-inner {
+  border-color: var(--home-border-gold, rgba(251, 191, 36, 0.35));
+  box-shadow: var(--home-shadow-gold, 0 0 40px -4px rgba(251, 191, 36, 0.35));
+}
+
+/* ── ARCHWAY logo treatment ───────────────────────────────────────────── */
+/* The hero logo mark sits on the deep navy canvas with a soft gold aura,
+   so it reads as though it is carved into the page. */
+[data-home] .home-logo-mark {
+  background: var(--home-bg-base, #0A1128);
+  box-shadow: var(--home-shadow-gold, 0 0 40px -4px rgba(251, 191, 36, 0.35));
+}
+
+/* A thin gold scan-line separator that sits between the hero and the next
+   section; it mirrors the logo's scan line and sweeps on scroll-in. */
+[data-home] .home-scanline {
+  position: relative;
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(251, 191, 36, 0) 0%,
+    rgba(251, 191, 36, 0.55) 50%,
+    rgba(251, 191, 36, 0) 100%
+  );
+  overflow: hidden;
+}
+[data-home] .home-scanline::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, #FBBF24, transparent);
+  transform: translateX(-100%);
+  animation: home-scanline-sweep 3.2s ease-in-out infinite;
+}
+@keyframes home-scanline-sweep {
+  0%   { transform: translateX(-100%); }
+  60%  { transform: translateX(100%); }
+  100% { transform: translateX(100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-home] .home-scanline::after { animation: none; opacity: 0; }
+}
+
+/* Viewfinder bracket corners — faint slate L-shapes that frame a panel the
+   way the logo's brackets frame the archway. Four 1px strokes, no layout. */
+[data-home] .home-viewfinder {
+  position: relative;
+}
+[data-home] .home-viewfinder::before,
+[data-home] .home-viewfinder::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-color: var(--home-text-muted, #94A3B8);
+  border-style: solid;
+  opacity: 0.55;
+  pointer-events: none;
+}
+[data-home] .home-viewfinder::before {
+  top: -1px; left: -1px;
+  border-width: 1px 0 0 1px;
+}
+[data-home] .home-viewfinder::after {
+  bottom: -1px; right: -1px;
+  border-width: 0 1px 1px 0;
+}
+
+/* Status dots — mint for active/entry, rose for exit/alert. Small, glowing,
+   compositing-friendly (transform + opacity only when pulsed). */
+[data-home] .home-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  flex: none;
+}
+[data-home] .home-dot-mint {
+  background: var(--home-accent-mint, #10B981);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
+}
+[data-home] .home-dot-rose {
+  background: var(--home-accent-rose, #F43F5E);
+  box-shadow: 0 0 8px rgba(244, 63, 94, 0.7);
+}
+[data-home] .home-dot-gold {
+  background: var(--home-accent-gold, #FBBF24);
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.7);
 }
 
 /* ── Footer link underline-draw (CSS only, no motion) ───────────────── */

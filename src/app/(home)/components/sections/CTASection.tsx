@@ -61,7 +61,7 @@ export function CTASection() {
             onClick={() => (window.location.href = "/login")}
             strength={0.05}
             radius={80}
-            className="inline-flex items-center gap-2 rounded-xl bg-[var(--home-accent-indigo,#6366F1)] px-6 py-3 font-semibold text-white shadow-lg hover:opacity-95"
+            className="inline-flex items-center gap-2 rounded-xl bg-[var(--home-accent-gold,#FBBF24)] px-6 py-3 font-semibold text-[var(--home-accent-navy,#0A1128)] shadow-lg hover:opacity-95"
           >
             <LogIn className="h-4 w-4" />
             Sign in
