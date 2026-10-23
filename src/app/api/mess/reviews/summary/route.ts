@@ -65,8 +65,7 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
        FROM public.mess_meal_reviews r
        JOIN public.users u ON u.id = r.user_id
       WHERE r.comment IS NOT NULL AND r.comment <> ''
-        AND r.deleted_at IS NULL
-        AND r.review_date BETWEEN $1::date AND $2::date
+       AND r.review_date BETWEEN $1::date AND $2::date
       ORDER BY r.updated_at DESC
       LIMIT 50`,
     [from, to],

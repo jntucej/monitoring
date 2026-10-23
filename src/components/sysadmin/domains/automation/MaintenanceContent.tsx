@@ -128,7 +128,17 @@ export function MaintenanceContent(
 
   if (!maintenanceData) return null;
 
-  const { kpis, gantt } = maintenanceData;
+  // The endpoint returns a FLAT shape: { scheduled, in_progress, next_window_at,
+  // notifications_sent, windows, gantt }. Normalize to the nested MaintenanceData
+  // the rest of this component expects, so a shape mismatch can't crash the page.
+  const raw = maintenanceData as unknown as Record<string, any>;
+  const kpis = {
+    scheduled: raw.kpis?.scheduled ?? raw.scheduled ?? 0,
+    inProgress: raw.kpis?.inProgress ?? raw.in_progress ?? 0,
+    nextWindowCountdown: raw.kpis?.nextWindowCountdown ?? raw.next_window_at ?? "—",
+    notificationsSent: raw.kpis?.notificationsSent ?? raw.notifications_sent ?? 0,
+  };
+  const gantt: MaintenanceGanttRow[] = raw.gantt ?? [];
   const dayCount = 30;
   const labels = dayLabels();
 
