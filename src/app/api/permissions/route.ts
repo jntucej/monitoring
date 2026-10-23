@@ -266,6 +266,12 @@ async function handleGet(
     // campus (their supervised gates are advisory, not a data filter), so
     // they see all requests — same as principal, whose escalation chain they
     // feed.
+  } else if (role === "operator") {
+    // Operators action hostel out-passes at the gate (their pass-verification
+    // page). The operator stage in the workflow is "hostel_manager", so scope
+    // them to that stage only — they must not see exam/memo/staff-leave queues.
+    params.push("hostel_manager");
+    where.push(`current_stage = $${params.length}`);
   } else {
     return fail("FORBIDDEN", "Role has no permission visibility", 403);
   }

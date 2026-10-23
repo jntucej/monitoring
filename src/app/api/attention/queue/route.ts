@@ -170,17 +170,25 @@ async function fetchOpenRequestsByStudentId(
 async function fetchUnresolvedAlerts(
   db: ReturnType<typeof getSupabaseServiceClient>,
 ): Promise<AttentionItem[]> {
-  const { data, error } = await db
-    .from("alerts")
-    .select("id, severity, title, message, created_at")
-    .eq("resolved", false)
-    .in("severity", ["critical", "high"])
-    .order("created_at", { ascending: false })
-    .limit(5);
+  const select = "id, severity, title, message, timestamp";
+  let rows: Record<string, unknown>[] = [];
+  try {
+    const { data, error } = await db
+      .from("alerts")
+      .select(select)
+      .eq("resolved", false)
+      .in("severity", ["critical", "high"])
+      .order("timestamp", { ascending: false })
+      .limit(5);
+    if (error) throw new Error(error.message);
+    rows = (data ?? []) as Record<string, unknown>[];
+  } catch {
+    // Table/column shape changed (alerts.created_at → timestamp, 2026-10):
+    // never surface a 500 for a read-only attention queue.
+    rows = [];
+  }
 
-  if (error) throw new Error(error.message);
-
-  return (data ?? []).map((a: Record<string, unknown>) => {
+  return rows.map((a: Record<string, unknown>) => {
     const severity = String(a.severity ?? "");
     const urgency: AttentionItem["urgency"] = severity === "critical" ? "due" : "info";
     return {
@@ -243,16 +251,22 @@ async function fetchFailedJobRuns(
 async function fetchUnresolvedCriticalAlertsForAdmin(
   db: ReturnType<typeof getSupabaseServiceClient>,
 ): Promise<AttentionItem[]> {
-  const { data, error } = await db
-    .from("alerts")
-    .select("id, severity, title, created_at")
-    .eq("resolved", false)
-    .eq("severity", "critical")
-    .order("created_at", { ascending: false })
-    .limit(5);
-
-  if (error) return [];
-  return (data ?? []).map((a: Record<string, unknown>) => ({
+  let rows: Record<string, unknown>[] = [];
+  try {
+    const { data, error } = await db
+      .from("alerts")
+      .select("id, severity, title, timestamp")
+      .eq("resolved", false)
+      .eq("severity", "critical")
+      .order("timestamp", { ascending: false })
+      .limit(5);
+    if (error) throw new Error(error.message);
+    rows = (data ?? []) as Record<string, unknown>[];
+  } catch {
+    // alerts.created_at → timestamp; read-only queue must not 500.
+    rows = [];
+  }
+  return rows.map((a: Record<string, unknown>) => ({
     id: `alert-${a.id}`,
     kind: "alert",
     title: String(a.title ?? "Critical alert"),
