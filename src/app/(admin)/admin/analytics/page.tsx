@@ -10,7 +10,7 @@ import {
   ChartRenderer, type ChartType, type SeriesDef,
 } from "@/components/admin/shared/ChartRenderer";
 import { ChartTypeSwitcher } from "@/components/admin/shared/ChartTypeSwitcher";
-import { PageLoading } from "@/components/shared/LoadingStates";
+import { PageLoading } from "@/components/admin/shared/LoadingStates";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
