@@ -32,7 +32,7 @@ const ALL_ROLES: readonly Role[] = [
   "operator", "admin", "sysadmin", "supervisor", "guardian", "parent",
   "hod", "student", "faculty", "staff", "worker", "visitor",
   "caretaker", "deputy_warden", "hostel_manager", "principal",
-  "vice_principal", "oie", "exam_branch",
+  "vice_principal", "oie", "exam_branch", "mess_incharge",
 ] as const;
 
 const TIMELINE_SOURCES = ["request", "event", "notification", "audit"] as const;
