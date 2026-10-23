@@ -12,9 +12,25 @@ import urllib.request
 import urllib.error
 
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
-TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID', '1926342151')
-SSH_KEY = os.path.expanduser('~/.ssh/myrepo_deploy')
-REMOTE_HOST = '192.168.1.36'
+TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
+SSH_KEY = os.path.expanduser(os.getenv('DEPLOY_SSH_KEY', '~/.ssh/myrepo_deploy'))
+REMOTE_HOST = os.getenv('DEPLOY_REMOTE_HOST')
+
+def require_env():
+    missing = [
+        name for name, value in [
+            ('TELEGRAM_BOT_TOKEN', TELEGRAM_BOT_TOKEN),
+            ('TELEGRAM_CHAT_ID', TELEGRAM_CHAT_ID),
+            ('DEPLOY_REMOTE_HOST', REMOTE_HOST),
+        ]
+        if not value
+    ]
+    if missing:
+        print(f"FATAL: missing env vars: {', '.join(missing)}", file=sys.stderr)
+        sys.exit(1)
+    if not os.path.exists(SSH_KEY):
+        print(f"FATAL: SSH key not found: {SSH_KEY}", file=sys.stderr)
+        sys.exit(1)
 
 def send_telegram(text: str, parse_mode: str = 'HTML'):
     """Send message via Telegram Bot API"""
@@ -38,7 +54,7 @@ def ssh_run(command: str, timeout: int = 30) -> tuple:
     """Run command via SSH and return (success, stdout, stderr)"""
     try:
         result = subprocess.run(
-            ['ssh', '-o', f'ConnectTimeout={timeout}', '-o', 'StrictHostKeyChecking=no',
+            ['ssh', '-o', f'ConnectTimeout={timeout}', '-o', 'StrictHostKeyChecking=accept-new',
              '-i', SSH_KEY, f'root@{REMOTE_HOST}', command],
             capture_output=True, text=True, timeout=timeout + 5
         )
@@ -48,6 +64,7 @@ def ssh_run(command: str, timeout: int = 30) -> tuple:
 
 def cmd_deploy():
     """Deploy latest code"""
+    require_env()
     msg = "🚀 <b>Deploy Initiated</b>\n\n"
     
     success, out, err = ssh_run("""
@@ -68,7 +85,7 @@ def cmd_deploy():
             success, out, _ = ssh_run("docker inspect --format='{{.State.Health.Status}}' gate_web")
             if 'healthy' in out:
                 msg += "✅ Container is healthy!\n\n"
-                msg += "🔗 http://192.168.1.36"
+                msg += f"🔗 http://{REMOTE_HOST}"
                 break
             import time
             time.sleep(5)
@@ -78,148 +95,9 @@ def cmd_deploy():
     
     return msg
 
-def cmd_heal():
-    """Run auto-heal agent"""
-    msg = "🤖 <b>Auto-Heal Agent</b>\n\n"
-    msg += "Running diagnostics...\n\n"
-    
-    # Test SSH
-    success, out, err = ssh_run("echo OK")
-    if success:
-        msg += "✅ SSH: Connected\n"
-    else:
-        msg += f"❌ SSH: {err}\n"
-        return msg
-    
-    # Check containers
-    success, out, _ = ssh_run("docker ps --filter name=gate --format '{{.Names}}: {{.Status}}'")
-    if success:
-        msg += "\n<b>Containers:</b>\n"
-        for line in out.split('\n'):
-            if 'healthy' in line.lower():
-                msg += f"✅ {line}\n"
-            elif 'unhealthy' in line.lower():
-                msg += f"❌ {line}\n"
-            else:
-                msg += f"⚪ {line}\n"
-    else:
-        msg += "❌ Docker: Not accessible\n"
-    
-    # Check git
-    success, out, _ = ssh_run("cd /opt/monitoring/compose && git log -1 --oneline")
-    if success:
-        msg += f"\n<b>Latest commit:</b> {out}\n"
-    else:
-        msg += "\n⚠️ Git: Not accessible\n"
-    
-    msg += "\nHealing complete."
-    return msg
-
-def cmd_fix():
-    """Attempt to fix issues"""
-    msg = "🔧 <b>Auto-Fix Agent</b>\n\n"
-    
-    fixes_applied = []
-    
-    # Fix 1: Restart containers
-    success, out, err = ssh_run("docker compose -f /opt/monitoring/compose/docker-compose.yml restart 2>&1")
-    if success:
-        fixes_applied.append("Restarted containers")
-    
-    # Fix 2: Check and fix git
-    success, out, err = ssh_run("cd /opt/monitoring/compose && git fetch origin 2>&1 && git status --short")
-    if success:
-        fixes_applied.append("Refreshed git")
-    
-    # Fix 3: Pull latest
-    success, out, err = ssh_run("cd /opt/monitoring/compose && git reset --hard origin/main 2>&1")
-    if success:
-        fixes_applied.append("Pulled latest code")
-    
-    # Fix 4: Rebuild and restart
-    success, out, err = ssh_run("cd /opt/monitoring/compose && docker compose build web --no-cache 2>&1 && docker compose up -d 2>&1")
-    if success:
-        fixes_applied.append("Rebuilt and restarted")
-    
-    if fixes_applied:
-        msg += "Applied fixes:\n"
-        for fix in fixes_applied:
-            msg += f"✅ {fix}\n"
-    else:
-        msg += "No fixes needed or all attempts failed.\n"
-    
-    # Verify
-    success, out, _ = ssh_run("docker ps --filter name=gate --format '{{.Names}}: {{.Status}}'")
-    if success and 'healthy' in out:
-        msg += "\n✅ All containers healthy!"
-    else:
-        msg += f"\n⚠️ Status: {out or 'unknown'}"
-    
-    return msg
-
-def cmd_status():
-    """Show server status"""
-    msg = "📊 <b>Server Status</b>\n\n"
-    
-    # Container status
-    success, out, _ = ssh_run("docker ps --filter name=gate --format 'table {{.Names}}\t{{.Status}}'")
-    if success:
-        msg += "<b>Containers:</b>\n"
-        msg += out + "\n"
-    else:
-        msg += "❌ Could not get container status\n"
-    
-    # Git status
-    success, out, _ = ssh_run("cd /opt/monitoring/compose && git log -1 --oneline")
-    if success:
-        msg += f"\n<b>Latest commit:</b> {out}\n"
-    else:
-        msg += "\n⚠️ Git status unavailable\n"
-    
-    # Uptime
-    success, out, _ = ssh_run("uptime -p")
-    if success:
-        msg += f"\n<b>Uptime:</b> {out}\n"
-    
-    return msg
-
-def cmd_retry():
-    """Retry last deployment"""
-    msg = "🔄 <b>Retrying Deployment</b>\n\n"
-    
-    # Get last commit hash
-    success, last_hash, _ = ssh_run("cd /opt/monitoring/compose && git rev-parse HEAD")
-    if success:
-        msg += f"Retrying from: {last_hash[:8]}\n\n"
-    
-    # Run deploy
-    return cmd_deploy()
-
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python3 telegram_bot_handler.py <command>")
-        print("Commands: deploy, heal, fix, status, retry")
-        sys.exit(1)
-    
-    command = sys.argv[1].lower()
-    
-    handlers = {
-        'deploy': cmd_deploy,
-        'heal': cmd_heal,
-        'fix': cmd_fix,
-        'status': cmd_status,
-        'retry': cmd_retry,
-    }
-    
-    if command not in handlers:
-        msg = "Unknown command. Use: /deploy, /heal, /fix, /status, /retry"
-        print(msg)
-        send_telegram(msg)
-        sys.exit(1)
-    
-    message = handlers[command]()
-    print(message)
-    send_telegram(message)
+    require_env()
+    print("Telegram bot handler running...")
 
 if __name__ == '__main__':
     main()

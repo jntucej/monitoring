@@ -33,7 +33,7 @@ if ! docker ps --format '{{.Names}}' | grep -q "^gate_postgres$"; then
 fi
 
 echo "Restoring database from backup..."
-zcat "$LATEST" | docker exec -i gate_postgres psql -U postgres 2>&1
+zcat "$LATEST" | docker exec -i gate_postgres psql -U postgres -v ON_ERROR_STOP=1 2>&1
 
 echo ""
 echo "Running migrations to ensure completeness..."

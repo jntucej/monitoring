@@ -2,7 +2,7 @@
 # k8s-build.sh - Build and deploy Gate Monitor to Kubernetes
 # Usage: ./k8s-build.sh [--push]
 
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COMPOSE_DIR="/opt/monitoring/compose"
@@ -20,11 +20,16 @@ docker build -t compose-worker:latest -f Dockerfile --target worker .
 echo "✅ Worker image built"
 
 if [[ "${1}" == "--push" ]]; then
-    echo "📤 Pushing images to registry..."
-    docker tag compose-web:latest registry.example.com/gate-monitor/web:latest
-    docker tag compose-worker:latest registry.example.com/gate-monitor/worker:latest
-    docker push registry.example.com/gate-monitor/web:latest
-    docker push registry.example.com/gate-monitor/worker:latest
+    REGISTRY="${REGISTRY:-}"
+    if [[ -z "$REGISTRY" ]]; then
+        echo "ERROR: REGISTRY env var must be set for --push (e.g. ghcr.io/myorg)"
+        exit 1
+    fi
+    echo "📤 Pushing images to $REGISTRY..."
+    docker tag compose-web:latest "$REGISTRY/gate-monitor/web:${GIT_SHA:-latest}"
+    docker tag compose-worker:latest "$REGISTRY/gate-monitor/worker:${GIT_SHA:-latest}"
+    docker push "$REGISTRY/gate-monitor/web:${GIT_SHA:-latest}"
+    docker push "$REGISTRY/gate-monitor/worker:${GIT_SHA:-latest}"
     echo "✅ Images pushed"
 fi
 

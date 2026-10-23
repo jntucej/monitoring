@@ -18,18 +18,15 @@ metadata:
   namespace: gate-monitor
 type: Opaque
 stringData:
-  # Generate these from .env before deploying:
-  # postgres-password: $(openssl rand -base64 32)
-  # redis-password: $(openssl rand -base64 32)
-  # jwt-secret: $(openssl rand -base64 64)
   postgres-password: "CHANGE_ME"
   redis-password: "CHANGE_ME"
   jwt-secret: "CHANGE_ME"
   supabase-url: "http://supabase-gateway.gate-monitor.svc.cluster.local:8000"
   supabase-service-role-key: "CHANGE_ME"
-  # Telegram bot token for auto-deploy notifications
   telegram-bot-token: "CHANGE_ME"
   telegram-chat-id: "CHANGE_ME"
+  DATABASE_URL: "postgres://postgres:CHANGE_ME@gate-postgres.gate-monitor.svc.cluster.local:5432/gate_monitor"
+  REDIS_URL: "redis://:CHANGE_ME@gate-redis.gate-monitor.svc.cluster.local:6379"
 
 ---
 apiVersion: v1
@@ -40,11 +37,6 @@ metadata:
 data:
   NEXT_PUBLIC_APP_URL: "https://monitor.cej.in"
   NEXT_PUBLIC_WS_URL: "wss://monitor.cej.in"
-  # Database
-  DATABASE_URL: "postgres://postgres:$(POSTGRES_PASSWORD)@postgres.gate-monitor.svc.cluster.local:5432/gate_monitor"
-  # Redis
-  REDIS_URL: "redis://:$(REDIS_PASSWORD)@redis.gate-monitor.svc.cluster.local:6379"
-  # Next.js
   NEXT_TELEMETRY_DISABLED: "1"
   SKIP_ENV_VALIDATION: "1"
   DOCKER_BUILD: "false"
@@ -68,8 +60,7 @@ spec:
     spec:
       containers:
       - name: web
-        image: compose-web:latest  # Build locally and load: docker load < compose-web.tar
-        imagePullPolicy: IfNotPresent
+        image: compose-web:latest
         ports:
         - containerPort: 3000
           name: http
@@ -122,8 +113,7 @@ spec:
     spec:
       containers:
       - name: worker
-        image: compose-worker:latest  # Build locally and load
-        imagePullPolicy: IfNotPresent
+        image: compose-worker:latest
         envFrom:
         - secretRef:
             name: gate-monitor-secrets
@@ -208,6 +198,20 @@ spec:
           limits:
             cpu: 1000m
             memory: 1Gi
+        readinessProbe:
+          exec:
+            command: ["pg_isready", "-U", "postgres", "-d", "gate_monitor"]
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        livenessProbe:
+          exec:
+            command: ["pg_isready", "-U", "postgres", "-d", "gate_monitor"]
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 3
+          failureThreshold: 3
   volumeClaimTemplates:
   - metadata:
       name: pgdata
@@ -270,6 +274,18 @@ spec:
           limits:
             cpu: 200m
             memory: 256Mi
+        readinessProbe:
+          exec:
+            command: ["redis-cli", "-a", "$(REDIS_PASSWORD)", "ping"]
+          initialDelaySeconds: 3
+          periodSeconds: 5
+          timeoutSeconds: 3
+        livenessProbe:
+          exec:
+            command: ["redis-cli", "-a", "$(REDIS_PASSWORD)", "ping"]
+          initialDelaySeconds: 15
+          periodSeconds: 30
+          timeoutSeconds: 3
   volumeClaimTemplates:
   - metadata:
       name: redis-data
@@ -304,4 +320,4 @@ spec:
           service:
             name: gate-web
             port:
-              number: 80
+              name: http
