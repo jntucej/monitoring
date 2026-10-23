@@ -28,12 +28,13 @@ const api = useApi();
         headers: api.getHeaders(),
         cache: "no-store",
       });
-      const data = await res.json();
-      if (data.success) {
-        setShifts(data.shifts || []);
-        if (data.summary) setSummary(data.summary);
+      const json = await res.json();
+      if (json?.success) {
+        const payload = json.data ?? json;
+        setShifts(payload.shifts || []);
+        if (payload.summary) setSummary(payload.summary);
       } else {
-        const msg = typeof data.error === "string" ? data.error : data.error?.message || "Failed to load worker shifts";
+        const msg = typeof json.error === "string" ? json.error : json.error?.message || "Failed to load worker shifts";
         setError(msg);
       }
     } catch (err) {

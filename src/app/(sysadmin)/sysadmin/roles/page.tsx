@@ -332,8 +332,15 @@ export default function RolesManagementPage() {
 
   const revokeRole = async (user: PickedUser) => {
     if (!grantRoleCode) return;
-    // Revoke = demote the user to their parent role in the hierarchy (or visitor if none).
-    const targetRole = roleParents[grantRoleCode] || "visitor";
+    // Revoke = demote the user to their parent role in the hierarchy.
+    const targetRole = roleParents[grantRoleCode];
+    if (!targetRole) {
+      addToast({
+        variant: "error",
+        message: `No parent role configured for '${grantRoleCode}'. Reassign manually — automatic demotion is disabled.`,
+      });
+      return;
+    }
     setGrantBusy(true);
     try {
       const res = await fetch(`/api/users/${user.id}`, {
@@ -900,9 +907,15 @@ export default function RolesManagementPage() {
                           {hasRole ? "Current" : "Grant"}
                         </button>
                         <button
+                          type="button"
                           onClick={() => revokeRole(u)}
-                          disabled={grantBusy}
-                          className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-rose-500/15 text-rose-400 hover:bg-rose-500/30 transition"
+                          disabled={grantBusy || !roleParents[grantRoleCode]}
+                          title={
+                            !roleParents[grantRoleCode]
+                              ? "Role graph unavailable — assign a replacement role manually"
+                              : `Demote to '${roleParents[grantRoleCode]}'`
+                          }
+                          className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-rose-500/15 text-rose-400 hover:bg-rose-500/30 transition disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                           Revoke
                         </button>

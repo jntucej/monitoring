@@ -126,13 +126,22 @@ async function fetchStudents(): Promise<StudentsData> {
     if (g) genderMap.set(g, (genderMap.get(g) ?? 0) + 1);
   }
 
+  const now = new Date();
+  const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const isToday = (iso: string | null | undefined) =>
+    typeof iso === "string" && iso.slice(0, 10) === todayKey;
+  const onCampusToday = arr.filter(
+    (p: any) => p.checkedInAt && !p.checkedOutAt).length;
+  const todayEntries = arr.filter((p: any) => isToday(p.checkedInAt)).length;
+  const todayExits   = arr.filter((p: any) => isToday(p.checkedOutAt)).length;
+
   return {
     total: rows.length,
     active,
     suspended,
-    onCampusToday: 0,
-    todayEntries: 0,
-    todayExits: 0,
+    onCampusToday,
+    todayEntries,
+    todayExits,
     rows,
     byDepartment: Array.from(byDeptMap.entries())
       .map(([code, count]) => ({ code, name: code, count }))

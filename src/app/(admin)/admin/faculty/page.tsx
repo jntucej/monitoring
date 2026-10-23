@@ -32,13 +32,14 @@ const api = useApi();
         headers: api.getHeaders(),
         cache: "no-store",
       });
-      const data = await res.json();
-      if (data.success) {
-        setRecords(data.records || []);
-        if (data.summary) setSummary(data.summary);
-        if (data.departmentSummaries) setDepartmentSummaries(data.departmentSummaries);
+      const json = await res.json();
+      if (json?.success) {
+        const payload = json.data ?? json;
+        setRecords(payload.records || []);
+        if (payload.summary) setSummary(payload.summary);
+        if (payload.departmentSummaries) setDepartmentSummaries(payload.departmentSummaries);
       } else {
-        const msg = typeof data.error === "string" ? data.error : data.error?.message || "Failed to fetch faculty attendance data";
+        const msg = typeof json.error === "string" ? json.error : json.error?.message || "Failed to fetch faculty attendance data";
         setError(msg);
       }
     } catch (err) {
