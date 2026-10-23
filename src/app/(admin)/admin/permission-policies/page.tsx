@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, Suspense } from "react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
@@ -258,21 +258,10 @@ function AdminPermissionPoliciesInner() {
 
 export default function AdminPermissionPoliciesPage() {
   return (
-    
-      <div className="p-2 sm:p-0">
-        <PageLoading />
-        <SuspenseFallback>
-          <AdminPermissionPoliciesInner />
-        </SuspenseFallback>
-      </div>
-    
-    
-
+    <div className="p-2 sm:p-0">
+      <Suspense fallback={<PageLoading />}>
+        <AdminPermissionPoliciesInner />
+      </Suspense>
+    </div>
   );
-}
-
-/* Keep the page component self-contained per the house style. */
-import { Suspense } from "react";
-function SuspenseFallback({ children }: { children: React.ReactNode }) {
-  return <Suspense fallback={null}>{children}</Suspense>;
 }

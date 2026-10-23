@@ -30,7 +30,7 @@ function ExamBranchOiehandoffInner() {
     loading,
     error,
     refresh,
-  } = useApiResource<DataResponse>("/api/permissions?workflowType=exam&status=PENDING&stage=oie", { ttlMs: 30_000 });
+  } = useApiResource<DataResponse>("/api/permissions?workflow_type=exam&status=PENDING&stage=oie", { ttlMs: 30_000 });
 
   const refreshAll = useCallback(async () => {
     clearCache();

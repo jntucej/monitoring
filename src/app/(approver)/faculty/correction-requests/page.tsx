@@ -48,7 +48,7 @@ function FacultyCorrectionRequestsInner() {
     loading,
     error,
     refresh,
-  } = useApiResource<PermissionsResponse>("/api/permissions?workflowType=memo&status=PENDING&stage=faculty", { ttlMs: 30_000 });
+  } = useApiResource<PermissionsResponse>("/api/permissions?workflow_type=memo&status=PENDING&stage=faculty", { ttlMs: 30_000 });
 
   const rows = data?.data ?? [];
   const total = data?.total ?? rows.length;

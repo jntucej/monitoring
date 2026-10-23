@@ -65,7 +65,7 @@ function ExamBranchRecordsInner() {
     error,
     refresh,
   } = useApiResource<PermissionsResponse>(
-    "/api/permissions?workflowType=exam",
+    "/api/permissions?workflow_type=exam",
     { ttlMs: 30_000 }
   );
 

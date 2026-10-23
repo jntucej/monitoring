@@ -47,7 +47,7 @@ function DeputyWardenOutpassInner() {
     loading,
     error,
     refresh,
-  } = useApiResource<PermissionsResponse>("/api/permissions?workflowType=hostel&status=PENDING&stage=deputy_warden", { ttlMs: 30_000 });
+  } = useApiResource<PermissionsResponse>("/api/permissions?workflow_type=hostel&status=PENDING&stage=deputy_warden", { ttlMs: 30_000 });
 
   const rows = data?.data ?? [];
   const total = data?.total ?? rows.length;

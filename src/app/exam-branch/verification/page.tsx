@@ -75,7 +75,7 @@ function ExamBranchVerificationInner() {
     error: examReqsError,
     refresh: refreshExamReqs,
   } = useApiResource<PermissionsResponse>(
-    "/api/permissions?workflowType=exam&status=PENDING&stage=vice_principal",
+    "/api/permissions?workflow_type=exam&status=PENDING&stage=vice_principal",
     { ttlMs: 30_000 }
   );
 

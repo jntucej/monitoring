@@ -54,7 +54,7 @@ function OieApprovalRequestsInner() {
     error,
     refresh,
   } = useApiResource<PermissionsResponse>(
-    "/api/permissions?workflowType=exam&status=PENDING&stage=oie",
+    "/api/permissions?workflow_type=exam&status=PENDING&stage=oie",
     { ttlMs: 30_000 }
   );
 

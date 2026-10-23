@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Activity } from "lucide-react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageLoading } from "@/components/admin/shared/LoadingStates";
@@ -42,24 +42,28 @@ function HealthSnapshotBar() {
   const [snap, setSnap] = useState<HealthSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadSnapshot = async (isInitial: boolean) => {
+  const loadSnapshot = useCallback(async (isInitial: boolean) => {
     if (isInitial) setLoading(true);
     try {
-      const res = await fetch("/api/health", { headers: getAuthHeaders(), cache: "no-store" });
+      const res = await fetch("/api/health", {
+        headers: getAuthHeaders(),
+        cache: "no-store",
+      });
       if (!res.ok && res.status !== 503) throw new Error("health unavailable");
       setSnap(await res.json());
     } catch {
-      /* snapshot is optional; the full dashboard below still renders */
+      // keep last snapshot on transient error
     } finally {
       if (isInitial) setLoading(false);
     }
-  };
-
-  /* Initial load + realtime poller so the bar updates every second. */
-  useEffect(() => {
-    loadSnapshot(true);
   }, []);
-  usePolling(() => { loadSnapshot(false); }, { intervalMs: 1000 });
+
+  useEffect(() => { void loadSnapshot(true); }, [loadSnapshot]);
+  // 30s is enough for a health page; usePolling is visibility-aware.
+  usePolling(() => loadSnapshot(false), {
+    intervalMs: 30_000,
+    enabled: !loading,
+  });
 
   if (loading || !snap) {
     return (
@@ -93,30 +97,26 @@ function HealthSnapshotBar() {
 
 export default function SystemHealthPage() {
   return (
-    
-      <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-            <Activity className="w-5 h-5 text-emerald-400" />
-          </div>
-          <div>
-            <h1 className="text-lg font-semibold text-[var(--text-primary)]">System Health</h1>
-            <p className="text-xs text-[var(--text-muted)]">
-              Live infrastructure status — database, redis, gateways and services.
-            </p>
-          </div>
+    <div className="max-w-6xl mx-auto space-y-6">
+      <div className="flex items-center gap-3">
+        <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+          <Activity className="w-5 h-5 text-emerald-400" />
         </div>
-
-        <WidgetBoundary title="Health Snapshot">
-          <HealthSnapshotBar />
-        </WidgetBoundary>
-
-        <WidgetBoundary title="Health Dashboard">
-          <HealthDashboard />
-        </WidgetBoundary>
+        <div>
+          <h1 className="text-lg font-semibold text-[var(--text-primary)]">System Health</h1>
+          <p className="text-xs text-[var(--text-muted)]">
+            Live infrastructure status — database, redis, gateways and services.
+          </p>
+        </div>
       </div>
-    
-    
 
+      <WidgetBoundary title="Health Snapshot">
+        <HealthSnapshotBar />
+      </WidgetBoundary>
+
+      <WidgetBoundary title="Health Dashboard">
+        <HealthDashboard />
+      </WidgetBoundary>
+    </div>
   );
 }

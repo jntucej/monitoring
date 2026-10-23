@@ -46,7 +46,7 @@ function SupervisorExceptionsInner() {
     error: outpassError,
     refresh: refreshOutpass,
   } = useApiResource<PermissionsResponse>(
-    "/api/permissions?workflow_type=outpass&status=PENDING",
+    "/api/permissions?workflow_type=hostel&stage=main_gate&status=PENDING",
     { ttlMs: 30_000 }
   );
 

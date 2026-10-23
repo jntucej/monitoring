@@ -141,7 +141,7 @@ function ExaminationDayAccessInner() {
     error,
     refresh: refreshAccess,
   } = useApiResource<PermissionsResponse>(
-    "/api/permissions?workflowType=exam&status=PENDING",
+    "/api/permissions?workflow_type=exam&status=PENDING",
     { ttlMs: 30_000 }
   );
 

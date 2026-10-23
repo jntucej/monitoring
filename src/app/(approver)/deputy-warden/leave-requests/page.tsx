@@ -47,7 +47,7 @@ function DeputyWardenLeaveInner() {
     loading,
     error,
     refresh,
-  } = useApiResource<PermissionsResponse>("/api/permissions?workflowType=staff_leave&status=PENDING", { ttlMs: 30_000 });
+  } = useApiResource<PermissionsResponse>("/api/permissions?workflow_type=staff_leave&status=PENDING", { ttlMs: 30_000 });
 
   const rows = data?.data ?? [];
   const total = data?.total ?? rows.length;

@@ -8,7 +8,7 @@ import { MobileNavDrawer } from "@/components/shared/MobileNavDrawer";
 import { AdminSidebar, type AdminOverviewPayload } from "@/components/admin/AdminSidebar";
 import { ScrollEdgeBlue } from "@/components/shared/ScrollEdgeBlue";
 import { Menu } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, getAuthHeaders } from "@/lib/utils";
 import type { Role } from "@/lib/types";
 
 /**
@@ -52,7 +52,11 @@ export default function AdminConsoleLayout({
     let timer: ReturnType<typeof setInterval> | undefined;
 
     const fetchOnce = () => {
-      fetch(OVERVIEW_URL, { credentials: "include" })
+      fetch(OVERVIEW_URL, {
+        headers: getAuthHeaders(),
+        credentials: "include",
+        cache: "no-store",
+      })
         .then((r) => (r.ok ? r.json() : null))
         .then((json) => {
           if (!alive || !json) return;

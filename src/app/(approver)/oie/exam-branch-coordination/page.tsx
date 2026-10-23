@@ -154,7 +154,7 @@ function ExamBranchCoordinationInner() {
     error,
     refresh: refreshCoord,
   } = useApiResource<PermissionsResponse>(
-    "/api/permissions?workflowType=exam&stage=exam_branch&status=PENDING",
+    "/api/permissions?workflow_type=exam&stage=exam_branch&status=PENDING",
     { ttlMs: 30_000 }
   );
 

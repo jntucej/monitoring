@@ -164,7 +164,7 @@ function DecisionHistoryInner() {
     error,
     refresh: refreshHistory,
   } = useApiResource<PermissionsResponse>(
-    `/api/permissions?workflowType=exam${filterParam}`,
+    `/api/permissions?workflow_type=exam${filterParam}`,
     { ttlMs: 60_000, deps: [filter] }
   );
 

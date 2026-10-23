@@ -119,7 +119,7 @@ function DeputyWardenDelegatedApprovalsInner() {
     error,
     refresh,
   } = useApiResource<PermissionsResponse>(
-    "/api/permissions?workflowType=hostel&status=PENDING&stage=deputy_warden",
+    "/api/permissions?workflow_type=hostel&status=PENDING&stage=deputy_warden",
     { ttlMs: 30_000 }
   );
   const {

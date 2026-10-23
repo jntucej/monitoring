@@ -31,7 +31,7 @@ function ExamSuperintendentReportsInner() {
     loading,
     error,
     refresh,
-  } = useApiResource<DataResponse>("/api/permissions?workflowType=exam", { ttlMs: 30_000 });
+  } = useApiResource<DataResponse>("/api/permissions?workflow_type=exam", { ttlMs: 30_000 });
 
   const refreshAll = useCallback(async () => {
     clearCache();

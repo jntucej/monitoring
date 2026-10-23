@@ -54,10 +54,8 @@ function PassVerificationInner() {
   const [rejectingTicket, setRejectingTicket] = useState<string | null>(null);
   const [rejectComment, setRejectComment] = useState("");
 
-  // The operator stage in the permission workflow is "hostel_manager"; the
-  // /api/permissions route scopes operator callers to that stage
-  // automatically, so no explicit stage param is needed.
-  const queueUrl = "/api/permissions?status=PENDING";
+  // Only hostel workflow at main_gate stage (what the operator can verify)
+  const queueUrl = "/api/permissions?workflow_type=hostel&stage=main_gate&status=PENDING";
 
   const {
     data,

@@ -50,7 +50,7 @@ function VpExaminationInner() {
     loading: examLoading,
     error: examError,
     refresh: refreshExam,
-  } = useApiResource<PermissionsResponse>("/api/permissions?workflowType=exam", {
+  } = useApiResource<PermissionsResponse>("/api/permissions?workflow_type=exam", {
     ttlMs: 30_000,
   });
 

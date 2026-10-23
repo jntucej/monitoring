@@ -98,7 +98,7 @@ function DeputyWardenDecisionHistoryInner() {
     error,
     refresh,
   } = useApiResource<PermissionsResponse>(
-    "/api/permissions?workflowType=hostel&stage=deputy_warden",
+    "/api/permissions?workflow_type=hostel&stage=deputy_warden",
     { ttlMs: 30_000 }
   );
 

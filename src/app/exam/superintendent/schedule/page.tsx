@@ -40,7 +40,7 @@ function ExamSuperintendentScheduleInner() {
     loading,
     error,
     refresh,
-  } = useApiResource<DataResponse>("/api/permissions?workflowType=exam&status=PENDING", { ttlMs: 30_000 });
+  } = useApiResource<DataResponse>("/api/permissions?workflow_type=exam&status=PENDING", { ttlMs: 30_000 });
 
   const refreshAll = useCallback(async () => {
     clearCache();

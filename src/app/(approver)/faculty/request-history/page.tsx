@@ -47,7 +47,7 @@ function FacultyRequestHistoryInner() {
     loading,
     error,
     refresh,
-  } = useApiResource<PermissionsResponse>("/api/permissions?workflowType=exam&stage=faculty", { ttlMs: 30_000 });
+  } = useApiResource<PermissionsResponse>("/api/permissions?workflow_type=exam&stage=faculty", { ttlMs: 30_000 });
 
   const rows = data?.data ?? [];
   const total = data?.total ?? rows.length;

@@ -139,7 +139,7 @@ function HostelPermissionsInner() {
     loading: permLoading,
     error: permError,
     refresh: refreshPerms,
-  } = useApiResource<PermissionsResponse>("/api/permissions?workflowType=hostel&status=PENDING", {
+  } = useApiResource<PermissionsResponse>("/api/permissions?workflow_type=hostel&status=PENDING", {
     ttlMs: 30_000,
   });
 
