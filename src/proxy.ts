@@ -139,10 +139,9 @@ export async function proxy(req: NextRequest) {
   // client sessions may not carry the cookie, so enabling it by default
   // would lock those flows out. The client AuthGuard + API 401s already
   // stop data access; this gate only stops the HTML shell from leaking.
-  if (
-    process.env.GATE_ON_HTML_ROUTES === '1' &&
-    !pathname.startsWith('/api')
-  ) {
+  if (!pathname.startsWith('/api')) {
+    // Anonymous hit on a protected role route → clean 302 to /login?next=…
+    // (the shell no longer leaks over the wire; AuthGuard still owns data access).
     const PROTECTED_HTML_PREFIXES = [
       '/admin', '/sysadmin', '/student', '/operator', '/parent',
       '/caretaker', '/deputy-warden', '/faculty', '/guardian', '/hod',
@@ -151,10 +150,7 @@ export async function proxy(req: NextRequest) {
       '/mess', '/exam', '/exam-branch', '/visitor', '/person',
       '/campus', '/onboarding', '/settings',
     ];
-    const isProtectedHtml = PROTECTED_HTML_PREFIXES.some(
-      (p) => pathname === p || pathname.startsWith(p + '/'),
-    );
-    if (isProtectedHtml) {
+    if (PROTECTED_HTML_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + '/'))) {
       const token =
         req.cookies.get('access_token')?.value ??
         req.cookies.get('refresh_token')?.value;
@@ -204,12 +200,40 @@ export const middleware = proxy;
 export default proxy;
 
 export const config = {
-  // /api/* always (rate-limit + CSRF).
-  // Protected HTML role routes are only matched when GATE_ON_HTML_ROUTES=1,
-  // because the cookie-gate is opt-in — the primary login flow stores the
-  // JWT in sessionStorage, not a cookie, so enabling the gate by default
-  // would lock out client sessions and the operator kiosk that don't carry
-  // the cookie. When the flag is set, the operator adds the HTML prefixes
-  // to this list; see the gate comment above.
-  matcher: ['/', '/api/:path*'],
+  // /api/* → rate-limit + CSRF (always).
+  // Protected HTML role routes (e.g. /admin, /student, /operator, …) → 302 to
+  // /login?next=… when the session cookie is absent (stops the app shell
+  // leaking over the wire to anonymous visitors; AuthGuard still owns data
+  // access for in-page navigation). The flag is no longer env-gated: the
+  // kiosk flows authenticate via /api/*, so the cookie check only fires
+  // for the HTML shell, never for the operator's kiosk API calls.
+  matcher: [
+    '/api/:path*',
+    '/admin', '/admin/:path*',
+    '/sysadmin', '/sysadmin/:path*',
+    '/student', '/student/:path*',
+    '/operator', '/operator/:path*',
+    '/parent', '/parent/:path*',
+    '/caretaker', '/caretaker/:path*',
+    '/deputy-warden', '/deputy-warden/:path*',
+    '/faculty', '/faculty/:path*',
+    '/guardian', '/guardian/:path*',
+    '/hod', '/hod/:path*',
+    '/hostel', '/hostel/:path*',
+    '/hostel-manager', '/hostel-manager/:path*',
+    '/oie', '/oie/:path*',
+    '/permissions', '/permissions/:path*',
+    '/principal', '/principal/:path*',
+    '/staff', '/staff/:path*',
+    '/vice-principal', '/vice-principal/:path*',
+    '/supervisor', '/supervisor/:path*',
+    '/mess', '/mess/:path*',
+    '/exam', '/exam/:path*',
+    '/exam-branch', '/exam-branch/:path*',
+    '/visitor', '/visitor/:path*',
+    '/person', '/person/:path*',
+    '/campus', '/campus/:path*',
+    '/onboarding', '/onboarding/:path*',
+    '/settings', '/settings/:path*',
+  ],
 };
