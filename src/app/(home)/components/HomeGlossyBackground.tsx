@@ -4,12 +4,14 @@ import { useReducedMotion } from "framer-motion";
 import type { HomeDeviceTier } from "./homeDeviceTier";
 
 /**
- * HomeGlossyBackground — the fixed mesh-gradient background that gives the
- * home page its gloss.
+ * HomeGlossyBackground — the fixed ambient background that gives the home
+ * page its gloss.
  *
  * HARD RULES honoured here:
- *   - Exactly three blobs (A/B/C), not four or five.
- *   - Every radial-gradient fades to the SAME colour at 0 alpha. Never the
+ *   - Exactly ONE ambient blob (A). Three semantic-coloured blobs (mint/rose/
+ *     gold) were dropped: additively they muddied to brown and fought the
+ *     headline. The single blob is an institutional teal at low opacity.
+ *   - The radial-gradient fades to the SAME colour at 0 alpha. Never the
  *     `transparent` keyword (that would produce transparent-black on dark
  *     bases and muddy the blend).
  *   - Animate `transform: translate3d()` only — never the gradient itself,
@@ -36,11 +38,9 @@ export function HomeGlossyBackground({ tier }: { tier: HomeDeviceTier }) {
       {/* Layer 0: solid base — the theme's base surface. No gradient here. */}
       <div className="home-bg-base" />
 
-      {/* Layer 1: three drifting blobs. Each uses its own keyframe loop
-          (18s / 24s / 30s) animating ONLY translate3d(). */}
+      {/* Layer 1: one drifting ambient blob. Its keyframe loop (60s) animates
+          ONLY translate3d(). */}
       <div className="home-blob home-blob-a" />
-      <div className="home-blob home-blob-b" />
-      <div className="home-blob home-blob-c" />
 
       {/* Layer 1.5: static film grain (high tier only). No animation. */}
       {showGrain && <div className="home-grain-overlay" />}

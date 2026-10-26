@@ -3,77 +3,82 @@
    [data-home] descendant). Nothing here may leak to another page.
 
    Contents:
-     - theme accent-rgb tokens (--accent-rgb / --accent-2-rgb / --accent-3-rgb
-       / --bg-flat) defined per-theme so the blobs + gradients adapt.
-     - three drifting blobs (A/B/C) — transform-only keyframes, fade to the
-       SAME colour at 0 alpha (never the `transparent` keyword).
+     - home colour tokens (--home-ambient / --home-action / --home-signal-in /
+       --home-signal-out / --bg-flat) defined per-theme so the ambient orb +
+       gradients adapt. One institutional hue for ambience; gold reserved for
+       action; mint/rose confined to the status dots.
+     - a single drifting ambient blob (A) — transform-only keyframes, fades to
+       the SAME colour at 0 alpha (never the `transparent` keyword).
      - static film-grain overlay (high tier).
      - tier overrides (low / mid) + interaction + reduced-motion.
      - theme-cycler restyle on home.
    ============================================================================ */
 
 /* ── accent-rgb tokens, keyed to the active theme ─────────────────────── */
-/* ARCHWAY default (dark) values so the blobs always have a valid colour even
-   before the theme attribute is applied. Blob A = mint, B = rose,
-   C = gold (the hero spotlight). Each theme re-overrides below. */
+/* One institutional hue for ambience (--home-ambient), one for action
+   (--home-action, gold CTA only), and two signal hues confined to dots
+   (--home-signal-in / --home-signal-out). No semantic colour is spent on
+   the background. ARCHWAY default (dark) values so the blob always has a
+   valid colour even before the theme attribute is applied. */
 [data-home] {
-  --accent-rgb: 16, 185, 129;
-  --accent-2-rgb: 244, 63, 94;
-  --accent-3-rgb: 251, 191, 36;
+  --home-ambient: 14, 116, 144;   /* #0E7490 teal-700 - calm, institutional */
+  --home-action:  251, 191, 36;   /* #FBBF24 gold - CTA/eyebrow only */
+  --home-signal-in:  16, 185, 129;  /* emerald - dots only */
+  --home-signal-out: 244, 63, 94;   /* rose - dots only */
   --bg-flat: #0A1128;
 }
 
 html[data-theme="dark"] [data-home] {
-  --accent-rgb: 16, 185, 129;
-  --accent-2-rgb: 244, 63, 94;
-  --accent-3-rgb: 251, 191, 36;
+  --home-ambient: 14, 116, 144;
+  --home-action:  251, 191, 36;
+  --home-signal-in:  16, 185, 129;
+  --home-signal-out: 244, 63, 94;
   --bg-flat: #0A1128;
 }
 
 html[data-theme="light"] [data-home] {
-  --accent-rgb: 5, 150, 105;
-  --accent-2-rgb: 225, 29, 72;
-  --accent-3-rgb: 217, 119, 6;
+  --home-ambient: 8, 145, 178;     /* cyan-600 */
+  --home-action:  180, 83, 9;      /* amber-700 */
+  --home-signal-in:  5, 150, 105;
+  --home-signal-out: 225, 29, 72;
   --bg-flat: #f8fafc;
 }
 
 html[data-theme="glass"] [data-home] {
-  --accent-rgb: 16, 185, 129;
-  --accent-2-rgb: 244, 63, 94;
-  --accent-3-rgb: 251, 191, 36;
+  --home-ambient: 14, 116, 144;
+  --home-action:  251, 191, 36;
+  --home-signal-in:  16, 185, 129;
+  --home-signal-out: 244, 63, 94;
   --bg-flat: rgba(10, 17, 40, 0.6);
 }
 
 /* ── glossy-blob gradient colours ─────────────────────────────────────── */
-/* The three drifting blobs paint radial gradients from these tokens. They
-   must be real colour values, not the `transparent` keyword, so every stop
-   fades to the SAME colour at 0 alpha (never transparent-black on dark
-   bases, which would muddy the blend).
-   ARCHWAY mapping: A = mint (top-left), B = rose (top-right),
-   C = gold (center spotlight for the hero text). */
+/* A single drifting ambient orb now (was three semantic-coloured blobs that
+   additively muddied to brown and fought the headline). It paints a radial
+   gradient from --home-ambient, fading to the SAME colour at 0 alpha (never
+   the `transparent` keyword). */
 [data-home] {
-  --home-grad-a: 16, 185, 129;    /* mint  */
-  --home-grad-b: 244, 63, 94;     /* rose  */
-  --home-grad-c: 251, 191, 36;    /* gold  */
+  --home-grad-a: 14, 116, 144;    /* teal ambient (dark/glass) */
 }
 html[data-theme="light"] [data-home] {
-  --home-grad-a: 5, 150, 105;
-  --home-grad-b: 225, 29, 72;
-  --home-grad-c: 217, 119, 6;
-}
-html[data-theme="glass"] [data-home] {
-  --home-grad-a: 16, 185, 129;
-  --home-grad-b: 244, 63, 94;
-  --home-grad-c: 251, 191, 36;
+  --home-grad-a: 8, 145, 178;      /* cyan ambient (light) */
 }
 
 /* ── gradient-headline tokens (used by .home-headline-gradient) ──────── */
-/* ARCHWAY: the headline reads as stark white archway that bleeds into the
-   gold scan line. White -> gold -> deep navy (the logo's own three anchors). */
+/* The headline reads as stark white archway that bleeds into the gold scan
+   line. Every stop must be visible on the base colour at all scroll
+   positions: white -> gold -> sky-300 (tint, never matches --bg-flat).
+   The middle stop is a tint, not the page background, so it can never
+   vanish as background-position animates 0% -> 100%. */
 [data-home] {
   --home-head-a: #FFFFFF;
   --home-head-b: var(--home-accent-gold, #FBBF24);
-  --home-head-c: var(--home-accent-navy, #0A1128);
+  --home-head-c: #7DD3FC;             /* sky-300, never vanishes on dark */
+}
+html[data-theme="light"] [data-home] {
+  --home-head-a: #0A1128;
+  --home-head-b: #B45309;
+  --home-head-c: #0E7490;             /* teal-700, visible on light base */
 }
 [data-home] .home-headline-gradient {
   background-image: linear-gradient(
@@ -104,15 +109,20 @@ html[data-theme="glass"] [data-home] {
   z-index: 0;
 }
 
-/* ── Layer 1: three drifting blobs ───────────────────────────────────── */
+/* ── Layer 1: single drifting ambient blob ────────────────────────────── */
+/* One slow, low-opacity institutional-teal bloom. Was three semantic-coloured
+   blobs (mint/rose/gold) that additively muddied to brown and fought the
+   headline. opacity <= 0.15, 60s loop, blur 64px on 120vmax. transform-only
+   keyframes; the gradient and blur radius are never animated. */
 [data-home] .home-blob {
   position: absolute;
-  width: 90vmax;
-  height: 90vmax;
+  width: 120vmax;
+  height: 120vmax;
   border-radius: 50%;
   will-change: transform;
   z-index: 1;
-  filter: blur(32px);
+  filter: blur(64px);
+  opacity: 0.14;
   backface-visibility: hidden;
   contain: layout paint style;
 }
@@ -120,51 +130,18 @@ html[data-theme="glass"] [data-home] {
   top: -20%;
   left: -10%;
   background: radial-gradient(
-    circle at 20% 30%,
-    rgba(var(--home-grad-a), 0.55) 0%,
-    rgba(var(--home-grad-a), 0) 70%
+    circle at 30% 30%,
+    rgba(var(--home-grad-a), 1) 0%,
+    rgba(var(--home-grad-a), 0) 65%
   );
-  animation: home-blob-a 18s ease-in-out infinite;
-}
-[data-home] .home-blob-b {
-  top: -25%;
-  right: -15%;
-  background: radial-gradient(
-    circle at 80% 20%,
-    rgba(var(--home-grad-b), 0.45) 0%,
-    rgba(var(--home-grad-b), 0) 65%
-  );
-  animation: home-blob-b 24s ease-in-out infinite;
-}
-[data-home] .home-blob-c {
-  bottom: -30%;
-  left: 50%;
-  transform: translate3d(-50%, 0, 0);
-  background: radial-gradient(
-    circle at 50% 85%,
-    rgba(var(--home-grad-c), 0.4) 0%,
-    rgba(var(--home-grad-c), 0) 70%
-  );
-  animation: home-blob-c 30s ease-in-out infinite;
+  animation: home-blob-a 60s ease-in-out infinite;
 }
 
-/* Each blob drifts on its OWN loop via translate3d() ONLY.
-   The gradient is never animated, and blur radius is never animated. */
+/* Drift on a single 60s loop via translate3d() only. */
 @keyframes home-blob-a {
   0%   { transform: translate3d(0, 0, 0); }
-  33%  { transform: translate3d(6vmax, 4vmax, 0); }
-  66%  { transform: translate3d(-4vmax, 8vmax, 0); }
+  50%  { transform: translate3d(8vmax, 6vmax, 0); }
   100% { transform: translate3d(0, 0, 0); }
-}
-@keyframes home-blob-b {
-  0%   { transform: translate3d(0, 0, 0); }
-  50%  { transform: translate3d(-8vmax, 6vmax, 0); }
-  100% { transform: translate3d(0, 0, 0); }
-}
-@keyframes home-blob-c {
-  0%   { transform: translate3d(-50%, 0, 0); }
-  50%  { transform: translate3d(calc(-50% - 6vmax), -5vmax, 0); }
-  100% { transform: translate3d(-50%, 0, 0); }
 }
 
 /* ── Layer 1.5: static film-grain overlay (high tier only) ───────────── */
@@ -195,13 +172,7 @@ html[data-theme="glass"] [data-home] {
 /* Mid tier: keep the blobs but slow the drift so it reads as ambient, not
    busy; the blur is already reduced above. */
 [data-home-tier="mid"] .home-blob-a {
-  animation-duration: 36s;
-}
-[data-home-tier="mid"] .home-blob-b {
-  animation-duration: 48s;
-}
-[data-home-tier="mid"] .home-blob-c {
-  animation-duration: 60s;
+  animation-duration: 120s;
 }
 
 /* interaction: pause the drift while the user is scrolling / panning */
