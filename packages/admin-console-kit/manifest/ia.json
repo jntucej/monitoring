@@ -12,7 +12,7 @@
         "source": "operations.traffic24h"
       },
       "pages": [
-        { "label": "Campus Dashboard", "href": "/admin", "icon": "LayoutDashboard", "exact": true },
+        { "label": "Campus Dashboard", "href": "/admin/overview", "icon": "LayoutDashboard", "exact": true },
         { "label": "Alerts & Radar", "href": "/admin/alerts", "icon": "Bell" },
         { "label": "Gates", "href": "/admin/gates", "icon": "QrCode" }
       ]

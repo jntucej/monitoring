@@ -47,7 +47,7 @@ function SkeletonCard() {
 function AdminPermissionPoliciesInner() {
   const [query, setQuery] = useState("");
 
-  const res = useApiResource<PermissionPoliciesData>("/api/admin/permission-policies", {
+  const res = useApiResource<{ success: boolean; data: PermissionPoliciesData }>("/api/admin/permission-policies", {
     ttlMs: 30_000,
   });
 
@@ -59,7 +59,7 @@ function AdminPermissionPoliciesInner() {
     { intervalMs: 60_000 }
   );
 
-  const workflows = res.data?.workflows ?? [];
+  const workflows = res.data?.data?.workflows ?? [];
 
   const visibleWorkflows = useMemo(() => {
     const q = query.trim().toLowerCase();

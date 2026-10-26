@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
+import { ConfirmDialog } from "@/components/admin/shared/ConfirmDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
@@ -37,6 +38,7 @@ function AdminSessionsInner() {
   const [rows, setRows] = useState<SessionRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
+  const [revokeTarget, setRevokeTarget] = useState<SessionRow | null>(null);
   const addToast = useUIStore((s) => s.addToast);
   const user = useAuthStore((s) => s.user);
 
@@ -50,6 +52,7 @@ function AdminSessionsInner() {
   useEffect(() => { load(); }, [load]);
 
   const revoke = async (sessionId: string) => {
+    setRevokeTarget(null);
     setBusy(sessionId);
     try {
       const res = await fetch(`/api/admin/sessions/${sessionId}`, {
@@ -129,7 +132,7 @@ function AdminSessionsInner() {
                     <td className="p-3 font-mono text-xs text-[var(--text-muted)]">{r.ipAddress ?? "—"}</td>
                     <td className="p-3 text-right">
                       <button
-                        onClick={() => revoke(r.sessionId)}
+                        onClick={() => setRevokeTarget(r)}
                         disabled={busy === r.sessionId}
                         className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--action-danger)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 hover:bg-[var(--action-danger)]/10 disabled:opacity-50"
                       >
@@ -144,6 +147,16 @@ function AdminSessionsInner() {
           </div>
         </div>
       </WidgetBoundary>
+
+      <ConfirmDialog
+        open={revokeTarget !== null}
+        onClose={() => setRevokeTarget(null)}
+        title="Revoke session?"
+        body={revokeTarget ? `Force-revoke ${revokeTarget.name} (${revokeTarget.email ?? "unknown"})? The user will be signed out on their next API call.` : ""}
+        confirmText="Revoke"
+        variant="destructive"
+        onConfirm={() => { void revoke(revokeTarget?.sessionId ?? ""); }}
+      />
     </div>
   );
 }

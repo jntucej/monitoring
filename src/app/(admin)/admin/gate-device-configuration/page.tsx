@@ -65,7 +65,7 @@ const DEVICE_LABELS: Record<string, string> = {
 const DAY_LABELS = ["", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 function AdminGateDeviceConfigurationInner() {
-  const res = useApiResource<GateDeviceConfigData>("/api/admin/gate-device-configuration", { ttlMs: 30_000 });
+  const res = useApiResource<{ success: boolean; data: GateDeviceConfigData }>("/api/admin/gate-device-configuration", { ttlMs: 30_000 });
 
   usePolling(
     () => {
@@ -75,8 +75,8 @@ function AdminGateDeviceConfigurationInner() {
     { intervalMs: 60_000 }
   );
 
-  const gates = res.data?.gates ?? [];
-  const deviceVerification = res.data?.device_verification ?? [];
+  const gates = res.data?.data?.gates ?? [];
+  const deviceVerification = res.data?.data?.device_verification ?? [];
   const loading = res.loading && !res.data;
 
   const activeGates = useMemo(() => gates.filter((g) => g.is_active), [gates]);

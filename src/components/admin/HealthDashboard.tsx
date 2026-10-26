@@ -53,8 +53,8 @@ export function HealthDashboard() {
   useEffect(() => {
     fetchHealth(true);
   }, [fetchHealth]);
-  /* Realtime: poll the health endpoint every second. */
-  usePolling(() => { fetchHealth(); }, { intervalMs: 1000 });
+  /* Realtime: poll the health endpoint every 15 s while the tab is visible. */
+  usePolling(() => { fetchHealth(); }, { intervalMs: 15_000 });
 
   const getStatusBadge = (status?: "healthy" | "degraded" | "unhealthy") => {
     switch (status) {
@@ -109,7 +109,7 @@ export function HealthDashboard() {
           </div>
           <p className="text-xs text-[var(--text-muted)] flex items-center gap-2">
             <Clock className="w-3.5 h-3.5 text-gray-400" />
-            {lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString()}` : "Fetching..."} (Auto-refreshes every 1s)
+            {lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString()}` : "Fetching..."} (Auto-refreshes every 15s)
           </p>
         </div>
       </div>

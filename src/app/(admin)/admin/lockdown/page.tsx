@@ -7,6 +7,7 @@ import {
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { SectionCard } from "@/components/admin/shared/SectionCard";
+import { ConfirmDialog } from "@/components/admin/shared/ConfirmDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
 
@@ -28,6 +29,8 @@ function AdminLockdownInner() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [draft, setDraft] = useState({ scope: "all-gates", message: "" });
+  const [confirmLift, setConfirmLift] = useState(false);
+  const [confirmBroadcast, setConfirmBroadcast] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -45,8 +48,9 @@ function AdminLockdownInner() {
 
   useEffect(() => { load(); }, [load]);
 
-  const broadcast = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const broadcast = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    setConfirmBroadcast(false);
     setBusy(true);
     try {
       await fetch("/api/admin/lockdown", {
@@ -63,6 +67,7 @@ function AdminLockdownInner() {
   };
 
   const lift = async () => {
+    setConfirmLift(false);
     setBusy(true);
     try {
       await fetch("/api/admin/lockdown", { method: "DELETE", headers: getAuthHeaders() });
@@ -119,7 +124,7 @@ function AdminLockdownInner() {
               </div>
               <div className="flex">
                 <button
-                  onClick={lift}
+                  onClick={() => setConfirmLift(true)}
                   disabled={busy}
                   className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold disabled:opacity-50"
                 >
@@ -147,7 +152,7 @@ function AdminLockdownInner() {
       {/* Broadcast form */}
       {!active && (
         <WidgetBoundary title="Broadcast lockdown">
-          <form onSubmit={broadcast}>
+          <form onSubmit={(e) => { void broadcast(e); }}>
             <SectionCard
               title="Initiate lockdown"
               description="Sends an immediate lockdown broadcast to the selected gate scope"
@@ -191,7 +196,8 @@ function AdminLockdownInner() {
                 </div>
                 <div className="flex justify-end">
                   <button
-                    type="submit"
+                    type="button"
+                    onClick={() => setConfirmBroadcast(true)}
                     disabled={busy}
                     className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold disabled:opacity-50 inline-flex items-center gap-2"
                   >
@@ -204,6 +210,25 @@ function AdminLockdownInner() {
           </form>
         </WidgetBoundary>
       )}
+
+      <ConfirmDialog
+        open={confirmLift}
+        onClose={() => setConfirmLift(false)}
+        title="Lift lockdown?"
+        body="All gates will return to normal operation immediately. This action is audited."
+        confirmText="Lift Lockdown"
+        variant="destructive"
+        onConfirm={lift}
+      />
+      <ConfirmDialog
+        open={confirmBroadcast}
+        onClose={() => setConfirmBroadcast(false)}
+        title="Broadcast lockdown?"
+        body={`Gates in the ${draft.scope} scope will be locked immediately. This action is audited.`}
+        confirmText="Broadcast"
+        variant="destructive"
+        onConfirm={() => { void broadcast(); }}
+      />
     </div>
   );
 }

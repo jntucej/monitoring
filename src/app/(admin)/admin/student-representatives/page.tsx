@@ -4,10 +4,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
+import { ConfirmDialog } from "@/components/admin/shared/ConfirmDialog";
 
 export default function RepsPage() {
   const [rows, setRows] = useState<any[]>([]);
   const addToast = useUIStore((s) => s.addToast);
+  const [revokeId, setRevokeId] = useState<string | null>(null);
   const [form, setForm] = useState({
     studentId: "",
     scopeType: "class",
@@ -44,6 +46,7 @@ export default function RepsPage() {
   };
 
   const revoke = async (id: string) => {
+    setRevokeId(null);
     await fetch(`/api/admin/student-representatives/${id}`, {
       method: "DELETE",
       headers: getAuthHeaders(),
@@ -126,7 +129,7 @@ export default function RepsPage() {
                 <td className="p-3 text-right">
                   <button
                     type="button"
-                    onClick={() => revoke(r.id)}
+                    onClick={() => setRevokeId(r.id)}
                     className="text-xs text-rose-600 hover:underline font-medium"
                   >
                     Revoke
@@ -142,6 +145,16 @@ export default function RepsPage() {
           </tbody>
         </table>
       </div>
+
+      <ConfirmDialog
+        open={revokeId !== null}
+        onClose={() => setRevokeId(null)}
+        title="Revoke representative?"
+        body="This representative will immediately lose their scope authority. This action is audited."
+        confirmText="Revoke"
+        variant="destructive"
+        onConfirm={() => { void revoke(revokeId ?? ""); }}
+      />
     </div>
   );
 }

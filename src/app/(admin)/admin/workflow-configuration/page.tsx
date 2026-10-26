@@ -52,7 +52,7 @@ interface WorkflowConfigData {
 function AdminWorkflowConfigurationInner() {
   const [query, setQuery] = useState("");
 
-  const res = useApiResource<WorkflowConfigData>("/api/admin/workflow-configuration", { ttlMs: 30_000 });
+  const res = useApiResource<{ success: boolean; data: WorkflowConfigData }>("/api/admin/workflow-configuration", { ttlMs: 30_000 });
 
   usePolling(
     () => {
@@ -62,7 +62,7 @@ function AdminWorkflowConfigurationInner() {
     { intervalMs: 60_000 }
   );
 
-  const passTypes = res.data?.pass_types ?? [];
+  const passTypes = res.data?.data?.pass_types ?? [];
   const loading = res.loading && !res.data;
 
   const visible = useMemo(() => {

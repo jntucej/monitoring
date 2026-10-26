@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   Shield,
   AlertTriangle,
@@ -20,6 +20,7 @@ import {
 import Link from "next/link";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { getAuthHeaders } from "@/lib/utils";
+import { usePolling } from "@/hooks/usePolling";
 
 const iconMap: Record<string, any> = {
   Activity,
@@ -54,27 +55,27 @@ function AdminOverviewInner() {
   const [data, setData] = useState<OverviewData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch("/api/admin/overview", { headers: getAuthHeaders(), cache: "no-store" });
-        const json = await res.json();
-        if (cancelled) return;
-        if (json.success) {
-          setData(json.data);
-          setError(null);
-        } else {
-          setError(typeof json.error === "string" ? json.error : json.error?.message ?? "Failed to load overview");
-        }
-      } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Failed to load overview");
+  const load = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/overview", { headers: getAuthHeaders(), cache: "no-store" });
+      const json = await res.json();
+      if (json.success) {
+        setData(json.data);
+        setError(null);
+      } else {
+        setError(typeof json.error === "string" ? json.error : json.error?.message ?? "Failed to load overview");
       }
-    })();
-    return () => {
-      cancelled = true;
-    };
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load overview");
+    }
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  // Poll the overview every 30 s so the KPI tiles and module cards stay fresh.
+  usePolling(load, { intervalMs: 30_000 });
 
   const activeGates = (data?.gates.status ?? []).filter((s) => s === "online").length;
   const totalGates = data?.gates.status.length ?? 0;
