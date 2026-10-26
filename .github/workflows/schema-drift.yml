@@ -13,9 +13,25 @@ jobs:
     permissions:
       issues: write
       contents: read
+    services:
+      scratch-postgres:
+        image: supabase/postgres:17.6.1.136
+        env:
+          POSTGRES_PASSWORD: ci_dummy_postgres_password_123
+          POSTGRES_DB: gate_monitor
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Install psql client
+        run: sudo apt-get install -y postgresql-client
 
       # NOTE: PROD_SCHEMA_READER_URL must be configured as a repository secret.
       # Use database/ops/create_schema_reader_role.sql to provision the least-privilege role.
@@ -24,6 +40,7 @@ jobs:
         id: drift_check
         env:
           PROD_DATABASE_URL: ${{ secrets.PROD_SCHEMA_READER_URL }}
+          SCRATCH_DATABASE_URL: postgres://postgres:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
         run: |
           if [ -z "$PROD_DATABASE_URL" ]; then
             echo "Skipping drift check: PROD_SCHEMA_READER_URL secret is not set."

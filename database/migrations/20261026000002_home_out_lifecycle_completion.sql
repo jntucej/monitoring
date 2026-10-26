@@ -126,11 +126,20 @@ ALTER TABLE public.notifications
   ADD COLUMN IF NOT EXISTS read_at TIMESTAMPTZ;
 
 -- ── Announcement follow (idempotent) ─────────────────────────────
-CREATE TABLE IF NOT EXISTS public.announcement_follows (
-  user_id         UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
-  announcement_id UUID NOT NULL REFERENCES public.announcements(id) ON DELETE CASCADE,
-  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  PRIMARY KEY (user_id, announcement_id)
-);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_tables
+    WHERE schemaname='public' AND tablename='announcement_follows'
+  ) THEN
+    CREATE TABLE public.announcement_follows (
+      user_id         UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+      announcement_id VARCHAR(100) NOT NULL REFERENCES public.announcements(id) ON DELETE CASCADE,
+      created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      PRIMARY KEY (user_id, announcement_id)
+    );
+  END IF;
+END
+$$;
 
 COMMIT;

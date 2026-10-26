@@ -10,7 +10,7 @@ import { useDashboardData } from "@/hooks/useDashboardData";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { cn } from "@/lib/utils";
 import { AlertsContent, type AlertsSseState } from "@/components/sysadmin/domains/alerts/AlertsContent";
-import type { AlertsData, AlertsEnvelope } from "@/components/sysadmin/domains/alerts/types";
+import type { AlertsData } from "@/components/sysadmin/domains/alerts/types";
 
 function useAlertsStream(
   active: boolean,
@@ -63,21 +63,20 @@ function useAlertsStream(
 
 function AlertsInner() {
   const user = useAuthStore((s) => s.user);
-  const { data, loading, error, refresh } = useDashboardData<AlertsEnvelope>(
+  const { data, loading, error, refresh } = useDashboardData<AlertsData>(
     "/api/admin/alerts/overview",
     {
       ttlMs: 30_000,
       pollMs: 10_000,
     }
   );
-  const payload: AlertsData | null = data?.data ?? null;
 
   const onLive = useCallback(() => {
     void refresh();
   }, [refresh]);
 
   const { sseState, liveAt } = useAlertsStream(Boolean(user?.id), onLive);
-  const busy = loading && !payload;
+  const busy = loading && !data;
 
   return (
     <div className="space-y-4 min-w-0">
@@ -122,7 +121,7 @@ function AlertsInner() {
             <div className="h-48 rounded-xl bg-slate-100 animate-pulse" />
           </div>
         ) : (
-          payload && <AlertsContent data={payload} sseState={sseState} />
+          data && <AlertsContent data={data} sseState={sseState} />
         )}
       </WidgetBoundary>
 

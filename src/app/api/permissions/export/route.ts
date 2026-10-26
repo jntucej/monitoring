@@ -7,13 +7,9 @@ import { withAuthorization } from "@/middleware/authorization";
 import { fail } from "@/server/http/response";
 import { query } from "@/lib/db";
 import { addAudit } from "@/lib/db";
+import { csvRow } from "@/lib/csv";
 import type { AuthContext } from "@/lib/authContext";
 import type { Role } from "@/lib/types";
-
-function csvEscape(v: unknown): string {
-  const s = v == null ? "" : String(v);
-  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-}
 
 async function handleGet(
   req: NextRequest,
@@ -61,7 +57,7 @@ async function handleGet(
   const csv = [headers.join(",")]
     .concat(
       rows.map((r) =>
-        headers.map((h) => csvEscape((r as Record<string, unknown>)[h])).join(","),
+        csvRow(headers.map((h) => String((r as Record<string, unknown>)[h] ?? ""))),
       ),
     )
     .join("\n");

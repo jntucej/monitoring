@@ -8,25 +8,24 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { NotificationsContent } from "@/components/sysadmin/domains/platform/NotificationsContent";
 import { NotificationsDrawer } from "@/components/sysadmin/domains/platform/NotificationsDrawer";
 import type {
-  NotificationsEnvelope,
+  NotificationsData,
   NotificationsEntity,
 } from "@/components/sysadmin/domains/platform/types";
 
 export default function NotificationsPage() {
-  const { data, loading, error, refresh } = useDashboardData<NotificationsEnvelope>(
+  const { data, loading, error, refresh } = useDashboardData<NotificationsData>(
     "/api/admin/platform/notifications/overview",
     { ttlMs: 180000, pollMs: 60000 },
   );
-  const payload = data?.data ?? null;
 
   const [selected, setSelected] = useState<NotificationsEntity | null>(null);
 
   return (
     <WidgetBoundary>
       <PageHeader title="Notifications" onRefresh={refresh} />
-      {loading && !payload ? (
+      {loading && !data ? (
         <Skeleton className="h-64 w-full" />
-      ) : error && !payload ? (
+      ) : error && !data ? (
         <div
           role="alert"
           className="rounded-md border p-4 text-sm"
@@ -38,8 +37,8 @@ export default function NotificationsPage() {
         >
           Failed to load Notifications: {String(error)}
         </div>
-      ) : payload ? (
-        <NotificationsContent data={payload} onRowClick={setSelected} />
+      ) : data ? (
+        <NotificationsContent data={data} onRowClick={setSelected} />
       ) : null}
       <NotificationsDrawer
         entity={selected}

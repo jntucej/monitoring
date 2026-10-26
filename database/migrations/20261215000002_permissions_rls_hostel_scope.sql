@@ -16,7 +16,6 @@ CREATE POLICY permissions_hostel_select ON public.permissions
     workflow_type <> 'hostel'
     OR is_admin(current_setting('app.current_user_id', true)::uuid)
     OR is_warden(current_setting('app.current_user_id', true)::uuid)
-    OR student_user_id = current_setting('app.current_user_id', true)::uuid
     OR requester_user_id = current_setting('app.current_user_id', true)::uuid
     OR (
       -- Warden scope filter
@@ -31,10 +30,7 @@ DROP POLICY IF EXISTS permissions_guardian_select ON public.permissions;
 CREATE POLICY permissions_guardian_select ON public.permissions
   FOR SELECT TO authenticated
   USING (
-    student_user_id = ANY(
-      get_guardian_wards(current_setting('app.current_user_id', true)::uuid)
-    )
-    OR requester_user_id = ANY(
+    requester_user_id = ANY(
       get_guardian_wards(current_setting('app.current_user_id', true)::uuid)
     )
   );

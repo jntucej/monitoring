@@ -31,8 +31,12 @@ jobs:
         env:
           DATABASE_URL: postgres://postgres:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
         run: |
-          psql "$DATABASE_URL" -f database/bootstrap.sql
           psql "$DATABASE_URL" -f database/schema.sql
+          # NOTE: do NOT run database/bootstrap.sql here. Its strict
+          # schema_migrations (NOT NULL filename/checksum) would clash with
+          # the looser shape check-migrations.sh expects and create; check-
+          # migrations.sh is self-sufficient (creates its own schema_migrations
+          # + Supabase-compat roles) and only needs schema.sql loaded.
       - name: Apply migrations
         env:
           DATABASE_URL: postgres://postgres:ci_dummy_postgres_password_123@localhost:5432/gate_monitor

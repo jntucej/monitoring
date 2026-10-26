@@ -64,6 +64,11 @@ services:
       - MONITORING_PROM_URL=${MONITORING_PROM_URL:-}
       - MONITORING_LOKI_URL=${MONITORING_LOKI_URL:-}
       - MONITORING_GRAFANA_URL=${MONITORING_GRAFANA_URL:-}
+    networks:
+      gate-net:
+        aliases:
+          - web
+          - gate_web
     depends_on:
       postgres:
         condition: service_healthy
@@ -86,8 +91,6 @@ services:
     cap_drop: [ALL]
     security_opt:
       - no-new-privileges:true
-    networks:
-      - gate-net
 
   worker:
     image: monitoring-worker:latest

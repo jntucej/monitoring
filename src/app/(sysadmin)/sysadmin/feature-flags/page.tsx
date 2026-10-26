@@ -8,25 +8,24 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { FeatureFlagsContent } from "@/components/sysadmin/domains/platform/FeatureFlagsContent";
 import { FeatureFlagsDrawer } from "@/components/sysadmin/domains/platform/FeatureFlagsDrawer";
 import type {
-  FeatureFlagsEnvelope,
+  FeatureFlagsData,
   FeatureFlagsEntity,
 } from "@/components/sysadmin/domains/platform/types";
 
 export default function FeatureFlagsPage() {
-  const { data, loading, error, refresh } = useDashboardData<FeatureFlagsEnvelope>(
+  const { data, loading, error, refresh } = useDashboardData<FeatureFlagsData>(
     "/api/admin/platform/feature-flags/overview",
     { ttlMs: 180000, pollMs: 60000 },
   );
-  const payload = data?.data ?? null;
 
   const [selected, setSelected] = useState<FeatureFlagsEntity | null>(null);
 
   return (
     <WidgetBoundary>
       <PageHeader title="Feature Flags" onRefresh={refresh} />
-      {loading && !payload ? (
+      {loading && !data ? (
         <Skeleton className="h-64 w-full" />
-      ) : error && !payload ? (
+      ) : error && !data ? (
         <div
           role="alert"
           className="rounded-md border p-4 text-sm"
@@ -38,8 +37,8 @@ export default function FeatureFlagsPage() {
         >
           Failed to load Feature Flags: {String(error)}
         </div>
-      ) : payload ? (
-        <FeatureFlagsContent data={payload} onRowClick={setSelected} />
+      ) : data ? (
+        <FeatureFlagsContent data={data} onRowClick={setSelected} />
       ) : null}
       <FeatureFlagsDrawer
         entity={selected}

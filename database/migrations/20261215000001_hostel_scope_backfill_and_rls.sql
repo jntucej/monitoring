@@ -11,7 +11,7 @@ UPDATE public.permissions p
   FROM public.student_details sd
  WHERE p.workflow_type = 'hostel'
    AND p.hostel_scope IS NULL
-   AND sd.user_id = p.student_user_id;
+   AND sd.user_id = p.requester_user_id;
 
 -- 2. Auto-derive hostel_scope on INSERT/UPDATE if the caller forgot.
 CREATE OR REPLACE FUNCTION public.derive_hostel_scope()
@@ -28,10 +28,10 @@ BEGIN
   END IF;
 
   -- If caller didn't set it, derive from student_details.gender.
-  IF NEW.hostel_scope IS NULL AND NEW.student_user_id IS NOT NULL THEN
+  IF NEW.hostel_scope IS NULL AND NEW.requester_user_id IS NOT NULL THEN
     SELECT gender INTO v_gender
       FROM student_details
-     WHERE user_id = NEW.student_user_id
+     WHERE user_id = NEW.requester_user_id
      LIMIT 1;
 
     IF v_gender = 'male'   THEN NEW.hostel_scope := 'boys';
@@ -45,7 +45,7 @@ $fn$;
 
 DROP TRIGGER IF EXISTS trg_derive_hostel_scope ON public.permissions;
 CREATE TRIGGER trg_derive_hostel_scope
-  BEFORE INSERT OR UPDATE OF workflow_type, student_user_id, hostel_scope
+  BEFORE INSERT OR UPDATE OF workflow_type, requester_user_id, hostel_scope
   ON public.permissions
   FOR EACH ROW EXECUTE FUNCTION public.derive_hostel_scope();
 

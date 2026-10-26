@@ -69,6 +69,7 @@ export function MobileNavigation() {
   else if (pathname?.startsWith("/caretaker")) currentRole = "caretaker";
   else if (pathname?.startsWith("/deputy-warden")) currentRole = "deputy_warden";
   else if (pathname?.startsWith("/hostel-manager")) currentRole = "hostel_manager";
+  else if (pathname?.startsWith("/emo")) currentRole = "emo";
   else if (storeRole) currentRole = storeRole;
 
   const assignedGateId = user?.gateId || "1";
@@ -173,6 +174,13 @@ export function MobileNavigation() {
           { label: "Dashboard", href: "/worker", icon: Wrench },
           { label: "Work", href: "/worker/work-orders", icon: PackageCheck },
           { label: "Shifts", href: "/worker/shifts", icon: Clock },
+          { label: "Profile", href: "/profile", icon: User },
+        ];
+      case "emo":
+        return [
+          { label: "Dashboard", href: "/emo", icon: Wrench },
+          { label: "Complaints", href: "/emo/complaints", icon: Inbox },
+          { label: "Resolved", href: "/emo/complaints?status=resolved", icon: History },
           { label: "Profile", href: "/profile", icon: User },
         ];
       case "staff":

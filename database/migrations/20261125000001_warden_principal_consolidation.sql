@@ -3,6 +3,9 @@
 -- Purpose:   Permanently remove the "warden" application role and fold its
 --            hostel-management responsibilities into "principal".
 --
+-- NOTE: .down.sql deleted (P1-13). Rollback of role changes must go through a
+--       planned migration, not a replay of audit_logs.
+--
 -- Ground truth (verified against production gate_monitor, 2026-10-15):
 --   * 1 active user with role='warden' ("Hostel Warden"), assigned_hostel NULL.
 --   * 1 active user with role='principal' ("Principal Account").

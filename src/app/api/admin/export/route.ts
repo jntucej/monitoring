@@ -3,6 +3,7 @@ import { query } from "@/lib/postgres";
 import { withAuthorization } from "@/middleware/authorization";
 import { addAudit } from "@/lib/db";
 import type { Role } from "@/lib/types";
+import { csvRow } from "@/lib/csv";
 
 /**
  * GET /api/admin/export?table=users&format=csv
@@ -111,16 +112,12 @@ async function handleGet(req: NextRequest) {
     }).catch(() => {});
 
     if (format === "csv") {
-      // Generate CSV
+      // Generate CSV — every data cell is run through csvEscape to prevent
+      // spreadsheet formula injection (e.g. =HYPERLINK(...), +CMD(...)).
+      // csvRow handles proper CSV quoting (commas, quotes, newlines).
       const headers = columnList.join(",");
-      const rows = data.map(row =>
-        columnList
-          .map((col) => {
-            const val = row[col];
-            if (typeof val === "string" && val.includes(",")) return `"${val}"`;
-            return val ?? "";
-          })
-          .join(",")
+      const rows = data.map((row) =>
+        csvRow(columnList.map((col) => row[col] == null ? "" : String(row[col])))
       );
       const csv = [headers, ...rows].join("\n");
 

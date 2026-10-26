@@ -15,25 +15,37 @@ if [ -z "$PROD_DATABASE_URL" ]; then
   exit 1
 fi
 
-SCRATCH_CONTAINER="scratch_drift_check_$$"
-POSTGRES_IMAGE="${POSTGRES_TEST_IMAGE:-postgres:17}"
+# 1. Scratch replay DB: either a pre-provisioned SCRATCH_DATABASE_URL (CI mode,
+# e.g. a `services: postgres` block in the calling workflow) or a local
+# docker-run scratch container (local/dev mode, unchanged behavior).
+PSQL=""
 
-cleanup() {
-  echo "Cleaning up scratch container $SCRATCH_CONTAINER..."
-  docker rm -f "$SCRATCH_CONTAINER" >/dev/null 2>&1 || true
-}
-trap cleanup EXIT INT TERM
+if [ -n "$SCRATCH_DATABASE_URL" ]; then
+  echo "Using pre-provisioned SCRATCH_DATABASE_URL (CI mode, no scratch container)."
+  PSQL=(psql "$SCRATCH_DATABASE_URL")
+  SCRATCH_CONTAINER=""
+else
+  SCRATCH_CONTAINER="scratch_drift_check_$$"
+  POSTGRES_IMAGE="${POSTGRES_TEST_IMAGE:-postgres:17}"
 
-# 1. Start scratch Postgres
-echo "Starting scratch Postgres container ($POSTGRES_IMAGE)..."
-docker run --rm -d --name "$SCRATCH_CONTAINER" -e POSTGRES_PASSWORD=test "$POSTGRES_IMAGE" >/dev/null
+  cleanup() {
+    echo "Cleaning up scratch container $SCRATCH_CONTAINER..."
+    docker rm -f "$SCRATCH_CONTAINER" >/dev/null 2>&1 || true
+  }
+  trap cleanup EXIT INT TERM
 
-until docker exec "$SCRATCH_CONTAINER" pg_isready -U postgres >/dev/null 2>&1; do
-  sleep 1
-done
+  echo "Starting scratch Postgres container ($POSTGRES_IMAGE)..."
+  docker run --rm -d --name "$SCRATCH_CONTAINER" -e POSTGRES_PASSWORD=test "$POSTGRES_IMAGE" >/dev/null
+
+  until docker exec "$SCRATCH_CONTAINER" pg_isready -U postgres >/dev/null 2>&1; do
+    sleep 1
+  done
+
+  PSQL=(docker exec "$SCRATCH_CONTAINER" psql -U postgres)
+fi
 
 # 2. Setup mock Supabase roles & auth schema in scratch
-docker exec "$SCRATCH_CONTAINER" psql -U postgres -v ON_ERROR_STOP=1 -c "
+"${PSQL[@]}" -v ON_ERROR_STOP=1 -c "
 DO \$\$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'admin') THEN CREATE ROLE admin; END IF;
@@ -48,8 +60,18 @@ CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid AS \$\$ SELECT null::uuid; \$
 
 # 3. Load baseline schema in scratch
 if [ -f "database/schema.sql" ]; then
-  docker exec -i "$SCRATCH_CONTAINER" psql -U postgres -v ON_ERROR_STOP=1 < "database/schema.sql" >/dev/null
+  "${PSQL[@]}" -v ON_ERROR_STOP=1 < "database/schema.sql" >/dev/null
 fi
+
+# 3b. Initialize schema_migrations tracking table (loosest shape, matching
+# check-migrations.sh) so migrations' self-record blocks don't fail.
+"${PSQL[@]}" -v ON_ERROR_STOP=1 -c "
+CREATE TABLE IF NOT EXISTS schema_migrations (
+  version     TEXT PRIMARY KEY,
+  filename    TEXT,
+  applied_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  checksum    TEXT
+);" >/dev/null
 
 # 4. Replay all migrations in scratch
 shopt -s nullglob
@@ -66,16 +88,18 @@ done
 SORTED_NAMES=($(for k in "${!MIGRATION_FILES[@]}"; do echo "$k"; done | sort))
 for fname in "${SORTED_NAMES[@]}"; do
   fpath="${MIGRATION_FILES[$fname]}"
-  docker exec -i "$SCRATCH_CONTAINER" psql -U postgres -v ON_ERROR_STOP=1 < "$fpath" >/dev/null
+  "${PSQL[@]}" -v ON_ERROR_STOP=1 < "$fpath" >/dev/null
 done
 
 # 5. Execute python drift comparison between PROD and SCRATCH
 export SCRATCH_CONTAINER
+export SCRATCH_DATABASE_URL
 python3 - << 'EOF'
 import os, sys, subprocess, json, re
 
 prod_url = os.environ.get("PROD_DATABASE_URL")
 scratch_container = os.environ.get("SCRATCH_CONTAINER")
+scratch_db_url = os.environ.get("SCRATCH_DATABASE_URL")
 
 def dump_catalog_json(conn_cmd):
     sql = """
@@ -123,7 +147,10 @@ except Exception as e:
     sys.exit(1)
 
 print("Extracting scratch replay catalog...")
-scratch_data = dump_catalog_json(["docker", "exec", scratch_container, "psql", "-U", "postgres", "-d", "postgres"])
+if scratch_db_url:
+    scratch_data = dump_catalog_json(["psql", scratch_db_url])
+else:
+    scratch_data = dump_catalog_json(["docker", "exec", scratch_container, "psql", "-U", "postgres", "-d", "postgres"])
 
 has_drift = False
 

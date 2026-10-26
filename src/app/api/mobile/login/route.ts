@@ -23,9 +23,9 @@ export async function handlePost(req: NextRequest) {
 
   try {
     const body = await req.json().catch(() => null);
-    const { uniqueId, code, deviceId, password, pin } = (body ?? {}) as Record<string, unknown>;
+    const { uniqueId, code, deviceId, password } = (body ?? {}) as Record<string, unknown>;
 
-    if (!uniqueId || (!code && !password && !pin)) {
+    if (!uniqueId || (!code && !password)) {
       return uniformFailure();
     }
 
@@ -41,7 +41,7 @@ export async function handlePost(req: NextRequest) {
       return uniformFailure();
     }
 
-    if (password || pin) {
+    if (password) {
       const { query } = await import("@/lib/postgres");
       const { verifyPassword } = await import("@/lib/auth-token");
       const userRes = await query(
@@ -51,12 +51,10 @@ export async function handlePost(req: NextRequest) {
 
       if (userRes.rows.length === 0) return uniformFailure();
       const user = userRes.rows[0];
-      const credential = String(password || pin || "").trim();
+      const credential = String(password || "").trim();
       let credentialValid = false;
 
       if (user.password_hash) credentialValid = await verifyPassword(credential, user.password_hash);
-      if (!credentialValid && user.pin_hash) credentialValid = await verifyPassword(credential, user.pin_hash);
-      if (!credentialValid && user.initial_pin_hash) credentialValid = await verifyPassword(credential, user.initial_pin_hash);
       if (!credentialValid) return uniformFailure();
 
       const targetDeviceId = String(deviceId || "mobile-device");
@@ -67,7 +65,7 @@ export async function handlePost(req: NextRequest) {
         userId: person.id,
         userName: person.fullName,
         role: (person.personType || "student") as unknown as Role,
-        details: { uniqueId: person.uniqueId, deviceId: targetDeviceId, method: password ? "password" : "pin" },
+        details: { uniqueId: person.uniqueId, deviceId: targetDeviceId, method: "password" },
       });
 
       return NextResponse.json({

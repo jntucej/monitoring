@@ -8,11 +8,7 @@ import { fail } from "@/server/http/response";
 import { query, addAudit } from "@/lib/db";
 import type { AuthContext } from "@/lib/authContext";
 import type { Role } from "@/lib/types";
-
-function csvEscape(v: unknown): string {
-  const s = v == null ? "" : String(v);
-  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-}
+import { csvRow } from "@/lib/csv";
 
 async function handleGet(
   req: NextRequest,
@@ -57,11 +53,11 @@ async function handleGet(
     .concat(
       rows.map((r) => {
         const detail = (r as Record<string, unknown>).details;
-        const detailCsv =
+        const detailStr =
           detail && typeof detail === "object" ? JSON.stringify(detail) : String(detail ?? "");
-        return headers
-          .map((h) => (h === "details" ? csvEscape(detailCsv) : csvEscape((r as Record<string, unknown>)[h])))
-          .join(",");
+        return csvRow(
+          headers.map((h) => (h === "details" ? detailStr : String((r as Record<string, unknown>)[h] ?? "")))
+        );
       }),
     )
     .join("\n");

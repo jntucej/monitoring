@@ -14,15 +14,13 @@
 
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { PromotionsContent } from "@/components/sysadmin/domains/identity/PromotionsContent";
-import type { PromotionsEnvelope } from "@/components/sysadmin/domains/identity/types";
+import type { PromotionsData } from "@/components/sysadmin/domains/identity/types";
 
 export default function PromotionsPage() {
-  const { data, loading, error } = useDashboardData<PromotionsEnvelope>(
+  const { data, loading, error } = useDashboardData<PromotionsData>(
     "/api/admin/promotions/overview",
     { ttlMs: 90_000, pollMs: 30_000 },
   );
-  // ok() wraps the payload in { data: PromotionsData } — unwrap for the content.
-  const payload = data?.data ?? null;
 
-  return <PromotionsContent data={payload} loading={loading} error={error} />;
+  return <PromotionsContent data={data} loading={loading} error={error} />;
 }
