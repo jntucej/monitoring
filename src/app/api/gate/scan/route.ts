@@ -38,8 +38,19 @@ export const POST = withRateLimit(
         return fail("BAD_REQUEST", "direction is required", 400);
       }
 
+      // Resolve the caller's CURRENT gate fresh from the DB. The JWT-embedded
+      // auth.gateId is minted at login and can go stale: an operator who just
+      // claimed a gate (POST /api/operator/claim-gate) has a fresh users.gate_id
+      // that is NOT yet in their access token. Trust the DB value first, fall
+      // back to the JWT value only if the DB row has no gate yet.
+      const dbGate = await query<{ gate_id: string | null }>(
+        "SELECT gate_id FROM public.users WHERE id = $1 LIMIT 1",
+        [auth.userId]
+      ).catch(() => null);
+      const freshGateId = dbGate?.rows[0]?.gate_id ?? auth.gateId;
+
       // gateId is a hint: when absent, fall back to the caller's bound gate.
-      const gateId = body.gateId ?? auth.gateId ?? null;
+      const gateId = body.gateId ?? freshGateId ?? null;
       if (!gateId) {
         return fail("BAD_REQUEST", "gateId is required", 400);
       }
@@ -65,7 +76,7 @@ export const POST = withRateLimit(
           operatorId: auth.userId,
           operatorName: auth.email,
           operatorRole: auth.role,
-          operatorGateId: auth.gateId ?? null,
+          operatorGateId: freshGateId ?? null,
           supervisedGates: auth.supervisedGates,
         });
         // Attach the consumed pass (if any) to the scan response so the gate

@@ -92,7 +92,7 @@ async function handleSessionCheck(req: NextRequest) {
     }
 
     const userRes = await query(
-      "SELECT id, unique_id, email, name, role, status, department_id, photo_url, supervised_gates, assigned_hostel FROM users WHERE id = $1 LIMIT 1",
+      "SELECT id, unique_id, email, name, role, status, department_id, photo_url, supervised_gates, assigned_hostel, gate_id FROM users WHERE id = $1 LIMIT 1",
       [payload.sub]
     );
 
@@ -136,6 +136,7 @@ async function handleSessionCheck(req: NextRequest) {
         photoUrl: user.photo_url,
         supervisedGates: user.supervised_gates,
         assignedHostel: user.assigned_hostel,
+        gateId: user.gate_id,
       },
       ...(newToken ? { accessToken: newToken } : {}),
       ...(newRefreshToken ? { refreshToken: newRefreshToken } : {}),

@@ -16,6 +16,8 @@ function toUser(raw: any): User {
     status: raw.status ?? "ACTIVE",
     studentDetails: raw.studentDetails ?? raw.student_details ?? undefined,
     employeeDetails: raw.employeeDetails ?? raw.employee_details ?? undefined,
+    gateId: raw.gateId ?? raw.gate_id ?? undefined,
+    supervisedGates: raw.supervisedGates ?? raw.supervised_gates ?? undefined,
   } as User;
 }
 
