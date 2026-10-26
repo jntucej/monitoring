@@ -89,7 +89,6 @@ function rowToClassRow(row: any): ClassRow {
   };
 }
 
-// SCARFOLD:WRITE — PATCH src/app/api/classes/[id]/route.ts
 // Contract: src/contracts/classes.ts  (hod|admin scope, input: UpdateClassInput)
 // Scope = caller.department_id must match target.department_id (HOD);
 // admin/sysadmin bypass.

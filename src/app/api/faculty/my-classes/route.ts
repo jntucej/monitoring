@@ -5,7 +5,6 @@ import { ok, fail } from "@/server/http/response";
 import { query } from "@/lib/postgres";
 import type { MyClass } from "@/contracts/classes";
 
-// SCARFOLD:READ — src/app/api/faculty/my-classes/route.ts
 // Contract: src/contracts/classes.ts  (faculty scope)
 //
 // GET /api/faculty/my-classes?role=class_teacher|subject_faculty

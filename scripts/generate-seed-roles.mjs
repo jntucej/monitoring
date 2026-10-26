@@ -43,7 +43,7 @@ function resolveCredential(envKey, label) {
 const users = [
   { id:'80eb29e3-7e71-48cb-a44c-6e0caa7f83f5', uid:'SYSADMIN',       name:'System Admin',          role:'sysadmin',   email:'sysadmin@college.edu',    envPwd:'ROLES_SYSADMIN_PASSWORD',         envPin:'ROLES_SYSADMIN_PIN' },
   { id:'a0eb29e3-7e71-48cb-a44c-6e0caa7f83f1', uid:'ADMIN',          name:'Campus Admin',          role:'admin',      email:'admin@college.edu',       envPwd:'ROLES_ADMIN_PASSWORD',            envPin:'ROLES_ADMIN_PIN' },
-  { id:'b0eb29e3-7e71-48cb-a44c-6e0caa7f83f2', uid:'VICE_PRINCIPAL', name:'Vice Principal',        role:'warden',     email:'viceprincipal@college.edu', envPwd:'ROLES_VICE_PRINCIPAL_PASSWORD',   envPin:'ROLES_VICE_PRINCIPAL_PIN' },
+  { id:'b0eb29e3-7e71-48cb-a44c-6e0caa7f83f2', uid:'VICE_PRINCIPAL', name:'Vice Principal',        role:'vice_principal', email:'viceprincipal@college.edu', envPwd:'ROLES_VICE_PRINCIPAL_PASSWORD',   envPin:'ROLES_VICE_PRINCIPAL_PIN' },
   { id:'c0eb29e3-7e71-48cb-a44c-6e0caa7f83f3', uid:'HOD',            name:'Head of Department',    role:'hod',        email:'hod@college.edu',         envPwd:'ROLES_HOD_PASSWORD',              envPin:'ROLES_HOD_PIN' },
   { id:'d0eb29e3-7e71-48cb-a44c-6e0caa7f83f4', uid:'OIE',            name:'OIE Officer',           role:'admin',      email:'oie@college.edu',           envPwd:'ROLES_OIE_PASSWORD',              envPin:'ROLES_OIE_PIN' },
   { id:'e0eb29e3-7e71-48cb-a44c-6e0caa7f83f5', uid:'EXAM_BRANCH',    name:'Exam Branch',           role:'staff',      email:'exam@college.edu',          envPwd:'ROLES_EXAM_BRANCH_PASSWORD',      envPin:'ROLES_EXAM_BRANCH_PIN' },

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { query } from "@/lib/postgres";
 import { withRateLimit, rateLimitByKey, extractClientIp } from "@/lib/rate-limit";
 import { signAccessToken, signRefreshToken } from "@/lib/auth-token";
 import crypto from "crypto";
@@ -9,6 +8,7 @@ import {
   findKioskDefaultOperators,
   resolveKioskGateId,
   resolveKioskGateIdForOperator,
+  verifyKioskPin,
 } from "@/lib/kiosk-operator";
 import type { Role } from "@/lib/types";
 
@@ -33,10 +33,22 @@ import type { Role } from "@/lib/types";
  */
 const KIOSK_AUTH_WARNED = { current: false };
 
-async function kioskAuthGate(
+export type KioskGateDecision =
+  | { kind: "pass" }
+  | { kind: "pin_missing" }
+  | { kind: "pin_invalid"; pin: string }
+  | { kind: "ip_not_trusted" }
+  | { kind: "open" };
+
+/**
+ * Determine which gate applies. Does NOT verify the PIN — that happens in
+ * `handleKioskSession` after the operator row is resolved, so we can
+ * compare against `operator.password_hash`.
+ */
+async function kioskGateDecision(
   req: NextRequest,
   bodyPin?: string | null
-): Promise<Response | null> {
+): Promise<KioskGateDecision> {
   const trusted = (process.env.TRUSTED_KIOSK_IPS ?? "")
     .split(",")
     .map((s) => s.trim())
@@ -46,41 +58,20 @@ async function kioskAuthGate(
   if (trusted.length > 0) {
     const ip = extractClientIp(req);
     if (!trusted.includes(ip)) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "KIOSK_IP_NOT_TRUSTED",
-            message: "Client IP is not in TRUSTED_KIOSK_IPS",
-          },
-        },
-        { status: 403 }
-      );
+      return { kind: "ip_not_trusted" };
     }
-    return null;
+    return { kind: "pass" };
   }
 
-  // Mode 2: KIOSK_SESSION_REQUIRE_PIN=true → 426
+  // Mode 2: KIOSK_SESSION_REQUIRE_PIN=true → PIN must be supplied.
+  // The actual bcrypt verification happens after operator resolution, because
+  // we need the operator's password_hash to compare against.
   const requirePin = process.env.KIOSK_SESSION_REQUIRE_PIN === "true";
   if (requirePin) {
     if (bodyPin === undefined || bodyPin === null || bodyPin === "") {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "PIN_REQUIRED",
-            message: "A kiosk operator PIN is required to mint a kiosk session. Show the operator PIN entry UI and retry with ?pin=<operator-pin>.",
-          },
-          upgradesRequired: true,
-        },
-        { status: 426 }
-      );
+      return { kind: "pin_missing" };
     }
-    // Pin provided; fall through to operator resolution below (real pin
-    // verification would live here — currently the PIN is NOT yet enforced
-    // against operator records, so a non-empty value passes the gate).
-    // The kiosk client is expected to collect and pass the operator's PIN.
-    return null;
+    return { kind: "pin_invalid", pin: bodyPin };
   }
 
   // Mode 3: open (backwards compat). One-time warning.
@@ -90,7 +81,7 @@ async function kioskAuthGate(
       "[kiosk-session] No trusted IP or PIN requirement configured; kiosk session is open to any caller"
     );
   }
-  return null;
+  return { kind: "open" };
 }
 
 function misconfiguredResponse(count: number) {
@@ -129,8 +120,40 @@ async function handleKioskSession(
 
   // Fail fast: IP allowlist / PIN gate BEFORE the rate-limit path so an
   // unauthorized caller cannot consume rate-limit quota.
-  const gate = await kioskAuthGate(req, bodyPin ?? null);
-  if (gate) return gate;
+  const decision = await kioskGateDecision(req, bodyPin ?? null);
+
+  switch (decision.kind) {
+    case "ip_not_trusted":
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "KIOSK_IP_NOT_TRUSTED",
+            message: "Client IP is not in TRUSTED_KIOSK_IPS",
+          },
+        },
+        { status: 403 }
+      );
+    case "pin_missing":
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "PIN_REQUIRED",
+            message:
+              "A kiosk operator PIN is required to mint a kiosk session. Show the operator PIN entry UI and retry with ?pin=<operator-pin>.",
+          },
+          upgradesRequired: true,
+        },
+        { status: 426 }
+      );
+    case "open":
+      break; // open mode — proceed to session mint.
+    case "pass":
+      break; // trusted IP — proceed to session mint.
+    case "pin_invalid":
+      break; // verified after operator resolution below.
+  }
 
   const ip = extractClientIp(req);
   const rl = await rateLimitByKey(`kiosk-session:${ip}`, {
@@ -153,6 +176,25 @@ async function handleKioskSession(
       { success: false, error: { code: "ACCOUNT_INACTIVE", message: "Kiosk operator is not active" } },
       { status: 403 }
     );
+  }
+
+  // In PIN_REQUIRED mode, verify the supplied PIN against the operator's
+  // stored password (bcrypt). The kiosk PIN is the operator's password in
+  // the password-only auth model. A wrong or missing hash → reject.
+  if (decision.kind === "pin_invalid") {
+    const pinOk = await verifyKioskPin(op, decision.pin);
+    if (!pinOk) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "PIN_INVALID",
+            message: "Kiosk operator PIN is incorrect. Please retry.",
+          },
+        },
+        { status: 401 }
+      );
+    }
   }
 
   const gateResolution = await resolveKioskGateIdForOperator(op, bodyGateId ?? null);

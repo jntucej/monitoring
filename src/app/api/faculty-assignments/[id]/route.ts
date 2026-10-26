@@ -23,7 +23,6 @@ function getAssignmentId(req: NextRequest): string {
   return decodeURIComponent(segments[segments.length - 1] ?? "");
 }
 
-// SCARFOLD:WRITE — DELETE src/app/api/faculty-assignments/[id]/route.ts
 // Contract: src/contracts/classes.ts  (hod|admin scope, input: void, output: null)
 // Soft-delete: set is_active = FALSE.
 // Scope = caller.department_id must own the department of the class this

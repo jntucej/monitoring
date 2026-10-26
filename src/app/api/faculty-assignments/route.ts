@@ -69,7 +69,6 @@ function rowToFacultyAssignment(row: any): FacultyAssignment {
 
 const ASSIGN_ROLES: AssignInput["role"][] = ["subject_faculty", "assistant"];
 
-// SCARFOLD:WRITE — POST src/app/api/faculty-assignments/route.ts
 // Contract: src/contracts/classes.ts  (hod|admin scope, input: AssignInput)
 // Scope = caller.department_id must match the class's department_id (HOD);
 // admin/sysadmin bypass.

@@ -1,4 +1,5 @@
 import { query } from "@/lib/postgres";
+import bcrypt from "bcryptjs";
 
 export interface KioskOperatorRow {
   id: string;
@@ -11,6 +12,28 @@ export interface KioskOperatorRow {
   supervised_gates: string[] | null;
   session_version: number;
   is_kiosk_default: boolean;
+  /** bcrypt hash of the operator's login credential (used to verify the kiosk PIN). */
+  password_hash: string | null;
+}
+
+/**
+ * Verify a kiosk PIN (which doubles as the operator's password, since we are
+ * password-only) against the operator's stored bcrypt hash.
+ *
+ * Fail-closed: if the operator has no password_hash on file, reject the
+ * session (a kiosk operator without credentials cannot mint a session in
+ * PIN_REQUIRED mode).
+ */
+export async function verifyKioskPin(
+  operator: KioskOperatorRow,
+  pin: string
+): Promise<boolean> {
+  if (!operator.password_hash || pin.length === 0) return false;
+  try {
+    return await bcrypt.compare(pin, operator.password_hash);
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -26,7 +49,8 @@ export async function findKioskDefaultOperators(): Promise<KioskOperatorRow[]> {
     `SELECT id, unique_id, name, email, role, status, gate_id,
             supervised_gates,
             COALESCE(session_version, 0) AS session_version,
-            COALESCE(is_kiosk_default, FALSE) AS is_kiosk_default
+            COALESCE(is_kiosk_default, FALSE) AS is_kiosk_default,
+            password_hash
        FROM public.users
       WHERE is_kiosk_default = TRUE
         AND status = 'ACTIVE'
