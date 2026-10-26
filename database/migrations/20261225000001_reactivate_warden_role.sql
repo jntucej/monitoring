@@ -6,8 +6,7 @@
 BEGIN;
 
 UPDATE public.config_roles_registry
-   SET is_active = TRUE,
-       updated_at = NOW()
+   SET is_active = TRUE
  WHERE code = 'warden'
    AND is_active = FALSE;
 
