@@ -19,6 +19,7 @@ import {
   Gavel,
   Settings,
 } from "lucide-react";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 /**
  * RoleMap — 8 permission-scoped role cards with a hover 3D tilt.
@@ -28,8 +29,9 @@ import {
  * (mobile) and on low device tier (via the `data-home-tier` CSS + the
  * reduced flag). Enter reveal is a stagger of opacity + y only.
  *
- * Roles: Student, Parent, Faculty, Staff, Operator, Warden, Approver,
- * Admin — each with an icon, name and a one-line capability.
+ * Roles: Student, Parent, Faculty, Staff, Operator, Hostel Manager,
+ * Principal, Admin — each with an icon, name and a one-line capability.
+ * Login slugs are path segments (/login/<role>), not query params.
  */
 
 interface Role {
@@ -43,49 +45,49 @@ const ROLES: Role[] = [
   {
     name: "Student",
     cap: "Digital ID, gate passes, permissions and attendance.",
-    href: "/login?role=student",
+    href: "/login/student",
     Icon: Crown,
   },
   {
     name: "Parent",
     cap: "Child status, movement timeline and pass requests.",
-    href: "/login?role=parent",
+    href: "/login/parent",
     Icon: Users,
   },
   {
     name: "Faculty",
     cap: "Class attendance, subject permissions, student directory.",
-    href: "/login?role=faculty",
+    href: "/login/faculty",
     Icon: Briefcase,
   },
   {
     name: "Staff",
     cap: "Outpass approvals, room allocation, resident tickets.",
-    href: "/login?role=hostel-manager",
+    href: "/login/staff",
     Icon: Building2,
   },
   {
     name: "Operator",
     cap: "Gate scan verification, manual entry, transactions.",
-    href: "/login?role=operator",
+    href: "/login/operator",
     Icon: ScanLine,
   },
   {
-    name: "Warden",
+    name: "Hostel Manager",
     cap: "Hostel oversight, outpass review, incident response.",
-    href: "/login?role=warden",
+    href: "/login/hostel_manager",
     Icon: ShieldCheck,
   },
   {
-    name: "Approver",
+    name: "Principal",
     cap: "Approval centre, delegated permissions, audit.",
-    href: "/login?role=approver",
+    href: "/login/principal",
     Icon: Gavel,
   },
   {
     name: "Admin",
     cap: "Department analytics, RBAC, configuration, oversight.",
-    href: "/login?role=admin",
+    href: "/login/admin",
     Icon: Settings,
   },
 ];
@@ -147,10 +149,9 @@ function TiltCard({ role, reduced, index }: { role: Role; reduced: boolean; inde
 
 export function RoleMap() {
   const reduced = useReducedMotion();
-  const coarse = useRef(false);
-  if (typeof window !== "undefined") {
-    coarse.current = window.matchMedia("(pointer: coarse)").matches;
-  }
+  // Client-only coarse-pointer detection via the shared hook (no ref
+  // mutation during render; returns false on the server).
+  const coarse = useMediaQuery("(pointer: coarse)");
 
   return (
     <section
@@ -165,7 +166,7 @@ export function RoleMap() {
       </div>
       <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {ROLES.map((r, i) => (
-          <TiltCard key={r.name} role={r} index={i} reduced={reduced || coarse.current} />
+          <TiltCard key={r.name} role={r} index={i} reduced={reduced || coarse} />
         ))}
       </div>
     </section>

@@ -19,11 +19,29 @@ while true; do
     
     if [ "$remote_hash" != "$current_hash" ] && [ -n "$remote_hash" ]; then
         echo "[$(date)] New commit detected: $remote_hash" >> "$LOG_FILE"
-        echo "[$(date)] Deploying..." >> "$LOG_FILE"
-        
-        # Deploy
+
+        # Refuse to touch the tree if there are uncommitted local changes.
         cd "$REPO_DIR"
-        git reset --hard origin/main >> "$LOG_FILE" 2>&1
+        local_changes=$(git status --porcelain | wc -l)
+        if [ "$local_changes" -ne 0 ]; then
+            echo "[$(date)] Refusing deploy: $local_changes uncommitted local change(s) present. Stashing first." >> "$LOG_FILE"
+            git stash push -u -m "auto-poll-deploy: pre-deploy stash" >> "$LOG_FILE" 2>&1 || {
+                echo "[$(date)] ERROR: could not stash local changes; aborting deploy this cycle." >> "$LOG_FILE"
+                sleep $CHECK_INTERVAL
+                continue
+            }
+        fi
+
+        echo "[$(date)] Deploying..." >> "$LOG_FILE"
+
+        # Use pull --rebase so we never lose local commits and always track
+        # the newest remote, not a stale origin/main from a failed fetch.
+        git pull --rebase --autostash >> "$LOG_FILE" 2>&1 || {
+            echo "[$(date)] ERROR: git pull --rebase failed; aborting deploy this cycle." >> "$LOG_FILE"
+            git stash pop >> "$LOG_FILE" 2>/dev/null
+            sleep $CHECK_INTERVAL
+            continue
+        }
         
         rsync -av --delete \
             --exclude='.git' --exclude='node_modules' --exclude='.next' \

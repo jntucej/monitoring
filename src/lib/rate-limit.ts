@@ -19,14 +19,33 @@ export interface RateLimitResult {
  * Caddy sets X-Client-IP from {remote_host} (see Caddyfile).
  * Cloudflare sets CF-Connecting-IP; prefer X-Client-IP because Caddy already
  * rewrote it from the real TCP peer.
+ *
+ * P1-14: X-Real-IP is client-spoofable (a caller can set it directly, e.g.
+ * via a curl header), so it is ONLY consulted when TRUSTED_PROXY_IPS is set
+ * to a non-empty list (i.e. we are behind a known proxy that is expected to
+ * set it, and the socket peer address check is enforced upstream). When
+ * TRUSTED_PROXY_IPS is empty/unset we skip x-real-ip entirely and rely on
+ * the rightmost x-forwarded-for hop (the last trusted proxy's view of the
+ * client) or "unknown".
+ *
+ * Unit note: extractClientIp("...x-real-ip: 10.0.0.1, x-forwarded-for: a,b")
+ *   - with TRUSTED_PROXY_IPS set      -> "10.0.0.1" (trusted proxy value)
+ *   - with TRUSTED_PROXY_IPS unset    -> "b"        (x-forwarded-for last hop;
+ *     x-real-ip is ignored as untrusted)
  */
 export function extractClientIp(req: NextRequest): string {
   const xff = req.headers.get("x-forwarded-for");
   const rightmostHop = xff ? xff.split(",").pop()?.trim() : undefined;
+
+  // Only trust x-real-ip when a trusted-proxy allowlist is configured
+  // (P1-14). Without it the header is spoofable and must be ignored.
+  const trustedProxyIps = (process.env.TRUSTED_PROXY_IPS ?? "").split(",").map(s => s.trim()).filter(Boolean);
+  const realIp = trustedProxyIps.length > 0 ? req.headers.get("x-real-ip") : undefined;
+
   return (
     req.headers.get("x-client-ip") ??
     req.headers.get("cf-connecting-ip") ??
-    req.headers.get("x-real-ip") ??
+    realIp ??
     rightmostHop ??
     "unknown"
   );

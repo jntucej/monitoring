@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { reportClientError } from "@/lib/monitoring";
 
 export default function HomeError({
   error,
@@ -11,14 +12,14 @@ export default function HomeError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("Homepage error:", error);
+    reportClientError(error, { route: "home", component: "HomeError", digest: error.digest });
   }, [error]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#070B14] px-6 text-center text-white">
-      <h2 className="mb-4 text-2xl font-light tracking-tight">The story encountered a silence.</h2>
+      <h2 className="mb-4 text-2xl font-light tracking-tight">Something went wrong.</h2>
       <p className="mb-8 max-w-sm text-sm text-white/60">
-        Something unexpected occurred while rendering the gate monitor.
+        The gate monitor hit an unexpected snag while rendering.
       </p>
       <div className="flex items-center gap-4">
         <button

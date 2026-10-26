@@ -103,6 +103,22 @@ function routeTemplate(ctx) {
     imports.push(`import { checkIdempotency, storeIdempotency } from "@/lib/idempotency";`);
   }
 
+  const rateLimitStr = rateLimit
+    ? `{ windowMs: ${rateLimit.windowMs}, maxRequests: ${rateLimit.maxRequests} }`
+    : `RATE_LIMITS.mutation`;
+
+  // P2-23: rate-limit config must actually be applied. Every generated
+  // mutating verb (POST/PATCH/PUT/DELETE) is wrapped in withRateLimit by
+  // default; GET is left unwrapped (cheap, covered by the global /api
+  // limiter in src/proxy.ts). withRateLimit is applied OUTSIDE
+  // withAuthorization so the canonical "auth — rate-limit — handler"
+  // order is preserved by passing the already-authorization-wrapped
+  // function in.
+  const methodRateLimit = (method, expr) =>
+    ["POST", "PATCH", "PUT", "DELETE"].includes(method)
+      ? `export const ${method} = withRateLimit(${expr}, rateLimitConfig);`
+      : `export const ${method} = ${expr};`;
+
   const handlers = methods.map((method) => {
     if (method === "GET") {
       return `
@@ -123,7 +139,7 @@ async function handleGet(
 
   return ok({ rows, count: rows.length });
 }
-export const GET = withAuthorization(handleGet, { ${roleConstraint} });`;
+${methodRateLimit("GET", `withAuthorization(handleGet, { ${roleConstraint} })`)}`;
     }
 
     if (method === "POST") {
@@ -184,7 +200,7 @@ async function handlePost(
 
   return ok(created, 201);
 }
-export const POST = withAuthorization(handlePost, { ${roleConstraint} });`;
+${methodRateLimit("POST", `withAuthorization(handlePost, { ${roleConstraint} })`)}`;
     }
 
     if (method === "PATCH" || method === "PUT") {
@@ -213,7 +229,7 @@ async function handle${fn}(
   // TODO: implement via service.
   return ok({ updated: true, actor: auth.userId });
 }
-export const ${method} = withAuthorization(handle${fn}, { ${roleConstraint} });`;
+${methodRateLimit(method, `withAuthorization(handle${fn}, { ${roleConstraint} })`)}`;
     }
 
     if (method === "DELETE") {
@@ -243,14 +259,10 @@ async function handleDelete(
 
   return ok({ deleted: true });
 }
-export const DELETE = withAuthorization(handleDelete, { ${roleConstraint} });`;
+${methodRateLimit("DELETE", `withAuthorization(handleDelete, { ${roleConstraint} })`)}`;
     }
     return "";
   }).join("\n");
-
-  const rateLimitStr = rateLimit
-    ? `{ windowMs: ${rateLimit.windowMs}, maxRequests: ${rateLimit.maxRequests} }`
-    : `RATE_LIMITS.mutation`;
 
   return `// src/app/api/${apiPath}/route.ts
 // ─────────────────────────────────────────────────────────────────────────────
@@ -267,7 +279,6 @@ export const DELETE = withAuthorization(handleDelete, { ${roleConstraint} });`;
 ${imports.join("\n")}
 
 const rateLimitConfig: RateLimitConfig = ${rateLimitStr};
-void rateLimitConfig; // reserved for withRateLimit when enabled per-route
 ${handlers}
 `;
 }

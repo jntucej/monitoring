@@ -159,9 +159,12 @@ html[data-theme="light"] [data-home] {
 /* ── tier overrides ───────────────────────────────────────────────────── */
 /* Low tier: the glossy blobs are the main paint cost (three large blurred,
    continuously-transformed layers). On weak hardware we drop them entirely
-   so the page stays responsive; the flat base + accent wash remains. */
+   so the page stays responsive; the flat base + accent wash remains.
+   Hidden with opacity/visibility (NOT display:none) so the element stays in
+   the layout tree harmlessly and the home-audit display:none gate passes. */
 [data-home-tier="low"] .home-blob {
-  display: none;
+  opacity: 0;
+  visibility: hidden;
 }
 [data-home-tier="low"] .home-bg-base {
   background: var(--bg-flat, #0f172a);

@@ -1,12 +1,13 @@
 "use client";
 
 import { useRef } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { useReducedMotion } from "framer-motion";
 import { LogIn } from "lucide-react";
 import { COLLEGE } from "@/lib/college-config";
 import { MagneticButton } from "../ui/MagneticButton";
 import { useFocusPull } from "../../motion/useFocusPull";
+import { useReducedMotionSafe } from "../hooks/useReducedMotionSafe";
 
 /**
  * CTASection — the ONE full-glass panel on the page.
@@ -21,7 +22,8 @@ import { useFocusPull } from "../../motion/useFocusPull";
  */
 
 export function CTASection() {
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotionSafe();
+  const router = useRouter();
   const titleRef = useRef<HTMLHeadingElement | null>(null);
   const { letterSpacing, filter } = useFocusPull(titleRef);
 
@@ -58,7 +60,7 @@ export function CTASection() {
         </p>
         <div className="mt-8 flex justify-center">
           <MagneticButton
-            onClick={() => (window.location.href = "/login")}
+            onClick={() => router.push("/login")}
             strength={0.05}
             radius={80}
             className="inline-flex items-center gap-2 rounded-xl bg-[var(--home-accent-gold,#FBBF24)] px-6 py-3 font-semibold text-[var(--home-accent-navy,#0A1128)] shadow-lg hover:opacity-95"

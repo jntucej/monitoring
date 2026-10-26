@@ -1,9 +1,9 @@
 "use client";
 
 import { useRef } from "react";
+import { useRouter } from "next/navigation";
 import {
   motion,
-  useReducedMotion,
   useScroll,
   useSpring,
   useTransform,
@@ -12,6 +12,7 @@ import { LogIn, ArrowRight } from "lucide-react";
 import { COLLEGE } from "@/lib/college-config";
 import { MagneticButton } from "../ui/MagneticButton";
 import { useGradientHeadline } from "../../motion/useGradientHeadline";
+import { useReducedMotionSafe } from "../hooks/useReducedMotionSafe";
 
 /**
  * Hero — the LCP-bearing first section.
@@ -34,7 +35,8 @@ import { useGradientHeadline } from "../../motion/useGradientHeadline";
 const HEADLINE = COLLEGE.shortName; // "JNTUH UCEJ"
 
 export function Hero() {
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotionSafe();
+  const router = useRouter();
   const sectionRef = useRef<HTMLElement | null>(null);
   const headRef = useRef<HTMLSpanElement | null>(null);
 
@@ -145,7 +147,7 @@ export function Hero() {
       {/* CTA row */}
       <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
         <MagneticButton
-          onClick={() => (window.location.href = "/login")}
+          onClick={() => router.push("/login")}
           strength={0.05}
           radius={80}
           className="inline-flex items-center gap-2 rounded-xl bg-[var(--home-accent-gold,#FBBF24)] px-6 py-3 font-semibold text-[var(--home-accent-navy,#0A1128)] shadow-lg hover:opacity-95"

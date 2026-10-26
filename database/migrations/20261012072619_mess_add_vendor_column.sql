@@ -1,3 +1,4 @@
+-- NOTE: No-op scaffolding migration (self-record insert only; no DDL).
 -- ============================================================================
 -- Migration: 20261012072619_mess_add_vendor_column
 -- Purpose: TODO — one-line description of what this changes and why.

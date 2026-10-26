@@ -44,9 +44,9 @@ export function RollingDigits({
       role="text"
       aria-label={String(value)}
     >
-      {digits.map((d) => (
+      {digits.map((d, i) => (
         <span
-          key={d.digit}
+          key={`d-${i}`}
           className="relative inline-flex overflow-hidden"
           style={{ height: cellHeight, width: "0.72em" }}
           aria-hidden="true"
@@ -56,7 +56,7 @@ export function RollingDigits({
             // offset so that digit d.digit is at the top of the visible
             // window. Each cell is a plain absolutely-positioned span
             // translated by k * cellHeight.
-            const shown = (k + d.offset) % 10;
+            const shown = (k + d.digit) % 10;
             return (
               <span
                 key={k}

@@ -4,27 +4,39 @@ import { useRef } from "react";
 import { motion } from "framer-motion";
 import { useReducedMotion } from "framer-motion";
 import { useFocusPull } from "../../motion/useFocusPull";
+import { useLiveData } from "../hooks/useLiveData";
 import { RollingDigits } from "./RollingDigits";
 
 /**
- * NumbersBand — counters: gates monitored, users managed, scans
- * processed, uptime %.
+ * NumbersBand — platform-scale counters: gates monitored, users on
+ * platform, scans processed, uptime %.
+ *
+ * "scans processed" and "gates monitored" read LIVE values via
+ * useLiveData so this band can never show a different number than
+ * LiveCountsStrip higher up the same page. "users on platform" and
+ * "uptime" are static platform framing (clearly cumulative, not
+ * current-second), so they stay hardcoded marketing copy.
  *
  * Every counter goes through `RollingDigits` (useDigitRoll D). The
  * section title uses useFocusPull (E).
  */
 
-const NUMBERS = [
-  { value: 12, suffix: "", label: "gates monitored" },
-  { value: 3100, suffix: "+", label: "users managed" },
-  { value: 847, suffix: "", label: "scans today" },
-  { value: 99, suffix: "%", label: "uptime" },
-];
-
 export function NumbersBand() {
   const reduced = useReducedMotion();
   const titleRef = useRef<HTMLHeadingElement | null>(null);
   const { letterSpacing, filter } = useFocusPull(titleRef);
+  const live = useLiveData(30_000);
+  const s = live?.stats;
+
+  const activeGates =
+    live?.modules?.find((m) => m.id === "gate")?.count ?? 0;
+
+  const NUMBERS: Array<{ value: number; suffix: string; label: string }> = [
+    { value: activeGates, suffix: "", label: "gates monitored" },
+    { value: 3100, suffix: "+", label: "users on platform" },
+    { value: s?.scansToday ?? 0, suffix: "", label: "scans processed today" },
+    { value: 99, suffix: "%", label: "uptime" },
+  ];
 
   return (
     <section
