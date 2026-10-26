@@ -78,6 +78,11 @@ const DIRS = [
 ];
 
 const DRY = process.argv.includes("--dry-run");
+// --force: treat checksum-drifted files as "already applied, upgrading legacy
+// checksum" — re-stamp the recorded checksum with the current file hash but
+// do NOT re-run the SQL. Safe for files that were edited after being applied
+// on a legacy install. Without this flag, any drift aborts the run.
+const FORCE = process.argv.includes("--force");
 
 function sha256(s: string) {
   return createHash("sha256").update(s).digest("hex");
@@ -112,6 +117,13 @@ async function main() {
     await client.query(
       `ALTER TABLE schema_migrations ADD COLUMN IF NOT EXISTS checksum TEXT`
     );
+    // Legacy self-records in migration files insert (version, filename,
+    // applied_at) without a checksum. If checksum was created NOT NULL those
+    // inserts fail. Make it nullable so legacy rows land; the runner's
+    // backfill (below) stamps the checksum on the next run.
+    await client.query(`
+      ALTER TABLE schema_migrations ALTER COLUMN checksum DROP NOT NULL
+    `).catch(() => {});
     // Backfill filename from version for legacy rows so checksum-drift detection
     // can map file -> recorded row. checksum stays NULL for those (never hashed),
     // which is treated below as "unknown checksum" rather than drift.
@@ -198,6 +210,18 @@ async function main() {
         continue;
       }
       if (recorded && prev !== sum) {
+        if (FORCE) {
+          // --force: treat drift as "already applied, upgrading legacy checksum".
+          // Re-stamp the checksum so future runs see a clean match, but do NOT
+          // re-run the SQL (the original migration already ran on this DB).
+          console.log(`✓ ${f.name} (drifted, --force: re-stamping checksum, SQL not re-run)`);
+          await client.query(
+            "UPDATE schema_migrations SET checksum = $1 WHERE version = $2 OR filename = $3",
+            [sum, version, f.name]
+          ).catch(() => {});
+          skipped++;
+          continue;
+        }
         console.error(`✗ ${f.name} — content changed since last apply (checksum drift). Aborting.`);
         drifted++;
         continue;
@@ -212,22 +236,93 @@ async function main() {
       // the runner: the file's COMMIT would end the runner's transaction
       // early, and the runner's follow-up INSERT would then fail (or worse,
       // land outside the migration's transaction). Detect and skip wrapping.
-      const selfTx = /^\s*BEGIN\s*;/im.test(sql) && /^\s*COMMIT\s*;/im.test(sql);
+      // CONCURRENTLY statements can't run inside ANY open transaction, not
+      // even pg's implicit per-query transaction on the shared client.
+      // For files containing CONCURRENTLY, split at the CONCURRENTLY keyword:
+      //   pre-concurrent part  -> runs as its own query (its own BEGIN/COMMIT)
+      //   CONCURRENTLY part    -> runs on a fresh client, single-statement, no tx
+      const hasConcurrently = /CONCURRENTLY/.test(sql);
+      const selfRecords = /INSERT\s+INTO\s+public\.schema_migrations/i.test(sql);
+      let preSql = sql;
+      let ccSql = "";
+      if (hasConcurrently) {
+        // Find the line start of the first CONCURRENTLY occurrence.
+        const lines = sql.split("\n");
+        let splitIdx = lines.findIndex((l) => /CONCURRENTLY/i.test(l));
+        if (splitIdx === -1) splitIdx = lines.length;
+        preSql = lines.slice(0, splitIdx).join("\n");
+        ccSql = lines.slice(splitIdx).join("\n");
+      }
+      let freshClient: any = null;
       try {
-        if (!selfTx) await client.query("BEGIN");
-        await client.query(sql);
-        await client.query(
-          "INSERT INTO schema_migrations (version, filename, checksum) VALUES ($1, $2, $3)",
-          [version, f.name, sum]
-        );
-        if (!selfTx) await client.query("COMMIT");
+        if (hasConcurrently) {
+          // Pre-concurrent part: run on shared client with its own tx if needed.
+          if (preSql.trim().length > 0) {
+            const preSelfTx = /^\s*BEGIN\s*;/im.test(preSql) && /^\s*COMMIT\s*;/im.test(preSql);
+            if (!preSelfTx) await client.query("BEGIN");
+            await client.query(preSql);
+            if (!preSelfTx) await client.query("COMMIT");
+          }
+          // CONCURRENTLY part: fresh client, single statement, no open tx.
+          if (ccSql.trim().length > 0) {
+            freshClient = await pool.connect();
+            // Execute each statement in the CONCURRENTLY section individually
+            // so no implicit batch transaction wraps them.
+            const ccStatements = ccSql
+              .split(/;\s*(?=\n|$)/)
+              .map((s) => s.trim())
+              .filter((s) => s.length > 0 && !s.startsWith("--"));
+            for (const stmt of ccStatements) {
+              if (/CONCURRENTLY/i.test(stmt)) {
+                await freshClient.query(stmt + ";");
+              } else if (/INSERT\s+INTO\s+public\.schema_migrations/i.test(stmt) || /DO\s*\$/i.test(stmt)) {
+                await freshClient.query(stmt + ";").catch(() => {});
+              }
+            }
+          }
+          // Record the migration (CONCURRENTLY files don't self-record).
+          if (!selfRecords) {
+            const recorder = freshClient ?? client;
+            await recorder.query(
+              "INSERT INTO schema_migrations (version, filename, checksum) VALUES ($1, $2, $3) ON CONFLICT (version) DO UPDATE SET checksum = EXCLUDED.checksum, filename = EXCLUDED.filename",
+              [version, f.name, sum]
+            );
+          } else {
+            const recorder = freshClient ?? client;
+            await recorder.query(
+              "UPDATE schema_migrations SET checksum = $1, filename = $2 WHERE version = $3 AND (checksum IS NULL OR checksum = '' OR filename IS NULL)",
+              [sum, f.name, version]
+            ).catch(() => {});
+          }
+        } else {
+          const selfTx = /^\s*BEGIN\s*;/im.test(sql) && /^\s*COMMIT\s*;/im.test(sql);
+          if (!selfTx) await client.query("BEGIN");
+          await client.query(sql);
+          if (!selfTx) await client.query("COMMIT");
+          if (selfRecords) {
+            await client.query(
+              "UPDATE schema_migrations SET checksum = $1, filename = $2 WHERE version = $3 AND (checksum IS NULL OR checksum = '' OR filename IS NULL)",
+              [sum, f.name, version]
+            );
+          } else {
+            await client.query(
+              "INSERT INTO schema_migrations (version, filename, checksum) VALUES ($1, $2, $3) ON CONFLICT (version) DO UPDATE SET checksum = EXCLUDED.checksum, filename = EXCLUDED.filename",
+              [version, f.name, sum]
+            );
+          }
+        }
         applied_count++;
-        console.log(`✓ ${f.name} applied${selfTx ? " (own transaction)" : ""}`);
+        console.log(`✓ ${f.name} applied${hasConcurrently ? " (CONCURRENTLY)" : ""}${selfRecords ? " (self-recorded)" : ""}`);
       } catch (err) {
-        if (!selfTx) await client.query("ROLLBACK").catch(() => {});
+        if (!hasConcurrently) {
+          const selfTx = /^\s*BEGIN\s*;/im.test(sql) && /^\s*COMMIT\s*;/im.test(sql);
+          if (!selfTx) await client.query("ROLLBACK").catch(() => {});
+        }
+        if (freshClient) freshClient.release?.();
         console.error(`✗ ${f.name} FAILED:`, err);
         process.exit(1);
       }
+      if (freshClient) freshClient.release?.();
     }
 
     console.log(`\nDone. Applied: ${applied_count}, Skipped: ${skipped}, Drifted: ${drifted}`);

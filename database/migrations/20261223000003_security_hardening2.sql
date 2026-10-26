@@ -1,5 +1,5 @@
 -- ============================================================================
--- Migration: 20261223000002_security_hardening2.sql
+-- Migration: 20261223000003_security_hardening2.sql
 --
 -- P1-11: Manual-scan 60-second dedup guard
 --   The process_gate_scan rewrite in 20261220000002 deduplicates only
@@ -96,13 +96,11 @@ BEGIN
   ORDER BY timestamp DESC LIMIT 1 FOR UPDATE;
   IF v_recent_manual_id IS NOT NULL AND p_is_manual THEN
     -- Second manual scan within 60s: reject to prevent inflation.
-    RAISE EXCEPTION 'DUPLICATE_MANUAL_SCAN_WITHIN_60S',
-      'HINT: A manual scan was already recorded for this user/direction within the last 60 seconds.';
+    RAISE EXCEPTION 'DUPLICATE_MANUAL_SCAN_WITHIN_60S: A manual scan was already recorded for this user/direction within the last 60 seconds.';
   END IF;
   IF v_recent_manual_id IS NOT NULL AND NOT p_is_manual THEN
     -- Auto scan within 60s of a manual scan: reject to prevent double-counting.
-    RAISE EXCEPTION 'DUPLICATE_SCAN_WITHIN_60S',
-      'HINT: A manual scan was already recorded for this user/direction within the last 60 seconds.';
+    RAISE EXCEPTION 'DUPLICATE_SCAN_WITHIN_60S: A manual scan was already recorded for this user/direction within the last 60 seconds.';
   END IF;
 
   IF NOT p_is_manual THEN
@@ -247,18 +245,18 @@ BEGIN
       AND column_name='checksum') INTO has_checksum;
   IF has_filename AND has_checksum THEN
     INSERT INTO public.schema_migrations (version, filename, applied_at, checksum)
-    VALUES ('20261223000002',
-            '20261223000002_security_hardening2.sql', NOW(),
-            md5('20261223000002_security_hardening2'))
+    VALUES ('20261223000003',
+            '20261223000003_security_hardening2.sql', NOW(),
+            md5('20261223000003_security_hardening2'))
     ON CONFLICT (version) DO NOTHING;
   ELSIF has_filename THEN
     INSERT INTO public.schema_migrations (version, filename, applied_at)
-    VALUES ('20261223000002',
-            '20261223000002_security_hardening2.sql', NOW())
+    VALUES ('20261223000003',
+            '20261223000003_security_hardening2.sql', NOW())
     ON CONFLICT (version) DO NOTHING;
   ELSE
     INSERT INTO public.schema_migrations (version, applied_at)
-    VALUES ('20261223000002', NOW())
+    VALUES ('20261223000003', NOW())
     ON CONFLICT (version) DO NOTHING;
   END IF;
 END $$;

@@ -31,18 +31,42 @@ END $$;
 DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'config_roles') THEN
-    -- Merge legacy rows into the registry (same columns)
+    -- Merge legacy rows into the registry.
+    -- The legacy config_roles table has (code, display_name, permissions, is_active,
+    -- created_at, updated_at) — no is_privileged or is_super.
+    -- Use a conditional INSERT so only codes not already in the registry are added,
+    -- and default the privilege flags to false.
     INSERT INTO public.config_roles_registry (code, display_name, is_privileged, is_active)
-    SELECT code, display_name, COALESCE(is_privileged, false), COALESCE(is_active, true)
-    FROM public.config_roles
+    SELECT
+      c.code,
+      c.display_name,
+      false,
+      COALESCE(c.is_active, true)
+    FROM public.config_roles c
+    WHERE NOT EXISTS (
+      SELECT 1 FROM public.config_roles_registry r WHERE r.code = c.code
+    )
     ON CONFLICT (code) DO NOTHING;
 
     -- Drop the now-redundant table
     DROP TABLE public.config_roles;
 
-    -- Re-create it as a thin view so existing code paths keep resolving
+    -- Re-create it as a thin view so existing code paths keep resolving.
+    -- The legacy table had columns not present on the registry
+    -- (permissions, description, icon_name, default_redirect, updated_at),
+    -- so expose them as NULL to keep SELECT * queries working.
     CREATE VIEW public.config_roles AS
-      SELECT * FROM public.config_roles_registry;
+      SELECT
+        r.code,
+        r.display_name,
+        NULL::jsonb AS permissions,
+        NULL::text  AS description,
+        NULL::text  AS icon_name,
+        NULL::text  AS default_redirect,
+        r.is_active,
+        r.created_at,
+        NULL::timestamptz AS updated_at
+      FROM public.config_roles_registry r;
 
     COMMENT ON VIEW public.config_roles IS
       'P1-12: config_roles is a VIEW over config_roles_registry; all reads/writes go to the registry.';
@@ -51,11 +75,31 @@ BEGIN
   ) THEN
     -- Already a view (idempotent re-run) — refresh to point at the registry
     CREATE OR REPLACE VIEW public.config_roles AS
-      SELECT * FROM public.config_roles_registry;
+      SELECT
+        r.code,
+        r.display_name,
+        NULL::jsonb AS permissions,
+        NULL::text  AS description,
+        NULL::text  AS icon_name,
+        NULL::text  AS default_redirect,
+        r.is_active,
+        r.created_at,
+        NULL::timestamptz AS updated_at
+      FROM public.config_roles_registry r;
   ELSE
     -- Neither a table nor a view existed; create the view fresh
     CREATE VIEW public.config_roles AS
-      SELECT * FROM public.config_roles_registry;
+      SELECT
+        r.code,
+        r.display_name,
+        NULL::jsonb AS permissions,
+        NULL::text  AS description,
+        NULL::text  AS icon_name,
+        NULL::text  AS default_redirect,
+        r.is_active,
+        r.created_at,
+        NULL::timestamptz AS updated_at
+      FROM public.config_roles_registry r;
 
     COMMENT ON VIEW public.config_roles IS
       'P1-12: config_roles is a VIEW over config_roles_registry; all reads/writes go to the registry.';
