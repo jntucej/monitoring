@@ -11,8 +11,8 @@ import {
 import { LogIn, ArrowRight } from "lucide-react";
 import { COLLEGE } from "@/lib/college-config";
 import { MagneticButton } from "../ui/MagneticButton";
-import { useGradientHeadline } from "../../motion/useGradientHeadline";
 import { useReducedMotionSafe } from "../hooks/useReducedMotionSafe";
+
 
 /**
  * Hero — the LCP-bearing first section.
@@ -38,7 +38,6 @@ export function Hero() {
   const reduced = useReducedMotionSafe();
   const router = useRouter();
   const sectionRef = useRef<HTMLElement | null>(null);
-  const headRef = useRef<HTMLSpanElement | null>(null);
 
   // Scroll recede on the section wrapper.
   const { scrollYProgress } = useScroll({
@@ -50,9 +49,6 @@ export function Hero() {
   const y = useTransform(scrollYProgress, [0, 1], [0, 20]);
   const springScale = useSpring(scale, { stiffness: 120, damping: 20 });
   const springY = useSpring(y, { stiffness: 120, damping: 20 });
-
-  // Gradient headline (C). Driven by scroll through the section.
-  const gradientBgPos = useGradientHeadline(headRef);
 
   const scrollTo = (id: string) => {
     const el = document.getElementById(id);
@@ -123,15 +119,16 @@ export function Hero() {
       </motion.div>
 
       {/* LCP: the h1. Full opacity on the first frame. Transform-only
-          wrapper motion. No blur, no opacity animation on the text. */}
+          wrapper motion. No blur, no opacity animation on the text. The
+          gradient is static (centered) so no repaints happen on scroll. */}
       <motion.h1
         className="home-headline-gradient text-6xl font-semibold tracking-tight md:text-8xl"
-        style={{ lineHeight: 1, ...(reduced ? {} : { backgroundPosition: gradientBgPos }) }}
+        style={{ lineHeight: 1 }}
         initial={reduced ? false : { y: 8, scale: 1.01 }}
         animate={reduced ? undefined : { y: 0, scale: 1 }}
         transition={{ type: "spring", stiffness: 120, damping: 20 }}
       >
-        <span ref={headRef}>{HEADLINE}</span>
+        <span>{HEADLINE}</span>
       </motion.h1>
 
       {/* Sub-headline — blur-reveal is fine here (not the LCP element). */}

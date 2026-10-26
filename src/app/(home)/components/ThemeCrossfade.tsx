@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { useUIStore } from "@/stores/uiStore";
 
 /**
@@ -12,7 +11,8 @@ import { useUIStore } from "@/stores/uiStore";
  *   - Only active inside [data-home] (home page). No-op elsewhere.
  *   - Skipped entirely under `prefers-reduced-motion: reduce`.
  *
- * The overlay fades via opacity only (transform-safe, no layout shift).
+ * The overlay fades via a CSS opacity transition (no framer-motion) so a
+ * theme change cannot add a main-thread task to the home page.
  */
 const THEME_BASE: Record<"dark" | "light" | "glass", string> = {
   dark: "#0A1128",    /* --bg-flat (dark) */
@@ -34,7 +34,7 @@ export function ThemeCrossfade() {
       prevRef.current = theme;
       return;
     }
-    // A real switch: capture the theme we're leaving and trigger the fade.
+    // A real switch: capture the theme we are leaving and trigger the fade.
     setFadeFrom(prevRef.current ?? theme);
     prevRef.current = theme;
   }, [theme]);
@@ -51,46 +51,52 @@ export function ThemeCrossfade() {
 
   if (!fadeFrom || reduced) return null;
   return (
-    <AnimatePresence>
-      <motion.div
-        key={fadeFrom}
-        aria-hidden="true"
-        className="home-crossfade fixed inset-0 pointer-events-none"
-        style={{ backgroundColor: THEME_BASE[fadeFrom], zIndex: 100 }}
-        initial={{ opacity: 1 }}
-        animate={{ opacity: 0 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-        onAnimationComplete={() => setFadeFrom(null)}
-      />
-      <CrossfadeTimeout fadeFrom={fadeFrom} onTimeout={() => setFadeFrom(null)} />
-    </AnimatePresence>
+    <CrossfadeOverlay
+      key={fadeFrom}
+      baseColor={THEME_BASE[fadeFrom]}
+      onDone={() => setFadeFrom(null)}
+    />
   );
 }
 
 /**
- * Safety net: even if the exit animation never calls onAnimationComplete
- * (framer-motion re-render race, a superseded theme change, or a reduced-
- * motion flip mid-fade), the overlay is force-cleared after 600ms so it
- * can never sit on top of the page and make it look "frozen".
+ * The overlay div: starts at opacity 1 and transitions to 0 over 400ms via
+ * a CSS opacity transition. A 600ms safety-net timer guarantees `onDone`
+ * fires even if the transition never completes (e.g. a mid-fade theme flip
+ * re-mounts the overlay before `transitionend` fires).
  */
-function CrossfadeTimeout({
-  fadeFrom,
-  onTimeout,
+function CrossfadeOverlay({
+  baseColor,
+  onDone,
 }: {
-  fadeFrom: ThemeName;
-  onTimeout: () => void;
+  baseColor: string;
+  onDone: () => void;
 }) {
-  // Stable ref so the 600ms timer only re-arms when the fade actually
-  // changes (fadeFrom), not on every parent re-render from a new inline
-  // onTimeout closure.
-  const onTimeoutRef = useRef(onTimeout);
+  const [fading, setFading] = useState(false);
+
+  // Trigger the opacity transition on the very next frame after mount so
+  // the browser has painted the overlay at opacity 1 first.
   useEffect(() => {
-    onTimeoutRef.current = onTimeout;
-  });
+    const raf = requestAnimationFrame(() => setFading(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  // Safety net: clear the overlay after 600ms no matter what.
   useEffect(() => {
-    const t = setTimeout(() => onTimeoutRef.current(), 600);
+    const t = setTimeout(onDone, 600);
     return () => clearTimeout(t);
-  }, [fadeFrom]);
-  return null;
+  }, [onDone]);
+
+  return (
+    <div
+      aria-hidden="true"
+      className="home-crossfade fixed inset-0 pointer-events-none"
+      style={{
+        backgroundColor: baseColor,
+        zIndex: 100,
+        opacity: fading ? 0 : 1,
+        transition: "opacity 400ms ease-out",
+      }}
+    />
+  );
 }
