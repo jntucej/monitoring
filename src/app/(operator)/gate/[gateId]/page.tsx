@@ -24,6 +24,7 @@ import { useCollegeInfo } from "@/hooks/useCollegeInfo";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { useScanQueueSync } from "@/hooks/useScanQueueSync";
 import { primeAudio } from "@/lib/sound";
+import { OperatorGateClaimPanel } from "@/components/operator/OperatorGateClaimPanel";
 
 function OperatorPageInner() {
   const params = useParams<{ gateId: string }>();
@@ -156,21 +157,20 @@ function OperatorPageInner() {
     if (targetMode) setOperatorSubMode(targetMode);
   }, [searchParams, isSpecialPath, gateIdParam]);
 
-  // Unassigned operators fall back to the default gate; if none is available,
-  // they see the "no gate" waiting panel (needsAssignment stays true).
+  // Unassigned operators see the "Register / claim a gate" panel so they can
+  // enter the claim code a supervisor generated for them. If a default gate is
+  // available (kiosk), show the claim panel first, then fall back to the
+  // default gate on the operator console.
   const [needsAssignment, setNeedsAssignment] = useState(false);
   useEffect(() => {
     if (!authenticated || !user) return;
     if (gateId === "" || gateId === "history" || gateId === "manual") {
-      if (user.gateId || defaultGateId) {
-        setNeedsAssignment(false);
-      } else {
-        setNeedsAssignment(true);
-      }
+      // No gate of their own: show the register/claim panel.
+      setNeedsAssignment(true);
     } else {
       setNeedsAssignment(false);
     }
-  }, [authenticated, user, gateId, defaultGateId]);
+  }, [authenticated, user, gateId]);
 
   // Fix #1: the Scanner's decode loop should only run while idle or actively
   // detecting. Once confirming / success / error, stop decoding so jsQR CPU
@@ -444,25 +444,11 @@ function OperatorPageInner() {
       case "scandesk":
       default:
         if (needsAssignment) {
+          // No gate assigned to this operator — walk them through claiming one
+          // via a supervisor-issued gate-claim code ("register at this kiosk").
           return (
             <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <div className="bg-[var(--bg-surface)] border border-amber-500/30 rounded-2xl p-6 text-center space-y-3 shadow-sm">
-                <div className="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-400 flex items-center justify-center mx-auto border border-amber-500/30">
-                  <AlertCircle className="w-6 h-6" />
-                </div>
-                <h3 className="font-bold text-sm text-[var(--text-primary)]">No active gate available</h3>
-                <p className="text-xs text-[var(--text-secondary)] max-w-sm mx-auto leading-relaxed">
-                  You have no gate assigned and no active gate was found. Ask a system administrator
-                  to enable a gate or assign you to one (SysAdmin → Gates). The kiosk will resolve a
-                  default gate automatically once one is active.
-                </p>
-                <button
-                  onClick={() => router.push("/operator")}
-                  className="px-4 py-2 rounded-xl bg-[var(--action-primary)] text-slate-950 text-xs font-bold hover:brightness-110 transition"
-                >
-                  Go to Dashboard
-                </button>
-              </div>
+              <OperatorGateClaimPanel />
             </div>
           );
         }

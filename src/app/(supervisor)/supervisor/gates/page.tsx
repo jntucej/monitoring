@@ -6,6 +6,7 @@ import { PageLoading } from "@/components/shared/LoadingStates";
 import { usePolling } from "@/hooks/usePolling";
 import { useApiResource } from "@/hooks/useApiResource";
 import { DoorOpen, ShieldAlert, Loader2, Inbox } from "lucide-react";
+import { GateClaimCodePanel } from "@/components/supervisor/GateClaimCodePanel";
 
 interface PresenceMatrixResponse {
   success: boolean;
@@ -106,6 +107,10 @@ function GateStatusInner() {
             </div>
           )}
         </div>
+      </WidgetBoundary>
+
+      <WidgetBoundary title="Gate Claim Codes">
+        <GateClaimCodePanel />
       </WidgetBoundary>
     </div>
   );
