@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { CommandCenterContent } from "@/components/sysadmin/domains/overview/CommandCenterContent";
-import type { CommandCenterEnvelope } from "@/components/sysadmin/domains/overview/types";
+import type { CommandCenterData } from "@/components/sysadmin/domains/overview/types";
 
 /**
  * SysAdmin Command Center — the live operational-state cockpit.
@@ -17,12 +17,10 @@ import type { CommandCenterEnvelope } from "@/components/sysadmin/domains/overvi
  * degrades to a local error card rather than taking the whole shell down.
  */
 export default function SysadminCommandCenterPage() {
-  const { data, loading, error, refresh } = useDashboardData<CommandCenterEnvelope>(
+  const { data, loading, error, refresh } = useDashboardData<CommandCenterData>(
     "/api/admin/overview",
     { ttlMs: 20_000, pollMs: 10_000 }
   );
-  // ok() wraps the payload in { data: CommandCenterData } — unwrap for the content.
-  const payload = data?.data ?? null;
 
   return (
     <>
@@ -33,7 +31,7 @@ export default function SysadminCommandCenterPage() {
         refreshing={loading && data != null}
       />
 
-      {loading && payload == null ? (
+      {loading && data == null ? (
         <CommandCenterSkeleton />
       ) : error ? (
         <div
@@ -55,9 +53,9 @@ export default function SysadminCommandCenterPage() {
           </button>
         </div>
       ) : (
-        payload && (
+        data && (
           <WidgetBoundary title="Command Center">
-            <CommandCenterContent data={payload} onRefresh={refresh} />
+            <CommandCenterContent data={data} onRefresh={refresh} />
           </WidgetBoundary>
         )
       )}

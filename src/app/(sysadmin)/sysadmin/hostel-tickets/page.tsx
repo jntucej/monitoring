@@ -18,7 +18,7 @@ interface Row {
 }
 
 export default function HostelTicketsAdminPage() {
-  const { data, loading, error } = useDashboardData<{ success: boolean; data: Row[] }>(
+  const { data, loading, error } = useDashboardData<Row[]>(
     "/api/admin/hostel-tickets",
     { ttlMs: 10_000, pollMs: 60_000 },
   );
@@ -39,7 +39,7 @@ export default function HostelTicketsAdminPage() {
             { header: "Status", accessor: (r) => r.status },
             { header: "Created", accessor: (r) => new Date(r.created_at).toLocaleString() },
           ]}
-          data={data?.data ?? []}
+          data={data ?? []}
           loading={loading}
           error={error}
           keyExtractor={(r) => r.ticket_number}

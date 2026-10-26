@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { MiniGauge } from "@/components/sysadmin/kit/sidebar";
-import type { DeploymentsData, DeploymentsEnvelope, DeploymentsEntity, DeploymentRow } from "./types";
+import type { DeploymentsData, DeploymentsEntity, DeploymentRow } from "./types";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -147,11 +147,11 @@ export function DeploymentsContent(
   },
 ) {
   const { data: externalData, onRowClick: _onRowClick } = _props ?? {};
-  const { data: envelope, loading, error } = useDashboardData<DeploymentsEnvelope>(
+  const { data, loading, error } = useDashboardData<DeploymentsData>(
     "/api/admin/deployments/overview",
     { ttlMs: 180_000, pollMs: 60_000, enabled: externalData == null },
   );
-  const deploymentsData: DeploymentsData | null = externalData ?? envelope?.data ?? null;
+  const deploymentsData: DeploymentsData | null = externalData ?? data;
 
   if (loading && !deploymentsData) {
     return (

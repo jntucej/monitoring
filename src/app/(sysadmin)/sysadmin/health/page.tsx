@@ -10,9 +10,6 @@ import { cn } from "@/lib/utils";
 import { HealthContent, TABS } from "@/components/sysadmin/domains/monitoring/HealthContent";
 import type { HealthData } from "@/components/sysadmin/domains/monitoring/types";
 
-/** ok() wraps in { data: T } */
-type HealthEnvelope = { data: HealthData };
-
 type TabId = "app" | "database" | "infra" | "redis";
 
 const VALID_TABS = new Set<string>(["app", "database", "infra", "redis"]);
@@ -33,7 +30,7 @@ function HealthPageInner() {
   const rawTab = searchParams.get("tab") ?? "app";
   const activeTab: TabId = VALID_TABS.has(rawTab) ? (rawTab as TabId) : "app";
 
-  const { data, loading, error, refresh, refreshKey } = useDashboardData<HealthEnvelope>(
+  const { data, loading, error, refresh, refreshKey } = useDashboardData<HealthData>(
     "/api/admin/health/overview",
     { ttlMs: 90_000, pollMs: 30_000 }
   );
@@ -106,12 +103,12 @@ function HealthPageInner() {
             <p className="font-medium">Failed to load health data</p>
             <p className="mt-1 text-xs opacity-70">{error}</p>
           </div>
-        ) : !data?.data ? (
+        ) : !data ? (
           <div className="p-8 text-center text-sm text-[var(--text-muted)]">
             {loading ? "Loading health signals…" : "No health data available."}
           </div>
         ) : (
-          <HealthContent data={data.data} activeTab={tab} onTabChange={setActiveTab} />
+          <HealthContent data={data} activeTab={tab} onTabChange={setActiveTab} />
         )}
       </WidgetBoundary>
 

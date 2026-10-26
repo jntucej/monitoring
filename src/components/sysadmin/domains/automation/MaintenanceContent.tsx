@@ -3,7 +3,7 @@
 
 import { cn } from "@/lib/utils";
 import { useDashboardData } from "@/hooks/useDashboardData";
-import type { MaintenanceData, MaintenanceEnvelope, MaintenanceEntity, MaintenanceGanttRow } from "./types";
+import type { MaintenanceData, MaintenanceEntity, MaintenanceGanttRow } from "./types";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -102,11 +102,11 @@ export function MaintenanceContent(
   },
 ) {
   const { data: externalData, onRowClick: _onRowClick } = _props ?? {};
-  const { data: envelope, loading, error } = useDashboardData<MaintenanceEnvelope>(
+  const { data, loading, error } = useDashboardData<MaintenanceData>(
     "/api/admin/maintenance/overview",
     { ttlMs: 180_000, pollMs: 60_000, enabled: externalData == null },
   );
-  const maintenanceData: MaintenanceData | null = externalData ?? envelope?.data ?? null;
+  const maintenanceData: MaintenanceData | null = externalData ?? data;
 
   if (loading && !maintenanceData) {
     return (

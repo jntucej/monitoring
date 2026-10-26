@@ -8,25 +8,24 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { WebhooksContent } from "@/components/sysadmin/domains/platform/WebhooksContent";
 import { WebhooksDrawer } from "@/components/sysadmin/domains/platform/WebhooksDrawer";
 import type {
-  WebhooksEnvelope,
+  WebhooksData,
   WebhooksEntity,
 } from "@/components/sysadmin/domains/platform/types";
 
 export default function WebhooksPage() {
-  const { data, loading, error, refresh } = useDashboardData<WebhooksEnvelope>(
+  const { data, loading, error, refresh } = useDashboardData<WebhooksData>(
     "/api/admin/platform/webhooks/overview",
     { ttlMs: 180000, pollMs: 60000 },
   );
-  const payload = data?.data ?? null;
 
   const [selected, setSelected] = useState<WebhooksEntity | null>(null);
 
   return (
     <WidgetBoundary>
       <PageHeader title="Webhooks" onRefresh={refresh} />
-      {loading && !payload ? (
+      {loading && !data ? (
         <Skeleton className="h-64 w-full" />
-      ) : error && !payload ? (
+      ) : error && !data ? (
         <div
           role="alert"
           className="rounded-md border p-4 text-sm"
@@ -38,8 +37,8 @@ export default function WebhooksPage() {
         >
           Failed to load Webhooks: {String(error)}
         </div>
-      ) : payload ? (
-        <WebhooksContent data={payload} onRowClick={setSelected} />
+      ) : data ? (
+        <WebhooksContent data={data} onRowClick={setSelected} />
       ) : null}
       <WebhooksDrawer
         entity={selected}
