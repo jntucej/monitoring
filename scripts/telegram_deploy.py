@@ -12,12 +12,53 @@ import os
 import sys
 import subprocess
 import json
+import logging
 from datetime import datetime
 
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(name)s: %(message)s')
+
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
-TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID', '1926342151')
+TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID', '')
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 REPO = 'jntucej/monitoring'
+
+# Comma-separated allowlist of Telegram user IDs permitted to trigger a deploy.
+# Read TELEGRAM_ALLOWED_USER_IDS from env; fail-closed if unset (no allowlist
+# → refuse dispatch so an unknown Telegram identity can't trigger workflows).
+TELEGRAM_ALLOWED_USER_IDS = os.getenv('TELEGRAM_ALLOWED_USER_IDS', '')
+
+if not TELEGRAM_CHAT_ID:
+    raise SystemExit(
+        'TELEGRAM_CHAT_ID env var is required; refusing to start with no chat target'
+    )
+
+def _resolve_allowed_user_ids() -> list:
+    """Parse the TELEGRAM_ALLOWED_USER_IDS allowlist.
+
+    Empty / unset → empty list (fail-closed). Callers MUST refuse dispatch
+    when the resulting list is empty so an unknown Telegram user can never
+    trigger a GitHub workflow.
+    """
+    raw = os.getenv('TELEGRAM_ALLOWED_USER_IDS', '').strip()
+    if not raw:
+        return []
+    return [s.strip() for s in raw.split(',') if s.strip()]
+
+def _dispatch_allowed(from_user_id) -> bool:
+    """Fail-closed allowlist check: only dispatch when from_user.id is in
+    TELEGRAM_ALLOWED_USER_IDS. Unset / empty allowlist → refuse."""
+    allowed = _resolve_allowed_user_ids()
+    if not allowed:
+        logger.warning(
+            'TELEGRAM_ALLOWED_USER_IDS unset or empty; refusing to dispatch '
+            'from user %s (fail-closed)', from_user_id
+        )
+        return False
+    if str(from_user_id) not in allowed:
+        logger.warning('Rejected deploy from untrusted user %s', from_user_id)
+        return False
+    return True
 
 def send_telegram_message(message: str, parse_mode: str = 'HTML'):
     """Send message to Telegram"""
@@ -83,22 +124,31 @@ def check_server_status() -> str:
     except Exception as e:
         return f"Error: {e}"
 
-def handle_deploy():
-    """Handle /deploy command"""
-    msg = "🚀 <b>Deploy Initiated</b>\n\n"
-    msg += "Triggering GitHub Actions workflow...\n\n"
-    
+def handle_deploy(msg=None):
+    """Handle /deploy command. `msg` is a Telegram Message-like object with
+    .from_user.id when called from the bot handler; pass None in CLI/SSO
+    mode and the call is treated as authorized (the CLI path is only
+    reachable by a human who already holds the bot token + GitHub token)."""
+    if msg is not None:
+        user_id = getattr(msg, 'from_user', None) and msg.from_user.id
+        if not _dispatch_allowed(user_id):
+            return ("🚫 <b>Deploy rejected</b>\n\n"
+                    "Your Telegram user is not in TELEGRAM_ALLOWED_USER_IDS.\n"
+                    "Contact the repo owner to add your ID.")
+    msg_html = "🚀 <b>Deploy Initiated</b>\n\n"
+    msg_html += "Triggering GitHub Actions workflow...\n\n"
+
     result = trigger_github_workflow('deploy')
-    
+
     if result['success']:
-        msg += f"✅ Workflow triggered!\n"
-        msg += f"Run ID: #{result['run_id']}\n\n"
-        msg += "You'll get a notification when it completes."
+        msg_html += f"✅ Workflow triggered!\n"
+        msg_html += f"Run ID: #{result['run_id']}\n\n"
+        msg_html += "You'll get a notification when it completes."
     else:
-        msg += f"❌ Failed to trigger workflow\n"
-        msg += f"Error: {result['error']}"
-    
-    return msg
+        msg_html += f"❌ Failed to trigger workflow\n"
+        msg_html += f"Error: {result['error']}"
+
+    return msg_html
 
 def handle_heal():
     """Handle /heal command"""
@@ -164,22 +214,29 @@ def handle_heal():
     
     return msg
 
-def handle_retry():
-    """Handle /retry command"""
-    msg = "🔄 <b>Retry Deployment</b>\n\n"
-    msg += "Retrying the last deployment...\n\n"
-    
+def handle_retry(msg=None):
+    """Handle /retry command. `msg` is a Telegram Message-like object with
+    .from_user.id when called from the bot handler; pass None in CLI mode."""
+    if msg is not None:
+        user_id = getattr(msg, 'from_user', None) and msg.from_user.id
+        if not _dispatch_allowed(user_id):
+            return ("🚫 <b>Retry rejected</b>\n\n"
+                    "Your Telegram user is not in TELEGRAM_ALLOWED_USER_IDS.\n"
+                    "Contact the repo owner to add your ID.")
+    msg_html = "🔄 <b>Retry Deployment</b>\n\n"
+    msg_html += "Retrying the last deployment...\n\n"
+
     result = trigger_github_workflow('retry')
-    
+
     if result['success']:
-        msg += f"✅ Retry triggered!\n"
-        msg += f"Run ID: #{result['run_id']}\n\n"
-        msg += "You'll get a notification when it completes."
+        msg_html += f"✅ Retry triggered!\n"
+        msg_html += f"Run ID: #{result['run_id']}\n\n"
+        msg_html += "You'll get a notification when it completes."
     else:
-        msg += f"❌ Failed to trigger retry\n"
-        msg += f"Error: {result['error']}"
-    
-    return msg
+        msg_html += f"❌ Failed to trigger retry\n"
+        msg_html += f"Error: {result['error']}"
+
+    return msg_html
 
 def handle_status():
     """Handle /status command"""

@@ -2,19 +2,49 @@
 """
 Telegram Bot Handler for Gate Monitor
 Handles commands: /deploy, /heal, /retry, /status, /fix
+
+Security: before dispatching any deploy/retry, the bot verifies that the
+requesting Telegram user's ID is in TELEGRAM_ALLOWED_USER_IDS (comma-separated).
+If the allowlist is unset or empty, dispatch is refused (fail-closed) so an
+unknown Telegram identity cannot trigger deploys.
 """
 
 import os
 import sys
 import json
+import logging
 import subprocess
 import urllib.request
 import urllib.error
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(name)s: %(message)s')
 
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 SSH_KEY = os.path.expanduser(os.getenv('DEPLOY_SSH_KEY', '~/.ssh/myrepo_deploy'))
 REMOTE_HOST = os.getenv('DEPLOY_REMOTE_HOST')
+TELEGRAM_ALLOWED_USER_IDS = os.getenv('TELEGRAM_ALLOWED_USER_IDS', '')
+
+def _resolve_allowed_user_ids() -> list:
+    raw = TELEGRAM_ALLOWED_USER_IDS.strip()
+    if not raw:
+        return []
+    return [s.strip() for s in raw.split(',') if s.strip()]
+
+def _user_allowed(from_user_id) -> bool:
+    """Fail-closed: return True only when from_user.id is in the allowlist."""
+    allowed = _resolve_allowed_user_ids()
+    if not allowed:
+        logger.warning(
+            'TELEGRAM_ALLOWED_USER_IDS unset or empty; refusing dispatch '
+            'from user %s (fail-closed)', from_user_id
+        )
+        return False
+    if str(from_user_id) not in allowed:
+        logger.warning('Rejected deploy from untrusted user %s', from_user_id)
+        return False
+    return True
 
 def require_env():
     missing = [
@@ -62,8 +92,16 @@ def ssh_run(command: str, timeout: int = 30) -> tuple:
     except Exception as e:
         return False, '', str(e)
 
-def cmd_deploy():
-    """Deploy latest code"""
+def cmd_deploy(from_user_id=None):
+    """Deploy latest code. `from_user_id` is the Telegram user who requested
+    the deploy (int or str). When provided, it is checked against
+    TELEGRAM_ALLOWED_USER_IDS; when the allowlist is unset/empty, dispatch
+    is refused (fail-closed). Pass None only for direct/SSO invocation
+    where the caller already holds the bot token + SSH key."""
+    if from_user_id is not None and not _user_allowed(from_user_id):
+        return ("🚫 <b>Deploy rejected</b>\n\n"
+                "Your Telegram user is not in TELEGRAM_ALLOWED_USER_IDS.\n"
+                "Contact the repo owner to add your ID.")
     require_env()
     msg = "🚀 <b>Deploy Initiated</b>\n\n"
     

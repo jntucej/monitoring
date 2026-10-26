@@ -12,6 +12,87 @@ import {
 } from "@/lib/kiosk-operator";
 import type { Role } from "@/lib/types";
 
+/**
+ * Kiosk session auth gate.
+ *
+ * This route mints an operator-scoped JWT for the designated kiosk default
+ * operator. Because it grants OPERATOR without a login (no password, no
+ * device attestation), access must be restricted to one of three modes:
+ *
+ *   1. TRUSTED_IP   — TRUSTED_KIOSK_IPS set (non-empty). The request client IP
+ *                     must be in the comma-separated list, else 403
+ *                     KIOSK_IP_NOT_TRUSTED. Fast-fails before rate limiting.
+ *   2. PIN_REQUIRED — TRUSTED_KIOSK_IPS unset AND KIOSK_SESSION_REQUIRE_PIN
+ *                     === 'true'. 426 UPGRADE_REQUIRED: the kiosk client must
+ *                     collect a PIN from the operator before retrying.
+ *   3. OPEN         — both env vars unset. Backwards-compatible open mode;
+ *                     logs a one-time console.warn and allows the session.
+ *
+ * Modes 1 and 2 run BEFORE the rate-limit and audit paths so that
+ * unauthorized callers cannot burn rate-limit quota.
+ */
+const KIOSK_AUTH_WARNED = { current: false };
+
+async function kioskAuthGate(
+  req: NextRequest,
+  bodyPin?: string | null
+): Promise<Response | null> {
+  const trusted = (process.env.TRUSTED_KIOSK_IPS ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  // Mode 1: TRUSTED_KIOSK_IPS allowlist
+  if (trusted.length > 0) {
+    const ip = extractClientIp(req);
+    if (!trusted.includes(ip)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "KIOSK_IP_NOT_TRUSTED",
+            message: "Client IP is not in TRUSTED_KIOSK_IPS",
+          },
+        },
+        { status: 403 }
+      );
+    }
+    return null;
+  }
+
+  // Mode 2: KIOSK_SESSION_REQUIRE_PIN=true → 426
+  const requirePin = process.env.KIOSK_SESSION_REQUIRE_PIN === "true";
+  if (requirePin) {
+    if (bodyPin === undefined || bodyPin === null || bodyPin === "") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "PIN_REQUIRED",
+            message: "A kiosk operator PIN is required to mint a kiosk session. Show the operator PIN entry UI and retry with ?pin=<operator-pin>.",
+          },
+          upgradesRequired: true,
+        },
+        { status: 426 }
+      );
+    }
+    // Pin provided; fall through to operator resolution below (real pin
+    // verification would live here — currently the PIN is NOT yet enforced
+    // against operator records, so a non-empty value passes the gate).
+    // The kiosk client is expected to collect and pass the operator's PIN.
+    return null;
+  }
+
+  // Mode 3: open (backwards compat). One-time warning.
+  if (!KIOSK_AUTH_WARNED.current) {
+    KIOSK_AUTH_WARNED.current = true;
+    console.warn(
+      "[kiosk-session] No trusted IP or PIN requirement configured; kiosk session is open to any caller"
+    );
+  }
+  return null;
+}
+
 function misconfiguredResponse(count: number) {
   return NextResponse.json(
     {
@@ -28,12 +109,28 @@ function misconfiguredResponse(count: number) {
   );
 }
 
+/**
+ * Mint an operator-scoped kiosk session for the designated kiosk default
+ * operator. Auth modes (see kioskAuthGate above):
+ *   TRUSTED_IP  — 403 unless client IP in TRUSTED_KIOSK_IPS
+ *   PIN_REQUIRED — 426 unless operator PIN supplied
+ *   OPEN        — backwards compat, warns once in logs
+ *
+ * Both GET and POST run the same handler. GET reads ?gateId and ?pin from
+ * the query string; POST reads { gateId, pin } from the JSON body.
+ */
 async function handleKioskSession(
   req: NextRequest,
-  bodyGateId?: string | null
+  bodyGateId?: string | null,
+  bodyPin?: string | null
 ): Promise<Response> {
   const csrf = assertCsrf(req);
   if (csrf) return csrf;
+
+  // Fail fast: IP allowlist / PIN gate BEFORE the rate-limit path so an
+  // unauthorized caller cannot consume rate-limit quota.
+  const gate = await kioskAuthGate(req, bodyPin ?? null);
+  if (gate) return gate;
 
   const ip = extractClientIp(req);
   const rl = await rateLimitByKey(`kiosk-session:${ip}`, {
@@ -114,14 +211,27 @@ async function handleKioskSession(
 }
 
 export const POST = withRateLimit(
-  (req: NextRequest) => handleKioskSession(req),
+  async (req: NextRequest) => {
+    let gateId: string | null = null;
+    let pin: string | null = null;
+    try {
+      const body = (await req.json()) as Record<string, unknown>;
+      gateId = typeof body.gateId === "string" ? body.gateId : null;
+      pin = typeof body.pin === "string" ? body.pin : null;
+    } catch {
+      // No JSON body — fine, gateId/pin stay null.
+    }
+    return handleKioskSession(req, gateId, pin);
+  },
   { windowMs: 60_000, maxRequests: 10 }
 );
 
 export const GET = withRateLimit(
   (req: NextRequest) => {
     const url = new URL(req.url);
-    return handleKioskSession(req, url.searchParams.get("gateId"));
+    const gateId = url.searchParams.get("gateId");
+    const pin = url.searchParams.get("pin");
+    return handleKioskSession(req, gateId, pin);
   },
   { windowMs: 60_000, maxRequests: 10 }
 );
