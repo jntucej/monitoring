@@ -1,8 +1,12 @@
+-- SECURITY: No plaintext credentials in this file. All passwords/PINs must be rotated out-of-band before or after seeding. See docs/CREDENTIALS.md.
 -- Seed all gate monitor users and config roles
--- Master PIN for most roles: 123456
--- Sysadmin password: junaid, pin: nf16
+-- Passwords/PINs: SET_VIA_ENV_OR_OOB_ROTATION — no literals are shipped here.
+-- The GUCs `app.seed_password` / `app.seed_pin` can be set by the caller for dev only;
+-- they must NOT be set in production. When unset the hashes resolve to NULL so the
+-- account is created with no usable credential and forces first-login rotation.
 
 -- Insert sysadmin with known ID
+-- SET_VIA_ENV_OR_OOB_ROTATION
 INSERT INTO users (id, unique_id, name, role, email, status, password_hash, initial_pin_hash, pin_must_change)
 VALUES (
   '80eb29e3-7e71-48cb-a44c-6e0caa7f83f5',
@@ -11,36 +15,31 @@ VALUES (
   'sysadmin',
   'sysadmin@college.edu',
   'ACTIVE',
-  crypt(COALESCE(NULLIF(current_setting('app.seed_password', true), ''), 'sysadmin_secure_change_me'), gen_salt('bf', 10)),
-  crypt(COALESCE(NULLIF(current_setting('app.seed_pin', true), ''), '654321'), gen_salt('bf', 10)),
+  CASE WHEN current_setting('app.seed_password', true) <> ''
+       THEN crypt(current_setting('app.seed_password', true), gen_salt('bf', 10))
+       ELSE NULL END,
+  CASE WHEN current_setting('app.seed_pin', true) <> ''
+       THEN crypt(current_setting('app.seed_pin', true), gen_salt('bf', 10))
+       ELSE NULL END,
   true
 ) ON CONFLICT (unique_id) DO NOTHING;
 
 -- Insert other role users with random UUIDs
+-- SET_VIA_ENV_OR_OOB_ROTATION
+-- Each user's password/PIN must be provided out-of-band; NULL means "no credential set".
 INSERT INTO users (unique_id, name, role, email, status, password_hash, initial_pin_hash, pin_must_change)
 VALUES
-  ('ADMIN', 'Campus Admin', 'admin', 'admin@college.edu', 'ACTIVE',
-   crypt('admin_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
-  ('OPERATOR', 'Gate Operator', 'operator', 'operator@college.edu', 'ACTIVE',
-   crypt('operator_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
-  ('SUPERVISOR', 'Gate Supervisor', 'supervisor', 'supervisor@college.edu', 'ACTIVE',
-   crypt('supervisor_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
-  ('WARDEN', 'Hostel Warden', 'hostel_manager', 'warden@college.edu', 'ACTIVE',
-   crypt('warden_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
-  ('HOD', 'Head of Department', 'hod', 'hod@college.edu', 'ACTIVE',
-   crypt('hod_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
-  ('FACULTY', 'Faculty Member', 'faculty', 'faculty@college.edu', 'ACTIVE',
-   crypt('faculty_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
-  ('STAFF', 'Office Staff', 'staff', 'staff@college.edu', 'ACTIVE',
-   crypt('staff_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
-  ('WORKER', 'Support Worker', 'worker', 'worker@college.edu', 'ACTIVE',
-   crypt('worker_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
-  ('GUARDIAN', 'Parent Guardian', 'guardian', 'guardian@college.edu', 'ACTIVE',
-   crypt('guardian_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
-  ('STUDENT', 'Demo Student', 'student', 'student@college.edu', 'ACTIVE',
-   crypt('student_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
-  ('VISITOR', 'Demo Visitor', 'visitor', 'visitor@college.edu', 'ACTIVE',
-   crypt('visitor_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true)
+  ('ADMIN', 'Campus Admin', 'admin', 'admin@college.edu', 'ACTIVE', NULL, NULL, true),
+  ('OPERATOR', 'Gate Operator', 'operator', 'operator@college.edu', 'ACTIVE', NULL, NULL, true),
+  ('SUPERVISOR', 'Gate Supervisor', 'supervisor', 'supervisor@college.edu', 'ACTIVE', NULL, NULL, true),
+  ('WARDEN', 'Hostel Warden', 'hostel_manager', 'warden@college.edu', 'ACTIVE', NULL, NULL, true),
+  ('HOD', 'Head of Department', 'hod', 'hod@college.edu', 'ACTIVE', NULL, NULL, true),
+  ('FACULTY', 'Faculty Member', 'faculty', 'faculty@college.edu', 'ACTIVE', NULL, NULL, true),
+  ('STAFF', 'Office Staff', 'staff', 'staff@college.edu', 'ACTIVE', NULL, NULL, true),
+  ('WORKER', 'Support Worker', 'worker', 'worker@college.edu', 'ACTIVE', NULL, NULL, true),
+  ('GUARDIAN', 'Parent Guardian', 'guardian', 'guardian@college.edu', 'ACTIVE', NULL, NULL, true),
+  ('STUDENT', 'Demo Student', 'student', 'student@college.edu', 'ACTIVE', NULL, NULL, true),
+  ('VISITOR', 'Demo Visitor', 'visitor', 'visitor@college.edu', 'ACTIVE', NULL, NULL, true)
 ON CONFLICT (unique_id) DO NOTHING;
 
 -- Insert config roles

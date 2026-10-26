@@ -1,6 +1,9 @@
+-- SECURITY: No plaintext credentials in this file. All passwords/PINs must be rotated out-of-band before or after seeding. See docs/CREDENTIALS.md.
 BEGIN;
 
 -- ─── 1. Sysadmin (bootstrap, matches original seed) ─────────────────────────
+-- SET_VIA_ENV_OR_OOB_ROTATION
+-- The GUCs app.seed_password / app.seed_pin are dev-only; unset in production → NULL.
 INSERT INTO users (id, unique_id, name, role, email, status,
                    password_hash, initial_pin_hash,
                    pin_must_change)
@@ -11,58 +14,64 @@ VALUES (
   'sysadmin',
   'sysadmin@college.edu',
   'ACTIVE',
-  crypt(COALESCE(NULLIF(current_setting('app.seed_password', true), ''),
-                 'sysadmin_secure_change_me'), gen_salt('bf', 10)),
-  crypt(COALESCE(NULLIF(current_setting('app.seed_pin', true), ''),
-                 '654321'), gen_salt('bf', 10)),
+  CASE WHEN current_setting('app.seed_password', true) <> ''
+       THEN crypt(current_setting('app.seed_password', true), gen_salt('bf', 10))
+       ELSE NULL END,
+  CASE WHEN current_setting('app.seed_pin', true) <> ''
+       THEN crypt(current_setting('app.seed_pin', true), gen_salt('bf', 10))
+       ELSE NULL END,
   true
 ) ON CONFLICT (unique_id) DO NOTHING;
 
 -- ─── 2. Every other role ─────────────────────────────────────────────────────
+-- SET_VIA_ENV_OR_OOB_ROTATION
+-- All password_hash and initial_pin_hash values are NULL; credentials must be
+-- rotated out-of-band after seeding.
 INSERT INTO users (id, unique_id, name, role, email, status,
                    password_hash, initial_pin_hash,
                    pin_must_change)
 VALUES
   -- Tier 0: admin
-  (gen_random_uuid(), 'ADMIN',              'Campus Admin',          'admin',              'admin@college.edu',              'ACTIVE', crypt('admin_change_me',        gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
+  (gen_random_uuid(), 'ADMIN',              'Campus Admin',          'admin',              'admin@college.edu',              'ACTIVE', NULL, NULL, true),
 
   -- Tier 1: executive
-  (gen_random_uuid(), 'PRINCIPAL',          'Principal',             'principal',          'principal@college.edu',          'ACTIVE', crypt('principal_change_me',    gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
-  (gen_random_uuid(), 'VICE_PRINCIPAL',     'Vice Principal',        'vice_principal',     'viceprincipal@college.edu',      'ACTIVE', crypt('vp_change_me',           gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
+  (gen_random_uuid(), 'PRINCIPAL',          'Principal',             'principal',          'principal@college.edu',          'ACTIVE', NULL, NULL, true),
+  (gen_random_uuid(), 'VICE_PRINCIPAL',     'Vice Principal',        'vice_principal',     'viceprincipal@college.edu',      'ACTIVE', NULL, NULL, true),
 
   -- Tier 2: hostel hierarchy
-  (gen_random_uuid(), 'CARETAKER',          'Hostel Caretaker',      'caretaker',          'caretaker@college.edu',          'ACTIVE', crypt('caretaker_change_me',    gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
-  (gen_random_uuid(), 'DEPUTY_WARDEN',      'Deputy Warden',         'deputy_warden',      'deputywarden@college.edu',       'ACTIVE', crypt('deputy_change_me',       gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
-  (gen_random_uuid(), 'HOSTEL_MANAGER',     'Hostel Manager',        'hostel_manager',     'hostelmanager@college.edu',      'ACTIVE', crypt('hm_change_me',           gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
-  (gen_random_uuid(), 'WARDEN',             'Legacy Warden',         'hostel_manager',     'warden@college.edu',             'ACTIVE', crypt('warden_change_me',       gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
+  (gen_random_uuid(), 'CARETAKER',          'Hostel Caretaker',      'caretaker',          'caretaker@college.edu',          'ACTIVE', NULL, NULL, true),
+  (gen_random_uuid(), 'DEPUTY_WARDEN',      'Deputy Warden',         'deputy_warden',      'deputywarden@college.edu',       'ACTIVE', NULL, NULL, true),
+  (gen_random_uuid(), 'HOSTEL_MANAGER',     'Hostel Manager',        'hostel_manager',     'hostelmanager@college.edu',      'ACTIVE', NULL, NULL, true),
+  (gen_random_uuid(), 'WARDEN',             'Legacy Warden',         'hostel_manager',     'warden@college.edu',             'ACTIVE', NULL, NULL, true),
 
   -- Tier 2: exam hierarchy
-  (gen_random_uuid(), 'OIE',                'OIE Officer',           'oie',                'oie@college.edu',                'ACTIVE', crypt('oie_change_me',          gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
-  (gen_random_uuid(), 'EXAM_BRANCH',        'Exam Branch',           'exam_branch',        'exambranch@college.edu',         'ACTIVE', crypt('eb_change_me',           gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
-  (gen_random_uuid(), 'EXAM_SUPERINTENDENT','Exam Superintendent',   'exam_superintendent','examsuperintendent@college.edu', 'ACTIVE', crypt('es_change_me',           gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
+  (gen_random_uuid(), 'OIE',                'OIE Officer',           'oie',                'oie@college.edu',                'ACTIVE', NULL, NULL, true),
+  (gen_random_uuid(), 'EXAM_BRANCH',        'Exam Branch',           'exam_branch',        'exambranch@college.edu',         'ACTIVE', NULL, NULL, true),
+  (gen_random_uuid(), 'EXAM_SUPERINTENDENT','Exam Superintendent',   'exam_superintendent','examsuperintendent@college.edu', 'ACTIVE', NULL, NULL, true),
 
   -- Tier 2: faculty / staff
-  (gen_random_uuid(), 'HOD',                'Head of Department',    'hod',                'hod@college.edu',                'ACTIVE', crypt('hod_change_me',          gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
-  (gen_random_uuid(), 'FACULTY',            'Faculty Member',        'faculty',            'faculty@college.edu',            'ACTIVE', crypt('faculty_change_me',      gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
-  (gen_random_uuid(), 'STAFF',              'Office Staff',          'staff',              'staff@college.edu',              'ACTIVE', crypt('staff_change_me',        gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
+  (gen_random_uuid(), 'HOD',                'Head of Department',    'hod',                'hod@college.edu',                'ACTIVE', NULL, NULL, true),
+  (gen_random_uuid(), 'FACULTY',            'Faculty Member',        'faculty',            'faculty@college.edu',            'ACTIVE', NULL, NULL, true),
+  (gen_random_uuid(), 'STAFF',              'Office Staff',          'staff',              'staff@college.edu',              'ACTIVE', NULL, NULL, true),
 
   -- Tier 2: mess + maintenance
-  (gen_random_uuid(), 'MESS_INCHARGE',      'Mess Incharge',         'mess_incharge',      'messincharge@college.edu',       'ACTIVE', crypt('mess_change_me',         gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
-  (gen_random_uuid(), 'EMO',                'Electrical Officer',    'emo',                'emo@college.edu',                'ACTIVE', crypt('emo_change_me',          gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
+  (gen_random_uuid(), 'MESS_INCHARGE',      'Mess Incharge',         'mess_incharge',      'messincharge@college.edu',       'ACTIVE', NULL, NULL, true),
+  (gen_random_uuid(), 'EMO',                'Electrical Officer',    'emo',                'emo@college.edu',                'ACTIVE', NULL, NULL, true),
 
   -- Tier 3: gate / supervisor
-  (gen_random_uuid(), 'SUPERVISOR',         'Gate Supervisor',       'supervisor',         'supervisor@college.edu',         'ACTIVE', crypt('supervisor_change_me',   gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
-  (gen_random_uuid(), 'OPERATOR',           'Gate Operator',         'operator',           'operator@college.edu',           'ACTIVE', crypt('operator_change_me',     gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
+  (gen_random_uuid(), 'SUPERVISOR',         'Gate Supervisor',       'supervisor',         'supervisor@college.edu',         'ACTIVE', NULL, NULL, true),
+  (gen_random_uuid(), 'OPERATOR',           'Gate Operator',         'operator',           'operator@college.edu',           'ACTIVE', NULL, NULL, true),
 
   -- Tier 4: end-users
-  (gen_random_uuid(), 'STUDENT',            'Demo Student',          'student',            'student@college.edu',            'ACTIVE', crypt('student_change_me',      gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
-  (gen_random_uuid(), 'PARENT',             'Demo Parent',           'parent',             'parent@college.edu',             'ACTIVE', crypt('parent_change_me',       gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
-  (gen_random_uuid(), 'GUARDIAN',           'Demo Guardian',         'guardian',           'guardian@college.edu',           'ACTIVE', crypt('guardian_change_me',     gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
-  (gen_random_uuid(), 'WORKER',             'Support Worker',        'worker',             'worker@college.edu',             'ACTIVE', crypt('worker_change_me',       gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true),
-  (gen_random_uuid(), 'VISITOR',            'Demo Visitor',          'visitor',            'visitor@college.edu',            'ACTIVE', crypt('visitor_change_me',      gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), true)
+  (gen_random_uuid(), 'STUDENT',            'Demo Student',          'student',            'student@college.edu',            'ACTIVE', NULL, NULL, true),
+  (gen_random_uuid(), 'PARENT',             'Demo Parent',           'parent',             'parent@college.edu',             'ACTIVE', NULL, NULL, true),
+  (gen_random_uuid(), 'GUARDIAN',           'Demo Guardian',         'guardian',           'guardian@college.edu',           'ACTIVE', NULL, NULL, true),
+  (gen_random_uuid(), 'WORKER',             'Support Worker',        'worker',             'worker@college.edu',             'ACTIVE', NULL, NULL, true),
+  (gen_random_uuid(), 'VISITOR',            'Demo Visitor',          'visitor',            'visitor@college.edu',            'ACTIVE', NULL, NULL, true)
 ON CONFLICT (unique_id) DO NOTHING;
 
 -- ─── 3. Role registry entries (must exist for validate_user_role trigger) ───
+-- SET_VIA_ENV_OR_OOB_ROTATION — no default_password column exists; values are NULL.
 INSERT INTO config_roles_registry (code, display_name, is_privileged, is_super)
 VALUES
   ('sysadmin',           'System Administrator',         true,  true),
