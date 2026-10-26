@@ -198,12 +198,12 @@ async function handleKioskSession(
   }
 
   const gateResolution = await resolveKioskGateIdForOperator(op, bodyGateId ?? null);
-  if (!gateResolution || "error" in gateResolution) {
-    return NextResponse.json(
-      { success: false, error: gateResolution?.error ?? { code: "GATE_RESOLUTION_FAILED", message: "Failed to resolve gate" } },
-      { status: 400 }
-    );
-  }
+
+  // When the kiosk operator has NO assigned gate (and no valid hint), we
+  // still mint the session — but with `noGate: true` so the client knows to
+  // show the "Register / enter a claim code" panel instead of trying to
+  // start scanning at a gate that doesn't exist yet.
+  const noGate = !gateResolution || "error" in gateResolution;
 
   const jti = crypto.randomUUID();
   const access = await signAccessToken({
@@ -230,8 +230,9 @@ async function handleKioskSession(
     role: op.role as Role,
     details: JSON.stringify({
       ip,
-      gateId: gateResolution.gateId,
+      gateId: noGate ? null : gateResolution!.gateId,
       requestedGateId: bodyGateId ?? null,
+      noGate,
     }),
   });
 
@@ -240,7 +241,8 @@ async function handleKioskSession(
     data: {
       accessToken: access,
       refreshToken: refresh,
-      gateId: gateResolution.gateId,
+      gateId: noGate ? null : gateResolution!.gateId,
+      noGate,
       operator: {
         id: op.id,
         name: op.name,

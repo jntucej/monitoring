@@ -90,19 +90,32 @@ export function useKioskOperator(gateIdParam?: string | null) {
 
     const result = await res.json().catch(() => null);
     if (!result?.success || !result?.data) {
+      // A 4xx/5xx that is NOT "no kiosk default configured" means something
+      // went wrong — surface the error state but still fall through to the
+      // normal "unauthenticated → login" redirect on the gate page.
       setState({ pending: false, kioskSession: false, notConfigured: false, error: true });
       return;
     }
 
-    const { token, refreshToken, user: rawUser, kiosk } = result.data as {
-      token: string;
-      refreshToken: string;
-      user: Record<string, unknown>;
-      kiosk?: { gateId: string | null; gateName: string | null };
-    };
+    const { accessToken, refreshToken, operator: opInfo, gateId: sessionGateId, noGate: noGateFlag } =
+      result.data as {
+        accessToken?: string;
+        refreshToken?: string;
+        operator?: Record<string, unknown>;
+        gateId?: string | null;
+        noGate?: boolean;
+      };
 
-    // Normalise with the same field mapping the rest of the store uses.
-    const u = rawUser as Record<string, unknown>;
+    // No usable token → treat as a config/transport error, fall through to
+    // the login redirect on the gate page.
+    if (!accessToken || !opInfo) {
+      setState({ pending: false, kioskSession: false, notConfigured: false, error: true });
+      return;
+    }
+
+    // Normalise the operator payload with the same field mapping the rest of
+    // the store uses.
+    const u = opInfo as Record<string, unknown>;
     const user = {
       id: String(u.id ?? ""),
       uniqueId: (u.uniqueId ?? u.unique_id) as string | undefined,
@@ -110,28 +123,48 @@ export function useKioskOperator(gateIdParam?: string | null) {
       name: u.name ? String(u.name) : "",
       role: (u.role as Role) ?? "operator",
       roles: u.roles as Role[] | undefined,
-      gateId: (kiosk?.gateId ?? u.gateId ?? u.gate_id) as string | undefined,
+      gateId: (noGateFlag ? undefined : sessionGateId) as string | undefined,
       email: u.email as string | undefined,
       status: u.status as never,
       photoUrl: (u.photoUrl ?? u.photo_url) as string | undefined,
       currentSessionToken: u.currentSessionToken as string | undefined,
     };
 
+    // Mint the session even when the operator has no gate (noGate === true).
+    // The gate page sees authenticated=true + no user.gateId and renders the
+    // "Register / enter a claim code" panel instead of redirecting to login.
+    //
+    // Persist the token to sessionStorage (not just the in-memory store) so a
+    // later UI read — e.g. OperatorGateClaimPanel calling /api/operator/claim-gate
+    // with the Bearer token — sees it. The partialized localStorage persist
+    // only stores {user, role, authenticated}; the token lives in sessionStorage.
+    if (typeof window !== "undefined" && accessToken) {
+      sessionStorage.setItem("auth.token", accessToken);
+      if (refreshToken) sessionStorage.setItem("auth.refresh", refreshToken);
+    }
+
     useAuthStore.setState({
       user,
-      token,
+      token: accessToken,
       refreshToken: refreshToken ?? null,
       role: (user.role as Role) ?? "operator",
       authenticated: true,
       loading: false,
     });
 
+    if (noGateFlag) {
+      // No gate: stay where we are (or land on /gate/ so the register panel
+      // renders). Do NOT try to redirect to a gate that doesn't exist.
+      setState({ pending: false, kioskSession: true, notConfigured: false, error: false });
+      return;
+    }
+
     setState({ pending: false, kioskSession: true, notConfigured: false, error: false });
 
     // Point the kiosk at the session's bound gate when it differs from the
     // URL. The operator can still switch gates via the existing setGate flow.
-    if (kiosk?.gateId && kiosk.gateId !== gateIdParam) {
-      router.replace(`/gate/${kiosk.gateId}`);
+    if (sessionGateId && sessionGateId !== gateIdParam) {
+      router.replace(`/gate/${sessionGateId}`);
     }
   }, [gateIdParam, router]);
 
