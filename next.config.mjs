@@ -72,7 +72,7 @@ const nextConfig = {
               "object-src 'none'",
               "frame-ancestors 'none'",
               process.env.NODE_ENV === "production"
-                ? "script-src 'self' 'unsafe-inline' 'strict-dynamic' https:"
+                ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http:"
                 : "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https:",
@@ -82,8 +82,6 @@ const nextConfig = {
               "manifest-src 'self'",
               "form-action 'self'",
               "upgrade-insecure-requests",
-              "require-trusted-types-for 'script'",
-              "trusted-types default nextjs* react*",
             ].join("; "),
           },
         ],
