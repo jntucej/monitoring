@@ -50,6 +50,15 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }): Promise
 
   const auth = ctx.auth;
 
+  // Gate must be a well-formed UUID (the gates.id column is uuid).
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!UUID_RE.test(gateId)) {
+    return NextResponse.json(
+      { success: false, error: { code: "BAD_GATE_ID", message: "gateId must be a gate UUID." } },
+      { status: 400 }
+    );
+  }
+
   // Gate must exist and be active.
   const gateRes = await query<{ id: string; name: string; is_active: boolean }>(
     `SELECT id, name, is_active FROM public.gates WHERE id = $1`,
@@ -123,6 +132,17 @@ async function handleGet(req: NextRequest, ctx: { auth: AuthContext }): Promise<
   const auth = ctx.auth;
   const supervised = auth.supervisedGates ?? [];
   const isSysadmin = auth.role === "sysadmin" || (auth.roles?.includes("sysadmin") ?? false);
+
+  // If a gate filter is provided, it must be a well-formed gate UUID.
+  if (gateId) {
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!UUID_RE.test(gateId)) {
+      return NextResponse.json(
+        { success: false, error: { code: "BAD_GATE_ID", message: "gateId must be a gate UUID." } },
+        { status: 400 }
+      );
+    }
+  }
 
   const params: unknown[] = [];
   let sql = `SELECT c.id, c.gate_id, g.name AS gate_name, c.operator_name_label,
