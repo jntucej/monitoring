@@ -137,6 +137,34 @@ async function handlePatch(req: NextRequest) {
         profileUpdates.is_kiosk_default = body.isKioskDefault;
       }
 
+      // B2: supervisor's supervised_gates + hostel manager / caretaker's
+      // assigned_hostel — elevated fields, admin/sysadmin only. Without this,
+      // these fields can only be set at account creation, so scoping a
+      // supervisor or hostel staff after the fact was impossible.
+      if (isAdmin && body.supervisedGates !== undefined) {
+        const ok =
+          body.supervisedGates === null ||
+          (Array.isArray(body.supervisedGates) &&
+            body.supervisedGates.every((g: unknown) => typeof g === "string"));
+        if (!ok) {
+          return NextResponse.json(
+            { success: false, error: { code: "INVALID_SUPERVISED_GATES", message: "supervisedGates must be null or an array of gate UUIDs" } },
+            { status: 400 }
+          );
+        }
+        profileUpdates.supervised_gates = body.supervisedGates === null ? null : body.supervisedGates;
+      }
+
+      if (isAdmin && body.assignedHostel !== undefined) {
+        if (body.assignedHostel !== null && typeof body.assignedHostel !== "string") {
+          return NextResponse.json(
+            { success: false, error: { code: "INVALID_ASSIGNED_HOSTEL", message: "assignedHostel must be a string or null" } },
+            { status: 400 }
+          );
+        }
+        profileUpdates.assigned_hostel = body.assignedHostel;
+      }
+
       // Password update
       if (body.password) {
         if (typeof body.password !== "string" || body.password.length < 6) {

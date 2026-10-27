@@ -128,12 +128,13 @@ export function resolveEntryOptions(
   }
   // home_out (or any known leave reason that wasn't caught above)
   // → [home_in, day_scholar_in], type choice.
-  // null (no prior OUT / first scan): do NOT offer home_in, since there's no
-  // matching home_out to pair with — offering it would let an operator create
-  // a phantom round-trip in movement_logs. Only allow day_scholar_in for a
-  // first-scan entry.
-  if (lastOutReason === null) {
-    return { buttons: ["day_scholar_in"], allowsTypeChoice: false };
-  }
+  // null (no prior OUT / first scan): SAME button set. The campus occupancy
+  // check (recordScan step 8) already rejects a same-direction duplicate,
+  // so a first scan has no prior OUT by construction — offering home_in is
+  // correct for a hosteller's first arrival of the day/term. Picking
+  // day_scholar_in sets the stored entry type to day_scholar; picking
+  // home_in sets it to hosteller. The recordScan home_in guard (10c)
+  // handles the rarer "home_in with no matching prior home_out" case with
+  // a clean NO_PRIOR_HOME_OUT 400, not silent corruption.
   return { buttons: ["home_in", "day_scholar_in"], allowsTypeChoice: true };
 }

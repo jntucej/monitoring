@@ -26,6 +26,16 @@ for f in $(ls database/migrations/*.sql 2>/dev/null | sort); do
 done
 
 echo "==> 4. Seed demo roles"
-psql -f scripts/seed-roles.sql
+# Use the static seed with real bcrypt hashes (works on a fresh container).
+# seed-21-roles.sql is idempotent and self-contained — it sets a usable
+# password on SYSADMIN and OPERATOR so the operator can log in immediately.
+# The GUC-dependent scripts/seed-roles.sql is NOT used here because on a
+# fresh container app.seed_password is unset, which yields NULL password_hash
+# for every role and blocks first login.
+psql -f database/seeds/seed-21-roles.sql
 
 echo "==> Done."
+echo ""
+echo "NOTE: seed-21-roles.sql ships with demo passwords (see CREDENTIALS.md)."
+echo "Run scripts/create-first-sysadmin.sh to rotate the SYSADMIN / kiosk"
+echo "operator credentials out-of-band before going live."

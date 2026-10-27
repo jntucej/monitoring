@@ -11,6 +11,7 @@ import { addAudit } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import pLimit from "p-limit";
 import crypto, { randomInt } from "crypto";
+import { hash } from "@/server/lib/crypto";
 import {
   parseRollNumber,
   getStudentYearFromRoll,
@@ -101,6 +102,13 @@ export interface CommitResult {
   importedCount: number;
   failedCount: number;
   errors: Array<{ row: number; error: string }>;
+  /**
+   * Per-row web_bootstrap enrollment codes, keyed by row number. Only
+   * populated for new student rows that successfully had a code issued.
+   * The admin can download / print this list to hand out-of-band to each
+   * student; the code is also persisted in the enrollment_codes table.
+   */
+  bootstrapCodes: Array<{ row: number; roll: string | null; code: string }>;
 }
 
 /**
@@ -595,6 +603,7 @@ export async function commitImport(
   let importedCount = 0;
   let failedCount = 0;
   const errors: Array<{ row: number; error: string }> = [];
+  const bootstrapCodes: Array<{ row: number; roll: string | null; code: string }> = [];
 
   for (const res of rowResults) {
     if (res.error) {
@@ -602,6 +611,9 @@ export async function commitImport(
       errors.push({ row: res.row, error: res.error });
     } else {
       importedCount++;
+      if (res.bootstrapCode) {
+        bootstrapCodes.push({ row: res.row, roll: res.roll ?? null, code: res.bootstrapCode });
+      }
     }
   }
 
@@ -623,7 +635,16 @@ export async function commitImport(
     importedCount,
     failedCount,
     errors,
+    bootstrapCodes,
   };
+}
+
+/** Generate a one-shot 8-char enrollment code (no ambiguous chars). */
+async function genEnrollmentCode(): Promise<string> {
+  const alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+  let out = "";
+  for (let i = 0; i < 8; i++) out += alphabet[randomInt(alphabet.length)];
+  return out;
 }
 
 async function processSingleRow(
@@ -631,7 +652,7 @@ async function processSingleRow(
   rowNum: number,
   supabase: any,
   _actorId: string
-): Promise<{ row: number; error: string | null }> {
+): Promise<{ row: number; error: string | null; bootstrapCode?: string; roll?: string | null }> {
   try {
     const salt = await bcrypt.genSalt(10);
     const pwHash = await bcrypt.hash(crypto.randomBytes(16).toString("hex") + "Welcome@123", salt);
@@ -678,6 +699,50 @@ async function processSingleRow(
     }
 
     if (row.role === "student") {
+      // B3: auto-issue a one-shot web_bootstrap enrollment code so the student
+      // can onboard at /bootstrap (Option A) AND so the admin can hand out
+      // out-of-band credentials at scale (Option B). The plain code is
+      // returned in this row's report so it can be persisted to CSV.
+      let bootstrapCode: string | null = null;
+      try {
+        const code = (await genEnrollmentCode()).toUpperCase();
+        const codeHash = await hash(code, 10);
+        const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+        const { error: codeErr } = await supabase
+          .from("enrollment_codes")
+          .insert({
+            user_id: targetUserId,
+            code_hash: codeHash,
+            purpose: "web_bootstrap",
+            expires_at: expiresAt,
+            created_by: _actorId || null,
+          });
+        if (codeErr) {
+          console.warn(
+            `[user-import] enrollment-code issuance failed for row ${rowNum} (non-fatal):`,
+            codeErr.message
+          );
+        } else {
+          bootstrapCode = code;
+        }
+      } catch (codeCatch: any) {
+        console.warn(
+          `[user-import] enrollment-code issuance threw for row ${rowNum} (non-fatal):`,
+          codeCatch?.message ?? codeCatch
+        );
+      }
+
+      if (bootstrapCode) {
+        return {
+          row: rowNum,
+          error: null,
+          bootstrapCode,
+          roll: row.roll || row.uniqueId || null,
+        };
+      }
+    }
+
+    if (["faculty", "staff", "operator", "admin", "sysadmin", "worker"].includes(row.role)) {
       // Course: prefer the sheet's COURSE cell; fall back to the branch name
       // decoded from the roll (CSE / IT / ECE / EEE / ME).
       const courseValue = row.course || row.courseFromRoll || null;
