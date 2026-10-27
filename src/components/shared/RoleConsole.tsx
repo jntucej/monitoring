@@ -1024,14 +1024,17 @@ export function RoleConsole({ role, roleRoot, groups, children, bare }: RoleCons
         ) : null}
       </div>
 
-      {/* Status bar — full width, sticky at the bottom of the shell */}
-      <div className="sticky bottom-0 z-30">
-        {isAdmin ? (
-          <AdminStatusBar
-            counts={adminCounts}
-            lastScan={lastScan}
-            refreshing={adminLoading}
-          />
+      {/* Status bar — full width, sticky at the bottom of the shell.
+          Skipped when `bare` so the parent shell (e.g. the operator's
+          OperatorShell) is the only chrome; no footer is rendered. */}
+      {!bare && (
+        <div className="sticky bottom-0 z-30">
+          {isAdmin ? (
+            <AdminStatusBar
+              counts={adminCounts}
+              lastScan={lastScan}
+              refreshing={adminLoading}
+            />
         ) : isVicePrincipal ? (
           <VpStatusBar
             counts={vpCounts}
@@ -1107,7 +1110,8 @@ export function RoleConsole({ role, roleRoot, groups, children, bare }: RoleCons
         ) : (
           <StatusBar counts={counts} lastScan={lastScan} />
         )}
-      </div>
+        </div>
+      )}
 
       {isAdmin ? (
         <AdminCommandBar
