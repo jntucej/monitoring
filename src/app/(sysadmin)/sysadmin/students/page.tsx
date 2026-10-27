@@ -375,27 +375,33 @@ const api = useApi();
   };
 
   // Canonical course label for a student, always "B.Tech" or "M.Tech".
-  // The raw s.course column is polluted (it stores department names like CSE/
-  // IT / M.Tech specialization labels), so we derive the programme from the
-  // roll's entry mode: 1D -> M.Tech, everything else -> B.Tech.
+  // The s.course column is now DB-derived (trg_sync_student_derived,
+  // migration 20261227000002), so prefer it; fall back to the roll-derived
+  // programme if the column is still polluted (e.g. a row missed by the
+  // backfill, or a legacy import that landed before the trigger was added).
+  // This keeps the UI correct even if the DB regresses.
   const courseOf = useCallback((s: StudentRecord): string => {
+    if (s.course === "B.Tech" || s.course === "M.Tech") return s.course;
     const decoded = s.roll ? parseRollNumber(s.roll) : null;
-    if (decoded) {
-      return resolveCourseType(undefined, decoded.entryModeCode).name;
-    }
-    const raw = (s.course || "").trim();
-    return raw === "M.Tech" || raw === "B.Tech" ? raw : "Unassigned";
+    if (decoded) return resolveCourseType(undefined, decoded.entryModeCode).name;
+    return "Unassigned";
   }, []);
 
-  // Canonical branch / department label, decoded from the roll (B.Tech
-  // 5-branch table + M.Tech specialization codes) so it is never the raw
-  // polluted s.course / s.department value.
+  // Canonical branch / department label.
+  // The s.branch column is now DB-derived (trg_sync_student_derived,
+  // migration 20261227000002): it holds the short department code
+  // (CSE / IT / ECE / EEE / ME) or the M.Tech specialization label,
+  // never a composite display string. Prefer it when it looks clean;
+  // fall back to roll decoding if the column is still the old composite
+  // ("CSE (Regular B.Tech)") or empty.
   const branchOf = useCallback((s: StudentRecord): string => {
+    const rawBranch = (s.studentDetails?.branch || "").trim();
+    if (rawBranch && !rawBranch.includes("(")) return rawBranch; // clean short code
     const decoded = s.roll ? parseRollNumber(s.roll) : null;
     if (decoded && decoded.departmentCode && ROLL_DEPT_CODES[decoded.departmentCode]) {
       return ROLL_DEPT_CODES[decoded.departmentCode].short;
     }
-    return (s.department || s.course || "").trim() || "Unassigned";
+    return (s.department || "").trim() || "Unassigned";
   }, []);
 
   const filteredStudents = useMemo(() => {

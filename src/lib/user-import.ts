@@ -258,10 +258,12 @@ export async function validateImport(csvInput: string | ImportRow[]): Promise<Va
     const dob = normalizeDate(pick(r, "dob", "DOB", "DATE OF BIRTH"));
     const fatherName = pick(r, "fatherName", "FATHER NAME", "FATHERNAME", "GUARDIAN NAME");
     const landlineNumber = pick(r, "LAND LINE 0R PARENT NUMBER", "LANDLINE", "LAND LINE", "PARENT NUMBER", "LANDLINE_NUMBER");
-    // The sheet's COURSE column is commonly used for the DEPARTMENT/branch
-    // (e.g. "CSE", "IT", "ECE", "EEE", "MECH", "ME") rather than the
-    // programme label (B.Tech / M.Tech). Route department-like values to
-    // `department` so the Course field stays clean.
+    // COURSE column in the sheet: if it holds a programme label
+    // (B.Tech / M.Tech) keep it; if it holds a department name
+    // (CSE / IT / ECE / …) it is NOT a programme — route it to
+    // `department` instead. The DB trigger (trg_sync_student_derived)
+    // owns student_details.course/branch, so the value we store here
+    // is only a cross-check, never written blindly.
     const courseRaw = pick(r, "COURSE", "course", "PROGRAM", "DEGREE");
     const DEPT_LIKE = /^(CSE|IT|ECE|EEE|MECH|ME|CS|DA)$/i;
     const courseIsDept = DEPT_LIKE.test(courseRaw.trim());
@@ -749,9 +751,16 @@ async function processSingleRow(
     // for students left a `users` row with no matching student_details, which
     // broke the scan / permission paths that read that table.)
     if (row.role === "student" || ["faculty", "staff", "operator", "admin", "sysadmin", "worker"].includes(row.role)) {
-      // Course: prefer the sheet's COURSE cell; fall back to the branch name
-      // decoded from the roll (CSE / IT / ECE / EEE / ME).
-      const courseValue = row.course || row.courseFromRoll || null;
+      // The DB trigger (trg_sync_student_derived, added in
+      // 20261227000002) owns student_details.course and .branch: on every
+      // INSERT/UPDATE it rewrites both from the roll (or the *_override
+      // escape-hatch columns). We do NOT write a guessed programme label or
+      // composite display string here — the trigger will overwrite whatever
+      // we store, and the roll is the single source of truth.
+      //
+      // We DO still write `department` from the sheet when present (it is
+      // not derived, it is the only free-text field that can hold an
+      // admin's explicit override of the roll-derived value).
 
       // Derive student_type (HM/HF/DM/DF) — a soft indicator, not a hard gate.
       // hosteller = has a hostel_block; day scholar = no hostel block.
@@ -779,13 +788,15 @@ async function processSingleRow(
         hostel_block: row.hostelBlock || null,
         room_number: row.roomNumber || null,
         gender: row.gender || null,
-        course: courseValue,
+        // course/branch are DB-derived by trg_sync_student_derived — do not
+        // store guessed values here; the trigger overwrites them on insert.
         father_name: row.fatherName || null,
         landline_number: row.landlineNumber || null,
         student_type: studentType,
-        // New student_details columns (all optional, written as null when absent).
+        // department: only written when the sheet explicitly provides it;
+        // the trigger does NOT own this column, so this is the admin's
+        // explicit override of the roll-derived branch.
         department: row.department || null,
-        branch: row.branch || null,
         semester: row.semester || null,
         regulation: row.regulation || null,
         admission_date: row.admissionDate || null,
