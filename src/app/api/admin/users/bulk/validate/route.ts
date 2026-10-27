@@ -96,23 +96,25 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }) {
       employee_id: string | null;
     }> = [];
 
-    if (emailList.length || rollList.length || uniqueList.length || empList.length) {
-      // Build a single OR-of-equality query with chunks to stay under the
-      // 65535 placeholder limit. We batch per-field with small chunks.
+    if (emailList.length || rollList.length || empList.length || uniqueList.length) {
+      // Build per-field chunked queries. Each query() call receives only its
+      // own chunk as params, so placeholders must be numbered from $1
+      // relative to that chunk — NOT from a shared running slot (the old
+      // `slot` started at 1 and produced $2,$3… in the first chunk while
+      // only one param was bound, causing
+      // "could not determine data type of parameter $1").
       const chunk = 500;
-      const ph = (i: number) => `$${i + 1}`;
-      let slot = 1;
+      const phsFor = (arr: string[]) =>
+        arr.map((_, k) => `$${k + 1}`).join(",");
 
       for (let i = 0; i < emailList.length; i += chunk) {
         const c = emailList.slice(i, i + chunk);
-        const phs = c.map((_, k) => ph(slot + k));
-        slot += c.length;
         const res = await query<{ email: string; unique_id: string | null; roll: string | null; employee_id: string | null }>(
           `SELECT u.email, u.unique_id, sd.roll, ed.employee_id
              FROM users u
              LEFT JOIN student_details  sd ON sd.user_id = u.id
              LEFT JOIN employee_details ed ON ed.user_id = u.id
-            WHERE LOWER(u.email) IN (${phs.join(",")})`,
+            WHERE LOWER(u.email) IN (${phsFor(c)})`,
           c
         );
         existing.push(...res.rows.map((r) => ({ email: r.email, unique_id: r.unique_id ?? null, roll: r.roll ?? null, employee_id: r.employee_id ?? null })));
@@ -120,46 +122,43 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }) {
 
       // Rolls / unique ids / employee ids may not have been caught by the email
       // branch above (e.g. email in the CSV differs from the stored one).
-      const needMoreRoll = rollList.length + uniqueList.length + empList.length > 0;
-      if (needMoreRoll) {
+      if (rollList.length > 0) {
         for (let i = 0; i < rollList.length; i += chunk) {
           const c = rollList.slice(i, i + chunk);
-          const phs = c.map((_, k) => ph(slot + k));
-          slot += c.length;
           const res = await query<{ email: string; unique_id: string | null; roll: string | null; employee_id: string | null }>(
             `SELECT u.email, u.unique_id, sd.roll, ed.employee_id
                FROM users u
                LEFT JOIN student_details  sd ON sd.user_id = u.id
                LEFT JOIN employee_details ed ON ed.user_id = u.id
-              WHERE UPPER(sd.roll) IN (${phs.join(",")})`,
+              WHERE UPPER(sd.roll) IN (${phsFor(c)})`,
             c
           );
           existing.push(...res.rows.map((r) => ({ email: r.email, unique_id: r.unique_id ?? null, roll: r.roll ?? null, employee_id: r.employee_id ?? null })));
         }
+      }
+      if (uniqueList.length > 0) {
         for (let i = 0; i < uniqueList.length; i += chunk) {
           const c = uniqueList.slice(i, i + chunk);
-          const phs = c.map((_, k) => ph(slot + k));
-          slot += c.length;
           const res = await query<{ email: string; unique_id: string | null; roll: string | null; employee_id: string | null }>(
             `SELECT u.email, u.unique_id, sd.roll, ed.employee_id
                FROM users u
                LEFT JOIN student_details  sd ON sd.user_id = u.id
                LEFT JOIN employee_details ed ON ed.user_id = u.id
-              WHERE UPPER(u.unique_id) IN (${phs.join(",")})`,
+              WHERE UPPER(u.unique_id) IN (${phsFor(c)})`,
             c
           );
           existing.push(...res.rows.map((r) => ({ email: r.email, unique_id: r.unique_id ?? null, roll: r.roll ?? null, employee_id: r.employee_id ?? null })));
         }
+      }
+      if (empList.length > 0) {
         for (let i = 0; i < empList.length; i += chunk) {
           const c = empList.slice(i, i + chunk);
-          const phs = c.map((_, k) => ph(slot + k));
-          slot += c.length;
           const res = await query<{ email: string; unique_id: string | null; roll: string | null; employee_id: string | null }>(
             `SELECT u.email, u.unique_id, sd.roll, ed.employee_id
                FROM users u
                LEFT JOIN student_details  sd ON sd.user_id = u.id
                LEFT JOIN employee_details ed ON ed.user_id = u.id
-              WHERE UPPER(ed.employee_id) IN (${phs.join(",")})`,
+              WHERE UPPER(ed.employee_id) IN (${phsFor(c)})`,
             c
           );
           existing.push(...res.rows.map((r) => ({ email: r.email, unique_id: r.unique_id ?? null, roll: r.roll ?? null, employee_id: r.employee_id ?? null })));
