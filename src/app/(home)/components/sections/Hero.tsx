@@ -121,12 +121,15 @@ export function Hero() {
       {/* LCP: the h1. Full opacity on the first frame. Transform-only
           wrapper motion. No blur, no opacity animation on the text. The
           gradient is static (centered) so no repaints happen on scroll. */}
-      <h1
+      <motion.h1
         className="home-headline-gradient text-6xl font-semibold tracking-tight md:text-8xl"
         style={{ lineHeight: 1 }}
+        initial={reduced ? false : { y: 8, scale: 1.01 }}
+        animate={reduced ? undefined : { y: 0, scale: 1 }}
+        transition={{ type: "spring", stiffness: 120, damping: 20 }}
       >
         <span>{HEADLINE}</span>
-      </h1>
+      </motion.h1>
 
       {/* Sub-headline — blur-reveal is fine here (not the LCP element). */}
       <motion.p
