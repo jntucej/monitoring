@@ -221,38 +221,8 @@ export function directGeneratePass(input: DirectGenInput): DirectGenResult {
   };
 }
 
-export interface EntryOptions {
-  buttons: ("return_to_hostel" | "home_in" | "day_scholar_in")[];
-  allowsTypeChoice: boolean;
-}
-
-export function resolveEntryOptions(
-  lastOutReason: string | null,
-  currentType: "hosteller" | "day_scholar" | null,
-): EntryOptions {
-  void currentType;
-  // Mirror permission-workflow-core.resolveEntryOptions exactly (single source
-  // of truth). The caller (record.ts / ScanConfirmation) passes the stored
-  // current_entry_type but the button set is driven only by lastOutReason:
-  // - daily_outing / day_pass / emergency → pinned to [return_to_hostel]
-  // - day_scholar_out                     → pinned to [day_scholar_in]
-  // - home_out / special_leave / null (first scan) → [home_in, day_scholar_in], type choice
-  const reason = (lastOutReason ?? "").toLowerCase();
-  if (reason === "daily_outing" || reason === "day_pass" || reason === "emergency") {
-    return { buttons: ["return_to_hostel"], allowsTypeChoice: false };
-  }
-  if (reason === "day_scholar_out") {
-    return { buttons: ["day_scholar_in"], allowsTypeChoice: false };
-  }
-  // home_out, special_leave, or null (first scan / no prior OUT). A first
-  // scan has no prior OUT by construction, so offering both home_in
-  // (hosteller) and day_scholar_in lets the operator pick the correct entry
-  // type. Picking home_in sets the stored entry type to hosteller; picking
-  // day_scholar_in sets it to day_scholar. The recordScan home_in guard
-  // (step 10c) rejects a home_in with no matching prior home_out with a
-  // clean 400, not silent corruption.
-  return { buttons: ["home_in", "day_scholar_in"], allowsTypeChoice: true };
-}
+export { resolveEntryOptions } from "@/lib/permission-workflow-core";
+export type { EntryOptions } from "@/lib/permission-workflow-core";
 
 export { PermissionRuleError };
 export type { StageHistoryEntry, RequestSnapshot, ActorContext };

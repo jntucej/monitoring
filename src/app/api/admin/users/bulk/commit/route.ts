@@ -114,6 +114,8 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }) {
         importedCount: result.importedCount,
         failedCount: result.failedCount,
         errors: result.errors,
+        // B7: per-row one-shot enrollment codes for freshly imported students.
+        bootstrapCodes: result.bootstrapCodes,
       },
       message: `Imported ${result.importedCount}, failed ${result.failedCount}`,
     });

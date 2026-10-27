@@ -105,7 +105,8 @@ export interface EntryOptions {
  * known OUT reason. Fully client-safe (no DB / pg / Node builtins).
  *
  * Rules:
- * - prior `daily_outing` / `day_pass`  → pinned to `[return_to_hostel]`, no type choice.
+ * - prior `daily_outing` / `day_pass` / `emergency`
+ *                                  → pinned to `[return_to_hostel]`, no type choice.
  * - prior `day_scholar_out`            → pinned to `[day_scholar_in]`, no type choice.
  * - prior `home_out` (or unknown)      → `[home_in, day_scholar_in]`, type choice.
  * - no prior OUT (`null`) / first scan → `[home_in, day_scholar_in]`, type choice.
@@ -120,7 +121,7 @@ export function resolveEntryOptions(
   // because it is a named param.)
   void currentType;
 
-  if (lastOutReason === "daily_outing" || lastOutReason === "day_pass") {
+  if (lastOutReason === "daily_outing" || lastOutReason === "day_pass" || lastOutReason === "emergency") {
     return { buttons: ["return_to_hostel"], allowsTypeChoice: false };
   }
   if (lastOutReason === "day_scholar_out") {

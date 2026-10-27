@@ -461,6 +461,13 @@ export interface BulkImportOutcome {
   report: BulkImportReport;
   /** Only the rows that were actually committed (status === 'imported'). */
   committedRows: ImportRow[];
+  /**
+   * B7: one-shot web_bootstrap enrollment codes issued for each freshly
+   * imported student row. Populated only when the enrollment-code insert
+   * succeeded; a failed code issue leaves the row imported but without a
+   * code (admin can re-issue manually later).
+   */
+  bootstrapCodes: Array<{ row: number; roll: string | null; code: string }>;
 }
 
 /**
@@ -544,6 +551,7 @@ export async function runBulkImport(
 
   // Commit only the genuinely-new rows.
   const commit = await commitImport(toCommit, actorId, skipErrors);
+  const bootstrapCodes = commit.bootstrapCodes;
 
   // Fold commit-level failures back onto the report (a row that errored while
   // inserting becomes 'invalid' with the commit error).
@@ -577,6 +585,7 @@ export async function runBulkImport(
       rows: reportRows,
     },
     committedRows: toCommit,
+    bootstrapCodes,
   };
 }
 
@@ -698,12 +707,13 @@ async function processSingleRow(
       if (insErr) throw new Error(insErr.message);
     }
 
+    let bootstrapCode: string | null = null;
+
     if (row.role === "student") {
       // B3: auto-issue a one-shot web_bootstrap enrollment code so the student
       // can onboard at /bootstrap (Option A) AND so the admin can hand out
       // out-of-band credentials at scale (Option B). The plain code is
       // returned in this row's report so it can be persisted to CSV.
-      let bootstrapCode: string | null = null;
       try {
         const code = (await genEnrollmentCode()).toUpperCase();
         const codeHash = await hash(code, 10);
@@ -731,18 +741,14 @@ async function processSingleRow(
           codeCatch?.message ?? codeCatch
         );
       }
-
-      if (bootstrapCode) {
-        return {
-          row: rowNum,
-          error: null,
-          bootstrapCode,
-          roll: row.roll || row.uniqueId || null,
-        };
-      }
     }
 
-    if (["faculty", "staff", "operator", "admin", "sysadmin", "worker"].includes(row.role)) {
+    // student_details upsert — runs for BOTH student and staff rows so the
+    // roll, hostel_block, gender, student_type, and full profile columns are
+    // populated regardless of role. (The early-return that used to skip this
+    // for students left a `users` row with no matching student_details, which
+    // broke the scan / permission paths that read that table.)
+    if (row.role === "student" || ["faculty", "staff", "operator", "admin", "sysadmin", "worker"].includes(row.role)) {
       // Course: prefer the sheet's COURSE cell; fall back to the branch name
       // decoded from the roll (CSE / IT / ECE / EEE / ME).
       const courseValue = row.course || row.courseFromRoll || null;
@@ -840,7 +846,12 @@ async function processSingleRow(
       }
     }
 
-    return { row: rowNum, error: null };
+    return {
+      row: rowNum,
+      error: null,
+      bootstrapCode: bootstrapCode ?? undefined,
+      roll: row.roll || row.uniqueId || null,
+    };
   } catch (err: any) {
     return { row: rowNum, error: err.message || "Failed to process row" };
   }

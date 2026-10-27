@@ -79,6 +79,8 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
   const [preview, setPreview] = useState<PreviewState | null>(null);
   /** The final per-row report, kept so the modal stays open and shows the outcome. */
   const [report, setReport] = useState<BulkImportReport | null>(null);
+  /** B7: per-row enrollment codes for freshly imported students (from the commit response). */
+  const [reportBootstrapCodes, setReportBootstrapCodes] = useState<Array<{ row: number; roll: string | null; code: string }> | null>(null);
 
   const runValidate = async (): Promise<PreviewState | null> => {
     const res = await fetch("/api/users/bulk/validate", {
@@ -115,6 +117,7 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
         const d = json.data ?? json;
         const rpt: BulkImportReport = d.report ?? { totalRows: 0, imported: 0, skipped: 0, invalid: 0, rows: [] };
         setReport(rpt);
+        setReportBootstrapCodes(d.bootstrapCodes ?? []);
         setPreview(null);
         onSuccess();
       } else {
@@ -125,6 +128,7 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
           invalid: 0,
           rows: [{ row: 0, status: "invalid", reason: json.error?.message || "Import failed" }],
         });
+        setReportBootstrapCodes(null);
       }
     } catch (err: any) {
       setReport({
@@ -134,13 +138,15 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
         invalid: 0,
         rows: [{ row: 0, status: "invalid", reason: err.message || "Network error during bulk import" }],
       });
+      setReportBootstrapCodes(null);
     } finally {
       setBusy("idle");
     }
   };
 
-  const buildReportCsv = (r: BulkImportReport): string => {
-    const header = ["row", "roll", "name", "email", "status", "reason"];
+  const buildReportCsv = (r: BulkImportReport, codes?: Array<{ row: number; roll: string | null; code: string }> | null): string => {
+    const codeByRow = new Map((codes ?? []).map((c) => [c.row, c.code]));
+    const header = ["row", "roll", "name", "email", "status", "reason", "bootstrap_code"];
     const lines = [header.join(",")];
     for (const row of r.rows) {
       const cells = [
@@ -150,6 +156,7 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
         row.email ?? "",
         row.status,
         row.reason,
+        codeByRow.get(row.row) ?? "",
       ];
       lines.push(cells.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","));
     }
@@ -158,7 +165,10 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
 
   const downloadReport = () => {
     if (!report) return;
-    downloadCsv(buildReportCsv(report), `bulk_import_report_${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.csv`);
+    downloadCsv(
+      buildReportCsv(report, reportBootstrapCodes),
+      `bulk_import_report_${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.csv`
+    );
   };
 
   return (
@@ -286,6 +296,22 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
               <Download className="w-4 h-4" /> Download Report CSV (imported + not-imported)
             </button>
 
+            {reportBootstrapCodes && reportBootstrapCodes.length > 0 && (
+              <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-3 text-xs space-y-1">
+                <div className="font-semibold text-emerald-400">
+                  {reportBootstrapCodes.length} one-time setup code(s) issued — hand each to the student so they
+                  can activate at <code className="font-mono">/bootstrap?code=…</code>
+                </div>
+                <div className="text-[var(--text-muted)]">
+                  Each code is shown once and stored hashed (in <code>enrollment_codes</code>). It is not
+                  recoverable later, so copy it into the CSV before closing this dialog.
+                </div>
+                <pre className="text-[11px] leading-5 bg-[var(--bg-base)] rounded p-2 overflow-x-auto">
+{reportBootstrapCodes.map((c) => `row ${c.row}  ${c.roll ?? ""}  ${c.code}`).join("\n")}
+                </pre>
+              </div>
+            )}
+
             <div className="max-h-64 overflow-y-auto rounded-lg border border-[var(--border)]">
               <table className="w-full text-xs">
                 <thead className="sticky top-0 bg-[var(--bg-base)] text-[var(--text-muted)]">
@@ -295,22 +321,27 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
                     <th className="p-2 text-left">Name</th>
                     <th className="p-2 text-left">Status</th>
                     <th className="p-2 text-left">Reason</th>
+                    <th className="p-2 text-left">Setup code</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {report.rows.map((r) => (
-                    <tr key={r.row} className="border-t border-[var(--border)]">
-                      <td className="p-2 text-[var(--text-muted)]">{r.row}</td>
-                      <td className="p-2 font-mono">{r.roll || "—"}</td>
-                      <td className="p-2">{r.name || "—"}</td>
-                      <td className="p-2">
-                        {r.status === "imported" && <span className="text-emerald-400 font-semibold">Imported</span>}
-                        {r.status === "skipped" && <span className="text-amber-400 font-semibold">Already in DB</span>}
-                        {r.status === "invalid" && <span className="text-rose-400 font-semibold">Invalid</span>}
-                      </td>
-                      <td className="p-2 text-[var(--text-muted)]">{r.reason}</td>
-                    </tr>
-                  ))}
+                  {report.rows.map((r) => {
+                    const codeEntry = reportBootstrapCodes?.find((c) => c.row === r.row);
+                    return (
+                      <tr key={r.row} className="border-t border-[var(--border)]">
+                        <td className="p-2 text-[var(--text-muted)]">{r.row}</td>
+                        <td className="p-2 font-mono">{r.roll || "—"}</td>
+                        <td className="p-2">{r.name || "—"}</td>
+                        <td className="p-2">
+                          {r.status === "imported" && <span className="text-emerald-400 font-semibold">Imported</span>}
+                          {r.status === "skipped" && <span className="text-amber-400 font-semibold">Already in DB</span>}
+                          {r.status === "invalid" && <span className="text-rose-400 font-semibold">Invalid</span>}
+                        </td>
+                        <td className="p-2 text-[var(--text-muted)]">{r.reason}</td>
+                        <td className="p-2 font-mono">{codeEntry?.code ?? ""}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -319,7 +350,7 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
               <button onClick={onClose} className="px-3 py-1.5 text-xs text-[var(--text-muted)] hover:text-white font-medium">Close</button>
               <button
                 type="button"
-                onClick={() => { setReport(null); setPreview(null); setCsvText(""); }}
+                onClick={() => { setReport(null); setPreview(null); setCsvText(""); setReportBootstrapCodes(null); }}
                 className="px-4 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-lg"
               >
                 Import Another File

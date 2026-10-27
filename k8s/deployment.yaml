@@ -41,6 +41,11 @@ data:
   SKIP_ENV_VALIDATION: "1"
   DOCKER_BUILD: "false"
   NODE_ENV: "production"
+  # Kiosk auth: in production the kiosk session route refuses OPEN mode
+  # (426 KIOSK_OPEN_REFUSED) unless exactly one of these is set.
+  # Set KIOSK_SESSION_REQUIRE_PIN=true OR a comma-separated TRUSTED_KIOSK_IPS.
+  KIOSK_SESSION_REQUIRE_PIN: "true"
+  # TRUSTED_KIOSK_IPS: "10.0.0.5,10.0.0.6"
 
 ---
 apiVersion: apps/v1

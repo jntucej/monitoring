@@ -21,11 +21,12 @@ async function handlePost(req: NextRequest, context: { auth: AuthContext }) {
       return NextResponse.json({ success: false, error: { message: "No CSV content supplied" } }, { status: 400 });
     }
 
-    const { report, committedRows } = await runBulkImport(
+    const outcome = await runBulkImport(
       payload as string | Array<import("@/lib/user-import").ImportRow>,
       context.auth.userId,
       body.skipErrors !== false
     );
+    const report = outcome.report;
 
     // A per-row outcome that maps the commit result back onto the report for
     // any row that errored during the actual insert.
@@ -35,18 +36,24 @@ async function handlePost(req: NextRequest, context: { auth: AuthContext }) {
     return NextResponse.json({
       success: true,
       data: {
-        importedCount: committedRows.length,
+        importedCount: report.imported,
         failedCount: report.invalid,
         skipped: report.skipped,
         report,
+        // B7: per-row one-shot enrollment codes for freshly imported students,
+        // so the admin can hand each out-of-band to redeem at /bootstrap?code=.
+        // Also persisted in the enrollment_codes table (code_hash only).
+        bootstrapCodes: outcome.bootstrapCodes,
       } satisfies {
         importedCount: number;
         failedCount: number;
         skipped: number;
         report: BulkImportReport;
+        bootstrapCodes: Array<{ row: number; roll: string | null; code: string }>;
       },
       // Also expose the classic shape for the older CsvBulkImporter caller.
       ...report,
+      bootstrapCodes: outcome.bootstrapCodes,
     });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: { message: error.message || "Commit failed" } }, { status: 500 });

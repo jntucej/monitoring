@@ -213,6 +213,65 @@ async function handlePatch(req: NextRequest, ctx: { auth: { userId: string; role
       changes.push(guardianId ? "guardian linked" : "guardian unlinked");
     }
 
+    // 4b) B2 — elevated fields.
+    //     supervisedGates (supervisor scoping) — sysadmin only.
+    //     assignedHostel (hostel staff scoping) — admin or sysadmin.
+    if (body.supervisedGates !== undefined) {
+      if (actorRole !== "sysadmin") {
+        return NextResponse.json(
+          { success: false, error: { code: "FORBIDDEN", message: "supervisedGates is sysadmin only" } },
+          { status: 403 }
+        );
+      }
+      const ids = body.supervisedGates;
+      if (ids !== null && !(Array.isArray(ids) && ids.every((g: unknown) => typeof g === "string" && g !== ""))) {
+        return NextResponse.json(
+          { success: false, error: { code: "INVALID_SUPERVISED_GATES", message: "supervisedGates must be null or a non-empty array of gate UUIDs" } },
+          { status: 400 }
+        );
+      }
+      if (Array.isArray(ids) && ids.length > 0) {
+        const { rows } = await query<{ id: string }>(
+          "SELECT id FROM gates WHERE id = ANY($1::uuid[]) AND is_active = TRUE",
+          [ids]
+        );
+        if (rows.length !== ids.length) {
+          return NextResponse.json(
+            { success: false, error: { code: "GATE_NOT_FOUND", message: "one or more supervisedGates is not a valid active gate" } },
+            { status: 400 }
+          );
+        }
+      }
+      const svc = getSupabaseServiceClient();
+      const { error } = await svc.from("users").update({ supervised_gates: ids === null ? null : ids }).eq("id", userId);
+      if (error) {
+        return NextResponse.json({ success: false, error: { code: "DB_ERROR", message: error.message } }, { status: 400 });
+      }
+      changes.push("supervisedGates updated");
+    }
+
+    if (body.assignedHostel !== undefined) {
+      if (actorRole !== "sysadmin" && actorRole !== "admin") {
+        return NextResponse.json(
+          { success: false, error: { code: "FORBIDDEN", message: "assignedHostel is admin or sysadmin only" } },
+          { status: 403 }
+        );
+      }
+      const val = body.assignedHostel;
+      if (val !== null && (typeof val !== "string" || val.trim() === "")) {
+        return NextResponse.json(
+          { success: false, error: { code: "INVALID_ASSIGNED_HOSTEL", message: "assignedHostel must be a non-empty string or null" } },
+          { status: 400 }
+        );
+      }
+      const svc = getSupabaseServiceClient();
+      const { error } = await svc.from("users").update({ assigned_hostel: val === null ? null : val }).eq("id", userId);
+      if (error) {
+        return NextResponse.json({ success: false, error: { code: "DB_ERROR", message: error.message } }, { status: 400 });
+      }
+      changes.push("assignedHostel updated");
+    }
+
     // 5) Catch-all: reject any attempt to smuggle privileged fields through.
     const forbidden = ["role", "password", "initialPinHash", "pin", "pinHash", "flagStatus", "flag_status", "flags"];
     for (const k of forbidden) {
