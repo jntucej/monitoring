@@ -1,5 +1,4 @@
 "use client";
-export const dynamic = "force-dynamic";
 
 // src/app/(approver)/oic/queue/page.tsx  → mounted at /oic/queue
 // SCAFFOLD:QUEUE — thin wrapper around OieQueuePanel.

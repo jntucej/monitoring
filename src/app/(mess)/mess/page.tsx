@@ -1,4 +1,3 @@
-export const dynamic = "force-dynamic";
 import { Suspense } from "react";
 import { UtensilsCrossed } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";

@@ -1,4 +1,3 @@
-export const dynamic = "force-dynamic";
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { RequestPassForm } from "@/components/parent/RequestPassForm";

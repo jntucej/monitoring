@@ -1,4 +1,3 @@
-export const dynamic = "force-dynamic";
 "use client";
 import { PredictiveAnalytics } from "@/components/admin/PredictiveAnalytics";
 

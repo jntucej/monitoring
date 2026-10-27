@@ -1,6 +1,5 @@
 "use client";
 
-export const dynamic = "force-dynamic";
 
 // src/app/(sysadmin)/sysadmin/profile/page.tsx
 

@@ -1,5 +1,4 @@
 "use client";
-export const dynamic = "force-dynamic";
 
 // src/app/(approver)/hostel-manager/tickets/page.tsx
 // Resident ticket inbox for hostel staff: permission requests routed to this

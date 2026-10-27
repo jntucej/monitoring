@@ -1,6 +1,5 @@
 "use client";
 
-export const dynamic = "force-dynamic";
 
 import React, { useState, useCallback } from "react";
 import { Users, AlertCircle, RotateCw, Inbox } from "lucide-react";

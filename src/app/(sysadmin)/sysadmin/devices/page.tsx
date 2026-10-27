@@ -1,6 +1,5 @@
 "use client";
 
-export const dynamic = "force-dynamic";
 
 import React, { useState, useCallback } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";

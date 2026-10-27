@@ -1,6 +1,5 @@
 "use client";
 
-export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { Database, ShieldCheck, Clock, Archive, ArrowUpRight, HardDrive, FileCheck2 } from "lucide-react";

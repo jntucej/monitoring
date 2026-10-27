@@ -2,7 +2,6 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export const dynamic = "force-dynamic";
 
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";

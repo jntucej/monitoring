@@ -1,4 +1,3 @@
-export const dynamic = "force-dynamic";
 "use client";
 // src/app/(sysadmin)/sysadmin/promotions/page.tsx
 // PROMOTIONS sysadmin page (kind: kanban, pollMs 30000).

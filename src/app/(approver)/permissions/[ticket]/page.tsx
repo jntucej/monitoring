@@ -1,7 +1,6 @@
 "use client";
 import { Suspense } from "react";
 
-export const dynamic = "force-dynamic";
 
 import React from "react";
 import { useParams, useRouter } from "next/navigation";

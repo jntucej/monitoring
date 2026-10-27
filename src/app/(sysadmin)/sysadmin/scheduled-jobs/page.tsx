@@ -1,4 +1,3 @@
-export const dynamic = "force-dynamic";
 
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { ScheduledJobsPanel } from "@/components/sysadmin/ScheduledJobsPanel";

@@ -1,4 +1,3 @@
-export const dynamic = "force-dynamic";
 "use client";
 // src/app/(sysadmin)/sysadmin/people/page.tsx
 // PEOPLE sysadmin page (faceted-table + drawer, pollMs 60000).

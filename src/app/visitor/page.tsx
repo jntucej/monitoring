@@ -1,4 +1,3 @@
-export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { UserCheck, Clock, History, User, FileText, MapPin, ArrowRight } from "lucide-react";
 

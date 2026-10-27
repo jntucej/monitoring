@@ -1,6 +1,5 @@
 "use client";
 
-export const dynamic = "force-dynamic";
 
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { ComplianceSettings } from "@/components/sysadmin/ComplianceSettings";

@@ -1,6 +1,5 @@
 "use client";
 
-export const dynamic = "force-dynamic";
 
 import { Suspense, useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";

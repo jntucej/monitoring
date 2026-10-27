@@ -1,6 +1,5 @@
 "use client";
 
-export const dynamic = "force-dynamic";
 
 import { Suspense } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";

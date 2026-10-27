@@ -1,4 +1,3 @@
-export const dynamic = "force-dynamic";
 "use client";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";

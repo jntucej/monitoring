@@ -10,7 +10,6 @@ import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { AcademicsDepartmentPanel } from "@/components/approver/AcademicsDepartmentPanel";
 import type { Role } from "@/lib/types";
 
-export const dynamic = "force-dynamic";
 
 const ALLOWED: Role[] = [
   "sysadmin", "admin", "principal", "vice_principal", "exam_branch", "oie", "hod",

@@ -1,6 +1,5 @@
 "use client";
 
-export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { Activity, Clock, Database, Sparkles, Layout, ArrowUpRight, Server } from "lucide-react";

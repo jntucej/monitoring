@@ -1,4 +1,3 @@
-export const dynamic = "force-dynamic";
 
 // src/app/(admin)/admin/analytics/sustainability/page.tsx
 // SCAFFOLD:PAGE — thin wrapper around the SustainabilityAnalytics component.

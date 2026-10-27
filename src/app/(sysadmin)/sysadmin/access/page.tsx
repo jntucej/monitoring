@@ -1,6 +1,5 @@
 "use client";
 
-export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { UserCheck, Lock, Landmark, Users, ArrowUpRight, ShieldCheck } from "lucide-react";

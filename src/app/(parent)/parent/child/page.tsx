@@ -1,4 +1,3 @@
-export const dynamic = "force-dynamic";
 
 import { ChildStatus } from "@/components/parent/ChildStatus";
 import { ChildActivity } from "@/components/parent/ChildActivity";
