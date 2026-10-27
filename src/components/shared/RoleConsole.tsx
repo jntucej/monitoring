@@ -78,6 +78,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { StatusBar } from "@/components/shared/StatusBar";
 import { CommandBar } from "@/components/shared/CommandBar";
 import { IconRail } from "@/components/shared/IconRail";
+import type { IconRailGroup } from "@/components/shared/IconRail";
 import { useApiResource } from "@/hooks/useApiResource";
 import { useKeyboardShortcuts, type Shortcut } from "@/hooks/useKeyboardShortcuts";
 import { getConsoleConfig } from "@/config/consoles";
@@ -124,13 +125,20 @@ export interface RoleConsoleProps {
   /** The role's root path, e.g. "/operator". */
   roleRoot: string;
   /**
+   * Optional collapsible sidebar groups. When provided, the IconRail renders
+   * these group icons (each with a desktop flyout + active indicator) instead
+   * of the flat nav items. Roles that pass nothing keep the current behavior
+   * exactly — no groups means the old flat rail.
+   */
+  groups?: IconRailGroup[];
+  /**
    * Optional content for the main column. When provided, it replaces the
    * default Board feed. Use this from sub-pages nested under the layout.
    */
   children?: ReactNode;
 }
 
-export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
+export function RoleConsole({ role, roleRoot, groups, children }: RoleConsoleProps) {
   const [selectedRow, setSelectedRow] = useState<BoardRow | null>(null);
   const [commandBarOpen, setCommandBarOpen] = useState(false);
 
@@ -928,7 +936,7 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
 
       {/* Main flex row: rail | main column | context panel */}
       <div className="flex flex-1 min-h-0">
-        <IconRail role={role} roleRoot={roleRoot} />
+        <IconRail role={role} roleRoot={roleRoot} groups={groups} />
 
         <main className="flex-1 min-w-0 overflow-y-auto custom-scrollbar">
           {children ??
