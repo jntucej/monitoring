@@ -75,10 +75,11 @@ export function useKioskOperator(gateIdParam?: string | null) {
 
     if (!res.ok) {
       // 404 = no kiosk operator configured; 503 = kiosk operator
-      // misconfigured (zero or multiple kiosk-default operators) — both
-      // mean "not configured", show the not-configured panel, fall back
-      // to manual login. 429 = rate-limited: treat as error.
-      const notConfigured = res.status === 404 || res.status === 503;
+      // misconfigured (zero or multiple kiosk-default operators).
+      // 426 = kiosk requires an upgrade (PIN entry UI, or OPEN-mode refused
+      // in production). All three mean "auto-session not available, fall
+      // back to manual login / claim-code panel."
+      const notConfigured = res.status === 404 || res.status === 503 || res.status === 426;
       setState({
         pending: false,
         kioskSession: false,

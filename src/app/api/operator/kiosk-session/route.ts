@@ -38,7 +38,8 @@ export type KioskGateDecision =
   | { kind: "pin_missing" }
   | { kind: "pin_invalid"; pin: string }
   | { kind: "ip_not_trusted" }
-  | { kind: "open" };
+  | { kind: "open" }
+  | { kind: "open_refused" };
 
 /**
  * Determine which gate applies. Does NOT verify the PIN — that happens in
@@ -74,7 +75,12 @@ async function kioskGateDecision(
     return { kind: "pin_invalid", pin: bodyPin };
   }
 
-  // Mode 3: open (backwards compat). One-time warning.
+  // Mode 3: open (backwards compat). In production this is refused outright —
+  // an open kiosk session is a privilege-escalation hole (any caller mints
+  // operator tokens). Require TRUSTED_KIOSK_IPS or KIOSK_SESSION_REQUIRE_PIN.
+  if (process.env.NODE_ENV === "production") {
+    return { kind: "open_refused" };
+  }
   if (!KIOSK_AUTH_WARNED.current) {
     KIOSK_AUTH_WARNED.current = true;
     console.warn(
@@ -148,7 +154,20 @@ async function handleKioskSession(
         { status: 426 }
       );
     case "open":
-      break; // open mode — proceed to session mint.
+      break; // open mode (non-production only) — proceed to session mint.
+    case "open_refused":
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "KIOSK_OPEN_REFUSED",
+            message:
+              "Kiosk open mode is disabled in production. Set KIOSK_SESSION_REQUIRE_PIN=true or TRUSTED_KIOSK_IPS to enable kiosk sessions.",
+          },
+          upgradesRequired: true,
+        },
+        { status: 426 }
+      );
     case "pass":
       break; // trusted IP — proceed to session mint.
     case "pin_invalid":

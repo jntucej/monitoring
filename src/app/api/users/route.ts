@@ -11,6 +11,7 @@ import {
   addAudit,
   generateUceJUniqueId,
 } from "@/lib/db";
+import { hash } from "@/server/lib/crypto";
 import type { Role } from "@/lib/types";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -302,11 +303,53 @@ async function handlePost(req: NextRequest) {
       }
     }
 
+    // A freshly created account has no usable credential by default (the
+    // Supabase Auth temp password above is discarded, never returned or
+    // logged). Auto-issue a one-shot mobile enrollment code so the new
+    // student can claim their device on first run, and surface the plain
+    // code ONCE in this response for the admin to hand off. Non-fatal: if
+    // enrollment-code issuance fails, the account is still created and the
+    // admin can mint a code via the enrollment-code endpoint afterward.
+    let enrollmentCode: string | null = null;
+    let enrollmentExpiresAt: string | null = null;
+    if (role === "student") {
+      try {
+        const alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+        let code = "";
+        for (let i = 0; i < 8; i++) code += alphabet[Math.floor(Math.random() * alphabet.length)];
+        const codeHash = await hash(code, 10);
+        enrollmentExpiresAt = new Date(Date.now() * 1 + 24 * 60 * 60 * 1000).toISOString();
+        const { error: enrollErr } = await service.from("enrollment_codes").insert({
+          user_id: user.id || authUserId,
+          code_hash: codeHash,
+          purpose: "mobile",
+          expires_at: enrollmentExpiresAt,
+          created_by: actorId,
+        });
+        if (enrollErr) {
+          console.warn("[users.POST] enrollment-code issuance failed (non-fatal):", enrollErr.message);
+        } else {
+          enrollmentCode = code;
+        }
+      } catch (enrollCatch: any) {
+        console.warn("[users.POST] enrollment-code issuance threw (non-fatal):", enrollCatch?.message ?? enrollCatch);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       data: user,
       uniqueId: resolvedUniqueId ?? (user as any).unique_id ?? null,
-      meta: { authProvider: 'supabase', inviteSent, uniqueIdGenerated: ucejRoles.includes(role) && !effectiveUniqueId },
+      meta: {
+        authProvider: 'supabase',
+        inviteSent,
+        uniqueIdGenerated: ucejRoles.includes(role) && !effectiveUniqueId,
+        // One-shot credential for the new account. The plain code is returned
+        // exactly once and is NOT re-fetchable; the admin must record or
+        // hand it off now.
+        enrollmentCode,
+        enrollmentCodeExpiresAt: enrollmentExpiresAt,
+      },
     });
   } catch (error) {
     console.error('Error creating user:', error);
@@ -389,8 +432,11 @@ async function handlePatch(req: NextRequest) {
         );
       }
 
-      // Guard: sysadmin promotion check removed — MFA subsystem has been
-      // removed from the architecture.
+      // Privilege-escalation guard: only a sysadmin actor may grant the
+      // sysadmin role. The MFA subsystem was removed from this architecture,
+      // but the role guard is NOT — it is enforced here (admin→sysadmin is
+      // rejected above) and re-checked in lib/db updateUserRole, so no
+      // logged-in admin can escalate another account to sysadmin.
 
       // Update role (also revokes all Supabase Auth sessions)
       const success = await updateUserRole(targetUserId, role as Role, actorId);

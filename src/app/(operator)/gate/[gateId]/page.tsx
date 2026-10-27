@@ -22,7 +22,6 @@ import { operatorIcon } from "@/config/operator-icons";
 import type { Scan as ScanRecord } from "@/lib/types";
 import { useCollegeInfo } from "@/hooks/useCollegeInfo";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
-import { useScanQueueSync } from "@/hooks/useScanQueueSync";
 import { primeAudio } from "@/lib/sound";
 import { OperatorGateClaimPanel } from "@/components/operator/OperatorGateClaimPanel";
 
@@ -87,7 +86,6 @@ function OperatorPageInner() {
   const [showVoiceModal, setShowVoiceModal] = useState(false);
   const [stripExpanded, setStripExpanded] = useState(false);
   const [bottomSheetOpen, setBottomSheetOpen] = useState(false);
-  const scanQueueSync = useScanQueueSync();
 
   // Local active tab for the desk panel: scan, manual, entry
   const [operatorSubMode, setOperatorSubMode] = useState<"scan" | "manual" | "entry">("scan");
@@ -361,7 +359,7 @@ function OperatorPageInner() {
   };
 
   // ── 28px status strip ─────────────────────────────────────────────────────
-  const statusStrip = operatorStore.getStatusStrip(scanQueueSync.queuedCount);
+  const statusStrip = operatorStore.getStatusStrip();
   const healthDotClass =
     statusStrip.health === "healthy"
       ? "bg-emerald-400"
@@ -394,14 +392,6 @@ function OperatorPageInner() {
         <span className="inline-flex items-center gap-0.5 text-[var(--text-muted)]">
           <Clock className="w-3 h-3" />{statusStrip.lastScanAgo}
         </span>
-        {statusStrip.queuedCount > 0 && (
-          <>
-            <span className="text-[var(--text-muted)]">·</span>
-            <span className="inline-flex items-center gap-0.5 text-amber-400 font-bold">
-              <Hourglass className="w-3 h-3" />{statusStrip.queuedCount}
-            </span>
-          </>
-        )}
       </div>
 
       {/* Right: Voice button + Online/Offline badge (smaller) */}
@@ -560,26 +550,20 @@ function OperatorPageInner() {
                         /token|session|unauthorized|sign in|authentication/i.test(error.message));
                     const canRetry = error.retryable === true;
                     const isNetworkError =
-                      error.code === "NETWORK_ERROR" || error.code === "TIMEOUT" || error.code === "OFFLINE_BLOCKED";
-                    const isQueued = error.queued === true;
+                      error.code === "NETWORK_ERROR" || error.code === "TIMEOUT" || error.code === "OFFLINE_BLOCKED" ||
+                      error.code === "NETWORK";
                     return (
                       <motion.div
                         initial={{ opacity: 0, scale: 0.96 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className={`scan-error p-5 rounded-2xl text-center space-y-3 ${
-                          isQueued ? "bg-amber-500/10 border border-amber-500/30" : "bg-rose-500/10 border border-rose-500/30"
-                        }`}
+                        className="scan-error p-5 rounded-2xl text-center space-y-3 bg-rose-500/10 border border-rose-500/30"
                       >
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center mx-auto ${
-                          isQueued ? "bg-amber-500/20 text-amber-400" : "bg-rose-500/20 text-rose-500"
-                        }`}>
-                          {isQueued ? <Hourglass className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto bg-rose-500/20 text-rose-400">
+                          <AlertCircle className="w-5 h-5" />
                         </div>
                         <div className="space-y-1">
-                          <h3 className={`font-bold text-sm ${isQueued ? "text-amber-400" : "text-[var(--action-danger)]"}`}>
-                            {isQueued
-                              ? "Scan Queued"
-                              : isAuthError
+                          <h3 className="font-bold text-sm text-[var(--action-danger)]">
+                            {isAuthError
                               ? "Verification Failed"
                               : error.code === "NOT_FOUND"
                               ? "Person Not Found"
@@ -599,7 +583,7 @@ function OperatorPageInner() {
                           )}
                         </div>
                         <div className="flex justify-center gap-2">
-                          {canRetry && !isQueued && (
+                          {canRetry && (
                             <button
                               type="button"
                               id="retry-btn"

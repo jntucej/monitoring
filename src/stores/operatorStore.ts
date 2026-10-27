@@ -5,7 +5,6 @@
 import { create } from "zustand";
 import { playAudioFeedback } from "@/lib/sound";
 import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
-import { addScan } from "@/lib/scan-queue";
 import type { Scan, Person, Student, Gate, ScanDirection, ExitReason, CategoryBreakdown, OutingEntry } from "@/lib/types";
 import type { ToastData } from "@/components/ui/toast";
 import { useAuthStore } from "@/stores/authStore";
@@ -94,8 +93,6 @@ interface ScanError {
   code?: string;
   /** True when pressing Retry can realistically recover (network issues, timeouts, duplicates). */
   retryable?: boolean;
-  /** True when the scan was captured locally and will sync when the network returns. */
-  queued?: boolean;
 }
 
 export interface TodayStatsResult {
@@ -115,7 +112,6 @@ export interface OperatorStatusStrip {
   shift: string;
   /** Human "last scan N ago" (e.g. "42s", "5m", "1h"); "—" when no scan. */
   lastScanAgo: string;
-  queuedCount: number;
   /** Number of distinct flagged/denied scans in the recent log (red signals). */
   flagCount: number;
   /** Gate health: healthy when online + no flags, caution when flagged, critical when offline. */
@@ -169,12 +165,10 @@ interface OperatorState {
   _fetchTodayStats: () => Promise<TodayStatsResult>;
   /**
    * Lean status strip for the gate kiosk header: gate name + today's
-   * in/out + current shift window + "last scan N ago" + locally queued scans.
+   * in/out + current shift window + "last scan N ago" + flagged-scan count.
    * Pure read of existing store fields — no logic changes to the scan flow.
-   * `queuedCount` is passed in (from useScanQueueSync) because the queue
-   * lives in hook-local state, not the store.
    */
-  getStatusStrip: (queuedCount: number) => OperatorStatusStrip;
+  getStatusStrip: () => OperatorStatusStrip;
   /**
    * Lean recommendation for the current scanned student (principle 3: auto-
    * recommend). Pure read of store fields + a pass count passed in from the
@@ -386,35 +380,6 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
       ? crypto.randomUUID()
       : `ev-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
-    // Offline path: capture locally; the queue hook replays it when the network returns.
-    if (typeof navigator !== "undefined" && !navigator.onLine) {
-      playAudioFeedback("warning");
-      addScan({
-        clientEventId,
-        roll: currentStudent.uniqueId || currentStudent.roll || "",
-        direction: directionToUse,
-        reason: reasonToUse ?? (directionToUse === "OUT" ? "daily_outing" : undefined),
-        gateId: get().gate?.id || get().gateId || "",
-        queuedAt: Date.now(),
-        status: "queued",
-        entryType: entryTypeToUse ?? undefined,
-      });
-      addToast({
-        variant: "warning",
-        title: "Scan Queued Offline",
-        message: "No network — this scan was saved locally and will sync automatically when the connection returns.",
-      });
-      set({
-        error: {
-          message: "Scan queued locally — will sync when the network returns.",
-          code: "QUEUED_OFFLINE",
-          retryable: false,
-          queued: true,
-        },
-        entryType: entryTypeToUse,
-      });
-      return;
-    }
     const uniqueId = currentStudent.uniqueId || currentStudent.roll || "";
     const authState = useAuthStore.getState();
     const operatorId = authState.user?.id || "op-1";
@@ -603,33 +568,23 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
         const msg = err instanceof Error ? err.message : "An unexpected error occurred during scan confirmation.";
         const isTimeout = err instanceof Error && err.message.includes("timed out");
         const isNetwork = isTimeout || err instanceof Error && (err.name === "TypeError" || err.name === "NetworkError");
-        // A failed request must not lose the scan: capture it locally and replay on reconnect.
-        addScan({
-          clientEventId,
-          roll: uniqueId,
-          direction: directionToUse,
-          reason: reasonToUse ?? (directionToUse === "OUT" ? "daily_outing" : undefined),
-          gateId: resolvedGateId,
-          queuedAt: Date.now(),
-          status: "queued",
-          entryType: entryTypeToUse ?? undefined,
-        });
+        // Network errors are retryable: the operator can simply re-scan. There is
+        // no local queue — the kiosk is stateless between scans.
         playAudioFeedback(isNetwork ? "warning" : "error");
         addToast({
           variant: isNetwork ? "warning" : "error",
-          title: isNetwork ? "Scan Queued" : "Scan Failed",
+          title: isNetwork ? "Network Error" : "Scan Failed",
           message: isNetwork
-            ? "Scan could not be delivered — saved locally and will sync when the network returns."
+            ? "Could not reach the server — tap Retry and scan again."
             : msg,
         });
         set({
           state: "error",
           error: isNetwork
             ? {
-                message: "Scan queued locally — will sync when the network returns.",
-                code: isTimeout ? "TIMEOUT" : "NETWORK_ERROR",
-                retryable: false,
-                queued: true,
+                message: "Network error — retry.",
+                code: isTimeout ? "TIMEOUT" : "NETWORK",
+                retryable: true,
               }
             : {
                 message: msg,
@@ -735,7 +690,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
   },
 
   // Lean status-strip read for the gate kiosk header. Pure — no writes.
-  getStatusStrip: (queuedCount: number) => {
+  getStatusStrip: () => {
     const s = get();
     const now = new Date();
     const shift = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -755,7 +710,6 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
       exits: s.todaysStats?.exits ?? 0,
       shift,
       lastScanAgo,
-      queuedCount,
       flagCount,
       health,
     };
