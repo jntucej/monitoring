@@ -59,26 +59,39 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
   const role = useAuthStore((s) => s.role);
   const hasHydrated = useHasHydrated();
 
-  // Track whether *this* component instance successfully called login() in the
-  // current mount. This is the ONLY thing that should trigger a redirect away
-  // from /login. Redirecting on mount merely because the auth store already
-  // holds a (possibly stale/session) `authenticated` state is what caused the
-  // /login <-> dashboard client-side redirect loop: an already-authenticated
-  // user landing on /login got instantly router.replace()'d to their default
-  // route, which bounced back to /login (via its own AuthGuard refresh), which
-  // re-fired this effect, etc. — Chrome's "additional client-side redirect."
-  const [justLoggedIn, setJustLoggedIn] = useState(false);
+  // Track whether this mount should be allowed to redirect away from /login.
+  // Two conditions, both required:
+  //   1. `sessionValid` — the persisted session was re-verified server-side via
+  //      /api/auth/session. Without this check, a user who landed on /login
+  //      holding a STALE client-side `authenticated` flag (from localStorage,
+  //      or a token that's about to expire on the server) gets instantly
+  //      router.replace()'d to their default route on mount. That route's
+  //      AuthGuard then calls checkSession(), the server 401s, the guard
+  //      bounces back to /login, and this effect fires again — Chrome's
+  //      "additional client-side redirect" loop.
+  //   2. `role` is present (a real login or a verified session, not a stale
+  //      flag that failed re-verification).
+  const [sessionValid, setSessionValid] = useState(false);
 
-  // ── Post-auth redirect: ONLY after a real successful login in this session ─
+  // ── Verify a rehydrated session exactly once on mount ────────────────────
+  // Runs before the redirect effect below can act, so by the time
+  // `sessionValid` flips, we KNOW the server actually accepts this session.
   useEffect(() => {
-    if (!justLoggedIn || !role) return;
+    const t = useAuthStore.getState();
+    if (!t.authenticated || !t.role) return; // nothing to verify
+    t.checkSession().then((ok) => setSessionValid(ok));
+  }, []);
+
+  // ── Post-auth redirect: only after the session was verified server-side ──
+  useEffect(() => {
+    if (!sessionValid || !role) return;
     const redirect = searchParams?.get("redirect");
     const target =
       redirect && redirect.startsWith("/")
         ? redirect
         : getDefaultRouteForRole(role as Role);
     router.replace(target);
-  }, [justLoggedIn, role, router, searchParams]);
+  }, [sessionValid, role, router, searchParams]);
 
   // ── Submit ────────────────────────────────────────────────────────────────
   const handleFormSubmit = useCallback(
@@ -101,7 +114,8 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
       try {
         const result = await login(id, password);
         if (result.success) {
-          setJustLoggedIn(true); // triggers the redirect effect above
+          // A successful login IS a verified session — allow the redirect.
+          setSessionValid(true);
         } else {
           setError(formatLoginError(result.code, result.error));
         }
