@@ -77,21 +77,20 @@ export function withAuthorization(
 ) {
   return async (req: NextRequest): Promise<Response> => {
     return metricsMiddleware(req, async () => {
-      // setupBodyCaching CONSUMES the original request's body stream and
-      // returns a re-wrapped request carrying the raw bytes + a
-      // x-parsed-body-hash header (used by getRequestBody). The original
-      // stream is disturbed after this, so the proxied request MUST be
-      // built from the re-wrapped one — reusing `req.body` made every
-      // handler-level `req.json()` throw "body object disturbed or locked"
-      // (500 on all POST routes: admin/kb, admin/mess-finalize, ...).
-      // For a BODYLESS request (GET, no-body DELETE, ...) setupBodyCaching
-      // returns the ORIGINAL request unchanged and a `hash: null` — re-wrapping
-      // that original (whose .body is an empty-but-already-consumed stream)
-      // with body + duplex:"half" makes the handler's own body access throw
-      // "Response body object should not be disturbed or locked" (a 500 on
-      // every no-body route through this chain). So forward a body ONLY when
-      // setupBodyCaching actually produced one (non-null hash).
-      const { req: cachedReq, hash: bodyHash } = await setupBodyCaching(req);
+      // No-body fast path (GET, no-body DELETE, ...): setupBodyCaching would
+      // still call `await req.text()` on the original request, which locks its
+      // body stream and — in undici/Node 20 — poisons the response object the
+      // route handler later creates, surfacing as a 500
+      // "Response body object should not be disturbed or locked" on every
+      // bodyless route that flows through this chain. For a request with no
+      // body there is nothing to cache, so forward a clean NextRequest and
+      // skip the whole re-wrap.
+      const hasBody =
+        req.method !== "GET" && req.method !== "HEAD" &&
+        req.body !== null;
+      const { req: cachedReq, hash: bodyHash } = hasBody
+        ? await setupBodyCaching(req)
+        : { req, hash: null };
       try {
         const auth = await requireAuthUser(bearer(req));
         if (!options.allowInactive && !auth.isActive) {
