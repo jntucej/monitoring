@@ -15,7 +15,6 @@ import { SecurityManagement } from "@/components/sysadmin/SecurityManagement";
 import {
   ShieldCheck,
   KeyRound,
-  Landmark,
   Lock,
   ArrowUpRight,
   AlertTriangle,
@@ -45,12 +44,6 @@ const QUICK_LINKS: Array<{
     Icon: KeyRound,
     title: "Access Keys",
     sub: "One-time enrollment codes for students, parents and staff",
-  },
-  {
-    href: "/sysadmin/sso",
-    Icon: Landmark,
-    title: "Single Sign-On",
-    sub: "SAML / OAuth2 identity providers and domain filters",
   },
   {
     href: "/sysadmin/sessions",
@@ -91,7 +84,7 @@ function SecurityReinforcedInner() {
     <div className="space-y-6 max-w-7xl mx-auto p-4 md:p-6 min-w-0">
       <PageHeader
         title="Infrastructure Security"
-        subtitle="Zero-trust posture: identity, keys, SSO, sessions and service health"
+        subtitle="Zero-trust posture: identity, keys, sessions and service health"
         onRefresh={refreshAll}
         refreshing={loading && data != null}
       />

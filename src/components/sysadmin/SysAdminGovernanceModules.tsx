@@ -46,7 +46,6 @@ export function GovernanceModules() {
           bgColor="bg-emerald-500/10"
           borderColor="hover:border-emerald-500/40"
           links={[
-            { label: "SSO & SAML Config", href: "/sysadmin/sso" },
             { label: "Integration Hub (LDAP/LMS)", href: "/sysadmin/integrations" },
             { label: "Scheduled Jobs Engine", href: "/sysadmin/jobs" },
             { label: "Smart Shift Scheduling", href: "/sysadmin/scheduling" },

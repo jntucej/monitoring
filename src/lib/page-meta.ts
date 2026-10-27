@@ -45,7 +45,6 @@ export const PAGE_META: Record<string, { title: string; description?: string }> 
   "/sysadmin/scheduling": { title: "Smart Scheduling", description: "AI-powered scheduling suggestions" },
   "/sysadmin/security": { title: "Security", description: "Zero-trust security and IP policies" },
   "/sysadmin/sessions": { title: "Sessions", description: "Active session management" },
-  "/sysadmin/sso": { title: "SSO Configuration", description: "Single sign-on and OIDC setup" },
   "/sysadmin/staff": { title: "Staff", description: "Staff accounts and oversight" },
   "/sysadmin/students": { title: "Students", description: "Student accounts and lifecycle" },
   "/sysadmin/parents": { title: "Parents & Guardians", description: "Parent accounts and guardian links" },
