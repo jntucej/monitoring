@@ -218,7 +218,7 @@ export function GateClaimCodePanel() {
               className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-xs font-bold flex items-center gap-2 transition"
             >
               {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <KeyRound className="w-3.5 h-3.5" />}
-              Generate Code
+              Generate 6-digit code
             </button>
           </div>
         </div>
@@ -233,11 +233,11 @@ export function GateClaimCodePanel() {
           <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-3">
             <div className="flex items-center gap-2 text-xs font-semibold text-emerald-300">
               <ShieldCheck className="w-4 h-4" />
-              New code for <span className="font-bold">{freshCode.gateName}</span> — expires{" "}
+              New 6-digit code for <span className="font-bold">{freshCode.gateName}</span> — valid until{" "}
               {formatExpiry(freshCode.expiresAt)}
             </div>
             <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
-              <code className="flex-1 px-3 py-3 rounded-lg bg-slate-950 border border-slate-700 font-mono text-lg tracking-[0.2em] text-emerald-300 select-all text-center">
+              <code className="flex-1 px-3 py-3 rounded-lg bg-slate-950 border border-slate-700 font-mono text-3xl tracking-[0.4em] text-emerald-300 select-all text-center">
                 {freshCode.code}
               </code>
               <button
@@ -250,8 +250,8 @@ export function GateClaimCodePanel() {
               </button>
             </div>
             <p className="text-[11px] text-emerald-300/70">
-              Show or read this code to the operator now. It is displayed only once and is one-time
-              use — after they enter it, it cannot be reused.
+              Give this 6-digit code to the operator. They enter it before it expires to claim the gate —
+              one-time use, shown only once.
             </p>
           </div>
         )}

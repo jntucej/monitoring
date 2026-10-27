@@ -3,39 +3,33 @@ import crypto from "crypto";
 /**
  * Gate-claim code primitives.
  *
- * A supervisor mints a human-readable claim string (NOT a bare numeric PIN —
- * a 16-char Crockford-safe token grouped with dashes) and hands it to an
- * operator. Only the SHA-256 hash is persisted; the plaintext is returned
- * exactly once so it can be shown / copied / read aloud.
+ * A supervisor mints a 6-digit gate-claim code (OTP-style, e.g. "482913") and
+ * hands it to an operator. The operator enters it at the kiosk / operator
+ * console to claim that gate. Only the SHA-256 hash is persisted; the
+ * plaintext is returned exactly once so it can be shown / copied / read aloud.
  *
- * Crockford-safe alphabet (no 0, 1, I, L, O, U, ambiguous digits):
- *   2 3 4 5 6 7 8 9 A B C D E F H J K M N P Q R S T V W X Y Z
+ * The code is a short, memorable 6-digit string (10^6 possible values) that a
+ * supervisor can read aloud on a phone call. It is single-use, expires within
+ * its TTL window, and is hashed at rest — so the short space is safe here:
+ * an attacker would need the plaintext (one-time, hand-delivered) AND to
+ * race it before expiry/revocation, which the one-use + expiry model blocks.
  */
-const CROCKFORD = "23456789ABCDEFGHJKMNPQRSTVWXYZ";
-const CODE_GROUPS = 4; // 4 groups × 4 chars, dash-separated → 16 chars total
+
+const CODE_LENGTH = 6;
 
 export function normalizeClaimCode(raw: string): string {
-  // Accept "GATE-2A3B-9XYZ" and "GATE 2A3B 9XYZ" and bare "GATE2A3B9XYZ".
-  return raw.toUpperCase().replace(/[\s-]+/g, "").trim();
+  // Accept "123456" and "123 456" and "12-34-56" — keep only digits.
+  return raw.replace(/\D+/g, "").trim();
 }
 
 export function formatClaimCode(raw: string): string {
-  const n = normalizeClaimCode(raw);
-  const out: string[] = [];
-  for (let i = 0; i < n.length; i += CODE_GROUPS) {
-    out.push(n.slice(i, i + CODE_GROUPS));
-  }
-  return out.join("-");
+  return normalizeClaimCode(raw).slice(0, CODE_LENGTH);
 }
 
-/** 28-byte (224-bit) claim code from a CSPRNG, Crockford-safe. */
+/** A 6-digit claim code from a CSPRNG (000000–999999), zero-padded. */
 export function generateClaimCode(): string {
-  const bytes = crypto.randomBytes(16);
-  let raw = "";
-  for (const b of bytes) {
-    raw += CROCKFORD[b % CROCKFORD.length];
-  }
-  return formatClaimCode(raw);
+  const n = crypto.randomInt(0, 10 ** CODE_LENGTH);
+  return n.toString().padStart(CODE_LENGTH, "0");
 }
 
 export function hashClaimCode(raw: string): string {
