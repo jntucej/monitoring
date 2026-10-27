@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { usePolling } from "@/hooks/usePolling";
 import { useUIStore } from "@/stores/uiStore";
 import { Users, LogOut, RefreshCw } from "lucide-react";
 import { useApi } from "@/hooks/useApi";
@@ -48,13 +47,14 @@ export function ActiveSessions() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [api.getHeaders]);
 
-  // Initial load only — the poller below handles the rest, so no double fetch.
+  // Initial load only — no background poll. Sessions change when users log
+  // in/out, not continuously; the 30-second timer was just adding request
+  // load to /api/admin/sessions. Manual refresh remains via the panel's
+  // Refresh button.
   useEffect(() => {
     fetchSessions(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  // Background poll: silent so the visible table never flashes out.
-  usePolling(() => fetchSessions(true), { intervalMs: 30_000 });
 
   const handleRevokeSession = async (targetUserId: string, userName: string) => {
     if (!confirm(`Are you sure you want to force logout ${userName}?`)) return;

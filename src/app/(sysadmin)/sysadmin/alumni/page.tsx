@@ -8,7 +8,6 @@ import {
 } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
-import { usePolling } from "@/hooks/usePolling";
 import { parseRollNumber, getGraduationYearFromRoll } from "@/lib/rollNumber";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 
@@ -101,9 +100,6 @@ export default function AlumniPage() {
   }, []);
 
   useEffect(() => { fetchStudents(); fetchDeprovisioned(); }, [fetchStudents, fetchDeprovisioned]);
-
-  // Poll every 60s so re-activation / graduation reflects live.
-  usePolling(() => { fetchStudents(); fetchDeprovisioned(); }, { intervalMs: 60_000 });
 
   // Compute graduation year for each student
   const enriched = useMemo(() => {
