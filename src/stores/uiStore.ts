@@ -61,6 +61,7 @@ export const useUIStore = create<UIState & UIActions>()(
       clearAllToasts: () => set({ toasts: [] }),
 
       setTheme: (theme) => {
+        if (!["dark", "light", "glass"].includes(theme)) return;
         if (typeof window !== "undefined") {
           document.documentElement.setAttribute("data-theme", theme);
           document.documentElement.classList.remove("dark", "light", "glass");
