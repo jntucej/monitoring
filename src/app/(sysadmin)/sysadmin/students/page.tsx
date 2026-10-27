@@ -358,7 +358,7 @@ const api = useApi();
         });
         loadStudents();
       } else {
-        addToast({ variant: "error", title: "Error", message: data.error ?? "Failed to delete." });
+        addToast({ variant: "error", title: "Error", message: typeof data.error === "string" ? data.error : (data.error?.message ?? "Failed to delete.") });
       }
     } catch {
       addToast({ variant: "error", title: "Error", message: "Network error." });
