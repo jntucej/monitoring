@@ -1,0 +1,15 @@
+# Monitor UCEJ
+
+> Monitor UCEJ provides real-time access monitoring, gate passes, and occupancy tracking for the UCEJ campus.
+
+## Main Pages
+
+- [Home](https://monitor-ucej.in/): Main entry point and live access dashboard.
+- [Scans](https://monitor-ucej.in/scans): Real-time gate scan logs and validations.
+- [Occupancy](https://monitor-ucej.in/occupancy): Live campus occupancy and visitor analytics.
+- [Help & Documentation](https://monitor-ucej.in/help): Guides, support, and documentation.
+
+## Resources
+
+- [API Endpoints](https://monitor-ucej.in/api): System APIs and status checks.
+- [Contact Support](https://monitor-ucej.in/help): Help and administrator contact.
