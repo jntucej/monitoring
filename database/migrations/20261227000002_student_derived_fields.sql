@@ -167,6 +167,16 @@ END;
 $$;
 
 DROP TRIGGER IF EXISTS trg_sync_student_derived ON public.student_details;
+-- BEFORE INSERT OR UPDATE OF roll, course_override, branch_override: fires
+-- exactly when a column that can make course/branch wrong actually changes.
+-- Firing on every UPDATE (no OF clause) would clobber the override escape
+-- hatch on unrelated writes (e.g. an admin edits guardian_name on a row
+-- whose roll is unparseable -> the trigger would null out the manually-set
+-- course/branch). Keeping it column-scoped means the trigger only acts when
+-- the derivation input changes, which is the correct, minimal guarantee.
+-- (A direct `UPDATE student_details SET course='CSE'` from psql is
+-- application code that bypasses the importer entirely; the import path
+-- is what's fixed here.)
 CREATE TRIGGER trg_sync_student_derived
   BEFORE INSERT OR UPDATE OF roll, course_override, branch_override
   ON public.student_details

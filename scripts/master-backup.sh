@@ -1,6 +1,7 @@
 #!/bin/bash
-# Master Backup Script — runs every 5 minutes via cron
-# Backs up: database, env secrets, migration state, and app code
+# Master Backup Script — scheduled via /etc/cron.d/gate-backup (setup-crons.sh).
+# Cadence: every 6 hours (not every 5 minutes — see scripts/setup-crons.sh).
+# Backs up: database, env secrets, migration state, and app code.
 set -euo pipefail
 
 BASE="/opt/monitoring"
@@ -16,12 +17,16 @@ log() { echo "[$(date '+%H:%M:%S')] $1" | tee -a "$LOG"; }
 
 log "=== Starting master backup: $TIMESTAMP ==="
 
-# 1. PostgreSQL full dump (with schema_migrations tracking)
+# 1. PostgreSQL full dump (COPY-friendly, NOT --inserts).
+#    --inserts writes one INSERT per row — 10–50x larger and far slower for
+#    big tables, and it thrashes the live DB's disk during a 6-hourly run.
+#    Plain SQL (COPY defaults) restores quickly and stays compact.
 if docker ps --format '{{.Names}}' | grep -q "^gate_postgres$"; then
     DB_DUMP="$BACKUP_ROOT/gate-db-$TIMESTAMP.sql.gz"
     docker exec gate_postgres pg_dump -U postgres -d gate_monitor \
-        --create --clean --if-exists --inserts \
-        --no-acl --no-owner 2>/dev/null | gzip > "$DB_DUMP"
+        --create --clean --if-exists \
+        --no-acl --no-owner \
+        2>/dev/null | gzip > "$DB_DUMP"
     log "✓ DB dump: $(ls -lh "$DB_DUMP" | awk '{print $5}')"
     
     # Also dump migration tracking table
@@ -83,9 +88,15 @@ tar cf "$COMPOSE_BACKUP" -C "$BASE" docker-compose.yml Caddyfile .env 2>/dev/nul
 tar cf "$COMPOSE_BACKUP" -C "$BASE/compose" docker-compose.yml Caddyfile .env 2>/dev/null || true
 log "✓ Compose config archived"
 
-# 5. Clean old backups (keep 30 days of daily, 12 weekly)
+# 5. Clean old backups.
+#    Keep DB dumps and secrets for 30 days each: a DB dump older than its
+#    matching secrets file can't be restored (no credentials to connect), so
+#    an 8-day-old dump and 7-day secrets retention is a silent, dangerous
+#    gap. Align both to 30d. For anything older, rotate the secrets into a
+#    proper secret manager (Vault / AWS Secrets Manager / Infisical) and
+#    never back them up.
 find "$BACKUP_ROOT" -name "*.sql.gz" -mtime +30 -delete 2>/dev/null || true
-find "$BACKUP_ROOT" -name "secrets-*.txt" -mtime +7 -delete 2>/dev/null || true  # secrets expire sooner
+find "$BACKUP_ROOT" -name "secrets-*.txt" -mtime +30 -delete 2>/dev/null || true
 find "$BACKUP_ROOT" -name "backup-*.log" -mtime +14 -delete 2>/dev/null || true
 
 TOTAL_SIZE=$(du -sh "$BACKUP_ROOT" 2>/dev/null | awk '{print $1}')

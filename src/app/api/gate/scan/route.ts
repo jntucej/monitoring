@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
-import { withRateLimit } from "@/lib/rate-limit";
+import { withRateLimit, rateLimitByKey } from "@/lib/rate-limit";
 import { recordScan } from "@/server/services/scan/record";
 import { query } from "@/lib/postgres";
 import { ok, fail } from "@/server/http/response";
@@ -55,6 +55,35 @@ export const POST = withRateLimit(
         return fail("BAD_REQUEST", "gateId is required", 400);
       }
 
+      // Per-operator+gate rate limit (NOT keyed by client IP).
+      //
+      // The outer withRateLimit wrapper keys by client IP and is raised to a
+      // high global ceiling so it only trips during an actual DoS burst.
+      // Real operational load is bounded per-operator: a human at one kiosk
+      // tops out at ~0.3 scans/sec (~20/min). Allowing 300/min per operator
+      // gives ~16x headroom over human pace while still protecting the DB
+      // from a runaway kiosk client or an authenticated but misbehaving
+      // caller. Multiple operators behind one campus NAT each get their own
+      // bucket instead of sharing a single 60/min IP bucket.
+      {
+        // Stable key per operator+gate (no minute bucket): the store's 60s
+        // sliding window then bounds the rate to 300/min continuously rather
+        // than resetting every wall-clock minute (which would allow a 300 +
+        // 300 burst straddling a minute boundary).
+        const rl = await rateLimitByKey(
+          `gate_scan_op:${auth.userId}:${gateId}`,
+          { windowMs: 60_000, maxRequests: 300 }
+        );
+        if (rl.limited) {
+          return fail(
+            "RATE_LIMIT_EXCEEDED",
+            "Scan rate limit exceeded for this operator and gate",
+            429,
+            { retryAfter: rl.retryAfter ?? 60 }
+          );
+        }
+      }
+
       // clientEventId must be a UUID for the Postgres process_gate_scan
       // function; normalise non-UUID values (e.g. test IDs) to a fresh UUID.
       const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -99,5 +128,8 @@ export const POST = withRateLimit(
     },
     { requiredRole: TIER.OPERATOR },
   ),
-  { keyPrefix: "gate_scan", maxRequests: 30, windowMs: 60_000 },
+  // Outer IP-keyed guard: high global ceiling so it only trips on an actual
+  // DoS burst from one client IP, never on legitimate multi-kiosk campus
+  // traffic (which is bounded per-operator+gate inside the handler).
+  { keyPrefix: "gate_scan", maxRequests: 5_000, windowMs: 60_000 },
 );
