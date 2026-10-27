@@ -23,8 +23,9 @@ import {
   Network,
   RefreshCw,
 } from "lucide-react";
-import { getAuthHeaders } from "@/lib/utils";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { useUIStore } from "@/stores/uiStore";
+import { getAuthHeaders } from "@/lib/utils";
 
 /** Shape of the read-only /api/roles-graph response. */
 interface RolesGraphPayload {
@@ -93,9 +94,25 @@ function buildTreeFromGraph(graph: RolesGraphPayload | null, roles: SystemRole[]
       childrenByParent.set(e.parent, [...(childrenByParent.get(e.parent) || []), e.child]);
     }
     const known = new Set(graph.nodes.map((n) => n.code));
+    // Guard against cycles in the DAG (e.g. principal -> vice_principal ->
+    // hod -> principal): track the current recursion stack so a node already
+    // on the stack is rendered as a leaf rather than recursed into, which
+    // would otherwise throw "Maximum call stack size exceeded".
+    const visiting = new Set<string>();
     const build = (code: string): HierarchyNode => ({
       code,
-      children: (childrenByParent.get(code) || []).filter((c) => known.has(c)).map(build),
+      children: visiting.has(code)
+        ? []
+        : (
+            (() => {
+              visiting.add(code);
+              const kids = (childrenByParent.get(code) || [])
+                .filter((c) => known.has(c))
+                .map(build);
+              visiting.delete(code);
+              return kids;
+            })()
+          ),
     });
     return [graph.root].filter((c) => known.has(c)).map(build);
   }
@@ -117,7 +134,8 @@ export default function RolesManagementPage() {
   const [graph, setGraph] = useState<RolesGraphPayload | null>(null);
   const [graphError, setGraphError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [editingRole, setEditingRole] = useState<Partial<SystemRole> | null>(null);
+  const [roleToDeactivate, setRoleToDeactivate] = useState<string | null>(null);
+  const [editingRole, setEditingRole] = useState<SystemRole | null>(null);
 
   // ---- role hierarchy state ----
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
@@ -318,8 +336,15 @@ export default function RolesManagementPage() {
 
   const revokeRole = async (user: PickedUser) => {
     if (!grantRoleCode) return;
-    // Revoke = demote the user to their parent role in the hierarchy (or visitor if none).
-    const targetRole = roleParents[grantRoleCode] || "visitor";
+    // Revoke = demote the user to their parent role in the hierarchy.
+    const targetRole = roleParents[grantRoleCode];
+    if (!targetRole) {
+      addToast({
+        variant: "error",
+        message: `No parent role configured for '${grantRoleCode}'. Reassign manually — automatic demotion is disabled.`,
+      });
+      return;
+    }
     setGrantBusy(true);
     try {
       const res = await fetch(`/api/users/${user.id}`, {
@@ -395,22 +420,26 @@ export default function RolesManagementPage() {
     }
   };
 
-  const handleDelete = async (code: string) => {
-    if (!confirm(`Are you sure you want to deactivate role '${code}'?`)) return;
+  const handleDelete = (code: string) => setRoleToDeactivate(code);
+
+  const confirmDeactivateRole = async () => {
+    if (!roleToDeactivate) return;
     try {
-      const res = await fetch(`/api/config/roles?code=${code}`, {
+      const res = await fetch(`/api/config/roles?code=${roleToDeactivate}`, {
         method: "DELETE",
         headers: getAuthHeaders(),
       });
       const json = await res.json();
       if (json.success) {
-        addToast({ variant: "success", message: `Deactivated role ${code}` });
+        addToast({ variant: "success", message: `Deactivated role ${roleToDeactivate}` });
         fetchRoles();
       } else {
         addToast({ variant: "error", message: json.error?.message || "Failed to deactivate role" });
       }
     } catch {
       addToast({ variant: "error", message: "Network error deactivating role" });
+    } finally {
+      setRoleToDeactivate(null);
     }
   };
 
@@ -589,7 +618,11 @@ export default function RolesManagementPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
+<<<<<<< HEAD
             <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
+=======
+            <p className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
               <UserCog className="w-6 h-6 text-purple-400" />
               Roles &amp; Authorization Policies
             </p>
@@ -882,9 +915,15 @@ export default function RolesManagementPage() {
                           {hasRole ? "Current" : "Grant"}
                         </button>
                         <button
+                          type="button"
                           onClick={() => revokeRole(u)}
-                          disabled={grantBusy}
-                          className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-rose-500/15 text-rose-400 hover:bg-rose-500/30 transition"
+                          disabled={grantBusy || !roleParents[grantRoleCode]}
+                          title={
+                            !roleParents[grantRoleCode]
+                              ? "Role graph unavailable — assign a replacement role manually"
+                              : `Demote to '${roleParents[grantRoleCode]}'`
+                          }
+                          className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-rose-500/15 text-rose-400 hover:bg-rose-500/30 transition disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                           Revoke
                         </button>
@@ -1014,6 +1053,15 @@ export default function RolesManagementPage() {
                     Save Role
                   </button>
                 </div>
+                <ConfirmDialog
+                  open={!!roleToDeactivate}
+                  onClose={() => setRoleToDeactivate(null)}
+                  title="Deactivate role?"
+                  body={`Deactivate role "${roleToDeactivate ?? ""}"? This is audited.`}
+                  confirmText="Deactivate"
+                  variant="destructive"
+                  onConfirm={confirmDeactivateRole}
+                />
               </form>
             </div>
           </div>

@@ -3,7 +3,6 @@
 export const dynamic = "force-dynamic";
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import {
   UtensilsCrossed,
   Plus,
@@ -19,14 +18,16 @@ import {
   Check,
   Clock,
   AlertTriangle,
-  ChevronRight,
-  FileText,
   Leaf,
   Beef,
+  Lock,
+  Users,
+  Ticket,
 } from "lucide-react";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { PageLoading } from "@/components/admin/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
-import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { ConfirmDialog } from "@/components/admin/shared/ConfirmDialog";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
@@ -222,6 +223,7 @@ function MenuItemsTab() {
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <span className="flex-1">{itemsRes.error}</span>
           <button
+          type="button"
             onClick={() => void itemsRes.refresh()}
             className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-rose-500/20 hover:bg-rose-500/30"
           >
@@ -235,6 +237,7 @@ function MenuItemsTab() {
         subtitle="Items students can select as their primary or sub-item"
         action={
           <button
+          type="button"
             onClick={startNew}
             className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold transition"
           >
@@ -282,6 +285,7 @@ function MenuItemsTab() {
                     <td className="py-2.5 pl-2">
                       <div className="flex items-center justify-end gap-1.5">
                         <button
+                        type="button"
                           onClick={() => startEdit(it)}
                           className="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition"
                           aria-label={`Edit ${it.label}`}
@@ -289,6 +293,7 @@ function MenuItemsTab() {
                           <Pencil className="w-3 h-3" />
                         </button>
                         <button
+                        type="button"
                           onClick={() => setDeleteId(it.id)}
                           className="w-7 h-7 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 flex items-center justify-center transition"
                           aria-label={`Delete ${it.label}`}
@@ -311,6 +316,7 @@ function MenuItemsTab() {
           title={editing.id ? `Edit: ${editing.label}` : "New menu item"}
           action={
             <button onClick={() => setEditing(null)} className="text-slate-500 hover:text-white">
+            type="button"
               <X className="w-4 h-4" />
             </button>
           }
@@ -347,7 +353,7 @@ function MenuItemsTab() {
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Type</span>
               <div className="mt-1 flex gap-2">
                 <button
-                  type="button"
+                type="button"
                   onClick={() => setEditing({ ...editing, isPrimary: true })}
                   className={`flex-1 px-3 py-2 rounded-xl text-xs font-bold border transition ${
                     editing.isPrimary
@@ -358,7 +364,7 @@ function MenuItemsTab() {
                   Primary
                 </button>
                 <button
-                  type="button"
+                type="button"
                   onClick={() => setEditing({ ...editing, isPrimary: false })}
                   className={`flex-1 px-3 py-2 rounded-xl text-xs font-bold border transition ${
                     !editing.isPrimary
@@ -372,6 +378,7 @@ function MenuItemsTab() {
             </div>
           </div>
           <button
+          type="button"
             onClick={() => void saveItem()}
             disabled={saving}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-xs font-bold transition"
@@ -577,6 +584,7 @@ function MealDaysTab() {
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <span className="flex-1">{daysRes.error}</span>
           <button
+          type="button"
             onClick={() => void daysRes.refresh()}
             className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-rose-500/20 hover:bg-rose-500/30"
           >
@@ -646,8 +654,8 @@ function MealDaysTab() {
                 const on = draft.items.includes(it.id);
                 return (
                   <button
-                    key={it.id}
                     type="button"
+                    key={it.id}
                     onClick={() => toggleItem(it.id)}
                     className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold transition ${
                       on
@@ -672,6 +680,7 @@ function MealDaysTab() {
         </div>
 
         <button
+        type="button"
           onClick={() => void createDay()}
           disabled={creating}
           className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-xs font-bold transition"
@@ -687,6 +696,7 @@ function MealDaysTab() {
         subtitle={String(sortedDays.length)}
         action={
           <button
+          type="button"
             onClick={() => void daysRes.refresh()}
             className="text-slate-500 hover:text-white"
             aria-label="Refresh"
@@ -738,6 +748,7 @@ function MealDaysTab() {
                     <td className="py-2.5 pl-2">
                       <div className="flex items-center justify-end gap-1.5">
                         <button
+                        type="button"
                           onClick={() => startEditDay(d)}
                           className="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition"
                           aria-label="Edit"
@@ -745,6 +756,7 @@ function MealDaysTab() {
                           <Pencil className="w-3 h-3" />
                         </button>
                         <button
+                        type="button"
                           onClick={() => setCancelDayId(d.id)}
                           className="w-7 h-7 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 flex items-center justify-center transition"
                           aria-label="Cancel day"
@@ -767,6 +779,7 @@ function MealDaysTab() {
           title={`Edit meal day — ${fmtDate(editingDraft.mealDate)}`}
           action={
             <button onClick={() => { setEditingDay(null); setEditingDraft(null); }} className="text-slate-500 hover:text-white">
+            type="button"
               <X className="w-4 h-4" />
             </button>
           }
@@ -824,9 +837,9 @@ function MealDaysTab() {
                   const on = editingDraft.items.includes(it.id);
                   return (
                     <button
-                      key={it.id}
-                      type="button"
-                      onClick={() => toggleEditItem(it.id)}
+                        key={it.id}
+                        type="button"
+                        onClick={() => toggleEditItem(it.id)}
                       className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold transition ${
                         on
                           ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
@@ -842,6 +855,7 @@ function MealDaysTab() {
             )}
           </div>
           <button
+          type="button"
             onClick={() => void saveEditDay()}
             disabled={creating}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-xs font-bold transition"
@@ -963,6 +977,7 @@ function AnalyticsTab() {
         subtitle="Last 30 meal days — declared vs confirmed vs no-show"
         action={
           <button
+          type="button"
             onClick={() => void loadAnalytics()}
             disabled={loading}
             className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-[11px] font-bold transition disabled:opacity-50"
@@ -1039,14 +1054,318 @@ function AnalyticsTab() {
   );
 }
 
+/* ── Today tab ─────────────────────────────────────────────────────────────── */
+
+interface MenuTodayItem {
+  id: string;
+  code: string;
+  label: string;
+  isAvailable: boolean;
+}
+
+interface TodayMenuData {
+  mealDate: string | null;
+  messDayId: string | null;
+  items: MenuTodayItem[];
+}
+
+interface CountsTimelineRow {
+  messDayId: string;
+  mealDate: string;
+  servedTotal: number;
+}
+
+function TodayTab() {
+  const { addToast } = useUIStore();
+  const menuRes = useApiResource<TodayMenuData | null>("/api/mess/menu");
+  const mealCountsRes = useApiResource<Record<string, unknown> | null>("/api/mess/meal-counts");
+  const consumptionRes = useApiResource<{ days: number; trend: CountsTimelineRow[]; totals: Record<string, number> } | null>(
+    "/api/mess/consumption?days=14"
+  );
+
+  const menu: MenuTodayItem[] = (menuRes.data as TodayMenuData | null)?.items ?? [];
+  const counts = mealCountsRes.data as Record<string, unknown> | null;
+  const trend: CountsTimelineRow[] = (consumptionRes.data as { trend?: CountsTimelineRow[] } | null)?.trend ?? [];
+  const total = counts ? Number(counts.total ?? 0) : 0;
+  const confirmed = counts ? Number(counts.confirmed ?? 0) : 0;
+  const noShows = counts ? Number(counts.noShows ?? 0) : 0;
+
+  const issued = confirmed + noShows;
+  const remaining = Math.max(0, total - issued);
+
+  const [headcount, setHeadcount] = useState<string>("");
+  const [finalizing, setFinalizing] = useState(false);
+  const [confirmFinalize, setConfirmFinalize] = useState(false);
+  const [confirmRevoke, setConfirmRevoke] = useState(false);
+  const [revoking, setRevoking] = useState(false);
+
+  const messDayId = (menuRes.data as TodayMenuData | null)?.messDayId ?? null;
+
+  const finalizeDay = async () => {
+    if (!messDayId) return;
+    setFinalizing(true);
+    try {
+      const res = await fetch("/api/admin/mess-finalize", {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          messDayId,
+          finalHeadcount: headcount.trim() !== "" ? Number(headcount) : confirmed,
+          confirmedBy: "MANUAL_FINALIZE",
+        }),
+      });
+      const json = await res.json().catch(() => null);
+      if (!res.ok || json?.success === false) {
+        throw new Error(
+          typeof json?.error === "string" ? json.error : json?.error?.message ?? `HTTP ${res.status}`
+        );
+      }
+      addToast({ variant: "success", title: "Day finalized", message: `Headcount ${json?.data?.finalHeadcount} locked.` });
+      clearCache("/api/mess/menu");
+      clearCache("/api/mess/meal-counts");
+      await menuRes.refresh();
+    } catch (err) {
+      addToast({
+        variant: "error",
+        title: "Finalize failed",
+        message: err instanceof Error ? err.message : "Could not finalize day",
+      });
+    } finally {
+      setFinalizing(false);
+    }
+  };
+
+  const revokeAllTokens = async () => {
+    if (!messDayId) return;
+    setRevoking(true);
+    try {
+      const res = await fetch("/api/mess/revoke", {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ dayId: messDayId }),
+      });
+      const json = await res.json().catch(() => null);
+      if (!res.ok || json?.success === false) {
+        throw new Error(
+          typeof json?.error === "string" ? json.error : json?.error?.message ?? `HTTP ${res.status}`
+        );
+      }
+      addToast({
+        variant: "success",
+        title: "Tokens revoked",
+        message: `${json?.data?.revokedCount ?? 0} token(s) revoked for ${menuRes.data?.mealDate ?? "this day"}.`,
+      });
+      clearCache("/api/mess/menu");
+      clearCache("/api/mess/meal-counts");
+      await menuRes.refresh();
+    } catch (err) {
+      addToast({
+        variant: "error",
+        title: "Revoke failed",
+        message: err instanceof Error ? err.message : "Could not revoke tokens",
+      });
+    } finally {
+      setRevoking(false);
+    }
+  };
+
+  const maxServed = trend.reduce((m, r) => Math.max(m, r.servedTotal), 1);
+
+  return (
+    <div className="space-y-4">
+      {(menuRes.error || mealCountsRes.error || consumptionRes.error) && (
+        <div className="flex items-center gap-2 p-3 rounded-xl bg-rose-500/10 border border-rose-500/25 text-rose-300 text-xs">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <span className="flex-1">
+            {[menuRes.error, mealCountsRes.error, consumptionRes.error].filter(Boolean).join(" · ")}
+          </span>
+          <button
+            type="button"
+            onClick={() => {
+              void menuRes.refresh();
+              void mealCountsRes.refresh();
+              void consumptionRes.refresh();
+            }}
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-rose-500/20 hover:bg-rose-500/30"
+          >
+            <RefreshCw className="w-3 h-3" /> Retry
+          </button>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Today's menu */}
+        <SectionCard
+          title="Today's Menu"
+          subtitle={(menuRes.data as TodayMenuData | null)?.mealDate ?? "No active meal day"}
+        >
+          {menuRes.loading && menu.length === 0 ? (
+            <PageLoading />
+          ) : menu.length === 0 ? (
+            <p className="py-4 text-center text-xs text-slate-500">
+              No menu items scheduled for the active meal day.
+            </p>
+          ) : (
+            <ul className="space-y-1.5">
+              {menu.map((it) => (
+                <li
+                  key={it.id}
+                  className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-900/60 border border-slate-800"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    {it.code === "VEG" ? (
+                      <Leaf className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    ) : (
+                      <Beef className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                    )}
+                    <span className="font-semibold text-white text-xs truncate">{it.label}</span>
+                    <span className="font-mono text-[10px] text-slate-500 bg-slate-800/60 border border-slate-700 rounded px-1.5 py-0.5">
+                      {it.code}
+                    </span>
+                  </div>
+                  <span
+                    className={`text-[10px] font-bold uppercase ${
+                      it.isAvailable ? "text-emerald-400" : "text-slate-500 line-through"
+                    }`}
+                  >
+                    {it.isAvailable ? "Available" : "Unavailable"}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </SectionCard>
+
+        {/* Token status */}
+        <SectionCard title="Token Status" subtitle="Issued · verified · remaining">
+          {mealCountsRes.loading ? (
+            <PageLoading />
+          ) : (
+            <div className="space-y-3">
+              <div className="grid grid-cols-3 gap-2">
+                <div className="rounded-xl bg-slate-900/60 border border-slate-800 p-3 text-center">
+                  <Users className="w-4 h-4 text-sky-400 mx-auto mb-1" />
+                  <p className="text-lg font-black text-white tabular-nums">{issued}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Issued</p>
+                </div>
+                <div className="rounded-xl bg-slate-900/60 border border-slate-800 p-3 text-center">
+                  <Check className="w-4 h-4 text-emerald-400 mx-auto mb-1" />
+                  <p className="text-lg font-black text-white tabular-nums">{confirmed}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Verified</p>
+                </div>
+                <div className="rounded-xl bg-slate-900/60 border border-slate-800 p-3 text-center">
+                  <Ticket className="w-4 h-4 text-amber-400 mx-auto mb-1" />
+                  <p className="text-lg font-black text-white tabular-nums">{remaining}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Remaining</p>
+                </div>
+              </div>
+
+              <div>
+                <label className="block">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                    Final headcount
+                  </span>
+                  <div className="mt-1 flex gap-2">
+                    <input
+                      type="number"
+                      min={0}
+                      value={headcount}
+                      onChange={(e) => setHeadcount(e.target.value)}
+                      placeholder={String(confirmed)}
+                      className="flex-1 px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setConfirmFinalize(true)}
+                      disabled={!messDayId || finalizing}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-xs font-bold transition"
+                    >
+                      {finalizing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Lock className="w-3.5 h-3.5" />}
+                      Finalize Day
+                    </button>
+                  </div>
+                </label>
+              </div>
+
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setConfirmRevoke(true)}
+                  disabled={!messDayId || revoking}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-rose-600/80 hover:bg-rose-600 disabled:opacity-40 text-white text-xs font-bold transition w-full"
+                >
+                  {revoking ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Ban className="w-3.5 h-3.5" />}
+                  Revoke All Tokens
+                </button>
+              </div>
+            </div>
+          )}
+        </SectionCard>
+      </div>
+
+      {/* Counts timeline */}
+      <SectionCard
+        title="Counts Timeline"
+        subtitle="Per-day served headcount, last 14 days"
+      >
+        {consumptionRes.loading && trend.length === 0 ? (
+          <PageLoading />
+        ) : trend.length === 0 ? (
+          <p className="py-4 text-center text-xs text-slate-500">No serving data yet.</p>
+        ) : (
+          <div className="space-y-2">
+            {trend.map((r) => (
+              <div key={r.messDayId} className="flex items-center gap-2">
+                <span className="text-[11px] text-slate-400 w-24 shrink-0 tabular-nums">
+                  {r.mealDate.slice(5)}
+                </span>
+                <div className="flex-1 h-2.5 rounded-full bg-slate-800 overflow-hidden">
+                  <div
+                    className="h-full bg-emerald-500/80 rounded-full transition-all"
+                    style={{ width: `${Math.round((r.servedTotal / maxServed) * 100)}%` }}
+                  />
+                </div>
+                <span className="text-[11px] text-white font-bold tabular-nums w-10 text-right">
+                  {r.servedTotal}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </SectionCard>
+
+      <ConfirmDialog
+        open={confirmFinalize}
+        onClose={() => setConfirmFinalize(false)}
+        title="Finalize this mess day?"
+        body={`The headcount (${headcount.trim() !== "" ? headcount : confirmed}) will be locked and the selection window closed for this day. This cannot be undone.`}
+        onConfirm={finalizeDay}
+        confirmText="Finalize"
+        variant="destructive"
+      />
+
+      <ConfirmDialog
+        open={confirmRevoke}
+        onClose={() => setConfirmRevoke(false)}
+        title="Revoke all tokens for this day?"
+        body="All unused, unrevoked tokens for the active meal day will be revoked immediately. Students will not be able to redeem them."
+        onConfirm={revokeAllTokens}
+        confirmText="Revoke tokens"
+        variant="destructive"
+      />
+    </div>
+  );
+}
+
 /* ── main page ───────────────────────────────────────────────────────────── */
 
-type Tab = "menu" | "days" | "analytics";
+type Tab = "today" | "menu" | "days" | "analytics";
 
 function AdminMessInner() {
-  const [tab, setTab] = useState<Tab>("menu");
+  const [tab, setTab] = useState<Tab>("today");
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
+    { id: "today", label: "Today", icon: <Clock className="w-3.5 h-3.5" /> },
     { id: "menu", label: "Menu Items", icon: <UtensilsCrossed className="w-3.5 h-3.5" /> },
     { id: "days", label: "Meal Days", icon: <CalendarDays className="w-3.5 h-3.5" /> },
     { id: "analytics", label: "Analytics", icon: <BarChart3 className="w-3.5 h-3.5" /> },
@@ -1062,18 +1381,12 @@ function AdminMessInner() {
               <UtensilsCrossed className="w-5 h-5 text-emerald-400" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-base sm:text-lg font-black text-white truncate">Mess Configuration</h1>
+              <p className="text-base sm:text-lg font-black text-white truncate">Mess Operations</p>
               <p className="text-[11px] text-slate-500">
-                Manage menu items, meal days and review historical counts
+                Today's menu, token status, counts, and historical analytics
               </p>
             </div>
           </div>
-          <Link
-            href="/mess"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-[11px] font-bold transition shrink-0"
-          >
-            Incharge dashboard <ChevronRight className="w-3.5 h-3.5" />
-          </Link>
         </div>
       </div>
 
@@ -1081,6 +1394,7 @@ function AdminMessInner() {
       <div className="flex gap-1 rounded-xl border border-slate-800 bg-[#0d1220] p-1 overflow-x-auto">
         {tabs.map((t) => (
           <button
+            type="button"
             key={t.id}
             onClick={() => setTab(t.id)}
             className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg text-[11px] font-bold whitespace-nowrap transition ${
@@ -1096,7 +1410,8 @@ function AdminMessInner() {
       </div>
 
       {/* Tab panels */}
-      <WidgetBoundary title="Mess config">
+      <WidgetBoundary title="Mess operations">
+        {tab === "today" && <TodayTab />}
         {tab === "menu" && <MenuItemsTab />}
         {tab === "days" && <MealDaysTab />}
         {tab === "analytics" && <AnalyticsTab />}
@@ -1109,7 +1424,7 @@ function AdminMessInner() {
 
 export default function AdminMessPage() {
   return (
-
+    
       <Suspense
         fallback={
           <div className="p-8 flex items-center justify-center min-h-[50vh]">
@@ -1120,5 +1435,7 @@ export default function AdminMessPage() {
         <AdminMessInner />
       </Suspense>
     
+    
+
   );
 }

@@ -1,13 +1,17 @@
 "use client";
+<<<<<<< HEAD
 export const dynamic = "force-dynamic";
 
 import { useEffect, useState } from "react";
+=======
+import { useCallback, useEffect, useState } from "react";
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 import { RequestPassForm } from "@/components/parent/RequestPassForm";
 import { Ticket, Clock, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import type { GatePass, GatePassStatus } from "@/lib/types";
 import { getPassTypeName } from "@/hooks/usePassTypes";
-import { useApi } from "@/hooks/useApi";
-import { useAuthStore } from "@/stores/authStore";
+import { getAuthHeaders } from "@/lib/utils";
+import { usePolling } from "@/hooks/usePolling";
 
 function statusStyle(status: string) {
   if (status === "APPROVED" || status === "COMPLETED") {
@@ -26,22 +30,17 @@ function statusIcon(status: string) {
 }
 
 export default function ParentPassesPage() {
-const api = useApi();
-
   const [passes, setPasses] = useState<GatePass[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const load = async () => {
-      try {
-        const auth = useAuthStore.getState();
-        const parentId = auth?.user?.parentId ?? auth?.user?.id;
-        if (!parentId) {
-          setError("Parent ID not found in session. Please log in again.");
-          return;
-        }
-        const res = await fetch(`/api/passes?parentId=${parentId}`, {
-        headers: api.getHeaders(),
+  const load = useCallback(async () => {
+    try {
+      const authRaw = sessionStorage.getItem("gate-monitor-auth");
+      const auth = authRaw ? JSON.parse(authRaw) : null;
+      const parentId = auth?.user?.parentId ?? auth?.user?.id ?? "pa-1";
+      const res = await fetch(`/api/passes?parentId=${parentId}`, { 
+        headers: getAuthHeaders(),
         cache: "no-store" 
       });
       if (!res.ok) throw new Error("Failed to fetch passes");
@@ -58,21 +57,22 @@ const api = useApi();
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    load();
-    const t = setInterval(() => {
-      if (typeof document !== "undefined" && document.hidden) return;
-      load();
-    }, 30_000);
-    return () => clearInterval(t);
   }, []);
+
+  // Initial load + visibility-aware polling (no raw setInterval)
+  useEffect(() => {
+    load().catch(() => {});
+  }, [load]);
+  usePolling(load, { intervalMs: 30_000 });
 
   return (
     <div className="space-y-6">
       <div>
+<<<<<<< HEAD
         <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">Pass Requests</p>
+=======
+        <p className="text-2xl font-bold">Pass Requests</p>
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
         <p className="text-[var(--text-muted)]">Request and track gate passes</p>
       </div>
 

@@ -1,9 +1,13 @@
+-- SECURITY: No plaintext credentials in this file. All passwords/PINs must be rotated out-of-band before or after seeding. See docs/CREDENTIALS.md.
 -- Seed all gate monitor users and config roles
--- Master PIN for most roles: 123456
--- Sysadmin password: junaid, pin: nf16
+-- Passwords/PINs: SET_VIA_ENV_OR_OOB_ROTATION — no literals are shipped here.
+-- The GUCs `app.seed_password` / `app.seed_pin` can be set by the caller for dev only;
+-- they must NOT be set in production. When unset the hashes resolve to NULL so the
+-- account is created with no usable credential and forces first-login rotation.
 
 -- Insert sysadmin with known ID
-INSERT INTO users (id, unique_id, name, role, email, status, password_hash, initial_pin_hash, two_factor_enabled, pin_must_change)
+-- SET_VIA_ENV_OR_OOB_ROTATION
+INSERT INTO users (id, unique_id, name, role, email, status, password_hash, initial_pin_hash, pin_must_change)
 VALUES (
   '80eb29e3-7e71-48cb-a44c-6e0caa7f83f5',
   'SYSADMIN',
@@ -11,44 +15,32 @@ VALUES (
   'sysadmin',
   'sysadmin@college.edu',
   'ACTIVE',
-  crypt(COALESCE(NULLIF(current_setting('app.seed_password', true), ''), 'sysadmin_secure_change_me'), gen_salt('bf', 10)),
-  crypt(COALESCE(NULLIF(current_setting('app.seed_pin', true), ''), '654321'), gen_salt('bf', 10)),
-  false,
+  CASE WHEN current_setting('app.seed_password', true) <> ''
+       THEN crypt(current_setting('app.seed_password', true), gen_salt('bf', 10))
+       ELSE NULL END,
+  CASE WHEN current_setting('app.seed_pin', true) <> ''
+       THEN crypt(current_setting('app.seed_pin', true), gen_salt('bf', 10))
+       ELSE NULL END,
   true
-) ON CONFLICT (unique_id) DO UPDATE SET
-  password_hash = EXCLUDED.password_hash,
-  initial_pin_hash = EXCLUDED.initial_pin_hash,
-  pin_must_change = true;
+) ON CONFLICT (unique_id) DO NOTHING;
 
 -- Insert other role users with random UUIDs
-INSERT INTO users (unique_id, name, role, email, status, password_hash, initial_pin_hash, two_factor_enabled, pin_must_change)
+-- SET_VIA_ENV_OR_OOB_ROTATION
+-- Each user's password/PIN must be provided out-of-band; NULL means "no credential set".
+INSERT INTO users (unique_id, name, role, email, status, password_hash, initial_pin_hash, pin_must_change)
 VALUES
-  ('ADMIN', 'Campus Admin', 'admin', 'admin@college.edu', 'ACTIVE',
-   crypt('admin_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
-  ('OPERATOR', 'Gate Operator', 'operator', 'operator@college.edu', 'ACTIVE',
-   crypt('operator_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
-  ('SUPERVISOR', 'Gate Supervisor', 'supervisor', 'supervisor@college.edu', 'ACTIVE',
-   crypt('supervisor_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
-  ('WARDEN', 'Hostel Warden', 'warden', 'warden@college.edu', 'ACTIVE',
-   crypt('warden_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
-  ('HOD', 'Head of Department', 'hod', 'hod@college.edu', 'ACTIVE',
-   crypt('hod_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
-  ('FACULTY', 'Faculty Member', 'faculty', 'faculty@college.edu', 'ACTIVE',
-   crypt('faculty_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
-  ('STAFF', 'Office Staff', 'staff', 'staff@college.edu', 'ACTIVE',
-   crypt('staff_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
-  ('WORKER', 'Support Worker', 'worker', 'worker@college.edu', 'ACTIVE',
-   crypt('worker_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
-  ('GUARDIAN', 'Parent Guardian', 'guardian', 'guardian@college.edu', 'ACTIVE',
-   crypt('guardian_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
-  ('STUDENT', 'Demo Student', 'student', 'student@college.edu', 'ACTIVE',
-   crypt('student_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true),
-  ('VISITOR', 'Demo Visitor', 'visitor', 'visitor@college.edu', 'ACTIVE',
-   crypt('visitor_change_me', gen_salt('bf', 10)), crypt('654321', gen_salt('bf', 10)), false, true)
-ON CONFLICT (unique_id) DO UPDATE SET
-  password_hash = EXCLUDED.password_hash,
-  initial_pin_hash = EXCLUDED.initial_pin_hash,
-  pin_must_change = true;
+  ('ADMIN', 'Campus Admin', 'admin', 'admin@college.edu', 'ACTIVE', NULL, NULL, true),
+  ('OPERATOR', 'Gate Operator', 'operator', 'operator@college.edu', 'ACTIVE', NULL, NULL, true),
+  ('SUPERVISOR', 'Gate Supervisor', 'supervisor', 'supervisor@college.edu', 'ACTIVE', NULL, NULL, true),
+  ('WARDEN', 'Hostel Warden', 'hostel_manager', 'warden@college.edu', 'ACTIVE', NULL, NULL, true),
+  ('HOD', 'Head of Department', 'hod', 'hod@college.edu', 'ACTIVE', NULL, NULL, true),
+  ('FACULTY', 'Faculty Member', 'faculty', 'faculty@college.edu', 'ACTIVE', NULL, NULL, true),
+  ('STAFF', 'Office Staff', 'staff', 'staff@college.edu', 'ACTIVE', NULL, NULL, true),
+  ('WORKER', 'Support Worker', 'worker', 'worker@college.edu', 'ACTIVE', NULL, NULL, true),
+  ('GUARDIAN', 'Parent Guardian', 'guardian', 'guardian@college.edu', 'ACTIVE', NULL, NULL, true),
+  ('STUDENT', 'Demo Student', 'student', 'student@college.edu', 'ACTIVE', NULL, NULL, true),
+  ('VISITOR', 'Demo Visitor', 'visitor', 'visitor@college.edu', 'ACTIVE', NULL, NULL, true)
+ON CONFLICT (unique_id) DO NOTHING;
 
 -- Insert config roles
 INSERT INTO config_roles (code, display_name, permissions, is_active)
@@ -57,7 +49,7 @@ VALUES
   ('admin', 'Campus Admin', '{"gates": "read_write", "users": "read_write", "reports": "read"}'::jsonb, true),
   ('operator', 'Gate Operator', '{"gates": "read_write", "scans": "write"}'::jsonb, true),
   ('supervisor', 'Gate Supervisor', '{"gates": "read_write", "alerts": "read", "reports": "read"}'::jsonb, true),
-  ('warden', 'Hostel Warden', '{"hostel": "read_write", "students": "read", "alerts": "read"}'::jsonb, true),
+  ('warden', 'Hostel Warden', '{"hostel": "read_write", "students": "read", "alerts": "read"}'::jsonb, false),
   ('hod', 'Head of Department', '{"department": "read_write", "reports": "read"}'::jsonb, true),
   ('faculty', 'Faculty Member', '{"classes": "read_write", "attendance": "read"}'::jsonb, true),
   ('staff', 'Office Staff', '{"office": "read_write"}'::jsonb, true),

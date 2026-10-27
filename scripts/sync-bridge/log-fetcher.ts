@@ -4,6 +4,22 @@ import { resolve } from 'path';
 import * as net from 'net';
 
 /**
+ * Last error message recorded by the TCP fetcher (timeout or socket error).
+ * Exported so callers can surface "no data because <reason>" instead of a
+ * silent empty list. Non-null only after a failed fetch.
+ */
+let lastFetchError: string | null = null;
+
+export function getLastFetchError(): string | null {
+  return lastFetchError;
+}
+
+function recordFetchError(msg: string): void {
+  lastFetchError = msg;
+  console.error(`[log-fetcher] ${msg}`);
+}
+
+/**
  * Log fetch boundary.
  *
  * Today this project has two realistic ingestion modes for the H0201:
@@ -131,6 +147,7 @@ export function createTcpLogFetcher(opts: {
         return fakeTcpLogs();
       }
 
+      lastFetchError = null;
       const timeoutMs = opts.timeoutMs || 5000;
       return new Promise((resolveResult) => {
         const socket = new net.Socket();
@@ -170,23 +187,28 @@ export function createTcpLogFetcher(opts: {
         });
 
         socket.on('timeout', () => {
-          console.warn(`[log-fetcher] TCP 4370 connection to ${opts.host}:${opts.port} timed out after ${timeoutMs}ms.`);
+          // Never throw inside an EventEmitter listener: an uncaught throw
+          // here crashes Node and the promise never resolves. Warn and fall
+          // back (fake logs when enabled, empty list otherwise).
           if (process.env.NODE_ENV === 'production' && process.env.ALLOW_FAKE_DEVICE_LOGS !== 'true') {
-            throw new Error(`[log-fetcher] FATAL: TCP terminal ${opts.host}:${opts.port} unreachable and USE_FAKE_DEVICE_LOGS is disabled in production.`);
+            recordFetchError(
+              `TCP terminal ${opts.host}:${opts.port} timed out after ${timeoutMs}ms and USE_FAKE_DEVICE_LOGS is disabled in production.`
+            );
+          } else {
+            console.warn(`[log-fetcher] TCP 4370 connection to ${opts.host}:${opts.port} timed out after ${timeoutMs}ms.`);
           }
           finish(process.env.USE_FAKE_DEVICE_LOGS === 'true' ? fakeTcpLogs() : []);
         });
 
         socket.on('error', (err) => {
-          console.error(`[log-fetcher] TCP 4370 connection error to ${opts.host}:${opts.port}:`, err.message);
+          // Consolidated error handler. Same rule: no throws in listeners.
           if (process.env.NODE_ENV === 'production' && process.env.ALLOW_FAKE_DEVICE_LOGS !== 'true') {
-            throw new Error(`[log-fetcher] FATAL: TCP terminal ${opts.host}:${opts.port} error and USE_FAKE_DEVICE_LOGS is disabled in production: ${err.message}`);
+            recordFetchError(
+              `TCP terminal ${opts.host}:${opts.port} error and USE_FAKE_DEVICE_LOGS is disabled in production: ${err.message}`
+            );
+          } else {
+            console.warn(`[log-fetcher] TCP 4370 socket error on ${opts.host}:${opts.port} (${err.message}). Using resilient fallback.`);
           }
-          finish(process.env.USE_FAKE_DEVICE_LOGS === 'true' ? fakeTcpLogs() : []);
-        });
-
-        socket.on('error', (err) => {
-          console.warn(`[log-fetcher] TCP 4370 socket error on ${opts.host}:${opts.port} (${err.message}). Using resilient fallback.`);
           finish(process.env.USE_FAKE_DEVICE_LOGS === 'true' ? fakeTcpLogs() : []);
         });
 

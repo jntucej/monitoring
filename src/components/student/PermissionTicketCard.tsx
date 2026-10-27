@@ -17,7 +17,7 @@ const STAGE_LABELS: Record<string, string> = {
   deputy_warden: "Deputy Warden",
   hostel_manager: "Hostel Manager",
   warden_or_principal: "Warden / Principal",
-  main_gate: "Main Gate",
+  lab_incharge: "Lab In-charge",
   hod: "HOD",
   oie: "Officer in Exam (OIE)",
   vice_principal: "Vice Principal",

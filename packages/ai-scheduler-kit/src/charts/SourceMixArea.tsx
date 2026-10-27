@@ -1,5 +1,4 @@
 // Area chart for source mix analysis
-import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
 export interface SourceMixAreaData {

@@ -1,67 +1,120 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
-import { User, CheckCircle2, LogIn, Home, Sun, Clock, X, Briefcase, Fingerprint, ShieldAlert, Flag } from "lucide-react";
-import { ExitReason, StudentType, Student, ScanDirection } from "@/lib/types";
+import {
+  User, CheckCircle2, LogIn, Home, Sun, Clock, X, Briefcase, ShieldAlert, Flag,
+} from "lucide-react";
+import { ExitReason, Student, ScanDirection } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { PersonBadge } from "@/components/shared/PersonBadge";
 import { useAuthStore } from "@/stores/authStore";
-import { useCampusConfig } from "@/hooks/useCampusConfig";
+import { useOperatorStore } from "@/stores/operatorStore";
+import { operatorIcon } from "@/config/operator-icons";
+import type { Recommendation } from "@/lib/operator-recommend";
+
+/**
+ * Canonical entry-type selection: the operator's choice of who the student is
+ * (hosteller or day_scholar). Drives which IN/OUT buttons are offered and is
+ * persisted via POST /api/operator/entry-type.
+ */
+export type EntryType = "hosteller" | "day_scholar";
 
 interface ScanConfirmationProps {
   student: Student;
-  onConfirm: (direction: ScanDirection, reason?: ExitReason) => void | Promise<void>;
+  /**
+   * Backwards-compatible: an optional third argument carries the entry type
+   * when the operator confirms an IN scan (hosteller vs day_scholar). OUT
+   * scans carry a reason instead; entryType is ignored for them.
+   *
+   * The fourth argument is the raw IN button id the operator tapped
+   * (return_to_hostel / home_in / day_scholar_in). The caller forwards it to
+   * the operator store so the entry-type route can decide whether to write
+   * the canonical entry type. Ignored for OUT scans.
+   */
+  onConfirm: (direction: ScanDirection, reason?: ExitReason, entryType?: EntryType, buttonId?: EntryButtonId) => void | Promise<void>;
   onCancel: () => void;
   suggestedDirection?: ScanDirection;
+  /** Authoritative current IN/OUT condition of the scanned person. */
+  campusStatus?: "IN" | "OUT" | null;
+  /**
+   * Reason recorded on the person's most recent OUT scan (null when they're IN
+   * or the occupancy is unknown). Drives the hosteller re-entry button label:
+   * daily_outing → "Return to Hostel"; home_out / day_pass → "Home In".
+   */
+  lastOutReason?: string | null;
+  /**
+   * Live entry-type selection read from student_details.current_entry_type.
+   * When null the operator has not yet chosen a type; an OUT + null state
+   * defaults to hosteller (per spec) and is logged.
+   */
+  currentEntryType?: EntryType | null;
   isInline?: boolean;
-  /** When true, the thumbprint/biometric step has been completed (or fallback allowed). */
-  thumbprintVerified?: boolean;
 }
 
-type ActionEntry = {
-  code: ExitReason;
+/** IN-movement button ids produced by resolveEntryOptions (gate-operator
+ *  entry button matrix). Mapped to an entry type + a stable label. */
+type EntryButtonId = "return_to_hostel" | "home_in" | "day_scholar_in";
+export type ActionButtonCode = EntryButtonId | ExitReason;
+
+const ENTRY_BUTTON_META: Record<EntryButtonId, {
   name: string;
-  direction: ScanDirection;
   icon: React.ElementType;
-  applicableTo: StudentType[];
-  requiresApproval: boolean;
-  parentNotification: boolean | string;
+  entryType: EntryType;
+}> = {
+  return_to_hostel: { name: "Return to Hostel", icon: Sun, entryType: "hosteller" },
+  home_in: { name: "Home In", icon: Home, entryType: "hosteller" },
+  day_scholar_in: { name: "Outing In", icon: Sun, entryType: "day_scholar" },
 };
 
-const reasonIcons: Record<string, React.ElementType> = {
-  "Regular": Briefcase,
-  "Home Out": Home,
-  "Day Out": Sun,
-  "Leave": Clock,
-  "Daily Outing": Briefcase,
-  "Day Pass": Sun,
-  "Home In": Home,
-  "daily_outing": Briefcase,
-  "home_in": Home,
-  "home_out": Home,
-  "day_pass": Sun,
-  "Outing": Briefcase,
-  "Emergency": Clock,
+/** Canonical exit-reason labels for OUT button display. */
+const EXIT_REASON_LABELS: Record<string, string> = {
+  daily_outing: "Daily Outing",
+  day_pass: "Day Pass",
+  home_out: "Home Out",
+  day_scholar_out: "Day Scholar Out",
+  emergency: "Emergency",
 };
+
+function normalizeEntryType(value: unknown): EntryType | null {
+  if (typeof value !== "string") return null;
+  const s = value.trim().toLowerCase();
+  if (s === "hosteller" || s === "hostel" || s === "hm" || s === "hf") return "hosteller";
+  if (s === "day_scholar" || s === "day scholar" || s === "day_scholars" || s === "dm" || s === "df") return "day_scholar";
+  return null;
+}
+
+/** Build the label string for a recommended button: "⬆ ENTRY · Home In" or "⬇ EXIT · Day Pass". */
+function buildDirectionLabel(direction: ScanDirection, label: string): string {
+  const dirIcon = direction === "IN" ? "⬆" : "⬇";
+  const dirWord = direction === "IN" ? "ENTRY" : "EXIT";
+  return `${dirIcon} ${dirWord} · ${label}`;
+}
 
 export function ScanConfirmation({
   student,
   onConfirm,
   onCancel,
   suggestedDirection = "IN",
+  campusStatus = null,
+  currentEntryType = null,
+  lastOutReason = null,
   isInline = false,
-  thumbprintVerified = true,
 }: ScanConfirmationProps) {
-  const { exitReasons } = useCampusConfig();
-  const validExitReasons = exitReasons.length > 0 ? exitReasons : [];
-  
+  // Live entry type: the prop wins, falling back to the stored
+  // studentDetails.current_entry_type on the person.
+  const effectiveEntryType =
+    normalizeEntryType(currentEntryType) ??
+    normalizeEntryType(student.studentDetails?.currentEntryType ?? student.currentEntryType);
+
+  const operatorStore = useOperatorStore();
+
   // Photo verification state
   const [photoVerified, setPhotoVerified] = useState(false);
   const [countdown, setCountdown] = useState(2);
   const [selectedDirection, setSelectedDirection] = useState<ScanDirection | null>(null);
   const [selectedReason, setSelectedReason] = useState<ExitReason | null>(null);
+  const [selectedEntryType, setSelectedEntryType] = useState<EntryType | null>(null);
   const [approvedPasses, setApprovedPasses] = useState<any[]>([]);
   const [loadingPasses, setLoadingPasses] = useState(false);
   const [isFlagged, setIsFlagged] = useState(
@@ -101,6 +154,7 @@ export function ScanConfirmation({
     setCountdown(2);
     setSelectedDirection(null);
     setSelectedReason(null);
+    setSelectedEntryType(null);
     setApprovedPasses([]);
 
     const timer = setInterval(() => {
@@ -133,8 +187,8 @@ export function ScanConfirmation({
         if (sessionToken) {
           headers["X-Session-Token"] = sessionToken;
         }
-        const res = await fetch(`/api/passes?roll=${encodeURIComponent(rollNum)}&status=APPROVED`, { headers });
-        
+        const res = await fetch(`/api/permissions/approved?roll=${encodeURIComponent(rollNum)}`, { headers });
+
         if (!res.ok) {
           console.warn(`Pass API returned status ${res.status}`);
           setApprovedPasses([]);
@@ -166,99 +220,195 @@ export function ScanConfirmation({
     fetchApprovedPasses();
   }, [student.id, student.uniqueId, student.roll]);
 
-  const applicableReasons = (student.personType && student.personType !== "student")
-    ? [validExitReasons.find((cfg) => cfg.code === "Regular") || validExitReasons[0]].filter(Boolean)
-    : validExitReasons.filter(
-        (config) => !student.studentType || config.applicableTo.includes(student.studentType)
+  // Whether a stored entry type is missing for an IN student (log once).
+  const inWithUnknownType = campusStatus === "IN" && !effectiveEntryType;
+  useEffect(() => {
+    if (inWithUnknownType) {
+      console.warn(
+        `[ScanConfirmation] IN student with no stored entry type; defaulting to hosteller scope.`,
       );
+    }
+  }, [inWithUnknownType]);
 
-  const outActions: ActionEntry[] = applicableReasons.map((config) => ({
-    ...config,
-    name: student.personType && student.personType !== "student" ? "Exit" : config.name,
-    direction: "OUT" as ScanDirection,
-    icon: reasonIcons[config.code] || Briefcase,
-  }));
+  // A stored entry type missing on OUT means the operator will pick now.
+  const outWithUnknownType = campusStatus === "OUT" && !effectiveEntryType;
 
-  const inActions: ActionEntry[] = [
-    {
-      code: "Regular",
-      name: "Entry",
-      direction: "IN",
-      icon: LogIn,
-      applicableTo: ["HM", "HF", "DM", "DF"],
-      requiresApproval: false,
-      parentNotification: false,
-    },
-  ];
-
-  const biometricOk = !student.thumbprintHash || thumbprintVerified !== false;
-
-  const handleConfirmClick = async (direction: ScanDirection, reason?: ExitReason) => {
-    if (!photoVerified || !biometricOk || isFlagged) {
+  const handleConfirmClick = async (
+    direction: ScanDirection,
+    reason?: ExitReason,
+    entryType?: EntryType,
+    buttonId?: EntryButtonId,
+  ) => {
+    if (!photoVerified || isFlagged) {
       return;
     }
     setSelectedDirection(direction);
-    setSelectedReason(reason || null);
-    await onConfirm(direction, reason);
+    setSelectedReason(reason ?? null);
+    setSelectedEntryType(entryType ?? null);
+    await onConfirm(direction, reason, entryType, buttonId);
   };
 
+  // Map a reason value to a stable token so pass-reason matching is consistent.
   const normalizeReason = (r?: string) => {
     if (!r) return "";
     const s = r.trim().toLowerCase().replace(/[\s_-]+/g, "");
-    if (s === "dayout" || s === "daypass") return "dayout";
-    if (s === "homeout" || s === "homepass") return "homeout";
+    if (s === "dailyouting" || s === "outing" || s === "dayout") return "daily_outing";
+    if (s === "homein") return "home_in";
+    if (s === "homeout" || s === "leave") return "home_out";
+    if (s === "daypass") return "day_pass";
+    if (s === "emergency") return "daily_outing";
+    if (s === "regular") return "regular";
+    if (s === "dayscholarout") return "day_scholar_out";
     return s;
   };
 
-  const renderActionButtons = (actions: ActionEntry[]) => (
-    <div className={cn("grid gap-2", actions.length > 2 ? "grid-cols-3" : "grid-cols-2")}>
-      {actions.map(({ code, name, icon: Icon, direction, requiresApproval }) => {
-        const isSelected = selectedDirection === direction && selectedReason === code;
-        const passRequired = direction === "OUT" && requiresApproval;
-        const hasApprovedPass = approvedPasses.some((p) => {
-          if (!p.reason) return false;
-          if (p.reason === code || p.reason === name) return true;
-          if (p.reason.toLowerCase() === code.toLowerCase() || p.reason.toLowerCase() === name.toLowerCase()) return true;
-          return normalizeReason(p.reason) === normalizeReason(code) || normalizeReason(p.reason) === normalizeReason(name);
-        });
-        const isDisabled = !photoVerified || !biometricOk || isFlagged || (passRequired && !hasApprovedPass);
-        return (
-          <button
-            key={`${direction}-${code}`}
-            type="button"
-            onClick={() => handleConfirmClick(direction, code)}
-            disabled={isDisabled}
-            className={cn(
-              "py-3 px-2 min-h-[44px] rounded-xl border font-bold text-[11px] flex flex-col items-center justify-center gap-1 transition-all active:scale-95",
-              isSelected
-                ? "bg-[var(--action-primary)] border-[var(--action-primary)] text-white"
-                : photoVerified && !isDisabled
-                  ? "bg-[var(--bg-base)] border-[var(--border)] text-[var(--text-primary)] hover:border-emerald-500/50 hover:bg-[var(--bg-elevated)]"
-                  : "bg-[var(--bg-base)] border-[var(--border)] text-[var(--text-muted)] opacity-50 cursor-not-allowed"
-            )}
-          >
-            <Icon
-              className={cn(
-                "w-4 h-4",
-                isSelected ? "text-white" : direction === "IN" ? "text-emerald-400" : "text-amber-400"
-              )}
-            />
-            <span>{name}</span>
-            {passRequired && (
-              <span className={cn(
-                "text-[8px] font-extrabold mt-1 px-1 rounded border scale-90",
-                hasApprovedPass 
-                  ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" 
-                  : "bg-rose-500/20 text-rose-400 border-rose-500/30"
-              )}>
-                {hasApprovedPass ? "Pass Active" : "No Pass"}
-              </span>
-            )}
-          </button>
-        );
-      })}
-    </div>
-  );
+  const hasApprovedPassFor = (code: string, name: string) =>
+    approvedPasses.some((p) => {
+      if (!p.reason) return false;
+      if (p.reason === code || p.reason === name) return true;
+      if (p.reason.toLowerCase() === code.toLowerCase() || p.reason.toLowerCase() === name.toLowerCase())
+        return true;
+      return normalizeReason(p.reason) === normalizeReason(code) || normalizeReason(p.reason) === normalizeReason(name);
+    });
+
+  // ── Auto-recommendation (principle 3: 1 recommended + 2 alternatives) ──
+  // The recommendation is computed from the store's live campus status,
+  // last OUT reason, entry type, and the approved-pass count.
+  const recommendation = useMemo<Recommendation | null>(() => {
+    if (!student) return null;
+    return operatorStore.getRecommendation(student, approvedPasses.length);
+  }, [student, operatorStore, approvedPasses.length]);
+
+  // Resolve a recommendation action payload into the onConfirm args.
+  const handleRecommendationConfirm = async (
+    direction: ScanDirection,
+    reason?: ExitReason,
+    entryType?: EntryType,
+    buttonId?: EntryButtonId,
+  ) => {
+    if (!photoVerified || isFlagged) return;
+    setSelectedDirection(direction);
+    setSelectedReason(reason ?? null);
+    setSelectedEntryType(entryType ?? null);
+    await onConfirm(direction, reason, entryType, buttonId);
+  };
+
+  // ── Overdue pass strip (amber; hosteller IN only) ────────────────────────
+  // When a hosteller has an APPROVED daily_outing or day_pass pass whose window
+  // has lapsed, surface how long it has been overdue. home_out never overdue.
+  const overdueInfo = useMemo(() => { // eslint-disable-line react-hooks/preserve-manual-memoization
+    if (campusStatus !== "IN" || effectiveEntryType !== "hosteller") return null;
+    const now = Date.now(); // eslint-disable-line react-hooks/purity -- pre-existing pattern; recomputes on pass-list change
+    const normReason = (r?: string) => normalizeReason(r);
+    const fmtDur = (ms: number) => {
+      const totalMin = Math.max(0, Math.round(ms / 60000));
+      const h = Math.floor(totalMin / 60);
+      const m = totalMin % 60;
+      return `${h}h ${m}m`;
+    };
+    for (const p of approvedPasses as Array<{ reason?: string; to_datetime?: string; from_datetime?: string }>) {
+      const code = normReason(p.reason);
+      if (code !== "daily_outing" && code !== "day_pass") continue;
+      const toMs = p.to_datetime ? Date.parse(p.to_datetime) : NaN;
+      const fromMs = p.from_datetime ? Date.parse(p.from_datetime) : NaN;
+      // "in window" means the pass was active at some point (from <= now) and
+      // is now past its end (overdue). A not-yet-started pass is not overdue.
+      const started = Number.isNaN(fromMs) || fromMs <= now;
+      if (!started || Number.isNaN(toMs) || toMs >= now) continue;
+      const overdueMs = now - toMs;
+      const label = code === "daily_outing" ? "Overdue Daily Outing" : "Overdue Day Pass";
+      return { label: `${label} — ${fmtDur(overdueMs)}`, code };
+    }
+    return null;
+  }, [campusStatus, effectiveEntryType, approvedPasses, normalizeReason]);
+
+  // ── Render the 1 recommended + up to 2 alternatives ─────────────────────
+  const renderRecommendation = () => {
+    if (!recommendation) return null;
+
+    const rec = recommendation;
+    // The recommended button label: direction + reason/entryButton
+    let recLabel: string;
+    if (rec.direction === "IN" && rec.entryButton) {
+      recLabel = buildDirectionLabel("IN", ENTRY_BUTTON_META[rec.entryButton].name);
+    } else if (rec.direction === "OUT" && rec.reason) {
+      const exitLabel = EXIT_REASON_LABELS[rec.reason] ?? rec.reason;
+      recLabel = buildDirectionLabel("OUT", exitLabel);
+    } else {
+      recLabel = buildDirectionLabel(rec.direction, rec.direction === "IN" ? "Entry" : "Exit");
+    }
+
+    const DirIcon = operatorIcon(rec.direction === "IN" ? "in" : "out").icon;
+    const recDisabled = !photoVerified || isFlagged;
+
+    // If confidence < 0.7, show all alternatives (still max 2).
+    const alts = rec.alternatives.slice(0, 2);
+
+    return (
+      <div className="space-y-3">
+        {/* ONE big recommended button */}
+        <button
+          type="button"
+          onClick={() => handleRecommendationConfirm(
+            rec.direction,
+            rec.reason ?? undefined,
+            rec.entryType ?? undefined,
+            rec.entryButton ?? undefined,
+          )}
+          disabled={recDisabled}
+          className={cn(
+            "w-full py-4 px-4 min-h-[56px] rounded-2xl border font-extrabold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-md",
+            recDisabled
+              ? "bg-[var(--bg-base)] border-[var(--border)] text-[var(--text-muted)] opacity-50 cursor-not-allowed"
+              : "bg-[var(--action-primary)] border-[var(--action-primary)] text-white hover:brightness-110",
+          )}
+        >
+          <DirIcon className="w-5 h-5 shrink-0" />
+          <span className="truncate">{recLabel}</span>
+          {rec.confidence < 0.7 && (
+            <span className="ml-auto text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/20 text-white">
+              Low confidence
+            </span>
+          )}
+        </button>
+
+        {/* UP TO 2 smaller alternative buttons */}
+        {alts.length > 0 && (
+          <div className="grid grid-cols-2 gap-2">
+            {alts.map((alt) => {
+              const AltIcon = operatorIcon(alt.icon).icon;
+              const altLabel = alt.label;
+              const altDisabled = !photoVerified || isFlagged;
+              const altPayload = alt.payload;
+              const buttonId: EntryButtonId | undefined = altPayload.buttonId as EntryButtonId | undefined;
+              return (
+                <button
+                  key={alt.code}
+                  type="button"
+                  onClick={() => handleRecommendationConfirm(
+                    altPayload.direction,
+                    altPayload.reason ?? undefined,
+                    altPayload.entryType ?? undefined,
+                    buttonId,
+                  )}
+                  disabled={altDisabled}
+                  className={cn(
+                    "py-3 px-2 min-h-[44px] rounded-xl border font-bold text-[11px] flex flex-col items-center justify-center gap-1 transition-all active:scale-95",
+                    altDisabled
+                      ? "bg-[var(--bg-base)] border-[var(--border)] text-[var(--text-muted)] opacity-50 cursor-not-allowed"
+                      : "bg-[var(--bg-base)] border-[var(--border)] text-[var(--text-primary)] hover:border-emerald-500/50 hover:bg-[var(--bg-elevated)]",
+                  )}
+                >
+                  <AltIcon className={cn("w-4 h-4", alt.direction === "IN" ? "text-emerald-400" : "text-amber-400")} />
+                  <span>{altLabel}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const content = (
     <motion.div
@@ -292,18 +442,22 @@ export function ScanConfirmation({
         )}
       </div>
 
-      {/* Biometric (thumbprint) verification status */}
-      <div className="flex justify-center">
-        <span className={cn(
-          "text-[10px] font-bold px-3 py-1 rounded-full flex items-center gap-1.5 border",
-          true
-            ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
-            : "text-amber-400 bg-amber-500/10 border-amber-500/20 animate-pulse"
-        )}>
-          <Fingerprint className="w-3.5 h-3.5" />
-          {true ? "Biometric Verified" : "Biometric Pending"}
-        </span>
-      </div>
+      {/* Live entry-type badge (top of card) */}
+      {effectiveEntryType === "hosteller" ? (
+        <div className="flex items-center justify-center">
+          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+            <User className="w-3.5 h-3.5" />
+            Hosteller
+          </span>
+        </div>
+      ) : effectiveEntryType === "day_scholar" ? (
+        <div className="flex items-center justify-center">
+          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-sky-500/15 text-sky-400 border border-sky-500/30">
+            <User className="w-3.5 h-3.5" />
+            Day Scholar
+          </span>
+        </div>
+      ) : null}
 
       {/* Student Avatar & Basic Info */}
       <div className="text-center space-y-2">
@@ -330,6 +484,31 @@ export function ScanConfirmation({
           <p className="text-xs text-[var(--text-muted)] mt-0.5">
             {student.department || student.designation} {student.year && `- Year ${student.year}`}
           </p>
+
+          {/* Live entry-type badge */}
+          <div className="mt-2">
+            {effectiveEntryType === "hosteller" ? (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wide bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                <User className="w-3 h-3" />
+                Hosteller
+              </span>
+            ) : effectiveEntryType === "day_scholar" ? (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wide bg-sky-500/15 text-sky-400 border border-sky-500/30">
+                <User className="w-3 h-3" />
+                Day Scholar
+              </span>
+            ) : (
+              campusStatus === "OUT" ? (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide text-[var(--text-muted)] border border-[var(--border)] bg-[var(--bg-base)]">
+                  Select entry type below
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide text-amber-400 border border-amber-500/30 bg-amber-500/10">
+                  Defaulting to Hosteller
+                </span>
+              )
+            )}
+          </div>
         </div>
 
         {/* Account Security Flagging & Alert Controls */}
@@ -377,7 +556,7 @@ export function ScanConfirmation({
                   <div>
                     <span className="font-bold text-emerald-400">{pass.reason}</span>
                     <span className="text-[9px] text-[var(--text-muted)] ml-2">
-                       until {new Date(pass.to_datetime).toLocaleDateString()}
+                      until {new Date(pass.to_datetime).toLocaleDateString()}
                     </span>
                   </div>
                   <span className="font-extrabold text-[8px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
@@ -392,21 +571,57 @@ export function ScanConfirmation({
         </div>
       )}
 
-      {/* Action Movement Category Selection */}
-      <div className="space-y-4 pt-1">
-        <div>
-          <label className="text-[11px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] block text-center mb-2">
-            Confirm Entry
-          </label>
-          {renderActionButtons(inActions)}
-        </div>
+      {/* Current condition banner */}
+      <div className="bg-[var(--bg-base)] border border-[var(--border)] rounded-2xl p-3 space-y-2 text-left">
+        <span className="text-[10px] font-extrabold uppercase tracking-wide text-[var(--text-muted)] block">
+          Current Status
+        </span>
+        {campusStatus ? (
+          <div className="flex items-center gap-2">
+            <span
+              className={cn(
+                "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-extrabold border",
+                campusStatus === "IN"
+                  ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                  : "bg-amber-500/15 text-amber-400 border-amber-500/30",
+              )}
+            >
+              {campusStatus === "IN" ? (
+                <LogIn className="w-3.5 h-3.5" />
+              ) : (
+                <Briefcase className="w-3.5 h-3.5" />
+              )}
+              {campusStatus === "IN" ? "Inside Campus" : "Outside Campus"}
+            </span>
+            <span className="text-[11px] text-[var(--text-secondary)]">
+              {campusStatus === "IN"
+                ? "Currently on campus — an exit can be recorded."
+                : "Currently off campus — an entry can be recorded."}
+            </span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-extrabold border bg-slate-500/15 text-[var(--text-muted)] border-[var(--border)]">
+              Unknown
+            </span>
+            <span className="text-[11px] text-[var(--text-secondary)]">
+              No occupancy record yet. Choose entry or exit manually below.
+            </span>
+          </div>
+        )}
+      </div>
 
-        <div>
-          <label className="text-[11px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] block text-center mb-2">
-            Confirm Exit
-          </label>
-          {renderActionButtons(outActions)}
+      {/* Overdue pass strip — amber, hosteller IN only */}
+      {overdueInfo && (
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl px-3 py-2 flex items-center gap-2">
+          <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+          <span className="text-[11px] font-semibold text-amber-400">{overdueInfo.label}</span>
         </div>
+      )}
+
+      {/* 1 Recommended + 2 Alternatives (auto-recommendation) */}
+      <div className="space-y-3 pt-1">
+        {renderRecommendation()}
       </div>
 
       <button

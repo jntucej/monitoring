@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query, addAudit } from "@/lib/db";
-import { withAuthorization } from "@/middleware/authorization";
-import { withRateLimit } from "@/lib/rate-limit";
+import { withAdminMutation } from "@/server/http/mutation-guard";
 import { ok, fail } from "@/server/http/response";
 import type { AuthContext } from "@/lib/authContext";
 
@@ -18,6 +17,7 @@ async function handlePatch(req: NextRequest, { auth }: { auth: AuthContext }) {
     const body = await req.json().catch(() => null);
     const existing = await query(`SELECT * FROM mess_menu_items WHERE id::text = $1`, [id]);
     if (existing.rows.length === 0) return fail("NOT_FOUND", "Menu item not found", 404);
+    const prevRow: any = existing.rows[0];
 
     const code: string | undefined = typeof body?.code === "string" ? body.code.trim() : undefined;
     const label: string | undefined = typeof body?.label === "string" ? body.label.trim() : undefined;
@@ -57,7 +57,10 @@ async function handlePatch(req: NextRequest, { auth }: { auth: AuthContext }) {
     );
 
     await addAudit({
-      action: "MESS_MENU_ITEM_UPDATED",
+      action:
+        isActive === false && (prevRow?.is_active ?? true) === true
+          ? "MESS_MENU_ITEM_DEACTIVATED"
+          : "MESS_MENU_ITEM_UPDATED",
       userId: auth.userId,
       role: auth.role,
       details: { id, changes: { code, label, isPrimary, sortOrder, isActive, applicableTo } },
@@ -101,12 +104,10 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
   }
 }
 
-export const PATCH = withRateLimit(
-  withAuthorization(async (req, ctx) => handlePatch(req, ctx), { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "mess_menu_items_patch", maxRequests: 20 }
-);
+export const PATCH = withAdminMutation(handlePatch, {
+  rateLimit: { windowMs: 60_000, maxRequests: 20 },
+});
 
-export const DELETE = withRateLimit(
-  withAuthorization(async (req, ctx) => handleDelete(req, ctx), { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "mess_menu_items_delete", maxRequests: 20 }
-);
+export const DELETE = withAdminMutation(handleDelete, {
+  rateLimit: { windowMs: 60_000, maxRequests: 20 },
+});

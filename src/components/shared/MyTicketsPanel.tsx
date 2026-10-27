@@ -64,10 +64,10 @@ export function MyTicketsPanel({
   );
 
   const { data, loading, error, refresh, refreshKey } =
-    useDashboardData<PermissionsResponse>(ticketsUrl, { ttlMs: 5_000, pollMs });
+    useDashboardData<PermissionItem[]>(ticketsUrl, { ttlMs: 5_000, pollMs });
 
   const { data: countsData, refresh: refreshCounts } =
-    useDashboardData<CountsResponse>("/api/permissions/my-counts", {
+    useDashboardData<TicketCounts>("/api/permissions/my-counts", {
       ttlMs: 5_000,
       pollMs,
     });
@@ -77,7 +77,7 @@ export function MyTicketsPanel({
     { intervalMs: pollMs, enabled: true },
   );
 
-  const rows = data?.data ?? [];
+  const rows = data ?? [];
   const filtered = useMemo(
     () => (filter === "ALL" ? rows : rows.filter((r) => r.status === filter)),
     [rows, filter],
@@ -132,7 +132,7 @@ export function MyTicketsPanel({
       {/* KPI strip */}
       <WidgetBoundary>
         <TicketKpiStrip
-          counts={countsData?.data ?? null}
+          counts={countsData ?? null}
           loading={!countsData && loading}
         />
       </WidgetBoundary>

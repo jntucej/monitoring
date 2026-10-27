@@ -159,8 +159,8 @@ export function PermissionRequestForm({
       )}
 
       <div className="space-y-1">
-        <label className="text-xs font-semibold text-[var(--text-secondary)]">Description {isExamMemo && "*"}</label>
-        <textarea
+        <label className="text-xs font-semibold text-[var(--text-secondary)]" htmlFor="description-isexammemo">Description {isExamMemo && "*"}</label>
+        <textarea id="description-isexammemo"
           rows={3}
           value={description}
           onChange={(e) => { setDescription(e.target.value); setFieldErrors((p) => ({ ...p, description: "" })); }}

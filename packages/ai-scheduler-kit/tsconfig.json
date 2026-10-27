@@ -20,12 +20,11 @@
     "noImplicitAny": true,
     "noImplicitOverride": true,
     "noUncheckedIndexedAccess": true,
-    "noFallthroughSwitchCases": true,
+    "jsx": "react-jsx",
     "moduleResolution": "node",
     "allowJs": false,
     "checkJs": false,
-    "isolatedModules": true,
-    "allowImportingTsFilesInJson": true
+    "isolatedModules": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

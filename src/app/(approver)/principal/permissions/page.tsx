@@ -8,6 +8,8 @@ import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { PermissionList } from "@/components/approver/PermissionList";
 import { RefreshCw } from "lucide-react";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+import type { Role } from "@/lib/types";
 
 function PrincipalPermissionsInner() {
   return (
@@ -53,9 +55,9 @@ function PrincipalPermissionsInner() {
           <PermissionList
             title="Outpass Requests"
             subtitle="Outpass clearances pending final principal approval"
-            workflowType="outpass"
+            workflowType="hostel"
             stageFilter="principal"
-            fetchUrl="/api/permissions?workflow_type=outpass&stage=principal&status=PENDING"
+            fetchUrl="/api/permissions?workflow_type=hostel&stage=principal&status=PENDING"
           />
         </WidgetBoundary>
       </div>
@@ -64,11 +66,12 @@ function PrincipalPermissionsInner() {
     </div>
   );
 }
-
 export default function PrincipalPermissionsPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <PrincipalPermissionsInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['principal', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <PrincipalPermissionsInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

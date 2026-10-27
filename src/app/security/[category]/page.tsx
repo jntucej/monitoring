@@ -102,12 +102,11 @@ export default function SecurityCategoryPage({ params }: PageProps) {
         };
       case "mfa":
         return {
-          title: "MFA & Auth Parameters",
+          title: "Security Parameters",
           categoryName: "Container 3",
           icon: KeyRound,
           accent: "text-indigo-400 bg-indigo-500/10 border-indigo-500/30",
           metrics: [
-            { label: "2FA Policy", value: userRole === "sysadmin" || userRole === "admin" ? "Enforced" : "Active" },
             { label: "PIN Lock", value: "Verified" },
             { label: "Biometrics", value: "WebAuthn Ready" },
             { label: "Failed Logins", value: "0 (24h)" },

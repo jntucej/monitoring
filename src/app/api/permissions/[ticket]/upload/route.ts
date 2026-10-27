@@ -5,156 +5,125 @@ import withAuthorization from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { appendStageHistory, getScopedTicket } from "@/lib/permission-workflow";
 import { addAudit, addNotification } from "@/lib/db";
+import { assertCsrf } from "@/lib/csrf";
 import type { Role } from "@/lib/types";
 import {
   ensureTicketDir,
   documentPath,
 } from "@/lib/permission-document";
 
-const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
-
 function getTicketParam(req: NextRequest): string {
-  // pathname: /api/permissions/{ticket}/upload → second-to-last segment
-  const segments = new URL(req.url).pathname.split("/").filter(Boolean);
-  return decodeURIComponent(segments[segments.length - 2] || "");
+  const parts = new URL(req.url).pathname.split("/").filter(Boolean);
+  const idx = parts.indexOf("permissions");
+  return idx >= 0 ? parts[idx + 1] ?? "" : "";
 }
 
 async function handlePost(req: NextRequest): Promise<Response> {
-  const ticketParam = getTicketParam(req);
-  const authUserId = req.headers.get("x-user-id") || "";
-  const authUserRole = req.headers.get("x-user-role") || "";
-  const authUserEmail = req.headers.get("x-user-email") || "";
+  const csrf = assertCsrf(req);
+  if (csrf) return csrf;
 
-  if (!ticketParam) {
+  const ticket = getTicketParam(req);
+  if (!ticket) {
     return NextResponse.json(
-      { success: false, error: { code: "BAD_REQUEST", message: "Ticket parameter required" } },
-      { status: 400 }
+      { success: false, error: { code: "MISSING_TICKET", message: "ticket required" } },
+      { status: 400 },
     );
   }
 
-  const scope = await getScopedTicket(ticketParam, authUserId, authUserRole);
-  if ("notFound" in scope && scope.notFound) {
+  const scoped = await getScopedTicket(ticket, "", "");
+  if ("notFound" in scoped) {
     return NextResponse.json(
-      { success: false, error: { code: "NOT_FOUND", message: "Permission request not found" } },
-      { status: 404 }
+      { success: false, error: { code: "TICKET_NOT_FOUND", message: "Ticket not found" } },
+      { status: 404 },
     );
   }
-  if ("forbidden" in scope && scope.forbidden) {
+  if ("forbidden" in scoped) {
     return NextResponse.json(
-      { success: false, error: { code: "FORBIDDEN", message: "Access denied" } },
-      { status: 403 }
-    );
-  }
-  const request = scope.request;
-
-  // Only the owner student or admin/sysadmin may upload.
-  const isOwner = request.student_user_id === authUserId;
-  const isElevated = authUserRole === "admin" || authUserRole === "sysadmin";
-  if (!isOwner && !isElevated) {
-    return NextResponse.json(
-      { success: false, error: { code: "FORBIDDEN", message: "Access denied" } },
-      { status: 403 }
+      { success: false, error: { code: "FORBIDDEN", message: "Not allowed" } },
+      { status: 403 },
     );
   }
 
-  // Guard: exam/memo workflow, document required, still PENDING.
-  const workflowOk =
-    request.workflow_type === "exam" || request.workflow_type === "memo";
-  if (!workflowOk || !request.document_required || request.status !== "PENDING") {
+  const row = scoped.request;
+  if (row.document_url) {
     return NextResponse.json(
-      { success: false, error: { code: "UPLOAD_NOT_ALLOWED", message: "Upload not allowed for this request" } },
-      { status: 400 }
+      { success: false, error: { code: "DOCUMENT_EXISTS", message: "Document already uploaded" } },
+      { status: 409 },
     );
   }
 
-  // Parse multipart body.
-  let formData: FormData;
-  try {
-    formData = await req.formData();
-  } catch {
-    return NextResponse.json(
-      { success: false, error: { code: "BAD_REQUEST", message: "Expected multipart/form-data" } },
-      { status: 400 }
-    );
-  }
-
-  const file = formData.get("file");
+  const form = await req.formData().catch(() => null);
+  const file = form?.get("file");
   if (!(file instanceof File)) {
     return NextResponse.json(
-      { success: false, error: { code: "BAD_REQUEST", message: "Missing file field" } },
-      { status: 400 }
+      { success: false, error: { code: "MISSING_FILE", message: "file required" } },
+      { status: 400 },
     );
   }
 
-  if (file.type !== "application/pdf") {
+  if (file.size > 10 * 1024 * 1024) {
     return NextResponse.json(
-      { success: false, error: { code: "INVALID_FILE_TYPE", message: "Only PDF files are allowed" } },
-      { status: 400 }
+      { success: false, error: { code: "FILE_TOO_LARGE", message: "Max 10 MB" } },
+      { status: 400 },
     );
   }
 
-  if (file.size > MAX_BYTES) {
+  const mime = file.type || "application/octet-stream";
+  const allowed = ["application/pdf", "image/png", "image/jpeg"];
+  if (!allowed.includes(mime)) {
     return NextResponse.json(
-      { success: false, error: { code: "FILE_TOO_LARGE", message: "File must be 10 MB or smaller" } },
-      { status: 400 }
+      { success: false, error: { code: "UNSUPPORTED_MIME", message: "PDF, PNG, JPG only" } },
+      { status: 415 },
     );
   }
 
-  const bytes = Buffer.from(await file.arrayBuffer());
-  const ticketNumber = request.ticket_number as string;
+  const dir = await ensureTicketDir(ticket);
+  const dest = documentPath(ticket);
+  const buf = Buffer.from(await file.arrayBuffer());
+  await fs.writeFile(dest, buf);
 
-  // Save (overwrite allowed — re-upload).
-  await ensureTicketDir(ticketNumber);
-  await fs.writeFile(documentPath(ticketNumber), bytes);
+  const supabase = getSupabaseServiceClient();
+  const { error: updErr } = await supabase
+    .from("permissions")
+    .update({
+      document_url: `/api/permissions/${ticket}/document`,
+      stage_history: appendStageHistory(
+        (row as any).stage_history,
+        { id: "system", name: "upload", role: "system" },
+        "DOCUMENT_UPLOADED",
+        `mime=${mime} size=${buf.length}`,
+      ),
+    })
+    .eq("id", row.id);
 
-  const documentUrl = `/api/permissions/${encodeURIComponent(ticketNumber)}/document`;
-  const history = appendStageHistory(
-    request.stage_history,
-    { id: authUserId, name: authUserEmail || "User", role: authUserRole },
-    "document_uploaded",
-    null
+  if (updErr) {
+    return NextResponse.json(
+      { success: false, error: { code: "DB_ERROR", message: updErr.message } },
+      { status: 500 },
+    );
+  }
+
+  await addAudit({
+    action: "PERMISSION_DOCUMENT_UPLOADED",
+    userId: row.id,
+    details: JSON.stringify({ ticket, size: buf.length, mime, dir }),
+  });
+
+  await addNotification(
+    "user",
+    (row as any).student_user_id ?? (row as any).requester_user_id,
+    "permission",
+    "Document Uploaded",
+    `Document attached to ticket ${ticket}`,
   );
 
-  const { error: updateErr } = await getSupabaseServiceClient()
-    .from("permission_requests")
-    .update({
-      document_url: documentUrl,
-      stage_history: history,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", request.id);
-
-  if (updateErr) {
-    console.error("[Permission Upload] update error for ticket", ticketNumber, updateErr.message);
-    return NextResponse.json(
-      { success: false, error: { code: "UPDATE_ERROR", message: updateErr.message } },
-      { status: 500 }
-    );
-  }
-
-  // Log ticket + byte length only — never file contents.
-  console.log("[Permission Upload] saved document for ticket", ticketNumber, bytes.length, "bytes");
-
-  addAudit({
-    action: "PERMISSION_DOCUMENT_UPLOADED",
-    userId: authUserId,
-    userName: authUserEmail,
-    role: authUserRole as Role,
-    details: { ticketNumber, bytes: bytes.length },
-  }).catch((err) => console.error("[Permission Upload] addAudit error:", err));
-
-  addNotification(
-    "user",
-    request.student_user_id,
-    "permission",
-    "Document Uploaded for " + ticketNumber,
-    "A document was uploaded to your permission request " + ticketNumber
-  ).catch((err) => console.error("[Permission Upload] addNotification error:", err));
-
-  return NextResponse.json({ success: true, data: { documentUrl } });
+  return NextResponse.json({
+    success: true,
+    data: { ticket, size: buf.length, mime },
+  });
 }
 
 export const POST = withRateLimit(withAuthorization(handlePost), {
-  keyPrefix: "permission_upload",
-  maxRequests: 30,
+  windowMs: 60_000,
+  maxRequests: 10,
 });

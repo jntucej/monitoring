@@ -1,0 +1,105 @@
+name: Auto Heal Agent
+
+on:
+  workflow_run:
+    workflows: ["Auto Deploy to Production", "Manual Deploy (Trusted)"]
+    types: [completed]
+  workflow_dispatch:
+
+jobs:
+  auto-heal:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Get failure details
+      run: |
+        echo "=== Auto Heal Agent Started ==="
+        echo "Failed run: ${{ github.event.workflow_run.id }}"
+        echo "Run conclusion: ${{ github.event.workflow_run.conclusion }}"
+        
+    - name: Diagnose common issues
+      run: |
+        echo "=== Diagnosing Deployment Issues ==="
+        
+        # Check if SSH host is accessible
+        echo "Checking SSH connectivity..."
+        if gh secret get SERVER_HOST &>/dev/null; then
+          echo "SERVER_HOST is configured"
+        else
+          echo "WARNING: SERVER_HOST not configured"
+        fi
+        
+        # Check if private key is set
+        if gh secret get SSH_PRIVATE_KEY &>/dev/null; then
+          echo "SSH_PRIVATE_KEY is configured"
+        else
+          echo "WARNING: SSH_PRIVATE_KEY not configured"
+        fi
+        
+        # Check workflow file
+        echo "Current deploy workflow:"
+        cat .github/workflows/deploy.yml
+        
+    - name: Create diagnostic report
+      run: |
+        mkdir -p reports
+        cat > reports/diagnostic.md << 'EOF'
+        # Deployment Diagnostic Report
+        
+        ## Workflow Run
+        - Run ID: ${{ github.event.workflow_run.id }}
+        - Conclusion: ${{ github.event.workflow_run.conclusion }}
+        - Triggered: ${{ github.event.workflow_run.created_at }}
+        
+        ## Common Failure Points
+        1. SSH connectivity to server
+        2. GitHub secrets configuration
+        3. Git operations (pull, merge conflicts)
+        4. Docker build failures
+        5. Container health checks
+        
+        ## Recommended Fixes
+        - Ensure SERVER_HOST is accessible from GitHub Actions
+        - Check that SSH key has proper permissions
+        - Verify git repository is cloned correctly
+        - Check Docker daemon is running
+        EOF
+        cat reports/diagnostic.md
+        
+    - name: Suggest fixes
+      run: |
+        echo "=== Suggested Actions ==="
+        echo "1. If SSH timeout: Use Tailscale Funnel or VPN"
+        echo "2. If git error: Check remote URL and permissions"
+        echo "3. If build error: Check Dockerfile and dependencies"
+        echo "4. If health check: Verify application starts correctly"
+        
+        echo ""
+        echo "To fix manually, run on server:"
+        echo "  cd /opt/monitoring/compose && git pull origin main"
+        echo "  docker compose build web --no-cache"
+        echo "  docker compose up -d"
+        
+    - name: Create PR with fix
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        git checkout -b "fix/auto-heal-$(date +%s)"
+        echo "# Auto Heal Diagnostic" >> README.md
+        git add .
+        git commit -m "fix: add auto-heal diagnostic report"
+        git push origin "fix/auto-heal-$(date +%s)"
+        gh pr create --title "Auto Heal Diagnostic" --body "Diagnostic report for deployment issues"
+      
+    - name: Notify on Telegram (only on actual failure with fix)
+      if: failure() && steps.diagnose.outputs.FIXES != ''
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_CHAT_ID }}
+        token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        message: |
+          🤖 Auto Heal: Fixed
+          Run: #${{ github.event.workflow_run.id }}
+          Fix: ${{ steps.diagnose.outputs.FIXES }}

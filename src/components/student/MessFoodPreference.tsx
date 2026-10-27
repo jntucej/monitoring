@@ -122,10 +122,9 @@ function MessFoodPreferenceInner() {
 
   /* live clock — drives the window countdown without refetching */
   const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
-  }, []);
+  usePolling(() => {
+    setNow(Date.now());
+  }, { intervalMs: 1000 });
 
   const [primaryItem, setPrimaryItem] = useState<string>("");
   const [subItemIds, setSubItemIds] = useState<string[]>([]);
@@ -140,9 +139,9 @@ function MessFoodPreferenceInner() {
       setPrimaryItem(p.primaryItem);
       setWillBePresent(p.willBePresent);
       setSubItemIds([]); /* sub ids come from the POST payload; re-derive from labels below */
-      const available = preference.data.menuItems.filter((i) => i.isAvailable);
+      const available = preference.data.menuItems?.filter((i) => i.isAvailable) ?? [];
       setSubItemIds(
-        p.subItemLabels
+        (p.subItemLabels ?? [])
           .map((label) => available.find((i) => i.label === label)?.id)
           .filter((id): id is string => Boolean(id)),
       );
@@ -164,9 +163,11 @@ function MessFoodPreferenceInner() {
   const availableSubs = useMemo(
     () =>
       menu.data?.items
-        .filter((i) => i.isAvailable)
-        .map((i) => ({ id: i.code, code: i.code, label: i.label })) ??
-      preference.data?.menuItems.filter((i) => i.isAvailable).map((i) => ({ id: i.id, code: i.code, label: i.label })) ??
+        ?.filter((i) => i.isAvailable)
+        ?.map((i) => ({ id: i.code, code: i.code, label: i.label })) ??
+      preference.data?.menuItems
+        ?.filter((i) => i.isAvailable)
+        ?.map((i) => ({ id: i.id, code: i.code, label: i.label })) ??
       [],
     [menu.data, preference.data],
   );

@@ -9,7 +9,11 @@ export default function AccessHubPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <div>
+<<<<<<< HEAD
         <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">Access & Identity Governance</p>
+=======
+        <p className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">Access & Identity Governance</p>
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
         <p className="text-sm text-[var(--text-secondary)] mt-1">
           Manage roles, live session terminations, SSO authentication providers, and role promotions.
         </p>
@@ -29,7 +33,7 @@ export default function AccessHubPage() {
           <div>
             <h3 className="font-semibold text-base text-[var(--text-primary)]">Role & Permission Matrix</h3>
             <p className="text-xs text-[var(--text-secondary)] mt-1">
-              Configure fine-grained access control across sysadmin, admin, warden, operator, faculty, and student roles.
+              Configure fine-grained access control across sysadmin, admin, principal, operator, faculty, and student roles.
             </p>
           </div>
         </Link>

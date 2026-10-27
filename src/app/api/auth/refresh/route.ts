@@ -4,6 +4,7 @@ import { query, withTransaction } from "@/lib/postgres";
 import { verifyRefreshToken, signAccessToken, signRefreshToken } from "@/lib/auth-token";
 import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
+import { secureCookieOptions } from "@/lib/cookies";
 
 async function handleRefresh(req: NextRequest) {
   const csrfError = assertCsrf(req);
@@ -91,7 +92,43 @@ async function handleRefresh(req: NextRequest) {
     }
 
     if (existingSession.rows.length > 0 && existingSession.rows[0].revoked_at) {
-      // Reuse of revoked refresh token detected: revoke all user sessions
+      // Two cases:
+      //   (a) Genuine theft: long-revoked token reused → revoke all.
+      //   (b) Concurrent-rotation race: two tabs or a retry fired /refresh
+      //       within a short window; the first rotated, the second sees the
+      //       old row revoked but a live session still exists. In that case
+      //       return 409 (not 401) so the client re-syncs via /api/auth/session
+      //       without destroying the user's other active tabs.
+      const GRACE_MS = 90_000;
+      const revokedAt = new Date(existingSession.rows[0].revoked_at).getTime();
+      const withinGrace = Date.now() - revokedAt < GRACE_MS;
+      let hasLiveSession = false;
+      if (withinGrace) {
+        try {
+          const live = await query(
+            "SELECT 1 FROM sessions WHERE user_id = $1 AND revoked_at IS NULL LIMIT 1",
+            [payload.sub]
+          );
+          hasLiveSession = live.rows.length > 0;
+        } catch {
+          hasLiveSession = false; // DB blip → fail closed to revoke-all
+        }
+      }
+
+      if (withinGrace && hasLiveSession) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: "SESSION_RACE",
+              message: "Session was just rotated. Please retry with the current session.",
+            },
+          },
+          { status: 409 }
+        );
+      }
+
+      // Genuine reuse of a long-revoked token → revoke all (theft signal).
       await query("UPDATE sessions SET revoked_at = NOW() WHERE user_id = $1", [payload.sub]).catch(() => {});
       return NextResponse.json(
         {
@@ -144,17 +181,18 @@ async function handleRefresh(req: NextRequest) {
       );
     }
 
-    const cookieOptions = {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax" as const,
-      path: "/",
-    };
+    const cookieOptions = secureCookieOptions(req, { maxAge: 3600 });
 
     const response = NextResponse.json(
       {
         success: true,
         message: "Session refreshed",
+        // Return the fresh tokens in the body so a client that cannot read
+        // the httpOnly cookies (e.g. a cross-origin iframe, or a fetch() with
+        // credentials that doesn't persist them) can still update its in-memory
+        // store. The cookies remain the source of truth; this is a hint.
+        accessToken: access_token,
+        refreshToken: refresh_token,
       },
       { status: 200 }
     );

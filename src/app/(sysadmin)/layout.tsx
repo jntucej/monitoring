@@ -1,15 +1,13 @@
-"use client";
+import type { Metadata } from "next";
+import { NOINDEX_METADATA } from "@/lib/seo";
+import { SysAdminShell } from "./SysAdminShell";
 
-import { AuthGuard } from "@/components/shared/AuthGuard";
+export const metadata: Metadata = NOINDEX_METADATA;
 
 export default function SysAdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <AuthGuard allowedRoles={["sysadmin"]}>
-      {children}
-    </AuthGuard>
-  );
+  return <SysAdminShell>{children}</SysAdminShell>;
 }

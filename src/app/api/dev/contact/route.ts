@@ -6,6 +6,21 @@ import { addAudit } from "@/lib/db";
 import type { Role } from "@/lib/types";
 import { assertLength, LIMITS } from "@/lib/validation";
 
+// /api/dev/contact is a developer-debug route. In production it returns 404
+// so scanners cannot enumerate it; the auth + rate-limit gates below still
+// apply in development.
+const PRODUCTION_404 = () =>
+  process.env.NODE_ENV === "production"
+    ? new NextResponse(null, { status: 404 })
+    : null;
+
+function prodGuard(req: NextRequest): Response | null {
+  const early = PRODUCTION_404();
+  if (early) return early;
+  void req;
+  return null;
+}
+
 /**
  * /api/dev/contact
  *
@@ -181,12 +196,20 @@ async function handleGet(req: NextRequest) {
   }
 }
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost),
-  { keyPrefix: "dev_contact", maxRequests: 10, windowMs: 15 * 60 * 1000 }
-);
+export const POST = (req: NextRequest) => {
+  const early = prodGuard(req);
+  if (early) return early;
+  return (withRateLimit(
+    withAuthorization(handlePost),
+    { keyPrefix: "dev_contact", maxRequests: 10, windowMs: 15 * 60 * 1000 }
+  ))(req);
+};
 
-export const GET = withAuthorization(
-  handleGet,
-  { requiredRole: ["sysadmin", "admin"] }
-);
+export const GET = (req: NextRequest) => {
+  const early = prodGuard(req);
+  if (early) return early;
+  return (withAuthorization(
+    handleGet,
+    { requiredRole: ["sysadmin", "admin"] }
+  ))(req);
+};

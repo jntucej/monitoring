@@ -1,18 +1,13 @@
-import { AuthGuard } from "@/components/shared/AuthGuard";
+import type { Metadata } from "next";
+import { NOINDEX_METADATA } from "@/lib/seo";
+import { AdminShell } from "./AdminShell";
 
-export const metadata = {
-  title: "Admin Dashboard",
-  description: "Campus dashboard and live telemetry"
-};
+export const metadata: Metadata = NOINDEX_METADATA;
 
-export default function AdminLayout({
+export default function AdminSegmentLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <AuthGuard allowedRoles={["admin", "sysadmin"]}>
-      {children}
-    </AuthGuard>
-  );
+  return <AdminShell>{children}</AdminShell>;
 }

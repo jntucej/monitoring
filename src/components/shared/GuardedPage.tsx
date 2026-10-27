@@ -22,7 +22,9 @@ export function GuardedPage({ allowedRoles, minTier = 0, children }: GuardedPage
   const router = useRouter();
 
   const roleOk = allowedRoles ? allowedRoles.includes(role) : true;
-  const tierOk = tier >= minTier;
+  // Tier gate only applies when an allowedRoles list was NOT provided
+  // (a role list already encodes the intended audience).
+  const tierOk = allowedRoles ? true : tier >= minTier;
 
   // Guard against double-mount in React strict mode — single render pass
   const redirectedRef = useRef(false);

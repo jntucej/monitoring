@@ -11,6 +11,7 @@ export interface ResponsivePanelProps {
     md?: React.ReactNode;
     lg?: React.ReactNode;
     xl?: React.ReactNode;
+    '2xl'?: React.ReactNode;
   };
   className?: string;
 }

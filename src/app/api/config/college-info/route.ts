@@ -1,8 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServiceClient } from '@/lib/dbClient';
-import { withAuthorization } from '@/middleware/authorization';
 import { withRateLimit } from '@/lib/rate-limit';
+import { withAdminMutation } from '@/server/http/mutation-guard';
+import type { AuthContext } from '@/lib/authContext';
+import type { Role } from '@/lib/types';
+import { addAudit } from '@/lib/db';
 import { getCached, setCached, invalidateCache } from '@/lib/cache';
+
+const ALLOWED_FIELDS = ['name', 'shortName', 'address', 'phone', 'email', 'logo', 'accreditation', 'website', 'principal'] as const;
+
+function toDbKey(key: string): string {
+  return key === 'shortName' ? 'short_name' : key;
+}
+
+function mapRow(row: any) {
+  if (!row) return null;
+  return {
+    name: row.name,
+    shortName: row.short_name,
+    address: row.address,
+    phone: row.phone ?? '',
+    email: row.email ?? '',
+    logo: row.logo,
+    accreditation: row.accreditation,
+    website: row.website,
+    principal: row.principal,
+    updatedAt: row.updated_at,
+  };
+}
 
 async function handleGet(req: NextRequest) {
   try {
@@ -25,6 +50,8 @@ async function handleGet(req: NextRequest) {
           name: '',
           shortName: '',
           address: '',
+          phone: '',
+          email: '',
           logo: '',
           accreditation: '',
           website: '',
@@ -36,16 +63,7 @@ async function handleGet(req: NextRequest) {
       throw error;
     }
 
-    const mapped = data ? {
-      name: data.name,
-      shortName: data.short_name,
-      address: data.address,
-      logo: data.logo,
-      accreditation: data.accreditation,
-      website: data.website,
-      principal: data.principal,
-      updatedAt: data.updated_at,
-    } : null;
+    const mapped = mapRow(data);
 
     if (mapped) {
       await setCached(cacheKey, mapped, 3600);
@@ -61,16 +79,14 @@ async function handleGet(req: NextRequest) {
   }
 }
 
-async function handlePatch(req: NextRequest) {
+async function handlePatch(req: NextRequest, ctx: { auth: AuthContext }) {
   try {
     const body = await req.json();
     const updates: Record<string, any> = { updated_at: new Date().toISOString() };
 
-    const allowed = ['name', 'shortName', 'address', 'logo', 'accreditation', 'website', 'principal'];
-    for (const key of allowed) {
+    for (const key of ALLOWED_FIELDS) {
       if (body[key] !== undefined) {
-        const dbKey = key === 'shortName' ? 'short_name' : key;
-        updates[dbKey] = body[key];
+        updates[toDbKey(key)] = body[key];
       }
     }
 
@@ -99,18 +115,20 @@ async function handlePatch(req: NextRequest) {
 
     if (result.error) throw result.error;
 
-    const mapped = result.data ? {
-      name: result.data.name,
-      shortName: result.data.short_name,
-      address: result.data.address,
-      logo: result.data.logo,
-      accreditation: result.data.accreditation,
-      website: result.data.website,
-      principal: result.data.principal,
-      updatedAt: result.data.updated_at,
-    } : null;
+    const mapped = mapRow(result.data);
 
     await invalidateCache("config:college-info");
+
+    try {
+      await addAudit({
+        action: 'SYSTEM_CONFIG_CHANGED',
+        userId: ctx.auth.userId,
+        role: ctx.auth.role as Role,
+        details: { resource: 'college-info', fields: Object.keys(updates).filter((k) => k !== 'updated_at') },
+      });
+    } catch {
+      // audit failure is non-fatal
+    }
 
     return NextResponse.json({ success: true, data: mapped });
   } catch (error) {
@@ -123,7 +141,4 @@ async function handlePatch(req: NextRequest) {
 }
 
 export const GET = withRateLimit(handleGet, { keyPrefix: 'college_info_get', maxRequests: 300 });
-export const PATCH = withRateLimit(
-  withAuthorization(handlePatch, { requiredRole: ['admin', 'sysadmin'] }),
-  { keyPrefix: 'college_info_patch', maxRequests: 10 }
-);
+export const PATCH = withAdminMutation(handlePatch, { rateLimit: { windowMs: 60_000, maxRequests: 10 } });

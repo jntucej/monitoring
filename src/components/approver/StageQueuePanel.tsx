@@ -24,6 +24,13 @@ import { friendlyApiError, readApiError } from "@/lib/apiErrors";
 import { getAuthHeaders } from "@/lib/utils";
 import { POLL_INTERVALS } from "@/config/app-constants";
 import { Check, Eye, Loader2, RefreshCw, X } from "lucide-react";
+import { useAuthStore } from "@/stores/authStore";
+import {
+  LevelBadge,
+  ForwardedFromChip,
+  DirectBadge,
+  sortHostelTickets,
+} from "./HostelTicketBadges";
 
 /** Row shape shared by every queue feed (mirrors /api/permissions). */
 export interface StageQueueRow {
@@ -39,6 +46,14 @@ export interface StageQueueRow {
     name?: string | null;
     student_details?: { roll?: string | null; hostel_block?: string | null } | null;
   } | null;
+  /** Current hostel level the ticket is routed to (forward target / stage). */
+  routed_to_role?: string | null;
+  /** Set when this ticket was forwarded from a lower level. */
+  forwarded_from_role?: string | null;
+  /** Forwarder's comment explaining the handoff. */
+  forward_comment?: string | null;
+  /** True when the pass was generated directly (bypassed the chain). */
+  direct_generated?: boolean;
   [k: string]: unknown;
 }
 
@@ -98,6 +113,8 @@ export function StageQueuePanel({
     total?: number;
   }>(url, { ttlMs, pollMs });
 
+  const viewerRole = useAuthStore((s) => s.role);
+
   const [busyId, setBusyId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -111,8 +128,12 @@ export function StageQueuePanel({
   );
 
   const visibleRows = useMemo(
-    () => (data?.data ?? []).filter((r) => chain.includes(r.current_stage)),
-    [data, chain],
+    () => {
+      const rows = (data?.data ?? []).filter((r) => chain.includes(r.current_stage));
+      // Pinned (forwarded to me) -> SLA-overdue -> rest.
+      return sortHostelTickets(rows, viewerRole);
+    },
+    [data, chain, viewerRole],
   );
 
   const handle = useCallback(
@@ -188,8 +209,13 @@ export function StageQueuePanel({
               return (
                 <li key={row.id} className="flex items-center gap-3 py-2">
                   <div className="min-w-0 flex-1">
-                    <div className="truncate font-mono text-xs text-[var(--text-muted)]">
-                      {row.ticket_number}
+                    <div className="flex items-center gap-2">
+                      <div className="truncate font-mono text-xs text-[var(--text-muted)]">
+                        {row.ticket_number}
+                      </div>
+                      <LevelBadge row={row} fallbackStage={row.current_stage} />
+                      <ForwardedFromChip row={row} />
+                      <DirectBadge row={row} />
                     </div>
                     <div className="truncate text-sm text-[var(--text-primary)]">
                       {row.student?.name ?? "—"}

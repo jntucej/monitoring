@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
+import { COLLEGE, collegeCanonical } from "@/lib/college-config";
 
 export const metadata: Metadata = {
-  title: "Login | Gate Monitoring",
-  description: "Login to the Gate Monitoring System",
+  title: `Sign in | ${COLLEGE.shortName}`,
+  description: `Sign in to the ${COLLEGE.officialName} campus portal for students, parents, faculty, staff and administrators.`,
+  alternates: { canonical: collegeCanonical("/login") },
+  robots: { index: true, follow: true },
 };
 
 export default function LoginLayout({
@@ -10,5 +13,5 @@ export default function LoginLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <main className="min-h-[100dvh] flex flex-col">{children}</main>;
+  return children;
 }

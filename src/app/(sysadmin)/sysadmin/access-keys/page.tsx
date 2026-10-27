@@ -177,7 +177,7 @@ export default function SysAdminAccessKeysPage() {
             <KeyRound className="w-5 h-5 text-emerald-400" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-[var(--text-primary)]">Access Keys</h1>
+            <p className="text-xl font-bold text-[var(--text-primary)]">Access Keys</p>
             <p className="text-xs text-[var(--text-muted)]">
               One-time enrollment codes for student bootstrap, mobile pairing and PIN reset. {activeCount} active.
             </p>
@@ -204,8 +204,8 @@ export default function SysAdminAccessKeysPage() {
               </div>
             </div>
             <div>
-              <label className="block text-[11px] font-semibold text-[var(--text-muted)] mb-1 uppercase tracking-wide">Purpose</label>
-              <select
+              <label className="block text-[11px] font-semibold text-[var(--text-muted)] mb-1 uppercase tracking-wide" htmlFor="purpose">Purpose</label>
+              <select id="purpose"
                 value={purpose}
                 onChange={(e) => setPurpose(e.target.value)}
                 className="px-3 py-2 bg-[var(--bg-base)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-primary)] focus:outline-none focus:border-emerald-500"

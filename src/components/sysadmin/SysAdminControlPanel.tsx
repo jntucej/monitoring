@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import {
   Activity,
@@ -13,7 +14,6 @@ import {
   ShieldAlert,
   ArrowRight,
   Loader2,
-  RefreshCw,
   Clock,
   Landmark,
   Sparkles,
@@ -95,20 +95,15 @@ const api = useApi();
 
   useEffect(() => {
     fetchTelemetry();
-    const interval = setInterval(fetchTelemetry, 30_000);
-    return () => clearInterval(interval);
   }, [fetchTelemetry]);
+  usePolling(() => { fetchTelemetry(); }, { intervalMs: 30_000 });
 
   return (
     <div className="space-y-8">
       {/* Page Heading */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2.5">
-            <Shield className="w-6 h-6 text-rose-400" />
-            System Control Room
-          </h1>
-          <p className="text-xs text-[var(--text-muted)] mt-1">
+          <p className="text-xs text-[var(--text-muted)]">
             Dedicated infrastructure, security governance, SSO/LDAP integrations & telemetry console.
           </p>
         </div>
@@ -120,14 +115,6 @@ const api = useApi();
             <User className="w-3.5 h-3.5 text-sky-400" />
             SysAdmin Profile
           </Link>
-          <button
-            onClick={fetchTelemetry}
-            disabled={isSyncing}
-            className="px-3.5 py-1.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-all flex items-center gap-2"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 text-rose-400 ${isSyncing ? "animate-spin" : ""}`} />
-            {isSyncing ? "Refreshing..." : "Sync Telemetry"}
-          </button>
         </div>
       </div>
 

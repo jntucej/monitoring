@@ -85,7 +85,11 @@ function FacultyAttendanceInner() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
+<<<<<<< HEAD
           <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
+=======
+          <p className="text-2xl font-bold text-white flex items-center gap-2">
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
             <Users className="w-6 h-6 text-emerald-400" />
             Faculty Attendance Desk
           </p>
@@ -97,15 +101,6 @@ function FacultyAttendanceInner() {
         </div>
         <div className="flex items-center gap-3 text-xs text-slate-500">
           {user?.name && <span className="truncate max-w-[220px]">{user.name}</span>}
-          <button
-            type="button"
-            onClick={() => fetchFacultyAttendance()}
-            disabled={loading}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-slate-200 hover:bg-slate-700 disabled:opacity-50 transition-colors"
-          >
-            <RotateCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-            Refresh
-          </button>
         </div>
       </div>
 

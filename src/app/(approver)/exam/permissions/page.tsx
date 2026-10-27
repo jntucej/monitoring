@@ -15,14 +15,13 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
 import type { PermissionItem } from "@/components/approver/PermissionRow";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
-
   ShieldCheck,
   UserCheck,
   AlertTriangle,
   Loader2,
   Inbox,
-  Clock,
 } from "lucide-react";
 
 /* ── response shapes (mirror /api/permissions) ── */
@@ -144,8 +143,8 @@ function ExamPermissionsInner() {
     refresh: refreshOie,
   } = useApiResource<PermissionsResponse>(
     isExamBranchRole
-      ? "/api/permissions?workflowType=exam&status=PENDING&stage=oie"
-      : "/api/permissions?workflowType=exam&status=PENDING",
+      ? "/api/permissions?workflow_type=exam&status=PENDING&stage=oie"
+      : "/api/permissions?workflow_type=exam&status=PENDING",
     { ttlMs: 30_000 },
   );
 
@@ -154,7 +153,7 @@ function ExamPermissionsInner() {
     loading: vpLoading,
     refresh: refreshVp,
   } = useApiResource<PermissionsResponse>(
-    "/api/permissions?workflowType=exam&status=PENDING&stage=vice_principal",
+    "/api/permissions?workflow_type=exam&status=PENDING&stage=vice_principal",
     { ttlMs: 30_000 }
   );
 
@@ -183,18 +182,6 @@ function ExamPermissionsInner() {
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
-        <button
-          onClick={() => void refresh()}
-          disabled={oieLoading || vpLoading}
-          className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700 disabled:opacity-50"
-        >
-          {(oieLoading || vpLoading) ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Clock className="w-4 h-4" />
-          )}
-          {(oieLoading || vpLoading) ? "Refreshing…" : "Refresh"}
-        </button>
       </div>
 
       {/* error banner */}
@@ -288,11 +275,12 @@ function ExamPermissionsInner() {
     </div>
   );
 }
-
 export default function ExamPermissionsPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <ExamPermissionsInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['exam_superintendent', 'exam_branch', 'oie', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <ExamPermissionsInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

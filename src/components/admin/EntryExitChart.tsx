@@ -1,7 +1,8 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import dynamic from "next/dynamic";
-import { useApi } from "@/hooks/useApi";
+import { getAuthHeaders } from "@/lib/utils";
+import { usePolling } from "@/hooks/usePolling";
 
 type Point = { name: string; entries: number; exits: number };
 
@@ -50,8 +51,6 @@ const DynamicRechartsBar = dynamic(
  * Lazy-loaded via next/dynamic (ssr: false) and IntersectionObserver when visible.
  */
 export function EntryExitChart() {
-const api = useApi();
-
   const [data, setData] = useState<Point[]>([]);
   const [loading, setLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
@@ -73,10 +72,7 @@ const api = useApi();
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    if (!isVisible) return;
-    let cancelled = false;
-    const load = async () => {
+  const load = useCallback(async () => {
       try {
         const today = new Date();
         const start = new Date(today);
@@ -86,7 +82,7 @@ const api = useApi();
 
         const res = await fetch(
           `/api/gate/logs?from=${startStr}&to=${endStr}&limit=1000`,
-          { headers: api.getHeaders(), cache: "no-store" }
+          { headers: getAuthHeaders(), cache: "no-store" }
         );
         const json = await res.json();
 
@@ -97,7 +93,7 @@ const api = useApi();
           buckets[d.toISOString().slice(0, 10)] = { entries: 0, exits: 0 };
         }
 
-        const items: any[] = json?.data?.items ?? json?.items ?? [];
+        const items: any[] = json?.data?.logs ?? json?.data?.items ?? json?.items ?? [];
         for (const it of items) {
           const day = (it.timestamp ?? "").slice(0, 10);
           if (!buckets[day]) continue;
@@ -111,24 +107,20 @@ const api = useApi();
           exits: v.exits,
         }));
 
-        if (!cancelled) {
-          setData(points);
-          setLoading(false);
-        }
-      } catch (e) {
-        if (!cancelled) setLoading(false);
+        setData(points);
+        setLoading(false);
+      } catch {
+        setLoading(false);
       }
-    };
+    },
+    []);
+
+  // Initial load when visible + visibility-aware polling (no raw setInterval)
+  useEffect(() => {
+    if (!isVisible) return;
     load();
-    const t = setInterval(() => {
-      if (typeof document !== "undefined" && document.hidden) return;
-      load();
-    }, 60_000);
-    return () => {
-      cancelled = true;
-      clearInterval(t);
-    };
-  }, [isVisible]);
+  }, [isVisible, load]);
+  usePolling(load, { intervalMs: 60_000, enabled: isVisible });
 
   return (
     <div ref={containerRef} className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-6 h-96">

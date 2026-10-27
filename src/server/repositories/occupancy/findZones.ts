@@ -24,7 +24,7 @@ export async function countInsideByRole(): Promise<InsideByRole[]> {
     `SELECT u.role, count(*)::int AS count
        FROM campus_occupancy co
        JOIN users u ON u.id = co.user_id
-      WHERE co.current_status = "IN"
+      WHERE co.current_status = 'IN'
       GROUP BY u.role`,
   );
   return rows;

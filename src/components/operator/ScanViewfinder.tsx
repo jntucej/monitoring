@@ -2,11 +2,14 @@
 
 import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, KeyRound, QrCode } from 'lucide-react';
+import { Camera, KeyRound, QrCode, ScanLine } from 'lucide-react';
 import { useGlass } from '@/context/GlassContext';
 
 interface ScanViewfinderProps {
-  onStartScanner: () => void;
+  /** Open the camera scanner in QR-only mode. */
+  onScanQr: () => void;
+  /** Open the camera scanner in barcode-only mode. */
+  onScanBarcode: () => void;
   onManualEntry: () => void;
   /** Set while a scan request is in flight — reserved for future use. */
   scanning?: boolean;
@@ -16,17 +19,18 @@ interface ScanViewfinderProps {
 
 /*
  * Operator gate scan viewfinder.
- * No duplicated Camera/Manual mode tiles — those options live in the desk's
- * top mode bar. The QR/Barcode mode tabs live inside the Scanner modal itself,
- * so this panel is just a clean entry point:
- *   - Open Camera Scanner (QR + Barcode tabs inside the modal, fixed gate)
+ * No generic "Open Camera" button: the operator picks which scanner to open
+ * directly from here, and the camera starts the moment the scanner opens:
+ *   - Scan QR (QR-only camera)
+ *   - Scan Barcode (1D/2D barcode-only camera)
  *   - Manual Entry (jumps to the manual roll-number form)
  * Buttons stack full-width on mobile, sit side-by-side on sm+.
  * Camera-unavailable fallback (Upload / manual) is handled inside the Scanner
  * modal, not here.
  */
 export function ScanViewfinder({
-  onStartScanner,
+  onScanQr,
+  onScanBarcode,
   onManualEntry,
 }: ScanViewfinderProps) {
   const { wsConnected, wsReconnecting } = useGlass();
@@ -57,30 +61,39 @@ export function ScanViewfinder({
       {/* Scanner workspace info */}
       <div className="flex flex-col items-center justify-center flex-1 py-4 sm:py-6 text-center space-y-4">
         <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center justify-center shadow-inner">
-          <QrCode className="w-8 h-8" />
+          <Camera className="w-8 h-8" />
         </div>
         <div className="max-w-md space-y-1.5">
           <h3 className="text-base font-bold text-[var(--text-primary)]">
             Gate Scanner
           </h3>
           <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-            Scan student ID QR codes, employee badges, or 1D barcodes for
-            instant verification. QR and Barcode modes auto-detect inside the
-            camera scanner.
+            The camera starts automatically when you open a scanner. Choose
+            QR or Barcode mode below, or enter the roll number manually.
           </p>
         </div>
       </div>
 
-      {/* Action buttons — stack vertically on mobile, 2-col grid on sm+ */}
+      {/* Action buttons — stack vertically on mobile, grid on sm+ */}
       <div className="flex flex-col sm:grid sm:grid-cols-2 gap-3 pt-4 border-t border-[var(--border)]">
-        <button
-          type="button"
-          onClick={onStartScanner}
-          className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98] min-w-0"
-        >
-          <Camera className="w-4 h-4 shrink-0" />
-          <span className="truncate">Open Camera Scanner</span>
-        </button>
+        <div className="grid grid-cols-2 gap-3 sm:col-span-2">
+          <button
+            type="button"
+            onClick={onScanQr}
+            className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98] min-w-0"
+          >
+            <QrCode className="w-4 h-4 shrink-0" />
+            <span className="truncate">Scan QR</span>
+          </button>
+          <button
+            type="button"
+            onClick={onScanBarcode}
+            className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98] min-w-0"
+          >
+            <ScanLine className="w-4 h-4 shrink-0" />
+            <span className="truncate">Scan Barcode</span>
+          </button>
+        </div>
         <button
           type="button"
           onClick={onManualEntry}

@@ -10,11 +10,30 @@
  */
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { useAuthStore } from "@/stores/authStore";
 
+/**
+ * useDashboardData — a composite for dashboard reads.
+ *
+ * Wraps useApiResource (cached, deduped) and usePolling (visibility-aware) so
+ * every dashboard gets the same correct behaviour with one call.
+ *
+ * - Cache key is url + userId — never shared across users.
+ * - Polling is disabled while the tab is hidden.
+ * - refreshKey increments on every successful refresh so WidgetBoundary can reset.
+ *
+ * The hook unwraps the standard ok() envelope ({ success, data: T }) internally,
+ * so callers type T as the *inner* payload shape (e.g. `AlertsData`) and read
+ * `data` directly as `T | null` — no `.data` access on the result.
+ *
+ * @deprecated `DashboardData<T>` and the `Envelope` alias types
+ * (AlertsEnvelope, PeopleEnvelope, etc.) are retained for backward
+ * compatibility but no longer needed: callers should pass the inner data
+ * type directly to `useDashboardData<T>` and use `data` without unwrapping.
+ */
 export interface DashboardData<T> {
   data: T | null;
   loading: boolean;
@@ -31,13 +50,27 @@ export function useDashboardData<T>(
   const userId = useAuthStore((s) => s.user?.id ?? "");
   const scopedUrl = url ? url + (url.includes("?") ? "&" : "?") + "_u=" + userId : null;
 
-  const res = useApiResource<T>(scopedUrl, { ttlMs, enabled: enabled && !!scopedUrl });
+  // The ok() helper returns { success: true, data: T, ... } — we type the
+  // fetch as the envelope and unwrap `.data` below so callers get T | null.
+  const res = useApiResource<{ data: T } | null>(scopedUrl, {
+    ttlMs,
+    enabled: enabled && !!scopedUrl,
+  });
   const [refreshKey, setRefreshKey] = useState(0);
 
+  // Stable access to the current refresh: useApiResource returns a fresh
+  // result object on every render (its inner refresh is a useCallback, but
+  // the *object* carrying it is not). Depending on the whole object made
+  // `refresh` re-identify on every render, which drove usePolling's effect
+  // (fn dep) into an immediate-tick burst loop. The ref below keeps
+  // refresh stable while still calling the current underlying refresh.
+  const refreshLiveRef = useRef(res.refresh);
+  refreshLiveRef.current = res.refresh;
+
   const refresh = useCallback(async () => {
-    await res.refresh();
+    await refreshLiveRef.current();
     setRefreshKey((k) => k + 1);
-  }, [res]);
+  }, []); // stable — the polling timer must never see it churn
 
   usePolling(async () => { await refresh(); }, { intervalMs: pollMs, enabled: enabled && !!scopedUrl });
 
@@ -45,8 +78,11 @@ export function useDashboardData<T>(
   const [firstLoad, setFirstLoad] = useState(true);
   useEffect(() => { if (!res.loading && firstLoad) setFirstLoad(false); }, [res.loading, firstLoad]);
 
+  // Unwrap the { data: T } envelope so callers get T | null directly.
+  const unwrapped: T | null = res.data?.data ?? null;
+
   return {
-    data: res.data,
+    data: unwrapped,
     loading: res.loading || firstLoad,
     error: res.error,
     refresh,

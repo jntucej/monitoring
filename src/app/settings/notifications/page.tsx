@@ -227,8 +227,8 @@ export default function NotificationSettingsPage() {
 
         <div className="flex items-center gap-4 pt-2">
           <div>
-            <label className="text-xs text-[var(--text-muted)] block mb-1">Start Time</label>
-            <input
+            <label className="text-xs text-[var(--text-muted)] block mb-1" htmlFor="start-time">Start Time</label>
+            <input id="start-time"
               type="time"
               value={prefs.quietHours?.start || "22:00"}
               onChange={(e) => setPrefs(prev => ({
@@ -240,8 +240,8 @@ export default function NotificationSettingsPage() {
           </div>
 
           <div>
-            <label className="text-xs text-[var(--text-muted)] block mb-1">End Time</label>
-            <input
+            <label className="text-xs text-[var(--text-muted)] block mb-1" htmlFor="end-time">End Time</label>
+            <input id="end-time"
               type="time"
               value={prefs.quietHours?.end || "06:00"}
               onChange={(e) => setPrefs(prev => ({

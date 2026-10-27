@@ -1,70 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
-import { checkSystemHealth } from "@/lib/health";
-import { query } from "@/lib/postgres";
 
-async function handleGet(req: NextRequest) {
-  const startTime = Date.now();
+/**
+ * Public health endpoint.
+ *
+ * Returns exactly one field: `status`. This is what external uptime
+ * monitors, Cloudflare health checks, and the docker-compose healthcheck
+ * need. Nothing else — no uptime, no component latencies, no gateway
+ * counts, no active sessions, no request/error rates, no alert UUIDs.
+ *
+ * The full diagnostic payload is now at /api/admin/health/full and
+ * requires an admin/sysadmin session.
+ */
+async function handleGet(_req: NextRequest) {
+  const { checkSystemHealth } = await import("@/lib/health");
   const health = await checkSystemHealth();
-  const duration = Math.round(Date.now() - startTime);
-
-  // Log this request's actual response time if DB is reachable
-  if (health.components.database.status !== 'unhealthy') {
-    try {
-      const result = await query(
-        `INSERT INTO api_metrics (path, method, response_time, status_code, timestamp)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING id`,
-        ['/api/health', 'GET', duration, 200, new Date().toISOString()]
-      );
-      console.log(`[health] metric inserted: ${duration}ms, id=${result.rows?.[0]?.id}`);
-    } catch (e) {
-      console.error('[health] metric insert FAILED:', e);
-    }
-  }
-
-  const statusCodes = {
+  const statusCodes: Record<string, number> = {
     healthy: 200,
-    degraded: health.uptime > 120 ? 503 : 200,
+    degraded: 200, // still operational (one gateway offline, etc.)
     unhealthy: 503,
   };
-  const sanitize = (h: typeof health): typeof h => ({
-    status: h.status,
-    timestamp: h.timestamp,
-    uptime: h.uptime,
-    components: {
-      database: {
-        status: h.components.database.status,
-        latency: h.components.database.latency,
-        ...(h.components.database.error ? { error: "Database unavailable" } : {}),
-      },
-      redis: {
-        status: (h.components as any).redis?.status ?? "healthy",
-        latency: (h.components as any).redis?.latency ?? 0,
-        ...((h.components as any).redis?.error ? { error: "Redis unavailable" } : {}),
-      },
-      gateways: {
-        status: h.components.gateways.status,
-        online: h.components.gateways.online,
-        offline: h.components.gateways.offline,
-        total: h.components.gateways.total,
-      },
-      services: {
-        status: h.components.services.status,
-        auth: { status: h.components.services.auth?.status ?? "healthy" },
-        worker: { status: h.components.services.worker?.status ?? "healthy" },
-      },
-      ...(h.components.env ? {
-        env: { status: h.components.env.status, ...(h.components.env.error ? { error: "Environment misconfigured" } : {}) },
-      } : {}),
+  return NextResponse.json(
+    { status: health.status },
+    {
+      status: statusCodes[health.status] ?? 200,
+      headers: { "cache-control": "public, max-age=30, s-maxage=30" },
     },
-    metrics: h.metrics,
-    recentAlerts: h.recentAlerts,
-  });
-
-  return NextResponse.json(sanitize(health), {
-    status: (statusCodes as Record<string, number>)[health.status] ?? 200,
-    headers: { 'X-Response-Time': `${duration}ms` },
-  });
+  );
 }
 
 export const GET = handleGet;

@@ -485,6 +485,8 @@ export class PostgresQueryBuilder<T = any> {
     },
     student_details: { users: "user_id" },
     employee_details: { users: "user_id" },
+    permission_requests: { users: "requester_user_id" },
+    permissions: { users: "requester_user_id" },
   };
 
   private buildWhereClause(params: any[]): string {
@@ -558,7 +560,18 @@ export class PostgresQueryBuilder<T = any> {
     if (this.embeddedRelations.length === 0) return baseCols;
 
     const buildRelationSubquery = (rel: EmbeddedRelation, parentTable: string): string => {
-      const { alias, targetTable, fields, nested } = rel;
+      const { alias, fields, nested } = rel;
+      // The parser sets targetTable to the FK column name (the part after ":")
+      // in Supabase embed syntax e.g. "student:requester_user_id(...)".
+      // Resolve the actual target table from FK_MAP when targetTable is a column.
+      const rawTarget = rel.targetTable;
+      let targetTable = rawTarget;
+      let fkCol = "";
+      const fkMap = PostgresQueryBuilder.FK_MAP[parentTable];
+      if (fkMap) {
+        const entry = Object.entries(fkMap).find(([, col]) => col === rawTarget);
+        if (entry) { targetTable = entry[0]; fkCol = rawTarget; }
+      }
       let joinCondition = "";
       if (parentTable === "movement_logs" && targetTable === "users") joinCondition = `users.id = ${parentTable}.user_id`;
       else if (parentTable === "movement_logs" && targetTable === "gates") joinCondition = `gates.id = ${parentTable}.gate_id`;
@@ -566,6 +579,10 @@ export class PostgresQueryBuilder<T = any> {
       else if (parentTable === "student_details" && targetTable === "users") joinCondition = `users.id = ${parentTable}.user_id`;
       else if (parentTable === "users" && targetTable === "student_details") joinCondition = `student_details.user_id = ${parentTable}.id`;
       else if (parentTable === "users" && targetTable === "employee_details") joinCondition = `employee_details.user_id = ${parentTable}.id`;
+      else if (parentTable === "permission_requests" && targetTable === "users") joinCondition = `users.id = ${parentTable}.requester_user_id`;
+      else if (parentTable === "permissions" && targetTable === "users") joinCondition = `users.id = ${parentTable}.requester_user_id`;
+      else if (parentTable === "event_registrations" && targetTable === "campus_events") joinCondition = `campus_events.id = ${parentTable}.event_id`;
+      else if (fkCol) joinCondition = `${targetTable}.id = ${parentTable}.${fkCol}`;
       else joinCondition = `${targetTable}.id = ${parentTable}.${targetTable.replace(/s$/, "")}_id`;
 
       const selectColsList = fields.includes("*") ? `${targetTable}.*` : fields.map((f) => `${targetTable}."${f}"`).join(", ");

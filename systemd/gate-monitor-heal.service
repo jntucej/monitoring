@@ -1,0 +1,19 @@
+[Unit]
+Description=Gate Monitor Auto-Heal Agent
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/monitoring/compose
+Environment=TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+Environment=TELEGRAM_CHAT_ID=1926342151
+ExecStart=/bin/bash /opt/monitoring/compose/scripts/auto-heal-agent.sh
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

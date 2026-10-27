@@ -76,8 +76,8 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
   const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
   const { data: movements, error: movErr } = await supabase
     .from("movement_logs")
-    .select("user_id, direction, created_at")
-    .gte("created_at", todayStart);
+    .select("user_id, direction, timestamp")
+    .gte("timestamp", todayStart);
   if (movErr) return fail("MOVEMENT_FETCH_FAILED", movErr.message, 500);
 
   const activeUsers = users.filter((u) => u.status === "ACTIVE");
@@ -88,7 +88,7 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
   // Latest movement per user today (IN → on campus, OUT → left)
   const latestMovement = new Map<string, "IN" | "OUT">();
   for (const m of (movements ?? []).sort((a, b) =>
-    (a.created_at ?? "").localeCompare(b.created_at ?? ""),
+    (a.timestamp ?? "").localeCompare(b.timestamp ?? ""),
   )) {
     if (m.direction === "IN" || m.direction === "OUT") {
       latestMovement.set(m.user_id, m.direction);

@@ -12,7 +12,10 @@ export const ROLES = {
   PARENT:          "parent",
   HOD:             "hod",
   STUDENT:         "student",
-  // warden was folded into principal — principal carries its privileges
+  // WARDEN removed 2026-11: its hostel-management responsibilities were
+  // consolidated into PRINCIPAL. The "warden" string value is no longer a
+  // valid Role; existing DB rows carrying it are reassigned by migration
+  // 20261125000001. deputy_warden / hostel_manager are kept.
   FACULTY:         "faculty",
   STAFF:           "staff",
   WORKER:          "worker",
@@ -25,7 +28,10 @@ export const ROLES = {
   OIE:             "oie",
   EXAM_BRANCH:     "exam_branch",
   EXAM_SUPERINTENDENT: "exam_superintendent",
-  MESS_INCHARGE:       "mess_incharge",
+  MESS_INCHARGE:   "mess_incharge",
+  EMO:             "emo",
+  // Legacy roles — folded but still recognized for approver surface compatibility
+  HOSTEL:          "hostel",
 } as const;
 
 export type RoleKey = keyof typeof ROLES;

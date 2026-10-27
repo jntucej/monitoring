@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { Server, RefreshCw, ExternalLink } from "lucide-react";
-import { useApi } from "@/hooks/useApi";
+import { getAuthHeaders } from "@/lib/utils";
+import { usePolling } from "@/hooks/usePolling";
 
 interface PromSample {
   metric: Record<string, string>;
@@ -20,8 +21,6 @@ interface FleetRow {
 const GRAFANA_BASE = process.env.NEXT_PUBLIC_MONITORING_GRAFANA_URL || "";
 
 export function DockerFleetPanel() {
-const api = useApi();
-
   const [rows, setRows] = useState<FleetRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +28,7 @@ const api = useApi();
 
   const load = useCallback(async () => {
     try {
-      const headers = api.getHeaders();
+      const headers = getAuthHeaders();
       const fetchQ = (id: string) =>
         fetch(`/api/admin/monitoring?queryId=${id}`, { headers, cache: "no-store" }).then((r) => r.json());
 
@@ -74,14 +73,11 @@ const api = useApi();
     }
   }, []);
 
+  // Initial load + visibility-aware polling (no raw setInterval)
   useEffect(() => {
-    load();
-    const t = setInterval(() => {
-      if (typeof document !== "undefined" && document.hidden) return;
-      load();
-    }, 30_000);
-    return () => clearInterval(t);
+    load().catch(() => {});
   }, [load]);
+  usePolling(load, { intervalMs: 30_000 });
 
   const fmtMem = (bytes: number) => {
     const mib = bytes / 1024 / 1024;
@@ -94,10 +90,10 @@ const api = useApi();
     <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]">
       <div className="flex items-center justify-between p-4 border-b border-[var(--border)]">
         <div>
-          <h3 className="text-sm font-bold flex items-center gap-2">
+          <p className="text-sm font-bold flex items-center gap-2">
             <Server className="w-4 h-4 text-emerald-400" />
             Docker Fleet
-          </h3>
+          </p>
           <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
             {lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString()}` : "Loading…"}
           </p>

@@ -70,10 +70,10 @@ export function SustainabilityDashboard() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-xl font-bold flex items-center gap-2">
+          <p className="text-xl font-bold flex items-center gap-2">
             <Leaf className="h-6 w-6 text-emerald-400" />
             Sustainability & Green IT Dashboard
-          </h1>
+          </p>
           <p className="text-xs text-[var(--text-secondary)]">
             Tracking paperless digital pass savings, carbon footprint reduction, and gate energy consumption.
           </p>

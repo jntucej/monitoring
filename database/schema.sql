@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS users (
   handle               TEXT UNIQUE,
   name                 TEXT NOT NULL,
   role                 TEXT NOT NULL
-                       CHECK (role IN ('operator','admin','sysadmin','supervisor','guardian','parent','hod','student','warden','faculty','staff','worker','visitor')),
+                       CHECK (role IN ('operator','admin','sysadmin','supervisor','guardian','parent','hod','student','warden','faculty','staff','worker','visitor','caretaker','deputy_warden','hostel_manager','principal','vice_principal','oie','exam_branch','exam_superintendent','mess_incharge','emo')),
   email                TEXT UNIQUE NOT NULL,
   phone                TEXT,
   department_id        TEXT,
@@ -75,6 +75,9 @@ CREATE TABLE IF NOT EXISTS users (
   failed_login_count INTEGER NOT NULL DEFAULT 0,
   locked_until TIMESTAMPTZ,
   is_kiosk_default   BOOLEAN NOT NULL DEFAULT FALSE,
+  deleted_at         TIMESTAMPTZ,
+  dob                DATE,
+  approval_password_hash TEXT,
 
 
   created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -347,20 +350,6 @@ BEGIN
     CREATE POLICY "service_role_all_enrollment_codes" ON public.enrollment_codes FOR ALL TO service_role USING (true) WITH CHECK (true);
   END IF;
 END $$;
-
-
-CREATE TABLE IF NOT EXISTS mfa_login_challenges (
-  id          TEXT PRIMARY KEY,
-  user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  expires_at  TIMESTAMPTZ NOT NULL,
-  used_at     TIMESTAMPTZ,
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS idx_mfa_challenges_user
-  ON mfa_login_challenges (user_id, expires_at)
-  WHERE used_at IS NULL;
-
 
 
 CREATE TABLE IF NOT EXISTS alert_rules (

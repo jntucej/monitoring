@@ -5,13 +5,12 @@ import { useUIStore } from "@/stores/uiStore";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, ShieldAlert, Lock, Globe, KeyRound, RefreshCw } from "lucide-react";
+import { ShieldCheck, ShieldAlert, Lock, Globe, RefreshCw } from "lucide-react";
 import { useApi } from "@/hooks/useApi";
 
 interface SecurityStats {
   failedLogins24h: number;
   activeSessions: number;
-  forced2FA: boolean;
   ipAllowlistEnabled: boolean;
   allowedIps: string[];
 }
@@ -23,7 +22,6 @@ const api = useApi();
   const [stats, setStats] = useState<SecurityStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [ipInput, setIpInput] = useState("");
-  const [force2FA, setForce2FA] = useState(false);
 
   const fetchStats = async () => {
     setLoading(true);
@@ -34,7 +32,6 @@ const api = useApi();
       if (result.success && result.data) {
         setStats(result.data);
         setIpInput((result.data.allowedIps || []).join(", "));
-        setForce2FA(Boolean(result.data.forced2FA));
       }
     } catch {
       addToast({ variant: "error", title: "Error", message: "Failed to load stats" });
@@ -52,7 +49,7 @@ const api = useApi();
       const res = await fetch("/api/admin/security/ip-allowlist", {
         method: "POST",
         headers,
-        body: JSON.stringify({ allowedIps: ips, forced2FA: force2FA }),
+        body: JSON.stringify({ allowedIps: ips }),
       });
       const result = await res.json();
       if (result.success) {
@@ -100,11 +97,11 @@ const api = useApi();
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xs font-semibold text-[var(--text-secondary)] uppercase">2FA Policy</CardTitle>
-            <KeyRound className="h-4 w-4 text-purple-400" />
+            <CardTitle className="text-xs font-semibold text-[var(--text-secondary)] uppercase">IP Policy</CardTitle>
+            <Globe className="h-4 w-4 text-purple-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-lg font-semibold text-[var(--text-primary)]">{stats?.forced2FA ? "Enforced" : "Optional"}</div>
+            <div className="text-lg font-semibold text-[var(--text-primary)]">{stats?.ipAllowlistEnabled ? "Allowlist" : "Open"}</div>
           </CardContent>
         </Card>
       </div>
@@ -115,18 +112,13 @@ const api = useApi();
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Allowed Subnets / IPs</label>
-            <input
+            <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1" htmlFor="allowed-subnets-ips">Allowed Subnets / IPs</label>
+            <input id="allowed-subnets-ips"
               type="text"
               value={ipInput}
               onChange={(e) => setIpInput(e.target.value)}
               className="w-full rounded-md bg-[var(--bg-surface)] border border-[var(--border)] px-3 py-2 text-xs text-[var(--text-primary)]"
             />
-          </div>
-
-          <div className="flex items-center gap-3">
-            <input type="checkbox" id="force2fa" checked={force2FA} onChange={(e) => setForce2FA(e.target.checked)} />
-            <label htmlFor="force2fa" className="text-xs text-[var(--text-primary)]">Enforce Mandatory 2FA</label>
           </div>
 
           <Button variant="primary" size="sm" onClick={handleSave}>Save Security Policies</Button>

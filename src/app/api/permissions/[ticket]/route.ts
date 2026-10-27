@@ -2,368 +2,309 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
+import { assertCsrf } from "@/lib/csrf";
+import { ok, fail } from "@/server/http/response";
 import {
   canApproveAtStage,
   canApproveAtStageWithBranch,
   resolveNextStage,
   appendStageHistory,
   getScopedTicket,
+  requiresStepup,
+  WORKFLOW_STAGES,
 } from "@/lib/permission-workflow";
-import { addAudit, addNotification } from "@/lib/db";
+import {
+  prepareHostelForward,
+  applyHostelForward,
+  prepareEscalateUp,
+  applyEscalateUp,
+  checkStepupPassword,
+} from "@/lib/permission-forward";
+import { addAudit, addNotification, getStudentGuardianLink } from "@/lib/db";
+import { sendSMS } from "@/lib/integrations/sms";
+import { query } from "@/lib/postgres";
+import type { AuthContext } from "@/lib/authContext";
 import type { WorkflowType, Role } from "@/lib/types";
 
-function getTicketFromReq(req: NextRequest): string {
-  const segments = new URL(req.url).pathname.split("/").filter(Boolean);
-  return decodeURIComponent(segments[segments.length - 1] || "");
+type Action = "APPROVE" | "REJECT" | "FORWARD" | "ESCALATE";
+interface PatchBody {
+  action?: Action;
+  comment?: string;
+  stepupPassword?: string;
+  targetRole?: string;
+  reason?: string;
+}
+
+function getTicket(req: NextRequest): string {
+  const parts = new URL(req.url).pathname.split("/").filter(Boolean);
+  const idx = parts.indexOf("permissions");
+  return idx >= 0 ? parts[idx + 1] ?? "" : "";
 }
 
 async function handleGet(req: NextRequest): Promise<Response> {
-  const ticketParam = getTicketFromReq(req);
-  const authUserId = req.headers.get("x-user-id") || "";
-  const authUserRole = req.headers.get("x-user-role") || "";
-
-  if (!ticketParam) {
-    return NextResponse.json(
-      { success: false, error: { code: "BAD_REQUEST", message: "Ticket parameter required" } },
-      { status: 400 }
-    );
-  }
-
-  const scope = await getScopedTicket(ticketParam, authUserId, authUserRole);
-
-  if ("notFound" in scope && scope.notFound) {
-    return NextResponse.json(
-      { success: false, error: { code: "NOT_FOUND", message: "Permission request not found" } },
-      { status: 404 }
-    );
-  }
-
-  if ("forbidden" in scope && scope.forbidden) {
-    return NextResponse.json(
-      { success: false, error: { code: "FORBIDDEN", message: "Access denied" } },
-      { status: 403 }
-    );
-  }
-
-  return NextResponse.json({ success: true, data: scope.request });
+  const ticket = getTicket(req);
+  const scoped = await getScopedTicket(ticket, "", "");
+  if ("notFound" in scoped) return fail("TICKET_NOT_FOUND", "Ticket not found", 404);
+  if ("forbidden" in scoped) return fail("FORBIDDEN", "Not allowed", 403);
+  return ok(scoped.request);
 }
 
-async function handlePatch(req: NextRequest): Promise<Response> {
-  const ticketParam = getTicketFromReq(req);
-  const authUserId = req.headers.get("x-user-id") || "";
-  const authUserRole = req.headers.get("x-user-role") || "";
-  const authUserEmail = req.headers.get("x-user-email") || "";
+async function handlePatch(
+  req: NextRequest,
+  { auth }: { auth: AuthContext },
+): Promise<Response> {
+  const csrf = assertCsrf(req);
+  if (csrf) return csrf;
 
-  if (!ticketParam) {
-    return NextResponse.json(
-      { success: false, error: { code: "BAD_REQUEST", message: "Ticket parameter required" } },
-      { status: 400 }
-    );
+  const ticket = getTicket(req);
+  if (!ticket) return fail("MISSING_TICKET", "ticket required", 400);
+
+  const body = (await req.json().catch(() => ({}))) as PatchBody;
+  const action = body.action;
+  if (!action || !["APPROVE", "REJECT", "FORWARD", "ESCALATE"].includes(action)) {
+    return fail("INVALID_ACTION", "action must be APPROVE|REJECT|FORWARD|ESCALATE", 400);
   }
 
-  let body: Record<string, unknown> | null = null;
-  try {
-    body = (await req.json()) as Record<string, unknown>;
-  } catch {
-    return NextResponse.json(
-      { success: false, error: { code: "BAD_REQUEST", message: "Invalid JSON body" } },
-      { status: 400 }
-    );
+  const scoped = await getScopedTicket(ticket, auth.userId, auth.role);
+  if ("notFound" in scoped) return fail("TICKET_NOT_FOUND", "Ticket not found", 404);
+  if ("forbidden" in scoped) return fail("FORBIDDEN", "Not allowed", 403);
+
+  const row = scoped.request;
+  const workflowType = row.workflow_type as WorkflowType;
+  const currentStage = row.current_stage;
+
+  if (row.status !== "PENDING" && row.status !== "ESCALATED") {
+    return fail("TICKET_NOT_PENDING", `Ticket status is ${row.status}`, 409);
   }
 
-  const { action, comment, digitalSignature, targetStage } = (body || {}) as {
-    action?: string;
-    comment?: string;
-    digitalSignature?: string;
-    targetStage?: string;
-  };
+  const actorBranch = auth.departmentId ?? null;
+  const requesterBranch = (row as any).branch ?? null;
+  const branchCheck = canApproveAtStageWithBranch(
+    auth.role,
+    workflowType,
+    currentStage,
+    actorBranch,
+    requesterBranch,
+  );
+  if (!branchCheck) {
+    return fail("STAGE_NOT_AUTHORIZED", `Role ${auth.role} cannot act on stage ${currentStage}`, 403);
+  }
 
-  const normalizedAction = (action || "").toUpperCase();
-  const validActions = [
-    "APPROVE",
-    "REJECT",
-    "ESCALATE",
-    "FORWARD",
-    "REQUEST_INFO",
-    "COMPLETE",
-    "SIGN",
-    "BIOMETRIC_HOSTEL",
-    "BIOMETRIC_GATE",
-    "CANCEL",
-  ];
+  const needsStepup = requiresStepup({
+    actorRole: auth.role,
+    action: action === "FORWARD" ? "forward" : "approve",
+    reason: (row as any).reason,
+    targetRole: body.targetRole,
+  });
 
-  if (!action || !validActions.includes(normalizedAction)) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: {
-          code: "BAD_REQUEST",
-          message: `Invalid action. Must be one of: ${validActions.join(", ")}`,
-        },
-      },
-      { status: 400 }
+  let stepupVerified = false;
+  if (needsStepup) {
+    const outcome = await checkStepupPassword(
+      auth.userId,
+      auth.role,
+      body.stepupPassword ?? "",
     );
+    if (!outcome.ok) {
+      return fail(outcome.code, outcome.message, outcome.failed ? 423 : 400);
+    }
+    stepupVerified = true;
+  }
+
+  if (action === "FORWARD") {
+    return handleForward(req, auth, row, body, stepupVerified);
+  }
+  if (action === "ESCALATE") {
+    return handleEscalate(req, auth, row);
   }
 
   const supabase = getSupabaseServiceClient();
-  // Pre-fetch branch scoping for HODs (used by the L4 staff_leave guard below)
-  const actorIsHod = authUserRole === "hod";
-  const actorBranch = actorIsHod
-    ? await (
-        supabase.from("users").select("department_id").eq("id", authUserId).single()
-      ).then(({ data }) => data?.department_id ?? null)
-    : null;
+  const now = new Date().toISOString();
+  const nextStage = action === "APPROVE" ? resolveNextStage(workflowType, currentStage) : null;
+  const newStatus =
+    action === "REJECT"
+      ? "REJECTED"
+      : nextStage === null
+        ? "COMPLETED"
+        : "PENDING";
+  const newCurrentStage = nextStage ?? currentStage;
 
-  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(ticketParam);
-  let q = supabase.from("permission_requests").select("*");
-  if (isUuid) {
-    q = q.or(`id.eq.${ticketParam},ticket_number.eq.${ticketParam}`);
-  } else {
-    q = q.eq("ticket_number", ticketParam);
+  const updates: Record<string, unknown> = {
+    status: newStatus,
+    current_stage: newCurrentStage,
+    stage_history: appendStageHistory(
+      (row as any).stage_history,
+      { id: auth.userId, name: auth.email ?? auth.userId, role: auth.role },
+      action,
+      body.comment ?? null,
+      { from: currentStage, to: newCurrentStage },
+    ),
+    updated_at: now,
+  };
+
+  if (action === "APPROVE" && nextStage) {
+    updates.routed_to_role = nextStage;
   }
 
-  const { data: request, error: fetchErr } = await q.single();
+  const { error: updErr } = await supabase
+    .from("permissions")
+    .update(updates)
+    .eq("id", row.id);
 
-  if (fetchErr || !request) {
-    return NextResponse.json(
-      { success: false, error: { code: "NOT_FOUND", message: "Permission request not found" } },
-      { status: 404 }
+  if (updErr) return fail("DB_ERROR", updErr.message, 500);
+
+  await addAudit({
+    action: action === "APPROVE" ? "PERMISSION_REQUEST_APPROVED" : "PERMISSION_REQUEST_REJECTED",
+    userId: auth.userId,
+    userName: auth.email ?? auth.userId,
+    role: auth.role,
+    details: JSON.stringify({
+      ticket,
+      fromStage: currentStage,
+      toStage: newCurrentStage,
+      status: newStatus,
+      stepupVerified,
+    }),
+  });
+
+  const studentUserId = (row as any).student_user_id ?? (row as any).requester_user_id;
+  if (action === "APPROVE" && nextStage) {
+    await notifyStage(nextStage, ticket, workflowType);
+  } else {
+    await addNotification(
+      "user",
+      studentUserId,
+      "permission",
+      action === "REJECT" ? "Request Rejected" : "Request Completed",
+      `Ticket ${ticket} is now ${newStatus.toLowerCase()}`,
     );
   }
 
-  if (normalizedAction === "CANCEL") {
-    const isOwner =
-      authUserId === request.requester_user_id ||
-      authUserId === request.student_user_id ||
-      ["admin", "sysadmin"].includes(authUserRole);
-    if (!isOwner) {
-      return NextResponse.json(
-        { success: false, error: { code: "FORBIDDEN", message: "Only the requester or student may cancel this request" } },
-        { status: 403 }
-      );
-    }
-    if (request.status !== "PENDING") {
-      return NextResponse.json(
-        { success: false, error: { code: "BAD_REQUEST", message: `Cannot cancel request with status ${request.status}. Only PENDING requests can be cancelled.` } },
-        { status: 400 }
-      );
-    }
-  } else {
-    if (request.status === "REJECTED" || request.status === "COMPLETED" || request.status === "CANCELLED") {
-      return NextResponse.json(
-        { success: false, error: { code: "BAD_REQUEST", message: `Cannot modify request with status ${request.status}` } },
-        { status: 400 }
-      );
-    }
-
-    const isAllowed = canApproveAtStage(authUserRole, request.workflow_type as WorkflowType, request.current_stage);
-        if (!isAllowed) {
-          return NextResponse.json(
-            {
-              success: false,
-              error: {
-                code: "FORBIDDEN",
-                message: `Role ${authUserRole} is not authorized to act at stage ${request.current_stage}`,
-              },
-            },
-            { status: 403 }
-          );
-        }
-
-        // HOD department scope check: HODs may only act on requests from students
-        // in their own department. Admins and sysadmins are exempt.
-        if (authUserRole === "hod") {
-          const { data: studentData } = await supabase
-            .from("users")
-            .select("department_id")
-            .eq("id", request.student_user_id)
-            .single();
-          const { data: hodData } = await supabase
-            .from("users")
-            .select("department_id")
-            .eq("id", authUserId)
-            .single();
-          const studentDept = studentData?.department_id;
-          const hodDept = hodData?.department_id;
-          if (!studentDept || !hodDept || studentDept !== hodDept) {
-            return NextResponse.json(
-              { success: false, error: { code: "FORBIDDEN", message: "HOD may only approve requests from own department" } },
-              { status: 403 }
-            );
-          }
-        }
-
-        if (request.workflow_type === "hostel" && ["caretaker", "deputy_warden"].includes(authUserRole)) {
-      const { data: userData } = await supabase
-        .from("users")
-        .select("hostel_scope")
-        .eq("id", authUserId)
-        .single();
-      if (userData?.hostel_scope && ["boys", "girls"].includes(userData.hostel_scope)) {
-        if (request.hostel_scope && request.hostel_scope !== userData.hostel_scope) {
-          return NextResponse.json(
-            { success: false, error: { code: "FORBIDDEN", message: `Cannot act on ${request.hostel_scope} hostel request` } },
-            { status: 403 }
-          );
-        }
-      }
-    }
-
-    // L4: branch scoping — a HOD may only act on staff_leave requests in the
-    // hod stage when their own branch matches the ticket's branch.
-    // (The branch check itself lives in the pure engine as
-    // canApproveAtStageWithBranch; the L4 layer only resolves the two branch
-    // values and applies the gate — P4 layering rule.)
-    if (!canApproveAtStageWithBranch(
-      authUserRole,
-      request.workflow_type as WorkflowType,
-      request.current_stage,
-      actorBranch,
-      request.branch,
-    )) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "FORBIDDEN",
-            message: `HOD of branch ${request.branch} required to act at the hod stage`,
-          },
-        },
-        { status: 403 }
-      );
-    }
+  if (
+    newStatus === "COMPLETED" &&
+    workflowType === "hostel" &&
+    ["home_out", "day_pass"].includes((row as any).reason ?? "")
+  ) {
+    await notifyGuardianSMS(studentUserId, ticket, (row as any).reason);
   }
 
-  const { data: actorUser } = await supabase
-    .from("users")
-    .select("id, name, role")
-    .eq("id", authUserId)
-    .single();
-
-  const actorName = actorUser?.name || authUserEmail || "Approver";
-
-  let nextStage = request.current_stage;
-  let nextStatus = request.status;
-  const updateFields: Record<string, unknown> = {};
-
-  if (normalizedAction === "CANCEL") {
-    nextStage = "cancelled";
-    nextStatus = "CANCELLED";
-  } else if (normalizedAction === "APPROVE" || normalizedAction === "FORWARD") {
-    const resolvedNext = targetStage || resolveNextStage(request.workflow_type as WorkflowType, request.current_stage);
-    if (!resolvedNext || resolvedNext === "completed") {
-      nextStage = "completed";
-      nextStatus = "APPROVED";
-    } else {
-      nextStage = resolvedNext;
-      nextStatus = "PENDING";
-    }
-  } else if (normalizedAction === "REJECT") {
-    nextStatus = "REJECTED";
-  } else if (normalizedAction === "ESCALATE") {
-    nextStatus = "ESCALATED";
-    if (targetStage) nextStage = targetStage;
-  } else if (normalizedAction === "COMPLETE") {
-    nextStage = "completed";
-    nextStatus = "COMPLETED";
-  } else if (normalizedAction === "BIOMETRIC_HOSTEL") {
-    updateFields.biometric_hostel_at = new Date().toISOString();
-  } else if (normalizedAction === "BIOMETRIC_GATE") {
-    updateFields.biometric_gate_at = new Date().toISOString();
-    if (request.current_stage === "main_gate") {
-      nextStage = "completed";
-      nextStatus = "COMPLETED";
-    }
-  } else if (normalizedAction === "SIGN") {
-    if (!digitalSignature) {
-      return NextResponse.json(
-        { success: false, error: { code: "BAD_REQUEST", message: "digitalSignature payload is required for SIGN action" } },
-        { status: 400 }
-      );
-    }
-    updateFields.digital_signature = digitalSignature;
-    await supabase.from("document_signatures").insert({
-      document_id: request.id,
-      signed_by: authUserId,
-      signature_hash: digitalSignature,
-    });
-  }
-
-
-  const updatedHistory = appendStageHistory(
-    request.stage_history,
-    { id: authUserId, name: actorName, role: authUserRole },
-    normalizedAction,
-    comment,
-    { from: request.current_stage, to: nextStage }
-  );
-
-  updateFields.current_stage = nextStage;
-  updateFields.status = nextStatus;
-  updateFields.stage_history = updatedHistory;
-
-  const { data: updated, error: updateErr } = await supabase
-    .from("permission_requests")
-    .update(updateFields)
-    .eq("id", request.id)
-    .select()
-    .single();
-
-  if (updateErr) {
-    return NextResponse.json(
-      { success: false, error: { code: "UPDATE_ERROR", message: updateErr.message } },
-      { status: 500 }
-    );
-  }
-
-  const auditAction =
-    normalizedAction === "CANCEL" ? "PERMISSION_REQUEST_CANCELLED" :
-    normalizedAction === "APPROVE" ? "PERMISSION_REQUEST_APPROVED" :
-    normalizedAction === "REJECT" ? "PERMISSION_REQUEST_REJECTED" :
-    normalizedAction === "FORWARD" ? "PERMISSION_REQUEST_FORWARDED" :
-    normalizedAction === "ESCALATE" ? "PERMISSION_REQUEST_ESCALATED" :
-    normalizedAction === "COMPLETE" ? "PERMISSION_REQUEST_COMPLETED" :
-    normalizedAction === "SIGN" ? "PERMISSION_DOCUMENT_SIGNED" :
-    normalizedAction.startsWith("BIOMETRIC_") ? "PERMISSION_BIOMETRIC_VERIFIED" :
-    `PERMISSION_REQUEST_${normalizedAction}`;
-
-  addAudit({
-    action: auditAction as any,
-    userId: authUserId,
-    role: authUserRole as Role,
-    details: {
-      ticketNumber: request.ticket_number,
-      action: normalizedAction,
-      fromStage: request.current_stage,
-      toStage: nextStage,
-      status: nextStatus,
-      comment,
-    },
-  }).catch((err) => console.error("[Permission Ticket API] addAudit error:", err));
-
-  addNotification(
-    "user",
-    request.student_user_id,
-    "permission",
-    `Permission Request ${request.ticket_number} Updated`,
-    `Your request ${request.ticket_number} was marked ${normalizedAction} (Status: ${nextStatus}, Stage: ${nextStage})`
-  ).catch((err) => console.error("[Permission Ticket API] addNotification error:", err));
-
-  return NextResponse.json({ success: true, data: updated });
+  return ok({
+    ticket,
+    action,
+    status: newStatus,
+    currentStage: newCurrentStage,
+    stepupVerified,
+  });
 }
 
-export const GET = withRateLimit(withAuthorization(handleGet), {
-  keyPrefix: "permission_ticket_get",
-  maxRequests: 100,
-});
+async function handleForward(
+  _req: NextRequest,
+  auth: AuthContext,
+  row: any,
+  body: PatchBody,
+  stepupVerified: boolean,
+): Promise<Response> {
+  const prep = await prepareHostelForward({
+    ticketParam: row.ticket_number,
+    authUserId: auth.userId,
+    authUserRole: auth.role,
+    authUserEmail: auth.email,
+    actorName: auth.email ?? auth.userId,
+    body: {
+      targetRole: body.targetRole,
+      comment: body.comment,
+      stepupPassword: body.stepupPassword,
+    },
+  });
+  if (!prep.ok) {
+    return prep.response ?? fail("FORWARD_FAILED", "Forward prep failed", 400);
+  }
+  const result = await applyHostelForward({
+    ticket: prep.ticket!,
+    actor: prep.actor!,
+    targetRole: prep.targetRole!,
+    comment: prep.comment ?? "",
+    stepupVerified: stepupVerified || Boolean(prep.stepupVerified),
+    authUserRole: auth.role,
+    authUserEmail: auth.email,
+    authUserId: auth.userId,
+  });
+  if ("response" in result && result.response) return result.response;
+  return ok({
+    ticket: row.ticket_number,
+    action: "FORWARD",
+    targetRole: prep.targetRole,
+  });
+}
 
+async function handleEscalate(
+  _req: NextRequest,
+  auth: AuthContext,
+  row: any,
+): Promise<Response> {
+  const prep = await prepareEscalateUp({
+    ticketParam: row.ticket_number,
+    authUserId: auth.userId,
+    authUserRole: auth.role,
+  });
+  if (!prep.ok) return prep.response ?? fail("ESCALATE_FAILED", "Escalate failed", 400);
+  const result = await applyEscalateUp({
+    ticket: prep.ticket!,
+    nextStage: prep.nextStage!,
+    actor: { id: auth.userId, name: auth.email ?? auth.userId, role: auth.role },
+    authUserEmail: auth.email,
+    reason: "escalate",
+  });
+  if ("response" in result && result.response) return result.response;
+  return ok({
+    ticket: row.ticket_number,
+    action: "ESCALATE",
+    nextStage: prep.nextStage,
+  });
+}
+
+async function notifyStage(
+  stage: string,
+  ticket: string,
+  workflowType: WorkflowType,
+): Promise<void> {
+  const { rows } = await query<{ id: string }>(
+    `SELECT id FROM users WHERE role = $1 AND status = 'ACTIVE'`,
+    [stage],
+  );
+  await Promise.all(
+    rows.map((u) =>
+      addNotification(
+        "user",
+        u.id,
+        "permission",
+        `Ticket ${ticket} ready for review`,
+        `${workflowType} ticket awaiting your action`,
+      ),
+    ),
+  );
+}
+
+async function notifyGuardianSMS(
+  studentUserId: string,
+  ticket: string,
+  reason: string,
+): Promise<void> {
+  const guardianId = await getStudentGuardianLink(studentUserId);
+  if (!guardianId) return;
+  const { rows } = await query<{ phone: string | null }>(
+    `SELECT phone FROM users WHERE id = $1 LIMIT 1`,
+    [guardianId],
+  );
+  const phone = rows[0]?.phone;
+  if (!phone) return;
+  await sendSMS({
+    to: phone,
+    message: `Your ward's ${reason.replace("_", " ")} pass (${ticket}) has been approved.`,
+  }).catch(() => undefined);
+}
+
+export const GET = withAuthorization(handleGet);
 export const PATCH = withRateLimit(withAuthorization(handlePatch), {
-  keyPrefix: "permission_ticket_patch",
+  windowMs: 60_000,
   maxRequests: 60,
 });
-
-export const POST = withRateLimit(withAuthorization(handlePatch), {
-  keyPrefix: "permission_ticket_post",
-  maxRequests: 60,
-});
-

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
+import { usePolling } from "@/hooks/usePolling";
 import { QrCode, Loader2, AlertCircle, Download } from "lucide-react";
 import { QRCode } from "react-qrcode-logo";
 import { parseRollNumber } from "@/lib/rollNumber";
@@ -17,12 +18,9 @@ const api = useApi();
   const [downloading, setDownloading] = useState(false);
   const qrRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCountdown((prev) => (prev > 1 ? prev - 1 : 30));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
+  usePolling(() => {
+    setCountdown((prev) => (prev > 1 ? prev - 1 : 30));
+  }, { intervalMs: 1000 });
 
   useEffect(() => {
     let cancelled = false;

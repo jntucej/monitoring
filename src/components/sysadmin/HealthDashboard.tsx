@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   Activity,
@@ -15,7 +15,9 @@ import {
   Zap,
 } from "lucide-react";
 import { SystemHealth } from "@/lib/health";
+import { getAuthHeaders } from "@/lib/utils";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
+import { usePolling } from "@/hooks/usePolling";
 import { useGlass } from "@/context/GlassContext";
 
 export function HealthDashboard() {
@@ -25,13 +27,12 @@ export function HealthDashboard() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchHealth = useCallback(async (isManual = false) => {
     if (isManual) setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/health", { cache: "no-store" });
+      const res = await fetch("/api/admin/health/full", { headers: getAuthHeaders(), cache: "no-store" });
       if (!res.ok && res.status !== 503) {
         throw new Error(`Failed to fetch health data (status ${res.status})`);
       }
@@ -45,30 +46,17 @@ export function HealthDashboard() {
     }
   }, []);
 
+  // Initial load + visibility-aware polling (no raw setInterval).
+  // A SINGLE poller drives /api/health. The previous version ran BOTH
+  // usePolling and useLiveRefresh on the same fetch, so every poll fired
+  // twice (mount double-fetch + overlapping timers), doubling requests to the
+  // health endpoint and inflating the "requests per minute" dashboard number.
+  // Slower cadence (15s live / 60s idle) keeps telemetry fresh without a
+  // request spike.
   useEffect(() => {
     fetchHealth(true);
-
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-      } else {
-        fetchHealth();
-        // Faster polling when live stream is enabled (5s instead of 30s)
-        intervalRef.current = setInterval(() => fetchHealth(), isLiveStream ? 5000 : 30000);
-      }
-    };
-
-    intervalRef.current = setInterval(() => fetchHealth(), isLiveStream ? 5000 : 30000);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
   }, [fetchHealth]);
-
-  // Live toggle transition also fires a health re-check.
-  useLiveRefresh(() => fetchHealth(), {});
+  usePolling(() => { fetchHealth(); }, { intervalMs: isLiveStream ? 15000 : 60000 });
 
   const getStatusBadge = (status?: "healthy" | "degraded" | "unhealthy") => {
     switch (status) {
@@ -123,7 +111,7 @@ export function HealthDashboard() {
           </div>
           <p className="text-xs text-[var(--text-muted)] flex items-center gap-2">
             <Clock className="w-3.5 h-3.5 text-gray-400" />
-            {lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString()}` : "Fetching..."} (Auto-refreshes every {isLiveStream ? '5' : '30'}s)
+            {lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString()}` : "Fetching..."} (Auto-refreshes every {isLiveStream ? '15' : '60'}s)
           </p>
         </div>
       </div>

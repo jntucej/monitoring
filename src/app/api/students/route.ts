@@ -14,10 +14,10 @@ const PRINCIPAL_ROLES = ["principal"];
  * Warden/supervisor scoped roster query, via the Postgres service client:
  *   ?scope=active&hostel=CSE  -> students not checked out, optional hostel block
  *   ?scope=active             -> all students not checked out
- *   (hostel without scope is rejected — wardens only get scoped listings)
+ *   (hostel without scope is rejected — scoped roles only get scoped listings)
  */
 async function findWardenScopedStudents(scope: string | null, hostel: string | null): Promise<Student[]> {
-  if (!HOSTEL_CODES.includes(hostel?.toUpperCase() ?? "")) {
+  if (hostel && !HOSTEL_CODES.includes(hostel.toUpperCase())) {
     throw new Error("Invalid hostel code. Use one of CSE, IT, ECE, EEE, ME.");
   }
   const service = getSupabaseServiceClient();
@@ -30,7 +30,7 @@ async function findWardenScopedStudents(scope: string | null, hostel: string | n
     query = query.eq("department", hostel.toUpperCase());
   }
   if (scope === "active") {
-    query = query.or(`checked_out_at.is.null,checked_out_at.eq.`);
+    query = query.or(`checked_out_at.is.null`);
   }
   const { data, error } = await query;
   if (error) throw error;

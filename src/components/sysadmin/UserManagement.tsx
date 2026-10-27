@@ -153,7 +153,7 @@ export function UserManagement() {
       const res = await fetch("/api/users", {
         method: "POST",
         headers: authHeaders(),
-        body: JSON.stringify({ name, email, role, uniqueId: customUniqueId.trim() || undefined, gateId: role === "operator" ? gateId || undefined : undefined, hostelScope: ["caretaker", "deputy_warden", "hostel_manager", "warden"].includes(role) ? hostelScope || undefined : undefined, isActive: true }),
+        body: JSON.stringify({ name, email, role, uniqueId: customUniqueId.trim() || undefined, gateId: role === "operator" ? gateId || undefined : undefined, hostelScope: ["caretaker", "deputy_warden", "hostel_manager"].includes(role) ? hostelScope || undefined : undefined, isActive: true }),
       });
       const j = await res.json();
       if (res.ok && j.success) {
@@ -238,8 +238,8 @@ export function UserManagement() {
       {showForm && (
         <form onSubmit={submit} className="mb-4 p-4 bg-[var(--bg-base)] rounded-lg space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Name</label>
-            <input
+            <label className="block text-sm font-medium text-gray-300 mb-1" htmlFor="name">Name</label>
+            <input id="name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -248,8 +248,8 @@ export function UserManagement() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
-            <input
+            <label className="block text-sm font-medium text-gray-300 mb-1" htmlFor="email">Email</label>
+            <input id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -258,8 +258,8 @@ export function UserManagement() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Role</label>
-            <select
+            <label className="block text-sm font-medium text-gray-300 mb-1" htmlFor="role">Role</label>
+            <select id="role"
               value={role}
               onChange={(e) => setRole(e.target.value as any)}
               className="block w-full rounded-md border-gray-700 bg-gray-800 text-white sm:text-sm p-2"
@@ -406,7 +406,7 @@ export function UserManagement() {
                   onChange={(e) => changeRole(user, e.target.value)}
                   className="text-xs rounded-full bg-sky-500/10 text-sky-300 px-2 py-1 border border-sky-500/20"
                 >
-                  {["operator", "admin", "student", "parent", "warden", "faculty", "staff", "sysadmin", "caretaker", "deputy_warden", "hostel_manager", "principal", "vice_principal", "oie", "exam_branch"].map((r) => (
+                  {["operator", "admin", "student", "parent", "faculty", "staff", "sysadmin", "caretaker", "deputy_warden", "hostel_manager", "principal", "vice_principal", "oie", "exam_branch"].map((r) => (
                     <option key={r} value={r}>{r}</option>
                   ))}
                 </select>

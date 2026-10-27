@@ -1,48 +1,40 @@
 "use client";
+<<<<<<< HEAD
 export const dynamic = "force-dynamic";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+=======
+
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 import Link from "next/link";
-import { ShieldCheck, ArrowRight, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Suspense, useCallback, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export default function BootstrapPage() {
+type BootstrapState = "idle" | "submitting" | "success" | "error";
+
+function BootstrapPageInner() {
   const router = useRouter();
+  const params = useSearchParams();
+  const code = (params.get("code") ?? "").trim().toUpperCase();
+
   const [uniqueId, setUniqueId] = useState("");
-  const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
   const [pin, setPin] = useState("");
+  const [state, setState] = useState<BootstrapState>("idle");
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
-  const [busy, setBusy] = useState(false);
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    if (password !== confirm) return setError("Passwords do not match.");
-    if (password.length < 8) return setError("Password must be at least 8 characters.");
-    if (!/^\d{4,8}$/.test(pin)) return setError("PIN must be 4-8 digits.");
-
-    setBusy(true);
-    try {
-      const res = await fetch("/api/auth/bootstrap", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          uniqueId: uniqueId.trim().toUpperCase(),
-          code: code.trim().toUpperCase(),
-          newPassword: password,
-          newPin: pin,
-        }),
-      });
-      const json = await res.json();
-      if (res.ok && json.success) {
-        setDone(true);
-        setTimeout(() => router.push("/login"), 2000);
-      } else {
-        setError(json.error?.message || "Setup failed.");
+  const submit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!uniqueId.trim() || !code || password.length < 8 || !/^\d{4,8}$/.test(pin)) {
+        setError(
+          "Provide your ID (roll), 8+ char password, and a 4-8 digit PIN. The activation code from your admin is pre-filled — if it's missing, ask your admin for the /bootstrap?code=... link."
+        );
+        setState("error");
+        return;
       }
+<<<<<<< HEAD
     } catch (e: any) { setError(e.message); }
     finally { setBusy(false); }
   if (done) {
@@ -56,87 +48,159 @@ export default function BootstrapPage() {
       </div>
     );
   }
+=======
+      setState("submitting");
+      setError(null);
+      try {
+        const res = await fetch("/api/auth/bootstrap", {
+          method: "POST",
+          credentials: "include",
+          cache: "no-store",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            uniqueId: uniqueId.trim(),
+            code,
+            newPassword: password,
+            newPin: pin,
+          }),
+        });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok || !json.success) {
+          const code = json?.error?.code ?? "UNKNOWN";
+          const msg =
+            json?.error?.message ??
+            (code === "ALREADY_ONBOARDED"
+              ? "This account has already completed setup."
+              : "Bootstrap failed. Check your code and try again.");
+          setError(msg);
+          setState("error");
+          return;
+        }
+        setState("success");
+        // A short beat so the success state is visible, then redirect.
+        setTimeout(() => router.replace("/login"), 1200);
+      } catch {
+        setError("Network error — please retry.");
+        setState("error");
+      }
+    },
+    [code, pin, router, uniqueId, password]
+  );
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--bg-base)] p-4">
-      <div className="w-full max-w-md bg-[var(--bg-surface)] border border-[var(--border)] rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
-        <div className="text-center space-y-2">
-          <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto">
-            <ShieldCheck className="w-7 h-7 text-emerald-400" />
-          </div>
-          <h1 className="text-xl font-bold text-[var(--text-primary)]">Activate Your Account</h1>
-          <p className="text-xs text-[var(--text-muted)] max-w-xs mx-auto">
-            Enter the one-time code your administrator gave you, then choose your password and PIN.
+    <div className="min-h-[100dvh] flex items-center justify-center bg-[var(--bg-base)] p-4 sm:p-8 relative overflow-x-hidden">
+      <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="w-full max-w-md space-y-4">
+        <div className="text-center">
+          <h1 className="text-lg font-bold text-[var(--text-primary)]">Activate your account</h1>
+          <p className="text-xs text-[var(--text-muted)] mt-1">
+            Use the one-time setup code your admin shared with you to set a
+            password and PIN, then log in as usual.
           </p>
         </div>
 
-        {error && (
-          <div className="flex items-center gap-2 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
-
-        <form onSubmit={submit} className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-[var(--text-secondary)]">Your ID (roll / employee ID)</label>
-            <input
-              value={uniqueId} onChange={(e) => setUniqueId(e.target.value.toUpperCase())}
-              placeholder="e.g. 24JJ1A0501" required
-              className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] font-mono text-sm text-[var(--text-primary)]"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-[var(--text-secondary)]">One-time code</label>
-            <input
-              value={code} onChange={(e) => setCode(e.target.value.toUpperCase())}
-              placeholder="8 characters" required maxLength={8}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] font-mono text-sm tracking-widest text-center text-[var(--text-primary)]"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-[var(--text-secondary)]">New password</label>
-              <input
-                type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-                required minLength={8}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-sm text-[var(--text-primary)]"
-              />
+        <div className="rounded-2xl bg-[var(--bg-surface)]/80 border border-[var(--border)] p-5 space-y-4">
+          {code ? (
+            <div className="text-[11px] text-[var(--text-muted)]">
+              Activation code: <span className="font-mono text-emerald-400 font-bold">{code}</span>
             </div>
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-[var(--text-secondary)]">Confirm</label>
-              <input
-                type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required
-                className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-sm text-[var(--text-primary)]"
-              />
+          ) : (
+            <div className="text-[11px] text-amber-400">
+              No <code>?code=</code> in the URL. Ask your admin for the full link
+              (it includes the one-time setup code).
             </div>
-          </div>
+          )}
 
-          <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-[var(--text-secondary)]">Kiosk / gate PIN (4-8 digits)</label>
-            <input
-              type="password" inputMode="numeric" pattern="\d*" maxLength={8}
-              value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))} required
-              className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] font-mono text-sm text-center tracking-widest text-[var(--text-primary)]"
-            />
-            <p className="text-[11px] text-[var(--text-muted)]">Used at gate kiosks. Not the same as your web password.</p>
-          </div>
+          <form onSubmit={submit} className="space-y-3">
+            <label className="block">
+              <span className="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wide">
+                Your ID / Roll
+              </span>
+              <input
+                type="text"
+                value={uniqueId}
+                onChange={(e) => setUniqueId(e.target.value)}
+                placeholder="e.g. 21011A0501"
+                required
+                className="mt-1 w-full rounded-lg bg-[var(--bg-base)] border border-[var(--border)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)]/50 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+              />
+            </label>
 
-          <button
-            type="submit" disabled={busy}
-            className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            {busy ? "Setting up…" : <><span>Activate Account</span><ArrowRight className="w-4 h-4" /></>}
-          </button>
-        </form>
+            <label className="block">
+              <span className="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wide">
+                New password
+              </span>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={8}
+                placeholder="At least 8 characters"
+                className="mt-1 w-full rounded-lg bg-[var(--bg-base)] border border-[var(--border)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)]/50 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+              />
+            </label>
 
-        <p className="text-center text-[11px] text-[var(--text-muted)]">
-          Already set up? <Link href="/login" className="text-emerald-400 hover:underline">Sign in</Link>
-        </p>
+            <label className="block">
+              <span className="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wide">
+                New PIN
+              </span>
+              <input
+                type="password"
+                inputMode="numeric"
+                pattern="\d{4,8}"
+                value={pin}
+                onChange={(e) => setPin(e.target.value)}
+                required
+                minLength={4}
+                maxLength={8}
+                placeholder="4–8 digits"
+                className="mt-1 w-full rounded-lg bg-[var(--bg-base)] border border-[var(--border)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)]/50 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+              />
+            </label>
+
+            {state === "error" && error && (
+              <p className="text-[11px] text-rose-400 font-semibold">{error}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={state === "submitting"}
+              className="w-full rounded-xl bg-emerald-500 text-slate-950 font-bold text-sm hover:bg-emerald-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed py-2.5"
+            >
+              {state === "submitting" ? "Activating…" : "Activate account"}
+            </button>
+          </form>
+
+          {state === "success" && (
+            <p className="text-[12px] font-semibold text-emerald-400 text-center">
+              Done. Redirecting to login…
+            </p>
+          )}
+
+          <p className="text-[11px] text-center text-[var(--text-muted)]">
+            Already activated?{" "}
+            <Link href="/login" className="text-emerald-400 hover:underline">
+              Go to login
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
 }
-  };
+
+export default function BootstrapPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center text-[var(--text-muted)] text-xs">
+          Loading…
+        </div>
+      }
+    >
+      <BootstrapPageInner />
+    </Suspense>
+  );
+}

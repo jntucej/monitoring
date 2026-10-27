@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withRateLimit } from "@/lib/rate-limit";
-import { withAuthorization } from "@/middleware/authorization";
+import { withAdminMutation } from "@/server/http/mutation-guard";
+import type { AuthContext } from "@/lib/authContext";
 import { addAudit } from "@/lib/db";
-import type { Role } from "@/lib/types";
 
 const DEFAULT_EXIT_REASONS = [
   {
@@ -29,7 +29,7 @@ const DEFAULT_EXIT_REASONS = [
   {
     code: "day_pass",
     name: "Day Pass",
-    description: "Full day leave (requires warden approved pass)",
+    description: "Full day leave (requires principal approved pass)",
     applicableTo: ["student"],
     requiresApproval: true,
     approvalBy: "principal",
@@ -39,7 +39,7 @@ const DEFAULT_EXIT_REASONS = [
   {
     code: "home_out",
     name: "Home Out",
-    description: "Weekend overnight leave (requires warden approved pass)",
+    description: "Weekend overnight leave (requires principal approved pass)",
     applicableTo: ["student"],
     requiresApproval: true,
     approvalBy: "principal",
@@ -81,7 +81,7 @@ async function handleGet(_req: NextRequest) {
   }
 }
 
-async function handlePost(req: NextRequest) {
+async function handlePost(req: NextRequest, ctx: { auth: AuthContext }) {
   try {
     const body = await req.json();
     const {
@@ -129,13 +129,11 @@ async function handlePost(req: NextRequest) {
     }
 
     try {
-      const authUserId = req.headers.get("x-user-id") || "00000000-0000-0000-0000-000000000000";
-      const authRole = (req.headers.get("x-user-role") as Role) || "sysadmin";
       await addAudit({
-        userId: authUserId,
-        role: authRole,
+        userId: ctx.auth.userId,
+        role: ctx.auth.role,
         action: "CONFIG_EXIT_REASON_SAVED",
-        details: { code, name },
+        details: { code, name, verb: "POST" },
       });
     } catch {
       // Audit fail non-fatal
@@ -151,7 +149,7 @@ async function handlePost(req: NextRequest) {
   }
 }
 
-async function handleDelete(req: NextRequest) {
+async function handleDelete(req: NextRequest, ctx: { auth: AuthContext }) {
   try {
     const searchParams = new URL(req.url).searchParams;
     const code = searchParams.get("code");
@@ -166,6 +164,17 @@ async function handleDelete(req: NextRequest) {
     const { error } = await service.from("config_exit_reasons").delete().eq("code", code);
     if (error) throw error;
 
+    try {
+      await addAudit({
+        userId: ctx.auth.userId,
+        role: ctx.auth.role,
+        action: "CONFIG_EXIT_REASON_SAVED",
+        details: { code, verb: "DELETE" },
+      });
+    } catch {
+      // Audit fail non-fatal
+    }
+
     return NextResponse.json({ success: true, message: `Deleted exit reason ${code}` });
   } catch (error: any) {
     return NextResponse.json(
@@ -176,6 +185,6 @@ async function handleDelete(req: NextRequest) {
 }
 
 export const GET = withRateLimit(handleGet as any, { keyPrefix: "config_exit_reasons_get", maxRequests: 100 });
-export const POST = withAuthorization(handlePost, { requiredRole: ["sysadmin", "admin"] });
-export const PATCH = withAuthorization(handlePost, { requiredRole: ["sysadmin", "admin"] });
-export const DELETE = withAuthorization(handleDelete, { requiredRole: ["sysadmin"] });
+export const POST = withAdminMutation(handlePost, { rateLimit: { windowMs: 60_000, maxRequests: 20 } });
+export const PATCH = withAdminMutation(handlePost, { rateLimit: { windowMs: 60_000, maxRequests: 20 } });
+export const DELETE = withAdminMutation(handleDelete, { rateLimit: { windowMs: 60_000, maxRequests: 20 } });

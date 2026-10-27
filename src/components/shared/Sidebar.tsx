@@ -4,15 +4,19 @@ import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import * as Icons from "lucide-react";
-import { Menu, X, ChevronLeft, ChevronRight, LogOut, ShieldCheck } from "lucide-react";
-
+import {
+  Menu,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  LogOut,
+  ShieldCheck,
+} from "lucide-react";
+import { getNavIcon } from "@/lib/lucide-icon-resolver";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 import { useNavigation, NavGroup, NavItem } from "@/hooks/useNavigation";
 import type { Role, User } from "@/lib/types";
-
-const iconMap: Record<string, any> = Icons;
 
 // Helper to determine active link
 // ponytail: takes searchParams as an arg (subscribed via useSearchParams in
@@ -130,7 +134,7 @@ function DesktopSidebar({
             <div className="space-y-1">
               {group.items.map((item) => {
                 const active = isItemActive(pathname, item.href, searchParams);
-                const Icon = (item.icon && iconMap[item.icon]) || Icons.HelpCircle;
+                const Icon = getNavIcon(item.icon);
 
                 return isSidebarCollapsed ? (
                   <div key={item.href} className="relative group flex items-center justify-center">
@@ -281,7 +285,7 @@ function MobileDrawer({
                   <div className="space-y-1">
                     {group.items.map((item) => {
                       const active = isItemActive(pathname, item.href, searchParams);
-                      const Icon = (item.icon && iconMap[item.icon]) || Icons.HelpCircle;
+                      const Icon = getNavIcon(item.icon);
 
                       return (
                         <Link
@@ -373,7 +377,7 @@ function MobileBottomBar({ toggleMobileSidebar, bottomTabs, pathname, searchPara
         {/* Dynamic tabs */}
         {bottomTabs.slice(0, 4).map((item) => {
           const active = isItemActive(pathname, item.href, searchParams);
-          const Icon = (item.icon && iconMap[item.icon]) || Icons.HelpCircle;
+          const Icon = getNavIcon(item.icon);
 
           return (
             <Link

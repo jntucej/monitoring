@@ -1,167 +1,300 @@
 import { NextRequest, NextResponse } from "next/server";
-import { query } from "@/lib/postgres";
-import { withRateLimit, extractClientIp } from "@/lib/rate-limit";
+import { withRateLimit, rateLimitByKey, extractClientIp } from "@/lib/rate-limit";
 import { signAccessToken, signRefreshToken } from "@/lib/auth-token";
+import crypto from "crypto";
 import { addAudit } from "@/lib/db";
-import { findKioskDefaultOperator, resolveKioskGateId } from "@/lib/kiosk-operator";
+import { assertCsrf } from "@/lib/csrf";
+import {
+  findKioskDefaultOperators,
+  resolveKioskGateId,
+  resolveKioskGateIdForOperator,
+  verifyKioskPin,
+} from "@/lib/kiosk-operator";
 import type { Role } from "@/lib/types";
 
 /**
- * GET /api/operator/kiosk-session[?gateId=<uuid>]
+ * Kiosk session auth gate.
  *
- * Mints a short-lived JWT for the designated kiosk default operator so that
- * an unattended gate kiosk can "just work" without manual credential entry.
+ * This route mints an operator-scoped JWT for the designated kiosk default
+ * operator. Because it grants OPERATOR without a login (no password, no
+ * device attestation), access must be restricted to one of three modes:
  *
- * Safety model:
- *   - Only the operator with is_kiosk_default = TRUE (or, if none is flagged,
- *     the built-in 'OPERATOR' account) receives a session. 404 if neither
- *     active operator exists — NOT 500.
- *   - Rate-limited per client IP: 20 sessions per 15-minute window.
- *   - Every issued session is audit-logged (OPERATOR_KIOSK_SESSION).
- *   - A real operator's PIN/password login always takes precedence: the
- *     kiosk hook in useKioskOperator only calls this endpoint when the
- *     auth store has NO active session at all.
+ *   1. TRUSTED_IP   — TRUSTED_KIOSK_IPS set (non-empty). The request client IP
+ *                     must be in the comma-separated list, else 403
+ *                     KIOSK_IP_NOT_TRUSTED. Fast-fails before rate limiting.
+ *   2. PIN_REQUIRED — TRUSTED_KIOSK_IPS unset AND KIOSK_SESSION_REQUIRE_PIN
+ *                     === 'true'. 426 UPGRADE_REQUIRED: the kiosk client must
+ *                     collect a PIN from the operator before retrying.
+ *   3. OPEN         — both env vars unset. Backwards-compatible open mode;
+ *                     logs a one-time console.warn and allows the session.
  *
- * ?gateId — if provided, the session is bound to that gate. If omitted or
- * the gate is inactive/unknown, the operator's assigned gate_id is used.
- * If neither resolves, the session is issued without a gate binding and
- * the kiosk shows a "no gate assigned" panel instead of a broken view.
+ * Modes 1 and 2 run BEFORE the rate-limit and audit paths so that
+ * unauthorized callers cannot burn rate-limit quota.
  */
+const KIOSK_AUTH_WARNED = { current: false };
 
-async function handleKioskSession(req: NextRequest) {
-  try {
-    // 1. Locate the kiosk default operator.
-    const operator = await findKioskDefaultOperator();
-    if (!operator) {
+export type KioskGateDecision =
+  | { kind: "pass" }
+  | { kind: "pin_missing" }
+  | { kind: "pin_invalid"; pin: string }
+  | { kind: "ip_not_trusted" }
+  | { kind: "open" }
+  | { kind: "open_refused" };
+
+/**
+ * Determine which gate applies. Does NOT verify the PIN — that happens in
+ * `handleKioskSession` after the operator row is resolved, so we can
+ * compare against `operator.password_hash`.
+ */
+async function kioskGateDecision(
+  req: NextRequest,
+  bodyPin?: string | null
+): Promise<KioskGateDecision> {
+  const trusted = (process.env.TRUSTED_KIOSK_IPS ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  // Mode 1: TRUSTED_KIOSK_IPS allowlist
+  if (trusted.length > 0) {
+    const ip = extractClientIp(req);
+    if (!trusted.includes(ip)) {
+      return { kind: "ip_not_trusted" };
+    }
+    return { kind: "pass" };
+  }
+
+  // Mode 2: KIOSK_SESSION_REQUIRE_PIN=true → PIN must be supplied.
+  // The actual bcrypt verification happens after operator resolution, because
+  // we need the operator's password_hash to compare against.
+  const requirePin = process.env.KIOSK_SESSION_REQUIRE_PIN === "true";
+  if (requirePin) {
+    if (bodyPin === undefined || bodyPin === null || bodyPin === "") {
+      return { kind: "pin_missing" };
+    }
+    return { kind: "pin_invalid", pin: bodyPin };
+  }
+
+  // Mode 3: open (backwards compat). In production this is refused outright —
+  // an open kiosk session is a privilege-escalation hole (any caller mints
+  // operator tokens). Require TRUSTED_KIOSK_IPS or KIOSK_SESSION_REQUIRE_PIN.
+  if (process.env.NODE_ENV === "production") {
+    return { kind: "open_refused" };
+  }
+  if (!KIOSK_AUTH_WARNED.current) {
+    KIOSK_AUTH_WARNED.current = true;
+    console.warn(
+      "[kiosk-session] No trusted IP or PIN requirement configured; kiosk session is open to any caller"
+    );
+  }
+  return { kind: "open" };
+}
+
+function misconfiguredResponse(count: number) {
+  return NextResponse.json(
+    {
+      success: false,
+      error: {
+        code: "KIOSK_MISCONFIGURED",
+        message:
+          count === 0
+            ? "No kiosk default operator configured"
+            : "Multiple kiosk default operators configured — exactly one is required",
+      },
+    },
+    { status: 500 }
+  );
+}
+
+/**
+ * Mint an operator-scoped kiosk session for the designated kiosk default
+ * operator. Auth modes (see kioskAuthGate above):
+ *   TRUSTED_IP  — 403 unless client IP in TRUSTED_KIOSK_IPS
+ *   PIN_REQUIRED — 426 unless operator PIN supplied
+ *   OPEN        — backwards compat, warns once in logs
+ *
+ * Both GET and POST run the same handler. GET reads ?gateId and ?pin from
+ * the query string; POST reads { gateId, pin } from the JSON body.
+ */
+async function handleKioskSession(
+  req: NextRequest,
+  bodyGateId?: string | null,
+  bodyPin?: string | null
+): Promise<Response> {
+  const csrf = assertCsrf(req);
+  if (csrf) return csrf;
+
+  // Fail fast: IP allowlist / PIN gate BEFORE the rate-limit path so an
+  // unauthorized caller cannot consume rate-limit quota.
+  const decision = await kioskGateDecision(req, bodyPin ?? null);
+
+  switch (decision.kind) {
+    case "ip_not_trusted":
       return NextResponse.json(
         {
           success: false,
           error: {
-            code: "NO_KIOSK_OPERATOR",
-            message: "No kiosk default operator is configured. " +
-                     "Designate one under SysAdmin → Gates → Default Gate Operator.",
+            code: "KIOSK_IP_NOT_TRUSTED",
+            message: "Client IP is not in TRUSTED_KIOSK_IPS",
           },
         },
-        { status: 404 }
+        { status: 403 }
       );
-    }
-
-    // 2. Resolve the session's gate binding.
-    const gateIdParam = req.nextUrl.searchParams.get("gateId")?.trim() || null;
-    const gate = await resolveKioskGateId(gateIdParam, operator.gate_id);
-
-    // 3. Build role list (mirror pin-login logic).
-    const role = (operator.role as Role) || "operator";
-    const rolesRes = await query<{ role: string }>(
-      `SELECT role FROM user_roles WHERE user_id = $1`,
-      [operator.id]
-    );
-    const roles = rolesRes.rows.map((r) => r.role);
-    if (!roles.includes(role)) roles.push(role);
-
-    // 4. Mint JWTs using the same helpers the real login endpoints use.
-    const accessToken = await signAccessToken({
-      sub: operator.id,
-      email: operator.email || undefined,
-      role,
-      roles,
-      account_status: operator.status,
-      name: operator.name || undefined,
-      session_version: operator.session_version,
-      gateId: gate?.gateId ?? operator.gate_id ?? undefined,
-    });
-
-    const refreshToken = await signRefreshToken({
-      sub: operator.id,
-      email: operator.email || undefined,
-      role,
-      roles,
-    });
-
-    // 5. Audit every session issue.
-    await addAudit({
-      action: "OPERATOR_KIOSK_SESSION",
-      userId: operator.id,
-      userName: operator.name || "Gate Operator",
-      role,
-      gateId: gate?.gateId,
-      details: {
-        source: "kiosk_session_endpoint",
-        gateId: gate?.gateId ?? null,
-        gateName: gate?.gateName ?? null,
-        requestedGateId: gateIdParam,
-        isExplicitFlag: operator.is_kiosk_default,
-        fallbackUsed: !operator.is_kiosk_default && gateIdParam === null,
-        ip: extractClientIp(req),
-        userAgent: req.headers.get("user-agent") || "unknown",
-      },
-    });
-
-    // 6. Build response — mirrors /api/auth/pin-login so the client store
-    //    can process it with the same toUser() normalizer.
-    const response = NextResponse.json(
-      {
-        success: true,
-        data: {
-          token: accessToken,
-          refreshToken,
-          user: {
-            id: operator.id,
-            uniqueId: operator.unique_id,
-            name: operator.name,
-            email: operator.email,
-            role,
-            roles,
-            status: operator.status,
-            gateId: gate?.gateId ?? null,
+    case "pin_missing":
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "PIN_REQUIRED",
+            message:
+              "A kiosk operator PIN is required to mint a kiosk session. Show the operator PIN entry UI and retry with ?pin=<operator-pin>.",
           },
+          upgradesRequired: true,
         },
-        access_token: accessToken,
-        refresh_token: refreshToken,
-        expires_in: 3600,
-        token_type: "Bearer",
-        kiosk: {
-          gateId: gate?.gateId ?? null,
-          gateName: gate?.gateName ?? null,
-          operatorId: operator.id,
-          operatorName: operator.name,
-          isDefault: operator.is_kiosk_default,
+        { status: 426 }
+      );
+    case "open":
+      break; // open mode (non-production only) — proceed to session mint.
+    case "open_refused":
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "KIOSK_OPEN_REFUSED",
+            message:
+              "Kiosk open mode is disabled in production. Set KIOSK_SESSION_REQUIRE_PIN=true or TRUSTED_KIOSK_IPS to enable kiosk sessions.",
+          },
+          upgradesRequired: true,
         },
-      },
-      { status: 200 }
-    );
+        { status: 426 }
+      );
+    case "pass":
+      break; // trusted IP — proceed to session mint.
+    case "pin_invalid":
+      break; // verified after operator resolution below.
+  }
 
-    // Set cookies the same way the real login endpoints do, so the browser
-    // session is fully established and /api/auth/session will refresh it.
-    response.cookies.set("access_token", accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 3600,
-    });
-    response.cookies.set("refresh_token", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 7 * 24 * 3600,
-    });
-
-    return response;
-  } catch (err) {
-    console.error("[kiosk-session] error:", err);
+  const ip = extractClientIp(req);
+  const rl = await rateLimitByKey(`kiosk-session:${ip}`, {
+    windowMs: 60_000,
+    maxRequests: 6,
+  });
+  if (rl.limited) {
     return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message: "Kiosk session unavailable." } },
-      { status: 500 }
+      { success: false, error: { code: "RATE_LIMITED", message: "Too many kiosk mints" } },
+      { status: 429, headers: { "Retry-After": String(rl.retryAfter ?? 60) } }
     );
   }
+
+  const operators = await findKioskDefaultOperators();
+  if (operators.length !== 1) return misconfiguredResponse(operators.length);
+
+  const op = operators[0];
+  if (op.status !== "ACTIVE") {
+    return NextResponse.json(
+      { success: false, error: { code: "ACCOUNT_INACTIVE", message: "Kiosk operator is not active" } },
+      { status: 403 }
+    );
+  }
+
+  // In PIN_REQUIRED mode, verify the supplied PIN against the operator's
+  // stored password (bcrypt). The kiosk PIN is the operator's password in
+  // the password-only auth model. A wrong or missing hash → reject.
+  if (decision.kind === "pin_invalid") {
+    const pinOk = await verifyKioskPin(op, decision.pin);
+    if (!pinOk) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "PIN_INVALID",
+            message: "Kiosk operator PIN is incorrect. Please retry.",
+          },
+        },
+        { status: 401 }
+      );
+    }
+  }
+
+  const gateResolution = await resolveKioskGateIdForOperator(op, bodyGateId ?? null);
+
+  // When the kiosk operator has NO assigned gate (and no valid hint), we
+  // still mint the session — but with `noGate: true` so the client knows to
+  // show the "Register / enter a claim code" panel instead of trying to
+  // start scanning at a gate that doesn't exist yet.
+  const noGate = !gateResolution || "error" in gateResolution;
+
+  const jti = crypto.randomUUID();
+  const access = await signAccessToken({
+    sub: op.id,
+    email: op.email ?? undefined,
+    role: op.role as Role,
+    account_status: op.status,
+    name: op.name,
+    session_version: op.session_version,
+    kiosk: true,
+    jti,
+  });
+  const refresh = await signRefreshToken({
+    sub: op.id,
+    email: op.email ?? undefined,
+    role: op.role as Role,
+    jti,
+  });
+
+  await addAudit({
+    action: "OPERATOR_KIOSK_SESSION",
+    userId: op.id,
+    userName: op.name,
+    role: op.role as Role,
+    details: JSON.stringify({
+      ip,
+      gateId: noGate ? null : gateResolution!.gateId,
+      requestedGateId: bodyGateId ?? null,
+      noGate,
+    }),
+  });
+
+  return NextResponse.json({
+    success: true,
+    data: {
+      accessToken: access,
+      refreshToken: refresh,
+      gateId: noGate ? null : gateResolution!.gateId,
+      noGate,
+      operator: {
+        id: op.id,
+        name: op.name,
+        uniqueId: op.unique_id,
+        role: op.role,
+      },
+      expiresIn: 900,
+    },
+  });
 }
 
-// 20 sessions / 15 min per client IP. A kiosk calls this at most once on
-// mount; a sustained flood is an abuse signal worth throttling hard.
-export const GET = withRateLimit(handleKioskSession, {
-  windowMs: 15 * 60 * 1000,
-  maxRequests: 200,
-  keyPrefix: "kiosk_session_limit",
-});
+export const POST = withRateLimit(
+  async (req: NextRequest) => {
+    let gateId: string | null = null;
+    let pin: string | null = null;
+    try {
+      const body = (await req.json()) as Record<string, unknown>;
+      gateId = typeof body.gateId === "string" ? body.gateId : null;
+      pin = typeof body.pin === "string" ? body.pin : null;
+    } catch {
+      // No JSON body — fine, gateId/pin stay null.
+    }
+    return handleKioskSession(req, gateId, pin);
+  },
+  { windowMs: 60_000, maxRequests: 10 }
+);
+
+export const GET = withRateLimit(
+  (req: NextRequest) => {
+    const url = new URL(req.url);
+    const gateId = url.searchParams.get("gateId");
+    const pin = url.searchParams.get("pin");
+    return handleKioskSession(req, gateId, pin);
+  },
+  { windowMs: 60_000, maxRequests: 10 }
+);

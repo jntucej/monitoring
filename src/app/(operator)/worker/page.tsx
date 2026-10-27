@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 "use client";
 
 export const dynamic = "force-dynamic";
@@ -5,50 +6,26 @@ export const dynamic = "force-dynamic";
 import { Suspense, useCallback, useMemo } from "react";
 import { ConditionalAlert } from "@/components/shared/ConditionalAlert";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+=======
+import { Suspense } from "react";
+import { HardHat } from "lucide-react";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
-import { usePolling } from "@/hooks/usePolling";
-import { useAuthStore } from "@/stores/authStore";
-import { getRoleTier } from "@/lib/alert-hierarchy";
-import type { Role } from "@/lib/types";
-import {
-  AlertTriangle,
-  Clock,
-  Loader2,
-  ShieldCheck,
-  Users,
-  Gauge,
-  Flag,
-} from "lucide-react";
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { AttentionQueue } from "@/components/engagement/AttentionQueue";
+import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
+import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 
-const MIN_TIER = 40; // worker tier
-
-/*
- * This page is intentionally scoped to the worker's OWN role data:
- * shift assignment + role-conditional alerts. Admin-only intelligence
- * (system-wide security stats) was removed — a worker
- * desk should not render privileged telemetry. If a worker-shifts
- * endpoint ever lands, add it here.
- */
-
-/* ── building blocks ── */
-
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-  sub,
-  accent = "text-white",
-  loading,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: React.ReactNode;
-  sub?: string;
-  accent?: string;
-  loading?: boolean;
-}) {
+export default function WorkerPage() {
   return (
+<<<<<<< HEAD
     <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2">
       <div className="flex items-center gap-2 text-slate-400">
         <Icon className="w-4 h-4" />
@@ -165,27 +142,37 @@ function WorkerDashboardInner() {
                 departmentId: user?.departmentId ?? null,
                 assignedHostel: user?.assignedHostel ?? null,
                 metrics,
+=======
+    <Suspense fallback={<PageLoading />}>
+      <AuthGuard allowedRoles={["worker"]}>
+        <div className="space-y-6">
+          <DevContactStrip />
+          <WidgetBoundary>
+            <RoleDashboardPanel
+              title="Worker dashboard"
+              icon={HardHat}
+              endpoint="/api/workers/my-work"
+              mapKpis={(raw: any) => {
+                const d = raw ?? {};
+                const tasks = Array.isArray(d.tasks) ? d.tasks.length : 0;
+                return [
+                  { label: "Assigned tasks", value: tasks, tone: tasks > 0 ? "warn" as const : "ok" as const },
+                  { label: "Completed (week)", value: d.completedLastWeek ?? 0, tone: "ok" as const },
+                  { label: "On shift", value: d.todayShift?.checkIn ? "Yes" : "No" },
+                ];
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
               }}
-              limit={5}
             />
-            <div className="rounded-xl border border-dashed border-slate-700 bg-slate-800/30 p-6 text-center text-sm text-slate-500">
-              No active alerts for your shift.
-            </div>
-          </div>
+          </WidgetBoundary>
+          <WidgetBoundary><AttentionQueue /></WidgetBoundary>
+          <WidgetBoundary><PersonalizedCampusHome /></WidgetBoundary>
+          <WidgetBoundary><TaskContinuity /></WidgetBoundary>
+          <WidgetBoundary><UnifiedCampusCalendar /></WidgetBoundary>
+          <WidgetBoundary><ActivityTimeline /></WidgetBoundary>
+          <WidgetBoundary><QuickActions /></WidgetBoundary>
+          <WidgetBoundary><NotificationCenter /></WidgetBoundary>
         </div>
-      </WidgetBoundary>
-
-      <DevContactStrip />
-    </div>
-  );
-}
-
-export default function WorkerDashboardPage() {
-  return (
-
-      <Suspense fallback={<PageLoading />}>
-        <WorkerDashboardInner />
-      </Suspense>
-    
+      </AuthGuard>
+    </Suspense>
   );
 }

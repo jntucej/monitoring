@@ -2,11 +2,10 @@
 export const dynamic = "force-dynamic";
 
 import { useEffect, useState } from "react";
-import { FileText, Download, BarChart3, Loader2 } from "lucide-react";
-import { useApi } from "@/hooks/useApi";
-import { useToast } from "@/components/ui/toast";
+import { FileText, Download, BarChart3, Loader2, ClipboardList, Clock } from "lucide-react";
+import { getAuthHeaders } from "@/lib/utils";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import type { DashboardData } from "@/lib/types";
-
 interface GeneratedReport {
   id: string;
   title: string;
@@ -61,9 +60,6 @@ function downloadReportCSV(report: GeneratedReport, data: DashboardData | null) 
 }
 
 export default function AdminReportsPage() {
-  const api = useApi();
-  const { addToast } = useToast();
-
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [generated, setGenerated] = useState<GeneratedReport[]>([]);
@@ -73,7 +69,7 @@ export default function AdminReportsPage() {
     let cancelled = false;
     const load = async () => {
       try {
-        const res = await fetch("/api/admin/dashboard", { headers: api.getHeaders(), cache: "no-store" });
+        const res = await fetch("/api/admin/dashboard", { headers: getAuthHeaders(), cache: "no-store" });
         const json = await res.json();
         if (!cancelled) {
           if (json.success) setData(json.data);
@@ -89,20 +85,80 @@ export default function AdminReportsPage() {
     };
   }, []);
 
-  const generate = (type: GeneratedReport["type"]) => {
+  // Load persisted generated reports so the list survives a refresh.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/admin/reports?limit=20", { headers: getAuthHeaders(), cache: "no-store" });
+        const json = await res.json();
+        if (!cancelled && json.success && Array.isArray(json.data)) {
+          setGenerated(
+            json.data.map((r: any) => ({
+              id: r.id,
+              title: r.title,
+              range: r.range_label,
+              type: r.type,
+              generatedAt: r.created_at,
+              source: r.source,
+            }))
+          );
+        }
+      } catch {
+        /* fall back to in-memory only */
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const generate = async (type: GeneratedReport["type"]) => {
     setBusy(type);
-    setTimeout(() => {
-      const rep: GeneratedReport = {
-        id: `rpt-${Date.now()}`,
-        title: `${type} Gate Activity Report`,
-        range: rangeFor(type),
-        type,
-        generatedAt: new Date().toISOString(),
-        source: "manual",
-      };
-      setGenerated((prev) => [rep, ...prev]);
+    const title = `${type} Gate Activity Report`;
+    const range = rangeFor(type);
+
+    // Snapshot the current dashboard numbers into the report so the CSV we
+    // persist reflects the real data at generation time, not whatever the
+    // dashboard happens to show later.
+    const payload = data
+      ? {
+          onCampus: data.onCampus,
+          totalScans: data.totalScans,
+          todayIn: data.todayIn,
+          todayOut: data.todayOut,
+          activeAlerts: data.activeAlerts,
+          deptBreakdown: data.deptBreakdown,
+        }
+      : null;
+    const csvBody = payload
+      ? [
+          ["Date", range].join(","),
+          ["Metric", "Value"].join(","),
+          ["Total Students (on campus)", String(payload.onCampus)],
+          ["Total Scans (today)", String(payload.totalScans)],
+          ["Entries (today)", String(payload.todayIn)],
+          ["Exits (today)", String(payload.todayOut)],
+          ["Active Alerts", String(payload.activeAlerts)],
+          "",
+          ["Department", "In", "Out", "% of Activity"].join(","),
+          ...payload.deptBreakdown.map((d) => [d.dept, d.in, d.out, `${d.pct}%`].join(",")),
+        ].join("\n")
+      : null;
+
+    try {
+      await fetch("/api/admin/reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify({ title, range, type, source: "manual", csvBody, payload }),
+      });
+    } catch {
+      /* persist best-effort; still show it in the session list */
+    } finally {
+      setGenerated((prev) => [
+        { id: `rpt-${Date.now()}`, title, range, type, generatedAt: new Date().toISOString(), source: "manual" },
+        ...prev,
+      ]);
       setBusy(null);
-    }, 500);
+    }
   };
 
   const exportAll = async () => {
@@ -118,10 +174,9 @@ export default function AdminReportsPage() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      addToast({ variant: "success", title: "Report exported", message: "Gate activity report downloaded." });
     } catch (err) {
       console.error("Export error:", err);
-      addToast({ variant: "error", title: "Export failed", message: "Failed to export report from server" });
+      alert("Failed to export report from server");
     }
   };
 
@@ -132,9 +187,14 @@ export default function AdminReportsPage() {
     : 0;
 
   return (
-    <div className="space-y-6">
+    
+      <div className="space-y-6">
       <div>
+<<<<<<< HEAD
         <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">Reports</p>
+=======
+        <p className="text-2xl font-bold">Reports</p>
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
         <p className="text-[var(--text-muted)]">Generate and download reports</p>
       </div>
 
@@ -153,6 +213,40 @@ export default function AdminReportsPage() {
           <BarChart3 className="w-6 h-6 text-[var(--action-warning)] mb-3" />
           <p className="text-2xl font-bold">{loading ? "—" : `${attendanceRate}%`}</p>
           <p className="text-sm text-[var(--text-muted)]">Activity Ratio (In/(In+Out))</p>
+        </div>
+      </div>
+
+      {/* KPI summary cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-4">
+          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+            <ClipboardList className="w-3.5 h-3.5 text-[var(--action-primary)]" /> Reports Generated
+          </div>
+          <div className="mt-1.5 text-xl font-black text-[var(--text-primary)] tabular-nums">{generated.length}</div>
+          <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">Session reports (refresh resets)</p>
+        </div>
+        <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-4">
+          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+            <Clock className="w-3.5 h-3.5 text-[var(--action-info)]" /> Last Export
+          </div>
+          <div className="mt-1.5 text-sm font-bold text-[var(--text-primary)]">
+            {generated.length > 0
+              ? new Date(generated[0].generatedAt).toLocaleString("en-IN", {
+                  day: "2-digit",
+                  month: "short",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "No exports this session"}
+          </div>
+          <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">{generated.length > 0 ? generated[0].title : "Export a report above"}</p>
+        </div>
+        <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-4">
+          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+            <FileText className="w-3.5 h-3.5 text-[var(--action-warning)]" /> Export Formats
+          </div>
+          <div className="mt-1.5 text-sm font-bold text-[var(--text-primary)]">CSV</div>
+          <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">One-click download from report rows</p>
         </div>
       </div>
 
@@ -220,6 +314,11 @@ export default function AdminReportsPage() {
           )}
         </div>
       </div>
+
+      <DevContactStrip />
     </div>
+    
+    
+
   );
 }

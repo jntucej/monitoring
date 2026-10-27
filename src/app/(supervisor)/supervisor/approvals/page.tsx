@@ -36,7 +36,7 @@ const api = useApi();
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [api]);
 
   // Live toggle drives refetch; polls every 20s while Live.
   useLiveRefresh(loadPasses, { intervalMs: 20000 });
@@ -48,10 +48,10 @@ const api = useApi();
     }
     setActionState(prev => ({ ...prev, [passId]: action === "approve" ? "approving" : "rejecting" }));
     try {
-      const res = await fetch(`/api/passes/${passId}`, {
-        method: "PUT",
+      const res = await fetch(`/api/passes/${encodeURIComponent(passId)}/action`, {
+        method: "POST",
         headers: { ...api.getHeaders(), "Content-Type": "application/json" },
-        body: JSON.stringify({ action, comment }),
+        body: JSON.stringify({ action: action.toUpperCase(), comment }),
       });
       const json = await res.json();
       if (json.success) setPasses(prev => prev.filter(p => p.id !== passId));
@@ -61,7 +61,7 @@ const api = useApi();
     } finally {
       setActionState(prev => { const n = { ...prev }; delete n[passId]; return n; });
     }
-  }, []);
+  }, [api]);
 
 
   return (
@@ -72,7 +72,11 @@ const api = useApi();
             <ShieldCheck className="w-5 h-5 text-indigo-400" />
           </div>
           <div>
+<<<<<<< HEAD
             <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
+=======
+            <p className="text-2xl font-bold text-[var(--text-primary)]">
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
               <span className="sm:hidden">🛡️</span>
               <span className="hidden sm:inline">🛡️ Warden Authorizations</span>
             </p>
@@ -139,12 +143,12 @@ const api = useApi();
                     </td>
                     <td className="p-4">
                       <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => handleAction(p.id, "approve", rejectComment[p.id] ?? "")} disabled={!!busy}
+                        <button type="button" onClick={() => handleAction(p.id, "approve", rejectComment[p.id] ?? "")} disabled={!!busy}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-xs font-semibold transition-colors disabled:opacity-40">
                           <CheckCircle className="w-4 h-4" />
                           {busy === "approving" ? "…" : "Approve"}
                         </button>
-                        <button onClick={() => handleAction(p.id, "reject", rejectComment[p.id] ?? "")} disabled={!!busy}
+                        <button type="button" onClick={() => handleAction(p.id, "reject", rejectComment[p.id] ?? "")} disabled={!!busy}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 text-xs font-semibold transition-colors disabled:opacity-40">
                           <XCircle className="w-4 h-4" />
                           {busy === "rejecting" ? "…" : "Reject"}

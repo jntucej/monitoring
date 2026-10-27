@@ -1,199 +1,367 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { NextResponse, NextRequest } from "next/server";
-import { err } from "@/lib/api-response";
+import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
-import { addAudit, addNotification, getLinkedPersons } from "@/lib/db";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
-import { resolveInitialStage, generateTicketNumber, WorkflowType } from "@/lib/permission-workflow";
+import { assertCsrf } from "@/lib/csrf";
+import { fail } from "@/server/http/response";
+import { addAudit, addNotification, getLinkedPersons } from "@/lib/db";
+import { query } from "@/lib/postgres";
+import {
+  resolveInitialStageForRequester,
+  generateTicketNumber,
+  WORKFLOW_STAGES,
+  type WorkflowType,
+} from "@/lib/permission-workflow";
+import { RATE_LIMITS } from "@/config/app-constants";
+import type { AuthContext } from "@/lib/authContext";
+import type { Role } from "@/lib/types";
 
-async function handlePost(req: NextRequest, context: any) {
-  const { auth: { userId, role } } = context;
-  const db = getSupabaseServiceClient();
-  let body: Record<string, unknown>;
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json(
-      { success: false, error: { code: "BAD_REQUEST", message: "Invalid JSON body" } },
-      { status: 400 }
+interface CreatePermissionBody {
+  workflowType?: WorkflowType;
+  reason?: string;
+  description?: string;
+  fromDate?: string;
+  toDate?: string;
+  priority?: "low" | "medium" | "high" | "urgent";
+  branch?: string;
+  hostelScope?: "boys" | "girls";
+  documentRequired?: boolean;
+  studentUserId?: string;
+}
+
+const VALID_WORKFLOWS: WorkflowType[] = ["hostel", "exam", "memo", "staff_leave", "lab_access"];
+const VALID_PRIORITIES: Array<CreatePermissionBody["priority"]> = [
+  "low", "medium", "high", "urgent",
+];
+
+async function deriveHostelScope(
+  workflowType: WorkflowType,
+  studentUserId: string,
+): Promise<"boys" | "girls" | null> {
+  if (workflowType !== "hostel") return null;
+  const { rows } = await query<{ gender: string | null }>(
+    `SELECT gender FROM student_details WHERE user_id = $1 LIMIT 1`,
+    [studentUserId],
+  );
+  const g = rows[0]?.gender;
+  if (g === "male") return "boys";
+  if (g === "female") return "girls";
+  return null;
+}
+
+const SLA_HOURS: Record<WorkflowType, Record<string, number>> = {
+  hostel:      { caretaker: 24, deputy_warden: 12, hostel_manager: 12, principal: 24 },
+  exam:        { hod: 48, oie: 24, exam_branch: 24, vice_principal: 24, principal: 24 },
+  memo:        { hod: 48, principal: 48 },
+  staff_leave: { hod: 48, principal: 48 },
+  lab_access:  { faculty: 24, hod: 24, principal: 24 },
+};
+
+function computeSlaDeadline(workflowType: WorkflowType, initialStage: string): string {
+  const hours = SLA_HOURS[workflowType]?.[initialStage] ?? 48;
+  return new Date(Date.now() + hours * 60 * 60 * 1000).toISOString();
+}
+
+async function handlePost(
+  req: NextRequest,
+  { auth }: { auth: AuthContext },
+): Promise<Response> {
+  const csrf = assertCsrf(req);
+  if (csrf) return csrf;
+  const raw = (await req.json().catch(() => ({}))) as Record<string, unknown>;
+  // UI forms mix casing: PermissionRequestForm posts camelCase
+  // (workflowType/fromDatetime), the student leave-requests + guardian
+  // pass-leave forms post snake_case (workflow_type/from). Accept both.
+  const body = {
+    ...raw,
+    workflowType: (raw.workflowType ?? raw.workflow_type ?? undefined) as WorkflowType,
+    studentUserId: (raw.studentUserId ?? raw.student_user_id ?? undefined) as string,
+    hostelScope: (raw.hostelScope ?? raw.hostel_scope ?? undefined) as "boys" | "girls" | undefined,
+    documentRequired: raw.documentRequired ?? raw.document_required,
+    fromDate: (raw.fromDate ?? raw.fromDatetime ?? raw.from ?? undefined) as string | undefined,
+    toDate: (raw.toDate ?? raw.toDatetime ?? raw.to ?? undefined) as string | undefined,
+    reason: (raw.reason ?? raw.description ?? undefined) as string | undefined,
+  } as CreatePermissionBody;
+
+  const workflowType = body.workflowType;
+  if (!workflowType || !VALID_WORKFLOWS.includes(workflowType)) {
+    return fail(
+      "INVALID_WORKFLOW",
+      `workflowType must be one of: ${VALID_WORKFLOWS.join(", ")}`,
+      400,
     );
   }
-  const workflowType = body.workflow_type || body.workflowType;
-  const studentUserId = body.student_user_id || body.studentUserId;
-  const hostelScope = body.hostel_scope || body.hostelScope;
-  const {
-    workflow_type: _wt,
-    workflowType: _wt2,
-    student_user_id: _su,
-    studentUserId: _su2,
-    hostel_scope: _hs,
-    hostelScope: _hs2,
-    ...rest
-  } = body;
-
-  if (!workflowType) return NextResponse.json(err("BAD_REQUEST", "Missing fields").body, { status: 400 });
-
-  if (!["student", "parent", "guardian", "admin", "sysadmin", "staff", "faculty"].includes(role)) {
-    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 403 });
+  // Historical role gate: any requester role may open a ticket.
+  if (!["student", "parent", "guardian", "admin", "sysadmin", "staff", "faculty", "oie", "exam_branch"].includes(auth.role)) {
+    return fail("FORBIDDEN", "Role may not submit permission requests", 403);
   }
+  const reason = (body.reason ?? "").trim();
+  const priority = VALID_PRIORITIES.includes((body.priority ?? "medium") as "low" | "medium" | "high" | "urgent")
+    ? (body.priority ?? "medium")
+    : "medium";
 
-  let targetUserId = userId;
-  if (role === "parent" || role === "guardian") {
-    if (!studentUserId) return NextResponse.json(err("BAD_REQUEST", "Missing child ID").body, { status: 400 });
-    const children = await getLinkedPersons(userId);
-    if (!children.some((c: any) => c.child_id === studentUserId)) {
-      return NextResponse.json(err("FORBIDDEN", "Not your child").body, { status: 403 });
+  let studentUserId: string;
+  if (["parent", "guardian"].includes(auth.role)) {
+    if (!body.studentUserId) {
+      return fail("MISSING_PARAM", "student_user_id is required", 400);
     }
-    targetUserId = studentUserId;
-  } else if (studentUserId && studentUserId !== userId) {
-    if (role !== "admin" && role !== "sysadmin") {
-      return NextResponse.json(err("FORBIDDEN", "Unauthorized").body, { status: 403 });
+    const children = await getLinkedPersons(auth.userId).catch(() => [] as unknown[]);
+    const isChild = (children as Array<Record<string, unknown>>).some(
+      (c) => c.child_id === body.studentUserId || c.id === body.studentUserId || c.uniqueId === body.studentUserId,
+    );
+    if (!isChild) return fail("NOT_YOUR_CHILD", "Not your child", 403);
+    studentUserId = body.studentUserId;
+  } else if (body.studentUserId && body.studentUserId !== auth.userId) {
+    if (!["admin", "sysadmin", "principal", "vice_principal", "hod"].includes(auth.role)) {
+      return fail("FORBIDDEN", "Only staff may submit on behalf of a student", 403);
     }
-    targetUserId = studentUserId;
-  }
-
-  const ticketNumber = await generateTicketNumber(workflowType as WorkflowType);
-  const initialStage = resolveInitialStage(workflowType as WorkflowType);
-  const slaDeadline = body.sla_deadline || new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
-
-  // For staff_leave: stamp the ticket with the requester's branch so the
-  // L4 approval gate (canApproveAtStageWithBranch) can enforce same-branch.
-  let branch: string | null = null;
-  if (workflowType === "staff_leave") {
-    const { data: reqRow } = await db.from("users").select("department_id").eq("id", userId).single();
-    branch = reqRow?.department_id ?? null;
-  }
-
-  const { data: request, error: createError } = await db.from("permission_requests").insert({
-    ticket_number: ticketNumber,
-    workflow_type: workflowType,
-    student_user_id: targetUserId,
-    hostel_scope: hostelScope,
-    sla_deadline: slaDeadline,
-    requester_user_id: userId,
-    // Strip any caller-supplied columns that we already set explicitly above;
-    // Postgres rejects duplicate column keys in a single SET (e.g. a `staff`
-    // actor re-submitting its own `requester_user_id` in the payload body).
-    ...Object.fromEntries(Object.entries(rest).filter(([k]) => ![
-      "ticket_number", "workflow_type", "student_user_id", "hostel_scope",
-      "sla_deadline", "requester_user_id", "current_stage", "status",
-      "stage_history", "branch",
-    ].includes(k))),
-    current_stage: initialStage,
-    status: "PENDING",
-    stage_history: [],
-    ...(branch ? { branch } : {}),
-  }).select().single();
-
-  if (createError) return NextResponse.json({ success: false, error: createError.message }, { status: 500 });
-  await addAudit({ action: "PERMISSION_REQUEST_CREATED", userId, role, details: ticketNumber });
-
-  await addNotification(
-    "system",
-    "system",
-    "permission_pending",
-    `New ${workflowType} Permission`,
-    `Ticket ${ticketNumber} created`
-  );
-
-  return NextResponse.json({ success: true, data: request });
-}
-
-async function handleGet(req: NextRequest, context: any) {
-  const { auth: { userId, role } } = context;
-  const db = getSupabaseServiceClient();
-  const url = new URL(req.url);
-  const { searchParams } = url;
-  const type = searchParams.get("workflow_type") || searchParams.get("workflowType");
-  const sid = searchParams.get("student_user_id") || searchParams.get("studentUserId");
-  const hscope = searchParams.get("hostel_scope") || searchParams.get("hostelScope");
-  const status = searchParams.get("status");
-  const mineOnly = searchParams.get("mine") === "true";
-
-  // ?mine=true — self-service "My Tickets" view: requester's own tickets
-  // with the student join so the card can render the requester's name/details.
-  if (mineOnly) {
-    const { data: mineData, error: mineErr } = await db
-      .from("permission_requests")
-      .select(`
-        id, ticket_number, workflow_type, current_stage, status,
-        sla_deadline, created_at, updated_at, description, reason,
-        from_date, to_date, priority, hostel_scope,
-        student_user_id, digital_signature, stage_history,
-        student:users(
-          id, name, email, phone, role,
-          student_details(roll, year, section, hostel_block, room_number, gender)
-        )
-      `, { count: "exact" })
-      .eq("student_user_id", userId)
-      .order("created_at", { ascending: false })
-      .limit(200);
-
-    if (mineErr) {
-      return NextResponse.json(
-        { success: false, code: "DB_ERROR", error: mineErr.message },
-        { status: 500 },
-      );
-    }
-    return NextResponse.json({ success: true, data: mineData ?? [], total: mineData?.length ?? 0 });
-  }
-
-  let query = db.from("permission_requests").select("*", { count: "exact" });
-  if (type) query = query.eq("workflow_type", type);
-  if (status) query = query.eq("status", status);
-  // Explicit stage filter (used by UI PermissionList: ?stage=principal etc.)
-  const stageParam = searchParams.get("stage") || searchParams.get("current_stage");
-  if (stageParam && ["faculty", "hod", "oie", "vice_principal", "principal", "caretaker", "deputy_warden", "hostel_manager", "main_gate", "warden_or_principal"].includes(stageParam)) {
-    query = query.eq("current_stage", stageParam);
-    // For principal: also include hostel requests at warden_or_principal stage
-    if (stageParam === "principal") {
-      query = query.or("current_stage.eq.principal,current_stage.eq.warden_or_principal");
-    }
-    // Return early — explicit stage param overrides role-based filtering below
-    const { data: stageData, count: stageCount, error: stageErr } = await query;
-    if (stageErr) return NextResponse.json({ success: false, error: stageErr.message }, { status: 500 });
-    return NextResponse.json({ success: true, data: stageData, total: stageCount || 0 });
-  }
-
-  if (role === "student") {
-    query = query.eq("student_user_id", userId);
-  } else if (["parent", "guardian"].includes(role)) {
-    const children = await getLinkedPersons(userId);
-    const childIds = children.map((c: any) => c.child_id);
-    if (!childIds.length) return NextResponse.json({ success: true, data: [], total: 0 });
-    if (sid) {
-      if (childIds.includes(sid)) query = query.eq("student_user_id", sid);
-      else return NextResponse.json(err("FORBIDDEN", "Not your child").body, { status: 403 });
-    } else {
-      query = query.in("student_user_id", childIds);
-    }
-  } else if (["caretaker", "deputy_warden", "hostel_manager", "faculty", "hod", "oie", "vice_principal"].includes(role)) {
-    query = query.eq("current_stage", role);
-    if (hscope) query = query.eq("hostel_scope", hscope);
-  } else if (role === "principal") {
-    // Principal sees hostel requests at warden_or_principal stage AND
-    // any other workflow requests currently at the principal stage.
-    query = query.or("current_stage.eq.warden_or_principal,current_stage.eq.principal");
-  } else if (["admin", "sysadmin"].includes(role)) {
-    if (sid) query = query.eq("student_user_id", sid);
-  } else if (role === "operator") {
-    query = query.eq("current_stage", "main_gate");
+    studentUserId = body.studentUserId;
   } else {
-    return NextResponse.json({ success: true, data: [], total: 0 });
+    studentUserId = body.studentUserId ?? auth.userId;
   }
 
-  const { data, count, error } = await query;
-  if (error) return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-  return NextResponse.json({ success: true, data, total: count || 0 });
+  const { rows: studentRows } = await query<{ id: string; role: string }>(
+    `SELECT id, role FROM users WHERE id = $1 AND status = 'ACTIVE' LIMIT 1`,
+    [studentUserId],
+  );
+  if (!studentRows[0]) {
+    return fail("STUDENT_NOT_FOUND", "Target student not found or inactive", 404);
+  }
+
+  const initialStage = resolveInitialStageForRequester(workflowType, auth.role);
+  const derivedScope = await deriveHostelScope(workflowType, studentUserId);
+  const explicitScope =
+    workflowType === "hostel" && (body.hostelScope === "boys" || body.hostelScope === "girls")
+      ? body.hostelScope
+      : null;
+  const hostelScope = explicitScope ?? derivedScope;
+
+  const branch =
+    workflowType === "staff_leave"
+      ? (auth.departmentId ?? body.branch ?? null)
+      : (body.branch ?? null);
+
+  const fromDate = body.fromDate ? new Date(body.fromDate) : null;
+  const toDate = body.toDate ? new Date(body.toDate) : null;
+  if (fromDate && toDate && fromDate > toDate) {
+    return fail("INVALID_DATES", "fromDate must be <= toDate", 400);
+  }
+
+  const ticketNumber = await generateTicketNumber(workflowType);
+  const slaDeadline = computeSlaDeadline(workflowType, initialStage);
+
+  const supabase = getSupabaseServiceClient();
+  const { data: inserted, error: insErr } = await supabase
+    .from("permissions")
+    .insert({
+      ticket_number: ticketNumber,
+      workflow_type: workflowType,
+      requester_user_id: auth.userId,
+      student_user_id: studentUserId,
+      current_stage: initialStage,
+      status: "PENDING",
+      priority,
+      stage_history: [],
+      document_required: Boolean(body.documentRequired),
+      reason,
+      description: body.description ?? null,
+      from_date: fromDate?.toISOString() ?? null,
+      to_date: toDate?.toISOString() ?? null,
+      hostel_scope: hostelScope,
+      branch,
+      routed_to_role: initialStage,
+      sla_deadline: slaDeadline,
+    })
+    .select()
+    .single();
+
+  if (insErr || !inserted) {
+    return fail("DB_ERROR", insErr?.message ?? "Insert failed", 500);
+  }
+
+  await addAudit({
+    action: "PERMISSION_REQUEST_CREATED",
+    userId: auth.userId,
+    userName: auth.email ?? auth.userId,
+    role: auth.role,
+    details: JSON.stringify({
+      ticket: ticketNumber,
+      workflowType,
+      initialStage,
+      hostelScope,
+      branch,
+      studentUserId,
+    }),
+  });
+
+  await notifyStage(initialStage, ticketNumber, workflowType, studentUserId);
+
+  // Historical success shape: { success: true, data: {..., ticket_number} }.
+  // UI forms read json.success && json.data?.ticket_number.
+  return NextResponse.json({
+    success: true,
+    data: {
+      id: inserted.id,
+      ticket_number: ticketNumber,
+      ticketNumber,
+      workflowType,
+      currentStage: initialStage,
+      status: "PENDING",
+      hostelScope,
+      branch,
+      slaDeadline,
+    },
+  });
 }
 
-export const POST = withRateLimit(withAuthorization(handlePost), {
-  keyPrefix: "perm_post",
-  maxRequests: 10,
-});
+async function handleGet(
+  req: NextRequest,
+  { auth }: { auth: AuthContext },
+): Promise<Response> {
+  const url = new URL(req.url);
+  const status = url.searchParams.get("status") ?? undefined;
+  // Callers use three param names for the workflow filter
+  // (workflowType / workflow_type / workflow) — accept all of them.
+  const workflow =
+    (url.searchParams.get("workflowType") ??
+      url.searchParams.get("workflow_type") ??
+      url.searchParams.get("workflow")) as WorkflowType | null;
+  const stage = url.searchParams.get("stage") ?? url.searchParams.get("assigned_stage") ?? undefined;
+  const limit = Math.min(Number(url.searchParams.get("limit") ?? 100), 500);
+  const offset = Math.max(Number(url.searchParams.get("offset") ?? 0), 0);
 
-export const GET = withRateLimit(withAuthorization(handleGet), {
-  keyPrefix: "perm_get",
-  maxRequests: 50,
+  const where: string[] = [];
+  const params: unknown[] = [];
+
+  const role: string = auth.role;
+  if (["admin", "sysadmin"].includes(role)) {
+    // see everything
+  } else if (["principal", "vice_principal"].includes(role)) {
+    // see everything
+  } else if (["caretaker", "deputy_warden", "hostel_manager"].includes(role)) {
+    params.push(auth.userId);
+    where.push(`(
+      workflow_type <> 'hostel'
+      OR hostel_scope IS NULL
+      OR hostel_scope = (SELECT hostel_scope FROM users WHERE id = $${params.length})
+    )`);
+  } else if (["hod", "faculty", "oie", "exam_branch", "exam_superintendent"].includes(role)) {
+    params.push(auth.departmentId ?? "");
+    where.push(`(workflow_type NOT IN ('staff_leave','memo') OR branch = $${params.length} OR branch IS NULL)`);
+  } else if (["parent", "guardian"].includes(role)) {
+    params.push(auth.userId);
+    where.push(`(
+      student_user_id IN (SELECT user_id FROM student_details WHERE guardian_id = $${params.length})
+      OR requester_user_id = $${params.length}
+    )`);
+  } else if (role === "student") {
+    params.push(auth.userId);
+    where.push(`(requester_user_id = $${params.length} OR student_user_id = $${params.length})`);
+  } else if (role === "staff") {
+    params.push(auth.userId);
+    where.push(`(requester_user_id = $${params.length})`);
+  } else if (role === "supervisor") {
+    // Supervisors action out-pass / staff-leave escalations across the whole
+    // campus (their supervised gates are advisory, not a data filter), so
+    // they see all requests — same as principal, whose escalation chain they
+    // feed.
+  } else if (role === "operator") {
+    // Operators action hostel out-passes at the gate (their pass-verification
+    // page). The operator stage in the workflow is "hostel_manager", so scope
+    // them to that stage only — they must not see exam/memo/staff-leave queues.
+    params.push("hostel_manager");
+    where.push(`current_stage = $${params.length}`);
+  } else {
+    return fail("FORBIDDEN", "Role has no permission visibility", 403);
+  }
+
+  if (status) {
+    params.push(status);
+    where.push(`status = $${params.length}`);
+  }
+  if (workflow) {
+    params.push(workflow);
+    where.push(`workflow_type = $${params.length}`);
+  }
+  if (stage) {
+    params.push(stage);
+    where.push(`current_stage = $${params.length}`);
+  }
+
+  params.push(limit, offset);
+  // `student` / `requester` are scalar subquery embeds (raw SQL, not
+  // PostgREST) — the UI cards read row.student?.name / .role and
+  // row.requester?.name. student_details is nested for roll display.
+  const sql = `
+    SELECT p.id, p.ticket_number, p.workflow_type, p.requester_user_id,
+           p.student_user_id, p.current_stage, p.status, p.priority,
+           p.hostel_scope, p.branch, p.reason, p.description,
+           p.from_date, p.to_date, p.direct_generated, p.routed_to_role,
+           p.forwarded_from_role, p.sla_deadline, p.created_at,
+           p.updated_at, p.stage_history,
+           (
+             SELECT jsonb_build_object(
+               'id', u.id, 'name', COALESCE(sd.student_name, u.name),
+               'role', u.role, 'unique_id', u.unique_id,
+               'student_details', jsonb_build_object(
+                 'roll', sd.roll, 'student_name', sd.student_name,
+                 'year', sd.year, 'department', sd.department
+               )
+             )
+             FROM users u
+             LEFT JOIN student_details sd ON sd.user_id = u.id
+             WHERE u.id = p.student_user_id
+           ) AS student,
+           (
+             SELECT jsonb_build_object(
+               'id', u.id, 'name', u.name, 'email', u.email,
+               'phone', u.phone, 'role', u.role, 'unique_id', u.unique_id
+             )
+             FROM users u WHERE u.id = p.requester_user_id
+           ) AS requester
+      FROM permissions p
+     WHERE ${where.length ? where.map((w) => w.replace(/permissions\./g, "p.")).join(" AND ") : "TRUE"}
+     ORDER BY
+       CASE p.status WHEN 'PENDING' THEN 0 WHEN 'ESCALATED' THEN 1 ELSE 2 END,
+       p.sla_deadline ASC NULLS LAST,
+       p.created_at DESC
+     LIMIT $${params.length - 1} OFFSET $${params.length}
+  `;
+
+  const { rows } = await query(sql, params);
+  // Historical flat-array contract: every UI consumer reads
+  //   { success: true, data: PermissionRow[], total }
+  // (array directly under `data`, with `student`/`requester` embeds and a
+  // top-level `success` flag). The batch-5 rewrite briefly returned
+  // ok({ items, total, ... }) which silently broke ~84 consumers.
+  return NextResponse.json({ success: true, data: rows, total: rows.length });
+}
+
+async function notifyStage(
+  stage: string,
+  ticket: string,
+  workflowType: WorkflowType,
+  _studentUserId: string,
+): Promise<void> {
+  const { rows } = await query<{ id: string }>(
+    `SELECT id FROM users WHERE role = $1 AND status = 'ACTIVE'`,
+    [stage],
+  );
+  await Promise.all(
+    rows.map((u) =>
+      addNotification(
+        "user",
+        u.id,
+        "permission",
+        "New Permission Request",
+        `Ticket ${ticket} needs your review (${workflowType})`,
+      ),
+    ),
+  );
+}
+
+export const POST = withMutationGuard(handlePost, {
+  rateLimit: RATE_LIMITS.PERMISSION_CREATE,
 });
+export const GET = withAuthorization(handleGet);

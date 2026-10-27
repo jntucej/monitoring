@@ -78,3 +78,15 @@ export function playAudioFeedback(type: "success" | "warning" | "error"): void {
     // ignore audio Context restrictions
   }
 }
+
+/**
+ * Resume the shared AudioContext on the first user gesture (button tap, etc.).
+ * Browsers start AudioContext in "suspended" state before a gesture; calling
+ * this in the "Scan QR" handler ensures the beep is audible on the first scan.
+ */
+export function primeAudio(): void {
+  if (typeof window === "undefined") return;
+  if (sharedCtx && sharedCtx.state === "suspended") {
+    void sharedCtx.resume();
+  }
+}

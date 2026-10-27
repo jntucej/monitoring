@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomInt } from "node:crypto";
 import {
   listParents,
   linkParentToStudent,
@@ -80,9 +81,7 @@ async function handlePost(req: NextRequest) {
 
     // One-time initial password — generated here and returned only in this response.
     const generatedPassword = Array.from({ length: 12 }, () =>
-      "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789"[
-        Math.floor(Math.random() * 57)
-      ]
+      "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789"[randomInt(57)]
     ).join("");
 
     const service = getSupabaseServiceClient();

@@ -1,13 +1,20 @@
 import readline from 'readline/promises';
 
+const NODE_ENV = process.env.NODE_ENV;
 const ALLOWED_ENV = ['development', 'test', 'local'];
 
-if (!ALLOWED_ENV.includes(process.env.NODE_ENV ?? 'development')) {
+if (!NODE_ENV || !ALLOWED_ENV.includes(NODE_ENV)) {
   console.error(
-    `FATAL: seed-data.js refuses to run with NODE_ENV=${process.env.NODE_ENV}.\n` +
-    `This script is for development only. If you really need to seed production,\n` +
-    `write a dedicated production-bootstrap script with explicit parameters.`,
+    `FATAL: seed-data.js refuses to run with NODE_ENV=${NODE_ENV ?? '<unset>'}.\n` +
+    `This script is for development only (NODE_ENV must be one of: ${ALLOWED_ENV.join(', ')}).\n` +
+    `If you need to seed production, write a dedicated production-bootstrap script with explicit parameters.`,
   );
+  process.exit(1);
+}
+
+const dbUrl = process.env.DATABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+if (/prod|production|live/i.test(dbUrl)) {
+  console.error(`FATAL: DATABASE_URL appears to be a production endpoint: ${dbUrl}`);
   process.exit(1);
 }
 

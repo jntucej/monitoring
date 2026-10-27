@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 "use client";
 
 export const dynamic = "force-dynamic";
@@ -5,93 +6,26 @@ export const dynamic = "force-dynamic";
 import { Suspense, useCallback, useState } from "react";
 import { GuardedPage } from "@/components/shared/GuardedPage";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+=======
+import { Suspense } from "react";
+import { FileSpreadsheet } from "lucide-react";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
-import { useAuthStore } from "@/stores/authStore";
-import { getRoleTier } from "@/lib/alert-hierarchy";
-import type { Role } from "@/lib/types";
-import { useApiResource, clearCache } from "@/hooks/useApiResource";
-import { usePolling } from "@/hooks/usePolling";
-import {
-  ClipboardCheck,
-  ShieldCheck,
-  UserCheck,
-  AlertTriangle,
-  Loader2,
-  Inbox,
-  Clock,
-  ArrowRight,
-  DoorOpen,
-  FileCheck2,
-  Lock,
-  DoorClosed,
-} from "lucide-react";
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { AttentionQueue } from "@/components/engagement/AttentionQueue";
+import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
+import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 
-/**
- * Exam Branch landing — the exam-operations workspace for oie / exam_branch /
- * vice_principal. Exam-branch-specific sections only:
- *   1. Exam Branch Overview KPIs (OIE-stage pending, VP-stage escalations, on-campus)
- *   2. OIE Queue (exam permissions at stage=oie)
- *   3. VP Escalation Queue (exam permissions at stage=vice_principal)
- *   4. Candidate Attendance (restricted at this tier — clean empty-state, no 403 banner)
- *   5. Examination-Day Gate Activity (per-gate presence-matrix counts)
- *   6. Reports & Approvals link + authority note
- *
- * The server scopes /api/permissions by the caller's role: oie sees its own
- * stage, vice_principal its own stage, and exam_branch (not in the
- * role→stage map) is queried with an explicit stage param so every queue is
- * server-scoped. Admin analytics endpoints are never fetched.
- */
-
-/* ── response shapes ── */
-
-interface PermissionRequestRow {
-  id: string;
-  ticket_number: string;
-  workflow_type: string;
-  current_stage: string;
-  status: string;
-  sla_deadline?: string | null;
-  student?: {
-    name: string;
-    student_details?: { roll?: string; hostel_block?: string } | null;
-  } | null;
-}
-
-interface PermissionsResponse {
-  success: boolean;
-  data: PermissionRequestRow[];
-  total?: number;
-}
-
-interface PresenceMatrixResponse {
-  success: boolean;
-  data: {
-    gates: Array<{ id: string; name: string; code: string; audience?: string; type?: string }>;
-    roles: string[];
-    matrix: Record<string, Record<string, number>>;
-    lastUpdated?: string;
-  };
-}
-
-/* ── building blocks ── */
-
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-  sub,
-  accent = "text-white",
-  loading,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: React.ReactNode;
-  sub?: string;
-  accent?: string;
-  loading?: boolean;
-}) {
+export default function ExamBranchPage() {
   return (
+<<<<<<< HEAD
     <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2">
       <div className="flex items-center gap-2 text-slate-400">
         <Icon className="w-4 h-4" />
@@ -577,5 +511,28 @@ export default function ExamBranchLandingPage() {
         <ExamBranchLandingInner />
       </Suspense>
     </GuardedPage>
+=======
+    <Suspense fallback={<PageLoading />}>
+      <AuthGuard allowedRoles={["exam_branch"]}>
+        <div className="space-y-6">
+          <DevContactStrip />
+          <WidgetBoundary>
+            <RoleDashboardPanel
+              title="Exam Branch dashboard"
+              icon={FileSpreadsheet}
+              endpoint={null}
+            />
+          </WidgetBoundary>
+          <WidgetBoundary><AttentionQueue /></WidgetBoundary>
+          <WidgetBoundary><PersonalizedCampusHome /></WidgetBoundary>
+          <WidgetBoundary><TaskContinuity /></WidgetBoundary>
+          <WidgetBoundary><UnifiedCampusCalendar /></WidgetBoundary>
+          <WidgetBoundary><ActivityTimeline /></WidgetBoundary>
+          <WidgetBoundary><QuickActions /></WidgetBoundary>
+          <WidgetBoundary><NotificationCenter /></WidgetBoundary>
+        </div>
+      </AuthGuard>
+    </Suspense>
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
   );
 }

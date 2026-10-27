@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { usePolling } from "@/hooks/usePolling";
 import { useUIStore } from "@/stores/uiStore";
 import { Users, LogOut, RefreshCw } from "lucide-react";
 import { useApi } from "@/hooks/useApi";
@@ -16,16 +17,20 @@ interface ActiveSession {
 }
 
 export function ActiveSessions() {
-const api = useApi();
+  const api = useApi();
 
   const { addToast } = useUIStore();
 
   const [sessions, setSessions] = useState<ActiveSession[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [revokingId, setRevokingId] = useState<string | null>(null);
 
-  const fetchSessions = useCallback(async () => {
-    setLoading(true);
+  // silent=true → background poll: never blank the table, just show a subtle
+  // "refreshing" indicator. Only the very first load shows the fetcher.
+  const fetchSessions = useCallback(async (silent: boolean = false) => {
+    if (silent) setRefreshing(true);
+    else setLoading(true);
     try {
       const headers = api.getHeaders();
       const res = await fetch("/api/admin/sessions", { headers });
@@ -34,17 +39,22 @@ const api = useApi();
         setSessions(data.data || []);
       }
     } catch {
-      // Best effort
+      // Best effort — keep the last known list so a transient 5xx never
+      // makes the table vanish (which is what looked "glitchy").
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [api.getHeaders]);
 
+  // Initial load only — the poller below handles the rest, so no double fetch.
   useEffect(() => {
-    fetchSessions();
-    const interval = setInterval(() => fetchSessions(), 30000);
-    return () => clearInterval(interval);
-  }, [fetchSessions]);
+    fetchSessions(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  // Background poll: silent so the visible table never flashes out.
+  usePolling(() => fetchSessions(true), { intervalMs: 30_000 });
 
   const handleRevokeSession = async (targetUserId: string, userName: string) => {
     if (!confirm(`Are you sure you want to force logout ${userName}?`)) return;
@@ -88,11 +98,12 @@ const api = useApi();
           </p>
         </div>
         <button
-          onClick={fetchSessions}
-          disabled={loading}
+          onClick={() => fetchSessions(false)}
+          disabled={loading || refreshing}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold transition-all disabled:opacity-50 shadow-md self-start sm:self-auto"
         >
-          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} /> Refresh List
+          <RefreshCw className={`w-4 h-4 ${loading || refreshing ? "animate-spin" : ""}`} />
+          {refreshing && !loading ? "Refreshing…" : "Refresh List"}
         </button>
       </div>
 
@@ -104,6 +115,11 @@ const api = useApi();
           <div className="py-12 text-center text-xs text-[var(--text-muted)]">No active sessions detected.</div>
         ) : (
           <div className="overflow-x-auto">
+            {refreshing && (
+              <div className="px-4 py-1.5 text-[10px] text-[var(--text-muted)] bg-[var(--bg-elevated)]/40 flex items-center gap-1.5">
+                <RefreshCw className="w-3 h-3 animate-spin" /> Refreshing in background…
+              </div>
+            )}
             <table className="w-full text-left text-xs min-w-[650px]">
               <thead>
                 <tr className="border-b border-[var(--border)] text-[var(--text-muted)] bg-[var(--bg-elevated)]/40">

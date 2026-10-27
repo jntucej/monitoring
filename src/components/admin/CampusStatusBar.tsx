@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Activity, GraduationCap, UserCheck, Briefcase, HardHat, Users } from "lucide-react";
 import Link from "next/link";
 import { useApi } from "@/hooks/useApi";
+import { usePolling } from "@/hooks/usePolling";
 
 interface CampusStats {
   studentStats: { onCampus: number; inToday: number; outToday: number };
@@ -20,35 +21,40 @@ const api = useApi();
   const [stats, setStats] = useState<CampusStats | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchDashboard = async () => {
-      try {
-        const res = await fetch("/api/admin/dashboard", {
-          headers: api.getHeaders(),
-          cache: "no-store",
+  const fetchDashboard = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/dashboard", {
+        headers: api.getHeaders(),
+        cache: "no-store",
+      });
+      const json = await res.json();
+      if (json.success && json.data) {
+        const d = json.data;
+        setStats({
+          studentStats: d.personTypeBreakdown?.student || { onCampus: 0, inToday: 0, outToday: 0 },
+          facultyStats: d.personTypeBreakdown?.faculty || { onCampus: 0, inToday: 0, total: 0 },
+          staffStats: d.personTypeBreakdown?.staff || { onCampus: 0, inToday: 0 },
+          workerStats: d.personTypeBreakdown?.worker || { onCampus: 0, inToday: 0 },
+          visitorStats: d.personTypeBreakdown?.visitor || { onCampus: 0 },
+          todayIn: d.todayIn ?? 0,
+          todayOut: d.todayOut ?? 0,
+          totalScans: d.totalScans ?? 0,
         });
-        const json = await res.json();
-        if (json.success && json.data) {
-          const d = json.data;
-          setStats({
-            studentStats: d.personTypeBreakdown?.student || { onCampus: 0, inToday: 0, outToday: 0 },
-            facultyStats: d.personTypeBreakdown?.faculty || { onCampus: 0, inToday: 0, total: 0 },
-            staffStats: d.personTypeBreakdown?.staff || { onCampus: 0, inToday: 0 },
-            workerStats: d.personTypeBreakdown?.worker || { onCampus: 0, inToday: 0 },
-            visitorStats: d.personTypeBreakdown?.visitor || { onCampus: 0 },
-            todayIn: d.todayIn ?? 0,
-            todayOut: d.todayOut ?? 0,
-            totalScans: d.totalScans ?? 0,
-          });
-        }
-      } catch (err) {
-        console.error("Failed to fetch campus stats:", err);
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (err) {
+      console.error("Failed to fetch campus stats:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [api]);
+
+  useEffect(() => {
     fetchDashboard();
-  }, []);
+  }, [fetchDashboard]);
+
+  // Poll every 60 s so the occupancy tiles stay fresh without hammering the
+  // dashboard endpoint. usePolling is visibility-aware (pauses in background tabs).
+  usePolling(fetchDashboard, { intervalMs: 60_000 });
 
   if (loading || !stats) return null;
 

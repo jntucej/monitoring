@@ -4,12 +4,12 @@ console.log("====================================================");
 console.log("🧪 RUNNING ROLE ROUTING SNAPSHOT TEST");
 console.log("====================================================");
 
-const EXPECTED_20_ROLES = [
+const EXPECTED_LIVE_ROLES = [
   "admin",
   "sysadmin",
   "operator",
   "supervisor",
-  "warden",
+  "principal",
   "faculty",
   "staff",
   "worker",
@@ -18,18 +18,19 @@ const EXPECTED_20_ROLES = [
   "parent",
   "guardian",
   "hod",
-  "principal",
   "vice_principal",
   "exam_branch",
   "oie",
   "hostel_manager",
   "deputy_warden",
   "caretaker",
+  "exam_superintendent",
+  "mess_incharge",
 ];
 
 let errors: string[] = [];
 
-for (const role of EXPECTED_20_ROLES) {
+for (const role of EXPECTED_LIVE_ROLES) {
   if (!ALL_ROLES.includes(role as any)) {
     errors.push(`Role '${role}' is missing from ALL_ROLES definition`);
   }
@@ -47,7 +48,7 @@ if (errors.length > 0) {
   process.exit(1);
 } else {
   console.log("\n====================================================");
-  console.log("📊 ALL 20 ROLES PROPERLY WIRED AND MAPPED!");
+  console.log("📊 ALL 21 ROLES PROPERLY WIRED AND MAPPED!");
   console.log("====================================================");
   process.exit(0);
 }

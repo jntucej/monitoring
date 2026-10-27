@@ -1,3 +1,5 @@
+import { randomBytes } from "node:crypto";
+
 export interface AnomalyEvent {
   id: string;
   metric: string;
@@ -24,7 +26,7 @@ export function classifyAnomaly(
   const severity = abs > 3.0 ? "critical" : "high";
 
   return {
-    id: `anom_${Date.now()}_${Math.random().toString(16).slice(2, 6)}`,
+    id: `anom_${Date.now()}_${randomBytes(2).toString("hex")}`,
     metric,
     actual_value: actual,
     expected_value: expected,

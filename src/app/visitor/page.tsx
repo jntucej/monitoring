@@ -1,5 +1,7 @@
-"use client";
+import Link from "next/link";
+import { UserCheck, Clock, History, User, FileText, MapPin, ArrowRight } from "lucide-react";
 
+<<<<<<< HEAD
 export const dynamic = "force-dynamic";
 
 import { Suspense, useCallback } from "react";
@@ -98,8 +100,20 @@ function VisitorDashboardInner() {
   const myLog = user ? activeLogs.find((l) => l.user_id === user.id) ?? activeLogs[0] : activeLogs[0];
 
   const passStatus = !visitorData ? "UNAVAILABLE" : activeLogs.length ? "ACTIVE" : "CHECKED OUT";
+=======
+const CARDS = [
+  { href: "/visitor/registration",   icon: UserCheck, label: "Registration",     desc: "Update your visitor profile" },
+  { href: "/visitor/request",        icon: FileText,  label: "Request Visit",    desc: "Ask a host to approve" },
+  { href: "/visitor/approval-status", icon: Clock,    label: "Approval Status",  desc: "See if you are approved" },
+  { href: "/visitor/checkin-out",    icon: MapPin,    label: "Check In / Out",   desc: "Record your entry and exit" },
+  { href: "/visitor/host-info",      icon: User,      label: "Host Info",        desc: "Who you are visiting" },
+  { href: "/visitor/history",        icon: History,   label: "History",          desc: "Past visits" },
+];
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 
+export default function VisitorLandingPage() {
   return (
+<<<<<<< HEAD
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-8 min-w-0">
       
       <div className="flex items-center justify-between gap-4">
@@ -122,175 +136,33 @@ function VisitorDashboardInner() {
             onClick={() => void refreshAll()}
             disabled={loading}
             className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs text-slate-200 hover:bg-slate-700 disabled:opacity-50"
+=======
+    <div className="p-6 max-w-4xl mx-auto space-y-6">
+      <header className="space-y-1">
+        <h1 className="text-2xl font-bold">Visitor Portal</h1>
+        <p className="text-sm text-[var(--text-muted)]">
+          Manage your visit, host approval, and check-in/out.
+        </p>
+      </header>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {CARDS.map(({ href, icon: Icon, label, desc }) => (
+          <Link
+            key={href}
+            href={href}
+            className="group flex items-center justify-between rounded-xl border border-[var(--border)] p-4 hover:bg-[var(--bg-elev-1)] transition-colors"
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
           >
-            {loading ? "Refreshing…" : "Refresh"}
-          </button>
-        </div>
-      </div>
-
-      {/* error banner — visitor role is not in /api/visitors' allowlist; render gracefully */}
-      {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2">
-          <span className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 shrink-0" />
-            Pass status loading failed — the visitor log service is not reachable for your role
-            ({error.split(":")[0]}). Contact the gate operator on duty for pass status.
-          </span>
-          <button
-            onClick={() => void refresh()}
-            className="rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20"
-          >
-            Retry
-          </button>
-        </div>
-      )}
-
-      {/* KPI row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-slate-400">
-            <Info className="w-4 h-4" />
-            <span className="text-xs font-semibold uppercase tracking-wide">Visit Status</span>
-          </div>
-          <p
-            className={`text-xl font-bold ${
-              passStatus === "ACTIVE"
-                ? "text-emerald-400"
-                : passStatus === "CHECKED OUT"
-                  ? "text-sky-400"
-                  : "text-slate-400"
-            }`}
-          >
-            {passStatus}
-          </p>
-          <p className="text-xs text-slate-500">
-            {passStatus === "ACTIVE"
-              ? "Your visitor pass is active for today"
-              : passStatus === "CHECKED OUT"
-                ? "No active visitor pass on record"
-                : "Pass status could not be verified"}
-          </p>
-        </div>
-
-        <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-slate-400">
-            <Ticket className="w-4 h-4" />
-            <span className="text-xs font-semibold uppercase tracking-wide">My Pass</span>
-          </div>
-          {myLog ? (
-            <>
-              <p className="text-lg font-bold text-white">
-                {myLog.purpose || "General Visit"}
-              </p>
-              <p className="text-xs text-slate-500">
-                Checked in {formatTime(myLog.check_in_at)}
-                {myLog.host?.name ? ` · Host: ${myLog.host.name}` : ""}
-              </p>
-            </>
-          ) : (
-            <>
-              <p className="text-lg font-bold text-slate-500">—</p>
-              <p className="text-xs text-slate-500">No pass detail available for your account</p>
-            </>
-          )}
-        </div>
-
-        <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-slate-400">
-            <LogOut className="w-4 h-4" />
-            <span className="text-xs font-semibold uppercase tracking-wide">Check-Out</span>
-          </div>
-          <p className="text-xl font-bold text-sky-400">On Exit</p>
-          <p className="text-xs text-slate-500">Scan your pass at any gate before leaving campus</p>
-        </div>
-
-        <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-slate-400">
-            <ShieldCheck className="w-4 h-4" />
-            <span className="text-xs font-semibold uppercase tracking-wide">Campus Rules</span>
-          </div>
-          <p className="text-xl font-bold text-indigo-400">Comply</p>
-          <p className="text-xs text-slate-500">Accompany your host while on premises</p>
-        </div>
-      </div>
-
-      {/* pass history table */}
-      <WidgetBoundary title="Visitor Pass Log">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden">
-          <div className="px-4 py-3 border-b border-slate-800">
-            <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wide">
-              Visitor Pass Log
-            </h2>
-          </div>
-          {loading ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-slate-500">
-              <Loader2 className="w-4 h-4 animate-spin" /> Loading visitor log…
-            </div>
-          ) : !visitorData || visitorData.data.length === 0 ? (
-            <div className="p-4">
-              <div className="rounded-xl border border-dashed border-slate-700 bg-slate-800/30 p-6 text-center text-sm text-slate-500">
-                No visitor log entries available.
+            <div className="flex items-center gap-3 min-w-0">
+              <Icon className="w-5 h-5 shrink-0" />
+              <div className="min-w-0">
+                <div className="font-semibold truncate">{label}</div>
+                <div className="text-xs text-[var(--text-muted)] truncate">{desc}</div>
               </div>
             </div>
-          ) : (
-            <div className="overflow-x-auto min-w-0">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-slate-800 text-slate-500 text-xs uppercase tracking-wide">
-                    <th className="text-left px-4 py-3">Visitor</th>
-                    <th className="text-left px-4 py-3">Host</th>
-                    <th className="text-left px-4 py-3">Purpose</th>
-                    <th className="text-left px-4 py-3">Checked In</th>
-                    <th className="text-left px-4 py-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/60">
-                  {visitorData.data.slice(0, 10).map((l) => (
-                    <tr key={l.id} className="hover:bg-slate-800/30 transition-colors">
-                      <td className="px-4 py-3 text-white font-medium">
-                        {l.person?.name || "—"}
-                      </td>
-                      <td className="px-4 py-3 text-slate-400">{l.host?.name || "—"}</td>
-                      <td className="px-4 py-3 text-slate-400">{l.purpose || "—"}</td>
-                      <td className="px-4 py-3 text-slate-400 text-xs">
-                        {formatTime(l.check_in_at)}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border ${
-                            l.status === "active"
-                              ? "text-emerald-400 border-emerald-400/30 bg-emerald-400/10"
-                              : "text-slate-500 border-slate-600/30 bg-slate-500/10"
-                          }`}
-                        >
-                          {l.status === "active" ? "Active" : "Completed"}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </WidgetBoundary>
-
-      <p className="text-sm text-slate-400 leading-relaxed">
-        Need to extend your visit or have questions about campus access? Contact the
-        gate operator on duty or the campus administration desk.
-      </p>
-
-      <DevContactStrip />
+            <ArrowRight className="w-4 h-4 shrink-0 text-[var(--text-muted)] group-hover:text-[var(--action-primary)] transition-colors" />
+          </Link>
+        ))}
+      </div>
     </div>
-  );
-}
-
-export default function VisitorDashboardPage() {
-  return (
-    <GuardedPage minTier={MIN_TIER} allowedRoles={["visitor", "admin", "sysadmin"]}>
-      <Suspense fallback={<PageLoading />}>
-        <VisitorDashboardInner />
-      </Suspense>
-    </GuardedPage>
   );
 }

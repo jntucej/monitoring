@@ -1,12 +1,17 @@
 "use client";
+import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
 
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { PermissionDetailPanel } from "@/components/approver/PermissionDetailPanel";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+import { PageLoading } from "@/components/shared/LoadingStates";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
+import type { Role } from "@/lib/types";
 
-export default function PermissionTicketPage() {
+function PermissionTicketInner() {
   const params = useParams();
   const router = useRouter();
   const ticket = typeof params?.ticket === "string" ? params.ticket : Array.isArray(params?.ticket) ? params.ticket[0] : "";
@@ -27,5 +32,14 @@ export default function PermissionTicketPage() {
         onClose={() => router.back()}
       />
     </div>
+  );
+}
+export default function PermissionTicketPage() {
+  return (
+    <AuthGuard allowedRoles={['admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <PermissionTicketInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

@@ -2,11 +2,11 @@
 import { useEffect, useState, useCallback } from "react";
 import { CheckCircle, XCircle, Loader2, AlertCircle } from "lucide-react";
 import type { Student } from "@/lib/types";
-import { useApi } from "@/hooks/useApi";
+import { getAuthHeaders } from "@/lib/utils";
+import { usePolling } from "@/hooks/usePolling";
+import { useAuthStore } from "@/stores/authStore";
 
 export function ChildStatus() {
-const api = useApi();
-
   const [children, setChildren] = useState<Student[]>([]);
   const [statuses, setStatuses] = useState<Record<string, { status: "IN" | "OUT"; last: { timestamp: string; gateName: string } | null }>>({});
   const [loading, setLoading] = useState(true);
@@ -16,12 +16,16 @@ const api = useApi();
     setLoading(true);
     setError(false);
     try {
-      // Get parent ID from auth (demo)
-      const authRaw = sessionStorage.getItem("gate-monitor-auth");
-      const auth = authRaw ? JSON.parse(authRaw) : null;
-      const parentId = auth?.state?.user?.id ?? auth?.user?.id ?? "pa-1";
+      // Get parent ID from the canonical auth store (localStorage-backed, not sessionStorage).
+      // Read via getState so `load` stays referentially stable (React Compiler).
+      const authUser = useAuthStore.getState().user;
+      const parentId = authUser?.id ?? null;
+      if (!parentId) {
+        setLoading(false);
+        return;
+      }
 
-      const res = await fetch(`/api/students?parentId=${parentId}`, { headers: api.getHeaders(), cache: "no-store" });
+      const res = await fetch(`/api/students?parentId=${parentId}`, { headers: getAuthHeaders(), cache: "no-store" });
       if (!res.ok) {
         setError(true);
         setLoading(false);
@@ -38,7 +42,7 @@ const api = useApi();
           const roll = k.uniqueId || k.roll || "";
           if (!roll) return;
           try {
-            const r = await fetch(`/api/persons/${encodeURIComponent(roll)}`, { headers: api.getHeaders(), cache: "no-store" });
+            const r = await fetch(`/api/persons/${encodeURIComponent(roll)}`, { headers: getAuthHeaders(), cache: "no-store" });
             const j = await r.json();
             // persons API returns { person, campusStatus, lastScan, history }
             stat[roll] = j?.data?.campusStatus
@@ -57,11 +61,11 @@ const api = useApi();
     }
   }, []);
 
+  // Initial load + visibility-aware polling (no raw setInterval)
   useEffect(() => {
-    load();
-    const t = setInterval(load, 30_000);
-    return () => clearInterval(t);
+    load().catch(() => {});
   }, [load]);
+  usePolling(load, { intervalMs: 30_000 });
 
   if (error) {
     return (

@@ -1,7 +1,7 @@
 import { SchedulerDataAdapter } from './base/SchedulerDataAdapter';
 
 export class MockAdapter extends SchedulerDataAdapter {
-  async fetchJobs(params?: any): Promise<any[]> {
+  async fetchJobs(_params?: any): Promise<any[]> {
     // Mock implementation for development/testing
     return [
       {
@@ -51,12 +51,12 @@ export class MockAdapter extends SchedulerDataAdapter {
     return { ...data, id, updatedAt: new Date().toISOString() };
   }
 
-  async deleteJob(id: string): Promise<void> {
+  async deleteJob(_id: string): Promise<void> {
     // Mock deletion - always succeeds
     return Promise.resolve();
   }
 
-  async fetchConflicts(params?: any): Promise<any[]> {
+  async fetchConflicts(_params?: any): Promise<any[]> {
     return [
       {
         id: 'conflict-1',
@@ -68,7 +68,7 @@ export class MockAdapter extends SchedulerDataAdapter {
     ];
   }
 
-  async fetchResources(params?: any): Promise<any[]> {
+  async fetchResources(_params?: any): Promise<any[]> {
     return [
       {
         id: 'resource-1',

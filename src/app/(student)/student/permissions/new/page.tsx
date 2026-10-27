@@ -20,7 +20,11 @@ export default function NewPermissionPage() {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <FilePlus2 className="w-6 h-6 text-[var(--action-primary)]" />
+<<<<<<< HEAD
             <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">New Permission Request</p>
+=======
+            <p className="text-xl md:text-2xl font-bold text-[var(--text-primary)]">New Permission Request</p>
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
           </div>
           <p className="text-xs md:text-sm text-[var(--text-muted)]">
             Raise a hostel, exam-document, or department-memo request and track its approval.

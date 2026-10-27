@@ -1,40 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-
-interface RateLimitStore {
-  [key: string]: {
-    count: number;
-    resetTime: number;
-  };
-}
-
-const store: RateLimitStore = {};
-const MAX_STORE_ENTRIES = 5000;
-let lastPruneTime = 0;
-const PRUNE_INTERVAL_MS = 30 * 1000; // prune every 30s
-
-function pruneStore(now: number) {
-  const storeSize = Object.keys(store).length;
-  if (now - lastPruneTime < PRUNE_INTERVAL_MS && storeSize < MAX_STORE_ENTRIES) {
-    return;
-  }
-  lastPruneTime = now;
-  const keys = Object.keys(store);
-  for (const k of keys) {
-    if (store[k] && store[k].resetTime < now) {
-      delete store[k];
-    }
-  }
-  const remainingKeys = Object.keys(store);
-  if (remainingKeys.length > MAX_STORE_ENTRIES) {
-    remainingKeys
-      .sort((a, b) => (store[a]?.resetTime || 0) - (store[b]?.resetTime || 0))
-      .slice(0, remainingKeys.length - MAX_STORE_ENTRIES)
-      .forEach((k) => delete store[k]);
-  }
-}
-
-const DEFAULT_WINDOW = 60 * 1000;
-const DEFAULT_MAX_REQUESTS = 100;
+import { NextRequest, NextResponse } from "next/server";
+import { poolQuery } from "@/lib/postgres";
 
 export interface RateLimitConfig {
   windowMs?: number;
@@ -49,170 +14,166 @@ export interface RateLimitResult {
   retryAfter?: number;
 }
 
+/**
+ * Trusted source-of-truth for client IP.
+ * Caddy sets X-Client-IP from {remote_host} (see Caddyfile).
+ * Cloudflare sets CF-Connecting-IP; prefer X-Client-IP because Caddy already
+ * rewrote it from the real TCP peer.
+ *
+ * P1-14: X-Real-IP is client-spoofable (a caller can set it directly, e.g.
+ * via a curl header), so it is ONLY consulted when TRUSTED_PROXY_IPS is set
+ * to a non-empty list (i.e. we are behind a known proxy that is expected to
+ * set it, and the socket peer address check is enforced upstream). When
+ * TRUSTED_PROXY_IPS is empty/unset we skip x-real-ip entirely and rely on
+ * the rightmost x-forwarded-for hop (the last trusted proxy's view of the
+ * client) or "unknown".
+ *
+ * Unit note: extractClientIp("...x-real-ip: 10.0.0.1, x-forwarded-for: a,b")
+ *   - with TRUSTED_PROXY_IPS set      -> "10.0.0.1" (trusted proxy value)
+ *   - with TRUSTED_PROXY_IPS unset    -> "b"        (x-forwarded-for last hop;
+ *     x-real-ip is ignored as untrusted)
+ */
 export function extractClientIp(req: NextRequest): string {
-  const realIp = req.headers.get('x-real-ip')?.trim();
-  if (realIp) return realIp;
+  const xff = req.headers.get("x-forwarded-for");
+  const rightmostHop = xff ? xff.split(",").pop()?.trim() : undefined;
 
-  const cfIp = req.headers.get('cf-connecting-ip')?.trim();
-  if (cfIp) return cfIp;
+  // Only trust x-real-ip when a trusted-proxy allowlist is configured
+  // (P1-14). Without it the header is spoofable and must be ignored.
+  const trustedProxyIps = (process.env.TRUSTED_PROXY_IPS ?? "").split(",").map(s => s.trim()).filter(Boolean);
+  const realIp = trustedProxyIps.length > 0 ? req.headers.get("x-real-ip") : undefined;
 
-  const xForwardedFor = req.headers.get('x-forwarded-for');
-  if (xForwardedFor) {
-    const ips = xForwardedFor.split(',').map((s) => s.trim()).filter(Boolean);
-    if (ips.length > 0) {
-      return ips[ips.length - 1];
-    }
-  }
-
-  return 'unknown';
+  return (
+    req.headers.get("x-client-ip") ??
+    req.headers.get("cf-connecting-ip") ??
+    realIp ??
+    rightmostHop ??
+    "unknown"
+  );
 }
 
+function resolveConfig(config: RateLimitConfig): Required<RateLimitConfig> {
+  return {
+    windowMs: config.windowMs ?? 60_000,
+    maxRequests: config.maxRequests ?? 60,
+    keyPrefix: config.keyPrefix ?? "rl",
+  };
+}
+
+function bucketKey(req: NextRequest, cfg: Required<RateLimitConfig>): string {
+  const ip = extractClientIp(req);
+  const path = new URL(req.url).pathname;
+  return `${cfg.keyPrefix}:${path}:${ip}`;
+}
+
+/**
+ * Atomic increment-and-read. Single SQL statement means it's safe under
+ * concurrency across replicas. Accepts either a NextRequest (keyed by
+ * keyPrefix:pathname:clientIp) or an explicit bucket key string (used by
+ * per-identifier / per-user lockouts in auth, mobile, and kiosk routes).
+ */
 export async function checkRateLimit(
   reqOrKey: NextRequest | string,
   config: RateLimitConfig = {}
 ): Promise<RateLimitResult> {
-  const windowMs = config.windowMs || DEFAULT_WINDOW;
-  const maxRequests = config.maxRequests || DEFAULT_MAX_REQUESTS;
-  const keyPrefix = config.keyPrefix || 'rate_limit';
-
-  let ip = 'global';
-  if (typeof reqOrKey === 'string') {
-    ip = reqOrKey;
-  } else {
-    ip = extractClientIp(reqOrKey);
-  }
-
-  const isDev = process.env.NODE_ENV !== 'production';
-  const isLocalLoopback = ip === '127.0.0.1' || ip === '::1' || ip === 'localhost';
-  const effectiveMaxRequests = (isDev || isLocalLoopback) ? Math.max(maxRequests * 10, 300) : maxRequests;
-  const key = `${keyPrefix}:${ip}`;
-
-  const isEdge = typeof (globalThis as any).EdgeRuntime !== 'undefined' || process.env.NEXT_RUNTIME === 'edge';
-  if (!isEdge && process.env.NODE_ENV === 'production' && !isDev) {
-    try {
-      const { query } = await import('./postgres');
-      // Count only real request rows, NOT the limiter's own bookkeeping
-      // (method='LIMITER') rows — otherwise the limiter counts itself
-      // and 429s after its own INSERTs fill the window.
-      const rows = await query(
-        `SELECT COUNT(*) as count FROM api_metrics
-         WHERE path = $1 AND timestamp >= $2 AND method != 'LIMITER'`,
-        [key, new Date(Date.now() - windowMs).toISOString()]
-      );
-
-      const currentCount = parseInt(rows.rows?.[0]?.count || '0', 10);
-      const limited = currentCount >= effectiveMaxRequests;
-      const remaining = Math.max(0, effectiveMaxRequests - currentCount);
-      const resetTime = new Date(Date.now() + windowMs);
-
-      void query(
-        `INSERT INTO api_metrics (path, method, response_time, status_code, timestamp) VALUES ($1, $2, $3, $4, $5)`,
-        [key, 'LIMITER', 0, limited ? 429 : 200, new Date().toISOString()]
-      ).catch(() => {});
-
-      return {
-        limited,
-        remaining,
-        resetTime,
-        retryAfter: limited ? Math.ceil(windowMs / 1000) : 0,
-      };
-    } catch (err) {
-      console.warn('[rate-limit] PostgreSQL rate limiter fallback:', err);
-    }
-  }
-
-  const now = Date.now();
-  pruneStore(now);
-  if (store[key] && store[key].resetTime < now) {
-    delete store[key];
-  }
-
-  if (!store[key]) {
-    store[key] = { count: 1, resetTime: now + windowMs };
-    return {
-      limited: false,
-      remaining: effectiveMaxRequests - 1,
-      resetTime: new Date(store[key].resetTime),
-    };
-  }
-
-  store[key].count++;
-  const resetTime = new Date(store[key].resetTime);
-
-  if (store[key].count > effectiveMaxRequests) {
-    const retryAfter = Math.ceil((store[key].resetTime - now) / 1000);
-    return { limited: true, remaining: 0, resetTime, retryAfter };
-  }
-
-  return { limited: false, remaining: effectiveMaxRequests - store[key].count, resetTime };
+  const cfg = resolveConfig(config);
+  const key =
+    typeof reqOrKey === "string" ? reqOrKey : bucketKey(reqOrKey, cfg);
+  const { rows } = await poolQuery<{ count: number; reset_at: Date }>(
+    `
+    INSERT INTO public.rate_limit_buckets (key, count, reset_at)
+    VALUES ($1, 1, NOW() + make_interval(secs => $2::float / 1000))
+    ON CONFLICT (key) DO UPDATE
+      SET count = CASE
+            WHEN rate_limit_buckets.reset_at <= NOW() THEN 1
+            ELSE rate_limit_buckets.count + 1
+          END,
+          reset_at = CASE
+            WHEN rate_limit_buckets.reset_at <= NOW()
+              THEN NOW() + make_interval(secs => $2::float / 1000)
+            ELSE rate_limit_buckets.reset_at
+          END
+    RETURNING count, reset_at;
+    `,
+    [key, cfg.windowMs]
+  );
+  const row = rows[0];
+  const remaining = Math.max(0, cfg.maxRequests - row.count);
+  const limited = row.count > cfg.maxRequests;
+  const retryAfter = limited
+    ? Math.max(1, Math.ceil((new Date(row.reset_at).getTime() - Date.now()) / 1000))
+    : undefined;
+  return { limited, remaining, resetTime: new Date(row.reset_at), retryAfter };
 }
 
-export function rateLimitByKey(key: string, opts?: RateLimitConfig): Promise<RateLimitResult> {
-  return checkRateLimit(key, opts);
+function attachHeaders(res: Response, cfg: Required<RateLimitConfig>, r: RateLimitResult) {
+  const out = new Response(res.body, {
+    status: res.status,
+    statusText: res.statusText,
+    headers: res.headers,
+  });
+  out.headers.set("x-ratelimit-limit", String(cfg.maxRequests));
+  out.headers.set("x-ratelimit-remaining", String(r.remaining));
+  out.headers.set("x-ratelimit-reset", r.resetTime.toISOString());
+  return out;
 }
 
-export function rateLimitMiddleware(config?: RateLimitConfig) {
-  return (req: NextRequest) => checkRateLimit(req, config);
-}
-
-export function rateLimit(keyOrReq: string | NextRequest, pointsOrConfig?: number | RateLimitConfig) {
-  if (typeof keyOrReq === 'string') {
-    const points = typeof pointsOrConfig === 'number' ? pointsOrConfig : pointsOrConfig?.maxRequests || 5;
-    const windowMs = typeof pointsOrConfig === 'object' ? pointsOrConfig?.windowMs : 60 * 1000;
-    return checkRateLimit(keyOrReq, { maxRequests: points, windowMs });
-  }
-  const config = (keyOrReq as unknown as RateLimitConfig) || {};
-  return (req: NextRequest) => checkRateLimit(req, config);
-}
-
+/**
+ * Wraps a route handler. Enforces the limit AND reflects real state on the
+ * success path — this is what the old version was missing (it set headers
+ * from config, never from the store).
+ */
 export function withRateLimit<TArgs extends unknown[] = unknown[]>(
   handler: (req: NextRequest, ...args: TArgs) => Promise<Response>,
   config: RateLimitConfig = {}
 ) {
-  return async (req: NextRequest, ...args: TArgs) => {
-    const result = await checkRateLimit(req, config);
+  const cfg = resolveConfig(config);
+  return async (req: NextRequest, ...args: TArgs): Promise<Response> => {
+    let result: RateLimitResult;
+    try {
+      result = await checkRateLimit(req, cfg);
+    } catch (err) {
+      // If the DB is unreachable, fail-open but log loudly. A limiter that
+      // 500s is worse than no limiter — it takes the whole auth flow down.
+      console.error("[rate-limit] store failure, failing open", err);
+      return handler(req, ...args);
+    }
     if (result.limited) {
       return NextResponse.json(
         {
           success: false,
-          error: {
-            code: 'RATE_LIMIT_EXCEEDED',
-            message: 'Too many requests. Please try again later.',
-            resetAt: result.resetTime.toISOString(),
-          },
+          error: { code: "RATE_LIMIT_EXCEEDED", message: "Too many requests" },
         },
         {
           status: 429,
           headers: {
-            'Retry-After': (result.retryAfter || 60).toString(),
-            'X-RateLimit-Limit': (config.maxRequests || DEFAULT_MAX_REQUESTS).toString(),
-            'X-RateLimit-Remaining': '0',
-            'X-RateLimit-Reset': result.resetTime.toISOString(),
+            "retry-after": String(result.retryAfter ?? 60),
+            "x-ratelimit-limit": String(cfg.maxRequests),
+            "x-ratelimit-remaining": "0",
+            "x-ratelimit-reset": result.resetTime.toISOString(),
           },
         }
       );
     }
-    const response = await handler(req, ...args);
-    response.headers.set('X-RateLimit-Limit', (config.maxRequests || DEFAULT_MAX_REQUESTS).toString());
-    response.headers.set('X-RateLimit-Remaining', result.remaining.toString());
-    response.headers.set('X-RateLimit-Reset', result.resetTime.toISOString());
-    return response;
+    return attachHeaders(await handler(req, ...args), cfg, result);
   };
 }
 
-export const rateLimits = {
-  auth: (handler: (req: NextRequest) => Promise<Response>) =>
-    withRateLimit(handler, { maxRequests: 5, windowMs: 60 * 1000, keyPrefix: 'auth' }),
-  scan: (handler: (req: NextRequest) => Promise<Response>) =>
-    withRateLimit(handler, { maxRequests: 30, windowMs: 60 * 1000, keyPrefix: 'scan' }),
-  read: (handler: (req: NextRequest) => Promise<Response>) =>
-    withRateLimit(handler, { maxRequests: 60, windowMs: 60 * 1000, keyPrefix: 'read' }),
-  admin: (handler: (req: NextRequest) => Promise<Response>) =>
-    withRateLimit(handler, { maxRequests: 120, windowMs: 60 * 1000, keyPrefix: 'admin' }),
-  sms: (handler: (req: NextRequest) => Promise<Response>) =>
-    withRateLimit(handler, { maxRequests: 3, windowMs: 60 * 1000, keyPrefix: 'sms' }),
-  export: (handler: (req: NextRequest) => Promise<Response>) =>
-    withRateLimit(handler, { maxRequests: 10, windowMs: 60 * 1000, keyPrefix: 'export' }),
-};
+/**
+ * Enforce a limit for an explicit bucket key. Some routes lock out per
+ * identifier (login attempts, bootstrap, mobile login, kiosk sessions)
+ * rather than per client IP, so they pass a key like
+ * `bootstrap:9150010505`. This delegates to the same Postgres-backed store.
+ */
+export async function rateLimitByKey(
+  key: string,
+  config: RateLimitConfig = {}
+): Promise<RateLimitResult> {
+  return checkRateLimit(key, config);
+}
+
+/** Kept for compatibility with `src/proxy.ts`. */
+export async function rateLimit(req: NextRequest, config?: RateLimitConfig) {
+  return checkRateLimit(req, config);
+}
 
 export default rateLimit;

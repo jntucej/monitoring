@@ -1,5 +1,4 @@
 // Smart suggestion card - displays individual AI recommendations
-import React from 'react';
 import { Card } from '../primitives/Card';
 
 export interface SmartSuggestionCardProps {

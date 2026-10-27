@@ -59,6 +59,11 @@ repomix-output*
 data/uploads/
 .DS_Store
 
+# One-shot credential-minting tools (removed from repo; never re-commit)
+mint_jwt.mjs
+scripts/provision-role-accounts.mts
+scripts/prov/
+
 # macOS
 **/.DS_Store
 
@@ -101,3 +106,4 @@ users.json
 
 # Permission workflow document uploads (never commit)
 data/uploads/
+.scannerwork/

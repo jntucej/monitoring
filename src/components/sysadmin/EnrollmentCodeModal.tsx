@@ -73,8 +73,8 @@ const api = useApi();
           {!issued && (
             <>
               <div>
-                <label className="block text-xs font-semibold text-[var(--text-muted)] mb-1 uppercase">Purpose</label>
-                <select
+                <label className="block text-xs font-semibold text-[var(--text-muted)] mb-1 uppercase" htmlFor="purpose">Purpose</label>
+                <select id="purpose"
                   value={purpose}
                   onChange={(e) => setPurpose(e.target.value as any)}
                   className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)]"

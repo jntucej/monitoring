@@ -11,16 +11,16 @@ import {
   addAudit,
   generateUceJUniqueId,
 } from "@/lib/db";
+import { hash } from "@/server/lib/crypto";
 import type { Role } from "@/lib/types";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { ROLES } from "@/lib/roles";
-import { isMfaRequiredForPrivileged } from "@/lib/authContext";
 
 // Roles assignable via this API. Intersection of src/lib/types.ts `Role`
 // and the CHECK constraint on public.users.role in consolidated_clean_schema.sql.
-const VALID_ROLES: (Role | string)[] = ["operator", "admin", "sysadmin", "supervisor", "guardian", "parent", "hod", "student", "warden", "faculty", "staff", "worker", "visitor", "caretaker", "deputy_warden", "hostel_manager", "principal", "vice_principal", "oie", "exam_branch", "mess_incharge"];
+const VALID_ROLES: (Role | string)[] = ["operator", "admin", "sysadmin", "supervisor", "guardian", "parent", "hod", "student", "faculty", "staff", "worker", "visitor", "caretaker", "deputy_warden", "hostel_manager", "principal", "vice_principal", "oie", "exam_branch", "mess_incharge"];
 const VALID_STATUSES = ['ACTIVE', 'LOCKED', 'SUSPENDED', 'DISABLED', 'DEPROVISIONED'];
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -50,16 +50,29 @@ async function handleGet(req: NextRequest) {
   try {
     const users = await findAllUsers();
 
-    // Optional client-side name/roll/email/role filter so sysadmin pages can
-    // offer a search box instead of raw UUID entry.
+    // Client-side filters so the admin/sysadmin user panels can drive their
+    // search box + department/role/status dropdowns. `q` matches
+    // name/roll/email/role; the rest are exact-match on the mapped keys.
     const q = req.nextUrl.searchParams.get("q");
+    const deptParam = req.nextUrl.searchParams.get("departmentId");
+    const statusParam = req.nextUrl.searchParams.get("status");
+    const roleParam = req.nextUrl.searchParams.get("role");
     let result = users;
     if (q && q.trim().length >= 1) {
       const needle = q.trim().toLowerCase();
-      result = users.filter((u: any) =>
+      result = result.filter((u: any) =>
         (u.name || u.email || u.uniqueId || u.unique_id || u.role || "").toString().toLowerCase().includes(needle) ||
         (u.fullname || "").toString().toLowerCase().includes(needle)
       );
+    }
+    if (deptParam && deptParam !== "ALL") {
+      result = result.filter((u: any) => (u.departmentId ?? u.department_id ?? "") === deptParam);
+    }
+    if (statusParam && statusParam !== "ALL") {
+      result = result.filter((u: any) => (u.status ?? u.flag_status ?? "") === statusParam);
+    }
+    if (roleParam && roleParam !== "ALL") {
+      result = result.filter((u: any) => (u.role ?? "") === roleParam);
     }
     return NextResponse.json({ success: true, data: result });
   } catch (error) {
@@ -266,7 +279,7 @@ async function handlePost(req: NextRequest) {
     // Insert employee_details for staff-like roles — never let this block
     // user creation. If employee_id is empty, auto-generate one from the
     // freshly minted user id so the UNIQUE/NOT NULL constraint is satisfied.
-    if (["faculty", "staff", "operator", "admin", "sysadmin", "worker", "caretaker", "deputy_warden", "hostel_manager", "principal", "vice_principal", "oie", "exam_branch", "warden"].includes(role)) {
+    if (["faculty", "staff", "operator", "admin", "sysadmin", "worker", "caretaker", "deputy_warden", "hostel_manager", "principal", "vice_principal", "oie", "exam_branch"].includes(role)) {
       const finalEmployeeId =
         (employeeId && String(employeeId).trim()) ||
         (resolvedUniqueId && String(resolvedUniqueId).trim()) ||
@@ -290,11 +303,53 @@ async function handlePost(req: NextRequest) {
       }
     }
 
+    // A freshly created account has no usable credential by default (the
+    // Supabase Auth temp password above is discarded, never returned or
+    // logged). Auto-issue a one-shot mobile enrollment code so the new
+    // student can claim their device on first run, and surface the plain
+    // code ONCE in this response for the admin to hand off. Non-fatal: if
+    // enrollment-code issuance fails, the account is still created and the
+    // admin can mint a code via the enrollment-code endpoint afterward.
+    let enrollmentCode: string | null = null;
+    let enrollmentExpiresAt: string | null = null;
+    if (role === "student") {
+      try {
+        const alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+        let code = "";
+        for (let i = 0; i < 8; i++) code += alphabet[Math.floor(Math.random() * alphabet.length)];
+        const codeHash = await hash(code, 10);
+        enrollmentExpiresAt = new Date(Date.now() * 1 + 24 * 60 * 60 * 1000).toISOString();
+        const { error: enrollErr } = await service.from("enrollment_codes").insert({
+          user_id: user.id || authUserId,
+          code_hash: codeHash,
+          purpose: "mobile",
+          expires_at: enrollmentExpiresAt,
+          created_by: actorId,
+        });
+        if (enrollErr) {
+          console.warn("[users.POST] enrollment-code issuance failed (non-fatal):", enrollErr.message);
+        } else {
+          enrollmentCode = code;
+        }
+      } catch (enrollCatch: any) {
+        console.warn("[users.POST] enrollment-code issuance threw (non-fatal):", enrollCatch?.message ?? enrollCatch);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       data: user,
       uniqueId: resolvedUniqueId ?? (user as any).unique_id ?? null,
-      meta: { authProvider: 'supabase', inviteSent, uniqueIdGenerated: ucejRoles.includes(role) && !effectiveUniqueId },
+      meta: {
+        authProvider: 'supabase',
+        inviteSent,
+        uniqueIdGenerated: ucejRoles.includes(role) && !effectiveUniqueId,
+        // One-shot credential for the new account. The plain code is returned
+        // exactly once and is NOT re-fetchable; the admin must record or
+        // hand it off now.
+        enrollmentCode,
+        enrollmentCodeExpiresAt: enrollmentExpiresAt,
+      },
     });
   } catch (error) {
     console.error('Error creating user:', error);
@@ -377,30 +432,11 @@ async function handlePatch(req: NextRequest) {
         );
       }
 
-      // Guard: if 2FA-for-admins is required, a newly promoted sysadmin who
-      // hasn't enrolled would be locked out of login AND every API route
-      // (enrollment itself needs an authenticated session). Block the
-      // promotion until they enroll, instead of stranding them.
-      if (role === ROLES.SYSADMIN && (await isMfaRequiredForPrivileged())) {
-        const service = getSupabaseServiceClient();
-        const { data: targetMfa } = await service
-          .from("users")
-          .select("two_factor_enabled")
-          .eq("id", targetUserId)
-          .maybeSingle();
-        if (!targetMfa?.two_factor_enabled) {
-          return NextResponse.json(
-            {
-              success: false,
-              error: {
-                code: "MFA_REQUIRED",
-                message: "This user must enroll in two-factor authentication (Profile → Security) before being promoted to sysadmin.",
-              },
-            },
-            { status: 403 }
-          );
-        }
-      }
+      // Privilege-escalation guard: only a sysadmin actor may grant the
+      // sysadmin role. The MFA subsystem was removed from this architecture,
+      // but the role guard is NOT — it is enforced here (admin→sysadmin is
+      // rejected above) and re-checked in lib/db updateUserRole, so no
+      // logged-in admin can escalate another account to sysadmin.
 
       // Update role (also revokes all Supabase Auth sessions)
       const success = await updateUserRole(targetUserId, role as Role, actorId);

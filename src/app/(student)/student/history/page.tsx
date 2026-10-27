@@ -49,7 +49,10 @@ const api = useApi();
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
+<<<<<<< HEAD
           <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">My History</p>
+=======
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
           <p className="text-[var(--text-muted)]">All your gate activity</p>
         </div>
         <div className="flex items-center gap-1 bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg p-1">

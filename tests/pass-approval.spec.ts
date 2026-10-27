@@ -22,8 +22,8 @@ test.describe('Gate Pass Approval Workflow', () => {
   test('Pass rejection requires non-empty comment', async ({ request }) => {
     const response = await request.put('/api/passes/mock-pass-uuid-1234', {
       headers: {
-        'x-user-role': 'warden',
-        'x-user-id': 'warden-test-id',
+        'x-user-role': 'principal',
+        'x-user-id': 'principal-test-id',
       },
       data: {
         action: 'reject',

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, ShieldCheck, ShieldAlert, ShieldQuestion, RefreshCw, User, LogOut } from "lucide-react";
+import { Menu, ShieldCheck, ShieldAlert, ShieldQuestion, User, LogOut } from "lucide-react";
 import { useUIStore } from "@/stores/uiStore";
 import { useAuthStore } from "@/stores/authStore";
 import { useCollegeInfo } from "@/hooks/useCollegeInfo";
@@ -19,14 +19,39 @@ const PAGE_TITLES: Record<string, string> = {
   "/admin/workers": "Shift & Presence Tracker",
   "/admin/alerts": "Security Alerts",
   "/admin/reports": "Gate Analytics",
+  "/admin/users": "User Management",
+  "/admin/roles": "Role Assignments",
+  "/admin/permission-policies": "Permission Policies",
+  "/admin/institutional-configuration": "Institutional Configuration",
+  "/admin/gate-device-configuration": "Gate & Device Configuration",
+  "/admin/gates": "Gate Devices",
+  "/admin/workflow-configuration": "Workflow Configuration",
+  "/admin/notification-settings": "Notification Settings",
+  "/admin/audit-logs": "Audit Logs",
   "/sysadmin": "Administration",
   "/parent": "Parent Student Tracker",
   "/student": "Digital ID & Pass Desk",
   // Approver / leadership desks
   "/principal": "Principal Command Center",
+  "/principal/attendance": "Institutional Attendance",
+  "/principal/gate-activity": "Gate Activity Overview",
+  "/principal/departments": "Department Performance",
+  "/principal/incidents": "Incident Oversight",
+  "/principal/reports": "Institutional Reports",
+  "/principal/approvals": "Approvals and Decisions",
+  "/principal/audit": "Audit and Compliance",
   "/principal/permissions": "Principal Approvals",
   "/vice-principal": "Vice Principal Desk",
+  "/vice-principal/department-performance": "Department Performance",
+  "/vice-principal/pending-approvals": "Pending Approvals",
+  "/vice-principal/escalated-requests": "Escalated Requests",
+  "/vice-principal/attendance-exceptions": "Attendance Exceptions",
+  "/vice-principal/hostel-security-summaries": "Hostel & Security Summaries",
+  "/vice-principal/examination-coordination": "Examination Coordination",
+  "/vice-principal/delegated-responsibilities": "Delegated Responsibilities",
+  "/vice-principal/decision-history": "Decision History",
   "/exam/permissions": "Exam Branch Permissions",
+  "/exam-branch": "Exam Branch Dashboard",
   "/oie": "OIE Dashboard",
   "/deputy-warden": "Deputy Warden Dashboard",
   "/hostel-manager": "Hostel Manager Dashboard",
@@ -44,7 +69,7 @@ export function DynamicHeader() {
   const { theme, setTheme, toggleMobileSidebar, addToast } = useUIStore();
   const { role, user, logout } = useAuthStore();
   const { college } = useCollegeInfo();
-  const { wsConnected, securityMode, activeAlerts, gateTraffic } = useGlass();
+  const { securityMode } = useGlass();
   const [isOnline, setIsOnline] = useState(true);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement | null>(null);
@@ -154,22 +179,11 @@ export function DynamicHeader() {
           </div>
         )}
 
-        {/* WebSocket Connection Reconnecting Indicator */}
-        {!wsConnected && (
-          <div 
-            className="px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] sm:text-[11px] font-semibold flex items-center gap-1 sm:gap-1.5 backdrop-blur-md animate-pulse"
-            title="Reconnecting WebSocket..."
-          >
-            <RefreshCw className="w-3 h-3 animate-spin shrink-0" />
-            <span className="hidden md:inline">Reconnecting WS…</span>
-          </div>
-        )}
-
         {/* Mode-aware Security Posture Button → /security */}
         <button
           onClick={() => router.push("/security")}
           className="p-0.5 sm:p-1 rounded-lg cursor-pointer hover:bg-[var(--bg-elevated)] transition-colors text-[var(--text-muted)] shrink-0"
-          title={`${SECURITY_MODE_CONFIG[mode].title} Tap to open security page.${wsConnected ? " Live protected." : ""}`}
+          title={SECURITY_MODE_CONFIG[mode].title + " Tap to open security page."}
           aria-label={`Security status: ${SECURITY_MODE_CONFIG[mode].label}`}
         >
           <div className={`flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-[11px] font-semibold border ${SECURITY_MODE_CONFIG[mode].badgeCls}`}>

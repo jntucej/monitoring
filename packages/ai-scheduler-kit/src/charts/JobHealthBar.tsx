@@ -1,5 +1,4 @@
 // Job health bar chart - displays job status distribution
-import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell } from 'recharts';
 
 export interface JobHealthBarData {

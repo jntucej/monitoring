@@ -1,21 +1,13 @@
 // AI Intelligence panel - displays AI insights and recommendations
-import React from 'react';
 import { Card } from '../primitives/Card';
 import { ChartFrame } from '../primitives/ChartFrame';
 import { Sparkline } from '../primitives/Sparkline';
 import { useSchedulerData } from '../hooks/useSchedulerData';
+import { MockAdapter } from '../lib/adapters/MockAdapter';
 
 export function AIIntelligencePanel() {
-  const { jobs, loading } = useSchedulerData({
-    adapter: {
-      fetchJobs: async () => [],
-      fetchJob: async (id) => ({}),
-      createJob: async (data) => ({}),
-      updateJob: async (id, data) => ({}),
-      deleteJob: async (id) => {},
-      fetchConflicts: async () => [],
-      fetchResources: async () => []
-    },
+  const { loading } = useSchedulerData({
+    adapter: new MockAdapter(),
     autoFetch: true,
     refreshInterval: 15000
   });
@@ -35,12 +27,6 @@ export function AIIntelligencePanel() {
     { value: 80, date: '2024-01-05' },
     { value: 78, date: '2024-01-06' },
     { value: 85, date: '2024-01-07' }
-  ];
-
-  const hintData = [
-    { name: 'Applied', value: 145, color: '#10b981' },
-    { name: 'Ignored', value: 23, color: '#ef4444' },
-    { name: 'Pending', value: 12, color: '#f59e0b' }
   ];
 
   if (loading) {

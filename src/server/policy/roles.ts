@@ -10,4 +10,11 @@ export const TIER = {
   ADMIN:    ["admin", "sysadmin"] as Role[],
   SYSADMIN: ["sysadmin"] as Role[],
   MESS_INCHARGE: ["mess_incharge", "principal", "admin", "sysadmin"] as Role[],
+  // All interactive-app roles — used where any authenticated user may act.
+  APP: [
+    "admin", "sysadmin", "principal", "vice_principal", "hod", "oie",
+    "exam_branch", "exam_superintendent", "faculty", "staff", "worker",
+    "supervisor", "operator", "hostel_manager", "deputy_warden",
+    "caretaker", "mess_incharge", "student", "parent", "guardian", "visitor",
+  ] as Role[],
 } as const;

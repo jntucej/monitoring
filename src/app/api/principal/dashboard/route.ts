@@ -22,7 +22,7 @@ async function handleGet(req: NextRequest) {
       .from("alerts")
       .select("*")
       .eq("resolved", false)
-      .order("created_at", { ascending: false })
+      .order("timestamp", { ascending: false })
       .limit(5);
 
     if (aError) throw aError;
@@ -51,6 +51,6 @@ async function handleGet(req: NextRequest) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["principal", "sysadmin"] }),
+  withAuthorization(handleGet, { requiredRole: ["principal", "vice_principal", "sysadmin"] }),
   { keyPrefix: "principal_dashboard", maxRequests: 60 }
 );

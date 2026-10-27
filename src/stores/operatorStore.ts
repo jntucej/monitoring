@@ -4,12 +4,35 @@
  */
 import { create } from "zustand";
 import { playAudioFeedback } from "@/lib/sound";
+import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
 import type { Scan, Person, Student, Gate, ScanDirection, ExitReason, CategoryBreakdown, OutingEntry } from "@/lib/types";
 import type { ToastData } from "@/components/ui/toast";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 import { validateRollNumber } from "@/lib/rollNumber";
 import { getClientLocation, getClientSysTag } from "@/lib/geo";
+import { recommend, type Recommendation } from "@/lib/operator-recommend";
+
+/**
+ * IN-movement button ids the gate operator can tap (from the
+ * resolveEntryOptions matrix). Distinct from the canonical entry type:
+ * `return_to_hostel` is a round-trip re-entry that must NOT rewrite the
+ * student's stored `current_entry_type`, whereas `home_in` / `day_scholar_in`
+ * do. The API agent maps these to type writes on the entry-type route.
+ */
+export type EntryButtonId = "return_to_hostel" | "home_in" | "day_scholar_in";
+
+/**
+ * Canonicalize any stored entry-type form to the two lowercase values the
+ * server accepts ("hosteller" | "day_scholar"), or null when absent.
+ */
+function normalizeEntryType(value: unknown): "hosteller" | "day_scholar" | null {
+  if (typeof value !== "string") return null;
+  const s = value.trim().toLowerCase();
+  if (s === "hosteller" || s === "hostel" || s === "hm" || s === "hf") return "hosteller";
+  if (s === "day_scholar" || s === "day scholar" || s === "dm" || s === "df") return "day_scholar";
+  return null;
+}
 
 /**
  * Fetch today's operator gate stats from the server.
@@ -43,7 +66,11 @@ async function fetchTodayStats(gateId?: string, signal?: AbortSignal): Promise<{
     const res = await fetch(url, { headers, cache: "no-store", signal });
     if (!res.ok) return null;
     const result = await res.json();
-    if (!result?.success || !result?.data) return null;
+    // /api/operator/stats returns { data: {...} } (the `ok()` helper), NOT
+    // { success: true, data: {...} }. Guard on the presence of `data` only;
+    // a missing/undefined `success` field must not cause us to discard a
+    // valid response, or the panel falls back to an empty local stat.
+    if (!result?.data) return null;
     return {
       entries: result.data.entries ?? 0,
       exits: result.data.exits ?? 0,
@@ -58,12 +85,14 @@ async function fetchTodayStats(gateId?: string, signal?: AbortSignal): Promise<{
 }
 
 
-type ScanState = "idle" | "detecting" | "confirming" | "selecting_reason" | "success" | "error";
+type ScanState = "idle" | "detecting" | "confirming" | "success" | "error";
 
 // Error info returned from the store on failed scans
 interface ScanError {
   message: string;
   code?: string;
+  /** True when pressing Retry can realistically recover (network issues, timeouts, duplicates). */
+  retryable?: boolean;
 }
 
 export interface TodayStatsResult {
@@ -75,18 +104,41 @@ export interface TodayStatsResult {
   outing: OutingEntry[] | null;
 }
 
+export interface OperatorStatusStrip {
+  gate: string;
+  entries: number;
+  exits: number;
+  /** Live shift window, e.g. "07:42 AM" (now) — the gate desk's on-duty span. */
+  shift: string;
+  /** Human "last scan N ago" (e.g. "42s", "5m", "1h"); "—" when no scan. */
+  lastScanAgo: string;
+  /** Number of distinct flagged/denied scans in the recent log (red signals). */
+  flagCount: number;
+  /** Gate health: healthy when online + no flags, caution when flagged, critical when offline. */
+  health: "healthy" | "caution" | "critical";
+}
+
 interface OperatorState {
   // Current scan flow
   state: ScanState;
   currentStudent: Student | null;
+  /** Authoritative current IN/OUT condition of the scanned person (from campus_occupancy). */
+  currentCampusStatus: "IN" | "OUT" | null;
+  /**
+   * Reason recorded on the person's most recent OUT scan. Drives the hosteller
+   * re-entry button label: daily_outing → "Return to Hostel", else "Home In".
+   */
+  lastOutReason: ExitReason | null;
   selectedDirection: ScanDirection;
   selectedReason: ExitReason | null;
+  /**
+   * Live entry-type selection carried through the scan flow. Populated from the
+   * person's stored student_details.current_entry_type in startScan, and set
+   * by the operator on IN-scan confirmations. Reset to null in reset/cancelScan.
+   */
+  entryType: "hosteller" | "day_scholar" | null;
   photoVerificationDone: boolean;
   error: ScanError | null;
-  /** Thumbprint (biometric) confirmation for the current scan person */
-  
-  /** True when verification was allowed because the person has no thumbprint on file */
-  
 
   // Data
   lastScan: Scan | null;
@@ -102,14 +154,32 @@ interface OperatorState {
   startScan: (roll: string) => void;
   setDirection: (direction: ScanDirection) => void;
   setReason: (reason: ExitReason | null) => void;
+  setEntryType: (entryType: "hosteller" | "day_scholar" | null) => void;
   clearError: () => void;
   
-  confirmScan: (addToast: (toast: Omit<ToastData, "id">) => void, overrideDirection?: ScanDirection, overrideReason?: ExitReason | string) => Promise<void>;
+  confirmScan: (addToast: (toast: Omit<ToastData, "id">) => void, overrideDirection?: ScanDirection, overrideReason?: ExitReason | string, overrideEntryType?: "hosteller" | "day_scholar", overrideEntryButton?: EntryButtonId) => Promise<void>;
     cancelScan: () => void;
   reset: () => void;
   loadStats: () => void;
   setGate: (gateId: string) => void;
   _fetchTodayStats: () => Promise<TodayStatsResult>;
+  /**
+   * Lean status strip for the gate kiosk header: gate name + today's
+   * in/out + current shift window + "last scan N ago" + flagged-scan count.
+   * Pure read of existing store fields — no logic changes to the scan flow.
+   */
+  getStatusStrip: () => OperatorStatusStrip;
+  /**
+   * Lean recommendation for the current scanned student (principle 3: auto-
+   * recommend). Pure read of store fields + a pass count passed in from the
+   * caller (approved passes are fetched in ScanConfirmation, not the store).
+   * No logic changes to the scan flow — it only produces the suggested
+   * direction/reason/entry + alternatives for the 1-button + 2-alternatives UI.
+   */
+  getRecommendation: (
+    currentStudent: Student | null,
+    approvedPassCount: number,
+  ) => Recommendation;
 }
 
 let activeStatsFetchCtrl: AbortController | null = null;
@@ -128,11 +198,12 @@ let scanAbortController: AbortController | null = null;
 export const useOperatorStore = create<OperatorState>((set, get) => ({
   state: "idle",
   currentStudent: null,
+  currentCampusStatus: null,
+  lastOutReason: null,
   selectedDirection: "IN",
   selectedReason: null,
+  entryType: null,
   photoVerificationDone: false,
-  
-  
   error: null,
 
   lastScan: null,
@@ -147,6 +218,11 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
   startScan: async (roll: string) => {
     const cleanRoll = roll.trim().toUpperCase();
     if (!cleanRoll) return;
+
+    // Increment generation so any in-flight startScan/confirmScan callbacks
+    // for the previous scan are dropped once we hit a stale check.
+    const gen = get()._scanGeneration + 1;
+    set({ _scanGeneration: gen });
 
     if (scanAbortController) {
       scanAbortController.abort();
@@ -169,7 +245,9 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
 
     try {
       const res = await fetch(`/api/persons/${encodeURIComponent(cleanRoll)}`, { headers, signal });
+      if (get()._scanGeneration !== gen) return;
       const result = await res.json().catch(() => null);
+      if (get()._scanGeneration !== gen) return;
 
       if (res.status === 401 || result?.error?.code === "SESSION_EXPIRED" || result?.error?.code === "UNAUTHORIZED") {
         authStore.logout();
@@ -186,6 +264,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
             ? `Person with ID "${cleanRoll}" not found in database.`
             : "Failed to fetch person details.");
         const errorCode = result?.error?.code || (res.status === 404 ? "NOT_FOUND" : "ERROR");
+        if (get()._scanGeneration !== gen) return;
         set({
           state: "error",
           error: { message: errorMsg, code: errorCode },
@@ -193,11 +272,11 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
         });
         return;
       }
-
       const person: Person = result.data.person;
 
       // Check account status — do not allow inactive/suspended accounts to proceed
       if (person.status && person.status.toUpperCase() !== "ACTIVE") {
+        if (get()._scanGeneration !== gen) return;
         set({
           state: "error",
           error: {
@@ -209,20 +288,38 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
         return;
       }
 
-      // Infer direction from last scan returned by the API
-      let direction: ScanDirection = "IN";
-      if (result.data.lastScan?.direction) {
+      // Use authoritative campus occupancy status to suggest next direction
+      const campusStatus = result.data.campusStatus;
+      let direction: ScanDirection;
+      if (campusStatus) {
+        direction = campusStatus === "IN" ? "OUT" : "IN";
+      } else if (result.data.lastScan?.direction) {
         direction = result.data.lastScan.direction === "IN" ? "OUT" : "IN";
+      } else {
+        direction = "IN";
       }
 
+      if (get()._scanGeneration !== gen) return;
+      // Derive the most recent OUT reason when occupancy is OUT, so the
+      // hosteller re-entry button can distinguish "Return to Hostel" (came out
+      // for an outing) from "Home In" (came out for home / day pass).
+      const lastScanData: any = result.data.lastScan ?? null;
+      const lastOutReason: ExitReason | null =
+        campusStatus === "OUT" && lastScanData?.direction === "OUT" && lastScanData.reason
+          ? (lastScanData.reason as ExitReason)
+          : null;
       set({
         state: "confirming",
         currentStudent: person,
+        currentCampusStatus:
+          campusStatus === "IN" || campusStatus === "OUT" ? campusStatus : null,
+        lastOutReason,
         selectedDirection: direction,
         selectedReason: null,
+        entryType: normalizeEntryType(
+          person.studentDetails?.currentEntryType ?? person.currentEntryType
+        ),
         photoVerificationDone: false,
-        
-        
         error: null,
       });
     } catch (err: unknown) {
@@ -230,11 +327,13 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
         return;
       }
       console.error("Network or fetch error during scan start:", err);
+      if (get()._scanGeneration !== gen) return;
       set({
         state: "error",
         error: {
           message: err instanceof Error ? err.message : "Unable to communicate with server.",
           code: "NETWORK_ERROR",
+          retryable: true,
         },
         currentStudent: null,
       });
@@ -251,39 +350,57 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
     set({ selectedReason: reason, state: "confirming" });
   },
 
+  setEntryType: (entryType: "hosteller" | "day_scholar" | null) => {
+    set({ entryType });
+  },
+
   
 
   // Clears only the error field, leaving other state intact
   clearError: () => set({ error: null }),
 
-  confirmScan: async (addToast: (toast: Omit<ToastData, "id">) => void, overrideDirection?: ScanDirection, overrideReason?: string) => {
+  confirmScan: async (addToast: (toast: Omit<ToastData, "id">) => void, overrideDirection?: ScanDirection, overrideReason?: string, overrideEntryType?: "hosteller" | "day_scholar", overrideEntryButton?: EntryButtonId) => {
     const { currentStudent } = get();
     if (!currentStudent) return;
 
     const gen = get()._scanGeneration + 1;
     set({ _scanGeneration: gen });
-    if (typeof navigator !== "undefined" && !navigator.onLine) {
+    const directionToUse = overrideDirection || get().selectedDirection;
+    const reasonToUse = (overrideReason as ExitReason) || get().selectedReason;
+    // Resolve the entry type: explicit override (operator tapped a specific
+    // entry/exit button) wins over the stored value; IN scans default to
+    // the stored type when the operator did not pick a button.
+    const entryTypeToUse: "hosteller" | "day_scholar" | null =
+      overrideEntryType ?? get().entryType ??
+      normalizeEntryType(
+        currentStudent.studentDetails?.currentEntryType ?? currentStudent.currentEntryType
+      ) ??
+      (directionToUse === "IN" ? "hosteller" : null);
+    const clientEventId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : `ev-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+    const uniqueId = currentStudent.uniqueId || currentStudent.roll || "";
+    const authState = useAuthStore.getState();
+    const operatorId = authState.user?.id || "op-1";
+    const resolvedGateId = get().gate?.id || get().gateId || authState.user?.gateId || "";
+    if (!resolvedGateId) {
       playAudioFeedback("error");
       addToast({
         variant: "error",
-        title: "Server Connection Required",
-        message: "Action blocked: Active live server API connection is strictly required.",
+        title: "No Gate Assigned",
+        message: "This operator account has no gate assignment. Ask your supervisor or sysadmin to assign a gate, then sign in at that gate's kiosk.",
       });
       set({
         error: {
-          message: "100% Strict Online Policy: Active server connection required to process scans.",
-          code: "OFFLINE_BLOCKED",
+          message: "No gate assigned to this operator. A gate must be assigned before scans can be recorded.",
+          code: "NO_GATE_ASSIGNED",
         },
       });
       return;
     }
 
-    const directionToUse = overrideDirection || get().selectedDirection;
-    const reasonToUse = (overrideReason as ExitReason) || get().selectedReason;
-    const uniqueId = currentStudent.uniqueId || currentStudent.roll || "";
-    const operatorId = useAuthStore.getState().user?.id || "op-1";
-
-    // Async execution with GPS geolocation & sysTag telemetry with strict 5s timeout
+    // Async execution with GPS geolocation & sysTag telemetry, 15s fetch timeout
     return (async () => {
       const geo = await getClientLocation();
       const sysTag = getClientSysTag();
@@ -294,30 +411,45 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
       if (token) headers["Authorization"] = `Bearer ${token}`;
       if (sessionToken) headers["X-Session-Token"] = sessionToken;
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-
       try {
-        const res = await fetch("/api/gate/scan", {
+        // IN scans: persist the entry-type selection first (POST
+        // /api/operator/entry-type) so the later OUT-scan scope check reads
+        // the freshly stored type, then record the movement. The entry-type
+        // write is non-fatal by design — a failure here never blocks the scan.
+        // We send the operator's chosen button id (return_to_hostel /
+        // home_in / day_scholar_in) so the route can decide whether to write
+        // the canonical entry type; the existing `entryType` field is kept for
+        // backward compatibility with record.ts consumers.
+        if (directionToUse === "IN" && entryTypeToUse) {
+          await fetchWithTimeout("/api/operator/entry-type", {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+              roll: uniqueId,
+              entryType: entryTypeToUse,
+              ...(overrideEntryButton ? { buttonId: overrideEntryButton } : {}),
+              gateId: resolvedGateId,
+            }),
+          }, 10_000).catch(() => { /* non-fatal: proceed to record the scan */ });
+        }
+        const res = await fetchWithTimeout("/api/gate/scan", {
           method: "POST",
           headers,
-          signal: controller.signal,
-          body: JSON.stringify({ clientEventId: crypto.randomUUID(), roll: uniqueId,
+          body: JSON.stringify({ clientEventId, roll: uniqueId,
             direction: directionToUse,
-            reason: reasonToUse || (directionToUse === "OUT" ? "Regular" : undefined),
-            gateId: get().gate?.id || get().gateId || useAuthStore.getState().user?.gateId || "gate-1",
+            reason: reasonToUse || (directionToUse === "OUT" ? "daily_outing" : undefined),
+            entryType: entryTypeToUse ?? undefined,
+            gateId: resolvedGateId,
             operatorId,
             isManual: false,
             sysTag,
             geo,
           }),
-        });
-        clearTimeout(timeoutId);
+        }, 15_000);
         return res;
       } catch (e: any) {
-        clearTimeout(timeoutId);
-        if (e.name === "AbortError") {
-          throw new Error("Scan request timed out (5s). Network connection may be slow.");
+        if (e?.name === "AbortError") {
+          throw new Error("Scan request timed out (15s). Network connection may be slow.");
         }
         throw e;
       }
@@ -331,12 +463,11 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
             title: "Duplicate Scan",
             message: `Duplicate scan detected. Same student scanned recently.`,
           });
-          set({ state: "error", error: { message: "Duplicate scan detected", code: "DUPLICATE" } });
+          set({ state: "error", error: { message: "Duplicate scan detected", code: "DUPLICATE", retryable: true } });
           return null;
         }
-
         // Handle session expiry — log out and redirect to login
-        if (res.status === 401 && result?.error?.code === "SESSION_EXPIRED") {
+        if (res.status === 401 || result?.error?.code === "SESSION_EXPIRED" || result?.error?.code === "UNAUTHORIZED") {
           const authStore = useAuthStore.getState();
           authStore.logout();
           if (typeof window !== "undefined") {
@@ -349,20 +480,60 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
       .then((result) => {
         if (get()._scanGeneration !== gen) return;
         if (!result) return;
-        if (result?.duplicate) {
+
+        // /api/gate/scan success shape: { data: { scan, isDuplicate, person } }
+        // Failure shapes: { error, message } (fail()) or { success:false, error:{code,message} } (auth).
+        const payload = result.data;
+
+        // A duplicate means the movement is ALREADY on record (the server
+        // returned the pre-existing row and did not insert a new one). We
+        // show the "already scanned" time and cancel this operation instead
+        // of recording a second movement.
+        if (payload?.isDuplicate) {
           playAudioFeedback("warning");
+          const dupScan: any = payload.scan;
+          const scannedAt =
+            (dupScan?.timestamp && new Date(dupScan.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })) ||
+            "just now";
           addToast({
-            variant: "error",
-            title: "Duplicate Scan",
-            message: `This student was already scanned ${directionToUse === "OUT" ? "out" : "in"} recently.`,
+            variant: "warning",
+            title: "Already Scanned",
+            message: `${currentStudent.name} was already scanned ${directionToUse === "OUT" ? "out" : "in"} at ${scannedAt}. This scan was not recorded.`,
           });
-          set({ state: "error", error: { message: "Duplicate scan detected", code: "DUPLICATE" } });
+          // Cancel the operation: do not count as a new movement, do not push
+          // into recentScans (it's the same row), just surface the existing
+          // record so the operator can see the time.
+          set({
+            state: "success",
+            lastScan: dupScan ?? get().lastScan,
+            error: null,
+            entryType: entryTypeToUse,
+          });
           return;
         }
 
-        if (!result?.success) {
+        // Any top-level error (fail() / auth layer) → error state
+        if (result.error || result.success === false) {
+          const msg = result.error?.message || result.message || result.error?.code || "Scan failed";
           playAudioFeedback("error");
-          throw new Error(result?.error?.message || "Scan failed");
+          set({
+            state: "error",
+            currentStudent: null,
+            error: { message: msg, code: result.error?.code || "ERROR", retryable: true },
+          });
+          addToast({ variant: "error", title: "Scan Failed", message: msg });
+          return;
+        }
+
+        // Success: a valid { data } payload means the movement was recorded
+        if (payload === undefined) {
+          playAudioFeedback("error");
+          set({
+            state: "error",
+            currentStudent: null,
+            error: { message: "Scan failed — no data returned.", code: "UNKNOWN", retryable: true },
+          });
+          return;
         }
 
         playAudioFeedback("success");
@@ -381,34 +552,60 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
             }
           : null;
 
+        const scan = payload.scan ?? null;
         set({
           state: "success",
-          lastScan: result.scan ?? null,
+          lastScan: scan,
           todaysStats: newStats,
-          recentScans: result.scan ? [result.scan, ...get().recentScans.slice(0, 4)] : get().recentScans,
+          // Keep up to 20 recent scans in memory (slice(0, 20) on the
+          // remainder means the array never grows past ~21 entries total).
+          recentScans: scan ? [scan, ...get().recentScans.slice(0, 20)] : get().recentScans,
           error: null,
+          entryType: entryTypeToUse,
         });
       })
       .catch((err: unknown) => {
         const msg = err instanceof Error ? err.message : "An unexpected error occurred during scan confirmation.";
+        const isTimeout = err instanceof Error && err.message.includes("timed out");
+        const isNetwork = isTimeout || err instanceof Error && (err.name === "TypeError" || err.name === "NetworkError");
+        // Network errors are retryable: the operator can simply re-scan. There is
+        // no local queue — the kiosk is stateless between scans.
+        playAudioFeedback(isNetwork ? "warning" : "error");
         addToast({
-          variant: "error",
-          title: "Scan Failed",
-          message: msg,
+          variant: isNetwork ? "warning" : "error",
+          title: isNetwork ? "Network Error" : "Scan Failed",
+          message: isNetwork
+            ? "Could not reach the server — tap Retry and scan again."
+            : msg,
         });
-        set({ state: "error", error: { message: msg, code: "UNKNOWN" } });
+        set({
+          state: "error",
+          error: isNetwork
+            ? {
+                message: "Network error — retry.",
+                code: isTimeout ? "TIMEOUT" : "NETWORK",
+                retryable: true,
+              }
+            : {
+                message: msg,
+                code: "UNKNOWN",
+                retryable: false,
+              },
+        });
       });
   },
 
     cancelScan: () => {
     set({
+      _scanGeneration: get()._scanGeneration + 1,
       state: "idle",
       currentStudent: null,
+      currentCampusStatus: null,
+      lastOutReason: null,
       selectedDirection: "IN",
       selectedReason: null,
+      entryType: null,
       photoVerificationDone: false,
-      
-      
       error: null,
     });
   },
@@ -432,10 +629,14 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
   reset: async () => {
     const stats = await get()._fetchTodayStats();
     set({
+      _scanGeneration: get()._scanGeneration + 1,
       state: "idle",
       currentStudent: null,
+      currentCampusStatus: null,
+      lastOutReason: null,
       selectedDirection: "IN",
       selectedReason: null,
+      entryType: null,
       photoVerificationDone: false,
       error: null,
       todaysStats: stats
@@ -477,11 +678,61 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
       });
       return;
     }
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(gateId);
-    const normalizedGateId = !isUuid && /^\d+$/.test(gateId) ? `gate-${gateId}` : gateId;
+    // Keep the gate identifier exactly as the URL supplied it (UUID, code,
+    // or bare digit). findGateById resolves both UUID ids and gate codes, so
+    // normalising a bare "1" to "gate-1" here would hide the real code from
+    // the fallback lookup and break scans against gates whose code is not
+    // literally "gate-1".
     set({
-      gate: { id: normalizedGateId, name: normalizedGateId, location: "Main Gate", type: "ENTRY_EXIT" as const, isActive: true },
-      gateId: normalizedGateId,
+      gate: { id: gateId, name: gateId, location: "Main Gate", type: "ENTRY_EXIT" as const, isActive: true },
+      gateId,
+    });
+  },
+
+  // Lean status-strip read for the gate kiosk header. Pure — no writes.
+  getStatusStrip: () => {
+    const s = get();
+    const now = new Date();
+    const shift = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    let lastScanAgo = "—";
+    if (s.lastScan?.timestamp) {
+      const diffMs = now.getTime() - new Date(s.lastScan.timestamp).getTime();
+      const sec = Math.max(0, Math.floor(diffMs / 1000));
+      lastScanAgo = sec < 5 ? "now" : sec < 60 ? `${sec}s` : Math.floor(sec / 60) < 60 ? `${Math.floor(sec / 60)}m` : `${Math.floor(sec / 3600)}h`;
+    }
+    // Red flags = recent operator-correction scans (principle 5: red = critical).
+    const flagCount = s.recentScans.filter((sc) => sc.isCorrection).length;
+    const online = s.gate?.isOnline ?? true;
+    const health: OperatorStatusStrip["health"] = !online ? "critical" : flagCount > 0 ? "caution" : "healthy";
+    return {
+      gate: s.gate?.name || s.gateId || "Gate",
+      entries: s.todaysStats?.entries ?? 0,
+      exits: s.todaysStats?.exits ?? 0,
+      shift,
+      lastScanAgo,
+      flagCount,
+      health,
+    };
+  },
+
+  // Auto-recommendation for the current scanned student (principle 3).
+  getRecommendation: (currentStudent: Student | null, approvedPassCount: number) => {
+    const s = get();
+    let curfewMinutes: number | null = null;
+    const curfewStr = currentStudent?.hostelCurfewTime;
+    if (curfewStr) {
+      const curfew = new Date(curfewStr);
+      if (!Number.isNaN(curfew.getTime())) {
+        curfewMinutes = Math.floor((curfew.getTime() - Date.now()) / 60000);
+      }
+    }
+    return recommend({
+      campusStatus: s.currentCampusStatus,
+      lastReason: s.lastOutReason ?? null,
+      currentEntryType: s.entryType,
+      hasApprovedPass: approvedPassCount > 0,
+      curfewMinutes,
+      biometricReady: Boolean(currentStudent?.hasThumbprint),
     });
   },
 }));

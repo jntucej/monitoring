@@ -26,7 +26,6 @@ const ROLES_TO_SEED = [
   { role: 'admin', name: 'Campus Admin' },
   { role: 'operator', name: 'Gate Operator' },
   { role: 'supervisor', name: 'Gate Supervisor' },
-  { role: 'warden', name: 'Hostel Warden' },
   { role: 'hod', name: 'Head of Department' },
   { role: 'faculty', name: 'Faculty Member' },
   { role: 'staff', name: 'Office Staff' },

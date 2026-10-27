@@ -5,7 +5,7 @@ import { useApi } from "@/hooks/useApi";
 
 const ALL_ROLES = [
   "operator","admin","sysadmin","supervisor","guardian","parent","hod","student",
-  "warden","faculty","staff","worker","visitor","caretaker","deputy_warden",
+  "faculty","staff","worker","visitor","caretaker","deputy_warden",
   "hostel_manager","principal","vice_principal","oie","exam_branch",
 ];
 

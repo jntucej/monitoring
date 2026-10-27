@@ -68,7 +68,7 @@ export function AdvancedAnalytics() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Advanced Analytics</h1>
+          <p className="text-2xl font-bold tracking-tight">Advanced Analytics</p>
           <p className="text-sm text-gray-500">Build queries and custom reports.</p>
         </div>
         <Button onClick={() => setShowSave(!showSave)} variant="secondary" size="sm" className="gap-2">
@@ -100,7 +100,16 @@ export function AdvancedAnalytics() {
 
       {data && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="lg:col-span-2 border p-4">
+          {data.model === "unavailable" && (
+            <div className="lg:col-span-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-300">
+              No prediction model available. Showing raw historical movement data only
+              ({data.dataPoints} samples). {data.reason}
+            </div>
+          )}
+          <Card className={data.model === "unavailable" ? "lg:col-span-3 border p-4" : "lg:col-span-2 border p-4"}>
+            {data.model === "historical-ma" && (
+              <p className="text-xs text-gray-400 mb-2">Historical trend (moving average of recorded movement logs). Not a forecast.</p>
+            )}
             <div className="h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data.timeSeries}>
@@ -113,14 +122,18 @@ export function AdvancedAnalytics() {
               </ResponsiveContainer>
             </div>
           </Card>
-          <Card className="border p-4 space-y-3">
-            {data.breakdown?.map((b: any) => (
-              <div key={b.category} className="flex justify-between text-sm border-b pb-2">
-                <span>{b.category}</span>
-                <Badge variant="entry">{b.count}</Badge>
-              </div>
-            ))}
-          </Card>
+          {data.model === "historical-ma" && (
+            <Card className="border p-4 space-y-3">
+              {Array.isArray(data.breakdown) && data.breakdown.length > 0
+                ? data.breakdown.map((b: any) => (
+                    <div key={b.category} className="flex justify-between text-sm border-b pb-2">
+                      <span>{b.category}</span>
+                      <Badge variant="entry">{b.count}</Badge>
+                    </div>
+                  ))
+                : <p className="text-xs text-gray-500">No breakdown available.</p>}
+            </Card>
+          )}
         </div>
       )}
 

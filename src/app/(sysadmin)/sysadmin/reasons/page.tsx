@@ -20,7 +20,6 @@ import {
   Search,
   Trash2,
   Edit2,
-  RefreshCw,
   Tag,
   Building2,
   FileCheck2,
@@ -188,7 +187,11 @@ const api = useApi();
       <div className="space-y-6 max-w-7xl mx-auto p-4 md:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
+<<<<<<< HEAD
             <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
+=======
+            <p className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
               <MessageSquarePlus className="w-6 h-6 text-purple-400" />
               Custom Permission Reasons
             </p>
@@ -197,10 +200,6 @@ const api = useApi();
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="secondary" size="sm" onClick={() => fetchReasons()} disabled={loading} className="gap-1.5">
-              <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
-              Refresh
-            </Button>
             <Button variant="primary" size="sm" onClick={openCreateModal} className="gap-1.5">
               <Plus className="w-4 h-4" />
               Add Reason

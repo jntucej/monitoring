@@ -1,15 +1,13 @@
-"use client";
+import type { Metadata } from "next";
+import { NOINDEX_METADATA } from "@/lib/seo";
+import { MessShell } from "./MessShell";
 
-import React from "react";
-import { AuthGuard } from "@/components/shared/AuthGuard";
-import type { Role } from "@/lib/types";
+export const metadata: Metadata = NOINDEX_METADATA;
 
-const MESS_ALLOWED_ROLES: Role[] = ["mess_incharge", "principal", "admin", "sysadmin"];
-
-export default function MessLayout({
+export default function MessConsoleLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <AuthGuard allowedRoles={MESS_ALLOWED_ROLES}>{children}</AuthGuard>;
+  return <MessShell>{children}</MessShell>;
 }

@@ -51,6 +51,29 @@ export default async function cleanupExpiredPasses() {
     );
     console.log(`[Worker Job] Purged ${tokenRes.rowCount || 0} stale password reset tokens.`);
 
+    // 6. Expire PENDING hostel permission tickets whose window has closed
+    //    (with a 24h grace to cover edge cases where the return scan is
+    //    recorded just after to_date). This prevents stale rows from
+    //    cluttering approver queues forever.
+    try {
+      const permExpireRes = await query(
+        `UPDATE permissions
+           SET status = 'CANCELLED',
+               cancelled_at = NOW(),
+               updated_at = NOW()
+         WHERE workflow_type = 'hostel'
+           AND status = 'PENDING'
+           AND reason = 'home_out'
+           AND to_date IS NOT NULL
+           AND to_date < NOW() - INTERVAL '24 hours'
+        RETURNING ticket_number`
+      );
+      console.log(`[Worker Job] Auto-cancelled ${permExpireRes?.rowCount || 0} expired home_out tickets.`);
+    } catch (dbErr) {
+      // Table/column may not exist yet; log and continue.
+      console.warn('[Worker Job] Skipping home_out ticket sweep:', dbErr.message);
+    }
+
     console.log('[Worker Job] Expired passes and sessions cleanup completed successfully.');
   } catch (err) {
     console.error('[Worker Job Error] Cleanup expired passes failed:', err.message);

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
-import { withRateLimit } from "@/lib/rate-limit";
-import withAuthorization from "@/middleware/authorization";
+import { withAdminMutation } from "@/server/http/mutation-guard";
 import { addAudit } from "@/lib/db";
+import type { AuthContext } from "@/lib/authContext";
+import type { Role } from "@/lib/types";
 
 const VALID_SCOPES = ["global", "gate", "hostel"] as const;
 
@@ -11,9 +12,10 @@ function getIdFromPath(req: NextRequest): string {
   return decodeURIComponent(segments[segments.length - 1]);
 }
 
-async function handlePatch(req: NextRequest): Promise<Response> {
+async function handlePatch(req: NextRequest, ctx: { auth: AuthContext }): Promise<Response> {
   try {
-    const authUserId = req.headers.get("x-user-id") || "";
+    const authUserId = ctx.auth.userId;
+    const actorRole = ctx.auth.role as Role;
     const id = getIdFromPath(req);
 
     if (!id) {
@@ -87,7 +89,9 @@ async function handlePatch(req: NextRequest): Promise<Response> {
 
     addAudit({
       userId: authUserId || "system",
-      action: "UPDATE_DEVICE_SETTING",
+      userName: ctx.auth.email,
+      role: actorRole,
+      action: "DEVICE_SETTING_UPDATED",
       details: { id, updates },
     }).catch((err) => console.error("[Device Settings API] addAudit error:", err));
 
@@ -108,12 +112,6 @@ async function handlePatch(req: NextRequest): Promise<Response> {
   }
 }
 
-export const PATCH = withRateLimit(
-  withAuthorization(handlePatch, {
-    requiredRole: ["sysadmin", "admin"],
-  }),
-  {
-    keyPrefix: "device_settings_patch",
-    maxRequests: 60,
-  }
-);
+export const PATCH = withAdminMutation(handlePatch, {
+  rateLimit: { keyPrefix: "device_settings_patch", maxRequests: 60 },
+});

@@ -18,7 +18,6 @@ import {
   ScanBarcode,
   QrCode,
   AlertTriangle,
-  RefreshCw,
   CheckCircle2,
   XCircle,
   Globe,
@@ -156,25 +155,19 @@ const api = useApi();
       <div className="space-y-6 max-w-7xl mx-auto p-4 md:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
+<<<<<<< HEAD
             <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
+=======
+            <p className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
               <Cpu className="w-6 h-6 text-indigo-400" />
               Device Verification Settings
             </p>
             <p className="text-sm text-[var(--text-secondary)] mt-1">
               Configure automated gate turnstile and device scan verification methods across campus.
-            </p>
-          </div>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => fetchSettings()}
-            disabled={loading}
-            className="gap-1.5 self-start sm:self-auto"
-          >
-            <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
-            Refresh
-          </Button>
-        </div>
+             </p>
+           </div>
+         </div>
 
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 flex items-start gap-3.5">
           <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />

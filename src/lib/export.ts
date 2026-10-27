@@ -1,3 +1,5 @@
+import { csvEscape } from "@/lib/csv";
+
 export interface ExportFilters {
   search?: string;
   role?: string;
@@ -14,13 +16,16 @@ export interface ExportFilters {
   gate?: string;
 }
 
-function sanitizeCsvCell(val: any): string {
+function sanitizeCsvCell(val: unknown): string {
   if (val === null || val === undefined) return '""';
   let str = typeof val === "object" ? JSON.stringify(val) : String(val);
-  if (/^[=+\-@\t\n+]/.test(str)) {
-    str = "'" + str;
+  // Injection guard: prefix with ' so spreadsheet apps treat as literal.
+  str = csvEscape(str);
+  // CSV quoting: wrap in double quotes if it contains comma, quote, or newline.
+  if (/[",\n\r]/.test(str)) {
+    str = `"${str.replace(/"/g, '""')}"`;
   }
-  return JSON.stringify(str);
+  return str;
 }
 
 export async function generateCSV(data: any[], filename: string) {

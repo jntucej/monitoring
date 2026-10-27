@@ -1,13 +1,14 @@
 "use client";
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useBotStore, type Citation } from "./store";
 import { useApi } from "@/hooks/useApi";
 import { useAuthStore } from "@/stores/authStore";
+import { broadcastBot } from "./crossTab";
 
 const FLUSH_MS = 33;
 
 export function useBotChat() {
-const api = useApi();
+  const api = useApi();
 
   const lang = useBotStore((s) => s.lang);
   const conversationId = useBotStore((s) => s.conversationId);
@@ -22,6 +23,23 @@ const api = useApi();
 
   const abortRef = useRef<AbortController | null>(null);
   const inflightRef = useRef<boolean>(false);
+
+  // Abort any in-flight stream on unmount and reconcile the store so a
+  // closed-mid-stream panel never leaves `streaming: true` (which would pin
+  // the composer in "Stop" mode on the next open). Also mark the abandoned
+  // draft as errored so the reopened panel shows the truth, not a ghost.
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+      const st = useBotStore.getState();
+      if (st.streaming) {
+        st.messages
+          .filter((m) => m.status === "streaming")
+          .forEach((m) => st.setDraftStatus(m.id, "error"));
+        st.setStreaming(false);
+      }
+    };
+  }, []);
 
   const send = useCallback(async (
     raw: string,
@@ -40,6 +58,7 @@ const api = useApi();
 
     appendUser(text);
     const draftId = appendDraft();
+    broadcastBot({ type: "send", content: text });
 
     const ac = new AbortController();
     abortRef.current = ac;
@@ -115,6 +134,7 @@ const api = useApi();
       flush(true);
       setDraftCitations(draftId, cites);
       setDraftStatus(draftId, "done");
+      broadcastBot({ type: "done", messageId: draftId });
 
       onDone?.(acc);
     } catch (err: any) {
@@ -145,6 +165,7 @@ const api = useApi();
     const store = useBotStore.getState();
     const msg = store.messages.find((m) => m.id === msgId);
     store.setFeedback(msgId, feedback);
+    broadcastBot({ type: "feedback", messageId: msgId, v: feedback });
     if (!msg?.dbId) return;
     try {
       await fetch("/api/bot/feedback", {
@@ -155,5 +176,10 @@ const api = useApi();
     } catch {}
   }, []);
 
-  return { send, cancel, setFeedback };
+  const resetChat = useCallback(() => {
+    useBotStore.getState().reset();
+    broadcastBot({ type: "reset" });
+  }, []);
+
+  return { send, cancel, setFeedback, resetChat };
 }

@@ -8,9 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { ChartRenderer, type ChartType, type SeriesDef } from "@/components/shared/ChartRenderer";
-import { ChartTypeSwitcher } from "@/components/shared/ChartTypeSwitcher";
+import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { ChartRenderer, type ChartType, type SeriesDef } from "@/components/admin/shared/ChartRenderer";
+import { ChartTypeSwitcher } from "@/components/admin/shared/ChartTypeSwitcher";
 import {
   Brain, AlertTriangle, RefreshCw, Activity, TrendingUp, CheckCircle,
   Target, Clock, Download, Sparkles, Zap,
@@ -213,7 +213,7 @@ export function OccupancyAnalytics() {
             <Brain className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold text-[var(--text-primary)]">Live Occupancy</h1>
+            <p className="text-xl font-semibold text-[var(--text-primary)]">Live Occupancy</p>
             <p className="text-xs text-[var(--text-muted)]">
               Forecasts, confidence intervals, anomaly detection &amp; model metrics
             </p>

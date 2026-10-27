@@ -44,7 +44,8 @@ export class SchedulerFormatter {
   }
 
   private static calculateImpact(conflict: any): number {
-    const severityMultiplier = { low: 1, medium: 2.5, high: 5 }[conflict.severity] || 1;
+    const severityMap = { low: 1, medium: 2.5, high: 5 } as const;
+    const severityMultiplier = severityMap[conflict.severity as keyof typeof severityMap] ?? 1;
     return conflict.affectedJobs?.length * 10 * severityMultiplier;
   }
 }

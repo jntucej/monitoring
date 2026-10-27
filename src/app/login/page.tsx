@@ -16,7 +16,7 @@ export default function UnifiedLoginPage() {
           <div className="text-center text-xs text-[var(--text-muted)] mb-2">Received a one-time setup code? <Link href="/bootstrap" className="text-emerald-400 hover:underline">Activate your account</Link></div>
         <LoginForm
             title="Login"
-            subtitle="Enter your credentials or security PIN to access your dashboard."
+            subtitle="Enter your credentials to access your dashboard."
           />
         </div>
       </div>

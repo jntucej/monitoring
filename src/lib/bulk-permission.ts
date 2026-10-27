@@ -40,7 +40,8 @@ export interface BulkResult {
     | "forbidden"
     | "not_pending"
     | "error"
-    | "not_allowed";
+    | "not_allowed"
+    | "skipped";
   error?: string;
   newStage?: string;
 }
@@ -65,7 +66,7 @@ export async function validateAndApplyAction(
   extraComment?: string | null
 ): Promise<{
   ok: boolean;
-  conflict?: "notFound" | "forbidden" | "notPending" | "notAllowed";
+  conflict?: "notFound" | "forbidden" | "notPending" | "notAllowed" | "concurrentModification";
   error?: string;
   newStage?: string;
   newStatus?: string;
@@ -132,6 +133,9 @@ export async function validateAndApplyAction(
   );
 
   const supabase = getSupabaseServiceClient();
+  // G18: CAS guard — only apply if the row is still at the stage we read.
+  // Same pattern as PATCH /api/permissions/[ticket]; prevents two bulk
+  // approvers from silently clobbering each other's stage_history entries.
   const { data: updated, error: updateErr } = await supabase
     .from("permission_requests")
     .update({
@@ -141,6 +145,7 @@ export async function validateAndApplyAction(
       updated_at: new Date().toISOString(),
     })
     .eq("id", row.id)
+    .eq("current_stage", row.current_stage)  // CAS
     .select()
     .single();
 
@@ -148,6 +153,15 @@ export async function validateAndApplyAction(
     return {
       ok: false,
       error: updateErr.message,
+    };
+  }
+
+  // G18: zero-row update → concurrent modification
+  if (!updated) {
+    return {
+      ok: false,
+      conflict: "concurrentModification",
+      error: `Ticket ${row.ticket_number} was modified by another approver.`,
     };
   }
 

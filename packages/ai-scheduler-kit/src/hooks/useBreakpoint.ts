@@ -24,6 +24,15 @@ export function useBreakpoint(options: UseBreakpointOptions = {}): UseBreakpoint
   const [breakpoint, setBreakpoint] = useState<Breakpoint>('xs');
   const [width, setWidth] = useState<number>(0);
 
+  const getBreakpoint = (width: number): Breakpoint => {
+    if (width < 640) return 'xs';
+    if (width < 768) return 'sm';
+    if (width < 1024) return 'md';
+    if (width < 1280) return 'lg';
+    if (width < 1536) return 'xl';
+    return '2xl';
+  };
+
   useEffect(() => {
     // Server-side rendering check
     if (ssr) {
@@ -39,15 +48,6 @@ export function useBreakpoint(options: UseBreakpointOptions = {}): UseBreakpoint
     if (typeof window === 'undefined') {
       return;
     }
-
-    const getBreakpoint = (width: number): Breakpoint => {
-      if (width < 640) return 'xs';
-      if (width < 768) return 'sm';
-      if (width < 1024) return 'md';
-      if (width < 1280) return 'lg';
-      if (width < 1536) return 'xl';
-      return '2xl';
-    };
 
     const handleResize = () => {
       const newWidth = window.innerWidth;

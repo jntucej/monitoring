@@ -27,11 +27,11 @@ export interface AlertContext {
 }
 
 export const ALERT_CATALOGUE: AlertDefinition[] = [
-    /* warden.overdue */
+    /* principal.overdue */
   {
-    id: "warden.overdue",
+    id: "principal.overdue",
     severity: "high",
-    title: "Warden.Overdue",
+    title: "Principal.Overdue",
     message: "Describe the trigger condition in one sentence.",
     minTier: 60,
     visibleToRoles: ["principal", "deputy_warden", "hostel_manager"],

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 "use client";
 
 export const dynamic = "force-dynamic";
@@ -5,68 +6,26 @@ export const dynamic = "force-dynamic";
 import { Suspense, useCallback } from "react";
 import { GuardedPage } from "@/components/shared/GuardedPage";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+=======
+import { Suspense } from "react";
+import { ScanEye } from "lucide-react";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
-import { useAuthStore } from "@/stores/authStore";
-import { getRoleTier } from "@/lib/alert-hierarchy";
-import type { Role } from "@/lib/types";
-import { useApiResource, clearCache } from "@/hooks/useApiResource";
-import { usePolling } from "@/hooks/usePolling";
-import {
-  ClipboardCheck,
-  Users,
-  FileText,
-  AlertTriangle,
-  Inbox,
-  Clock,
-  Loader2,
-  Flag,
-} from "lucide-react";
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { AttentionQueue } from "@/components/engagement/AttentionQueue";
+import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
+import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 
-// Restricted to exam-staff approvers: exam_superintendent (tier 50) plus the
-// exam-branch roles that act on the same queue (oie 75 / exam_branch 80 /
-// vice_principal 85) and admin/sysadmin.
-const MIN_TIER = 50;
-
-/* ── response shapes ── */
-
-interface ExamQueueRow {
-  id: string;
-  ticket_number: string;
-  workflow_type: string;
-  current_stage: string;
-  status: string;
-  sla_deadline?: string | null;
-  student?: {
-    name: string;
-    student_details?: { roll?: string } | null;
-  } | null;
-}
-
-interface PermissionsResponse {
-  success: boolean;
-  data: ExamQueueRow[];
-  total?: number;
-}
-
-/* ── building blocks ── */
-
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-  sub,
-  accent = "text-white",
-  loading,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: React.ReactNode;
-  sub?: string;
-  accent?: string;
-  loading?: boolean;
-}) {
+export default function ExamSuperintendentPage() {
   return (
+<<<<<<< HEAD
     <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2">
       <div className="flex items-center gap-2 text-slate-400">
         <Icon className="w-4 h-4" />
@@ -151,142 +110,28 @@ function ExamSuperintendentDashboardInner() {
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
+=======
+    <Suspense fallback={<PageLoading />}>
+      <AuthGuard allowedRoles={["exam_superintendent"]}>
+        <div className="space-y-6">
+          <DevContactStrip />
+          <WidgetBoundary>
+            <RoleDashboardPanel
+              title="Exam Superintendent dashboard"
+              icon={ScanEye}
+              endpoint="/api/exam/superintendent"
+            />
+          </WidgetBoundary>
+          <WidgetBoundary><AttentionQueue /></WidgetBoundary>
+          <WidgetBoundary><PersonalizedCampusHome /></WidgetBoundary>
+          <WidgetBoundary><TaskContinuity /></WidgetBoundary>
+          <WidgetBoundary><UnifiedCampusCalendar /></WidgetBoundary>
+          <WidgetBoundary><ActivityTimeline /></WidgetBoundary>
+          <WidgetBoundary><QuickActions /></WidgetBoundary>
+          <WidgetBoundary><NotificationCenter /></WidgetBoundary>
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
         </div>
-        <button
-          onClick={() => void refresh()}
-          disabled={queueLoading}
-          className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700 disabled:opacity-50"
-        >
-          {queueLoading ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Clock className="w-4 h-4" />
-          )}
-          {queueLoading ? "Refreshing…" : "Refresh"}
-        </button>
-      </div>
-
-      {queueError && (
-        <ErrorBanner
-          message={`Exam queue: ${queueError}`}
-          onRetry={() => void refreshQueue()}
-        />
-      )}
-
-      {/* KPI row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard
-          icon={Inbox}
-          label="Pending Exam Passes"
-          value={pendingTotal}
-          sub="Awaiting clearance at the superintendent desk"
-          accent="text-emerald-400"
-          loading={queueLoading && !examQueue}
-        />
-        <StatCard
-          icon={Flag}
-          label="SLA Breached"
-          value={breachedCount}
-          sub="Past their 48h approval deadline"
-          accent="text-amber-400"
-          loading={queueLoading && !examQueue}
-        />
-        <StatCard
-          icon={Users}
-          label="Scope"
-          value={user?.name || "Superintendent"}
-          sub="Examination clearance &amp; escalation authority"
-          accent="text-white"
-        />
-      </div>
-
-      {/* exam pass queue */}
-      <WidgetBoundary title="Exam Pass Queue">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden">
-          <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wide flex items-center gap-2">
-              <ClipboardCheck className="w-4 h-4 text-emerald-400" />
-              Exam Pass Queue
-            </h2>
-            <span className="text-xs text-slate-500">
-              {pendingTotal > 0 ? `${pendingTotal} pending` : "Clear"}
-            </span>
-          </div>
-          {queueLoading ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-slate-500">
-              <Loader2 className="w-4 h-4 animate-spin" /> Loading queue…
-            </div>
-          ) : queueRows.length === 0 ? (
-            <EmptyState message="No pending exam clearance requests. All exam passes have cleared the pipeline." />
-          ) : (
-            <div className="overflow-x-auto min-w-0">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-slate-800 text-slate-500 text-xs uppercase tracking-wide">
-                    <th className="text-left px-4 py-3">Ticket</th>
-                    <th className="text-left px-4 py-3">Student</th>
-                    <th className="text-left px-4 py-3">Stage</th>
-                    <th className="text-left px-4 py-3">Status</th>
-                    <th className="text-left px-4 py-3">SLA</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/60">
-                  {queueRows.slice(0, 10).map((r) => (
-                    <tr key={r.id} className="hover:bg-slate-800/30 transition-colors">
-                      <td className="px-4 py-3 text-white font-mono text-xs">{r.ticket_number}</td>
-                      <td className="px-4 py-3 text-slate-300">
-                        {r.student?.name || "—"}
-                        {r.student?.student_details?.roll ? ` · ${r.student.student_details.roll}` : ""}
-                      </td>
-                      <td className="px-4 py-3 text-slate-400 capitalize">{r.current_stage.replace(/_/g, " ")}</td>
-                      <td className="px-4 py-3">
-                        <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium border border-amber-400/30 bg-amber-400/10 text-amber-400">
-                          {r.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-slate-400 text-xs">
-                        {r.sla_deadline ? (
-                          new Date(r.sla_deadline).getTime() < Date.now() ? (
-                            <span className="text-rose-400">Breached · {new Date(r.sla_deadline).toLocaleString()}</span>
-                          ) : (
-                            new Date(r.sla_deadline).toLocaleString()
-                          )
-                        ) : (
-                          "—"
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </WidgetBoundary>
-
-      <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 text-sm text-slate-400 flex items-start gap-3">
-        <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-        <p>
-          Exam clearance requests reach this desk after OIE and Vice Principal review.
-          Use{" "}
-          <a className="text-emerald-400 hover:underline" href="/exam/permissions">
-            Exam Branch Permissions
-          </a>{" "}
-          to action the full queue.
-        </p>
-      </div>
-
-      <DevContactStrip />
-    </div>
-  );
-}
-
-export default function ExamSuperintendentDashboardPage() {
-  return (
-    <GuardedPage minTier={MIN_TIER} allowedRoles={["exam_superintendent", "oie", "exam_branch", "vice_principal", "admin", "sysadmin"]}>
-      <Suspense fallback={<PageLoading />}>
-        <ExamSuperintendentDashboardInner />
-      </Suspense>
-    </GuardedPage>
+      </AuthGuard>
+    </Suspense>
   );
 }

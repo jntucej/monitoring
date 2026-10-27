@@ -163,3 +163,29 @@ BEGIN
   END IF;
 END $$;
 
+-- 12. Reconcile views that predate the student_user_id -> requester_user_id
+-- rename: v_my_ticket_counts (created by 20261012181951_ticket_indexes.sql)
+-- still selects FROM public.permission_requests (student_user_id ...) using
+-- the *pre-reconciliation* table name + column. Once the base table is renamed
+-- to `permissions` and the column to `requester_user_id`, the VIEW alias
+-- `permission_requests` above is a thin SELECT-alias, but v_my_ticket_counts
+-- was created directly against the original table/column and would silently
+-- break (or, on a from-scratch replay, fail to resolve `student_user_id`
+-- against the renamed base) unless we rebind it to the post-rename names.
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_tables WHERE schemaname='public' AND tablename='permissions') THEN
+    CREATE OR REPLACE VIEW public.v_my_ticket_counts AS
+    SELECT
+      p.requester_user_id                                   AS user_id,
+      COUNT(*) FILTER (WHERE p.status = 'PENDING')           AS pending,
+      COUNT(*) FILTER (WHERE p.status = 'APPROVED')          AS approved,
+      COUNT(*) FILTER (WHERE p.status = 'REJECTED')          AS rejected,
+      COUNT(*) FILTER (WHERE p.status = 'COMPLETED')         AS completed,
+      COUNT(*) FILTER (WHERE p.status = 'CANCELLED')         AS cancelled,
+      COUNT(*)                                                AS total
+    FROM public.permissions p
+    GROUP BY p.requester_user_id;
+  END IF;
+END $$;
+

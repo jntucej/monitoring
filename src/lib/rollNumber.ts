@@ -18,7 +18,7 @@
  * ------------------------------------------------------------------ */
 
 export type CollegeCode = "JJ"; // JNTUH University College of Engineering Jagtial (UCEJ)
-export type EntryModeCode = "1A" | "5A"; // Regular B.Tech | Lateral Entry B.Tech / M.Tech
+export type EntryModeCode = "1A" | "5A" | "1D"; // Regular B.Tech | Lateral B.Tech | M.Tech (PG)
 
 export interface CourseType {
   name: string;
@@ -40,7 +40,7 @@ export const COURSE_TYPES: Record<string, CourseType> = {
     name: "M.Tech",
     shortName: "M.Tech",
     durationYears: 2,
-    lateralEntryMode: "5A",
+    lateralEntryMode: "1D",
   },
 };
 
@@ -54,7 +54,10 @@ export function resolveCourseType(
   entryModeCode?: EntryModeCode
 ): CourseType {
   const norm = (courseLabel || "").trim().toUpperCase();
-  if (norm === "M.TECH" || norm === "MTECH") return COURSE_TYPES["M.Tech"];
+  // M.Tech is authoritative when the label says so, or when the entry mode is 1D.
+  if (norm === "M.TECH" || norm === "MTECH" || norm === "PG" || entryModeCode === "1D") {
+    return COURSE_TYPES["M.Tech"];
+  }
   if (norm === "B.TECH" || norm === "BTECH") return COURSE_TYPES["B.Tech"];
   // Fallback: B.Tech is the default programme at this college.
   return COURSE_TYPES["B.Tech"];
@@ -142,6 +145,12 @@ export const ENTRY_MODE_CODES: Record<string, EntryModeInfo> = {
     description: "Lateral Entry B.Tech (Joined directly into 2nd year / 3rd semester)",
     durationYears: 3,
   },
+  "1D": {
+    code: "1D",
+    label: "M.Tech (PG)",
+    description: "2-year postgraduate M.Tech programme",
+    durationYears: 2,
+  },
 };
 
 /**
@@ -154,12 +163,17 @@ export const ENTRY_MODE_CODES: Record<string, EntryModeInfo> = {
  * Reference: user-provided decoding model.
  */
 export const ROLL_DEPT_CODES: Record<string, { short: string; full: string }> = {
-  "01": { short: "CIVIL", full: "Civil Engineering" },
   "02": { short: "EEE", full: "Electrical & Electronics Engineering" },
   "03": { short: "MECH", full: "Mechanical Engineering" },
   "04": { short: "ECE", full: "Electronics & Communication Engineering" },
   "05": { short: "CSE", full: "Computer Science & Engineering" },
   "12": { short: "IT",  full: "Information Technology" },
+  // M.Tech (1D) specializations — dept slot uses these codes for PG students.
+  "06": { short: "DSCE", full: "Data Science & AI (M.Tech)" },
+  "07": { short: "EPS",  full: "Electrical & Power Systems (M.Tech)" },
+  "58": { short: "CSE",  full: "Computer Science & Engineering (M.Tech)" },
+  "95": { short: "ED",   full: "Electrical (M.Tech)" },
+  "A3": { short: "CYS",  full: "Cyber Security (M.Tech)" },
 };
 
 /**
@@ -169,11 +183,15 @@ export const ROLL_DEPT_CODES: Record<string, { short: string; full: string }> = 
  *   ^(\d{2})       – YY: 2 digits (year)
  *   ([A-Z]{2})     – CC: 2 uppercase letters (college)
  *   ([0-9A-Z]{2})  – ED: 2 alphanumeric (entry/degree)
- *   (\d{2})        – BB: 2 digits (department)
+ *   ([0-9A-Z]{2})  – BB: 2 alphanumeric (department / specialization)
  *   ([0-9A-Z]{2})  – SS: 2 alphanumeric (serial)
  *   $
+ *
+ * The department slot accepts alphanumeric codes so that M.Tech / PG
+ * specializations (e.g. "A3") pass. B.Tech uses pure-numeric dept codes
+ * (02, 03, 04, 05, 12).
  */
-export const ROLL_NUMBER_REGEX = /^(\d{2})([A-Z]{2})([0-9A-Z]{2})(\d{2})([0-9A-Z]{2})$/;
+export const ROLL_NUMBER_REGEX = /^(\d{2})([A-Z]{2})([0-9A-Z]{2})([0-9A-Z]{2})([0-9A-Z]{2})$/;
 
 /* ------------------------------------------------------------------ *
  *  CORE FUNCTIONS
@@ -219,9 +237,17 @@ export function parseRollNumber(roll: string | null | undefined): RollNumberDeco
   const entryInfo = ENTRY_MODE_CODES[entryModeCode as EntryModeCode];
   if (!entryInfo) return null;
 
-  // Validate department code
+  // Validate department code. B.Tech (1A/5A) rolls use the known 5-programme
+  // dept codes (02/03/04/05/12). M.Tech (1D) rolls carry a specialization
+  // code in the same slot (e.g. 58, 59, …) that is NOT in the B.Tech table.
+  // For 1D we accept any well-formed 2-digit code and fall back to the sheet's
+  // declared course (default CSE) rather than rejecting the whole row.
+  const isMtechEntry = entryModeCode === "1D";
   const deptInfo = ROLL_DEPT_CODES[deptCode];
-  if (!deptInfo) return null;
+  if (!deptInfo && !isMtechEntry) return null;
+
+  const deptShort = deptInfo ? deptInfo.short : "M.Tech";
+  const deptFull = deptInfo ? deptInfo.full : "M.Tech / PG Specialization";
 
   // Compute full admission year (2000–2099 range)
   const yearNum = parseInt(yearCode, 10);
@@ -241,9 +267,11 @@ export function parseRollNumber(roll: string | null | undefined): RollNumberDeco
     entryMode: entryInfo.label,
     entryModeDescription: entryInfo.description,
     departmentCode: deptCode,
-    department: deptInfo.short,
-    departmentFullName: deptInfo.full,
-    branch: `${deptInfo.short} — ${entryInfo.label}`,
+    department: deptShort,
+    departmentFullName: deptFull,
+    branch: isMtechEntry
+      ? `M.Tech (PG) — ${deptCode}`
+      : `${deptShort} — ${entryInfo.label}`,
     serial,
     serialNumber,
   };

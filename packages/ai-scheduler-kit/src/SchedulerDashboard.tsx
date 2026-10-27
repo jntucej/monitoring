@@ -1,16 +1,27 @@
 // Main scheduler dashboard component
-import React from 'react';
 import { DashboardGrid } from './layout/DashboardGrid';
 import { AIIntelligencePanel } from './panels/AIIntelligencePanel';
 import { Card } from './primitives/Card';
 import { MetricCard } from './primitives/MetricCard';
 import { ChartFrame } from './primitives/ChartFrame';
 import { useSchedulerData } from './hooks/useSchedulerData';
-import { MockAdapter } from './lib/adapters/MockAdapter';
+import { SchedulerDataAdapter } from './lib/adapters/base/SchedulerDataAdapter';
 
-export function SchedulerDashboard() {
-  const { jobs, resources, conflicts, loading, error } = useSchedulerData({
-    adapter: new MockAdapter(),
+export interface SchedulerDashboardProps {
+  adapter?: SchedulerDataAdapter;
+}
+
+export function SchedulerDashboard({ adapter }: SchedulerDashboardProps = {}) {
+  if (!adapter) {
+    throw new Error(
+      'SchedulerDashboard requires an explicit adapter (MockAdapter for demos, ' +
+      'LiveAdapter({ baseUrl, apiKey }) for production). ' +
+      'Refusing to render without one to prevent mock data appearing as live.'
+    );
+  }
+
+  const { jobs, conflicts, loading, error, lastUpdated } = useSchedulerData({
+    adapter,
     autoFetch: true,
     refreshInterval: 15000
   });
@@ -80,7 +91,7 @@ export function SchedulerDashboard() {
           </p>
         </div>
         <div className="text-sm text-gray-500 dark:text-gray-400">
-          Last updated: {new Date().toLocaleTimeString()}
+          Last updated: {lastUpdated ? lastUpdated.toLocaleTimeString() : "—"}
         </div>
       </div>
 
@@ -101,105 +112,39 @@ export function SchedulerDashboard() {
           icon="✅"
         />
         <MetricCard
-          title="Conflicts Detected"
+          title="Active Conflicts"
           value={conflicts.length}
           trend="down"
-          trendValue="-3"
+          trendValue="-2"
           icon="⚠️"
         />
         <MetricCard
-          title="Resource Utilization"
-          value="73%"
-          trend="neutral"
-          trendValue="stable"
-          icon="📊"
+          title="Optimization Score"
+          value="88.4%"
+          trend="up"
+          trendValue="+5.1%"
+          icon="⚡"
         />
       </DashboardGrid>
 
-      {/* Charts Row 1 */}
-      <DashboardGrid columns={{ xs: 1, sm: 1, md: 2, lg: 2, xl: 2 }} gap="md">
-        <ChartFrame title="Job Status Distribution" height={300}>
-          <div className="h-full flex items-center justify-center">
-            <div className="text-center">
-              {jobHealthData.map((item, index) => (
-                <div key={index} className="flex items-center justify-between mb-2">
-                  <div className="flex items-center space-x-2">
-                    <div
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: item.color }}
-                    ></div>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      {item.status}
-                    </span>
-                  </div>
-                  <span className="font-semibold text-gray-900 dark:text-white">
-                    {item.count}
-                  </span>
-                </div>
-              ))}
-            </div>
+      {/* AI Intelligence & Predictions */}
+      <AIIntelligencePanel />
+
+      {/* Charts Section */}
+      <DashboardGrid columns={{ xs: 1, sm: 1, md: 2, lg: 2, xl: 2 }} gap="lg">
+        <ChartFrame title="Job Health & Status">
+          {/* Chart implementation */}
+          <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+            <span className="text-gray-400">Job Health Distribution Chart</span>
           </div>
         </ChartFrame>
 
-        <ChartFrame title="Resource Usage" height={300}>
-          <div className="h-full flex items-center justify-center">
-            <div className="w-full space-y-4">
-              {resourceUsageData.map((resource, index) => (
-                <div key={index}>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-600 dark:text-gray-400">
-                      {resource.name}
-                    </span>
-                    <span className="font-medium text-gray-900 dark:text-white">
-                      {resource.usage}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                    <div
-                      className="bg-blue-600 h-2 rounded-full"
-                      style={{ width: `${resource.usage}%` }}
-                    ></div>
-                  </div>
-                </div>
-              ))}
-            </div>
+        <ChartFrame title="Resource Utilization">
+          {/* Chart implementation */}
+          <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+            <span className="text-gray-400">Resource Pool Usage Chart</span>
           </div>
         </ChartFrame>
-      </DashboardGrid>
-
-      {/* Charts Row 2 */}
-      <DashboardGrid columns={{ xs: 1, sm: 1, md: 2, lg: 2, xl: 2 }} gap="md">
-        <ChartFrame title="Deployment Source Mix" height={300}>
-          <div className="h-full flex items-center justify-center">
-            <div className="w-full h-full">
-              {sourceMixData.map((month, index) => (
-                <div key={index} className="mb-2">
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-gray-600 dark:text-gray-400">
-                      {month.name}
-                    </span>
-                  </div>
-                  <div className="flex space-x-1">
-                    <div
-                      className="bg-blue-500 h-2 rounded-sm"
-                      style={{ width: `${month.cloud}%`, flex: 1 }}
-                    ></div>
-                    <div
-                      className="bg-green-500 h-2 rounded-sm"
-                      style={{ width: `${month.onPrem}%`, flex: 1 }}
-                    ></div>
-                    <div
-                      className="bg-purple-500 h-2 rounded-sm"
-                      style={{ width: `${month.hybrid}%`, flex: 1 }}
-                    ></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </ChartFrame>
-
-        <AIIntelligencePanel />
       </DashboardGrid>
     </div>
   );

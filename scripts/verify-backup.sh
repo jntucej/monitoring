@@ -21,7 +21,7 @@ if docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^gate_postgres$"; then
   docker exec -t gate_postgres psql -U postgres -c "CREATE DATABASE ${SCRATCH_DB};"
   
   echo "==> 2. Restoring backup to scratch database..."
-  gunzip -c "${LATEST_BACKUP}" | docker exec -i gate_postgres psql -U postgres -d "${SCRATCH_DB}" >/dev/null 2>&1
+  gunzip -c "${LATEST_BACKUP}" | docker exec -i gate_postgres psql -U postgres -d "${SCRATCH_DB}" -v ON_ERROR_STOP=1 >/dev/null 2>&1
   
   TABLE_COUNT=$(docker exec -t gate_postgres psql -U postgres -d "${SCRATCH_DB}" -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" | tr -d '[:space:]')
   echo "✅ Scratch database restored successfully with ${TABLE_COUNT} public tables."

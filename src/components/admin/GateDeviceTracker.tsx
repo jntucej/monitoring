@@ -9,6 +9,23 @@ export interface GateDevice {
   location: string;
   gateCode?: string;
   status: "online" | "offline" | "maintenance";
+  /** True only when the gate is configured active AND was scanned in the last 5 min. */
+  isOnline: boolean;
+  scannedRecently: boolean;
+  onlineWindowMs: number;
+  /**
+   * The operator attributed to the most recent in-window scan. When
+   * `attributed` is true the scan's own operator_name is shown; when false
+   * it is the configured assignment (used as a fallback only).
+   */
+  lastOperator: {
+    id: string | null;
+    name: string;
+    email: string;
+    role: string;
+    attributed: boolean;
+    at: string;
+  } | null;
   /** Operator actually assigned to this gate (users.gate_id). Empty when unassigned. */
   assignedOperators: Array<{ id: string; name: string; email: string; role: string }>;
   lastScanTime: string;
@@ -102,6 +119,19 @@ export function GateDeviceTracker({ devices, onRefresh }: GateDeviceTrackerProps
                       </span>
                     </div>
                   ))
+                )}
+
+                {/* Who actually used the gate in the last 5 minutes */}
+                {device.lastOperator && (
+                  <div className="flex items-center justify-between text-[11px] mt-1 pt-2 border-t border-[var(--border)]">
+                    <span className="text-[var(--text-muted)] flex items-center gap-1">
+                      <Activity className="w-3 h-3 text-emerald-400" />
+                      {device.lastOperator.attributed ? "Last scan by" : "Likely user"}
+                    </span>
+                    <span className="font-semibold text-[var(--text-primary)]">
+                      {device.lastOperator.name}
+                    </span>
+                  </div>
                 )}
               </div>
 

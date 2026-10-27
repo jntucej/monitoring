@@ -6,7 +6,6 @@ import { DataTable } from "@/components/ui/DataTable";
 import { CalendarDays, CheckCircle2, XCircle, Clock } from "lucide-react";
 import type { Scan, Student } from "@/lib/types";
 import { useApi } from "@/hooks/useApi";
-
 interface Row {
   roll: string;
   name: string;
@@ -52,7 +51,7 @@ const api = useApi();
         const stuJson = await stuRes.json();
         if (cancelled) return;
 
-        const logs: Scan[] = logsJson?.data?.items ?? [];
+        const logs: Scan[] = logsJson?.data?.logs ?? [];
         const students: Student[] = stuJson?.data ?? [];
 
         // For each student: find first IN and last OUT of the day
@@ -122,10 +121,15 @@ const api = useApi();
   };
 
   return (
-    <div className="space-y-6">
+    
+      <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
+<<<<<<< HEAD
           <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">Attendance</p>
+=======
+          <p className="text-2xl font-bold">Attendance</p>
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
           <p className="text-[var(--text-muted)]">Daily student attendance records</p>
         </div>
         <div className="flex items-center gap-2">
@@ -189,6 +193,9 @@ const api = useApi();
         keyExtractor={(r) => r.roll}
       />
       </div>
-    </div>
+      </div>
+    
+    
+
   );
 }

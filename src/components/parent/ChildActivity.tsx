@@ -57,7 +57,7 @@ const api = useApi();
   }, []);
 
   useEffect(() => {
-    load();
+    load().catch(() => {});
   }, [load]);
 
   return (

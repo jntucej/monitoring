@@ -8,3 +8,12 @@ tests
 playwright-report
 test-results
 *.log
+
+# never ship full-repo dumps or one-shot credential-minting tooling in the image
+repomix-output*
+repomix.config.json
+
+# One-shot credential-minting tools (removed from repo; never ship in image)
+mint_jwt.mjs
+scripts/prov/
+scripts/provision-role-accounts.mts

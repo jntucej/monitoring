@@ -7,7 +7,7 @@ export { Role };
 
 export type AccountStatus = "ACTIVE" | "LOCKED" | "SUSPENDED" | "DISABLED" | "DEPROVISIONED";
 
-export type WorkflowType = "hostel" | "exam" | "memo" | "staff_leave";
+export type WorkflowType = "hostel" | "exam" | "memo" | "staff_leave" | "lab_access";
 
 export type PermissionStatus = "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED" | "COMPLETED" | "ESCALATED";
 
@@ -36,6 +36,15 @@ export interface StudentDetails {
   /** Guardian (parent/ward caretaker) user id */
   guardianId?: string;
   studentType?: StudentType;
+  /**
+   * Live entry-type selection for the hostel-permission flow
+   * (student_details.current_entry_type). Populated at each IN scan via
+   * POST /api/operator/entry-type; read on OUT scans to enforce scope.
+   */
+  currentEntryType?: "hosteller" | "day_scholar" | null;
+  course?: string;
+  fatherName?: string;
+  landlineNumber?: string;
   hostelBlock?: string;
   roomNumber?: string;
   hostelCurfewTime?: string;
@@ -45,6 +54,39 @@ export interface StudentDetails {
   completed?: boolean;
   /** ISO timestamp when the student was marked graduated. */
   completedAt?: string;
+  /* ── Academic & Personal (extended student_details) ─────────────── */
+  department?: string;
+  branch?: string;
+  semester?: string;
+  regulation?: string;
+  admissionDate?: string;
+  admissionCategory?: string;
+  eamcetHtNo?: string;
+  eamcetEcetRank?: string;
+  htNo?: string;
+  studentName?: string;
+  identificationMarks1?: string;
+  identificationMarks2?: string;
+  mobile?: string;
+  email?: string;
+  bloodGroup?: string;
+  nationality?: string;
+  religion?: string;
+  caste?: string;
+  subcaste?: string;
+  phStatus?: string;
+  dob?: string;
+  fatherGuardianName?: string;
+  motherName?: string;
+  parentMobile?: string;
+  parentEmail?: string;
+  fatherOccupation?: string;
+  incomePerAnnum?: string;
+  address?: string;
+  city?: string;
+  district?: string;
+  state?: string;
+  pincode?: string;
 }
 
 export type StaffCategory =
@@ -147,6 +189,12 @@ export interface Person {
   hostelBlock?: string;
   roomNumber?: string;
   hostelCurfewTime?: string;
+  /**
+   * Live entry-type selection for the hostel-permission flow. Mirrors
+   * `studentDetails.currentEntryType`; sourced from
+   * student_details.current_entry_type on the persons lookup.
+   */
+  currentEntryType?: "hosteller" | "day_scholar" | null;
   /** Graduation flag — true when the student has completed the programme. */
   completed?: boolean;
   /** ISO timestamp when the student was marked graduated. */
@@ -206,10 +254,14 @@ export type ExitReason =
   | "Regular" | "Leave" | "Outing" | "Emergency"          // legacy
   | "Home Out" | "Day Out"                                 // legacy labels
   | "Daily Outing" | "Day Pass" | "Home In"                // new labels
-  | "daily_outing" | "home_in" | "home_out" | "day_pass";  // canonical codes
+  | "Special Leave" | "Day Scholar Out"                     // hostel-permission additions
+  | "daily_outing" | "home_in" | "home_out" | "day_pass"   // canonical codes
+  | "emergency" | "special_leave" | "day_scholar_out";     // hostel-permission canonical codes
 
 /** Canonical exit-reason codes the config table is keyed on. */
-export type ReasonCode = "daily_outing" | "home_in" | "home_out" | "day_pass";
+export type ReasonCode =
+  | "daily_outing" | "home_in" | "home_out" | "day_pass"
+  | "emergency" | "special_leave" | "day_scholar_out";
 
 // ---- Operator dashboard: category breakdown & outing tracking -------------
 export type PersonCategoryKey =
@@ -357,6 +409,9 @@ export type DepartmentCode = string;
   location: string;
   type: string;
   isActive: boolean;
+  /** Live operational status: true when the gate has an active operator
+   *  session or recent scan traffic. Falls back to isActive when unknown. */
+  isOnline?: boolean;
   latitude?: number;
   longitude?: number;
   allowedRadiusMeters?: number;
@@ -441,7 +496,6 @@ export interface ExitReasonConfig {
 }
 
 export const DEPARTMENT_CODES: Record<string, string> = {
-  "01": "CIVIL",
   "02": "EEE",
   "03": "MECH",
   "04": "ECE",
@@ -450,7 +504,6 @@ export const DEPARTMENT_CODES: Record<string, string> = {
 };
 
 export const DEPARTMENT_CODE_TO_NAME: Record<string, string> = {
-  "01": "Civil Engineering",
   "02": "Electrical & Electronics Engineering",
   "03": "Mechanical Engineering",
   "04": "Electronics & Communication Engineering",

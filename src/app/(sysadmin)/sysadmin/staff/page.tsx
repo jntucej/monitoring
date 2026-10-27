@@ -249,7 +249,11 @@ const api = useApi();
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
+<<<<<<< HEAD
             <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
+=======
+            <p className="text-2xl font-bold tracking-tight text-[var(--text-primary)] flex items-center gap-2.5">
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
               <Briefcase className="w-7 h-7 text-[var(--action-primary)]" />
               Staff &amp; Non-Students Management
             </p>
@@ -478,8 +482,8 @@ const api = useApi();
                 </div>
             {["caretaker", "deputy_warden", "hostel_manager", "warden"].includes(createForm.role) && (
               <div>
-                <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Hostel Scope</label>
-                <input
+                <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1" htmlFor="hostel-scope">Hostel Scope</label>
+                <input id="hostel-scope"
                   type="text"
                   placeholder="e.g. MH-1, LH-2, or ALL"
                   value={createForm.hostelScope}
@@ -557,8 +561,8 @@ const api = useApi();
                 </div>
             {["caretaker", "deputy_warden", "hostel_manager", "warden"].includes(editForm.role) && (
               <div>
-                <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Hostel Scope</label>
-                <input
+                <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1" htmlFor="hostel-scope">Hostel Scope</label>
+                <input id="hostel-scope"
                   type="text"
                   placeholder="e.g. MH-1, LH-2, or ALL"
                   value={editForm.hostelScope}

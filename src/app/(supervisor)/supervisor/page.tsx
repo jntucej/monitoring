@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 "use client";
 
 export const dynamic = "force-dynamic";
@@ -34,133 +35,26 @@ import {
   ClipboardCheck,
 } from "lucide-react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+=======
+import { Suspense } from "react";
+import { ShieldAlert } from "lucide-react";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { useAuthStore } from "@/stores/authStore";
-import { getAuthHeaders } from "@/lib/utils";
-import { useLiveRefresh } from "@/hooks/useLiveRefresh";
-import { usePolling } from "@/hooks/usePolling";
-import { useApiResource, clearCache } from "@/hooks/useApiResource";
-import { getPassTypeName } from "@/hooks/usePassTypes";
-import { getRoleTier } from "@/lib/alert-hierarchy";
-import type { GatePass, Alert, Gate, Role } from "@/lib/types";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { AttentionQueue } from "@/components/engagement/AttentionQueue";
+import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
+import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 
-interface WardenStudent {
-  id: string;
-  uniqueId: string;
-  fullName: string;
-  roll?: string;
-  hostelBlock?: string;
-  roomNumber?: string;
-  status: string;
-  checkedOutAt?: string;
-}
-
-// ── response shapes for the supervisor-tier endpoints ──
-
-interface PresenceMatrixData {
-  gates: Array<{ id: string; name: string; code: string; audience: string; type: string }>;
-  roles: string[];
-  matrix: Record<string, Record<string, number>>;
-  lastUpdated: string;
-}
-interface PresenceMatrixResponse {
-  success: boolean;
-  data: PresenceMatrixData;
-}
-
-interface LockdownResponse {
-  success: boolean;
-  data: { id?: string; reason?: string; startedAt?: string; started_at?: string } | null;
-}
-
-interface StaffAttendanceSummary {
-  totalStaff: number;
-  presentToday: number;
-  absentToday?: number;
-  onLeave?: number;
-  currentlyInside?: number;
-  currentlyOutside?: number;
-  overallAttendanceRate?: number;
-}
-interface StaffAttendanceRecord {
-  id: string;
-  uniqueId?: string;
-  fullName: string;
-  department?: string;
-  designation?: string;
-  status: "INSIDE" | "OUTSIDE" | "ABSENT";
-  punctualityStatus?: string;
-  firstInTime?: string | null;
-}
-interface StaffAttendanceResponse {
-  success: boolean;
-  summary?: StaffAttendanceSummary;
-  records?: StaffAttendanceRecord[];
-}
-
-interface PermissionsResponse {
-  success: boolean;
-  data: Array<{
-    id: string;
-    ticket_number?: string;
-    workflow_type?: string;
-    status?: string;
-    sla_deadline?: string | null;
-    student?: { name?: string; student_details?: { roll?: string } | null } | null;
-  }>;
-  total?: number;
-}
-
-// Defensive render helpers — gate-pass rows historically leaked "undefined"/"NaN"
-// straight into JSX when API fields were missing or dates were malformed.
-function safeText(v: string | number | null | undefined, fallback = "—"): string {
-  const s = String(v ?? "").trim();
-  if (!s || s === "undefined" || s === "NaN" || s.toLowerCase() === "null") return fallback;
-  return s;
-}
-
-function fmtPassTime(iso: string | null | undefined): string {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return String(iso);
-  return `${d.toLocaleDateString([], { day: "2-digit", month: "short" })} ${d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
-}
-
-function gateLabel(gates: Gate[] | null, p: GatePass): string {
-  const id = (p as any).gateId ?? (p as any).gate_id;
-  const code = (p as any).gateCode ?? (p as any).gate_code;
-  if (id || code) {
-    const g = gates?.find((x) => (id && (x.id === id || x.gateCode === id)) || (code && x.gateCode === code));
-    if (g?.name) return g.name;
-    return code || id;
-  }
-  return "Main Gate";
-}
-
-function terminalLabel(p: GatePass): string {
-  const t = (p as any).terminalId ?? (p as any).terminal_id ?? (p as any).operatorName ?? (p as any).operator;
-  return t ? `Desk ${String(t)}` : "Desk n/a";
-}
-
-// ── shared building blocks (dark slate-800 / #111827 pattern) ──
-
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-  sub,
-  accent = "text-white",
-  loading,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: React.ReactNode;
-  sub?: string;
-  accent?: string;
-  loading?: boolean;
-}) {
+export default function SupervisorPage() {
   return (
+<<<<<<< HEAD
     <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
       <div className="flex items-center gap-2 text-slate-400 min-w-0">
         <Icon className="w-4 h-4 shrink-0" />
@@ -1127,276 +1021,36 @@ function SupervisorDashboardInner() {
               staffLoading={staffLoading}
               staffError={staffError}
               onRetryStaff={() => void refreshStaff()}
+=======
+    <Suspense fallback={<PageLoading />}>
+      <AuthGuard allowedRoles={["supervisor"]}>
+        <div className="space-y-6">
+          <DevContactStrip />
+          <WidgetBoundary>
+            <RoleDashboardPanel
+              title="Supervisor dashboard"
+              icon={ShieldAlert}
+              endpoint="/api/supervisor/escalations"
+              mapKpis={(raw: any) => {
+                const c = raw?.counts ?? {};
+                return [
+                  { label: "Escalated", value: c.escalated ?? 0, tone: "warn" as const },
+                  { label: "Active alerts", value: c.alerts ?? 0, tone: "danger" as const },
+                  { label: "Recent decisions", value: c.decisions ?? 0, tone: "ok" as const },
+                ];
+              }}
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
             />
           </WidgetBoundary>
-
-          <WidgetBoundary title="Gate Status">
-            <GateStatusSection
-              presence={presence}
-              presenceLoading={presenceLoading}
-              presenceError={presenceError}
-              onRetryPresence={() => void refreshPresence()}
-              lockdown={lockdown}
-              lockdownError={lockdownError}
-            />
-          </WidgetBoundary>
-
-          <WidgetBoundary title="Assigned Gate Activity">
-            <AssignedGateActivitySection
-              presence={presence}
-              presenceLoading={presenceLoading}
-              presenceError={presenceError}
-              onRetryPresence={() => void refreshPresence()}
-            />
-          </WidgetBoundary>
-
-          <WidgetBoundary title="Guard and Shift Management">
-            <GuardShiftSection
-              staff={staff}
-              staffLoading={staffLoading}
-              staffError={staffError}
-              onRetryStaff={() => void refreshStaff()}
-            />
-          </WidgetBoundary>
-
-          <WidgetBoundary title="Access Exceptions">
-            <AccessExceptionsSection
-              staffLeave={staffLeave}
-              staffLeaveLoading={staffLeaveLoading}
-              staffLeaveError={staffLeaveError}
-              onRetryStaffLeave={() => void refreshStaffLeave()}
-              outpass={outpass}
-              outpassLoading={outpassLoading}
-              outpassError={outpassError}
-              onRetryOutpass={() => void refreshOutpass()}
-            />
-          </WidgetBoundary>
-
-          <WidgetBoundary title="Incident Assignment">
-            <IncidentAssignmentSection
-              alerts={alerts}
-              alertsLoading={alertsLoading}
-              alertsError={alertsError}
-              onRetryAlerts={() => void refreshAlerts()}
-              onResolveAlert={handleResolveAlert}
-            />
-          </WidgetBoundary>
-
-          <WidgetBoundary title="Shift Handover">
-            <ShiftHandoverSection />
-          </WidgetBoundary>
-
-          <WidgetBoundary title="Security Reports">
-            <SecurityReportsSection />
-          </WidgetBoundary>
+          <WidgetBoundary><AttentionQueue /></WidgetBoundary>
+          <WidgetBoundary><PersonalizedCampusHome /></WidgetBoundary>
+          <WidgetBoundary><TaskContinuity /></WidgetBoundary>
+          <WidgetBoundary><UnifiedCampusCalendar /></WidgetBoundary>
+          <WidgetBoundary><ActivityTimeline /></WidgetBoundary>
+          <WidgetBoundary><QuickActions /></WidgetBoundary>
+          <WidgetBoundary><NotificationCenter /></WidgetBoundary>
         </div>
-      )}
-
-      {/* ── legacy operational tabs (kept; still 200 for supervisor) ── */}
-      {activeTab === "approvals" && (
-        <div className="space-y-4 sm:space-y-5 min-w-0">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 min-w-0">
-            <h2 className="text-lg font-bold text-[var(--text-primary)] min-w-0">
-              <span className="sm:hidden">📋</span><span className="hidden sm:inline">📋 Outpass Approvals</span>
-            </h2>
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar max-w-full">
-              {["DAY_PASS", "HOME_OUT", "DAILY_OUTING"].map((f) => (
-                <button key={f} onClick={() => setPassTypeFilter(f)} className={`px-3 py-1 rounded-xl text-[11px] font-bold shrink-0 ${passTypeFilter === f ? "bg-indigo-500 text-white" : "bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border)]"}`}>
-                  {getPassTypeName(f).toUpperCase()}
-                </button>
-              ))}
-              <button onClick={() => setPassTypeFilter("ALL")} className={`px-3 py-1 rounded-xl text-[11px] font-bold shrink-0 ${passTypeFilter === "ALL" ? "bg-indigo-500 text-white" : "bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border)]"}`}>
-                All Types
-              </button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 min-w-0">
-            <div className="p-2.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] flex items-center gap-2 text-[11px] min-w-0">
-              <MapPin className="w-4 h-4 text-amber-400 shrink-0" />
-              <span className="text-[var(--text-muted)] truncate">Campus: <span className="font-bold text-[var(--text-primary)]">UCEJ Main Campus</span></span>
-            </div>
-            <div className="p-2.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] flex items-center gap-2 text-[11px] min-w-0">
-              <CheckSquare className="w-4 h-4 text-sky-400 shrink-0" />
-              <span className="text-[var(--text-muted)] truncate">Queue: <span className="font-bold text-[var(--text-primary)]">{filteredPasses.length} pending</span></span>
-            </div>
-            <div className="p-2.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] flex items-center gap-2 text-[11px] min-w-0">
-              <Users className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span className="text-[var(--text-muted)] truncate">Staff: <span className="font-bold text-[var(--text-primary)]">{totalStaff} on roll</span></span>
-            </div>
-          </div>
-
-          {filteredPasses.length > 0 && (
-            <div className="sticky top-0 z-10 p-3 sm:p-4 bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl shadow-lg shadow-black/20">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-2 text-xs min-w-0">
-                <div className="flex items-center gap-2 font-mono text-[var(--text-muted)] min-w-0">
-                  <button onClick={() => setSelectedPasses(selectedPasses.length === filteredPasses.length ? [] : filteredPasses.map((p) => p.id))} className="px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] font-semibold shrink-0">
-                    {selectedPasses.length === filteredPasses.length && filteredPasses.length > 0 ? "Deselect All" : "Select All"}
-                  </button>
-                  <span className="truncate">{selectedPasses.length} selected</span>
-                </div>
-                {selectedPasses.length > 0 && (
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button onClick={() => handleBulkAction("approve")} className="px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-xl font-bold">Approve ({selectedPasses.length})</button>
-                    <button onClick={() => handleBulkAction("reject")} className="px-3 py-1 bg-rose-500/20 text-rose-300 border border-rose-500/30 rounded-xl font-bold">Reject ({selectedPasses.length})</button>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 sm:p-5 text-xs overflow-hidden max-h-[70vh] overflow-y-auto">
-            {filteredPasses.length === 0 ? (
-              <p className="p-8 text-center text-[var(--text-muted)]">No pending outpasses match filter criteria.</p>
-            ) : (
-              filteredPasses.map((p) => {
-                const parentPhone = (p as any).parentPhone;
-                const isVerified = verifiedParents[p.id] || false;
-                const busy = actionState[p.id];
-                const hasErr = !!rejectComment[`${p.id}_err`];
-                return (
-                  <div key={p.id} className="py-4 sm:py-5 space-y-3 border-b border-[var(--border)] last:border-b-0 last:pb-0">
-                    <div className="flex items-start gap-3 min-w-0">
-                      <input type="checkbox" checked={selectedPasses.includes(p.id)} onChange={() => togglePassSelection(p.id)} className="mt-1 accent-indigo-500 rounded cursor-pointer shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <p className="font-bold text-sm text-[var(--text-primary)] break-words">{safeText(p.studentName, "Unknown student")} <span className="font-mono text-xs text-indigo-400 font-bold">({safeText(p.roll)})</span></p>
-                        <p className="text-[var(--text-muted)] mt-1 break-words">{getPassTypeName(p.reason)} • {safeText(p.description, "Pass request")} · {fmtPassTime(p.from)} → {fmtPassTime(p.to)}</p>
-                        <p className="text-[11px] text-[var(--text-muted)] mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                          <span className="inline-flex items-center gap-1"><MapPin className="w-3 h-3 shrink-0" /> Gate: <span className="font-bold text-[var(--text-primary)]">{gateLabel(gates, p)}</span></span>
-                          <span className="inline-flex items-center gap-1"><DoorOpen className="w-3 h-3 shrink-0" /> {terminalLabel(p)}</span>
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <button onClick={() => handlePassAction(p.id, "approve", rejectComment[p.id] || "")} disabled={!!busy} className="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl font-bold disabled:opacity-40 disabled:cursor-not-allowed">{busy === "approving" ? "…" : "Approve"}</button>
-                        <button onClick={() => handlePassAction(p.id, "reject", rejectComment[p.id] || "")} disabled={!!busy} className="px-3 py-1.5 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-xl font-bold disabled:opacity-40 disabled:cursor-not-allowed">{busy === "rejecting" ? "…" : "Reject"}</button>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 min-w-0">
-                      <div className="p-2.5 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] flex flex-wrap items-center justify-between gap-2 min-w-0">
-                        {parentPhone ? (
-                          <span className="text-[11px] font-bold text-[var(--text-primary)] break-all">Parent: <a href={`tel:${safeText(parentPhone)}`} className="font-mono text-indigo-400">{safeText(parentPhone)}</a></span>
-                        ) : (
-                          <span className="text-[11px] font-bold text-[var(--text-muted)]">Parent: Not on file</span>
-                        )}
-                        <label className="flex items-center gap-1 text-[10px] text-[var(--text-muted)] font-semibold cursor-pointer shrink-0">
-                          <input type="checkbox" checked={isVerified} onChange={(e) => setVerifiedParents((prev) => ({ ...prev, [p.id]: e.target.checked }))} className="accent-emerald-500" />
-                          <span>Verified Call</span>
-                        </label>
-                      </div>
-                      <div className="min-w-0">
-                        <input value={rejectComment[p.id] || ""} onChange={(e) => setRejectComment((prev) => ({ ...prev, [p.id]: e.target.value, [`${p.id}_err`]: "" }))} placeholder="Rejection remark" className={`w-full text-xs px-3 py-1.5 rounded-xl bg-[var(--bg-base)] border ${hasErr ? "border-rose-500" : "border-[var(--border)]"} text-[var(--text-primary)] focus:outline-none`} />
-                        {hasErr && <p className="text-[10px] text-rose-400 mt-1">A remark is required to reject this pass.</p>}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-
-          {loading && (
-            <div className="p-4 text-center text-xs text-[var(--text-muted)]">
-              <Loader2 className="w-4 h-4 animate-spin inline-block mr-2" /> Syncing approval queue…
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Curfew Roster Tab */}
-      {activeTab === "curfew" && (
-        <div className="space-y-4 sm:space-y-5 min-w-0">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <h2 className="text-lg font-bold text-[var(--text-primary)]">
-              <span className="sm:hidden">👥</span><span className="hidden sm:inline">👥 Hostel Wards</span>
-            </h2>
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              <div className="flex items-center bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-1 text-xs">
-                <button onClick={() => setRosterViewMode("list")} className={`px-2 py-1 rounded-lg font-bold flex items-center gap-1 ${rosterViewMode === "list" ? "bg-indigo-500 text-white" : "text-[var(--text-muted)]"}`}>
-                  <List className="w-4 h-4 sm:w-5 sm:h-5" /> List
-                </button>
-                <button onClick={() => setRosterViewMode("heatmap")} className={`px-2 py-1 rounded-lg font-bold flex items-center gap-1 ${rosterViewMode === "heatmap" ? "bg-indigo-500 text-white" : "text-[var(--text-muted)]"}`}>
-                  <Grid className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" /> Grid Map
-                </button>
-              </div>
-              <input type="text" value={studentSearch} onChange={(e) => setStudentSearch(e.target.value)} placeholder="Search Ward..." className="px-3 py-1.5 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-xs text-[var(--text-primary)] flex-1 sm:w-48" />
-            </div>
-          </div>
-
-          {rosterViewMode === "list" ? (
-            <div className="overflow-x-auto min-w-0 bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl">
-              <table className="w-full min-w-[560px] text-left">
-                <thead className="bg-[var(--bg-elevated)] text-[var(--text-muted)] border-b border-[var(--border)] font-mono uppercase">
-                  <tr><th className="p-3">Ward Student</th><th className="p-3">Block / Room</th><th className="p-3">Campus Status</th><th className="p-3">Demerits</th><th className="p-3 text-right">Actions</th></tr>
-                </thead>
-                <tbody className="divide-y divide-[var(--border)]">
-                  {filteredStudents.length === 0 ? (
-                    <tr><td colSpan={5} className="p-6 text-center text-[var(--text-muted)]">No ward records match.</td></tr>
-                  ) : (
-                    filteredStudents.slice(0, 20).map((s) => {
-                      const isInside = s.status === "ACTIVE" || !s.checkedOutAt;
-                      const strikes = studentStrikes[s.id] || 0;
-                      return (
-                        <tr key={s.id} className="hover:bg-[var(--bg-elevated)]/30">
-                          <td className="p-3 font-bold text-[var(--text-primary)]">{s.fullName} <span className="font-mono text-[11px] text-[var(--text-muted)]">({s.roll || s.uniqueId})</span></td>
-                          <td className="p-3 text-[var(--text-muted)] font-mono">{s.hostelBlock || "N/A"} - {s.roomNumber || "N/A"}</td>
-                          <td className="p-3"><span className={`px-2.5 py-1 rounded-full font-bold text-[10px] border ${isInside ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border-amber-500/20"}`}>{isInside ? "INSIDE" : "OUT ON PASS"}</span></td>
-                          <td className="p-3 font-mono">{strikes > 0 ? <span className="px-2 py-0.5 rounded font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-1 w-max"><Zap className="w-3 h-3 text-rose-400" /> {strikes} Strikes</span> : <span className="text-[var(--text-muted)]">0</span>}</td>
-                          <td className="p-3 text-right"><button onClick={() => handleAddStrike(s.id)} className="px-2.5 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-lg text-[10px] font-bold">+ Strike</button></td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 space-y-4 text-xs">
-              <div className="flex items-center justify-between">
-                <p className="font-bold text-[var(--text-primary)]">Hostel A Occupancy Grid</p>
-                <div className="flex items-center gap-2">
-                  {[1, 2, 3].map((f) => (
-                    <button key={f} onClick={() => setSelectedFloor(f)} className={`px-3 py-1 rounded-lg font-bold border ${selectedFloor === f ? "bg-indigo-500 text-white" : "border-[var(--border)] text-[var(--text-muted)]"}`}>Floor {f}</button>
-                  ))}
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-4 md:grid-cols-6 gap-2.5 sm:gap-3">
-                {Array.from({ length: 12 }, (_, i) => {
-                  const roomNum = selectedFloor * 100 + i + 1;
-                  const matchStudent = students[i % (students.length || 1)];
-                  const isOut = matchStudent ? (matchStudent.status !== "ACTIVE" || Boolean(matchStudent.checkedOutAt)) : false;
-                  const strikes = matchStudent ? (studentStrikes[matchStudent.id] || 0) : 0;
-                  const isLate = strikes > 1;
-                  return (
-                    <div key={roomNum} className={`p-3 rounded-xl border text-center space-y-1 ${isLate ? "bg-rose-500/10 border-rose-500/30 text-rose-300" : isOut ? "bg-amber-500/10 border-amber-500/30 text-amber-300" : "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"}`}>
-                      <p className="font-mono font-bold text-sm">R-{roomNum}</p>
-                      <p className="text-[10px] font-bold truncate text-[var(--text-primary)]">{matchStudent?.fullName ? matchStudent.fullName.split(" ")[0] : "Occupant"}</p>
-                      <p className="text-[9px] uppercase font-bold">{isLate ? "OVERDUE" : isOut ? "ON PASS" : "PRESENT"}</p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-          {loading && (
-            <div className="p-4 text-center text-xs text-[var(--text-muted)]">
-              <Loader2 className="w-4 h-4 animate-spin inline-block mr-2" /> Syncing ward roster…
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Contact the developer (all roles) */}
-      <DevContactStrip />
-    </div>
-  );
-}
-
-export default function SupervisorDashboardPage() {
-  return (
-
-      <Suspense fallback={<PageLoading />}>
-        <SupervisorDashboardInner />
-      </Suspense>
-    
+      </AuthGuard>
+    </Suspense>
   );
 }

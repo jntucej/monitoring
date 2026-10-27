@@ -114,7 +114,7 @@ async function handlePut(req: NextRequest) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["operator", "admin", "sysadmin"] }),
+  withAuthorization(handleGet, { requiredRole: ["operator", "admin", "sysadmin", "visitor"] }),
   { keyPrefix: "visitors_get", maxRequests: 100 }
 );
 

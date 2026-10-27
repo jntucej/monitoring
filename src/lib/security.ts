@@ -8,13 +8,11 @@ import { getSupabaseServiceClient } from "./dbClient";
 export interface SecurityStats {
   failedLogins24h: number;
   activeSessions: number;
-  forced2FA: boolean;
   ipAllowlistEnabled: boolean;
   allowedIps: string[];
 }
 
 let inMemoryAllowedIps: string[] = ["127.0.0.1", "::1", "192.168.1.0/24"];
-let inMemoryForced2FA = false;
 let inMemoryIpAllowlistEnabled = true;
 
 export function isIpAllowed(ip: string | null): boolean {
@@ -101,9 +99,6 @@ export async function getSecurityStats(): Promise<SecurityStats> {
       if (Array.isArray(data.value.allowed_ips)) {
         inMemoryAllowedIps = data.value.allowed_ips;
       }
-      if (typeof data.value.forced_2fa === "boolean") {
-        inMemoryForced2FA = data.value.forced_2fa;
-      }
       if (typeof data.value.ip_allowlist_enabled === "boolean") {
         inMemoryIpAllowlistEnabled = data.value.ip_allowlist_enabled;
       }
@@ -127,16 +122,14 @@ export async function getSecurityStats(): Promise<SecurityStats> {
   return {
     failedLogins24h: failed24h,
     activeSessions: activeSessions,
-    forced2FA: inMemoryForced2FA,
     ipAllowlistEnabled: inMemoryIpAllowlistEnabled,
     allowedIps: inMemoryAllowedIps,
   };
 }
 
-export async function updateIpAllowlist(ips: string[], enabled = true, force2FA?: boolean): Promise<SecurityStats> {
+export async function updateIpAllowlist(ips: string[], enabled = true): Promise<SecurityStats> {
   inMemoryAllowedIps = ips;
   inMemoryIpAllowlistEnabled = enabled;
-  if (force2FA !== undefined) inMemoryForced2FA = force2FA;
 
   try {
     const supabase = getSupabaseServiceClient();
@@ -144,7 +137,6 @@ export async function updateIpAllowlist(ips: string[], enabled = true, force2FA?
       id: "security_ip_allowlist",
       value: {
         allowed_ips: inMemoryAllowedIps,
-        forced_2fa: inMemoryForced2FA,
         ip_allowlist_enabled: inMemoryIpAllowlistEnabled,
       },
       updated_at: new Date().toISOString(),

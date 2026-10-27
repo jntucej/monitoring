@@ -10,6 +10,10 @@ export default async function auditLogRotation() {
   const retentionDays = parseInt(process.env.AUDIT_LOG_RETENTION_DAYS || '180', 10);
   const integrationLogRetentionDays = parseInt(process.env.INTEGRATION_LOG_RETENTION_DAYS || '30', 10);
   const alertRetentionDays = parseInt(process.env.ALERT_RETENTION_DAYS || '90', 10);
+  // API metrics are short-lived telemetry (the dashboard only reads the last
+  // minute, retention only needs a few days of history). Keep them bounded so
+  // the append-only table can't grow unboundedly and slow the RPS count.
+  const apiMetricsRetentionDays = parseInt(process.env.API_METRICS_RETENTION_DAYS || '7', 10);
 
   try {
     // 1. Purge old audit logs past retention threshold
@@ -36,6 +40,14 @@ export default async function auditLogRotation() {
       [alertRetentionDays]
     );
     console.log(`[Worker Job] Purged ${alertRes.rowCount || 0} resolved security alerts older than ${alertRetentionDays} days.`);
+
+    // 3b. Purge old API metrics (append-only telemetry; short retention)
+    const metricsRes = await query(
+      `DELETE FROM api_metrics
+       WHERE timestamp < NOW() - ($1 || ' days')::INTERVAL`,
+      [apiMetricsRetentionDays]
+    );
+    console.log(`[Worker Job] Purged ${metricsRes.rowCount || 0} api_metrics rows older than ${apiMetricsRetentionDays} days.`);
 
     // 4. Record rotation completion into audit trail
     await query(

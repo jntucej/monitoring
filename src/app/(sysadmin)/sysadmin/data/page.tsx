@@ -10,7 +10,11 @@ export default function DataManagementHubPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <div>
+<<<<<<< HEAD
         <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">Data Governance & Backups</p>
+=======
+        <p className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">Data Governance & Backups</p>
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
         <p className="text-sm text-[var(--text-secondary)] mt-1">
           Automated snapshots, SHA-256 verified disaster recovery, and data retention policies.
         </p>

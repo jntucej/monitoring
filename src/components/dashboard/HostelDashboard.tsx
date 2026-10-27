@@ -70,7 +70,6 @@ export function HostelDashboard() {
     "deputy_warden",
     "hostel_manager",
     "warden_or_principal",
-    "main_gate",
   ];
   const stageData: { stage: string; count: number }[] = stageKeys.map((k) => ({
     stage: k,
@@ -81,7 +80,7 @@ export function HostelDashboard() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)]">Hostel Dashboard</h1>
+          <p className="text-2xl font-bold text-[var(--text-primary)]">Hostel Dashboard</p>
           <p className="text-sm text-[var(--text-muted)] mt-1">Live hostel permissions — boys, girls, stages, overdue, biometric.</p>
         </div>
         <div className="flex items-center gap-2">

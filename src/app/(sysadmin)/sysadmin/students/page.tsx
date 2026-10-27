@@ -16,7 +16,7 @@ import { useApi } from "@/hooks/useApi";
 import { useUIStore } from "@/stores/uiStore";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { BulkUserImportModal } from "@/components/sysadmin/BulkUserImportModal";
-import { ROLL_DEPT_CODES, parseRollNumber, getStudentYearFromRoll, getDepartmentFromRoll } from "@/lib/rollNumber";
+import { ROLL_DEPT_CODES, parseRollNumber, getStudentYearFromRoll, getDepartmentFromRoll, resolveCourseType } from "@/lib/rollNumber";
 
 interface StudentRecord {
   id: string;
@@ -42,6 +42,37 @@ interface StudentRecord {
     guardianPhone?: string;
     hostelRoom?: string;
     isHosteller?: boolean;
+    branch?: string;
+    semester?: string;
+    regulation?: string;
+    admissionDate?: string;
+    admissionCategory?: string;
+    eamcetHtNo?: string;
+    eamcetEcetRank?: string;
+    htNo?: string;
+    studentName?: string;
+    identificationMarks1?: string;
+    identificationMarks2?: string;
+    mobile?: string;
+    email?: string;
+    bloodGroup?: string;
+    nationality?: string;
+    religion?: string;
+    caste?: string;
+    subcaste?: string;
+    phStatus?: string;
+    dob?: string;
+    fatherGuardianName?: string;
+    motherName?: string;
+    parentMobile?: string;
+    parentEmail?: string;
+    fatherOccupation?: string;
+    incomePerAnnum?: string;
+    address?: string;
+    city?: string;
+    district?: string;
+    state?: string;
+    pincode?: string;
   };
 }
 
@@ -345,30 +376,57 @@ const api = useApi();
     });
   };
 
+  // Canonical course label for a student, always "B.Tech" or "M.Tech".
+  // The s.course column is now DB-derived (trg_sync_student_derived,
+  // migration 20261227000002), so prefer it; fall back to the roll-derived
+  // programme if the column is still polluted (e.g. a row missed by the
+  // backfill, or a legacy import that landed before the trigger was added).
+  // This keeps the UI correct even if the DB regresses.
+  const courseOf = useCallback((s: StudentRecord): string => {
+    if (s.course === "B.Tech" || s.course === "M.Tech") return s.course;
+    const decoded = s.roll ? parseRollNumber(s.roll) : null;
+    if (decoded) return resolveCourseType(undefined, decoded.entryModeCode).name;
+    return "Unassigned";
+  }, []);
+
+  // Canonical branch / department label.
+  // The s.branch column is now DB-derived (trg_sync_student_derived,
+  // migration 20261227000002): it holds the short department code
+  // (CSE / IT / ECE / EEE / ME) or the M.Tech specialization label,
+  // never a composite display string. Prefer it when it looks clean;
+  // fall back to roll decoding if the column is still the old composite
+  // ("CSE (Regular B.Tech)") or empty.
+  const branchOf = useCallback((s: StudentRecord): string => {
+    const rawBranch = (s.studentDetails?.branch || "").trim();
+    if (rawBranch && !rawBranch.includes("(")) return rawBranch; // clean short code
+    const decoded = s.roll ? parseRollNumber(s.roll) : null;
+    if (decoded && decoded.departmentCode && ROLL_DEPT_CODES[decoded.departmentCode]) {
+      return ROLL_DEPT_CODES[decoded.departmentCode].short;
+    }
+    return (s.department || "").trim() || "Unassigned";
+  }, []);
+
   const filteredStudents = useMemo(() => {
     return students.filter((s) => {
       const q = search.toLowerCase();
       const matchesSearch = !q || s.name?.toLowerCase().includes(q) || s.roll?.toLowerCase().includes(q) ||
         s.uniqueId?.toLowerCase().includes(q) || s.email?.toLowerCase().includes(q) || s.department?.toLowerCase().includes(q);
-      const deptOf = s.department || s.course;
-      const matchesBranch = branchFilter === "ALL" || deptOf === branchFilter;
-      const matchesCourse = courseFilter === "ALL" || s.course === courseFilter;
+      const matchesBranch = branchFilter === "ALL" || branchOf(s) === branchFilter;
+      const matchesCourse = courseFilter === "ALL" || courseOf(s) === courseFilter;
       const matchesYear = yearFilter === "ALL" || String(s.year ?? "") === yearFilter;
       const matchesStatus = statusFilter === "ALL" || s.status === statusFilter;
       return matchesSearch && matchesBranch && matchesCourse && matchesYear && matchesStatus;
     });
-  }, [students, search, branchFilter, courseFilter, yearFilter, statusFilter]);
+  }, [students, search, branchFilter, courseFilter, yearFilter, statusFilter, branchOf, courseOf]);
 
   const branches = useMemo(() => {
-    // Union of explicit department values and course (roll-derived branch) so
-    // imported students (which carry course, not department) are filterable.
+    // Decode the branch / department from the roll (canonical B.Tech 5-branch
+    // table + M.Tech specialization codes) so the filter options are the real
+    // department names, not the polluted s.course values.
     const set = new Set<string>();
-    students.forEach((s) => {
-      if (s.department) set.add(s.department);
-      if (s.course) set.add(s.course);
-    });
-    return Array.from(set).sort();
-  }, [students]);
+    students.forEach((s) => set.add(branchOf(s)));
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [branchOf]);
 
   const years = useMemo(() => {
     const set = new Set<string>();
@@ -382,11 +440,11 @@ const api = useApi();
   const byBranch = useMemo(() => {
     const map: Record<string, number> = {};
     students.forEach((s) => {
-      const k = s.department || s.course || "Unassigned";
+      const k = branchOf(s);
       map[k] = (map[k] || 0) + 1;
     });
     return Object.entries(map).sort((a, b) => b[1] - a[1]);
-  }, [students]);
+  }, [branchOf]);
 
   const byYear = useMemo(() => {
     const map: Record<string, number> = {};
@@ -408,18 +466,18 @@ const api = useApi();
 
   const courses = useMemo(() => {
     const set = new Set<string>();
-    students.forEach((s) => { if (s.course) set.add(s.course); });
-    return Array.from(set).sort();
-  }, [students]);
+    students.forEach((s) => { set.add(courseOf(s)); });
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [courseOf]);
 
   const byCourse = useMemo(() => {
     const map: Record<string, number> = {};
     students.forEach((s) => {
-      const k = s.course || "Unassigned";
+      const k = courseOf(s);
       map[k] = (map[k] || 0) + 1;
     });
     return Object.entries(map).sort((a, b) => b[1] - a[1]);
-  }, [students]);
+  }, [courseOf]);
 
   // --- Canonical branch card: always the 5 defined branches, decoded from roll
   const CANONICAL_BRANCHES = ["CSE", "IT", "ECE", "EEE", "MECH"] as const;
@@ -453,7 +511,7 @@ const api = useApi();
     students.forEach((s) => {
       const decoded = s.roll ? parseRollNumber(s.roll) : null;
       if (!decoded) return;
-      const course = s.course || "Unassigned";
+      const course = courseOf(s);
       const key = `${decoded.admissionYear}|${course}`;
       if (!map[key]) map[key] = { course, admissionYear: decoded.admissionYear, regular: 0, lateral: 0, liveYearRegular: 0, liveYearLateral: 0 };
       const rec = map[key];
@@ -480,7 +538,7 @@ const api = useApi();
       };
     });
     return rows.sort((a, b) => a.admissionYear - b.admissionYear || a.course.localeCompare(b.course));
-  }, [students]);
+  }, [students, courseOf]);
 
   const activeCount = useMemo(() => students.filter((s) => s.status === "ACTIVE").length, [students]);
   const totalStudents = students.length;
@@ -500,7 +558,11 @@ const api = useApi();
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
+<<<<<<< HEAD
             <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
+=======
+            <p className="text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
               <GraduationCap className="w-7 h-7 text-emerald-400" />
               Student Management
             </p>
@@ -873,8 +935,8 @@ const api = useApi();
                   No guardians yet? Create one from the <Link href="/sysadmin/parents" className="text-violet-400 hover:text-violet-300">Parents &amp; Guardians</Link> page.
                 </p>
                 <div>
-                  <label className="text-xs font-semibold text-slate-400 block mb-1">Guardian</label>
-                  <select
+                  <label className="text-xs font-semibold text-slate-400 block mb-1" htmlFor="guardian">Guardian</label>
+                  <select id="guardian"
                     value={selectedParentId}
                     onChange={(e) => setSelectedParentId(e.target.value)}
                     className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-violet-500"

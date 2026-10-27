@@ -97,6 +97,16 @@ async function handleChangePassword(
     [auth.userId]
   ).catch(() => null);
 
+  // P0-2: invalidate any unspent password-reset tokens so an intercepted
+  // reset link (or a token minted before this change) stops working the
+  // moment the password changes — not 30 min later.
+  await query(
+    `UPDATE public.password_reset_tokens
+        SET used_at = NOW()
+      WHERE user_id = $1 AND used_at IS NULL AND expires_at > NOW()`,
+    [auth.userId]
+  ).catch(() => null);
+
   // 7. Evict the 30s user-row cache so the new session_version is enforced
   //    on the very next request, not up to 30s later.
   invalidateAuthCache(auth.userId);

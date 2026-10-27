@@ -1,18 +1,28 @@
+<<<<<<< HEAD
 "use client";
 
 export const dynamic = "force-dynamic";
 
 import { Suspense, useCallback, useMemo } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+=======
+import { Suspense } from "react";
+import { Users } from "lucide-react";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
-import { useApiResource } from "@/hooks/useApiResource";
-import { usePolling } from "@/hooks/usePolling";
-import { useAuthStore } from "@/stores/authStore";
-import { getRoleTier } from "@/lib/alert-hierarchy";
-import type { Role } from "@/lib/types";
-import {
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { AttentionQueue } from "@/components/engagement/AttentionQueue";
+import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
+import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 
+<<<<<<< HEAD
   Users,
   GraduationCap,
   CheckCircle2,
@@ -409,9 +419,36 @@ function HodDashboardInner() {
 }
 
 export default function HodDashboardPage() {
+=======
+export default function HodPage() {
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
   return (
     <Suspense fallback={<PageLoading />}>
-      <HodDashboardInner />
+      <AuthGuard allowedRoles={["hod"]}>
+        <div className="space-y-6">
+          <DevContactStrip />
+          <WidgetBoundary>
+            <RoleDashboardPanel
+              title="HOD dashboard"
+              icon={Users}
+              endpoint="/api/hod/faculty"
+              mapKpis={(raw: any) => {
+                const list = Array.isArray(raw) ? raw : [];
+                return [
+                  { label: "Faculty in department", value: list.length },
+                ];
+              }}
+            />
+          </WidgetBoundary>
+          <WidgetBoundary><AttentionQueue /></WidgetBoundary>
+          <WidgetBoundary><PersonalizedCampusHome /></WidgetBoundary>
+          <WidgetBoundary><TaskContinuity /></WidgetBoundary>
+          <WidgetBoundary><UnifiedCampusCalendar /></WidgetBoundary>
+          <WidgetBoundary><ActivityTimeline /></WidgetBoundary>
+          <WidgetBoundary><QuickActions /></WidgetBoundary>
+          <WidgetBoundary><NotificationCenter /></WidgetBoundary>
+        </div>
+      </AuthGuard>
     </Suspense>
   );
 }

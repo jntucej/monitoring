@@ -1,0 +1,47 @@
+# Optional convenience job: regenerate database/schema.sql (the fresh-install
+# baseline) so it stays in sync with the migration chain. NOT a required gate
+# — check-migrations.sh and check-schema-drift.sh are the real CI signals.
+name: Regenerate schema.sql
+
+on:
+  workflow_dispatch:
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: supabase/postgres:17.6.1.136
+        env:
+          POSTGRES_PASSWORD: ci_dummy_postgres_password_123
+          POSTGRES_DB: gate_monitor
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install psql + pg_dump client
+        run: sudo apt-get install -y postgresql-client
+
+      - name: Regenerate schema.sql from baseline + migrations
+        env:
+          DATABASE_URL: postgres://postgres:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
+        run: bash scripts/regenerate-schema.sh
+
+      - name: Show diff
+        run: git diff --stat database/schema.sql || true
+
+      # Intentionally does not push automatically; review the diff manually
+      # (or wire a PR back to main from here as a follow-up) so a bad dump
+      # never silently overwrites the checked-in baseline.
+      - name: Upload for review
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: schema-sql-regen
+          path: database/schema.sql

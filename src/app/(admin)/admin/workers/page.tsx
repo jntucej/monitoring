@@ -3,12 +3,11 @@
 export const dynamic = "force-dynamic";
 
 import React, { useState } from "react";
-import { HardHat, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { WorkerShiftTracker, WorkerShift } from "@/components/admin/WorkerShiftTracker";
 import { useApi } from "@/hooks/useApi";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh"
 import { CampusStatusBar } from "@/components/admin/CampusStatusBar";
-
 export default function AdminWorkersPage() {
 const api = useApi();
 
@@ -31,12 +30,13 @@ const api = useApi();
         headers: api.getHeaders(),
         cache: "no-store",
       });
-      const data = await res.json();
-      if (data.success) {
-        setShifts(data.shifts || []);
-        if (data.summary) setSummary(data.summary);
+      const json = await res.json();
+      if (json?.success) {
+        const payload = json.data ?? json;
+        setShifts(payload.shifts || []);
+        if (payload.summary) setSummary(payload.summary);
       } else {
-        const msg = typeof data.error === "string" ? data.error : data.error?.message || "Failed to load worker shifts";
+        const msg = typeof json.error === "string" ? json.error : json.error?.message || "Failed to load worker shifts";
         setError(msg);
       }
     } catch (err) {
@@ -51,17 +51,22 @@ const api = useApi();
   useLiveRefresh(fetchShifts, { intervalMs: 30000 });
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    
+      <div className="min-h-screen bg-[var(--bg)]">
       <CampusStatusBar />
       <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
+<<<<<<< HEAD
           <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
             <HardHat className="w-6 h-6 text-amber-500" />
             Worker & Contractor Management
           </p>
           <p className="text-sm text-[var(--text-muted)] mt-1">
+=======
+          <p className="text-sm text-[var(--text-muted)]">
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
             Track daily worker shifts, contractor compliance, late check-ins, and duty progress.
           </p>
         </div>
@@ -82,7 +87,10 @@ const api = useApi();
         <WorkerShiftTracker shifts={shifts} summary={summary} />
       )}
     </div>
-    </div>
+      </div>
+    
+    
+
   );
 }
 

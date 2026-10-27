@@ -13,9 +13,27 @@ jobs:
   check-migrations:
     name: Verify Migration Replay
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: supabase/postgres:17.6.1.136
+        env:
+          POSTGRES_PASSWORD: ci_dummy_postgres_password_123
+          POSTGRES_DB: gate_monitor
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install psql client
+        run: sudo apt-get install -y postgresql-client
+
       - name: Run migration replay check
+        env:
+          DATABASE_URL: postgres://postgres:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
         run: bash scripts/check-migrations.sh

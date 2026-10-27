@@ -8,7 +8,15 @@ import { PermissionRow, type PermissionItem } from "./PermissionRow";
 import { BulkActionsBar } from "./BulkActionsBar";
 import { PermissionDetailPanel } from "./PermissionDetailPanel";
 import { useUIStore } from "@/stores/uiStore";
+import { useAuthStore } from "@/stores/authStore";
 import { getAuthHeaders } from "@/lib/utils";
+import {
+  LevelBadge,
+  ForwardedFromChip,
+  DirectBadge,
+  sortHostelTickets,
+  type HostelTicketRow,
+} from "./HostelTicketBadges";
 
 export interface PermissionListProps {
   title: string;
@@ -43,6 +51,7 @@ export function PermissionList({
   const [activeDetailTicket, setActiveDetailTicket] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const addToast = useUIStore((s) => s.addToast);
+  const viewerRole = useAuthStore((s) => s.role);
 
   const effectiveDescription = description || subtitle || "";
   const effectiveStage = stageFilter || currentStage;
@@ -109,7 +118,7 @@ export function PermissionList({
   }, [getEffectiveUrl, initialPermissions]);
 
   const filteredPermissions = useMemo(() => {
-    return permissions.filter((p) => {
+    const filtered = permissions.filter((p) => {
       if (statusFilter !== "ALL" && p.status !== statusFilter) {
         return false;
       }
@@ -120,7 +129,9 @@ export function PermissionList({
       const ticket = p.ticket_number?.toLowerCase() || "";
       return studentName.includes(q) || roll.includes(q) || ticket.includes(q);
     });
-  }, [permissions, searchQuery, statusFilter]);
+    // Pinned (forwarded to me) -> SLA-overdue -> rest.
+    return sortHostelTickets(filtered, viewerRole);
+  }, [permissions, searchQuery, statusFilter, viewerRole]);
 
   const handleToggleSelect = (ticket: string) => {
     setSelectedTickets((prev) => {
@@ -218,7 +229,7 @@ export function PermissionList({
     <div className="space-y-6 min-w-0">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 min-w-0">
         <div className="min-w-0">
-          <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] min-w-0 truncate">{title}</h1>
+          <p className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] min-w-0 truncate">{title}</p>
           {effectiveDescription && (
             <p className="text-sm text-[var(--text-secondary)] mt-1 min-w-0">{effectiveDescription}</p>
           )}
@@ -303,18 +314,33 @@ export function PermissionList({
         </div>
       ) : (
         <div className="space-y-3 min-w-0">
-          {filteredPermissions.map((req) => (
-            <PermissionRow
-              key={req.id || req.ticket_number}
-              request={req}
-              isSelected={selectedTickets.has(req.ticket_number)}
-              onToggleSelect={handleToggleSelect}
-              onViewDetails={(ticket) => setActiveDetailTicket(ticket)}
-              onQuickApprove={(ticket) => handleSingleAction(ticket, "APPROVE")}
-              onQuickReject={(ticket) => handleSingleAction(ticket, "REJECT")}
-              loadingAction={actionLoading}
-            />
-          ))}
+          {filteredPermissions.map((req) => {
+            const hostelRow = req as HostelTicketRow;
+            const showBadges =
+              hostelRow.routed_to_role ||
+              hostelRow.forwarded_from_role ||
+              hostelRow.direct_generated;
+            return (
+              <div key={req.id || req.ticket_number} className="space-y-1.5 min-w-0">
+                {showBadges && (
+                  <div className="flex flex-wrap items-center gap-1.5 px-1">
+                    <LevelBadge row={hostelRow} fallbackStage={req.current_stage} />
+                    <ForwardedFromChip row={hostelRow} />
+                    <DirectBadge row={hostelRow} />
+                  </div>
+                )}
+                <PermissionRow
+                  request={req}
+                  isSelected={selectedTickets.has(req.ticket_number)}
+                  onToggleSelect={handleToggleSelect}
+                  onViewDetails={(ticket) => setActiveDetailTicket(ticket)}
+                  onQuickApprove={(ticket) => handleSingleAction(ticket, "APPROVE")}
+                  onQuickReject={(ticket) => handleSingleAction(ticket, "REJECT")}
+                  loadingAction={actionLoading}
+                />
+              </div>
+            );
+          })}
         </div>
       )}
 

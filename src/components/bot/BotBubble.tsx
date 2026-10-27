@@ -21,9 +21,13 @@ export const BotBubble = memo(function BotBubble({
   const [thanked, setThanked] = useState(false);
   const isError = m.status === "error";
   const isStreaming = m.status === "streaming";
+  // Feedback is only valid once the message has been persisted server-side
+  // (dbId present) and is no longer streaming — clicking earlier would 404
+  // on a dbId that doesn't exist yet.
+  const canGiveFeedback = !isStreaming && !isError && !!m.dbId;
 
   const give = (f: -1 | 1) => {
-    if (thanked) return;
+    if (!canGiveFeedback || thanked) return;
     onFeedback(m.id, f);
     setThanked(true);
     playAudioFeedback(f === 1 ? "success" : "warning");
@@ -87,22 +91,28 @@ export const BotBubble = memo(function BotBubble({
                 <RotateCcw className="h-3 w-3" /> {retryLabel}
               </button>
             ) : !thanked ? (
-              <>
-                <button
-                  aria-label="Helpful"
-                  onClick={() => give(1)}
-                  className="text-[var(--text-muted)] hover:text-emerald-500 transition active:scale-95"
-                >
-                  <ThumbsUp className="h-3.5 w-3.5" />
-                </button>
-                <button
-                  aria-label="Not helpful"
-                  onClick={() => give(-1)}
-                  className="text-[var(--text-muted)] hover:text-rose-500 transition active:scale-95"
-                >
-                  <ThumbsDown className="h-3.5 w-3.5" />
-                </button>
-              </>
+              canGiveFeedback ? (
+                <>
+                  <button
+                    aria-label="Helpful"
+                    onClick={() => give(1)}
+                    className="text-[var(--text-muted)] hover:text-emerald-500 transition active:scale-95"
+                  >
+                    <ThumbsUp className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    aria-label="Not helpful"
+                    onClick={() => give(-1)}
+                    className="text-[var(--text-muted)] hover:text-rose-500 transition active:scale-95"
+                  >
+                    <ThumbsDown className="h-3.5 w-3.5" />
+                  </button>
+                </>
+              ) : (
+                <span className="text-[10px] text-[var(--text-muted)] opacity-60">
+                  {m.status === "streaming" ? "Still generating…" : "Offline"}
+                </span>
+              )
             ) : (
               <motion.span
                 initial={{ opacity: 0, y: 4 }}

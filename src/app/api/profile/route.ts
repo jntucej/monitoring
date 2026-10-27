@@ -22,7 +22,8 @@ async function handleGet(_req: NextRequest, context: { auth: AuthContext }) {
     .select(`
       id, name, email, phone, role, status, unique_id,
       photo_url, department_id, login_identifier,
-      two_factor_enabled, created_at
+      bot_lang, bot_voice_replies,
+      created_at
     `)
     .eq("id", context.auth.userId)
     .maybeSingle();
@@ -34,7 +35,15 @@ async function handleGet(_req: NextRequest, context: { auth: AuthContext }) {
   const [studentRes, employeeRes] = await Promise.all([
     supabase
       .from("student_details")
-      .select(`roll, year, section, batch, hostel_block, room_number, gender, student_type`)
+      .select(
+        "roll, year, section, batch, hostel_block, room_number, gender, student_type, " +
+        "course, father_name, landline_number, department, branch, semester, regulation, " +
+        "admission_date, admission_category, eamcet_htno, eamcet_ecet_rank, htno, student_name, " +
+        "identification_marks_1, identification_marks_2, mobile, email, blood_group, nationality, " +
+        "religion, caste, subcaste, ph_status, dob, father_guardian_name, mother_name, " +
+        "parent_mobile, parent_email, father_occupation, income_per_annum, address, city, " +
+        "district, state, pincode"
+      )
       .eq("user_id", context.auth.userId)
       .maybeSingle(),
     supabase
@@ -60,7 +69,9 @@ async function handleGet(_req: NextRequest, context: { auth: AuthContext }) {
       photoUrl: user.photo_url,
       departmentId: user.department_id,
       loginIdentifier: user.login_identifier,
-      twoFactorEnabled: !!user.two_factor_enabled,
+      botLang: user.bot_lang ?? "en",
+      botVoiceReplies: Boolean(user.bot_voice_replies),
+      twoFactorEnabled: false,
       createdAt: user.created_at,
       studentDetails,
       employeeDetails,
@@ -99,6 +110,15 @@ async function handlePatch(req: NextRequest, context: { auth: AuthContext }) {
 
   if (typeof body.photoUrl === "string") {
     updates.photo_url = body.photoUrl || null;
+  }
+
+  // Floating-bot preferences: language + TTS. Persisted so a fresh tab /
+  // hard refresh re-hydrates instead of silently resetting to defaults.
+  if (typeof body.bot_lang === "string" && ["en", "te"].includes(body.bot_lang)) {
+    updates.bot_lang = body.bot_lang;
+  }
+  if (typeof body.bot_voice_replies === "boolean") {
+    updates.bot_voice_replies = body.bot_voice_replies;
   }
 
   if (Object.keys(updates).length === 0) {

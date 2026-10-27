@@ -64,7 +64,6 @@ export async function resolveAlert(alertId: string, userId: string): Promise<boo
 }
 
 export const DEPARTMENTS: Department[] = [
-  { code: "CIVIL", name: "Civil Engineering", hod: "Dr. A. Kumar" },
   { code: "CSE", name: "Computer Science & Engineering", hod: "Dr. K. Sridhar" },
   { code: "IT",  name: "Information Technology",        hod: "Dr. P. Sreedhar" },
   { code: "ECE", name: "Electronics & Communication Engineering", hod: "Dr. M. Srinivas" },
@@ -100,6 +99,42 @@ export function mPerson(r: any): Person {
     completed: r.student_details.completed,
     completedAt: r.student_details.completed_at || r.student_details.completedAt,
     wardenId: r.student_details.warden_id,
+    course: r.student_details.course,
+    fatherName: r.student_details.father_name,
+    landlineNumber: r.student_details.landline_number,
+    department: r.student_details.department,
+    branch: r.student_details.branch,
+    semester: r.student_details.semester,
+    regulation: r.student_details.regulation,
+    admissionDate: r.student_details.admission_date,
+    admissionCategory: r.student_details.admission_category,
+    eamcetHtNo: r.student_details.eamcet_htno,
+    eamcetEcetRank: r.student_details.eamcet_ecet_rank,
+    htNo: r.student_details.htno,
+    studentName: r.student_details.student_name,
+    identificationMarks1: r.student_details.identification_marks_1,
+    identificationMarks2: r.student_details.identification_marks_2,
+    currentEntryType: r.student_details.current_entry_type ?? null,
+    mobile: r.student_details.mobile,
+    email: r.student_details.email,
+    bloodGroup: r.student_details.blood_group,
+    nationality: r.student_details.nationality,
+    religion: r.student_details.religion,
+    caste: r.student_details.caste,
+    subcaste: r.student_details.subcaste,
+    phStatus: r.student_details.ph_status,
+    dob: r.student_details.dob,
+    fatherGuardianName: r.student_details.father_guardian_name,
+    motherName: r.student_details.mother_name,
+    parentMobile: r.student_details.parent_mobile,
+    parentEmail: r.student_details.parent_email,
+    fatherOccupation: r.student_details.father_occupation,
+    incomePerAnnum: r.student_details.income_per_annum,
+    address: r.student_details.address,
+    city: r.student_details.city,
+    district: r.student_details.district,
+    state: r.student_details.state,
+    pincode: r.student_details.pincode,
   } : undefined;
 
   const employeeDetails: EmployeeDetails | undefined = r.employee_details ? {
@@ -119,7 +154,6 @@ export function mPerson(r: any): Person {
     course: r.student_details?.course || r.course || undefined,
     department: (() => {
       const deptCodeMap: Record<string, string> = {
-        "01": "CIVIL",
         "02": "EEE",
         "03": "MECH",
         "04": "ECE",
@@ -168,6 +202,7 @@ export function mPerson(r: any): Person {
     completed: studentDetails?.completed,
     completedAt: studentDetails?.completedAt,
     wardenId: (studentDetails as any)?.warden_id || studentDetails?.wardenId || r.warden_id,
+    currentEntryType: studentDetails?.currentEntryType ?? r.current_entry_type ?? null,
   };
 }
 
@@ -211,7 +246,6 @@ function mScan(r: any): Scan {
   const personType = user?.role || r.person_type || "student";
   const department = (() => {
     const deptCodeMap: Record<string, string> = {
-      "01": "CIVIL",
       "02": "EEE",
       "03": "MECH",
       "04": "ECE",
@@ -671,7 +705,7 @@ export async function correctScan(
  * Derive which gate UUIDs currently have a live activity signal.
  *
  * A gate counts as "operational" when ANY of these is true:
- *   1. A session row exists for a gate-desk role (operator/supervisor/warden)
+ *   1. A session row exists for a gate-desk role (operator/supervisor)
  *      assigned to (or supervising) the gate. Sessions are written on
  *      refresh-token rotation, so this captures operators that are actively
  *      using their desk app. We do NOT count sysadmin/admin sessions —
@@ -686,7 +720,7 @@ export async function correctScan(
  * that's how the old implementation marked dormant gates "Online" for
  * hours after the last scan of the day.
  */
-const GATE_OPERATOR_ROLES: string[] = ['operator', 'supervisor', 'warden'];
+const GATE_OPERATOR_ROLES: string[] = ['operator', 'supervisor'];
 const ACTIVE_SESSION_WINDOW_MIN = 5;
 
 async function getGateOnlineIds(client: ReturnType<typeof getDbClient>): Promise<Set<string>> {
@@ -1359,7 +1393,7 @@ export async function createUser(userData: {
   }
 
   // Insert/upsert auxiliary employee_details if applicable
-  if (['faculty', 'staff', 'worker', 'operator', 'admin', 'sysadmin', 'caretaker', 'deputy_warden', 'hostel_manager', 'principal', 'vice_principal', 'oie', 'exam_branch', 'warden'].includes(userData.role) || userData.employeeId || userData.isHod) {
+  if (['faculty', 'staff', 'worker', 'operator', 'admin', 'sysadmin', 'caretaker', 'deputy_warden', 'hostel_manager', 'principal', 'vice_principal', 'oie', 'exam_branch'].includes(userData.role) || userData.employeeId || userData.isHod) {
     const finalEmployeeId =
       (userData.employeeId && userData.employeeId.trim()) ||
       (uniqueId && String(uniqueId).trim()) ||
@@ -1444,17 +1478,6 @@ export async function findUserByLogin(login: string): Promise<User | null> {
 // NOTE: `verifyLogin` was REMOVED. Password verification belongs exclusively
 // to Supabase Auth (`signInWithPassword`) — application code must never
 // authenticate users by merely looking up a row.
-
-/** Verify an operator PIN against the bcrypt-hashed `initial_pin_hash`. */
-export async function verifyPin(userId: string, pin: string): Promise<boolean> {
-  const { rows } = await query<{ pin_hash: string|null; initial_pin_hash: string|null }>(
-    `SELECT pin_hash, initial_pin_hash FROM users WHERE id = $1 AND status = 'ACTIVE'`,
-    [userId]
-  );
-  const hashes = [rows[0]?.pin_hash, rows[0]?.initial_pin_hash].filter(Boolean) as string[];
-  for (const h of hashes) if (await bcrypt.compare(pin, h)) return true;
-  return false;
-}
 
 export async function hashPin(pin: string): Promise<string> {
   return await bcrypt.hash(pin, 10);
@@ -1705,220 +1728,6 @@ export async function inferDirection(uniqueId: string): Promise<ScanDirection> {
   return l.direction === "IN" ? "OUT" : "IN";
 }
 
-export async function addScan(input: {
-  roll: string; // unique_id / roll
-  direction: ScanDirection;
-  reason?: ExitReason;
-  gateId: string;
-  operatorId: string;
-  isManual?: boolean;
-  clientEventId?: string;
-}): Promise<{ scan: Scan; duplicate: boolean }> {
-  const uniqueId = input.roll.trim().toUpperCase();
-
-  const person = await findPersonByUniqueId(uniqueId);
-  if (!person) {
-    throw new Error(`Person not found with ID: ${uniqueId}`);
-  }
-
-  if (person.status && person.status.toUpperCase() !== "ACTIVE") {
-    throw new Error(`Access Denied: Account status is ${person.status}. Gate access denied.`);
-  }
-
-  // Enforce server-side student exit gate-pass requirements
-  const isStudent = person.role === "student" || person.personType === "student" || !!person.studentDetails;
-  if (isStudent && input.direction === "OUT") {
-    const { validateStudentExitFlow } = await import("./student-exit-flow");
-    const flowResult = await validateStudentExitFlow(uniqueId, input.direction, input.reason);
-    if (!flowResult.allowed) {
-      throw new Error(flowResult.error || `Exit denied: Approved gate pass required for ${input.reason || "student exit"}`);
-    }
-  }
-
-  let client = supabase;
-  try {
-    const { getSupabaseServiceClient } = await import('./dbClient');
-    client = getSupabaseServiceClient();
-  } catch { /* fallback */ }
-
-  if (input.reason) {
-    const reasonAliasMap: Record<string, string> = {
-      "day_pass": "day_pass",
-      "home_out": "home_out",
-      "Day Out": "day_pass",
-      "Home Out": "home_out",
-      "Daily Outing": "daily_outing",
-      "daily_outing": "daily_outing",
-      "home_in": "home_in",
-      "regular": "regular",
-      "Regular": "regular",
-      "Day Pass": "day_pass",
-    };
-    const normReason = reasonAliasMap[input.reason] || input.reason.toLowerCase().trim().replace(/\s+/g, '_');
-    const searchCodes = Array.from(new Set([input.reason, normReason].filter(Boolean)));
-    const { data: validReasons, error: rErr } = await client
-        .from('config_exit_reasons')
-        .select('code')
-        .in('code', searchCodes)
-        .limit(1);
-    
-    const matchedReason = validReasons && validReasons.length > 0 ? validReasons[0] : null;
-    const allowedStandard = [
-      'day_pass', 'home_out', 'daily_outing', 'home_in', 'regular',
-      'Day Out', 'Home Out', 'Day Pass', 'Daily Outing', 'Regular', 'Emergency', 'emergency'
-    ];
-
-    if (!matchedReason && !allowedStandard.map(s => s.toLowerCase()).includes(input.reason.toLowerCase()) && !allowedStandard.includes(normReason)) {
-      if (!rErr || (rErr.code !== '42P01' && rErr.code !== 'PGRST205')) {
-        throw new Error(`Invalid exit reason: ${input.reason}`);
-      }
-    }
-  }
-
-  const isUuid = (str?: string) => !!str && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
-
-  // DB Idempotency Check via clientEventId
-  if (input.clientEventId && isUuid(input.clientEventId)) {
-    const { data: existingLog } = await client
-      .from('movement_logs')
-      .select('*, users:users!movement_logs_user_id_fkey(*)')
-      .eq('id', input.clientEventId)
-      .maybeSingle();
-
-    if (existingLog) {
-      return { scan: mScan(existingLog), duplicate: true };
-    }
-  }
-
-  const gate = await findGateById(input.gateId);
-  if (!gate) throw new Error("Invalid gate ID");
-
-  const op = await findUserById(input.operatorId);
-  if (!op) throw new Error("Invalid operator ID");
-
-  const ts = new Date().toISOString();
-  const id = (input.clientEventId && isUuid(input.clientEventId)) ? input.clientEventId : crypto.randomUUID();
-
-  // Attempt atomic database scan insertion via stored RPC with row lock
-  try {
-    const { data: rpcRes, error: rpcErr } = await client.rpc('process_gate_scan', {
-      p_scan_id: id,
-      p_user_id: person.id,
-      p_direction: input.direction,
-      p_reason: input.reason || null,
-      p_gate_id: gate.id,
-      p_gate_name: gate.name,
-      p_operator_id: op.id,
-      p_operator_name: op.name,
-      p_timestamp: ts,
-      p_is_manual: !!input.isManual,
-      p_dup_window_minutes: 5,
-    });
-
-    if (!rpcErr && rpcRes && rpcRes.length > 0) {
-      const res = rpcRes[0];
-      const logData = res.inserted_log;
-      const isDup = !!res.is_duplicate;
-      return { scan: mScan({ ...logData, users: person }), duplicate: isDup };
-    }
-    // ponytail: silent fallthrough here hides a broken RPC (missing fn, type
-    // drift) and the slow path skips FOR UPDATE dedup — log + audit so the
-    // drift query in the runbook catches it before occupancy diverges.
-    if (rpcErr) {
-      console.error("[addScan] process_gate_scan RPC failed — falling back:", rpcErr);
-      await addAudit({
-        action: "SCAN_RPC_FALLBACK",
-        userId: op.id,
-        userName: op.name,
-        role: op.role as Role,
-        details: `RPC fallback: ${rpcErr.message}`,
-        gateId: gate.id,
-      });
-    }
-  } catch (err: any) {
-    console.error("[addScan] process_gate_scan RPC failed, falling back:", err);
-    await addAudit({
-      action: "GATE_OFFLINE",
-      userId: op.id,
-      userName: op.name,
-      role: (op.role || "operator") as Role,
-      details: `RPC fallback: ${String(err?.message || err)}`,
-      gateId: gate.id,
-    }).catch(() => {});
-  }
-
-  const duplicate = await isDuplicate(uniqueId, input.direction);
-  if (duplicate) {
-    const last = await lastScanFor(uniqueId);
-    if (last) {
-      return { scan: last, duplicate: true };
-    }
-  }
-
-  const dbScanReasonMap: Record<string, string> = {
-    "day_pass": "Day Out",
-    "home_out": "Home Out",
-    "daily_outing": "Daily Outing",
-  };
-  const scanReason = input.reason ? (dbScanReasonMap[input.reason] || input.reason) : "Regular";
-
-  const scanRow = {
-    id,
-    user_id: person.id,
-    direction: input.direction,
-    reason: scanReason,
-    gate_id: gate.id,
-    gate_name: gate.name,
-    operator_id: op.id,
-    operator_name: op.name,
-    timestamp: ts,
-    is_manual: !!input.isManual,
-    is_correction: false,
-  };
-
-  const { data, error } = await client.from('movement_logs').insert(scanRow).select().single();
-  if (error || !data) {
-    if (error?.code === '23505') {
-      const { data: existingLog } = await client
-        .from('movement_logs')
-        .select('*, users:users!movement_logs_user_id_fkey(*)')
-        .eq('id', id)
-        .maybeSingle();
-      if (existingLog) {
-        return { scan: mScan(existingLog), duplicate: true };
-      }
-    }
-    console.error('Error inserting scan:', error);
-    throw new Error(`Failed to log scan: ${error?.message}`);
-  }
-
-  // Note: campus_occupancy is automatically updated by the trigger update_campus_occupancy_on_movement()
-  // when a record is inserted into movement_logs. No manual upsert needed.
-
-  await addAudit({
-    action: "SCAN_CREATED",
-    userId: op.id,
-    userName: op.name,
-    role: op.role as Role,
-    details: `${input.direction} ${person.fullName} (${person.uniqueId}) [${person.personType}] at ${gate.name}`,
-    gateId: gate.id,
-  });
-
-  if (person.parentId) {
-    await addNotification(
-      "parent",
-      person.parentId,
-      "gate_entry",
-      "Gate Entry",
-      `${person.fullName} (${person.uniqueId}) ${input.direction === "IN" ? "entered" : "exited"} campus at ${new Date(ts).toLocaleTimeString()} via ${gate.name}`
-    );
-  }
-
-  // Re-attach user record because PostgresQueryBuilder doesn't hydrate relations on simple insert.
-  const personRecord = await findPersonByUniqueId(uniqueId);
-  return { scan: mScan({ ...data, users: personRecord || person }), duplicate: false };
-}
-
 export async function getAllLogs(f?: {
   gateId?: string;
   date?: string;
@@ -2012,7 +1821,7 @@ export async function addAudit(entry: {
     if (userExists) targetUserId = entry.userId;
   }
 
-  const auditRow = {
+  const auditRow: any = {
     action: entry.action,
     user_id: targetUserId,
     user_name: entry.userName || "System User",
@@ -2020,6 +1829,9 @@ export async function addAudit(entry: {
     details: detailObject, // Pass as object directly to Supabase driver
     timestamp,
   };
+  // CEJ fix: audit_logs gained a gate_id column (20261222000001). Persist the
+  // gate scope when provided so gate-scoped audit entries are queryable.
+  if (entry.gateId) auditRow.gate_id = entry.gateId;
 
   let { error } = await serviceClient.from('audit_logs').insert(auditRow);
   if (error && error.code === 'PGRST204') {

@@ -6,6 +6,8 @@ import { Suspense } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { PermissionList } from "@/components/approver/PermissionList";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+import type { Role } from "@/lib/types";
 
 function HodPermissionsInner() {
   return (
@@ -39,11 +41,12 @@ function HodPermissionsInner() {
     </div>
   );
 }
-
 export default function HodPermissionsPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <HodPermissionsInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['hod', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <HodPermissionsInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

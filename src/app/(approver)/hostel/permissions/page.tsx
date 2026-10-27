@@ -12,12 +12,12 @@ import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
   Building2,
   Inbox,
   MoonStar,
   Users,
-  Clock,
   AlertTriangle,
   Loader2,
 
@@ -141,7 +141,7 @@ function HostelPermissionsInner() {
     loading: permLoading,
     error: permError,
     refresh: refreshPerms,
-  } = useApiResource<PermissionsResponse>("/api/permissions?workflowType=hostel&status=PENDING", {
+  } = useApiResource<PermissionsResponse>("/api/permissions?workflow_type=hostel&status=PENDING", {
     ttlMs: 30_000,
   });
 
@@ -187,18 +187,6 @@ function HostelPermissionsInner() {
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
-        <button
-          onClick={() => void refresh()}
-          disabled={permLoading || presenceLoading}
-          className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700 disabled:opacity-50"
-        >
-          {permLoading || presenceLoading ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Clock className="w-4 h-4" />
-          )}
-          {permLoading || presenceLoading ? "Refreshing…" : "Refresh"}
-        </button>
       </div>
 
       {/* error banners — presence matrix may 403 for hostel roles; render gracefully */}
@@ -328,11 +316,12 @@ function HostelPermissionsInner() {
     </div>
   );
 }
-
 export default function HostelPermissionsPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <HostelPermissionsInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['principal', 'hostel_manager', 'deputy_warden', 'caretaker', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <HostelPermissionsInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

@@ -93,7 +93,7 @@ async function handleDelete(req: NextRequest, ctx: any) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "operator"] }),
+  withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "operator", "supervisor"] }),
   { keyPrefix: "gate_get", maxRequests: 50 }
 );
 

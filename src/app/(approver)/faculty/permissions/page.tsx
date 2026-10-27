@@ -6,6 +6,8 @@ import { Suspense } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { PermissionList } from "@/components/approver/PermissionList";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+import type { Role } from "@/lib/types";
 
 function FacultyPermissionsInner() {
   return (
@@ -40,11 +42,12 @@ function FacultyPermissionsInner() {
     </div>
   );
 }
-
 export default function FacultyPermissionsPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <FacultyPermissionsInner />
-    </Suspense>
+    <AuthGuard allowedRoles={['faculty', 'hod', 'admin', 'sysadmin']}>
+      <Suspense fallback={<PageLoading />}>
+        <FacultyPermissionsInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

@@ -18,7 +18,7 @@ const ROLE_STEPS: Record<string, OnboardingStep[]> = {
     { id: "op_online_resilience", title: "Network Resilience & Health Check", description: "Understand real-time server health, retry buttons, and online status.", targetPath: "/gate/[gateId]", role: "operator" },
   ],
   admin: [
-    { id: "adm_dashboard", title: "Executive Dashboard", description: "Monitor real-time campus occupancy and gate metrics.", targetPath: "/admin/dashboard", role: "admin" },
+    { id: "adm_dashboard", title: "Executive Dashboard", description: "Monitor real-time campus occupancy and gate metrics.", targetPath: "/admin", role: "admin" },
     { id: "adm_schedules", title: "Gate Access Schedules", description: "Configure night curfews and holiday overrides.", targetPath: "/admin/gates/schedule", role: "admin" },
   ],
   student: [

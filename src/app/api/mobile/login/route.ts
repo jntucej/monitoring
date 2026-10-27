@@ -23,9 +23,9 @@ export async function handlePost(req: NextRequest) {
 
   try {
     const body = await req.json().catch(() => null);
-    const { uniqueId, code, deviceId, password, pin } = (body ?? {}) as Record<string, unknown>;
+    const { uniqueId, code, deviceId, password } = (body ?? {}) as Record<string, unknown>;
 
-    if (!uniqueId || (!code && !password && !pin)) {
+    if (!uniqueId || (!code && !password)) {
       return uniformFailure();
     }
 
@@ -41,7 +41,7 @@ export async function handlePost(req: NextRequest) {
       return uniformFailure();
     }
 
-    if (password || pin) {
+    if (password) {
       const { query } = await import("@/lib/postgres");
       const { verifyPassword } = await import("@/lib/auth-token");
       const userRes = await query(
@@ -51,32 +51,11 @@ export async function handlePost(req: NextRequest) {
 
       if (userRes.rows.length === 0) return uniformFailure();
       const user = userRes.rows[0];
-      const credential = String(password || pin || "").trim();
+      const credential = String(password || "").trim();
       let credentialValid = false;
 
       if (user.password_hash) credentialValid = await verifyPassword(credential, user.password_hash);
-      if (!credentialValid && user.pin_hash) credentialValid = await verifyPassword(credential, user.pin_hash);
-      if (!credentialValid && user.initial_pin_hash) credentialValid = await verifyPassword(credential, user.initial_pin_hash);
       if (!credentialValid) return uniformFailure();
-
-      const { isMfaRequiredForAdmin } = await import("@/lib/authContext");
-      const requiresMfa =
-        (user.role === "sysadmin" || user.role === "admin" || user.two_factor_enabled) &&
-        (user.two_factor_enabled || (await isMfaRequiredForAdmin()));
-
-      if (requiresMfa) {
-        const presentedTotp = body.totp_code ? String(body.totp_code).trim() : null;
-        if (!presentedTotp) {
-          return NextResponse.json(
-            { success: false, mfa_required: true, message: "Two-factor authentication code required for this account." },
-            { status: 403 }
-          );
-        }
-        const { verifyTOTPCode } = await import("@/lib/totp");
-        const { decryptSecret } = await import("@/lib/mfa-secret");
-        const secret = user.two_factor_secret ? decryptSecret(user.two_factor_secret) : null;
-        if (!secret || !verifyTOTPCode(secret, presentedTotp)) return uniformFailure();
-      }
 
       const targetDeviceId = String(deviceId || "mobile-device");
       const token = await generateMobileToken(person.id, person.uniqueId, targetDeviceId);
@@ -86,7 +65,7 @@ export async function handlePost(req: NextRequest) {
         userId: person.id,
         userName: person.fullName,
         role: (person.personType || "student") as unknown as Role,
-        details: { uniqueId: person.uniqueId, deviceId: targetDeviceId, method: password ? "password" : "pin" },
+        details: { uniqueId: person.uniqueId, deviceId: targetDeviceId, method: "password" },
       });
 
       return NextResponse.json({

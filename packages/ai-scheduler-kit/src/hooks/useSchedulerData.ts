@@ -7,7 +7,6 @@ export interface UseSchedulerDataOptions {
   adapter?: SchedulerDataAdapter;
   autoFetch?: boolean;
   refreshInterval?: number;
-  cache?: boolean;
   filter?: (job: any) => boolean;
 }
 
@@ -30,7 +29,6 @@ export function useSchedulerData(options: UseSchedulerDataOptions = {}): UseSche
     adapter,
     autoFetch = true,
     refreshInterval = 30000, // 30 seconds default
-    cache = true,
     filter
   } = options;
 
@@ -127,14 +125,16 @@ export function useSchedulerData(options: UseSchedulerDataOptions = {}): UseSche
 
   // Initial fetch and periodic refresh
   useEffect(() => {
-    if (autoFetch && adapterInstance) {
-      fetchData();
+    if (!autoFetch || !adapterInstance) return undefined;
 
-      if (refreshInterval > 0) {
-        const interval = setInterval(fetchData, refreshInterval);
-        return () => clearInterval(interval);
-      }
+    fetchData();
+
+    if (refreshInterval > 0) {
+      const interval = setInterval(fetchData, refreshInterval);
+      return () => clearInterval(interval);
     }
+
+    return undefined;
   }, [autoFetch, adapterInstance, refreshInterval, fetchData]);
 
   return {

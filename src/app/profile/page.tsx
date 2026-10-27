@@ -15,7 +15,6 @@ import {
   User as UserIcon,
   Mail,
   Phone,
-  Shield,
   KeyRound,
   Lock,
   Save,
@@ -26,6 +25,8 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
+import { ParticleField } from "@/components/cinematic/ParticleField";
+import { AmbientGlow } from "@/components/cinematic/AmbientGlow";
 
 /* ------------------------------------------------------------------ *
  *  Types
@@ -40,7 +41,6 @@ interface Profile {
   uniqueId: string | null;
   photoUrl: string | null;
   departmentId: string | null;
-  twoFactorEnabled: boolean;
   studentDetails?: { roll?: string; year?: number; section?: string; hostel_block?: string; room_number?: string } | null;
   employeeDetails?: { employee_id?: string; designation?: string; department_id?: string } | null;
 }
@@ -150,7 +150,7 @@ function ProfileDashboard() {
   }, [addError]);
 
   useEffect(() => {
-    load();
+    load().catch(() => {});
   }, [load]);
 
   /* -------------------- Save name/phone -------------------- */
@@ -269,7 +269,11 @@ function ProfileDashboard() {
     .toUpperCase();
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+    <div className="relative min-h-screen overflow-hidden bg-[#070B14] text-[var(--text-primary)]">
+      <div aria-hidden="true" className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(139,92,246,0.14), transparent 55%), radial-gradient(ellipse at 50% 100%, rgba(139,92,246,0.14), transparent 60%)" }} />
+      <ParticleField color="#c4b5fd" />
+      <AmbientGlow color="rgba(139,92,246,0.18)" />
+      <div className="relative z-10 max-w-4xl mx-auto px-4 py-8 space-y-6">
       {/* Header card */}
       <div className="glass-card p-6 flex items-center gap-5">
         <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-2xl font-bold">
@@ -287,11 +291,6 @@ function ProfileDashboard() {
             <Badge variant={profile.status === "ACTIVE" ? "success" : "error"}>
               {profile.status}
             </Badge>
-            {profile.twoFactorEnabled && (
-              <Badge variant="success">
-                <Shield className="w-3 h-3 mr-1" /> 2FA On
-              </Badge>
-            )}
           </div>
         </div>
       </div>
@@ -563,25 +562,7 @@ function ProfileDashboard() {
             </form>
           )}
 
-          {/* 2FA */}
-          <div className="glass-card p-6 space-y-3">
-            <h2 className="text-lg font-semibold text-[var(--text-primary)] flex items-center gap-2">
-              <Shield className="w-5 h-5" /> Two-factor authentication
-            </h2>
-            <p className="text-sm text-[var(--text-secondary)]">
-              {profile.twoFactorEnabled
-                ? "2FA is enabled on this account. You will be asked for a TOTP code at sign-in."
-                : "2FA is not enabled. System administrators are required to enable it."}
-            </p>
-            <div className="flex justify-end">
-              <a
-                href="/sysadmin/security"
-                className="text-sm text-[var(--action-primary)] hover:underline"
-              >
-                Manage 2FA →
-              </a>
-            </div>
-          </div>
+          {/* 2FA subsystem removed from the architecture */}
         </div>
       )}
 
@@ -604,6 +585,7 @@ function ProfileDashboard() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

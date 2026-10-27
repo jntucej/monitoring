@@ -59,7 +59,7 @@ export async function generatePredictions(): Promise<PredictionItem[]> {
       const variance = Math.max(5, predictedTraffic * 0.15);
       predictions.push({
         type: "traffic",
-        target: "main_gate",
+        target: "gate",
         predicted_value: Math.round(predictedTraffic + (h % 3 === 0 ? 5 : -2)),
         confidence_interval_low: Math.max(0, Math.round(predictedTraffic - variance)),
         confidence_interval_high: Math.round(predictedTraffic + variance + 10),
@@ -72,7 +72,7 @@ export async function generatePredictions(): Promise<PredictionItem[]> {
       const targetTime = new Date(now.getTime() + h * 3600 * 1000).toISOString();
       predictions.push({
         type: "traffic",
-        target: "main_gate",
+        target: "gate",
         predicted_value: 120 + h * 5,
         confidence_interval_low: 100,
         confidence_interval_high: 150,

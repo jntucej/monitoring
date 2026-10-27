@@ -1,9 +1,10 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Ticket, Loader2, Clock, CheckCircle2, XCircle } from "lucide-react";
 import type { GatePass } from "@/lib/types";
 import { getPassTypeName } from "@/hooks/usePassTypes";
-import { useApi } from "@/hooks/useApi";
+import { getAuthHeaders } from "@/lib/utils";
+import { usePolling } from "@/hooks/usePolling";
 import { useAuthStore } from "@/stores/authStore";
 
 function expiryLabel(to: string, status: string): string {
@@ -25,41 +26,40 @@ function statusStyle(s: string) {
 }
 
 export function ActivePasses() {
-const api = useApi();
-
   const [passes, setPasses] = useState<GatePass[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const user = useAuthStore((s) => s.user);
 
-  useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const auth = useAuthStore.getState();
-        const roll = auth?.user?.uniqueId;
-        if (!roll) {
-          if (!cancelled) setLoading(false);
-          return;
-        }
-        const res = await fetch(`/api/passes?roll=${encodeURIComponent(roll)}`, { 
-          headers: api.getHeaders(),
-          cache: "no-store" 
-        });
-        const json = await res.json();
-        if (!cancelled) {
-          setPasses(Array.isArray(json.data) ? json.data : []);
-          setLoading(false);
-        }
-      } catch {
-        if (!cancelled) setLoading(false);
+  const load = useCallback(async () => {
+    const roll = user?.uniqueId ?? user?.studentDetails?.roll ?? null;
+    if (!roll) {
+      setLoading(false);
+      return;
+    }
+    try {
+      const res = await fetch(`/api/passes?roll=${encodeURIComponent(roll)}`, {
+        headers: getAuthHeaders(),
+        cache: "no-store",
+      });
+      if (!res.ok) {
+        setError(`HTTP ${res.status}`);
       }
-    };
-    load();
-    const t = setInterval(load, 30_000);
-    return () => {
-      cancelled = true;
-      clearInterval(t);
-    };
-  }, []);
+      const json = await res.json().catch(() => ({}));
+      setPasses(Array.isArray(json.data) ? json.data : []);
+      setError(null);
+      setLoading(false);
+    } catch {
+      setError("Request failed");
+      setLoading(false);
+    }
+  }, [user?.uniqueId, user?.studentDetails?.roll]);
+
+  // Initial load + visibility-aware polling (no raw setInterval)
+  useEffect(() => {
+    load().catch(() => {});
+  }, [load]);
+  usePolling(load, { intervalMs: 30_000 });
 
   return (
     <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-6">
@@ -67,6 +67,16 @@ const api = useApi();
       {loading ? (
         <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
           <Loader2 className="w-4 h-4 animate-spin" /> Loading…
+        </div>
+      ) : error ? (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 p-3 rounded-lg bg-rose-500/10 border border-rose-500/30">
+          <p className="text-sm text-rose-300">Could not load passes: {error}</p>
+          <button
+            onClick={load}
+            className="px-3 py-1 rounded-lg bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs font-bold hover:bg-rose-500/30 transition shrink-0"
+          >
+            Retry
+          </button>
         </div>
       ) : passes.length === 0 ? (
         <p className="text-sm text-[var(--text-muted)] text-center py-4">No passes yet.</p>

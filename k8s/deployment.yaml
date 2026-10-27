@@ -1,0 +1,328 @@
+# Kubernetes deployment manifests for Gate Monitor
+# Deploy with: kubectl apply -f k8s/
+# Requires: namespace, PVC for postgres data, external Redis (or deploy separately)
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gate-monitor
+  labels:
+    app: gate-monitor
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: gate-monitor-secrets
+  namespace: gate-monitor
+type: Opaque
+stringData:
+  postgres-password: "CHANGE_ME"
+  redis-password: "CHANGE_ME"
+  jwt-secret: "CHANGE_ME"
+  supabase-url: "http://supabase-gateway.gate-monitor.svc.cluster.local:8000"
+  supabase-service-role-key: "CHANGE_ME"
+  telegram-bot-token: "CHANGE_ME"
+  telegram-chat-id: "CHANGE_ME"
+  DATABASE_URL: "postgres://postgres:CHANGE_ME@gate-postgres.gate-monitor.svc.cluster.local:5432/gate_monitor"
+  REDIS_URL: "redis://:CHANGE_ME@gate-redis.gate-monitor.svc.cluster.local:6379"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gate-monitor-config
+  namespace: gate-monitor
+data:
+  NEXT_PUBLIC_APP_URL: "https://monitor.cej.in"
+  NEXT_PUBLIC_WS_URL: "wss://monitor.cej.in"
+  NEXT_TELEMETRY_DISABLED: "1"
+  SKIP_ENV_VALIDATION: "1"
+  DOCKER_BUILD: "false"
+  NODE_ENV: "production"
+  # Kiosk auth: in production the kiosk session route refuses OPEN mode
+  # (426 KIOSK_OPEN_REFUSED) unless exactly one of these is set.
+  # Set KIOSK_SESSION_REQUIRE_PIN=true OR a comma-separated TRUSTED_KIOSK_IPS.
+  KIOSK_SESSION_REQUIRE_PIN: "true"
+  # TRUSTED_KIOSK_IPS: "10.0.0.5,10.0.0.6"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gate-web
+  namespace: gate-monitor
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: gate-web
+  template:
+    metadata:
+      labels:
+        app: gate-web
+    spec:
+      containers:
+      - name: web
+        image: compose-web:latest
+        ports:
+        - containerPort: 3000
+          name: http
+        envFrom:
+        - secretRef:
+            name: gate-monitor-secrets
+        - configMapRef:
+            name: gate-monitor-config
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 15
+          periodSeconds: 60
+        startupProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          failureThreshold: 30
+          periodSeconds: 5
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gate-worker
+  namespace: gate-monitor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gate-worker
+  template:
+    metadata:
+      labels:
+        app: gate-worker
+    spec:
+      containers:
+      - name: worker
+        image: compose-worker:latest
+        envFrom:
+        - secretRef:
+            name: gate-monitor-secrets
+        - configMapRef:
+            name: gate-monitor-config
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gate-web
+  namespace: gate-monitor
+spec:
+  selector:
+    app: gate-web
+  ports:
+  - name: http
+    port: 80
+    targetPort: 3000
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gate-postgres
+  namespace: gate-monitor
+spec:
+  selector:
+    app: gate-postgres
+  ports:
+  - name: postgres
+    port: 5432
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: gate-postgres
+  namespace: gate-monitor
+spec:
+  serviceName: gate-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gate-postgres
+  template:
+    metadata:
+      labels:
+        app: gate-postgres
+    spec:
+      containers:
+      - name: postgres
+        image: supabase/postgres:17.6.1.136
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: "gate_monitor"
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: gate-monitor-secrets
+              key: postgres-password
+        volumeMounts:
+        - name: pgdata
+          mountPath: /var/lib/postgresql/data
+        resources:
+          requests:
+            cpu: 250m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+        readinessProbe:
+          exec:
+            command: ["pg_isready", "-U", "postgres", "-d", "gate_monitor"]
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        livenessProbe:
+          exec:
+            command: ["pg_isready", "-U", "postgres", "-d", "gate_monitor"]
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 3
+          failureThreshold: 3
+  volumeClaimTemplates:
+  - metadata:
+      name: pgdata
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 10Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gate-redis
+  namespace: gate-monitor
+spec:
+  selector:
+    app: gate-redis
+  ports:
+  - name: redis
+    port: 6379
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: gate-redis
+  namespace: gate-monitor
+spec:
+  serviceName: gate-redis
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gate-redis
+  template:
+    metadata:
+      labels:
+        app: gate-redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        command: ["redis-server", "--requirepass", "$(REDIS_PASSWORD)"]
+        ports:
+        - containerPort: 6379
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: gate-monitor-secrets
+              key: redis-password
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+        readinessProbe:
+          exec:
+            command: ["redis-cli", "-a", "$(REDIS_PASSWORD)", "ping"]
+          initialDelaySeconds: 3
+          periodSeconds: 5
+          timeoutSeconds: 3
+        livenessProbe:
+          exec:
+            command: ["redis-cli", "-a", "$(REDIS_PASSWORD)", "ping"]
+          initialDelaySeconds: 15
+          periodSeconds: 30
+          timeoutSeconds: 3
+  volumeClaimTemplates:
+  - metadata:
+      name: redis-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gate-monitor
+  namespace: gate-monitor
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - monitor.cej.in
+    secretName: gate-monitor-tls
+  rules:
+  - host: monitor.cej.in
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: gate-web
+            port:
+              name: http

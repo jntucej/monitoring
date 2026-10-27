@@ -21,7 +21,6 @@ export interface UseSchedulerRealtimeResult {
 
 export function useSchedulerRealtime(options: UseSchedulerRealtimeOptions = {}): UseSchedulerRealtimeResult {
   const {
-    adapter,
     channels = ['jobs', 'resources', 'conflicts'],
     autoConnect = true,
     onUpdate,
@@ -34,7 +33,6 @@ export function useSchedulerRealtime(options: UseSchedulerRealtimeOptions = {}):
 
   const socketRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const adapterRef = useRef<SchedulerDataAdapter | undefined>(adapter);
 
   const connect = useCallback(() => {
     if (socketRef.current?.readyState === WebSocket.OPEN) {
@@ -111,7 +109,7 @@ export function useSchedulerRealtime(options: UseSchedulerRealtimeOptions = {}):
       throw new Error('WebSocket is not connected');
     }
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       socketRef.current!.send(JSON.stringify({ type: 'message', channel, data: message }));
       resolve();
     });

@@ -3,6 +3,7 @@
 import React from "react";
 import { Check, Eye, Clock, Shield, User, Building, FileText } from "lucide-react";
 import { formatDateTime } from "@/lib/utils";
+import { SlaBadge } from "./SlaBadge";
 import type { PermissionStatus, WorkflowType } from "@/lib/types";
 
 export interface PermissionItem {
@@ -13,6 +14,20 @@ export interface PermissionItem {
   hostel_scope?: "boys" | "girls" | null;
   current_stage: string;
   status: PermissionStatus;
+  /** Request reason (e.g. home_out, day_pass, daily_outing, day_scholar_out). */
+  reason?: string | null;
+  /** True when the pass was generated directly, bypassing the staged chain. */
+  direct_generated?: boolean | null;
+  /** Pending hostel room-assignment fields (day_scholar home_out flow). */
+  pending_hostel_block?: string | null;
+  pending_room_number?: string | null;
+  pending_warden_id?: string | null;
+  /** Current hostel level the ticket is routed to (forward target / stage). */
+  routed_to_role?: string | null;
+  /** Set when this ticket was forwarded from a lower level. */
+  forwarded_from_role?: string | null;
+  /** Forwarder's comment explaining the handoff. */
+  forward_comment?: string | null;
   stage_history: Array<{
     actorId: string;
     actorName: string;
@@ -30,6 +45,7 @@ export interface PermissionItem {
   digital_signature?: string | null;
   created_at: string;
   updated_at: string;
+  sla_deadline?: string | null;
   student?: {
     id: string;
     name: string;
@@ -43,6 +59,9 @@ export interface PermissionItem {
       hostel_block?: string;
       room_number?: string;
       gender?: string;
+      /** Live entry-type selection (student_details.current_entry_type). */
+      current_entry_type?: "hosteller" | "day_scholar" | null;
+      currentEntryType?: "hosteller" | "day_scholar" | null;
     };
   } | null;
   document_signatures?: Array<{
@@ -68,7 +87,7 @@ const STAGE_LABELS: Record<string, string> = {
   deputy_warden: "Deputy Warden",
   hostel_manager: "Hostel Manager",
   warden_or_principal: "Warden / Principal",
-  main_gate: "Main Gate",
+  lab_incharge: "Lab In-charge",
   hod: "HOD",
   oie: "Officer in Exam (OIE)",
   vice_principal: "Vice Principal",
@@ -165,6 +184,7 @@ export function PermissionRow({
               <Clock className="w-3 h-3" />
               {formatDateTime(request.created_at)}
             </span>
+            <SlaBadge slaDeadline={request.sla_deadline} status={request.status} />
           </div>
         </div>
       </div>

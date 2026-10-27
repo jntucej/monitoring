@@ -3,7 +3,10 @@
 import React from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
-import { User, Mail, Shield, CheckCircle, Tag, LogOut, Smartphone } from "lucide-react";
+import { User, Mail, Shield, CheckCircle, Tag, LogOut, Smartphone, ShieldCheck } from "lucide-react";
+import Link from "next/link";
+
+
 import { GlassThemeToggle } from "@/components/shared/GlassThemeToggle";
 
 export function UserProfileTab() {
@@ -117,6 +120,18 @@ export function UserProfileTab() {
           <span>Sign Out of Device</span>
         </button>
       </div>
+
+      {role === "student" && (
+        <div className="pt-2">
+          <Link
+            href="/student/profile/privacy"
+            className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] px-4 py-2 text-sm hover:border-emerald-500/40 transition-colors bg-[var(--bg-elevated,var(--bg-surface))] text-[var(--text-primary)]"
+          >
+            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            Privacy & Access Matrix
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

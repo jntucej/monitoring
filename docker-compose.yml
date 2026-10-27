@@ -41,6 +41,7 @@ services:
       - gate-net
 
   web:
+    image: monitoring-web:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -57,18 +58,24 @@ services:
       - NODE_ENV=production
       - PORT=3000
       - NEXT_TELEMETRY_DISABLED=1
-      - DATABASE_URL=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-gate_monitor}
-      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - DATABASE_URL=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@${POSTGRES_HOST:-postgres}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-gate_monitor}
       - MONITORING_PROM_URL=${MONITORING_PROM_URL:-}
       - MONITORING_LOKI_URL=${MONITORING_LOKI_URL:-}
       - MONITORING_GRAFANA_URL=${MONITORING_GRAFANA_URL:-}
+    networks:
+      gate-net:
+        aliases:
+          - web
+          - gate_web
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3000/api/health"]
+      test: ["CMD-SHELL", "wget -q -O- http://127.0.0.1:3000/api/health | grep -q '\"database\":{\"status\":\"healthy\"\\|\"status\":\"healthy\"\\|\"status\":\"degraded\"'"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -77,13 +84,16 @@ services:
     tmpfs:
       - /tmp:size=128m
       - /app/.next/cache:size=512m
+      - /app/.cache:size=64m
+      - /app/.config:size=64m
+    volumes:
+      - uploads_data:/app/data/uploads:rw
     cap_drop: [ALL]
     security_opt:
       - no-new-privileges:true
-    networks:
-      - gate-net
 
   worker:
+    image: monitoring-worker:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -96,8 +106,13 @@ services:
         required: false
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-gate_monitor}
-      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - DATABASE_URL=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@${POSTGRES_HOST:-postgres}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-gate_monitor}
+      - MONITORING_PROM_URL=${MONITORING_PROM_URL:-}
+      - MONITORING_LOKI_URL=${MONITORING_LOKI_URL:-}
+      - MONITORING_GRAFANA_URL=${MONITORING_GRAFANA_URL:-}
+      - CRON_SECRET=${CRON_SECRET:?CRON_SECRET must be set for worker}
     depends_on:
       postgres:
         condition: service_healthy
@@ -139,6 +154,7 @@ volumes:
   redisdata:
   caddy_data:
   caddy_config:
+  uploads_data:
 
 networks:
   gate-net:

@@ -70,17 +70,34 @@ export async function getUserAdoptionTrends(): Promise<{ dau: number; mau: numbe
   try {
     const dauRes = await query("SELECT COUNT(DISTINCT user_id)::int as count FROM movement_logs WHERE timestamp >= NOW() - INTERVAL '24 hours'");
     const mauRes = await query("SELECT COUNT(DISTINCT user_id)::int as count FROM movement_logs WHERE timestamp >= NOW() - INTERVAL '30 days'");
-    
+
+    // Compute per-role adoption: share of each role that had ≥1 movement in the last 30 days.
+    const roleRes = await query(`
+      SELECT
+        u.role,
+        COUNT(DISTINCT u.id)::int AS total_users,
+        COUNT(DISTINCT m.user_id)::int AS active_users
+      FROM public.users u
+      LEFT JOIN public.movement_logs m
+        ON m.user_id = u.id
+        AND m.timestamp >= NOW() - INTERVAL '30 days'
+      WHERE u.status = 'ACTIVE'
+      GROUP BY u.role
+      HAVING COUNT(DISTINCT u.id) > 0
+      ORDER BY u.role
+    `);
+
+    const adoptionByRole: Record<string, number> = {};
+    for (const row of roleRes.rows as Array<{ role: string; total_users: number; active_users: number }>) {
+      if (row.total_users > 0) {
+        adoptionByRole[row.role.toUpperCase()] = Math.round((row.active_users / row.total_users) * 100);
+      }
+    }
+
     return {
       dau: dauRes.rows[0]?.count ?? 0,
       mau: mauRes.rows[0]?.count ?? 0,
-      adoptionByRole: {
-        STUDENT: 92,
-        FACULTY: 86,
-        STAFF: 89,
-        GATE_OPERATOR: 98,
-        PARENT: 64,
-      },
+      adoptionByRole,
     };
   } catch {
     return {

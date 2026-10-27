@@ -1,15 +1,13 @@
-"use client";
+import type { Metadata } from "next";
+import { NOINDEX_METADATA } from "@/lib/seo";
+import { ParentShell } from "./ParentShell";
 
-import { AuthGuard } from "@/components/shared/AuthGuard";
+export const metadata: Metadata = NOINDEX_METADATA;
 
-export default function ParentLayout({
+export default function ParentConsoleLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <AuthGuard allowedRoles={["parent", "guardian", "admin", "sysadmin"]}>
-      {children}
-    </AuthGuard>
-  );
+  return <ParentShell>{children}</ParentShell>;
 }

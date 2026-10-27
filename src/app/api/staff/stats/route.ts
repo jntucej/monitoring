@@ -20,7 +20,7 @@ const STAFF_ROLES = [
 const ROLE_GROUPS: Array<{ label: string; roles: string[]; color: string }> = [
   { label: "Admin", roles: ["sysadmin", "admin"], color: "bg-red-500" },
   { label: "Academic", roles: ["principal", "vice_principal", "oie", "exam_branch", "hod", "faculty"], color: "bg-blue-500" },
-  { label: "Hostel", roles: ["warden", "principal", "deputy_warden", "hostel_manager", "caretaker", "supervisor"], color: "bg-cyan-500" },
+  { label: "Hostel", roles: ["principal", "deputy_warden", "hostel_manager", "caretaker", "supervisor"], color: "bg-cyan-500" },
   { label: "Field", roles: ["operator", "staff", "worker"], color: "bg-emerald-500" },
   { label: "Other", roles: ["guardian", "visitor"], color: "bg-slate-500" },
 ];
@@ -39,6 +39,10 @@ async function handleGet(req: NextRequest) {
   try {
     const svc = getSupabaseServiceClient();
     const roleFilter = req.nextUrl.searchParams.get("role");
+    // The sysadmin staff console sends dept + status filters; honor them so
+    // the department/status dropdowns actually drive the infographic.
+    const deptFilter = req.nextUrl.searchParams.get("dept");
+    const statusFilter = req.nextUrl.searchParams.get("status");
 
     const [usersRes, empRes] = await Promise.all([
       svc.from("users")
@@ -49,6 +53,7 @@ async function handleGet(req: NextRequest) {
 
     const users = (usersRes.data || []).filter((u: any) => {
       if (roleFilter && roleFilter !== "ALL" && u.role !== roleFilter) return false;
+      if (statusFilter && statusFilter !== "ALL" && u.status !== statusFilter) return false;
       return true;
     });
 
@@ -56,7 +61,7 @@ async function handleGet(req: NextRequest) {
 
     // Resolve the department for each staff member: explicit department_id,
     // otherwise employee_details.department_id.
-    const staffRows = users.map((u: any) => {
+    let staffRows = users.map((u: any) => {
       const emp = empMap.get(u.id) || {};
       const rawDept = u.department_id || emp.department_id || "";
       return {
@@ -66,6 +71,9 @@ async function handleGet(req: NextRequest) {
         staff_category: emp.staff_category || null,
       };
     });
+    if (deptFilter && deptFilter !== "ALL") {
+      staffRows = staffRows.filter((s: any) => s.department_id === deptFilter);
+    }
 
     const total = staffRows.length;
     const active = staffRows.filter((s: any) => s.status === "ACTIVE").length;

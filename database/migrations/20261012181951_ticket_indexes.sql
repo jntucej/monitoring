@@ -73,12 +73,7 @@ BEGIN
   SELECT EXISTS (SELECT 1 FROM information_schema.columns
                  WHERE table_schema='public' AND table_name='schema_migrations'
                    AND column_name='checksum') INTO has_checksum;
-  IF has_filename AND has_checksum THEN
-    INSERT INTO public.schema_migrations (version, filename, applied_at, checksum)
-    VALUES ('20261012181951', '20261012181951_ticket_indexes.sql', NOW(),
-            md5('20261012181951_ticket_indexes'))
-    ON CONFLICT (version) DO NOTHING;
-  ELSIF has_filename THEN
+  IF has_filename THEN
     INSERT INTO public.schema_migrations (version, filename, applied_at)
     VALUES ('20261012181951', '20261012181951_ticket_indexes.sql', NOW())
     ON CONFLICT (version) DO NOTHING;

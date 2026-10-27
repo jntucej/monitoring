@@ -1,0 +1,87 @@
+name: Auto Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  verify-admin-independence:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Verify admin console independence
+      run: bash scripts/check-admin-independence.sh
+
+  deploy:
+    needs: verify-admin-independence
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Deploy via SSH
+      uses: appleboy/ssh-action@v1
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          set -e
+          cd /opt/monitoring/compose
+
+          echo "=== Pull latest code ==="
+          git fetch origin
+          git reset --hard origin/main
+
+          echo "=== Rsync src/ only ==="
+          rsync -av --delete \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='.next' \
+            --exclude='__pycache__' \
+            --exclude='*.pyc' \
+            --exclude='.env' \
+            --exclude='.env.*' \
+            --exclude='.last_notified_hash' \
+            --exclude='audit.log' \
+            --exclude='.approve-deploy' \
+            --exclude='tests/' \
+            --exclude='test-results/' \
+            --exclude='playwright-report/' \
+            --exclude='.idea/' \
+            --exclude='node_modules/.cache/' \
+            src/ /opt/monitoring/compose/src/
+
+          echo "=== Build and deploy ==="
+          docker compose build web --no-cache
+          docker compose up -d --remove-orphans
+
+          echo "=== Waiting for healthy ==="
+          for i in $(seq 1 20); do
+            STATUS=$(docker inspect --format="{{.State.Health.Status}}" gate_web 2>/dev/null || echo "missing")
+            if [ "$STATUS" = "healthy" ]; then
+              echo "Container is healthy!"
+              break
+            fi
+            echo "Waiting... ($i/20)"
+            sleep 5
+          done
+
+          echo "=== Deploy log ==="
+          docker logs gate_web --tail 10
+
+    - name: Notify Telegram
+      if: always()
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_CHAT_ID }}
+        token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        message: |
+          🚀 Auto Deploy
+          Branch: ${{ github.ref_name }}
+          Commit: ${{ github.sha }}
+          Author: ${{ github.actor }}
+          Status: ${{ job.status == 'success' && '✅ Success' || '❌ Failed' }}

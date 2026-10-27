@@ -1,5 +1,4 @@
 // Sparkline chart component for small trend displays
-import React from 'react';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 
 export interface SparklineProps {

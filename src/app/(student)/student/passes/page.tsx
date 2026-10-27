@@ -220,10 +220,14 @@ const api = useApi();
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Link href="/student" className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors">
+            <Link href="/student" className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors" aria-label="Back to student hub">
               <ArrowLeft className="w-4 h-4" />
             </Link>
+<<<<<<< HEAD
             <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
+=======
+            <p className="text-xs text-[var(--text-muted)]">
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
               Digital Gate Passes
             </p>
           </div>
@@ -335,8 +339,8 @@ const api = useApi();
             <h2 className="text-lg font-bold text-[var(--text-primary)]">Apply Gate Pass</h2>
             <form onSubmit={handleCreatePass} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-[var(--text-secondary)]">Pass Category</label>
-                <select
+                <label className="text-xs font-semibold text-[var(--text-secondary)]" htmlFor="pass-category">Pass Category</label>
+                <select id="pass-category"
                   value={passType || passTypes[0]?.code || ""}
                   onChange={(e) => handlePassTypeChange(e.target.value)}
                   className="w-full p-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)]"
@@ -358,8 +362,8 @@ const api = useApi();
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[var(--text-secondary)]">From (Departure)</label>
-                  <input
+                  <label className="text-xs font-semibold text-[var(--text-secondary)]" htmlFor="from-departure">From (Departure)</label>
+                  <input id="from-departure"
                     type="datetime-local"
                     value={fromTime}
                     onChange={(e) => handleFromTimeChange(e.target.value)}
@@ -369,8 +373,8 @@ const api = useApi();
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[var(--text-secondary)]">To (Return)</label>
-                  <input
+                  <label className="text-xs font-semibold text-[var(--text-secondary)]" htmlFor="to-return">To (Return)</label>
+                  <input id="to-return"
                     type="datetime-local"
                     value={toTime}
                     onChange={(e) => setToTime(e.target.value)}
@@ -388,8 +392,8 @@ const api = useApi();
               )}
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-[var(--text-secondary)]">Reason for Outing / Pass</label>
-                <textarea
+                <label className="text-xs font-semibold text-[var(--text-secondary)]" htmlFor="reason-for-outing-pass">Reason for Outing / Pass</label>
+                <textarea id="reason-for-outing-pass"
                   required
                   rows={3}
                   value={reasonText}

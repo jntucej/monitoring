@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 "use client";
 
 export const dynamic = "force-dynamic";
@@ -81,12 +82,13 @@ function OperatorDashboardInner() {
   );
 }
 
+=======
+/**
+ * Root operator page — the shell (RoleConsole with the Board feed) is
+ * provided by the layout; this page contributes no extra content, so the
+ * default Board feed shows through.
+ */
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 export default function OperatorDashboardPage() {
-  return (
-
-      <Suspense fallback={<PageLoading />}>
-        <OperatorDashboardInner />
-      </Suspense>
-    
-  );
+  return null;
 }

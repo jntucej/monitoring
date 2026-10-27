@@ -5,6 +5,7 @@
 "use client";
 
 import { useAuthStore } from "@/stores/authStore";
+import { singleFlightRefresh } from "@/lib/auth-refresh";
 import type { ApiResponse } from "@/lib/types";
 
 function parseFilename(disposition: string | null): string {
@@ -66,13 +67,43 @@ export function useApi() {
       return { success: false, error: "Network error" };
     }
 
-    // Handle authentication/authorization
+    // Handle 401: attempt one single-flight refresh, then retry the request.
+    // Only log out if the retry still returns 401 (genuinely expired session).
     if (res.status === 401) {
-      logout();
-      if (typeof window !== "undefined") {
-        window.location.href = "/login";
+      try {
+        await singleFlightRefresh();
+      } catch {
+        // refresh itself failed — fall through to logout
       }
-      throw new Error("UNAUTHORIZED");
+
+      const refreshedToken = useAuthStore.getState().token;
+      if (refreshedToken) {
+        const retryHeaders: Record<string, string> = {
+          "Content-Type": "application/json",
+          ...(init?.headers as Record<string, string>),
+        };
+        retryHeaders["Authorization"] = `Bearer ${refreshedToken}`;
+        const sessionToken = useAuthStore.getState().user?.currentSessionToken;
+        if (sessionToken) retryHeaders["X-Session-Token"] = sessionToken;
+
+        const retryRes = await fetch(input, { ...init, headers: retryHeaders });
+        if (retryRes.status === 401) {
+          logout();
+          if (typeof window !== "undefined") {
+            window.location.href = "/login";
+          }
+          throw new Error("UNAUTHORIZED");
+        }
+        // Retry succeeded — proceed with the new response.
+        res = retryRes;
+      } else {
+        // No refreshed token available — hard logout.
+        logout();
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+        throw new Error("UNAUTHORIZED");
+      }
     }
 
     // Handle 304 Not Modified explicitly (Issue #558)

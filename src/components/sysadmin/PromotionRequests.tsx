@@ -269,8 +269,8 @@ export function PromotionRequests() {
             </h3>
             <div className="space-y-3 text-xs">
               <div className="space-y-1">
-                <label className="text-[var(--text-muted)] font-medium">Find person (search by name, roll or email)</label>
-                <input
+                <label className="text-[var(--text-muted)] font-medium" htmlFor="find-person-search-by-name-roll-or-email">Find person (search by name, roll or email)</label>
+                <input id="find-person-search-by-name-roll-or-email"
                   type="text"
                   value={userQuery}
                   onChange={(e) => searchUsers(e.target.value)}
@@ -303,8 +303,8 @@ export function PromotionRequests() {
                 )}
               </div>
               <div className="space-y-1">
-                <label className="text-[var(--text-muted)] font-medium">Target Role</label>
-                <select
+                <label className="text-[var(--text-muted)] font-medium" htmlFor="target-role">Target Role</label>
+                <select id="target-role"
                   value={newRole}
                   onChange={(e) => setNewRole(e.target.value)}
                   className="w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-sky-500"
@@ -317,8 +317,8 @@ export function PromotionRequests() {
                 </select>
               </div>
               <div className="space-y-1">
-                <label className="text-[var(--text-muted)] font-medium">Reason for Promotion</label>
-                <textarea
+                <label className="text-[var(--text-muted)] font-medium" htmlFor="reason-for-promotion">Reason for Promotion</label>
+                <textarea id="reason-for-promotion"
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="Explain justification for role change..."

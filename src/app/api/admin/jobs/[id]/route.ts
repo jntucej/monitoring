@@ -13,20 +13,31 @@ async function handlePatch(req: NextRequest) {
   const actorId = req.headers.get("x-user-id") || "";
 
   try {
-    const { enabled } = await req.json().catch(() => ({}));
+    const { enabled, cron_expression } = await req.json().catch(() => ({}));
 
-    if (typeof enabled !== "boolean") {
+    if (typeof enabled !== "boolean" && typeof cron_expression !== "string") {
       return NextResponse.json(
-        { success: false, error: { code: "BAD_REQUEST", message: "'enabled' boolean field is required" } },
+        { success: false, error: { code: "BAD_REQUEST", message: "'enabled' boolean and/or 'cron_expression' string field is required" } },
         { status: 400 }
       );
     }
 
     const supabase = getSupabaseServiceClient();
 
+    const updatePayload: Record<string, unknown> = {};
+    if (typeof enabled === "boolean") updatePayload.enabled = enabled;
+    if (typeof cron_expression === "string" && cron_expression.trim()) updatePayload.cron_expression = cron_expression;
+
+    if (Object.keys(updatePayload).length === 0) {
+      return NextResponse.json(
+        { success: false, error: { code: "BAD_REQUEST", message: "No valid fields to update" } },
+        { status: 400 }
+      );
+    }
+
     const { data: updated, error: updateErr } = await supabase
       .from("scheduled_jobs")
-      .update({ enabled })
+      .update(updatePayload)
       .eq("id", jobId)
       .select();
 
@@ -46,20 +57,20 @@ async function handlePatch(req: NextRequest) {
 
     await addAudit({
       userId: actorId,
-      action: enabled ? "JOB_ENABLED" : "JOB_DISABLED",
-      details: { jobId, enabled },
+      action: typeof enabled === "boolean" ? (enabled ? "JOB_ENABLED" : "JOB_DISABLED") : "JOB_SCHEDULE_UPDATED",
+      details: { jobId, ...updatePayload },
     });
 
     return NextResponse.json({
       success: true,
-      message: `Job '${jobId}' ${enabled ? "enabled" : "disabled"} successfully`,
+      message: `Job '${jobId}' updated successfully`,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { success: false, error: { code: "SERVER_ERROR", message: error.message } },
+      { success: false, error: { code: "SERVER_ERROR", message: String(error) } },
       { status: 500 }
     );
   }
 }
 
-export const PATCH = withAuthorization(handlePatch, { requiredRole: ["sysadmin"] });
+export const PATCH = withAuthorization(handlePatch, { requiredRole: ["sysadmin", "admin"] });

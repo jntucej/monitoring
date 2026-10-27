@@ -15,18 +15,18 @@ interface Row {
   current_stage: string;
   status: string;
   student_user_id: string;
-  requester_name: string;
+  requester_name: string | null;
   created_at: string;
 }
 
 export default function HostelTicketsAdminPage() {
-  const { data, loading, error } = useDashboardData<{ success: boolean; data: Row[] }>(
+  const { data, loading, error } = useDashboardData<Row[]>(
     "/api/admin/hostel-tickets",
     { ttlMs: 10_000, pollMs: 60_000 },
   );
 
   return (
-    <AuthGuard allowedRoles={["sysadmin", "admin", "warden", "principal"] as never}>
+    <AuthGuard allowedRoles={["sysadmin", "admin", "principal"] as never}>
       <div className="space-y-4 p-4">
         <h1 className="flex items-center gap-2 text-fluid-lg font-semibold">
           <ClipboardList className="h-5 w-5" />
@@ -36,12 +36,12 @@ export default function HostelTicketsAdminPage() {
           columns={[
             { header: "Ticket", accessor: (r) => <span className="font-mono text-xs">{r.ticket_number}</span> },
             { header: "Type", accessor: (r) => r.workflow_type },
-            { header: "Requester", accessor: (r) => r.requester_name },
+            { header: "Requester", accessor: (r) => r.requester_name ?? "Unknown" },
             { header: "Stage", accessor: (r) => r.current_stage },
             { header: "Status", accessor: (r) => r.status },
             { header: "Created", accessor: (r) => new Date(r.created_at).toLocaleString() },
           ]}
-          data={data?.data ?? []}
+          data={data ?? []}
           loading={loading}
           error={error}
           keyExtractor={(r) => r.ticket_number}

@@ -1,3 +1,4 @@
+-- NOTE: No-op scaffolding migration (self-record insert only; no DDL).
 -- ============================================================================
 -- Migration: 20261012072619_mess_add_vendor_column
 -- Purpose: TODO — one-line description of what this changes and why.
@@ -77,15 +78,16 @@ BEGIN
       AND column_name='checksum'
   ) INTO has_checksum;
 
-  IF has_filename AND has_checksum THEN
-    INSERT INTO public.schema_migrations (version, filename, applied_at, checksum)
-    VALUES ('20261012072619', '20261012072619_mess_add_vendor_column.sql', NOW(),
-            md5('20261012072619_mess_add_vendor_column'))
-    ON CONFLICT (version) DO NOTHING;
-  ELSIF has_filename THEN
-    INSERT INTO public.schema_migrations (version, filename, applied_at)
-    VALUES ('20261012072619', '20261012072619_mess_add_vendor_column.sql', NOW())
-    ON CONFLICT (version) DO NOTHING;
+  IF has_filename THEN
+    IF has_checksum THEN
+      INSERT INTO public.schema_migrations (version, filename, applied_at, checksum)
+      VALUES ('20261012072619', '20261012072619_mess_add_vendor_column.sql', NOW(), md5('20261012072619_mess_add_vendor_column'))
+      ON CONFLICT (version) DO NOTHING;
+    ELSE
+      INSERT INTO public.schema_migrations (version, filename, applied_at)
+      VALUES ('20261012072619', '20261012072619_mess_add_vendor_column.sql', NOW())
+      ON CONFLICT (version) DO NOTHING;
+    END IF;
   ELSE
     INSERT INTO public.schema_migrations (version, applied_at)
     VALUES ('20261012072619', NOW())

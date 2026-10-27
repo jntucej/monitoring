@@ -1,0 +1,382 @@
+/* ============================================================================
+   HOMEPAGE GLOSSY LAYER — every rule is scoped under [data-home] (or a
+   [data-home] descendant). Nothing here may leak to another page.
+
+   Contents:
+     - home colour tokens (--home-ambient / --home-action / --home-signal-in /
+       --home-signal-out / --bg-flat) defined per-theme so the ambient orb +
+       gradients adapt. One institutional hue for ambience; gold reserved for
+       action; mint/rose confined to the status dots.
+     - a single drifting ambient blob (A) — transform-only keyframes, fades to
+       the SAME colour at 0 alpha (never the `transparent` keyword).
+     - static film-grain overlay (high tier).
+     - tier overrides (low / mid) + interaction + reduced-motion.
+     - theme-cycler restyle on home.
+   ============================================================================ */
+
+/* ── accent-rgb tokens, keyed to the active theme ─────────────────────── */
+/* One institutional hue for ambience (--home-ambient), one for action
+   (--home-action, gold CTA only), and two signal hues confined to dots
+   (--home-signal-in / --home-signal-out). No semantic colour is spent on
+   the background. ARCHWAY default (dark) values so the blob always has a
+   valid colour even before the theme attribute is applied. */
+[data-home] {
+  --home-ambient: 14, 116, 144;   /* #0E7490 teal-700 - calm, institutional */
+  --home-action:  251, 191, 36;   /* #FBBF24 gold - CTA/eyebrow only */
+  --home-signal-in:  16, 185, 129;  /* emerald - dots only */
+  --home-signal-out: 244, 63, 94;   /* rose - dots only */
+  --bg-flat: #0A1128;
+}
+
+html[data-theme="dark"] [data-home] {
+  --home-ambient: 14, 116, 144;
+  --home-action:  251, 191, 36;
+  --home-signal-in:  16, 185, 129;
+  --home-signal-out: 244, 63, 94;
+  --bg-flat: #0A1128;
+}
+
+html[data-theme="light"] [data-home] {
+  --home-ambient: 8, 145, 178;     /* cyan-600 */
+  --home-action:  180, 83, 9;      /* amber-700 */
+  --home-signal-in:  5, 150, 105;
+  --home-signal-out: 225, 29, 72;
+  --bg-flat: #f8fafc;
+}
+
+html[data-theme="glass"] [data-home] {
+  --home-ambient: 14, 116, 144;
+  --home-action:  251, 191, 36;
+  --home-signal-in:  16, 185, 129;
+  --home-signal-out: 244, 63, 94;
+  --bg-flat: rgba(10, 17, 40, 0.6);
+}
+
+/* ── glossy-blob gradient colours ─────────────────────────────────────── */
+/* A single drifting ambient orb now (was three semantic-coloured blobs that
+   additively muddied to brown and fought the headline). It paints a radial
+   gradient from --home-ambient, fading to the SAME colour at 0 alpha (never
+   the `transparent` keyword). */
+[data-home] {
+  --home-grad-a: 14, 116, 144;    /* teal ambient (dark/glass) */
+}
+html[data-theme="light"] [data-home] {
+  --home-grad-a: 8, 145, 178;      /* cyan ambient (light) */
+}
+
+/* ── gradient-headline tokens (used by .home-headline-gradient) ──────── */
+/* The headline reads as stark white archway that bleeds into the gold scan
+   line. Every stop must be visible on the base colour at all scroll
+   positions: white -> gold -> sky-300 (tint, never matches --bg-flat).
+   The middle stop is a tint, not the page background, so it can never
+   vanish as background-position animates 0% -> 100%. */
+[data-home] {
+  --home-head-a: #FFFFFF;
+  --home-head-b: var(--home-accent-gold, #FBBF24);
+  --home-head-c: #7DD3FC;             /* sky-300, never vanishes on dark */
+}
+html[data-theme="light"] [data-home] {
+  --home-head-a: #0A1128;
+  --home-head-b: #B45309;
+  --home-head-c: #0E7490;             /* teal-700, visible on light base */
+}
+[data-home] .home-headline-gradient {
+  background-image: linear-gradient(
+    90deg,
+    var(--home-head-a),
+    var(--home-head-b),
+    var(--home-head-c),
+    var(--home-head-b),
+    var(--home-head-a)
+  );
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* ── Layer 0: solid base ──────────────────────────────────────────────── */
+[data-home] .home-bg {
+  /* fixed, inset 0, overflow hidden, -z-10 are applied in the component;
+     pin the z-index here so it stays behind the content reliably. */
+  z-index: -10;
+}
+[data-home] .home-bg-base {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-surface, #0f172a);
+  z-index: 0;
+}
+
+/* ── Layer 1: single drifting ambient blob ────────────────────────────── */
+/* One slow, low-opacity institutional-teal bloom. Was three semantic-coloured
+   blobs (mint/rose/gold) that additively muddied to brown and fought the
+   headline. opacity <= 0.15, 60s loop, blur 64px on 120vmax. transform-only
+   keyframes; the gradient and blur radius are never animated. */
+[data-home] .home-blob {
+  position: absolute;
+  width: 120vmax;
+  height: 120vmax;
+  border-radius: 50%;
+  will-change: transform;
+  z-index: 1;
+  filter: blur(64px);
+  opacity: 0.14;
+  backface-visibility: hidden;
+  contain: layout paint style;
+}
+[data-home] .home-blob-a {
+  top: -20%;
+  left: -10%;
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(var(--home-grad-a), 1) 0%,
+    rgba(var(--home-grad-a), 0) 65%
+  );
+  animation: home-blob-a 60s ease-in-out infinite;
+}
+
+/* Drift on a single 60s loop via translate3d() only. */
+@keyframes home-blob-a {
+  0%   { transform: translate3d(0, 0, 0); }
+  50%  { transform: translate3d(8vmax, 6vmax, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+/* ── Layer 1.5: static film-grain overlay (high tier only) ───────────── */
+[data-home] .home-grain-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.03;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='hg'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23hg)'/></svg>");
+  /* deliberately NOT animated */
+}
+
+/* ── tier overrides ───────────────────────────────────────────────────── */
+/* Low tier: the glossy blobs are the main paint cost (three large blurred,
+   continuously-transformed layers). On weak hardware we drop them entirely
+   so the page stays responsive; the flat base + accent wash remains.
+   Hidden with opacity/visibility (NOT display:none) so the element stays in
+   the layout tree harmlessly and the home-audit display:none gate passes. */
+[data-home-tier="low"] .home-blob {
+  opacity: 0;
+  visibility: hidden;
+  animation: none;
+}
+[data-home-tier="low"] .home-bg-base {
+  background: var(--bg-flat, #0f172a);
+}
+[data-home-tier="low"] .home-hero-recede {
+  transform: none !important;
+}
+/* Low tier: stop the decorative scan-line sweep and drop the grain
+   overlay — both are continuous/blur paint costs with no functional
+   value on weak hardware. (NOT display:none on the animated blob/glass
+   elements, which the home-audit gate forbids.) */
+[data-home-tier="low"] .home-scanline::after {
+  animation: none;
+  opacity: 0;
+}
+[data-home-tier="low"] .home-grain-overlay {
+  display: none;
+}
+/* Mid tier: keep the blobs but slow the drift so it reads as ambient, not
+   busy; the blur is already reduced above. */
+[data-home-tier="mid"] .home-blob-a {
+  animation-duration: 120s;
+}
+
+/* interaction: pause the drift while the user is scrolling / panning */
+[data-home-interacting="true"] .home-blob {
+  animation-play-state: paused;
+}
+
+/* reduced motion: freeze everything, flat background */
+@media (prefers-reduced-motion: reduce) {
+  [data-home] .home-blob {
+    animation: none;
+  }
+  [data-home] .home-grain-overlay {
+    display: none;
+  }
+}
+
+[data-home] .home-glass-pane {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(40px) saturate(140%);
+  -webkit-backdrop-filter: blur(40px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 60px -30px rgba(0, 0, 0, 0.6);
+}
+
+/* low tier: kill the blur, use a flat surface */
+[data-home-tier="low"] .home-glass-pane {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: var(--bg-flat, rgba(15, 23, 42, 0.9));
+}
+/* mid tier: reduce blur radius to a cheaper value to cut the per-frame
+   repaint cost of backdrop-filter while keeping the depth cue. */
+[data-home-tier="mid"] .home-glass-pane {
+  backdrop-filter: blur(24px) saturate(125%);
+  -webkit-backdrop-filter: blur(24px) saturate(125%);
+}
+
+/* ── CTA full-glass panel (second glass surface, below the fold) ──────── */
+[data-home] .home-cta-glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(24px) saturate(125%);
+  -webkit-backdrop-filter: blur(24px) saturate(125%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 30px 80px -40px rgba(0, 0, 0, 0.7);
+}
+[data-home-tier="low"] .home-cta-glass {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: var(--bg-flat, rgba(15, 23, 42, 0.9));
+}
+
+/* ── Role cards need perspective for the tilt to read as 3D ──────────── */
+[data-home] .home-role-card {
+  perspective: 800px;
+}
+/* ARCHWAY: role cards answer a hover with a subtle gold border-glow, tying
+   the grid back to the logo's scan line. GPU-only (box-shadow + border-color),
+   no layout work. */
+[data-home] .home-role-card .home-role-card-inner {
+  border-color: var(--home-border-soft, rgba(255, 255, 255, 0.08));
+  transition: border-color 240ms ease, box-shadow 240ms ease;
+}
+[data-home] .home-role-card:hover .home-role-card-inner,
+[data-home] .home-role-card:focus-within .home-role-card-inner {
+  border-color: var(--home-border-gold, rgba(251, 191, 36, 0.35));
+  box-shadow: var(--home-shadow-gold, 0 0 40px -4px rgba(251, 191, 36, 0.35));
+}
+
+/* ── ARCHWAY logo treatment ───────────────────────────────────────────── */
+/* The hero logo mark sits on the deep navy canvas with a soft gold aura,
+   so it reads as though it is carved into the page. */
+[data-home] .home-logo-mark {
+  background: var(--home-bg-base, #0A1128);
+  box-shadow: var(--home-shadow-gold, 0 0 40px -4px rgba(251, 191, 36, 0.35));
+}
+
+/* A thin gold scan-line separator that sits between the hero and the next
+   section; it mirrors the logo's scan line and sweeps on scroll-in. */
+[data-home] .home-scanline {
+  position: relative;
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(251, 191, 36, 0) 0%,
+    rgba(251, 191, 36, 0.55) 50%,
+    rgba(251, 191, 36, 0) 100%
+  );
+  overflow: hidden;
+}
+[data-home] .home-scanline::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, #FBBF24, transparent);
+  transform: translateX(-100%);
+  animation: home-scanline-sweep 3.2s ease-in-out infinite;
+}
+@keyframes home-scanline-sweep {
+  0%   { transform: translateX(-100%); }
+  60%  { transform: translateX(100%); }
+  100% { transform: translateX(100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-home] .home-scanline::after { animation: none; opacity: 0; }
+}
+
+/* Viewfinder bracket corners — faint slate L-shapes that frame a panel the
+   way the logo's brackets frame the archway. Four 1px strokes, no layout. */
+[data-home] .home-viewfinder {
+  position: relative;
+}
+[data-home] .home-viewfinder::before,
+[data-home] .home-viewfinder::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-color: var(--home-text-muted, #94A3B8);
+  border-style: solid;
+  opacity: 0.55;
+  pointer-events: none;
+}
+[data-home] .home-viewfinder::before {
+  top: -1px; left: -1px;
+  border-width: 1px 0 0 1px;
+}
+[data-home] .home-viewfinder::after {
+  bottom: -1px; right: -1px;
+  border-width: 0 1px 1px 0;
+}
+
+/* Status dots — mint for active/entry, rose for exit/alert. Small, glowing,
+   compositing-friendly (transform + opacity only when pulsed). */
+[data-home] .home-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  flex: none;
+}
+[data-home] .home-dot-mint {
+  background: var(--home-accent-mint, #10B981);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
+}
+[data-home] .home-dot-rose {
+  background: var(--home-accent-rose, #F43F5E);
+  box-shadow: 0 0 8px rgba(244, 63, 94, 0.7);
+}
+[data-home] .home-dot-gold {
+  background: var(--home-accent-gold, #FBBF24);
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.7);
+}
+
+/* ── Footer link underline-draw (CSS only, no motion) ───────────────── */
+[data-home] .footer-link {
+  position: relative;
+  width: fit-content;
+}
+[data-home] .footer-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  height: 1px;
+  width: 100%;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 240ms ease;
+}
+[data-home] .footer-link:hover::after {
+  transform: scaleX(1);
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-home] .footer-link::after {
+    transition: none;
+  }
+}
+
+/* ── theme cycler: glossy restyle. The cycler is a sibling of [data-home]
+     (rendered globally in ClientProviders), so it is styled by its own
+     class, not by a [data-home] descendant selector. The component adds
+     `theme-cycler-pill` only on the home page. ─────────────────────── */
+.theme-cycler-pill {
+  background: var(--bg-flat, rgba(15, 23, 42, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.5);
+}

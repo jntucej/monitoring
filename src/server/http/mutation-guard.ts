@@ -18,6 +18,7 @@ import { NextResponse } from "next/server";
 import { withAuthorization, type AuthorizationOptions } from "@/middleware/authorization";
 import { withRateLimit, type RateLimitConfig, checkRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
+import { requireTrustedHeaders } from "@/server/http/trusted-headers";
 import type { AuthContext } from "@/lib/authContext";
 
 export interface MutationGuardOptions extends AuthorizationOptions {
@@ -25,21 +26,61 @@ export interface MutationGuardOptions extends AuthorizationOptions {
   rateLimit?: RateLimitConfig;
   /** Set false ONLY for pre-auth endpoints (login, reset). Default true. */
   csrf?: boolean;
+  /** Set false ONLY when the route genuinely cannot be trusted-header signed. Default true. */
+  trustedHeaders?: boolean;
 }
 
 type Handler = (req: NextRequest, ctx: { auth: AuthContext }) => Promise<Response>;
 
 export function withMutationGuard(handler: Handler, options: MutationGuardOptions = {}) {
-  const { rateLimit, csrf = true, ...authOptions } = options;
+  const { rateLimit, csrf = true, trustedHeaders = true, ...authOptions } = options;
+  const effectiveRateLimit: RateLimitConfig = rateLimit ?? { windowMs: 60_000, maxRequests: 60 };
 
-  return withAuthorization(async (req, ctx) => {
-    // assertCsrf is a no-op for safe verbs; kept here for defence in depth.
+  // Chain: withAuthorization → user-rate-limit → requireTrustedHeaders → assertCsrf → handler
+  const csrfGuard: Handler = async (req, ctx) => {
+    if (trustedHeaders) {
+      const untrusted = requireTrustedHeaders(req);
+      if (untrusted) return untrusted;
+    }
     if (csrf) {
       const blocked = assertCsrf(req);
       if (blocked) return blocked;
     }
     return handler(req, ctx);
-  }, authOptions);
+  };
+
+  const rateLimited: Handler = async (req, ctx) => {
+    const key = `user:${ctx.auth.userId}`;
+    const result = await checkRateLimit(key, effectiveRateLimit);
+    if (result.limited) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "RATE_LIMIT_EXCEEDED",
+            message: "Too many requests. Please try again later.",
+            resetAt: result.resetTime.toISOString(),
+          },
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": (result.retryAfter || 60).toString(),
+            "X-RateLimit-Limit": (effectiveRateLimit.maxRequests || 60).toString(),
+            "X-RateLimit-Remaining": "0",
+            "X-RateLimit-Reset": result.resetTime.toISOString(),
+          },
+        },
+      );
+    }
+    const response = await csrfGuard(req, ctx);
+    response.headers.set("X-RateLimit-Limit", (effectiveRateLimit.maxRequests || 60).toString());
+    response.headers.set("X-RateLimit-Remaining", result.remaining.toString());
+    response.headers.set("X-RateLimit-Reset", result.resetTime.toISOString());
+    return response;
+  };
+
+  return withAuthorization(rateLimited, authOptions);
 }
 
 /** Rate-limit a mutating route keyed by the authenticated user id. */
@@ -78,3 +119,20 @@ export function withRateLimitByUser(
     return response;
   };
 }
+
+/**
+ * Convenience wrapper for admin-owned mutating routes.
+ * Bakes in requiredRole ['admin','sysadmin'] and the full triad
+ * (rate-limit + trusted-headers + csrf) so callers only supply the handler.
+ */
+export function withAdminMutation(
+  handler: Handler,
+  options: Omit<MutationGuardOptions, "requiredRole"> = {},
+) {
+  return withMutationGuard(handler, {
+    ...options,
+    requiredRole: ["admin", "sysadmin"],
+  });
+}
+
+export default withMutationGuard;

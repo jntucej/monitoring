@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { MapPin, Users, Activity, RefreshCw, X } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
+import { usePolling } from "@/hooks/usePolling";
 
 /* ------------------------------------------------------------------ */
 /*  Types returned by /api/occupancy/presence-matrix                 */
@@ -79,12 +80,11 @@ export function OccupancyHeatmap() {
     }
   }, []);
 
+  // Initial load + visibility-aware polling only when live mode is on
   useEffect(() => {
     load();
-    if (!live) return;
-    const t = setInterval(load, 15_000);
-    return () => clearInterval(t);
   }, [live, load]);
+  usePolling(load, { intervalMs: 15_000, enabled: live });
 
   // Compute the global max for consistent heat scaling
   const maxCell = useMemo(() => {
@@ -118,10 +118,10 @@ export function OccupancyHeatmap() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold flex items-center gap-2 text-white">
+          <p className="text-xl font-bold flex items-center gap-2 text-white">
             <MapPin className="h-5 w-5 text-emerald-400" />
             Live Campus Presence Matrix
-          </h1>
+          </p>
           <p className="text-xs text-slate-400 mt-0.5">
             Who is inside each gate right now — entry/exit combined by role. Click any cell for details.
           </p>

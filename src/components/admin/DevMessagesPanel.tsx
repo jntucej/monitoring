@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { MessageSquare, Send } from "lucide-react";
-import { useApi } from "@/hooks/useApi";
+import { getAuthHeaders } from "@/lib/utils";
+import { usePolling } from "@/hooks/usePolling";
 
 interface DevMessage {
   id: string;
@@ -20,15 +21,13 @@ interface DevMessage {
  * Self-contained — mount on any admin dashboard; polls every 60s.
  */
 export function DevMessagesPanel() {
-const api = useApi();
-
   const [messages, setMessages] = useState<DevMessage[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     try {
       const res = await fetch("/api/dev/contact?limit=10", {
-        headers: api.getHeaders(),
+        headers: getAuthHeaders(),
         cache: "no-store",
       });
       const data = await res.json();
@@ -40,11 +39,11 @@ const api = useApi();
     }
   }, []);
 
+  // Initial load + visibility-aware polling (no raw setInterval)
   useEffect(() => {
-    load();
-    const t = setInterval(load, 60_000);
-    return () => clearInterval(t);
+    load().catch(() => {});
   }, [load]);
+  usePolling(load, { intervalMs: 60_000 });
 
   return (
     <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">

@@ -42,7 +42,11 @@ export default function ParentSettingsPage() {
   return (
     <div className="space-y-6 max-w-4xl">
       <div>
+<<<<<<< HEAD
         <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">Guardian Settings</p>
+=======
+        <p className="text-2xl font-extrabold text-[var(--text-primary)]">Guardian Settings</p>
+>>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
         <p className="text-xs text-[var(--text-muted)]">Manage preferences and profile</p>
       </div>
 

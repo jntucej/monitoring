@@ -8,8 +8,8 @@ import type { AuthContext } from "@/lib/authContext";
 /**
  * POST /api/passes/[id]/action
  * Body: { action: "approve" | "reject", comment?: string }
- * Allowed roles: admin, sysadmin, warden, supervisor.
- * Warden actions are scoped to their assigned hostel block.
+ * Allowed roles: admin, sysadmin, principal, supervisor.
+ * Principal actions are scoped to their assigned hostel block.
  */
 
 function getPassId(req: NextRequest): string {
