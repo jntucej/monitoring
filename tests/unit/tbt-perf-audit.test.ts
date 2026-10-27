@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 
 describe("TBT & Performance Audit Compliance", () => {
   it("verifies mobile TBT target is defined", () => {
-    const targetMobileTBT = 200; // ms
+    const targetMobileTBT = 120; // ms
     expect(targetMobileTBT).toBeLessThanOrEqual(200);
   });
 
