@@ -6,7 +6,7 @@ import { usePolling } from "@/hooks/usePolling";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { normalizeScannedPayload } from "@/lib/barcode";
 import { motion, AnimatePresence } from "framer-motion";
-import { RefreshCw, AlertCircle, KeyRound, UserCheck, Mic, ShieldAlert, Hourglass, ArrowUp, ArrowDown, ChevronUp, Clock } from "lucide-react";
+import { RefreshCw, AlertCircle, KeyRound, UserCheck, Mic, ShieldAlert, Hourglass, ArrowUp, ArrowDown, Clock } from "lucide-react";
 import { useOperatorStore } from "@/stores/operatorStore";
 import { useAuth } from "@/hooks/useAuth";
 import { useKioskOperator } from "@/hooks/useKioskOperator";
@@ -16,13 +16,12 @@ import { VoiceAssistantModal } from "@/components/operator/VoiceAssistantModal";
 import { SuccessFlash } from "@/components/operator/SuccessFlash";
 import { Scanner } from "@/components/operator/Scanner";
 import { ScanViewfinder } from "@/components/operator/ScanViewfinder";
-import { RecentScans } from "@/components/operator/RecentScans";
 import { ScanDetailModal } from "@/components/operator/ScanDetailModal";
-import { BreakdownPanel } from "@/components/operator/BreakdownPanel";
 import { operatorIcon } from "@/config/operator-icons";
+import { MobileOperatorScanView } from "@/components/mobile/MobileOperatorScanView";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
 import type { Scan as ScanRecord } from "@/lib/types";
 import { useCollegeInfo } from "@/hooks/useCollegeInfo";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { primeAudio } from "@/lib/sound";
 import { OperatorGateClaimPanel } from "@/components/operator/OperatorGateClaimPanel";
 
@@ -71,7 +70,6 @@ function OperatorPageInner() {
     selectedDirection,
     todaysStats,
     recentScans,
-    breakdown,
     outing,
     error,
     startScan,
@@ -85,8 +83,12 @@ function OperatorPageInner() {
   const [selectedScan, setSelectedScan] = useState<ScanRecord | null>(null);
   const [activeLockdown, setActiveLockdown] = useState<any>(null);
   const [showVoiceModal, setShowVoiceModal] = useState(false);
-  const [stripExpanded, setStripExpanded] = useState(false);
-  const [bottomSheetOpen, setBottomSheetOpen] = useState(false);
+
+  // Mobile (< md) renders the dedicated mobile scan view (camera + decode +
+  // confirmation bottom sheet). Desktop keeps the existing desk layout. Both
+  // paths drive the same useOperatorStore, so recent scans/stats stay in
+  // sync regardless of which view ran the scan.
+  const { md: isDesktop } = useBreakpoint({ md: "(min-width: 768px)" });
 
   // Local active tab for the desk panel: scan, manual, entry
   const [operatorSubMode, setOperatorSubMode] = useState<"scan" | "manual" | "entry">("scan");
@@ -183,25 +185,15 @@ function OperatorPageInner() {
   const pollEnabled = state === "idle" && !showCameraScanner;
   usePolling(loadStats, { intervalMs: 15_000, enabled: pollEnabled });
 
-  // Open the bottom sheet on mount when ?tab=history is present
+  // ?tab=history was the old bottom-sheet trigger; the sheet is gone (Log tab
+  // in the operator bottom bar replaces it). Redirect legacy ?tab=history URLs
+  // to the transactions log so deep links don't dead-end.
   useEffect(() => {
     const tab = searchParams?.get("tab");
     if (tab === "history") {
-      setBottomSheetOpen(true);
+      router.replace("/operator/transactions");
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ?tab=history opens the bottom sheet on mount
-  useEffect(() => {
-    const tab = searchParams?.get("tab");
-    if (tab === "history") {
-      setBottomSheetOpen(true);
-      // Clean the URL param after opening the sheet
-      const url = new URL(window.location.href);
-      url.searchParams.delete("tab");
-      window.history.replaceState({}, "", url.toString());
-    }
-  }, [searchParams]);
+  }, [searchParams, router]);
 
   // Derive effective sub-mode: when a scan flow is active (any non-idle
   // state), force the "entry" tab so the user sees the confirmation/success/
@@ -359,73 +351,16 @@ function OperatorPageInner() {
     );
   };
 
-  // ── 28px status strip ─────────────────────────────────────────────────────
-  const statusStrip = operatorStore.getStatusStrip();
-  const healthDotClass =
-    statusStrip.health === "healthy"
-      ? "bg-emerald-400"
-      : statusStrip.health === "caution"
-      ? "bg-amber-400"
-      : "bg-rose-500";
-
-  const renderStatusStrip = () => (
-    <div
-      role="button"
-      aria-label="Expand gate status details"
-      aria-expanded={stripExpanded}
-      onClick={() => setStripExpanded(!stripExpanded)}
-      className="w-full h-[28px] rounded-lg bg-[var(--bg-surface)]/90 backdrop-blur-sm border border-[var(--border)] flex items-center justify-between px-2.5 cursor-pointer transition-colors hover:bg-[var(--bg-elevated)]"
-    >
-      {/* Left: health dot + gate + counts */}
-      <div className="flex items-center gap-1.5 min-w-0 text-[10px] font-semibold">
-        <span className={`w-2 h-2 rounded-full shrink-0 ${healthDotClass} ${statusStrip.health !== "healthy" ? "animate-pulse" : ""}`} />
-        <span className="text-[var(--text-primary)] font-bold truncate">{statusStrip.gate}</span>
-        <span className="text-[var(--text-muted)]">·</span>
-        <span className="inline-flex items-center gap-0.5 text-emerald-400">
-          <ArrowUp className="w-3 h-3" />{statusStrip.entries}
-        </span>
-        <span className="inline-flex items-center gap-0.5 text-rose-400">
-          <ArrowDown className="w-3 h-3" />{statusStrip.exits}
-        </span>
-        <span className="text-[var(--text-muted)] hidden sm:inline">·</span>
-        <span className="text-[var(--text-muted)] hidden sm:inline">{statusStrip.shift}</span>
-        <span className="text-[var(--text-muted)]">·</span>
-        <span className="inline-flex items-center gap-0.5 text-[var(--text-muted)]">
-          <Clock className="w-3 h-3" />{statusStrip.lastScanAgo}
-        </span>
-      </div>
-
-      {/* Right: Voice button + Online/Offline badge (smaller) */}
-      <div className="flex items-center gap-1.5 shrink-0">
-        <button
-          type="button"
-          onClick={(e) => { e.stopPropagation(); setShowVoiceModal(!showVoiceModal); }}
-          className="p-1 rounded-md bg-purple-500/10 text-purple-400 border border-purple-500/20 hover:bg-purple-500/20 flex items-center"
-          title="Voice Assistant"
-        >
-          <Mic className="w-3 h-3" />
-        </button>
-        <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[var(--bg-base)] border border-[var(--border)] text-[9px] text-[var(--text-secondary)]">
-          {(operatorStore.gate?.isOnline ?? true) ? (
-            <span className="font-bold text-emerald-400">Online</span>
-          ) : (
-            <span className="font-bold text-rose-400">Offline</span>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-
   const renderActiveView = () => {
     switch (currentTab) {
       case "stats":
-        // Stats now live in the status-strip expansion (stripExpanded).
-        // This case is kept for backward-compat but renders nothing.
+        // Stats are now shown in the operator bottom bar + stats panel on
+        // desktop; nothing to render here for legacy ?tab=stats.
         return null;
 
       case "history":
-        // History is now rendered as a bottom sheet; the tab is kept for URL
-        // compatibility but the sheet is opened via bottomSheetOpen state.
+        // History (recent scans) is now accessed via the Log tab in the
+        // operator bottom bar (/operator/transactions). Nothing to render here.
         return null;
 
       case "profile":
@@ -642,34 +577,19 @@ function OperatorPageInner() {
     }
   };
 
+  // ── Mobile (< md) — dedicated mobile scan view. Same operatorStore, so
+  // stats/recent-scans stay in sync with the desktop path.
+  if (!isDesktop && !needsAssignment) {
+    return (
+      <div className="min-w-0 flex-1 overflow-y-auto bg-[var(--bg-base)]">
+        <MobileOperatorScanView />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-[85vh] flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] pb-safe min-w-0">
       <main className="flex-1 w-full max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto p-2 sm:p-4 space-y-3">
-        {/* 28px status strip (replaces the old Gate Operational Status Bar) */}
-        {renderStatusStrip()}
-
-        {/* Expandable breakdown (inline, no modal) */}
-        {stripExpanded && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="overflow-hidden rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] p-3"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-xs font-bold text-[var(--text-primary)]">Breakdown</h3>
-              <button
-                type="button"
-                onClick={() => setStripExpanded(false)}
-                className="text-[10px] text-[var(--text-muted)] hover:text-[var(--text-primary)] font-semibold"
-              >
-                Close
-              </button>
-            </div>
-            <BreakdownPanel breakdown={breakdown} />
-          </motion.div>
-        )}
-
         {/* Emergency Lockdown Active Alert Header Banner */}
         {activeLockdown && (
           <div className="bg-rose-600 text-white p-4 rounded-xl border border-rose-700 shadow-lg flex items-center justify-between animate-pulse">
@@ -707,57 +627,6 @@ function OperatorPageInner() {
 
         {/* Dynamic Inner view */}
         <div className="min-w-0 w-full">{renderActiveView()}</div>
-
-        {/* Bottom sheet trigger: small ↑ button */}
-        <button
-          type="button"
-          onClick={() => setBottomSheetOpen(true)}
-          className="fixed bottom-4 right-4 z-40 w-10 h-10 rounded-full bg-[var(--bg-surface)] border border-[var(--border)] shadow-lg flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-          aria-label="Open recent scans"
-        >
-          <ChevronUp className="w-5 h-5" />
-        </button>
-
-        {/* Bottom sheet: swipe-up panel for RecentScans + ScanDetailModal */}
-        <AnimatePresence>
-          {bottomSheetOpen && (
-            <motion.div
-              key="bottom-sheet"
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 28, stiffness: 300 }}
-              className="fixed bottom-0 left-0 right-0 z-40 bg-[var(--bg-surface)] border-t border-[var(--border)] rounded-t-2xl shadow-2xl max-h-[70dvh] overflow-y-auto pb-safe"
-            >
-              {/* Drag handle */}
-              <div className="sticky top-0 z-10 flex items-center justify-center pt-2 pb-1 bg-[var(--bg-surface)]">
-                <div className="w-10 h-1 rounded-full bg-[var(--border)]" />
-              </div>
-
-              <div className="px-4 py-3 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-[var(--action-primary)]" />
-                    <h2 className="text-sm font-bold text-[var(--text-primary)]">Recent Scans</h2>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setBottomSheetOpen(false)}
-                    className="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] font-semibold"
-                  >
-                    Close
-                  </button>
-                </div>
-                <RecentScans scans={recentScans} onSelect={setSelectedScan} />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Dev contact strip for reporting gate issues */}
-        <div className="pt-2">
-          <DevContactStrip />
-        </div>
       </main>
 
       {/* Person overview modal opened by tapping a log */}

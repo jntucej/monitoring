@@ -7,13 +7,12 @@ import { GlossyFloatingContainer } from "@/components/shared/GlossyFloatingConta
 import { ArrowUpRight } from "lucide-react";
 
 interface OperatorStatsProps {
-  gateId?: string;
   entries: number;
   exits: number;
   onCampus: number;
 }
 
-export function OperatorStats({ entries, exits, onCampus, gateId }: OperatorStatsProps) {
+export function OperatorStats({ entries, exits, onCampus }: OperatorStatsProps) {
   const router = useRouter();
 
   const cards = [
@@ -24,7 +23,7 @@ export function OperatorStats({ entries, exits, onCampus, gateId }: OperatorStat
       value: entries,
       color: "text-[var(--action-primary)]",
       glow: "shadow-emerald-500/10",
-      href: `/gate/${gateId || 'active'}?tab=history`,
+      href: `/operator/transactions`,
     },
     {
       id: "EXITS",
@@ -33,7 +32,7 @@ export function OperatorStats({ entries, exits, onCampus, gateId }: OperatorStat
       value: exits,
       color: "text-[var(--action-danger)]",
       glow: "shadow-red-500/10",
-      href: `/gate/${gateId || 'active'}?tab=history`,
+      href: `/operator/transactions`,
     },
     {
       id: "ON CAMPUS",
@@ -42,7 +41,7 @@ export function OperatorStats({ entries, exits, onCampus, gateId }: OperatorStat
       value: onCampus,
       color: "text-[var(--focus-ring)]",
       glow: "shadow-sky-500/10",
-      href: `/gate/${gateId || 'active'}?tab=stats`,
+      href: `/operator/transactions`,
     },
   ];
 

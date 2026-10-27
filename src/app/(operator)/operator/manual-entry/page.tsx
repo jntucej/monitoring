@@ -9,7 +9,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { useToast } from "@/components/ui/toast";
 import { getAuthHeaders } from "@/lib/utils";
 import {
-  KeyRound,
+
   Search,
   Loader2,
   CheckCircle2,
@@ -207,21 +207,6 @@ function ManualEntryInner() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-5 px-4 py-6 md:px-6 min-w-0">
-      {/* Page toolbar */}
-      <div className="min-w-0">
-        <div className="flex items-center gap-2 min-w-0">
-          <KeyRound className="w-5 h-5 text-[var(--action-primary)] shrink-0" />
-          <h2 className="text-lg font-bold text-[var(--text-primary)] truncate">
-            Manual Entry
-          </h2>
-        </div>
-        <p className="text-xs text-[var(--text-muted)] mt-1 min-w-0">
-          Manually verify a person&rsquo;s identity at the gate. Type the name as
-          it appears on the ID and their roll / employee / ID number, then look
-          them up against the campus records.
-        </p>
-      </div>
-
       {/* Lookup form */}
       <WidgetBoundary title="Person Lookup">
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-4 space-y-3 min-w-0">

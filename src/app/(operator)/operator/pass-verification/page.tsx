@@ -9,7 +9,6 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
 import {
-  BadgeCheck,
   Check,
   X,
   Loader2,
@@ -108,22 +107,6 @@ function PassVerificationInner() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-5 px-4 py-6 md:px-6 min-w-0">
-      {/* Page toolbar */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2 min-w-0">
-            <BadgeCheck className="w-5 h-5 text-[var(--action-primary)] shrink-0" />
-            <h2 className="text-lg font-bold text-[var(--text-primary)] truncate">
-              Pass Verification
-            </h2>
-          </div>
-          <p className="text-xs text-[var(--text-muted)] mt-1 min-w-0">
-            Pending gate-pass tickets at the {user?.role === "operator" ? "main-gate" : "your"} stage —
-            verify against the ID before approving.
-          </p>
-        </div>
-      </div>
-
       {error && (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">

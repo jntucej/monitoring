@@ -8,7 +8,6 @@ import { useAuthStore } from "@/stores/authStore";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import {
-  Flag,
   Loader2,
   AlertTriangle,
   Inbox,
@@ -144,22 +143,6 @@ function ExceptionsInner() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-5 px-4 py-6 md:px-6 min-w-0">
-      {/* Page toolbar */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2 min-w-0">
-            <Flag className="w-5 h-5 text-rose-400 shrink-0" />
-            <h2 className="text-lg font-bold text-[var(--text-primary)] truncate">
-              Exceptions
-            </h2>
-          </div>
-          <p className="text-xs text-[var(--text-muted)] mt-1 min-w-0">
-            Flagged, corrected and denied entries recorded today — plus any
-            rejected hostel passes that reached the main-gate stage.
-          </p>
-        </div>
-      </div>
-
       {(txError || permError) && (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex items-center gap-2 min-w-0">
           <AlertTriangle className="w-4 h-4 shrink-0" />

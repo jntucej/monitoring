@@ -51,9 +51,10 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
   // with their own manifest-driven sidebar; everything else uses the shared
   // SafeAreaAppShell navigation.
   const isStandaloneConsole =
-    pathname?.startsWith("/sysadmin") ?? false
-      ? true
-      : (pathname?.startsWith("/admin") ?? false);
+    pathname?.startsWith("/sysadmin") ||
+    pathname?.startsWith("/admin") ||
+    pathname?.startsWith("/operator") ||
+    pathname?.startsWith("/gate");
 
   // Initialize theme from localStorage on client-side mount
   useEffect(() => {
