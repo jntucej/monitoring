@@ -30,10 +30,14 @@ export async function POST(req: NextRequest) {
       ticket_number: string;
       current_stage: string;
       requester_user_id: string | null;
-      student_user_id: string;
     }>(
+      // NOTE: `student_user_id` does NOT exist on the base `permissions`
+      // table (it is only an alias exposed by the permission_requests view,
+      // where it maps to requester_user_id). Use requester_user_id here —
+      // the audit/notification below keys off the ticket, and a null
+      // requester is tolerated by addAudit/addNotification.
       `SELECT p.id, p.ticket_number, p.current_stage,
-              p.requester_user_id, p.student_user_id
+              p.requester_user_id
          FROM public.permissions p
         WHERE p.status IN ('PENDING','ESCALATED')
           AND p.sla_deadline IS NOT NULL
@@ -49,7 +53,7 @@ export async function POST(req: NextRequest) {
     for (const r of breached.rows) {
       await addAudit({
         action: "SLA_BREACHED",
-        userId: r.student_user_id,
+        userId: r.requester_user_id ?? "",
         details: { ticketNumber: r.ticket_number, stage: r.current_stage },
       });
       await addNotification(

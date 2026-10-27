@@ -759,8 +759,8 @@ const api = useApi();
                       No students found.
                       {students.length === 0 && !search && !loadError && (
                                         <div className="mt-2 text-xs text-slate-600 max-w-md mx-auto">
-                  The server may be falling back to the anon client (RLS silently returns 0 rows). Verify <code className="mx-1 px-1 py-0.5 rounded bg-slate-800 text-emerald-400">SUPABASE_SERVICE_ROLE_KEY</code> is set in the deployment environment.
-                </div>
+                      The database has 0 student rows. Add students via the bulk import (admin → Users → Import) — this page reflects live DB state, not a permissions or RLS issue.
+                    </div>
                       )}
                     </td>
                   </tr>
