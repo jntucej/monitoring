@@ -1,0 +1,13 @@
+{
+  "name": "human-pulse-kit",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cookiecutter for a human-like heartbeat pulse (lub-dub-rest) React component, CSS keyframes, and Framer Motion variants.",
+  "keywords": ["cookiecutter", "pulse", "heartbeat", "framer-motion", "reduced-motion"],
+  "license": "MIT",
+  "scripts": {
+    "generate": "cookiecutter . --output-dir ./out",
+    "generate:dry": "cookiecutter . --output-dir ./out --no-input",
+    "clean": "rm -rf ./out"
+  }
+}
