@@ -77,6 +77,10 @@ export function withAuthorization(
 ) {
   return async (req: NextRequest): Promise<Response> => {
     return metricsMiddleware(req, async () => {
+      const url = new URL(req.url);
+      const path = url.pathname;
+      const isAdminPath = path.startsWith("/api/admin/") || path.startsWith("/api/sysadmin/");
+      const effectiveRequiredRole = options.requiredRole ?? (isAdminPath ? ["admin", "sysadmin"] : undefined);
       // No-body fast path (GET, no-body DELETE, ...): setupBodyCaching would
       // still call `await req.text()` on the original request, which locks its
       // body stream and — in undici/Node 20 — poisons the response object the
@@ -96,10 +100,10 @@ export function withAuthorization(
         if (!options.allowInactive && !auth.isActive) {
           throw new AuthError("ACCOUNT_INACTIVE", "Account is not active", 403);
         }
-        if (options.requiredRole) {
-          const allowed = Array.isArray(options.requiredRole)
-            ? options.requiredRole
-            : [options.requiredRole];
+        if (effectiveRequiredRole) {
+          const allowed = Array.isArray(effectiveRequiredRole)
+            ? effectiveRequiredRole
+            : [effectiveRequiredRole];
           const callerRoles = auth.roles && auth.roles.length ? auth.roles : [auth.role];
           const ok = allowed.some((r) => callerRoles.includes(r));
           if (!ok) {
