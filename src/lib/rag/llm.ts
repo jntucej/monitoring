@@ -23,7 +23,6 @@ export async function* streamCompletion(messages: { role: "system" | "user" | "a
   }
 
   const reader = res.body.getReader();
-  const decoder = new TextEncoder(); // wait, decoder needs TextDecoder for decoding bytes
   const dec = new TextDecoder();
   let buffer = "";
 
