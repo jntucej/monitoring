@@ -12,7 +12,8 @@ import { LiveCountsStrip } from "./components/sections/LiveCountsStrip";
 import { RoleMap } from "./components/sections/RoleMap";
 import { AccessFlow } from "./components/sections/AccessFlow";
 import { Modules } from "./components/sections/Modules";
-import { TrustBand } from "./components/sections/TrustBand";
+import { TrustBand } from "./sections/TrustBand";
+import { SystemHealthSection } from "./sections/SystemHealthSection";
 import { NumbersBand } from "./components/sections/NumbersBand";
 import { CTASection } from "./components/sections/CTASection";
 import { HomeFooter } from "./components/sections/HomeFooter";
@@ -56,6 +57,7 @@ export default function HomePage() {
       <AccessFlow />
       <Modules />
       <TrustBand />
+      <SystemHealthSection />
       <NumbersBand />
       <CTASection />
       <HomeFooter />
