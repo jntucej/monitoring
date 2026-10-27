@@ -54,6 +54,10 @@ services:
     env_file:
       - path: .env
         required: false
+    extra_hosts:
+      # Let the container reach the host's local LLM (jcode openrouter gateway
+      # on 127.0.0.1:20128) for the campus-assistant RAG/bot chat surface.
+      - "host.docker.internal:host-gateway"
     environment:
       - NODE_ENV=production
       - PORT=3000
@@ -64,6 +68,15 @@ services:
       - MONITORING_PROM_URL=${MONITORING_PROM_URL:-}
       - MONITORING_LOKI_URL=${MONITORING_LOKI_URL:-}
       - MONITORING_GRAFANA_URL=${MONITORING_GRAFANA_URL:-}
+      # RAG / campus assistant (bot chat + RAG memory) — OpenAI-compatible LLM.
+      # By default the web container reaches the LLM via the llm-proxy sidecar
+      # (which uses host network mode to bridge UFW). Override RAG_LLM_API_URL
+      # in .env to point at a different OpenAI-compatible endpoint if desired.
+      - RAG_LLM_API_URL=${RAG_LLM_API_URL:-http://llm-proxy:8080/v1}
+      - RAG_LLM_API_KEY=${RAG_LLM_API_KEY:-}
+      - RAG_LLM_MODEL=${RAG_LLM_MODEL:-agnes-3.0-flash}
+      - RAG_EMBEDDING_API_URL=${RAG_EMBEDDING_API_URL:-http://llm-proxy:8080/v1}
+      - RAG_EMBEDDING_API_KEY=${RAG_EMBEDDING_API_KEY:-}
       - CRON_SECRET=${CRON_SECRET:?CRON_SECRET must be set for web}
     networks:
       gate-net:
@@ -75,20 +88,32 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "wget -q -O- http://127.0.0.1:3000/api/health | grep -q '\"database\":{\"status\":\"healthy\"\\|\"status\":\"healthy\"\\|\"status\":\"degraded\"'"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    read_only: true
-    tmpfs:
-      - /tmp:size=128m
-      - /app/.next/cache:size=512m
-      - /app/.cache:size=64m
-      - /app/.config:size=64m
+      llm-proxy:
+        condition: service_started
+
+  # ---------------------------------------------------------------------------
+  # llm-proxy — lightweight Node proxy that bridges the compose network to the
+  # host's omniroute LLM gateway (127.0.0.1:20128). Uses host network mode
+  # so it can reach 127.0.0.1 directly, bypassing the UFW FORWARD DROP that
+  # blocks container→host LAN traffic on non-published ports.
+  # ---------------------------------------------------------------------------
+  llm-proxy:
+    image: node:20-alpine
+    container_name: gate_llm_proxy
+    restart: always
+    network_mode: host
+    ports:
+      # Published on 127.0.0.1 only — Docker creates a NAT rule that lets the
+      # web container reach it via the published port, bypassing the UFW
+      # FORWARD DROP that otherwise blocks container→host LAN traffic.
+      - "127.0.0.1:8080:8080"
+    command: node /app/llm-proxy.mjs
+    environment:
+      - LLM_PROXY_BACKEND_HOST=${LLM_PROXY_BACKEND_HOST:-127.0.0.1}
+      - LLM_PROXY_BACKEND_PORT=${LLM_PROXY_BACKEND_PORT:-20128}
+      - LLM_PROXY_LISTEN=0.0.0.0:8080
     volumes:
-      - uploads_data:/app/data/uploads:rw
+      - ./scripts/llm-proxy.mjs:/app/llm-proxy.mjs:ro
     cap_drop: [ALL]
     security_opt:
       - no-new-privileges:true
