@@ -384,27 +384,13 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
     case "student":
       groups = [
         {
-          groupLabel: "My Digital Desk",
+          groupLabel: "Student Console",
           items: [
-            { href: "/student", label: "Digital ID & Gate Pass", icon: "QrCode", badge: "ID PASS" },
-            { href: "/student/history", label: "My Scan Logs", icon: "Clock" },
-            { href: "/student/passes", label: "Outpass Requests", icon: "FileSpreadsheet" },
-            { href: "/student/permissions", label: "Permission Requests", icon: "ClipboardList", badge: "NEW" },
-            { href: "/mess/default", label: "Mess Default", icon: "UtensilsCrossed" },
-          ],
-        },
-        {
-          groupLabel: "Campus Life",
-          items: [
-            { href: "/campus", label: "My Campus", icon: "Sparkles" },
-          ],
-        },
-        {
-          groupLabel: "General & Support",
-          items: [
-            { href: "/support", label: "Help & Support", icon: "LifeBuoy" },
-            { href: "/profile", label: "My Profile", icon: "User" },
-            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+            { href: "/student", label: "Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
+            { href: "/student/passes", label: "Passes", icon: "DoorOpen" },
+            { href: "/student/permissions", label: "Permissions", icon: "ClipboardList" },
+            { href: "/student/history", label: "Movement", icon: "Clock" },
+            { href: "/student/mess", label: "Mess", icon: "UtensilsCrossed" },
           ],
         },
       ];
