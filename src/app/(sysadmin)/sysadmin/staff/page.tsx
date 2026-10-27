@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import { useApi } from "@/hooks/useApi";
 import { useUIStore } from "@/stores/uiStore";
-import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 
 interface StaffRecord {
   id: string;
@@ -81,8 +80,10 @@ const api = useApi();
     } finally { setLoading(false); }
   }, [addToast]);
 
-  // Live toggle drives refetch; polls every 30s while Live.
-  useLiveRefresh(loadStaff, { intervalMs: 30000 });
+  // Load once on mount. Staff rosters aren't live feeds (they change on
+  // admin action), so no 30-second polling — the interval kept /api/users
+  // and the stats endpoint hammering the rate-limit budget.
+  useEffect(() => { loadStaff(); }, [loadStaff]);
 
   // Load the server-side staff statistics (role hierarchy / department /
   // category / designation) for the infographic row.
