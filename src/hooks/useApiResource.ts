@@ -1,6 +1,8 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getAuthHeaders } from "@/lib/utils";
+import { useAuthStore } from "@/stores/authStore";
+import { singleFlightRefresh } from "@/lib/auth-refresh";
 
 interface CachedEntry<T> {
   data: T;
@@ -38,7 +40,7 @@ export async function cachedFetch<T>(
   const hit = cache.get(url) as CachedEntry<T> | undefined;
   if (hit && hit.expiresAt > now) return hit.data;
 
-  const res = await fetch(url, {
+  let res = await fetch(url, {
     headers: {
       "Content-Type": "application/json",
       ...(auth ? getAuthHeaders() : {}),
@@ -46,6 +48,26 @@ export async function cachedFetch<T>(
     },
     credentials: "include",
   });
+
+  // A 401 means the stored token went stale (e.g. session rotated/revoked
+  // after a deploy, or a refreshed access token). Attempt one single-flight
+  // refresh and retry once so dashboards self-heal instead of surfacing a
+  // hard "HTTP 401" that only a full reload would clear.
+  if (res.status === 401 && auth) {
+    try { await singleFlightRefresh(); } catch { /* fall through */ }
+    const fresh = getAuthHeaders();
+    if (fresh["Authorization"] && fresh["Authorization"] !== (headers as Record<string,string>)["Authorization"]) {
+      res = await fetch(url, {
+        headers: {
+          "Content-Type": "application/json",
+          ...fresh,
+          ...headers,
+        },
+        credentials: "include",
+      });
+    }
+  }
+
   if (!res.ok) {
     const e = new Error(`HTTP ${res.status}`) as Error & { status?: number };
     e.status = res.status;
