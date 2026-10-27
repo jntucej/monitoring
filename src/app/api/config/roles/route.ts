@@ -10,7 +10,7 @@ async function handleGet(req: NextRequest) {
   try {
     const service = getSupabaseServiceClient();
     const { data, error } = await service
-      .from('config_roles')
+      .from('config_roles_registry')
       .select('*')
       .eq('is_active', true)
       .order('display_name');
@@ -52,7 +52,7 @@ async function handlePost(req: NextRequest) {
     };
 
     const service = getSupabaseServiceClient();
-    const { data, error } = await service.from('config_roles').upsert([payload]).select().single();
+    const { data, error } = await service.from('config_roles_registry').upsert([payload]).select().single();
     if (error) throw error;
 
     const actorId = req.headers.get('x-user-id') || 'sysadmin';
@@ -81,7 +81,7 @@ async function handleDelete(req: NextRequest) {
     }
 
     const service = getSupabaseServiceClient();
-    const { error } = await service.from('config_roles').update({ is_active: false }).eq('code', code);
+    const { error } = await service.from('config_roles_registry').update({ is_active: false }).eq('code', code);
     if (error) throw error;
 
     return NextResponse.json({ success: true, message: `Deactivated role ${code}` });
