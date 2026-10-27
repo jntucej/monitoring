@@ -18,8 +18,6 @@ DO $$ BEGIN CREATE ROLE authenticated;   EXCEPTION WHEN duplicate_object THEN NU
 DO $$ BEGIN CREATE ROLE admin;          EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 GRANT supabase_admin TO service_role;
-GRANT supabase_admin TO authenticated;
-GRANT supabase_admin TO admin;
 
 -- ---------------------------------------------------------------------------
 -- 2. Auth Schema (for SSO/MFA-related tables)
