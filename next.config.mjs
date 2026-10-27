@@ -16,6 +16,12 @@ const nextConfig = {
       "@remotion/player",
     ],
   },
+  transpilePackages: [
+    "ai-scheduler-kit",
+    "human-pulse-kit",
+    "sysadmin-console-kit",
+    "admin-console-kit",
+  ],
   output: "standalone",
   serverExternalPackages: ["bcryptjs", "pg"],
   images: {

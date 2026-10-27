@@ -252,7 +252,7 @@ export interface User {
 
 export type ExitReason =
   | "Regular" | "Leave" | "Outing" | "Emergency"          // legacy
-  | "Home Out" | "Day Out"                                 // legacy labels
+  | "Home Out" | "Day Out" | "Weekend Outing"                // legacy labels
   | "Daily Outing" | "Day Pass" | "Home In"                // new labels
   | "Special Leave" | "Day Scholar Out"                     // hostel-permission additions
   | "daily_outing" | "home_in" | "home_out" | "day_pass"   // canonical codes
