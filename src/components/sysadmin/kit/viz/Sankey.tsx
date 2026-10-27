@@ -76,8 +76,8 @@ export function Sankey({
 
       const x0 = pad;
       const x1 = W - pad;
-      const y0 = s.y + so + thickness / 2;
-      const y1 = t.y + to + thickness / 2;
+      const y0 = Number.isFinite(s.y + so + thickness / 2) ? s.y + so + thickness / 2 : H / 2;
+      const y1 = Number.isFinite(t.y + to + thickness / 2) ? t.y + to + thickness / 2 : H / 2;
       const midX = (x0 + x1) / 2;
       const d = `M ${x0} ${y0} C ${midX} ${y0}, ${midX} ${y1}, ${x1} ${y1}`;
       return { link: l, d, thickness };

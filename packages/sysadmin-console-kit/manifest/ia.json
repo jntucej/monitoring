@@ -108,7 +108,6 @@
             "roles",
             { "id": "sessions", "sse": "/api/admin/sessions/stream" },
             "mfa",
-            "sso",
             "codes"
           ]
         },
@@ -131,13 +130,6 @@
           "route": "access-keys",
           "title": "Access Keys",
           "kind": "table",
-          "pollMs": 60000
-        },
-        {
-          "id": "sso",
-          "route": "sso",
-          "title": "SSO",
-          "kind": "form",
           "pollMs": 60000
         }
       ]

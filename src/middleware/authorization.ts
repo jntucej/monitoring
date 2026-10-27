@@ -84,7 +84,14 @@ export function withAuthorization(
       // built from the re-wrapped one — reusing `req.body` made every
       // handler-level `req.json()` throw "body object disturbed or locked"
       // (500 on all POST routes: admin/kb, admin/mess-finalize, ...).
-      const { req: cachedReq } = await setupBodyCaching(req);
+      // For a BODYLESS request (GET, no-body DELETE, ...) setupBodyCaching
+      // returns the ORIGINAL request unchanged and a `hash: null` — re-wrapping
+      // that original (whose .body is an empty-but-already-consumed stream)
+      // with body + duplex:"half" makes the handler's own body access throw
+      // "Response body object should not be disturbed or locked" (a 500 on
+      // every no-body route through this chain). So forward a body ONLY when
+      // setupBodyCaching actually produced one (non-null hash).
+      const { req: cachedReq, hash: bodyHash } = await setupBodyCaching(req);
       try {
         const auth = await requireAuthUser(bearer(req));
         if (!options.allowInactive && !auth.isActive) {
@@ -135,12 +142,26 @@ export function withAuthorization(
         headers.set("x-mw-timestamp", String(ts));
         // Legacy header some routes still read — keep it in sync.
         headers.set("x-auth-signature", sig);
-        const proxied = new NextRequest(cachedReq.url, {
-          method: cachedReq.method,
-          headers,
-          body: cachedReq.body,
-          duplex: "half",
-        });
+        // Forward the body only when the original request actually had one.
+        // `bodyHash !== null` is the authoritative signal: setupBodyCaching
+        // returns hash: null for bodyless requests (see the `if (!raw)`
+        // branch in body-cache.ts), and only builds a re-wrapped request with
+        // a real body stream when the request carried one. Guarding on
+        // `cachedReq.body` directly is unreliable because NextRequest.body can
+        // be a non-null (already-consumed) stream object even when there is no
+        // real payload to forward.
+        const proxied =
+          bodyHash !== null
+            ? new NextRequest(cachedReq.url, {
+                method: cachedReq.method,
+                headers,
+                body: cachedReq.body,
+                duplex: "half",
+              })
+            : new NextRequest(cachedReq.url, {
+                method: cachedReq.method,
+                headers,
+              });
         return await handler(proxied, { auth });
       } catch (err) {
         return handleAuthError(err);

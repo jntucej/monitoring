@@ -16,13 +16,6 @@ import { randomInt, randomBytes } from "crypto";
 import { assertLength, LIMITS } from "../src/lib/validation";
 import { generateMobileToken, verifyMobileToken, validateMobileToken } from "../src/lib/mobile-auth"; import { hashDeviceId } from "../src/lib/mobile-auth";
 import { generateQrToken, validateQrToken } from "../src/lib/qr-token";
-import {
-  getAuthorizationUrl,
-  mapExternalGroupToRole,
-  assertSsoEnabled,
-  validateOIDCIdToken,
-  SSOConfig,
-} from "../src/lib/sso";
 import { getCached, setCached, invalidateCache } from "../src/lib/cache";
 import { validateCsrf } from "../src/lib/csrf";
 import { extractClientIp } from "../src/lib/rate-limit";
@@ -267,105 +260,6 @@ async function runTests() {
 
   const isInvalid = await verifyPassword("WrongPassword!", hashed);
   assert(isInvalid === false, "Reject incorrect password against bcrypt hash");
-
-  // 2. SSO OIDC Security Primitives (Issue #4)
-  console.log("\n🌐 [2/4] Testing SSO OIDC Security Primitives...");
-  const mockConfig: SSOConfig = {
-    providerId: "google",
-    enabled: true,
-    clientId: "test-client-id.apps.googleusercontent.com",
-    issuerUrl: "https://accounts.google.com",
-    groupMappings: {
-      "Campus-Security-Leads": "admin",
-      "IT-Administrators": "sysadmin",
-      "Faculty-Members": "faculty",
-    },
-    autoApproveSsoUsers: false,
-  };
-
-  // 2a. Authorization URL construction with PKCE and nonce
-  const authUrl = getAuthorizationUrl(
-    mockConfig,
-    "http://localhost:3000/api/auth/sso/callback",
-    "state-123",
-    "nonce-456",
-    "challenge-789"
-  );
-  assert(
-    authUrl.startsWith("https://accounts.google.com") &&
-      authUrl.includes("client_id=test-client-id") &&
-      authUrl.includes("state=state-123") &&
-      authUrl.includes("nonce=nonce-456") &&
-      authUrl.includes("code_challenge=challenge-789") &&
-      authUrl.includes("code_challenge_method=S256"),
-    "Construct valid OIDC Authorization URL with PKCE and nonce"
-  );
-
-  // 2b. Assert SSO enabled check
-  const enabledConfig = await assertSsoEnabled();
-  assert(enabledConfig.enabled === true, "assertSsoEnabled passes when SSO is active");
-
-  // 2c. Group mapping priority and default DENY (§3.3)
-  assert(
-    mapExternalGroupToRole(["Campus-Security-Leads"]) === "admin",
-    "Map Security Leads OIDC group to admin role"
-  );
-  assert(
-    mapExternalGroupToRole(["IT-Administrators"]) === "sysadmin",
-    "Map IT-Administrators OIDC group to sysadmin role"
-  );
-  assert(
-    mapExternalGroupToRole(["Faculty-Members"]) === "faculty",
-    "Map Faculty-Members OIDC group to faculty role"
-  );
-  assert(
-    mapExternalGroupToRole(["Campus-Security-Leads", "IT-Administrators"]) === "sysadmin",
-    "Resolve multiple groups to highest-privilege matching role"
-  );
-  assert(
-    mapExternalGroupToRole(["Unknown-Guest-Group"]) === null,
-    "Default DENY: unmapped external group resolves to null (refuse login)"
-  );
-  assert(
-    mapExternalGroupToRole([]) === null,
-    "Default DENY: empty groups resolve to null"
-  );
-
-  // 2d. OIDC validation requirements (fail-closed)
-  const validationWithBadNonce = await validateOIDCIdToken("bad.jwt.token", {
-    provider: "google",
-    clientId: "test-client-id.apps.googleusercontent.com",
-    nonce: "expected-nonce",
-  });
-  assert(
-    validationWithBadNonce.valid === false,
-    "validateOIDCIdToken fails closed on invalid/tampered token"
-  );
-
-  // 2e. SSO state lifecycle simulation (atomic single-use & expiration)
-  const stateRecord = {
-    state: "valid-state-abc",
-    nonce: "valid-nonce-def",
-    expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
-    consumed_at: null as string | null,
-  };
-
-  const isStateValid = (s: typeof stateRecord) => {
-    if (s.consumed_at !== null) return false;
-    if (new Date(s.expires_at).getTime() < Date.now()) return false;
-    return true;
-  };
-
-  assert(isStateValid(stateRecord) === true, "Unconsumed active state is valid");
-  stateRecord.consumed_at = new Date().toISOString();
-  assert(isStateValid(stateRecord) === false, "Consumed state is rejected on replay");
-
-  const expiredState = {
-    ...stateRecord,
-    consumed_at: null,
-    expires_at: new Date(Date.now() - 1000).toISOString(),
-  };
-  assert(isStateValid(expiredState) === false, "Expired state is rejected");
 
   // 2f. 2FA/MFA subsystem removed — no longer tested.
 

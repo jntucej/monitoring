@@ -26,11 +26,15 @@ export async function setupBodyCaching(req: NextRequest): Promise<{ req: NextReq
   // Re-construct the request with the hash header
   const headers = new Headers(req.headers);
   headers.set("x-parsed-body-hash", hash);
-  
+
+  // duplex:"half" is required for a Node/Next.js Request with a body stream
+  // (undici enforces it); without it a body-carrying request throws at
+  // construction time ("RequestInit body not supported with duplex default").
   const newReq = new NextRequest(req.url, {
     method: req.method,
     headers: headers,
     body: raw,
+    duplex: "half",
   });
 
   return { req: newReq, hash };
