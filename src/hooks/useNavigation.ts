@@ -86,18 +86,11 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       break;
 
     case "deputy_warden":
-      // Deputy warden is migrated to the RoleConsole shell (kanban:pending
-      // hostel permissions at the deputy_warden stage). The nav is a single
-      // console group of exactly 5 items so the IconRail stays lean.
       groups = [
         {
           groupLabel: "Deputy Warden Console",
           items: [
-            { href: "/deputy-warden", label: "Approvals", icon: "CheckSquare", badge: "PENDING" },
-            { href: "/deputy-warden/gate-movement", label: "Gate Movement", icon: "DoorOpen" },
-            { href: "/deputy-warden/outpass-queue", label: "Attendance", icon: "UserCheck" },
-            { href: "/deputy-warden/shift-handover", label: "Shifts", icon: "CalendarClock" },
-            { href: "/deputy-warden/decision-history", label: "History", icon: "History" },
+            { href: "/deputy-warden", label: "Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
           ],
         },
       ];
