@@ -71,8 +71,8 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 0 * * * *    root  curl -s -X POST -H "x-cron-secret: ${CRON_SECRET}" \\
                 http://localhost:3000/api/cron/sla-breach >> /var/log/gate-cron.log 2>&1
 EOF
-  chmod 644 /etc/cron.d/gate-jobs
-  echo "✓ Installed /etc/cron.d/gate-jobs"
+  chmod 600 /etc/cron.d/gate-jobs
+  echo "✓ Installed /etc/cron.d/gate-jobs (mode 600 — contains CRON_SECRET)"
 else
   echo "⚠ CRON_SECRET not set (checked env var + ${BASE_DIR}/env/production.env); /etc/cron.d/gate-jops skipped."
 fi
