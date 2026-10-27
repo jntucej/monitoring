@@ -26,8 +26,12 @@ export function formatDate(iso: string): string {
   return d.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
 }
 
-export function getTimeAgo(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime();
+export function getTimeAgo(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return "—";
+  const diff = Date.now() - t;
+  if (diff < 0) return "in the future";
   const mins = Math.floor(diff / 60000);
   if (mins < 1) return "just now";
   if (mins < 60) return `${mins}m ago`;
@@ -106,7 +110,8 @@ export function getAvatarColor(name: string): string {
   return colors[Math.abs(hash) % colors.length];
 }
 
-export function formatNumber(n: number): string {
+export function formatNumber(n: number | null | undefined): string {
+  if (n == null || Number.isNaN(n)) return "—";
   return n.toLocaleString("en-IN");
 }
 
