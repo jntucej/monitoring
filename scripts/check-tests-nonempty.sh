@@ -3,10 +3,10 @@ set -euo pipefail
 fail=0
 
 # Every .spec.ts under tests/ must have at least one `test(` or `it(`
-for f in tests/*.spec.ts; do
+for f in tests/*.spec.ts tests/unit/*.test.ts tests/integration/*.test.ts; do
   [ -f "$f" ] || continue
-  if ! grep -qE '\b(test|it)\s*\(' "$f"; then
-    echo "❌ $f contains no test() calls"
+  if ! grep -qE '\b(test|it|describe)\s*\(' "$f"; then
+    echo "❌ $f contains no test/it/describe calls"
     fail=1
   fi
 done

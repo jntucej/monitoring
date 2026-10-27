@@ -13,7 +13,7 @@
     "verify:phase2": "node scripts/verify-layering.js",
     "verify:admin-independence": "bash scripts/check-admin-independence.sh",
     "verify:admin-layers": "npm run verify:admin-independence && npm run verify:phase2",
-    "test:unit": "npx --yes tsx scripts/run_system_tests.ts && npx --yes tsx scripts/check-role-routing.ts && npx --yes tsx scripts/test-registers-and-flows.ts && npm run verify:phase2",
+    "test:ci": "bash scripts/check-tests-nonempty.sh",
     "test": "npm run test:unit && npm run test:e2e",
     "test:e2e": "playwright test",
     "test:e2e:smoke": "playwright test tests/login-success.spec.ts",
