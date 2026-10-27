@@ -114,12 +114,10 @@ RETURNS TEXT
 LANGUAGE sql STABLE PARALLEL SAFE
 AS $$
   WITH parts AS (
-    SELECT substring(upper(p_roll) FROM 5 FOR 2) AS entry_mode,
-           substring(upper(p_roll) FROM 7 FOR 2) AS dept_code
+    SELECT substring(upper(p_roll) FROM 7 FOR 2) AS dept_code
   )
   SELECT CASE
-    WHEN p_roll ~ '^[0-9]{2}[A-Z]{2}(1A|5A)[0-9A-Z]{4}$'
-      OR p_roll ~ '^[0-9]{2}[a-z]{2}(1A|5A)[0-9A-Z]{4}$' THEN
+    WHEN p_roll ~* '^[0-9]{2}[A-Za-z]{2}(1A|5A)[0-9A-Za-z]{4}$' THEN
       CASE (SELECT dept_code FROM parts)
         WHEN '02' THEN 'EEE'
         WHEN '03' THEN 'ME'
@@ -128,8 +126,7 @@ AS $$
         WHEN '12' THEN 'IT'
         ELSE NULL
       END
-    WHEN p_roll ~ '^[0-9]{2}[A-Z]{2}1D[0-9A-Z]{4}$'
-      OR p_roll ~ '^[0-9]{2}[a-z]{2}1D[0-9A-Z]{4}$' THEN
+    WHEN p_roll ~* '^[0-9]{2}[A-Za-z]{2}1D[0-9A-Za-z]{4}$' THEN
       (SELECT label FROM public.mtech_specializations
        WHERE code = (SELECT dept_code FROM parts) AND is_active
        LIMIT 1)
