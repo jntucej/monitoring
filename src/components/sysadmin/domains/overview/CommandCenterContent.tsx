@@ -32,7 +32,7 @@ import { MiniSparkline } from "@/components/sysadmin/kit/sidebar";
 import type { CommandCenterData } from "./types";
 
 export interface CommandCenterContentProps {
-  data: CommandCenterData;
+  data: CommandCenterData | null;
   onRefresh: () => void;
 }
 
@@ -149,6 +149,7 @@ function KpiCard({ tile }: { tile: KpiTile }) {
 // ── main ──────────────────────────────────────────────────────────────────
 
 export function CommandCenterContent({ data }: CommandCenterContentProps) {
+  if (!data) return null;
   const health = data.command?.health ?? [];
   const status = overallStatus(health);
   const backup = data.data?.backupFreshness ?? 0;
