@@ -161,6 +161,14 @@ export const CONSOLES: Record<string, RoleConsoleConfig> = {
     nav: ["scan", "log", "flags", "more"],
     statusStrip: true,
     recentSheet: true,
+    board: {
+      kind: "feed",
+      source: "/api/operator/transactions",
+      itemKey: "transactions",
+    },
+    contextEntity: "scan",
+    commands: ["scan", "manual-entry", "pass-verify", "lookup"],
+    statusFields: ["gate", "entries", "exits", "shift", "lastScan"],
   },
   hod: {
     role: "hod",
