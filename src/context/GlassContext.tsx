@@ -312,7 +312,7 @@ export function GlassProvider({
 
     let animationFrameId: number;
     let stableCount = 0;
-    let lastTier: string | null = null;
+    const lastTier: string | null = null;
 
     const measureFps = () => {
       if (document.visibilityState === "hidden") return;

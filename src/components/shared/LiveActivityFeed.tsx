@@ -107,7 +107,7 @@ export function LiveActivityFeed({ compact = false, limit = MAX_FEED }: LiveActi
         return [...fresh, ...old].slice(0, limit);
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [activeAlerts, hasHydrated, limit]);
 
   const offline = !wsConnected && (wsTransportExhausted || !wsReconnecting);

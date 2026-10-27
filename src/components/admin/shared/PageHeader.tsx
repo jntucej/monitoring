@@ -25,24 +25,7 @@ export interface PageHeaderProps {
  *
  * Any new code should use `usePageTitle` instead of mounting a PageHeader.
  */
-export function PageHeader({
-  title,
-  subtitle,
-  onRefresh: _onRefresh,
-  refreshing: _refreshing,
-  actions: _actions,
-  breadcrumb: _breadcrumb,
-  pathOverride,
-}: PageHeaderProps) {
-  const pathname = usePathname();
-
-  // Auto-set document title from page meta (client-side fallback for client pages)
-  useEffect(() => {
-    const path = pathOverride ?? pathname;
-    const meta = metaFor(path);
-    document.title = `${meta.title} | Gate Monitor`;
-  }, [pathOverride, pathname]);
-
+export function PageHeader(_props: PageHeaderProps): null {
   return null;
 }
 

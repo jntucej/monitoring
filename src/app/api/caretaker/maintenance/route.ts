@@ -5,7 +5,7 @@
 // scoped to the caller's assigned hostel (or all for admin/sysadmin).
 // The response shape matches what the caretaker/maintenance page destructures:
 //   { success, data: { tickets: [...], total, summary }, total }
-/* eslint-disable @typescript-eslint/no-unused-vars */
+ 
 
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";

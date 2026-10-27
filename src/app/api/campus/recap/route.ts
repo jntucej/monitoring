@@ -40,7 +40,7 @@ async function handleGet(_req: NextRequest, context: { auth: AuthContext }) {
   }
   const eventIds = (regs || []).map((r) => r.event_id);
   let completedEvents: string[] = [];
-  let eventsRegistered = eventIds.length;
+  const eventsRegistered = eventIds.length;
   if (eventIds.length > 0) {
     const { data: evs, error: evErr } = await supabase
       .from("campus_events")

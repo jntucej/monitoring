@@ -85,7 +85,7 @@ async function handleGet(req: NextRequest, { auth }: { auth: { userId: string } 
       : { state: "NONE" as const, checkedInAt: null, checkedOutAt: null, purpose: null };
 
     // Check-in/out: timestamps + duration for the active visit.
-    let checkInOut: { checkedInAt: string | null; checkedOutAt: string | null; durationMinutes: number | null } = {
+    const checkInOut: { checkedInAt: string | null; checkedOutAt: string | null; durationMinutes: number | null } = {
       checkedInAt: null,
       checkedOutAt: null,
       durationMinutes: null,

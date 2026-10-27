@@ -488,7 +488,7 @@ export function Scanner({
       stopCamera();
     }
     return () => { stopCamera(); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [isOpen, startCamera, stopCamera]);
 
   // ponytail: kill camera + decode loop when tab hidden (battery, privacy
@@ -510,7 +510,7 @@ export function Scanner({
       document.removeEventListener("freeze", onFreeze as EventListener);
       document.removeEventListener("resume", onResume as EventListener);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [isOpen, startCamera, stopCamera]);
 
   // On full unmount (gate change / page leave) drop cached streams —

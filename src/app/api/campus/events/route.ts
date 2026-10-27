@@ -28,8 +28,8 @@ async function handleGet(_req: NextRequest, context: { auth: AuthContext }) {
   }
 
   const eventIds = (events || []).map((e) => e.id);
-  let counts = new Map<string, number>();
-  let myRegistrations = new Map<string, string>();
+  const counts = new Map<string, number>();
+  const myRegistrations = new Map<string, string>();
 
   if (eventIds.length > 0) {
     const { data: regs, error: regErr } = await supabase

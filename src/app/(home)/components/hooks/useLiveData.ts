@@ -26,7 +26,7 @@ export interface LivePayload {
 }
 
 let cached: LivePayload | null = null;
-let fetching = false;
+const fetching = false;
 const subscribers = new Set<(d: LivePayload) => void>();
 
 async function runFetch(signal?: AbortSignal) {

@@ -26,9 +26,9 @@ export interface AlertHistory {
   status: "active" | "resolved";
 }
 
-let inMemoryRules: AlertRule[] = [];
+const inMemoryRules: AlertRule[] = [];
 
-let inMemoryAlerts: AlertHistory[] = [];
+const inMemoryAlerts: AlertHistory[] = [];
 
 export async function getAlertRules(): Promise<AlertRule[]> {
   try {

@@ -530,7 +530,7 @@ export function useNavItems(roleCode?: string) {
 
   useEffect(() => {
     if (!roleCode) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+       
       setNavigation([]);
       setLoading(false);
       return;

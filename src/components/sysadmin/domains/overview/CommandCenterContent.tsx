@@ -102,7 +102,7 @@ function KpiCard({ tile }: { tile: KpiTile }) {
           >
             <tile.icon
               className="h-4 w-4"
-              // eslint-disable-next-line @typescript-eslint/no-base-to-string
+               
             />
           </span>
           <span className="text-xs font-medium text-[var(--text-muted)] truncate">

@@ -44,7 +44,7 @@ async function handleGet(req: NextRequest) {
       )
     );
 
-    let usersMap: Record<string, any> = {};
+    const usersMap: Record<string, any> = {};
     if (userIds.length > 0) {
       const { data: users } = await supabase.from("users").select("id, name, role, email").in("id", userIds);
       (users || []).forEach((u) => {

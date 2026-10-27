@@ -30,7 +30,7 @@ const ROLE_STEPS: Record<string, OnboardingStep[]> = {
   ],
 };
 
-let inMemoryProgress = new Map<string, Set<string>>();
+const inMemoryProgress = new Map<string, Set<string>>();
 
 export async function getUserCompletedSteps(userId: string): Promise<string[]> {
   try {

@@ -7,7 +7,7 @@
 // the caller's assigned_hostel (users.assigned_hostel). Admin/sysadmin
 // bypass the hostel filter. This mirrors the FORBIDDEN_HOSTEL_SCOPE check in
 // /api/passes/[passId].
-/* eslint-disable @typescript-eslint/no-unused-vars */
+ 
 
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
@@ -66,7 +66,7 @@ async function handleGet(
   // Open tickets at the caretaker-owned stages, soonest SLA first.
   // For non-admin callers, JOIN to the student's hostel_block and filter by
   // the caller's assigned hostel.
-  let query = db
+  const query = db
     .from("permission_requests")
     .select(
       "ticket_number, workflow_type, status, sla_deadline, created_at, " +

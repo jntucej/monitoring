@@ -56,8 +56,8 @@ export const GET = withRateLimit(
       void ctx;
 
       // ── job names (REAL: scheduled_jobs, fallback to job_runs) ───
-      let jobNames: Record<string, string> = {};
-      let fallbackJobIds: string[] = [];
+      const jobNames: Record<string, string> = {};
+      const fallbackJobIds: string[] = [];
       try {
         const res = await query(
           `SELECT id, name FROM scheduled_jobs ORDER BY name`
@@ -73,7 +73,7 @@ export const GET = withRateLimit(
       let success24h = 0;
       let failed24h = 0;
       let dlq = 0;
-      let durations: number[] = [];
+      const durations: number[] = [];
       try {
         const res = await query<JobRun>(
           `SELECT job_id, status, start_time::text AS start_time, end_time::text AS end_time

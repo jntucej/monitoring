@@ -182,7 +182,7 @@ interface OperatorState {
   ) => Recommendation;
 }
 
-let activeStatsFetchCtrl: AbortController | null = null;
+const activeStatsFetchCtrl: AbortController | null = null;
 
 const EMPTY_BREAKDOWN: CategoryBreakdown = {
   hostellers: { inside: 0, inToday: 0, outToday: 0 },

@@ -33,7 +33,7 @@ export function CalendarHeatmap({ days, weeks, label, onDayClick, className }: C
     const byDate = new Map<string, CalendarDay>();
     days.forEach((d) => byDate.set(d.date, d));
 
-    let start = parseDate(days[0].date);
+    const start = parseDate(days[0].date);
     if (days.length > 0) {
       const wd = isoWeekday(start);
       start.setDate(start.getDate() - wd); // back to Sunday

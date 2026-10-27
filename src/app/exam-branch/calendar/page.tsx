@@ -38,7 +38,7 @@ function ExamBranchCalendarInner() {
   /* This month so the URL stays stable; re-fetches on mount and every 30 s */
   const month = useMemo(
     () => new Date().toISOString().slice(0, 7),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     []
   );
 

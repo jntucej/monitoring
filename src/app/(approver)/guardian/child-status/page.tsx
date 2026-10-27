@@ -53,7 +53,7 @@ function WardStatusCard({ ward, status }: { ward: Person; status: PersonStatus |
       <div className="flex items-center gap-3 min-w-0">
         <div className="relative w-12 h-12 rounded-full border-2 border-[var(--border-strong)] overflow-hidden shrink-0">
           {ward.photoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
+             
             <img src={ward.photoUrl} alt={name} className="rounded-full w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg font-semibold">

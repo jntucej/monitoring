@@ -229,7 +229,7 @@ export function RoleConsole({ role, roleRoot, children }: RoleConsoleProps) {
     if (!isCaretaker) return null;
     let open = 0;
     let urgent = 0;
-    let lastUpdate: string | null = null;
+    const lastUpdate: string | null = null;
     for (const t of caretakerTickets) {
       const s = (t.status ?? "").toUpperCase();
       if (s !== "APPROVED" && s !== "RESOLVED" && s !== "REJECTED") open += 1;

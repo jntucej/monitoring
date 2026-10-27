@@ -268,7 +268,7 @@ export interface BackupVerificationResult {
   details: string;
 }
 
-let inMemoryVerifications: BackupVerificationResult[] = [
+const inMemoryVerifications: BackupVerificationResult[] = [
   {
     id: "verif-1",
     backupId: "backup_latest",

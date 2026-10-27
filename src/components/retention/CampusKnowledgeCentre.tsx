@@ -59,7 +59,7 @@ export function CampusKnowledgeCentre() {
   useEffect(() => {
     const t = setTimeout(() => load(activeCategory, search), 300);
     return () => clearTimeout(t);
-  }, [search, activeCategory, load]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [search, activeCategory, load]);  
 
   const reportOutdated = useCallback(
     async (docId: string) => {

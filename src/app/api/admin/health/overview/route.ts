@@ -118,7 +118,7 @@ export const GET = withRateLimit(
 
       // ── redis: health-engine status + worker liveness ────────────
       // Mirrors src/app/api/sysadmin/redis-worker via checkSystemHealth.
-      let queueDepth = 0; // stub: no persistent queue table yet
+      const queueDepth = 0; // stub: no persistent queue table yet
       let workerHealthy = false;
       try {
         const { checkSystemHealth } = await import("@/lib/health");

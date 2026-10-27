@@ -51,7 +51,7 @@ async function handleGet(_req: NextRequest) {
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
 
-    let logsByUser: Record<string, any[]> = {};
+    const logsByUser: Record<string, any[]> = {};
     if (userIds.length > 0) {
       const { data: logData } = await service
         .from("movement_logs")

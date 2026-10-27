@@ -24,7 +24,7 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
         .eq("id", auth.userId)
         .maybeSingle();
 
-      let isOwn = profile?.unique_id && profile.unique_id === uniqueId;
+      const isOwn = profile?.unique_id && profile.unique_id === uniqueId;
       let isGuardianOfStudent = false;
 
       if (!isOwn && (authRole === "parent" || authRole === "guardian")) {

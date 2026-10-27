@@ -125,7 +125,7 @@ function ExceptionsInner() {
       default:
         return rows.filter((r) => isFlagged(r) || isDenied(r) || isManual(r));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [rows, filter]);
 
   const deniedPermissionRows = useMemo(() => {
@@ -134,7 +134,7 @@ function ExceptionsInner() {
       const created = p.created_at ? new Date(p.created_at).getTime() : 0;
       return created >= cutoff;
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [deniedPerms]);
 
   const fmtTime = (iso: string | null | undefined) =>
