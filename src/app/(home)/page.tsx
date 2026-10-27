@@ -48,10 +48,6 @@ export default function HomePage() {
 
       <Hero />
 
-      {/* ARCHWAY: the logo's gold scan line, drawn as a full-width separator
-          between the hero and the live-stat strip. CSS-only (no JS). */}
-      <div className="home-scanline mx-auto w-full max-w-6xl px-6" aria-hidden="true" />
-
       <WidgetBoundary>
         <LiveCountsStrip />
       </WidgetBoundary>

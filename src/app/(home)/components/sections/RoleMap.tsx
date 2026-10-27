@@ -19,7 +19,6 @@ import {
   Gavel,
   Settings,
 } from "lucide-react";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 /**
  * RoleMap — 8 permission-scoped role cards with a hover 3D tilt.
@@ -29,9 +28,8 @@ import { useMediaQuery } from "@/hooks/useMediaQuery";
  * (mobile) and on low device tier (via the `data-home-tier` CSS + the
  * reduced flag). Enter reveal is a stagger of opacity + y only.
  *
- * Roles: Student, Parent, Faculty, Staff, Operator, Hostel Manager,
- * Principal, Admin — each with an icon, name and a one-line capability.
- * Login slugs are path segments (/login/<role>), not query params.
+ * Roles: Student, Parent, Faculty, Staff, Operator, Warden, Approver,
+ * Admin — each with an icon, name and a one-line capability.
  */
 
 interface Role {
@@ -45,49 +43,49 @@ const ROLES: Role[] = [
   {
     name: "Student",
     cap: "Digital ID, gate passes, permissions and attendance.",
-    href: "/login/student",
+    href: "/login?role=student",
     Icon: Crown,
   },
   {
     name: "Parent",
     cap: "Child status, movement timeline and pass requests.",
-    href: "/login/parent",
+    href: "/login?role=parent",
     Icon: Users,
   },
   {
     name: "Faculty",
     cap: "Class attendance, subject permissions, student directory.",
-    href: "/login/faculty",
+    href: "/login?role=faculty",
     Icon: Briefcase,
   },
   {
     name: "Staff",
     cap: "Outpass approvals, room allocation, resident tickets.",
-    href: "/login/staff",
+    href: "/login?role=hostel-manager",
     Icon: Building2,
   },
   {
     name: "Operator",
     cap: "Gate scan verification, manual entry, transactions.",
-    href: "/login/operator",
+    href: "/login?role=operator",
     Icon: ScanLine,
   },
   {
-    name: "Hostel Manager",
+    name: "Warden",
     cap: "Hostel oversight, outpass review, incident response.",
-    href: "/login/hostel_manager",
+    href: "/login?role=warden",
     Icon: ShieldCheck,
   },
   {
-    name: "Principal",
+    name: "Approver",
     cap: "Approval centre, delegated permissions, audit.",
-    href: "/login/principal",
+    href: "/login?role=approver",
     Icon: Gavel,
   },
   {
     name: "Admin",
     cap: "Department analytics, RBAC, configuration, oversight.",
-    href: "/login/admin",
+    href: "/login?role=admin",
     Icon: Settings,
   },
 ];
@@ -132,14 +130,14 @@ function TiltCard({ role, reduced, index }: { role: Role; reduced: boolean; inde
     >
       <Link
         href={role.href}
-        className="group home-role-card-inner block h-full rounded-2xl border border-[var(--home-border-soft,rgba(255,255,255,0.08))] bg-[var(--home-bg-elev-1,#0F172A)] p-5"
+        className="group block h-full rounded-2xl border border-[var(--home-border-soft,rgba(255,255,255,0.08))] bg-[var(--home-bg-elev-1,#0F172A)] p-5"
       >
-        <role.Icon className="h-7 w-7 text-[var(--home-accent-gold,#FBBF24)]" />
-        <h3 className="mt-3 text-lg font-semibold text-[var(--home-text-primary,#FFFFFF)]">
+        <role.Icon className="h-7 w-7 text-[var(--home-accent-indigo,#6366F1)]" />
+        <h3 className="mt-3 text-lg font-semibold text-[var(--home-text-primary,#F3F4F6)]">
           {role.name}
         </h3>
-        <p className="mt-1 text-sm text-[var(--home-text-muted,#94A3B8)]">{role.cap}</p>
-        <span className="mt-3 inline-block text-xs font-semibold text-[var(--home-accent-mint,#10B981)] opacity-0 transition group-hover:opacity-100">
+        <p className="mt-1 text-sm text-[var(--home-text-muted,#6B7280)]">{role.cap}</p>
+        <span className="mt-3 inline-block text-xs font-semibold text-[var(--home-accent-steel,#0EA5E9)] opacity-0 transition group-hover:opacity-100">
           Sign in →
         </span>
       </Link>
@@ -149,9 +147,10 @@ function TiltCard({ role, reduced, index }: { role: Role; reduced: boolean; inde
 
 export function RoleMap() {
   const reduced = useReducedMotion();
-  // Client-only coarse-pointer detection via the shared hook (no ref
-  // mutation during render; returns false on the server).
-  const coarse = useMediaQuery("(pointer: coarse)");
+  const coarse = useRef(false);
+  if (typeof window !== "undefined") {
+    coarse.current = window.matchMedia("(pointer: coarse)").matches;
+  }
 
   return (
     <section
@@ -166,7 +165,7 @@ export function RoleMap() {
       </div>
       <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {ROLES.map((r, i) => (
-          <TiltCard key={r.name} role={r} index={i} reduced={reduced || coarse} />
+          <TiltCard key={r.name} role={r} index={i} reduced={reduced || coarse.current} />
         ))}
       </div>
     </section>

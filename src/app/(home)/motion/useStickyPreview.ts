@@ -43,89 +43,46 @@ export function useStickyPreview(
     if (typeof window === "undefined") return;
 
     let raf = 0;
-
-    // Card geometry cache: top + height, read ONCE per card then only
-    // refreshed when an IntersectionObserver fires (card enters/exits the
-    // viewport) or the window is resized. Reading the cache on every
-    // scroll frame avoids 8x getBoundingClientRect() per frame, which
-    // is the main TBT/long-task contributor of this hook.
-    const cache = new Map<Element, { top: number; height: number }>();
-
-    const refreshCache = () => {
-      const cards = cardRefs.current ?? [];
-      for (const el of cards) {
-        if (!el) continue;
-        const r = el.getBoundingClientRect();
-        cache.set(el, { top: r.top + window.scrollY, height: r.height });
-      }
-    };
-
-    const pickFromCache = () => {
-      const cards = cardRefs.current ?? [];
-      if (cards.length === 0) return;
-      const hotZoneY = window.innerHeight * hotZone + window.scrollY;
-      let best = 0;
-      let bestDist = Infinity;
-      for (let i = 0; i < cards.length; i++) {
-        const el = cards[i];
-        if (!el) continue;
-        const c = cache.get(el);
-        if (!c) continue;
-        const center = c.top + c.height / 2;
-        const dist = Math.abs(center - hotZoneY);
-        if (dist < bestDist) {
-          bestDist = dist;
-          best = i;
-        }
-      }
-      setActiveIndex((cur) => (cur === best ? cur : best));
-    };
-
-    // Scroll: cheap — only reads the cache, no layout reads.
-    const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(pickFromCache);
-    };
-
-    // Resize: cache is stale; re-read once, then pick.
-    const onResize = () => {
+    const evaluate = () => {
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
-        refreshCache();
-        pickFromCache();
+        const cards = cardRefs.current ?? [];
+        if (cards.length === 0) return;
+        const hotZoneY = window.innerHeight * hotZone;
+        let best = 0;
+        let bestDist = Infinity;
+        for (let i = 0; i < cards.length; i++) {
+          const el = cards[i];
+          if (!el) continue;
+          const r = el.getBoundingClientRect();
+          const center = r.top + r.height / 2;
+          const dist = Math.abs(center - hotZoneY);
+          if (dist < bestDist) {
+            bestDist = dist;
+            best = i;
+          }
+        }
+        setActiveIndex((cur) => (cur === best ? cur : best));
       });
     };
 
-    // IntersectionObserver: fires when a card crosses a threshold boundary;
-    // re-read ONLY the cards whose geometry could have shifted.
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          const r = e.target.getBoundingClientRect();
-          cache.set(e.target, {
-            top: r.top + window.scrollY,
-            height: r.height,
-          });
-        }
-        pickFromCache();
-      },
-      { threshold: [0, 0.25, 0.5, 0.75, 1] },
-    );
-
     const cards = cardRefs.current ?? [];
+    const io = new IntersectionObserver(
+      () => evaluate(),
+      { threshold: [0.01, 0.5, 1], root: root ?? null },
+    );
     cards.forEach((el) => el && io.observe(el));
 
-    // Initial read + start listening.
-    refreshCache();
-    pickFromCache();
+    const onScroll = () => evaluate();
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onResize, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    evaluate();
 
     return () => {
       cancelAnimationFrame(raf);
       io.disconnect();
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
+      window.removeEventListener("resize", onScroll);
     };
   }, [cardRefs, hotZone, root, reduced, prefersReduced]);
 

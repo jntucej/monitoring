@@ -38,10 +38,8 @@ export function useParallax(
 export function useSectionParallax(): {
   ref: React.RefObject<HTMLDivElement | null>;
   progress: MotionValue<number>;
-  layer0: MotionValue<number>;
-  layer1: MotionValue<number>;
-  layer2: MotionValue<number>;
-  layerFade: MotionValue<number>;
+  layer: (rate: number, axis?: "y" | "x") => MotionValue<number>;
+  fade: (inStart: number, inEnd: number, outStart: number, outEnd: number) => MotionValue<number>;
 } {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
@@ -49,13 +47,13 @@ export function useSectionParallax(): {
     offset: ["start start", "end end"],
   });
   const smoothed = useSpring(scrollYProgress, { stiffness: 90, damping: 26, mass: 1 });
-  // Precompute the four standard layers (hero, mid, far, fade) as hooks so
-  // they satisfy react-hooks/rules-of-hooks (no hooks inside callbacks).
-  const layer0 = useTransform(smoothed, [0, 1], [0.3 * 1.35 * 100, 0.3 * 1.35 * -100]);
-  const layer1 = useTransform(smoothed, [0, 1], [0.5 * 1.35 * 100, 0.5 * 1.35 * -100]);
-  const layer2 = useTransform(smoothed, [0, 1], [0.8 * 1.35 * 100, 0.8 * 1.35 * -100]);
-  const layerFade = useTransform(smoothed, [0, 0.3, 0.8, 1], [0, 1, 1, 0]);
-  return { ref, progress: smoothed, layer0, layer1, layer2, layerFade };
+  const layer = (rate: number, axis: "y" | "x" = "y") => {
+    const values = [rate * 1.35 * 100, rate * 1.35 * -100];
+    return useTransform(smoothed, [0, 1], values);
+  };
+  const fade = (inStart: number, inEnd: number, outStart: number, outEnd: number) =>
+    useTransform(smoothed, [inStart, inEnd, outStart, outEnd], [0, 1, 1, 0]);
+  return { ref, progress: smoothed, layer, fade };
 }
 
 /**
