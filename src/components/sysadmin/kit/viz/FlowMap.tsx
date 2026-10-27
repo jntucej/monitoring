@@ -13,9 +13,11 @@ export function FlowMap({ nodes, edges, height = 220, onNodeClick, className }: 
   // Auto-layout: nodes without explicit x/y are placed left→right in input order.
   const positions = useMemo(() => {
     const map: Record<string, { x: number; y: number }> = {};
-    const auto = nodes.filter((n) => n.x == null || n.y == null);
-    const explicit = nodes.filter((n) => n.x != null && n.y != null);
-    explicit.forEach((n) => (map[n.id] = { x: n.x! * W, y: n.y! * H }));
+    const num = (v: unknown): number | null =>
+      typeof v === "number" && Number.isFinite(v) ? v : null;
+    const auto = nodes.filter((n) => num(n.x) == null || num(n.y) == null);
+    const explicit = nodes.filter((n) => num(n.x) != null && num(n.y) != null);
+    explicit.forEach((n) => (map[n.id] = { x: num(n.x)! * W, y: num(n.y)! * H }));
     const pad = 60;
     auto.forEach((n, i) => {
       void n;

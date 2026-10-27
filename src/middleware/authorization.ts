@@ -135,12 +135,26 @@ export function withAuthorization(
         headers.set("x-mw-timestamp", String(ts));
         // Legacy header some routes still read — keep it in sync.
         headers.set("x-auth-signature", sig);
-        const proxied = new NextRequest(cachedReq.url, {
-          method: cachedReq.method,
-          headers,
-          body: cachedReq.body,
-          duplex: "half",
-        });
+        // Forward the body only when the original request actually had one.
+        // For bodyless requests (GET, no-body DELETE, ...) setupBodyCaching
+        // returns the ORIGINAL request object unchanged (see the `if (!raw)`
+        // branch in body-cache.ts), so re-wrapping it into a new NextRequest
+        // with body + duplex:"half" makes the handler's own body access throw
+        // "Response body object should not be disturbed or locked" (a 500 on
+        // every no-body route through this chain). A genuinely bodyless
+        // request has req.body === null, so guard on that.
+        const proxied =
+          cachedReq.body !== null
+            ? new NextRequest(cachedReq.url, {
+                method: cachedReq.method,
+                headers,
+                body: cachedReq.body,
+                duplex: "half",
+              })
+            : new NextRequest(cachedReq.url, {
+                method: cachedReq.method,
+                headers,
+              });
         return await handler(proxied, { auth });
       } catch (err) {
         return handleAuthError(err);
