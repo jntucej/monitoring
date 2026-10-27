@@ -64,6 +64,7 @@ services:
       - MONITORING_PROM_URL=${MONITORING_PROM_URL:-}
       - MONITORING_LOKI_URL=${MONITORING_LOKI_URL:-}
       - MONITORING_GRAFANA_URL=${MONITORING_GRAFANA_URL:-}
+      - CRON_SECRET=${CRON_SECRET:?CRON_SECRET must be set for web}
     networks:
       gate-net:
         aliases:
