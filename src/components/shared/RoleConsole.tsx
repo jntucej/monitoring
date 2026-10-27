@@ -79,6 +79,7 @@ import { StatusBar } from "@/components/shared/StatusBar";
 import { CommandBar } from "@/components/shared/CommandBar";
 import { IconRail } from "@/components/shared/IconRail";
 import type { IconRailGroup } from "@/components/shared/IconRail";
+import { MobileGroupsDrawer } from "@/components/shared/MobileGroupsDrawer";
 import { useApiResource } from "@/hooks/useApiResource";
 import { useKeyboardShortcuts, type Shortcut } from "@/hooks/useKeyboardShortcuts";
 import { getConsoleConfig } from "@/config/consoles";
@@ -933,6 +934,11 @@ export function RoleConsole({ role, roleRoot, groups, children }: RoleConsolePro
           </kbd>
         </button>
       </header>
+
+      {/* Mobile navigation drawer — only when groups are provided */}
+      {groups && groups.length > 0 && (
+        <MobileGroupsDrawer groups={groups} roleRoot={roleRoot} />
+      )}
 
       {/* Main flex row: rail | main column | context panel */}
       <div className="flex flex-1 min-h-0">
