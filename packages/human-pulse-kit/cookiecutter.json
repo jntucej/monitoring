@@ -1,0 +1,18 @@
+{
+  "project_name": "human-pulse-kit",
+  "pulse_name": "HumanPulseDot",
+  "pulse_variant": ["dot", "badge", "orb", "all"],
+  "dot_color": "#34d399",
+  "dot_size_px": "8",
+  "beat_duration_ms": "1100",
+  "lub_scale": "1.20",
+  "dub_scale": "1.12",
+  "rest_opacity": "0.90",
+  "repeat_delay_s": "0.6",
+  "respect_reduced_motion": ["yes", "no"],
+  "render_strategy": ["both", "css", "framer-motion"],
+  "target_path": "src/components/shared",
+  "include_tests": ["yes", "no"],
+  "include_storybook": ["no", "yes"],
+  "_copy_without_render": ["node_modules", "*.lock"]
+}

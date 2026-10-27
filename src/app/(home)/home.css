@@ -121,8 +121,8 @@ html[data-theme="light"] [data-home] {
   border-radius: 50%;
   will-change: transform;
   z-index: 1;
-  filter: blur(64px);
-  opacity: 0.14;
+  filter: blur(48px);
+  opacity: 0.08;
   backface-visibility: hidden;
   contain: layout paint style;
 }
@@ -134,7 +134,7 @@ html[data-theme="light"] [data-home] {
     rgba(var(--home-grad-a), 1) 0%,
     rgba(var(--home-grad-a), 0) 65%
   );
-  animation: home-blob-a 60s ease-in-out infinite;
+  animation: home-blob-a 120s ease-in-out infinite;
 }
 
 /* Drift on a single 60s loop via translate3d() only. */
