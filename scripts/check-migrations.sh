@@ -82,7 +82,7 @@ else
   PSQL=(docker exec "$CONTAINER_NAME" psql -U postgres)
 fi
 
-# 3. Setup mock Supabase roles & auth schema
+# 3. Setup mock Supabase roles & auth schema and grant permissions on public
 "${PSQL[@]}" -v ON_ERROR_STOP=1 <<'SQL'
 DO $$
 BEGIN
@@ -102,6 +102,12 @@ END
 $$;
 
 CREATE SCHEMA IF NOT EXISTS auth;
+GRANT ALL ON DATABASE gate_monitor TO postgres;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA auth TO postgres;
+GRANT USAGE, CREATE ON SCHEMA public TO PUBLIC;
+GRANT USAGE, CREATE ON SCHEMA auth TO PUBLIC;
+
 CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid AS $$
   SELECT null::uuid;
 $$ LANGUAGE sql;
