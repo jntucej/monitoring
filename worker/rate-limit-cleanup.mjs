@@ -7,14 +7,25 @@ import auditLogRotation from './jobs/audit_log_rotation.js';
 // Periodic maintenance jobs run as cron-style intervals in the worker.
 // Each job is idempotent and fail-safe: a single failure logs and continues.
 
-function runJob(name, fn) {
-  return async () => {
+async function runJob(name, fn) {
+  const pool = getWorkerDbPool();
+  try {
+    const { rows } = await pool.query(
+      "SELECT pg_try_advisory_lock(hashtext($1)) AS locked",
+      [`worker:${name}`]
+    );
+    if (!rows[0].locked) {
+      console.log(`[worker] ${name} skipped — another worker holds the lock`);
+      return;
+    }
     try {
       await fn();
-    } catch (err) {
-      console.error(`[worker] ${name} failed:`, err);
+    } finally {
+      await pool.query("SELECT pg_advisory_unlock(hashtext($1))", [`worker:${name}`]);
     }
-  };
+  } catch (err) {
+    console.error(`[worker] ${name} lock/run error:`, err);
+  }
 }
 
 // Every 5 minutes: purge expired rate-limit buckets so the table doesn't grow.
@@ -39,8 +50,8 @@ async function rotateAuditLogs() {
 }
 
 const jobs = [
-  { name: 'rate-limit-cleanup', ms: 5 * 60 * 1000, run: runJob('rate-limit-cleanup', cleanupRateLimits) },
-  { name: 'audit-log-rotation', ms: 60 * 60 * 1000, run: runJob('audit-log-rotation', rotateAuditLogs) },
+  { name: 'rate-limit-cleanup', ms: 5 * 60 * 1000, run: () => runJob('rate-limit-cleanup', cleanupRateLimits) },
+  { name: 'audit-log-rotation', ms: 60 * 60 * 1000, run: () => runJob('audit-log-rotation', rotateAuditLogs) },
 ];
 
 for (const job of jobs) {
