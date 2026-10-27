@@ -59,16 +59,26 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
   const role = useAuthStore((s) => s.role);
   const hasHydrated = useHasHydrated();
 
-  // ── Post-auth redirect (unchanged from original intent) ─────────────────
+  // Track whether *this* component instance successfully called login() in the
+  // current mount. This is the ONLY thing that should trigger a redirect away
+  // from /login. Redirecting on mount merely because the auth store already
+  // holds a (possibly stale/session) `authenticated` state is what caused the
+  // /login <-> dashboard client-side redirect loop: an already-authenticated
+  // user landing on /login got instantly router.replace()'d to their default
+  // route, which bounced back to /login (via its own AuthGuard refresh), which
+  // re-fired this effect, etc. — Chrome's "additional client-side redirect."
+  const [justLoggedIn, setJustLoggedIn] = useState(false);
+
+  // ── Post-auth redirect: ONLY after a real successful login in this session ─
   useEffect(() => {
-    if (!hasHydrated || !authenticated || !role) return;
+    if (!justLoggedIn || !role) return;
     const redirect = searchParams?.get("redirect");
     const target =
       redirect && redirect.startsWith("/")
         ? redirect
         : getDefaultRouteForRole(role as Role);
     router.replace(target);
-  }, [authenticated, role, hasHydrated, router, searchParams]);
+  }, [justLoggedIn, role, router, searchParams]);
 
   // ── Submit ────────────────────────────────────────────────────────────────
   const handleFormSubmit = useCallback(
@@ -90,10 +100,11 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
       setSubmitting(true);
       try {
         const result = await login(id, password);
-        if (!result.success) {
+        if (result.success) {
+          setJustLoggedIn(true); // triggers the redirect effect above
+        } else {
           setError(formatLoginError(result.code, result.error));
         }
-        // Success → the useEffect above redirects.
       } catch {
         setError(formatLoginError("NETWORK_ERROR"));
       } finally {
