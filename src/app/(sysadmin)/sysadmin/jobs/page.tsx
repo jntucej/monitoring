@@ -1,12 +1,9 @@
+export const dynamic = "force-dynamic";
 "use client";
 
-<<<<<<< HEAD
-export const dynamic = "force-dynamic";
-=======
 // src/app/(sysadmin)/sysadmin/jobs/page.tsx
 // JOBS — kind cards, pollMs 30000, automation category.
 // Thin wrapper: all logic lives in JobsContent (useDashboardData inside).
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { useDashboardData } from "@/hooks/useDashboardData";

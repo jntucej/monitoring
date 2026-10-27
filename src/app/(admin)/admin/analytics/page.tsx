@@ -1,20 +1,9 @@
+export const dynamic = "force-dynamic";
 "use client";
 
-<<<<<<< HEAD
-export const dynamic = "force-dynamic";
-
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { useState, useEffect } from "react";
-import { 
-  PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, Legend
-} from "recharts";
-import { 
-  Download, FileText, FileSpreadsheet, UserCheck, HardHat, Clock, Building2, Calendar, TrendingUp
-=======
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import {
   Activity, TrendingUp, Users, AlertTriangle, Download, RefreshCw,
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 } from "lucide-react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";

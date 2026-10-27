@@ -1,11 +1,7 @@
-"use client";
-<<<<<<< HEAD
 export const dynamic = "force-dynamic";
-
-=======
+"use client";
 
 import { useState } from "react";
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 import { usePolling } from "@/hooks/usePolling";
 import { DataTable } from "@/components/ui/DataTable";
 import { ConfirmDialog } from "@/components/admin/shared/ConfirmDialog";
@@ -109,18 +105,10 @@ function AdminAlertsInner() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-<<<<<<< HEAD
-          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
-            <span className="sm:hidden">🔔</span>
-            <span className="hidden sm:inline">🔔 Alerts</span>
-          </p>
-          <p className="text-[var(--text-muted)]">System alerts and notifications</p>
-=======
           <h1 className="text-lg font-semibold text-[var(--text-primary)]">Alert Center</h1>
           <p className="text-sm text-[var(--text-muted)]">
             Unresolved alerts plus those resolved in the last 7 days.
           </p>
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
         </div>
         <div className="flex items-center gap-2">
           <button

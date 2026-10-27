@@ -116,18 +116,9 @@ export default function AdminGatesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-<<<<<<< HEAD
-          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
-            <Signal className="w-6 h-6 text-emerald-400" />
-            Gate & Hardware Management
-          </p>
-          <p className="text-sm text-[var(--text-muted)] mt-1">
-            Monitor real-time gate terminal status, operator shifts, scan activity, and hardware health.
-=======
           <h1 className="text-lg font-bold text-[var(--text-primary)]">Gates</h1>
           <p className="text-sm text-[var(--text-muted)]">
             Manage gate roster, create gates, and monitor real-time terminal status.
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
           </p>
         </div>
         <button

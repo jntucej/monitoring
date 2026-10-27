@@ -1,11 +1,6 @@
+export const dynamic = "force-dynamic";
 "use client";
 
-<<<<<<< HEAD
-export const dynamic = "force-dynamic";
-
-import { AuthGuard } from "@/components/shared/AuthGuard";
-import { HealthDashboard } from "@/components/sysadmin/HealthDashboard";
-=======
 import { useEffect, useState, useCallback } from "react";
 import { Activity } from "lucide-react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
@@ -100,7 +95,6 @@ function HealthSnapshotBar() {
     </div>
   );
 }
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 
 export default function SystemHealthPage() {
   return (

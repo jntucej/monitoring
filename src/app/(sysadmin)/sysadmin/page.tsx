@@ -1,10 +1,5 @@
-<<<<<<< HEAD
 export const dynamic = "force-dynamic";
-
-import { SysAdminControlPanel } from "@/components/sysadmin/SysAdminControlPanel";
-=======
 "use client";
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 
 import { PageHeader } from "@/components/shared/PageHeader";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";

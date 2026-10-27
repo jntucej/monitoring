@@ -1,11 +1,4 @@
-<<<<<<< HEAD
-'use client';
 export const dynamic = "force-dynamic";
-
-import React from 'react';
-import Link from 'next/link';
-import { useCollegeInfo } from '@/hooks/useCollegeInfo';
-=======
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -46,7 +39,6 @@ const PG = [
   "M.Tech — Computer Science & Engineering (CSE)",
   "M.Tech — Cyber Security (new from 2024-25)",
 ];
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 
 export default function AboutPage() {
   const breadcrumb = breadcrumbJsonLd([
@@ -55,29 +47,6 @@ export default function AboutPage() {
   ]);
 
   return (
-<<<<<<< HEAD
-    <main className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] p-6 md:p-12">
-      <div className="max-w-3xl mx-auto glass-card p-8 rounded-3xl border-slate-800/50">
-        <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">About {college.name} Monitoring</p>
-        <div className="space-y-4 text-[var(--text-secondary)]">
-          <p>
-            Welcome to the {college.name} Gate Monitoring System. This platform provides real-time oversight of campus mobility, enhancing security and operational efficiency for students, faculty, and administration.
-          </p>
-          <h2 className="text-xl font-semibold text-[var(--text-primary)] pt-4">Legal & Privacy</h2>
-          <p>
-            {college.accreditation} • {college.principal}
-          </p>
-          <p>
-            {college.address}
-          </p>
-          <p>
-            Our commitment to data privacy is paramount. This system complies with modern security standards to ensure student and staff records are handled securely.
-          </p>
-          <div className="pt-6">
-            <Link href="/" className="inline-block px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-medium transition">
-              Back to Home
-            </Link>
-=======
     <main id="main-content" className="mx-auto max-w-3xl px-4 py-12 text-[var(--text-primary)]">
       <script
         type="application/ld+json"
@@ -148,7 +117,6 @@ export default function AboutPage() {
                 <li key={p}>{p}</li>
               ))}
             </ul>
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
           </div>
         </div>
       </section>

@@ -249,11 +249,7 @@ const api = useApi();
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-<<<<<<< HEAD
-            <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
-=======
             <p className="text-2xl font-bold tracking-tight text-[var(--text-primary)] flex items-center gap-2.5">
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
               <Briefcase className="w-7 h-7 text-[var(--action-primary)]" />
               Staff &amp; Non-Students Management
             </p>

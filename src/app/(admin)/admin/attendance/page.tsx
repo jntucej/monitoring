@@ -125,11 +125,7 @@ const api = useApi();
       <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-<<<<<<< HEAD
-          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">Attendance</p>
-=======
           <p className="text-2xl font-bold">Attendance</p>
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
           <p className="text-[var(--text-muted)]">Daily student attendance records</p>
         </div>
         <div className="flex items-center gap-2">

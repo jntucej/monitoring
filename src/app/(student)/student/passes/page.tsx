@@ -223,11 +223,7 @@ const api = useApi();
             <Link href="/student" className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors" aria-label="Back to student hub">
               <ArrowLeft className="w-4 h-4" />
             </Link>
-<<<<<<< HEAD
-            <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
-=======
             <p className="text-xs text-[var(--text-muted)]">
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
               Digital Gate Passes
             </p>
           </div>

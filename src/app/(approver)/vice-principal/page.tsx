@@ -1,15 +1,7 @@
-<<<<<<< HEAD
-"use client";
-
 export const dynamic = "force-dynamic";
-
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-=======
 import { Suspense } from "react";
 import { GraduationCap } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";

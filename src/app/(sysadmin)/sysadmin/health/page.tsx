@@ -1,11 +1,6 @@
+export const dynamic = "force-dynamic";
 "use client";
 
-<<<<<<< HEAD
-export const dynamic = "force-dynamic";
-
-import { AuthGuard } from "@/components/shared/AuthGuard";
-import { HealthDashboard } from "@/components/sysadmin/HealthDashboard";
-=======
 import { Suspense, useState, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -67,7 +62,6 @@ function HealthPageInner() {
     () => TABS.find((t) => t.id === tab)?.label ?? "App",
     [tab]
   );
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 
   return (
     <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-6">

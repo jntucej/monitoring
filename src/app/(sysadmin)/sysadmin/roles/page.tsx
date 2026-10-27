@@ -618,11 +618,7 @@ export default function RolesManagementPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-<<<<<<< HEAD
-            <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
-=======
             <p className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
               <UserCog className="w-6 h-6 text-purple-400" />
               Roles &amp; Authorization Policies
             </p>

@@ -131,22 +131,6 @@ function StudentDashboardInner() {
 
   return (
     <div className="space-y-6 pb-12 min-w-0">
-<<<<<<< HEAD
-      {/* Dynamic Tab Heading */}
-      <div className="text-center sm:text-left border-b border-[var(--border)] pb-4 space-y-1">
-        <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
-          {currentTab === "idcard" && <><span className="sm:hidden">🪪</span><span className="hidden sm:inline">🪪 Student Hub</span></>}
-          {currentTab === "passes" && <><span className="sm:hidden">📋</span><span className="hidden sm:inline">📋 Gate Passes Desk</span></>}
-          {currentTab === "history" && <><span className="sm:hidden">🕐</span><span className="hidden sm:inline">🕐 Activity History</span></>}
-          {currentTab === "profile" && <><span className="sm:hidden">👤</span><span className="hidden sm:inline">👤 Account Center</span></>}
-        </p>
-        <p className="text-xs text-[var(--text-muted)] hidden sm:block">
-          {currentTab === "idcard" && "Your permanent digital identity card & boarding passes"}
-          {currentTab === "passes" && "Track permissions, request leaves, and review warden status"}
-          {currentTab === "history" && "Complete audit trail of your entries and exits"}
-          {currentTab === "profile" && "Manage theme settings, local details, and credentials"}
-        </p>
-=======
       {/* Shared + engagement panels */}
       <QuickActions />
       <NotificationCenter />
@@ -210,7 +194,6 @@ function StudentDashboardInner() {
             </div>
           </div>
         </Link>
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
       </div>
 
       {/* Curfew & Movement Analytics Cards */}

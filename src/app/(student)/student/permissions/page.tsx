@@ -1,14 +1,8 @@
+export const dynamic = "force-dynamic";
 "use client";
 
-<<<<<<< HEAD
-export const dynamic = "force-dynamic";
-
-import React, { useState, useCallback, useEffect } from "react";
-import { ClipboardList, Plus, Inbox, AlertCircle } from "lucide-react";
-=======
 import React, { useState, useCallback } from "react";
 import { ClipboardList, Plus, Inbox, AlertCircle, ArrowUpRight, Check, X } from "lucide-react";
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PermissionTicketCard } from "@/components/student/PermissionTicketCard";
@@ -67,19 +61,11 @@ export default function StudentPermissionsPage() {
   return (
     <AuthGuard allowedRoles={["student"]}>
       <div className="p-4 md:p-6 space-y-6 max-w-4xl mx-auto">
-<<<<<<< HEAD
-        
-=======
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <ClipboardList className="w-6 h-6 text-[var(--action-primary)]" />
-<<<<<<< HEAD
-              <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">My Permissions</p>
-=======
               <p className="text-xl md:text-2xl font-bold text-[var(--text-primary)]">My Permissions</p>
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
             </div>
             <p className="text-xs md:text-sm text-[var(--text-muted)]">Track your requests and approvals</p>
           </div>

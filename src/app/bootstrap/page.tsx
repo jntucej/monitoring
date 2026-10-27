@@ -1,12 +1,6 @@
-"use client";
-<<<<<<< HEAD
 export const dynamic = "force-dynamic";
+"use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-=======
-
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 import Link from "next/link";
 import { Suspense, useCallback, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -34,21 +28,6 @@ function BootstrapPageInner() {
         setState("error");
         return;
       }
-<<<<<<< HEAD
-    } catch (e: any) { setError(e.message); }
-    finally { setBusy(false); }
-  if (done) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--bg-base)] p-4">
-        <div className="text-center space-y-3">
-          <CheckCircle2 className="w-16 h-16 text-emerald-400 mx-auto" />
-          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">Setup Complete</p>
-          <p className="text-sm text-[var(--text-muted)]">Redirecting you to login…</p>
-        </div>
-      </div>
-    );
-  }
-=======
       setState("submitting");
       setError(null);
       try {
@@ -86,7 +65,6 @@ function BootstrapPageInner() {
     },
     [code, pin, router, uniqueId, password]
   );
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 
   return (
     <div className="min-h-[100dvh] flex items-center justify-center bg-[var(--bg-base)] p-4 sm:p-8 relative overflow-x-hidden">

@@ -1,10 +1,6 @@
+export const dynamic = "force-dynamic";
 "use client";
 
-<<<<<<< HEAD
-export const dynamic = "force-dynamic";
-
-import { Shield, AlertTriangle, Clock, Info, ArrowRight, Activity, GraduationCap, UserCheck, Briefcase, HardHat, Zap, Database } from "lucide-react";
-=======
 import { useEffect, useState, useCallback } from "react";
 import {
   Shield,
@@ -22,7 +18,6 @@ import {
   Ticket,
   Clock,
 } from "lucide-react";
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 import Link from "next/link";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { getAuthHeaders } from "@/lib/utils";

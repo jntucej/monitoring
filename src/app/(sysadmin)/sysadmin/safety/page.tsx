@@ -1,11 +1,6 @@
+export const dynamic = "force-dynamic";
 "use client";
 
-<<<<<<< HEAD
-export const dynamic = "force-dynamic";
-
-import Link from "next/link";
-import { ShieldCheck, Bell, DoorOpen, ShieldAlert, ArrowUpRight, AlertOctagon } from "lucide-react";
-=======
 import { Suspense } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
@@ -26,18 +21,8 @@ function SafetyInner() {
   );
 
   const busy = loading && !data;
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 
   return (
-<<<<<<< HEAD
-    <div className="space-y-6 max-w-7xl mx-auto">
-      <div>
-        <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">Safety & Security Control</p>
-        <p className="text-sm text-[var(--text-secondary)] mt-1">
-          Zero-trust gate enforcement, real-time alert rules, perimeter lockdown, and standardized exit codes.
-        </p>
-      </div>
-=======
     <div className="space-y-4 min-w-0">
       <PageHeader
         title="Safety & Security Control"
@@ -45,7 +30,6 @@ function SafetyInner() {
         onRefresh={refresh}
         refreshing={loading && data != null}
       />
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 
       {error && (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-700">

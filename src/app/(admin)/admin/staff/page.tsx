@@ -1,15 +1,6 @@
+export const dynamic = "force-dynamic";
 "use client";
 
-<<<<<<< HEAD
-export const dynamic = "force-dynamic";
-
-import React, { useState } from "react";
-import { Briefcase, AlertCircle } from "lucide-react";
-import { StaffTracking, StaffMember } from "@/components/admin/StaffTracking";
-import { useApi } from "@/hooks/useApi";
-import { useLiveRefresh } from "@/hooks/useLiveRefresh"
-import { CampusStatusBar } from "@/components/admin/CampusStatusBar";
-=======
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Search, X, Briefcase, ShieldCheck, ShieldAlert, Mail,
@@ -24,7 +15,6 @@ import {
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
 import type { User } from "@/lib/types";
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 
 /**
  * Admin Staff & Faculty — merged roster view.
@@ -229,20 +219,6 @@ function AdminStaffInner() {
   }));
 
   return (
-<<<<<<< HEAD
-    <div className="min-h-screen bg-[var(--bg)]">
-      <CampusStatusBar />
-      <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
-            <Briefcase className="w-6 h-6 text-purple-400" />
-            Administrative Staff Oversight & Movement
-          </p>
-          <p className="text-sm text-[var(--text-muted)] mt-1">
-            Real-time staff gate entries, presence tracking, exception flags (WRN), and log history.
-=======
     <div className="space-y-6 p-4 md:p-6">
       <PageHeader
         title="Staff & Faculty"
@@ -262,7 +238,6 @@ function AdminStaffInner() {
           <p className="text-xs text-[var(--text-muted)]">Total staff</p>
           <p className="text-2xl font-bold text-[var(--text-primary)] tabular-nums">
             {stats?.total ?? rows.length}
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
           </p>
           <MiniSparkline
             label=""

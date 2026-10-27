@@ -1,10 +1,6 @@
+export const dynamic = "force-dynamic";
 "use client";
 
-<<<<<<< HEAD
-export const dynamic = "force-dynamic";
-
-import React from "react";
-=======
 import { Suspense, useCallback } from "react";
 import Link from "next/link";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
@@ -15,7 +11,6 @@ import { useAuthStore } from "@/stores/authStore";
 import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { SecurityManagement } from "@/components/sysadmin/SecurityManagement";
 import {
@@ -214,21 +209,9 @@ function SecurityReinforcedInner() {
 export default function SysadminSecurityPage() {
   return (
     <AuthGuard allowedRoles={["sysadmin"]}>
-<<<<<<< HEAD
-      <div className="space-y-6 max-w-7xl mx-auto p-4 md:p-6">
-        <div>
-          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">Zero-Trust & Security Hardening</p>
-          <p className="text-xs text-[var(--text-secondary)]">
-            Manage IP allowlists, mandatory 2FA enforcement, and active JWT user sessions.
-          </p>
-        </div>
-        <SecurityManagement />
-      </div>
-=======
       <Suspense fallback={<PageLoading />}>
         <SecurityReinforcedInner />
       </Suspense>
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
     </AuthGuard>
   );
 }

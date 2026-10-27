@@ -1,15 +1,7 @@
+export const dynamic = "force-dynamic";
 "use client";
 
-<<<<<<< HEAD
-export const dynamic = "force-dynamic";
-
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { usePolling } from "@/hooks/usePolling";
-import { useEffect, useState, useCallback, useRef, useMemo } from "react";
-import { fadeInUp } from "@/lib/animations";
-=======
 import { useEffect } from "react";
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 import { useRouter } from "next/navigation";
 
 /**

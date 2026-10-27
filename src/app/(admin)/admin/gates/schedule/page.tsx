@@ -1,11 +1,5 @@
-"use client";
-<<<<<<< HEAD
-
 export const dynamic = "force-dynamic";
-
-import { AuthGuard } from "@/components/shared/AuthGuard";
-=======
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
+"use client";
 import { GateSchedule } from "@/components/admin/GateSchedule";
 
 export default function GateSchedulePage() {

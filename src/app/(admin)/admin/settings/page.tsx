@@ -1,18 +1,4 @@
-<<<<<<< HEAD
 export const dynamic = "force-dynamic";
-
-import { Bell, Shield, Database, Component } from "lucide-react";
-import { CollegeInfoForm } from "./CollegeInfoForm";
-import { PassTypesForm } from "./PassTypesForm";
-
-export default function AdminSettingsPage() {
-  return (
-    <div className="space-y-6">
-      <div>
-        <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">Settings</p>
-        <p className="text-[var(--text-muted)]">Configure dynamic system preferences</p>
-      </div>
-=======
 "use client";
 
 import { Settings } from "lucide-react";
@@ -33,7 +19,6 @@ export default function AdminSettingsPage() {
           <WidgetBoundary title="College Information">
             <CollegeInfoForm />
           </WidgetBoundary>
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 
           <WidgetBoundary title="Pass Types">
             <PassTypesForm />

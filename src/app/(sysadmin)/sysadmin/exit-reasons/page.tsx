@@ -94,11 +94,7 @@ export default function ExitReasonsPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-<<<<<<< HEAD
-            <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
-=======
             <p className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
               <DoorOpen className="w-6 h-6 text-amber-400" />
               Exit Reasons & Outpass Governance
             </p>

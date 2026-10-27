@@ -1,13 +1,6 @@
+export const dynamic = "force-dynamic";
 "use client";
 
-<<<<<<< HEAD
-export const dynamic = "force-dynamic";
-
-import { useState, useEffect } from "react";
-import { useApi } from "@/hooks/useApi";
-import { useUIStore } from "@/stores/uiStore";
-import { Database, HardDrive, Download, RefreshCw, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
-=======
 import { Suspense, useCallback, useMemo } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
@@ -27,7 +20,6 @@ import {
   Clock,
   RefreshCw,
 } from "lucide-react";
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 
 interface BackupStatusData {
   source: "host-backup-dir" | "unavailable";
@@ -74,21 +66,6 @@ function BackupReinforcedInner() {
   );
 
   return (
-<<<<<<< HEAD
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">Backup & Export</p>
-          <p className="text-[var(--text-muted)] mt-1">Manage database backups and data exports</p>
-        </div>
-        <button
-          onClick={fetchData}
-          className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-sm font-medium hover:bg-[var(--bg-base)] transition-colors"
-        >
-          <RefreshCw className="w-4 h-4" />
-          Refresh
-        </button>
-=======
     <div className="space-y-6 max-w-7xl mx-auto min-w-0">
       <div>
         <p className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
@@ -99,7 +76,6 @@ function BackupReinforcedInner() {
           Cron dump freshness from /opt/monitoring/backups, plus manual backup &amp; export tooling.
           Signed in as <span className="font-mono text-slate-300">{role}</span>.
         </p>
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
       </div>
 
       {/* Cron backup freshness strip */}

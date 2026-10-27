@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 "use client";
 // src/app/(sysadmin)/sysadmin/promotions/page.tsx
 // PROMOTIONS sysadmin page (kind: kanban, pollMs 30000).
@@ -12,16 +13,9 @@
 // "use client" tsx; cn from @/lib/utils; viz from kit/viz; minis from
 // kit/sidebar; query from @/lib/postgres on the server (NOT Supabase).
 
-<<<<<<< HEAD
-export const dynamic = "force-dynamic";
-
-import { AuthGuard } from "@/components/shared/AuthGuard";
-import { PromotionRequests } from "@/components/sysadmin/PromotionRequests";
-=======
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { PromotionsContent } from "@/components/sysadmin/domains/identity/PromotionsContent";
 import type { PromotionsData } from "@/components/sysadmin/domains/identity/types";
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 
 export default function PromotionsPage() {
   const { data, loading, error } = useDashboardData<PromotionsData>(

@@ -72,11 +72,7 @@ const api = useApi();
             <ShieldCheck className="w-5 h-5 text-indigo-400" />
           </div>
           <div>
-<<<<<<< HEAD
-            <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
-=======
             <p className="text-2xl font-bold text-[var(--text-primary)]">
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
               <span className="sm:hidden">🛡️</span>
               <span className="hidden sm:inline">🛡️ Warden Authorizations</span>
             </p>

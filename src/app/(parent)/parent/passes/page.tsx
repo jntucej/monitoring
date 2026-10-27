@@ -1,11 +1,6 @@
-"use client";
-<<<<<<< HEAD
 export const dynamic = "force-dynamic";
-
-import { useEffect, useState } from "react";
-=======
+"use client";
 import { useCallback, useEffect, useState } from "react";
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 import { RequestPassForm } from "@/components/parent/RequestPassForm";
 import { Ticket, Clock, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import type { GatePass, GatePassStatus } from "@/lib/types";
@@ -68,11 +63,7 @@ export default function ParentPassesPage() {
   return (
     <div className="space-y-6">
       <div>
-<<<<<<< HEAD
-        <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">Pass Requests</p>
-=======
         <p className="text-2xl font-bold">Pass Requests</p>
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
         <p className="text-[var(--text-muted)]">Request and track gate passes</p>
       </div>
 

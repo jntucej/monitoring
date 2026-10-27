@@ -1,11 +1,6 @@
+export const dynamic = "force-dynamic";
 "use client";
 
-<<<<<<< HEAD
-export const dynamic = "force-dynamic";
-
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-=======
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 import { useEffect, useMemo, useState } from "react";
 import { Shield, GraduationCap, Briefcase, Grid, Lock, ArrowRight } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
@@ -68,13 +63,6 @@ export default function AdminUsersPage() {
       <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-<<<<<<< HEAD
-          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
-            <Users className="w-6 h-6 text-purple-400" />
-            Roles & Branch Heatmaps
-          </p>
-=======
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
           <p className="text-[var(--text-muted)]">
             Staff & admin account directory, HOD oversight, branch student & faculty density heatmaps
           </p>

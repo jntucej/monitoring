@@ -1,17 +1,5 @@
-"use client";
-<<<<<<< HEAD
 export const dynamic = "force-dynamic";
-
-import { useState, useMemo, useCallback, useEffect } from "react";
-import { User, Search, RefreshCw, GraduationCap, Ban, AlertTriangle } from "lucide-react";
-import { parseRollNumber, getStudentYearFromRoll } from "@/lib/rollNumber";
-import type { Student } from "@/lib/types";
-import { useApi } from "@/hooks/useApi";
-import { useLiveRefresh } from "@/hooks/useLiveRefresh"
-import { CampusStatusBar } from "@/components/admin/CampusStatusBar";
-import { StudentInfographics } from "@/components/admin/StudentInfographics";
-=======
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
+"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -238,22 +226,6 @@ function AdminStudentsInner() {
   }));
 
   return (
-<<<<<<< HEAD
-    <div className="min-h-screen bg-[var(--bg)]">
-      <CampusStatusBar />
-      <div className="space-y-6 p-6">
-        <StudentInfographics />
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
-            <GraduationCap className="w-6 h-6 text-blue-400" />
-            Registered Students &amp; Roster
-          </p>
-          <p className="text-[var(--text-muted)]">
-            {loading
-              ? "Loading roster…"
-              : `${filteredStudents.length} student${filteredStudents.length === 1 ? "" : "s"} listed (${students.length} total)`}
-=======
     <div className="space-y-6 p-4 md:p-6">
       <PageHeader
         title="Students"
@@ -298,7 +270,6 @@ function AdminStudentsInner() {
           </p>
           <p className="text-[11px] text-[var(--text-muted)]">
             {data?.todayEntries ?? 0} in · {data?.todayExits ?? 0} out
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
           </p>
         </div>
         <div className="glass-card p-4">

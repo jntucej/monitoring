@@ -1,12 +1,7 @@
+export const dynamic = "force-dynamic";
 "use client";
 
-<<<<<<< HEAD
-export const dynamic = "force-dynamic";
-
-import { useEffect, useMemo, useState } from "react";
-=======
 import { useState, useCallback, useEffect } from "react";
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { useUIStore } from "@/stores/uiStore";
 import { useApi } from "@/hooks/useApi";
@@ -256,18 +251,9 @@ export default function SysAdminParentsPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-<<<<<<< HEAD
-            <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
-              <Users className="w-7 h-7 text-violet-400" />
-              Parents &amp; Guardians
-            </p>
-            <p className="text-sm text-slate-400 mt-1">
-              Create parent accounts, link them to students, and manage guardian access. {parents.length} parents.
-=======
             <p className="text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
               <Users className="w-7 h-7 text-violet-400" />
               Parents &amp; Guardians Registry
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
             </p>
             <p className="text-sm text-slate-400 mt-1">Manage guardian accounts, student-parent relationships, and portal access credentials.</p>
           </div>

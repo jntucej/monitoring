@@ -190,11 +190,7 @@ export default function AdminReportsPage() {
     
       <div className="space-y-6">
       <div>
-<<<<<<< HEAD
-        <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">Reports</p>
-=======
         <p className="text-2xl font-bold">Reports</p>
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
         <p className="text-[var(--text-muted)]">Generate and download reports</p>
       </div>
 

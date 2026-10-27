@@ -1,15 +1,8 @@
+export const dynamic = "force-dynamic";
 "use client";
 
-<<<<<<< HEAD
-export const dynamic = "force-dynamic";
-
-import { Suspense, useCallback } from "react";
-import { ConditionalAlert } from "@/components/shared/ConditionalAlert";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-=======
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { EmptyState } from "@/components/shared/EmptyState";
@@ -87,15 +80,6 @@ function FacultyInner() {
     : "/api/permissions?status=PENDING&stage=hod";
 
   return (
-<<<<<<< HEAD
-    <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 min-w-0">
-      
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="mt-1 text-sm text-slate-400">
-            Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
-            {user?.name ? ` · ${user.name}` : ""}
-=======
     <div className="space-y-4 p-2 min-w-0">
       {classes.length > 1 ? (
         /* Scope picker: year × section chips, persisted in URL */
@@ -132,7 +116,6 @@ function FacultyInner() {
           <p className="text-sm font-semibold text-[var(--text-primary)] mt-1">
             Year {activeClass.year} &middot; {activeClass.section}
             {activeClass.name ? ` · ${activeClass.name}` : ""}
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
           </p>
         </div>
       ) : null}

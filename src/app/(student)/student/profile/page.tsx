@@ -1,10 +1,5 @@
-<<<<<<< HEAD
 export const dynamic = "force-dynamic";
-
-import { redirect } from "next/navigation";
-=======
 "use client";
->>>>>>> 8083ee407bab2659673d477f46b4a98d66726c31
 
 import { Suspense } from "react";
 import { UserProfileTab } from "@/components/shared/UserProfileTab";
