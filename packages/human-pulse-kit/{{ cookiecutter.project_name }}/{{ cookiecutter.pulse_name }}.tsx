@@ -110,6 +110,7 @@ export const {{ cookiecutter.pulse_name }} = forwardRef<
         className={cn("inline-block rounded-full", `pulse-${variant}`, className)}
         style={baseStyle}
         animate={RESPECT_REDUCED && reduced ? undefined : beat}
+{% raw %}
         transition={{
           duration: BEAT_DURATION_S,
           times: [0, 0.10, 0.20, 0.30, 0.45],
@@ -118,6 +119,7 @@ export const {{ cookiecutter.pulse_name }} = forwardRef<
           repeatDelay: REPEAT_DELAY_S,
           delay: delayMs / 1000,
         }}
+{% endraw %}
         {...(props as any)}
       />
     );
@@ -135,6 +137,7 @@ export const {{ cookiecutter.pulse_name }} = forwardRef<
         `pulse-${variant}`,
         className
       )}
+{% raw %}
       style={{
         ...baseStyle,
         ["--pulse-color" as any]:   resolved,
@@ -145,6 +148,7 @@ export const {{ cookiecutter.pulse_name }} = forwardRef<
         ["--dub-scale" as any]:     DUB_SCALE,
         ["--rest-opacity" as any]:  REST_OPACITY,
       }}
+{% endraw %}
       {...props}
     />
   );

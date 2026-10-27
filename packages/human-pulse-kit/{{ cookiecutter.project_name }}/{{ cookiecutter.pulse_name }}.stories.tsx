@@ -25,11 +25,12 @@ type Story = StoryObj<typeof {{ cookiecutter.pulse_name }}>;
 
 export const Default: Story = {};
 
+{% raw %}
 export const DotMatrix: Story = {
   render: () => {
     const items = ["mint", "rose", "gold", "sky", "amber", "violet"];
     return (
-      <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+      <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
         {items.map((c, i) => (
           <{{ cookiecutter.pulse_name }} key={c} color={c} delayMs={i * 90} />
         ))}
@@ -41,10 +42,11 @@ export const DotMatrix: Story = {
 export const LiveStatusRow: Story = {
   render: () => {
     return (
-      <div style={{ display: "flex", gap: 8, alignItems: "center", fontSize: 13 }}>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13 }}>
         <{{ cookiecutter.pulse_name }} color="mint" label="Gates online" />
         <span>6 gates online</span>
       </div>
     );
   },
 };
+{% endraw %}
