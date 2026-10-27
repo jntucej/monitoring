@@ -42,7 +42,7 @@ async function handleGet(
             p.to_date,
             EXTRACT(EPOCH FROM (p.to_date - NOW())) / 60 AS minutes_until_return
        FROM public.permissions p
-       JOIN public.users u ON u.id = p.student_user_id
+       JOIN public.users u ON u.id = p.requester_user_id
       WHERE p.workflow_type = 'hostel'
         AND p.reason = 'home_out'
         AND p.status = 'COMPLETED'
@@ -63,7 +63,7 @@ async function handleGet(
             p.to_date,
             EXTRACT(EPOCH FROM (NOW() - p.to_date)) / 60 AS minutes_overdue
        FROM public.permissions p
-       JOIN public.users u ON u.id = p.student_user_id
+       JOIN public.users u ON u.id = p.requester_user_id
       WHERE p.workflow_type = 'hostel'
         AND p.reason = 'home_out'
         AND p.status = 'COMPLETED'
@@ -71,7 +71,7 @@ async function handleGet(
         AND p.to_date < NOW()
         AND NOT EXISTS (
           SELECT 1 FROM public.movement_logs m
-           WHERE m.user_id = p.student_user_id
+           WHERE m.user_id = p.requester_user_id
              AND m.direction = 'IN'
              AND m.timestamp > p.used_at
         )

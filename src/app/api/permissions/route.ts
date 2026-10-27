@@ -252,12 +252,12 @@ async function handleGet(
   } else if (["parent", "guardian"].includes(role)) {
     params.push(auth.userId);
     where.push(`(
-      student_user_id IN (SELECT user_id FROM student_details WHERE guardian_id = $${params.length})
+      requester_user_id IN (SELECT user_id FROM student_details WHERE guardian_id = $${params.length})
       OR requester_user_id = $${params.length}
     )`);
   } else if (role === "student") {
     params.push(auth.userId);
-    where.push(`(requester_user_id = $${params.length} OR student_user_id = $${params.length})`);
+    where.push(`(requester_user_id = $${params.length} OR requester_user_id = $${params.length})`);
   } else if (role === "staff") {
     params.push(auth.userId);
     where.push(`(requester_user_id = $${params.length})`);
@@ -295,7 +295,7 @@ async function handleGet(
   // row.requester?.name. student_details is nested for roll display.
   const sql = `
     SELECT p.id, p.ticket_number, p.workflow_type, p.requester_user_id,
-           p.student_user_id, p.current_stage, p.status, p.priority,
+           p.current_stage, p.status, p.priority,
            p.hostel_scope, p.branch, p.reason, p.description,
            p.from_date, p.to_date, p.direct_generated, p.routed_to_role,
            p.forwarded_from_role, p.sla_deadline, p.created_at,
@@ -311,7 +311,7 @@ async function handleGet(
              )
              FROM users u
              LEFT JOIN student_details sd ON sd.user_id = u.id
-             WHERE u.id = p.student_user_id
+             WHERE u.id = p.requester_user_id
            ) AS student,
            (
              SELECT jsonb_build_object(
