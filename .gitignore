@@ -65,7 +65,11 @@ scripts/provision-role-accounts.mts
 scripts/prov/
 
 # macOS
-**/.DS_Store
+**/provenance/.DS_Store
+/backups/
+*.sql.gz
+*.sql
+
 
 # Python bytecode
 __pycache__/
