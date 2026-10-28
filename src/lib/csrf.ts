@@ -19,6 +19,14 @@ export function validateCsrf(req: NextRequest): CsrfValidationResult {
     return { valid: true };
   }
 
+  const pathname = new URL(req.url).pathname;
+  const CSRF_EXEMPT = new Set([
+    "/api/auth/login", "/api/auth/refresh", "/api/auth/reset-password", "/api/auth/bootstrap", "/api/csrf",
+  ]);
+  if (CSRF_EXEMPT.has(pathname)) {
+    return { valid: true };
+  }
+
   // Check Sec-Fetch-Site if provided by modern browsers.
   // Issue #390: narrow from accepting 'same-site' to only 'same-origin' | 'none'.
   // 'same-site' permits requests from other subdomains (e.g. evil.college.edu).
