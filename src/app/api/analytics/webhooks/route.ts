@@ -5,6 +5,12 @@ import { sampleWebhooksDataset } from "@/lib/webhooks-analytics";
 
 async function handleGet() {
   try {
+    if (process.env.NODE_ENV === "production" && process.env.ALLOW_DEMO_ANALYTICS !== "true") {
+      return NextResponse.json(
+        { success: false, error: { code: "NOT_IMPLEMENTED", message: "Webhooks analytics requires ALLOW_DEMO_ANALYTICS=true in production" } },
+        { status: 501 }
+      );
+    }
     const { predictions, anomalies } = sampleWebhooksDataset();
     return NextResponse.json({ success: true, data: { predictions, anomalies } });
   } catch (error: any) {
