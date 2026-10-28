@@ -178,7 +178,7 @@ export function AdminProfilePanel({ tab }: { tab: Tab }) {
         <SectionCard title="Account" description="Signed in to the admin console" icon={Shield} showHeader={false}>
           <div className="flex flex-col sm:flex-row sm:items-center gap-5">
             <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[var(--action-primary)]/15 flex items-center justify-center text-xl sm:text-2xl font-black text-[var(--action-primary)] ring-2 ring-[var(--action-primary)]/25 overflow-hidden shrink-0">
-              {photoUrl ? <img src={photoUrl} alt="" className="w-full h-full object-cover" /> : initials}
+              {photoUrl ? <img src={photoUrl} alt="" width={80} height={80} className="w-full h-full object-cover" /> : initials}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-lg font-bold text-[var(--text-primary)] truncate">{user?.name || "Administrator"}</p>

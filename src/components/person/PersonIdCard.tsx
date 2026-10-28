@@ -75,7 +75,7 @@ export function PersonIdCard({ person: initialPerson, type }: PersonIdCardProps 
     <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-8 flex flex-col items-center">
       {/* Person Photo */}
       <div className="relative w-32 h-32 rounded-full mb-4 border-4 border-sky-500 overflow-hidden">
-        <img src={photoSrc} alt={person.fullName || person.name} className="rounded-full w-full h-full object-cover" />
+        <img src={photoSrc} alt={person.fullName || person.name} width={128} height={128} className="rounded-full w-full h-full object-cover" />
       </div>
 
       {/* Basic Info */}

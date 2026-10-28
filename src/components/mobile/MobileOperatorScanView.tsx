@@ -375,6 +375,8 @@ export function MobileOperatorScanView() {
               <img
                 src={currentStudent.photo || getAvatarPlaceholder(currentStudent.name || "??")}
                 alt={currentStudent.name}
+                width={64}
+                height={64}
                 className="w-16 h-16 rounded-2xl object-cover border-2 border-emerald-400"
               />
               <div className="flex-1 min-w-0">
