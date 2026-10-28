@@ -85,12 +85,9 @@ function Inner() {
   );
 }
 
+import { redirect } from "next/navigation";
+
 export default function PrincipalApprovalsPage() {
-  return (
-    <AuthGuard allowedRoles={["principal"] as Role[]}>
-      <Suspense fallback={<PageLoading />}>
-        <Inner />
-      </Suspense>
-    </AuthGuard>
-  );
+  redirect("/principal/approvals/mine");
 }
+
