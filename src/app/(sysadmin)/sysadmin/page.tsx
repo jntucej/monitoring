@@ -65,7 +65,7 @@ export default function SysadminCommandCenterPage() {
 
 function CommandCenterSkeleton() {
   return (
-    <div className="space-y-6" aria-hidden="true">
+    <div className="space-y-6" aria-hidden="true" inert>
       <Skeleton className="h-20 w-full rounded-2xl" />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Skeleton className="h-28 rounded-2xl" />
