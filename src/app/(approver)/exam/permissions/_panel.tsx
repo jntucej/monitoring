@@ -88,7 +88,6 @@ export function ExamPermissionsPanel({ queue }: { queue: ExamQueue }) {
   const {
     data: oieData,
     loading: oieLoading,
-    error: oieError,
     refresh: refreshOie,
   } = useApiResource<PermissionsResponse>(
     isExamBranchRole
