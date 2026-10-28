@@ -6,7 +6,9 @@ import { withRateLimit } from "@/lib/rate-limit";
 
 // TODO(scaffold): implement the real handler for Data lifecycle (tabbed).
 async function handler(req: NextRequest) {
-  return ok({ items: [] });
+  const { query } = await import("@/lib/postgres");
+  const { rows } = await query(`SELECT * FROM data_retention_logs ORDER BY executed_at DESC LIMIT 50`);
+  return ok({ items: rows });
 }
 
 export const GET = withRateLimit(

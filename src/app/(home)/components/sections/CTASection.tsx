@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useReducedMotion } from "framer-motion";
 import { LogIn } from "lucide-react";
@@ -21,6 +22,7 @@ import { useFocusPull } from "../../motion/useFocusPull";
  */
 
 export function CTASection() {
+  const router = useRouter();
   const reduced = useReducedMotion();
   const titleRef = useRef<HTMLHeadingElement | null>(null);
   const { letterSpacing, filter } = useFocusPull(titleRef);
@@ -58,7 +60,7 @@ export function CTASection() {
         </p>
         <div className="mt-8 flex justify-center">
           <MagneticButton
-            onClick={() => (window.location.href = "/login")}
+            onClick={() => router.push("/login")}
             strength={0.05}
             radius={80}
             className="inline-flex items-center gap-2 rounded-xl bg-[var(--home-accent-indigo,#6366F1)] px-6 py-3 font-semibold text-white shadow-lg hover:opacity-95"

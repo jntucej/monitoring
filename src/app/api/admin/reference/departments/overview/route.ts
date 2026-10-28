@@ -6,7 +6,9 @@ import { withRateLimit } from "@/lib/rate-limit";
 
 // TODO(scaffold): implement the real handler for Departments (tree).
 async function handler(req: NextRequest) {
-  return ok({ items: [] });
+  const { query } = await import("@/lib/postgres");
+  const { rows } = await query(`SELECT * FROM departments ORDER BY name ASC`);
+  return ok({ items: rows });
 }
 
 export const GET = withRateLimit(

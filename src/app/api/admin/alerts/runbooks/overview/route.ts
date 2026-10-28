@@ -6,7 +6,9 @@ import { withRateLimit } from "@/lib/rate-limit";
 
 // TODO(scaffold): implement the real handler for Runbooks (list).
 async function handler(req: NextRequest) {
-  return ok({ items: [] });
+  const { query } = await import("@/lib/postgres");
+  const { rows } = await query(`SELECT * FROM incident_runbooks ORDER BY title ASC LIMIT 100`);
+  return ok({ items: rows });
 }
 
 export const GET = withRateLimit(

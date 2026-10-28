@@ -6,7 +6,9 @@ import { withRateLimit } from "@/lib/rate-limit";
 
 // TODO(scaffold): implement the real handler for Audit (timeline+table).
 async function handler(req: NextRequest) {
-  return ok({ items: [] });
+  const { query } = await import("@/lib/postgres");
+  const { rows } = await query(`SELECT * FROM audit_logs ORDER BY created_at DESC LIMIT 100`);
+  return ok({ items: rows });
 }
 
 export const GET = withRateLimit(

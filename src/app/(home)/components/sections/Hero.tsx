@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import { useRouter } from "next/navigation";
 import {
   motion,
   useReducedMotion,
@@ -34,6 +35,7 @@ import { useGradientHeadline } from "../../motion/useGradientHeadline";
 const HEADLINE = COLLEGE.shortName; // "JNTUH UCEJ"
 
 export function Hero() {
+  const router = useRouter();
   const reduced = useReducedMotion();
   const sectionRef = useRef<HTMLElement | null>(null);
   const headRef = useRef<HTMLSpanElement | null>(null);
@@ -104,7 +106,7 @@ export function Hero() {
       {/* CTA row */}
       <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
         <MagneticButton
-          onClick={() => (window.location.href = "/login")}
+          onClick={() => router.push("/login")}
           strength={0.05}
           radius={80}
           className="inline-flex items-center gap-2 rounded-xl bg-[var(--home-accent-indigo,#6366F1)] px-6 py-3 font-semibold text-white shadow-lg hover:opacity-95"
