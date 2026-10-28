@@ -83,6 +83,27 @@
           "pollMs": 120000
         },
         {
+          "id": "alumni-auto",
+          "route": "alumni/auto",
+          "title": "Auto-Detected Graduates",
+          "kind": "table",
+          "pollMs": 120000
+        },
+        {
+          "id": "alumni-graduated",
+          "route": "alumni/graduated",
+          "title": "Graduated Roster",
+          "kind": "table",
+          "pollMs": 120000
+        },
+        {
+          "id": "alumni-deprovisioned",
+          "route": "alumni/deprovisioned",
+          "title": "Deprovisioned Users",
+          "kind": "table",
+          "pollMs": 120000
+        },
+        {
           "id": "promotions",
           "route": "promotions",
           "title": "Promotions",
@@ -363,7 +384,13 @@
           "route": "mess",
           "title": "Mess Management",
           "kind": "tabbed",
-          "pollMs": 60000
+          "pollMs": 60000,
+          "tabs": [
+            "mess/today",
+            "mess/items",
+            "mess/days",
+            "mess/analytics"
+          ]
         }
       ]
     },
