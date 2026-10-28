@@ -11,7 +11,7 @@ cd "$(dirname "$0")/.."
 
 URL="${DATABASE_URL:-postgres://postgres:ci_dummy_postgres_password_123@localhost:5432/gate_monitor}"
 
-psql() { psql "$URL" -v ON_ERROR_STOP=0 -e "$@"; }
+psql() { psql "$URL" -v ON_ERROR_STOP=1 "$@"; }
 
 echo "==> 1. Bootstrap (roles + extensions)"
 psql -f database/bootstrap.sql
@@ -22,7 +22,7 @@ psql -f database/schema.sql
 echo "==> 3. Migrations (in filename order)"
 for f in $(ls database/migrations/*.sql 2>/dev/null | sort); do
   echo "    $f"
-  psql -f "$f" || true   # individual migration errors are non-fatal (drift tolerated)
+  psql -f "$f"
 done
 
 echo "==> 4. Seed demo roles"
