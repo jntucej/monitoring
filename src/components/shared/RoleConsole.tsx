@@ -79,6 +79,7 @@ import { StatusBar } from "@/components/shared/StatusBar";
 import { CommandBar } from "@/components/shared/CommandBar";
 import { IconRail } from "@/components/shared/IconRail";
 import type { IconRailGroup } from "@/components/shared/IconRail";
+import { MobileGroupsDrawer } from "@/components/shared/MobileGroupsDrawer";
 import { useApiResource } from "@/hooks/useApiResource";
 import { useKeyboardShortcuts, type Shortcut } from "@/hooks/useKeyboardShortcuts";
 import { getConsoleConfig } from "@/config/consoles";
@@ -136,9 +137,17 @@ export interface RoleConsoleProps {
    * default Board feed. Use this from sub-pages nested under the layout.
    */
   children?: ReactNode;
+  /**
+   * When true, skip RoleConsole's own IconRail + top "Ops Console" header.
+   * Used when the parent shell (e.g. the operator's slim 4-icon
+   * `OperatorShell`) already provides the only side-rail and header chrome —
+   * RoleConsole then renders just the dashboard column (board feed + status
+   * strip + command palette + context panel) so the rails don't double up.
+   */
+  bare?: boolean;
 }
 
-export function RoleConsole({ role, roleRoot, groups, children }: RoleConsoleProps) {
+export function RoleConsole({ role, roleRoot, groups, children, bare }: RoleConsoleProps) {
   const [selectedRow, setSelectedRow] = useState<BoardRow | null>(null);
   const [commandBarOpen, setCommandBarOpen] = useState(false);
 
@@ -910,33 +919,46 @@ export function RoleConsole({ role, roleRoot, groups, children }: RoleConsolePro
 
   return (
     <div className="flex flex-col min-h-dvh w-full min-w-0">
-      {/* Top bar: role + console title, Command affordance */}
-      <header className="flex items-center justify-between gap-3 px-4 py-2 border-b border-[var(--border)] bg-[var(--bg-base)]/80 backdrop-blur-md sticky top-0 z-30">
-        <div className="flex items-center gap-3 min-w-0">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--text-muted)] shrink-0">
-            {roleLabel}
-          </span>
-          <span className="text-sm font-bold text-[var(--text-primary)] truncate">
-            Ops Console
-          </span>
-        </div>
-        <button
-          type="button"
-          onClick={openCommandBar}
-          className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-2.5 py-1.5 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--action-primary)]/40 transition-colors"
-          aria-label="Open command palette"
-        >
-          <Command className="w-3.5 h-3.5" />
-          <span>Command</span>
-          <kbd className="hidden sm:inline text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--bg-base)] text-[var(--text-muted)] border border-[var(--border)]">
-            ⌘K
-          </kbd>
-        </button>
-      </header>
+      {/* Top bar: role + console title, Command affordance.
+          Skipped when `bare` — the parent shell already owns the header
+          chrome (e.g. the operator's slim OperatorShell rail). */}
+      {!bare && (
+        <header className="flex items-center justify-between gap-3 px-4 py-2 border-b border-[var(--border)] bg-[var(--bg-base)]/80 backdrop-blur-md sticky top-0 z-30">
+          <div className="flex items-center gap-3 min-w-0">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--text-muted)] shrink-0">
+              {roleLabel}
+            </span>
+            <span className="text-sm font-bold text-[var(--text-primary)] truncate">
+              Ops Console
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={openCommandBar}
+            className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-2.5 py-1.5 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--action-primary)]/40 transition-colors"
+            aria-label="Open command palette"
+          >
+            <Command className="w-3.5 h-3.5" />
+            <span>Command</span>
+            <kbd className="hidden sm:inline text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--bg-base)] text-[var(--text-muted)] border border-[var(--border)]">
+              ⌘K
+            </kbd>
+          </button>
+        </header>
+      )}
 
-      {/* Main flex row: rail | main column | context panel */}
+      {/* Mobile navigation drawer — only when groups are provided */}
+      {groups && groups.length > 0 && (
+        <MobileGroupsDrawer groups={groups} roleRoot={roleRoot} />
+      )}
+
+      {/* Main flex row: rail | main column | context panel.
+          The IconRail is skipped when `bare` so a parent shell's rail stays
+          the only one. */}
       <div className="flex flex-1 min-h-0">
-        <IconRail role={role} roleRoot={roleRoot} groups={groups} />
+        {!bare && (
+          <IconRail role={role} roleRoot={roleRoot} groups={groups} />
+        )}
 
         <main className="flex-1 min-w-0 overflow-y-auto custom-scrollbar">
           {children ??
@@ -1002,14 +1024,17 @@ export function RoleConsole({ role, roleRoot, groups, children }: RoleConsolePro
         ) : null}
       </div>
 
-      {/* Status bar — full width, sticky at the bottom of the shell */}
-      <div className="sticky bottom-0 z-30">
-        {isAdmin ? (
-          <AdminStatusBar
-            counts={adminCounts}
-            lastScan={lastScan}
-            refreshing={adminLoading}
-          />
+      {/* Status bar — full width, sticky at the bottom of the shell.
+          Skipped when `bare` so the parent shell (e.g. the operator's
+          OperatorShell) is the only chrome; no footer is rendered. */}
+      {!bare && (
+        <div className="sticky bottom-0 z-30">
+          {isAdmin ? (
+            <AdminStatusBar
+              counts={adminCounts}
+              lastScan={lastScan}
+              refreshing={adminLoading}
+            />
         ) : isVicePrincipal ? (
           <VpStatusBar
             counts={vpCounts}
@@ -1085,7 +1110,8 @@ export function RoleConsole({ role, roleRoot, groups, children }: RoleConsolePro
         ) : (
           <StatusBar counts={counts} lastScan={lastScan} />
         )}
-      </div>
+        </div>
+      )}
 
       {isAdmin ? (
         <AdminCommandBar

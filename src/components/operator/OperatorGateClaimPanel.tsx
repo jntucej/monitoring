@@ -119,7 +119,7 @@ export function OperatorGateClaimPanel() {
       <ol className="space-y-2 text-xs text-[var(--text-secondary)]">
         <li className="flex gap-2.5 items-start">
           <span className="w-5 h-5 rounded-full bg-slate-700 text-[10px] font-bold flex items-center justify-center shrink-0 text-slate-200 mt-0.5">1</span>
-          <span>Your supervisor generates a <span className="font-semibold text-[var(--text-primary)]">gate-claim code</span> and hands it to you (it is a string, not just a number).</span>
+          <span>Your supervisor generates a <span className="font-semibold text-[var(--text-primary)]">6-digit gate-claim code</span> and hands it to you (a short string you can read aloud, like an OTP).</span>
         </li>
         <li className="flex gap-2.5 items-start">
           <span className="w-5 h-5 rounded-full bg-slate-700 text-[10px] font-bold flex items-center justify-center shrink-0 text-slate-200 mt-0.5">2</span>
@@ -143,10 +143,10 @@ export function OperatorGateClaimPanel() {
             type="text"
             value={code}
             onChange={(e) => {
-              setCode(e.target.value.toUpperCase());
+              setCode(e.target.value.replace(/\D/g, "").slice(0, 6).toUpperCase());
               if (error) setError(null);
             }}
-            placeholder="XXXX-XXXX-XXXX-XXXX"
+            placeholder="6-digit code, e.g. 482913"
             aria-label="Gate claim code"
             className="w-full px-4 py-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] font-mono text-sm tracking-[0.2em] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:tracking-normal focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
           />

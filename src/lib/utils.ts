@@ -132,23 +132,59 @@ export function getAuthHeaders(): Record<string, string> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
-  
+
   try {
-    const raw = sessionStorage.getItem("gate-monitor-auth") ?? localStorage.getItem("gate-monitor-auth");
-    if (!raw) return headers;
-    
-    const parsed = JSON.parse(raw);
-    const state = parsed?.state || {};
-    const token = state.token;
-    const sessionToken = state.user?.currentSessionToken;
-    
+    // Primary source: the zustand auth store's persisted token (tokenStorage),
+    // written to sessionStorage by the login flow under the key "auth.token".
+    // The legacy `gate-monitor-auth` key is a fallback for pre-store sessions —
+    // it is no longer written, so reading it first is what produced the
+    // command-center 401 storm (an empty Authorization header).
+    let token: string | null = null;
+    let sessionToken: string | null = null;
+
+    if (typeof window !== "undefined") {
+      token =
+        sessionStorage.getItem("auth.token") ||
+        localStorage.getItem("auth.token") ||
+        null;
+
+      // X-Session-Token is persisted with the rest of the store under
+      // `mycampus-auth` (user.currentSessionToken).
+      try {
+        const raw =
+          sessionStorage.getItem("mycampus-auth") ||
+          localStorage.getItem("mycampus-auth");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          const state = parsed?.state ?? parsed ?? {};
+          sessionToken = state.user?.currentSessionToken ?? null;
+          if (!token) token = state.token ?? null;
+        }
+      } catch {
+        /* ignore malformed store */
+      }
+
+      // Legacy fallback — older clients persisted under this key.
+      if (!token && !sessionToken) {
+        const raw =
+          sessionStorage.getItem("gate-monitor-auth") ??
+          localStorage.getItem("gate-monitor-auth");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          const state = parsed?.state ?? parsed ?? {};
+          token = state.token ?? null;
+          sessionToken = sessionToken ?? state.user?.currentSessionToken ?? null;
+        }
+      }
+    }
+
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
     if (sessionToken) {
       headers["X-Session-Token"] = sessionToken;
     }
-    
+
     return headers;
   } catch (e) {
     return headers;

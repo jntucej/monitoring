@@ -16,13 +16,9 @@ import {
 } from "lucide-react";
 import { SystemHealth } from "@/lib/health";
 import { getAuthHeaders } from "@/lib/utils";
-import { useLiveRefresh } from "@/hooks/useLiveRefresh";
-import { usePolling } from "@/hooks/usePolling";
-import { useGlass } from "@/context/GlassContext";
 
 export function HealthDashboard() {
   const router = useRouter();
-  const { isLiveStream } = useGlass();
   const [health, setHealth] = useState<SystemHealth | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,17 +42,13 @@ export function HealthDashboard() {
     }
   }, []);
 
-  // Initial load + visibility-aware polling (no raw setInterval).
-  // A SINGLE poller drives /api/health. The previous version ran BOTH
-  // usePolling and useLiveRefresh on the same fetch, so every poll fired
-  // twice (mount double-fetch + overlapping timers), doubling requests to the
-  // health endpoint and inflating the "requests per minute" dashboard number.
-  // Slower cadence (15s live / 60s idle) keeps telemetry fresh without a
-  // request spike.
+  // Initial load only. /api/health reflects the live stack and is cheap to
+  // call, but the 15s/60s timer was still the source of the request-spike
+  // the user was seeing on the sysadmin area. Manual refresh remains
+  // available via the Refresh button in the panel header.
   useEffect(() => {
     fetchHealth(true);
   }, [fetchHealth]);
-  usePolling(() => { fetchHealth(); }, { intervalMs: isLiveStream ? 15000 : 60000 });
 
   const getStatusBadge = (status?: "healthy" | "degraded" | "unhealthy") => {
     switch (status) {
@@ -111,7 +103,7 @@ export function HealthDashboard() {
           </div>
           <p className="text-xs text-[var(--text-muted)] flex items-center gap-2">
             <Clock className="w-3.5 h-3.5 text-gray-400" />
-            {lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString()}` : "Fetching..."} (Auto-refreshes every {isLiveStream ? '15' : '60'}s)
+            {lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString()}` : "Fetching..."} (refresh on demand)
           </p>
         </div>
       </div>

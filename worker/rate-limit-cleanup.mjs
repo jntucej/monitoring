@@ -3,6 +3,9 @@ import fs from 'fs';
 import path from 'path';
 import { getWorkerDbPool } from './db.js';
 import auditLogRotation from './jobs/audit_log_rotation.js';
+import dispatchNotifications from './jobs/dispatch_notifications.js';
+import retryNotifications from './jobs/retry_notifications.js';
+import cleanupEphemeral from './jobs/cleanup_ephemeral.js';
 
 // Periodic maintenance jobs run as cron-style intervals in the worker.
 // Each job is idempotent and fail-safe: a single failure logs and continues.
@@ -51,6 +54,9 @@ async function rotateAuditLogs() {
 
 const jobs = [
   { name: 'rate-limit-cleanup', ms: 5 * 60 * 1000, run: () => runJob('rate-limit-cleanup', cleanupRateLimits) },
+  { name: 'notification-dispatch', ms: 2 * 60 * 1000, run: () => runJob('notification-dispatch', dispatchNotifications) },
+  { name: 'notification-retry', ms: 5 * 60 * 1000, run: () => runJob('notification-retry', retryNotifications) },
+  { name: 'cleanup-ephemeral', ms: 15 * 60 * 1000, run: () => runJob('cleanup-ephemeral', cleanupEphemeral) },
   { name: 'audit-log-rotation', ms: 60 * 60 * 1000, run: () => runJob('audit-log-rotation', rotateAuditLogs) },
 ];
 

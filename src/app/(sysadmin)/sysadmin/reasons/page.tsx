@@ -1,14 +1,13 @@
 "use client";
 
 
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { useUIStore } from "@/stores/uiStore";
 import { cn, formatDate } from "@/lib/utils";
 import { useApi } from "@/hooks/useApi";
@@ -80,7 +79,7 @@ const api = useApi();
     }
   }, [addToast]);
 
-  useLiveRefresh(fetchReasons, { intervalMs: 30000 });
+  useEffect(() => { fetchReasons(); }, [fetchReasons]);
 
   const openCreateModal = () => {
     setModalMode("create");

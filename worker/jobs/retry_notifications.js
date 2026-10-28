@@ -1,104 +1,53 @@
 /**
- * Retry failed notifications (email, SMS, push) with exponential backoff.
- * Reads from notification queues where status = "failed" AND attempts < 5.
- * Updates attempts count and resets status to "pending" for reprocessing.
+ * Retry failed notifications (email, SMS, push).
+ *
+ * Reads notification queues where status = "failed" AND attempts < MAX.
+ * Resets status back to "pending" so dispatch_notifications picks them up
+ * on the next cycle. Failures are logged per-queue and never crash the
+ * worker (runJob wraps this; a per-queue error must not block the other
+ * queues).
+ *
+ * NOTE: The original version imported getDbClient() from src/lib/db.js and
+ * used Supabase-style `.from().select()` chaining — that module does not
+ * exist in the post-migration codebase and the queue tables have no
+ * `next_retry_at` / `updated_at` columns, so the job would have crashed
+ * on first use. This rewrite uses the worker's PG pool like every other
+ * job and only touches columns that actually exist.
  */
 
-import { getDbClient } from "../src/lib/db.js";
+import { query } from '../db.js';
 
 const MAX_ATTEMPTS = 5;
-const BACKOFF_BASE_MS = 5 * 60 * 1000; // 5 minutes base
 
-async function retryNotifications() {
-  const db = getDbClient();
-  
-  try {
-    // Process email queue
-    const { data: failedEmails, error: emailError } = await db
-      .from("notification_email_queue")
-      .select("id, attempts, created_at")
-      .eq("status", "failed")
-      .lt("attempts", MAX_ATTEMPTS);
-    
-    if (emailError) {
-      console.error("[retry_notifications] Email query error:", emailError);
-    } else if (failedEmails && failedEmails.length > 0) {
-      console.log(`[retry_notifications] Retrying ${failedEmails.length} failed emails`);
-      for (const email of failedEmails) {
-        const attempts = (email.attempts || 0) + 1;
-        const backoffMs = BACKOFF_BASE_MS * Math.pow(2, attempts - 1);
-        const nextRetryAt = new Date(Date.now() + backoffMs).toISOString();
-        
-        await db
-          .from("notification_email_queue")
-          .update({
-            status: "pending",
-            attempts,
-            next_retry_at: nextRetryAt,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", email.id);
-      }
-    }
+const QUEUES = [
+  { name: 'notification_email_queue', log: 'email' },
+  { name: 'notification_sms_queue', log: 'sms' },
+  { name: 'notification_push_queue', log: 'push' },
+];
 
-    // Process SMS queue
-    const { data: failedSms, error: smsError } = await db
-      .from("notification_sms_queue")
-      .select("id, attempts, created_at")
-      .eq("status", "failed")
-      .lt("attempts", MAX_ATTEMPTS);
-    
-    if (smsError) {
-      console.error("[retry_notifications] SMS query error:", smsError);
-    } else if (failedSms && failedSms.length > 0) {
-      console.log(`[retry_notifications] Retrying ${failedSms.length} failed SMS`);
-      for (const sms of failedSms) {
-        const attempts = (sms.attempts || 0) + 1;
-        const backoffMs = BACKOFF_BASE_MS * Math.pow(2, attempts - 1);
-        const nextRetryAt = new Date(Date.now() + backoffMs).toISOString();
-        
-        await db
-          .from("notification_sms_queue")
-          .update({
-            status: "pending",
-            attempts,
-            next_retry_at: nextRetryAt,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", sms.id);
-      }
-    }
+export default async function retryNotifications() {
+  const summary = [];
 
-    // Process push queue
-    const { data: failedPush, error: pushError } = await db
-      .from("notification_push_queue")
-      .select("id, attempts, created_at")
-      .eq("status", "failed")
-      .lt("attempts", MAX_ATTEMPTS);
-    
-    if (pushError) {
-      console.error("[retry_notifications] Push query error:", pushError);
-    } else if (failedPush && failedPush.length > 0) {
-      console.log(`[retry_notifications] Retrying ${failedPush.length} failed push notifications`);
-      for (const push of failedPush) {
-        const attempts = (push.attempts || 0) + 1;
-        const backoffMs = BACKOFF_BASE_MS * Math.pow(2, attempts - 1);
-        const nextRetryAt = new Date(Date.now() + backoffMs).toISOString();
-        
-        await db
-          .from("notification_push_queue")
-          .update({
-            status: "pending",
-            attempts,
-            next_retry_at: nextRetryAt,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", push.id);
-      }
+  for (const q of QUEUES) {
+    try {
+      // Reset failed rows back to pending so the dispatcher re-attempts
+      // them. We do NOT bump attempts here (dispatch_notifications owns
+      // the attempts counter on send outcome); bumping it on the *reset*
+      // path would double-count and push jobs past MAX_ATTEMPTS faster.
+      const { rowCount } = await query(
+        `UPDATE ${q.name} SET status = 'pending'
+         WHERE status = 'failed' AND attempts < $1`,
+        [MAX_ATTEMPTS],
+      );
+      summary.push({ queue: q.log, requeued: rowCount ?? 0 });
+    } catch (err) {
+      summary.push({ queue: q.log, error: String(err.message ?? err) });
+      console.error(`[retry_notifications] ${q.name} failed:`, err);
     }
-  } catch (err) {
-    console.error("[retry_notifications] Unexpected error:", err);
   }
-}
 
-export default retryNotifications;
+  console.log(
+    `[retry_notifications] requeued: ${JSON.stringify(summary)}`,
+  );
+  return { success: true, data: summary };
+}

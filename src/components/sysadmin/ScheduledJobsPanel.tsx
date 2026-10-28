@@ -29,7 +29,6 @@ import {
 } from "lucide-react";
 import { useUIStore } from "@/stores/uiStore";
 import { useAuthStore } from "@/stores/authStore";
-import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { useApi } from "@/hooks/useApi";
 import {
   describeCron,
@@ -363,7 +362,6 @@ const api = useApi();
   }, []);
 
   useEffect(() => { void load(); }, [load]);
-  useLiveRefresh(load, { intervalMs: 30_000 });
 
   /* ── Derived ──────────────────────────────────────────────────────── */
   const kpis = useMemo(() => {

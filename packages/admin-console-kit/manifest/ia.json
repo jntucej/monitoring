@@ -108,7 +108,10 @@
       "icon": "UtensilsCrossed",
       "role": "admin",
       "pages": [
-        { "label": "Mess Management", "href": "/admin/mess", "icon": "UtensilsCrossed" }
+        { "label": "Today", "href": "/admin/mess/today", "icon": "UtensilsCrossed" },
+        { "label": "Menu Items", "href": "/admin/mess/items", "icon": "UtensilsCrossed" },
+        { "label": "Meal Days", "href": "/admin/mess/days", "icon": "CalendarDays" },
+        { "label": "Analytics", "href": "/admin/mess/analytics", "icon": "BarChart3" }
       ]
     },
     {
@@ -152,6 +155,8 @@
     }
   ],
   "personal": [
-    { "id": "profile", "label": "My Profile", "href": "/admin/profile", "icon": "UserCog" }
+    { "id": "profile", "label": "My Profile", "href": "/admin/profile/personal", "icon": "UserCog" },
+    { "id": "profile-security", "label": "Security", "href": "/admin/profile/security", "icon": "Shield" },
+    { "id": "profile-appearance", "label": "Appearance", "href": "/admin/profile/appearance", "icon": "Palette" }
   ]
 }

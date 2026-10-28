@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import {
   Activity,
@@ -96,7 +95,6 @@ const api = useApi();
   useEffect(() => {
     fetchTelemetry();
   }, [fetchTelemetry]);
-  usePolling(() => { fetchTelemetry(); }, { intervalMs: 30_000 });
 
   return (
     <div className="space-y-8">

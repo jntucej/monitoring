@@ -33,11 +33,9 @@ import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { EmptyState } from "@/components/shared/EmptyState";
 
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
-import { usePolling } from "@/hooks/usePolling";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 
-import { POLL_INTERVALS } from "@/config/app-constants";
 import { getAuthHeaders } from "@/lib/utils";
 import { fmtInt, fmtRelative } from "@/lib/formatters";
 
@@ -128,14 +126,10 @@ export function SchedulingPanel() {
     { ttlMs: 30_000 },
   );
 
-  usePolling(
-    async () => {
-      try { await suggestions.refresh(); }
-      catch (e) { addToast(e instanceof Error ? e.message : "Refresh failed"); }
-    },
-    { intervalMs: POLL_INTERVALS.slow, enabled: true },
-  );
-
+  // useApiResource already fires the initial fetch on mount and re-validates
+  // on TTL expiry when visible. No separate usePolling timer on top of that —
+  // two overlapping pollers on the same endpoint was the exact "requests
+  // per minute" spike pattern this app has been fighting.
   const rows = useMemo(() => {
     const all = suggestions.data?.suggestions ?? [];
     return all

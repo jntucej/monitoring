@@ -87,7 +87,12 @@ export function GlassProvider({
   const [displayMode, setDisplayModeState] = useState<DisplayMode>("indoor");
 
   // --- LIVE TELEMETRY & SINE WAVE REFRESH STATE ---
-  const [isLiveStream, setIsLiveStream] = useState<boolean>(true);
+  // Defaults OFF: the "Live" toggle gates useLiveRefresh's 30-second
+  // auto-poll. Leaving it on by default made every roster page that wired
+  // useLiveRefresh hammer its API endpoint into the rate-limit budget the
+  // moment a user opened it — the 429 flood the user was seeing. Pages
+  // that genuinely need a live feed can still flip it on via the toggle.
+  const [isLiveStream, setIsLiveStream] = useState<boolean>(false);
   const [isLiveLoading, setIsLiveLoading] = useState<boolean>(false);
 
   const triggerLiveRefresh = useCallback(() => {

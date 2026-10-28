@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { Server, RefreshCw, ExternalLink } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
-import { usePolling } from "@/hooks/usePolling";
 
 interface PromSample {
   metric: Record<string, string>;
@@ -73,11 +72,12 @@ export function DockerFleetPanel() {
     }
   }, []);
 
-  // Initial load + visibility-aware polling (no raw setInterval)
+  // Initial load only — the fleet status changes on admin action (deploy/
+  // restart), not continuously, so no auto-poll. The 30-second timer was
+  // hammering the docker-status endpoint every minute this panel was open.
   useEffect(() => {
     load().catch(() => {});
   }, [load]);
-  usePolling(load, { intervalMs: 30_000 });
 
   const fmtMem = (bytes: number) => {
     const mib = bytes / 1024 / 1024;

@@ -1,7 +1,7 @@
 "use client";
 
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { EnrollmentCodeModal } from "@/components/sysadmin/EnrollmentCodeModal";
@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { useApi } from "@/hooks/useApi";
 import { useUIStore } from "@/stores/uiStore";
-import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { BulkUserImportModal } from "@/components/sysadmin/BulkUserImportModal";
 import { ROLL_DEPT_CODES, parseRollNumber, getStudentYearFromRoll, getDepartmentFromRoll, resolveCourseType } from "@/lib/rollNumber";
 
@@ -157,25 +156,18 @@ const api = useApi();
     setLoading(true);
     setLoadError(null);
     try {
-      // Force cache: 'no-store' is already here, but let's add a timestamp to ensure zero caching
-      const res = await fetch(`/api/students?t=${Date.now()}`, { 
-        headers: api.getHeaders(), 
+      // Load the roster once per refresh. The empty state is legitimate when
+      // the DB has 0 students (a bulk import is pending), so no auto-retry —
+      // the retry-on-empty path was compounding the 429s this page was
+      // getting, and it was a leftover from the Supabase-cache era.
+      const res = await fetch("/api/students", {
+        headers: api.getHeaders(),
         cache: "no-store",
       });
       const json = await res.json().catch(() => ({ success: false, error: { message: "Invalid server response." } }));
       if (res.ok && json.success && Array.isArray(json.data)) {
         setStudents(json.data);
       } else {
-        // If data is empty but res is ok, trigger a one-time automatic retry to bypass transient cache
-        if (Array.isArray(json.data) && json.data.length === 0) {
-           console.warn("API returned empty data, attempting one-time quiet retry...");
-           const retryRes = await fetch(`/api/students?t=${Date.now()}&retry=1`, { headers: api.getHeaders(), cache: "no-store" });
-           const retryJson = await retryRes.json().catch(() => ({}));
-           if (retryRes.ok && retryJson.success && Array.isArray(retryJson.data)) {
-              setStudents(retryJson.data);
-              return;
-           }
-        }
         const msg = json.error?.message || `Failed to load student roster (HTTP ${res.status})`;
         setLoadError(msg);
         addToast({ variant: "error", title: "Error", message: msg });
@@ -187,8 +179,12 @@ const api = useApi();
     } finally { setLoading(false); }
   }, [addToast]);
 
-  // Live toggle drives refetch; polls every 30s while Live.
-  useLiveRefresh(loadStudents, { intervalMs: 30000 });
+  // Load once on mount. The roster is not a live feed (students change only
+  // on admin action), so no auto-polling — the 30-second interval used to
+  // flood /api/students into its 429 budget. Manual refresh still works:
+  // the page's Refresh button and every mutation (create/update/delete)
+  // calls loadStudents directly.
+  useEffect(() => { loadStudents(); }, [loadStudents]);
 
   const handleCreateStudent = async (e: React.FormEvent) => {
     e.preventDefault();

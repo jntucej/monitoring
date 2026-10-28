@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
-import { DoorOpen, ClipboardList, GraduationCap, BookOpen, User } from "lucide-react";
+import { DoorOpen, ClipboardList, GraduationCap, BookOpen, User, Bell, UtensilsCrossed } from "lucide-react";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { AuthGuard } from "@/components/shared/AuthGuard";
@@ -56,10 +56,27 @@ export default function StudentConsoleLayout({
                 label: "Campus Life",
                 icon: BookOpen,
                 children: [
-                  { label: "Mess", href: "/student/mess" },
                   { label: "Mess Bill", href: "/student/mess-bill" },
                   { label: "Complaints", href: "/student/complaints" },
                   { label: "Anti-Ragging", href: "/student/anti-ragging" },
+                ],
+              },
+              {
+                id: "mess",
+                label: "Mess",
+                icon: UtensilsCrossed,
+                children: [
+                  { label: "Meal Reviews", href: "/student/mess/reviews" },
+                  { label: "Special Items", href: "/student/mess/special" },
+                ],
+              },
+              {
+                id: "notifications",
+                label: "Notifications",
+                icon: Bell,
+                children: [
+                  { label: "Alerts", href: "/student/notifications/alerts" },
+                  { label: "Announcements", href: "/student/notifications/announcements" },
                 ],
               },
               {
@@ -70,7 +87,6 @@ export default function StudentConsoleLayout({
                   { label: "Profile", href: "/student/profile" },
                   { label: "Profile Security", href: "/student/profile-security" },
                   { label: "Digital ID", href: "/student/id" },
-                  { label: "Notifications", href: "/student/notifications" },
                 ],
               },
             ]}

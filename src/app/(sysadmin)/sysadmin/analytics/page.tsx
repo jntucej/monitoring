@@ -15,7 +15,6 @@ import {
 import { ChartTypeSwitcher } from "@/components/admin/shared/ChartTypeSwitcher";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
-import { usePolling } from "@/hooks/usePolling";
 
 /**
  * SysAdmin Analytics — ported from the admin console so the root operator has
@@ -83,7 +82,6 @@ function SysAdminAnalyticsInner() {
     catch (e) { setError(e instanceof Error ? e.message : "Failed to load analytics"); }
   }, [range]);
   useEffect(() => { load(); }, [load]);
-  usePolling(load, { intervalMs: 60_000 });
 
   const trafficSeries: SeriesDef[] = [
     { key: "entries", label: "Entries", color: CHART_PALETTE.primary, type: "area" },

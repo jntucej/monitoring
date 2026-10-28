@@ -52,24 +52,31 @@ echo "✓ Installed /etc/cron.d/gate-backup"
 #    Skipped entirely if CRON_SECRET is not set (the routes will 401 anyway).
 # ----------------------------------------------------------------------------
 CRON_SECRET="${CRON_SECRET:-$(grep -h 'CRON_SECRET=' "${BASE_DIR}/env/production.env" 2>/dev/null | head -1 | cut -d= -f2- || true)}"
+CRON_BASE="${CRON_BASE:-https://monitor.ucej.in}"
 
 if [ -n "$CRON_SECRET" ]; then
   cat > /etc/cron.d/gate-jobs <<EOF
 SHELL=/bin/bash
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
+# Cron jobs run on the host, not inside the docker network: the web
+# container's :3000 is NOT published (caddy proxies to it internally), so
+# POSTs must go through caddy's published https port. Caddy forwards
+# /api/* to the app with the x-cron-secret header intact.
+CRON_BASE="${CRON_BASE:-https://monitor.ucej.in}"
+
 # api_metrics / audit rotation — daily 03:30 (purges api_metrics past
 # API_METRICS_RETENTION_DAYS, default 7d, so the table cannot grow unbounded)
-30 3 * * *  root  curl -s -X POST -H "x-cron-secret: ${CRON_SECRET}" \\
-                http://localhost:3000/api/cron/audit-rotate >> /var/log/gate-cron.log 2>&1
+30 3 * * *  root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \\
+                ${CRON_BASE}/api/cron/audit-rotate >> /var/log/gate-cron.log 2>&1
 
 # Expire stale gate passes — every 15 min
-*/15 * * * * root  curl -s -X POST -H "x-cron-secret: ${CRON_SECRET}" \\
-                http://localhost:3000/api/cron/expire-passes >> /var/log/gate-cron.log 2>&1
+*/15 * * * * root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \\
+                ${CRON_BASE}/api/cron/expire-passes >> /var/log/gate-cron.log 2>&1
 
 # SLA breach sweep — hourly
-0 * * * *    root  curl -s -X POST -H "x-cron-secret: ${CRON_SECRET}" \\
-                http://localhost:3000/api/cron/sla-breach >> /var/log/gate-cron.log 2>&1
+0 * * * *    root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \\
+                ${CRON_BASE}/api/cron/sla-breach >> /var/log/gate-cron.log 2>&1
 EOF
   chmod 600 /etc/cron.d/gate-jobs
   echo "✓ Installed /etc/cron.d/gate-jobs (mode 600 — contains CRON_SECRET)"
