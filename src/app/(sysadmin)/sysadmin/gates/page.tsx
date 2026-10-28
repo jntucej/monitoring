@@ -10,6 +10,7 @@ import {
   DoorOpen, Plus, Pencil, Power, Trash2, Search, UserCog,
   Building2, ShieldCheck, X, KeyRound, Monitor,
 } from "lucide-react";
+import { GateClaimCodePanel } from "@/components/supervisor/GateClaimCodePanel";
 
 interface Gate {
   id: string;
@@ -373,6 +374,18 @@ const api = useApi();
             </div>
           </div>
         )}
+
+        {/* Gate-claim codes (OTP strings the operator enters to self-assign) */}
+        <WidgetBoundary title="Gate-Claim Codes (OTP assign)">
+          <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4 sm:p-5">
+            <p className="text-xs text-slate-400 mb-4">
+              Generate a one-time string code for a gate. Hand it to an operator (in person, read aloud, or via chat) —
+              they enter it at the kiosk / operator console and get assigned to that gate automatically. No other
+              admin action required.
+            </p>
+            <GateClaimCodePanel />
+          </div>
+        </WidgetBoundary>
 
         {/* Kiosk default operator designation */}
         <WidgetBoundary title="Gate-Kiosk Default Session">
