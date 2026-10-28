@@ -382,15 +382,30 @@
         {
           "id": "mess",
           "route": "mess",
-          "title": "Mess Management",
-          "kind": "tabbed",
-          "pollMs": 60000,
-          "tabs": [
-            "mess/today",
-            "mess/items",
-            "mess/days",
-            "mess/analytics"
-          ]
+          "title": "Mess Today",
+          "kind": "table",
+          "pollMs": 60000
+        },
+        {
+          "id": "mess-items",
+          "route": "mess/items",
+          "title": "Mess Menu Items",
+          "kind": "table",
+          "pollMs": 60000
+        },
+        {
+          "id": "mess-days",
+          "route": "mess/days",
+          "title": "Mess Meal Days",
+          "kind": "table",
+          "pollMs": 60000
+        },
+        {
+          "id": "mess-analytics",
+          "route": "mess/analytics",
+          "title": "Mess Analytics",
+          "kind": "table",
+          "pollMs": 60000
         }
       ]
     },
