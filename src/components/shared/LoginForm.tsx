@@ -233,7 +233,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
         onSubmit={handleFormSubmit}
         action="/api/auth/login"
         method="POST"
-        autoComplete="on"
+        autoComplete="off"
         noValidate
         className="space-y-4"
       >
