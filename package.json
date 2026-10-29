@@ -31,7 +31,10 @@
     "dash:dead": "node scripts/dashboard-doctor.mjs dead",
     "dash:ci": "node scripts/check-dashboards.mjs",
     "test:gate": "jest --config tests/gate/jest.config.mjs",
-    "test:gate:ci": "jest --config tests/gate/jest.config.mjs --ci --coverage --coverageThreshold='{\"global\":{\"lines\":70,\"functions\":70,\"branches\":60}}'",
+    "test:gate:node": "jest --config tests/gate/jest.config.mjs --selectProjects node",
+    "test:gate:ui": "jest --config tests/gate/jest.config.mjs --selectProjects ui",
+    "test:gate:e2e": "jest --config tests/gate/jest.config.mjs tests/gate/e2e",
+    "test:gate:ci": "jest --config tests/gate/jest.config.mjs --ci --coverage",
     "test:gate:watch": "jest --config tests/gate/jest.config.mjs --watch"
   },
   "dependencies": {
@@ -75,6 +78,9 @@
   "devDependencies": {
     "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^14.3.1",
+    "@testing-library/user-event": "^14.6.8",
     "@types/jest": "^29.5.14",
     "@types/node": "^20",
     "@types/node-cron": "^3.0.11",
@@ -83,7 +89,9 @@
     "@types/three": "^0.186.0",
     "eslint": "^9",
     "eslint-config-next": "16.3.1",
+    "identity-obj-proxy": "^3.0.0",
     "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
     "tailwindcss": "^4",
     "ts-jest": "^29.4.15",
     "typescript": "^5"

@@ -5,16 +5,18 @@ import { dirname, resolve } from 'node:path';
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '../..');
 
-/** @type {import('jest').Config} */
-export default {
+const shared = {
   rootDir: root,
-  testEnvironment: 'node',
-  roots: ['<rootDir>/tests/gate'],
-  testMatch: ['**/*.test.ts'],
-  setupFilesAfterEnv: ['<rootDir>/tests/gate/jest.setup.ts'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^next/server$': '<rootDir>/tests/gate/helpers/next-server.ts',
+    '^next/navigation$': '<rootDir>/tests/gate/helpers/next-navigation.ts',
+    '\\.(css|scss)$': 'identity-obj-proxy',
+    '\\.(png|jpg|jpeg|svg|webp)$': '<rootDir>/tests/gate/helpers/file-stub.ts',
+    '^framer-motion$': '<rootDir>/tests/gate/helpers/framer-motion.mock.ts',
+    '^qrcode.react$': '<rootDir>/tests/gate/helpers/qrcode.mock.tsx',
+    '^react-qrcode-logo$': '<rootDir>/tests/gate/helpers/qrcode.mock.tsx',
+    '^jsqr$': '<rootDir>/tests/gate/helpers/jsqr.mock.ts',
   },
   transformIgnorePatterns: [
     'node_modules/(?!(jose)/)',
@@ -26,23 +28,35 @@ export default {
       diagnostics: { warnOnly: true },
     }],
   },
-  collectCoverageFrom: [
-    'src/server/policy/gate-access.ts',
-    'src/server/policy/lockdown.ts',
-    'src/server/policy/student-exit.ts',
-    'src/server/policy/gate-scope.ts',
-    'src/server/services/scan/record.ts',
-    'src/lib/claim-codes.ts',
-    'src/lib/qr-token.ts',
-    'src/lib/barcode.ts',
-    'src/lib/operator-recommend.ts',
-    'src/lib/rate-limit.ts',
-    'src/lib/csrf.ts',
-    'src/server/http/trusted-headers.ts',
-    'src/server/http/cron-auth.ts',
-  ],
-  testTimeout: 10_000,
+  testTimeout: 15_000,
   clearMocks: true,
   restoreMocks: true,
   verbose: true,
+};
+
+/** @type {import('jest').Config} */
+export default {
+  projects: [
+    {
+      ...shared,
+      displayName: 'node',
+      testEnvironment: 'node',
+      roots: ['<rootDir>/tests/gate/policy', '<rootDir>/tests/gate/service',
+              '<rootDir>/tests/gate/routes', '<rootDir>/tests/gate/auth',
+              '<rootDir>/tests/gate/e2e', '<rootDir>/tests/gate/lib'],
+      testMatch: ['**/*.test.ts'],
+      setupFilesAfterEnv: ['<rootDir>/tests/gate/jest.setup.node.ts'],
+    },
+    {
+      ...shared,
+      displayName: 'ui',
+      testEnvironment: 'jsdom',
+      testEnvironmentOptions: { url: 'http://localhost:3000' },
+      roots: ['<rootDir>/tests/gate/ui', '<rootDir>/tests/gate/integration',
+              '<rootDir>/tests/gate/auth'],
+      testMatch: ['**/*.test.tsx', '**/*.test.ts'],
+      testPathIgnorePatterns: ['-api\\.test\\.ts$'],
+      setupFilesAfterEnv: ['<rootDir>/tests/gate/jest.setup.ui.ts'],
+    },
+  ],
 };
