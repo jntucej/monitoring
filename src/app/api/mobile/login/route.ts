@@ -13,7 +13,7 @@ function uniformFailure() {
   );
 }
 
-export async function handlePost(req: NextRequest) {
+async function handlePost(req: NextRequest) {
   if (process.env.MOBILE_LOGIN_ENABLED === "false") {
     return NextResponse.json(
       { success: false, error: { code: "DISABLED", message: "Mobile login is temporarily disabled." } },
