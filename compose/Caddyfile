@@ -1,0 +1,38 @@
+{
+    admin off
+    log {
+        output stdout
+        format json
+    }
+}
+
+:80 {
+    log {
+        output stdout
+        format json
+    }
+
+    header {
+        X-Frame-Options        "DENY"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy        "strict-origin-when-cross-origin"
+        Permissions-Policy     "camera=(self), microphone=(self), geolocation=(self)"
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' wss: https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
+        Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        -Server
+        -X-Powered-By
+        -X-Client-IP
+        -X-Forwarded-For
+        -X-Real-IP
+        -X-Auth-User
+        -X-Auth-Timestamp
+        -X-Auth-Signature
+    }
+
+    reverse_proxy web:3000 {
+        flush_interval -1
+        header_up X-Client-IP {remote_host}
+        header_up X-Real-IP   {remote_host}
+        header_up X-Forwarded-Proto https
+    }
+}
