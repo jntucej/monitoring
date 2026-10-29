@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState, useCallback } from "react";
 import { Activity, GraduationCap, UserCheck, Briefcase, HardHat, Users } from "lucide-react";
 import Link from "next/link";
@@ -16,7 +18,7 @@ interface CampusStats {
 }
 
 export function CampusStatusBar() {
-const api = useApi();
+  const api = useApi();
 
   const [stats, setStats] = useState<CampusStats | null>(null);
   const [loading, setLoading] = useState(true);

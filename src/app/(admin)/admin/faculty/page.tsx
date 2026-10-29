@@ -1,5 +1,6 @@
-import { POLL_INTERVALS } from "@/config/app-constants";
+"use client";
 
+import { POLL_INTERVALS } from "@/config/app-constants";
 
 import React, { useState } from "react";
 import { AlertCircle } from "lucide-react";
