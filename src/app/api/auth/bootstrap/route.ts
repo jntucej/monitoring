@@ -95,13 +95,17 @@ async function handlePost(req: NextRequest) {
   const ok = await compare(String(code).trim().toUpperCase(), row.code_hash);
   if (!ok) return await rejectAudit(user);
 
-  const { data: burned } = await svc
-    .from("enrollment_codes")
-    .update({ used_at: new Date().toISOString() })
-    .eq("id", row.id)
-    .is("used_at", null)
-    .select("id");
-  if (!burned || burned.length === 0) return await rejectAudit(user);
+  const burnRes = await query(
+    `UPDATE enrollment_codes
+        SET used_at = NOW()
+      WHERE id = $1 AND used_at IS NULL
+      RETURNING id`,
+    [row.id]
+  );
+  // Atomic burn: exactly one concurrent caller can flip used_at IS NULL → set.
+  // (Mirrors the pattern in mobile/[...path]/route.ts; the PostgREST update
+  // above is read-then-write, which lets two requests burn the same row.)
+  if (burnRes.rowCount !== 1) return await rejectAudit(user);
 
   const pwHash = await hashPassword(newPassword);
   const pinHash = await hash(newPin, 10);
