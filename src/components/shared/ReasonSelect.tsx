@@ -44,7 +44,7 @@ export function ReasonSelect({
         const headers = api.getHeaders();
         const [exitReasonsRes, customReasonsRes] = await Promise.all([
           fetch("/api/config/exit-reasons", { headers }).catch(() => null),
-          fetch(`/api/config/custom-reasons?workflowType=${encodeURIComponent(workflowType)}`, {
+          fetch(`/api/config/custom-reasons?workflow_type=${encodeURIComponent(workflowType)}`, {
             headers,
           }).catch(() => null),
         ]);

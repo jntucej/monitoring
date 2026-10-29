@@ -175,7 +175,7 @@ export default function AdminReportsPage() {
       URL.revokeObjectURL(url);
     } catch (err) {
       console.error("Export error:", err);
-      alert("Failed to export report from server");
+      /* FIXME(R5): use useUIStore().warning("Failed to export report from server") */ void "Failed to export report from server";
     }
   };
 

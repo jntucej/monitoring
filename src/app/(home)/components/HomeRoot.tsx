@@ -83,7 +83,7 @@ export function HomeRoot({ children }: { children: ReactNode }) {
       data-home=""
       data-home-tier={tier}
       data-home-interacting={interacting ? "true" : undefined}
-      className="home-root min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)]"
+      className="home-root min-h-dvh bg-[var(--bg-base)] text-[var(--text-primary)]"
     >
       <HomeGlossyBackground tier={tier} />
       {children}

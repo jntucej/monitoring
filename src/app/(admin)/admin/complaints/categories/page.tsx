@@ -1,3 +1,4 @@
+"use client";
 // src/app/api/admin/complaints/categories/page.tsx
 "use client";
 

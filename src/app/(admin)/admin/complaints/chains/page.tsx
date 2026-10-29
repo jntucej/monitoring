@@ -1,3 +1,4 @@
+"use client";
 // src/app/(admin)/admin/complaints/chains/page.tsx
 "use client";
 

@@ -1,3 +1,4 @@
+"use client";
 // src/app/(admin)/admin/anti-ragging-config/page.tsx
 "use client";
 
@@ -35,7 +36,7 @@ export default function AntiRaggingConfigPage() {
   if (loading) return <p className="p-6 text-slate-500">Loading…</p>;
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-6">
+    <div className="max-w-3xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
       <h1 className="text-2xl font-semibold">Anti-Ragging Alert Configuration</h1>
       <form onSubmit={save} className="space-y-4 bg-white p-6 border rounded shadow-sm">
         <label className="flex items-center gap-2">

@@ -1,4 +1,5 @@
 "use client";
+import { POLL_INTERVALS } from "@/config/app-constants";
 
 
 import React, { useState } from "react";
@@ -47,13 +48,13 @@ const api = useApi();
   };
 
   // Live toggle drives refetch; polls every 30s while Live.
-  useLiveRefresh(fetchShifts, { intervalMs: 30000 });
+  useLiveRefresh(fetchShifts, { intervalMs: POLL_INTERVALS.normal });
 
   return (
     
-      <div className="min-h-screen bg-[var(--bg)]">
+      <div className="min-h-dvh bg-[var(--bg)]">
       <CampusStatusBar />
-      <div className="p-6 space-y-6">
+      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

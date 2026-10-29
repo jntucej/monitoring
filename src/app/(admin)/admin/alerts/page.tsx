@@ -17,16 +17,8 @@ const SEVERITY_STYLES: Record<string, { bg: string; text: string; label: string 
   low: { bg: "bg-slate-500/10 border-slate-500/30", text: "text-slate-400", label: "Low Priority" },
 };
 
-function timeAgo(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime();
-  const m = Math.floor(diff / 60_000);
-  if (m < 1) return "Just now";
-  if (m < 60) return `${m} min ago`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h} hour${h === 1 ? "" : "s"} ago`;
-  const d = Math.floor(h / 24);
-  return `${d} day${d === 1 ? "" : "s"} ago`;
-}
+import { fmtRelative } from "@/lib/formatters";
+const timeAgo = fmtRelative;
 
 function AdminAlertsInner() {
   const [alerts, setAlerts] = useState<Alert[]>([]);

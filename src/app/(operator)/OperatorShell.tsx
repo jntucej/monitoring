@@ -87,7 +87,7 @@ const RAIL: Array<{
  * deeper in (operator)/operator/layout.tsx. A mobile operator at /gate/MAIN
  * had no way to reach /operator/transactions or /operator/exceptions.
  *
- * h-dvh (not h-screen) so the container tracks the real visible viewport on
+ * h-dvh (not h-dvh) so the container tracks the real visible viewport on
  * iOS (100vh includes the URL-bar area, which would push the scan desk's
  * bottom controls below the fold on a phone).
  */

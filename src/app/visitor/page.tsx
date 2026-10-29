@@ -12,7 +12,7 @@ const CARDS = [
 
 export default function VisitorLandingPage() {
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-4 sm:space-y-6">
       <header className="space-y-1">
         <h1 className="text-2xl font-bold">Visitor Portal</h1>
         <p className="text-sm text-[var(--text-muted)]">

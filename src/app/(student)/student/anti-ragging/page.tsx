@@ -1,3 +1,4 @@
+"use client";
 // src/app/(student)/student/anti-ragging/page.tsx
 "use client";
 

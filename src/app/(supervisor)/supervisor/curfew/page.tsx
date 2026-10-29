@@ -1,4 +1,5 @@
 "use client";
+import { POLL_INTERVALS } from "@/config/app-constants";
 
 import { Suspense, useCallback, useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
@@ -50,7 +51,7 @@ function CurfewRosterInner() {
     }
   }, []);
 
-  useLiveRefresh(loadData, { intervalMs: 30000 });
+  useLiveRefresh(loadData, { intervalMs: POLL_INTERVALS.normal });
 
   const handleAddStrike = (studentId: string) => {
     setStudentStrikes((prev) => ({ ...prev, [studentId]: (prev[studentId] || 0) + 1 }));

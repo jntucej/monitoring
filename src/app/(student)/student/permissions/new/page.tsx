@@ -14,7 +14,7 @@ import { PermissionRequestForm } from "@/components/student/PermissionRequestFor
 export default function NewPermissionPage() {
   return (
     <AuthGuard allowedRoles={["student"]}>
-      <div className="p-4 md:p-6 space-y-6 max-w-3xl mx-auto">
+      <div className="p-4 md:p-4 sm:p-6 space-y-4 sm:space-y-6 max-w-3xl mx-auto">
         {/* Page title — global DynamicHeader renders the app header */}
         <div className="space-y-1">
           <div className="flex items-center gap-2">

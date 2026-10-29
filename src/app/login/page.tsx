@@ -6,7 +6,7 @@ export default function CinematicLoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#05070b] text-slate-400">
+        <div className="min-h-dvh flex items-center justify-center bg-[#05070b] text-slate-400">
           Loading...
         </div>
       }

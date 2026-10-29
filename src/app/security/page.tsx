@@ -268,7 +268,7 @@ export default function SecurityPage() {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] p-4 md:p-6 space-y-4 max-w-5xl mx-auto select-none">
+      <div className="min-h-dvh bg-[var(--bg-base)] text-[var(--text-primary)] p-4 md:p-6 space-y-4 max-w-5xl mx-auto select-none">
         
         {/* Minimal Header */}
         <div className="flex items-center justify-between gap-3 border-b border-[var(--border)] pb-3">

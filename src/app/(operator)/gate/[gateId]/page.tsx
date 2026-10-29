@@ -127,7 +127,7 @@ function OperatorPageInner() {
   useEffect(() => {
     checkLockdown();
   }, [checkLockdown]);
-  usePolling(checkLockdown, { intervalMs: 10000 });
+  usePolling(checkLockdown, { intervalMs: 10000 /* R15: name this profile */ });
   
   // Redirect special routing path shortcuts (/gate/history & /gate/manual) to operators dynamic gate path
   useEffect(() => {

@@ -80,7 +80,7 @@ function FacultyAttendanceInner() {
   const deptCode = user?.departmentId ? ` · dept ${user.departmentId}` : "";
 
   return (
-    <div className="min-h-screen bg-[#0d1220] p-4 md:p-6 space-y-6">
+    <div className="min-h-dvh bg-[#0d1220] p-4 md:p-4 sm:p-6 space-y-4 sm:space-y-6">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

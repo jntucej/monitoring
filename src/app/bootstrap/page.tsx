@@ -172,7 +172,7 @@ export default function BootstrapPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center text-[var(--text-muted)] text-xs">
+        <div className="min-h-dvh flex items-center justify-center text-[var(--text-muted)] text-xs">
           Loading…
         </div>
       }

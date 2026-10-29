@@ -24,7 +24,7 @@ function PermissionTicketInner() {
   }
 
   return (
-    <div className="p-4 md:p-6 max-w-5xl mx-auto space-y-6 min-w-0">
+    <div className="p-4 md:p-4 sm:p-6 max-w-5xl mx-auto space-y-4 sm:space-y-6 min-w-0">
       <PermissionDetailPanel
         ticket={ticket}
         isStandalonePage

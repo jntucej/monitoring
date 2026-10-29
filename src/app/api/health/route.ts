@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
  * Returns exactly one field: `status`. This is what external uptime
  * monitors, Cloudflare health checks, and the docker-compose healthcheck
  * need. Nothing else — no uptime, no component latencies, no gateway
- * counts, no active sessions, no request/error rates, no alert UUIDs.
+ * counts, no active session counts, no request/error rates, no alert UUIDs.
  *
  * The full diagnostic payload is now at /api/admin/health/full and
  * requires an admin/sysadmin session.

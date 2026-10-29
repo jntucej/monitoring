@@ -87,7 +87,7 @@ export function ProfilePersonalPanel() {
   const initials = profile.name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#070B14] text-[var(--text-primary)]">
+    <div className="relative min-h-dvh overflow-hidden bg-[#070B14] text-[var(--text-primary)]">
       <div aria-hidden="true" className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(139,92,246,0.14), transparent 55%), radial-gradient(ellipse at 50% 100%, rgba(139,92,246,0.14), transparent 60%)" }} />
       <ParticleField color="#c4b5fd" />
       <AmbientGlow color="rgba(139,92,246,0.18)" />
