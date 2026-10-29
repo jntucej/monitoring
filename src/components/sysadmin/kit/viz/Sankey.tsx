@@ -104,14 +104,14 @@ export function Sankey({
         return (
           <g key={`link-${i}`}>
             <path
-              d={g.d}
+              d={g.d || "M 0 0 L 0 0"}
               fill="none"
               stroke={stroke}
               strokeOpacity={0.18}
               strokeWidth={width}
             />
             <path
-              d={g.d}
+              d={g.d || "M 0 0 L 0 0"}
               fill="none"
               stroke={stroke}
               strokeOpacity={0.55}

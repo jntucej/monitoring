@@ -56,7 +56,9 @@ export function FlowMap({ nodes, edges, height = 220, onNodeClick, className }: 
         const stroke = statusColor(e.status ?? "neutral");
         const traffic = e.traffic ?? 0.5;
         const dur = `${Math.max(0.8, 2.2 - traffic * 1.5)}s`;
-        const d = `M ${a.x + NODE_R} ${a.y} C ${a.x + (b.x - a.x) / 2} ${a.y}, ${b.x - (b.x - a.x) / 2} ${b.y}, ${b.x - NODE_R} ${b.y}`;
+        const d = Number.isFinite(a.x) && Number.isFinite(b.x) 
+          ? `M ${a.x + NODE_R} ${a.y} C ${a.x + (b.x - a.x) / 2} ${a.y}, ${b.x - (b.x - a.x) / 2} ${b.y}, ${b.x - NODE_R} ${b.y}`
+          : "M 0 0 L 0 0";
         return (
           <g key={`${e.from}-${e.to}-${i}`}>
             <path d={d} fill="none" stroke={stroke} strokeOpacity={0.25} strokeWidth={2} />
