@@ -70,6 +70,15 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
       );
     }
 
+    // §2 gate scoping. Supervisors are scoped to their supervised gates;
+    // admin / sysadmin / principal are campus-wide and see every gate.
+    // Fail-closed: a supervisor with no assigned gates sees an empty view,
+    // never all gates.
+    const isSupervisor = auth.role === "supervisor";
+    const scopedGates = isSupervisor
+      ? (auth.supervisedGates ?? [])
+      : null; // null = campus-wide
+
     const [permRes, alertRes, decisionRes] = await Promise.all([
       query<EscalatedPermissionRow>(
         `SELECT pr.ticket_number,
@@ -86,21 +95,42 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
           ORDER BY pr.sla_deadline ASC NULLS LAST
           LIMIT 50`
       ),
-      query<ActiveAlertRow>(
-        `SELECT a.id,
-                a.severity,
-                a.title,
-                a.message,
-                a.gate_id,
-                g.name AS gate_name,
-                a.timestamp
-           FROM alerts a
-           LEFT JOIN gates g ON g.id = a.gate_id
-          WHERE a.resolved = FALSE
-            AND a.severity IN ('critical', 'high')
-          ORDER BY a.timestamp DESC
-          LIMIT 50`
-      ),
+      scopedGates && scopedGates.length > 0
+        ? query<ActiveAlertRow>(
+            `SELECT a.id,
+                    a.severity,
+                    a.title,
+                    a.message,
+                    a.gate_id,
+                    g.name AS gate_name,
+                    a.timestamp
+               FROM alerts a
+               LEFT JOIN gates g ON g.id = a.gate_id
+              WHERE a.resolved = FALSE
+                AND a.severity IN ('critical', 'high')
+                AND a.gate_id = ANY($1::uuid[])
+              ORDER BY a.timestamp DESC
+              LIMIT 50`,
+            [scopedGates]
+          )
+        : scopedGates && scopedGates.length === 0
+          ? // Fail-closed: unassigned supervisor → no gate-scoped alerts.
+            Promise.resolve({ rows: [] } as { rows: ActiveAlertRow[] })
+          : query<ActiveAlertRow>(
+            `SELECT a.id,
+                    a.severity,
+                    a.title,
+                    a.message,
+                    a.gate_id,
+                    g.name AS gate_name,
+                    a.timestamp
+               FROM alerts a
+               LEFT JOIN gates g ON g.id = a.gate_id
+              WHERE a.resolved = FALSE
+                AND a.severity IN ('critical', 'high')
+              ORDER BY a.timestamp DESC
+              LIMIT 50`
+          ),
       query<DecisionRow>(
         `SELECT action,
                 user_name,
@@ -124,6 +154,8 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
         escalatedPermissions,
         activeAlerts,
         recentDecisions,
+        // Echo the scoping so the UI can tell campus-wide vs zone-scoped.
+        scope: scopedGates === null ? "campus-wide" : "supervised-gates",
         counts: {
           escalated: escalatedPermissions.length,
           alerts: activeAlerts.length,

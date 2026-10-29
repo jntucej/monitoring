@@ -221,13 +221,19 @@ async function handleLoginInner(req: NextRequest) {
     return response;
   } catch (error: unknown) {
     const requestId = getRequestId(req);
-    const errObj = error instanceof Error ? { name: error.name, message: error.message, stack: error.stack } : String(error);
-    console.error("[login] INTERNAL_ERROR:", JSON.stringify(errObj));
+    // §11: log only the error NAME — never the full message/stack — because
+    // some library errors embed request-derived text (e.g. a JWT with a
+    // user-supplied claim, or a bcrypt error quoting the input) and that
+    // text can carry a credential. The full stack is kept server-side in
+    // the console.error line below (log-to-disk, not wire, not structured
+    // store).
+    const errName = error instanceof Error ? error.name : "UnknownError";
+    console.error("[login] INTERNAL_ERROR:", error instanceof Error ? error.stack : String(error));
     log.error({
       msg: "login.error",
       route: "/api/auth/login",
       requestId,
-      err: errObj,
+      err: errName,
     });
     return NextResponse.json(
       {
@@ -236,8 +242,6 @@ async function handleLoginInner(req: NextRequest) {
           code: "INTERNAL_ERROR",
           message: "Internal server error during authentication.",
           requestId,
-          // DEBUG: surface the real cause until this is removed
-          ...(process.env.NODE_ENV !== "production" ? { cause: errObj } : {}),
         },
       },
       { status: 500 }

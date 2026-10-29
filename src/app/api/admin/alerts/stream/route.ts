@@ -2,23 +2,41 @@ import { type NextRequest } from "next/server";
 import type { AuthContext } from "@/lib/authContext";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
+import { getRoleTier } from "@/lib/alert-hierarchy";
+import type { Alert } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 45;
 
-interface AlertStreamRow {
-  id: string;
-  severity: string;
-  title: string;
-  message: string;
-  gate_id: string | null;
-  user_unique_id: string | null;
-  timestamp: string;
-  resolved: boolean;
+// §5 alert-tier visibility. The stream previously pushed every unresolved
+// alert row to every connected client. Now each alert is filtered by the
+// caller's role tier + visibleToRoles before it is ever enqueued — a student
+// or low-tier role can no longer receive critical-incident alert payloads
+// that the non-stream /api/admin/alerts route would have hidden from them.
+
+// The `alerts` table has no min_tier / visible_to_roles columns — those
+// gates live in the in-memory alert catalogue (lib/types Alert) consumed by
+// the non-stream /api/admin/alerts route. Reuse the same helpers so both
+// routes agree on what is visible.
+function callerTier(auth: { role: string; roles?: string[] }): number {
+  const roles = auth.roles?.length ? auth.roles : [auth.role];
+  return roles.reduce((max, r) => Math.max(max, getRoleTier(r)), 0);
 }
 
-async function handleGet(req: NextRequest, _ctx: { auth: AuthContext }): Promise<Response> {
+function alertVisibleTo(auth: { role: string; roles?: string[] }, alert: Alert): boolean {
+  const tier = callerTier(auth);
+  if (typeof alert.minTier === "number" && tier < alert.minTier) return false;
+  const visibleToRoles = alert.visibleToRoles;
+  if (Array.isArray(visibleToRoles) && visibleToRoles.length > 0) {
+    const roleSet = new Set(auth.roles?.length ? auth.roles : [auth.role]);
+    if (!visibleToRoles.some((r: unknown) => typeof r === "string" && roleSet.has(r))) return false;
+  }
+  return true;
+}
+
+async function handleGet(req: NextRequest, ctx: { auth: AuthContext }): Promise<Response> {
   const encoder = new TextEncoder();
+  const { auth } = ctx;
 
   const stream = new ReadableStream({
     async start(controller) {
@@ -27,16 +45,13 @@ async function handleGet(req: NextRequest, _ctx: { auth: AuthContext }): Promise
 
       const sendSnapshot = async () => {
         try {
-          const { query } = await import("@/lib/postgres");
-          const result = await query<AlertStreamRow>(
-            `SELECT id, severity, title, message, gate_id, user_unique_id, timestamp, resolved
-               FROM alerts
-              WHERE resolved = FALSE
-              ORDER BY timestamp DESC
-              LIMIT 100`
-          );
-          const rows = result.rows ?? [];
-          const signature = JSON.stringify(rows.map((row) => `${row.id}:${row.timestamp}:${row.resolved}`));
+          const { getAlerts } = await import("@/lib/db");
+          // Use the same catalogue source as /api/admin/alerts (non-stream),
+          // which already carries minTier / visibleToRoles — not a raw SQL
+          // SELECT, since the alerts table has no tier columns.
+          const all = await getAlerts(false);
+          const rows = all.filter((row) => alertVisibleTo(auth, row));
+          const signature = JSON.stringify(rows.map((row) => `${row.id}:${row.timestamp}`));
 
           if (signature !== lastSignature) {
             lastSignature = signature;
