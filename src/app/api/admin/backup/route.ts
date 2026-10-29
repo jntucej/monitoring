@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { assertCsrf } from "@/lib/csrf";
 import { createDatabaseBackup, listBackups, restoreDatabaseBackup } from "@/lib/backup";
+import { query } from "@/lib/postgres";
 import { addAudit } from "@/lib/db";
 import { Role } from "@/lib/types";
 import { withAuthorization } from "@/middleware/authorization";
@@ -94,27 +95,41 @@ async function handlePost(req: NextRequest) {
     }
 
     // Default action: Create backup
-    const result = await createDatabaseBackup(actorId, {
-      anonymize,
-      includeTables: Array.isArray(tables) && tables.length > 0 ? tables : undefined,
-    });
-
-    if (!result.success) {
+    const lockRes = await query<{ got_lock: boolean }>(`SELECT pg_try_advisory_lock(424242) AS got_lock`).catch(() => null);
+    if (lockRes && !lockRes.rows[0]?.got_lock) {
       return NextResponse.json(
-        { success: false, error: { code: "BACKUP_FAILED", message: result.error || "Failed to create backup" } },
-        { status: 500 }
+        { success: false, error: { code: "BACKUP_IN_PROGRESS", message: "Another backup operation is currently in progress." } },
+        { status: 409 }
       );
     }
 
-    await addAudit({
-      action: "BACKUP_CREATED",
-      userId: actorId,
-      userName: "Admin",
-      role: actorRole as Role,
-      details: `Created backup file ${result.metadata?.filename} with ${result.metadata?.recordCount} records`,
-    });
+    try {
+      const result = await createDatabaseBackup(actorId, {
+        anonymize,
+        includeTables: Array.isArray(tables) && tables.length > 0 ? tables : undefined,
+      });
 
-    return NextResponse.json({ success: true, data: result.metadata, dump: result.data });
+      if (!result.success) {
+        return NextResponse.json(
+          { success: false, error: { code: "BACKUP_FAILED", message: result.error || "Failed to create backup" } },
+          { status: 500 }
+        );
+      }
+
+      await addAudit({
+        action: "BACKUP_CREATED",
+        userId: actorId,
+        userName: "Admin",
+        role: actorRole as Role,
+        details: `Created backup file ${result.metadata?.filename} with ${result.metadata?.recordCount} records`,
+      });
+
+      return NextResponse.json({ success: true, data: result.metadata, dump: result.data });
+    } finally {
+      if (lockRes?.rows[0]?.got_lock) {
+        await query(`SELECT pg_advisory_unlock(424242)`).catch(() => {});
+      }
+    }
   } catch (error) {
     console.error("Error in backup operation:", error);
     return NextResponse.json(

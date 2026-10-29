@@ -60,6 +60,7 @@ async function handleGet(req: NextRequest): Promise<Response> {
       "Content-Type": "application/pdf",
       "Content-Disposition": `inline; filename="${ticketNumber}.pdf"`,
       "Content-Length": String(bytes.length),
+      "X-Content-Type-Options": "nosniff",
       "Cache-Control": "no-store",
     },
   });
