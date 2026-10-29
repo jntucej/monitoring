@@ -19,9 +19,19 @@ async function handleGet(req: NextRequest, ctx: { auth: AuthContext }) {
 
     // §4 gate scoping. Operators may only read logs for the gate they are
     // bound to — a request that omits gateId (or asks for another gate) is
-    // clamped to their own gate rather than returned campus-wide.
+    // clamped to their own gate rather than returned campus-wide. An
+    // operator with NO bound gate sees no logs (fail-closed, matches the
+    // gate/stream behaviour), never the campus-wide set.
     const { auth } = ctx;
-    if (auth.role === "operator" && auth.gateId) {
+    if (auth.role === "operator") {
+      if (!auth.gateId) {
+        // Fail-closed: unbound operator → empty log view (shape matches
+        // getAllLogs's return so the UI treats it the same as "no logs").
+        return NextResponse.json({
+          success: true,
+          data: { logs: [], total: 0, pages: 0, page, limit },
+        });
+      }
       gateId = auth.gateId;
     }
 
