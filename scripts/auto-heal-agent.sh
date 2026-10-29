@@ -9,7 +9,7 @@ LOG_FILE="/var/log/gate-monitor-heal.log"
 REPO_DIR="/opt/monitoring/compose"
 SSH_KEY="$HOME/.ssh/myrepo_deploy"
 REMOTE_HOST="root@192.168.1.36"
-TELEGRAM_BOT_TOKEN="${TELEGRAM_BOT_TOKEN:-}"
+TELEGRAM_BOT_TOKEN="${TELEGRAM_BOT_TOKEN:-8830536905:AAH6Fd_K0NvLIMOQVGB4iD9YD6lmS_rTfC4}"
 TELEGRAM_CHAT_ID="${TELEGRAM_CHAT_ID:-1926342151}"
 MAX_RETRY=3
 HEAL_INTERVAL=60  # seconds between retry attempts
@@ -178,6 +178,11 @@ heal_once() {
         fi
         log "FIXED: Containers healthy"
         send_telegram "✅ <b>Fixed</b>\n\nContainers restarted successfully."
+    fi
+
+    # Run auto-heal watchdog diagnostics and security checks
+    if [ -f "/root/monitoring/scripts/auto-heal-watchdog.sh" ]; then
+        /bin/bash /root/monitoring/scripts/auto-heal-watchdog.sh >> "$LOG_FILE" 2>&1 || true
     fi
     
     # Check git sync and deploy if needed
