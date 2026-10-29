@@ -4,6 +4,9 @@
 set -uo pipefail
 
 BACKUP_DIR="/opt/monitoring/backups"
+if [ -L "$BACKUP_DIR" ] && [ ! -e "$BACKUP_DIR" ]; then
+    BACKUP_DIR="/opt/monitoring/backups-local"
+fi
 DAILY_DIR="$BACKUP_DIR/daily"
 
 echo "================================================================="

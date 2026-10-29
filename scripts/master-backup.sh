@@ -5,7 +5,14 @@
 set -euo pipefail
 
 BASE="/opt/monitoring"
-BACKUP_ROOT="$BASE/backups/daily"
+
+# If /opt/monitoring/backups is a broken symlink (e.g. unmounted external drive), fallback to local /opt/monitoring/backups-local
+if [ -L "$BASE/backups" ] && [ ! -e "$BASE/backups" ]; then
+    BACKUP_ROOT="$BASE/backups-local/daily"
+else
+    BACKUP_ROOT="$BASE/backups/daily"
+fi
+
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 DATE_TAG=$(date +"%Y-%m-%d")
 mkdir -p "$BACKUP_ROOT"
