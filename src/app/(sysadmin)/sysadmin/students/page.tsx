@@ -36,6 +36,9 @@ interface StudentRecord {
     roll?: string;
     departmentId?: string;
     course?: string;
+    year?: number | string;
+    section?: string;
+    batch?: string;
     guardianName?: string;
     guardianPhone?: string;
     hostelRoom?: string;
@@ -378,27 +381,32 @@ const api = useApi();
   // backfill, or a legacy import that landed before the trigger was added).
   // This keeps the UI correct even if the DB regresses.
   const courseOf = useCallback((s: StudentRecord): string => {
-    if (s.course === "B.Tech" || s.course === "M.Tech") return s.course;
+    const rawCourse = s.studentDetails?.course || s.course;
+    if (rawCourse === "B.Tech" || rawCourse === "M.Tech") return rawCourse;
     const decoded = s.roll ? parseRollNumber(s.roll) : null;
-    if (decoded) return resolveCourseType(undefined, decoded.entryModeCode).name;
+    if (decoded) return resolveCourseType(rawCourse, decoded.entryModeCode).name;
+    const rollUpper = (s.roll || s.uniqueId || "").toUpperCase();
+    if (rollUpper.includes("1D")) return "M.Tech";
+    if (rollUpper.includes("1A") || rollUpper.includes("5A")) return "B.Tech";
     return "Unassigned";
   }, []);
 
   // Canonical branch / department label.
-  // The s.branch column is now DB-derived (trg_sync_student_derived,
-  // migration 20261227000002): it holds the short department code
-  // (CSE / IT / ECE / EEE / ME) or the M.Tech specialization label,
-  // never a composite display string. Prefer it when it looks clean;
-  // fall back to roll decoding if the column is still the old composite
-  // ("CSE (Regular B.Tech)") or empty.
   const branchOf = useCallback((s: StudentRecord): string => {
-    const rawBranch = (s.studentDetails?.branch || "").trim();
-    if (rawBranch && !rawBranch.includes("(")) return rawBranch; // clean short code
+    let rawBranch = (s.studentDetails?.branch || "").trim();
+    if (rawBranch === "ME") rawBranch = "MECH";
+    if (rawBranch && !rawBranch.includes("(")) return rawBranch;
     const decoded = s.roll ? parseRollNumber(s.roll) : null;
     if (decoded && decoded.departmentCode && ROLL_DEPT_CODES[decoded.departmentCode]) {
       return ROLL_DEPT_CODES[decoded.departmentCode].short;
     }
-    return (s.department || "").trim() || "Unassigned";
+    const dept = (s.department || "").trim();
+    if (dept === "Mechanical Engineering" || dept === "ME") return "MECH";
+    if (dept === "Computer Science & Engineering") return "CSE";
+    if (dept === "Electronics & Communication Engineering") return "ECE";
+    if (dept === "Electrical & Electronics Engineering") return "EEE";
+    if (dept === "Information Technology") return "IT";
+    return dept || "Unassigned";
   }, []);
 
   const filteredStudents = useMemo(() => {
@@ -444,10 +452,13 @@ const api = useApi();
   const byYear = useMemo(() => {
     const map: Record<string, number> = {};
     students.forEach((s) => {
-      const k = s.year == null || s.year === "" ? "—" : String(s.year);
+      const yr = s.year ?? s.studentDetails?.year;
+      const k = yr == null || yr === "" ? "—" : String(yr);
       map[k] = (map[k] || 0) + 1;
     });
-    return Object.entries(map).sort((a, b) => Number(a[0]) - Number(b[0]) || a[0].localeCompare(b[0]));
+    return Object.entries(map)
+      .filter(([k]) => k !== "—")
+      .sort((a, b) => Number(a[0]) - Number(b[0]));
   }, [students]);
 
   const byBatch = useMemo(() => {
@@ -481,13 +492,12 @@ const api = useApi();
     CANONICAL_BRANCHES.forEach((b) => { map[b] = 0; });
     let unassigned = 0;
     students.forEach((s) => {
-      const decoded = s.roll ? parseRollNumber(s.roll) : null;
-      const short = decoded ? ROLL_DEPT_CODES[decoded.departmentCode]?.short : undefined;
-      if (short && map[short] !== undefined) map[short] += 1;
+      const b = branchOf(s);
+      if (b && map[b] !== undefined) map[b] += 1;
       else unassigned += 1;
     });
     return { entries: CANONICAL_BRANCHES.map((b) => [b, map[b]] as [string, number]), unassigned };
-  }, [students]);
+  }, [students, branchOf]);
 
   // --- Batch → cohort spans with regular/lateral split + live year + graduation
   interface CohortRow {
@@ -740,7 +750,8 @@ const api = useApi();
                 <tr className="bg-slate-900/60 text-xs text-slate-400 uppercase tracking-wider">
                   <th className="px-4 py-3 text-left">Roll No</th>
                   <th className="px-4 py-3 text-left">Name</th>
-                  <th className="px-4 py-3 text-left">Department</th>
+                  <th className="px-4 py-3 text-left">Course</th>
+                  <th className="px-4 py-3 text-left">Branch</th>
                   <th className="px-4 py-3 text-left">Year</th>
                   <th className="px-4 py-3 text-left">Status</th>
                   <th className="px-4 py-3 text-right">Actions</th>
@@ -748,10 +759,10 @@ const api = useApi();
               </thead>
               <tbody className="divide-y divide-slate-800/60">
                 {loading ? (
-                  <tr><td colSpan={6} className="px-4 py-12 text-center text-slate-500"><RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2" />Loading...</td></tr>
+                  <tr><td colSpan={7} className="px-4 py-12 text-center text-slate-500"><RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2" />Loading...</td></tr>
                 ) : filteredStudents.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-12 text-center text-slate-500">
+                    <td colSpan={7} className="px-4 py-12 text-center text-slate-500">
                       No students found.
                       {students.length === 0 && !search && !loadError && (
                                         <div className="mt-2 text-xs text-slate-600 max-w-md mx-auto">
@@ -765,8 +776,13 @@ const api = useApi();
                     <tr key={s.id} className="hover:bg-slate-800/40 transition-colors">
                       <td className="px-4 py-3 font-mono text-xs text-emerald-400">{s.roll || s.uniqueId || "—"}</td>
                       <td className="px-4 py-3 font-medium text-white">{s.name}</td>
-                      <td className="px-4 py-3 text-slate-300 text-xs">{s.department || "—"}</td>
-                      <td className="px-4 py-3 text-slate-300 text-xs">{s.year || "—"}</td>
+                      <td className="px-4 py-3 text-xs">
+                        <span className={`px-2 py-0.5 rounded-md font-medium ${courseOf(s) === "M.Tech" ? "bg-purple-500/15 text-purple-400 border border-purple-500/30" : "bg-sky-500/15 text-sky-400 border border-sky-500/30"}`}>
+                          {courseOf(s)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-slate-300 text-xs font-semibold">{branchOf(s)}</td>
+                      <td className="px-4 py-3 text-slate-300 text-xs">{s.year ? `Year ${s.year}` : "—"}</td>
                       <td className="px-4 py-3">
                         <select
                           value={s.status}

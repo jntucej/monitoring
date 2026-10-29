@@ -160,7 +160,14 @@ export function mPerson(r: any): Person {
         "05": "CSE",
         "12": "IT"
       };
-      const rawDept = r.department || r.department_id || r.employee_details?.department_id || r.student_details?.course || undefined;
+      const rawDept =
+        (r.student_details?.branch && r.student_details.branch !== "B.Tech" && r.student_details.branch !== "M.Tech"
+          ? r.student_details.branch
+          : undefined) ||
+        r.department ||
+        r.department_id ||
+        r.employee_details?.department_id ||
+        undefined;
       if (!rawDept) return undefined;
       const deptCode = deptCodeMap[rawDept] || rawDept;
       const deptObj = DEPARTMENTS.find(d => d.code === deptCode || d.name === deptCode);

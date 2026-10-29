@@ -18,8 +18,10 @@ export function sanitizeKbContent(content: string): string {
   // 2. Remove HTML comments (frequent vector for indirect prompt injection)
   clean = clean.replace(/<!--[\s\S]*?-->/g, "");
 
-  // 3. Remove suspicious style tags or white-on-white / hidden styling
+  // 3. Remove suspicious script and style tags or hidden styling
+  clean = clean.replace(/<script[\s\S]*?<\/script>/gi, "");
   clean = clean.replace(/<style[\s\S]*?<\/style>/gi, "");
+  clean = clean.replace(/<\/?(?:untrusted_context|system_prompt|instructions)>/gi, "");
   clean = clean.replace(/(?:display\s*:\s*none|visibility\s*:\s*hidden|font-size\s*:\s*0|opacity\s*:\s*0|color\s*:\s*(?:white|#fff(?:fff)?|rgba?\([^)]+\)))/gi, "");
 
   // 4. Normalize newlines
