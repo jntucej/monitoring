@@ -83,6 +83,8 @@ services:
         aliases:
           - web
           - gate_web
+    volumes:
+      - uploads_data:/app/data/uploads
     depends_on:
       postgres:
         condition: service_healthy
