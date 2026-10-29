@@ -701,6 +701,9 @@ async function processSingleRow(
         password_hash: pwHash,
         pin_hash: pinHash,
         initial_pin_hash: pinHash,
+        // The imported password is an initial credential the user did not
+        // choose — flag it for a mandatory rotation on first use.
+        password_must_change: true,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };

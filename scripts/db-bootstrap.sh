@@ -39,3 +39,10 @@ echo ""
 echo "NOTE: seed-21-roles.sql ships with demo passwords (see CREDENTIALS.md)."
 echo "Run scripts/create-first-sysadmin.sh to rotate the SYSADMIN / kiosk"
 echo "operator credentials out-of-band before going live."
+
+# First-run guard: the seed above ships with demo passwords and sets
+# password_must_change=TRUE on every seeded account. Before going live you
+# MUST run scripts/create-first-sysadmin.sh to rotate SYSADMIN / kiosk
+# OPERATOR credentials out-of-band; users flagged password_must_change are
+# forced to change their password on next login (client redirect to
+# /settings/password?mandatory=1, cleared by a self-service change).

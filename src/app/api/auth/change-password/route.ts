@@ -8,10 +8,11 @@ import { assertCsrf } from "@/lib/csrf";
 import { withRateLimit } from "@/lib/rate-limit";
 import { withAuthorization } from "@/middleware/authorization";
 import { invalidateAuthCache } from "@/lib/authContext";
+import { assertPasswordPolicy } from "@/server/policy/passwords";
 import type { AuthContext } from "@/lib/authContext";
 
-const MIN_LEN = 8;
-const MAX_LEN = 128;
+// Password policy (min/max length) is enforced by assertPasswordPolicy from
+// @/server/policy/passwords, imported and called below.
 
 async function handleChangePassword(
   req: NextRequest,
@@ -36,11 +37,10 @@ async function handleChangePassword(
   if (!currentPassword || !newPassword) {
     return NextResponse.json(err("BAD_REQUEST", "Current password and new password are required").body, { status: 400 });
   }
-  if (newPassword.length < MIN_LEN) {
-    return NextResponse.json(err("BAD_REQUEST", `New password must be at least ${MIN_LEN} characters`).body, { status: 400 });
-  }
-  if (newPassword.length > MAX_LEN) {
-    return NextResponse.json(err("BAD_REQUEST", `New password must be at most ${MAX_LEN} characters`).body, { status: 400 });
+  try {
+    assertPasswordPolicy(newPassword);
+  } catch (e) {
+    return NextResponse.json(err("BAD_REQUEST", e instanceof Error ? e.message : "Password does not meet policy").body, { status: 400 });
   }
   if (newPassword === currentPassword) {
     return NextResponse.json(err("BAD_REQUEST", "New password must be different from current password").body, { status: 400 });
@@ -75,12 +75,15 @@ async function handleChangePassword(
   }
 
   // 5. Hash + persist. Bump session_version in the SAME UPDATE so the
-  //    revocation is atomic with the change (Bug 104 pattern).
+  //    revocation is atomic with the change (Bug 104 pattern). A
+  //    self-service change also clears the must-change obligation — the user
+  //    has now picked a credential they own.
   const newHash = await hashPassword(newPassword);
   await query(
     `UPDATE public.users
         SET password_hash      = $1,
             last_password_change = NOW(),
+            password_must_change = FALSE,
             session_version      = session_version + 1,
             updated_at           = NOW()
       WHERE id = $2`,

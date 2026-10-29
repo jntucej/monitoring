@@ -83,15 +83,23 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
   }, []);
 
   // ── Post-auth redirect: only after the session was verified server-side ──
+  // Users flagged password_must_change are routed to /settings/password
+  // instead of their normal dashboard, so a temporary/admin-set credential
+  // is rotated before they can reach any role UI.
+  const mustChangePassword = useAuthStore((s) => s.mustChangePassword);
   useEffect(() => {
     if (!sessionValid || !role) return;
+    if (mustChangePassword) {
+      router.replace("/settings/password?mandatory=1");
+      return;
+    }
     const redirect = searchParams?.get("redirect");
     const target =
       redirect && redirect.startsWith("/")
         ? redirect
         : getDefaultRouteForRole(role as Role);
     router.replace(target);
-  }, [sessionValid, role, router, searchParams]);
+  }, [sessionValid, role, router, searchParams, mustChangePassword]);
 
   // ── Submit ────────────────────────────────────────────────────────────────
   const handleFormSubmit = useCallback(

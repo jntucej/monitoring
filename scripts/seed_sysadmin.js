@@ -20,8 +20,9 @@ async function run() {
       password_hash: passwordHash,
       initial_pin_hash: pinHash,
       unique_id: "SYSADMIN",
-      pin_must_change: true
+      pin_must_change: true,
+      password_must_change: true
   }, { onConflict: 'id' });
-  console.log("Sysadmin seeded/updated (pin_must_change=true).");
+  console.log("Sysadmin seeded/updated (pin_must_change + password_must_change = true).");
 }
 run();
