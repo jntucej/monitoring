@@ -1,38 +1,72 @@
 #!/usr/bin/env bash
-set -euo pipefail
+# Robust backup verification script incorporating structural gzip check,
+# un-swallowed psql errors (-v ON_ERROR_STOP=1), and table sanity floors.
+set -uo pipefail
 
-BASE_DIR="${BASE_DIR:-/opt/monitoring}"
-LATEST_BACKUP=$(find "${BASE_DIR}/backups/daily" -name "gate-*.sql.gz" -type f 2>/dev/null | sort -r | head -n 1 || echo "")
+BACKUP_DIR="/opt/monitoring/backups"
+DAILY_DIR="$BACKUP_DIR/daily"
 
-if [ -z "${LATEST_BACKUP:-}" ] || [ ! -f "${LATEST_BACKUP}" ]; then
-  echo "❌ No backup file found in ${BASE_DIR}/backups/daily to verify."
-  exit 1
+echo "================================================================="
+echo "GATE MONITOR — ROBUST BACKUP RESTORE VERIFICATION"
+echo "================================================================="
+
+PG_CONTAINER="gate_postgres"
+
+LATEST_BACKUP=$(ls -t "$DAILY_DIR"/gate-*.sql.gz 2>/dev/null | head -n 1)
+if [ -z "$LATEST_BACKUP" ]; then
+    echo "ERROR: No backup files found in $DAILY_DIR."
+    exit 1
 fi
 
-echo "================================================================="
-echo "🧪 VERIFYING DATABASE BACKUP RESTORE INTEGRITY"
-echo "Backup File: ${LATEST_BACKUP}"
-echo "================================================================="
+echo "Verifying backup: $LATEST_BACKUP"
 
+# 1. Integrity check (gzip -t)
+gzip -t "$LATEST_BACKUP" || { echo "FAIL: gzip integrity check failed"; exit 1; }
+
+# 2. Header check (PostgreSQL database dump)
+HEADER=$(gunzip -c "$LATEST_BACKUP" | head -5)
+if [[ "$HEADER" != *"PostgreSQL database dump"* ]]; then
+    echo "FAIL: Backup file header does not match PostgreSQL database dump format"
+    exit 1
+fi
+
+# 3. Create scratch DB with template = template1 (which has extensions allowed)
 SCRATCH_DB="restore_test_$(date +%Y%m%d_%H%M%S)"
+echo "Creating scratch database: $SCRATCH_DB..."
+docker exec "$PG_CONTAINER" psql -U postgres -c "CREATE DATABASE $SCRATCH_DB TEMPLATE template1;"
 
-echo "==> 1. Creating scratch database ${SCRATCH_DB}..."
-if docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^gate_postgres$"; then
-  docker exec -t gate_postgres psql -U postgres -c "CREATE DATABASE ${SCRATCH_DB};"
-  
-  echo "==> 2. Restoring backup to scratch database..."
-  gunzip -c "${LATEST_BACKUP}" | docker exec -i gate_postgres psql -U postgres -d "${SCRATCH_DB}" -v ON_ERROR_STOP=1 >/dev/null 2>&1
-  
-  TABLE_COUNT=$(docker exec -t gate_postgres psql -U postgres -d "${SCRATCH_DB}" -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" | tr -d '[:space:]')
-  echo "✅ Scratch database restored successfully with ${TABLE_COUNT} public tables."
-  
-  echo "==> 3. Cleaning up scratch database..."
-  docker exec -t gate_postgres psql -U postgres -c "DROP DATABASE ${SCRATCH_DB};"
-  echo "✅ Scratch database dropped."
-else
-  echo "⚠️ Docker postgres container not active; skipping live restore verification."
+cleanup() {
+    echo "Cleaning up scratch database: $SCRATCH_DB..."
+    docker exec "$PG_CONTAINER" psql -U postgres -c "DROP DATABASE IF EXISTS $SCRATCH_DB;" >/dev/null 2>&1 || true
+}
+trap cleanup EXIT
+
+# 4. Restore backup into scratch DB with strict error stopping and error capture
+echo "Restore backup into $SCRATCH_DB..."
+TMP_ERR="/tmp/restore_err_$$.txt"
+if ! gunzip -c "$LATEST_BACKUP" \
+     | sed -e '/DROP DATABASE IF EXISTS gate_monitor;/d' \
+           -e '/CREATE DATABASE gate_monitor/,/;/d' \
+           -e 's/\\connect gate_monitor/\\connect '"$SCRATCH_DB"'/g' \
+           -e '/CREATE EXTENSION IF NOT EXISTS pg_trgm;/d' \
+           -e '/extension-custom-scripts/d' \
+     | docker exec -i "$PG_CONTAINER" psql -U postgres -d "$SCRATCH_DB" -v ON_ERROR_STOP=1 >/dev/null 2> "$TMP_ERR"; then
+    echo "❌ FAIL: psql restore encountered errors:"
+    cat "$TMP_ERR"
+    rm -f "$TMP_ERR"
+    exit 1
+fi
+rm -f "$TMP_ERR"
+
+# 5. Assert table count floor
+TABLE_COUNT=$(docker exec "$PG_CONTAINER" psql -U postgres -d "$SCRATCH_DB" -t -A -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';")
+echo "Scratch database public table count: $TABLE_COUNT"
+if [ "$TABLE_COUNT" -lt 50 ]; then
+    echo "❌ FAIL: Table count $TABLE_COUNT is below expected sanity floor (50 tables)"
+    exit 1
 fi
 
 echo "================================================================="
-echo "✅ BACKUP INTEGRITY VERIFICATION COMPLETE"
+echo "✅ RESTORE VERIFICATION PASSED SUCCESSFULLY."
 echo "================================================================="
+exit 0
