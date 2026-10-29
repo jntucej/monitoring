@@ -37,29 +37,22 @@ export function SineWaveLoader({ className = "" }: { className?: string }) {
             <stop offset="100%" stopColor="#f43f5e" stopOpacity="0.8" />
           </linearGradient>
         </defs>
-        <motion.path
+        <path
           d="M 0 12 Q 12.5 2, 25 12 T 50 12 T 75 12 T 100 12"
           stroke="url(#sine-wave-grad)"
           strokeWidth="3"
           strokeLinecap="round"
           fill="none"
-          animate={
-            prefersReducedMotion
-              ? {}
-              : {
-                  d: [
-                    "M 0 12 Q 12.5 2, 25 12 T 50 12 T 75 12 T 100 12",
-                    "M 0 12 Q 12.5 22, 25 12 T 50 12 T 75 12 T 100 12",
-                    "M 0 12 Q 12.5 2, 25 12 T 50 12 T 75 12 T 100 12",
-                  ],
-                }
-          }
-          transition={{
-            duration: 1.2,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
+        >
+          {!prefersReducedMotion && (
+            <animate
+              attributeName="d"
+              dur="1.2s"
+              repeatCount="indefinite"
+              values="M 0 12 Q 12.5 2, 25 12 T 50 12 T 75 12 T 100 12; M 0 12 Q 12.5 22, 25 12 T 50 12 T 75 12 T 100 12; M 0 12 Q 12.5 2, 25 12 T 50 12 T 75 12 T 100 12"
+            />
+          )}
+        </path>
       </svg>
 
       {/* Noticeable Oscillating Sine Text */}

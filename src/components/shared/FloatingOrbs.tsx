@@ -42,21 +42,20 @@ export function FloatingOrbs() {
                 </linearGradient>
               </defs>
 
-              <motion.path
+              <path
                 d="M -100,250 C 300,100 450,600 800,400 C 1150,200 1300,700 1600,500"
                 stroke="url(#fluidRibbonGrad1)"
                 strokeWidth={isGlossy ? "52" : "30"}
                 strokeLinecap="round"
-                animate={{
-                  d: [
-                    "M -100,250 C 300,100 450,600 800,400 C 1150,200 1300,700 1600,500",
-                    "M -100,270 C 320,120 430,580 820,420 C 1130,220 1320,670 1600,520",
-                    "M -100,250 C 300,100 450,600 800,400 C 1150,200 1300,700 1600,500",
-                  ]
-                }}
-                transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
                 style={{ filter: "drop-shadow(0px 16px 32px rgba(0, 114, 255, 0.25))" }}
-              />
+              >
+                <animate
+                  attributeName="d"
+                  dur="18s"
+                  repeatCount="indefinite"
+                  values="M -100,250 C 300,100 450,600 800,400 C 1150,200 1300,700 1600,500; M -100,270 C 320,120 430,580 820,420 C 1130,220 1320,670 1600,520; M -100,250 C 300,100 450,600 800,400 C 1150,200 1300,700 1600,500"
+                />
+              </path>
 
               {isGlossy && (
                 <motion.ellipse
