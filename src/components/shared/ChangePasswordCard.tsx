@@ -8,7 +8,8 @@ import { useApi } from "@/hooks/useApi";
 
 export function ChangePasswordCard() {
 const api = useApi();
-
+  const mustChangePassword = useAuthStore((s) => s.mustChangePassword);
+  const setMustChangePassword = useAuthStore((s) => s.setMustChangePassword);
   const router = useRouter();
   const logout = useAuthStore((s) => s.logout);
 
@@ -71,6 +72,10 @@ const api = useApi();
       setCurrent("");
       setNext("");
       setConfirm("");
+      // The rotation just cleared the server-side password_must_change flag;
+      // clear the client-side copy so the redirect target is the normal
+      // dashboard (or login page) instead of the forced-change flow again.
+      setMustChangePassword(false);
 
       // Server bumped session_version → every token is now stale.
       // Give the user a moment to read the confirmation, then sign out.
@@ -87,6 +92,18 @@ const api = useApi();
 
   return (
     <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-sm">
+      {mustChangePassword && !success && (
+        <div className="mb-4 flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-200">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+          <div>
+            <p className="font-semibold">A temporary password was set for your account.</p>
+            <p className="mt-0.5 text-amber-200/80">
+              You must choose a new password now — the one an administrator or the
+              enrollment process set for you is valid until you replace it.
+            </p>
+          </div>
+        </div>
+      )}
       <div className="flex items-center gap-3 mb-5">
         <div className="p-2 rounded-xl bg-[var(--action-primary)]/10">
           <KeyRound className="w-5 h-5 text-[var(--action-primary)]" />

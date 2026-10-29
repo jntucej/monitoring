@@ -23,6 +23,7 @@ async function handleGet(_req: NextRequest, context: { auth: AuthContext }) {
       id, name, email, phone, role, status, unique_id,
       photo_url, department_id, login_identifier,
       bot_lang, bot_voice_replies,
+      password_must_change,
       created_at
     `)
     .eq("id", context.auth.userId)
@@ -72,6 +73,10 @@ async function handleGet(_req: NextRequest, context: { auth: AuthContext }) {
       botLang: user.bot_lang ?? "en",
       botVoiceReplies: Boolean(user.bot_voice_replies),
       twoFactorEnabled: false,
+      // True when this credential was set by an admin/seed/bootstrap and the
+      // user still has to rotate it. The client uses this to render a
+      // "change your password now" banner / redirect.
+      mustChangePassword: Boolean(user.password_must_change),
       createdAt: user.created_at,
       studentDetails,
       employeeDetails,

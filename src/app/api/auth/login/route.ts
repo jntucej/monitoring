@@ -197,6 +197,9 @@ async function handleLoginInner(req: NextRequest) {
       data: {
         token: access_token,
         refreshToken: refresh_token,
+        // When a credential was set by an admin/seed (password_must_change),
+        // the client must route the user through a password change.
+        mustChangePassword: Boolean(user.password_must_change),
         user: {
           id: user.id,
           unique_id: user.unique_id,

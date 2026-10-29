@@ -103,6 +103,7 @@ async function main() {
         password_hash: pinHash,
         initial_pin_hash: pinHash,
         pin_must_change: true,
+        password_must_change: true,
         pin_set_by: null,
         pin_set_at: new Date().toISOString(),
       });

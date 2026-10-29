@@ -67,8 +67,16 @@ scripts/prov/
 # macOS
 **/provenance/.DS_Store
 /backups/
+# Ignore SQL dumps and compressed archives, but never the versioned
+# migration/seed files (gitignore is a list of rules, not a whitelist —
+# so the specific negation patterns below must follow the blanket rule).
 *.sql.gz
 *.sql
+!database/migrations/*.sql
+!database/seeds/*.sql
+!database/schema.sql
+!database/bootstrap.sql
+!database/bootstrap-roles.sql
 
 
 # Python bytecode

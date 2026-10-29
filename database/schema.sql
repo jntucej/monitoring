@@ -72,6 +72,7 @@ CREATE TABLE IF NOT EXISTS users (
   pin_set_by UUID REFERENCES users(id),
   pin_set_at TIMESTAMPTZ,
   pin_must_change BOOLEAN NOT NULL DEFAULT FALSE,
+  password_must_change BOOLEAN NOT NULL DEFAULT FALSE,
   failed_login_count INTEGER NOT NULL DEFAULT 0,
   locked_until TIMESTAMPTZ,
   is_kiosk_default   BOOLEAN NOT NULL DEFAULT FALSE,

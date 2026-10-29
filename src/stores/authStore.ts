@@ -48,6 +48,10 @@ interface AuthState {
   authenticated: boolean;
   loading: boolean;
   _hasHydrated: boolean;
+  /** Set when the server says the logged-in user must rotate a credential
+   *  (password_must_change flag set by an admin reset / seed / bootstrap).
+   *  NOT persisted — re-evaluated on every login/session check. */
+  mustChangePassword: boolean;
 }
 
 interface LoginResult {
@@ -55,6 +59,7 @@ interface LoginResult {
   error?: string;
   code?: string;
   role?: Role;
+  mustChangePassword?: boolean;
 }
 
 interface AuthActions {
@@ -65,6 +70,7 @@ interface AuthActions {
   setUser: (user: User | null) => void;
   setLoading: (loading: boolean) => void;
   setHasHydrated: (hydrated: boolean) => void;
+  setMustChangePassword: (v: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState & AuthActions>()(
@@ -77,6 +83,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       authenticated: false,
       loading: false,
       _hasHydrated: false,
+      mustChangePassword: false,
       login: async (loginIdentifier, password) => {
         set({ loading: true });
         try {
@@ -104,9 +111,10 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             user: toUser(d.user),
             role: d.user?.role,
             authenticated: true,
+            mustChangePassword: Boolean(d.mustChangePassword),
             loading: false,
           });
-          return { success: true, role: d.user?.role };
+          return { success: true, role: d.user?.role, mustChangePassword: Boolean(d.mustChangePassword) };
         } catch (err) {
           set({ loading: false });
           return { success: false, error: err instanceof Error ? err.message : "Network error" };
@@ -197,6 +205,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       setUser: (user) => set({ user }),
       setLoading: (loading) => set({ loading }),
       setHasHydrated: (hydrated) => set({ _hasHydrated: hydrated }),
+      setMustChangePassword: (v) => set({ mustChangePassword: v }),
     }),
     {
       name: "mycampus-auth",
@@ -212,6 +221,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           state.token = t.token;
           state.refreshToken = t.refreshToken;
           state.authenticated = Boolean(t.token && state.authenticated);
+          state.mustChangePassword = false; // not persisted; re-evaluated on next login/session
           // Flip the hydrated flag via the store action so Zustand subscribers
           // (useHasHydrated) are notified immediately. A direct field write
           // would not trigger subscribers and could leave a guarded route on

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { findUserById, updateUserRole, updateAccountStatus, setUserFlag, addAudit } from "@/lib/db";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { hashPassword } from "@/lib/auth-token";
+import { assertPasswordPolicy } from "@/server/policy/passwords";
 import { query } from "@/lib/postgres";
 import type { Role, AccountStatus } from "@/lib/types";
 import type { FlagStatus } from "@/lib/db";
@@ -165,15 +166,25 @@ async function handlePatch(req: NextRequest) {
         profileUpdates.assigned_hostel = body.assignedHostel;
       }
 
-      // Password update
+      // Password update — admin-set password is an initial credential, so it
+      // must be rotated by the target on next use (password_must_change flag).
       if (body.password) {
-        if (typeof body.password !== "string" || body.password.length < 6) {
+        if (typeof body.password !== "string") {
           return NextResponse.json(
-            { success: false, error: { message: "Password must be at least 6 characters" } },
+            { success: false, error: { message: "Password must be a string" } },
+            { status: 400 }
+          );
+        }
+        try {
+          assertPasswordPolicy(body.password);
+        } catch (e) {
+          return NextResponse.json(
+            { success: false, error: { message: e instanceof Error ? e.message : "Password does not meet policy." } },
             { status: 400 }
           );
         }
         profileUpdates.password_hash = await hashPassword(body.password);
+        profileUpdates.password_must_change = true;
         profileUpdates.last_password_change = new Date().toISOString();
         profileUpdates.failed_login_count = 0;
         profileUpdates.locked_until = null;

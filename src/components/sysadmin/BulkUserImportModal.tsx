@@ -146,7 +146,12 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
 
   const buildReportCsv = (r: BulkImportReport, codes?: Array<{ row: number; roll: string | null; code: string }> | null): string => {
     const codeByRow = new Map((codes ?? []).map((c) => [c.row, c.code]));
-    const header = ["row", "roll", "name", "email", "status", "reason", "bootstrap_code"];
+    // `bootstrap_code` is intentionally NOT a column in this file — bundling
+    // live enrollment codes into a downloadable CSV turns the report into a
+    // credential leak (any copy on disk/email/ticket = usable login code).
+    // The codes are only shown on-screen (read-only) in this dialog; admins
+    // copy them out-of-band. Status + reason stay in the CSV.
+    const header = ["row", "roll", "name", "email", "status", "reason", "has_setup_code"];
     const lines = [header.join(",")];
     for (const row of r.rows) {
       const cells = [
@@ -156,7 +161,7 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
         row.email ?? "",
         row.status,
         row.reason,
-        codeByRow.get(row.row) ?? "",
+        codeByRow.has(row.row) ? "yes" : "no",
       ];
       lines.push(cells.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","));
     }

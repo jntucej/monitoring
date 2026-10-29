@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
-import { withRateLimit } from "@/lib/rate-limit";
+import { withRateLimit, rateLimitByKey } from "@/lib/rate-limit";
 import { query } from "@/lib/postgres";
-import { signPasswordResetToken, verifyPasswordResetToken, hashPassword } from "@/lib/auth-token";
+import { signPasswordResetToken, verifyPasswordResetToken, hashPassword, verifyPassword } from "@/lib/auth-token";
+import { assertPasswordPolicy } from "@/server/policy/passwords";
 import { assertCsrf } from "@/lib/csrf";
 import { sendEmail } from "@/lib/integrations/email";
 
@@ -10,6 +11,21 @@ const SUCCESS_RESPONSE = {
   success: true,
   message: "If the email address exists in the system, a password reset link has been dispatched.",
 };
+
+function passwordPolicyError(password: string): NextResponse | null {
+  try {
+    assertPasswordPolicy(password);
+    return null;
+  } catch (e) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: { code: "INVALID_PASSWORD", message: e instanceof Error ? e.message : "Password does not meet policy." },
+      },
+      { status: 400 }
+    );
+  }
+}
 
 async function handleResetPassword(req: NextRequest) {
   const csrfError = assertCsrf(req);
@@ -27,15 +43,8 @@ async function handleResetPassword(req: NextRequest) {
 
     // Case 1: Submitting new password with a reset token
     if (token && newPassword) {
-      if (newPassword.length < 6) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: { code: "INVALID_PASSWORD", message: "New password must be at least 6 characters long." },
-          },
-          { status: 400 }
-        );
-      }
+      const policyErr = passwordPolicyError(newPassword);
+      if (policyErr) return policyErr;
 
       const payload = await verifyPasswordResetToken(token);
       if (!payload || !payload.sub) {
@@ -43,6 +52,29 @@ async function handleResetPassword(req: NextRequest) {
           {
             success: false,
             error: { code: "INVALID_TOKEN", message: "Password reset token is invalid or expired." },
+          },
+          { status: 400 }
+        );
+      }
+
+      // Reject re-using the current password (audit trail shows which user,
+      // but the response is uniform so token holders can't probe it).
+      const userRes = await query<{ password_hash: string | null }>(
+        "SELECT password_hash FROM users WHERE id = $1 LIMIT 1",
+        [payload.sub]
+      );
+      if (userRes.rows.length === 0) {
+        return NextResponse.json(
+          { success: false, error: { code: "USER_NOT_FOUND", message: "User not found." } },
+          { status: 404 }
+        );
+      }
+      const currentHash = userRes.rows[0].password_hash;
+      if (currentHash && (await verifyPassword(newPassword, currentHash))) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: { code: "INVALID_PASSWORD", message: "New password must differ from the current password." },
           },
           { status: 400 }
         );
@@ -76,8 +108,10 @@ async function handleResetPassword(req: NextRequest) {
 
       const passwordHash = await hashPassword(newPassword);
 
+      // Self-service password change: clear any pending must-change obligation
+      // (the user just chose a new credential themselves).
       const updateRes = await query(
-        "UPDATE users SET password_hash = $1, session_version = COALESCE(session_version, 0) + 1, updated_at = NOW() WHERE id = $2 RETURNING id, email",
+        "UPDATE users SET password_hash = $1, last_password_change = NOW(), password_must_change = FALSE, session_version = COALESCE(session_version, 0) + 1, updated_at = NOW() WHERE id = $2 RETURNING id, email",
         [passwordHash, payload.sub]
       );
 
@@ -107,6 +141,22 @@ async function handleResetPassword(req: NextRequest) {
     // Case 2: Requesting a password reset link via email
     if (email) {
       const trimmedEmail = email.trim().toLowerCase();
+      if (!trimmedEmail) {
+        return NextResponse.json(SUCCESS_RESPONSE);
+      }
+
+      // Per-identifier rate limit on top of the IP-keyed wrapper: an
+      // attacker who knows a target email cannot spam reset mail from a
+      // botnet — the bucket is keyed on the email, not the client IP.
+      const resetLimit = await rateLimitByKey(`password_reset_email:${trimmedEmail}`, {
+        maxRequests: 3,
+        windowMs: 60 * 60 * 1000,
+      });
+      if (resetLimit.limited) {
+        // Uniform 200 either way — never reveal whether the mailbox exists.
+        return NextResponse.json(SUCCESS_RESPONSE);
+      }
+
       const userRes = await query(
         "SELECT id, email, name, role FROM users WHERE LOWER(email) = $1 LIMIT 1",
         [trimmedEmail]

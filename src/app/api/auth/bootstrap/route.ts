@@ -6,6 +6,7 @@ import { hashPassword } from "@/lib/auth-token";
 import { query } from "@/lib/postgres";
 import { addAudit } from "@/lib/db";
 import { assertCsrf } from "@/lib/csrf";
+import { assertPasswordPolicy } from "@/server/policy/passwords";
 
 const UNIFORM = { success: false, error: { code: "INVALID_CODE", message: "Invalid identifier or enrollment code." } };
 
@@ -35,8 +36,10 @@ async function handlePost(req: NextRequest) {
   if (!uniqueId || !code || !newPassword || !newPin) {
     return NextResponse.json({ success: false, error: { code: "MISSING_FIELDS", message: "uniqueId, code, newPassword, newPin are all required." } }, { status: 400 });
   }
-  if (newPassword.length < 8) {
-    return NextResponse.json({ success: false, error: { code: "WEAK_PASSWORD", message: "Password must be at least 8 characters." } }, { status: 400 });
+  try {
+    assertPasswordPolicy(newPassword);
+  } catch (e) {
+    return NextResponse.json({ success: false, error: { code: "WEAK_PASSWORD", message: e instanceof Error ? e.message : "Password does not meet policy." } }, { status: 400 });
   }
   if (!/^\d{4,8}$/.test(newPin)) {
     return NextResponse.json({ success: false, error: { code: "INVALID_PIN", message: "PIN must be 4-8 digits." } }, { status: 400 });
@@ -115,7 +118,13 @@ async function handlePost(req: NextRequest) {
       WHERE id = $3`,
     [pwHash, pinHash, user.id]
   );
-
+  // The bootstrap password is still an initial credential (it came from the
+  // enrollment flow, not chosen freely by the user), so flag it for a
+  // mandatory rotation via /api/auth/change-password on first use.
+  await query(
+    `UPDATE users SET password_must_change = TRUE WHERE id = $1`,
+    [user.id]
+  );
   await addAudit({
     action: "USER_ONBOARDED",
     userId: user.id,

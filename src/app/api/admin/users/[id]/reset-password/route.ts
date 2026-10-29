@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hashPassword } from "@/server/lib/crypto";
+import { assertPasswordPolicy } from "@/server/policy/passwords";
 import { withAdminMutation } from "@/server/http/mutation-guard";
 import { query } from "@/lib/postgres";
 import { getSupabaseServiceClient, invalidateAllUserSessions } from "@/lib/dbClient";
@@ -7,8 +8,6 @@ import { addAudit } from "@/lib/db";
 import { invalidateAuthCache } from "@/lib/authContext";
 import type { AuthContext } from "@/lib/authContext";
 import type { Role } from "@/lib/types";
-
-const MIN_PASSWORD_LEN = 8;
 
 function userIdFromPath(req: NextRequest): string {
   const segs = new URL(req.url).pathname.split("/").filter(Boolean);
@@ -27,9 +26,11 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }) {
 
   const body = await req.json().catch(() => ({}));
   const password = typeof body.password === "string" ? body.password : "";
-  if (password.length < MIN_PASSWORD_LEN) {
+  try {
+    assertPasswordPolicy(password);
+  } catch (e) {
     return NextResponse.json(
-      { success: false, error: { code: "INVALID_PASSWORD", message: `Password must be at least ${MIN_PASSWORD_LEN} characters` } },
+      { success: false, error: { code: "INVALID_PASSWORD", message: e instanceof Error ? e.message : "Password does not meet policy." } },
       { status: 400 }
     );
   }
@@ -81,6 +82,7 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }) {
       .from("users")
       .update({
         password_hash: hash,
+        password_must_change: true,
         session_version: (target.session_version ?? 0) + 1,
         last_password_change: new Date().toISOString(),
         failed_login_count: 0,
@@ -115,12 +117,15 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }) {
       }
     }
 
+    // Admin-driven reset: the target did not choose this credential, so the
+    // next login must be followed by a mandatory change
+    // (password_must_change flag, gated client-side and by /api/profile).
     await addAudit({
       action: "PASSWORD_CHANGED",
       userId: actorId,
       userName: ctx.auth.email,
       role: actorRole,
-      details: { targetId: userId, resetByAdmin: true },
+      details: { targetId: userId, resetByAdmin: true, mustChange: true },
     });
 
     return NextResponse.json({ success: true, message: "Password reset" });
