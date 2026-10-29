@@ -1,0 +1,35 @@
+# Control 2: mTLS and Workload Identity with step-ca
+# Internal Private CA configuration for container-to-container mutual TLS
+
+authority:
+  provisioners:
+    - type: JWK
+      name: gate-monitor-ca
+      key:
+        use: sig
+        kty: OKP
+        crv: Ed25519
+
+tls:
+  cipherSuites:
+    - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+    - TLS_CHACHA20_POLY1305_SHA256
+  minVersion: 1.3
+  maxVersion: 1.3
+
+db:
+  type: badgerv2
+  dataSource: /home/step/db
+
+logger:
+  format: json
+
+# Data-layer client verification rules:
+# Postgres:
+#   hostssl all all 0.0.0.0/0 cert clientcert=verify-full
+# Redis:
+#   tls-port 6380
+#   tls-auth-clients yes
+#   tls-cert-file /etc/step/redis.crt
+#   tls-key-file /etc/step/redis.key
+#   tls-ca-cert-file /etc/step/ca.crt

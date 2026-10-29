@@ -9,7 +9,27 @@ const LISTEN = process.env.LLM_PROXY_LISTEN || '0.0.0.0:8080';
 
 const [host, port] = LISTEN.split(':');
 
+// Control 6: Strict egress allowlist on the proxy.
+// Only allow /v1/chat/completions, /v1/embeddings, /v1/models. Reject arbitrary URLs and tool sinks.
+const ALLOWED_PATH_PREFIXES = [
+  '/v1/chat/completions',
+  '/v1/embeddings',
+  '/v1/models',
+];
+
+function isPathAllowed(urlPath) {
+  const clean = (urlPath || '').split('?')[0];
+  return ALLOWED_PATH_PREFIXES.some((p) => clean === p || clean.startsWith(`${p}/`));
+}
+
 const server = http.createServer((req, res) => {
+  if (!isPathAllowed(req.url)) {
+    console.warn(`[llm-proxy] blocked forbidden path: ${req.method} ${req.url}`);
+    res.writeHead(403, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ error: { code: 'FORBIDDEN_ENDPOINT', message: 'Endpoint not permitted by LLM proxy egress policy.' } }));
+    return;
+  }
+
   // Stream the request body through
   const chunks = [];
   req.on('data', (c) => chunks.push(c));

@@ -1,0 +1,16 @@
+# CrowdSec Acquisition Configuration for Caddy on Gate Monitor
+# Destination: /etc/crowdsec/acquis.d/caddy.yaml
+#
+# CrowdSec natively parses Caddy's structured JSON logs without regex fragility.
+
+filenames:
+  - /var/lib/docker/volumes/gate_caddy_data/_data/access.log
+  - /var/log/caddy/access.log
+labels:
+  type: caddy
+---
+# SSH Authentication acquisition for fail2ban / CrowdSec
+filenames:
+  - /var/log/auth.log
+labels:
+  type: syslog

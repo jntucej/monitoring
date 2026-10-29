@@ -86,11 +86,12 @@ else
   print_result "Redis responds to PING" "FAIL"
 fi
 
-# 7. Cloudflared container status
-if docker ps --format "{{.Names}}" | grep -qi "cloudflared"; then
-  print_result "Cloudflared tunnel container running" "PASS"
+# 7. Edge / Ingress container status (Caddy TLS reverse proxy or Cloudflare tunnel)
+if docker ps --format "{{.Names}}" | grep -qiE "gate_caddy|caddy|cloudflared"; then
+  edge_name=$(docker ps --format "{{.Names}}" | grep -iE "gate_caddy|caddy|cloudflared" | head -n 1)
+  print_result "Edge ingress container running (${edge_name})" "PASS"
 else
-  print_result "Cloudflared tunnel container running" "WARN"
+  print_result "Edge ingress container (Caddy / Cloudflared) running" "WARN"
 fi
 
 # 8. Disk free > 50 GB

@@ -117,6 +117,19 @@ export async function saveAttachment(input: SaveInput): Promise<Saved> {
 }
 
 export async function readAttachment(p: string): Promise<Buffer | null> {
+  // Control 7: Canary file tripwire
+  // If an attacker attempts to read .env.bak, credentials.json, etc. via path traversal or direct read
+  if (p && (p.includes(".env") || p.includes("production.env") || p.includes("credentials.json"))) {
+    try {
+      const { triggerDeceptionAlert } = await import("@/lib/deception");
+      await triggerDeceptionAlert("canary_env", {
+        details: { requestedPath: p, reason: "Attempted read of canary environment/credential decoy" },
+      });
+    } catch (err) {
+      console.error("[deception] Error triggering canary_env alert:", err);
+    }
+  }
+
   try {
     return await fs.readFile(p);
   } catch {

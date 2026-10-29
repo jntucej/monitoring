@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { query, withTransaction } from "@/lib/postgres";
 import { verifyRefreshToken, signAccessToken, signRefreshToken } from "@/lib/auth-token";
+import { verifyDPoPProof } from "@/lib/dpop";
 import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
 import { secureCookieOptions } from "@/lib/cookies";
@@ -51,6 +52,47 @@ async function handleRefresh(req: NextRequest) {
         },
         { status: 401 }
       );
+    }
+
+    // RFC 9449 DPoP verification:
+    // If the token was bound to a client public key (cnf.jkt), the client MUST present a valid DPoP proof.
+    // Kiosk and service tokens (is_kiosk or without cnf) remain exempt.
+    const expectedJkt = payload.cnf?.jkt;
+    const dpopHeader = req.headers.get("dpop");
+
+    if (expectedJkt) {
+      if (!dpopHeader) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: "DPOP_PROOF_REQUIRED",
+              message: "A DPoP proof is required to refresh this sender-constrained session.",
+            },
+          },
+          { status: 401 }
+        );
+      }
+
+      const dpopValidation = await verifyDPoPProof(dpopHeader, req.method, req.nextUrl.pathname);
+      if (!dpopValidation.valid || dpopValidation.jkt !== expectedJkt) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: "INVALID_DPOP_PROOF",
+              message: dpopValidation.error || "DPoP thumbprint mismatch.",
+            },
+          },
+          { status: 401 }
+        );
+      }
+    } else if (dpopHeader) {
+      // Opportunistic DPoP binding if client provides a proof for an unbound session
+      const dpopValidation = await verifyDPoPProof(dpopHeader, req.method, req.nextUrl.pathname);
+      if (dpopValidation.valid && dpopValidation.jkt) {
+        payload.cnf = { jkt: dpopValidation.jkt };
+      }
     }
 
     const userRes = await query("SELECT * FROM users WHERE id = $1 AND status = 'ACTIVE' LIMIT 1", [
@@ -152,6 +194,7 @@ async function handleRefresh(req: NextRequest) {
       sub: user.id,
       email: user.email,
       role: user.role,
+      ...(payload.cnf ? { cnf: payload.cnf } : {}),
     });
 
     // Atomic rotation: insert new session AND revoke old one in a single

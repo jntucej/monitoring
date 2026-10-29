@@ -77,6 +77,8 @@ export interface AuthTokenClaims extends BaseClaims {
   name?: string;
   token_type?: TokenType | string;
   purpose?: string;
+  cnf?: { jkt?: string };
+  is_kiosk?: boolean;
   [key: string]: unknown;
 }
 

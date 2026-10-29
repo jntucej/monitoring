@@ -4,6 +4,28 @@ import { RAG } from "./config";
 
 const MAX_CHUNK_CHARS = 1600;
 
+/**
+ * Control 6: Ingestion sanitization.
+ * Strips zero-width characters, HTML comments, and hidden/white-on-white CSS trickery
+ * from knowledge base content before chunking and embedding.
+ */
+export function sanitizeKbContent(content: string): string {
+  if (!content) return "";
+  let clean = content;
+  // 1. Remove zero-width characters (\u200B-\u200D, \uFEFF, \u202A-\u202E, etc.)
+  clean = clean.replace(/[\u200B-\u200D\uFEFF\u202A-\u202E\u2060-\u206F]/g, "");
+
+  // 2. Remove HTML comments (frequent vector for indirect prompt injection)
+  clean = clean.replace(/<!--[\s\S]*?-->/g, "");
+
+  // 3. Remove suspicious style tags or white-on-white / hidden styling
+  clean = clean.replace(/<style[\s\S]*?<\/style>/gi, "");
+  clean = clean.replace(/(?:display\s*:\s*none|visibility\s*:\s*hidden|font-size\s*:\s*0|opacity\s*:\s*0|color\s*:\s*(?:white|#fff(?:fff)?|rgba?\([^)]+\)))/gi, "");
+
+  // 4. Normalize newlines
+  return clean.replace(/\r\n/g, "\n");
+}
+
 function splitIntoChunks(content: string): string[] {
   const clean = content.replace(/\r\n/g, "\n").trim();
   if (!clean) return [];
@@ -83,8 +105,9 @@ export async function ingestKbDocument(input: {
   roles: string[];
 }): Promise<IngestResult> {
   const { title, source, content, roles } = input;
+  const sanitizedContent = sanitizeKbContent(content);
   const rolesNorm = roles.length ? roles : ["all"];
-  const hash = sha256Hex(content);
+  const hash = sha256Hex(sanitizedContent);
 
   const { rows: docRows } = await query<{ id: string; content_hash: string | null }>(
     `SELECT id, content_hash FROM public.kb_documents WHERE source = $1 LIMIT 1`,
@@ -102,7 +125,7 @@ export async function ingestKbDocument(input: {
     documentId = existing.id;
     await query(
       `UPDATE public.kb_documents SET title=$1, content=$2, content_hash=$3, roles=$4, is_active=TRUE WHERE id=$5`,
-      [title, content, hash, rolesNorm, existing.id]
+      [title, sanitizedContent, hash, rolesNorm, existing.id]
     );
   } else {
     const { rows: insRows } = await query<{ id: string }>(
@@ -110,7 +133,7 @@ export async function ingestKbDocument(input: {
        VALUES ($1, $2, $3, $4, $5, TRUE)
        ON CONFLICT DO NOTHING
        RETURNING id`,
-      [title, source, content, hash, rolesNorm]
+      [title, source, sanitizedContent, hash, rolesNorm]
     );
     if (!insRows.length) {
       // Lost the race: row appeared between SELECT and INSERT.
@@ -124,7 +147,7 @@ export async function ingestKbDocument(input: {
     }
   }
 
-  const chunks = splitIntoChunks(content);
+  const chunks = splitIntoChunks(sanitizedContent);
 
   // Replace semantics: clear stale chunks, then insert fresh ones.
   await query(`DELETE FROM public.kb_chunks WHERE document_id = $1`, [documentId]);

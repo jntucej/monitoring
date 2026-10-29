@@ -32,6 +32,10 @@ async function walk(root, out = []) {
 
 async function ingestOne(path) {
   const raw = await readFile(path, "utf8");
+  // Control 6: Strip zero-width chars and comments during file read
+  const sanitized = raw
+    .replace(/[\u200B-\u200D\uFEFF\u202A-\u202E\u2060-\u206F]/g, "")
+    .replace(/<!--[\s\S]*?-->/g, "");
   const info = await stat(path);
   if (info.size > 500_000) {
     console.warn(`  · skip (too large >500KB): ${path}`);
@@ -43,7 +47,7 @@ async function ingestOne(path) {
   const res = await fetch(`${appUrl}/api/admin/kb/documents`, {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${jwt}` },
-    body: JSON.stringify({ title, source: rel, content: raw, roles }),
+    body: JSON.stringify({ title, source: rel, content: sanitized, roles }),
   });
   if (!res.ok) {
     console.error(`  ✗ ${title}: ${res.status} ${await res.text()}`);

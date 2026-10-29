@@ -379,15 +379,20 @@ async function runTests() {
     }
 
   // 10i. Client IP extraction prefers x-real-ip and rightmost x-forwarded-for
-  process.env.TRUSTED_PROXY_IPS = "10.0.0.1";
-  const spoofedReq = new NextRequest("http://campus.example.edu/api/auth/pin-login", {
-    headers: {
-      "x-forwarded-for": "1.1.1.1, 2.2.2.2, 3.3.3.3",
-      "x-real-ip": "10.0.0.1",
-    },
-  });
-  assert(extractClientIp(spoofedReq) === "10.0.0.1", "10i-realip: extractClientIp prefers trusted x-real-ip");
-  process.env.TRUSTED_PROXY_IPS = "";
+  const origTrustedProxies = process.env.TRUSTED_PROXY_IPS;
+  try {
+    process.env.TRUSTED_PROXY_IPS = "10.0.0.1, 127.0.0.1";
+    const spoofedReq = new NextRequest("http://campus.example.edu/api/auth/pin-login", {
+      headers: {
+        "x-forwarded-for": "1.1.1.1, 2.2.2.2, 3.3.3.3",
+        "x-real-ip": "10.0.0.1",
+      },
+    });
+    assert(extractClientIp(spoofedReq) === "10.0.0.1", "10i-realip: extractClientIp prefers trusted x-real-ip");
+  } finally {
+    if (origTrustedProxies !== undefined) process.env.TRUSTED_PROXY_IPS = origTrustedProxies;
+    else delete process.env.TRUSTED_PROXY_IPS;
+  }
   const multiHopReq = new NextRequest("http://campus.example.edu/api/auth/pin-login", {
     headers: {
       "x-forwarded-for": "198.51.100.1, 203.0.113.5",

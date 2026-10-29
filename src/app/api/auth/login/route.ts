@@ -3,6 +3,8 @@ import { randomBytes } from "crypto";
 import { withRateLimit, extractClientIp } from "@/lib/rate-limit";
 import { query } from "@/lib/postgres";
 import { signAccessToken, signRefreshToken, verifyPassword } from "@/lib/auth-token";
+import { verifyDPoPProof } from "@/lib/dpop";
+import { isHoneytokenIdentifier, triggerDeceptionAlert } from "@/lib/deception";
 import { secureCookieOptions } from "@/lib/cookies";
 import { addAudit } from "@/lib/db";
 import { log, getRequestId } from "@/lib/log";
@@ -52,6 +54,19 @@ async function handleLoginInner(req: NextRequest) {
     }
 
     const identifier = rawIdentifier.trim();
+
+    // Control 7: Honeytoken tripwire check.
+    // If someone attempts to authenticate with a canary sysadmin identifier, fire an immediate alert.
+    if (isHoneytokenIdentifier(identifier)) {
+      await triggerDeceptionAlert("honeytoken_user", {
+        ip: extractClientIp(req),
+        userAgent: req.headers.get("user-agent") || undefined,
+        attemptedIdentifier: identifier,
+        details: { attemptedIdentifier: identifier },
+      });
+      // Do not reveal it is a honeytoken, fail with generic invalid credentials
+      return NextResponse.json(GENERIC_FAILURE, { status: 401 });
+    }
 
     const userRes = await query(
       `SELECT * FROM users
@@ -160,10 +175,21 @@ async function handleLoginInner(req: NextRequest) {
       session_version: user.session_version ?? 0,
     });
 
+    // Optional RFC 9449 DPoP proof binding for interactive human sessions
+    const dpopHeader = req.headers.get("dpop");
+    let cnf: { jkt: string } | undefined = undefined;
+    if (dpopHeader) {
+      const dpopResult = await verifyDPoPProof(dpopHeader, req.method, req.nextUrl.pathname);
+      if (dpopResult.valid && dpopResult.jkt) {
+        cnf = { jkt: dpopResult.jkt };
+      }
+    }
+
     const refresh_token = await signRefreshToken({
       sub: user.id,
       email: user.email,
       role: user.role,
+      ...(cnf ? { cnf } : {}),
     });
 
     const response = NextResponse.json({

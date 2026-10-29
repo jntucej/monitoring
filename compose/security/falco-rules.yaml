@@ -1,0 +1,47 @@
+# Control 1: Falco eBPF Runtime Security Rules for Gate Monitor
+# Scoped specifically to avoid execve storm while catching real post-exploitation attempts.
+
+- list: shell_binaries
+  items: [bash, sh, dash, ash, zsh]
+
+- list: gate_monitor_containers
+  items: [gate_web, gate_worker, gate_postgres, gate_redis, gate_caddy, gate_llm_proxy]
+
+# 1. Shell spawned inside web or llm-proxy container (should NEVER happen in normal production)
+- rule: Shell Spawned in Application Container
+  desc: Detect any shell spawned inside web or llm-proxy container
+  condition: >
+    spawned_process and
+    container.name in (gate_web, gate_llm_proxy) and
+    proc.name in (shell_binaries)
+  output: >
+    CRITICAL: Shell spawned inside application container (user=%user.name container=%container.name
+    command=%proc.cmdline parent=%proc.pname pid=%proc.pid)
+  priority: CRITICAL
+  tags: [container, mitre_execution, gate_monitor]
+
+# 2. Outbound network connection to unexpected destination from web container
+# Web should only connect to postgres, redis, and llm-proxy
+- rule: Unexpected Outbound Connection from Web Container
+  desc: Detect unexpected outbound connections originating from gate_web
+  condition: >
+    outbound and
+    container.name = "gate_web" and
+    not fd.sip in ("127.0.0.1", "host.docker.internal") and
+    not fd.sport in (5432, 6379, 8080)
+  output: >
+    WARNING: Outbound connection from gate_web to unexpected endpoint (dest=%fd.rip:%fd.rport proc=%proc.name)
+  priority: WARNING
+  tags: [network, mitre_command_and_control, gate_monitor]
+
+# 3. Read/write to sensitive system credentials inside containers
+- rule: Sensitive File Access in Gate Containers
+  desc: Detect access to /etc/shadow or credentials inside container
+  condition: >
+    open_read and
+    container.name in (gate_monitor_containers) and
+    fd.name in (/etc/shadow, /etc/gshadow)
+  output: >
+    CRITICAL: Access to sensitive file inside container (file=%fd.name container=%container.name proc=%proc.cmdline)
+  priority: CRITICAL
+  tags: [filesystem, mitre_credential_access, gate_monitor]

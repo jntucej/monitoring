@@ -95,23 +95,23 @@ services:
 
   # ---------------------------------------------------------------------------
   # llm-proxy — lightweight Node proxy that bridges the compose network to the
-  # host's omniroute LLM gateway (127.0.0.1:20128). Uses host network mode
-  # so it can reach 127.0.0.1 directly, bypassing the UFW FORWARD DROP that
-  # blocks container→host LAN traffic on non-published ports.
+  # host's omniroute LLM gateway (127.0.0.1:20128). Runs on gate-net bridge
+  # with extra_hosts mapping to host gateway, publishing loopback only.
+  # Governed strictly by UFW (no network_mode: host).
   # ---------------------------------------------------------------------------
   llm-proxy:
     image: node:20-alpine
     container_name: gate_llm_proxy
     restart: always
-    network_mode: host
     ports:
-      # Published on 127.0.0.1 only — Docker creates a NAT rule that lets the
-      # web container reach it via the published port, bypassing the UFW
-      # FORWARD DROP that otherwise blocks container→host LAN traffic.
       - "127.0.0.1:8080:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - gate-net
     command: node /app/llm-proxy.mjs
     environment:
-      - LLM_PROXY_BACKEND_HOST=${LLM_PROXY_BACKEND_HOST:-127.0.0.1}
+      - LLM_PROXY_BACKEND_HOST=${LLM_PROXY_BACKEND_HOST:-host.docker.internal}
       - LLM_PROXY_BACKEND_PORT=${LLM_PROXY_BACKEND_PORT:-20128}
       - LLM_PROXY_LISTEN=0.0.0.0:8080
     volumes:

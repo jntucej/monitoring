@@ -56,6 +56,14 @@ touch "$SECRETS_FILE" && chmod 600 "$SECRETS_FILE"
     echo "POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-unknown}"
     echo "REDIS_PASSWORD=${REDIS_PASSWORD:-unknown}"
     echo ""
+    echo "=== S3 BACKUP RECOVERY (SECONDARY) ==="
+    # Control 7: Canary backup credential tripwire.
+    # Fake secondary AWS credentials; real backup never touches this key. Any call to AWS using this key trips an immediate alert.
+    echo "AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE_CANARY"
+    echo "AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY_CANARY"
+    echo "S3_ENDPOINT=https://s3.ap-south-1.amazonaws.com"
+    echo "S3_CANARY_BUCKET=gate-monitor-encrypted-cold-vault-canary"
+    echo ""
     echo "=== USERS TABLE ==="
     if docker ps --format '{{.Names}}' | grep -q "^gate_postgres$"; then
         docker exec gate_postgres psql -U postgres -d gate_monitor \
