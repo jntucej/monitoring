@@ -28,7 +28,7 @@ import {
 import type { Person, Scan } from "@/lib/types";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
-import { BoardRow } from "@/components/shared/Board";
+import { BoardRow } from "@/components/admin/shared/Board";
 
 interface PersonPayload {
   person: Person;
