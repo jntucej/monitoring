@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -18,24 +18,25 @@ export function OnboardingTour() {
   const [nextStep, setNextStep] = useState<Step | null>(null);
   const [dismissed, setDismissed] = useState(false);
 
-  useEffect(() => {
+  const fetchNext = useCallback(async () => {
     if (!token) return;
+    try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
 
-    const fetchNext = async () => {
-      try {
-        const headers: Record<string, string> = { "Content-Type": "application/json" };
-        if (token) headers["Authorization"] = `Bearer ${token}`;
-
-        const res = await fetch("/api/onboarding/next", { headers });
-        const result = await res.json();
-        if (result.success && result.data) {
-          setNextStep(result.data);
-        }
-      } catch {}
-    };
-
-    fetchNext();
+      const res = await fetch("/api/onboarding/next", { headers, credentials: "include" });
+      const result = await res.json();
+      if (result.success && result.data?.step) {
+        setNextStep(result.data.step);
+      } else if (result.success && result.data?.allComplete) {
+        setDismissed(true);
+      }
+    } catch {}
   }, [token]);
+
+  useEffect(() => {
+    void fetchNext();
+  }, [fetchNext]);
 
   const handleComplete = async () => {
     if (!nextStep) return;
@@ -46,9 +47,12 @@ export function OnboardingTour() {
       await fetch("/api/onboarding/complete", {
         method: "POST",
         headers,
+        credentials: "include",
         body: JSON.stringify({ step: nextStep.id }),
       });
-      setNextStep(null);
+      // Re-poll: if all steps are done the next call reports allComplete
+      // and the tour dismisses itself.
+      void fetchNext();
     } catch {}
   };
 

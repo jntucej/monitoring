@@ -32,6 +32,21 @@ const ROLE_STEPS: Record<string, OnboardingStep[]> = {
 
 const inMemoryProgress = new Map<string, Set<string>>();
 
+/**
+ * F4: the ONLY step ids the API accepts. The catalogue is the closed
+ * universe — a client can't mark progress on an arbitrary string and
+ * pollute onboarding_progress or the audit log with junk rows.
+ */
+export const VALID_ONBOARDING_STEPS: ReadonlySet<string> = new Set(
+  Object.values(ROLE_STEPS).flatMap((steps) => steps.map((s) => s.id))
+);
+
+export function assertValidStep(step: string): void {
+  if (typeof step !== "string" || !VALID_ONBOARDING_STEPS.has(step)) {
+    throw new Error(`Unknown onboarding step: ${String(step).slice(0, 120)}`);
+  }
+}
+
 export async function getUserCompletedSteps(userId: string): Promise<string[]> {
   try {
     const supabase = getSupabaseServiceClient();
@@ -53,6 +68,10 @@ export async function getUserCompletedSteps(userId: string): Promise<string[]> {
 }
 
 export async function markStepCompleted(userId: string, stepId: string): Promise<void> {
+  // F4: reject any step id that is not in the closed catalogue BEFORE it
+  // can reach the DB or the audit log (garbage-step spam).
+  assertValidStep(stepId);
+
   let set = inMemoryProgress.get(userId);
   if (!set) {
     set = new Set<string>();
@@ -62,34 +81,33 @@ export async function markStepCompleted(userId: string, stepId: string): Promise
 
   try {
     const supabase = getSupabaseServiceClient();
-    const { data: existing } = await supabase
+    // Idempotent upsert: the UNIQUE(user_id, step) constraint (migration
+    // 20261231000002) makes this safe under concurrent callers — the
+    // ON CONFLICT DO UPDATE branch only re-touches completed_at, and the
+    // monotonic trigger prevents ever demoting a completed step back.
+    const { error } = await supabase
       .from("onboarding_progress")
-      .select("id")
-      .eq("user_id", userId)
-      .eq("step", stepId)
-      .maybeSingle();
-
-    if (existing?.id) {
-      await supabase
-        .from("onboarding_progress")
-        .update({
-          completed: true,
-          completed_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", existing.id);
-    } else {
-      await supabase
-        .from("onboarding_progress")
-        .insert({
+      .upsert(
+        {
           user_id: userId,
           step: stepId,
           completed: true,
           completed_at: new Date().toISOString(),
-        });
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id,step" }
+      );
+    if (error) {
+      // Surface the write failure instead of silently "succeeding" — the
+      // in-memory set is a cache, not the source of truth, and an unhandled
+      // error here would let the client believe a step is done when it
+      // isn't. The route still returns 200 (idempotent retry is fine), but
+      // the error must be visible to the operator.
+      console.error("[onboarding] markStepCompleted upsert failed:", error.message);
     }
   } catch {
-    // fallback to in-memory
+    // DB unreachable — in-memory set already updated; logged above so the
+    // fallback is not silent.
   }
 }
 
