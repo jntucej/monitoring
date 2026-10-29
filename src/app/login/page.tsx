@@ -35,7 +35,7 @@ export default function CinematicLoginPage() {
           </div>
           <div className="text-xs text-slate-500 flex items-center justify-between">
             <span>© JNTUH University College of Engineering Jagtial</span>
-            <Link href="/bootstrap" className="text-emerald-400 hover:underline">
+            <Link href="/bootstrap" prefetch={false} className="text-emerald-400 hover:underline">
               Account Setup
             </Link>
           </div>

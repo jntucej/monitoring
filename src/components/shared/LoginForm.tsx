@@ -315,7 +315,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
 
       <p className="text-center text-xs text-[var(--text-muted)]">
         Need help?{" "}
-        <Link href="/help" className="text-[var(--action-primary)] hover:underline">
+        <Link href="/help" prefetch={false} className="text-[var(--action-primary)] hover:underline">
           Contact your administrator
         </Link>
       </p>

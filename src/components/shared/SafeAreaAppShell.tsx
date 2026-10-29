@@ -43,6 +43,7 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
   // AppLoadingScreen there so opening the portal lands on content, not on a
   // full-screen "Loading…" overlay. Guarded/role consoles keep the screen.
   const isHome = pathname === "/" || pathname === "";
+  const isLogin = pathname?.startsWith("/login");
 
   // Standalone console routes own their full-screen shell (their own sidebar +
   // header via the route layout). The shared nav chrome (global Sidebar +
@@ -75,11 +76,9 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
     <div className="relative min-h-[100dvh] flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] antialiased selection:bg-[var(--action-primary)] selection:text-white pt-safe pb-safe pl-safe pr-safe">
       {/* Global loading overlay — covers the entire shell until auth hydrates.
           Suppressed on the home page so / lands on content, not a loader. */}
-      {!isHome && <AppLoadingScreen />}
-      {/* Ambient Desktop Mouse-Parallax Orbs — skipped on / (it is a
-          pointermove-driven decorative layer; the home page has its own
-          blob background and should not double-subscribe to pointermove). */}
-      {!isHome && <FloatingOrbs />}
+      {!isHome && !isLogin && <AppLoadingScreen />}
+      {/* Ambient Desktop Mouse-Parallax Orbs — skipped on / and /login */}
+      {!isHome && !isLogin && <FloatingOrbs />}
 
       {/* Network & Offline Status Bar */}
       <NetworkStatusBanner />

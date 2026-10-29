@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { COLLEGE } from "@/lib/college-config";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 export const alt = `${COLLEGE.officialName} Campus Access Portal`;
 export const size = { width: 1200, height: 630 };
