@@ -101,10 +101,15 @@ async function handlePost(
     return NextResponse.json(body, { status });
   }
 
+  if (registration.status === "attended") {
+    return NextResponse.json({ success: true, data: { attended: true, alreadyAttended: true } });
+  }
+
   const { data: updated, error: upErr } = await supabase
     .from("event_registrations")
     .update({ status: "attended" })
     .eq("id", registration.id)
+    .eq("status", "registered")
     .select("id, user_id, status, event_id")
     .single();
   if (upErr) {

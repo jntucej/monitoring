@@ -25,7 +25,12 @@ export interface PageHeaderProps {
  *
  * Any new code should use `usePageTitle` instead of mounting a PageHeader.
  */
-export function PageHeader(_props: PageHeaderProps): null {
+export function PageHeader({ title }: PageHeaderProps): null {
+  useEffect(() => {
+    if (title && typeof document !== "undefined") {
+      document.title = `${title} | Gate Monitor`;
+    }
+  }, [title]);
   return null;
 }
 

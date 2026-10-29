@@ -57,11 +57,18 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   const buf = await readAttachment(att.storage_path);
   if (!buf) return fail("FILE_MISSING", "File no longer on storage", 410);
 
+  const SAFE_INLINE_TYPES = new Set(["image/png", "image/jpeg", "image/webp", "application/pdf"]);
+  const isInline = SAFE_INLINE_TYPES.has((att.mime_type || "").toLowerCase().trim());
+  const contentType = isInline ? att.mime_type : "application/octet-stream";
+  const disposition = isInline ? "inline" : "attachment";
+  const safeFilename = att.original_name.replace(/[^a-zA-Z0-9._-]/g, "_");
+
   return new Response(buf as unknown as BodyInit, {
     headers: {
-      "content-type": att.mime_type,
+      "content-type": contentType,
       "content-length": String(buf.length),
-      "content-disposition": `inline; filename="${att.original_name.replace(/"/g, "")}"`,
+      "content-disposition": `${disposition}; filename="${safeFilename}"`,
+      "x-content-type-options": "nosniff",
       "cache-control": "private, max-age=300",
     },
   });

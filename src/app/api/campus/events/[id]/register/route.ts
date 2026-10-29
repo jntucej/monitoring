@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
+import { query } from "@/lib/postgres";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
@@ -81,27 +82,48 @@ async function handlePost(
   }
 
   if (event.capacity && event.capacity > 0) {
-    const current = await activeRegistrationCount(supabase, eventId);
-    if (current >= event.capacity) {
+    // Atomic insert with subquery capacity check to eliminate TOCTOU race conditions
+    const insertRes = await query<{ id: string }>(
+      `INSERT INTO public.event_registrations (event_id, user_id, status, registered_at)
+       SELECT $1, $2, 'registered', NOW()
+       WHERE (
+         SELECT COUNT(*) FROM public.event_registrations
+         WHERE event_id = $1 AND status IN ('registered', 'attended')
+       ) < $3
+       ON CONFLICT (event_id, user_id) DO UPDATE
+         SET status = 'registered', registered_at = NOW()
+         WHERE event_registrations.status = 'cancelled'
+       RETURNING id`,
+      [eventId, auth.userId, event.capacity]
+    ).catch((err) => ({ rows: [], error: err }));
+
+    if ("error" in insertRes && insertRes.error) {
+      return NextResponse.json(
+        { success: false, error: { code: "DB_ERROR", message: String(insertRes.error) } },
+        { status: 500 }
+      );
+    }
+
+    if (insertRes.rows.length === 0) {
       return NextResponse.json(
         { success: false, error: { code: "EVENT_FULL", message: "Event is at capacity" } },
         { status: 409 }
       );
     }
-  }
+  } else {
+    const { error: insErr } = await supabase
+      .from("event_registrations")
+      .upsert(
+        { event_id: eventId, user_id: auth.userId, status: "registered", registered_at: new Date().toISOString() },
+        { onConflict: "event_id,user_id" }
+      );
 
-  const { error: insErr } = await supabase
-    .from("event_registrations")
-    .upsert(
-      { event_id: eventId, user_id: auth.userId, status: "registered", registered_at: new Date().toISOString() },
-      { onConflict: "event_id,user_id" }
-    );
-
-  if (insErr) {
-    return NextResponse.json(
-      { success: false, error: { code: "DB_ERROR", message: insErr.message } },
-      { status: 500 }
-    );
+    if (insErr) {
+      return NextResponse.json(
+        { success: false, error: { code: "DB_ERROR", message: insErr.message } },
+        { status: 500 }
+      );
+    }
   }
 
   await awardAchievement(auth.userId, "event_participation").catch(() => undefined);

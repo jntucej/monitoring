@@ -51,11 +51,27 @@ export const fmtRelative = (iso: string): string => {
   return `${days}d ago`;
 };
 
-/** Format a cell value — never render null/undefined as blank */
+/** Format a cell value — never render null/undefined or raw object as blank */
 export function fmtCell(value: unknown, fallback = "—"): string {
   if (value == null || value === "") return fallback;
+  if (typeof value === "object") return fallback;
   if (typeof value === "number") return fmtInt(value);
   return String(value);
+}
+
+/**
+ * Safely parse an SLA deadline string.
+ * If raw is a date-only string (e.g. "2026-10-30"), treat as end of day IST (23:59:59+05:30)
+ * rather than UTC midnight (05:30 IST) to prevent false premature SLA breach flags.
+ */
+export function parseSlaDeadline(raw?: string | null): Date | null {
+  if (!raw) return null;
+  const str = String(raw).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+    return new Date(`${str}T23:59:59+05:30`);
+  }
+  const d = new Date(str);
+  return isNaN(d.getTime()) ? null : d;
 }
 
 /** Format a boolean as a colored badge */
