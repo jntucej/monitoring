@@ -55,6 +55,11 @@ export function validateCsrf(req: NextRequest): CsrfValidationResult {
       const originHost = originUrl.host.toLowerCase();
       const targetHost = host.toLowerCase();
 
+      // Normalise standard HTTP/HTTPS default ports (:80 on http, :443 on https)
+      const stripDefaultPort = (h: string) => h.replace(/:80$/, "").replace(/:443$/, "");
+      const cleanOriginHost = stripDefaultPort(originHost);
+      const cleanTargetHost = stripDefaultPort(targetHost);
+
       const allowedOriginEnv = process.env.ALLOWED_ORIGIN || process.env.ALLOWED_ORIGINS;
       let allowedHosts: string[] = [];
       if (allowedOriginEnv && allowedOriginEnv !== "*") {
@@ -64,17 +69,17 @@ export function validateCsrf(req: NextRequest): CsrfValidationResult {
           .filter(Boolean)
           .map((o) => {
             try {
-              return new URL(o).host.toLowerCase();
+              return stripDefaultPort(new URL(o).host.toLowerCase());
             } catch {
-              return o.toLowerCase();
+              return stripDefaultPort(o.toLowerCase());
             }
           });
       }
 
       if (
-        originHost !== targetHost &&
+        cleanOriginHost !== cleanTargetHost &&
         allowedOriginEnv !== "*" &&
-        !allowedHosts.includes(originHost)
+        !allowedHosts.includes(cleanOriginHost)
       ) {
         return {
           valid: false,
