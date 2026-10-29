@@ -9,6 +9,7 @@ import { withRateLimit } from "@/lib/rate-limit";
 import { withAuthorization } from "@/middleware/authorization";
 import { invalidateAuthCache } from "@/lib/authContext";
 import { assertPasswordPolicy } from "@/server/policy/passwords";
+import { log } from "@/lib/log";
 import type { AuthContext } from "@/lib/authContext";
 
 // Password policy (min/max length) is enforced by assertPasswordPolicy from
@@ -103,12 +104,34 @@ async function handleChangePassword(
   // P0-2: invalidate any unspent password-reset tokens so an intercepted
   // reset link (or a token minted before this change) stops working the
   // moment the password changes — not 30 min later.
-  await query(
+  // §D: this is a STATE-MUTATING write that currently swallows its own
+  // failure. If it fails, the user's stale reset link keeps working — a
+  // real credential-staleness bug. So we log at ERROR with the userId so
+  // ops can chase it; we still never fail the password change itself.
+  const tokenInvalidation = await query(
     `UPDATE public.password_reset_tokens
         SET used_at = NOW()
       WHERE user_id = $1 AND used_at IS NULL AND expires_at > NOW()`,
     [auth.userId]
-  ).catch(() => null);
+  ).catch((e: unknown) => {
+    log.error({
+      msg: "change-password: reset-token invalidation failed — stale tokens remain valid",
+      route: "/api/auth/change-password",
+      userId: auth.userId,
+      error: e instanceof Error ? e.message : String(e),
+    });
+    return null;
+  });
+  if (tokenInvalidation === null) {
+    // The write failed (caught above). Add an audit row so the failure is
+    // visible in the trail — silent failure is the bug §D is closing.
+    await addAudit({
+      action: "RESET_TOKEN_INVALIDATION_FAILED",
+      userId: auth.userId,
+      role: auth.role,
+      details: "change-password: reset-token UPDATE was swallowed; stale tokens may still be usable",
+    }).catch(() => null);
+  }
 
   // 7. Evict the 30s user-row cache so the new session_version is enforced
   //    on the very next request, not up to 30s later.

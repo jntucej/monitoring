@@ -6,6 +6,8 @@ import { verifyDPoPProof } from "@/lib/dpop";
 import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
 import { secureCookieOptions } from "@/lib/cookies";
+import { addAudit } from "@/lib/db";
+import type { Role } from "@/lib/types";
 
 async function handleRefresh(req: NextRequest) {
   const csrfError = assertCsrf(req);
@@ -172,6 +174,13 @@ async function handleRefresh(req: NextRequest) {
 
       // Genuine reuse of a long-revoked token → revoke all (theft signal).
       await query("UPDATE sessions SET revoked_at = NOW() WHERE user_id = $1", [payload.sub]).catch(() => {});
+      await addAudit({
+        action: "SESSION_ROTATED",
+        userId: user.id,
+        userName: user.name,
+        role: user.role as Role,
+        details: "Refresh token reuse of a long-revoked session detected — all sessions revoked (theft signal)",
+      });
       return NextResponse.json(
         {
           success: false,
@@ -222,6 +231,20 @@ async function handleRefresh(req: NextRequest) {
         },
         { status: 503 }
       );
+    }
+
+    // Audit the rotation (success path) — a stolen session's rotation trail is
+    // the first thing a reviewer looks for after an incident.
+    try {
+      await addAudit({
+        action: "SESSION_ROTATED",
+        userId: user.id,
+        userName: user.name,
+        role: user.role as Role,
+        details: "Refresh token rotated; prior session revoked",
+      });
+    } catch {
+      // audit is best-effort — never fail the refresh on an audit write
     }
 
     const cookieOptions = secureCookieOptions(req, { maxAge: 3600 });

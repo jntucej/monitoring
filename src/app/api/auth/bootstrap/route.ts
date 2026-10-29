@@ -105,7 +105,22 @@ async function handlePost(req: NextRequest) {
   // Atomic burn: exactly one concurrent caller can flip used_at IS NULL → set.
   // (Mirrors the pattern in mobile/[...path]/route.ts; the PostgREST update
   // above is read-then-write, which lets two requests burn the same row.)
-  if (burnRes.rowCount !== 1) return await rejectAudit(user);
+  if (burnRes.rowCount !== 1) {
+    // Distinct from the generic rejectAudit: this branch means a concurrent
+    // caller burned the code first — a race condition, not a wrong code.
+    await addAudit({
+      action: "ENROLLMENT_CODE_RACE_LOST",
+      userId: user.id,
+      userName: user.name,
+      role: "student" as any,
+      details: {
+        identifier: normId,
+        reason: "concurrent burn — code was claimed by another request",
+        ip: req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")?.split(",").pop()?.trim() || "unknown",
+      },
+    });
+    return NextResponse.json(UNIFORM, { status: 401 });
+  }
 
   const pwHash = await hashPassword(newPassword);
   const pinHash = await hash(newPin, 10);

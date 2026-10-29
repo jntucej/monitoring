@@ -449,8 +449,12 @@ export async function recordScan(input: RecordScanInput): Promise<RecordScanResu
         // wasted food. Auto-revoke the tokens and clear the preferences.
         // Non-fatal: a mess-table failure must not roll back the scan.
         if (normReason === "home_out") {
+          // §D: hoisted so the failure audit can report the window even when
+          // the queries below fail partway through (otherwise fromDate/toDate
+          // would be out of scope in the catch).
+          const failWindowFrom = new Date().toISOString().slice(0, 10);
           try {
-            const fromDate = new Date().toISOString().slice(0, 10);
+            const fromDate = failWindowFrom;
             const { rows: passEnd } = await query<{ to_date: string | null }>(
               `SELECT to_date FROM public.permissions
                 WHERE id = $1 AND to_date IS NOT NULL LIMIT 1`,
@@ -492,8 +496,23 @@ export async function recordScan(input: RecordScanInput): Promise<RecordScanResu
               },
             });
           } catch (err) {
-            // Best-effort: log but do not fail the scan.
+            // §D: this is a STATE-MUTATING write that previously swallowed its
+            // own failure. If mess auto-revoke fails on `home_out`, the
+            // student's tokens stay live — a food-waste + audit-trail bug.
+            // Log the structured context AND add a MESS_REVOKE_FAILED audit
+            // row so ops can chase it; the scan itself still succeeds.
             console.error("[recordScan] M18 mess auto-revoke failed:", err);
+            await auditWrite({
+              action: "MESS_REVOKE_FAILED",
+              userId: input.operatorId,
+              role: input.operatorRole,
+              details: {
+                personId: person.id,
+                passId: consumedPassId,
+                window: { fromDate: failWindowFrom },
+                reason: err instanceof Error ? err.message : String(err),
+              },
+            });
           }
         }
       }
