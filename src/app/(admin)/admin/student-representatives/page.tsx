@@ -57,7 +57,7 @@ export default function RepsPage() {
   };
 
   return (
-    <div className="p-4 sm:p-6 max-w-5xl mx-auto space-y-4 sm:space-y-6">
+    <div className="p-4 sm:p-4 sm:p-6 max-w-5xl mx-auto space-y-4 sm:space-y-4 sm:space-y-6">
       <h1 className="text-2xl font-semibold">Student representatives</h1>
 
       <form onSubmit={create} className="grid grid-cols-2 gap-3 border p-4 rounded bg-white shadow-sm">

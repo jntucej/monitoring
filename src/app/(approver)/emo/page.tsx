@@ -3,7 +3,7 @@ import { Wrench, AlertTriangle, ArrowRight } from "lucide-react";
 
 export default function EmoLandingPage() {
   return (
-    <div className="p-4 sm:p-6 max-w-3xl mx-auto space-y-4 sm:space-y-6">
+    <div className="p-4 sm:p-4 sm:p-6 max-w-3xl mx-auto space-y-4 sm:space-y-4 sm:space-y-6">
       <header className="space-y-1">
         <h1 className="text-2xl font-bold">Electrical Maintenance Officer</h1>
         <p className="text-sm text-[var(--text-muted)]">

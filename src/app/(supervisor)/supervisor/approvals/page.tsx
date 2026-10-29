@@ -38,7 +38,7 @@ const api = useApi();
   }, [api]);
 
   // Live toggle drives refetch; polls every 20s while Live.
-  useLiveRefresh(loadPasses, { intervalMs: 20000 /* R15: name this profile */ });
+  useLiveRefresh(loadPasses, { intervalMs: 20000 /* R15: name this profile */ /* R15: name this profile */ });
 
   const handleAction = useCallback(async (passId: string, action: "approve" | "reject", comment: string) => {
     if (action === "reject" && !comment.trim()) {

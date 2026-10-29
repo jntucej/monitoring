@@ -451,7 +451,7 @@ const api = useApi();
       {/* Main Grid: Profile Updation & Password Changing */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Column: Update Profile Information */}
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-6 space-y-4 sm:space-y-6 shadow-xl">
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-4 sm:p-6 space-y-4 sm:space-y-4 sm:space-y-6 shadow-xl">
           <div className="flex items-center justify-between border-b border-[var(--border)] pb-4">
             <div className="flex items-center gap-2.5">
               <div className="p-2 rounded-xl bg-sky-500/10 text-sky-400">
@@ -560,7 +560,7 @@ const api = useApi();
         {/* Right Column: Password & Security PIN Change */}
         <div className="space-y-8">
           {/* Change Password Card */}
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-6 space-y-4 sm:space-y-6 shadow-xl">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-4 sm:p-6 space-y-4 sm:space-y-4 sm:space-y-6 shadow-xl">
             <div className="flex items-center justify-between border-b border-[var(--border)] pb-4">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 rounded-xl bg-rose-500/10 text-rose-400">

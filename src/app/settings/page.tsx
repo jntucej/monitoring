@@ -8,7 +8,7 @@ import { KeyRound, Bell, ChevronRight } from "lucide-react";
 export default function SettingsHubPage() {
   return (
     <AuthGuard>
-      <div className="mx-auto max-w-3xl p-4 sm:p-6 space-y-4 sm:space-y-6 min-w-0">
+      <div className="mx-auto max-w-3xl p-4 sm:p-4 sm:p-6 space-y-4 sm:space-y-4 sm:space-y-6 min-w-0">
         {/* Page title — global DynamicHeader renders the app header */}
         <div>
           <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">Settings</p>

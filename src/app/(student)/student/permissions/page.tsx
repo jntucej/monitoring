@@ -60,7 +60,7 @@ export default function StudentPermissionsPage() {
 
   return (
     <AuthGuard allowedRoles={["student"]}>
-      <div className="p-4 md:p-4 sm:p-6 space-y-4 sm:space-y-6 max-w-4xl mx-auto">
+      <div className="p-4 md:p-4 sm:p-4 sm:p-6 space-y-4 sm:space-y-4 sm:space-y-6 max-w-4xl mx-auto">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
