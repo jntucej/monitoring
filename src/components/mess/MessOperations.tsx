@@ -311,8 +311,7 @@ export function MenuItemsTab() {
         <SectionCard
           title={editing.id ? `Edit: ${editing.label}` : "New menu item"}
           action={
-            <button onClick={() => setEditing(null)} className="text-slate-500 hover:text-white">
-            type="button"
+            <button type="button" onClick={() => setEditing(null)} className="text-slate-500 hover:text-white">
               <X className="w-4 h-4" />
             </button>
           }
@@ -774,8 +773,7 @@ export function MealDaysTab() {
         <SectionCard
           title={`Edit meal day — ${fmtDate(editingDraft.mealDate)}`}
           action={
-            <button onClick={() => { setEditingDay(null); setEditingDraft(null); }} className="text-slate-500 hover:text-white">
-            type="button"
+            <button type="button" onClick={() => { setEditingDay(null); setEditingDraft(null); }} className="text-slate-500 hover:text-white">
               <X className="w-4 h-4" />
             </button>
           }
