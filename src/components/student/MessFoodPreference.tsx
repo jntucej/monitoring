@@ -122,9 +122,10 @@ function MessFoodPreferenceInner() {
 
   /* live clock — drives the window countdown without refetching */
   const [now, setNow] = useState(() => Date.now());
-  usePolling(() => {
-    setNow(Date.now());
-  }, { intervalMs: 1000 });
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const [primaryItem, setPrimaryItem] = useState<string>("");
   const [subItemIds, setSubItemIds] = useState<string[]>([]);
