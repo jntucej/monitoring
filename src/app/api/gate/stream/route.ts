@@ -144,5 +144,5 @@ async function handleGet(req: NextRequest) {
 }
 
 export const GET = withAuthorization(handleGet, { 
-  requiredRole: ["sysadmin", "admin", "operator", "supervisor"] 
+  requiredRole: ["sysadmin", "admin", "operator", "supervisor", "oie"] 
 });
