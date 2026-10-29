@@ -121,7 +121,7 @@ export function useApiResource<T>(
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [url, enabled, ttlMs, ...(deps ?? [])]);
+  }, [url, enabled, ttlMs, ...(deps || [])]);
 
   useEffect(() => {
     void refresh();
