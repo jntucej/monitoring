@@ -1,6 +1,6 @@
 {
   "name": "mycampus",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "prebuild": "node scripts/validate-env.js",
@@ -97,5 +97,8 @@
     "tailwindcss": "^4",
     "ts-jest": "^29.4.15",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }
