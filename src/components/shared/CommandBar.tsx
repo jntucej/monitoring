@@ -39,7 +39,7 @@ function buildCommands(role: string): CommandDef[] {
       label: "Scan badge",
       hint: "Open the scanner to read a pass or badge",
       icon: ScanLine,
-      href: "/operator/scan",
+      href: "/gate/main",
     },
     "manual-entry": {
       id: "manual-entry",
