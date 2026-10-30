@@ -1,8 +1,9 @@
 -- database/migrations/20261014000001_ensure_bypass_rls_for_app_role.sql
--- Ensure the Postgres app role has BYPASSRLS for direct pool connections in self-hosted deployments.
+-- In legacy self-hosted setups this granted BYPASSRLS. In production, NOBYPASSRLS
+-- is enforced per Phase 1 DoD to ensure RLS policies are active.
 DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'postgres') THEN
-    ALTER ROLE postgres BYPASSRLS;
+    ALTER ROLE postgres NOBYPASSRLS;
   END IF;
 END $$;

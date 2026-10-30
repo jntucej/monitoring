@@ -11,6 +11,8 @@ metadata:
     app: gate-monitor
 
 ---
+# Note: In production clusters, secrets are provisioned via ExternalSecret (see k8s/external-secrets.yaml).
+# For bootstrapping or local test clusters, populate actual secrets into gate-monitor-secrets.
 apiVersion: v1
 kind: Secret
 metadata:
@@ -18,15 +20,15 @@ metadata:
   namespace: gate-monitor
 type: Opaque
 stringData:
-  postgres-password: "CHANGE_ME"
-  redis-password: "CHANGE_ME"
-  jwt-secret: "CHANGE_ME"
+  postgres-password: ""
+  redis-password: ""
+  jwt-secret: ""
   supabase-url: "http://supabase-gateway.gate-monitor.svc.cluster.local:8000"
-  supabase-service-role-key: "CHANGE_ME"
-  telegram-bot-token: "CHANGE_ME"
-  telegram-chat-id: "CHANGE_ME"
-  DATABASE_URL: "postgres://postgres:CHANGE_ME@gate-postgres.gate-monitor.svc.cluster.local:5432/gate_monitor"
-  REDIS_URL: "redis://:CHANGE_ME@gate-redis.gate-monitor.svc.cluster.local:6379"
+  supabase-service-role-key: ""
+  telegram-bot-token: ""
+  telegram-chat-id: ""
+  DATABASE_URL: ""
+  REDIS_URL: ""
 
 ---
 apiVersion: v1
@@ -99,6 +101,26 @@ spec:
             port: 3000
           failureThreshold: 30
           periodSeconds: 5
+        volumeMounts:
+        - name: uploads-storage
+          mountPath: /app/data/uploads
+      volumes:
+      - name: uploads-storage
+        persistentVolumeClaim:
+          claimName: gate-uploads-pvc
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gate-uploads-pvc
+  namespace: gate-monitor
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 20Gi
 
 ---
 apiVersion: apps/v1

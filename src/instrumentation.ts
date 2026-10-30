@@ -14,6 +14,19 @@
 
 export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
+
+  // Fail closed in production if kiosk is left in open mode without PIN or trusted IP restriction
+  if (
+    process.env.NODE_ENV === "production" &&
+    !process.env.KIOSK_SESSION_REQUIRE_PIN &&
+    !process.env.TRUSTED_KIOSK_IPS
+  ) {
+    console.error(
+      "FATAL: KIOSK_SESSION_REQUIRE_PIN=true or TRUSTED_KIOSK_IPS must be set in production to prevent open kiosk mode."
+    );
+    process.exit(1);
+  }
+
   const { runSchemaDriftGuardOnBoot } = await import("@/lib/schema-drift-guard");
   runSchemaDriftGuardOnBoot();
 }

@@ -73,11 +73,42 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
     // §2 gate scoping. Supervisors are scoped to their supervised gates;
     // admin / sysadmin / principal are campus-wide and see every gate.
     // Fail-closed: a supervisor with no assigned gates sees an empty view,
-    // never all gates.
+    // never all gates. Unassigned alerts (gate_id IS NULL) stay visible to
+    // everyone — they have no gate to scope on.
     const isSupervisor = auth.role === "supervisor";
     const scopedGates = isSupervisor
       ? (auth.supervisedGates ?? [])
       : null; // null = campus-wide
+    const alertSql =
+      scopedGates && scopedGates.length > 0
+        ? `SELECT a.id,
+                  a.severity,
+                  a.title,
+                  a.message,
+                  a.gate_id,
+                  g.name AS gate_name,
+                  a.timestamp
+             FROM alerts a
+             LEFT JOIN gates g ON g.id = a.gate_id
+            WHERE a.resolved = FALSE
+              AND a.severity IN ('critical', 'high')
+              AND (a.gate_id = ANY($1::uuid[]) OR a.gate_id IS NULL)
+            ORDER BY a.timestamp DESC
+            LIMIT 50`
+        : `SELECT a.id,
+                  a.severity,
+                  a.title,
+                  a.message,
+                  a.gate_id,
+                  g.name AS gate_name,
+                  a.timestamp
+             FROM alerts a
+             LEFT JOIN gates g ON g.id = a.gate_id
+            WHERE a.resolved = FALSE
+              AND a.severity IN ('critical', 'high')
+            ORDER BY a.timestamp DESC
+            LIMIT 50`;
+    const alertParams = scopedGates && scopedGates.length > 0 ? [scopedGates] : [];
 
     const [permRes, alertRes, decisionRes] = await Promise.all([
       query<EscalatedPermissionRow>(
@@ -95,42 +126,10 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
           ORDER BY pr.sla_deadline ASC NULLS LAST
           LIMIT 50`
       ),
-      scopedGates && scopedGates.length > 0
-        ? query<ActiveAlertRow>(
-            `SELECT a.id,
-                    a.severity,
-                    a.title,
-                    a.message,
-                    a.gate_id,
-                    g.name AS gate_name,
-                    a.timestamp
-               FROM alerts a
-               LEFT JOIN gates g ON g.id = a.gate_id
-              WHERE a.resolved = FALSE
-                AND a.severity IN ('critical', 'high')
-                AND a.gate_id = ANY($1::uuid[])
-              ORDER BY a.timestamp DESC
-              LIMIT 50`,
-            [scopedGates]
-          )
-        : scopedGates && scopedGates.length === 0
-          ? // Fail-closed: unassigned supervisor → no gate-scoped alerts.
-            Promise.resolve({ rows: [] } as { rows: ActiveAlertRow[] })
-          : query<ActiveAlertRow>(
-            `SELECT a.id,
-                    a.severity,
-                    a.title,
-                    a.message,
-                    a.gate_id,
-                    g.name AS gate_name,
-                    a.timestamp
-               FROM alerts a
-               LEFT JOIN gates g ON g.id = a.gate_id
-              WHERE a.resolved = FALSE
-                AND a.severity IN ('critical', 'high')
-              ORDER BY a.timestamp DESC
-              LIMIT 50`
-          ),
+      scopedGates && scopedGates.length === 0
+        ? // Fail-closed: unassigned supervisor → no gate-scoped alerts.
+          Promise.resolve({ rows: [] } as { rows: ActiveAlertRow[] })
+        : query<ActiveAlertRow>(alertSql, alertParams),
       query<DecisionRow>(
         `SELECT action,
                 user_name,

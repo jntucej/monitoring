@@ -27,8 +27,11 @@ for f in "${FILES[@]}"; do
   if [[ "$fname" == *.down.sql ]]; then continue; fi
 
   ver="${fname%%_*}"
-  # Require a canonical 14-digit timestamp prefix
-  if [[ ! "$ver" =~ ^[0-9]{14}$ ]]; then continue; fi
+  # Include both 14-digit timestamps and date prefixes (e.g. 20261027_gate_ops.sql)
+  if [[ ! "$ver" =~ ^[0-9]{8,14}$ ]]; then
+    echo "ERROR: Migration '$fname' has invalid version prefix '$ver' (expected 8-14 digits)" >&2
+    exit 1
+  fi
   if [[ -n "${SEEN_VERSIONS[$ver]}" && "${SEEN_VERSIONS[$ver]}" != "$fname" ]]; then
     echo "ERROR: Duplicate version prefix '$ver' detected: '$fname' and '${SEEN_VERSIONS[$ver]}'" >&2
     exit 1
@@ -44,9 +47,10 @@ echo "✓ Verified ${#SEEN_VERSIONS[@]} unique migration version prefixes"
 # grep exits 1 when it finds zero matches (the normal, healthy case); under
 # `set -o pipefail` that would otherwise kill this whole script mid-way, so
 # tolerate an empty result explicitly.
-AUDIT_ACTION_OWNERS=$(grep -E -- '^[[:space:]]*ALTER[[:space:]]+TABLE[[:space:]]+public\.audit_logs[[:space:]]+(DROP|ADD)[[:space:]]+CONSTRAINT[[:space:]]+(IF[[:space:]]+EXISTS[[:space:]]+)?audit_logs_action_known' database/migrations/*.sql 2>/dev/null | wc -l || true)
+# Count distinct migration files that declare direct ALTER TABLE statements for audit_logs_action_known.
+AUDIT_ACTION_OWNERS=$(grep -El -- '^[[:space:]]*ALTER[[:space:]]+TABLE[[:space:]]+public\.audit_logs[[:space:]]+(DROP|ADD)[[:space:]]+CONSTRAINT[[:space:]]+(IF[[:space:]]+EXISTS[[:space:]]+)?audit_logs_action_known' database/migrations/*.sql 2>/dev/null | wc -l || true)
 if [ "$AUDIT_ACTION_OWNERS" -gt 1 ]; then
-  echo "ERROR: Multiple migrations modify audit_logs_action_known ($AUDIT_ACTION_OWNERS found). Only one canonical migration allowed." >&2
+  echo "ERROR: Multiple migrations modify audit_logs_action_known ($AUDIT_ACTION_OWNERS files found). Only one canonical migration allowed." >&2
   exit 1
 fi
 
@@ -144,11 +148,12 @@ APPLIED_COUNT=0
 for fname in "${SORTED_NAMES[@]}"; do
   fpath="${MIGRATION_FILES[$fname]}"
   echo "Replaying migration: $fname"
-  # Tolerate individual SQL errors within a file (hand-written migrations have
-  # pre-existing non-replayable quirks when run against a from-scratch scratch
-  # DB — that's not what this check is trying to assert). What we DO assert,
-  # below, is that every file was at least *attempted* and recorded.
-  "${PSQL[@]}" -v ON_ERROR_STOP=0 < "$fpath" >/dev/null
+  # Replay migrations with ON_ERROR_STOP=1 so failures are never swallowed
+  if ! "${PSQL[@]}" -v ON_ERROR_STOP=1 < "$fpath" >/dev/null 2>&1; then
+    echo "ERROR: Migration '$fname' failed during replay with ON_ERROR_STOP=1" >&2
+    "${PSQL[@]}" -v ON_ERROR_STOP=1 < "$fpath" || true
+    exit 1
+  fi
 
   ver="${fname%%_*}"
   "${PSQL[@]}" -v ON_ERROR_STOP=1 -c \

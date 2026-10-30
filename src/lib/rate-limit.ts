@@ -71,6 +71,33 @@ function bucketKey(req: NextRequest, cfg: Required<RateLimitConfig>): string {
  * keyPrefix:pathname:clientIp) or an explicit bucket key string (used by
  * per-identifier / per-user lockouts in auth, mobile, and kiosk routes).
  */
+// In-memory fallback bucket store if database is unreachable (degrades gracefully per-instance, never fails open blindly)
+interface MemoryBucket {
+  count: number;
+  resetAt: number;
+}
+const fallbackMemoryStore = new Map<string, MemoryBucket>();
+
+function checkFallbackMemoryLimit(key: string, cfg: Required<RateLimitConfig>): RateLimitResult {
+  const now = Date.now();
+  let bucket = fallbackMemoryStore.get(key);
+  if (!bucket || bucket.resetAt <= now) {
+    bucket = { count: 1, resetAt: now + cfg.windowMs };
+    fallbackMemoryStore.set(key, bucket);
+  } else {
+    bucket.count += 1;
+  }
+  const remaining = Math.max(0, cfg.maxRequests - bucket.count);
+  const limited = bucket.count > cfg.maxRequests;
+  const retryAfter = limited ? Math.max(1, Math.ceil((bucket.resetAt - now) / 1000)) : undefined;
+  return { limited, remaining, resetTime: new Date(bucket.resetAt), retryAfter };
+}
+
+/**
+ * Enforce a rate limit using PostgreSQL `rate_limit_buckets` table for shared
+ * concurrency across replicas. If the DB fails, degrades to local in-memory
+ * enforcement rather than failing open.
+ */
 export async function checkRateLimit(
   reqOrKey: NextRequest | string,
   config: RateLimitConfig = {}
@@ -78,31 +105,36 @@ export async function checkRateLimit(
   const cfg = resolveConfig(config);
   const key =
     typeof reqOrKey === "string" ? reqOrKey : bucketKey(reqOrKey, cfg);
-  const { rows } = await poolQuery<{ count: number; reset_at: Date }>(
-    `
-    INSERT INTO public.rate_limit_buckets (key, count, reset_at)
-    VALUES ($1, 1, NOW() + make_interval(secs => $2::float / 1000))
-    ON CONFLICT (key) DO UPDATE
-      SET count = CASE
-            WHEN rate_limit_buckets.reset_at <= NOW() THEN 1
-            ELSE rate_limit_buckets.count + 1
-          END,
-          reset_at = CASE
-            WHEN rate_limit_buckets.reset_at <= NOW()
-              THEN NOW() + make_interval(secs => $2::float / 1000)
-            ELSE rate_limit_buckets.reset_at
-          END
-    RETURNING count, reset_at;
-    `,
-    [key, cfg.windowMs]
-  );
-  const row = rows[0];
-  const remaining = Math.max(0, cfg.maxRequests - row.count);
-  const limited = row.count > cfg.maxRequests;
-  const retryAfter = limited
-    ? Math.max(1, Math.ceil((new Date(row.reset_at).getTime() - Date.now()) / 1000))
-    : undefined;
-  return { limited, remaining, resetTime: new Date(row.reset_at), retryAfter };
+  try {
+    const { rows } = await poolQuery<{ count: number; reset_at: Date }>(
+      `
+      INSERT INTO public.rate_limit_buckets (key, count, reset_at)
+      VALUES ($1, 1, NOW() + make_interval(secs => $2::float / 1000))
+      ON CONFLICT (key) DO UPDATE
+        SET count = CASE
+              WHEN rate_limit_buckets.reset_at <= NOW() THEN 1
+              ELSE rate_limit_buckets.count + 1
+            END,
+            reset_at = CASE
+              WHEN rate_limit_buckets.reset_at <= NOW()
+                THEN NOW() + make_interval(secs => $2::float / 1000)
+              ELSE rate_limit_buckets.reset_at
+            END
+      RETURNING count, reset_at;
+      `,
+      [key, cfg.windowMs]
+    );
+    const row = rows[0];
+    const remaining = Math.max(0, cfg.maxRequests - row.count);
+    const limited = row.count > cfg.maxRequests;
+    const retryAfter = limited
+      ? Math.max(1, Math.ceil((new Date(row.reset_at).getTime() - Date.now()) / 1000))
+      : undefined;
+    return { limited, remaining, resetTime: new Date(row.reset_at), retryAfter };
+  } catch (err) {
+    console.warn("[rate-limit] DB store unavailable, degrading to local memory store:", err);
+    return checkFallbackMemoryLimit(key, cfg);
+  }
 }
 
 function attachHeaders(res: Response, cfg: Required<RateLimitConfig>, r: RateLimitResult) {

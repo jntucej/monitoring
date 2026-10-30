@@ -97,11 +97,22 @@ GIT_BACKUP="$BACKUP_ROOT/git-state-$TIMESTAMP.txt"
 cd "$BASE" && git log --oneline -20 2>/dev/null > "$GIT_BACKUP" || true
 log "✓ Git state saved"
 
-# 4. Backup compose config
+# 4. Backup compose config & user uploads
 COMPOSE_BACKUP="$BACKUP_ROOT/compose-config-$TIMESTAMP.tar"
 tar cf "$COMPOSE_BACKUP" -C "$BASE" docker-compose.yml Caddyfile .env 2>/dev/null || \
 tar cf "$COMPOSE_BACKUP" -C "$BASE/compose" docker-compose.yml Caddyfile .env 2>/dev/null || true
 log "✓ Compose config archived"
+
+# 4b. Backup user uploads (complaint attachments, gate passes, sign docs)
+UPLOADS_DIR="$BASE/data/uploads"
+if [ ! -d "$UPLOADS_DIR" ] && [ -d "/root/monitoring/data/uploads" ]; then
+    UPLOADS_DIR="/root/monitoring/data/uploads"
+fi
+if [ -d "$UPLOADS_DIR" ]; then
+    UPLOADS_BACKUP="$BACKUP_ROOT/uploads-$TIMESTAMP.tar.gz"
+    tar czf "$UPLOADS_BACKUP" -C "$UPLOADS_DIR" . 2>/dev/null || true
+    log "✓ User uploads archived: $(ls -lh "$UPLOADS_BACKUP" 2>/dev/null | awk '{print $5}' || echo '0B')"
+fi
 
 # 5. Clean old backups.
 #    Keep DB dumps and secrets for 30 days each: a DB dump older than its

@@ -2,7 +2,7 @@ FROM node:20-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 COPY package.json package-lock.json* ./
-RUN npm ci --no-audit --no-fund --prefer-offline
+RUN npm ci --no-audit --no-fund --prefer-offline || npm ci --legacy-peer-deps --no-audit --no-fund --prefer-offline
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules

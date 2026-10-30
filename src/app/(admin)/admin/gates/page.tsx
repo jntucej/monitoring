@@ -3,7 +3,8 @@
 
 import React, { useState } from "react";
 import { GateDeviceTracker, GateDevice } from "@/components/admin/GateDeviceTracker";
-import { AlertCircle, Plus, CheckCircle2, Lock } from "lucide-react";
+import { AlertCircle, Plus, CheckCircle2, Lock, Wrench, Moon, Check, Shield } from "lucide-react";
+import Link from "next/link";
 import { getAuthHeaders } from "@/lib/utils";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
@@ -28,6 +29,42 @@ export default function AdminGatesPage() {
   const [loadingDevices, setLoadingDevices] = useState<boolean>(true);
   const [loadingGates, setLoadingGates] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Gate Operations Mode state
+  const [gateMode, setGateMode] = useState<"OPEN" | "CURFEW" | "MAINTENANCE">("OPEN");
+  const [updatingMode, setUpdatingMode] = useState<boolean>(false);
+
+  const fetchGateMode = async () => {
+    try {
+      const res = await fetch("/api/operator/mode", { cache: "no-store" });
+      const json = await res.json();
+      if (json?.success && json?.data?.mode) {
+        setGateMode(json.data.mode);
+      }
+    } catch {}
+  };
+
+  const handleSetGateMode = async (newMode: "OPEN" | "CURFEW" | "MAINTENANCE") => {
+    if (newMode === gateMode || updatingMode) return;
+    setUpdatingMode(true);
+    try {
+      const res = await fetch("/api/operator/mode", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify({ mode: newMode, reason: `Set to ${newMode} via Admin Console` }),
+      });
+      const json = await res.json();
+      if (json?.success) {
+        setGateMode(newMode);
+      } else {
+        setError(json?.error?.message || "Failed to update gate mode");
+      }
+    } catch {
+      setError("Network error updating gate mode");
+    } finally {
+      setUpdatingMode(false);
+    }
+  };
 
   // Create form
   const [showCreate, setShowCreate] = useState(false);
@@ -78,6 +115,8 @@ export default function AdminGatesPage() {
   };
 
   useLiveRefresh(fetchDevices, { intervalMs: 20000 /* R15: name this profile */ /* R15: name this profile */ });
+  useLiveRefresh(fetchGates, { intervalMs: 30000 });
+  useLiveRefresh(fetchGateMode, { intervalMs: 15000 });
 
   const createGate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,6 +175,82 @@ export default function AdminGatesPage() {
           <span>{error}</span>
         </div>
       )}
+
+      {/* Campus Gate Operations Mode */}
+      <WidgetBoundary title="Campus Gate Operations Mode">
+        <div className="p-5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+                Current Operating State
+              </p>
+              <div className="flex items-center gap-2 mt-1">
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wide flex items-center gap-1.5 ${
+                    gateMode === "OPEN"
+                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                      : gateMode === "CURFEW"
+                      ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                      : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                  }`}
+                >
+                  {gateMode === "OPEN" && <Check className="w-3.5 h-3.5" />}
+                  {gateMode === "CURFEW" && <Moon className="w-3.5 h-3.5" />}
+                  {gateMode === "MAINTENANCE" && <Wrench className="w-3.5 h-3.5" />}
+                  {gateMode}
+                </span>
+                <span className="text-xs text-[var(--text-muted)]">
+                  {gateMode === "OPEN" && "All campus gates operating normally. Scans allowed."}
+                  {gateMode === "CURFEW" && "Night curfew active. Scans require supervisor override."}
+                  {gateMode === "MAINTENANCE" && "Gate maintenance in progress. Routine scans paused."}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={updatingMode}
+                onClick={() => handleSetGateMode("OPEN")}
+                className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                  gateMode === "OPEN"
+                    ? "bg-emerald-600 text-white shadow-sm"
+                    : "bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                }`}
+              >
+                <Check className="w-3.5 h-3.5" />
+                Normal (OPEN)
+              </button>
+              <button
+                type="button"
+                disabled={updatingMode}
+                onClick={() => handleSetGateMode("CURFEW")}
+                className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                  gateMode === "CURFEW"
+                    ? "bg-amber-600 text-white shadow-sm"
+                    : "bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                }`}
+              >
+                <Moon className="w-3.5 h-3.5" />
+                Curfew
+              </button>
+              <button
+                type="button"
+                disabled={updatingMode}
+                onClick={() => handleSetGateMode("MAINTENANCE")}
+                className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                  gateMode === "MAINTENANCE"
+                    ? "bg-rose-600 text-white shadow-sm"
+                    : "bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                }`}
+              >
+                <Wrench className="w-3.5 h-3.5" />
+                Maintenance
+              </button>
+            </div>
+          </div>
+        </div>
+      </WidgetBoundary>
 
       {/* Create form */}
       {showCreate && (
@@ -255,7 +370,12 @@ export default function AdminGatesPage() {
                           </span>
                         </td>
                         <td className="py-3 px-4 text-[var(--text-muted)]">
-                          {/* Actions if needed */}
+                          <Link
+                            href={`/admin/gates/${g.id}`}
+                            className="px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[11px] font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-base)] transition"
+                          >
+                            Details & Status
+                          </Link>
                         </td>
                       </tr>
                     );

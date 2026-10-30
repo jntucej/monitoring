@@ -9,8 +9,25 @@ jest.mock('@/server/repositories/scans/findById');
 jest.mock('@/server/repositories/scans/findLastByUserId');
 jest.mock('@/server/services/audit/write');
 jest.mock('@/lib/postgres');
+jest.mock('@/lib/gate-operations', () => ({
+  getGateMode: jest.fn().mockResolvedValue('OPEN'),
+  assertScansAllowed: jest.requireActual('@/lib/gate-operations').assertScansAllowed,
+}));
+jest.mock('@/server/policy/gate-schedule', () => ({
+  checkGateSchedule: jest.fn().mockResolvedValue({ allowed: true }),
+}));
+jest.mock('@/metrics', () => ({
+  metricsRegistry: {
+    incGateScan: jest.fn(),
+  },
+}));
 jest.mock('@/lib/db', () => ({
   setUserFlag: jest.fn().mockResolvedValue(true),
+  addNotification: jest.fn().mockResolvedValue(undefined),
+  getStudentGuardianLink: jest.fn().mockResolvedValue('PAR-1'),
+}));
+jest.mock('@/lib/integrations/sms', () => ({
+  sendSMS: jest.fn().mockResolvedValue({ success: true }),
 }));
 
 import { recordScan } from '@/server/services/scan/record';
@@ -24,13 +41,18 @@ import { findScanById } from '@/server/repositories/scans/findById';
 import { findLastMovementByUserId } from '@/server/repositories/scans/findLastByUserId';
 import { auditWrite } from '@/server/services/audit/write';
 import { query } from '@/lib/postgres';
-import { setUserFlag } from '@/lib/db';
+import { setUserFlag, addNotification, getStudentGuardianLink } from '@/lib/db';
+import { sendSMS } from '@/lib/integrations/sms';
+import { getGateMode } from '@/lib/gate-operations';
+import { checkGateSchedule } from '@/server/policy/gate-schedule';
+import { metricsRegistry } from '@/metrics';
 import {
   BadRequestError,
   ConflictError,
   ForbiddenError,
   LockedError,
   NotFoundError,
+  ServiceUnavailableError,
 } from '@/server/http/errors';
 
 const m = {
@@ -46,6 +68,12 @@ const m = {
   auditWrite: auditWrite as jest.Mock,
   query: query as jest.Mock,
   setUserFlag: setUserFlag as jest.Mock,
+  getGateMode: getGateMode as jest.Mock,
+  checkGateSchedule: checkGateSchedule as jest.Mock,
+  incGateScan: metricsRegistry.incGateScan as jest.Mock,
+  addNotification: addNotification as jest.Mock,
+  getStudentGuardianLink: getStudentGuardianLink as jest.Mock,
+  sendSMS: sendSMS as jest.Mock,
 };
 
 const baseInput = {
@@ -93,10 +121,16 @@ function primeWorld() {
     log: { id: 'S-1', user_id: 'U-1', direction: 'IN' },
   });
   m.query.mockResolvedValue({ rows: [], rowCount: 0 });
+  m.getGateMode.mockResolvedValue('OPEN');
+  m.checkGateSchedule.mockResolvedValue({ allowed: true });
+  m.setUserFlag.mockResolvedValue(true);
+  m.getStudentGuardianLink.mockResolvedValue('PAR-1');
+  m.addNotification.mockResolvedValue(undefined);
+  m.sendSMS.mockResolvedValue({ success: true });
 }
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  jest.resetAllMocks();
   primeWorld();
 });
 
@@ -248,9 +282,6 @@ describe('recordScan — pass enforcement', () => {
     m.findOccupancyByUserId.mockResolvedValueOnce({
       user_id: 'U-1', current_status: 'IN', last_gate_id: 'G-1', last_updated: 'x',
     });
-    m.findLastMovementByUserId.mockResolvedValueOnce({
-      user_id: 'U-1', direction: 'IN', reason: null, timestamp: new Date().toISOString(),
-    });
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const exitFlow = require('@/lib/student-exit-flow');
     jest.spyOn(exitFlow, 'validateStudentExitFlow').mockResolvedValueOnce({
@@ -286,6 +317,11 @@ describe('recordScan — OUT duration cap', () => {
       user_id: 'U-1', direction: 'IN', reason: null,
       timestamp: new Date(Date.now() - 13 * 60 * 60 * 1000).toISOString(),
     });
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const exitFlow = require('@/lib/student-exit-flow');
+    jest.spyOn(exitFlow, 'validateStudentExitFlow').mockResolvedValueOnce({
+      allowed: true, canonicalReason: 'day_pass', requiresPass: true, passId: 'P-1',
+    });
     await expect(
       recordScan({ ...baseInput, direction: 'OUT', entryType: undefined, reason: 'day_pass' }),
     ).rejects.toMatchObject({ code: 'DAY_PASS_OVERDUE' });
@@ -307,6 +343,26 @@ describe('recordScan — OUT duration cap', () => {
     await expect(
       recordScan({ ...baseInput, direction: 'OUT', entryType: undefined, reason: 'home_out' }),
     ).resolves.toBeDefined();
+  });
+
+  it('flags OVERDUE on IN return when student was out on daily_outing for longer than cap (1h)', async () => {
+    m.findOccupancyByUserId.mockResolvedValueOnce({
+      user_id: 'U-1', current_status: 'OUT', last_gate_id: 'G-1', last_updated: 'x',
+    });
+    // last OUT was 3h ago on daily_outing
+    m.findLastMovementByUserId.mockResolvedValueOnce({
+      user_id: 'U-1', direction: 'OUT', reason: 'daily_outing',
+      timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+    });
+
+    const res = await recordScan({
+      ...baseInput,
+      direction: 'IN',
+      entryType: 'hosteller',
+      reason: 'return_to_hostel',
+    });
+    expect(res).toBeDefined();
+    expect(m.setUserFlag).toHaveBeenCalledWith('U-1', 'OVERDUE', 'U-1');
   });
 });
 
@@ -359,5 +415,108 @@ describe('recordScan — non-student', () => {
     const out = await recordScan({ ...baseInput, personId: 'F-1', roll: '24JJ1A0501', entryType: undefined });
     expect(out.person.role).toBe('faculty');
     expect(m.updateEntryType).not.toHaveBeenCalled();
+  });
+});
+
+// ─── Gate Operating Mode ──────────────────────────────────────────────
+describe('recordScan — gate operating mode', () => {
+  it('rejects scan when gate is in MAINTENANCE mode', async () => {
+    m.getGateMode.mockResolvedValueOnce('MAINTENANCE');
+    await expect(recordScan(baseInput)).rejects.toThrow(ServiceUnavailableError);
+    expect(m.auditWrite).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'SCAN_REJECTED',
+        details: expect.objectContaining({ code: 'MAINTENANCE_ACTIVE' }),
+      }),
+    );
+  });
+
+  it('allows scan in MAINTENANCE mode with emergency reason override', async () => {
+    m.getGateMode.mockResolvedValueOnce('MAINTENANCE');
+    const res = await recordScan({ ...baseInput, reason: 'emergency' });
+    expect(res).toBeDefined();
+  });
+
+  it('rejects scan in CURFEW mode without override reason', async () => {
+    m.getGateMode.mockResolvedValueOnce('CURFEW');
+    await expect(recordScan({ ...baseInput, reason: undefined })).rejects.toThrow(ForbiddenError);
+    expect(m.auditWrite).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'SCAN_REJECTED',
+        details: expect.objectContaining({ code: 'CURFEW_ACTIVE' }),
+      }),
+    );
+  });
+});
+
+// ─── Gate Inactivity & Schedule Policy ────────────────────────────────
+describe('recordScan — gate inactive & schedule enforcement', () => {
+  it('rejects scan when gate is marked is_active = false', async () => {
+    m.findGateById.mockResolvedValueOnce({
+      id: 'G-1', gate_code: 'MAIN', name: 'Main', location: 'Front',
+      is_active: false, latitude: null, longitude: null, allowed_radius_meters: null,
+    });
+    await expect(recordScan(baseInput)).rejects.toThrow(LockedError);
+    expect(m.auditWrite).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'SCAN_REJECTED',
+        details: expect.objectContaining({ code: 'GATE_INACTIVE' }),
+      }),
+    );
+  });
+
+  it('rejects scan when gate schedule check disallows entry', async () => {
+    m.checkGateSchedule.mockResolvedValueOnce({
+      allowed: false,
+      code: 'GATE_CLOSED_HOLIDAY',
+      reason: 'Gate closed for holiday: Diwali',
+    });
+    await expect(recordScan(baseInput)).rejects.toThrow(ForbiddenError);
+    expect(m.auditWrite).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'SCAN_REJECTED',
+        details: expect.objectContaining({ code: 'GATE_CLOSED_HOLIDAY' }),
+      }),
+    );
+  });
+});
+
+// ─── Prometheus Scan Metric & Pass Gate Scoping ───────────────────────
+describe('recordScan — metrics & pass scoping', () => {
+  it('increments Prometheus gate scan counter on successful scan', async () => {
+    await recordScan(baseInput);
+    expect(m.incGateScan).toHaveBeenCalledWith('G-1', 'IN');
+  });
+
+  it('audits SCAN_REJECTED on rejection', async () => {
+    m.findGateById.mockResolvedValueOnce(null);
+    await expect(recordScan(baseInput)).rejects.toThrow(NotFoundError);
+    expect(m.auditWrite).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'SCAN_REJECTED',
+        details: expect.objectContaining({ code: 'NOT_FOUND' }),
+      }),
+    );
+  });
+
+  it('notifies linked guardian on student movement scan', async () => {
+    (query as jest.Mock).mockResolvedValueOnce({ rows: [{ phone: '+919999999999' }] });
+    await recordScan(baseInput);
+    // Allow microtask queue for async parent notification fire-and-forget
+    await new Promise((r) => setTimeout(r, 10));
+    expect(addNotification).toHaveBeenCalledWith(
+      'user',
+      'PAR-1',
+      'movement',
+      expect.stringContaining('Campus Movement'),
+      expect.stringContaining('entered campus'),
+      'G-1',
+    );
+    expect(sendSMS).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: '+919999999999',
+        message: expect.stringContaining('entered campus'),
+      }),
+    );
   });
 });

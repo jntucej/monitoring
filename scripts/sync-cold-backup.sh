@@ -11,7 +11,7 @@ if [ ! -d "$BACKUP_DIR" ]; then
   BACKUP_DIR="${BASE}/backups-local/daily"
 fi
 
-LATEST_DUMP=$(ls -t "${BACKUP_DIR}"/gate-db-*.sql.gz 2>/dev/null | head -n 1)
+LATEST_DUMP=$(find "${BACKUP_DIR}" -name "gate-db-*.sql.gz" -printf "%T@ %p\n" | sort -nr | head -n 1 | awk '{print $2}')
 
 if [ -z "$LATEST_DUMP" ]; then
   echo "[cold-backup] ERROR: No daily dump found in ${BACKUP_DIR} to sync."

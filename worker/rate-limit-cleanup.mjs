@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { getWorkerDbPool } from './db.js';
 import auditLogRotation from './jobs/audit_log_rotation.js';
+import cleanupMovementLogs from './jobs/cleanup_movement_logs.js';
 import dispatchNotifications from './jobs/dispatch_notifications.js';
 import retryNotifications from './jobs/retry_notifications.js';
 import cleanupEphemeral from './jobs/cleanup_ephemeral.js';
@@ -58,6 +59,7 @@ const jobs = [
   { name: 'notification-retry', ms: 5 * 60 * 1000, run: () => runJob('notification-retry', retryNotifications) },
   { name: 'cleanup-ephemeral', ms: 15 * 60 * 1000, run: () => runJob('cleanup-ephemeral', cleanupEphemeral) },
   { name: 'audit-log-rotation', ms: 60 * 60 * 1000, run: () => runJob('audit-log-rotation', rotateAuditLogs) },
+  { name: 'cleanup-movement-logs', ms: 24 * 60 * 60 * 1000, run: () => runJob('cleanup-movement-logs', cleanupMovementLogs) },
 ];
 
 for (const job of jobs) {

@@ -1,8 +1,13 @@
 #!/bin/bash
 # Send Telegram notification for server startup, shutdown, or health alerts
 MESSAGE="${1:-Gate Monitor notification}"
-TOKEN="8830536905:AAH6Fd_K0NvLIMOQVGB4iD9YD6lmS_rTfC4"
-CHAT_ID="1926342151"
+TOKEN="${TELEGRAM_BOT_TOKEN:-}"
+CHAT_ID="${TELEGRAM_CHAT_ID:-}"
+
+if [ -z "$TOKEN" ] || [ -z "$CHAT_ID" ]; then
+  # Gracefully skip notification if not configured in environment
+  exit 0
+fi
 
 python3 -c "
 import urllib.request, urllib.parse, sys

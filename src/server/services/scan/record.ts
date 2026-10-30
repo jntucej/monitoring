@@ -25,13 +25,20 @@ import { findScanById } from "@/server/repositories/scans/findById";
 import { findLastMovementByUserId } from "@/server/repositories/scans/findLastByUserId";
 import { validateRollNumber } from "@/lib/rollNumber";
 import { auditWrite } from "@/server/services/audit/write";
+import { getGateMode, assertScansAllowed } from "@/lib/gate-operations";
+import { checkGateSchedule } from "@/server/policy/gate-schedule";
+import { metricsRegistry } from "@/metrics";
 import {
+  AppError,
   BadRequestError,
   ConflictError,
   ForbiddenError,
+  LockedError,
   NotFoundError,
+  ServiceUnavailableError,
 } from "@/server/http/errors";
-import { setUserFlag } from "@/lib/db";
+import { setUserFlag, addNotification, getStudentGuardianLink } from "@/lib/db";
+import { sendSMS } from "@/lib/integrations/sms";
 
 /**
  * Duration caps for OUT-scan enforcement (hours from last IN to now).
@@ -44,9 +51,11 @@ const OUT_DURATION_CAPS_HOURS: Record<string, number> = {
   day_pass: 12,
 };
 /** Duration caps for IN-return checks (hours from last OUT to now).
- *  home_out: 48h, special_leave: 24h. Silently flags OVERDUE if exceeded
- *  — the scan is allowed but the student's flag_status is updated. */
+ *  daily_outing: 1h, day_pass: 12h, home_out: 48h, special_leave: 24h.
+ *  Silently flags OVERDUE if exceeded — the scan is allowed but the student's flag_status is updated. */
 const IN_RETURN_CAPS_HOURS: Record<string, number> = {
+  daily_outing: 1,
+  day_pass: 12,
   home_out: 48,
   special_leave: 24,
 };
@@ -183,13 +192,14 @@ async function enforceOutDurationCap(
 async function enforceInReturnDurationCap(
   userId: string,
   reason: string | null | undefined,
+  cachedLastOut?: any,
 ): Promise<void> {
-  const normalized = normalizeExitReason(reason);
-  const capHours = IN_RETURN_CAPS_HOURS[normalized];
-  if (capHours === undefined) return;
-
-  const lastOut = await findLastMovementByUserId(userId);
+  const lastOut = cachedLastOut !== undefined ? cachedLastOut : await findLastMovementByUserId(userId);
   if (!lastOut || lastOut.direction !== "OUT") return;
+
+  const targetReason = normalizeExitReason(lastOut.reason || reason);
+  const capHours = IN_RETURN_CAPS_HOURS[targetReason];
+  if (capHours === undefined) return;
 
   const lastOutMs = Date.parse(lastOut.timestamp);
   if (Number.isNaN(lastOutMs)) return;
@@ -202,7 +212,7 @@ async function enforceInReturnDurationCap(
       userId,
       role: "system",
       details: {
-        reason: normalized,
+        reason: targetReason,
         capHours,
         elapsedHours: Number(elapsedHours.toFixed(1)),
         lastOutAt: lastOut.timestamp,
@@ -212,9 +222,46 @@ async function enforceInReturnDurationCap(
 }
 
 export async function recordScan(input: RecordScanInput): Promise<RecordScanResult> {
+  try {
+    return await recordScanInner(input);
+  } catch (err: any) {
+    // Fail audit visibility: record rejected attempt in audit_logs so supervisors
+    // and security dashboards have full visibility into failed access attempts.
+    await auditWrite({
+      action: "SCAN_REJECTED",
+      userId: input.operatorId,
+      userName: input.operatorName,
+      role: input.operatorRole,
+      details: {
+        roll: input.roll ?? input.personId ?? null,
+        direction: input.direction,
+        gateId: input.gateId,
+        reason: input.reason ?? null,
+        code: err instanceof AppError ? err.code : "UNKNOWN_ERROR",
+        message: err.message,
+      },
+    });
+    throw err;
+  }
+}
+
+async function recordScanInner(input: RecordScanInput): Promise<RecordScanResult> {
   // 1. Lockdown gate
   const lockdown = await findActiveLockdown();
   assertNotLockedOut(lockdown, input.gateId);
+
+  // 1.5. Gate operating mode (OPEN / CURFEW / MAINTENANCE)
+  const mode = await getGateMode();
+  const modeCheck = assertScansAllowed(mode, input.reason);
+  if (!modeCheck.allowed) {
+    if (modeCheck.status === 423) {
+      throw new LockedError(modeCheck.message, modeCheck.code);
+    } else if (modeCheck.status === 503) {
+      throw new ServiceUnavailableError(modeCheck.message, modeCheck.code);
+    } else {
+      throw new ForbiddenError(modeCheck.message, modeCheck.code);
+    }
+  }
 
   // 2. Operator must hold a gate (supervisors via supervised_gates are exempt)
   await assertOperatorHasGate(input.operatorRole, input.operatorGateId);
@@ -226,9 +273,27 @@ export async function recordScan(input: RecordScanInput): Promise<RecordScanResu
     throw new BadRequestError("Invalid roll number format");
   }
 
-  // 4. Gate must exist
+  // 4. Gate must exist and must be active
   const gate = await findGateById(input.gateId);
   if (!gate) throw new NotFoundError("Gate not found");
+  if (gate.is_active === false) {
+    throw new LockedError("Gate is inactive or decommissioned", "GATE_INACTIVE");
+  }
+
+  // 4.5. Gate schedule enforcement (gate_schedules, gate_holidays, gate_access_rules)
+  const scheduleCheck = await checkGateSchedule({
+    gateId: gate.id,
+    at: new Date(),
+    direction: input.direction,
+    overrideReason: input.reason,
+  });
+  if (!scheduleCheck.allowed) {
+    throw new ForbiddenError(
+      scheduleCheck.reason ?? "Gate closed by schedule policy",
+      scheduleCheck.code ?? "GATE_CLOSED",
+      scheduleCheck.details
+    );
+  }
 
   // 5. Operator↔gate assignment
   assertOperatorGateMatch(
@@ -284,6 +349,7 @@ export async function recordScan(input: RecordScanInput): Promise<RecordScanResu
   // 9. Student exit-flow enforcement (only for students). Manual entries are
   // subject to the SAME pass check as regular scans (spec §11 overrides §7).
   if (person.role === "student") {
+    let lastMoveForIn: any = null;
     // 9a. IN scans: the operator MUST have selected an entry type. Reject
     //     early (before recording anything) with a clear 400. Additionally,
     //     the chosen entry type must be present in the resolved entry-options
@@ -311,9 +377,9 @@ export async function recordScan(input: RecordScanInput): Promise<RecordScanResu
           ? detailsForOptions.current_entry_type
           : null;
       // lastOutReason: read from the most recent movement log for this user.
-      const lastMoveForOptions = await findLastMovementByUserId(person.id);
+      lastMoveForIn = await findLastMovementByUserId(person.id);
       const lastOutReason =
-        lastMoveForOptions?.direction === "OUT" ? normalizeExitReason(lastMoveForOptions.reason) : null;
+        lastMoveForIn?.direction === "OUT" ? normalizeExitReason(lastMoveForIn.reason) : null;
 
       const entryOptions = resolveEntryOptions(lastOutReason, currentType);
       // Map button IDs to entry types so the chosen entryType can be checked
@@ -332,6 +398,10 @@ export async function recordScan(input: RecordScanInput): Promise<RecordScanResu
           { code: "ENTRY_TYPE_MISMATCH", entryType: input.entryType, allowed: allowedEntryTypes },
         );
       }
+
+      // 9d. IN-return duration cap for daily_outing / day_pass / home_out / special_leave (non-fatal).
+      //     Flags the student as OVERDUE if returning beyond cap, but allows the scan through.
+      await enforceInReturnDurationCap(person.id, input.reason, lastMoveForIn);
     }
 
     // 9b. OUT scans: read the stored entry type and enforce the scope.
@@ -354,16 +424,13 @@ export async function recordScan(input: RecordScanInput): Promise<RecordScanResu
       // 9c. OUT-scan duration cap: reject if the student has been out longer
       //     than the reason's cap (daily_outing: 1h, day_pass: 12h).
       await enforceOutDurationCap(person.id, input.reason);
-
-      // 9d. IN-return duration cap for home_out / special_leave (non-fatal).
-      //     Flags the student as OVERDUE but allows the scan through.
-      await enforceInReturnDurationCap(person.id, input.reason);
     }
 
     const flow = await validateStudentExitFlow(
       person.unique_id,
       input.direction,
       input.reason ?? null,
+      gate.id,
     );
     if (!flow.allowed) {
       throw new ForbiddenError(
@@ -423,6 +490,8 @@ export async function recordScan(input: RecordScanInput): Promise<RecordScanResu
                AND p.status = 'APPROVED'
                AND p.reason = $2
                AND p.used_at IS NULL
+               AND (p.current_stage = 'main_gate' OR p.current_stage = 'completed')
+               AND (p.allowed_gate_ids IS NULL OR $3 = ANY(p.allowed_gate_ids))
              ORDER BY p.created_at DESC
              LIMIT 1
           )
@@ -595,6 +664,40 @@ export async function recordScan(input: RecordScanInput): Promise<RecordScanResu
           scanId,
         },
       });
+    }
+
+    // 13. Prometheus scan metrics increment
+    try {
+      metricsRegistry.incGateScan(gate.id, input.direction);
+    } catch (e) {
+      console.error("[metrics] Error incrementing gate scan count:", e);
+    }
+
+    // 14. Real-time parent/guardian notification on student movement
+    if (person.role === "student") {
+      void (async () => {
+        try {
+          const guardianId = await getStudentGuardianLink(person.id);
+          if (!guardianId) return;
+
+          const actionWord = input.direction === "IN" ? "entered" : "left";
+          const title = `Campus Movement: ${person.name} ${actionWord} campus`;
+          const reasonLabel = input.reason ? ` (${input.reason.replace(/_/g, " ")})` : "";
+          const msg = `Your ward ${person.name} (${person.unique_id}) has ${actionWord} campus through ${gate.name}${reasonLabel} at ${new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}.`;
+
+          await addNotification("user", guardianId, "movement", title, msg, gate.id);
+
+          const { rows } = await query<{ phone: string | null }>(
+            `SELECT phone FROM public.users WHERE id = $1 LIMIT 1`,
+            [guardianId]
+          );
+          if (rows[0]?.phone) {
+            await sendSMS({ to: rows[0].phone, message: msg }).catch(() => undefined);
+          }
+        } catch (notifErr) {
+          console.error("[recordScan] Error notifying guardian:", notifErr);
+        }
+      })();
     }
   }
 

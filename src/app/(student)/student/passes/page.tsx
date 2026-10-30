@@ -9,6 +9,7 @@ import type { GatePass } from "@/lib/types";
 import { usePassTypes, getPassTypeName } from "@/hooks/usePassTypes";
 import { useApi } from "@/hooks/useApi";
 import { useAuthStore } from "@/stores/authStore";
+import { PassQrModal } from "@/components/student/PassQrModal";
 
 export default function StudentPassesPage() {
 const api = useApi();
@@ -23,6 +24,12 @@ const api = useApi();
   const [toTime, setToTime] = useState("");
   const [reasonText, setReasonText] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [selectedQrPass, setSelectedQrPass] = useState<{
+    ticket: string;
+    title: string;
+    from?: string;
+    to?: string;
+  } | null>(null);
 
   const formatForDatetimeInput = (date: Date) => {
     const pad = (n: number) => n.toString().padStart(2, '0');
@@ -313,18 +320,39 @@ const api = useApi();
                       <Sparkles className="w-3.5 h-3.5" />
                       Ready to scan at campus gates
                     </span>
-                    <Link
-                      href="/student"
-                      className="px-3 py-1.5 rounded-lg bg-[var(--action-primary)] text-white text-xs font-bold hover:opacity-95"
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setSelectedQrPass({
+                          ticket: pass.ticket_number || pass.id,
+                          title: passTitle,
+                          from: pass.from,
+                          to: pass.to,
+                        })
+                      }
+                      className="px-3 py-1.5 rounded-lg bg-[var(--action-primary)] text-white text-xs font-bold hover:opacity-95 flex items-center gap-1.5 transition active:scale-95 shadow-sm"
                     >
-                      View QR Badge
-                    </Link>
+                      <QrCode className="w-3.5 h-3.5" />
+                      <span>Show QR Pass</span>
+                    </button>
                   </div>
                 )}
               </div>
             );
           })}
         </div>
+      )}
+
+      {/* Pass QR Presentation Modal */}
+      {selectedQrPass && (
+        <PassQrModal
+          isOpen={Boolean(selectedQrPass)}
+          ticketNumber={selectedQrPass.ticket}
+          passTitle={selectedQrPass.title}
+          fromDate={selectedQrPass.from}
+          toDate={selectedQrPass.to}
+          onClose={() => setSelectedQrPass(null)}
+        />
       )}
 
       {/* New Pass Application Modal */}

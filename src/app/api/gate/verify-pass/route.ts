@@ -11,6 +11,7 @@ import { withRateLimit } from "@/lib/rate-limit";
 import { ok, fail } from "@/server/http/response";
 import { query } from "@/lib/postgres";
 import { requireSecret } from "@/lib/env";
+import { validateQrToken } from "@/lib/qr-token";
 import type { AuthContext } from "@/lib/authContext";
 
 const GATE_ROLES = [
@@ -120,56 +121,109 @@ async function handlePost(req: NextRequest, _ctx: { auth: AuthContext }): Promis
   const { token } = (await req.json().catch(() => ({}))) as { token?: string };
   if (!token) return fail("VALIDATION_ERROR", "token required", 400);
 
-  const [b64, sig] = token.split(".");
-  if (!b64 || !sig) return fail("INVALID_TOKEN", "Malformed token", 400);
+  const cleanToken = token.trim().replace(/^mycampus:pass:/i, "");
+  const parts = cleanToken.split(".");
 
-  let payload: string;
-  try {
-    payload = Buffer.from(b64, "base64url").toString("utf8");
-  } catch {
-    return fail("INVALID_TOKEN", "Bad token", 400);
-  }
-  if (!verifySignature(payload, sig)) {
-    return fail("INVALID_TOKEN", "Signature mismatch", 401);
-  }
+  // 1. 3-segment JWT: student ID QR token
+  if (parts.length === 3) {
+    const claims = await validateQrToken(cleanToken);
+    if (!claims) {
+      return fail("INVALID_TOKEN", "Invalid, expired, or replayed student QR token", 401);
+    }
 
-  let claim: { v: number; jti: string; sub: string; tkt: string; exp: number };
-  try {
-    claim = JSON.parse(payload);
-  } catch {
-    return fail("INVALID_TOKEN", "Bad payload", 400);
-  }
-  if (typeof claim.exp !== "number" || claim.exp * 1000 < Date.now()) {
-    return fail("TOKEN_EXPIRED", "Token expired", 410);
-  }
+    const { rows: users } = await query<{ id: string; unique_id: string; status: string }>(
+      `SELECT id, unique_id, status FROM public.users WHERE id = $1 LIMIT 1`,
+      [claims.sub],
+    );
+    const user = users[0];
+    if (!user) return fail("PERSON_NOT_FOUND", "Student not found", 404);
+    if (user.status !== "ACTIVE") return fail("ACCOUNT_NOT_ACTIVE", `Account is ${user.status}`, 403);
 
-  const { rows } = await query<{
-    id: string;
-    status: string;
-    used_at: string | null;
-    from_date: string;
-    to_date: string;
-  }>(
-    `SELECT id, status, used_at, from_date, to_date
-       FROM public.permissions
-      WHERE ticket_number = $1
-      LIMIT 1`,
-    [claim.tkt],
-  );
-  const row = rows[0];
-  if (!row) return fail("TICKET_NOT_FOUND", "Ticket not found", 404);
-  if (row.status !== "APPROVED") {
-    return fail("PASS_NOT_USABLE", `Pass is ${row.status}`, 409);
-  }
-  if (row.used_at) return fail("PASS_ALREADY_USED", `Pass used at ${row.used_at}`, 409);
-  if (new Date(row.from_date).getTime() > Date.now()) {
-    return fail("PASS_NOT_YET_VALID", "Pass window has not opened", 409);
-  }
-  if (new Date(row.to_date).getTime() < Date.now()) {
-    return fail("PASS_EXPIRED", "Pass window has closed", 409);
+    const roll = claims.roll || user.unique_id;
+    return ok({
+      valid: true,
+      type: "student_id",
+      roll,
+      studentUserId: claims.sub,
+    });
   }
 
-  return ok({ valid: true, ticket: claim.tkt, studentUserId: claim.sub });
+  // 2. 2-segment token: signed permission pass QR token (payload.sig)
+  if (parts.length === 2) {
+    const [b64, sig] = parts;
+    if (!b64 || !sig) return fail("INVALID_TOKEN", "Malformed token", 400);
+
+    let payload: string;
+    try {
+      payload = Buffer.from(b64, "base64url").toString("utf8");
+    } catch {
+      return fail("INVALID_TOKEN", "Bad token", 400);
+    }
+    if (!verifySignature(payload, sig)) {
+      return fail("INVALID_TOKEN", "Signature mismatch", 401);
+    }
+
+    let claim: { v: number; jti: string; sub: string; tkt: string; exp: number };
+    try {
+      claim = JSON.parse(payload);
+    } catch {
+      return fail("INVALID_TOKEN", "Bad payload", 400);
+    }
+    if (typeof claim.exp !== "number" || claim.exp * 1000 < Date.now()) {
+      return fail("TOKEN_EXPIRED", "Token expired", 410);
+    }
+
+    const { rows } = await query<{
+      id: string;
+      ticket_number: string;
+      status: string;
+      used_at: string | null;
+      from_date: string;
+      to_date: string;
+      roll: string;
+      reason: string | null;
+    }>(
+      `SELECT p.id, p.ticket_number, p.status, p.used_at, p.from_date, p.to_date, p.reason,
+              COALESCE(u.unique_id, s.roll) AS roll
+         FROM public.permissions p
+         JOIN public.users u ON u.id = p.student_user_id
+    LEFT JOIN public.student_details s ON s.user_id = u.id
+        WHERE p.ticket_number = $1
+        LIMIT 1`,
+      [claim.tkt],
+    );
+    const row = rows[0];
+    if (!row) return fail("TICKET_NOT_FOUND", "Ticket not found", 404);
+    if (row.status !== "APPROVED") {
+      return fail("PASS_NOT_USABLE", `Pass is ${row.status}`, 409);
+    }
+    if (row.used_at) return fail("PASS_ALREADY_USED", `Pass used at ${row.used_at}`, 409);
+    if (new Date(row.from_date).getTime() > Date.now()) {
+      return fail("PASS_NOT_YET_VALID", "Pass window has not opened", 409);
+    }
+    if (new Date(row.to_date).getTime() < Date.now()) {
+      return fail("PASS_EXPIRED", "Pass window has closed", 409);
+    }
+
+    return ok({
+      valid: true,
+      type: "pass",
+      ticket: claim.tkt,
+      ticketNumber: claim.tkt,
+      studentUserId: claim.sub,
+      roll: row.roll,
+      pass: {
+        id: row.id,
+        ticketNumber: row.ticket_number,
+        status: row.status,
+        fromDate: row.from_date,
+        toDate: row.to_date,
+        reason: row.reason,
+      },
+    });
+  }
+
+  return fail("INVALID_TOKEN", "Malformed token", 400);
 }
 
 const gateLimit = { windowMs: 60_000, maxRequests: 120 };

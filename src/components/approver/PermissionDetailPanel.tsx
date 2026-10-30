@@ -18,7 +18,9 @@ import {
   FileText,
   Zap,
   CornerUpRight,
+  QrCode,
 } from "lucide-react";
+import { PassQrModal } from "@/components/student/PassQrModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatDateTime } from "@/lib/utils";
@@ -73,6 +75,7 @@ export function PermissionDetailPanel({
 
   const [forwardOpen, setForwardOpen] = useState(false);
   const [directGenOpen, setDirectGenOpen] = useState(false);
+  const [qrOpen, setQrOpen] = useState(false);
 
   // Room-assignment fields for the day_scholar home_out approval flow.
   const [pendingHostelBlock, setPendingHostelBlock] = useState("");
@@ -313,6 +316,25 @@ export function PermissionDetailPanel({
 
       {data && (
         <div className="space-y-6">
+          {data.status === "APPROVED" && (
+            <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-emerald-400">
+                <QrCode className="w-5 h-5 shrink-0" />
+                <div>
+                  <p className="text-xs font-bold text-emerald-300">Approved Pass Credential Ready</p>
+                  <p className="text-[11px] text-emerald-400/80">Scan this pass credential at campus gates.</p>
+                </div>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => setQrOpen(true)}
+                className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shrink-0"
+              >
+                <QrCode className="w-3.5 h-3.5 mr-1.5" />
+                Show Pass QR
+              </Button>
+            </div>
+          )}
           <div className="bg-[var(--bg-elevated)] p-4 rounded-xl border border-[var(--border)] space-y-3">
             <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider flex items-center gap-1.5">
               <User className="w-3.5 h-3.5" />
@@ -687,6 +709,17 @@ export function PermissionDetailPanel({
               defaultStudentName={data?.student?.name}
               defaultStudentEntryType={studentEntryType}
               ticketNumber={ticket}
+            />
+          )}
+
+          {qrOpen && ticket && (
+            <PassQrModal
+              isOpen={qrOpen}
+              ticketNumber={ticket}
+              passTitle={`${data.workflow_type || "Gate"} Pass`}
+              fromDate={data.from_date}
+              toDate={data.to_date}
+              onClose={() => setQrOpen(false)}
             />
           )}
         </div>

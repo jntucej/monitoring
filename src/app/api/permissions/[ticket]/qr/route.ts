@@ -77,14 +77,14 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }): Pro
     jti,
     sub: row.student_user_id,
     tkt: row.ticket_number,
-    exp: Math.floor(now / 1000) + 300,
+    exp: Math.floor(now / 1000) + 900,
   });
   const token = Buffer.from(payload).toString("base64url") + "." + signPayload(payload);
 
   return ok({
     ticket: row.ticket_number,
     token,
-    expiresIn: 300,
+    expiresIn: 900,
     qrText: `mycampus:pass:${token}`,
   });
 }

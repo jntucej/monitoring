@@ -447,7 +447,7 @@ const api = useApi();
       map[k] = (map[k] || 0) + 1;
     });
     return Object.entries(map).sort((a, b) => b[1] - a[1]);
-  }, [branchOf]);
+  }, [students, branchOf]);
 
   const byYear = useMemo(() => {
     const map: Record<string, number> = {};
@@ -547,7 +547,9 @@ const api = useApi();
 
   const activeCount = useMemo(() => students.filter((s) => s.status === "ACTIVE").length, [students]);
   const totalStudents = students.length;
-  const topBranch = byBranch[0];
+  const topBranch = useMemo(() => {
+    return byBranchCanonical.entries.slice().sort((a, b) => b[1] - a[1])[0] || byBranch[0];
+  }, [byBranchCanonical, byBranch]);
 
   // ponytail: newest 4 by createdAt (capped so the panel doesn't flood)
   const recentStudents = useMemo(() => {

@@ -58,15 +58,21 @@ export async function getPostgresPool(): Promise<Pool> {
 
 /**
  * Execute a parameterized query using a fast pool connection (no audit context).
+ * Automatically retries on deadlock (40P01) or serialization failure (40001) with jitter.
  */
 export async function poolQuery<T extends QueryResultRow = any>(
   text: string,
-  params: any[] = []
+  params: any[] = [],
+  retries = 3
 ): Promise<QueryResult<T>> {
   const pool = await getPostgresPool();
   try {
     return await pool.query<T>(text, params);
   } catch (err: any) {
+    if (retries > 0 && (err.code === '40P01' || err.code === '40001')) {
+      await new Promise(r => setTimeout(r, 50 + Math.random() * 100));
+      return poolQuery<T>(text, params, retries - 1);
+    }
     console.error(`[SQL Error] Query: ${text} | Params:`, params, "| Error:", err.message);
     throw err;
   }
@@ -75,11 +81,13 @@ export async function poolQuery<T extends QueryResultRow = any>(
 /**
  * Execute a parameterized query with established user context for RLS.
  * Manages its own connection to ensure GUC isolation.
+ * Automatically retries on deadlock (40P01) or serialization failure (40001) with jitter.
  */
 export async function query<T extends QueryResultRow = any>(
   text: string,
   params: any[] = [],
-  options?: { currentUserId?: string }
+  options?: { currentUserId?: string },
+  retries = 3
 ): Promise<QueryResult<T>> {
   const pool = await getPostgresPool();
   const client = await pool.connect();
@@ -89,6 +97,11 @@ export async function query<T extends QueryResultRow = any>(
     }
     return await client.query<T>(text, params);
   } catch (err: any) {
+    if (retries > 0 && (err.code === '40P01' || err.code === '40001')) {
+      client.release();
+      await new Promise(r => setTimeout(r, 50 + Math.random() * 100));
+      return query<T>(text, params, options, retries - 1);
+    }
     console.error(`[SQL Error] Query: ${text} | Params:`, params, "| Error:", err.message);
     throw err;
   } finally {
