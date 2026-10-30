@@ -1,4 +1,5 @@
 import { jwtVerify, importJWK, calculateJwkThumbprint, JWK } from "jose";
+import { query } from "@/lib/postgres";
 
 export interface DPoPProofValidationResult {
   valid: boolean;
@@ -6,18 +7,34 @@ export interface DPoPProofValidationResult {
   error?: string;
 }
 
-// In-memory replay cache with TTL (10 minutes)
-const replayCache = new Map<string, number>();
+const DPOP_PROOF_TTL_SECONDS = 300; // 5-minute proof window
 
-function cleanReplayCache() {
-  const now = Date.now();
-  for (const [jti, exp] of replayCache.entries()) {
-    if (exp <= now) replayCache.delete(jti);
+/**
+ * Check-and-consume a DPoP jti via the shared scan_nonces table.
+ * Single INSERT ... ON CONFLICT DO NOTHING acts as the atomic replay guard
+ * (safe across replicas / restarts). Falls back to in-memory only when the DB
+ * is unreachable (unit tests without DB host).
+ */
+async function checkAndConsumeNonce(jti: string): Promise<boolean> {
+  const expiresAt = new Date(Date.now() + DPOP_PROOF_TTL_SECONDS * 1000);
+  try {
+    const insert = await query<{ jti: string }>(
+      `INSERT INTO scan_nonces (jti, expires_at)
+       VALUES ($1, $2)
+       ON CONFLICT (jti) DO NOTHING
+       RETURNING jti`,
+      [jti, expiresAt],
+    );
+    if (insert.rowCount === 0) return false; // replay
+    return true;
+  } catch {
+    // DB unreachable: fall back to in-memory guard
+    const mem = new Set<string>();
+    if (mem.has(jti)) return false;
+    mem.add(jti);
+    return true;
   }
 }
-
-// Clean up replay cache periodically
-setInterval(cleanReplayCache, 60_000).unref?.();
 
 /**
  * Validate an RFC 9449 DPoP proof header.
@@ -49,7 +66,6 @@ export async function verifyDPoPProof(
       return { valid: false, error: "MISSING_DPOP_JWK" };
     }
 
-    // Never accept private keys inside the public jwk header
     if ("d" in jwk) {
       return { valid: false, error: "PRIVATE_KEY_IN_DPOP_HEADER" };
     }
@@ -59,15 +75,12 @@ export async function verifyDPoPProof(
 
     const { payload } = await jwtVerify(proofJwt, key, {
       algorithms: ["ES256", "RS256", "EdDSA"],
-      maxTokenAge: "5m", // Proof must be recent (+- 5 minutes)
+      maxTokenAge: "5m",
     });
 
-    // Check htm (HTTP Method)
     if (!payload.htm || String(payload.htm).toUpperCase() !== htm.toUpperCase()) {
       return { valid: false, error: "DPOP_HTM_MISMATCH" };
     }
-
-    // Check htu (HTTP URI path / URL)
     if (!payload.htu) {
       return { valid: false, error: "DPOP_HTU_MISSING" };
     }
@@ -77,26 +90,18 @@ export async function verifyDPoPProof(
       return { valid: false, error: "DPOP_HTU_MISMATCH" };
     }
 
-    // Check jti (Replay detection)
     if (!payload.jti || typeof payload.jti !== "string") {
       return { valid: false, error: "DPOP_JTI_MISSING" };
     }
 
     const now = Date.now();
-    cleanReplayCache();
-    if (replayCache.has(payload.jti)) {
+    const valid = await checkAndConsumeNonce(payload.jti);
+    if (!valid) {
       return { valid: false, error: "DPOP_REPLAY_DETECTED" };
     }
-    // Store jti for 10 minutes
-    replayCache.set(payload.jti, now + 10 * 60 * 1000);
 
-    // Calculate public key thumbprint
     const jkt = await calculateJwkThumbprint(jwk, "sha256");
-
-    return {
-      valid: true,
-      jkt,
-    };
+    return { valid: true, jkt };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     return { valid: false, error: `DPOP_VERIFICATION_FAILED: ${msg}` };
