@@ -23,6 +23,11 @@ jest.mock('@/metrics', () => ({
 }));
 jest.mock('@/lib/db', () => ({
   setUserFlag: jest.fn().mockResolvedValue(true),
+  addNotification: jest.fn().mockResolvedValue(undefined),
+  getStudentGuardianLink: jest.fn().mockResolvedValue('PAR-1'),
+}));
+jest.mock('@/lib/integrations/sms', () => ({
+  sendSMS: jest.fn().mockResolvedValue({ success: true }),
 }));
 
 import { recordScan } from '@/server/services/scan/record';
@@ -36,7 +41,8 @@ import { findScanById } from '@/server/repositories/scans/findById';
 import { findLastMovementByUserId } from '@/server/repositories/scans/findLastByUserId';
 import { auditWrite } from '@/server/services/audit/write';
 import { query } from '@/lib/postgres';
-import { setUserFlag } from '@/lib/db';
+import { setUserFlag, addNotification, getStudentGuardianLink } from '@/lib/db';
+import { sendSMS } from '@/lib/integrations/sms';
 import { getGateMode } from '@/lib/gate-operations';
 import { checkGateSchedule } from '@/server/policy/gate-schedule';
 import { metricsRegistry } from '@/metrics';
@@ -65,6 +71,9 @@ const m = {
   getGateMode: getGateMode as jest.Mock,
   checkGateSchedule: checkGateSchedule as jest.Mock,
   incGateScan: metricsRegistry.incGateScan as jest.Mock,
+  addNotification: addNotification as jest.Mock,
+  getStudentGuardianLink: getStudentGuardianLink as jest.Mock,
+  sendSMS: sendSMS as jest.Mock,
 };
 
 const baseInput = {
@@ -114,6 +123,10 @@ function primeWorld() {
   m.query.mockResolvedValue({ rows: [], rowCount: 0 });
   m.getGateMode.mockResolvedValue('OPEN');
   m.checkGateSchedule.mockResolvedValue({ allowed: true });
+  m.setUserFlag.mockResolvedValue(true);
+  m.getStudentGuardianLink.mockResolvedValue('PAR-1');
+  m.addNotification.mockResolvedValue(undefined);
+  m.sendSMS.mockResolvedValue({ success: true });
 }
 
 beforeEach(() => {
@@ -482,6 +495,27 @@ describe('recordScan — metrics & pass scoping', () => {
       expect.objectContaining({
         action: 'SCAN_REJECTED',
         details: expect.objectContaining({ code: 'NOT_FOUND' }),
+      }),
+    );
+  });
+
+  it('notifies linked guardian on student movement scan', async () => {
+    (query as jest.Mock).mockResolvedValueOnce({ rows: [{ phone: '+919999999999' }] });
+    await recordScan(baseInput);
+    // Allow microtask queue for async parent notification fire-and-forget
+    await new Promise((r) => setTimeout(r, 10));
+    expect(addNotification).toHaveBeenCalledWith(
+      'user',
+      'PAR-1',
+      'movement',
+      expect.stringContaining('Campus Movement'),
+      expect.stringContaining('entered campus'),
+      'G-1',
+    );
+    expect(sendSMS).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: '+919999999999',
+        message: expect.stringContaining('entered campus'),
       }),
     );
   });

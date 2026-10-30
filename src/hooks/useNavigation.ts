@@ -289,6 +289,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           groupLabel: "Supervisor Console",
           items: [
             { href: "/supervisor", label: "Live", icon: "Activity", badge: "PENDING" },
+            { href: "/supervisor/wall", label: "Gate Wall", icon: "Radio" },
             { href: "/supervisor/escalation-centre", label: "Escalations", icon: "ShieldAlert" },
             { href: "/supervisor/gates", label: "Gates", icon: "DoorOpen" },
             { href: "/supervisor/shifts", label: "Shifts", icon: "CalendarClock" },

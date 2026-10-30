@@ -61,11 +61,11 @@ export function ChildStatus() {
     }
   }, []);
 
-  // Initial load + visibility-aware polling (no raw setInterval)
+  // Initial load + fast visibility-aware polling (10s for real-time movement monitoring)
   useEffect(() => {
     load().catch(() => {});
   }, [load]);
-  usePolling(load, { intervalMs: 30_000 });
+  usePolling(load, { intervalMs: 10_000 });
 
   if (error) {
     return (
@@ -113,7 +113,7 @@ export function ChildStatus() {
               month: "short",
               hour: "2-digit",
               minute: "2-digit",
-            })}`
+            })}${st.last.reason ? ` • ${st.last.reason.replace(/_/g, " ")}` : ""}`
           : "No recent activity";
         return (
           <div key={child.id} className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-6 flex items-center justify-between gap-3 flex-wrap">

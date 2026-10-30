@@ -74,12 +74,17 @@ export function useKioskOperator(gateIdParam?: string | null) {
     }
 
     if (!res.ok) {
+      if (res.status === 426) {
+        // PIN required or upgrade required: redirect to PIN entry screen
+        const targetGate = gateIdParam || "";
+        const pinRoute = targetGate ? `/operator/kiosk-pin?gateId=${encodeURIComponent(targetGate)}` : "/operator/kiosk-pin";
+        router.push(pinRoute);
+        setState({ pending: false, kioskSession: false, notConfigured: false, error: false });
+        return;
+      }
       // 404 = no kiosk operator configured; 503 = kiosk operator
       // misconfigured (zero or multiple kiosk-default operators).
-      // 426 = kiosk requires an upgrade (PIN entry UI, or OPEN-mode refused
-      // in production). All three mean "auto-session not available, fall
-      // back to manual login / claim-code panel."
-      const notConfigured = res.status === 404 || res.status === 503 || res.status === 426;
+      const notConfigured = res.status === 404 || res.status === 503;
       setState({
         pending: false,
         kioskSession: false,

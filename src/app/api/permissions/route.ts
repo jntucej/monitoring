@@ -5,7 +5,7 @@ import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
 import { fail } from "@/server/http/response";
-import { addAudit, addNotification, getLinkedPersons } from "@/lib/db";
+import { addAudit, addNotification, getLinkedPersons, getStudentGuardianLink } from "@/lib/db";
 import { query } from "@/lib/postgres";
 import {
   resolveInitialStageForRequester,
@@ -342,7 +342,7 @@ async function notifyStage(
   stage: string,
   ticket: string,
   workflowType: WorkflowType,
-  _studentUserId: string,
+  studentUserId: string,
 ): Promise<void> {
   const { rows } = await query<{ id: string }>(
     `SELECT id FROM users WHERE role = $1 AND status = 'ACTIVE'`,
@@ -359,6 +359,24 @@ async function notifyStage(
       ),
     ),
   );
+
+  // Notify student's linked guardian of new request
+  if (studentUserId) {
+    try {
+      const guardianId = await getStudentGuardianLink(studentUserId);
+      if (guardianId) {
+        await addNotification(
+          "user",
+          guardianId,
+          "permission",
+          "Pass Request Submitted",
+          `Your ward submitted a ${workflowType} pass request (Ticket ${ticket}).`,
+        );
+      }
+    } catch (err) {
+      console.error("[permissions] Error notifying guardian of submission:", err);
+    }
+  }
 }
 
 export const POST = withMutationGuard(handlePost, {

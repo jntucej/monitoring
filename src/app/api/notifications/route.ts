@@ -21,13 +21,16 @@ async function handleGet(req: NextRequest) {
 
     // Authorization: Prevent user enumeration
     const isAdmin = ['admin', 'sysadmin'].includes(authRole || '');
-    if (!isAdmin) {
-        if (recipientId !== authUserId || recipientType !== authRole) {
-            return NextResponse.json(
-                { success: false, error: { code: "FORBIDDEN", message: "You can only access your own notifications." } },
-                { status: 403 }
-            );
-        }
+    const isSelf =
+      recipientId === authUserId &&
+      (recipientType === "user" ||
+        recipientType === authRole ||
+        (["parent", "guardian"].includes(authRole || "") && ["parent", "guardian", "user"].includes(recipientType)));
+    if (!isAdmin && !isSelf) {
+      return NextResponse.json(
+        { success: false, error: { code: "FORBIDDEN", message: "You can only access your own notifications." } },
+        { status: 403 }
+      );
     }
 
     const data = await getNotifications(recipientType, recipientId);
@@ -42,6 +45,6 @@ async function handleGet(req: NextRequest) {
 }
 
 export const GET = withRateLimit(
-    withAuthorization(handleGet, { requiredRole: ['admin', 'sysadmin', 'parent', 'student'] }),
-    { keyPrefix: 'notifications_list', maxRequests: 60 }
+  withAuthorization(handleGet, { requiredRole: ['admin', 'sysadmin', 'parent', 'guardian', 'student', 'operator', 'supervisor'] }),
+  { keyPrefix: 'notifications_list', maxRequests: 60 }
 );

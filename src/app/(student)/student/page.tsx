@@ -21,8 +21,9 @@ import { SemesterRecap } from "@/components/engagement/SemesterRecap";
 import { useAuthStore } from "@/stores/authStore";
 import { extractStudentRoll, fetchAuthWithFriendlyError } from "@/lib/student-utils";
 import {
-  Send, Calendar, Clock, Loader2, UtensilsCrossed, TrendingUp, AlertTriangle,
+  Send, Calendar, Clock, Loader2, UtensilsCrossed, TrendingUp, AlertTriangle, Sparkles, QrCode,
 } from "lucide-react";
+import { PassQrModal } from "@/components/student/PassQrModal";
 
 type StatsErrorCode =
   | "unknown"
@@ -63,6 +64,29 @@ function StudentDashboardInner() {
     lastGateTime: string;
   } | null>(null);
   const [statsError, setStatsError] = useState<{ code: StatsErrorCode; message: string } | null>(null);
+  const [activePass, setActivePass] = useState<any>(null);
+  const [showQrModal, setShowQrModal] = useState<boolean>(false);
+
+  const fetchActivePass = async () => {
+    try {
+      const roll = extractStudentRoll(authUser);
+      if (!roll) return;
+      const res = await fetch(`/api/passes?roll=${encodeURIComponent(roll)}&status=APPROVED`, { cache: "no-store" });
+      const json = await res.json().catch(() => null);
+      if (json?.success && Array.isArray(json.data) && json.data.length > 0) {
+        const now = Date.now();
+        const valid = json.data.find((p: any) => {
+          const to = p.to ? new Date(p.to).getTime() : Infinity;
+          return p.status !== "USED" && !p.used_at && to >= now;
+        });
+        setActivePass(valid ?? null);
+      } else {
+        setActivePass(null);
+      }
+    } catch {
+      setActivePass(null);
+    }
+  };
 
   const fetchStudentStats = () => {
     setStatsError(null);
@@ -126,10 +150,48 @@ function StudentDashboardInner() {
 
   useEffect(() => {
     fetchStudentStats();
+    fetchActivePass();
   }, []);
 
   return (
     <div className="space-y-6 pb-12 min-w-0">
+      {/* Active Approved Gate Pass Banner */}
+      {activePass && (
+        <div className="p-4 rounded-3xl bg-emerald-500/10 border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm animate-in fade-in">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-2xl bg-emerald-500/20 text-emerald-400">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-emerald-300">You have an Active Approved Gate Pass!</p>
+              <p className="text-xs text-emerald-400/80 capitalize">
+                {activePass.reason?.replace(/_/g, " ") || "Gate Pass"} • Valid until{" "}
+                {new Date(activePass.to).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowQrModal(true)}
+            className="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition active:scale-95 shrink-0"
+          >
+            <QrCode className="w-4 h-4" />
+            <span>Show QR at Gate</span>
+          </button>
+        </div>
+      )}
+
+      {showQrModal && activePass && (
+        <PassQrModal
+          isOpen={showQrModal}
+          ticketNumber={activePass.ticket_number || activePass.id}
+          passTitle={`${activePass.reason?.replace(/_/g, " ") || "Gate"} Pass`}
+          fromDate={activePass.from}
+          toDate={activePass.to}
+          onClose={() => setShowQrModal(false)}
+        />
+      )}
+
       {/* Shared + engagement panels */}
       <QuickActions />
       <NotificationCenter />

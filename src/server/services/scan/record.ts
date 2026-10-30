@@ -37,7 +37,8 @@ import {
   NotFoundError,
   ServiceUnavailableError,
 } from "@/server/http/errors";
-import { setUserFlag } from "@/lib/db";
+import { setUserFlag, addNotification, getStudentGuardianLink } from "@/lib/db";
+import { sendSMS } from "@/lib/integrations/sms";
 
 /**
  * Duration caps for OUT-scan enforcement (hours from last IN to now).
@@ -651,6 +652,33 @@ async function recordScanInner(input: RecordScanInput): Promise<RecordScanResult
       metricsRegistry.incGateScan(gate.id, input.direction);
     } catch (e) {
       console.error("[metrics] Error incrementing gate scan count:", e);
+    }
+
+    // 14. Real-time parent/guardian notification on student movement
+    if (person.role === "student") {
+      void (async () => {
+        try {
+          const guardianId = await getStudentGuardianLink(person.id);
+          if (!guardianId) return;
+
+          const actionWord = input.direction === "IN" ? "entered" : "left";
+          const title = `Campus Movement: ${person.name} ${actionWord} campus`;
+          const reasonLabel = input.reason ? ` (${input.reason.replace(/_/g, " ")})` : "";
+          const msg = `Your ward ${person.name} (${person.unique_id}) has ${actionWord} campus through ${gate.name}${reasonLabel} at ${new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}.`;
+
+          await addNotification("user", guardianId, "movement", title, msg, gate.id);
+
+          const { rows } = await query<{ phone: string | null }>(
+            `SELECT phone FROM public.users WHERE id = $1 LIMIT 1`,
+            [guardianId]
+          );
+          if (rows[0]?.phone) {
+            await sendSMS({ to: rows[0].phone, message: msg }).catch(() => undefined);
+          }
+        } catch (notifErr) {
+          console.error("[recordScan] Error notifying guardian:", notifErr);
+        }
+      })();
     }
   }
 

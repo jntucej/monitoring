@@ -6,7 +6,7 @@ import { usePolling } from "@/hooks/usePolling";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { normalizeScannedPayload } from "@/lib/barcode";
 import { motion, AnimatePresence } from "framer-motion";
-import { RefreshCw, AlertCircle, KeyRound, UserCheck, Mic, ShieldAlert, Hourglass, ArrowUp, ArrowDown, Clock, Wrench, Moon } from "lucide-react";
+import { RefreshCw, AlertCircle, KeyRound, UserCheck, Mic, ShieldAlert, Hourglass, ArrowUp, ArrowDown, Clock, Wrench, Moon, WifiOff } from "lucide-react";
 import { useOperatorStore } from "@/stores/operatorStore";
 import { useAuth } from "@/hooks/useAuth";
 import { useKioskOperator } from "@/hooks/useKioskOperator";
@@ -24,7 +24,7 @@ import type { Scan as ScanRecord } from "@/lib/types";
 import { useCollegeInfo } from "@/hooks/useCollegeInfo";
 import { primeAudio } from "@/lib/sound";
 import { OperatorGateClaimPanel } from "@/components/operator/OperatorGateClaimPanel";
-import { flushOfflineScanQueue } from "@/lib/kiosk-offline-queue";
+import { flushOfflineScanQueue, getOfflineScanQueue } from "@/lib/kiosk-offline-queue";
 import { useAuthStore } from "@/stores/authStore";
 
 function OperatorPageInner() {
@@ -85,6 +85,8 @@ function OperatorPageInner() {
   const [selectedScan, setSelectedScan] = useState<ScanRecord | null>(null);
   const [activeLockdown, setActiveLockdown] = useState<any>(null);
   const [showVoiceModal, setShowVoiceModal] = useState(false);
+  const [isOnline, setIsOnline] = useState<boolean>(typeof navigator !== "undefined" ? navigator.onLine : true);
+  const [offlineCount, setOfflineCount] = useState<number>(0);
 
   // Mobile (< md) renders the dedicated mobile scan view (camera + decode +
   // confirmation bottom sheet). Desktop keeps the existing desk layout. Both
@@ -282,7 +284,14 @@ function OperatorPageInner() {
   // Auto-flush offline scan queue when network recovers
   useEffect(() => {
     if (typeof window === "undefined") return;
+
+    const updateOfflineCount = () => {
+      setOfflineCount(getOfflineScanQueue().length);
+    };
+
     const handleOnline = async () => {
+      setIsOnline(true);
+      updateOfflineCount();
       const auth = useAuthStore.getState();
       const token = auth.token;
       const headersGetter = () => {
@@ -291,6 +300,7 @@ function OperatorPageInner() {
         return h;
       };
       const res = await flushOfflineScanQueue(headersGetter);
+      updateOfflineCount();
       if (res.flushed > 0) {
         addToast({
           variant: "success",
@@ -301,10 +311,25 @@ function OperatorPageInner() {
       }
     };
 
+    const handleOffline = () => {
+      setIsOnline(false);
+      updateOfflineCount();
+    };
+
     window.addEventListener("online", handleOnline);
-    const interval = setInterval(handleOnline, 30_000);
+    window.addEventListener("offline", handleOffline);
+    updateOfflineCount();
+
+    const interval = setInterval(() => {
+      updateOfflineCount();
+      if (navigator.onLine) {
+        handleOnline();
+      }
+    }, 15_000);
+
     return () => {
       window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
       clearInterval(interval);
     };
   }, [addToast, loadStats]);
@@ -432,6 +457,30 @@ function OperatorPageInner() {
           <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
             {/* Switchable Workspace */}
             <div className="min-h-[220px]">
+              {!isOnline && (
+                <div className="mb-4 bg-amber-500/15 border border-amber-500/30 rounded-2xl p-4 flex items-center justify-between gap-3 text-amber-300 text-xs shadow-sm">
+                  <div className="flex items-center gap-2.5">
+                    <WifiOff className="w-5 h-5 shrink-0 text-amber-400" />
+                    <div>
+                      <p className="font-bold text-amber-200">Terminal Running Offline</p>
+                      <p className="text-[11px] text-amber-300/80">Campus network connection dropped. Scans are preserved locally ({offlineCount} queued) and will sync upon reconnection.</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {isOnline && offlineCount > 0 && (
+                <div className="mb-4 bg-sky-500/15 border border-sky-500/30 rounded-2xl p-4 flex items-center justify-between gap-3 text-sky-300 text-xs shadow-sm">
+                  <div className="flex items-center gap-2.5">
+                    <RefreshCw className="w-5 h-5 shrink-0 text-sky-400 animate-spin" />
+                    <div>
+                      <p className="font-bold text-sky-200">Synchronizing Offline Scans</p>
+                      <p className="text-[11px] text-sky-300/80">Syncing {offlineCount} scan(s) to the campus security database…</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {gateMode === "MAINTENANCE" && (
                 <div className="mb-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5 text-center space-y-2 shadow-sm animate-in fade-in">
                   <Wrench className="w-8 h-8 text-amber-500 mx-auto animate-bounce" />
