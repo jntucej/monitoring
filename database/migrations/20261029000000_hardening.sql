@@ -1,16 +1,16 @@
 -- ── Hardening migration for runtime envelope and critical security items ──────
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_movement_logs_ts
+CREATE INDEX IF NOT EXISTS idx_movement_logs_ts
   ON movement_logs (timestamp DESC);
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_movement_logs_gate_ts
+CREATE INDEX IF NOT EXISTS idx_movement_logs_gate_ts
   ON movement_logs (gate_id, timestamp DESC);
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_movement_logs_user_ts
+CREATE INDEX IF NOT EXISTS idx_movement_logs_user_ts
   ON movement_logs (user_id, timestamp DESC);
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_movement_logs_correction
+CREATE INDEX IF NOT EXISTS idx_movement_logs_correction
   ON movement_logs (corrected_by_scan_id) WHERE corrected_by_scan_id IS NOT NULL;
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_permreq_status_sla
+CREATE INDEX IF NOT EXISTS idx_permreq_status_sla
   ON permission_requests (status, sla_deadline);
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_sessions_active
+CREATE INDEX IF NOT EXISTS idx_sessions_active
   ON sessions (user_id) WHERE revoked_at IS NULL;
 
 CREATE OR REPLACE VIEW movement_logs_v AS

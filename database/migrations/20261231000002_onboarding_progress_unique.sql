@@ -11,7 +11,7 @@
 --     it is dropped so it can never be attributed to a real account.
 
 -- 1. Drop untrusted demo-user rows (they belong to no real account).
-DELETE FROM public.onboarding_progress WHERE user_id = 'demo-user';
+DELETE FROM public.onboarding_progress WHERE user_id::text = 'demo-user';
 
 -- 2. De-duplicate real rows: keep the earliest completion per (user_id, step).
 DELETE FROM public.onboarding_progress a
