@@ -45,6 +45,9 @@ export function isRequestSecure(req: {
   url?: string;
   nextUrl?: { protocol: string } | string;
 }): boolean {
+  if (process.env.NODE_ENV !== "production") {
+    return false;
+  }
   // 1. Trusted proxy set x-forwarded-proto.
   const xfProto = req.headers.get("x-forwarded-proto");
   if (xfProto) {
@@ -62,7 +65,7 @@ export function isRequestSecure(req: {
   }
 
   // 3. Fallback: treat production as secure (historical behaviour).
-  return process.env.NODE_ENV === "production";
+  return true;
 }
 
 /**
