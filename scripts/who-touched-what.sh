@@ -1,21 +1,15 @@
-#!/bin/bash
-# who-touched-what.sh — Forensic helper for audit_logs & api_metrics
+#!/usr/bin/env bash
+set -euo pipefail
 USER_QUERY="${1:-}"
+OUT="${2:-who-touched-what.csv}"
 if [ -z "$USER_QUERY" ]; then
-  echo "Usage: $0 <user-id | unique-id | email>" >&2
+  echo "Usage: $0 <user_id_or_unique_id> [output_csv]"
   exit 1
 fi
-
-OUT="/tmp/who-touched-what-$USER_QUERY.csv"
-echo "Extracting audit and API activity for $USER_QUERY..."
-
-docker exec gate_postgres psql -U postgres -d gate_monitor -c "\copy (
-  SELECT timestamp, action, ip_address, details 
+docker exec -e Q="$USER_QUERY" gate_postgres psql -U postgres -d gate_monitor -v q="$USER_QUERY" -c "\copy (
+  SELECT id, action, user_id, user_name, user_role, details, ip_address, timestamp 
   FROM audit_logs 
-  WHERE user_id::text = '$USER_QUERY' 
-     OR user_id IN (SELECT id FROM users WHERE unique_id ILIKE '%$USER_QUERY%' OR email ILIKE '%$USER_QUERY%')
-  ORDER BY timestamp DESC LIMIT 1000
+  WHERE user_id::text = :'q'
+     OR user_id IN (SELECT id FROM users WHERE unique_id ILIKE '%' || :'q' || '%' OR email ILIKE '%' || :'q' || '%')
 ) TO STDOUT WITH CSV HEADER" > "$OUT"
-
-echo "Audit log activity saved to $OUT"
-head -n 20 "$OUT"
+echo "Done. Exported to $OUT"
