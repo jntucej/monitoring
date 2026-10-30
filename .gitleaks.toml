@@ -1,0 +1,19 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Global allowlists for build artifacts, local env files, and false positives"
+paths = [
+    '''^\.next/''',
+    '''^\.env$''',
+    '''^\.env\.local$''',
+    '''^node_modules/''',
+    '''^dist/''',
+    '''^build/'''
+]
+regexes = [
+    '''identificationMarks[12]''',
+    '''AKIAIOSFODNN7EXAMPLE''',
+    '''AKIAIOSFODNN7EXAMPLE_CANARY''',
+    '''wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY_CANARY'''
+]
