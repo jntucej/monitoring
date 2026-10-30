@@ -7,7 +7,7 @@ export class LiveAdapter extends SchedulerDataAdapter {
   constructor(baseUrl: string, apiKey: string) {
     super();
     this.baseUrl = baseUrl;
-    this.apiKey = apiKey;
+    this.apiKey = apiKey; const parsed = new URL(baseUrl);
   }
 
   async fetchJobs(params?: any): Promise<any[]> {
