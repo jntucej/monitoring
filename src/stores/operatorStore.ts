@@ -151,6 +151,14 @@ interface OperatorState {
   gate: Gate | null;
   gateId: string | null;
 
+  /**
+   * Approved passes fetched ahead of the confirmation card during
+   * `startScan` (in parallel with the person fetch). The card reads this
+   * synchronously instead of doing a second roundtrip. Cleared in
+   * `reset` / `cancelScan` so stale passes never leak into the next student.
+   */
+  _cachedPasses: any[];
+
   _scanGeneration: number;
   startScan: (roll: string) => void;
   setDirection: (direction: ScanDirection) => void;
@@ -214,6 +222,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
   outing: [],
   gate: null,
   gateId: null,
+  _cachedPasses: [],
   _scanGeneration: 0,
 
   startScan: async (roll: string) => {
@@ -277,9 +286,24 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
         cleanRoll = verifyJson.data.roll;
       }
       cleanRoll = cleanRoll.trim().toUpperCase();
-      const res = await fetch(`/api/persons/${encodeURIComponent(cleanRoll)}`, { headers, signal });
+      // Fire the person fetch and the approved-passes fetch IN PARALLEL so the
+      // confirmation card has pass data in hand the moment it renders. The
+      // passes fetch is non-fatal: on failure we just cache an empty array.
+      const [res, passesRes] = await Promise.all([
+        fetch(`/api/persons/${encodeURIComponent(cleanRoll)}`, { headers, signal }),
+        fetch(`/api/permissions/approved?roll=${encodeURIComponent(cleanRoll)}`, { headers, signal }),
+      ]);
       if (get()._scanGeneration !== gen) return;
       const result = await res.json().catch(() => null);
+      let cachedPasses: any[] = [];
+      try {
+        const passesJson = await passesRes.json().catch(() => null);
+        if (passesJson?.data && Array.isArray(passesJson.data)) {
+          cachedPasses = passesJson.data;
+        }
+      } catch {
+        cachedPasses = [];
+      }
       if (get()._scanGeneration !== gen) return;
 
       if (res.status === 401 || result?.error?.code === "SESSION_EXPIRED" || result?.error?.code === "UNAUTHORIZED") {
@@ -354,6 +378,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
         ),
         photoVerificationDone: false,
         error: null,
+        _cachedPasses: cachedPasses,
       });
     } catch (err: unknown) {
       if ((err as Error)?.name === "AbortError") {
@@ -677,6 +702,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
       entryType: null,
       photoVerificationDone: false,
       error: null,
+      _cachedPasses: [],
     });
   },
 
@@ -709,6 +735,7 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
       entryType: null,
       photoVerificationDone: false,
       error: null,
+      _cachedPasses: [],
       todaysStats: stats
         ? { entries: stats.entries, exits: stats.exits, onCampus: stats.onCampus }
         : null,

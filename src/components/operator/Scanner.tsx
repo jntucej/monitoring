@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, X, RefreshCw, AlertTriangle, KeyRound, Volume2, VolumeX, Upload, CheckCircle, ArrowLeftRight } from "lucide-react";
+import { Camera, X, RefreshCw, AlertTriangle, KeyRound, Volume2, VolumeX, Upload, ArrowLeftRight } from "lucide-react";
 import { playAudioFeedback } from "@/lib/sound";
 import jsQR from "jsqr";
 import { SCANNABLE_FORMATS, normalizeScannedPayload } from "@/lib/barcode";
@@ -16,13 +16,23 @@ type FormatScope = ScanMode | "all";
 const QR_FORMATS: string[] = ["qr_code"];
 const BARCODE_FORMATS: string[] = SCANNABLE_FORMATS.filter((f) => f !== "qr_code");
 
+// ── Module-level native API detection ────────────────────────────────────────
+// requestVideoFrameCallback is the most efficient way to sync to decoded
+// video frames; fall back to a ~15fps rAF tick when unavailable.
+const HAS_RVFC: boolean =
+  typeof window !== "undefined" &&
+  "requestVideoFrameCallback" in HTMLVideoElement.prototype;
+
+const hasNativeBarcodeDetector: boolean =
+  typeof window !== "undefined" && "BarcodeDetector" in window;
+
 const formatCache: Record<string, string[]> = {};
 const getUsableFormats = async (scope: FormatScope) => {
   const wanted = scope === "qr" ? QR_FORMATS : scope === "barcode" ? BARCODE_FORMATS : [...SCANNABLE_FORMATS];
   const key = wanted.join(",");
   if (formatCache[key]) return formatCache[key];
   let detectorFormats: string[] = [];
-  if (typeof window !== "undefined" && "BarcodeDetector" in window) {
+  if (hasNativeBarcodeDetector) {
     try {
       detectorFormats = await (window as any).BarcodeDetector.getSupportedFormats();
     } catch { detectorFormats = []; }
@@ -39,6 +49,36 @@ const getUsableFormats = async (scope: FormatScope) => {
 // ~400ms device re-open cost). The stream is only reclaimed on full unload.
 const gateStreamCache: Record<string, MediaStream> = {};
 
+// ── Cached native QR BarcodeDetector (lazily created, reused every frame) ───
+let qrDetectorInstance: any = null;
+function getQrDetector(): any | null {
+  if (qrDetectorInstance) return qrDetectorInstance;
+  if (!hasNativeBarcodeDetector) return null;
+  try {
+    // Confirm qr_code is actually supported before constructing; on some
+    // engines BarcodeDetector exists but doesn't support qr_code.
+    // We defer the supported-formats check to the call site (async); this
+    // just caches the constructor so we don't re-instantiate every frame.
+    qrDetectorInstance = new (window as any).BarcodeDetector({ formats: QR_FORMATS });
+    return qrDetectorInstance;
+  } catch {
+    return null;
+  }
+}
+
+// Cached native barcode detector (barcode mode)
+let barcodeDetectorInstance: any = null;
+function getBarcodeDetector(): any | null {
+  if (barcodeDetectorInstance) return barcodeDetectorInstance;
+  if (!hasNativeBarcodeDetector) return null;
+  try {
+    barcodeDetectorInstance = new (window as any).BarcodeDetector({ formats: BARCODE_FORMATS });
+    return barcodeDetectorInstance;
+  } catch {
+    return null;
+  }
+}
+
 interface ScannerModalProps {
   isOpen: boolean;
   /**
@@ -53,6 +93,13 @@ interface ScannerModalProps {
   gateId?: string;
   /** Which scan mode the operator chose before opening (QR-only or barcode-only). */
   initialMode?: ScanMode;
+  /**
+   * Parent-controlled mode. When present and different from the internal mode
+   * state, the internal mode switches in place (no unmount/restart of the
+   * decode loop). The parent's bottom mode-bar uses this instead of re-
+   * seeding initialMode. Keeps the camera stream warm across switches.
+   */
+  mode?: ScanMode;
 }
 
 export function Scanner({
@@ -63,6 +110,7 @@ export function Scanner({
   onManualEntryClick,
   gateId,
   initialMode = "qr",
+  mode: modeProp,
 }: ScannerModalProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -74,6 +122,7 @@ export function Scanner({
   const processFrameRef = useRef<() => void>(() => {});
   const lastDecodeRef = useRef<number>(0);
   const activeRef = useRef<boolean>(active);
+  const rvfAvailableRef = useRef<boolean>(HAS_RVFC);
 
   const [cameraState, setCameraState] = useState<"idle" | "requesting" | "active" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -82,8 +131,6 @@ export function Scanner({
   const modeRef = useRef<ScanMode>(initialMode);
   const [barcodeApiAvailable, setBarcodeApiAvailable] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [showSuccessFlash, setShowSuccessFlash] = useState(false);
-  const successFlashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Keep the selected mode in sync with the mode the operator chose before
   // opening the modal (the viewfinder's Scan QR / Scan Barcode buttons).
@@ -95,12 +142,14 @@ export function Scanner({
     }
   }, [isOpen, initialMode]);
 
-  // Detect whether the phone's browser can auto-detect barcodes natively.
-  // QR is always auto-detectable via jsQR; 1D/2D barcodes need the native
-  // BarcodeDetector API (Chromium-based phones). Told to the user so they
-  // aren't staring at a live feed that never matches.
+  // Parent-controlled mode switch (no unmount, stream stays warm).
   useEffect(() => {
-    setBarcodeApiAvailable(typeof window !== "undefined" && "BarcodeDetector" in window);
+    if (modeProp) switchMode(modeProp);
+  }, [modeProp]);
+
+  // Detect whether the phone's browser can auto-detect barcodes natively.
+  useEffect(() => {
+    setBarcodeApiAvailable(hasNativeBarcodeDetector);
   }, []);
 
   const switchMode = useCallback((next: ScanMode) => {
@@ -140,11 +189,30 @@ export function Scanner({
     setCameraState("idle");
   }, [gateId]);
 
+  /**
+   * Park the live stream in the per-gate cache WITHOUT clearing
+   * videoRef.srcObject and WITHOUT stopping the decode loop.  The stream stays
+   * warm on the <video> element; the loop continues ticking (paused by the
+   * parent via active=false).  Used after a successful scan so the camera is
+   * instantly available for the next scan.
+   */
+  const parkStream = useCallback(() => {
+    if (streamRef.current) {
+      if (gateId) {
+        gateStreamCache[gateId] = streamRef.current;
+      }
+      streamRef.current = null;
+      // NOTE: videoRef.current.srcObject is deliberately left intact so the
+      // <video> element keeps showing the live feed (stream is not stopped).
+    }
+    // Decode loop stays alive; hasScannedRef re-arms on the next frame.
+    isScanningRef.current = true;
+  }, [gateId]);
+
   const handleSuccessScan = useCallback((rawScannedData: string) => {
     const scannedData = normalizeScannedPayload(rawScannedData);
     if (hasScannedRef.current || !scannedData) return;
     hasScannedRef.current = true;
-    isScanningRef.current = false;
 
     playBeep();
 
@@ -156,29 +224,17 @@ export function Scanner({
       }
     }
 
-    stopCamera();
+    // Park the stream (camera stays warm, decode loop keeps ticking, paused
+    // by the parent via active=false).  Fire onScan + onClose immediately.
+    parkStream();
+    onScan(scannedData);
+    onClose();
 
-    // Show the green success flash inside the modal, then close on a delay.
-    // The page-level SuccessFlash component also fires after this; the
-    // in-modal flash is just the pre-close visual cue.
-    setShowSuccessFlash(true);
-    successFlashTimerRef.current = setTimeout(() => {
-      onScan(scannedData);
-      onClose();
-      setShowSuccessFlash(false);
-    }, 700);
-  }, [stopCamera, onScan, onClose, playBeep]);
-
-  // Clean up the success-flash timer on unmount so a mid-flash navigation
-  // doesn't fire onScan/onClose after the component is gone.
-  useEffect(() => {
-    return () => {
-      if (successFlashTimerRef.current) {
-        clearTimeout(successFlashTimerRef.current);
-        successFlashTimerRef.current = null;
-      }
-    };
-  }, []);
+    // Re-arm: the next frame will process again even though the stream is
+    // parked (active gate from the parent will flip back to true on reopen).
+    hasScannedRef.current = false;
+    isScanningRef.current = true;
+  }, [parkStream, onScan, onClose, playBeep]);
 
   const handleImageFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -236,36 +292,36 @@ export function Scanner({
               console.error("jsQR upload process error:", err);
             }
           }
-          
+
           // Browser BarcodeDetector fallback
-    if ("BarcodeDetector" in window) {
-      getUsableFormats("all").then((usableFormats) => {
-        if (usableFormats.length === 0) return;
-        try {
-          const barcodeDetector = new (window as any).BarcodeDetector({ formats: [...usableFormats] });
-          barcodeDetector
-            .detect(canvas)
-            .then((barcodes: Array<{ rawValue: string }>) => {
-              const roll = normalizeScannedPayload(barcodes?.[0]?.rawValue || "");
-              if (roll) {
-                playBeep();
-                stopCamera();
-                onScan(roll);
-                onClose();
-              } else {
-                setErrorMessage("Could not detect any QR/Barcode in the uploaded image. Please try a clearer picture.");
+          if (hasNativeBarcodeDetector) {
+            getUsableFormats("all").then((usableFormats) => {
+              if (usableFormats.length === 0) return;
+              try {
+                const detector = new (window as any).BarcodeDetector({ formats: [...usableFormats] });
+                detector
+                  .detect(canvas)
+                  .then((barcodes: Array<{ rawValue: string }>) => {
+                    const roll = normalizeScannedPayload(barcodes?.[0]?.rawValue || "");
+                    if (roll) {
+                      playBeep();
+                      stopCamera();
+                      onScan(roll);
+                      onClose();
+                    } else {
+                      setErrorMessage("Could not detect any QR/Barcode in the uploaded image. Please try a clearer picture.");
+                    }
+                  })
+                  .catch(() => {
+                    setErrorMessage("Could not detect any QR/Barcode in the uploaded image. Please try a clearer picture.");
+                  });
+              } catch {
+                // fallback
               }
-            })
-            .catch(() => {
-              setErrorMessage("Could not detect any QR/Barcode in the uploaded image. Please try a clearer picture.");
             });
-        } catch {
-          // fallback
-        }
-      });
-    } else {
-      setErrorMessage("Could not decode code from the uploaded image. Please make sure it is centered and clear.");
-    }
+          } else {
+            setErrorMessage("Could not decode code from the uploaded image. Please make sure it is centered and clear.");
+          }
         }
       };
       img.src = e.target?.result as string;
@@ -273,7 +329,31 @@ export function Scanner({
     reader.readAsDataURL(file);
   }, [playBeep, stopCamera, onClose, onScan]);
 
-  // processFrame defined and stored in ref to avoid stale closures
+  // jsQR fallback helper (sync — called synchronously in the QR path when the
+  // native detector returned nothing or threw for this frame).
+  const runJsQrFallback = useCallback((canvas: HTMLCanvasElement, onSuccess: (raw: string) => void) => {
+    const context = canvas.getContext("2d");
+    if (!context) return;
+    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    const decodeQR = typeof jsQR === "function" ? jsQR : (jsQR as any).default;
+    if (!decodeQR) return;
+    try {
+      const code = decodeQR(imageData.data, imageData.width, imageData.height, {
+        inversionAttempts: "dontInvert",
+      });
+      if (code && code.data && code.data.trim().length > 0) {
+        onSuccess(code.data.trim());
+      }
+    } catch (err) {
+      console.error("jsQR fallback error:", err);
+    }
+  }, []);
+
+  // processFrame defined and stored in ref to avoid stale closures.
+  //
+  // QR path: try the cached native BarcodeDetector first (async, non-blocking),
+  // fall back to jsQR when the detector is absent or returns nothing for this
+  // frame.  Barcode path: use the cached native detector for 1D/2D formats.
   const processFrame = useCallback(() => {
     if (!isScanningRef.current || hasScannedRef.current) return;
     const video = videoRef.current;
@@ -285,8 +365,8 @@ export function Scanner({
 
     const targetWidth = video.videoWidth || 640;
     const targetHeight = video.videoHeight || 480;
-    // ponytail: downscale to 640px wide before jsQR — ~4x faster, still
-    // decodes 20cm QR codes. See tick throttle above.
+    // Downscale to 640px wide before decoding — ~4x faster, still decodes
+    // 20cm QR codes and most 1D barcodes comfortably.
     const DECODE_WIDTH = 640;
     const scale = Math.min(1, DECODE_WIDTH / targetWidth);
     canvas.width = Math.round(targetWidth * scale);
@@ -296,49 +376,51 @@ export function Scanner({
     if (!context) return;
 
     context.drawImage(video, 0, 0, targetWidth, targetHeight);
-    const imageData = context.getImageData(0, 0, targetWidth, targetHeight);
 
-    const decodeQR = typeof jsQR === "function" ? jsQR : (jsQR as any).default;
     const activeMode = modeRef.current;
 
-    // QR tab: jsQR decodes QR codes universally (works even when the native
-    // BarcodeDetector API is absent). Barcode tab is handled by the native
-    // detector below, restricted to linear/2D formats so it won't match QR.
-    if (activeMode === "qr" && decodeQR) {
-      try {
-        const code = decodeQR(imageData.data, imageData.width, imageData.height, {
-          inversionAttempts: "dontInvert",
-        });
+    // ── QR mode ───────────────────────────────────────────────────────────────
+    if (activeMode === "qr") {
+      const qrDetector = getQrDetector();
+      if (qrDetector) {
+        // Native async path (non-blocking): fires .detect(canvas) and
+        // processes results in a promise — the decode loop continues.
+        qrDetector
+          .detect(canvas)
+          .then((barcodes: Array<{ rawValue: string }>) => {
+            if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
+              handleSuccessScan(barcodes[0].rawValue);
+              return;
+            }
+            // No native hit → fall back to jsQR for this frame.
+            runJsQrFallback(canvas, handleSuccessScan);
+          })
+          .catch(() => {
+            // Native detector threw → fall back to jsQR.
+            runJsQrFallback(canvas, handleSuccessScan);
+          });
+      } else {
+        // No native QR detector available — pure jsQR path.
+        runJsQrFallback(canvas, handleSuccessScan);
+      }
+      return;
+    }
 
-        if (code && code.data && code.data.trim().length > 0) {
-          handleSuccessScan(code.data.trim());
-          return;
-        }
-      } catch (err) {
-        console.error("jsQR process frame error:", err);
+    // ── Barcode mode (1D / 2D, not QR) ──────────────────────────────────────
+    if (activeMode === "barcode") {
+      const barcodeDetector = getBarcodeDetector();
+      if (barcodeDetector) {
+        barcodeDetector
+          .detect(canvas)
+          .then((barcodes: Array<{ rawValue: string }>) => {
+            if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
+              handleSuccessScan(barcodes[0].rawValue);
+            }
+          })
+          .catch(() => {});
       }
     }
-
-    // Barcode tab: native detector auto-detecting 1D + 2D barcodes.
-    if (activeMode === "barcode" && "BarcodeDetector" in window) {
-      getUsableFormats("barcode").then((usableFormats) => {
-        if (usableFormats.length === 0) return;
-        try {
-          const barcodeDetector = new (window as any).BarcodeDetector({ formats: [...usableFormats] });
-          barcodeDetector
-            .detect(canvas)
-            .then((barcodes: Array<{ rawValue: string }>) => {
-              if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
-                handleSuccessScan(barcodes[0].rawValue);
-              }
-            })
-            .catch(() => {});
-        } catch {
-          // Fallback catch
-        }
-      });
-    }
-  }, [handleSuccessScan]);
+  }, [handleSuccessScan, runJsQrFallback]);
 
   // Keep activeRef in sync so the decode tick always sees the latest value.
   useEffect(() => {
@@ -348,39 +430,61 @@ export function Scanner({
     }
   }, [active]);
 
-  // Keep ref in sync so setInterval always calls latest version
+  // Keep processFrameRef in sync so the decode tick always calls the latest.
   useEffect(() => {
     processFrameRef.current = processFrame;
   }, [processFrame]);
 
+  /**
+   * Decode loop.
+   *
+   *  • Native path (rVFC): every call to requestVideoFrameCallback fires
+   *    exactly once per decoded video frame (~30–60fps on a phone).  No
+   *    time gate needed — processFrame runs on every frame.
+   *
+   *  • rAF fallback (~15fps): gate with lastDecodeRef ≥ 66ms so we don't
+   *    run jsQR on every rAF tick (~16ms).
+   */
   const startDecodeLoop = useCallback(() => {
     if (!videoRef.current) return;
-    // ponytail: throttle decode to ~5fps (200ms) + downscale to 640px wide.
-    // QR codes don't move fast enough to need 60fps; full-res jsQR costs
-    // 40-80ms/frame. 5fps keeps CPU + battery manageable.
+
     const tick = () => {
       if (!isScanningRef.current) {
         animationFrameRef.current = null;
         return;
       }
       // When the parent disables decoding (active=false) bail out early and
-      // release the RAF so no frame work happens.
+      // release the RAF/rVFC so no frame work happens.
       if (!activeRef.current) {
         animationFrameRef.current = null;
         return;
       }
-      const now = performance.now();
-      if (now - lastDecodeRef.current >= 200) {
-        lastDecodeRef.current = now;
-        processFrameRef.current();
+      processFrameRef.current();
+
+      if (rvfAvailableRef.current && videoRef.current) {
+        // Native: next decoded video frame.
+        (videoRef.current as any).requestVideoFrameCallback(() => tick());
+      } else {
+        // Fallback: ~15fps rAF gate.
+        const now = performance.now();
+        if (now - lastDecodeRef.current >= 66) {
+          lastDecodeRef.current = now;
+        }
+        animationFrameRef.current = requestAnimationFrame(tick);
       }
-      animationFrameRef.current = requestAnimationFrame(tick);
     };
+
     // Fire the first tick immediately so the first frame is processed the
     // moment it arrives — no debounce delay on startup.
     lastDecodeRef.current = 0;
     processFrameRef.current();
-    animationFrameRef.current = requestAnimationFrame(tick);
+
+    if (rvfAvailableRef.current && videoRef.current) {
+      // rVFC path: schedule on the next decoded frame.
+      (videoRef.current as any).requestVideoFrameCallback(() => tick());
+    } else {
+      animationFrameRef.current = requestAnimationFrame(tick);
+    }
   }, []);
 
   const startCamera = useCallback(async () => {
@@ -488,10 +592,10 @@ export function Scanner({
       stopCamera();
     }
     return () => { stopCamera(); };
-     
+
   }, [isOpen, startCamera, stopCamera]);
 
-  // ponytail: kill camera + decode loop when tab hidden (battery, privacy
+  // Kill camera + decode loop when tab hidden (battery, privacy
   // indicator, dead-stream-on-return). pagehide covers iOS tab suspension.
   useEffect(() => {
     if (!isOpen) return;
@@ -510,7 +614,7 @@ export function Scanner({
       document.removeEventListener("freeze", onFreeze as EventListener);
       document.removeEventListener("resume", onResume as EventListener);
     };
-     
+
   }, [isOpen, startCamera, stopCamera]);
 
   // On full unmount (gate change / page leave) drop cached streams —
@@ -635,35 +739,6 @@ export function Scanner({
                 </button>
               </div>
             )}
-
-            {/* Green success flash overlay — shown for ~700ms before modal closes */}
-            <AnimatePresence>
-              {showSuccessFlash && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.15 }}
-                  className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-emerald-500/95"
-                >
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 18 }}
-                  >
-                    <CheckCircle className="w-20 h-20 text-white" />
-                  </motion.div>
-                  <motion.p
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.15 }}
-                    className="mt-3 text-lg font-extrabold text-white"
-                  >
-                    Scan Recorded
-                  </motion.p>
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
 
           {/* Actions */}

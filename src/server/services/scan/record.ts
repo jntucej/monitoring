@@ -541,72 +541,76 @@ async function recordScanInner(input: RecordScanInput): Promise<RecordScanResult
         // mess token + "will be present" preference inside that window is
         // wasted food. Auto-revoke the tokens and clear the preferences.
         // Non-fatal: a mess-table failure must not roll back the scan.
+        // FIRE-AND-FORGET: this is the one genuinely slow follow-up (2 mess
+        // table UPDATEs + audits); it no longer delays the scan response.
         if (normReason === "home_out") {
-          // §D: hoisted so the failure audit can report the window even when
-          // the queries below fail partway through (otherwise fromDate/toDate
-          // would be out of scope in the catch).
-          const failWindowFrom = new Date().toISOString().slice(0, 10);
-          try {
-            const fromDate = failWindowFrom;
-            const { rows: passEnd } = await query<{ to_date: string | null }>(
-              `SELECT to_date FROM public.permissions
-                WHERE id = $1 AND to_date IS NOT NULL LIMIT 1`,
-              [consumedPassId],
-            );
-            const toDate = passEnd[0]?.to_date?.slice(0, 10) ?? fromDate;
+          void (async () => {
+            // §D: hoisted so the failure audit can report the window even when
+            // the queries below fail partway through (otherwise fromDate/toDate
+            // would be out of scope in the catch).
+            const failWindowFrom = new Date().toISOString().slice(0, 10);
+            try {
+              const fromDate = failWindowFrom;
+              const { rows: passEnd } = await query<{ to_date: string | null }>(
+                `SELECT to_date FROM public.permissions
+                  WHERE id = $1 AND to_date IS NOT NULL LIMIT 1`,
+                [consumedPassId],
+              );
+              const toDate = passEnd[0]?.to_date?.slice(0, 10) ?? fromDate;
 
-            const { rowCount: revokedCount } = await query(
-              `UPDATE public.mess_tokens t
-                  SET revoked_at = NOW(), revoked_by = $2::uuid
-                FROM public.mess_days d
-               WHERE t.mess_day_id = d.id
-                 AND t.user_id = $1
-                 AND t.used_at IS NULL
-                 AND t.revoked_at IS NULL
-                 AND d.meal_date BETWEEN $3::date AND $4::date`,
-              [person.id, input.operatorId, fromDate, toDate],
-            );
-            // Clear their mess preferences for the covered window so they
-            // aren't counted as "present" for analytics.
-            await query(
-              `UPDATE public.mess_preferences p
-                  SET will_be_present = FALSE
-                FROM public.mess_days d
-               WHERE p.mess_day_id = d.id
-                 AND p.user_id = $1
-                 AND d.meal_date BETWEEN $2::date AND $3::date`,
-              [person.id, fromDate, toDate],
-            );
-            await auditWrite({
-              action: "MESS_TOKENS_REVOKED_HOME_OUT",
-              userId: input.operatorId,
-              role: input.operatorRole,
-              details: {
-                personId: person.id,
-                passId: consumedPassId,
-                window: { fromDate, toDate },
-                revokedTokens: revokedCount ?? 0,
-              },
-            });
-          } catch (err) {
-            // §D: this is a STATE-MUTATING write that previously swallowed its
-            // own failure. If mess auto-revoke fails on `home_out`, the
-            // student's tokens stay live — a food-waste + audit-trail bug.
-            // Log the structured context AND add a MESS_REVOKE_FAILED audit
-            // row so ops can chase it; the scan itself still succeeds.
-            console.error("[recordScan] M18 mess auto-revoke failed:", err);
-            await auditWrite({
-              action: "MESS_REVOKE_FAILED",
-              userId: input.operatorId,
-              role: input.operatorRole,
-              details: {
-                personId: person.id,
-                passId: consumedPassId,
-                window: { fromDate: failWindowFrom },
-                reason: err instanceof Error ? err.message : String(err),
-              },
-            });
-          }
+              const { rowCount: revokedCount } = await query(
+                `UPDATE public.mess_tokens t
+                    SET revoked_at = NOW(), revoked_by = $2::uuid
+                  FROM public.mess_days d
+                 WHERE t.mess_day_id = d.id
+                   AND t.user_id = $1
+                   AND t.used_at IS NULL
+                   AND t.revoked_at IS NULL
+                   AND d.meal_date BETWEEN $3::date AND $4::date`,
+                [person.id, input.operatorId, fromDate, toDate],
+              );
+              // Clear their mess preferences for the covered window so they
+              // aren't counted as "present" for analytics.
+              await query(
+                `UPDATE public.mess_preferences p
+                    SET will_be_present = FALSE
+                  FROM public.mess_days d
+                 WHERE p.mess_day_id = d.id
+                   AND p.user_id = $1
+                   AND d.meal_date BETWEEN $2::date AND $3::date`,
+                [person.id, fromDate, toDate],
+              );
+              await auditWrite({
+                action: "MESS_TOKENS_REVOKED_HOME_OUT",
+                userId: input.operatorId,
+                role: input.operatorRole,
+                details: {
+                  personId: person.id,
+                  passId: consumedPassId,
+                  window: { fromDate, toDate },
+                  revokedTokens: revokedCount ?? 0,
+                },
+              });
+            } catch (err) {
+              // §D: this is a STATE-MUTATING write that previously swallowed its
+              // own failure. If mess auto-revoke fails on `home_out`, the
+              // student's tokens stay live — a food-waste + audit-trail bug.
+              // Log the structured context AND add a MESS_REVOKE_FAILED audit
+              // row so ops can chase it; the scan itself still succeeds.
+              console.error("[recordScan] M18 mess auto-revoke failed:", err);
+              await auditWrite({
+                action: "MESS_REVOKE_FAILED",
+                userId: input.operatorId,
+                role: input.operatorRole,
+                details: {
+                  personId: person.id,
+                  passId: consumedPassId,
+                  window: { fromDate: failWindowFrom },
+                  reason: err instanceof Error ? err.message : String(err),
+                },
+              });
+            }
+          })();
         }
       }
     }

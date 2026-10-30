@@ -5,24 +5,24 @@ import { motion } from "framer-motion";
 import { CheckCircle } from "lucide-react";
 
 interface SuccessFlashProps {
-  onClick?: () => void;
+  onDismiss?: () => void;
   autoDismissMs?: number;
   children?: React.ReactNode;
   direction?: "IN" | "OUT";
   reason?: string;
 }
 
-export function SuccessFlash({ onClick, autoDismissMs = 2500, children, direction, reason }: SuccessFlashProps) {
+export function SuccessFlash({ onDismiss, autoDismissMs = 500, children, direction, reason }: SuccessFlashProps) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dismissedRef = useRef(false);
 
   useEffect(() => {
-    if (!onClick || autoDismissMs <= 0) return;
+    if (autoDismissMs <= 0) return;
 
     timerRef.current = setTimeout(() => {
       if (dismissedRef.current) return;
       dismissedRef.current = true;
-      onClick();
+      onDismiss?.();
     }, autoDismissMs);
 
     return () => {
@@ -31,14 +31,7 @@ export function SuccessFlash({ onClick, autoDismissMs = 2500, children, directio
         timerRef.current = null;
       }
     };
-  }, [onClick, autoDismissMs]);
-
-  const handleClick = () => {
-    if (dismissedRef.current) return;
-    dismissedRef.current = true;
-    if (timerRef.current) clearTimeout(timerRef.current);
-    onClick?.();
-  };
+  }, [onDismiss, autoDismissMs]);
 
   const heading =
     direction === "IN"
@@ -52,12 +45,7 @@ export function SuccessFlash({ onClick, autoDismissMs = 2500, children, directio
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      onClick={handleClick}
-      role="button"
-      tabIndex={0}
-      aria-label="Dismiss and continue"
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleClick(); }}
-      className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[var(--action-primary)] text-slate-950 cursor-pointer select-none"
+      className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[var(--action-primary)] text-slate-950 select-none"
     >
       <motion.div
         initial={{ scale: 0 }}
@@ -82,7 +70,7 @@ export function SuccessFlash({ onClick, autoDismissMs = 2500, children, directio
             transition={{ delay: 0.3 }}
             className="mt-2 text-xs font-semibold uppercase tracking-wider bg-slate-950/10 px-3 py-1 rounded-full text-slate-900"
           >
-            {reason ? `${reason} · ` : ""}Tap anywhere to scan next
+            {reason ? `${reason} · ` : ""}Next scan ready
           </motion.p>
         </>
       )}

@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import {
-  User, CheckCircle2, LogIn, Home, Sun, Clock, X, Briefcase, ShieldAlert, Flag,
+  User, LogIn, Home, Sun, Clock, X, Briefcase, ShieldAlert, Flag,
 } from "lucide-react";
 import { ExitReason, Student, ScanDirection } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -50,6 +50,14 @@ interface ScanConfirmationProps {
    */
   currentEntryType?: EntryType | null;
   isInline?: boolean;
+  /**
+   * Auto-confirm delay in ms. When > 0 and the student is not flagged,
+   * the component animates a thin progress bar under the recommended
+   * button and fires onConfirm automatically after this many ms —
+   * provided the recommendation confidence is >= 0.7.
+   * The gate page decides the delay from recommendation.confidence.
+   */
+  autoConfirmMs?: number;
 }
 
 /** IN-movement button ids produced by resolveEntryOptions (gate-operator
@@ -100,6 +108,7 @@ export function ScanConfirmation({
   currentEntryType = null,
   lastOutReason = null,
   isInline = false,
+  autoConfirmMs = 0,
 }: ScanConfirmationProps) {
   // Live entry type: the prop wins, falling back to the stored
   // studentDetails.current_entry_type on the person.
@@ -109,9 +118,6 @@ export function ScanConfirmation({
 
   const operatorStore = useOperatorStore();
 
-  // Photo verification state
-  const [photoVerified, setPhotoVerified] = useState(false);
-  const [countdown, setCountdown] = useState(2);
   const [selectedDirection, setSelectedDirection] = useState<ScanDirection | null>(null);
   const [selectedReason, setSelectedReason] = useState<ExitReason | null>(null);
   const [selectedEntryType, setSelectedEntryType] = useState<EntryType | null>(null);
@@ -121,6 +127,7 @@ export function ScanConfirmation({
     student.status === "SUSPENDED" || !!student.flagStatus
   );
   const [flaggingLoading, setFlaggingLoading] = useState(false);
+  const [autoProgress, setAutoProgress] = useState(0);
 
   const handleToggleFlagAccount = async () => {
     if (flaggingLoading || !student?.id) return;
@@ -148,28 +155,48 @@ export function ScanConfirmation({
     }
   };
 
-  // Start photo verification countdown when component mounts
+  // Reset operator selections when a new student is scanned
   useEffect(() => {
-    setPhotoVerified(false);
-    setCountdown(2);
     setSelectedDirection(null);
     setSelectedReason(null);
     setSelectedEntryType(null);
     setApprovedPasses([]);
-
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          setPhotoVerified(true);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
   }, [student.id]);
+
+  // rAF-driven progress bar + one-shot auto-confirm when autoConfirmMs > 0
+  // and the recommendation is confident enough (>= 0.7) and student not flagged
+  useEffect(() => {
+    if (!autoConfirmMs || autoConfirmMs <= 0 || isFlagged) return;
+    // The recommendation is computed from the store; we re-read it here to
+    // guarantee we use the latest value when this effect runs.
+    const rec = operatorStore.getRecommendation(student, approvedPasses.length);
+    if (!rec || rec.confidence < 0.7) return;
+
+    setAutoProgress(0);
+    let rafId = 0;
+    const start = performance.now();
+
+    const tick = (now: number) => {
+      const elapsed = now - start;
+      const pct = Math.min(100, Math.round((elapsed / autoConfirmMs) * 100));
+      setAutoProgress(pct);
+      if (pct < 100) {
+        rafId = requestAnimationFrame(tick);
+      } else {
+        // fire the same onConfirm the manual button would
+        handleRecommendationConfirm(
+          rec.direction,
+          (rec.reason as ExitReason | undefined) ?? undefined,
+          (rec.entryType as EntryType | undefined) ?? undefined,
+          rec.entryButton as EntryButtonId | undefined,
+        );
+      }
+    };
+
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [student.id, autoConfirmMs, isFlagged]);
 
   useEffect(() => {
     const fetchApprovedPasses = async () => {
@@ -239,7 +266,7 @@ export function ScanConfirmation({
     entryType?: EntryType,
     buttonId?: EntryButtonId,
   ) => {
-    if (!photoVerified || isFlagged) {
+    if (isFlagged) {
       return;
     }
     setSelectedDirection(direction);
@@ -286,7 +313,7 @@ export function ScanConfirmation({
     entryType?: EntryType,
     buttonId?: EntryButtonId,
   ) => {
-    if (!photoVerified || isFlagged) return;
+    if (isFlagged) return;
     setSelectedDirection(direction);
     setSelectedReason(reason ?? null);
     setSelectedEntryType(entryType ?? null);
@@ -339,7 +366,7 @@ export function ScanConfirmation({
     }
 
     const DirIcon = operatorIcon(rec.direction === "IN" ? "in" : "out").icon;
-    const recDisabled = !photoVerified || isFlagged;
+    const recDisabled = isFlagged;
 
     // If confidence < 0.7, show all alternatives (still max 2).
     const alts = rec.alternatives.slice(0, 2);
@@ -372,13 +399,25 @@ export function ScanConfirmation({
           )}
         </button>
 
+        {/* Keyboard-hint chip + auto-confirm progress bar */}
+        {!isFlagged && (
+          <div className="space-y-1.5">
+            <div className="mx-4 h-1 overflow-hidden rounded-full bg-white/20">
+              <div className="h-full bg-white" style={{ width: `${autoProgress}%` }} />
+            </div>
+            <div className="mt-1 text-center text-[10px] text-white/50">
+              Space confirm · Esc cancel · 1/2 alternatives
+            </div>
+          </div>
+        )}
+
         {/* UP TO 2 smaller alternative buttons */}
         {alts.length > 0 && (
           <div className="grid grid-cols-2 gap-2">
             {alts.map((alt) => {
               const AltIcon = operatorIcon(alt.icon).icon;
               const altLabel = alt.label;
-              const altDisabled = !photoVerified || isFlagged;
+              const altDisabled = isFlagged;
               const altPayload = alt.payload;
               const buttonId: EntryButtonId | undefined = altPayload.buttonId as EntryButtonId | undefined;
               return (
@@ -427,21 +466,6 @@ export function ScanConfirmation({
         <X className="w-5 h-5" />
       </button>
 
-      {/* Verification Status Banner */}
-      <div className="flex items-center justify-center gap-1.5 text-xs font-bold py-1.5 px-3 rounded-full w-fit mx-auto">
-        {photoVerified ? (
-          <span className="text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full flex items-center gap-1.5">
-            <CheckCircle2 className="w-4 h-4" />
-            <span>Identity Verified</span>
-          </span>
-        ) : (
-          <span className="text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full flex items-center gap-1.5 animate-pulse">
-            <Clock className="w-4 h-4" />
-            <span>Verifying Identity... {countdown}s</span>
-          </span>
-        )}
-      </div>
-
       {/* Live entry-type badge (top of card) */}
       {effectiveEntryType === "hosteller" ? (
         <div className="flex items-center justify-center">
@@ -468,10 +492,6 @@ export function ScanConfirmation({
             <div className="w-full h-full flex items-center justify-center bg-[var(--bg-base)]">
               <User className="w-9 h-9 text-[var(--text-muted)]" />
             </div>
-          )}
-          {/* Photo verification overlay ring */}
-          {!photoVerified && (
-            <div className="absolute inset-0 rounded-2xl border-4 border-amber-400/60 animate-pulse" />
           )}
         </div>
 
