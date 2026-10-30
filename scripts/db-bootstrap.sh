@@ -36,13 +36,11 @@ psql_exec -f database/seeds/seed-21-roles.sql
 
 echo "==> Done."
 echo ""
-echo "NOTE: seed-21-roles.sql ships with demo passwords (see CREDENTIALS.md)."
-echo "Run scripts/create-first-sysadmin.sh to rotate the SYSADMIN / kiosk"
-echo "operator credentials out-of-band before going live."
 
-# First-run guard: the seed above ships with demo passwords and sets
-# password_must_change=TRUE on every seeded account. Before going live you
-# MUST run scripts/create-first-sysadmin.sh to rotate SYSADMIN / kiosk
-# OPERATOR credentials out-of-band; users flagged password_must_change are
-# forced to change their password on next login (client redirect to
-# /settings/password?mandatory=1, cleared by a self-service change).
+# First-run guard: ensure no ACTIVE sysadmin/admin user has NULL password without operator initialization
+NULL_ADMINS=$(psql_exec -tAc "SELECT count(*) FROM users WHERE role IN ('sysadmin', 'admin') AND status = 'ACTIVE' AND password_hash IS NULL;" || echo "0")
+if [ "$NULL_ADMINS" -gt 0 ]; then
+  echo "⚠️ NOTICE: $NULL_ADMINS administrative accounts have password_hash = NULL (uninitialized)."
+  echo "You MUST run: bash scripts/create-first-sysadmin.sh to configure the root administrator."
+fi
+
