@@ -93,7 +93,22 @@ export function ReasonSelect({
     };
   }, [workflowType]);
 
-  const allReasons = [...standardReasons, ...customReasons];
+  // Display-side dedupe: two seed migrations shipped the same labels under
+  // different codes (hostel_medical/medical_emergency, hostel_family/family_emergency).
+  // The migration 20270101000002 deletes the older rows; this guard is a
+  // belt-and-suspenders measure so the dropdown never shows duplicates even
+  // if the migration has not yet run.
+  const dedupedCustomReasons = useMemo(() => {
+    const seen = new Set<string>();
+    return customReasons.filter((r) => {
+      const key = r.label.trim().toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [customReasons]);
+
+  const allReasons = [...standardReasons, ...dedupedCustomReasons];
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedCode = e.target.value;
@@ -129,9 +144,9 @@ export function ReasonSelect({
           </optgroup>
         )}
 
-        {customReasons.length > 0 && (
+        {dedupedCustomReasons.length > 0 && (
           <optgroup label="Custom" className="bg-[var(--bg-surface)] text-[var(--text-primary)] font-semibold">
-            {customReasons.map((reason) => (
+            {dedupedCustomReasons.map((reason) => (
               <option key={`cust_${reason.code}`} value={reason.code} className="font-normal text-[var(--text-primary)] py-1">
                 {reason.label}
               </option>

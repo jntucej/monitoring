@@ -24,8 +24,7 @@ async function handleGet(req: NextRequest): Promise<Response> {
     let query = supabase
       .from("custom_reasons")
       .select("id, code, label, workflow_type, created_by, created_at")
-      .order("workflow_type", { ascending: true })
-      .order("label", { ascending: true });
+      .order("created_at", { ascending: false });
 
     if (workflowType) {
       query = query.eq("workflow_type", workflowType);
@@ -44,9 +43,36 @@ async function handleGet(req: NextRequest): Promise<Response> {
       );
     }
 
+    // Dedupe by label within the same workflow_type, keeping the newest row.
+    // Two seed migrations (20261010000001 and 20261026000001) shipped the same
+    // labels under different codes; this prevents the UI from showing them twice.
+    interface ReasonRow {
+      id: string;
+      code: string;
+      label: string;
+      workflow_type: string;
+      created_by: string | null;
+      created_at: string;
+    }
+    const deduped: ReasonRow[] = [];
+    const seen = new Map<string, ReasonRow>();
+    for (const row of (data ?? []) as ReasonRow[]) {
+      const key = `${row.workflow_type}::${row.label.trim().toLowerCase()}`;
+      const existing = seen.get(key);
+      if (!existing || new Date(row.created_at).getTime() > new Date(existing.created_at).getTime()) {
+        if (existing) {
+          const idx = deduped.indexOf(existing);
+          if (idx >= 0) deduped[idx] = row;
+        } else {
+          deduped.push(row);
+        }
+        seen.set(key, row);
+      }
+    }
+
     return NextResponse.json({
       success: true,
-      data: data || [],
+      data: deduped,
     });
   } catch (err: unknown) {
     const error = err as Error;
