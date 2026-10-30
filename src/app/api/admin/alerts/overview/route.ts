@@ -26,6 +26,7 @@ import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok } from "@/server/http/response";
 import { query } from "@/lib/postgres";
+import { lastIstDayStrings } from "@/server/policy/dates";
 import type { QueryResultRow } from "pg";
 
 function median(nums: number[]): number | null {
@@ -41,14 +42,10 @@ function mean(nums: number[]): number | null {
 }
 
 function lastNDays(n: number): string[] {
-  const out: string[] = [];
-  const now = new Date();
-  for (let i = n - 1; i >= 0; i--) {
-    const d = new Date(now);
-    d.setDate(now.getDate() - i);
-    out.push(d.toISOString().slice(0, 10));
-  }
-  return out;
+  // IST-boundary-safe (see server/policy/dates.lastIstDayStrings): a UTC
+  // `toISOString().slice(0,10)` walk returns yesterday's day in the
+  // 00:00-05:30 IST window, shifting the whole alerts overview.
+  return lastIstDayStrings(n);
 }
 
 async function safeQuery<T extends QueryResultRow>(

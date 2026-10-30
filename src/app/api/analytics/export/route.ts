@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { exportRangeReport } from "@/lib/server-export";
+import { getIstDateString } from "@/server/policy/dates";
 
 async function handleGet(req: NextRequest) {
   try {
     const params = req.nextUrl.searchParams;
     const format = (params.get("format") as "pdf" | "csv") || "csv";
-    const from = params.get("from") || new Date().toISOString().slice(0, 10);
+    const from = params.get("from") || getIstDateString();
     const to = params.get("to") || from;
     const department = params.get("department") || undefined;
     const personType = params.get("personType") || undefined;

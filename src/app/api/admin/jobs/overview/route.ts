@@ -29,6 +29,7 @@ import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok } from "@/server/http/response";
 import { query } from "@/lib/postgres";
+import { lastIstDayStrings } from "@/server/policy/dates";
 
 interface JobRun {
   job_id: string;
@@ -39,14 +40,9 @@ interface JobRun {
 
 /** Build last-N day column labels (oldest → newest, "YYYY-MM-DD"). */
 function lastNDays(n: number): string[] {
-  const out: string[] = [];
-  const now = new Date();
-  for (let i = n - 1; i >= 0; i--) {
-    const d = new Date(now);
-    d.setDate(d.getDate() - i);
-    out.push(d.toISOString().slice(0, 10));
-  }
-  return out;
+  // IST-boundary-safe: UTC slice(0,10) returns yesterday's day in the
+  // 00:00-05:30 IST window, shifting the whole jobs overview.
+  return lastIstDayStrings(n);
 }
 
 export const GET = withRateLimit(

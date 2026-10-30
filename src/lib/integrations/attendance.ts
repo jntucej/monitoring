@@ -1,9 +1,10 @@
 import { getDbClient } from "@/lib/db";
 import { AttendanceRecord } from "@/lib/integration-types";
+import { getIstDateString } from "@/server/policy/dates";
 
 // Generate attendance report for a specific date
 export async function generateAttendanceReport(
-  date: string = new Date().toISOString().slice(0, 10)
+  date: string = getIstDateString()
 ): Promise<AttendanceRecord[]> {
   // Get all persons who are students, faculty, or staff
   const { data: persons } = await getDbClient()

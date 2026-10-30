@@ -1,11 +1,15 @@
 import { withAuthorization } from "@/middleware/authorization";
 import { getVisitorAnalytics } from "@/server/services/analytics/visitors";
 import { ok } from "@/server/http/response";
+import { getIstDateString } from "@/server/policy/dates";
 
 export const GET = withAuthorization(async (req) => {
   const params = req.nextUrl.searchParams;
-  const from = params.get("from") || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-  const to = params.get("to") || new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const monthAgo = new Date(now);
+  monthAgo.setDate(now.getDate() - 30);
+  const from = params.get("from") || getIstDateString(monthAgo);
+  const to = params.get("to") || getIstDateString();
   
   const analytics = await getVisitorAnalytics({ from, to });
   return ok(analytics);

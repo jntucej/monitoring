@@ -32,6 +32,15 @@ const TABLES = [
     table: "enrollment_codes",
     where: "(used_at IS NOT NULL OR expires_at < NOW() - INTERVAL '7 days') AND expires_at IS NOT NULL",
   },
+  {
+    // #5: every login/refresh writes a sessions row; without a prune the
+    // table grows unboundedly (500 users x 10 rotations/day ~ 1.8M rows/yr).
+    // Prune only LONG-REVOKED rows (revoked > 30 days ago) — live and
+    // recently-revoked rows are still useful for theft forensics.
+    key: "sessions",
+    table: "sessions",
+    where: "revoked_at IS NOT NULL AND revoked_at < NOW() - INTERVAL '30 days'",
+  },
 ];
 
 export default async function cleanupEphemeral() {

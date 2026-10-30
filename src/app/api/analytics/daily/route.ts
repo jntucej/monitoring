@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { DailyStats } from "@/lib/analytics-types";
+import { getIstDateString } from "@/server/policy/dates";
 
 async function handleGet(req: NextRequest) {
   try {
     const service = getSupabaseServiceClient();
     const params = req.nextUrl.searchParams;
-    const date = params.get("date") || new Date().toISOString().slice(0, 10);
+    const date = params.get("date") || getIstDateString();
 
     const { data: scans, error } = await service
       .from("movement_logs")

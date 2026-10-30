@@ -7,6 +7,7 @@ import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
 import { ok, fail } from "@/server/http/response";
+import { getIstDateString } from "@/server/policy/dates";
 import { query } from "@/lib/postgres";
 import { addAudit } from "@/lib/db";
 import { isMessBillExempt } from "@/lib/delegation";
@@ -75,7 +76,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
 async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   if (auth.role !== "student") return fail("FORBIDDEN", "Not allowed", 403);
   const url = new URL(req.url);
-  const from = url.searchParams.get("from") ?? new Date().toISOString().slice(0, 10);
+  const from = url.searchParams.get("from") ?? getIstDateString();
 
   const { rows } = await query(
     `SELECT id, meal_date AS "mealDate", meal_type AS "mealType", reason, created_at AS "createdAt"

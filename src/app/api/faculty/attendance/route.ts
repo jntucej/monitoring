@@ -4,6 +4,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient, supabase } from "@/lib/dbClient";
 import { getDepartments } from "@/lib/departments";
+import { getIstDateString } from "@/server/policy/dates";
 import { withAuthorization } from "@/middleware/authorization";
 import type { HeatmapDay, MovementLogEntry, FacultyMemberAttendance, DepartmentAttendanceSummary } from "@/lib/types";
 
@@ -90,7 +91,7 @@ async function handleGet(req: NextRequest, context: { auth: any }) {
       }
     }
 
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayStr = getIstDateString();
     const now = new Date();
 
     const records: FacultyMemberAttendance[] = facultyUsers.map((u: any) => {
