@@ -4,7 +4,9 @@ import { constants as fsConstants } from "fs";
 import { createHash, randomUUID } from "crypto";
 import { tmpdir } from "os";
 
-export type StorageKind = "volume" | "tmp";
+import { isS3Configured, s3PutObject, s3GetObject, s3ObjectExists } from "@/lib/s3-storage";
+
+export type StorageKind = "volume" | "tmp" | "s3";
 
 const VOLUME_PATH = process.env.COMPLAINTS_STORAGE_PATH ?? "/app/data/complaints";
 const TMP_PATH = join(tmpdir(), "complaints");
@@ -44,7 +46,9 @@ async function freeBytes(p: string): Promise<number> {
 export async function resolveStorage(): Promise<Resolved> {
   const now = Date.now();
   if (_resolved && now - _resolvedAt < RESOLVE_TTL_MS) return _resolved;
-  if (await tryDir(VOLUME_PATH)) {
+  if (isS3Configured()) {
+    _resolved = { baseDir: "s3", kind: "s3", freeBytes: Number.MAX_SAFE_INTEGER };
+  } else if (await tryDir(VOLUME_PATH)) {
     _resolved = { baseDir: VOLUME_PATH, kind: "volume", freeBytes: await freeBytes(VOLUME_PATH) };
   } else if (await tryDir(TMP_PATH)) {
     _resolved = {
@@ -99,10 +103,23 @@ export async function saveAttachment(input: SaveInput): Promise<Saved> {
 
   const sha256 = createHash("sha256").update(buffer).digest("hex");
   const ext = extFromMime(input.mimeType) || extFromName(input.fileName) || "bin";
+  const relativeKey = `${input.complaintId.replace(/[^a-zA-Z0-9\-_]/g, "_")}/${randomUUID()}.${ext}`;
+
+  if (storage.kind === "s3") {
+    const s3Key = `complaints/${relativeKey}`;
+    await s3PutObject(s3Key, buffer, input.mimeType);
+    return {
+      storagePath: `s3://${s3Key}`,
+      storageKind: "s3",
+      sha256,
+      sizeBytes: buffer.length,
+      exifStripped,
+    };
+  }
+
   const fullPath = join(
     storage.baseDir,
-    input.complaintId.replace(/[^a-zA-Z0-9\-_]/g, "_"),
-    `${randomUUID()}.${ext}`,
+    relativeKey,
   );
   await fs.mkdir(dirname(fullPath), { recursive: true });
   await fs.writeFile(fullPath, buffer, { mode: 0o640 });
@@ -117,6 +134,11 @@ export async function saveAttachment(input: SaveInput): Promise<Saved> {
 }
 
 export async function readAttachment(p: string): Promise<Buffer | null> {
+  if (p && p.startsWith("s3://")) {
+    const key = p.replace("s3://", "");
+    return s3GetObject(key);
+  }
+
   // Control 7: Canary file tripwire
   // If an attacker attempts to read .env.bak, credentials.json, etc. via path traversal or direct read
   if (p && (p.includes(".env") || p.includes("production.env") || p.includes("credentials.json"))) {

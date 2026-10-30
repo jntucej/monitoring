@@ -1,6 +1,7 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { createHash } from "node:crypto";
+import { isS3Configured, s3PutObject, s3GetObject, s3ObjectExists } from "@/lib/s3-storage";
 
 /**
  * Permission document storage helpers (Step 7).
@@ -41,6 +42,10 @@ export function signedDocumentPath(ticketNumber: string): string {
 
 /** True when the ticket has an uploaded document on disk. */
 export async function documentExists(ticketNumber: string): Promise<boolean> {
+  if (isS3Configured()) {
+    const safe = String(ticketNumber).replace(/[^a-zA-Z0-9_-]/g, "_");
+    return s3ObjectExists(`permissions/${safe}/${DOCUMENT_FILENAME}`);
+  }
   try {
     await fs.access(documentPath(ticketNumber));
     return true;
@@ -58,6 +63,10 @@ export async function ensureTicketDir(ticketNumber: string): Promise<string> {
 
 /** Reads the uploaded document bytes, or null when absent. */
 export async function readDocument(ticketNumber: string): Promise<Buffer | null> {
+  if (isS3Configured()) {
+    const safe = String(ticketNumber).replace(/[^a-zA-Z0-9_-]/g, "_");
+    return s3GetObject(`permissions/${safe}/${DOCUMENT_FILENAME}`);
+  }
   try {
     return await fs.readFile(documentPath(ticketNumber));
   } catch {
@@ -67,11 +76,37 @@ export async function readDocument(ticketNumber: string): Promise<Buffer | null>
 
 /** Reads the signed document bytes, or null when absent. */
 export async function readSignedDocument(ticketNumber: string): Promise<Buffer | null> {
+  if (isS3Configured()) {
+    const safe = String(ticketNumber).replace(/[^a-zA-Z0-9_-]/g, "_");
+    return s3GetObject(`permissions/${safe}/${SIGNED_FILENAME}`);
+  }
   try {
     return await fs.readFile(signedDocumentPath(ticketNumber));
   } catch {
     return null;
   }
+}
+
+/** Writes uploaded document bytes to storage (disk or S3). */
+export async function writeDocument(ticketNumber: string, bytes: Buffer): Promise<void> {
+  if (isS3Configured()) {
+    const safe = String(ticketNumber).replace(/[^a-zA-Z0-9_-]/g, "_");
+    await s3PutObject(`permissions/${safe}/${DOCUMENT_FILENAME}`, bytes, "application/pdf");
+    return;
+  }
+  await ensureTicketDir(ticketNumber);
+  await fs.writeFile(documentPath(ticketNumber), bytes);
+}
+
+/** Writes signed document bytes to storage (disk or S3). */
+export async function writeSignedDocument(ticketNumber: string, bytes: Buffer): Promise<void> {
+  if (isS3Configured()) {
+    const safe = String(ticketNumber).replace(/[^a-zA-Z0-9_-]/g, "_");
+    await s3PutObject(`permissions/${safe}/${SIGNED_FILENAME}`, bytes, "application/pdf");
+    return;
+  }
+  await ensureTicketDir(ticketNumber);
+  await fs.writeFile(signedDocumentPath(ticketNumber), bytes);
 }
 
 /**

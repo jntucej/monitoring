@@ -69,6 +69,14 @@ if [ "$TABLE_COUNT" -lt 50 ]; then
     exit 1
 fi
 
+# 6. Verify Uploads / Attachments backup archive if present
+LATEST_UPLOADS=$(ls -t "$DAILY_DIR"/uploads-*.tar.gz 2>/dev/null | head -n 1 || true)
+if [ -n "$LATEST_UPLOADS" ]; then
+    echo "Verifying uploads backup: $LATEST_UPLOADS"
+    tar -tzf "$LATEST_UPLOADS" >/dev/null || { echo "FAIL: uploads backup archive is corrupt"; exit 1; }
+    echo "✓ Uploads archive is valid and readable."
+fi
+
 echo "================================================================="
 echo "✅ RESTORE VERIFICATION PASSED SUCCESSFULLY."
 echo "================================================================="
