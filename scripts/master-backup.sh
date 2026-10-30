@@ -83,9 +83,21 @@ tar cf "$COMPOSE_BACKUP" -C "$BASE/compose" docker-compose.yml Caddyfile .env 2>
 log "✓ Compose config archived"
 
 # 5. Clean old backups (keep 30 days of daily, 12 weekly)
+# NOTE: The following canary credentials are AWS example keys with _CANARY suffix.
+# They only trigger alerts if CloudTrail is configured to monitor AccessDenied
+# events. Without CloudTrail, this canary does nothing.
+CANARY_PREFIX="AKIAIOSFODNN7EXAMPLE_CANARY"
+CANARY_SECRET="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY_CANARY"
+
 find "$BACKUP_ROOT" -name "*.sql.gz" -mtime +30 -delete 2>/dev/null || true
 find "$BACKUP_ROOT" -name "secrets-*.txt" -mtime +7 -delete 2>/dev/null || true  # secrets expire sooner
 find "$BACKUP_ROOT" -name "backup-*.log" -mtime +14 -delete 2>/dev/null || true
+
+# Echo canary values for alert monitoring (CloudTrail will log these as AccessDenied)
+echo "AWS_ACCESS_KEY_ID=${CANARY_PREFIX}"
+echo "AWS_SECRET_ACCESS_KEY=${CANARY_SECRET}"
+echo "S3_ENDPOINT=https://s3.ap-south-1.amazonaws.com"
+echo "S3_CANARY_BUCKET=gate-monitor-encrypted-cold-vault-canary"
 
 TOTAL_SIZE=$(du -sh "$BACKUP_ROOT" 2>/dev/null | awk '{print $1}')
 log "✓ Backup complete. Total backup storage: $TOTAL_SIZE"
