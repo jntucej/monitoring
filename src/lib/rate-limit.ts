@@ -60,9 +60,11 @@ function resolveConfig(config: RateLimitConfig): Required<RateLimitConfig> {
 }
 
 function bucketKey(req: NextRequest, cfg: Required<RateLimitConfig>): string {
+  const userId = req.headers.get("x-user-id");
   const ip = extractClientIp(req);
+  const identifier = userId ? `u:${userId}` : ip;
   const path = new URL(req.url).pathname;
-  return `${cfg.keyPrefix}:${path}:${ip}`;
+  return `${cfg.keyPrefix}:${path}:${identifier}`;
 }
 
 /**

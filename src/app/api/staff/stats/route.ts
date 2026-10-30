@@ -138,5 +138,5 @@ async function handleGet(req: NextRequest) {
 
 export const GET = withRateLimit(
   withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "hod", "faculty", "staff"] }),
-  { keyPrefix: "staff_stats", maxRequests: 30 }
+  { keyPrefix: "staff_stats", maxRequests: 120 }
 );

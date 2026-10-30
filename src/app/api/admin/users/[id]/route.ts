@@ -302,8 +302,8 @@ async function handlePatch(req: NextRequest, ctx: { auth: { userId: string; role
 
 export const GET = withRateLimit(
   withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "admin_user_get", maxRequests: 60, windowMs: 60_000 }
+  { keyPrefix: "admin_user_get", maxRequests: 300, windowMs: 60_000 }
 );
 export const PATCH = withAdminMutation(handlePatch, {
-  rateLimit: { keyPrefix: "admin_user_patch", maxRequests: 30, windowMs: 60_000 },
+  rateLimit: { keyPrefix: "admin_user_patch", maxRequests: 120, windowMs: 60_000 },
 });

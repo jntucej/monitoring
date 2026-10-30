@@ -551,6 +551,6 @@ await addAudit({
   }
 }
 
-export const GET = withRateLimit(withAuthorization(handleGet, { requiredRole: ['admin', 'sysadmin'] }), { keyPrefix: 'users_list', maxRequests: 30 });
-export const POST = withRateLimit(withAuthorization(handlePost, { requiredRole: ['admin', 'sysadmin'] }), { keyPrefix: 'users_create', maxRequests: 10 });
-export const PATCH = withRateLimit(withAuthorization(handlePatch, { requiredRole: ['admin', 'sysadmin'] }), { keyPrefix: 'users_update', maxRequests: 20 });
+export const GET = withRateLimit(withAuthorization(handleGet, { requiredRole: ['admin', 'sysadmin'] }), { keyPrefix: 'users_list', maxRequests: 600 });
+export const POST = withRateLimit(withAuthorization(handlePost, { requiredRole: ['admin', 'sysadmin'] }), { keyPrefix: 'users_create', maxRequests: 120 });
+export const PATCH = withRateLimit(withAuthorization(handlePatch, { requiredRole: ['admin', 'sysadmin'] }), { keyPrefix: 'users_update', maxRequests: 120 });
