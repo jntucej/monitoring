@@ -4,6 +4,7 @@
 import { useEffect, useState, useRef, useMemo, Suspense, useCallback } from "react";
 import { usePolling } from "@/hooks/usePolling";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
+import { useOperatorGate } from "@/hooks/useOperatorGate";
 import { normalizeScannedPayload } from "@/lib/barcode";
 import { motion, AnimatePresence } from "framer-motion";
 import { RefreshCw, AlertCircle, KeyRound, ShieldAlert, Hourglass, Wrench, Moon, WifiOff } from "lucide-react";
@@ -11,7 +12,6 @@ import { useOperatorStore } from "@/stores/operatorStore";
 import type { ExitReason } from "@/lib/types";
 import type { EntryButtonId, Recommendation } from "@/lib/operator-recommend";
 import { useAuth } from "@/hooks/useAuth";
-import { useKioskOperator } from "@/hooks/useKioskOperator";
 import { useToast } from "@/components/ui/toast";
 import { ScanConfirmation } from "@/components/operator/ScanConfirmation";
 import { VoiceAssistantModal } from "@/components/operator/VoiceAssistantModal";
@@ -24,15 +24,25 @@ import { useBreakpoint } from "@/hooks/useBreakpoint";
 import type { Scan as ScanRecord, Student } from "@/lib/types";
 import { useCollegeInfo } from "@/hooks/useCollegeInfo";
 import { primeAudio } from "@/lib/sound";
-import { OperatorGateClaimPanel } from "@/components/operator/OperatorGateClaimPanel";
-import { flushOfflineScanQueue, getOfflineScanQueue } from "@/lib/kiosk-offline-queue";
 import { useAuthStore } from "@/stores/authStore";
 
 function OperatorPageInner() {
   const params = useParams<{ gateId: string }>();
   const searchParams = useSearchParams();
   const router = useRouter();
-  
+  const { role, gateId: assignedGateId } = useOperatorGate();
+
+  // Deep-link guard: an operator landing on /gate/<other> is bounced to
+  // their own assigned gate. The shell already blocks unassigned operators
+  // (they see the picker), so this fires only when params.gateId !== assignedGateId.
+  useEffect(() => {
+    if (role !== "operator") return;
+    if (!assignedGateId) return;
+    if (params?.gateId !== assignedGateId) {
+      router.replace(`/gate/${assignedGateId}`);
+    }
+  }, [role, assignedGateId, params?.gateId, router]);
+
   const lastRollRef = useRef<string>("");
   const { college } = useCollegeInfo();
   const gateIdParam = params?.gateId;
@@ -87,7 +97,19 @@ function OperatorPageInner() {
   const [activeLockdown, setActiveLockdown] = useState<any>(null);
   const [showVoiceModal, setShowVoiceModal] = useState(false);
   const [isOnline, setIsOnline] = useState<boolean>(typeof navigator !== "undefined" ? navigator.onLine : true);
-  const [offlineCount, setOfflineCount] = useState<number>(0);
+
+  // Online status listener (offline scan queue has been removed; keep online
+  // state tracking only for UI display purposes)
+  useEffect(() => {
+    const handleOffline = () => setIsOnline(false);
+    const handleOnline = () => setIsOnline(true);
+    window.addEventListener("offline", handleOffline);
+    window.addEventListener("online", handleOnline);
+    return () => {
+      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener("online", handleOnline);
+    };
+  }, []);
 
   // Mobile (< md) renders the dedicated mobile scan view (camera + decode +
   // confirmation bottom sheet). Desktop keeps the existing desk layout. Both
@@ -98,22 +120,11 @@ function OperatorPageInner() {
   // Local active tab for the desk panel: scan, manual, entry
   const [operatorSubMode, setOperatorSubMode] = useState<"scan" | "manual" | "entry">("scan");
 
-  // Kiosk auto-sign-in: when this page opens with NO active session, try
-  // to mint a default-operator session via /api/operator/kiosk-session.
-  // The hook is a no-op if a real operator already has an active session,
-  // so a normal PIN/password login always takes precedence.
-  const { state: kiosk } = useKioskOperator(
-    gateIdParam && !isSpecialPath ? gateIdParam : undefined
-  );
-
-  // Redirect unauthenticated users to operator login, but hold off while the
-  // kiosk fetch is in flight: a default session may still arrive and flip
-  // `authenticated` to true before the redirect would fire. Once the kiosk
-  // attempt settles without a session (notConfigured / error), redirect.
+  // Redirect unauthenticated users to operator login.
   useEffect(() => {
-    if (authenticated || kiosk.pending) return;
+    if (authenticated) return;
     router.replace(`/login/operator?redirect=/gate/${gateId}`);
-  }, [authenticated, kiosk.pending, gateId, router]);
+  }, [authenticated, gateId, router]);
 
   // Check lockdown status
   const checkLockdown = useCallback(async () => {
@@ -287,59 +298,6 @@ function OperatorPageInner() {
     const interval = setInterval(checkMode, 15000);
     return () => clearInterval(interval);
   }, []);
-
-  // Auto-flush offline scan queue when network recovers
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const updateOfflineCount = () => {
-      setOfflineCount(getOfflineScanQueue().length);
-    };
-
-    const handleOnline = async () => {
-      setIsOnline(true);
-      updateOfflineCount();
-      const auth = useAuthStore.getState();
-      const token = auth.token;
-      const headersGetter = () => {
-        const h: Record<string, string> = { "Content-Type": "application/json" };
-        if (token) h["Authorization"] = `Bearer ${token}`;
-        return h;
-      };
-      const res = await flushOfflineScanQueue(headersGetter);
-      updateOfflineCount();
-      if (res.flushed > 0) {
-        addToast({
-          variant: "success",
-          title: "Offline Scans Synced",
-          message: `Successfully synchronized ${res.flushed} offline scan(s).`,
-        });
-        loadStats();
-      }
-    };
-
-    const handleOffline = () => {
-      setIsOnline(false);
-      updateOfflineCount();
-    };
-
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
-    updateOfflineCount();
-
-    const interval = setInterval(() => {
-      updateOfflineCount();
-      if (navigator.onLine) {
-        handleOnline();
-      }
-    }, 15_000);
-
-    return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
-      clearInterval(interval);
-    };
-  }, [addToast, loadStats]);
 
   useEffect(() => {
     fetch("/api/gates")
@@ -583,11 +541,10 @@ function OperatorPageInner() {
       case "scandesk":
       default:
         if (needsAssignment) {
-          // No gate assigned to this operator — walk them through claiming one
-          // via a supervisor-issued gate-claim code ("register at this kiosk").
+          // No gate assigned — show a placeholder; claim flow handled by shell.
           return (
             <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <OperatorGateClaimPanel />
+              <p className="text-sm text-[var(--text-muted)]">Gate assignment pending. Please complete the operator claim flow.</p>
             </div>
           );
         }
@@ -595,30 +552,6 @@ function OperatorPageInner() {
           <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
             {/* Switchable Workspace */}
             <div className="min-h-[220px]">
-              {!isOnline && (
-                <div className="mb-4 bg-amber-500/15 border border-amber-500/30 rounded-2xl p-4 flex items-center justify-between gap-3 text-amber-300 text-xs shadow-sm">
-                  <div className="flex items-center gap-2.5">
-                    <WifiOff className="w-5 h-5 shrink-0 text-amber-400" />
-                    <div>
-                      <p className="font-bold text-amber-200">Terminal Running Offline</p>
-                      <p className="text-[11px] text-amber-300/80">Campus network connection dropped. Scans are preserved locally ({offlineCount} queued) and will sync upon reconnection.</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {isOnline && offlineCount > 0 && (
-                <div className="mb-4 bg-sky-500/15 border border-sky-500/30 rounded-2xl p-4 flex items-center justify-between gap-3 text-sky-300 text-xs shadow-sm">
-                  <div className="flex items-center gap-2.5">
-                    <RefreshCw className="w-5 h-5 shrink-0 text-sky-400 animate-spin" />
-                    <div>
-                      <p className="font-bold text-sky-200">Synchronizing Offline Scans</p>
-                      <p className="text-[11px] text-sky-300/80">Syncing {offlineCount} scan(s) to the campus security database…</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {gateMode === "MAINTENANCE" && (
                 <div className="mb-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5 text-center space-y-2 shadow-sm animate-in fade-in">
                   <Wrench className="w-8 h-8 text-amber-500 mx-auto animate-bounce" />

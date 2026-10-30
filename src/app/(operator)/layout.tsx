@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { NOINDEX_METADATA } from "@/lib/seo";
 import { OperatorShell } from "./OperatorShell";
 
-export const metadata: Metadata = NOINDEX_METADATA;
+export const metadata: Metadata = {
+  ...NOINDEX_METADATA,
+  title: "Operator · Gate Monitor",
+};
 
 export default function OperatorLayout({
   children,

@@ -12,7 +12,6 @@ import { useUIStore } from "@/stores/uiStore";
 import { validateRollNumber } from "@/lib/rollNumber";
 import { getClientLocation, getClientSysTag } from "@/lib/geo";
 import { recommend, type Recommendation } from "@/lib/operator-recommend";
-import { enqueueOfflineScan } from "@/lib/kiosk-offline-queue";
 
 /**
  * IN-movement button ids the gate operator can tap (from the
@@ -630,39 +629,20 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
         const isNetwork = isTimeout || (err instanceof Error && (err.name === "TypeError" || err.name === "NetworkError"));
         
         if (isNetwork && currentStudent) {
-          // WAN network failure / timeout: preserve scan in offline queue so rush-hour flow is not blocked
-          const catchGeo: unknown = null;
-          const catchSysTag: unknown = null;
-          enqueueOfflineScan({
-            clientEventId,
-            roll: uniqueId,
-            direction: directionToUse,
-            reason: reasonToUse || (directionToUse === "OUT" ? "daily_outing" : undefined),
-            entryType: entryTypeToUse ?? undefined,
-            gateId: resolvedGateId,
-            operatorId,
-            sysTag: catchSysTag,
-            geo: catchGeo,
-          });
+          // Network failure / timeout: fail the scan (offline queue removed).
           playAudioFeedback("warning");
           addToast({
             variant: "warning",
-            title: "Offline — Scan Queued",
-            message: `${currentStudent.name} (${currentStudent.roll}) movement queued offline. Will sync automatically once connection recovers.`,
+            title: "Network Error",
+            message: `${currentStudent.name} (${currentStudent.roll}) — scan failed due to network issue. Please retry.`,
           });
-          const prev = get().todaysStats;
-          const newStats = prev
-            ? {
-                entries: directionToUse === "IN" ? prev.entries + 1 : prev.entries,
-                exits: directionToUse === "OUT" ? prev.exits + 1 : prev.exits,
-                onCampus: directionToUse === "IN" ? prev.onCampus + 1 : prev.onCampus - 1,
-              }
-            : null;
           set({
-            state: "success",
-            todaysStats: newStats,
-            entryType: entryTypeToUse,
-            error: null,
+            state: "error",
+            error: {
+              message: "Network error — retry.",
+              code: isTimeout ? "TIMEOUT" : "NETWORK",
+              retryable: true,
+            },
           });
           return;
         }
