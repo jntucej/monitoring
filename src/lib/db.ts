@@ -728,7 +728,7 @@ export async function correctScan(
  * hours after the last scan of the day.
  */
 const GATE_OPERATOR_ROLES: string[] = ['operator', 'supervisor'];
-const ACTIVE_SESSION_WINDOW_MIN = 5;
+const ACTIVE_SESSION_WINDOW_MIN = 15;
 
 async function getGateOnlineIds(client: ReturnType<typeof getDbClient>): Promise<Set<string>> {
   // --- Signal 1: live operator sessions -----------------------------------

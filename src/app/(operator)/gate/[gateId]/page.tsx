@@ -6,7 +6,7 @@ import { usePolling } from "@/hooks/usePolling";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { normalizeScannedPayload } from "@/lib/barcode";
 import { motion, AnimatePresence } from "framer-motion";
-import { RefreshCw, AlertCircle, KeyRound, UserCheck, Mic, ShieldAlert, Hourglass, ArrowUp, ArrowDown, Clock } from "lucide-react";
+import { RefreshCw, AlertCircle, KeyRound, UserCheck, Mic, ShieldAlert, Hourglass, ArrowUp, ArrowDown, Clock, Wrench, Moon } from "lucide-react";
 import { useOperatorStore } from "@/stores/operatorStore";
 import { useAuth } from "@/hooks/useAuth";
 import { useKioskOperator } from "@/hooks/useKioskOperator";
@@ -258,6 +258,24 @@ function OperatorPageInner() {
   }, [authenticated, gateId, setGate, reset]);
 
   const [gateName, setGateName] = useState("Loading...");
+  const [gateMode, setGateMode] = useState<string>("OPEN");
+
+  useEffect(() => {
+    // Poll gate operating mode (OPEN / CURFEW / MAINTENANCE)
+    const checkMode = () => {
+      fetch("/api/operator/mode")
+        .then((res) => res.json())
+        .then((res) => {
+          if (res.success && res.data?.mode) {
+            setGateMode(res.data.mode);
+          }
+        })
+        .catch(() => {});
+    };
+    checkMode();
+    const interval = setInterval(checkMode, 15000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     fetch("/api/gates")
@@ -382,6 +400,34 @@ function OperatorPageInner() {
           <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
             {/* Switchable Workspace */}
             <div className="min-h-[220px]">
+              {gateMode === "MAINTENANCE" && (
+                <div className="mb-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5 text-center space-y-2 shadow-sm animate-in fade-in">
+                  <Wrench className="w-8 h-8 text-amber-500 mx-auto animate-bounce" />
+                  <div>
+                    <h3 className="font-extrabold text-sm text-amber-400 uppercase tracking-wide">
+                      Maintenance Mode Active
+                    </h3>
+                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                      Scheduled maintenance in progress. Routine scans are temporarily blocked.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {gateMode === "CURFEW" && (
+                <div className="mb-4 bg-indigo-500/10 border border-indigo-500/30 rounded-2xl p-5 text-center space-y-2 shadow-sm animate-in fade-in">
+                  <Moon className="w-8 h-8 text-indigo-400 mx-auto" />
+                  <div>
+                    <h3 className="font-extrabold text-sm text-indigo-300 uppercase tracking-wide">
+                      Night Curfew Hours Active
+                    </h3>
+                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                      Curfew restrictions in effect. An override reason is required for student exits.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {activeLockdown ? (
                 <div className="bg-rose-500/10 border border-rose-500/30 rounded-2xl p-6 text-center space-y-3 shadow-md">
                   <ShieldAlert className="w-10 h-10 text-rose-500 mx-auto animate-pulse" />

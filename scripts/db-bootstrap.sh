@@ -37,10 +37,13 @@ psql_exec -f database/seeds/seed-21-roles.sql
 echo "==> Done."
 echo ""
 
-# First-run guard: ensure no ACTIVE sysadmin/admin user has NULL password without operator initialization
+# First-run guard: ensure no ACTIVE sysadmin/admin user has NULL password without operator initialization,
+# and ensure no default kiosk operator has NULL password while marked active.
 NULL_ADMINS=$(psql_exec -tAc "SELECT count(*) FROM users WHERE role IN ('sysadmin', 'admin') AND status = 'ACTIVE' AND password_hash IS NULL;" || echo "0")
-if [ "$NULL_ADMINS" -gt 0 ]; then
-  echo "⚠️ NOTICE: $NULL_ADMINS administrative accounts have password_hash = NULL (uninitialized)."
-  echo "You MUST run: bash scripts/create-first-sysadmin.sh to configure the root administrator."
+NULL_KIOSK=$(psql_exec -tAc "SELECT count(*) FROM users WHERE is_kiosk_default = TRUE AND status = 'ACTIVE' AND password_hash IS NULL;" || echo "0")
+
+if [ "$NULL_ADMINS" -gt 0 ] || [ "$NULL_KIOSK" -gt 0 ]; then
+  echo "⚠️ NOTICE: Uninitialized core security accounts detected (Admins: $NULL_ADMINS, Kiosk default: $NULL_KIOSK with password_hash = NULL)."
+  echo "You MUST run: bash scripts/create-first-sysadmin.sh to configure the root administrator and kiosk credentials before gates can operate."
 fi
 

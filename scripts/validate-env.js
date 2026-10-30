@@ -86,6 +86,11 @@ function validate() {
     errors.push('MFA_ENROLL_SECRET is required to be set and secure in production (sysadmin break-glass mechanism).');
   }
 
+  // Kiosk posture in production: fail closed unless trusted kiosk IPs or PIN requirement is configured
+  if (isProd && !process.env.KIOSK_SESSION_REQUIRE_PIN && !process.env.TRUSTED_KIOSK_IPS) {
+    errors.push('FATAL: KIOSK_SESSION_REQUIRE_PIN=true or TRUSTED_KIOSK_IPS must be set in production to prevent open kiosk mode.');
+  }
+
   // Cache configuration
   // MFA posture — must be an explicit, auditable deployment decision in prod
   // (Issue #5 §4.1: refuse to start with an ambiguous posture).

@@ -19,3 +19,7 @@ export class ConflictError    extends AppError { constructor(m: string, code?: s
 export class LockedError extends AppError {
   constructor(m = "Resource is locked", code?: string, d?: Record<string, unknown>) { super(code ?? "LOCKED", m, 423, d); }
 }
+
+export class ServiceUnavailableError extends AppError {
+  constructor(m = "Service unavailable", code?: string, d?: Record<string, unknown>) { super(code ?? "SERVICE_UNAVAILABLE", m, 503, d); }
+}

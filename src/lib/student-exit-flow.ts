@@ -97,6 +97,7 @@ export async function validateStudentExitFlow(
   rollNumber: string,
   direction: "IN" | "OUT",
   rawReason?: ExitReason | string | null,
+  gateId?: string | null,
 ): Promise<StudentExitFlowResult> {
   const canonicalReason = normalizeExitReason(rawReason);
   const passNeeded = direction === "OUT" && requiresGatePass(canonicalReason);
@@ -157,6 +158,12 @@ export async function validateStudentExitFlow(
   const modernPass = (perms || []).find((p: any) => {
     const passReason = normalizeExitReason(p.reason);
     if (passReason !== canonicalReason) return false;
+    // Check gate scoping: if allowed_gate_ids is configured, gateId must be contained in it
+    if (gateId && Array.isArray(p.allowed_gate_ids) && p.allowed_gate_ids.length > 0) {
+      if (!p.allowed_gate_ids.includes(gateId)) {
+        return false;
+      }
+    }
     // Validity window: from_date <= NOW() and to_date >= NOW().
     if (!p.from_date || !p.to_date) return false;
     const fromDate = new Date(p.from_date).getTime();

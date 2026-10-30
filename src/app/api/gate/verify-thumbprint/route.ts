@@ -2,11 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyThumbprint, findPersonByUniqueId } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
+import { isDeviceTypeEnabled } from "@/lib/device-settings";
 
 async function handlePost(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
-    const { userId, roll, signature } = body;
+    const { userId, roll, signature, gateId } = body;
+
+    // Authoritative server-side device settings check
+    const enabled = await isDeviceTypeEnabled("thumb", gateId ?? null);
+    if (!enabled) {
+      return NextResponse.json(
+        { success: false, error: { code: "DEVICE_DISABLED", message: "Thumbprint verification is disabled by administrator policy" } },
+        { status: 403 }
+      );
+    }
 
     let targetId = userId;
     if (!targetId && roll) {

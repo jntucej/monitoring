@@ -9,6 +9,18 @@ jest.mock('@/server/repositories/scans/findById');
 jest.mock('@/server/repositories/scans/findLastByUserId');
 jest.mock('@/server/services/audit/write');
 jest.mock('@/lib/postgres');
+jest.mock('@/lib/gate-operations', () => ({
+  getGateMode: jest.fn().mockResolvedValue('OPEN'),
+  assertScansAllowed: jest.requireActual('@/lib/gate-operations').assertScansAllowed,
+}));
+jest.mock('@/server/policy/gate-schedule', () => ({
+  checkGateSchedule: jest.fn().mockResolvedValue({ allowed: true }),
+}));
+jest.mock('@/metrics', () => ({
+  metricsRegistry: {
+    incGateScan: jest.fn(),
+  },
+}));
 jest.mock('@/lib/db', () => ({
   setUserFlag: jest.fn().mockResolvedValue(true),
 }));
@@ -25,12 +37,16 @@ import { findLastMovementByUserId } from '@/server/repositories/scans/findLastBy
 import { auditWrite } from '@/server/services/audit/write';
 import { query } from '@/lib/postgres';
 import { setUserFlag } from '@/lib/db';
+import { getGateMode } from '@/lib/gate-operations';
+import { checkGateSchedule } from '@/server/policy/gate-schedule';
+import { metricsRegistry } from '@/metrics';
 import {
   BadRequestError,
   ConflictError,
   ForbiddenError,
   LockedError,
   NotFoundError,
+  ServiceUnavailableError,
 } from '@/server/http/errors';
 
 const m = {
@@ -46,6 +62,9 @@ const m = {
   auditWrite: auditWrite as jest.Mock,
   query: query as jest.Mock,
   setUserFlag: setUserFlag as jest.Mock,
+  getGateMode: getGateMode as jest.Mock,
+  checkGateSchedule: checkGateSchedule as jest.Mock,
+  incGateScan: metricsRegistry.incGateScan as jest.Mock,
 };
 
 const baseInput = {
@@ -93,6 +112,8 @@ function primeWorld() {
     log: { id: 'S-1', user_id: 'U-1', direction: 'IN' },
   });
   m.query.mockResolvedValue({ rows: [], rowCount: 0 });
+  m.getGateMode.mockResolvedValue('OPEN');
+  m.checkGateSchedule.mockResolvedValue({ allowed: true });
 }
 
 beforeEach(() => {
@@ -359,5 +380,87 @@ describe('recordScan — non-student', () => {
     const out = await recordScan({ ...baseInput, personId: 'F-1', roll: '24JJ1A0501', entryType: undefined });
     expect(out.person.role).toBe('faculty');
     expect(m.updateEntryType).not.toHaveBeenCalled();
+  });
+});
+
+// ─── Gate Operating Mode ──────────────────────────────────────────────
+describe('recordScan — gate operating mode', () => {
+  it('rejects scan when gate is in MAINTENANCE mode', async () => {
+    m.getGateMode.mockResolvedValueOnce('MAINTENANCE');
+    await expect(recordScan(baseInput)).rejects.toThrow(ServiceUnavailableError);
+    expect(m.auditWrite).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'SCAN_REJECTED',
+        details: expect.objectContaining({ code: 'MAINTENANCE_ACTIVE' }),
+      }),
+    );
+  });
+
+  it('allows scan in MAINTENANCE mode with emergency reason override', async () => {
+    m.getGateMode.mockResolvedValueOnce('MAINTENANCE');
+    const res = await recordScan({ ...baseInput, reason: 'emergency' });
+    expect(res).toBeDefined();
+  });
+
+  it('rejects scan in CURFEW mode without override reason', async () => {
+    m.getGateMode.mockResolvedValueOnce('CURFEW');
+    await expect(recordScan({ ...baseInput, reason: undefined })).rejects.toThrow(ForbiddenError);
+    expect(m.auditWrite).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'SCAN_REJECTED',
+        details: expect.objectContaining({ code: 'CURFEW_ACTIVE' }),
+      }),
+    );
+  });
+});
+
+// ─── Gate Inactivity & Schedule Policy ────────────────────────────────
+describe('recordScan — gate inactive & schedule enforcement', () => {
+  it('rejects scan when gate is marked is_active = false', async () => {
+    m.findGateById.mockResolvedValueOnce({
+      id: 'G-1', gate_code: 'MAIN', name: 'Main', location: 'Front',
+      is_active: false, latitude: null, longitude: null, allowed_radius_meters: null,
+    });
+    await expect(recordScan(baseInput)).rejects.toThrow(LockedError);
+    expect(m.auditWrite).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'SCAN_REJECTED',
+        details: expect.objectContaining({ code: 'GATE_INACTIVE' }),
+      }),
+    );
+  });
+
+  it('rejects scan when gate schedule check disallows entry', async () => {
+    m.checkGateSchedule.mockResolvedValueOnce({
+      allowed: false,
+      code: 'GATE_CLOSED_HOLIDAY',
+      reason: 'Gate closed for holiday: Diwali',
+    });
+    await expect(recordScan(baseInput)).rejects.toThrow(ForbiddenError);
+    expect(m.auditWrite).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'SCAN_REJECTED',
+        details: expect.objectContaining({ code: 'GATE_CLOSED_HOLIDAY' }),
+      }),
+    );
+  });
+});
+
+// ─── Prometheus Scan Metric & Pass Gate Scoping ───────────────────────
+describe('recordScan — metrics & pass scoping', () => {
+  it('increments Prometheus gate scan counter on successful scan', async () => {
+    await recordScan(baseInput);
+    expect(m.incGateScan).toHaveBeenCalledWith('G-1', 'IN');
+  });
+
+  it('audits SCAN_REJECTED on rejection', async () => {
+    m.findGateById.mockResolvedValueOnce(null);
+    await expect(recordScan(baseInput)).rejects.toThrow(NotFoundError);
+    expect(m.auditWrite).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'SCAN_REJECTED',
+        details: expect.objectContaining({ code: 'NOT_FOUND' }),
+      }),
+    );
   });
 });

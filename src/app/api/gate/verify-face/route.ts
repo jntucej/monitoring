@@ -4,12 +4,22 @@ import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { matchFace, isFaceMatchConfigured } from "@/lib/face-match";
 import { logAuditEvent } from "@/lib/audit";
+import { isDeviceTypeEnabled } from "@/lib/device-settings";
 
 async function handlePost(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
-    const { uniqueId, roll, photoBase64, image } = body;
+    const { uniqueId, roll, photoBase64, image, gateId } = body;
     const targetRoll = (uniqueId || roll || "").trim().toUpperCase();
+
+    // Authoritative server-side device settings check
+    const enabled = await isDeviceTypeEnabled("face", gateId ?? null);
+    if (!enabled) {
+      return NextResponse.json(
+        { success: false, error: { code: "DEVICE_DISABLED", message: "Face verification is disabled by administrator policy" } },
+        { status: 403 }
+      );
+    }
 
     if (!targetRoll) {
       return NextResponse.json(

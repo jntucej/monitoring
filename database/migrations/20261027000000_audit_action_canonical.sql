@@ -81,7 +81,8 @@ ALTER TABLE public.audit_logs ADD CONSTRAINT audit_logs_action_known CHECK (
     'COMPLAINT_SLA_WARNING',
     'COMPLAINT_SLA_BREACHED',
     'CANARY_ALERT_TRIGGERED',
-    'DEV_CONTACT_SUBMITTED'
+    'DEV_CONTACT_SUBMITTED',
+    'SCAN_REJECTED'
   ]::text[])
 );
 

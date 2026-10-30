@@ -25,11 +25,17 @@ import { findScanById } from "@/server/repositories/scans/findById";
 import { findLastMovementByUserId } from "@/server/repositories/scans/findLastByUserId";
 import { validateRollNumber } from "@/lib/rollNumber";
 import { auditWrite } from "@/server/services/audit/write";
+import { getGateMode, assertScansAllowed } from "@/lib/gate-operations";
+import { checkGateSchedule } from "@/server/policy/gate-schedule";
+import { metricsRegistry } from "@/metrics";
 import {
+  AppError,
   BadRequestError,
   ConflictError,
   ForbiddenError,
+  LockedError,
   NotFoundError,
+  ServiceUnavailableError,
 } from "@/server/http/errors";
 import { setUserFlag } from "@/lib/db";
 
@@ -212,9 +218,46 @@ async function enforceInReturnDurationCap(
 }
 
 export async function recordScan(input: RecordScanInput): Promise<RecordScanResult> {
+  try {
+    return await recordScanInner(input);
+  } catch (err: any) {
+    // Fail audit visibility: record rejected attempt in audit_logs so supervisors
+    // and security dashboards have full visibility into failed access attempts.
+    await auditWrite({
+      action: "SCAN_REJECTED",
+      userId: input.operatorId,
+      userName: input.operatorName,
+      role: input.operatorRole,
+      details: {
+        roll: input.roll ?? input.personId ?? null,
+        direction: input.direction,
+        gateId: input.gateId,
+        reason: input.reason ?? null,
+        code: err instanceof AppError ? err.code : "UNKNOWN_ERROR",
+        message: err.message,
+      },
+    });
+    throw err;
+  }
+}
+
+async function recordScanInner(input: RecordScanInput): Promise<RecordScanResult> {
   // 1. Lockdown gate
   const lockdown = await findActiveLockdown();
   assertNotLockedOut(lockdown, input.gateId);
+
+  // 1.5. Gate operating mode (OPEN / CURFEW / MAINTENANCE)
+  const mode = await getGateMode();
+  const modeCheck = assertScansAllowed(mode, input.reason);
+  if (!modeCheck.allowed) {
+    if (modeCheck.status === 423) {
+      throw new LockedError(modeCheck.message, modeCheck.code);
+    } else if (modeCheck.status === 503) {
+      throw new ServiceUnavailableError(modeCheck.message, modeCheck.code);
+    } else {
+      throw new ForbiddenError(modeCheck.message, modeCheck.code);
+    }
+  }
 
   // 2. Operator must hold a gate (supervisors via supervised_gates are exempt)
   await assertOperatorHasGate(input.operatorRole, input.operatorGateId);
@@ -226,9 +269,27 @@ export async function recordScan(input: RecordScanInput): Promise<RecordScanResu
     throw new BadRequestError("Invalid roll number format");
   }
 
-  // 4. Gate must exist
+  // 4. Gate must exist and must be active
   const gate = await findGateById(input.gateId);
   if (!gate) throw new NotFoundError("Gate not found");
+  if (gate.is_active === false) {
+    throw new LockedError("Gate is inactive or decommissioned", "GATE_INACTIVE");
+  }
+
+  // 4.5. Gate schedule enforcement (gate_schedules, gate_holidays, gate_access_rules)
+  const scheduleCheck = await checkGateSchedule({
+    gateId: gate.id,
+    at: new Date(),
+    direction: input.direction,
+    overrideReason: input.reason,
+  });
+  if (!scheduleCheck.allowed) {
+    throw new ForbiddenError(
+      scheduleCheck.reason ?? "Gate closed by schedule policy",
+      scheduleCheck.code ?? "GATE_CLOSED",
+      scheduleCheck.details
+    );
+  }
 
   // 5. Operator↔gate assignment
   assertOperatorGateMatch(
@@ -364,6 +425,7 @@ export async function recordScan(input: RecordScanInput): Promise<RecordScanResu
       person.unique_id,
       input.direction,
       input.reason ?? null,
+      gate.id,
     );
     if (!flow.allowed) {
       throw new ForbiddenError(
@@ -423,6 +485,8 @@ export async function recordScan(input: RecordScanInput): Promise<RecordScanResu
                AND p.status = 'APPROVED'
                AND p.reason = $2
                AND p.used_at IS NULL
+               AND (p.current_stage = 'main_gate' OR p.current_stage = 'completed')
+               AND (p.allowed_gate_ids IS NULL OR $3 = ANY(p.allowed_gate_ids))
              ORDER BY p.created_at DESC
              LIMIT 1
           )
@@ -576,6 +640,13 @@ export async function recordScan(input: RecordScanInput): Promise<RecordScanResu
           scanId,
         },
       });
+    }
+
+    // 13. Prometheus scan metrics increment
+    try {
+      metricsRegistry.incGateScan(gate.id, input.direction);
+    } catch (e) {
+      console.error("[metrics] Error incrementing gate scan count:", e);
     }
   }
 
