@@ -127,12 +127,12 @@ async function handlePost(req: NextRequest) {
     const effectiveDept = departmentId || department;
     const effectiveHostel = assignedHostel || hostelRoom;
 
-    // For non-staff roles (student/parent/guardian/visitor/worker), when no
-    // explicit unique_id/employee_id was provided, auto-generate a ucej-NNNN
-    // id (e.g. ucej-s-0001). Staff roles keep their existing convention.
-    let resolvedUniqueId: string | undefined = effectiveUniqueId;
+    // staff gets its own emp-id convention (STF-0001) so staff can log in with an
+    // emp-id instead of email. Non-staff roles auto-generate ucej-NNNN.
     const ucejRoles = ["student", "parent", "guardian", "visitor", "worker"];
-    if (ucejRoles.includes(role) && !resolvedUniqueId) {
+    const autoGenRoles = [...ucejRoles, "staff"];
+    let resolvedUniqueId: string | undefined = effectiveUniqueId;
+    if (autoGenRoles.includes(role) && !resolvedUniqueId) {
       resolvedUniqueId = await generateUceJUniqueId(role);
     }
 

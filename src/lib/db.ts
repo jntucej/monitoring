@@ -1300,6 +1300,7 @@ const UCEJ_ROLE_PREFIXES: Record<string, string> = {
   guardian: "g",
   visitor: "v",
   worker: "w",
+  staff: "STF",
 };
 
 /**
@@ -1311,7 +1312,8 @@ const UCEJ_ROLE_PREFIXES: Record<string, string> = {
 export async function generateUceJUniqueId(role: string): Promise<string> {
   const prefix = UCEJ_ROLE_PREFIXES[role];
   if (!prefix) throw new Error(`No ucej prefix for role "${role}"`);
-  const prefixStr = `ucej-${prefix}-`;
+  // staff uses a bare emp-id (STF-0001); other roles use ucej-NNNN
+  const prefixStr = role === "staff" ? `${prefix}-` : `ucej-${prefix}-`;
   try {
     const client = getDbClient();
     const { data } = await client.from("users")
