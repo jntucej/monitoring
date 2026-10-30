@@ -23,7 +23,13 @@ for f in "${FILES[@]}"; do
   fname=$(basename "$f")
   if [[ "$fname" == _* ]]; then continue; fi
 
+  # Validate 14-digit version prefix (YYYYMMDDHHMMSS format) per R8-6
   ver="${fname%%_*}"
+  if [[ ! "$ver" =~ ^[0-9]{14}$ ]]; then
+    echo "ERROR: Migration '$fname' must use a 14-digit version prefix (YYYYMMDDHHMMSS), got: '$ver'" >&2
+    exit 1
+  fi
+
   if [[ -n "${SEEN_VERSIONS[$ver]}" && "${SEEN_VERSIONS[$ver]}" != "$fname" ]]; then
     echo "ERROR: Duplicate version prefix '$ver' detected: '$fname' and '${SEEN_VERSIONS[$ver]}'" >&2
     exit 1
