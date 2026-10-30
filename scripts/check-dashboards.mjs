@@ -1,24 +1,18 @@
 #!/usr/bin/env node
-// CI gate — exits non-zero if any critical dashboard issue exists.
+// scripts/check-dashboards.mjs
+// Validates all dashboards and domain pages using dashboard-doctor audit logic.
 import { spawnSync } from "node:child_process";
-const r = spawnSync("node", ["scripts/dashboard-doctor.mjs", "audit"], {
-  encoding: "utf8",
-});
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-if (r.error) {
-  console.error("dashboard-doctor failed to spawn:", r.error.message);
-  process.exit(1);
-}
-if (r.status !== 0 && r.status !== 1) {
-  console.error("dashboard-doctor exited with unexpected status:", r.status);
-  console.error(r.stdout, r.stderr);
-  process.exit(1);
-}
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.resolve(__dirname, "..");
+const DOCTOR = path.join(ROOT, "scripts", "dashboard-doctor.mjs");
 
-const out = (r.stdout ?? "") + (r.stderr ?? "");
-const critical = (out.match(/\bR(2|7|8|24)\b/g) ?? []).length;
-if (critical > 0) {
-  console.error("Critical dashboard issues:", critical);
-  process.exit(1);
+console.log("=== Checking Dashboards via Dashboard Doctor ===");
+const res = spawnSync("node", [DOCTOR, "audit"], { stdio: "inherit", cwd: ROOT });
+if (res.status !== 0) {
+  console.error("❌ Dashboard audit failed!");
+  process.exit(res.status ?? 1);
 }
-process.exit(0);
+console.log("✓ Dashboard audit passed cleanly.");

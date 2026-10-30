@@ -1,0 +1,84 @@
+name: CI Verification Gates
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  gates:
+    name: Production Readiness Gates
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci_dummy_postgres_password_123
+          POSTGRES_DB: gate_monitor
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Run Gitleaks Secret Scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          config-path: .gitleaks.toml
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Check Environment Invariants
+        run: node scripts/check-env.mjs
+
+      - name: Check Security Invariants
+        run: bash scripts/check-security.sh
+
+      - name: Check Role Scoping Strict
+        run: bash scripts/check-role-scoping-strict.sh
+
+      - name: Check Migration Replay
+        run: bash scripts/check-migrations.sh
+        env:
+          DATABASE_URL: postgres://postgres:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
+
+      - name: Check Audit Constraint
+        run: bash scripts/check-audit-constraint.sh
+        env:
+          DATABASE_URL: postgres://postgres:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
+
+      - name: Check RLS Cross-Role Enforcement
+        run: bash scripts/check-rls-enforcement.sh
+        env:
+          DATABASE_URL: postgres://postgres:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
+
+      - name: Run Jest Test Suite
+        run: npm run test:gate:ci
