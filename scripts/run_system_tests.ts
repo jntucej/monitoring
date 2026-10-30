@@ -186,7 +186,7 @@ async function runTests() {
   const wrongDeviceCheck = await validateMobileToken(mobileToken, "device-android-intruder");
   assert(wrongDeviceCheck === null, "D6d: validateMobileToken rejects token presented from wrong device_id");
 
-  const missingDeviceCheck = await validateMobileToken(mobileToken);
+  const missingDeviceCheck = await validateMobileToken(mobileToken, "");
   assert(missingDeviceCheck === null, "D6e: validateMobileToken rejects device-bound token when device_id omitted");
 
   // D6f. One-time Enrollment Code Cryptographic & Hygiene Verification
