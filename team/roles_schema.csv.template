@@ -1,0 +1,5 @@
+CSV Name,Jira Display Name,Jira Account ID,Role
+Akarsh,Akarsh,${JIRA_ACCOUNT_ID_AKARSH},Frontend Developer
+Ashwitha,Moola Ashwitha,${JIRA_ACCOUNT_ID_ASHWITHA},Fullstack Developer
+Junaid,Djengo,${JIRA_ACCOUNT_ID_JUNAID},Infrastructure & Security
+Dhanavarsha,Dhanavarsha Ponnala,${JIRA_ACCOUNT_ID_DHANAVARSHA},QA Lead
