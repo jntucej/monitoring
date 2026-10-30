@@ -1,12 +1,11 @@
 -- 20261010120000_create_app_role.sql
 DO $$BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'gate_app') THEN
-    -- Create without a password. The password must be set out-of-band via
-    -- scripts/ops/rotate-gate-app-password.sh (reads GATE_APP_PASSWORD from env)
-    -- and never committed to the repo.
     CREATE ROLE gate_app
-      NOSUPERUSER NOCREATEDB NOCREATEROLE INHERIT LOGIN
+      NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE INHERIT LOGIN
       PASSWORD NULL;
+  ELSE
+    ALTER ROLE gate_app NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE;
   END IF;
   EXECUTE format('GRANT CONNECT ON DATABASE %I TO gate_app', current_database());
 END $$;
