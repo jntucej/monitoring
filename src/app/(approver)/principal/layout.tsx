@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Suspense } from "react";
-import { PageLoading } from "@/components/shared/LoadingStates";
+import { PrincipalLoading } from "@/components/principal/shared/PrincipalLoading";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { RoleConsole } from "@/components/shared/RoleConsole";
@@ -27,7 +27,7 @@ export default function PrincipalConsoleLayout({
     <AuthGuard
       allowedRoles={["principal", "vice_principal", "admin", "sysadmin"] as Role[]}
     >
-      <Suspense fallback={<PageLoading />}>
+      <Suspense fallback={<PrincipalLoading />}>
         <div className="min-w-0">
           <RoleConsole role="principal" roleRoot="/principal">
             {children}

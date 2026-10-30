@@ -220,7 +220,6 @@ export interface User {
   employeeId?: string;
   email?: string;
   phone?: string;
-  pin?: string;
   /** @deprecated use guardianId */
   parentId?: string;
   /** Guardian (parent/ward caretaker) links to student_details.guardian_id */
@@ -246,7 +245,7 @@ export interface User {
   thumbprintVerifiedAt?: string;
   /** Kiosk default operator flag (sysadmin/designated) */
   isKioskDefault?: boolean;
-  /** Login identifier used by PIN/password login */
+  /** Login identifier used by password login */
   loginIdentifier?: string;
 }
 

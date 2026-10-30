@@ -1,8 +1,8 @@
 "use client";
 
 import { Suspense, useCallback, useMemo, useState } from "react";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { PageLoading } from "@/components/shared/LoadingStates";
+import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
+import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoading";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { useAuthStore } from "@/stores/authStore";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
@@ -117,7 +117,7 @@ function OperatorTransactionsInner() {
         </div>
       )}
 
-      <WidgetBoundary title="Movement Log">
+      <OperatorWidgetBoundary title="Movement Log">
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] overflow-hidden min-w-0">
           {/* Counts strip */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-px border-b border-[var(--border)]">
@@ -287,7 +287,7 @@ function OperatorTransactionsInner() {
             </>
           )}
         </div>
-      </WidgetBoundary>
+      </OperatorWidgetBoundary>
 
       <DevContactStrip />
     </div>
@@ -296,7 +296,7 @@ function OperatorTransactionsInner() {
 
 export default function OperatorTransactionsPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
+    <Suspense fallback={<OperatorPageLoading />}>
       <OperatorTransactionsInner />
     </Suspense>
   );

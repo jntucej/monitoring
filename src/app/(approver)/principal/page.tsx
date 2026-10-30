@@ -1,11 +1,11 @@
 import { Suspense } from "react";
 import { Crown } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import { PageLoading } from "@/components/shared/LoadingStates";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { PrincipalLoading } from "@/components/principal/shared/PrincipalLoading";
+import { PrincipalWidgetBoundary } from "@/components/principal/shared/PrincipalWidgetBoundary";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { QuickActions } from "@/components/shared/QuickActions";
-import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { PrincipalNotifications } from "@/components/principal/shared/PrincipalNotifications";
 import { AttentionQueue } from "@/components/engagement/AttentionQueue";
 import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
 import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
@@ -15,11 +15,11 @@ import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 
 export default function PrincipalPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
+    <Suspense fallback={<PrincipalLoading />}>
       <AuthGuard allowedRoles={["principal"]}>
         <div className="space-y-6">
           <DevContactStrip />
-          <WidgetBoundary>
+          <PrincipalWidgetBoundary>
             <RoleDashboardPanel
               title="Principal dashboard"
               icon={Crown}
@@ -33,14 +33,14 @@ export default function PrincipalPage() {
                 ];
               }}
             />
-          </WidgetBoundary>
-          <WidgetBoundary><AttentionQueue /></WidgetBoundary>
-          <WidgetBoundary><PersonalizedCampusHome /></WidgetBoundary>
-          <WidgetBoundary><TaskContinuity /></WidgetBoundary>
-          <WidgetBoundary><UnifiedCampusCalendar /></WidgetBoundary>
-          <WidgetBoundary><ActivityTimeline /></WidgetBoundary>
-          <WidgetBoundary><QuickActions /></WidgetBoundary>
-          <WidgetBoundary><NotificationCenter /></WidgetBoundary>
+          </PrincipalWidgetBoundary>
+          <PrincipalWidgetBoundary><AttentionQueue /></PrincipalWidgetBoundary>
+          <PrincipalWidgetBoundary><PersonalizedCampusHome /></PrincipalWidgetBoundary>
+          <PrincipalWidgetBoundary><TaskContinuity /></PrincipalWidgetBoundary>
+          <PrincipalWidgetBoundary><UnifiedCampusCalendar /></PrincipalWidgetBoundary>
+          <PrincipalWidgetBoundary><ActivityTimeline /></PrincipalWidgetBoundary>
+          <PrincipalWidgetBoundary><QuickActions /></PrincipalWidgetBoundary>
+          <PrincipalWidgetBoundary><PrincipalNotifications /></PrincipalWidgetBoundary>
         </div>
       </AuthGuard>
     </Suspense>

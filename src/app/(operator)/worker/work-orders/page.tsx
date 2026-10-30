@@ -3,9 +3,9 @@
 import { useMemo } from "react";
 import { Suspense } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
-import { PageLoading } from "@/components/shared/LoadingStates";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { EmptyState } from "@/components/shared/EmptyState";
+import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoading";
+import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
+import { OperatorEmptyState } from "@/components/operator/shared/OperatorEmptyState";
 import { Loader2, ClipboardList, CheckCircle2 } from "lucide-react";
 
 interface WorkOrderRow {
@@ -63,7 +63,7 @@ function WorkerWorkOrdersInner() {
         </div>
       )}
 
-      <WidgetBoundary title="Open">
+      <OperatorWidgetBoundary title="Open">
         <div className="min-w-0">
           <p className="mb-3 text-xs text-slate-500">{totalOpen} open task(s)</p>
           {busy ? (
@@ -71,7 +71,7 @@ function WorkerWorkOrdersInner() {
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" /> Loading…
             </div>
           ) : open.length === 0 ? (
-            <EmptyState icon={<CheckCircle2 className="h-6 w-6 text-emerald-500" />} title="All caught up" description="No open work orders assigned to you right now." />
+            <OperatorEmptyState icon={<CheckCircle2 className="h-6 w-6 text-emerald-500" />} title="All caught up" description="No open work orders assigned to you right now." />
           ) : (
             <div className="divide-y divide-slate-800">
               {open.map((o) => (
@@ -92,10 +92,10 @@ function WorkerWorkOrdersInner() {
             </div>
           )}
         </div>
-      </WidgetBoundary>
+      </OperatorWidgetBoundary>
 
       {recentlyClosed.length > 0 && (
-        <WidgetBoundary title="Recently Closed">
+        <OperatorWidgetBoundary title="Recently Closed">
           <div className="min-w-0">
             <div className="divide-y divide-slate-800">
               {recentlyClosed.map((c) => (
@@ -115,7 +115,7 @@ function WorkerWorkOrdersInner() {
               ))}
             </div>
           </div>
-        </WidgetBoundary>
+        </OperatorWidgetBoundary>
       )}
     </div>
   );
@@ -123,7 +123,7 @@ function WorkerWorkOrdersInner() {
 
 export default function WorkerWorkOrdersPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
+    <Suspense fallback={<OperatorPageLoading />}>
       <WorkerWorkOrdersInner />
     </Suspense>
   );

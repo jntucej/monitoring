@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
-import { usePolling } from "@/hooks/usePolling";
 import { QrCode, Loader2, AlertCircle, Download } from "lucide-react";
 import { QRCode } from "react-qrcode-logo";
 import { parseRollNumber } from "@/lib/rollNumber";
@@ -8,19 +7,26 @@ import { useApi } from "@/hooks/useApi";
 import { useAuthStore } from "@/stores/authStore";
 import type { Student } from "@/lib/types";
 
+interface MessToken {
+  id: string;
+  token_code: string;
+  manualCode?: string;
+  expires_at: string;
+  kind: string;
+}
+
 export function DigitalIdCard() {
 const api = useApi();
 
   const [student, setStudent] = useState<Student | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [countdown, setCountdown] = useState(30);
   const [downloading, setDownloading] = useState(false);
   const qrRef = useRef<HTMLDivElement | null>(null);
 
-  usePolling(() => {
-    setCountdown((prev) => (prev > 1 ? prev - 1 : 30));
-  }, { intervalMs: 1000 });
+  // Mess token for today's mess code
+  const [messToken, setMessToken] = useState<MessToken | null>(null);
+  const [messError, setMessError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -58,6 +64,37 @@ const api = useApi();
     };
   }, []);
 
+  // Fetch today's mess token
+  useEffect(() => {
+    let cancelled = false;
+    const loadMess = async () => {
+      try {
+        const res = await fetch("/api/mess/my-token", {
+          headers: api.getHeaders(),
+          cache: "no-store",
+        });
+        const json = await res.json();
+        if (!cancelled) {
+          if (res.ok && json.success && json.data?.tokens?.length > 0) {
+            const active = json.data.tokens.find((t: MessToken) => {
+              const exp = new Date(t.expires_at).getTime();
+              return exp > Date.now();
+            });
+            if (active) {
+              setMessToken(active);
+            }
+          }
+        }
+      } catch {
+        if (!cancelled) {
+          setMessError(null);
+        }
+      }
+    };
+    loadMess();
+    return () => { cancelled = true; };
+  }, []);
+
   if (loading) {
     return (
       <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-8 flex items-center gap-2 text-[var(--text-muted)] text-sm">
@@ -79,7 +116,6 @@ const api = useApi();
   const downloadQR = () => {
     if (!student) return;
     setDownloading(true);
-    // Find the canvas that react-qrcode-logo renders inside the ref
     const container = qrRef.current;
     const canvas = container?.querySelector("canvas");
     if (canvas) {
@@ -148,16 +184,16 @@ const api = useApi();
         </div>
       </div>
 
-      {/* Dynamic Anti-Screenshot QR Code */}
+      {/* Static QR Code — value is student's uniqueId */}
       <div ref={qrRef} className="mt-4 sm:mt-6 p-3 sm:p-4 bg-white rounded-2xl flex flex-col items-center shadow-lg relative">
         <QRCode
-          value={JSON.stringify({ roll: student.roll, ts: Math.floor(Date.now() / 30000) })}
+          value={student.uniqueId || student.roll || ""}
           size={140}
           style={{ width: "100%", maxWidth: 140, height: "auto" }}
         />
         <div className="mt-1.5 sm:mt-2 text-[9px] sm:text-[10px] font-bold text-slate-700 font-mono flex items-center gap-1 sm:gap-1.5 bg-slate-100 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-slate-200">
-          <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 animate-ping" />
-          Anti-Screenshot Security Token • Refreshes in {countdown}s
+          <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500" />
+          Gate Verification QR
         </div>
         <button
           onClick={downloadQR}
@@ -170,8 +206,26 @@ const api = useApi();
       </div>
       <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-[var(--text-muted)] flex items-center gap-1">
         <QrCode className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-indigo-400" />
-        Live Gate Verification Token
+        Static Gate Verification Token
       </p>
+
+      {/* Today's Mess Code */}
+      {messToken && (
+        <div className="mt-4 sm:mt-6 w-full max-w-sm rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
+          <p className="text-xs font-semibold text-emerald-400 uppercase tracking-wide mb-1">
+            Today&apos;s Mess Code
+          </p>
+          <p className="text-xs text-emerald-300/80 mb-2">
+            Show this code at the mess counter
+          </p>
+          <div className="font-mono text-3xl font-black tracking-[0.35em] text-emerald-300 text-center py-2">
+            {messToken.manualCode || messToken.token_code || "—"}
+          </div>
+          <p className="text-[10px] text-emerald-400/60 text-center mt-1">
+            Expires {new Date(messToken.expires_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

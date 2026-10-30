@@ -11,6 +11,15 @@ import { addAudit, addNotification } from "@/lib/db";
 import type { Role } from "@/lib/types";
 import { NextResponse } from "next/server";
 
+/**
+ * Normalize a delegation delegate_role value. After the principal/warden
+ * consolidation (20261125000001), any legacy "warden" delegate_target should be
+ * treated as "principal" so downstream lookups resolve to the right actors.
+ */
+export function normalizeDelegateRole(role: string): string {
+  return role === "warden" ? "principal" : role;
+}
+
 export const DIRECT_GENERATE_ROLES: Role[] = [
   "caretaker",
   "deputy_warden",
@@ -96,7 +105,7 @@ export async function prepareHostelForward(args: {
     return { ok: false as const, response: NextResponse.json({ success: false, error: { code: "FORBIDDEN", message: "Not allowed" } }, { status: 403 }) };
   }
   const ticket = scoped.request;
-  const targetRole = args.body.targetRole;
+  const targetRole = normalizeDelegateRole(args.body.targetRole ?? "");
   const comment = args.body.comment;
   if (!targetRole) {
     return { ok: false as const, response: NextResponse.json({ success: false, error: { code: "MISSING_TARGET", message: "targetRole required" } }, { status: 400 }) };

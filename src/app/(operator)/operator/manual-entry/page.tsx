@@ -2,8 +2,8 @@
 
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { PageLoading } from "@/components/shared/LoadingStates";
+import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
+import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoading";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { useAuthStore } from "@/stores/authStore";
 import { useToast } from "@/components/ui/toast";
@@ -231,7 +231,7 @@ function ManualEntryInner() {
   return (
     <div className="mx-auto max-w-3xl space-y-5 px-4 py-6 md:px-6 min-w-0">
       {/* Lookup form */}
-      <WidgetBoundary title="Person Lookup">
+      <OperatorWidgetBoundary title="Person Lookup">
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-4 space-y-3 min-w-0">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-w-0">
             <div className="space-y-1.5 min-w-0">
@@ -284,7 +284,7 @@ function ManualEntryInner() {
             Look Up Person
           </button>
         </div>
-      </WidgetBoundary>
+      </OperatorWidgetBoundary>
 
       {/* Result card */}
       {lookupState === "loading" && (
@@ -416,7 +416,7 @@ function ManualEntryInner() {
 
       {/* Record form — rendered below a successful lookup */}
       {lookupState === "found" && result && (
-        <WidgetBoundary title="Record Scan">
+        <OperatorWidgetBoundary title="Record Scan">
           <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-4 space-y-3 min-w-0">
             {/* Direction toggle */}
             <div className="space-y-1.5 min-w-0">
@@ -583,7 +583,7 @@ function ManualEntryInner() {
               Record Scan
             </button>
           </div>
-        </WidgetBoundary>
+        </OperatorWidgetBoundary>
       )}
 
       <DevContactStrip />
@@ -593,7 +593,7 @@ function ManualEntryInner() {
 
 export default function OperatorManualEntryPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
+    <Suspense fallback={<OperatorPageLoading />}>
       <ManualEntryInner />
     </Suspense>
   );

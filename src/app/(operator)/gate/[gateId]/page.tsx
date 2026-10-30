@@ -20,6 +20,7 @@ import { Scanner } from "@/components/operator/Scanner";
 import { ScanDetailModal } from "@/components/operator/ScanDetailModal";
 import { operatorIcon } from "@/config/operator-icons";
 import { MobileOperatorScanView } from "@/components/mobile/MobileOperatorScanView";
+import { OfflineBanner } from "@/components/operator/OfflineBanner";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import type { Scan as ScanRecord, Student } from "@/lib/types";
 import { useCollegeInfo } from "@/hooks/useCollegeInfo";
@@ -678,6 +679,9 @@ function OperatorPageInner() {
 
   return (
     <div className="min-h-[85vh] flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] pb-safe min-w-0">
+      {/* Offline banner — shows when navigator.onLine is false */}
+      <OfflineBanner />
+
       <main className="flex-1 w-full max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto p-2 sm:p-4 space-y-3">
         {/* Emergency Lockdown Active Alert Header Banner */}
         {activeLockdown && (

@@ -15,8 +15,18 @@ jobs:
     - name: Verify admin console independence
       run: bash scripts/check-admin-independence.sh
 
+  verify-principal-independence:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Verify principal console independence
+      run: bash scripts/check-principal-independence.sh
+
   deploy:
     needs: verify-admin-independence
+    needs: verify-principal-independence
     runs-on: ubuntu-latest
     steps:
     - name: Checkout

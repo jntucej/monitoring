@@ -1,8 +1,8 @@
 "use client";
 
 import { Suspense, useCallback, useMemo, useState } from "react";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { PageLoading } from "@/components/shared/LoadingStates";
+import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
+import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoading";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { useAuthStore } from "@/stores/authStore";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
@@ -152,7 +152,7 @@ function ExceptionsInner() {
         </div>
       )}
 
-      <WidgetBoundary title="Today&rsquo;s Exceptions">
+      <OperatorWidgetBoundary title="Today&rsquo;s Exceptions">
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] overflow-hidden min-w-0">
           {/* Filter tabs */}
           <div className="flex items-center gap-1 px-3 py-2 border-b border-[var(--border)] overflow-x-auto no-scrollbar min-w-0">
@@ -311,10 +311,10 @@ function ExceptionsInner() {
             </>
           )}
         </div>
-      </WidgetBoundary>
+      </OperatorWidgetBoundary>
 
       {/* Denied hostel passes (workflow) */}
-      <WidgetBoundary title="Rejected Passes Today">
+      <OperatorWidgetBoundary title="Rejected Passes Today">
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] overflow-hidden min-w-0">
           <div className="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2 min-w-0">
             <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0" />
@@ -359,7 +359,7 @@ function ExceptionsInner() {
             </ul>
           )}
         </div>
-      </WidgetBoundary>
+      </OperatorWidgetBoundary>
 
       <DevContactStrip />
     </div>
@@ -368,7 +368,7 @@ function ExceptionsInner() {
 
 export default function OperatorExceptionsPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
+    <Suspense fallback={<OperatorPageLoading />}>
       <ExceptionsInner />
     </Suspense>
   );

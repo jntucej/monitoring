@@ -17,6 +17,23 @@ import { RATE_LIMITS } from "@/config/app-constants";
 import type { AuthContext } from "@/lib/authContext";
 import type { Role } from "@/lib/types";
 
+// Maps each role to the permission workflow stages it may act upon when
+// assigned_to_me=true is requested. The principal/warden consolidation means
+// that both "principal" and "warden_or_principal" stages are relevant.
+const STAGES_BY_ROLE: Record<string, string[]> = {
+  principal:       ["principal", "warden_or_principal"],
+  vice_principal:  ["principal", "warden_or_principal"],
+  hod:             ["hod"],
+  faculty:         ["hod"], // faculty escalates to HOD
+  deputy_warden:   ["deputy_warden"],
+  hostel_manager:  ["hostel_manager"],
+  caretaker:       ["caretaker"],
+  oie:             ["oie"],
+  exam_branch:     ["exam_branch", "exam_branch_forwarded"],
+  exam_superintendent: ["exam_superintendent"],
+  supervisor:      ["warden_or_principal", "principal"], // escalation chain
+};
+
 interface CreatePermissionBody {
   workflowType?: WorkflowType;
   reason?: string;
@@ -237,6 +254,8 @@ async function handleGet(
       url.searchParams.get("workflow_type") ??
       url.searchParams.get("workflow")) as WorkflowType | null;
   const stage = url.searchParams.get("stage") ?? url.searchParams.get("assigned_stage") ?? undefined;
+  const assignedToMe = url.searchParams.get("assigned_to_me");
+  const asParam = url.searchParams.get("as");
   const limit = Math.min(Number(url.searchParams.get("limit") ?? 100), 500);
   const offset = Math.max(Number(url.searchParams.get("offset") ?? 0), 0);
 
@@ -244,6 +263,24 @@ async function handleGet(
   const params: unknown[] = [];
 
   const role: string = auth.role;
+
+  // Scope to hostel-only or institutional-only (non-hostel) when ?as= is provided.
+  if (asParam === "hostel") {
+    where.push("workflow_type = 'hostel'");
+  } else if (asParam === "institutional") {
+    where.push("workflow_type <> 'hostel' AND workflow_type IS NOT NULL");
+  }
+
+  // assigned_to_me filter: restrict to stages that the caller's role can act on.
+  if (assignedToMe === "true" || assignedToMe === "1") {
+    const myStages = STAGES_BY_ROLE[role];
+    if (myStages) {
+      const placeholders = myStages.map((_, i) => `$${params.length + i + 1}`).join(", ");
+      params.push(...myStages);
+      where.push(`current_stage IN (${placeholders})`);
+    }
+  }
+
   if (["admin", "sysadmin"].includes(role)) {
     // see everything
   } else if (["principal", "vice_principal"].includes(role)) {

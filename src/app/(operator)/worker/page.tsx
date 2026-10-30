@@ -1,11 +1,11 @@
 import { Suspense } from "react";
 import { HardHat } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import { PageLoading } from "@/components/shared/LoadingStates";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoading";
+import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { QuickActions } from "@/components/shared/QuickActions";
-import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { OperatorNotifications } from "@/components/operator/shared/OperatorNotifications";
 import { AttentionQueue } from "@/components/engagement/AttentionQueue";
 import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
 import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
@@ -15,11 +15,11 @@ import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 
 export default function WorkerPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
+    <Suspense fallback={<OperatorPageLoading />}>
       <AuthGuard allowedRoles={["worker"]}>
         <div className="space-y-6">
           <DevContactStrip />
-          <WidgetBoundary>
+          <OperatorWidgetBoundary>
             <RoleDashboardPanel
               title="Worker dashboard"
               icon={HardHat}
@@ -34,14 +34,14 @@ export default function WorkerPage() {
                 ];
               }}
             />
-          </WidgetBoundary>
-          <WidgetBoundary><AttentionQueue /></WidgetBoundary>
-          <WidgetBoundary><PersonalizedCampusHome /></WidgetBoundary>
-          <WidgetBoundary><TaskContinuity /></WidgetBoundary>
-          <WidgetBoundary><UnifiedCampusCalendar /></WidgetBoundary>
-          <WidgetBoundary><ActivityTimeline /></WidgetBoundary>
-          <WidgetBoundary><QuickActions /></WidgetBoundary>
-          <WidgetBoundary><NotificationCenter /></WidgetBoundary>
+          </OperatorWidgetBoundary>
+          <OperatorWidgetBoundary><AttentionQueue /></OperatorWidgetBoundary>
+          <OperatorWidgetBoundary><PersonalizedCampusHome /></OperatorWidgetBoundary>
+          <OperatorWidgetBoundary><TaskContinuity /></OperatorWidgetBoundary>
+          <OperatorWidgetBoundary><UnifiedCampusCalendar /></OperatorWidgetBoundary>
+          <OperatorWidgetBoundary><ActivityTimeline /></OperatorWidgetBoundary>
+          <OperatorWidgetBoundary><QuickActions /></OperatorWidgetBoundary>
+          <OperatorWidgetBoundary><OperatorNotifications /></OperatorWidgetBoundary>
         </div>
       </AuthGuard>
     </Suspense>

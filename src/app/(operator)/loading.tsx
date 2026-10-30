@@ -1,5 +1,5 @@
-import { PageLoading } from "@/components/shared/LoadingStates";
+import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoading";
 
 export default function OperatorLoading() {
-  return <PageLoading />;
+  return <OperatorPageLoading />;
 }

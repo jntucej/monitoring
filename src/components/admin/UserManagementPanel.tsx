@@ -8,7 +8,6 @@ import {
   ShieldOff,
   Shield,
   Hash,
-  FileText,
   CheckCircle2,
   AlertTriangle,
   X,
@@ -30,7 +29,7 @@ export interface UserManagementPanelProps {
   initialRole?: Role | string;
 }
 
-type ModalKind = "password" | "pin" | null;
+type ModalKind = "password" | null;
 
 interface SuspendTarget {
   user: User;
@@ -152,7 +151,7 @@ function UserManagementPanelBody({
     }
   }, [loadUsers]);
 
-  const openSecretModal = useCallback((kind: "password" | "pin", user: User) => {
+  const openSecretModal = useCallback((kind: "password", user: User) => {
     setModal(kind);
     setModalTarget(user);
     setSecretValue("");
@@ -174,27 +173,19 @@ function UserManagementPanelBody({
     setSecretError(null);
     setFlash(null);
     try {
-      const isPassword = modal === "password";
-      if (isPassword && secretValue.length < 8) {
+      if (secretValue.length < 8) {
         setSecretError("Password must be at least 8 characters");
         setBusy(false);
         return;
       }
-      if (!isPassword && !/^\d{8}$/.test(secretValue)) {
-        setSecretError("PIN must be exactly 8 digits");
-        setBusy(false);
-        return;
-      }
-      const endpoint = isPassword ? "reset-password" : "reset-pin";
-      const body = isPassword ? { password: secretValue } : { pin: secretValue };
-      const res = await fetch(`/api/admin/users/${modalTarget.id}/${endpoint}`, {
+      const res = await fetch(`/api/admin/users/${modalTarget.id}/reset-password`, {
         method: "POST",
         headers: getAuthHeaders(),
-        body: JSON.stringify(body),
+        body: JSON.stringify({ password: secretValue }),
       });
       const json = await res.json();
       if (json.success) {
-        setFlash({ type: "success", msg: isPassword ? "Password reset" : "PIN reset" });
+        setFlash({ type: "success", msg: "Password reset" });
         closeSecretModal();
       } else {
         const msg = typeof json.error === "string" ? json.error : json.error?.message || "Reset failed";
@@ -466,14 +457,6 @@ function UserManagementPanelBody({
                             <KeyRound className="w-3.5 h-3.5" />
                             <span className="hidden sm:inline">Password</span>
                           </button>
-                          <button
-                            onClick={() => openSecretModal("pin", u)}
-                            title="Reset PIN"
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)] transition"
-                          >
-                            <FileText className="w-3.5 h-3.5" />
-                            <span className="hidden sm:inline">PIN</span>
-                          </button>
                         </div>
                       </td>
                     </tr>
@@ -528,10 +511,10 @@ function UserManagementPanelBody({
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center">
-                  {modal === "password" ? <KeyRound className="w-5 h-5" /> : <FileText className="w-5 h-5" />}
+                  <KeyRound className="w-5 h-5" />
                 </div>
                 <h3 className="text-lg font-semibold text-[var(--text-primary)]">
-                  {modal === "password" ? "Reset password" : "Reset PIN"}
+                  Reset password
                 </h3>
               </div>
               <button onClick={closeSecretModal} className="text-[var(--text-muted)] hover:text-[var(--text-primary)]">
@@ -539,7 +522,7 @@ function UserManagementPanelBody({
               </button>
             </div>
             <p className="text-sm text-[var(--text-muted)] mb-4">
-              Set a new {modal === "password" ? "password" : "8-digit PIN"} for{" "}
+              Set a new password for{" "}
               <span className="text-[var(--text-primary)] font-medium">{displayName(modalTarget)}</span>.
             </p>
             <input
@@ -547,7 +530,7 @@ function UserManagementPanelBody({
               value={secretValue}
               onChange={(e) => setSecretValue(e.target.value)}
               autoFocus
-              placeholder={modal === "password" ? "New password (min 8 chars)" : "8-digit PIN"}
+              placeholder="New password (min 8 chars)"
               className={`w-full bg-[var(--bg-elevated)] border rounded-lg px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${secretError ? "border-rose-500/50" : "border-[var(--border)]"}`}
             />
             {secretError && <p className="mt-2 text-xs text-rose-400">{secretError}</p>}

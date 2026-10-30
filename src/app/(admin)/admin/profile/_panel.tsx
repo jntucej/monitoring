@@ -77,12 +77,6 @@ export function AdminProfilePanel({ tab }: { tab: Tab }) {
   const [showPw, setShowPw] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
 
-  // Security — PIN
-  const [currentPin, setCurrentPin] = useState("");
-  const [newPin, setNewPin] = useState("");
-  const [confirmPin, setConfirmPin] = useState("");
-  const [savingPin, setSavingPin] = useState(false);
-
   // Security telemetry
   const [sessions, setSessions] = useState<number | null>(null);
   const [audit, setAudit] = useState<{ action?: string; timestamp?: string }[]>([]);
@@ -153,18 +147,8 @@ export function AdminProfilePanel({ tab }: { tab: Tab }) {
     finally { setSavingPassword(false); }
   };
 
-  const changePin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newPin !== confirmPin) { addToast({ title: "Mismatch", message: "PIN confirmation does not match.", variant: "error" }); return; }
-    if (!/^\d{4,8}$/.test(newPin)) { addToast({ title: "Invalid PIN", message: "PIN must be 4–8 digits.", variant: "error" }); return; }
-    setSavingPin(true);
-    try {
-      const res = await fetch("/api/auth/pin-change", { method: "POST", headers: { ...authHeaders(), "Content-Type": "application/json" }, body: JSON.stringify({ currentPin, newPin }) });
-      const json = await res.json();
-      if (res.ok && json.success) { addToast({ title: "Gate PIN Updated", message: "Kiosk PIN changed.", variant: "success" }); setCurrentPin(""); setNewPin(""); setConfirmPin(""); }
-      else addToast({ title: "PIN Update Failed", message: json.error?.message || json.error || "Could not update gate PIN.", variant: "error" });
-    } catch { addToast({ title: "Network Error", message: "Failed to update gate PIN.", variant: "error" }); }
-    finally { setSavingPin(false); }
+  const changePin = async (_e: React.FormEvent) => {
+    // PIN removed — password-only auth model
   };
 
   const initials = useMemo(() => (name || user?.name || role || "U").trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase()).join(""), [name, user?.name, role]);
@@ -260,31 +244,6 @@ export function AdminProfilePanel({ tab }: { tab: Tab }) {
                 </div>
                 <div className="flex justify-end">
                   <PrimaryButton type="submit" disabled={savingPassword} icon={Lock} loading={savingPassword}>Change Password</PrimaryButton>
-                </div>
-              </form>
-            </SectionCard>
-          </WidgetBoundary>
-
-          <WidgetBoundary title="Gate & Kiosk PIN">
-            <SectionCard title="Gate & Kiosk PIN" description="Used for manual overrides and emergency kiosk authorization" icon={KeyRound}>
-              <form onSubmit={changePin} className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-semibold text-[var(--text-secondary)]">Current PIN</label>
-                    <Field value={currentPin} onChange={(v) => setCurrentPin(v.replace(/\D/g, ""))} type="password" inputMode="numeric" placeholder="Existing PIN" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-semibold text-[var(--text-secondary)]">New PIN</label>
-                    <Field value={newPin} onChange={(v) => setNewPin(v.replace(/\D/g, ""))} type="password" inputMode="numeric" placeholder="4–8 digits" required />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-semibold text-[var(--text-secondary)]">Confirm PIN</label>
-                    <Field value={confirmPin} onChange={(v) => setConfirmPin(v.replace(/\D/g, ""))} type="password" inputMode="numeric" placeholder="Repeat PIN" required />
-                  </div>
-                </div>
-                <p className="text-xs text-[var(--text-muted)]">4–8 digits. Used for kiosk/gate login, not for web sign-in.</p>
-                <div className="flex justify-end">
-                  <PrimaryButton type="submit" disabled={savingPin} icon={CheckCircle2} loading={savingPin}>Update Gate PIN</PrimaryButton>
                 </div>
               </form>
             </SectionCard>

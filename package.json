@@ -12,6 +12,8 @@
     "typecheck": "tsc --noEmit",
     "verify:phase2": "node scripts/verify-layering.js",
     "verify:admin-independence": "bash scripts/check-admin-independence.sh",
+    "verify:principal-independence": "bash scripts/check-principal-independence.sh",
+    "verify:operator-independence": "bash scripts/check-operator-independence.sh",
     "verify:admin-layers": "npm run verify:admin-independence && npm run verify:phase2",
     "test:ci": "bash scripts/check-tests-nonempty.sh",
     "test:unit": "npx tsx scripts/run_system_tests.ts",

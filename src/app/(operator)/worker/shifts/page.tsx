@@ -2,9 +2,9 @@
 
 import { Suspense, useMemo } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
-import { PageLoading } from "@/components/shared/LoadingStates";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { EmptyState } from "@/components/shared/EmptyState";
+import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoading";
+import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
+import { OperatorEmptyState } from "@/components/operator/shared/OperatorEmptyState";
 import { Loader2, Clock, ArrowRight } from "lucide-react";
 
 interface MovementRow {
@@ -61,7 +61,7 @@ function WorkerShiftsInner() {
         </div>
       )}
 
-      <WidgetBoundary title="Today">
+      <OperatorWidgetBoundary title="Today">
         <div className="min-w-0">
           {busy ? (
             <div className="p-4 flex items-center gap-2 text-sm text-slate-500">
@@ -83,12 +83,12 @@ function WorkerShiftsInner() {
               </div>
             </div>
           ) : (
-            <EmptyState icon={<Clock className="h-6 w-6 text-slate-500" />} title="No shift recorded today" description="Gate check-ins will appear here once recorded." />
+            <OperatorEmptyState icon={<Clock className="h-6 w-6 text-slate-500" />} title="No shift recorded today" description="Gate check-ins will appear here once recorded." />
           )}
         </div>
-      </WidgetBoundary>
+      </OperatorWidgetBoundary>
 
-      <WidgetBoundary title="Recent Gate Activity">
+      <OperatorWidgetBoundary title="Recent Gate Activity">
         <div className="min-w-0">
           {myRecent.length === 0 ? (
             <p className="px-4 py-3 text-sm text-slate-500">No recent gate scans recorded.</p>
@@ -119,14 +119,14 @@ function WorkerShiftsInner() {
             </div>
           )}
         </div>
-      </WidgetBoundary>
+      </OperatorWidgetBoundary>
     </div>
   );
 }
 
 export default function WorkerShiftsPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
+    <Suspense fallback={<OperatorPageLoading />}>
       <WorkerShiftsInner />
     </Suspense>
   );

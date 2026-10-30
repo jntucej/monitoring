@@ -1,8 +1,8 @@
 "use client";
 
 import { Suspense, useCallback, useState } from "react";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { PageLoading } from "@/components/shared/LoadingStates";
+import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
+import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoading";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { useAuthStore } from "@/stores/authStore";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
@@ -123,7 +123,7 @@ function PassVerificationInner() {
         </div>
       )}
 
-      <WidgetBoundary title="Verification Queue">
+      <OperatorWidgetBoundary title="Verification Queue">
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] overflow-hidden min-w-0">
           <div className="px-4 py-3 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-2 min-w-0">
             <span className="text-sm font-semibold text-[var(--text-primary)] min-w-0">
@@ -258,7 +258,7 @@ function PassVerificationInner() {
             </div>
           )}
         </div>
-      </WidgetBoundary>
+      </OperatorWidgetBoundary>
 
       <DevContactStrip />
     </div>
@@ -267,7 +267,7 @@ function PassVerificationInner() {
 
 export default function PassVerificationPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
+    <Suspense fallback={<OperatorPageLoading />}>
       <PassVerificationInner />
     </Suspense>
   );

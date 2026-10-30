@@ -47,5 +47,7 @@ jobs:
         run: npx tsx scripts/verify-permission-workflow.ts
       - name: Admin independence
         run: bash scripts/check-admin-independence.sh
+      - name: Principal independence
+        run: bash scripts/check-principal-independence.sh
       - name: TypeScript
         run: npm run typecheck

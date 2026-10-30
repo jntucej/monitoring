@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Suspense } from "react";
-import { PageLoading } from "@/components/shared/LoadingStates";
+import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoading";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { RoleConsole } from "@/components/shared/RoleConsole";
@@ -27,7 +27,7 @@ export default function WorkerConsoleLayout({
     <AuthGuard
       allowedRoles={["worker", "admin", "sysadmin", "supervisor"] as Role[]}
     >
-      <Suspense fallback={<PageLoading />}>
+      <Suspense fallback={<OperatorPageLoading />}>
         <div className="min-w-0">
           <RoleConsole role="worker" roleRoot="/worker">
             {children}

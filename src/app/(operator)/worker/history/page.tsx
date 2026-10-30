@@ -1,14 +1,14 @@
 import { Suspense } from "react";
-import { PageLoading } from "@/components/shared/LoadingStates";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoading";
+import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
 import { MyWorkPanel } from "@/components/approver/MyWorkPanel";
 
 export default function WorkerHistoryPage() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <WidgetBoundary>
+    <Suspense fallback={<OperatorPageLoading />}>
+      <OperatorWidgetBoundary>
         <MyWorkPanel />
-      </WidgetBoundary>
+      </OperatorWidgetBoundary>
     </Suspense>
   );
 }
