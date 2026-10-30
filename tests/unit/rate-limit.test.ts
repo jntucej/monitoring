@@ -5,7 +5,7 @@ vi.mock("@/lib/postgres", () => ({
 }));
 
 import { query } from "@/lib/postgres";
-import { withRateLimit, getClientIpSafe } from "@/lib/rate-limit";
+import { withRateLimit, extractClientIp } from "@/lib/rate-limit";
 
 const mockQuery = vi.mocked(query);
 
@@ -41,15 +41,15 @@ describe("withRateLimit", () => {
   });
 });
 
-describe("getClientIpSafe", () => {
+describe("extractClientIp", () => {
   it("prefers x-client-ip", () => {
-    expect(getClientIpSafe(makeReq("1.2.3.4"))).toBe("1.2.3.4");
+    expect(extractClientIp(makeReq("1.2.3.4"))).toBe("1.2.3.4");
   });
   it("ignores x-forwarded-for", () => {
     const req: any = {
       headers: new Map([["x-forwarded-for", "9.9.9.9"]]) as any,
       ip: "1.2.3.4",
     };
-    expect(getClientIpSafe(req)).toBe("1.2.3.4");
+    expect(extractClientIp(req)).toBe("1.2.3.4");
   });
 });

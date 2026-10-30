@@ -38,11 +38,26 @@ async function handleSessionCheck(req: NextRequest) {
     if (!payload && refreshToken) {
       const refreshPayload = await verifyRefreshToken(refreshToken);
       if (refreshPayload && refreshPayload.sub) {
+        // Re-read session_version from the live DB row so a revoked session
+        // cannot mint a fresh access token via /api/auth/session.
+        const userRow = await query(
+          "SELECT session_version, email, role, status FROM users WHERE id = $1 AND deleted_at IS NULL LIMIT 1",
+          [refreshPayload.sub],
+        );
+        if (userRow.rows.length === 0 || userRow.rows[0].status !== 'ACTIVE') {
+          return NextResponse.json(
+            { success: false, error: { code: "USER_NOT_FOUND", message: "User account not found or inactive." } },
+            { status: 404 },
+          );
+        }
+        const row = userRow.rows[0];
         payload = refreshPayload;
         newToken = await signAccessToken({
           sub: refreshPayload.sub,
-          email: refreshPayload.email,
-          role: refreshPayload.role,
+          email: row.email,
+          role: row.role,
+          account_status: row.status,
+          session_version: row.session_version ?? 0,
         });
         newRefreshToken = await signRefreshToken({
           sub: refreshPayload.sub,

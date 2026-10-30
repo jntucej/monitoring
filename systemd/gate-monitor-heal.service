@@ -5,10 +5,9 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=root
+User=gate-monitor
 WorkingDirectory=/opt/monitoring/compose
-Environment=TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-Environment=TELEGRAM_CHAT_ID=1926342151
+EnvironmentFile=/etc/gate-monitor/gate-monitor.env
 ExecStart=/bin/bash /opt/monitoring/compose/scripts/auto-heal-agent.sh
 Restart=always
 RestartSec=10

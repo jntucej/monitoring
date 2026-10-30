@@ -16,10 +16,13 @@ export default async function auditLogRotation() {
   const apiMetricsRetentionDays = parseInt(process.env.API_METRICS_RETENTION_DAYS || '7', 10);
 
   try {
-    // 1. Purge old audit logs past retention threshold
+    // 1. Purge old audit logs past retention threshold.
+    //    Never delete the deception canary row — removing it would trip
+    //    verify-audit-chain.sh and produce a false tamper alert.
     const auditRes = await query(
-      `DELETE FROM audit_logs 
-       WHERE timestamp < NOW() - ($1 || ' days')::INTERVAL`,
+      `DELETE FROM audit_logs
+       WHERE timestamp < NOW() - ($1 || ' days')::INTERVAL
+         AND id <> '00000000-0000-0000-0000-000000000099'::uuid`,
       [retentionDays]
     );
     console.log(`[Worker Job] Purged ${auditRes.rowCount || 0} audit logs older than ${retentionDays} days.`);

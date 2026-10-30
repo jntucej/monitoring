@@ -21,7 +21,32 @@ CREATE POLICY permissions_hostel_select ON public.permissions
       -- Warden scope filter
       (SELECT hostel_scope FROM users WHERE id = current_setting('app.current_user_id', true)::uuid) = 'both'
       OR hostel_scope = (SELECT hostel_scope FROM users WHERE id = current_setting('app.current_user_id', true)::uuid)
-      OR hostel_scope IS NULL   -- legacy rows before backfill
+      OR (hostel_scope IS NULL AND workflow_type = 'hostel')
+    )
+  );
+
+-- 2b. RLS: non-hostel workflows (exam, memo, staff_leave, lab_access) are
+--     scoped to the requester and staff approvers. The short-circuit
+--     `workflow_type <> 'hostel'` above previously let any authenticated user
+--     read every non-hostel ticket.
+CREATE POLICY permissions_select_own ON public.permissions
+  FOR SELECT TO authenticated
+  USING (
+    requester_user_id = current_setting('app.current_user_id', true)::uuid
+  );
+
+CREATE POLICY permissions_select_staff_approver ON public.permissions
+  FOR SELECT TO authenticated
+  USING (
+    workflow_type <> 'hostel'
+    AND status IN ('PENDING','ESCALATED')
+    AND (
+      is_admin(current_setting('app.current_user_id', true)::uuid)
+      OR is_warden(current_setting('app.current_user_id', true)::uuid)
+      OR EXISTS (
+        SELECT 1 FROM public.config_roles_registry r
+        WHERE r.code = (SELECT role FROM public.users WHERE id = current_setting('app.current_user_id', true)::uuid)
+      )
     )
   );
 

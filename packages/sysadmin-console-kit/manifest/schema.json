@@ -61,7 +61,8 @@
                     "tree",
                     "calendar",
                     "list",
-                    "feed+rules"
+                    "feed+rules",
+                    "charts"
                   ]
                 },
                 "pollMs": { "type": "integer", "minimum": 0 },

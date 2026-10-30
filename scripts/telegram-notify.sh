@@ -9,15 +9,16 @@ if [ -z "$TOKEN" ] || [ -z "$CHAT_ID" ]; then
   exit 0
 fi
 
-python3 -c "
-import urllib.request, urllib.parse, sys
-token = '$TOKEN'
-chat_id = '$CHAT_ID'
-text = sys.argv[1]
-url = f'https://api.telegram.org/bot{token}/sendMessage'
-data = urllib.parse.urlencode({'chat_id': chat_id, 'text': text}).encode('utf-8')
+export TOKEN CHAT_ID MESSAGE
+python3 -c '
+import os, urllib.request, urllib.parse, sys
+token = os.environ["TOKEN"]
+chat_id = os.environ["CHAT_ID"]
+text = os.environ["MESSAGE"]
+url = f"https://api.telegram.org/bot{token}/sendMessage"
+data = urllib.parse.urlencode({"chat_id": chat_id, "text": text}).encode("utf-8")
 try:
     urllib.request.urlopen(url, data=data, timeout=5)
 except Exception as e:
-    print('Failed to send telegram notification:', e, file=sys.stderr)
-" "$MESSAGE"
+    print("Failed to send telegram notification:", e, file=sys.stderr)
+'

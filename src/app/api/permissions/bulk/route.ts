@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { assertCsrf } from "@/lib/csrf";
-import { getSupabaseServiceClient } from "@/lib/dbClient";
+import { query, withTransaction } from "@/lib/postgres";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import {
@@ -169,114 +169,99 @@ async function handlePost(req: NextRequest): Promise<Response> {
   }
 
   const rowMap = new Map<string, TicketRow>();
-  (rows || []).forEach((r) => {
+  (rows || []).forEach((r: any) => {
     rowMap.set((r as TicketRow).ticket_number, r as TicketRow);
     rowMap.set((r as TicketRow).id, r as TicketRow);
   });
 
-  const results: BulkResult[] = [];
-  let succeeded = 0;
-  let failed = 0;
+  // Wrap the whole batch in one transaction so a mid-batch failure rolls back
+  // every ticket (no partial writes, no orphaned audit/notifications).
+  const txResults = await withTransaction(async (pgClient) => {
+    const out: BulkResult[] = [];
+    let txSucceeded = 0;
+    let txFailed = 0;
+    for (const ticket of tickets) {
+      const row = rowMap.get(ticket);
+      if (!row) {
+        out.push({ ticket, status: "not_found", error: "Ticket not found" });
+        txFailed++;
+        continue;
+      }
 
-  for (const ticket of tickets) {
-    const row = rowMap.get(ticket);
-    if (!row) {
-      results.push({
-        ticket,
-        status: "not_found",
-        error: "Ticket not found",
-      });
-      failed++;
-      continue;
-    }
+      // Check visibility scope
+      const scope = await getScopedTicket(row.ticket_number, actor.id, actor.role);
+      if ("notFound" in scope && scope.notFound) {
+        out.push({ ticket, status: "not_found", error: "Ticket not found" });
+        txFailed++;
+        continue;
+      }
+      if ("forbidden" in scope && scope.forbidden) {
+        out.push({ ticket, status: "forbidden", error: "Access denied to this ticket" });
+        txFailed++;
+        continue;
+      }
 
-    // Check visibility scope
-    const scope = await getScopedTicket(row.ticket_number, actor.id, actor.role);
-    if ("notFound" in scope && scope.notFound) {
-      results.push({
-        ticket,
-        status: "not_found",
-        error: "Ticket not found",
-      });
-      failed++;
-      continue;
-    }
-    if ("forbidden" in scope && scope.forbidden) {
-      results.push({
-        ticket,
-        status: "forbidden",
-        error: "Access denied to this ticket",
-      });
-      failed++;
-      continue;
-    }
-
-    // Apply action
-    const applyRes = await validateAndApplyAction({
-      action,
-      actor,
-      comment,
-      ticketRow: row,
-    });
-
-    if (!applyRes.ok) {
-      const status =
-        applyRes.conflict === "forbidden"
-          ? "forbidden"
-          : applyRes.conflict === "notPending"
-          ? "not_pending"
-          : applyRes.conflict === "notAllowed"
-          ? "not_allowed"
-          : applyRes.conflict === "concurrentModification"
-          ? "skipped"  // G18: ticket was modified by another approver mid-batch
-          : "error";
-
-      results.push({
-        ticket,
-        status,
-        error: applyRes.error || "Action could not be applied",
-      });
-      failed++;
-      continue;
-    }
-
-    // Audit and Notification
-    addAudit({
-      action: `PERMISSION_BULK_${action}`,
-      userId: actor.id,
-      userName: actor.name,
-      role: actor.role,
-      details: {
-        ticket: row.ticket_number,
-        newStage: applyRes.newStage,
-        newStatus: applyRes.newStatus,
+      // Apply action inside the transaction
+      const applyRes = await validateAndApplyAction({
+        action,
+        actor,
         comment,
-      },
-    }).catch((err) =>
-      console.error("[Permission Bulk] addAudit error for ticket", row.ticket_number, err)
-    );
+        ticketRow: row,
+        client: pgClient,
+      });
 
-    addNotification(
-      "user",
-      row.student_user_id,
-      "permission",
-      `Bulk Action: ${action} for ${row.ticket_number}`,
-      `Your permission request ${row.ticket_number} status updated to ${applyRes.newStatus}`
-    ).catch((err) =>
-      console.error(
-        "[Permission Bulk] addNotification error for ticket",
-        row.ticket_number,
-        err
-      )
-    );
+      if (!applyRes.ok) {
+        const status =
+          applyRes.conflict === "forbidden"
+            ? "forbidden"
+            : applyRes.conflict === "notPending"
+            ? "not_pending"
+            : applyRes.conflict === "notAllowed"
+            ? "not_allowed"
+            : applyRes.conflict === "concurrentModification"
+            ? "skipped"
+            : "error";
 
-    results.push({
-      ticket,
-      status: "ok",
-      newStage: applyRes.newStage,
-    });
-    succeeded++;
-  }
+        out.push({ ticket, status, error: applyRes.error || "Action could not be applied" });
+        txFailed++;
+        continue;
+      }
+
+      // Audit and Notification
+      addAudit({
+        action: `PERMISSION_BULK_${action}`,
+        userId: actor.id,
+        userName: actor.name,
+        role: actor.role,
+        details: {
+          ticket: row.ticket_number,
+          newStage: applyRes.newStage,
+          newStatus: applyRes.newStatus,
+          comment,
+        },
+      }).catch((err) =>
+        console.error("[Permission Bulk] addAudit error for ticket", row.ticket_number, err)
+      );
+
+      addNotification(
+        "user",
+        row.student_user_id,
+        "permission",
+        `Bulk Action: ${action} for ${row.ticket_number}`,
+        `Your permission request ${row.ticket_number} status updated to ${applyRes.newStatus}`
+      ).catch((err) =>
+        console.error("[Permission Bulk] addNotification error for ticket", row.ticket_number, err)
+      );
+
+      out.push({ ticket, status: "ok", newStage: applyRes.newStage });
+      txSucceeded++;
+    }
+    return { out, txSucceeded, txFailed };
+  }, { currentUserId: actor.id });
+
+  const results = txResults.out;
+  let succeeded = txResults.txSucceeded;
+  let failed = txResults.txFailed;
 
   return NextResponse.json({
     success: true,

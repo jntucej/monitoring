@@ -1,24 +1,26 @@
 -- ============================================================================
 -- Migration: 20261224000001_fix_is_admin_param_rename
--- Purpose: Re-create is_admin with the p_uid param name. The live DB has
---   is_admin(user_id) from an older baseline; 20261010000000_role_registry
---   redefines it as is_admin(p_uid). On a DB where the old function still
---   exists, the CREATE OR REPLACE fails on the param-name change. This
---   migration drops the old function (by arg type, not name) and re-creates
---   it, so the chain can proceed. Idempotent: safe to run twice.
+-- Purpose: Re-create is_admin with a stable parameter name. The live DB has
+--   is_admin(user_id) from an older baseline; renaming the parameter would
+--   break CREATE OR REPLACE (Postgres rejects "cannot change name of input
+--   parameter"). So we keep the parameter name `user_id` and rely on CREATE
+--   OR REPLACE which is idempotent.
+--   CRITICAL: Never use CASCADE here — it drops every RLS policy that
+--   references is_admin (users_select_admin, gates_select_admin,
+--   sdetails_manage_admin, predictions, audit_logs, etc.) and those policies
+--   are never recreated.
 -- ============================================================================
-DROP FUNCTION IF EXISTS public.is_admin(uuid) CASCADE;
-CREATE OR REPLACE FUNCTION public.is_admin(p_uid uuid)
+CREATE OR REPLACE FUNCTION public.is_admin(user_id uuid)
 RETURNS boolean
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public
 AS $$
   SELECT EXISTS (
     SELECT 1 FROM public.users
-    WHERE id = p_uid AND role IN ('admin', 'sysadmin')
+    WHERE id = user_id AND role IN ('admin', 'sysadmin')
   );
 $$;
 
--- Self-record
+-- Self-record (adaptive to 2-col or 4-col schema_migrations)
 DO $$
 DECLARE
   has_filename BOOLEAN;

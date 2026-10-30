@@ -9,12 +9,12 @@ services:
         required: false
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-gate_monitor}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-gate_app}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in production or .env}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-gate_monitor}"]
+      test: ["CMD-SHELL", "pg_isready -U gate_app -d ${POSTGRES_DB:-gate_monitor}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -64,7 +64,7 @@ services:
       - NEXT_TELEMETRY_DISABLED=1
       - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
       - POSTGRES_PORT=${POSTGRES_PORT:-5432}
-      - DATABASE_URL=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@${POSTGRES_HOST:-postgres}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-gate_monitor}
+      - DATABASE_URL=postgres://gate_app:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}@${POSTGRES_HOST:-postgres}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-gate_monitor}
       - MONITORING_PROM_URL=${MONITORING_PROM_URL:-}
       - MONITORING_LOKI_URL=${MONITORING_LOKI_URL:-}
       - MONITORING_GRAFANA_URL=${MONITORING_GRAFANA_URL:-}
@@ -143,7 +143,7 @@ services:
       - NODE_ENV=production
       - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
       - POSTGRES_PORT=${POSTGRES_PORT:-5432}
-      - DATABASE_URL=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@${POSTGRES_HOST:-postgres}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-gate_monitor}
+      - DATABASE_URL=postgres://gate_app:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}@${POSTGRES_HOST:-postgres}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-gate_monitor}
       - MONITORING_PROM_URL=${MONITORING_PROM_URL:-}
       - MONITORING_LOKI_URL=${MONITORING_LOKI_URL:-}
       - MONITORING_GRAFANA_URL=${MONITORING_GRAFANA_URL:-}

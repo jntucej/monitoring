@@ -187,29 +187,19 @@ export function createTcpLogFetcher(opts: {
         });
 
         socket.on('timeout', () => {
-          // Never throw inside an EventEmitter listener: an uncaught throw
-          // here crashes Node and the promise never resolves. Warn and fall
-          // back (fake logs when enabled, empty list otherwise).
-          if (process.env.NODE_ENV === 'production' && process.env.ALLOW_FAKE_DEVICE_LOGS !== 'true') {
-            recordFetchError(
-              `TCP terminal ${opts.host}:${opts.port} timed out after ${timeoutMs}ms and USE_FAKE_DEVICE_LOGS is disabled in production.`
-            );
-          } else {
-            console.warn(`[log-fetcher] TCP 4370 connection to ${opts.host}:${opts.port} timed out after ${timeoutMs}ms.`);
-          }
-          finish(process.env.USE_FAKE_DEVICE_LOGS === 'true' ? fakeTcpLogs() : []);
+          cleanup();
+          recordFetchError(
+            `TCP terminal ${opts.host}:${opts.port} timed out after ${timeoutMs}ms. Refusing to inject synthetic logs.`
+          );
+          resolveResult([]);
         });
 
         socket.on('error', (err) => {
-          // Consolidated error handler. Same rule: no throws in listeners.
-          if (process.env.NODE_ENV === 'production' && process.env.ALLOW_FAKE_DEVICE_LOGS !== 'true') {
-            recordFetchError(
-              `TCP terminal ${opts.host}:${opts.port} error and USE_FAKE_DEVICE_LOGS is disabled in production: ${err.message}`
-            );
-          } else {
-            console.warn(`[log-fetcher] TCP 4370 socket error on ${opts.host}:${opts.port} (${err.message}). Using resilient fallback.`);
-          }
-          finish(process.env.USE_FAKE_DEVICE_LOGS === 'true' ? fakeTcpLogs() : []);
+          cleanup();
+          recordFetchError(
+            `TCP terminal ${opts.host}:${opts.port} socket error: ${err.message}. Refusing to inject synthetic logs.`
+          );
+          resolveResult([]);
         });
 
         socket.on('close', () => {

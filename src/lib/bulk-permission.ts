@@ -10,6 +10,7 @@ import {
   canApproveAtStage,
 } from "./permission-workflow";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
+import type { PoolClient } from "pg";
 
 export interface Actor {
   id: string;
@@ -52,6 +53,7 @@ export interface ApplyActionOptions {
   comment?: string | null;
   targetStage?: string;
   ticketRow: TicketRow;
+  client?: PoolClient;
 }
 
 /**
@@ -72,7 +74,7 @@ export async function validateAndApplyAction(
   newStatus?: string;
   updatedRow?: unknown;
 }> {
-  const { action, actor, targetStage, ticketRow: row } = options;
+  const { action, actor, targetStage, ticketRow: row, client } = options;
   const comment = extraComment !== undefined ? extraComment : options.comment;
 
   // Check stage permission
@@ -131,6 +133,32 @@ export async function validateAndApplyAction(
     comment,
     { from: row.current_stage, to: nextStage }
   );
+  const updatedAt = new Date().toISOString();
+
+  if (client) {
+    // CAS guard inside the caller's transaction.
+    const res = await client.query(
+      `UPDATE public.permission_requests
+       SET current_stage = $1, status = $2, stage_history = $3, updated_at = $4
+       WHERE id = $5 AND current_stage = $6
+       RETURNING id, ticket_number, current_stage, status, stage_history`,
+      [nextStage, nextStatus, JSON.stringify(updatedHistory), updatedAt, row.id, row.current_stage]
+    );
+    const updated = res.rows[0] || null;
+    if (!updated) {
+      return {
+        ok: false,
+        conflict: "concurrentModification",
+        error: `Ticket ${row.ticket_number} was modified by another approver.`,
+      };
+    }
+    return {
+      ok: true,
+      newStage: nextStage,
+      newStatus: nextStatus,
+      updatedRow: updated,
+    };
+  }
 
   const supabase = getSupabaseServiceClient();
   // G18: CAS guard — only apply if the row is still at the stage we read.
