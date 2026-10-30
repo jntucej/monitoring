@@ -375,7 +375,10 @@ async function handleGet(
      LIMIT $${params.length - 1} OFFSET $${params.length}
   `;
 
-  const { rows } = await query(sql, params);
+  const { rows } = await query(sql, params, {
+    currentUserId: auth.userId,
+    currentRole: auth.role,
+  });
   // Historical flat-array contract: every UI consumer reads
   //   { success: true, data: PermissionRow[], total }
   // (array directly under `data`, with `student`/`requester` embeds and a
