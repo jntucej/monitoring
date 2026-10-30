@@ -255,7 +255,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
 
   return (
     <div
-      className={`glass-card w-full max-w-lg p-6 sm:p-8 rounded-3xl space-y-6 transition-all border border-slate-800/50 shadow-2xl ${
+      className={`glass-card w-full max-w-lg sm:max-w-xl md:max-w-2xl lg:max-w-md xl:max-w-lg p-6 sm:p-8 md:p-10 rounded-3xl space-y-6 transition-all border border-slate-800/50 shadow-2xl ${
         isShaking ? "animate-shake border-[var(--action-danger)]" : ""
       }`}
     >
@@ -460,7 +460,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
 
       {showResetModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
+          <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 max-w-sm w-full space-y-4 shadow-2xl">
             <h3 className="font-bold text-lg text-white">Reset Password</h3>
             <p className="text-xs text-[var(--text-muted)]">
               Enter your registered email address to receive password reset instructions.

@@ -11,7 +11,7 @@ export default function UnifiedLoginPage() {
         <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-1/4 right-1/4 w-[28rem] h-[28rem] bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none" />
         
-        <div className="w-full max-w-lg space-y-3">
+      <div className="w-full max-w-lg sm:max-w-xl md:max-w-2xl lg:max-w-md xl:max-w-lg space-y-3">
           <div className="text-center text-xs text-[var(--text-muted)] mb-2">Received a one-time setup code? <Link href="/bootstrap" className="text-emerald-400 hover:underline">Activate your account</Link></div>
         <LoginForm
             title="Login"
