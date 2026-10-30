@@ -153,6 +153,21 @@ export function RoleConsole({ role, roleRoot, groups, children, bare }: RoleCons
 
   const config = useMemo(() => getConsoleConfig(role), [role]);
 
+  // Unknown roles (e.g. "student") have no console config. Rendering the
+  // operator shell chrome for them leaks the "Ops Console" header and the
+  // "Gate not set" operator status strip. The parent layout owns navigation
+  // chrome, so render only the caller's children.
+  if (!config) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn(
+        `[RoleConsole] No console config for role="${role}". ` +
+          `Rendering children only. Add a CONSOLES entry or pass bare={true} ` +
+          `if the parent shell already owns the chrome.`
+      );
+    }
+    return <>{children}</>;
+  }
+
   const isKanban = config?.board?.kind === "kanban";
   const isGrid = config?.board?.kind === "grid";
   const isDigest = config?.board?.kind === "digest";

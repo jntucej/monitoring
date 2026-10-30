@@ -90,12 +90,15 @@ export function PermissionRequestForm({ onSubmitted, defaultWorkflow = "hostel" 
         }),
       });
       const json = await res.json().catch(() => ({}));
-      if (json.success && json.data?.ticket_number) {
+      if (!res.ok || json?.success === false) {
+        const code = json?.error?.code ?? json?.code ?? `HTTP_${res.status}`;
+        const msg =
+          json?.error?.message ?? json?.message ?? "Failed to submit your request. Please try again.";
+        setError(`[${code}] ${msg}`);
+      } else if (json.success && json.data?.ticket_number) {
         const ticket = json.data.ticket_number as string;
         setTicketNumber(ticket);
         if (onSubmitted) onSubmitted(ticket);
-      } else {
-        setError(json.error?.message || "Failed to submit your request. Please try again.");
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Network error. Please check your connection.");

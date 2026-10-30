@@ -52,6 +52,8 @@ WHERE b.std_daily > 0
   AND m.today_count > 50; -- Avoid low-volume noise
 
 -- 3. View for Off-Hours Privileged Actions (sysadmin/admin actions outside 07:00-22:00 IST)
+-- audit_logs schema: (id, action, user_id, user_name, user_role, details, ip_address, user_agent, timestamp)
+-- `details` is JSONB; entity info lives in details->>'entity' when present.
 CREATE OR REPLACE VIEW public.v_ueba_off_hours_privileged AS
 SELECT 
   a.id,
@@ -59,19 +61,19 @@ SELECT
   u.email,
   u.role,
   a.action,
-  a.entity,
-  a.entity_id,
-  a.created_at,
-  EXTRACT(HOUR FROM (a.created_at AT TIME ZONE 'Asia/Kolkata')) AS local_hour
+  a.details->>'entity' AS entity,
+  a.details->>'entity_id' AS entity_id,
+  a.timestamp AS created_at,
+  EXTRACT(HOUR FROM (a.timestamp AT TIME ZONE 'Asia/Kolkata')) AS local_hour
 FROM public.audit_logs a
 JOIN public.users u ON u.id = a.user_id
 WHERE u.role IN ('sysadmin', 'admin')
   AND (
-    EXTRACT(HOUR FROM (a.created_at AT TIME ZONE 'Asia/Kolkata')) < 7 
-    OR EXTRACT(HOUR FROM (a.created_at AT TIME ZONE 'Asia/Kolkata')) >= 22
+    EXTRACT(HOUR FROM (a.timestamp AT TIME ZONE 'Asia/Kolkata')) < 7 
+    OR EXTRACT(HOUR FROM (a.timestamp AT TIME ZONE 'Asia/Kolkata')) >= 22
   )
   AND a.action NOT LIKE 'CRON_%'
-ORDER BY a.created_at DESC;
+ORDER BY a.timestamp DESC;
 
 -- 4. View for Impossible Travel / Multi-IP Session Anomalies (within 1 hour)
 CREATE OR REPLACE VIEW public.v_ueba_impossible_travel AS

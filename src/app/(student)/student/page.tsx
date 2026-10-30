@@ -1,31 +1,40 @@
 "use client";
 
-
-import React, { useEffect, useState, Suspense } from "react";
+import React, { useEffect, useMemo, useState, Suspense } from "react";
 import Link from "next/link";
 import { DigitalIdCard } from "@/components/student/DigitalIdCard";
-import { MessFoodPreference } from "@/components/student/MessFoodPreference";
 import { StudentDashboardWidgets } from "@/components/student/widgets";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
-import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
-import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { CampusFeed } from "@/components/engagement/CampusFeed";
-import { AttentionQueue } from "@/components/engagement/AttentionQueue";
-import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
 import { EventsPanel } from "@/components/engagement/EventsPanel";
+import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
 import { Achievements } from "@/components/engagement/Achievements";
 import { PersonalGoals } from "@/components/engagement/PersonalGoals";
-import { SemesterRecap } from "@/components/engagement/SemesterRecap";
 import { useAuthStore } from "@/stores/authStore";
-import { extractStudentRoll, fetchAuthWithFriendlyError } from "@/lib/student-utils";
 import {
-  Send, Calendar, Clock, Loader2, UtensilsCrossed, TrendingUp, AlertTriangle, Sparkles, QrCode,
+  Calendar,
+  Clock,
+  Loader2,
+  Send,
+  Sparkles,
+  QrCode,
+  TrendingUp,
 } from "lucide-react";
 import { PassQrModal } from "@/components/student/PassQrModal";
 
-type StatsErrorCode =
+type StudentDashboardPayload = {
+  curfew: {
+    today: { score: number; onTime: number; late: number; violations: number };
+    thirtyDayAvg: number;
+    trend: "up" | "down" | "flat";
+  };
+  monthly: { yearMonth: string; total: number };
+  activePasses: Array<{ id: string; reason: string; from: string; to: string; qrCode?: string }>;
+  lastScan: { direction: "IN" | "OUT"; gateName: string; timestamp: string } | null;
+};
+
+type StudentDashboardError =
   | "unknown"
   | "no_roll"
   | "http_401"
@@ -35,305 +44,309 @@ type StatsErrorCode =
   | "http_5xx"
   | "network";
 
-function friendlyStatsError(code: StatsErrorCode): string {
+function friendlyDashboardError(code: StudentDashboardError): string {
   switch (code) {
     case "no_roll":
       return "Couldn't identify your student ID. Please re-login to refresh your session.";
     case "http_401":
-      return "Session expired — please re-login to continue.";
+      return "Session expired. Please re-login to continue.";
     case "http_403":
-      return "You don't have permission to view gate stats.";
+      return "You don't have permission to view this dashboard.";
     case "http_404":
-      return "No gate history yet — check back after your first scan.";
+      return "No dashboard data yet. Check back after your first scan.";
     case "http_429":
-      return "Too many requests — please wait a moment and retry.";
+      return "Too many requests. Please wait a moment and retry.";
     case "http_5xx":
-      return "Server error — please retry.";
+      return "Server error. Please retry.";
     case "network":
-      return "Network error — check your connection and retry.";
+      return "Network error. Check your connection and retry.";
     default:
-      return "Could not load stats — please retry.";
+      return "Could not load dashboard data. Please retry.";
   }
 }
 
 function StudentDashboardInner() {
   const authUser = useAuthStore((s) => s.user);
+  const [dashboard, setDashboard] = useState<StudentDashboardPayload | null>(null);
+  const [dashboardError, setDashboardError] = useState<{ code: StudentDashboardError; message: string } | null>(null);
+  const [dashboardLoading, setDashboardLoading] = useState(true);
+  const [activePass, setActivePass] = useState<StudentDashboardPayload["activePasses"][number] | null>(null);
+  const [showQrModal, setShowQrModal] = useState(false);
 
-  const [studentStats, setStudentStats] = useState<{
-    monthlyOutings: number;
-    lastGateTime: string;
-  } | null>(null);
-  const [statsError, setStatsError] = useState<{ code: StatsErrorCode; message: string } | null>(null);
-  const [activePass, setActivePass] = useState<any>(null);
-  const [showQrModal, setShowQrModal] = useState<boolean>(false);
+  const loadDashboard = async () => {
+    setDashboardLoading(true);
+    setDashboardError(null);
+    setDashboard(null);
+    setActivePass(null);
 
-  const fetchActivePass = async () => {
     try {
-      const roll = extractStudentRoll(authUser);
-      if (!roll) return;
-      const res = await fetch(`/api/passes?roll=${encodeURIComponent(roll)}&status=APPROVED`, { cache: "no-store" });
+      const res = await fetch("/api/student/dashboard", { cache: "no-store" });
       const json = await res.json().catch(() => null);
-      if (json?.success && Array.isArray(json.data) && json.data.length > 0) {
-        const now = Date.now();
-        const valid = json.data.find((p: any) => {
-          const to = p.to ? new Date(p.to).getTime() : Infinity;
-          return p.status !== "USED" && !p.used_at && to >= now;
+
+      if (!res.ok || !json?.success || !json.data) {
+        let code: StudentDashboardError = "unknown";
+        if (res.status === 401) code = "http_401";
+        else if (res.status === 403) code = "http_403";
+        else if (res.status === 404) code = "http_404";
+        else if (res.status === 429) code = "http_429";
+        else if (res.status >= 500) code = "http_5xx";
+        setDashboardError({
+          code,
+          message: json?.error?.message ?? friendlyDashboardError(code),
         });
-        setActivePass(valid ?? null);
-      } else {
-        setActivePass(null);
+        return;
       }
+
+      const data = json.data as StudentDashboardPayload;
+      setDashboard(data);
+
+      const now = Date.now();
+      const validPass = data.activePasses.find((pass) => new Date(pass.to).getTime() >= now) ?? null;
+      setActivePass(validPass);
     } catch {
-      setActivePass(null);
+      setDashboardError({ code: "network", message: friendlyDashboardError("network") });
+    } finally {
+      setDashboardLoading(false);
     }
   };
 
-  const fetchStudentStats = () => {
-    setStatsError(null);
-    setStudentStats(null);
-    (async () => {
-      try {
-        const roll = extractStudentRoll(authUser);
-        if (!roll) {
-          setStatsError({ code: "no_roll", message: friendlyStatsError("no_roll") });
-          return;
-        }
-
-        const res = await fetchAuthWithFriendlyError(
-          `/api/persons/${encodeURIComponent(roll)}/history`,
-        );
-
-        if (!res.ok) {
-          let code: StatsErrorCode = "unknown";
-          if (res.status === 401) code = "http_401";
-          else if (res.status === 403) code = "http_403";
-          else if (res.status === 404) code = "http_404";
-          else if (res.status === 429) code = "http_429";
-          else if (res.status && res.status >= 500) code = "http_5xx";
-          else if (res.status === null) code = "network";
-          setStatsError({ code, message: res.friendly || friendlyStatsError(code) });
-          return;
-        }
-
-        const json = res.json as { success?: boolean; data?: { history?: any[] } } | null;
-        const history = json?.data?.history;
-        if (json?.success && Array.isArray(history)) {
-          const scans = history;
-          const monthly = scans.filter((s: any) => {
-            const scanDate = new Date(s.timestamp || s.scanned_at);
-            const now = new Date();
-            return (
-              !Number.isNaN(scanDate.getTime()) &&
-              scanDate.getMonth() === now.getMonth() &&
-              scanDate.getFullYear() === now.getFullYear()
-            );
-          }).length;
-
-          setStudentStats({
-            monthlyOutings: monthly,
-            lastGateTime:
-              scans[0]?.timestamp || scans[0]?.scanned_at
-                ? new Date(scans[0].timestamp || scans[0].scanned_at).toLocaleString([], {
-                    dateStyle: "short",
-                    timeStyle: "short",
-                  })
-                : "—",
-          });
-        } else {
-          setStudentStats({ monthlyOutings: 0, lastGateTime: "—" });
-        }
-      } catch {
-        setStatsError({ code: "network", message: friendlyStatsError("network") });
-      }
-    })();
-  };
-
   useEffect(() => {
-    fetchStudentStats();
-    fetchActivePass();
-  }, []);
+    void loadDashboard();
+  }, [authUser?.id]);
+
+  const todayGlance = useMemo(() => {
+    if (!dashboard) return null;
+    return {
+      curfewScore: dashboard.curfew.today.score,
+      trend: dashboard.curfew.trend,
+      monthlyOutings: dashboard.monthly.total,
+      lastScan: dashboard.lastScan,
+      activePassCount: dashboard.activePasses.length,
+    };
+  }, [dashboard]);
 
   return (
     <div className="space-y-6 pb-12 min-w-0">
-      {/* Active Approved Gate Pass Banner */}
-      {activePass && (
-        <div className="p-4 rounded-3xl bg-emerald-500/10 border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm animate-in fade-in">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-emerald-500/20 text-emerald-400">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-emerald-300">You have an Active Approved Gate Pass!</p>
-              <p className="text-xs text-emerald-400/80 capitalize">
-                {activePass.reason?.replace(/_/g, " ") || "Gate Pass"} • Valid until{" "}
-                {new Date(activePass.to).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-              </p>
-            </div>
+      <section aria-label="Student hero" className="rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-xs text-[var(--text-muted)]">Student dashboard</p>
+            <h1 className="mt-1 text-lg font-bold text-[var(--text-primary)]">
+              {authUser?.name || "Student"}
+            </h1>
+            <p className="mt-1 text-xs text-[var(--text-muted)]">
+              {authUser?.uniqueId ? `ID ${authUser.uniqueId}` : "Signed in"}
+            </p>
           </div>
-          <button
-            type="button"
-            onClick={() => setShowQrModal(true)}
-            className="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition active:scale-95 shrink-0"
-          >
-            <QrCode className="w-4 h-4" />
-            <span>Show QR at Gate</span>
-          </button>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/student/id"
+              className="inline-flex items-center gap-2 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] px-3 py-2 text-xs font-semibold text-[var(--text-primary)]"
+            >
+              <QrCode className="h-4 w-4 text-[var(--action-primary)]" />
+              Open Digital ID
+            </Link>
+          </div>
         </div>
+      </section>
+
+      {activePass && (
+        <section aria-label="Active gate pass" className="rounded-3xl bg-emerald-500/10 border border-emerald-500/30 p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-2xl bg-emerald-500/20 text-emerald-400">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-emerald-300">Active Approved Gate Pass</p>
+                <p className="text-xs text-emerald-400/80">
+                  {activePass.reason ? activePass.reason.replace(/_/g, " ") : "Gate Pass"} · Valid until{" "}
+                  {new Date(activePass.to).toLocaleString([], {
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowQrModal(true)}
+              className="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-2"
+            >
+              <QrCode className="w-4 h-4" />
+              Show QR at Gate
+            </button>
+          </div>
+        </section>
       )}
 
       {showQrModal && activePass && (
         <PassQrModal
           isOpen={showQrModal}
-          ticketNumber={activePass.ticket_number || activePass.id}
-          passTitle={`${activePass.reason?.replace(/_/g, " ") || "Gate"} Pass`}
+          ticketNumber={activePass.id}
+          passTitle={`${activePass.reason ? activePass.reason.replace(/_/g, " ") : "Gate"} Pass`}
           fromDate={activePass.from}
           toDate={activePass.to}
           onClose={() => setShowQrModal(false)}
         />
       )}
 
-      {/* Shared + engagement panels */}
-      <QuickActions />
-      <NotificationCenter />
-      <PersonalizedCampusHome />
-      <AttentionQueue />
-      <ActivityTimeline />
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <CampusFeed />
-        <EventsPanel />
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Achievements />
-        <PersonalGoals />
-      </div>
-      <SemesterRecap />
-      <TaskContinuity />
-
-      {/* Quick Actions & Pass Request Bar */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <Link
-          href="/student/gate-pass?action=new"
-          className="p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/15 transition-all flex items-center justify-between group"
-        >
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-indigo-500/20 text-indigo-400 group-hover:scale-105 transition-transform">
-              <Send className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="text-xs font-bold text-[var(--text-primary)]">Request Local Pass</div>
-              <div className="text-[10px] text-[var(--text-muted)]">Day outing up to 21:00</div>
-            </div>
+      <section aria-label="Today glance" className="rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-bold text-[var(--text-primary)]">Today’s Glance</h2>
+            <p className="text-xs text-[var(--text-muted)]">Curfew, last movement, and active pass state in one place.</p>
           </div>
-        </Link>
+          {dashboardLoading && <Loader2 className="h-4 w-4 animate-spin text-[var(--text-muted)]" />}
+        </div>
 
-        <Link
-          href="/student/gate-pass?action=new_leave"
-          className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/15 transition-all flex items-center justify-between group"
-        >
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400 group-hover:scale-105 transition-transform">
-              <Calendar className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="text-xs font-bold text-[var(--text-primary)]">Outstation Leave</div>
-              <div className="text-[10px] text-[var(--text-muted)]">Multi-day home permissions</div>
-            </div>
-          </div>
-        </Link>
-
-        <Link
-          href="/student/gate-pass?action=new"
-          className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/15 transition-all flex items-center justify-between group"
-        >
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400 group-hover:scale-105 transition-transform">
-              <Clock className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="text-xs font-bold text-[var(--text-primary)]">Daily Outing</div>
-              <div className="text-[10px] text-[var(--text-muted)]">Short outing (2-4 hrs)</div>
-            </div>
-          </div>
-        </Link>
-      </div>
-
-      {/* Curfew & Movement Analytics Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {statsError ? (
-          <div className="sm:col-span-4 flex items-center justify-between gap-3 p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30">
-            <div className="flex items-center gap-2 text-xs text-rose-300 font-medium">
-              <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
-              <span>{statsError.message}</span>
-            </div>
+        {dashboardError ? (
+          <div className="mt-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 p-4">
+            <p className="text-xs font-semibold text-rose-500">
+              {`[${dashboardError.code}] `}{dashboardError.message}
+            </p>
             <button
               type="button"
-              onClick={fetchStudentStats}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-500/20 border border-rose-500/30 text-rose-300 text-[11px] font-bold hover:bg-rose-500/30 transition"
+              onClick={() => void loadDashboard()}
+              className="mt-3 rounded-xl bg-rose-500/20 border border-rose-500/30 px-3 py-1.5 text-[11px] font-bold text-rose-300 hover:bg-rose-500/30"
             >
               Retry
             </button>
           </div>
-        ) : studentStats === null ? (
-          <div className="sm:col-span-4 flex items-center justify-center gap-2 p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] text-xs text-[var(--text-muted)]">
-            <Loader2 className="w-4 h-4 animate-spin text-[var(--action-info)]" />
-            Loading your stats…
+        ) : dashboardLoading ? (
+          <div className="mt-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] p-4 text-xs text-[var(--text-muted)]">
+            Loading your dashboard...
+          </div>
+        ) : todayGlance ? (
+          <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] p-4">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Curfew Score</p>
+              <p className="mt-1 text-2xl font-black text-[var(--text-primary)]">{todayGlance.curfewScore}</p>
+              <p className="text-[10px] text-[var(--text-muted)]">Trend: {todayGlance.trend}</p>
+            </div>
+            <div className="rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] p-4">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Last Scan</p>
+              <p className="mt-1 text-sm font-bold text-[var(--text-primary)]">
+                {todayGlance.lastScan ? todayGlance.lastScan.direction : "No scan yet"}
+              </p>
+              <p className="text-[10px] text-[var(--text-muted)]">
+                {todayGlance.lastScan
+                  ? new Date(todayGlance.lastScan.timestamp).toLocaleString([], {
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : "Awaiting first movement"}
+              </p>
+            </div>
+            <div className="rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] p-4">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Monthly Outings</p>
+              <p className="mt-1 text-2xl font-black text-[var(--text-primary)]">{todayGlance.monthlyOutings}</p>
+              <p className="text-[10px] text-[var(--text-muted)]">Total this month</p>
+            </div>
+            <div className="rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] p-4">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Active Passes</p>
+              <p className="mt-1 text-2xl font-black text-[var(--text-primary)]">{todayGlance.activePassCount}</p>
+              <p className="text-[10px] text-[var(--text-muted)]">Approved and valid now</p>
+            </div>
           </div>
         ) : (
-          <>
-            <div className="p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] space-y-1">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                  Monthly Outings
-                </span>
-                <TrendingUp className="w-4 h-4 text-[var(--action-info)]" />
-              </div>
-              <div className="text-xl font-black text-[var(--text-primary)]">{studentStats.monthlyOutings}</div>
-              <div className="text-[10px] text-[var(--text-muted)] font-medium">Scans this month</div>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] space-y-1">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                  Last Gate Scan
-                </span>
-                <Clock className="w-4 h-4 text-[var(--action-info)]" />
-              </div>
-              <div className="text-xs font-bold text-[var(--text-primary)] truncate">{studentStats.lastGateTime}</div>
-              <div className="text-[10px] text-[var(--action-info)] font-medium">Verified Server Log</div>
-            </div>
-          </>
+          <div className="mt-4 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] p-4 text-xs text-[var(--text-muted)]">
+            No dashboard data yet.
+          </div>
         )}
-      </div>
+      </section>
 
-      {/* Student Overview Widgets */}
-      <section aria-label="Student overview" className="mt-2">
+      <section aria-label="Quick actions" className="rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <Link
+            href="/student/permissions/new"
+            className="p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/15 transition-all flex items-center gap-2.5 group"
+          >
+            <div className="p-2 rounded-xl bg-indigo-500/20 text-indigo-400">
+              <Send className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-xs font-bold text-[var(--text-primary)]">New Pass / Request</div>
+              <div className="text-[10px] text-[var(--text-muted)]">Hostel, exam, or memo request</div>
+            </div>
+          </Link>
+
+          <Link
+            href="/student/gate-pass?action=new"
+            className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/15 transition-all flex items-center gap-2.5"
+          >
+            <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400">
+              <Calendar className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-xs font-bold text-[var(--text-primary)]">Local Gate Pass</div>
+              <div className="text-[10px] text-[var(--text-muted)]">Day outing up to curfew</div>
+            </div>
+          </Link>
+
+          <Link
+            href="/student/history"
+            className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/15 transition-all flex items-center gap-2.5"
+          >
+            <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400">
+              <Clock className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-xs font-bold text-[var(--text-primary)]">Movement Log</div>
+              <div className="text-[10px] text-[var(--text-muted)]">Your recent gate history</div>
+            </div>
+          </Link>
+        </div>
+      </section>
+
+      <section aria-label="Campus pulse" className="rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-bold text-[var(--text-primary)]">Campus Pulse</h2>
+            <p className="text-xs text-[var(--text-muted)]">Announcements and events in one calm feed.</p>
+          </div>
+          <TrendingUp className="w-4 h-4 text-[var(--action-info)]" />
+        </div>
+
+        <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <CampusFeed limit={8} />
+          <EventsPanel limit={4} />
+        </div>
+      </section>
+
+      <section aria-label="Progress strip" className="rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Achievements />
+          <PersonalGoals />
+        </div>
+      </section>
+
+      <section aria-label="Recent activity" className="rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+        <ActivityTimeline limit={8} />
+      </section>
+
+      <section aria-label="Student overview widgets" className="space-y-3">
+        <div className="flex items-center gap-2 justify-center sm:justify-start">
+          <p className="text-sm font-semibold text-[var(--text-primary)]">Status and Pass Widgets</p>
+        </div>
         <StudentDashboardWidgets />
       </section>
 
-      {/* Digital ID Card */}
-      <div className="space-y-3">
+      <section aria-label="Digital ID card" className="space-y-3">
         <div className="flex items-center gap-2 justify-center sm:justify-start">
           <p className="text-sm font-semibold text-[var(--text-primary)]">Digital Campus ID Card</p>
         </div>
         <div className="max-w-md mx-auto sm:max-w-none">
           <DigitalIdCard />
         </div>
-      </div>
+      </section>
 
-      {/* Mess Food Preference */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2 justify-center sm:justify-start">
-          <UtensilsCrossed className="w-5 h-5 text-[var(--action-primary)]" />
-          <p className="text-sm font-semibold text-[var(--text-primary)]">Mess Food Preference</p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          <MessFoodPreference />
-        </div>
-      </div>
-
-      <div className="mt-6">
-        <DevContactStrip />
-      </div>
+      <QuickActions />
+      <NotificationCenter />
     </div>
   );
 }

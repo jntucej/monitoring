@@ -177,7 +177,16 @@ async function handlePost(
     .single();
 
   if (insErr || !inserted) {
-    return fail("DB_ERROR", insErr?.message ?? "Insert failed", 500);
+    const code = (insErr as { code?: string } | null)?.code;
+    const message = insErr?.message ?? "Insert failed";
+    if (code === "42501") {
+      console.error("[permissions POST] RLS blocked insert", { code, message });
+      return fail("DB_RLS", "Row-level security blocked this request", 500);
+    }
+    if (code) {
+      console.error("[permissions POST] DB error", { code, message });
+    }
+    return fail("DB_ERROR", message, 500);
   }
 
   await addAudit({

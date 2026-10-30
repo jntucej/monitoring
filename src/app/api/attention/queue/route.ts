@@ -205,10 +205,12 @@ async function fetchUnresolvedAlerts(
 async function fetchOfflineGates(
   db: ReturnType<typeof getSupabaseServiceClient>,
 ): Promise<AttentionItem[]> {
+  // gates table tracks liveness via is_active (true = online).
+  // A "gate offline" item is any gate whose is_active flag is false.
   const { data, error } = await db
     .from("gates")
-    .select("id, name, is_online")
-    .eq("is_online", false)
+    .select("id, name, is_active")
+    .eq("is_active", false)
     .limit(1);
 
   if (error) return [];
