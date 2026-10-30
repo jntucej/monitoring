@@ -130,6 +130,11 @@ export interface RoleConsoleConfig {
   /** Render RecentScans as a swipe-up / swipe-down bottom sheet. */
   recentSheet: boolean;
   /**
+   * Opt-in "Ops Console" top header. Only operator/supervisor desks need this;
+   * every other role renders no header by default.
+   */
+  opsHeader?: boolean;
+  /**
    * Board source (optional, legacy). When present the RoleConsole shell
    * drives a Board feed, KanbanBoard, or StatusBar from this endpoint.
    */

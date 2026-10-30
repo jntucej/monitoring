@@ -27,7 +27,13 @@ function getClient() {
   try { return getSupabaseServiceClient(); } catch { return supabase; }
 }
 
-export async function checkSystemHealth(): Promise<SystemHealth> {
+async function getRedis() {
+  const { createClient } = await import('redis');
+  const url = process.env.REDIS_URL || 'redis://localhost:6379';
+  return createClient({ url });
+}
+
+export async function checkSystemHealth() {
   const startTime = Date.now();
   const health: SystemHealth = {
     status: 'healthy',
@@ -35,6 +41,7 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
     uptime: typeof process !== 'undefined' && process.uptime ? process.uptime() : 3600,
     components: {
       database: { status: 'healthy', latency: 0 },
+      redis: undefined,
       gateways: { status: 'healthy', online: 0, offline: 0, total: 0 },
       services: { status: 'healthy' },
       env: { status: 'healthy' },
@@ -42,6 +49,66 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
     metrics: { activeUsers: 0, activeSessions: 0, requestsPerMinute: 0, errorRate: 0, avgResponseTime: 0 },
     recentAlerts: [],
   };
+
+  // Check Redis - deep health check
+  try {
+    const redis = await getRedis();
+    const redisStart = Date.now();
+    // Ping Redis
+    await redis.ping();
+    const pingLatency = Date.now() - redisStart;
+
+    // Get replication info (lag)
+    const replInfo = await redis.info('replication');
+    const roleMatch = replInfo.match(/^role:(\w+)$/m);
+    const role = roleMatch?.[1] || 'unknown';
+    const connectedSlaves = replInfo.match(/^connected_slaves:(\d+)$/m);
+    const slaves = connectedSlaves ? parseInt(connectedSlaves[1]) : 0;
+    let replicationLag = 0;
+    if (slaves > 0) {
+      // redis v4: info('replica') without slave index
+      const slave0Info = await redis.info('replica');
+      const lagEndMatch = slave0Info.match(/^repl_backlog_tail_length:(\d+)$/m);
+      replicationLag = lagEndMatch ? parseInt(lagEndMatch[1]) : 0;
+    }
+
+    // Get memory info (used memory)
+    const memInfo = await redis.info('memory');
+    const usedMemMatch = memInfo.match(/^used_memory:(\d+)$/m);
+    const usedMem = usedMemMatch ? parseInt(usedMemMatch[1]) : 0;
+    const maxMemMatch = memInfo.match(/^maxmemory:(\d+)$/m);
+    const maxMem = maxMemMatch ? parseInt(maxMemMatch[1]) : 0;
+    const usedMemPercent = maxMem > 0 ? (usedMem / maxMem) * 100 : 0;
+
+    // Check queue depth (assuming standard Redis queue key pattern)
+    let queueDepth = 0;
+    try {
+      const queues = await Promise.all([
+        redis.lLen('notification_email_queue'),
+        redis.zCard('email_queue'),
+        redis.sCard('email_queue_set')
+      ]);
+      queueDepth = queues.reduce((sum: number, depth: number) => sum + depth, 0);
+    } catch {
+      // Queue check failed silently - will be recorded in error
+    }
+
+    const isHealthy = role === 'master' && usedMemPercent < 90 && replicationLag < 100;
+    health.components.redis = {
+      status: isHealthy ? 'healthy' : 'degraded',
+      latency: pingLatency,
+      error: isHealthy ? undefined : `role=${role}, usedMemPercent=${usedMemPercent.toFixed(1)}%, replicationLag=${replicationLag}, queueDepth=${queueDepth}`
+    };
+    if (!isHealthy && health.status === 'healthy') health.status = 'degraded';
+    await redis.quit();
+  } catch (error) {
+    health.components.redis = {
+      status: 'unhealthy',
+      latency: 0,
+      error: String(error)
+    };
+    health.status = 'unhealthy';
+  }
 
   // Check database
   try {
@@ -62,87 +129,87 @@ export async function checkSystemHealth(): Promise<SystemHealth> {
 
   // If database is down, skip downstream DB queries to avoid cascading timeouts
   if (health.components.database.status !== 'unhealthy') {
-  // Check gateways
-  try {
-    const dbClient = getClient();
-    const { data: gates } = await dbClient.from('gates').select('is_active');
-    const gateStatuses = gates || [];
-    health.components.gateways.total = gateStatuses.length;
-    health.components.gateways.online = gateStatuses.filter((g: any) => g.is_active).length;
-    health.components.gateways.offline = gateStatuses.filter((g: any) => !g.is_active).length;
-    if (health.components.gateways.offline > 0) {
-      health.components.gateways.status = 'degraded';
-      if (health.status === 'healthy') health.status = 'degraded';
-    }
-  } catch (error) {
-    health.components.gateways.status = 'unhealthy';
-    health.status = 'unhealthy';
-  }
-
-  // Active session and user count
-  try {
-    const dbClient = getClient();
-    const { data: sessionData } = await dbClient.from("sessions").select("user_id").is("revoked_at", null).gt("expires_at", new Date().toISOString());
-    if (sessionData) {
-      health.metrics.activeSessions = sessionData.length;
-      const uniqueUsers = new Set(sessionData.map((s: any) => s.user_id).filter(Boolean));
-      health.metrics.activeUsers = uniqueUsers.size;
-    }
-  } catch (error) {
-    console.error('Error getting active sessions:', error);
-  }
-
-  // Get recent alerts
-  try {
-    const { data: alerts } = await getClient().from('alerts').select('*').order('timestamp', { ascending: false }).limit(10);
-    health.recentAlerts = (alerts || []).map((a: any) => ({ id: a.id, severity: a.severity, message: a.message, timestamp: a.timestamp || a.created_at }));
-  } catch (error) {
-    console.error('Error getting recent alerts:', error);
-  }
-
-  // Performance metrics using direct SQL
-  try {
-    const oneMinuteAgo = new Date(Date.now() - 60 * 1000).toISOString();
-
-    // Count real traffic only. Exclude the rate limiter's own bookkeeping
-    // rows (method='LIMITER') — otherwise the limiter writes a row on every
-    // check, so RPS the dashboard reports inflates over time even when real
-    // request volume is flat. This is what made "requests per minute" look
-    // like it was steadily increasing / fluctuating.
-    const totalResult = await query(
-      `SELECT COUNT(*) as count FROM api_metrics WHERE timestamp >= $1 AND method != 'LIMITER'`,
-      [oneMinuteAgo]
-    );
-    health.metrics.requestsPerMinute = parseInt(totalResult.rows?.[0]?.count || '0', 10);
-
-    // Calculate average response time from non-zero entries only
-    const avgResult = await query(
-      `SELECT AVG(response_time) as avg_time, COUNT(*) as cnt
-       FROM api_metrics
-       WHERE timestamp >= $1 AND response_time > 0`,
-      [oneMinuteAgo]
-    );
-    const avgRow = avgResult.rows?.[0];
-    if (avgRow && parseInt(avgRow.cnt) > 0) {
-      health.metrics.avgResponseTime = Math.round(parseFloat(avgRow.avg_time || "0"));
-      console.log(`[health] avgResponseTime from DB: ${health.metrics.avgResponseTime}ms (${avgRow.cnt} records)`);
-    } else {
-      console.log('[health] No non-zero response time records found in last minute');
+    // Check gateways
+    try {
+      const dbClient = getClient();
+      const { data: gates } = await dbClient.from('gates').select('is_active');
+      const gateStatuses = gates || [];
+      health.components.gateways.total = gateStatuses.length;
+      health.components.gateways.online = gateStatuses.filter((g: any) => g.is_active).length;
+      health.components.gateways.offline = gateStatuses.filter((g: any) => !g.is_active).length;
+      if (health.components.gateways.offline > 0) {
+        health.components.gateways.status = 'degraded';
+        if (health.status === 'healthy') health.status = 'degraded';
+      }
+    } catch (error) {
+      health.components.gateways.status = 'unhealthy';
+      health.status = 'unhealthy';
     }
 
-    // Error rate
-    const errorResult = await query(
-      `SELECT COUNT(*) as count FROM api_metrics WHERE timestamp >= $1 AND method != 'LIMITER' AND status_code >= 500`,
-      [oneMinuteAgo]
-    );
-    const errors = parseInt(errorResult.rows?.[0]?.count || '0', 10);
-    const errorRate = health.metrics.requestsPerMinute > 0 ? errors / health.metrics.requestsPerMinute : 0;
-    health.metrics.errorRate = errorRate;
-    if (errorRate > 0.05) health.status = 'degraded';
-  } catch (error) {
-    console.error('Error getting performance metrics:', error);
+    // Active session and user count
+    try {
+      const dbClient = getClient();
+      const { data: sessionData } = await dbClient.from("sessions").select("user_id").is("revoked_at", null).gt("expires_at", new Date().toISOString());
+      if (sessionData) {
+        health.metrics.activeSessions = sessionData.length;
+        const uniqueUsers = new Set(sessionData.map((s: any) => s.user_id).filter(Boolean));
+        health.metrics.activeUsers = uniqueUsers.size;
+      }
+    } catch (error) {
+      console.error('Error getting active sessions:', error);
+    }
+
+    // Get recent alerts
+    try {
+      const { data: alerts } = await getClient().from('alerts').select('*').order('timestamp', { ascending: false }).limit(10);
+      health.recentAlerts = (alerts || []).map((a: any) => ({ id: a.id, severity: a.severity, message: a.message, timestamp: a.timestamp || a.created_at }));
+    } catch (error) {
+      console.error('Error getting recent alerts:', error);
+    }
+
+    // Performance metrics using direct SQL
+    try {
+      const oneMinuteAgo = new Date(Date.now() - 60 * 1000).toISOString();
+
+      // Count real traffic only. Exclude the rate limiter's own bookkeeping
+      // rows (method='LIMITER') — otherwise the limiter writes a row on every
+      // check, so RPS the dashboard reports inflates over time even when real
+      // request volume is flat. This is what made "requests per minute" look
+      // like it was steadily increasing / fluctuating.
+      const totalResult = await query(
+        `SELECT COUNT(*) as count FROM api_metrics WHERE timestamp >= $1 AND method != 'LIMITER'`,
+        [oneMinuteAgo]
+      );
+      health.metrics.requestsPerMinute = parseInt(totalResult.rows?.[0]?.count || '0', 10);
+
+      // Calculate average response time from non-zero entries only
+      const avgResult = await query(
+        `SELECT AVG(response_time) as avg_time, COUNT(*) as cnt
+         FROM api_metrics
+         WHERE timestamp >= $1 AND response_time > 0`,
+        [oneMinuteAgo]
+      );
+      const avgRow = avgResult.rows?.[0];
+      if (avgRow && parseInt(avgRow.cnt) > 0) {
+        health.metrics.avgResponseTime = Math.round(parseFloat(avgRow.avg_time || "0"));
+        console.log(`[health] avgResponseTime from DB: ${health.metrics.avgResponseTime}ms (${avgRow.cnt} records)`);
+      } else {
+        console.log('[health] No non-zero response time records found in last minute');
+      }
+
+      // Error rate
+      const errorResult = await query(
+        `SELECT COUNT(*) as count FROM api_metrics WHERE timestamp >= $1 AND method != 'LIMITER' AND status_code >= 500`,
+        [oneMinuteAgo]
+      );
+      const errors = parseInt(errorResult.rows?.[0]?.count || '0', 10);
+      const errorRate = health.metrics.requestsPerMinute > 0 ? errors / health.metrics.requestsPerMinute : 0;
+      health.metrics.errorRate = errorRate;
+      if (errorRate > 0.05) health.status = 'degraded';
+    } catch (error) {
+      console.error('Error getting performance metrics:', error);
+    }
   }
-}
 
   // Auth-path readiness
   try {
