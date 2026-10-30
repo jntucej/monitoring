@@ -5,7 +5,6 @@
   "scripts": {
     "verify:admin-gating": "bash scripts/verify-admin-role-gating.sh",
     "prebuild": "node scripts/validate-env.js && npm run verify:admin-gating",
-
     "dev": "next dev",
     "build": "NODE_ENV=production next build",
     "start": "next start",
@@ -20,7 +19,8 @@
     "test:e2e:smoke:auth": "SMOKE_USER=admin SMOKE_PASS=123456 playwright test tests/login-success.spec.ts",
     "lint": "eslint src",
     "kb:ingest": "node scripts/ingest-kb.mjs",
-    "kb:ingest:warden": "node scripts/ingest-kb.mjs --dir docs/kb/warden --role warden,admin,sysadmin"
+    "kb:ingest:warden": "node scripts/ingest-kb.mjs --dir docs/kb/warden --role warden,admin,sysadmin",
+    "typecheck:tools": "tsc --noEmit -p tsconfig.tools.json"
   },
   "dependencies": {
     "@remotion/player": "^4.0.518",
@@ -65,5 +65,12 @@
     "eslint-config-next": "16.3.1",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=20.10.0"
+  },
+  "overrides": {
+    "semver": "^7.5.4",
+    "tough-cookie": "^4.1.4"
   }
 }
