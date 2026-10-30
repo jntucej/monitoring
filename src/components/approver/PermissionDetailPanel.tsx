@@ -717,8 +717,8 @@ export function PermissionDetailPanel({
               isOpen={qrOpen}
               ticketNumber={ticket}
               passTitle={`${data.workflow_type || "Gate"} Pass`}
-              fromDate={data.from_date}
-              toDate={data.to_date}
+              fromDate={data.from_date ?? data.fromDate ?? undefined}
+              toDate={data.to_date ?? data.toDate ?? undefined}
               onClose={() => setQrOpen(false)}
             />
           )}

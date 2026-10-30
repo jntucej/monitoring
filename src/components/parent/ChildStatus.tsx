@@ -8,7 +8,7 @@ import { useAuthStore } from "@/stores/authStore";
 
 export function ChildStatus() {
   const [children, setChildren] = useState<Student[]>([]);
-  const [statuses, setStatuses] = useState<Record<string, { status: "IN" | "OUT"; last: { timestamp: string; gateName: string } | null }>>({});
+  const [statuses, setStatuses] = useState<Record<string, { status: "IN" | "OUT"; last: { timestamp: string; gateName: string; reason?: string | null } | null }>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 

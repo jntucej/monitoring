@@ -52,15 +52,24 @@ function KioskPinInner() {
       if (res.ok && json?.success && json?.data) {
         const { accessToken, operator: opInfo, gateId: sessionGateId } = json.data;
         if (accessToken && opInfo) {
-          const authStore = useAuthStore.getState();
-          authStore.setToken(accessToken);
-          authStore.setUser({
+          const userObj = {
             id: String(opInfo.id ?? ""),
             uniqueId: (opInfo.uniqueId ?? opInfo.unique_id) as string,
             name: String(opInfo.name ?? "Kiosk Operator"),
             role: (opInfo.role as Role) ?? "operator",
             gateId: sessionGateId || gateIdParam || undefined,
             status: "ACTIVE" as any,
+          };
+
+          if (typeof sessionStorage !== "undefined") {
+            sessionStorage.setItem("auth.token", accessToken);
+          }
+
+          useAuthStore.setState({
+            token: accessToken,
+            authenticated: true,
+            role: userObj.role,
+            user: userObj,
           });
 
           // Redirect to the gate scan desk

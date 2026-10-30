@@ -433,10 +433,12 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
       return;
     }
 
+    let geo: any = null;
+    let sysTag: any = null;
     // Async execution with GPS geolocation & sysTag telemetry, 15s fetch timeout
     return (async () => {
-      const geo = await getClientLocation();
-      const sysTag = getClientSysTag();
+      geo = await getClientLocation();
+      sysTag = getClientSysTag();
       const authStore = useAuthStore.getState();
       const token = authStore.token;
       const sessionToken = authStore.user?.currentSessionToken;
