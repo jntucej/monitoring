@@ -28,7 +28,11 @@
 
     reverse_proxy web:3000 {
         flush_interval -1
-        header_up X-Client-IP {remote_host}
-        header_up X-Real-IP   {remote_host}
+        # Cloudflare always overwrites CF-Connecting-IP at the edge, so the
+        # value here is the real client. Caddy is bound to 127.0.0.1:80, so
+        # the only way in is through the tunnel — nobody can spoof it.
+        header_up X-Client-IP {http.request.header.CF-Connecting-IP}
+        header_up X-Real-IP   {http.request.header.CF-Connecting-IP}
+        header_up X-Forwarded-Proto https
     }
 }

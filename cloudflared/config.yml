@@ -1,0 +1,44 @@
+# cloudflared CLI-managed tunnel config
+# Generated: cloudflared tunnel create gate-monitor
+# Tunnel UUID:   <set-by-create>
+# Credentials:   /opt/monitoring/compose/cloudflared/credentials.json
+#
+# This file lives in Git (reproducible). The tunnel definition is local to the
+# VPS, not in the Cloudflare dashboard — so no token to leak, no dashboard
+# dependency, and recreating the tunnel is: re-run `cloudflared tunnel create`
+# and re-paste the UUID below.
+#
+# See RUNBOOK.md § "Cloudflare Tunnel (CLI-managed)" for the full lifecycle.
+
+tunnel: <TUNNEL_UUID>
+credentials-file: /etc/cloudflared/credentials.json
+
+# Ingress rules. Order matters: first match wins.
+#   - monitor.cej.in  -> the public app (Caddy -> web:3000)
+#   - hooks.cej.in     -> Resend bounce/complaint webhooks (web:3000)
+ingress:
+  - hostname: monitor.cej.in
+    service: http://caddy:80
+  - hostname: hooks.cej.in
+    service: http://web:3000
+  - service: http://status:3000
+
+# Fallthrough: everything else gets a 404 from cloudflared itself rather than
+# being forwarded. Prevents accidental exposure of internal hostnames.
+  - service: http://localhost:9999
+
+# Force TCP/443 outbound. Without this, cloudflared probes QUIC (UDP 7844)
+# first and flaps behind DPI-restricted ISPs. This is the single most
+# important knob on a consumer line.
+protocol: http2
+
+# Don't phone home for updates mid-flight.
+no-update: true
+
+# Don't autoupdate the binary.
+autoupdate: false
+
+# 30s probe interval; if both probes fail the tunnel is marked down.
+originRequest:
+  http2:
+    maxConnections: 100

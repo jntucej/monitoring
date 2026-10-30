@@ -1,0 +1,53 @@
+# Cloudflare Tunnel (CLI-managed) — systemd unit for host-mode operation
+# Place at: /etc/systemd/system/cloudflared-gate-monitor.service
+# Enable:    sudo systemctl daemon-reload && sudo systemctl enable --now cloudflared-gate-monitor
+# Logs:      sudo journalctl -u cloudflared-gate-monitor -f
+#
+# This replaces the Docker cloudflared service. The tunnel config and
+# credentials live in /opt/monitoring/compose/cloudflared/ (tracked in Git).
+#
+# Pre-reqs:
+#   1. cloudflared tunnel login
+#   2. cloudflared tunnel create gate-monitor
+#   3. Copy ~/.cloudflared/<UUID>.json to /opt/monitoring/compose/cloudflared/credentials.json
+#   4. Update config.yml with the printed UUID (tunnel: <UUID>)
+#   5. cloudflared tunnel route dns gate-monitor monitor.cej.in
+#   6. cloudflared tunnel route dns gate-monitor hooks.cej.in
+
+[Unit]
+Description=Cloudflare Tunnel (gate-monitor) — CLI-managed
+Documentation=https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/
+After=network-online.target docker.service
+Wants=network-online.target
+# If you run Caddy in Docker, cloudflared must start after Docker is up
+# so the 'caddy:80' internal hostname resolves.
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/monitoring/compose
+EnvironmentFile=/opt/monitoring/compose/.env
+# Command reads config.yml and credentials from the compose directory
+ExecStart=/usr/local/bin/cloudflared \
+  --config /opt/monitoring/compose/cloudflared/config.yml \
+  --no-autoupdate \
+  tunnel run
+# Restart policy: always restart on failure, with a short backoff
+Restart=always
+RestartSec=10
+# Hardening
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/monitoring/compose/cloudflared
+
+# Standard output goes to journal
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=cloudflared-gate-monitor
+
+[Install]
+WantedBy=multi-user.target

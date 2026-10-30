@@ -184,12 +184,33 @@ services:
     networks:
       - gate-net
 
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: gate_cloudflared
+    restart: always
+    # --protocol http2 forces TCP/443 outbound. Without this the connector
+    # tries QUIC/UDP 7844 first and flaps behind DPI-restricted ISPs.
+    command: tunnel --no-autoupdate --protocol http2 run --config /etc/cloudflared/config.yml
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN:?CLOUDFLARE_TUNNEL_TOKEN must be set}
+    volumes:
+      - ./cloudflared/config.yml:/etc/cloudflared/config.yml:ro
+      - cloudflared_creds:/etc/cloudflared/credentials.json:ro
+    networks:
+      - gate-net
+    depends_on:
+      - caddy
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+
 volumes:
   pgdata:
   redisdata:
   caddy_data:
   caddy_config:
   uploads_data:
+  cloudflared_creds:
 
 networks:
   gate-net:
