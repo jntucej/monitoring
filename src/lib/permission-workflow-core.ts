@@ -102,40 +102,33 @@ export interface EntryOptions {
 
 /**
  * Pure resolver for the gate-operator IN-moves offered after a student's last
- * known OUT reason. Fully client-safe (no DB / pg / Node builtins).
+ * known OUT reason and their current stored entry type. Fully client-safe
+ * (no DB / pg / Node builtins).
  *
  * Rules:
+ * - currentType === "day_scholar"                    → pinned to `[day_scholar_in]`, no type choice.
+ * - currentType === "hosteller"                      → pinned to `[home_in]`, no type choice.
  * - prior `daily_outing` / `day_pass` / `emergency`
- *                                  → pinned to `[return_to_hostel]`, no type choice.
- * - prior `day_scholar_out`            → pinned to `[day_scholar_in]`, no type choice.
- * - prior `home_out` (or unknown)      → `[home_in, day_scholar_in]`, type choice.
- * - no prior OUT (`null`) / first scan → `[home_in, day_scholar_in]`, type choice.
+ *                                                  → pinned to `[return_to_hostel]`, no type choice.
+ * - prior `day_scholar_out`                          → pinned to `[day_scholar_in]`, no type choice.
+ * - prior `home_out` (or unknown)                    → `[home_in, day_scholar_in]`, type choice.
+ * - no prior OUT (`null`) / first scan               → `[home_in, day_scholar_in]`, type choice.
  */
 export function resolveEntryOptions(
   lastOutReason: string | null,
   currentType: "hosteller" | "day_scholar" | null,
 ): EntryOptions {
-  // `currentType` is part of the public contract but does not change the
-  // button set today; it is reserved so callers can pass it forward without
-  // the signature ever needing to break. (Unused by design → no lint noise
-  // because it is a named param.)
-  void currentType;
-
+  if (currentType === "day_scholar") {
+    return { buttons: ["day_scholar_in"], allowsTypeChoice: false };
+  }
+  if (currentType === "hosteller") {
+    return { buttons: ["home_in"], allowsTypeChoice: false };
+  }
   if (lastOutReason === "daily_outing" || lastOutReason === "day_pass" || lastOutReason === "emergency") {
     return { buttons: ["return_to_hostel"], allowsTypeChoice: false };
   }
   if (lastOutReason === "day_scholar_out") {
     return { buttons: ["day_scholar_in"], allowsTypeChoice: false };
   }
-  // home_out (or any known leave reason that wasn't caught above)
-  // → [home_in, day_scholar_in], type choice.
-  // null (no prior OUT / first scan): SAME button set. The campus occupancy
-  // check (recordScan step 8) already rejects a same-direction duplicate,
-  // so a first scan has no prior OUT by construction — offering home_in is
-  // correct for a hosteller's first arrival of the day/term. Picking
-  // day_scholar_in sets the stored entry type to day_scholar; picking
-  // home_in sets it to hosteller. The recordScan home_in guard (10c)
-  // handles the rarer "home_in with no matching prior home_out" case with
-  // a clean NO_PRIOR_HOME_OUT 400, not silent corruption.
   return { buttons: ["home_in", "day_scholar_in"], allowsTypeChoice: true };
 }

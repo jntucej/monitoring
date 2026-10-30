@@ -473,14 +473,19 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
       try {
         // IN scans: persist the entry-type selection first (POST
         // /api/operator/entry-type) so the later OUT-scan scope check reads
-        // the freshly stored type, then record the movement. The entry-type
-        // write is non-fatal by design — a failure here never blocks the scan.
+        // the freshly stored type, then record the movement.
+        //
+        // REQUIRED + ATOMIC (PR 10 Layer 4): the entry-type transition MUST
+        // commit before the scan is recorded. A failure here aborts the scan
+        // with a ConflictError-equivalent (`.code` property so the gate page
+        // can surface it), not a silent-swallow proceed.
+        //
         // We send the operator's chosen button id (return_to_hostel /
         // home_in / day_scholar_in) so the route can decide whether to write
         // the canonical entry type; the existing `entryType` field is kept for
         // backward compatibility with record.ts consumers.
         if (directionToUse === "IN" && entryTypeToUse) {
-          await fetchWithTimeout("/api/operator/entry-type", {
+          const etRes = await fetchWithTimeout("/api/operator/entry-type", {
             method: "POST",
             headers,
             body: JSON.stringify({
@@ -489,7 +494,38 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
               ...(overrideEntryButton ? { buttonId: overrideEntryButton } : {}),
               gateId: resolvedGateId,
             }),
-          }, 10_000).catch(() => { /* non-fatal: proceed to record the scan */ });
+          }, 10_000);
+          if (!etRes.ok) {
+            let etError: any;
+            try {
+              const etBody = await etRes.json().catch(() => null);
+              etError = etBody?.error ?? { code: "ENTRY_TYPE_WRITE_FAILED", message: etRes.statusText || `HTTP ${etRes.status}` };
+            } catch {
+              etError = { code: "ENTRY_TYPE_WRITE_FAILED", message: `HTTP ${etRes.status}` };
+            }
+            // Throw with a .code property so the gate page can surface it
+            // in the error overlay. The scan is NOT recorded.
+            const err = new Error(
+              etError?.message || "Failed to commit entry-type transition. Scan not recorded.",
+            ) as Error & { code?: string; status?: number };
+            err.code = etError?.code || "ENTRY_TYPE_WRITE_FAILED";
+            err.status = etRes.status;
+            set({
+              state: "error",
+              error: {
+                message: err.message,
+                code: err.code,
+                retryable: etRes.status >= 500 || etRes.status === 429,
+              },
+            });
+            playAudioFeedback("error");
+            addToast({
+              variant: "error",
+              title: "Entry-Type Not Committed",
+              message: err.message,
+            });
+            throw err;
+          }
         }
         const res = await fetchWithTimeout("/api/gate/scan", {
           method: "POST",

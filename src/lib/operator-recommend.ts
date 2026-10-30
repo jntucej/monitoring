@@ -111,9 +111,25 @@ export function recommend(input: RecommendationInput): Recommendation {
   let reason: ExitReason | null = null;
 
   if (direction === "IN") {
-    // Entry: pick the re-entry button from the last OUT reason (mirrors
-    // resolveEntryOptions), auto-selecting the recommended one.
-    if (lastReason === "daily_outing" || lastReason === "day_pass") {
+    // Entry: the stored currentEntryType constrains the button set.
+    //
+    // Type-aware (LAYER 3): when the student's stored type is known, the
+    // button set is pinned (mirrors resolveEntryOptions with currentType
+    // active). No alternatives — the type is state, not a choice.
+    if (currentEntryType === "day_scholar") {
+      entryButton = "day_scholar_in";
+      entryType = "day_scholar";
+      confidence = 0.95;
+      // No alternatives: a day_scholar is pinned to day_scholar_in.
+    } else if (currentEntryType === "hosteller") {
+      entryButton = "home_in";
+      entryType = "hosteller";
+      confidence = 0.95;
+      // No alternatives: a hosteller is pinned to home_in (not outing).
+    } else if (lastReason === "daily_outing" || lastReason === "day_pass") {
+      // Unknown type + last OUT was a hostel-related reason → pin to
+      // return_to_hostel, but still offer alternatives since the type
+      // hasn't been explicitly stored yet.
       entryButton = "return_to_hostel";
       alternatives.push(entryAlt("home_in"), entryAlt("day_scholar_in"));
       confidence = 0.9;
@@ -122,26 +138,34 @@ export function recommend(input: RecommendationInput): Recommendation {
       entryType = "day_scholar";
       confidence = 0.9;
     } else {
-      // home_out / null / unknown → recommend Home In; offer Day Scholar In.
+      // home_out / null / unknown → offer both, operator picks once.
       entryButton = "home_in";
       alternatives.push(entryAlt("day_scholar_in"));
       confidence = lastReason === null ? 0.7 : 0.85;
     }
     reason = null;
   } else {
-    // Exit: auto-select the canonical reason.
+    // Exit: type-aware OUT recommendations.
     if (currentEntryType === "day_scholar") {
       reason = "day_scholar_out";
+      entryType = "day_scholar";
+      confidence = 0.95;
+      // home_out ONLY as an alternative if an approved pass exists.
+      if (hasApprovedPass) {
+        alternatives.push(exitAlt("home_out"));
+      }
+    } else if (currentEntryType === "hosteller") {
+      reason = "daily_outing";
+      entryType = "hosteller";
       confidence = 0.9;
-      alternatives.push(exitAlt("home_out"));
+      alternatives.push(exitAlt("day_pass"), exitAlt("home_out"));
     } else {
-      // hosteller (or unknown→hosteller): recommend Daily Outing (no pass
-      // needed), offer Day Pass + Home Out as alternatives.
+      // Unknown type → treat as hosteller (default safe path).
       reason = "daily_outing";
       confidence = 0.85;
       alternatives.push(exitAlt("day_pass"), exitAlt("home_out"));
     }
-    entryType = null; // entry type is irrelevant on an exit
+    // entry type is set above for IN; on OUT it mirrors the stored value
   }
 
   // ── Alternatives: curfew + biometric cautions ─────────────────────────────
@@ -166,10 +190,6 @@ export function recommend(input: RecommendationInput): Recommendation {
 
   // cap at 2 alternatives (principle 3 + acceptance "1 recommended + 2 alt")
   const cappedAlts = alternatives.slice(0, 2);
-
-  // hasApprovedPass is a badge-only signal — it does not change the
-  // recommendation (principle: keep the safe path 1 tap).
-  void hasApprovedPass;
 
   return {
     direction,
