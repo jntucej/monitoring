@@ -81,7 +81,7 @@ EOF
   chmod 600 /etc/cron.d/gate-jobs
   echo "✓ Installed /etc/cron.d/gate-jobs (mode 600 — contains CRON_SECRET)"
 else
-  echo "⚠ CRON_SECRET not set (checked env var + ${BASE_DIR}/env/production.env); /etc/cron.d/gate-jops skipped."
+  echo "⚠ CRON_SECRET not set (checked env var + ${BASE_DIR}/env/production.env); /etc/cron.d/gate-jobs skipped."
 fi
 
 # ----------------------------------------------------------------------------
