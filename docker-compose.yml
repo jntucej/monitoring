@@ -40,6 +40,56 @@ services:
     networks:
       - gate-net
 
+  # Prometheus + cAdvisor for real container metrics
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: gate_prometheus
+    restart: always
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-admin-api'
+      - '--log.level=warn'
+    networks:
+      - gate-net
+    depends_on:
+      cadvisor:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost:9090/-/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.51.0
+    container_name: gate_cadvisor
+    restart: always
+    privileged: true
+    volumes:
+      - /:/rootfs:ro
+      - /sys:/sys:ro
+      - /var/run:/var/run
+      - /var/lib/docker:/var/lib/docker:ro
+      - /dev/disk:/dev/disk:ro
+    command: ["-logtostderr"]
+    networks:
+      - gate-net
+    healthcheck:
+      # cadvisor image has wget, not curl
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost:8080/healthz"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
   web:
     image: monitoring-web:latest
     build:
@@ -67,7 +117,7 @@ services:
       - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
       - POSTGRES_PORT=${POSTGRES_PORT:-5432}
       - DATABASE_URL=postgres://gate_app:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}@${POSTGRES_HOST:-postgres}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-gate_monitor}
-      - MONITORING_PROM_URL=${MONITORING_PROM_URL:-}
+      - MONITORING_PROM_URL=${MONITORING_PROM_URL:-http://prometheus:9090}
       - MONITORING_LOKI_URL=${MONITORING_LOKI_URL:-}
       - MONITORING_GRAFANA_URL=${MONITORING_GRAFANA_URL:-}
       # RAG / campus assistant (bot chat + RAG memory) — OpenAI-compatible LLM.
@@ -100,6 +150,10 @@ services:
       redis:
         condition: service_healthy
       llm-proxy:
+        condition: service_started
+      prometheus:
+        condition: service_started
+      cadvisor:
         condition: service_started
 
   # ---------------------------------------------------------------------------
@@ -146,7 +200,7 @@ services:
       - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
       - POSTGRES_PORT=${POSTGRES_PORT:-5432}
       - DATABASE_URL=postgres://gate_app:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}@${POSTGRES_HOST:-postgres}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-gate_monitor}
-      - MONITORING_PROM_URL=${MONITORING_PROM_URL:-}
+      - MONITORING_PROM_URL=${MONITORING_PROM_URL:-http://prometheus:9090}
       - MONITORING_LOKI_URL=${MONITORING_LOKI_URL:-}
       - MONITORING_GRAFANA_URL=${MONITORING_GRAFANA_URL:-}
       - CRON_SECRET=${CRON_SECRET:?CRON_SECRET must be set for worker}
@@ -213,6 +267,7 @@ volumes:
   caddy_config:
   uploads_data:
   cloudflared_creds:
+  prometheus_data:
 
 networks:
   gate-net:
