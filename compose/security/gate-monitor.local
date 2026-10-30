@@ -1,4 +1,7 @@
 # /etc/fail2ban/jail.d/gate-monitor.conf
+[DEFAULT]
+ignoreip = 127.0.0.1/8 ::1
+
 [gate-monitor-4xx]
 enabled  = true
 filter   = caddy-4xx
@@ -6,3 +9,4 @@ logpath  = /var/lib/docker/volumes/gate_caddy_data/_data/access.log
 maxretry = 30
 findtime = 120
 bantime  = 3600
+bantime.increment = true

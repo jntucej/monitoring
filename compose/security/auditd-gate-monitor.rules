@@ -5,10 +5,11 @@
 -w /etc/passwd -p wa -k identity
 -w /etc/shadow -p wa -k identity
 -w /etc/sudoers -p wa -k sudoers
+-w /etc/sudoers.d/ -p wa -k sudoers
 -w /etc/ssh/sshd_config -p wa -k sshd
 
 # App secrets & configuration
--w /opt/monitoring/compose/.env -p rwa -k app_secrets
+-w /opt/monitoring/compose/.env -p wa -k app_secrets
 
 # Backups (tamper detection)
 -w /opt/monitoring/backups/ -p wd -k backup_tamper
