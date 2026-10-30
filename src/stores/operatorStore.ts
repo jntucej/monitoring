@@ -606,6 +606,8 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
         
         if (isNetwork && currentStudent) {
           // WAN network failure / timeout: preserve scan in offline queue so rush-hour flow is not blocked
+          const catchGeo: unknown = null;
+          const catchSysTag: unknown = null;
           enqueueOfflineScan({
             clientEventId,
             roll: uniqueId,
@@ -614,8 +616,8 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
             entryType: entryTypeToUse ?? undefined,
             gateId: resolvedGateId,
             operatorId,
-            sysTag,
-            geo,
+            sysTag: catchSysTag,
+            geo: catchGeo,
           });
           playAudioFeedback("warning");
           addToast({
