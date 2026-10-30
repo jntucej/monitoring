@@ -44,6 +44,7 @@ interface CachedUserRow {
   department_id: string | null;
   employee_id: string | null;
   two_factor_enabled: boolean;
+  password_must_change: boolean;
   handle: string | null;
   cachedAt: number;
 }
@@ -58,7 +59,7 @@ async function getUserRowCached(userId: string): Promise<CachedUserRow | null> {
   const res = await query(
     `SELECT id, role, status, email, session_version, unique_id,
             login_identifier, gate_id, department_id, employee_id,
-            two_factor_enabled, handle
+            two_factor_enabled, password_must_change, handle
      FROM public.users WHERE id = $1 AND deleted_at IS NULL LIMIT 1`,
     [userId],
   );
@@ -129,6 +130,9 @@ export interface AuthContext {
 
   /** Whether the user has 2FA enabled */
   twoFactorEnabled: boolean;
+
+  /** Whether the user must change their password before proceeding */
+  passwordMustChange: boolean;
 }
 
 /**
@@ -256,6 +260,7 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
     isActive: profile.status === 'ACTIVE',
     handle: profile.handle || undefined,
     twoFactorEnabled: profile.two_factor_enabled === true,
+    passwordMustChange: profile.password_must_change === true,
   };
 }
 

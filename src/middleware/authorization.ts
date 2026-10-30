@@ -82,6 +82,20 @@ export function withAuthorization(
       // Validate basic authentication
       const authContext = await requireAuthUser(token);
 
+      // Enforce password change if required
+      const PASSWORD_CHANGE_ALLOWLIST = new Set([
+        "/api/auth/change-password",
+        "/api/auth/logout",
+        "/api/auth/logout-all",
+        "/api/auth/session",
+      ]);
+      if (authContext.passwordMustChange && !PASSWORD_CHANGE_ALLOWLIST.has(req.nextUrl.pathname)) {
+        return NextResponse.json(
+          { success: false, error: { code: "PASSWORD_CHANGE_REQUIRED", message: "Change your password to continue." } },
+          { status: 403 }
+        );
+      }
+
       // Check account status - must be ACTIVE unless explicitly allowed
       if (!options.allowInactive && !authContext.isActive) {
         return NextResponse.json(
