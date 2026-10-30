@@ -53,6 +53,7 @@ export async function checkSystemHealth() {
   // Check Redis - deep health check
   try {
     const redis = await getRedis();
+    await redis.connect();
     const redisStart = Date.now();
     // Ping Redis
     await redis.ping();

@@ -189,6 +189,7 @@ export function RoleConsole({ role, roleRoot, groups, children, bare }: RoleCons
   const isVicePrincipal = role === "vice_principal";
   const isWorker = role === "worker";
   const showAllocationPanel = config?.extraPanels?.includes("AllocationPanel") ?? false;
+  const showOpsHeader = !bare && config?.opsHeader === true;
   const showExamDayPanel = config?.extraPanels?.includes("ExamDayPanel") ?? false;
   const showHandoffPanel = config?.extraPanels?.includes("HandoffPanel") ?? false;
   const showMealServePanel =
@@ -937,7 +938,7 @@ export function RoleConsole({ role, roleRoot, groups, children, bare }: RoleCons
       {/* Top bar: role + console title, Command affordance.
           Skipped when `bare` — the parent shell already owns the header
           chrome (e.g. the operator's slim OperatorShell rail). */}
-      {!bare && (
+      {showOpsHeader && (
         <header className="flex items-center justify-between gap-3 px-4 py-2 border-b border-[var(--border)] bg-[var(--bg-base)]/80 backdrop-blur-md sticky top-0 z-30">
           <div className="flex items-center gap-3 min-w-0">
             <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--text-muted)] shrink-0">
@@ -1122,9 +1123,9 @@ export function RoleConsole({ role, roleRoot, groups, children, bare }: RoleCons
             lastScan={lastScan}
             refreshing={workerLoading}
           />
-        ) : (
+        ) : role === "operator" ? (
           <StatusBar counts={counts} lastScan={lastScan} />
-        )}
+        ) : null}
         </div>
       )}
 

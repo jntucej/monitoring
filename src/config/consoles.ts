@@ -163,6 +163,7 @@ export interface RoleConsoleConfig {
 export const CONSOLES: Record<string, RoleConsoleConfig> = {
   operator: {
     role: "operator",
+    opsHeader: true,
     nav: ["scan", "log", "flags", "more"],
     statusStrip: true,
     recentSheet: true,
@@ -330,6 +331,7 @@ export const CONSOLES: Record<string, RoleConsoleConfig> = {
   },
   supervisor: {
     role: "supervisor",
+    opsHeader: true,
     nav: ["live", "escalations", "gates", "shifts", "reports"],
     statusStrip: false,
     recentSheet: false,
