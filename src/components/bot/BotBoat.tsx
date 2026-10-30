@@ -2,7 +2,7 @@
 import { memo } from "react";
 import { motion } from "framer-motion";
 
-type Phase = "idle" | "listening" | "thinking" | "speaking";
+export type Phase = "idle" | "listening" | "thinking" | "speaking";
 
 export const BotBoat = memo(function BotBoat({
   phase = "idle", size = 34,
