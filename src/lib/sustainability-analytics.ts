@@ -45,6 +45,9 @@ export interface SustainabilityChartSpec {
 
 /* ─── Sample data (fallback when API is empty) ───────────────────────────── */
 export function sampleSustainabilityDataset(): SustainabilityDataset {
+  if (process.env.NODE_ENV === "production" && process.env.ENABLE_MOCK_ANALYTICS !== "true") {
+    return { predictions: [], anomalies: [] };
+  }
   const now = Date.now();
   const predictions = Array.from({ length: 14 }).map((_, i) => {
     const base = 80 + Math.sin(i / 2) * 30 + (Math.random() * 10 - 5);

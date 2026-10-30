@@ -99,6 +99,26 @@ spec:
             port: 3000
           failureThreshold: 30
           periodSeconds: 5
+        volumeMounts:
+        - name: uploads-storage
+          mountPath: /app/data/uploads
+      volumes:
+      - name: uploads-storage
+        persistentVolumeClaim:
+          claimName: gate-uploads-pvc
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gate-uploads-pvc
+  namespace: gate-monitor
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 20Gi
 
 ---
 apiVersion: apps/v1

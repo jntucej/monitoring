@@ -1,0 +1,88 @@
+-- ============================================================================
+-- Migration: 20261027000000_audit_action_canonical.sql
+-- Description: Establish canonical audit_logs_action_known check constraint
+-- ============================================================================
+
+BEGIN;
+
+-- Ensure action column is wide enough
+ALTER TABLE public.audit_logs ALTER COLUMN action TYPE VARCHAR(100);
+
+-- Drop existing constraint if present
+ALTER TABLE public.audit_logs DROP CONSTRAINT IF EXISTS audit_logs_action_known;
+
+-- Add canonical CHECK constraint on audit_logs.action
+ALTER TABLE public.audit_logs ADD CONSTRAINT audit_logs_action_known CHECK (
+  action::text = ANY (ARRAY[
+    'LOGIN',
+    'LOGOUT',
+    'LOGIN_FAILED',
+    'PASS_CREATED',
+    'PASS_APPROVED',
+    'PASS_REJECTED',
+    'SCAN_CREATED',
+    'GATE_SCAN_RECORDED',
+    'SCAN_CORRECTED',
+    'VISITOR_CHECK_IN',
+    'VISITOR_CHECK_OUT',
+    'USER_CREATED',
+    'USER_UPDATED',
+    'USER_DELETED',
+    'ROLE_CHANGED',
+    'PERMISSION_CHANGED',
+    'SYSTEM_CONFIG_CHANGED',
+    'DATA_EXPORTED',
+    'ADMIN_EXPORT',
+    'BACKUP_CREATED',
+    'BACKUP_RESTORED',
+    'EMERGENCY_BROADCAST',
+    'GATE_OFFLINE',
+    'GATE_ONLINE',
+    'SMART_SCHEDULE_APPLIED',
+    'CRON_REPORTS_EXECUTED',
+    'PIN_CHANGED',
+    'SESSION_FORCE_REVOKED',
+    'BACK_GATE_GEO_MISMATCH',
+    'PHOTO_CAPTURED',
+    'MANUAL_ENTRY_AUTHORIZED',
+    'MANUAL_ENTRY_DENIED',
+    'PASSWORD_CHANGED',
+    'ROLE_REGISTRY_CHANGED',
+    'PERMISSION_REQUEST_CREATED',
+    'PERMISSION_REQUEST_SUBMITTED',
+    'PERMISSION_REQUEST_UPDATED',
+    'PERMISSION_REQUEST_APPROVED',
+    'PERMISSION_REQUEST_REJECTED',
+    'PERMISSION_REQUEST_FORWARDED',
+    'PERMISSION_REQUEST_ESCALATED',
+    'PERMISSION_REQUEST_CANCELLED',
+    'PERMISSION_REQUEST_COMPLETED',
+    'PERMISSION_BIOMETRIC_VERIFIED',
+    'PERMISSION_DOCUMENT_UPLOADED',
+    'PERMISSION_DOCUMENT_SIGNED',
+    'PERMISSION_BULK_ACTION',
+    'DEVICE_SETTING_UPDATED',
+    'CUSTOM_REASON_CREATED',
+    'CUSTOM_REASON_UPDATED',
+    'CUSTOM_REASON_DELETED',
+    'PASS_CONSUMED_ON_SCAN',
+    'STUDENT_TYPE_CHANGED_AT_ENTRY',
+    'BULK_USER_IMPORT',
+    'MESS_TOKEN_GENERATED',
+    'MESS_TOKEN_SERVED',
+    'MESS_TOKEN_REVOKED',
+    'MESS_PREFERENCE_UPDATED',
+    'DELEGATION_RULE_CREATED',
+    'DELEGATION_RULE_UPDATED',
+    'DELEGATION_RULE_DELETED',
+    'DELEGATION_RULE_MATCHED',
+    'MEAL_OPT_OUT_CREATED',
+    'MEAL_OPT_OUT_DELETED',
+    'COMPLAINT_SLA_WARNING',
+    'COMPLAINT_SLA_BREACHED',
+    'CANARY_ALERT_TRIGGERED',
+    'DEV_CONTACT_SUBMITTED'
+  ]::text[])
+);
+
+COMMIT;
