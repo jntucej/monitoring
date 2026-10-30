@@ -8,7 +8,22 @@ jest.mock('@/server/repositories/scans/create');
 jest.mock('@/server/repositories/scans/findById');
 jest.mock('@/server/repositories/scans/findLastByUserId');
 jest.mock('@/server/services/audit/write');
-jest.mock('@/lib/postgres');
+jest.mock('@/lib/postgres', () => {
+  const queryMock = jest.fn();
+  const mod = {
+    query: queryMock,
+    // withTransaction: used by withSameDirectionGuard (C1 fix). Runs the
+    // callback directly on a fake client; the real transactional client and
+    // advisory-lock behaviour are out of scope for unit tests.
+    withTransaction: jest.fn(
+      async (cb: (client: { query: jest.Mock }) => Promise<unknown>) => {
+        const client = { query: queryMock };
+        return cb(client);
+      },
+    ),
+  };
+  return mod;
+});
 jest.mock('@/lib/gate-operations', () => ({
   getGateMode: jest.fn().mockResolvedValue('OPEN'),
   assertScansAllowed: jest.requireActual('@/lib/gate-operations').assertScansAllowed,
@@ -40,7 +55,7 @@ import { createScan } from '@/server/repositories/scans/create';
 import { findScanById } from '@/server/repositories/scans/findById';
 import { findLastMovementByUserId } from '@/server/repositories/scans/findLastByUserId';
 import { auditWrite } from '@/server/services/audit/write';
-import { query } from '@/lib/postgres';
+import { withTransaction, query } from '@/lib/postgres';
 import { setUserFlag, addNotification, getStudentGuardianLink } from '@/lib/db';
 import { sendSMS } from '@/lib/integrations/sms';
 import { getGateMode } from '@/lib/gate-operations';
@@ -67,6 +82,7 @@ const m = {
   findLastMovementByUserId: findLastMovementByUserId as jest.Mock,
   auditWrite: auditWrite as jest.Mock,
   query: query as jest.Mock,
+  withTransaction: withTransaction as jest.Mock,
   setUserFlag: setUserFlag as jest.Mock,
   getGateMode: getGateMode as jest.Mock,
   checkGateSchedule: checkGateSchedule as jest.Mock,
@@ -91,6 +107,17 @@ const baseInput = {
 
 function primeWorld() {
   m.findActiveLockdown.mockResolvedValue(null);
+  // C1 guard: withTransaction is mocked to run the callback directly on a
+  // fake client whose .query returns empty rows (no occupancy row → no
+  // lock held → the dedup index inside process_gate_scan remains the
+  // backstop). Re-armed on every test because jest.config has
+  // clearMocks: true / restoreMocks: true.
+  m.withTransaction.mockImplementation(
+    async (cb: (client: { query: any }) => Promise<unknown>) => {
+      const fakeClient = { query: m.query };
+      return cb(fakeClient);
+    },
+  );
   m.findGateById.mockImplementation(async (id: string) => {
     if (id === 'G-1') {
       return {
@@ -500,7 +527,12 @@ describe('recordScan — metrics & pass scoping', () => {
   });
 
   it('notifies linked guardian on student movement scan', async () => {
-    (query as jest.Mock).mockResolvedValueOnce({ rows: [{ phone: '+919999999999' }] });
+    // primeWorld() arms m.query (shared by withTransaction's fake client).
+    // The guard's FOR UPDATE read must NOT consume the phone-row mock, so
+    // return [] for that call and the phone row for the next one.
+    (query as jest.Mock)
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ phone: '+919****9999' }] });
     await recordScan(baseInput);
     // Allow microtask queue for async parent notification fire-and-forget
     await new Promise((r) => setTimeout(r, 10));
@@ -509,13 +541,16 @@ describe('recordScan — metrics & pass scoping', () => {
       'PAR-1',
       'movement',
       expect.stringContaining('Campus Movement'),
-      expect.stringContaining('entered campus'),
+      expect.stringMatching(/entered campus/),
       'G-1',
     );
     expect(sendSMS).toHaveBeenCalledWith(
       expect.objectContaining({
-        to: '+919999999999',
-        message: expect.stringContaining('entered campus'),
+        to: '+919****9999',
+        // Upstream gate-ops commit bf67e78d changed the SMS copy from
+        // "…entered campus…" to "…has entered campus…"; match either form
+        // so the test tracks the message intent, not a brittle substring.
+        message: expect.stringMatching(/entered campus/),
       }),
     );
   });

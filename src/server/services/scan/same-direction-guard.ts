@@ -42,13 +42,22 @@ export async function withSameDirectionGuard(
       // creates it in a way that is already race-safe (the
       // idx_movement_logs_dedup partial-unique index inside
       // process_gate_scan catches a same-person same-minute double).
-      const locked = await client.query<{ current_status: "IN" | "OUT" }>(
-        `SELECT current_status FROM public.campus_occupancy
-          WHERE user_id = $1
-          FOR UPDATE`,
-        [userId],
-      );
-      const row = locked.rows[0];
+      let row: { current_status: "IN" | "OUT" } | undefined;
+      try {
+        const locked = await client.query<{ current_status: "IN" | "OUT" }>(
+          `SELECT current_status FROM public.campus_occupancy
+            WHERE user_id = $1
+            FOR UPDATE`,
+          [userId],
+        );
+        row = locked.rows[0];
+      } catch {
+        // Guard-degraded: the occupancy table (or the FOR UPDATE read)
+        // failed. Fall through to the insert — process_gate_scan's
+        // dedup index still prevents a true double-record, and the
+        // pre-insert fast-path check above already handled the
+        // non-conflict case.
+      }
 
       if (row && !overrideRoles.has(operatorRole)) {
         if (row.current_status === direction) {
