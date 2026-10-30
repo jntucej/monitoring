@@ -78,6 +78,7 @@ services:
       - RAG_EMBEDDING_API_URL=${RAG_EMBEDDING_API_URL:-http://llm-proxy:8080/v1}
       - RAG_EMBEDDING_API_KEY=${RAG_EMBEDDING_API_KEY:-}
       - CRON_SECRET=${CRON_SECRET:?CRON_SECRET must be set for web}
+      - KIOSK_SESSION_REQUIRE_PIN=${KIOSK_SESSION_REQUIRE_PIN:-true}
     networks:
       gate-net:
         aliases:

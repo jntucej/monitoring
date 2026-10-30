@@ -1,7 +1,17 @@
 // tests/gate/lib/barcode.test.ts
-import { normalizeScannedPayload } from '@/lib/barcode';
+import { normalizeScannedPayload, isJwtOrToken, isRecognizedIdentifier } from '@/lib/barcode';
 
 describe('lib/barcode — normalizeScannedPayload', () => {
+  it('preserves case for security tokens (JWTs and signed pass tokens)', () => {
+    const fakeJwt = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.doNotUppercaseMe';
+    expect(isJwtOrToken(fakeJwt)).toBe(true);
+    expect(normalizeScannedPayload(fakeJwt)).toBe(fakeJwt);
+
+    const fakePassToken = 'mycampus:pass:eyJhbGciOiJIUzI1NiJ9.sig';
+    expect(isJwtOrToken(fakePassToken)).toBe(true);
+    expect(normalizeScannedPayload(fakePassToken)).toBe(fakePassToken);
+    expect(isRecognizedIdentifier(fakeJwt)).toBe(true);
+  });
   it('extracts roll from JSON payloads', () => {
     expect(normalizeScannedPayload('{"roll":"24JJ1A0501"}')).toBe('24JJ1A0501');
     expect(normalizeScannedPayload('{"student_roll":"24JJ1A0501"}')).toBe('24JJ1A0501');

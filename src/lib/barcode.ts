@@ -19,9 +19,26 @@ const JNTUH_ROLL = /^[0-9]{2}[A-Z]{2}[0-9A-Z]{2}[0-9]{2}[0-9A-Z]{2}$/;
 const EMPLOYEE_ID = /^[A-Z]{2,5}[-_]?[0-9]{2,6}$/;
 const NUMERIC = /^[0-9]{3,12}$/;
 
+export function isJwtOrToken(raw: string): boolean {
+  const trimmed = (raw || "").trim();
+  if (trimmed.startsWith("mycampus:pass:")) return true;
+  if (trimmed.includes("/") || trimmed.includes(" ") || trimmed.includes("?")) return false;
+  const parts = trimmed.split(".");
+  if (parts.length === 3 && trimmed.startsWith("eyJ")) return true;
+  if (parts.length === 2 && trimmed.length > 25 && /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(trimmed)) {
+    return true;
+  }
+  return false;
+}
+
 export function normalizeScannedPayload(raw: string): string {
   const trimmed = (raw || "").trim();
   if (!trimmed) return "";
+
+  // 0. Case-sensitive security tokens: do not uppercase JWTs or signed tokens!
+  if (isJwtOrToken(trimmed)) {
+    return trimmed;
+  }
 
   // 1. JSON payload: {"roll":"24JJ1A0501"} or {"student_roll":"24JJ1A0501"} or {"uniqueId":"..."}
   if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
@@ -51,6 +68,7 @@ export function normalizeScannedPayload(raw: string): string {
 
 /** True for formats that are 1D/2D barcodes (not QR). */
 export function isRecognizedIdentifier(value: string): boolean {
+  if (isJwtOrToken(value)) return true;
   const v = normalizeScannedPayload(value);
   return JNTUH_ROLL.test(v) || EMPLOYEE_ID.test(v) || NUMERIC.test(v) || (v.length >= 4);
 }

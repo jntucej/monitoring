@@ -50,9 +50,11 @@ const OUT_DURATION_CAPS_HOURS: Record<string, number> = {
   day_pass: 12,
 };
 /** Duration caps for IN-return checks (hours from last OUT to now).
- *  home_out: 48h, special_leave: 24h. Silently flags OVERDUE if exceeded
- *  — the scan is allowed but the student's flag_status is updated. */
+ *  daily_outing: 1h, day_pass: 12h, home_out: 48h, special_leave: 24h.
+ *  Silently flags OVERDUE if exceeded — the scan is allowed but the student's flag_status is updated. */
 const IN_RETURN_CAPS_HOURS: Record<string, number> = {
+  daily_outing: 1,
+  day_pass: 12,
   home_out: 48,
   special_leave: 24,
 };
@@ -189,13 +191,14 @@ async function enforceOutDurationCap(
 async function enforceInReturnDurationCap(
   userId: string,
   reason: string | null | undefined,
+  cachedLastOut?: any,
 ): Promise<void> {
-  const normalized = normalizeExitReason(reason);
-  const capHours = IN_RETURN_CAPS_HOURS[normalized];
-  if (capHours === undefined) return;
-
-  const lastOut = await findLastMovementByUserId(userId);
+  const lastOut = cachedLastOut !== undefined ? cachedLastOut : await findLastMovementByUserId(userId);
   if (!lastOut || lastOut.direction !== "OUT") return;
+
+  const targetReason = normalizeExitReason(lastOut.reason || reason);
+  const capHours = IN_RETURN_CAPS_HOURS[targetReason];
+  if (capHours === undefined) return;
 
   const lastOutMs = Date.parse(lastOut.timestamp);
   if (Number.isNaN(lastOutMs)) return;
@@ -208,7 +211,7 @@ async function enforceInReturnDurationCap(
       userId,
       role: "system",
       details: {
-        reason: normalized,
+        reason: targetReason,
         capHours,
         elapsedHours: Number(elapsedHours.toFixed(1)),
         lastOutAt: lastOut.timestamp,
@@ -345,6 +348,7 @@ async function recordScanInner(input: RecordScanInput): Promise<RecordScanResult
   // 9. Student exit-flow enforcement (only for students). Manual entries are
   // subject to the SAME pass check as regular scans (spec §11 overrides §7).
   if (person.role === "student") {
+    let lastMoveForIn: any = null;
     // 9a. IN scans: the operator MUST have selected an entry type. Reject
     //     early (before recording anything) with a clear 400. Additionally,
     //     the chosen entry type must be present in the resolved entry-options
@@ -372,9 +376,9 @@ async function recordScanInner(input: RecordScanInput): Promise<RecordScanResult
           ? detailsForOptions.current_entry_type
           : null;
       // lastOutReason: read from the most recent movement log for this user.
-      const lastMoveForOptions = await findLastMovementByUserId(person.id);
+      lastMoveForIn = await findLastMovementByUserId(person.id);
       const lastOutReason =
-        lastMoveForOptions?.direction === "OUT" ? normalizeExitReason(lastMoveForOptions.reason) : null;
+        lastMoveForIn?.direction === "OUT" ? normalizeExitReason(lastMoveForIn.reason) : null;
 
       const entryOptions = resolveEntryOptions(lastOutReason, currentType);
       // Map button IDs to entry types so the chosen entryType can be checked
@@ -393,6 +397,10 @@ async function recordScanInner(input: RecordScanInput): Promise<RecordScanResult
           { code: "ENTRY_TYPE_MISMATCH", entryType: input.entryType, allowed: allowedEntryTypes },
         );
       }
+
+      // 9d. IN-return duration cap for daily_outing / day_pass / home_out / special_leave (non-fatal).
+      //     Flags the student as OVERDUE if returning beyond cap, but allows the scan through.
+      await enforceInReturnDurationCap(person.id, input.reason, lastMoveForIn);
     }
 
     // 9b. OUT scans: read the stored entry type and enforce the scope.
@@ -415,10 +423,6 @@ async function recordScanInner(input: RecordScanInput): Promise<RecordScanResult
       // 9c. OUT-scan duration cap: reject if the student has been out longer
       //     than the reason's cap (daily_outing: 1h, day_pass: 12h).
       await enforceOutDurationCap(person.id, input.reason);
-
-      // 9d. IN-return duration cap for home_out / special_leave (non-fatal).
-      //     Flags the student as OVERDUE but allows the scan through.
-      await enforceInReturnDurationCap(person.id, input.reason);
     }
 
     const flow = await validateStudentExitFlow(

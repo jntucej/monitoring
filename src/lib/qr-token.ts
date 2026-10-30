@@ -32,7 +32,7 @@ export interface QrTokenClaims extends JWTPayload {
 export async function generateQrToken(
   roll: string,
   userId: string,
-  ttlSeconds = 300,   // 5 minutes
+  ttlSeconds = 900,   // 15 minutes (sufficient for crossing campus)
 ): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   const jti = randomUUID();

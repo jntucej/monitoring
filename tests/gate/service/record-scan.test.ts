@@ -117,7 +117,7 @@ function primeWorld() {
 }
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  jest.resetAllMocks();
   primeWorld();
 });
 
@@ -269,9 +269,6 @@ describe('recordScan — pass enforcement', () => {
     m.findOccupancyByUserId.mockResolvedValueOnce({
       user_id: 'U-1', current_status: 'IN', last_gate_id: 'G-1', last_updated: 'x',
     });
-    m.findLastMovementByUserId.mockResolvedValueOnce({
-      user_id: 'U-1', direction: 'IN', reason: null, timestamp: new Date().toISOString(),
-    });
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const exitFlow = require('@/lib/student-exit-flow');
     jest.spyOn(exitFlow, 'validateStudentExitFlow').mockResolvedValueOnce({
@@ -307,6 +304,11 @@ describe('recordScan — OUT duration cap', () => {
       user_id: 'U-1', direction: 'IN', reason: null,
       timestamp: new Date(Date.now() - 13 * 60 * 60 * 1000).toISOString(),
     });
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const exitFlow = require('@/lib/student-exit-flow');
+    jest.spyOn(exitFlow, 'validateStudentExitFlow').mockResolvedValueOnce({
+      allowed: true, canonicalReason: 'day_pass', requiresPass: true, passId: 'P-1',
+    });
     await expect(
       recordScan({ ...baseInput, direction: 'OUT', entryType: undefined, reason: 'day_pass' }),
     ).rejects.toMatchObject({ code: 'DAY_PASS_OVERDUE' });
@@ -328,6 +330,26 @@ describe('recordScan — OUT duration cap', () => {
     await expect(
       recordScan({ ...baseInput, direction: 'OUT', entryType: undefined, reason: 'home_out' }),
     ).resolves.toBeDefined();
+  });
+
+  it('flags OVERDUE on IN return when student was out on daily_outing for longer than cap (1h)', async () => {
+    m.findOccupancyByUserId.mockResolvedValueOnce({
+      user_id: 'U-1', current_status: 'OUT', last_gate_id: 'G-1', last_updated: 'x',
+    });
+    // last OUT was 3h ago on daily_outing
+    m.findLastMovementByUserId.mockResolvedValueOnce({
+      user_id: 'U-1', direction: 'OUT', reason: 'daily_outing',
+      timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+    });
+
+    const res = await recordScan({
+      ...baseInput,
+      direction: 'IN',
+      entryType: 'hosteller',
+      reason: 'return_to_hostel',
+    });
+    expect(res).toBeDefined();
+    expect(m.setUserFlag).toHaveBeenCalledWith('U-1', 'OVERDUE', 'U-1');
   });
 });
 

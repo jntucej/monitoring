@@ -24,6 +24,8 @@ import type { Scan as ScanRecord } from "@/lib/types";
 import { useCollegeInfo } from "@/hooks/useCollegeInfo";
 import { primeAudio } from "@/lib/sound";
 import { OperatorGateClaimPanel } from "@/components/operator/OperatorGateClaimPanel";
+import { flushOfflineScanQueue } from "@/lib/kiosk-offline-queue";
+import { useAuthStore } from "@/stores/authStore";
 
 function OperatorPageInner() {
   const params = useParams<{ gateId: string }>();
@@ -276,6 +278,36 @@ function OperatorPageInner() {
     const interval = setInterval(checkMode, 15000);
     return () => clearInterval(interval);
   }, []);
+
+  // Auto-flush offline scan queue when network recovers
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handleOnline = async () => {
+      const auth = useAuthStore.getState();
+      const token = auth.token;
+      const headersGetter = () => {
+        const h: Record<string, string> = { "Content-Type": "application/json" };
+        if (token) h["Authorization"] = `Bearer ${token}`;
+        return h;
+      };
+      const res = await flushOfflineScanQueue(headersGetter);
+      if (res.flushed > 0) {
+        addToast({
+          variant: "success",
+          title: "Offline Scans Synced",
+          message: `Successfully synchronized ${res.flushed} offline scan(s).`,
+        });
+        loadStats();
+      }
+    };
+
+    window.addEventListener("online", handleOnline);
+    const interval = setInterval(handleOnline, 30_000);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      clearInterval(interval);
+    };
+  }, [addToast, loadStats]);
 
   useEffect(() => {
     fetch("/api/gates")

@@ -70,6 +70,45 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
       );
     }
 
+    // Supervisor gate-scoping: if caller is a supervisor with supervised_gates,
+    // restrict active alerts to their gates (or campus-wide unassigned alerts).
+    // Admin, sysadmin, principal see all.
+    const isSupervisor = auth.role === "supervisor";
+    const supervisedGates =
+      isSupervisor && Array.isArray(auth.supervisedGates) && auth.supervisedGates.length > 0
+        ? auth.supervisedGates
+        : null;
+
+    const alertSql = supervisedGates
+      ? `SELECT a.id,
+                a.severity,
+                a.title,
+                a.message,
+                a.gate_id,
+                g.name AS gate_name,
+                a.timestamp
+           FROM alerts a
+           LEFT JOIN gates g ON g.id = a.gate_id
+          WHERE a.resolved = FALSE
+            AND a.severity IN ('critical', 'high')
+            AND (a.gate_id = ANY($1::uuid[]) OR a.gate_id IS NULL)
+          ORDER BY a.timestamp DESC
+          LIMIT 50`
+      : `SELECT a.id,
+                a.severity,
+                a.title,
+                a.message,
+                a.gate_id,
+                g.name AS gate_name,
+                a.timestamp
+           FROM alerts a
+           LEFT JOIN gates g ON g.id = a.gate_id
+          WHERE a.resolved = FALSE
+            AND a.severity IN ('critical', 'high')
+          ORDER BY a.timestamp DESC
+          LIMIT 50`;
+    const alertParams = supervisedGates ? [supervisedGates] : [];
+
     const [permRes, alertRes, decisionRes] = await Promise.all([
       query<EscalatedPermissionRow>(
         `SELECT pr.ticket_number,
@@ -86,21 +125,7 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
           ORDER BY pr.sla_deadline ASC NULLS LAST
           LIMIT 50`
       ),
-      query<ActiveAlertRow>(
-        `SELECT a.id,
-                a.severity,
-                a.title,
-                a.message,
-                a.gate_id,
-                g.name AS gate_name,
-                a.timestamp
-           FROM alerts a
-           LEFT JOIN gates g ON g.id = a.gate_id
-          WHERE a.resolved = FALSE
-            AND a.severity IN ('critical', 'high')
-          ORDER BY a.timestamp DESC
-          LIMIT 50`
-      ),
+      query<ActiveAlertRow>(alertSql, alertParams),
       query<DecisionRow>(
         `SELECT action,
                 user_name,

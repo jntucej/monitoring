@@ -12,6 +12,7 @@ import { useUIStore } from "@/stores/uiStore";
 import { validateRollNumber } from "@/lib/rollNumber";
 import { getClientLocation, getClientSysTag } from "@/lib/geo";
 import { recommend, type Recommendation } from "@/lib/operator-recommend";
+import { enqueueOfflineScan } from "@/lib/kiosk-offline-queue";
 
 /**
  * IN-movement button ids the gate operator can tap (from the
@@ -216,8 +217,8 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
   _scanGeneration: 0,
 
   startScan: async (roll: string) => {
-    const cleanRoll = roll.trim().toUpperCase();
-    if (!cleanRoll) return;
+    let rawIdentifier = (roll || "").trim();
+    if (!rawIdentifier) return;
 
     // Increment generation so any in-flight startScan/confirmScan callbacks
     // for the previous scan are dropped once we hit a stale check.
@@ -244,6 +245,38 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
     }
 
     try {
+      // If the scanned payload is a security token (JWT or signed pass token), resolve it via /api/gate/verify-pass
+      let cleanRoll = rawIdentifier;
+      if (
+        rawIdentifier.startsWith("eyJ") ||
+        rawIdentifier.startsWith("mycampus:") ||
+        (rawIdentifier.includes(".") && rawIdentifier.length > 25)
+      ) {
+        const verifyRes = await fetch("/api/gate/verify-pass", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ token: rawIdentifier }),
+          signal,
+        });
+        if (get()._scanGeneration !== gen) return;
+        const verifyJson = await verifyRes.json().catch(() => null);
+        if (get()._scanGeneration !== gen) return;
+
+        if (!verifyRes.ok || !verifyJson?.success || !verifyJson?.data?.roll) {
+          const verifyErr = verifyJson?.error?.message || "Invalid or expired QR code.";
+          set({
+            state: "error",
+            error: {
+              message: verifyErr,
+              code: verifyJson?.error?.code || "INVALID_QR",
+            },
+            currentStudent: null,
+          });
+          return;
+        }
+        cleanRoll = verifyJson.data.roll;
+      }
+      cleanRoll = cleanRoll.trim().toUpperCase();
       const res = await fetch(`/api/persons/${encodeURIComponent(cleanRoll)}`, { headers, signal });
       if (get()._scanGeneration !== gen) return;
       const result = await res.json().catch(() => null);
@@ -567,16 +600,49 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
       .catch((err: unknown) => {
         const msg = err instanceof Error ? err.message : "An unexpected error occurred during scan confirmation.";
         const isTimeout = err instanceof Error && err.message.includes("timed out");
-        const isNetwork = isTimeout || err instanceof Error && (err.name === "TypeError" || err.name === "NetworkError");
-        // Network errors are retryable: the operator can simply re-scan. There is
-        // no local queue — the kiosk is stateless between scans.
-        playAudioFeedback(isNetwork ? "warning" : "error");
+        const isNetwork = isTimeout || (err instanceof Error && (err.name === "TypeError" || err.name === "NetworkError"));
+        
+        if (isNetwork && currentStudent) {
+          // WAN network failure / timeout: preserve scan in offline queue so rush-hour flow is not blocked
+          enqueueOfflineScan({
+            clientEventId,
+            roll: uniqueId,
+            direction: directionToUse,
+            reason: reasonToUse || (directionToUse === "OUT" ? "daily_outing" : undefined),
+            entryType: entryTypeToUse ?? undefined,
+            gateId: resolvedGateId,
+            operatorId,
+            sysTag,
+            geo,
+          });
+          playAudioFeedback("warning");
+          addToast({
+            variant: "warning",
+            title: "Offline — Scan Queued",
+            message: `${currentStudent.name} (${currentStudent.roll}) movement queued offline. Will sync automatically once connection recovers.`,
+          });
+          const prev = get().todaysStats;
+          const newStats = prev
+            ? {
+                entries: directionToUse === "IN" ? prev.entries + 1 : prev.entries,
+                exits: directionToUse === "OUT" ? prev.exits + 1 : prev.exits,
+                onCampus: directionToUse === "IN" ? prev.onCampus + 1 : prev.onCampus - 1,
+              }
+            : null;
+          set({
+            state: "success",
+            todaysStats: newStats,
+            entryType: entryTypeToUse,
+            error: null,
+          });
+          return;
+        }
+
+        playAudioFeedback("error");
         addToast({
-          variant: isNetwork ? "warning" : "error",
-          title: isNetwork ? "Network Error" : "Scan Failed",
-          message: isNetwork
-            ? "Could not reach the server — tap Retry and scan again."
-            : msg,
+          variant: "error",
+          title: "Scan Failed",
+          message: msg,
         });
         set({
           state: "error",
