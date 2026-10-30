@@ -51,7 +51,7 @@ async function handleGet(req: NextRequest) {
           const currentJson = JSON.stringify(items);
           if (currentJson !== lastJson) {
             lastJson = currentJson;
-            sendEvent({ type: "notifications", data: items, unreadCount: items.filter((n: any) => !n.read).length });
+            sendEvent({ type: "notifications", data: items, unreadCount: items.filter((n: any) => !n.readAt).length });
           }
         } catch {}
       };

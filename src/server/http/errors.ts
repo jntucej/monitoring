@@ -19,3 +19,7 @@ export class ConflictError    extends AppError { constructor(m: string)         
 export class LockedError extends AppError {
   constructor(m = "Resource is locked") { super("LOCKED", m, 423); }
 }
+
+export class ServiceUnavailableError extends AppError {
+  constructor(m = "Service unavailable") { super("SERVICE_UNAVAILABLE", m, 503); }
+}

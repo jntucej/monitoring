@@ -137,6 +137,16 @@ async function runOnce(): Promise<void> {
     snapshot.attendanceRecordUpsertCount = sinkResult.attendanceRecordUpserted;
     snapshot.attendanceRecordConflictCount = sinkResult.attendanceRecordConflicts;
     snapshot.errors.push(...sinkResult.movementLogErrors, ...sinkResult.attendanceRecordErrors);
+
+    if (snapshot.skippedUnmappedCount > 0) {
+      await supabase.from("alerts").insert({
+        severity: "warning",
+        title: "Unmapped biometric user",
+        message: `${snapshot.skippedUnmappedCount} biometric scans skipped: device user IDs have no matching system user.`,
+        timestamp: new Date().toISOString(),
+        resolved: false,
+      });
+    }
   } catch (err) {
     snapshot.errors.push(`cycle failed: ${err}`);
   }

@@ -2,6 +2,7 @@ const isDockerBuild = process.env.DOCKER_BUILD === 'true';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  instrumentation: () => import("./src/instrumentation"),
   output: 'standalone',
   reactStrictMode: true,
   experimental: {

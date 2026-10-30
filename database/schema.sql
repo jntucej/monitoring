@@ -215,7 +215,6 @@ CREATE TABLE IF NOT EXISTS notifications (
   recipient_type TEXT NOT NULL CHECK (recipient_type IN ('user','role','department','all', 'parent')),
   channels       TEXT[] NOT NULL DEFAULT ARRAY['in_app'],
   data           JSONB,
-  read           BOOLEAN NOT NULL DEFAULT FALSE,
   delivered_at   TIMESTAMPTZ,
   read_at        TIMESTAMPTZ,
   created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -927,7 +926,7 @@ CREATE INDEX IF NOT EXISTS idx_occ_status ON campus_occupancy(current_status);
 CREATE INDEX IF NOT EXISTS idx_alerts_timestamp ON alerts(timestamp DESC);
 CREATE INDEX IF NOT EXISTS idx_alerts_resolved ON alerts(resolved);
 CREATE INDEX IF NOT EXISTS idx_notif_recipient ON notifications(recipient_id, recipient_type);
-CREATE INDEX IF NOT EXISTS idx_notif_read ON notifications(read);
+CREATE INDEX IF NOT EXISTS idx_notif_read_at ON notifications(read_at);
 CREATE INDEX IF NOT EXISTS idx_notif_created ON notifications(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_pushq_status ON notification_push_queue(status);
 CREATE INDEX IF NOT EXISTS idx_smsq_status ON notification_sms_queue(status);
