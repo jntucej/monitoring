@@ -343,7 +343,7 @@ async function handlePost(req: NextRequest) {
       meta: {
         authProvider: 'supabase',
         inviteSent,
-        uniqueIdGenerated: ucejRoles.includes(role) && !effectiveUniqueId,
+        uniqueIdGenerated: autoGenRoles.includes(role) && !effectiveUniqueId,
         // One-shot credential for the new account. The plain code is returned
         // exactly once and is NOT re-fetchable; the admin must record or
         // hand it off now.
