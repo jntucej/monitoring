@@ -33,15 +33,15 @@ async function handlePost(req: NextRequest) {
   }
 
   const { uniqueId, code, newPassword, newPin } = body as Record<string, string>;
-  if (!uniqueId || !code || !newPassword || !newPin) {
-    return NextResponse.json({ success: false, error: { code: "MISSING_FIELDS", message: "uniqueId, code, newPassword, newPin are all required." } }, { status: 400 });
+  if (!uniqueId || !code || !newPassword) {
+    return NextResponse.json({ success: false, error: { code: "MISSING_FIELDS", message: "uniqueId, code, and newPassword are required." } }, { status: 400 });
   }
   try {
     assertPasswordPolicy(newPassword);
   } catch (e) {
     return NextResponse.json({ success: false, error: { code: "WEAK_PASSWORD", message: e instanceof Error ? e.message : "Password does not meet policy." } }, { status: 400 });
   }
-  if (!/^\d{4,8}$/.test(newPin)) {
+  if (newPin && !/^\d{4,8}$/.test(newPin)) {
     return NextResponse.json({ success: false, error: { code: "INVALID_PIN", message: "PIN must be 4-8 digits." } }, { status: 400 });
   }
 
@@ -123,26 +123,20 @@ async function handlePost(req: NextRequest) {
   }
 
   const pwHash = await hashPassword(newPassword);
-  const pinHash = await hash(newPin, 10);
+  const pinHash = newPin && /^\d{4,8}$/.test(newPin) ? await hash(newPin, 10) : null;
 
   await query(
     `UPDATE users
         SET password_hash      = $1,
-            pin_hash           = $2,
-            initial_pin_hash   = $2,
+            pin_hash           = COALESCE($2, pin_hash),
+            initial_pin_hash   = COALESCE($2, initial_pin_hash),
             pin_must_change    = FALSE,
             onboarded_at       = NOW(),
+            password_must_change = FALSE,
             session_version    = COALESCE(session_version, 0) + 1,
             updated_at         = NOW()
       WHERE id = $3`,
     [pwHash, pinHash, user.id]
-  );
-  // The bootstrap password is still an initial credential (it came from the
-  // enrollment flow, not chosen freely by the user), so flag it for a
-  // mandatory rotation via /api/auth/change-password on first use.
-  await query(
-    `UPDATE users SET password_must_change = TRUE WHERE id = $1`,
-    [user.id]
   );
   await addAudit({
     action: "USER_ONBOARDED",
