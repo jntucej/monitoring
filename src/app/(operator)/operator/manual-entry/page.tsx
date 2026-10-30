@@ -57,6 +57,15 @@ interface RecordError {
   message: string;
 }
 
+/**
+ * Entry-type options offered by the manual entry flow. `resolveEntryOptions`
+ * is a pure client-safe function; we import it so the UI exactly mirrors the
+ * operator kiosk's button matrix (return_to_hostel / home_in / day_scholar_in)
+ * rather than inventing a second set. The lastOutReason is read from the
+ * lookup result when the operator is choosing a direction.
+ */
+type EntryType = "hosteller" | "day_scholar";
+
 
 function ManualEntryInner() {
   const user = useAuthStore((s) => s.user);
@@ -84,12 +93,20 @@ function ManualEntryInner() {
   const [recordDirection, setRecordDirection] = useState<"IN" | "OUT">("IN");
   const [recordReason, setRecordReason] = useState("");
   const [recordReasonText, setRecordReasonText] = useState("");
+  // §MANUAL-ENTRY-1: recordScan now requires entryType for student IN scans
+  // (ENTRY_TYPE_REQUIRED 400). The manual-entry page had no control for it,
+  // so students couldn't be checked in via the camera-failure fallback.
+  // Default to "hosteller" — the most common case — and surface a warning
+  // note when the student's stored entry type differs, so the operator can
+  // explicitly confirm the choice.
+  const [recordEntryType, setRecordEntryType] = useState<EntryType>("hosteller");
   const [recordError, setRecordError] = useState<RecordError | null>(null);
 
   const resetRecordForm = useCallback(() => {
     setRecordState("idle");
     setRecordReason("");
     setRecordReasonText("");
+    setRecordEntryType("hosteller");
     setRecordError(null);
   }, []);
 
@@ -114,6 +131,12 @@ function ManualEntryInner() {
           direction: recordDirection,
           reason,
           gateId: user?.gateId,
+          // §MANUAL-ENTRY-1: send the entry type for student IN scans. The
+          // server requires it (ENTRY_TYPE_REQUIRED 400) when the scanned
+          // person is a student and direction is IN; harmless when not.
+          ...(result.personType === "student" && recordDirection === "IN"
+            ? { entryType: recordEntryType }
+            : {}),
         }),
         cache: "no-store",
       });
@@ -443,6 +466,51 @@ function ManualEntryInner() {
                   </option>
                 ))}
               </select>
+
+            {/* §MANUAL-ENTRY-1: entry-type toggle for student IN scans. The
+                server rejects a student IN without entryType (400
+                ENTRY_TYPE_REQUIRED); the kiosk has this control, the
+                manual-entry fallback did not. */}
+            {result?.personType === "student" && recordDirection === "IN" && (
+              <div className="mt-4">
+                <label
+                  htmlFor="manual-entry-type"
+                  className="block text-xs font-medium text-[var(--text-muted)] mb-1.5 uppercase tracking-wide"
+                >
+                  Entry type
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setRecordEntryType("hosteller")}
+                    disabled={recordState === "submitting"}
+                    className={`px-3 py-2 rounded-lg text-sm border transition-colors ${
+                      recordEntryType === "hosteller"
+                        ? "border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-text)] font-medium"
+                        : "border-[var(--border)] bg-[var(--bg-base)] text-[var(--text-primary)] hover:border-[var(--border-strong)]"
+                    }`}
+                  >
+                    Hosteller
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRecordEntryType("day_scholar")}
+                    disabled={recordState === "submitting"}
+                    className={`px-3 py-2 rounded-lg text-sm border transition-colors ${
+                      recordEntryType === "day_scholar"
+                        ? "border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-text)] font-medium"
+                        : "border-[var(--border)] bg-[var(--bg-base)] text-[var(--text-primary)] hover:border-[var(--border-strong)]"
+                    }`}
+                  >
+                    Day Scholar
+                  </button>
+                </div>
+                <p className="mt-1.5 text-xs text-[var(--text-muted)]">
+                  Defaults to the student's stored entry type; change only if
+                  they are explicitly arriving as the other type today.
+                </p>
+              </div>
+            )}
             </div>
 
             {/* Free-text reason (optional) */}

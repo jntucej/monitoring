@@ -211,6 +211,30 @@ CREATE TABLE IF NOT EXISTS alerts (
   resolved_at  TIMESTAMPTZ,
   resolved_by  UUID REFERENCES users(id)
 );
+
+-- Supervisor gate-claim codes (20261226000001). One-time, human-readable
+-- claim strings: an operator enters one at the kiosk and is assigned to
+-- that gate. Only the SHA-256 hash is stored; plaintext returned once at
+-- mint time. Scoped to one gate, one-use, revocable, expiring.
+CREATE TABLE IF NOT EXISTS public.gate_claim_codes (
+    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    code_hash     TEXT NOT NULL,
+    gate_id       UUID NOT NULL,
+    operator_name_label TEXT,
+    generated_by  UUID,
+    expires_at    TIMESTAMPTZ NOT NULL,
+    used_at       TIMESTAMPTZ,
+    used_by       UUID,
+    revoked       BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT gate_claim_codes_gate_fk
+        FOREIGN KEY (gate_id) REFERENCES public.gates (id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS gate_claim_codes_lookup
+    ON public.gate_claim_codes (code_hash, gate_id, revoked, used_at);
+CREATE INDEX IF NOT EXISTS gate_claim_codes_gate
+    ON public.gate_claim_codes (gate_id, created_at DESC);
+
 -- ============================================================================
 -- SECTION 3: PLATFORM TABLES
 -- ============================================================================

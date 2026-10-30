@@ -20,7 +20,8 @@ import {
   findStudentDetailsByUserId,
   updateEntryType,
 } from "@/server/repositories/studentDetails/findByUserId";
-import { createScan } from "@/server/repositories/scans/create";
+import { createScan, type CreateScanResult } from "@/server/repositories/scans/create";
+import { withSameDirectionGuard } from "@/server/services/scan/same-direction-guard";
 import { findScanById } from "@/server/repositories/scans/findById";
 import { findLastMovementByUserId } from "@/server/repositories/scans/findLastByUserId";
 import { validateRollNumber } from "@/lib/rollNumber";
@@ -331,13 +332,20 @@ async function recordScanInner(input: RecordScanInput): Promise<RecordScanResult
     throw new ForbiddenError(`Account ${person.status}`);
   }
 
-  // 8. Direction validation against campus_occupancy
+  // 8. Direction validation against campus_occupancy.
+  // C1 fix: the read-then-insert guard was TOCTOU — two concurrent scans
+  // of the same person both read the same current_status, both pass the
+  // check, both insert. We now acquire a row-level FOR UPDATE lock on the
+  // occupancy row inside withSameDirectionGuard and re-check current_status
+  // while still holding the lock, so a concurrent scan's status flip is
+  // observed by the second caller. OVERRIDING_ROLES keep their prior
+  // bypass.
   const occupancy = await findOccupancyByUserId(person.id);
-  if (
-    occupancy &&
-    !OVERRIDING_ROLES.has(input.operatorRole)
-  ) {
+  if (occupancy && !OVERRIDING_ROLES.has(input.operatorRole)) {
     if (occupancy.current_status === input.direction) {
+      // Fast-path reject without the lock — we already know the status
+      // conflicts for our direction, so a concurrent scan cannot change
+      // that within microseconds.
       throw new ConflictError(
         `Last known direction for this person is ${occupancy.current_status} ` +
         `as of ${occupancy.last_updated}; same-direction scans are not accepted. ` +
@@ -440,24 +448,40 @@ async function recordScanInner(input: RecordScanInput): Promise<RecordScanResult
       );
     }
   }
-  // 10. Insert via RPC (atomic, dedup-aware)
+  // 10. Insert via RPC (atomic, dedup-aware) — wrapped in a row-level
+  //     FOR UPDATE lock on the caller's occupancy row so the same-
+  //     direction guard above is race-safe. Two concurrent scans of
+  //     the same person serialize on the lock; the second re-reads
+  //     current_status while still holding the lock and sees the
+  //     first scan's flip, so it either rejects with CONFLICT or
+  //     proceeds cleanly. Without this the guard is TOCTOU — both
+  //     scans read the same current_status, both pass, both insert.
   const scanId = input.clientEventId ?? randomUUID();
-  const { log, isDuplicate } = await createScan({
-    scanId,
-    userId: person.id,
-    direction: input.direction,
-    reason: input.reason ?? null,
-    gateId: gate.id,
-    gateName: gate.name,
-    operatorId: input.operatorId,
-    operatorName: input.operatorName,
-    timestamp: new Date().toISOString(),
-    isManual: input.isManual ?? false,
-    // Dedup window disabled (0): same-direction rescans are no longer
-    // rejected by the time window. The occupancy same-direction check above
-    // still guards against true double-records; manual corrections override.
-    dupWindowMinutes: 0,
-  });
+  const { log, isDuplicate } = await withSameDirectionGuard(
+    person.id,
+    input.direction,
+    OVERRIDING_ROLES,
+    input.operatorRole,
+    input.operatorId,
+    async () =>
+      createScan({
+        scanId,
+        userId: person.id,
+        direction: input.direction,
+        reason: input.reason ?? null,
+        gateId: gate.id,
+        gateName: gate.name,
+        operatorId: input.operatorId,
+        operatorName: input.operatorName,
+        timestamp: new Date().toISOString(),
+        isManual: input.isManual ?? false,
+        // Dedup window disabled (0): same-direction rescans are no longer
+        // rejected by the time window. The DB partial-unique index
+        // (idx_movement_logs_dedup) plus the occupancy FOR UPDATE
+        // guard above are the same-direction race defenses.
+        dupWindowMinutes: 0,
+      }),
+  );
 
   // If duplicate, the RPC returned the pre-existing row, not the one we sent.
   // Fetch it so the response is consistent.
