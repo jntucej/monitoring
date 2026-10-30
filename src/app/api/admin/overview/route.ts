@@ -39,6 +39,31 @@ export const GET = withRateLimit(
       void ctx;
 
       // ------------------------------------------------------------------
+      // Service health checks (best-effort).
+      // ------------------------------------------------------------------
+      let serviceHealth = ["ok", "ok", "ok", "ok", "ok"];
+      try {
+        const { checkSystemHealth } = await import("@/lib/health");
+        const health = await checkSystemHealth();
+        const components = health.components;
+        const dbOk = components.database?.status === "healthy";
+        const redisOk = !components.redis || components.redis.status === "healthy";
+        const servicesOk =
+          components.services?.status === "healthy" &&
+          (components.services as Record<string, { status?: string }> | undefined)
+            ?.auth?.status !== "unhealthy";
+        const envOk = !components.env || components.env.status === "healthy";
+        const webOk = dbOk && servicesOk;
+        const caddyOk = envOk; // proxy: if env/config ready, reverse proxy assumed up
+        const workerOk = redisOk; // proxy: worker is healthy when redis is healthy
+        serviceHealth = [caddyOk, webOk, dbOk, redisOk, workerOk].map(
+          (ok) => (ok ? "ok" : "error")
+        );
+      } catch {
+        // health engine unavailable — leave the nominal stub
+      }
+
+      // ------------------------------------------------------------------
       // All reads fire in a single Promise.all.
       // ------------------------------------------------------------------
       const [
@@ -187,9 +212,9 @@ export const GET = withRateLimit(
       };
 
       const payload = {
-        // command: 5 service checks — simplified to all "ok" for now.
-        // NOTE: wire to checkSystemHealth later; today we just assert liveness.
-        command: { health: ["ok", "ok", "ok", "ok", "ok"] },
+        // command: 5 service checks — caddy, web, postgres, redis, worker.
+        // Real status via checkSystemHealth when reachable; nominal otherwise.
+        command: { health: serviceHealth },
 
         identity,
 

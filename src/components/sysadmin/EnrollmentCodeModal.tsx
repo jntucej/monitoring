@@ -13,7 +13,7 @@ export function EnrollmentCodeModal({ userId, userName, onClose }: Props) {
 const api = useApi();
 
   const [purpose, setPurpose] = useState<"web_bootstrap" | "mobile" | "pin_reset">("web_bootstrap");
-  const [issued, setIssued] = useState<{ code: string; expiresAt: string } | null>(null);
+  const [issued, setIssued] = useState<{ code: string; expiresAt: string; bootstrapLink?: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
@@ -56,7 +56,7 @@ const api = useApi();
 
   const copyLink = async () => {
     if (!issued) return;
-    const url = typeof window !== "undefined" ? `${window.location.origin}/bootstrap?code=${encodeURIComponent(issued.code)}` : `/bootstrap?code=${encodeURIComponent(issued.code)}`;
+    const url = issued.bootstrapLink || (typeof window !== "undefined" ? `${window.location.origin}/bootstrap?code=${encodeURIComponent(issued.code)}` : `/bootstrap?code=${encodeURIComponent(issued.code)}`);
     try {
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(url);
@@ -151,7 +151,7 @@ const api = useApi();
               <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 space-y-1">
                 <p className="font-semibold text-amber-200">Direct Activation Link:</p>
                 <p className="font-mono text-[11px] break-all select-all text-amber-300/90">
-                  {typeof window !== "undefined" ? `${window.location.origin}/bootstrap?code=${issued.code}` : `/bootstrap?code=${issued.code}`}
+                  {issued.bootstrapLink || (typeof window !== "undefined" ? `${window.location.origin}/bootstrap?code=${issued.code}` : `/bootstrap?code=${issued.code}`)}
                 </p>
               </div>
 

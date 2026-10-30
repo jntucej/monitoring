@@ -7,6 +7,7 @@ import { query } from "@/lib/postgres";
 import { addAudit } from "@/lib/db";
 import { assertCsrf } from "@/lib/csrf";
 import { assertPasswordPolicy } from "@/server/policy/passwords";
+import { verifyBootstrapToken } from "@/lib/bootstrap-link";
 
 const UNIFORM = { success: false, error: { code: "INVALID_CODE", message: "Invalid identifier or enrollment code." } };
 
@@ -32,9 +33,36 @@ async function handlePost(req: NextRequest) {
     return NextResponse.json({ success: false, error: { code: "BAD_REQUEST", message: "JSON body required." } }, { status: 400 });
   }
 
-  const { uniqueId, code, newPassword, newPin } = body as Record<string, string>;
-  if (!uniqueId || !code || !newPassword) {
-    return NextResponse.json({ success: false, error: { code: "MISSING_FIELDS", message: "uniqueId, code, and newPassword are required." } }, { status: 400 });
+  const { uniqueId, code, newPassword, newPin, token } = body as Record<string, string>;
+
+  // If a secure signed bootstrap token is provided, derive the user ID from it.
+  // This prevents an attacker from supplying a different user's ID.
+  let targetUserId: string | null = null;
+  if (token) {
+    targetUserId = verifyBootstrapToken(token);
+    if (!targetUserId) {
+      return NextResponse.json({ success: false, error: { code: "INVALID_TOKEN", message: "Activation link is invalid or expired." } }, { status: 400 });
+    }
+  }
+
+  const normId = (uniqueId ?? "").trim().toUpperCase();
+
+  // Resolve the target user by ID or roll.
+  let user: any = null;
+  if (targetUserId) {
+    const { rows: idRows } = await query("SELECT id, name, status, unique_id, onboarded_at FROM users WHERE id = $1 LIMIT 1", [targetUserId]);
+    user = idRows[0] ?? null;
+  }
+  if (!user && normId) {
+    const sanitizePostgrestParam = (val: string) => val.replace(/,/g, "%2C");
+    const { rows: lookupRows } = await query(
+      `SELECT id, name, status, unique_id, onboarded_at FROM users WHERE upper(unique_id) = $1 OR email = lower($1) OR login_identifier = $1 LIMIT 1`,
+      [normId]
+    );
+    user = lookupRows[0] ?? null;
+  }
+  if (!user) {
+    return NextResponse.json({ success: false, error: { code: "INVALID_CODE", message: "User not found." } }, { status: 404 });
   }
   try {
     assertPasswordPolicy(newPassword);
@@ -45,33 +73,23 @@ async function handlePost(req: NextRequest) {
     return NextResponse.json({ success: false, error: { code: "INVALID_PIN", message: "PIN must be 4-8 digits." } }, { status: 400 });
   }
 
-  const normId = uniqueId.trim().toUpperCase();
-  const sanitizePostgrestParam = (val: string) => val.replace(/,/g, "%2C");
+  const identifierForAudit = targetUserId ? user.unique_id : normId;
   const rejectAudit = async (u?: any) => {
     await addAudit({
       action: "ENROLLMENT_CODE_REJECTED",
       userId: u?.id ?? "Unknown",
       role: "student" as any,
-      details: { identifier: normId, reason: "invalid_code", ip: req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")?.split(",").pop()?.trim() || "unknown" },
+      details: { identifier: identifierForAudit, reason: "invalid_code", ip: req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")?.split(",").pop()?.trim() || "unknown" },
     });
     return NextResponse.json(UNIFORM, { status: 401 });
   };
 
-  const lockKey = `bootstrap:${normId}`;
+  const lockKey = `bootstrap:${targetUserId ?? normId}`;
   const lock = await checkRateLimit(lockKey, { maxRequests: 5, windowMs: 15 * 60 * 1000 });
   if (lock.limited) {
     return NextResponse.json({ success: false, error: { code: "LOCKED", message: "Too many attempts. Try again later." } }, { status: 429 });
   }
 
-  const svc = getSupabaseServiceClient();
-
-  const { data: user } = await svc
-    .from("users")
-    .select("id, name, status, unique_id, onboarded_at")
-    .or(`unique_id.eq.${sanitizePostgrestParam(normId)},email.eq.${sanitizePostgrestParam(normId.toLowerCase())},login_identifier.eq.${sanitizePostgrestParam(normId)}`)
-    .maybeSingle();
-
-  if (!user) return await rejectAudit(null);
   if (user.status !== "ACTIVE") {
     return NextResponse.json({ success: false, error: { code: "ACCOUNT_INACTIVE", message: `Account is ${user.status}.` } }, { status: 403 });
   }
@@ -79,17 +97,15 @@ async function handlePost(req: NextRequest) {
     return NextResponse.json({ success: false, error: { code: "ALREADY_ONBOARDED", message: "This account has already completed setup. Use the normal login page." } }, { status: 409 });
   }
 
-  const { data: rows } = await svc
-    .from("enrollment_codes")
-    .select("id, code_hash, expires_at")
-    .eq("user_id", user.id)
-    .eq("purpose", "web_bootstrap")
-    .is("used_at", null)
-    .gt("expires_at", new Date().toISOString())
-    .order("created_at", { ascending: false })
-    .limit(1);
+  const resRows = await query(
+    `SELECT id, code_hash, expires_at FROM enrollment_codes
+     WHERE user_id = $1 AND purpose = 'web_bootstrap' AND used_at IS NULL AND expires_at > NOW()
+     ORDER BY created_at DESC LIMIT 1`,
+    [user.id]
+  );
+  const rows = resRows.rows as any[];
 
-  const row = rows?.[0];
+  const row = rows[0];
   if (!row) return await rejectAudit(user);
 
   const ok = await compare(String(code).trim().toUpperCase(), row.code_hash);
@@ -114,7 +130,7 @@ async function handlePost(req: NextRequest) {
       userName: user.name,
       role: "student" as any,
       details: {
-        identifier: normId,
+        identifier: identifierForAudit,
         reason: "concurrent burn — code was claimed by another request",
         ip: req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")?.split(",").pop()?.trim() || "unknown",
       },

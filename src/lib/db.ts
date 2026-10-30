@@ -464,7 +464,34 @@ export async function createGatePass(passData: {
   requestedByName?: string;
   isParentRequest?: boolean;
 }): Promise<GatePass | null> {
-  const person = await findPersonByUniqueId(passData.roll.trim().toUpperCase());
+  const { getSupabaseServiceClient } = await import('./dbClient');
+  const serviceClient = getSupabaseServiceClient();
+
+  let person = await findPersonByUniqueId(passData.roll.trim().toUpperCase());
+  if (!person) {
+    // Fallback for self-service flows: if the roll lookup failed but a
+    // user exists with that exact unique_id, use their own user record.
+    // This repairs students whose roll drifted away from users.unique_id
+    // (bulk-import era) without weakening admin checks — the API layer
+    // already enforces "students create only for their own roll" before
+    // this is reached.
+    const { data: selfUser } = await serviceClient
+      .from('users')
+      .select('*')
+      .eq('unique_id', passData.roll.trim().toUpperCase())
+      .maybeSingle();
+    if (selfUser) {
+      const [sDet, eDet] = await Promise.all([
+        serviceClient.from('student_details').select('*').eq('user_id', selfUser.id).maybeSingle(),
+        serviceClient.from('employee_details').select('*').eq('user_id', selfUser.id).maybeSingle(),
+      ]);
+      person = mPerson({
+        ...selfUser,
+        student_details: sDet.data || undefined,
+        employee_details: eDet.data || undefined,
+      });
+    }
+  }
   if (!person) {
     console.error('Person not found for pass creation:', passData.roll);
     return null;
@@ -473,9 +500,6 @@ export async function createGatePass(passData: {
   const id = `pass-${Date.now()}`;
   const qrCode = `PASS-${id}-${person.uniqueId}-${Date.now()}`;
   const parentStatus = passData.isParentRequest ? 'APPROVED' : 'PENDING';
-
-  const { getSupabaseServiceClient } = await import('./dbClient');
-  const serviceClient = getSupabaseServiceClient();
 
   const isValidUuid = (val?: string) => val && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
 

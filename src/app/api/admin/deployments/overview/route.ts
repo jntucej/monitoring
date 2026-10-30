@@ -124,17 +124,23 @@ export const GET = withRateLimit(
       const releases = rows.slice(0, 20).map((d) => ({
         id: d.id,
         version: d.version ?? "unknown",
-        deployed_at: d.deployed_at ?? d.created_at,
+        message: d.message,
+        source: d.source,
+        commit: d.commit,
         status: deriveStatus(d.source, d.message),
+        created_at: d.created_at,
+        deployed_at: d.deployed_at ?? d.created_at,
         change_size: 0, // stub: no diff-size column in deployments table
       }));
 
       return ok({
-        last_deploy_at,
-        health_gate_pct,
-        rollbacks_30d,
-        lead_time_h,
-        releases,
+        deployments: releases,
+        kpis: {
+          lastDeployAt: last_deploy_at,
+          healthGatePassPct: health_gate_pct,
+          rollbacks30d: rollbacks_30d,
+          leadTimeAvgMin: Math.round(lead_time_h * 60),
+        },
       });
     },
     { requiredRole: ["sysadmin", "admin"] }

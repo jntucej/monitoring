@@ -8,6 +8,7 @@
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { Role } from "@/lib/types";
 import { addAudit } from "@/lib/db";
+import { query } from "@/lib/postgres";
 import bcrypt from "bcryptjs";
 import pLimit from "p-limit";
 import crypto, { randomInt } from "crypto";
@@ -723,19 +724,15 @@ async function processSingleRow(
         const code = (await genEnrollmentCode()).toUpperCase();
         const codeHash = await hash(code, 10);
         const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-        const { error: codeErr } = await supabase
-          .from("enrollment_codes")
-          .insert({
-            user_id: targetUserId,
-            code_hash: codeHash,
-            purpose: "web_bootstrap",
-            expires_at: expiresAt,
-            created_by: _actorId || null,
-          });
-        if (codeErr) {
+        const insRes = await query(
+          `INSERT INTO enrollment_codes (user_id, code_hash, purpose, expires_at, created_by)
+           VALUES ($1, $2, 'web_bootstrap', $3, $4)`,
+          [targetUserId, codeHash, expiresAt, _actorId || null],
+          { currentRole: "sysadmin" }
+        );
+        if (insRes.rowCount !== 1) {
           console.warn(
-            `[user-import] enrollment-code issuance failed for row ${rowNum} (non-fatal):`,
-            codeErr.message
+            `[user-import] enrollment-code issuance failed for row ${rowNum} (non-fatal): rowCount=${insRes.rowCount}`
           );
         } else {
           bootstrapCode = code;

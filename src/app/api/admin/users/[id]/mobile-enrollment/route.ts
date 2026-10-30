@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomInt } from "crypto";
-import { hash, compare, genSalt } from "@/server/lib/crypto";
-import { getSupabaseServiceClient } from "@/lib/dbClient";
+import { hash } from "@/server/lib/crypto";
+import { query } from "@/lib/postgres";
 import { withAuthorization } from "@/middleware/authorization";
 import { addAudit } from "@/lib/db";
 import type { AuthContext } from "@/lib/authContext";
@@ -35,15 +35,6 @@ async function handlePost(req: NextRequest, context: { auth: AuthContext }) {
     );
   }
 
-  const service = getSupabaseServiceClient();
-
-  // Invalidate any outstanding codes for this user
-  await service
-    .from("enrollment_codes")
-    .update({ used_at: new Date().toISOString() })
-    .eq("user_id", userId)
-    .is("used_at", null);
-
   const code = generateCode();
   const code_hash = await hash(code, 10);
   const expires_at = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 min
@@ -51,33 +42,43 @@ async function handlePost(req: NextRequest, context: { auth: AuthContext }) {
   const actorId = context?.auth?.userId || req.headers.get("x-user-id") || null;
   const actorRole = (context?.auth?.role || req.headers.get("x-user-role") || "admin") as Role;
 
-  const { error } = await service.from("enrollment_codes").insert({
-    user_id: userId,
-    code_hash,
-    expires_at,
-    created_by: actorId,
-  });
+  const currentRole = (actorRole === "admin" || actorRole === "sysadmin") ? actorRole : "sysadmin";
 
-  if (error) {
+  try {
+    // Invalidate any outstanding codes for this user.
+    await query(
+      `UPDATE enrollment_codes SET used_at = NOW()
+       WHERE user_id = $1 AND used_at IS NULL`,
+      [userId],
+      { currentRole }
+    );
+
+    await query(
+      `INSERT INTO enrollment_codes (user_id, code_hash, purpose, expires_at, created_by)
+       VALUES ($1, $2, 'mobile', $3, $4)`,
+      [userId, code_hash, expires_at, actorId],
+      { currentRole }
+    );
+
+    await addAudit({
+      action: "MOBILE_ENROLLMENT_CODE_ISSUED",
+      userId: actorId || "system",
+      userName: context?.auth?.email || "Admin",
+      role: actorRole,
+      details: `Issued mobile enrollment code for user ${userId}; expires ${expires_at}`,
+    });
+
+    // Returned exactly once. The admin reads it out / hands it over.
+    return NextResponse.json({
+      success: true,
+      data: { code, expiresAt: expires_at },
+    });
+  } catch (err: any) {
     return NextResponse.json(
-      { success: false, error: { code: "DB_ERROR", message: error.message } },
+      { success: false, error: { code: "DB_ERROR", message: err?.message || "Failed to issue mobile enrollment code" } },
       { status: 500 }
     );
   }
-
-  await addAudit({
-    action: "MOBILE_ENROLLMENT_CODE_ISSUED",
-    userId: actorId || "system",
-    userName: context?.auth?.email || "Admin",
-    role: actorRole,
-    details: `Issued mobile enrollment code for user ${userId}; expires ${expires_at}`,
-  });
-
-  // Returned exactly once. The admin reads it out / hands it over.
-  return NextResponse.json({
-    success: true,
-    data: { code, expiresAt: expires_at },
-  });
 }
 
 export const POST = withAuthorization(handlePost, { requiredRole: ["admin", "sysadmin"] });

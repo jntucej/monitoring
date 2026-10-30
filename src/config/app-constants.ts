@@ -21,9 +21,9 @@ export function pollMs(profile: PollProfile | number): number {
 export const RATE_LIMITS = {
   auth:      { windowMs: 15 * 60_000, maxRequests: 10  },
   mutation:  { windowMs:      60_000, maxRequests: 60  },
-  read:      { windowMs:      60_000, maxRequests: 300 },
+  read:      { windowMs:      60_000, maxRequests: 600 },
   sensitive: { windowMs: 60 * 60_000, maxRequests: 20  },
-  admin:     { windowMs:      60_000, maxRequests: 120 },
+  admin:     { windowMs:      60_000, maxRequests: 300 },
   PERMISSION_CREATE: {
     windowMs: 60_000,
     maxRequests: 30,

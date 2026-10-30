@@ -29,7 +29,9 @@ import {
 import { cn } from "@/lib/utils";
 import { FlowMap } from "@/components/sysadmin/kit/viz";
 import { MiniSparkline } from "@/components/sysadmin/kit/sidebar";
+import { ServiceInspector } from "./ServiceInspector";
 import type { CommandCenterData } from "./types";
+import { useState } from "react";
 
 export interface CommandCenterContentProps {
   data: CommandCenterData | null;
@@ -149,6 +151,7 @@ function KpiCard({ tile }: { tile: KpiTile }) {
 // ── main ──────────────────────────────────────────────────────────────────
 
 export function CommandCenterContent({ data }: CommandCenterContentProps) {
+  const [inspectedService, setInspectedService] = useState<string | null>(null);
   if (!data) return null;
   const health = data.command?.health ?? [];
   const status = overallStatus(health);
@@ -347,9 +350,15 @@ export function CommandCenterContent({ data }: CommandCenterContentProps) {
             edges={edges}
             height={220}
             onNodeClick={(id) => {
-              window.location.href = `/sysadmin/health?service=${encodeURIComponent(id)}`;
+              setInspectedService(id);
             }}
           />
+          {inspectedService && (
+            <ServiceInspector
+              serviceId={inspectedService}
+              onClose={() => setInspectedService(null)}
+            />
+          )}
         </section>
 
         <section

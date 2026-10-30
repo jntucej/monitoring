@@ -36,7 +36,7 @@ jobs:
           git fetch origin
           git reset --hard origin/main
 
-          echo "=== Rsync src/ only ==="
+          echo "=== Rsync src/ ==="
           rsync -av --delete \
             --exclude='.git' \
             --exclude='node_modules' \
@@ -54,6 +54,11 @@ jobs:
             --exclude='.idea/' \
             --exclude='node_modules/.cache/' \
             src/ /opt/monitoring/compose/src/
+
+          echo "=== Rsync database/migrations/ ==="
+          rsync -av --delete \
+            --exclude='.git' \
+            database/migrations/ /opt/monitoring/compose/database/migrations/
 
           echo "=== Build and deploy ==="
           docker compose build web --no-cache

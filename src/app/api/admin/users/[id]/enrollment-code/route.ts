@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomInt } from "crypto";
-import { hash, compare, genSalt } from "@/server/lib/crypto";
-import { getSupabaseServiceClient } from "@/lib/dbClient";
+import { hash } from "@/server/lib/crypto";
+import { query } from "@/lib/postgres";
+import { createBootstrapToken } from "@/lib/bootstrap-link";
 import { withAuthorization } from "@/middleware/authorization";
 import { addAudit } from "@/lib/db";
 import type { AuthContext } from "@/lib/authContext";
@@ -33,32 +34,51 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }) {
   const purpose: "mobile" | "web_bootstrap" | "pin_reset" = body.purpose;
   const ttlMinutes = purpose === "mobile" ? 15 : 60 * 24;
 
-  const svc = getSupabaseServiceClient();
+  const currentRole = (ctx.auth.role === "admin" || ctx.auth.role === "sysadmin") ? ctx.auth.role : "sysadmin";
 
-  await svc.from("enrollment_codes")
-    .update({ used_at: new Date().toISOString() })
-    .eq("user_id", userId).eq("purpose", purpose).is("used_at", null);
+  try {
+    // Invalidate any existing active codes for this user and purpose.
+    await query(
+      `UPDATE enrollment_codes SET used_at = NOW()
+       WHERE user_id = $1 AND purpose = $2 AND used_at IS NULL`,
+      [userId, purpose],
+      { currentRole }
+    );
 
-  const code = generateCode();
-  const code_hash = await hash(code, 10);
-  const expires_at = new Date(Date.now() + ttlMinutes * 60_000).toISOString();
+    const code = generateCode();
+    const code_hash = await hash(code, 10);
+    const expires_at = new Date(Date.now() + ttlMinutes * 60_000).toISOString();
 
-  const { error } = await svc.from("enrollment_codes").insert({
-    user_id: userId, code_hash, purpose, expires_at, created_by: ctx.auth.userId,
-  });
-  if (error) {
-    return NextResponse.json({ success: false, error: { code: "DB_ERROR", message: error.message } }, { status: 500 });
+    await query(
+      `INSERT INTO enrollment_codes (user_id, code_hash, purpose, expires_at, created_by)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [userId, code_hash, purpose, expires_at, ctx.auth.userId],
+      { currentRole }
+    );
+
+    await addAudit({
+      action: "ENROLLMENT_CODE_ISSUED",
+      userId: ctx.auth.userId,
+      userName: ctx.auth.email,
+      role: ctx.auth.role as Role,
+      details: `Issued ${purpose} enrollment code for user ${userId}; expires ${expires_at}`,
+    });
+
+    // Build a secure, shareable activation link scoped to this user.
+    const baseUrl = req.nextUrl.origin;
+    const token = createBootstrapToken(userId, 24 * 60 * 60 * 1000);
+    const bootstrapLink = `${baseUrl}/bootstrap?t=${encodeURIComponent(token)}`;
+
+    return NextResponse.json({
+      success: true,
+      data: { code, purpose, expiresAt: expires_at, bootstrapLink },
+    });
+  } catch (err: any) {
+    return NextResponse.json(
+      { success: false, error: { code: "DB_ERROR", message: err?.message || "Failed to issue enrollment code" } },
+      { status: 500 }
+    );
   }
-
-  await addAudit({
-    action: "ENROLLMENT_CODE_ISSUED",
-    userId: ctx.auth.userId,
-    userName: ctx.auth.email,
-    role: ctx.auth.role as Role,
-    details: `Issued ${purpose} enrollment code for user ${userId}; expires ${expires_at}`,
-  });
-
-  return NextResponse.json({ success: true, data: { code, purpose, expiresAt: expires_at } });
 }
 
 export const POST = withAuthorization(handlePost, { requiredRole: ["admin", "sysadmin"] });

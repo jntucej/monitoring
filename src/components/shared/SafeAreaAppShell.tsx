@@ -55,7 +55,13 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
     pathname?.startsWith("/sysadmin") ||
     pathname?.startsWith("/admin") ||
     pathname?.startsWith("/operator") ||
-    pathname?.startsWith("/gate");
+    pathname?.startsWith("/gate") ||
+    // The student console owns its full-screen shell (StudentShell adds a
+    // mobile bottom tab bar). Hide the shared Sidebar nav so it never
+    // double-renders over the student layout.
+    pathname?.startsWith("/student") ||
+    pathname?.startsWith("/parent") ||
+    pathname?.startsWith("/guardian");
 
   // Initialize theme from localStorage on client-side mount
   useEffect(() => {

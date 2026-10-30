@@ -86,7 +86,7 @@ export async function poolQuery<T extends QueryResultRow = any>(
 export async function query<T extends QueryResultRow = any>(
   text: string,
   params: any[] = [],
-  options?: { currentUserId?: string },
+  options?: { currentUserId?: string; currentRole?: string },
   retries = 3
 ): Promise<QueryResult<T>> {
   const pool = await getPostgresPool();
@@ -94,6 +94,9 @@ export async function query<T extends QueryResultRow = any>(
   try {
     if (options?.currentUserId) {
       await client.query("SELECT set_config('app.current_user_id', $1, false)", [options.currentUserId]);
+    }
+    if (options?.currentRole) {
+      await client.query("SELECT set_config('app.current_role', $1, false)", [options.currentRole]);
     }
     return await client.query<T>(text, params);
   } catch (err: any) {
@@ -114,7 +117,7 @@ export async function query<T extends QueryResultRow = any>(
  */
 export async function withTransaction<T>(
   callback: (client: PoolClient) => Promise<T>,
-  options?: { currentUserId?: string }
+  options?: { currentUserId?: string; currentRole?: string }
 ): Promise<T> {
   const pool = await getPostgresPool();
   const client = await pool.connect();
@@ -122,6 +125,9 @@ export async function withTransaction<T>(
     await client.query("BEGIN");
     if (options?.currentUserId) {
       await client.query("SET LOCAL app.current_user_id = $1", [options.currentUserId]);
+    }
+    if (options?.currentRole) {
+      await client.query("SET LOCAL app.current_role = $1", [options.currentRole]);
     }
     const result = await callback(client);
     await client.query("COMMIT");

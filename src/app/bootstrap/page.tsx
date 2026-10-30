@@ -10,6 +10,7 @@ type BootstrapState = "idle" | "submitting" | "success" | "error";
 function BootstrapPageInner() {
   const router = useRouter();
   const params = useSearchParams();
+  const urlToken = (params?.get("t") ?? "").trim();
   const urlCode = (params?.get("code") ?? "").trim().toUpperCase();
 
   const [uniqueId, setUniqueId] = useState("");
@@ -18,12 +19,23 @@ function BootstrapPageInner() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [state, setState] = useState<BootstrapState>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [idLocked, setIdLocked] = useState(false);
 
+  // Pre-fill ID and code from the secure signed token when provided.
   useEffect(() => {
-    if (urlCode && !code) {
+    if (urlToken) {
+      const parts = urlToken.split(":");
+      if (parts.length === 3) {
+        const userId = parts[0];
+        // Pre-fill the raw user ID; the API resolves it to the correct user.
+        setUniqueId(userId);
+        setIdLocked(true);
+      }
+      setCode("");
+    } else if (urlCode && !code) {
       setCode(urlCode);
     }
-  }, [urlCode, code]);
+  }, [urlToken, urlCode, code]);
 
   const submit = useCallback(
     async (e: React.FormEvent) => {
@@ -33,13 +45,7 @@ function BootstrapPageInner() {
       const cleanId = uniqueId.trim().toUpperCase();
       const cleanCode = code.trim().toUpperCase();
 
-      if (!cleanId) {
-        setError("Please enter your ID or Roll Number.");
-        setState("error");
-        return;
-      }
-
-      if (!cleanCode) {
+      if (!cleanCode && !urlToken) {
         setError("Please enter the activation code given by your administrator.");
         setState("error");
         return;
@@ -60,16 +66,23 @@ function BootstrapPageInner() {
       setState("submitting");
 
       try {
+        const body: Record<string, unknown> = {
+          code: cleanCode || undefined,
+          newPassword: password,
+        };
+        if (cleanId && !idLocked) {
+          body.uniqueId = cleanId;
+        }
+        if (urlToken) {
+          body.token = urlToken;
+        }
+
         const res = await fetch("/api/auth/bootstrap", {
           method: "POST",
           credentials: "include",
           cache: "no-store",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            uniqueId: cleanId,
-            code: cleanCode,
-            newPassword: password,
-          }),
+          body: JSON.stringify(body),
         });
 
         const json = await res.json().catch(() => ({}));
@@ -79,7 +92,9 @@ function BootstrapPageInner() {
             json?.error?.message ??
             (errCode === "ALREADY_ONBOARDED"
               ? "This account has already completed setup. You can log in directly."
-              : "Invalid activation code or ID. Check your details and try again.");
+              : errCode === "INVALID_TOKEN"
+                ? "This activation link is invalid or has expired. Ask your administrator for a new one."
+                : "Invalid activation code or ID. Check your details and try again.");
           setError(msg);
           setState("error");
           return;
@@ -92,7 +107,7 @@ function BootstrapPageInner() {
         setState("error");
       }
     },
-    [code, confirmPassword, password, router, uniqueId]
+    [code, confirmPassword, password, router, uniqueId, idLocked, urlToken]
   );
 
   return (
@@ -105,7 +120,9 @@ function BootstrapPageInner() {
           </div>
           <h1 className="text-2xl font-bold text-[var(--text-primary)]">Activate Your Account</h1>
           <p className="text-xs text-[var(--text-muted)] max-w-sm mx-auto">
-            Enter your university ID and the one-time activation code from your administrator to set your password.
+            {urlToken
+              ? "Follow your personalized activation link to set your password. Your ID is pre-filled and locked."
+              : "Enter your university ID and the one-time activation code from your administrator to set your password."}
           </p>
         </div>
 
@@ -126,49 +143,80 @@ function BootstrapPageInner() {
 
           <form onSubmit={submit} className="space-y-4">
             {/* Unique ID / Roll */}
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide block" htmlFor="uniqueId">
-                ID / Roll Number *
-              </label>
-              <div className="relative">
-                <input
-                  id="uniqueId"
-                  type="text"
-                  value={uniqueId}
-                  onChange={(e) => setUniqueId(e.target.value)}
-                  placeholder="e.g. 24JJ1A0501 or EMP-001"
-                  required
-                  autoCapitalize="characters"
-                  className="w-full rounded-xl bg-[var(--bg-base)] border border-[var(--border)] px-3.5 py-2.5 pl-10 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)]/50 focus:outline-none focus:border-emerald-500 font-medium"
-                />
-                <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
+            {!idLocked && (
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide block" htmlFor="uniqueId">
+                  ID / Roll Number *
+                </label>
+                <div className="relative">
+                  <input
+                    id="uniqueId"
+                    type="text"
+                    value={uniqueId}
+                    onChange={(e) => setUniqueId(e.target.value.toUpperCase())}
+                    placeholder="e.g. 24JJ1A0501 or EMP-001"
+                    required
+                    autoCapitalize="characters"
+                    className="w-full rounded-xl bg-[var(--bg-base)] border border-[var(--border)] px-3.5 py-2.5 pl-10 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)]/50 focus:outline-none focus:border-emerald-500 font-medium uppercase"
+                  />
+                  <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* Locked ID (secure token) */}
+            {idLocked && (
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide block" htmlFor="uniqueId-locked">
+                  Your Account ID
+                </label>
+                <div className="relative">
+                  <input
+                    id="uniqueId-locked"
+                    type="text"
+                    value={uniqueId}
+                    readOnly
+                    className="w-full rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] px-3.5 py-2.5 pl-10 text-sm text-[var(--text-primary)]/60 font-medium cursor-not-allowed"
+                  />
+                  <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
+                </div>
+                <p className="text-[10px] text-emerald-400/70">Locked to your personalized activation link. You cannot change this.</p>
+              </div>
+            )}
 
             {/* Activation Code */}
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide block" htmlFor="code">
-                  Activation Code *
-                </label>
-                {urlCode && (
-                  <span className="text-[10px] text-emerald-400 font-medium">Pre-filled from link</span>
-                )}
+            {!urlToken && (
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide block" htmlFor="code">
+                    Activation Code *
+                  </label>
+                  {urlCode && (
+                    <span className="text-[10px] text-emerald-400 font-medium">Pre-filled from link</span>
+                  )}
+                </div>
+                <div className="relative">
+                  <input
+                    id="code"
+                    type="text"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.toUpperCase())}
+                    placeholder="e.g. ABCD1234"
+                    required
+                    maxLength={12}
+                    className="w-full rounded-xl bg-[var(--bg-base)] border border-[var(--border)] px-3.5 py-2.5 pl-10 text-sm font-mono tracking-widest text-[var(--text-primary)] placeholder:text-[var(--text-muted)]/50 focus:outline-none focus:border-emerald-500 font-bold uppercase"
+                  />
+                  <KeyRound className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
+                </div>
               </div>
-              <div className="relative">
-                <input
-                  id="code"
-                  type="text"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value.toUpperCase())}
-                  placeholder="e.g. ABCD1234"
-                  required
-                  maxLength={12}
-                  className="w-full rounded-xl bg-[var(--bg-base)] border border-[var(--border)] px-3.5 py-2.5 pl-10 text-sm font-mono tracking-widest text-[var(--text-primary)] placeholder:text-[var(--text-muted)]/50 focus:outline-none focus:border-emerald-500 font-bold uppercase"
-                />
-                <KeyRound className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
+            )}
+
+            {urlToken && (
+              <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300">
+                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+                <span>Secure activation link verified. Set your password below to finish.</span>
               </div>
-            </div>
+            )}
 
             {/* New Password */}
             <div className="space-y-1">

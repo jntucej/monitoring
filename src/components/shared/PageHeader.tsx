@@ -14,23 +14,44 @@ export interface PageHeaderProps {
   breadcrumb?: { label: string; href: string }[];
   /** Optional explicit path to look up metadata. Defaults to current pathname. */
   pathOverride?: string;
+  /** Render a visible mobile title bar even when the desktop shell hides one. */
+  showMobileTitle?: boolean;
 }
 
 /**
- * PageHeader — invisible. The role consoles dropped the per-page title
- * banner (the shell chrome + role nav already identify the page). This
- * component now only owns the document-title side effect so all the
- * existing `<PageHeader ... />` call sites keep working unchanged.
- *
- * Any new code should use `usePageTitle` instead of mounting a PageHeader.
+ * PageHeader — renders a compact mobile-only title bar (below the standalone
+ * shell top chrome) so students/parents on phones always see the page name.
+ * On md+ the console chrome already identifies the page, so nothing renders.
+ * Also owns the document-title side effect; all existing call sites keep
+ * working unchanged.
  */
-export function PageHeader({ title }: PageHeaderProps): null {
+export function PageHeader({
+  title,
+  subtitle,
+  onRefresh,
+  refreshing,
+  actions,
+  breadcrumb,
+  pathOverride,
+  showMobileTitle = true,
+}: PageHeaderProps) {
   useEffect(() => {
     if (title && typeof document !== "undefined") {
       document.title = `${title} | Gate Monitor`;
     }
   }, [title]);
-  return null;
+
+  // Keep unused-destructure lint clean without a no-op render.
+  void [subtitle, onRefresh, refreshing, actions, breadcrumb, pathOverride];
+
+  if (!showMobileTitle || !title) return null;
+
+  return (
+    <div className="md:hidden -mx-4 px-4 pt-2 pb-1">
+      <h1 className="text-base font-bold text-[var(--text-primary)] truncate">{title}</h1>
+      {subtitle && <p className="text-xs text-[var(--text-muted)] truncate">{subtitle}</p>}
+    </div>
+  );
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

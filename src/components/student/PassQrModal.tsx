@@ -103,7 +103,7 @@ export function PassQrModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-3xl p-6 max-w-sm w-full shadow-2xl relative space-y-4">
+    <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-3xl p-4 sm:p-6 max-w-[calc(100vw-2rem)] sm:max-w-sm w-full shadow-2xl relative space-y-4 overflow-y-auto max-h-[90dvh]">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -148,6 +148,7 @@ export function PassQrModal({
                 size={210}
                 level="M"
                 includeMargin
+                style={{ width: "100%", maxWidth: 210, height: "auto" }}
               />
               <div className="mt-2 text-[10px] font-bold text-slate-700 font-mono flex items-center gap-1.5 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />

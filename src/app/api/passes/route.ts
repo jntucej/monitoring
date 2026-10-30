@@ -171,7 +171,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
           { status: 403 }
         );
       }
-    } else if (!['admin', 'sysadmin', ].includes(authRole)) {
+    } else if (!['admin', 'sysadmin', 'operator'].includes(authRole)) {
       return NextResponse.json(
         { success: false, error: { code: "FORBIDDEN", message: "Insufficient permissions to create a pass." } },
         { status: 403 }
@@ -189,8 +189,20 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
     });
 
     if (!pass) {
+      // Distinguish "user exists but profile row missing" from "roll unknown".
+      const { data: userExists } = await supabase
+        .from('users')
+        .select('id')
+        .eq('unique_id', roll)
+        .maybeSingle();
+      if (userExists) {
+        return NextResponse.json(
+          { success: false, error: { code: "STUDENT_PROFILE_MISSING", message: "Your student profile is not set up. Contact admin." } },
+          { status: 409 }
+        );
+      }
       return NextResponse.json(
-        { success: false, error: { code: "NOT_FOUND", message: "Student not found" } },
+        { success: false, error: { code: "STUDENT_NOT_FOUND", message: "No student with this roll number found" } },
         { status: 404 }
       );
     }

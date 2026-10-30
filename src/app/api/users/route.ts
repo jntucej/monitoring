@@ -12,6 +12,7 @@ import {
   generateUceJUniqueId,
 } from "@/lib/db";
 import { hash } from "@/server/lib/crypto";
+import { query } from "@/lib/postgres";
 import type { Role } from "@/lib/types";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -335,16 +336,15 @@ async function handlePost(req: NextRequest) {
         let code = "";
         for (let i = 0; i < 8; i++) code += alphabet[Math.floor(Math.random() * alphabet.length)];
         const codeHash = await hash(code, 10);
-        enrollmentExpiresAt = new Date(Date.now() * 1 + 24 * 60 * 60 * 1000).toISOString();
-        const { error: enrollErr } = await service.from("enrollment_codes").insert({
-          user_id: user.id || authUserId,
-          code_hash: codeHash,
-          purpose: "mobile",
-          expires_at: enrollmentExpiresAt,
-          created_by: actorId,
-        });
-        if (enrollErr) {
-          console.warn("[users.POST] enrollment-code issuance failed (non-fatal):", enrollErr.message);
+        enrollmentExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+        const insRes = await query(
+          `INSERT INTO enrollment_codes (user_id, code_hash, purpose, expires_at, created_by)
+           VALUES ($1, $2, 'mobile', $3, $4)`,
+          [user.id || authUserId, codeHash, enrollmentExpiresAt, actorId],
+          { currentRole: "sysadmin" }
+        );
+        if (insRes.rowCount !== 1) {
+          console.warn("[users.POST] enrollment-code issuance failed (non-fatal): rowCount=", insRes.rowCount);
         } else {
           enrollmentCode = code;
         }

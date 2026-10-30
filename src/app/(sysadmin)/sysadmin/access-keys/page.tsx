@@ -27,6 +27,7 @@ interface GeneratedCode {
   expiresAt: string;
   userRoll: string;
   userName: string;
+  bootstrapLink?: string;
 }
 
 const PURPOSES: { value: string; label: string }[] = [
