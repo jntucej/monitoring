@@ -1,18 +1,9 @@
 {
-  "specVersion": "1.0",
-  "entries": [
-    {
-      "identifier": "urn:air:monitor-ucej:dashboard",
-      "displayName": "Monitor UCEJ Dashboard",
-      "type": "application",
-      "url": "https://monitor-ucej.in/",
-      "representativeQueries": [
-        "open monitoring dashboard",
-        "check system status"
-      ],
-      "trustManifest": {
-        "identity": "https://monitor-ucej.in/"
-      }
-    }
-  ]
+  "name": "Gate Monitor AI Agent Catalog",
+  "version": "1.0.0",
+  "description": "AI agent catalog and service endpoints for Gate Monitor",
+  "endpoints": {
+    "api": "https://monitor.cej.in/api",
+    "rag": "https://monitor.cej.in/api/rag"
+  }
 }

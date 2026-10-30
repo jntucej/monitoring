@@ -1,18 +1,6 @@
 {
-  "specVersion": "1.0",
-  "entries": [
-    {
-      "identifier": "urn:air:monitor-ucej:dashboard",
-      "displayName": "Monitor UCEJ Dashboard",
-      "type": "application",
-      "url": "https://monitor-ucej.in/",
-      "representativeQueries": [
-        "open monitoring dashboard",
-        "check system status"
-      ],
-      "trustManifest": {
-        "identity": "https://monitor-ucej.in/"
-      }
-    }
-  ]
+  "domain": "monitor.cej.in",
+  "service": "Gate Monitor",
+  "contact": "security@college.edu",
+  "policy": "https://monitor.cej.in/privacy"
 }
