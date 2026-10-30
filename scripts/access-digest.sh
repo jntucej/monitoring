@@ -11,7 +11,7 @@ docker exec gate_postgres psql -U postgres -d gate_monitor -c "
 "
 echo "=== Top 10 API Endpoints (Last 7 Days) ==="
 docker exec gate_postgres psql -U postgres -d gate_monitor -c "
-  SELECT path, method, count(*) as requests, avg(duration)::int as avg_ms 
+  SELECT path, method, count(*) as requests, avg(response_time)::int as avg_ms 
   FROM api_metrics 
   WHERE timestamp > now() - interval '7 days' 
   GROUP BY path, method 

@@ -40,7 +40,7 @@ assert_index_scan "Movement log student lookup" \
 
 # Hot query 3: Audit log inspection by action
 assert_index_scan "Audit logs action lookup" \
-  "SELECT id, action, performed_at FROM audit_logs WHERE action = 'SCAN_RECORDED' ORDER BY performed_at DESC LIMIT 10;" \
+  "SELECT id, action, timestamp FROM audit_logs WHERE action = 'SCAN_RECORDED' ORDER BY timestamp DESC LIMIT 10;" \
   "audit_logs"
 
 echo ""

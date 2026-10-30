@@ -20,7 +20,7 @@ echo; echo "── 1. user row ──"
 run_sql_var "SELECT id, unique_id, email, role, status,
   password_hash IS NOT NULL AS has_pwd,
   initial_pin_hash IS NOT NULL AS has_pin,
-  two_factor_enabled, failed_login_count, locked_until
+  failed_login_count, locked_until
   FROM users
   WHERE LOWER(email)=LOWER(:'login') OR UPPER(unique_id)=UPPER(:'login')
      OR LOWER(login_identifier)=LOWER(:'login') OR LOWER(handle)=LOWER(:'login')

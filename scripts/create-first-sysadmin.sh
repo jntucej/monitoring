@@ -107,67 +107,26 @@ set_user_password() {
   local uid="$1" pw="$2"
   printf '%s' "$pw" > "$pw_file"
   chmod 600 "$pw_file"
-  # Prefer in-DB hashing: pg_read_file() on the 0600 file; the file PATH
-  # (not the password) is passed via psql -v.
-  if PGPASSWORD="$(pgpass_from_url)" psql "$DATABASE_URL" \
-      -v ON_ERROR_STOP=1 -X -q \
-      -v "pwdfile=$pw_file" -v "uid=$uid" <<'SQL'
-DO $$
-DECLARE
-  v_plain text;
-  v_hash text;
-BEGIN
-  v_plain := pg_read_file(current_setting('app.pwdfile'));
-  SELECT crypt(v_plain, gen_salt('bf', 10)) INTO v_hash;
-  UPDATE users
-     SET password_hash = v_hash,
-         password_must_change = TRUE,
-         session_version = COALESCE(session_version, 0) + 1,
-         updated_at = NOW()
-   WHERE unique_id = current_setting('app.uid');
-  IF NOT FOUND THEN
-    RAISE NOTICE 'row not found for unique_id=%; nothing updated.',
-      current_setting('app.uid');
-  END IF;
-END $$;
-SQL
-  then
-    :
-  else
-    echo "In-DB hashing unavailable; falling back to client-side bcrypt." >&2
-    local hash
-    # bcryptjs ships in this repo's node_modules (used by src/server/lib/crypto).
-    if ! hash="$(node -e '
-      const bcrypt = require("bcryptjs");
-      const fs = require("fs");
-      console.log(bcrypt.hashSync(fs.readFileSync(process.argv[1], "utf8"), 10));
-    ' "$pw_file")"; then
-      echo "ERROR: could not compute a bcrypt hash of the new password." >&2
-      echo "       (node + the project's node_modules/bcryptjs must be available)" >&2
-      exit 1
-    fi
-    # Only the hash (the at-rest value, safe to log) crosses the psql boundary.
-    PGPASSWORD="$(pgpass_from_url)" psql "$DATABASE_URL" \
+  local hash
+  if ! hash="$(node -e '
+    const bcrypt = require("bcryptjs");
+    const fs = require("fs");
+    console.log(bcrypt.hashSync(fs.readFileSync(process.argv[1], "utf8"), 10));
+  ' "$pw_file")"; then
+    echo "ERROR: could not compute a bcrypt hash of the new password." >&2
+    echo "       (node + the project'\''s node_modules/bcryptjs must be available)" >&2
+    exit 1
+  fi
+  PGPASSWORD="$(pgpass_from_url)" psql "$DATABASE_URL" \
       -v ON_ERROR_STOP=1 -X -q \
       -v "pwhash=$hash" -v "uid=$uid" <<'SQL'
-DO $$
-DECLARE
-  v_hash text;
-BEGIN
-  SELECT current_setting('app.pwhash') INTO v_hash;
-  UPDATE users
-     SET password_hash = v_hash,
-         password_must_change = TRUE,
-         session_version = COALESCE(session_version, 0) + 1,
-         updated_at = NOW()
-   WHERE unique_id = current_setting('app.uid');
-  IF NOT FOUND THEN
-    RAISE NOTICE 'row not found for unique_id=%; nothing updated.',
-      current_setting('app.uid');
-  END IF;
-END $$;
+UPDATE users
+   SET password_hash = :'pwhash',
+       password_must_change = TRUE,
+       session_version = COALESCE(session_version, 0) + 1,
+       updated_at = NOW()
+ WHERE unique_id = :'uid';
 SQL
-  fi
   # Zero the password file contents after every use.
   : > "$pw_file"
 }

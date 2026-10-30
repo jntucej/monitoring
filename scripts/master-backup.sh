@@ -79,7 +79,7 @@ touch "$SECRETS_FILE" && chmod 600 "$SECRETS_FILE"
         echo ""
         echo "=== ADMIN TOKENS ==="
         docker exec gate_postgres psql -U postgres -d gate_monitor \
-            -tAc "SELECT id, email, role, session_version, two_factor_enabled FROM users WHERE role IN ('sysadmin','admin','supervisor');"\
+            -tAc "SELECT id, email, role, session_version FROM users WHERE role IN ('sysadmin','admin','supervisor');"\
             2>/dev/null || echo "(query failed)"
     fi
     echo ""
