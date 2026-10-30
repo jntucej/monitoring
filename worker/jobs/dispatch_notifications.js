@@ -14,7 +14,7 @@ async function fetchBacklog(queue) {
 
 async function markProcessing(queue, id) {
   await query(
-    `UPDATE notification_${queue}_queue SET status = 'processing' WHERE id = $1`,
+    `UPDATE notification_${queue}_queue SET status = 'pending' WHERE id = $1`,
     [id]
   );
 }
