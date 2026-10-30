@@ -36,9 +36,27 @@ const shared = {
 
 /** @type {import('jest').Config} */
 export default {
-  ...shared,
-  testEnvironment: 'node',
-  roots: ['<rootDir>/tests/gate'],
-  testMatch: ['**/*.test.ts', '**/*.test.tsx', '**/*.spec.ts'],
-  setupFilesAfterEnv: ['<rootDir>/tests/gate/jest.setup.node.ts'],
+  projects: [
+    {
+      ...shared,
+      displayName: 'node',
+      testEnvironment: 'node',
+      roots: ['<rootDir>/tests/gate/policy', '<rootDir>/tests/gate/service',
+              '<rootDir>/tests/gate/routes', '<rootDir>/tests/gate/auth',
+              '<rootDir>/tests/gate/e2e', '<rootDir>/tests/gate/lib'],
+      testMatch: ['**/*.test.ts'],
+      setupFilesAfterEnv: ['<rootDir>/tests/gate/jest.setup.node.ts'],
+    },
+    {
+      ...shared,
+      displayName: 'ui',
+      testEnvironment: 'jsdom',
+      testEnvironmentOptions: { url: 'http://localhost:3000' },
+      roots: ['<rootDir>/tests/gate/ui', '<rootDir>/tests/gate/integration',
+              '<rootDir>/tests/gate/auth'],
+      testMatch: ['**/*.test.tsx', '**/*.test.ts'],
+      testPathIgnorePatterns: ['-api\\.test\\.ts$'],
+      setupFilesAfterEnv: ['<rootDir>/tests/gate/jest.setup.ui.ts'],
+    },
+  ],
 };
