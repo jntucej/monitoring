@@ -1,4 +1,4 @@
-import { db } from "@/lib/dbClient";
+import { supabase } from "@/lib/dbClient";
 
 export interface CurrentGateScheduleRow {
   id: string;
@@ -13,11 +13,10 @@ export interface CurrentGateScheduleRow {
 }
 
 export async function findCurrent(now: Date = new Date()): Promise<CurrentGateScheduleRow[]> {
-  // Keeping the original day/time computation as requested
   const dayOfWeek = now.getDay();
   const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
 
-  const { data, error } = await db
+  const { data, error } = await supabase
     .from("gate_access_rules")
     .select("*")
     .eq("is_active", true)

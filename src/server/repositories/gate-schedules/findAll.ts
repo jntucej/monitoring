@@ -1,4 +1,4 @@
-import { db } from "@/lib/dbClient";
+import { supabase } from "@/lib/dbClient";
 
 export interface GateScheduleRow {
   id: string;
@@ -10,7 +10,7 @@ export interface GateScheduleRow {
 }
 
 export async function findAll(): Promise<GateScheduleRow[]> {
-  const { data, error } = await db
+  const { data, error } = await supabase
     .from("gate_access_rules")
     .select("*")
     .order("priority", { ascending: false });

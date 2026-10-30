@@ -1,11 +1,11 @@
-import { db } from "@/lib/dbClient";
+import { supabase } from "@/lib/dbClient";
 import { Alert } from "@/lib/types";
 
 export async function find(filters: {
   resolved?: boolean;
   severity?: string;
 }): Promise<Alert[]> {
-  let query = db.from("alerts").select("*").order("timestamp", { ascending: false });
+  let query = supabase.from("alerts").select("*").order("timestamp", { ascending: false });
   
   if (filters.resolved !== undefined) {
     query = query.eq("resolved", filters.resolved);

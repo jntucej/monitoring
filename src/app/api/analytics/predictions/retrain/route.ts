@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
-import { generatePredictions } from "@/server/services/analytics/predictions";
+import { getPredictions } from "@/server/services/analytics/predictions";
 
 async function handlePost(req: NextRequest) {
   try {
-    const updatedPredictions = await generatePredictions();
+    const updatedPredictions = await getPredictions();
 
     return NextResponse.json({
       success: true,
