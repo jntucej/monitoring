@@ -205,7 +205,7 @@ export async function GET(
     return NextResponse.json(err("UNAUTHORIZED", "Unauthorized").body, { status: 401 });
   }
 
-  const deviceId = req.headers.get("x-device-id") || undefined;
+  const deviceId = req.headers.get("x-device-id") || "";
   const token = authHeader.split(" ")[1];
   const person = await validateMobileToken(token, deviceId);
 

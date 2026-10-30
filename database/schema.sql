@@ -269,7 +269,7 @@ CREATE TABLE IF NOT EXISTS notification_push_queue (
   title           TEXT NOT NULL,
   message         TEXT NOT NULL,
   data            JSONB,
-  status          TEXT DEFAULT 'pending' CHECK (status IN ('pending','sent','failed')),
+  status          TEXT DEFAULT 'pending' CHECK (status IN ('pending','processing','sent','failed','dead_letter')),
   attempts        INTEGER DEFAULT 0,
   created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -278,7 +278,7 @@ CREATE TABLE IF NOT EXISTS notification_sms_queue (
   notification_id TEXT REFERENCES notifications(id) ON DELETE CASCADE,
   phone_number    TEXT NOT NULL,
   message         TEXT NOT NULL,
-  status          TEXT DEFAULT 'pending' CHECK (status IN ('pending','sent','failed')),
+  status          TEXT DEFAULT 'pending' CHECK (status IN ('pending','processing','sent','failed','dead_letter')),
   attempts        INTEGER DEFAULT 0,
   created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -288,7 +288,7 @@ CREATE TABLE IF NOT EXISTS notification_email_queue (
   email           TEXT NOT NULL,
   subject         TEXT NOT NULL,
   body            TEXT NOT NULL,
-  status          TEXT DEFAULT 'pending' CHECK (status IN ('pending','sent','failed')),
+  status          TEXT DEFAULT 'pending' CHECK (status IN ('pending','processing','sent','failed','dead_letter')),
   attempts        INTEGER DEFAULT 0,
   created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

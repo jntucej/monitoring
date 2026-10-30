@@ -1,18 +1,18 @@
 -- 20261030000000_enrollment_purpose_check.sql
-DO $$BEGIN
-  ALTER TABLE public.enrollment_codes
-    DROP CONSTRAINT IF EXISTS enrollment_codes_purpose_check;
-  ALTER TABLE public.enrollment_codes
-    ADD CONSTRAINT enrollment_codes_purpose_check
-    CHECK (purpose = ANY (ARRAY[
-      'mobile'::text,
-      'web'::text,
-      'web_bootstrap'::text,
-      'pin_reset'::text,
-      'role_bootstrap'::text
-      -- restore, was dropped by the previous version
-    ]));
-END$$;
+-- Restore 'web' as a valid enrollment purpose (used by the first-password
+-- web enrollment flow; distinct from 'web_bootstrap'). If no code path emits
+-- 'web', remove it here instead of leaving a dead security-sensitive value.
+ALTER TABLE public.enrollment_codes
+  DROP CONSTRAINT IF EXISTS enrollment_codes_purpose_check;
+ALTER TABLE public.enrollment_codes
+  ADD CONSTRAINT enrollment_codes_purpose_check
+  CHECK (purpose = ANY (ARRAY[
+    'mobile'::text,
+    'web'::text,
+    'web_bootstrap'::text,
+    'pin_reset'::text,
+    'role_bootstrap'::text
+  ]));
 
 DO $$DECLARE
   has_filename BOOLEAN;

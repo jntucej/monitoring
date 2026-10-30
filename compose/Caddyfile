@@ -27,6 +27,10 @@
         -X-Auth-User
         -X-Auth-Timestamp
         -X-Auth-Signature
+        # Strip client-supplied forwarding headers so a malicious client over
+        # HTTP cannot forge X-Forwarded-Proto and leak Secure-flag cookies.
+        -X-Forwarded-Proto
+        -X-Forwarded-Host
     }
 
     reverse_proxy web:3000 {
@@ -34,5 +38,6 @@
         header_up X-Client-IP {remote_host}
         header_up X-Real-IP   {remote_host}
         header_up X-Forwarded-Proto https
+        header_up X-Forwarded-Host {host}
     }
 }

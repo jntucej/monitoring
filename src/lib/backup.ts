@@ -112,6 +112,9 @@ export async function createDatabaseBackup(
       checksum,
     };
 
+    const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const safeCreatedBy = createdBy && UUID_REGEX.test(createdBy) ? createdBy : null;
+
     // Log backup in metadata table
     await getDbClient()
       .from('backups')
@@ -122,8 +125,9 @@ export async function createDatabaseBackup(
         size: metadata.size,
         table_count: metadata.tableCount,
         record_count: metadata.recordCount,
-        created_by: metadata.createdBy,
+        created_by: safeCreatedBy,
         status: metadata.status,
+        checksum: metadata.checksum,
       });
 
     return {

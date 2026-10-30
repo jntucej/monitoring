@@ -3,14 +3,8 @@
 -- Addressed review items: P0-1, P0-2, P0-6, P2-22, P2-24, P2-25
 --
 -- P0-1: RLS role bridge (gate_app)
---   KNOWN GAP: postgres currently has BYPASSRLS (from 20261014000004).
---   The running deploy connects as postgres, so we CANNOT revoke BYPASSRLS
---   in this migration without breaking it. The real fix is:
---     1. Switch k8s DATABASE_URL to connect as gate_app.
---     2. Then run: ALTER ROLE postgres NOBYPASSRLS;
---   As a bridge, this migration does GRANT service_role TO gate_app so
---   gate_app inherits all existing `FOR ALL TO service_role USING (true)`
---   policies and can actually read rows when it connects directly.
+-- REVOKE service_role from gate_app so it cannot assume BYPASSRLS.
+REVOKE service_role FROM gate_app;
 --
 -- P0-2: Immutable audit_logs
 --   REVOKE UPDATE, DELETE on audit_logs from all roles (keep SELECT).

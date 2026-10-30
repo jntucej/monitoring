@@ -642,8 +642,11 @@ export class PostgresQueryBuilder<T = any> {
     return this;
   }
 
+  private _promise?: Promise<{ data: any; error: any; count?: number }> | null;
   async execute(): Promise<{ data: any; error: any; count?: number }> {
-    try {
+    if (this._promise) return this._promise;
+    this._promise = (async () => {
+      try {
       if (this.pendingMutation?.type === "insert") {
         const raw = this.pendingMutation.data;
         const list = Array.isArray(raw) ? raw : [raw];
@@ -755,9 +758,11 @@ export class PostgresQueryBuilder<T = any> {
         totalCount = countRes.rows[0]?.count ?? res.rowCount ?? 0;
       }
       return { data: res.rows, error: null, count: totalCount ?? res.rowCount ?? undefined };
-    } catch (err: any) {
-      return { data: null, error: { message: err.message, code: err.code } };
-    }
+      } catch (err: any) {
+        return { data: null, error: { message: err.message, code: err.code } };
+      }
+    })();
+    return this._promise;
   }
 
   then<TResult1 = { data: any; error: any; count?: number }, TResult2 = never>(

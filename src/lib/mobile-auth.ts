@@ -1,7 +1,7 @@
-import { createHash } from 'crypto';
 import { SignJWT, jwtVerify, JWTPayload } from 'jose';
+import { requireSecret } from '@/lib/env';
+import { randomUUID, createHmac } from 'crypto';
 import { Person } from "@/lib/types";
-import { requireSecret } from "@/lib/env";
 import { findPersonByUniqueId } from "@/lib/db";
 import { getCached, setCached } from './cache';
 
@@ -33,8 +33,11 @@ export interface MobileTokenClaims extends JWTPayload {
 }
 
 export function hashDeviceId(deviceId: string): string {
-  // Short, deterministic. Not a security boundary — just tamper-evident.
-  return createHash('sha256').update(deviceId).digest('hex').slice(0, 16);
+  // HMAC-SHA256 with a server-side secret. Without MOBILE_DEVICE_SECRET the
+  // hash is still deterministic but NOT reversible from the JWT payload,
+  // so an attacker who steals the JWT cannot forge a matching device claim.
+  const secret = process.env.MOBILE_DEVICE_SECRET || requireSecret("MOBILE_TOKEN_SECRET", 32);
+  return createHmac('sha256', secret).update(deviceId).digest('hex').slice(0, 16);
 }
 
 /**
@@ -65,7 +68,7 @@ export async function generateMobileToken(
  */
 export async function validateMobileToken(
   token: string,
-  presentedDeviceId?: string,
+  presentedDeviceId: string,
 ): Promise<Person | null> {
   try {
     const { payload } = await jwtVerify(token, getSigningKey(), {

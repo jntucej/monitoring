@@ -37,7 +37,9 @@ export async function cachedFetch<T>(
 ): Promise<T> {
   const { ttlMs = 15_000, headers, auth = true } = options;
   const now = Date.now();
-  const hit = cache.get(url) as CachedEntry<T> | undefined;
+  const userId = typeof window !== "undefined" ? (window as any).__currentUserId ?? "anon" : "anon";
+  const key = `${userId}|${url}`;
+  const hit = cache.get(key) as CachedEntry<T> | undefined;
   if (hit && hit.expiresAt > now) return hit.data;
 
   let res = await fetch(url, {
@@ -81,6 +83,14 @@ export async function cachedFetch<T>(
 export function clearCache(url?: string) {
   if (url) cache.delete(url);
   else cache.clear();
+}
+
+/** Scope cache keys to a specific user ID. Call on logout to evict a user's
+ *  cached entries so the next operator on a shared kiosk never reads them. */
+export function clearCacheForUser(userId: string | null) {
+  if (!userId) return;
+  const prefix = `${userId}|`;
+  for (const k of cache.keys()) if (k.startsWith(prefix)) cache.delete(k);
 }
 
 export interface ApiResource<T> {

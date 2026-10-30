@@ -17,3 +17,9 @@ repomix.config.json
 mint_jwt.mjs
 scripts/prov/
 scripts/provision-role-accounts.mts
+
+# Biometric sync bridge — reads device credentials; not part of the web image
+scripts/sync-bridge/
+
+# Security compose tree — mounted from host, not shipped into the image
+compose/security/

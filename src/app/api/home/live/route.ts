@@ -13,7 +13,15 @@ import { poolQuery } from "@/lib/postgres";
  * reads only `stats`; the `LiveGateFeed` centrepiece uses labeled sample
  * rows, so the richer payload was never consumed by the public UI.
  */
+/** Ten-second in-memory cache for /api/home/live so a bot flood cannot
+ *  saturate Postgres. Single-process scope is enough; the header already
+ *  advertises max-age=15. */
+let homeLiveCache: { at: number; data: unknown } | null = null;
+
 export async function GET() {
+  if (homeLiveCache && Date.now() - homeLiveCache.at < 10_000) {
+    return NextResponse.json(homeLiveCache.data);
+  }
   const { rows } = await poolQuery<{
     requests_today: string;
     approved_today: string;
@@ -35,16 +43,18 @@ export async function GET() {
         WHERE current_status = 'IN')::text AS on_campus_now
   `);
   const r = rows[0];
-  return NextResponse.json(
-    {
-      stats: {
-        requestsToday: Number(r.requests_today),
-        approvedToday: Number(r.approved_today),
-        scansToday: Number(r.scans_today),
-        onCampusNow: Number(r.on_campus_now),
-      },
-      updatedAt: new Date().toISOString(),
+  const payload = {
+    stats: {
+      requestsToday: Number(r.requests_today),
+      approvedToday: Number(r.approved_today),
+      scansToday: Number(r.scans_today),
+      onCampusNow: Number(r.on_campus_now),
     },
-    { headers: { "cache-control": "public, max-age=15, s-maxage=15" } },
+    updatedAt: new Date().toISOString(),
+  };
+  homeLiveCache = { at: Date.now(), data: payload };
+  return NextResponse.json(
+    payload,
+    { headers: { "cache-control": "public, max-age=15, s-maxage=15" } }
   );
 }

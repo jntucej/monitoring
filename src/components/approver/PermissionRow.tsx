@@ -46,6 +46,10 @@ export interface PermissionItem {
   created_at: string;
   updated_at: string;
   sla_deadline?: string | null;
+  from_date?: string | null;
+  to_date?: string | null;
+  fromDate?: string | null;
+  toDate?: string | null;
   student?: {
     id: string;
     name: string;

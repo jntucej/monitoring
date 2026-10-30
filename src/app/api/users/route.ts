@@ -17,6 +17,7 @@ import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { ROLES } from "@/lib/roles";
+import { parseRollNumber, getStudentYearFromRoll, getBatchFromRoll } from "@/lib/rollNumber";
 
 // Roles assignable via this API. Intersection of src/lib/types.ts `Role`
 // and the CHECK constraint on public.users.role in consolidated_clean_schema.sql.
@@ -124,7 +125,6 @@ async function handlePost(req: NextRequest) {
     } = body || {};
 
     const effectiveUniqueId = uniqueId || employeeId;
-    const effectiveDept = departmentId || department;
     const effectiveHostel = assignedHostel || hostelRoom;
 
     // staff gets its own emp-id convention (STF-0001) so staff can log in with an
@@ -134,6 +134,16 @@ async function handlePost(req: NextRequest) {
     let resolvedUniqueId: string | undefined = effectiveUniqueId;
     if (autoGenRoles.includes(role) && !resolvedUniqueId) {
       resolvedUniqueId = await generateUceJUniqueId(role);
+    }
+
+    let effectiveDept = departmentId || department;
+    // Auto-derive department and course for student from roll number if omitted
+    if (role === "student" && !effectiveDept) {
+      const rollCandidate = body?.roll || resolvedUniqueId || body?.uniqueId;
+      const parsed = parseRollNumber(rollCandidate);
+      if (parsed?.departmentCode) {
+        effectiveDept = parsed.department;
+      }
     }
 
     const rawEmail = body?.email;
@@ -262,17 +272,24 @@ async function handlePost(req: NextRequest) {
 
     // Insert student_details if role is student
     if (role === "student") {
+      const studentRoll = body?.roll || resolvedUniqueId || body?.uniqueId || (user as any).unique_id || String(email).split("@")[0];
+      const parsed = parseRollNumber(studentRoll);
+      const computedYear = studentRoll ? getStudentYearFromRoll(studentRoll) : null;
+      const computedBatch = studentRoll ? getBatchFromRoll(studentRoll) : null;
       await service.from("student_details").upsert({
         user_id: user.id || authUserId,
-        roll: body.roll || resolvedUniqueId || body.uniqueId || (user as any).unique_id || String(email).split("@")[0],
-        year: body.year ?? 1,
-        section: body.section ?? "A",
-        batch: body.batch ?? "",
-        hostel_block: body.hostelBlock ?? effectiveHostel ?? null,
-        room_number: body.roomNumber ?? body.hostelRoom ?? null,
-        student_type: body.studentType ?? null,
-        gender: body.gender ?? null,
-        guardian_id: body.guardianId ?? parentId ?? null,
+        roll: studentRoll,
+        year: body?.year ?? (computedYear ?? 1),
+        section: body?.section ?? "A",
+        batch: body?.batch ?? (computedBatch ?? ""),
+        course: body?.course || (parsed?.entryMode ?? "Regular B.Tech"),
+        branch: body?.branch || (parsed?.department ?? effectiveDept ?? null),
+        department: body?.department || (parsed?.department ?? effectiveDept ?? null),
+        hostel_block: body?.hostelBlock ?? effectiveHostel ?? null,
+        room_number: body?.roomNumber ?? body?.hostelRoom ?? null,
+        student_type: body?.studentType ?? null,
+        gender: body?.gender ?? null,
+        guardian_id: body?.guardianId ?? parentId ?? null,
       }, { onConflict: "user_id" });
     }
 
@@ -551,6 +568,6 @@ await addAudit({
   }
 }
 
-export const GET = withRateLimit(withAuthorization(handleGet, { requiredRole: ['admin', 'sysadmin'] }), { keyPrefix: 'users_list', maxRequests: 30 });
-export const POST = withRateLimit(withAuthorization(handlePost, { requiredRole: ['admin', 'sysadmin'] }), { keyPrefix: 'users_create', maxRequests: 10 });
-export const PATCH = withRateLimit(withAuthorization(handlePatch, { requiredRole: ['admin', 'sysadmin'] }), { keyPrefix: 'users_update', maxRequests: 20 });
+export const GET = withRateLimit(withAuthorization(handleGet, { requiredRole: ['admin', 'sysadmin'] }), { keyPrefix: 'users_list', maxRequests: 600 });
+export const POST = withRateLimit(withAuthorization(handlePost, { requiredRole: ['admin', 'sysadmin'] }), { keyPrefix: 'users_create', maxRequests: 120 });
+export const PATCH = withRateLimit(withAuthorization(handlePatch, { requiredRole: ['admin', 'sysadmin'] }), { keyPrefix: 'users_update', maxRequests: 120 });
