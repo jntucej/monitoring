@@ -4,14 +4,15 @@ import { createDatabaseBackup, listBackups, restoreDatabaseBackup } from "@/lib/
 import { query } from "@/lib/postgres";
 import { addAudit } from "@/lib/db";
 import { Role } from "@/lib/types";
+import type { AuthContext } from "@/lib/authContext";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 
 /**
  * GET /api/admin/backup - List database backups
  */
-async function handleGet(req: NextRequest) {
-  const actorRole = req.headers.get("x-user-role");
+async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
+  const actorRole = auth?.role;
   if (actorRole !== "sysadmin" && actorRole !== "admin") {
     return NextResponse.json(
       { success: false, error: { code: "FORBIDDEN", message: "SysAdmin access required" } },
@@ -36,12 +37,12 @@ async function handleGet(req: NextRequest) {
  * Body format for create: { action: "create", anonymize?: boolean, tables?: string[] }
  * Body format for restore: { action: "restore", backupData: Record<string, any[]>, truncate?: boolean }
  */
-async function handlePost(req: NextRequest) {
+async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   const csrfFail = assertCsrf(req);
   if (csrfFail) return csrfFail;
 
-  const actorId = req.headers.get("x-user-id");
-  const actorRole = req.headers.get("x-user-role");
+  const actorId = auth?.userId;
+  const actorRole = auth?.role;
 
   if (!actorId || (actorRole !== "sysadmin" && actorRole !== "admin")) {
     return NextResponse.json(

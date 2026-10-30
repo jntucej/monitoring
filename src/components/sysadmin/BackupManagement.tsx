@@ -51,7 +51,7 @@ const api = useApi();
   const handleCreateBackup = async () => {
     setBusy(true); setMsg(null);
     try {
-      const headers = api.getHeaders();
+      const headers = { ...api.getHeaders(), "Content-Type": "application/json" };
       const res = await fetch("/api/admin/backup", { method: "POST", headers, body: JSON.stringify({ action: "create" }) });
       const json = await res.json();
       if (res.ok && json.success) {
@@ -122,13 +122,22 @@ const api = useApi();
       ) : (
         <div className="space-y-3">
           <div className="divide-y divide-[var(--border)] border border-[var(--border)] rounded-lg overflow-hidden">
-            {backups.slice(0, 5).map((b) => (
-              <div key={b.id} className="p-2.5 flex items-center justify-between bg-[var(--bg-elevated)]/40 text-xs">
-                <div>
-                  <p className="font-semibold text-sky-400 font-mono">{b.filename}</p>
-                  <p className="text-[10px] text-[var(--text-muted)]">{new Date(b.createdAt).toLocaleString("en-IN")} &bull; {b.recordCount} records</p>
+            {backups.slice(0, 10).map((b) => (
+              <div key={b.id} className="p-3 flex items-center justify-between bg-[var(--bg-elevated)]/40 text-xs gap-3">
+                <div className="space-y-0.5 min-w-0">
+                  <p className="font-semibold text-sky-400 font-mono truncate">{b.filename}</p>
+                  <p className="text-[10px] text-[var(--text-muted)]">
+                    {new Date(b.createdAt).toLocaleString("en-IN")} &bull; {b.recordCount} records &bull; {b.size > 1048576 ? `${(b.size / 1048576).toFixed(1)} MB` : `${Math.round(b.size / 1024)} KB`}
+                  </p>
+                  {b.checksum && (
+                    <p className="text-[10px] font-mono text-[var(--text-muted)] truncate max-w-sm">
+                      SHA-256: <span className="text-emerald-400/90">{b.checksum.slice(0, 16)}…</span>
+                    </p>
+                  )}
                 </div>
-                <span className="px-2 py-0.5 rounded text-[10px] uppercase bg-emerald-500/10 text-emerald-400 font-bold">{b.status}</span>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="px-2 py-0.5 rounded text-[10px] uppercase bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20">{b.status}</span>
+                </div>
               </div>
             ))}
           </div>
