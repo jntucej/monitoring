@@ -78,7 +78,6 @@ const api = useApi();
   const [loading, setLoading] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
-  const [savingPin, setSavingPin] = useState(false);
 
   // Profile fields
   const [name, setName] = useState("");
@@ -91,11 +90,6 @@ const api = useApi();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
-  // PIN fields
-  const [currentPin, setCurrentPin] = useState("");
-  const [newPin, setNewPin] = useState("");
-  const [confirmPin, setConfirmPin] = useState("");
 
   // Telemetry & audit
   const [recentAudits, setRecentAudits] = useState<RecentAuditItem[]>([]);
@@ -285,54 +279,6 @@ const api = useApi();
       });
     } finally {
       setSavingPassword(false);
-    }
-  };
-
-  const handleChangePin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newPin !== confirmPin) {
-      addToast({ title: "Validation Error", message: "PIN confirmation does not match.", variant: "error" });
-      return;
-    }
-    if (!/^\d{4,8}$/.test(newPin)) {
-      addToast({ title: "Validation Error", message: "PIN must be between 4 and 8 digits.", variant: "error" });
-      return;
-    }
-
-    setSavingPin(true);
-    try {
-      const headers = { ...api.getHeaders(), "Content-Type": "application/json" };
-      const res = await fetch("/api/auth/pin-change", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ currentPin, newPin }),
-      });
-
-      const json = await res.json();
-      if (res.ok && json.success) {
-        addToast({
-          title: "Gate PIN Updated",
-          message: "Your administrator terminal PIN has been updated.",
-          variant: "success",
-        });
-        setCurrentPin("");
-        setNewPin("");
-        setConfirmPin("");
-      } else {
-        addToast({
-          title: "PIN Update Failed",
-          message: json.error?.message || json.error || "Could not update gate PIN.",
-          variant: "error",
-        });
-      }
-    } catch (err: any) {
-      addToast({
-        title: "Network Error",
-        message: err.message || "Failed to update gate PIN.",
-        variant: "error",
-      });
-    } finally {
-      setSavingPin(false);
     }
   };
 
@@ -653,86 +599,6 @@ const api = useApi();
                       <Lock className="w-4 h-4" /> Change Master Password
                     </>
                   )}
-                </button>
-              </div>
-            </form>
-          </div>
-
-          {/* Change Security PIN Card */}
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 space-y-5 shadow-xl">
-            <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
-                  <Fingerprint className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-[var(--text-primary)]">Admin Kiosk & Gate PIN</h3>
-                  <p className="text-xs text-[var(--text-muted)]">Used for manual overrides and emergency kiosk authorization.</p>
-                </div>
-              </div>
-            </div>
-
-            <form onSubmit={handleChangePin} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-[var(--text-secondary)] block">
-                    Current PIN
-                  </label>
-                  <input
-                    type="password"
-                    inputMode="numeric"
-                    pattern="\d*"
-                    maxLength={8}
-                    value={currentPin}
-                    onChange={(e) => setCurrentPin(e.target.value.replace(/\D/g, ""))}
-                    placeholder="Existing PIN"
-                    className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-xs text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 font-mono text-center"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-[var(--text-secondary)] block">
-                    New PIN (4–8 digits) *
-                  </label>
-                  <input
-                    type="password"
-                    inputMode="numeric"
-                    pattern="\d*"
-                    maxLength={8}
-                    required
-                    value={newPin}
-                    onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ""))}
-                    placeholder="New PIN"
-                    className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-xs text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 font-mono text-center"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-[var(--text-secondary)] block">
-                    Confirm PIN *
-                  </label>
-                  <input
-                    type="password"
-                    inputMode="numeric"
-                    pattern="\d*"
-                    maxLength={8}
-                    required
-                    value={confirmPin}
-                    onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ""))}
-                    placeholder="Repeat PIN"
-                    className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-xs text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 font-mono text-center"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end">
-                <button
-                  type="submit"
-                  disabled={savingPin}
-                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all disabled:opacity-50 flex items-center gap-2"
-                >
-                  {savingPin ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
-                  Update Gate PIN
                 </button>
               </div>
             </form>

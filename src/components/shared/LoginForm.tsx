@@ -41,6 +41,7 @@ function formatLoginError(code?: string, defaultMsg?: string): string {
 export function LoginForm({ title, subtitle }: LoginFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const code = searchParams?.get("code");
 
   // ── Local form state (NOT tied to store.loading — that's the bug) ───────
   const [loginIdentifier, setLoginIdentifier] = useState("");
@@ -320,6 +321,29 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
           {!submitting && <ArrowRight className="h-4 w-4" />}
         </button>
       </form>
+
+      {/* New account? */}
+      {code ? (
+        <p className="mt-4 text-center text-sm text-[var(--text-secondary)]">
+          It looks like you have an activation code.{" "}
+          <Link
+            href={`/bootstrap?code=${encodeURIComponent(code)}`}
+            className="font-medium text-[var(--action-primary)] hover:underline"
+          >
+            Activate your account
+          </Link>
+        </p>
+      ) : (
+        <p className="mt-4 text-center text-sm text-[var(--text-secondary)]">
+          New account?{" "}
+          <Link
+            href="/bootstrap"
+            className="font-medium text-[var(--action-primary)] hover:underline"
+          >
+            Activate with your enrollment code
+          </Link>
+        </p>
+      )}
 
       <p className="text-center text-xs text-[var(--text-muted)]">
         Need help?{" "}

@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { X, Copy, Check, KeyRound, Clock } from "lucide-react";
+import { X, Copy, Check, KeyRound, Clock, ExternalLink } from "lucide-react";
 import { useApi } from "@/hooks/useApi";
 
 interface Props {
@@ -16,6 +16,7 @@ const api = useApi();
   const [issued, setIssued] = useState<{ code: string; expiresAt: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const issue = async () => {
@@ -51,6 +52,25 @@ const api = useApi();
     } catch {
       // The code is displayed on-screen anyway
     }
+  };
+
+  const copyLink = async () => {
+    if (!issued) return;
+    const url = typeof window !== "undefined" ? `${window.location.origin}/bootstrap?code=${encodeURIComponent(issued.code)}` : `/bootstrap?code=${encodeURIComponent(issued.code)}`;
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = url;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+      }
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 1500);
+    } catch {}
   };
 
   return (
@@ -104,13 +124,23 @@ const api = useApi();
                 <p className="text-3xl font-mono font-black tracking-[0.35em] text-emerald-400 select-all">
                   {issued.code}
                 </p>
-                <button
-                  onClick={copy}
-                  className="inline-flex items-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300"
-                >
-                  {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  {copied ? "Copied" : "Copy to clipboard"}
-                </button>
+                <div className="flex items-center justify-center gap-4 pt-1">
+                  <button
+                    onClick={copy}
+                    className="inline-flex items-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 font-medium"
+                  >
+                    {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copied ? "Code Copied" : "Copy Code"}
+                  </button>
+                  <span className="text-[var(--border)]">•</span>
+                  <button
+                    onClick={copyLink}
+                    className="inline-flex items-center gap-1.5 text-xs text-sky-400 hover:text-sky-300 font-medium"
+                  >
+                    {linkCopied ? <Check className="w-3.5 h-3.5" /> : <ExternalLink className="w-3.5 h-3.5" />}
+                    {linkCopied ? "Link Copied" : "Copy Activation Link"}
+                  </button>
+                </div>
               </div>
 
               <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
@@ -118,8 +148,11 @@ const api = useApi();
                 Expires {new Date(issued.expiresAt).toLocaleString()}
               </div>
 
-              <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300">
-                Share at <code className="font-mono">/bootstrap</code>.
+              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 space-y-1">
+                <p className="font-semibold text-amber-200">Direct Activation Link:</p>
+                <p className="font-mono text-[11px] break-all select-all text-amber-300/90">
+                  {typeof window !== "undefined" ? `${window.location.origin}/bootstrap?code=${issued.code}` : `/bootstrap?code=${issued.code}`}
+                </p>
               </div>
 
               <button
