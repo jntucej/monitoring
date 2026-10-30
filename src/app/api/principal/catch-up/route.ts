@@ -46,7 +46,7 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
     let alerts: unknown[] = [];
     try {
       const { rows: alertRows } = await query(
-        `SELECT id, title, severity, gate_name, timestamp
+        `SELECT id, title, message, severity, timestamp
            FROM alerts
           WHERE resolved = FALSE
           ORDER BY timestamp DESC
@@ -60,10 +60,10 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
 
     // Active delegations
     const { rows: delRows } = await query(
-      `SELECT name, delegate_role, scope, expires_at
+      `SELECT id, name, delegate_role, priority, max_duration_hours
          FROM delegation_rules
         WHERE is_active = TRUE
-          AND (expires_at IS NULL OR expires_at > now())
+          AND requires_principal = FALSE
         ORDER BY priority ASC
         LIMIT 10`
     );
