@@ -275,7 +275,11 @@ async function recordScanInner(input: RecordScanInput): Promise<RecordScanResult
   }
 
   // 4. Gate must exist and must be active
-  const gate = await findGateById(input.gateId);
+  // Thread the operator's identity GUCs so the `gates` RLS policy can match.
+  const gate = await findGateById(input.gateId, {
+    currentUserId: input.operatorId,
+    currentRole: input.operatorRole,
+  });
   if (!gate) throw new NotFoundError("Gate not found");
   if (gate.is_active === false) {
     throw new LockedError("Gate is inactive or decommissioned", "GATE_INACTIVE");

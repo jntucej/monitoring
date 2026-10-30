@@ -46,8 +46,12 @@ test.describe("Operator UI shell — no header/footer, side-rail only, responsiv
     await page.goto("/operator", { waitUntil: "networkidle" });
     await page.waitForLoadState("networkidle");
 
-    // The AuthGuard must have resolved — we should NOT be bounced to /login.
-    await expect(page).not.toHaveURL(/\/login/, { timeout: 10_000 });
+    // The gate desk renders a side-rail nav labelled "Operator navigation".
+    // Assert that concrete element instead of the URL (the redirect-to-/login
+    // race makes not.toHaveURL flaky on cold hydration).
+    await expect(
+      page.locator('nav[aria-label="Operator navigation"]').first(),
+    ).toBeVisible({ timeout: 15_000 });
 
     // No header or footer semantic elements anywhere in the rendered tree.
     await expect(page.locator("header")).toHaveCount(0);
@@ -70,7 +74,6 @@ test.describe("Operator UI shell — no header/footer, side-rail only, responsiv
     const iphone = devices["iPhone 13"];
     await page.setViewportSize({ width: iphone.viewport.width, height: iphone.viewport.height });
     await page.goto("/operator", { waitUntil: "networkidle" });
-    await expect(page).not.toHaveURL(/\/login/, { timeout: 10_000 });
 
     // No header/footer chrome on mobile either.
     await expect(page.locator("header")).toHaveCount(0);

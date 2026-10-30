@@ -164,7 +164,10 @@ async function handlePost(
   }
 
   await assertOperatorHasGate(ctx.auth.role, gateId);
-  const gate = await findGateById(gateId);
+  const gate = await findGateById(gateId, {
+    currentUserId: ctx.auth.userId,
+    currentRole: ctx.auth.role,
+  });
   if (!gate) {
     return NextResponse.json(
       { success: false, error: { code: "GATE_NOT_FOUND", message: "Gate not found" } },

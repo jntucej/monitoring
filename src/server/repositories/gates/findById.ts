@@ -22,7 +22,18 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
  * back to a gate_code match, stripping a `gate-` prefix from the lookup value
  * so `gate-1` → gate_code `1` and `MAIN` → gate_code `MAIN` both resolve.
  */
-export async function findGateById(id: string): Promise<GateRow | null> {
+export interface FindGateOpts {
+  /**
+   * RLS GUCs to set for this read. The `gates` table has row-level security
+   * for the `gate_app` role; when the app connects as gate_app, a SELECT that
+   * carries no GUC context sees zero rows. Operator surfaces (gate-scan / entry-type)
+   * pass the caller's identity so the `gates_gate_app_select` policy can match.
+   */
+  currentUserId?: string;
+  currentRole?: string;
+}
+
+export async function findGateById(id: string, opts: FindGateOpts = {}): Promise<GateRow | null> {
   const isUuid = UUID_RE.test(id);
   if (isUuid) {
     const { rows } = await query<GateRow>(
@@ -30,6 +41,7 @@ export async function findGateById(id: string): Promise<GateRow | null> {
               latitude, longitude, allowed_radius_meters
          FROM gates WHERE id = $1`,
       [id],
+      opts,
     );
     if (rows[0]) return rows[0];
   }
@@ -47,6 +59,7 @@ export async function findGateById(id: string): Promise<GateRow | null> {
        FROM gates WHERE upper(gate_code) = upper($1) OR upper(gate_code) = upper($2)
        LIMIT 1`,
     [id, codeCandidates[0]],
+    opts,
   );
   return rows[0] ?? null;
 }
