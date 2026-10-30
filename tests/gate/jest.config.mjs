@@ -14,7 +14,7 @@ const shared = {
     '\\.(css|scss)$': 'identity-obj-proxy',
     '\\.(png|jpg|jpeg|svg|webp)$': '<rootDir>/tests/gate/helpers/file-stub.ts',
     '^framer-motion$': '<rootDir>/tests/gate/helpers/framer-motion.mock.ts',
-    '^qrcode.react$': '<rootDir>/tests/gate/helpers/qrcode.mock.tsx',
+    '^qrcode\\.react$': '<rootDir>/tests/gate/helpers/qrcode.mock.tsx',
     '^react-qrcode-logo$': '<rootDir>/tests/gate/helpers/qrcode.mock.tsx',
     '^jsqr$': '<rootDir>/tests/gate/helpers/jsqr.mock.ts',
   },
@@ -36,27 +36,9 @@ const shared = {
 
 /** @type {import('jest').Config} */
 export default {
-  projects: [
-    {
-      ...shared,
-      displayName: 'node',
-      testEnvironment: 'node',
-      roots: ['<rootDir>/tests/gate/policy', '<rootDir>/tests/gate/service',
-              '<rootDir>/tests/gate/routes', '<rootDir>/tests/gate/auth',
-              '<rootDir>/tests/gate/e2e', '<rootDir>/tests/gate/lib'],
-      testMatch: ['**/*.test.ts'],
-      setupFilesAfterEnv: ['<rootDir>/tests/gate/jest.setup.node.ts'],
-    },
-    {
-      ...shared,
-      displayName: 'ui',
-      testEnvironment: 'jsdom',
-      testEnvironmentOptions: { url: 'http://localhost:3000' },
-      roots: ['<rootDir>/tests/gate/ui', '<rootDir>/tests/gate/integration',
-              '<rootDir>/tests/gate/auth'],
-      testMatch: ['**/*.test.tsx', '**/*.test.ts'],
-      testPathIgnorePatterns: ['-api\\.test\\.ts$'],
-      setupFilesAfterEnv: ['<rootDir>/tests/gate/jest.setup.ui.ts'],
-    },
-  ],
+  ...shared,
+  testEnvironment: 'node',
+  roots: ['<rootDir>/tests/gate'],
+  testMatch: ['**/*.test.ts', '**/*.test.tsx', '**/*.spec.ts'],
+  setupFilesAfterEnv: ['<rootDir>/tests/gate/jest.setup.node.ts'],
 };
