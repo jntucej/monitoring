@@ -118,21 +118,16 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       break;
 
     case "vice_principal":
-      // Vice Principal is migrated to the RoleConsole shell (feed:
-      // /api/principal/dashboard, itemKey "item", VP scope = delegated
-      // oversight, no hostel/branch filter). Single console group of exactly
-      // 5 items so the IconRail stays lean. No "General & Support" group.
-      // All 5 commands are pure navigation to the real VP sub-pages under
-      // /vice-principal/.
       groups = [
         {
-          groupLabel: "VP Console",
+          groupLabel: "Vice Principal",
           items: [
-            { href: "/vice-principal/pending-approvals", label: "Approvals", icon: "CheckSquare", badge: "PENDING" },
-            { href: "/vice-principal/delegated-responsibilities", label: "Delegations", icon: "KeyRound" },
-            { href: "/vice-principal/decision-history", label: "Audit", icon: "History" },
-            { href: "/vice-principal/examination-coordination", label: "Reports", icon: "FileSpreadsheet" },
-            { href: "/vice-principal/hostel-security-summaries", label: "Records", icon: "ClipboardList" },
+            { href: "/vice-principal", label: "Today", icon: "LayoutDashboard" },
+            { href: "/vice-principal/approvals/pending", label: "Approvals", icon: "CheckSquare" },
+            { href: "/vice-principal/academics/departments", label: "Academics", icon: "GraduationCap" },
+            { href: "/vice-principal/examinations", label: "Examinations", icon: "FileText" },
+            { href: "/vice-principal/history/30-days", label: "History", icon: "History" },
+            { href: "/vice-principal/profile", label: "Profile", icon: "UserCog" },
           ],
         },
       ];

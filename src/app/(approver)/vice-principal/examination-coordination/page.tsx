@@ -7,6 +7,7 @@ import { PageLoading } from "@/components/shared/LoadingStates";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { WeekBar } from "../_shared/WeekBar";
 import {
   Loader2,
   Inbox,
@@ -84,6 +85,7 @@ function VpExaminationInner() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
+      <WeekBar />
       <WidgetBoundary title="Examination Operations">
         <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
           <div className="flex items-center gap-2 text-slate-400 mb-3 min-w-0">
