@@ -48,17 +48,22 @@ export async function findGateById(id: string, opts: FindGateOpts = {}): Promise
 
   // Fallback: match on gate_code. Strip a leading "gate-" token so the
   // normalised operator-store form ("gate-1") still resolves to code "1".
-  const codeCandidates = [id, id.replace(/^gate-/i, "")].filter(
-    (c) => c.length > 0 && c !== id,
-  );
-  if (codeCandidates.length === 0) return null;
+  //
+  // The original `id` is ALWAYS a valid candidate (covers bare codes like
+  // "MAIN" that have no gate- prefix, where the stripped form equals id and
+  // the old filter would have emptied the list). We only de-dupe; the SELECT
+  // below matches on upper($1) OR upper($2) with $1 = id.
+  const stripped = id.replace(/^gate-/i, "");
+  const codeCandidates = stripped !== id && stripped.length > 0
+    ? [id, stripped]
+    : [id];
 
   const { rows } = await query<GateRow>(
     `SELECT id, gate_code, name, location, is_active,
             latitude, longitude, allowed_radius_meters
        FROM gates WHERE upper(gate_code) = upper($1) OR upper(gate_code) = upper($2)
        LIMIT 1`,
-    [id, codeCandidates[0]],
+    [id, codeCandidates[1] ?? id],
     opts,
   );
   return rows[0] ?? null;
