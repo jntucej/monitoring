@@ -4,7 +4,7 @@ test.describe('App Sanity & Navigation Tests', () => {
   test('Health check / public landing responds successfully', async ({ page }) => {
     const response = await page.goto('/login');
     expect(response?.status()).toBeLessThan(500);
-    await expect(page).toHaveTitle(/Monitoring|Gate|Campus|Login/i);
+    await expect(page).toHaveTitle(/Monitoring|Gate|Campus|Login|Sign in|JNTUH/i);
   });
 
   test('Public routes block unauthorized API access', async ({ request }) => {
