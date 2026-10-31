@@ -31,19 +31,18 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
   let groups: NavGroup[] = [];
 
   if (isHod || roleCode === "hod") {
-    // HOD is migrated to the RoleConsole shell (Ops Console / Kanban). The nav
-    // is intentionally a single "HOD Console" group of <=6 items so the IconRail
-    // stays lean. No "Campus Life" / "General & Support" groups for HOD.
+    // HOD Console navigation — flat 6-item list per spec section 12.
+    // Approvals points to pending; Faculty points to directory.
     groups = [
       {
         groupLabel: "HOD Console",
         items: [
-          { href: "/hod", label: "Approvals", icon: "CheckSquare", badge: "PENDING" },
-          { href: "/hod/attendance-exceptions", label: "Department", icon: "UserCheck" },
-          { href: "/hod/faculty-overview", label: "Faculty", icon: "Building2" },
-          { href: "/hod/department-reports", label: "Reports", icon: "FileSpreadsheet" },
-          { href: "/hod/escalation-centre", label: "Escalations", icon: "ShieldAlert" },
-          { href: "/hod/student-directory", label: "Directory", icon: "GraduationCap" },
+          { href: "/hod", label: "Today", icon: "LayoutDashboard" },
+          { href: "/hod/approvals/pending", label: "Approvals", icon: "CheckSquare" },
+          { href: "/hod/faculty/directory", label: "Faculty", icon: "Users" },
+          { href: "/hod/students", label: "Students", icon: "GraduationCap" },
+          { href: "/hod/classes", label: "Classes", icon: "BookOpen" },
+          { href: "/hod/reports", label: "Reports", icon: "FileBarChart" },
         ],
       },
     ];

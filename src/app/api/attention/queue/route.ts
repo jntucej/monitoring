@@ -65,7 +65,7 @@ function ctaForWorkflow(workflowType: string, role: Role): string {
     case "exam":
       return "/exam/permissions";
     case "staff_leave":
-      return role === "faculty" ? "/permissions" : "/hod/permissions";
+      return role === "faculty" ? "/permissions" : "/hod/approvals/pending";
     case "hostel":
       return "/hostel/permissions";
     case "memo":

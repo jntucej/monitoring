@@ -7,7 +7,7 @@
  *   approve <ticket>            PATCH /api/permissions/<ticket> { action: "APPROVE" }
  *   reject <ticket> [reason]   PATCH /api/permissions/<ticket> { action: "REJECT", comment }
  *   escalate <ticket>          PATCH /api/permissions/<ticket> { action: "ESCALATE" }
- *   dept stats                  router.push("/hod/department-reports")
+ *   dept stats                  router.push("/hod/reports")
  *
  * When the input is empty the available commands are listed as hints.
  * Keyboard: up/down to navigate, Enter to execute, Escape to close.
@@ -130,7 +130,7 @@ export function PermissionCommandBar({ role, open, onClose }: PermissionCommandB
   const executeCommand = useCallback(
     async (parsed: ParsedCommand) => {
       if (parsed.action === "DEPT_STATS") {
-        router.push("/hod/department-reports");
+        router.push("/hod/reports");
         addToast({ variant: "info", message: "Opening department reports" });
         onClose();
         return;

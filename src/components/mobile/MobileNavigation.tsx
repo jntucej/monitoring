@@ -109,9 +109,9 @@ export function MobileNavigation() {
       case "hod":
         return [
           { label: "Dashboard", href: "/hod", icon: GraduationCap },
-          { label: "Faculty", href: "/hod/faculty-overview", icon: Users },
-          { label: "Students", href: "/hod/student-directory", icon: User },
-          { label: "Profile", href: "/profile", icon: User },
+          { label: "Faculty", href: "/hod/faculty/directory", icon: Users },
+          { label: "Students", href: "/hod/students", icon: User },
+          { label: "Profile", href: "/hod/profile", icon: User },
         ];
       case "oie":
         return [

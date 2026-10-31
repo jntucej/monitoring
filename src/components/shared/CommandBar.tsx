@@ -67,28 +67,28 @@ function buildCommands(role: string): CommandDef[] {
       label: "Approve request",
       hint: "Approve a pending permission request",
       icon: BadgeCheck,
-      href: "/hod/pending-approvals",
+      href: "/hod/approvals/pending",
     },
     reject: {
       id: "reject",
       label: "Reject request",
       hint: "Reject a pending permission request",
       icon: Search,
-      href: "/hod/pending-approvals",
+      href: "/hod/approvals/pending",
     },
     escalate: {
       id: "escalate",
       label: "Escalate request",
       hint: "Escalate a permission request to a higher stage",
       icon: Search,
-      href: "/hod/escalation-centre",
+      href: "/hod/approvals/escalated",
     },
     "department-stats": {
       id: "department-stats",
       label: "Department stats",
       hint: "Open department reports and analytics",
       icon: Search,
-      href: "/hod/department-reports",
+      href: "/hod/reports",
     },
   };
   const roleRoot =

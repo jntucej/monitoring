@@ -50,7 +50,7 @@ const APPROVER_HOMES: Record<string, { home: string; inbox: string; escalated?: 
   admin: { home: "/admin", inbox: "/admin/permissions", escalated: "/admin/permissions?status=ESCALATED" },
   sysadmin: { home: "/sysadmin", inbox: "/sysadmin", escalated: "/sysadmin?tab=approvals" },
   faculty: { home: "/faculty", inbox: "/faculty/permissions", escalated: "/faculty/permissions?status=ESCALATED" },
-  hod: { home: "/hod", inbox: "/hod/pending-approvals", escalated: "/hod/escalation-centre" },
+  hod: { home: "/hod", inbox: "/hod/approvals/pending", escalated: "/hod/approvals/escalated" },
   vice_principal: { home: "/vice-principal", inbox: "/vice-principal/permissions", escalated: "/vice-principal/permissions?status=ESCALATED" },
   oie: { home: "/oie", inbox: "/oie/permissions", escalated: "/oie/permissions?status=ESCALATED" },
   exam_branch: { home: "/exam-branch", inbox: "/exam/permissions", escalated: "/exam/permissions?status=ESCALATED" },

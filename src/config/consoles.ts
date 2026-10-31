@@ -176,21 +176,6 @@ export const CONSOLES: Record<string, RoleConsoleConfig> = {
     commands: ["scan", "manual-entry", "pass-verify", "lookup"],
     statusFields: ["gate", "entries", "exits", "shift", "lastScan"],
   },
-  hod: {
-    role: "hod",
-    nav: ["approvals", "department", "faculty", "reports", "escalations", "directory"],
-    statusStrip: false,
-    recentSheet: false,
-    board: {
-      kind: "kanban",
-      source: "/api/permissions",
-      itemKey: "permission",
-      columns: ["PENDING", "APPROVED", "REJECTED"],
-    },
-    contextEntity: "permission",
-    commands: ["approve", "reject", "escalate", "department-stats"],
-    statusFields: ["pending", "escalated", "department-attendance"],
-  },
   class_teacher: {
     role: "class_teacher",
     nav: ["approvals", "class", "attendance", "reports"],
