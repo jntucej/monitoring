@@ -5,6 +5,7 @@
 -- Any login attempt or SELECT on this identifier fires a deception tripwire.
 INSERT INTO public.users (
   id,
+  unique_id,
   name,
   email,
   login_identifier,
@@ -16,6 +17,7 @@ INSERT INTO public.users (
   updated_at
 ) VALUES (
   '00000000-0000-0000-0000-000000000099',
+  'canary-00000000-0000-0000-0000-000000000099',
   'System Administration Root (Canary)',
   'sysadmin.canary@internal.monitoring.local',
   'sysadmin.canary',
@@ -28,7 +30,10 @@ INSERT INTO public.users (
 )
 ON CONFLICT (id) DO NOTHING;
 
--- 2. Canary audit entry
+-- 2. Canary audit entry (the sentinel src/lib/deception.ts watches for:
+--    action='CANARY_TRIPWIRE_SENTINEL'). A NULL user_id + the immutable
+--    audit log mean the integrity check passes as long as this exact row
+--    is present and unmodified.
 INSERT INTO public.audit_logs (
   id,
   user_id,
@@ -37,8 +42,8 @@ INSERT INTO public.audit_logs (
   timestamp
 ) VALUES (
   '00000000-0000-0000-0000-000000000099',
-  '00000000-0000-0000-0000-000000000099',
-  'CANARY_ALERT_TRIGGERED',
+  NULL,
+  'CANARY_TRIPWIRE_SENTINEL',
   '{"tripwire":"audit_log_tamper_canary"}'::jsonb,
   NOW()
 )

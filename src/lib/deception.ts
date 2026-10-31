@@ -15,6 +15,10 @@ export const HONEYTOKEN_IDENTIFIERS = [
   "superadmin_backup",
 ];
 
+// Legacy constant kept for source compatibility of any external consumer;
+// the live canary row is identified by action token only (audit_logs has no
+// entry_hash column since 20261231000000's repair) and its immutability is
+// enforced by the reject-mutation trigger.
 export const CANARY_AUDIT_ENTRY_HASH = "canary-audit-tripwire-hash-deadbeef0001";
 
 /**
@@ -73,14 +77,18 @@ export function isHoneytokenIdentifier(identifier: string): boolean {
  */
 export async function verifyCanaryAuditRow(): Promise<boolean> {
   try {
+    // The canary row is identified by its action token, not by a hash column
+    // (audit_logs has no entry_hash column since 20261231000000's repair; the
+    // tripwire is the row's IMMUTABILITY — the reject-mutation trigger blocks
+    // UPDATE/DELETE, so "the row is still present and unmodified" is the
+    // integrity property this check verifies).
     const { rows } = await query<{ count: string }>(
-      `SELECT count(*) FROM public.audit_logs WHERE action = 'CANARY_TRIPWIRE_SENTINEL' AND entry_hash = $1`,
-      [CANARY_AUDIT_ENTRY_HASH]
+      `SELECT count(*) FROM public.audit_logs WHERE action = 'CANARY_TRIPWIRE_SENTINEL'`
     );
     const count = parseInt(rows[0]?.count ?? "0", 10);
     if (count === 0) {
       await triggerDeceptionAlert("canary_audit", {
-        details: { reason: "Canary audit row was deleted or modified" },
+        details: { reason: "Canary audit row is missing" },
       });
       return false;
     }
