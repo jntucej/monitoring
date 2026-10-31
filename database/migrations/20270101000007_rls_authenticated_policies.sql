@@ -49,14 +49,16 @@ DO $$ BEGIN
       WITH CHECK (current_setting('app.current_user_role', true) IN ('admin', 'sysadmin', 'principal'));
   END IF;
 
-  -- Meal Opt Outs RLS
+  -- Meal Opt Outs RLS. The owner column on meal_opt_outs is `student_id`
+  -- (the table has no `user_id` column — verified live), so the policy
+  -- scopes rows via student_id against app.current_user_id.
   IF EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'meal_opt_outs') THEN
     EXECUTE 'ALTER TABLE public.meal_opt_outs ENABLE ROW LEVEL SECURITY';
     DROP POLICY IF EXISTS meal_opt_outs_auth_all ON public.meal_opt_outs;
     CREATE POLICY meal_opt_outs_auth_all ON public.meal_opt_outs
       FOR ALL TO authenticated
-      USING (user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid OR current_setting('app.current_user_role', true) IN ('admin', 'sysadmin', 'mess_incharge'))
-      WITH CHECK (user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid OR current_setting('app.current_user_role', true) IN ('admin', 'sysadmin', 'mess_incharge'));
+      USING (student_id::text = NULLIF(current_setting('app.current_user_id', true), '')::uuid OR current_setting('app.current_user_role', true) IN ('admin', 'sysadmin', 'mess_incharge'))
+      WITH CHECK (student_id::text = NULLIF(current_setting('app.current_user_id', true), '')::uuid OR current_setting('app.current_user_role', true) IN ('admin', 'sysadmin', 'mess_incharge'));
   END IF;
 
 END $$;
