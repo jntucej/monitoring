@@ -60,10 +60,10 @@ function ownedStages(role: Role): string[] {
   }
   if (role === "exam_superintendent") {
     // The exam workflow routes through oie → exam_branch → vice_principal →
-    // principal; the superintend
-ent sits at the front of that chain and needs
-    // visibility across it (a bare "exam_superintendent" stage owns zero tickets,
-    // which made /api/attention/queue always return empty for this role).
+    // principal; the superintendent sits at the front of that chain and needs
+    // visibility across it (a bare "exam_superintendent" stage owns zero
+    // tickets, which made /api/attention/queue always return empty for this
+    // role).
     return ["oie", "exam_branch", "vice_principal", "principal"];
   }
   return [...list];
