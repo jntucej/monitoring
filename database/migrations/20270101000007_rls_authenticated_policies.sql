@@ -57,8 +57,8 @@ DO $$ BEGIN
     DROP POLICY IF EXISTS meal_opt_outs_auth_all ON public.meal_opt_outs;
     CREATE POLICY meal_opt_outs_auth_all ON public.meal_opt_outs
       FOR ALL TO authenticated
-      USING (student_id::text = NULLIF(current_setting('app.current_user_id', true), '')::uuid OR current_setting('app.current_user_role', true) IN ('admin', 'sysadmin', 'mess_incharge'))
-      WITH CHECK (student_id::text = NULLIF(current_setting('app.current_user_id', true), '')::uuid OR current_setting('app.current_user_role', true) IN ('admin', 'sysadmin', 'mess_incharge'));
+      USING (student_id::uuid = NULLIF(current_setting('app.current_user_id', true), '')::uuid OR current_setting('app.current_user_role', true) IN ('admin', 'sysadmin', 'mess_incharge'))
+      WITH CHECK (student_id::uuid = NULLIF(current_setting('app.current_user_id', true), '')::uuid OR current_setting('app.current_user_role', true) IN ('admin', 'sysadmin', 'mess_incharge'));
   END IF;
 
 END $$;
