@@ -19,6 +19,10 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
 import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
@@ -106,6 +110,7 @@ function AdminOverviewInner() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
+      <PageHeader title="Admin" subtitle="Campus administration" onRefresh={load} />
       {/* Hero */}
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 sm:p-8">
         <div className="flex items-start gap-4">
@@ -238,6 +243,14 @@ function AdminOverviewInner() {
           })}
         </div>
       </div>
+
+      <WidgetBoundary name="QuickActions" title="Quick Actions">
+        <QuickActions />
+      </WidgetBoundary>
+      <WidgetBoundary name="NotificationCenter" title="Notification Center">
+        <NotificationCenter />
+      </WidgetBoundary>
+      <DevContactStrip />
 
       {/* Info Strip */}
       <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 flex items-center gap-3">

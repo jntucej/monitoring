@@ -13,13 +13,18 @@ import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampu
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { ChildStatus } from "@/components/parent/ChildStatus";
+import { ChildActivityPanel } from "@/components/approver/ChildActivityPanel";
+import { ChildWeeklyActivity } from "@/components/parent/ChildWeeklyActivity";
+import { RequestPassForm } from "@/components/parent/RequestPassForm";
 
 export default function ParentPage() {
   return (
     <Suspense fallback={<PageLoading />}>
       <AuthGuard allowedRoles={["parent", "guardian"]}>
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
-          <DevContactStrip />
+          <PageHeader title="Parent" subtitle="Your children\u2019 campus life" />
           <WidgetBoundary name="RoleDashboardPanel" title="Parent Dashboard">
             <RoleDashboardPanel
               title="Parent dashboard"
@@ -35,13 +40,26 @@ export default function ParentPage() {
               }}
             />
           </WidgetBoundary>
-          <WidgetBoundary name="AttentionQueue" title="Attention Queue"><AttentionQueue /></WidgetBoundary>
+          <WidgetBoundary name="ChildStatus" title="Child Status">
+            <ChildStatus />
+          </WidgetBoundary>
+          <WidgetBoundary name="ChildActivityPanel" title="Child Activity">
+            <ChildActivityPanel />
+          </WidgetBoundary>
+          <WidgetBoundary name="ChildWeeklyActivity" title="Weekly Activity">
+            <ChildWeeklyActivity />
+          </WidgetBoundary>
+          <WidgetBoundary name="RequestPassForm" title="Request a Pass">
+            <RequestPassForm />
+          </WidgetBoundary>
+                    <WidgetBoundary name="AttentionQueue" title="Attention Queue"><AttentionQueue /></WidgetBoundary>
           <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home"><PersonalizedCampusHome /></WidgetBoundary>
           <WidgetBoundary name="TaskContinuity" title="Task Continuity"><TaskContinuity /></WidgetBoundary>
           <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar"><UnifiedCampusCalendar /></WidgetBoundary>
           <WidgetBoundary name="ActivityTimeline" title="Activity Timeline"><ActivityTimeline /></WidgetBoundary>
           <WidgetBoundary name="QuickActions" title="Quick Actions"><QuickActions /></WidgetBoundary>
           <WidgetBoundary name="NotificationCenter" title="Notification Center"><NotificationCenter /></WidgetBoundary>
+          <DevContactStrip />
         </div>
       </AuthGuard>
     </Suspense>

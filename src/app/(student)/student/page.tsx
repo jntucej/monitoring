@@ -26,6 +26,8 @@ import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { CampusKnowledgeCentre } from "@/components/retention/CampusKnowledgeCentre";
 import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
 import { ContributionPortfolio } from "@/components/retention/ContributionPortfolio";
+import { MessFoodPreference } from "@/components/student/MessFoodPreference";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
@@ -380,6 +382,9 @@ function StudentDashboardInner() {
       <WidgetBoundary name="ContributionPortfolio" title="Contribution Portfolio">
         <ContributionPortfolio />
       </WidgetBoundary>
+      <WidgetBoundary name="MessFoodPreference" title="Mess & Food Preference">
+        <MessFoodPreference />
+      </WidgetBoundary>
 
       <WidgetBoundary name="QuickActions" title="Quick Actions">
         <QuickActions />
@@ -387,6 +392,7 @@ function StudentDashboardInner() {
       <WidgetBoundary name="NotificationCenter" title="Notification Center">
         <NotificationCenter />
       </WidgetBoundary>
+      <DevContactStrip />
     </div>
   );
 }

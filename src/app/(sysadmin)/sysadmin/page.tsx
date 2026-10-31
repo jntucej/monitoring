@@ -10,6 +10,12 @@ import type { CommandCenterData } from "@/components/sysadmin/domains/overview/t
 import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
+import { SysadminHealthPanel } from "@/components/approver/SysadminHealthPanel";
+import { AdminAlertsPanel } from "@/components/approver/AdminAlertsPanel";
+import { DevMessagesPanel } from "@/components/admin/DevMessagesPanel";
 
 /**
  * SysAdmin Command Center — the live operational-state cockpit.
@@ -72,6 +78,23 @@ export default function SysadminCommandCenterPage() {
       <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar">
         <UnifiedCampusCalendar />
       </WidgetBoundary>
+
+      <WidgetBoundary name="SysadminHealthPanel" title="Service Health">
+        <SysadminHealthPanel />
+      </WidgetBoundary>
+      <WidgetBoundary name="AdminAlertsPanel" title="Alerts">
+        <AdminAlertsPanel />
+      </WidgetBoundary>
+      <WidgetBoundary name="DevMessagesPanel" title="Dev Messages">
+        <DevMessagesPanel />
+      </WidgetBoundary>
+      <WidgetBoundary name="QuickActions" title="Quick Actions">
+        <QuickActions />
+      </WidgetBoundary>
+      <WidgetBoundary name="NotificationCenter" title="Notification Center">
+        <NotificationCenter />
+      </WidgetBoundary>
+      <DevContactStrip />
     </>
   );
 }
