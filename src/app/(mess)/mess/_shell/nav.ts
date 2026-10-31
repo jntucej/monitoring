@@ -1,7 +1,7 @@
-import type { NavEntry } from "@/components/shell/types";
-// src/app/(mess)/mess/_shell/nav.ts
+import type { NavEntry, NavGroup } from "@/components/shell/types";
+import type { IconRailGroup } from "@/components/shared/IconRail";
 import {
-  LayoutDashboard, CalendarDays, Package, AlertCircle, UtensilsCrossed,
+  LayoutDashboard, CalendarDays, Package, AlertCircle,
 } from "lucide-react";
 
 export const MESS_NAV: NavEntry[] = [
@@ -33,4 +33,9 @@ export const MESS_NAV: NavEntry[] = [
     ],
   },
 ];
+
+export const MESS_GROUPS: IconRailGroup[] = MESS_NAV.filter(
+  (e): e is NavGroup => e.kind === "group"
+);
+
 export const NAV_STORAGE_KEY = "mess-nav-expanded";

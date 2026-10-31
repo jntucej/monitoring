@@ -1,16 +1,26 @@
-import type { NavEntry } from "@/components/shell/types";
-// src/app/(operator)/operator/_shell/nav.ts
+import type { NavEntry, NavGroup } from "@/components/shell/types";
+import type { IconRailGroup } from "@/components/shared/IconRail";
 import {
-  ScanLine, History, ShieldAlert, KeyRound,
-  BadgeCheck, MoreHorizontal,
+  ScanLine, History, MoreHorizontal,
 } from "lucide-react";
 
 export const OPERATOR_NAV: NavEntry[] = [
   { kind: "link", href: "/operator", label: "Desk", icon: ScanLine },
-  { kind: "link", href: "/operator/transactions", label: "Transactions", icon: History },
-  { kind: "link", href: "/operator/exceptions", label: "Exceptions", icon: ShieldAlert },
   {
-    kind: "group", id: "more", label: "More", icon: MoreHorizontal,
+    kind: "group",
+    id: "activity",
+    label: "Activity",
+    icon: History,
+    children: [
+      { href: "/operator/transactions", label: "Transactions" },
+      { href: "/operator/exceptions", label: "Exceptions" },
+    ],
+  },
+  {
+    kind: "group",
+    id: "management",
+    label: "Operations",
+    icon: MoreHorizontal,
     children: [
       { href: "/operator/manual-entry", label: "Manual entry" },
       { href: "/operator/pass-verification", label: "Pass verification" },
@@ -19,4 +29,9 @@ export const OPERATOR_NAV: NavEntry[] = [
     ],
   },
 ];
+
+export const OPERATOR_GROUPS: IconRailGroup[] = OPERATOR_NAV.filter(
+  (e): e is NavGroup => e.kind === "group"
+);
+
 export const NAV_STORAGE_KEY = "operator-nav-expanded";

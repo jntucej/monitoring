@@ -1,7 +1,7 @@
-import type { NavEntry } from "@/components/shell/types";
-// src/app/(approver)/staff/_shell/nav.ts
+import type { NavEntry, NavGroup } from "@/components/shell/types";
+import type { IconRailGroup } from "@/components/shared/IconRail";
 import {
-  LayoutDashboard, ClipboardList, Inbox, History, Bell,
+  LayoutDashboard, ClipboardList, Inbox, History,
 } from "lucide-react";
 
 export const STAFF_NAV: NavEntry[] = [
@@ -30,4 +30,9 @@ export const STAFF_NAV: NavEntry[] = [
     ],
   },
 ];
+
+export const STAFF_GROUPS: IconRailGroup[] = STAFF_NAV.filter(
+  (e): e is NavGroup => e.kind === "group"
+);
+
 export const NAV_STORAGE_KEY = "staff-nav-expanded";

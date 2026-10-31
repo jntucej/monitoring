@@ -1,5 +1,5 @@
-import type { NavEntry } from "@/components/shell/types";
-// src/app/(parent)/parent/_shell/nav.ts
+import type { NavEntry, NavGroup } from "@/components/shell/types";
+import type { IconRailGroup } from "@/components/shared/IconRail";
 import {
   LayoutDashboard, Users, Ticket, UserCog,
 } from "lucide-react";
@@ -30,4 +30,9 @@ export const PARENT_NAV: NavEntry[] = [
     ],
   },
 ];
+
+export const PARENT_GROUPS: IconRailGroup[] = PARENT_NAV.filter(
+  (e): e is NavGroup => e.kind === "group"
+);
+
 export const NAV_STORAGE_KEY = "parent-nav-expanded";

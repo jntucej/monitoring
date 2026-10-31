@@ -1,7 +1,7 @@
-import type { NavEntry } from "@/components/shell/types";
-// src/app/(approver)/faculty/_shell/nav.ts
+import type { NavEntry, NavGroup } from "@/components/shell/types";
+import type { IconRailGroup } from "@/components/shared/IconRail";
 import {
-  LayoutDashboard, BookOpen, ClipboardList, CheckSquare, FileBarChart,
+  LayoutDashboard, BookOpen, CheckSquare, FileBarChart,
 } from "lucide-react";
 
 export const FACULTY_NAV: NavEntry[] = [
@@ -30,4 +30,9 @@ export const FACULTY_NAV: NavEntry[] = [
     ],
   },
 ];
+
+export const FACULTY_GROUPS: IconRailGroup[] = FACULTY_NAV.filter(
+  (e): e is NavGroup => e.kind === "group"
+);
+
 export const NAV_STORAGE_KEY = "faculty-nav-expanded";

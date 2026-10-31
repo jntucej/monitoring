@@ -1,8 +1,8 @@
-import type { NavEntry } from "@/components/shell/types";
-// src/app/(approver)/oie/_shell/nav.ts
+import type { NavEntry, NavGroup } from "@/components/shell/types";
+import type { IconRailGroup } from "@/components/shared/IconRail";
 import {
-  LayoutDashboard, CheckSquare, CalendarClock, DoorOpen,
-  FileText, History, ClipboardList,
+  LayoutDashboard, CheckSquare, CalendarClock,
+  ClipboardList,
 } from "lucide-react";
 
 export const OIE_NAV: NavEntry[] = [
@@ -33,4 +33,9 @@ export const OIE_NAV: NavEntry[] = [
     ],
   },
 ];
+
+export const OIE_GROUPS: IconRailGroup[] = OIE_NAV.filter(
+  (e): e is NavGroup => e.kind === "group"
+);
+
 export const NAV_STORAGE_KEY = "oie-nav-expanded";

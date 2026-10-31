@@ -1,8 +1,8 @@
-import type { NavEntry } from "@/components/shell/types";
-// src/app/exam-branch/_shell/nav.ts
+import type { NavEntry, NavGroup } from "@/components/shell/types";
+import type { IconRailGroup } from "@/components/shared/IconRail";
 import {
   LayoutDashboard, ClipboardList, FileText,
-  BookOpen, AlertCircle,
+  BookOpen,
 } from "lucide-react";
 
 export const EXAM_BRANCH_NAV: NavEntry[] = [
@@ -32,4 +32,9 @@ export const EXAM_BRANCH_NAV: NavEntry[] = [
     ],
   },
 ];
+
+export const EXAM_BRANCH_GROUPS: IconRailGroup[] = EXAM_BRANCH_NAV.filter(
+  (e): e is NavGroup => e.kind === "group"
+);
+
 export const NAV_STORAGE_KEY = "exam-branch-nav-expanded";

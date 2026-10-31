@@ -1,8 +1,7 @@
-import type { NavEntry } from "@/components/shell/types";
-// src/app/(approver)/hostel-manager/_shell/nav.ts
+import type { NavEntry, NavGroup } from "@/components/shell/types";
+import type { IconRailGroup } from "@/components/shared/IconRail";
 import {
-  LayoutDashboard, Ticket, AlertCircle, Building2,
-  Users, Package, Wrench,
+  LayoutDashboard, Ticket, Building2, Users,
 } from "lucide-react";
 
 export const HOSTEL_MANAGER_NAV: NavEntry[] = [
@@ -31,4 +30,9 @@ export const HOSTEL_MANAGER_NAV: NavEntry[] = [
     ],
   },
 ];
+
+export const HOSTEL_MANAGER_GROUPS: IconRailGroup[] = HOSTEL_MANAGER_NAV.filter(
+  (e): e is NavGroup => e.kind === "group"
+);
+
 export const NAV_STORAGE_KEY = "hostel-manager-nav-expanded";

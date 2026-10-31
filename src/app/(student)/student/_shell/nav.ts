@@ -1,8 +1,8 @@
-import type { NavEntry } from "@/components/shell/types";
-// src/app/(student)/student/_shell/nav.ts
+import type { NavEntry, NavGroup } from "@/components/shell/types";
+import type { IconRailGroup } from "@/components/shared/IconRail";
 import {
-  Home, CheckSquare, Plus, QrCode, UtensilsCrossed,
-  Bell, UserCog, AlertCircle,
+  Home, CheckSquare, UtensilsCrossed,
+  UserCog, AlertCircle,
 } from "lucide-react";
 
 export const STUDENT_NAV: NavEntry[] = [
@@ -15,7 +15,6 @@ export const STUDENT_NAV: NavEntry[] = [
       { href: "/student/request-tracking", label: "Tracking" },
     ],
   },
-  { kind: "link", href: "/student/id", label: "My ID", icon: QrCode },
   {
     kind: "group", id: "mess", label: "Mess", icon: UtensilsCrossed,
     children: [
@@ -35,9 +34,15 @@ export const STUDENT_NAV: NavEntry[] = [
   {
     kind: "group", id: "account", label: "Account", icon: UserCog,
     children: [
+      { href: "/student/id", label: "Digital ID" },
       { href: "/student/notifications", label: "Notifications" },
       { href: "/student/profile", label: "Profile" },
     ],
   },
 ];
+
+export const STUDENT_GROUPS: IconRailGroup[] = STUDENT_NAV.filter(
+  (e): e is NavGroup => e.kind === "group"
+);
+
 export const NAV_STORAGE_KEY = "student-nav-expanded";

@@ -4,11 +4,11 @@ import {
   Users,
   DoorOpen,
   Siren,
-  CheckSquare,
   BarChart3,
   UserCog,
   type LucideIcon,
 } from "lucide-react";
+import type { IconRailGroup } from "@/components/shared/IconRail";
 
 export interface SupervisorLink {
   kind: "link";
@@ -73,10 +73,30 @@ export const SUPERVISOR_NAV: SupervisorEntry[] = [
       { href: "/supervisor/response/exceptions", label: "Exceptions" },
     ],
   },
-  { kind: "link", href: "/supervisor/approvals", label: "Approvals", icon: CheckSquare },
-  { kind: "link", href: "/supervisor/reports", label: "Reports", icon: BarChart3 },
-  { kind: "link", href: "/supervisor/profile", label: "Profile", icon: UserCog },
+  {
+    kind: "group",
+    id: "oversight",
+    label: "Oversight",
+    icon: BarChart3,
+    children: [
+      { href: "/supervisor/approvals", label: "Approvals" },
+      { href: "/supervisor/reports", label: "Reports" },
+    ],
+  },
+  {
+    kind: "group",
+    id: "account",
+    label: "Account",
+    icon: UserCog,
+    children: [
+      { href: "/supervisor/profile", label: "Profile" },
+    ],
+  },
 ];
+
+export const SUPERVISOR_GROUPS: IconRailGroup[] = SUPERVISOR_NAV.filter(
+  (e): e is SupervisorGroup => e.kind === "group"
+);
 
 export function isPathActive(pathname: string | null, href: string): boolean {
   if (!pathname) return false;
