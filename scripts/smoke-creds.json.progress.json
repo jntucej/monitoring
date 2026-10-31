@@ -55,7 +55,6 @@
     "ok": false,
     "url": "https://monitor.ucej.in/parent",
     "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 404 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
@@ -64,7 +63,8 @@
       "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
-      "Failed to load resource: the server responded with a status of 404 ()"
+      "Failed to load resource: the server responded with a status of 429 ()",
+      "Failed to load resource: the server responded with a status of 429 ()"
     ],
     "badApis": [],
     "leaves": [
@@ -81,13 +81,13 @@
         "error": null
       },
       {
-        "leaf": "/parent/child",
+        "leaf": "/parent/child-attendance",
         "status": 200,
         "anchorOk": true,
         "error": null
       },
       {
-        "leaf": "/parent/child-movement",
+        "leaf": "/parent/passes",
         "status": 200,
         "anchorOk": true,
         "error": null
@@ -112,7 +112,7 @@
       "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
-      "Failed to load resource: the server responded with a status of 404 ()",
+      "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()"
     ],
@@ -141,26 +141,14 @@
         "status": 200,
         "anchorOk": true,
         "error": null
-      },
-      {
-        "leaf": "/oie/examination-reports",
-        "status": 200,
-        "anchorOk": true,
-        "error": null
       }
     ]
   },
   {
     "role": "staff",
-    "ok": false,
+    "ok": true,
     "url": "https://monitor.ucej.in/admin/overview",
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 404 ()",
-      "Failed to load resource: the server responded with a status of 404 ()",
-      "Failed to load resource: the server responded with a status of 404 ()",
-      "Failed to load resource: the server responded with a status of 404 ()",
-      "Failed to load resource: the server responded with a status of 404 ()"
-    ],
+    "consoleErrors": [],
     "badApis": [],
     "leaves": [
       {
@@ -189,12 +177,6 @@
       },
       {
         "leaf": "/staff/assigned-tasks",
-        "status": 200,
-        "anchorOk": true,
-        "error": null
-      },
-      {
-        "leaf": "/staff/my-profile",
         "status": 200,
         "anchorOk": true,
         "error": null
@@ -292,13 +274,13 @@
     "ok": false,
     "url": "https://monitor.ucej.in/mess",
     "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 429 ()",
-      "Failed to load resource: the server responded with a status of 404 ()",
-      "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 404 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
+      "Failed to load resource: the server responded with a status of 429 ()",
+      "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 404 ()",
+      "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()"
@@ -313,24 +295,6 @@
       },
       {
         "leaf": "/mess",
-        "status": 200,
-        "anchorOk": true,
-        "error": null
-      },
-      {
-        "leaf": "/mess/menu-management",
-        "status": 200,
-        "anchorOk": true,
-        "error": null
-      },
-      {
-        "leaf": "/mess/reviews",
-        "status": 200,
-        "anchorOk": true,
-        "error": null
-      },
-      {
-        "leaf": "/mess/scan",
         "status": 200,
         "anchorOk": true,
         "error": null
@@ -342,12 +306,12 @@
     "ok": false,
     "url": "https://monitor.ucej.in/exam/superintendent",
     "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 501 ()",
-      "Failed to load resource: the server responded with a status of 404 ()",
-      "Failed to load resource: the server responded with a status of 501 ()",
-      "Failed to load resource: the server responded with a status of 501 ()",
+      "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 501 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
+      "Failed to load resource: the server responded with a status of 429 ()",
+      "Failed to load resource: the server responded with a status of 429 ()",
+      "Failed to load resource: the server responded with a status of 501 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
@@ -363,18 +327,6 @@
       },
       {
         "leaf": "/exam/superintendent",
-        "status": 200,
-        "anchorOk": true,
-        "error": null
-      },
-      {
-        "leaf": "/exam/superintendent/reports",
-        "status": 200,
-        "anchorOk": true,
-        "error": null
-      },
-      {
-        "leaf": "/exam/superintendent/schedule",
         "status": 200,
         "anchorOk": true,
         "error": null
@@ -388,14 +340,14 @@
     "consoleErrors": [
       "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
-      "Failed to load resource: the server responded with a status of 404 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
-      "Failed to load resource: the server responded with a status of 404 ()"
+      "Failed to load resource: the server responded with a status of 429 ()",
+      "Failed to load resource: the server responded with a status of 429 ()"
     ],
     "badApis": [],
     "leaves": [
@@ -406,27 +358,9 @@
         "error": null
       },
       {
-        "leaf": "/exam-branch",
-        "status": 200,
-        "anchorOk": true,
-        "error": null
-      },
-      {
-        "leaf": "/exam-branch/calendar",
-        "status": 200,
-        "anchorOk": true,
-        "error": null
-      },
-      {
-        "leaf": "/exam-branch/pass-queue",
-        "status": 200,
-        "anchorOk": true,
-        "error": null
-      },
-      {
-        "leaf": "/exam-branch/records",
-        "status": 200,
-        "anchorOk": true,
+        "leaf": "/exam/branch",
+        "status": 404,
+        "anchorOk": false,
         "error": null
       }
     ]
@@ -437,8 +371,6 @@
     "url": "https://monitor.ucej.in/deputy-warden",
     "consoleErrors": [
       "Failed to load resource: the server responded with a status of 429 ()",
-      "Failed to load resource: the server responded with a status of 429 ()",
-      "Failed to load resource: the server responded with a status of 404 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
@@ -457,24 +389,6 @@
       },
       {
         "leaf": "/deputy-warden",
-        "status": 200,
-        "anchorOk": true,
-        "error": null
-      },
-      {
-        "leaf": "/deputy-warden/curfew-oversight",
-        "status": 200,
-        "anchorOk": true,
-        "error": null
-      },
-      {
-        "leaf": "/deputy-warden/daily-overview",
-        "status": 200,
-        "anchorOk": true,
-        "error": null
-      },
-      {
-        "leaf": "/deputy-warden/outpass-queue",
         "status": 200,
         "anchorOk": true,
         "error": null
@@ -488,7 +402,7 @@
     "consoleErrors": [
       "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
-      "Failed to load resource: the server responded with a status of 404 ()",
+      "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
@@ -510,37 +424,14 @@
         "status": 200,
         "anchorOk": true,
         "error": null
-      },
-      {
-        "leaf": "/hostel-manager/complaints",
-        "status": 200,
-        "anchorOk": true,
-        "error": null
-      },
-      {
-        "leaf": "/hostel-manager/residents",
-        "status": 200,
-        "anchorOk": true,
-        "error": null
-      },
-      {
-        "leaf": "/hostel-manager/rooms",
-        "status": 200,
-        "anchorOk": true,
-        "error": null
       }
     ]
   },
   {
     "role": "caretaker",
-    "ok": false,
+    "ok": true,
     "url": "https://monitor.ucej.in/caretaker",
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 404 ()",
-      "Failed to load resource: the server responded with a status of 404 ()",
-      "Failed to load resource: the server responded with a status of 404 ()",
-      "Failed to load resource: the server responded with a status of 404 ()"
-    ],
+    "consoleErrors": [],
     "badApis": [],
     "leaves": [
       {
@@ -551,24 +442,6 @@
       },
       {
         "leaf": "/caretaker",
-        "status": 200,
-        "anchorOk": true,
-        "error": null
-      },
-      {
-        "leaf": "/caretaker/buildings",
-        "status": 200,
-        "anchorOk": true,
-        "error": null
-      },
-      {
-        "leaf": "/caretaker/maintenance",
-        "status": 200,
-        "anchorOk": true,
-        "error": null
-      },
-      {
-        "leaf": "/caretaker/workers",
         "status": 200,
         "anchorOk": true,
         "error": null
@@ -577,14 +450,9 @@
   },
   {
     "role": "subject_faculty",
-    "ok": false,
+    "ok": true,
     "url": "https://monitor.ucej.in/faculty/subject",
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 404 ()",
-      "Failed to load resource: the server responded with a status of 404 ()",
-      "Failed to load resource: the server responded with a status of 404 ()",
-      "Failed to load resource: the server responded with a status of 404 ()"
-    ],
+    "consoleErrors": [],
     "badApis": [],
     "leaves": [
       {
@@ -595,18 +463,6 @@
       },
       {
         "leaf": "/faculty/subject",
-        "status": 200,
-        "anchorOk": true,
-        "error": null
-      },
-      {
-        "leaf": "/faculty/subject/attendance",
-        "status": 200,
-        "anchorOk": true,
-        "error": null
-      },
-      {
-        "leaf": "/faculty/subject/classes",
         "status": 200,
         "anchorOk": true,
         "error": null
@@ -618,7 +474,7 @@
     "ok": false,
     "url": "https://monitor.ucej.in/worker",
     "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 404 ()",
+      "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
@@ -639,24 +495,6 @@
       },
       {
         "leaf": "/worker",
-        "status": 200,
-        "anchorOk": true,
-        "error": null
-      },
-      {
-        "leaf": "/worker/history",
-        "status": 200,
-        "anchorOk": true,
-        "error": null
-      },
-      {
-        "leaf": "/worker/shifts",
-        "status": 200,
-        "anchorOk": true,
-        "error": null
-      },
-      {
-        "leaf": "/worker/work-orders",
         "status": 200,
         "anchorOk": true,
         "error": null
@@ -707,8 +545,6 @@
     "ok": false,
     "url": "https://monitor.ucej.in/principal",
     "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 429 ()",
-      "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",
       "Failed to load resource: the server responded with a status of 429 ()",

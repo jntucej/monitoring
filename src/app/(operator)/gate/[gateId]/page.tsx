@@ -314,7 +314,12 @@ function OperatorPageInner() {
       .catch(() => setGateName(operatorStore.gate?.name || `Gate ${gateId}`));
   }, [gateId, operatorStore.gate?.name]);
 
-  const handleQRScanned = (scannedPayload: string) => {
+  // useCallback: the reference must be stable across renders. The
+  // `useEffect([handleQRScanned])` below (line 478) and the `onScan` prop
+  // both depend on this identity — a plain function re-created every render
+  // causes the effect to re-run → setDefaultGateId / reset() → re-render →
+  // new function identity → effect re-runs → infinite loop (React #310).
+  const handleQRScanned = useCallback((scannedPayload: string) => {
     if (activeLockdown) {
       addToast({ variant: "error", title: "Lockdown Active", message: "Scans are blocked during active campus lockdown." });
       return;
@@ -326,7 +331,7 @@ function OperatorPageInner() {
     }
     lastRollRef.current = rollCandidate;
     startScan(rollCandidate);
-  };
+  }, [activeLockdown, addToast, startScan]);
 
   // ── Auto-confirm by recommendation confidence ─────────────────────────────
   // 0-click engine: when the scanned student's recommendation is confident
