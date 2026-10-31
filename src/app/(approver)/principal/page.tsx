@@ -108,7 +108,7 @@ export default function PrincipalTodayPage() {
         <FocusZone item={focusItem} onEnterFocus={() => setFocusOpen(true)} />
 
         {/* 4. Chain impact + Delegation health — the leverage view */}
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2">
           <ChainImpact
             students={d?.chainImpact.students ?? 0}
             faculty={d?.chainImpact.faculty ?? 0}
@@ -128,7 +128,7 @@ export default function PrincipalTodayPage() {
         />
 
         {/* 6. Wins + Insight */}
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2">
           <WinFeed />
           <InsightCard
             thisWeek={d?.counts.todayDecisions ?? 0}
