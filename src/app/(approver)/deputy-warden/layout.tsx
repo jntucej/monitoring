@@ -1,35 +1,30 @@
 "use client";
 
-import React from "react";
 import { Suspense } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import { RoleConsole } from "@/components/shared/RoleConsole";
+import { RoleDesktopShell } from "@/components/shell/RoleDesktopShell";
+import { RoleMobileShell } from "@/components/shell/RoleMobileShell";
+import { DEPUTY_WARDEN_NAV, NAV_STORAGE_KEY } from "./_shell/nav";
 import type { Role } from "@/lib/types";
 
-/**
- * Deputy Warden console layout — mirrors the caretaker/staff mount pattern.
- *
- * The local sticky tab bar (TABS / DeputyWardenTabs) is removed. The shell is
- * the RoleConsole: IconRail + KanbanBoard (hostel permissions at the
- * deputy_warden stage, grouped by status) + PermissionContextPanel +
- * PermissionStatusBar + DeputyWardenCommandBar (approve/reject/forward/
- * escalate/delegate). Sub-pages pass their content through `children`.
- */
-export default function DeputyWardenConsoleLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+const MANIFEST = {
+  role: "deputy_warden",
+  brand: { short: "Deputy Warden", long: "Hostel Ops" },
+  rootHref: "/deputy-warden",
+  storageKey: NAV_STORAGE_KEY,
+  nav: DEPUTY_WARDEN_NAV,
+};
+
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <AuthGuard allowedRoles={["deputy_warden", "hostel_manager", "principal", "admin", "sysadmin"] as Role[]}>
       <Suspense fallback={<PageLoading />}>
-        <div className="min-w-0">
-          <RoleConsole role="deputy_warden" roleRoot="/deputy-warden">
-            {children}
-          </RoleConsole>
-          <DevContactStrip />
+        <div className="hidden lg:block">
+          <RoleDesktopShell manifest={MANIFEST}>{children}</RoleDesktopShell>
+        </div>
+        <div className="block lg:hidden">
+          <RoleMobileShell manifest={MANIFEST}>{children}</RoleMobileShell>
         </div>
       </Suspense>
     </AuthGuard>
