@@ -143,11 +143,15 @@
   --touch-target-min: 48px;
   --touch-target-operational: 64px;
 
-  /* Radius (Subtle Apple-style rounded rects) */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
+  /* Radius (rounded corners everywhere — no sharp edges) */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
   --radius-xl: 24px;
+  --radius-3xl: 32px;
+  --radius-4xl: 40px;
+  /* Bare `rounded` utility => comfortable medium radius, not sharp */
+  --radius: 14px;
 
   /* Motion & Spring Dynamics */
   --duration-fast: 120ms;
@@ -1086,8 +1090,8 @@ button, a, [role="button"], .clickable-card {
   .glass-panel {
     backdrop-filter: blur(12px) saturate(180%) !important; /* Half the blur (24px -> 12px) */
     -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
-    padding: 1rem !important; /* Tighter padding for small cards */
-    border-radius: 1rem !important; /* Slightly smaller radius */
+    padding: 1rem !important; /* Tighter padding on small cards */
+    border-radius: 1.25rem !important; /* Kept rounded, never square */
   }
 
   /* Headers & Metric Numbers (Prevent overflow on small screens) */
@@ -1109,7 +1113,7 @@ button, a, [role="button"], .clickable-card {
 @media (max-width: 400px) {
   .glass-panel {
     padding: 0.75rem !important;
-    border-radius: 0.75rem !important;
+    border-radius: 1rem !important;
   }
   .glass-panel h1 {
     font-size: 1.4rem !important;
