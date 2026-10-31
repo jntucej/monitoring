@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ScrollEdgeBlue } from "@/components/shared/ScrollEdgeBlue";
 import { VPSidebar } from "./VPSidebar";
 import { VPNotificationBell } from "./VPNotificationBell";
 import { FocusMode } from "../_retention/FocusMode";
@@ -21,7 +22,9 @@ export function VPDesktopShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto w-full max-w-7xl px-6 py-6">{children}</div>
+        <ScrollEdgeBlue className="h-full">
+          <div className="mx-auto w-full max-w-7xl px-6 py-6">{children}</div>
+        </ScrollEdgeBlue>
       </main>
 
       <VPNotificationBell className="fixed right-6 top-6 z-20" />
