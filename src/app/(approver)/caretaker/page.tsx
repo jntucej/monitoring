@@ -16,13 +16,15 @@ import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalen
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 import { GridBoard } from "@/components/shared/GridBoard";
+import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
+import { PageHeader } from "@/components/shared/PageHeader";
 
 export default function CaretakerPage() {
   return (
     <Suspense fallback={<PageLoading />}>
       <AuthGuard allowedRoles={["caretaker", "admin", "sysadmin"]}>
         <div className="space-y-6">
-          <DevContactStrip />
+          <PageHeader title="Caretaker" subtitle="Facilities & maintenance" />
           <WidgetBoundary name="RoleDashboardPanel" title="Caretaker Dashboard">
             <RoleDashboardPanel
               title="Caretaker dashboard"
@@ -43,6 +45,14 @@ export default function CaretakerPage() {
               }}
             />
           </WidgetBoundary>
+
+          <WidgetBoundary name="GridBoard" title="Maintenance Tasks">
+            <GridBoard
+              source="/api/caretaker/summary"
+              groupBy="status"
+              columns={["Open", "In Progress", "Resolved"]}
+            />
+          </WidgetBoundary>
           <WidgetBoundary name="AttentionQueue" title="Attention Queue">
             <AttentionQueue />
           </WidgetBoundary>
@@ -58,12 +68,8 @@ export default function CaretakerPage() {
           <WidgetBoundary name="RoleAnalytics" title="Role Analytics">
             <RoleAnalytics />
           </WidgetBoundary>
-          <WidgetBoundary name="GridBoard" title="Maintenance Tasks">
-            <GridBoard
-              source="/api/caretaker/summary"
-              groupBy="status"
-              columns={["Open", "In Progress", "Resolved"]}
-            />
+          <WidgetBoundary name="CampusFeedbackDesk" title="Campus Feedback Desk">
+            <CampusFeedbackDesk />
           </WidgetBoundary>
           <WidgetBoundary name="ActivityTimeline" title="Activity Timeline">
             <ActivityTimeline />
@@ -74,6 +80,7 @@ export default function CaretakerPage() {
           <WidgetBoundary name="NotificationCenter" title="Notification Center">
             <NotificationCenter />
           </WidgetBoundary>
+          <DevContactStrip />
         </div>
       </AuthGuard>
     </Suspense>

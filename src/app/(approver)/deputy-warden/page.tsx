@@ -14,13 +14,15 @@ import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
+import { KanbanBoard } from "@/components/shared/KanbanBoard";
+import { PageHeader } from "@/components/shared/PageHeader";
 
 export default function DeputyWardenPage() {
   return (
     <Suspense fallback={<PageLoading />}>
       <AuthGuard allowedRoles={["deputy_warden", "principal"]}>
         <div className="space-y-6">
-          <DevContactStrip />
+          <PageHeader title="Deputy Warden" subtitle="Hostel delegation & discipline" />
           <WidgetBoundary name="RoleDashboardPanel" title="Deputy Warden Dashboard">
             <RoleDashboardPanel
               title="Deputy Warden dashboard"
@@ -37,6 +39,12 @@ export default function DeputyWardenPage() {
               }}
             />
           </WidgetBoundary>
+          <KanbanBoard
+            source="/api/permissions?workflow_type=hostel"
+            itemKey="permission"
+            columns={["PENDING", "ESCALATED", "APPROVED", "REJECTED"]}
+            onSelect={() => {}}
+          />
           <WidgetBoundary name="AttentionQueue" title="Attention Queue"><AttentionQueue /></WidgetBoundary>
           <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home"><PersonalizedCampusHome /></WidgetBoundary>
           <WidgetBoundary name="TaskContinuity" title="Task Continuity"><TaskContinuity /></WidgetBoundary>
@@ -45,6 +53,7 @@ export default function DeputyWardenPage() {
           <WidgetBoundary name="ActivityTimeline" title="Activity Timeline"><ActivityTimeline /></WidgetBoundary>
           <WidgetBoundary name="QuickActions" title="Quick Actions"><QuickActions /></WidgetBoundary>
           <WidgetBoundary name="NotificationCenter" title="Notification Center"><NotificationCenter /></WidgetBoundary>
+          <DevContactStrip />
         </div>
       </AuthGuard>
     </Suspense>

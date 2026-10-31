@@ -9,6 +9,15 @@ import { KanbanBoard } from "@/components/shared/KanbanBoard";
 import { useApiResource } from "@/hooks/useApiResource";
 import type { MyClass } from "@/contracts/classes";
 import { Loader2, BookOpen, PencilLine } from "lucide-react";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
+import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 
 /* my-classes response shape */
 interface MyClassesResponse {
@@ -80,6 +89,7 @@ function FacultyInner() {
 
   return (
     <div className="space-y-4 p-2 min-w-0">
+      <PageHeader title="Faculty" subtitle="Class scope & HOD-stage queue" />
       {classes.length > 1 ? (
         /* Scope picker: year × section chips, persisted in URL */
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3 min-w-0">
@@ -126,6 +136,25 @@ function FacultyInner() {
         columns={["PENDING", "APPROVED", "REJECTED"]}
         onSelect={() => {}}
       />
+      <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home">
+        <PersonalizedCampusHome />
+      </WidgetBoundary>
+      <WidgetBoundary name="TaskContinuity" title="Task Continuity">
+        <TaskContinuity />
+      </WidgetBoundary>
+      <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar">
+        <UnifiedCampusCalendar />
+      </WidgetBoundary>
+      <WidgetBoundary name="RoleAnalytics" title="Role Analytics">
+        <RoleAnalytics />
+      </WidgetBoundary>
+      <WidgetBoundary name="QuickActions" title="Quick Actions">
+        <QuickActions />
+      </WidgetBoundary>
+      <WidgetBoundary name="NotificationCenter" title="Notification Center">
+        <NotificationCenter />
+      </WidgetBoundary>
+      <DevContactStrip />
     </div>
   );
 }

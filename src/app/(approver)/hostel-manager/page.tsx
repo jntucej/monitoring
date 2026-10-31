@@ -14,13 +14,16 @@ import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
+import { AllocationPanel } from "@/components/approver/AllocationPanel";
+import { KanbanBoard } from "@/components/shared/KanbanBoard";
+import { PageHeader } from "@/components/shared/PageHeader";
 
 export default function HostelManagerPage() {
   return (
     <Suspense fallback={<PageLoading />}>
       <AuthGuard allowedRoles={["hostel_manager", "principal"]}>
         <div className="space-y-6">
-          <DevContactStrip />
+          <PageHeader title="Hostel Manager" subtitle="Hostel operations & allocation" />
           <WidgetBoundary name="RoleDashboardPanel" title="Hostel Manager Dashboard">
             <RoleDashboardPanel
               title="Hostel Manager dashboard"
@@ -35,6 +38,15 @@ export default function HostelManagerPage() {
               }}
             />
           </WidgetBoundary>
+          <KanbanBoard
+            source="/api/hostel-manager/summary"
+            itemKey="pendingTickets"
+            columns={["PENDING", "ESCALATED", "APPROVED", "REJECTED"]}
+            onSelect={() => {}}
+          />
+          <WidgetBoundary name="AllocationPanel" title="Room Allocation">
+            <AllocationPanel />
+          </WidgetBoundary>
           <WidgetBoundary name="AttentionQueue" title="Attention Queue"><AttentionQueue /></WidgetBoundary>
           <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home"><PersonalizedCampusHome /></WidgetBoundary>
           <WidgetBoundary name="TaskContinuity" title="Task Continuity"><TaskContinuity /></WidgetBoundary>
@@ -43,6 +55,7 @@ export default function HostelManagerPage() {
           <WidgetBoundary name="ActivityTimeline" title="Activity Timeline"><ActivityTimeline /></WidgetBoundary>
           <WidgetBoundary name="QuickActions" title="Quick Actions"><QuickActions /></WidgetBoundary>
           <WidgetBoundary name="NotificationCenter" title="Notification Center"><NotificationCenter /></WidgetBoundary>
+          <DevContactStrip />
         </div>
       </AuthGuard>
     </Suspense>
