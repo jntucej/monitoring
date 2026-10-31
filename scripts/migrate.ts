@@ -180,7 +180,17 @@ async function main() {
       // Applied if either the bare version or the full filename was recorded
       // (mirrors schema-drift-guard). Checksum is only compared when we have a
       // recorded one; legacy rows (version-only, no checksum) are trusted as-is.
-      const recorded = seen.has(version) || seen.has(f.name);
+      // Legacy rows record a bare 14-digit version with NO descriptive suffix
+    // (e.g. version='20261110000000', filename='20261110000000'), while the
+    // migration file on disk is '20261110000000_xxx.sql'. A file is "applied"
+    // if its bare version matches OR its full filename matches OR its
+    // version-prefix matches the recorded bare version — the same three-form
+    // rule schema-drift-guard uses.
+    const recorded =
+      seen.has(version) ||
+      seen.has(f.name) ||
+      seen.has(f.name.replace(/\.sql$/, "")) ||
+      Array.from(seen).some((v) => v.length === 14 && version.startsWith(v));
       const prev =
         checksums.get(f.name) ??
         // fall back to a checksum recorded under the extension-less filename form
