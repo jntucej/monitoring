@@ -155,8 +155,42 @@
     }
   ],
   "personal": [
-    { "id": "profile", "label": "My Profile", "href": "/admin/profile/personal", "icon": "UserCog" },
-    { "id": "profile-security", "label": "Security", "href": "/admin/profile/security", "icon": "Shield" },
-    { "id": "profile-appearance", "label": "Appearance", "href": "/admin/profile/appearance", "icon": "Palette" }
+    {
+      "id": "profile",
+      "route": "profile",
+      "title": "My Profile",
+      "label": "My Profile",
+      "href": "/admin/profile",
+      "icon": "UserCog",
+      "kind": "group",
+      "children": [
+        {
+          "id": "profile-personal",
+          "route": "profile/personal",
+          "title": "Personal Details",
+          "label": "Personal Details",
+          "href": "/admin/profile/personal",
+          "kind": "cards"
+        },
+        {
+          "id": "profile-security",
+          "route": "profile/security",
+          "title": "Security",
+          "label": "Security",
+          "href": "/admin/profile/security",
+          "icon": "Shield",
+          "kind": "cards"
+        },
+        {
+          "id": "profile-appearance",
+          "route": "profile/appearance",
+          "title": "Appearance",
+          "label": "Appearance",
+          "href": "/admin/profile/appearance",
+          "icon": "Palette",
+          "kind": "cards"
+        }
+      ]
+    }
   ]
 }

@@ -78,8 +78,15 @@ export interface AdminOverviewPayload {
 
 // ── Manifest shape (subset the sidebar consumes) ──────────────────────────
 interface ManifestPage {
-  label: string;
-  href: string;
+  id: string;
+  route: string;
+  title: string;
+  kind?: string;
+  pollMs?: number;
+  sse?: string;
+  children?: ManifestPage[];
+  label?: string;
+  href?: string;
   icon?: string;
   exact?: boolean;
 }
@@ -140,6 +147,31 @@ function iconFor(name?: string): LucideIcon {
 // sysadmin's sidebar persistence) ─────────────────────────────────────────
 const OPEN_KEY = "admin:sidebar:open";
 const COLLAPSED_KEY = "admin:sidebar:collapsed";
+
+function loadAdminGroupOpen(pageId: string): boolean | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw =
+      window.localStorage.getItem(`admin:sidebar:page:${pageId}`) ??
+      window.localStorage.getItem(pageId);
+    if (raw !== null) {
+      return raw === "1" || raw === "true" || raw === "open";
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+function saveAdminGroupOpen(pageId: string, isOpen: boolean) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(`admin:sidebar:page:${pageId}`, isOpen ? "1" : "0");
+    window.localStorage.setItem(pageId, isOpen ? "1" : "0");
+  } catch {
+    /* no-op */
+  }
+}
 
 function loadOpenState(): Record<string, boolean> {
   if (typeof window === "undefined") return {};
@@ -231,12 +263,93 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
     }
   }, [collapsed, hydratedCollapsed]);
 
+  const [groupOpen, setGroupOpen] = useState<Record<string, boolean>>({});
+
+  const personalRoutes = useMemo(() => ia.personal ?? [], []);
+
+  // Initial group hydration
+  useEffect(() => {
+    const initial: Record<string, boolean> = {};
+    const initPages = (pages: ManifestPage[]) => {
+      pages.forEach((p) => {
+        if (p.children && p.children.length > 0) {
+          const id = p.id || p.href || p.route || "";
+          const stored = loadAdminGroupOpen(id);
+          const pageUrl = p.href || (p.route ? `/admin/${p.route}` : "/admin");
+          const isUnder =
+            pathname === pageUrl ||
+            pathname.startsWith(pageUrl + "/") ||
+            p.children.some((c) => {
+              const cUrl = c.href || (c.route ? `/admin/${c.route}` : "/admin");
+              return pathname === cUrl || pathname.startsWith(cUrl + "/");
+            });
+          if (stored !== null) {
+            initial[id] = stored || isUnder;
+          } else {
+            initial[id] = isUnder;
+          }
+        }
+      });
+    };
+
+    categories.forEach((cat) => initPages(cat.pages));
+    initPages(personalRoutes);
+    setGroupOpen((prev) => ({ ...initial, ...prev }));
+  }, [categories, personalRoutes, pathname]);
+
+  // When collapsed, if the current path starts with page.route (or href), auto-expand the group
+  useEffect(() => {
+    const checkPages = (pages: ManifestPage[]) => {
+      pages.forEach((p) => {
+        if (p.children && p.children.length > 0) {
+          const pageUrl = p.href || (p.route ? `/admin/${p.route}` : "/admin");
+          const matches =
+            pathname === pageUrl ||
+            pathname.startsWith(pageUrl + "/") ||
+            p.children.some((c) => {
+              const cUrl = c.href || (c.route ? `/admin/${c.route}` : "/admin");
+              return pathname === cUrl || pathname.startsWith(cUrl + "/");
+            });
+          if (matches) {
+            const id = p.id || pageUrl;
+            setGroupOpen((prev) => {
+              if (prev[id]) return prev;
+              saveAdminGroupOpen(id, true);
+              return { ...prev, [id]: true };
+            });
+          }
+        }
+      });
+    };
+
+    categories.forEach((cat) => checkPages(cat.pages));
+    checkPages(personalRoutes);
+  }, [categories, personalRoutes, pathname]);
+
+  const toggleGroup = useCallback((pageId: string) => {
+    setGroupOpen((prev) => {
+      const current = prev[pageId] ?? loadAdminGroupOpen(pageId) ?? false;
+      const next = !current;
+      saveAdminGroupOpen(pageId, next);
+      return { ...prev, [pageId]: next };
+    });
+  }, []);
+
   // Auto-expand the category that contains the current route.
   const containingCatId = useMemo(() => {
     const active = categories.find((c) =>
       c.pages.some((p) => {
-        const url = p.href || "/admin";
-        return pathname === url || pathname.startsWith(url + "/");
+        const url = p.href || (p.route ? `/admin/${p.route}` : "/admin");
+        if (pathname === url || pathname.startsWith(url + "/")) return true;
+        if (
+          p.children?.some((child) => {
+            const childUrl = child.href || (child.route ? `/admin/${child.route}` : "/admin");
+            return pathname === childUrl || pathname.startsWith(childUrl + "/");
+          })
+        ) {
+          return true;
+        }
+        return false;
       })
     );
     return active?.id ?? null;
@@ -268,8 +381,6 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
       return next;
     });
   }, [categories]);
-
-  const personalRoutes = useMemo(() => ia.personal ?? [], []);
 
   const widthClass = isCollapsed ? "w-16" : "w-64";
 
@@ -377,16 +488,100 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
               {isOpen && (
                 <ul className="space-y-0.5 pb-1">
                   {cat.pages.map((page) => {
-                    const href = page.href || "/admin";
+                    const pageId = page.id || page.href || page.route || page.label || "";
+                    const pageTitle = page.title || page.label || "";
+                    const pageHref = page.href || (page.route ? `/admin/${page.route}` : "/admin");
+
+                    if (page.children && page.children.length > 0) {
+                      const isGroupOpen = groupOpen[pageId] ?? false;
+                      const isGroupActive =
+                        pathname === pageHref ||
+                        pathname.startsWith(pageHref + "/") ||
+                        page.children.some((c) => {
+                          const cUrl = c.href || (c.route ? `/admin/${c.route}` : "/admin");
+                          return pathname === cUrl || pathname.startsWith(cUrl + "/");
+                        });
+
+                      return (
+                        <li key={pageId} className="space-y-0.5">
+                          <button
+                            type="button"
+                            onClick={() => toggleGroup(pageId)}
+                            aria-expanded={isGroupOpen}
+                            className={cn(
+                              "flex items-center gap-1.5 w-full rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors text-left",
+                              isGroupActive
+                                ? "text-[var(--text-primary)] font-medium"
+                                : "text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"
+                            )}
+                          >
+                            <span className="flex-1 truncate">{pageTitle}</span>
+                            <ChevronRight
+                              className={cn(
+                                "h-3.5 w-3.5 shrink-0 transition-transform text-[var(--text-muted)]",
+                                isGroupOpen ? "rotate-90" : "rotate-0"
+                              )}
+                              aria-hidden="true"
+                            />
+                          </button>
+                          {isGroupOpen && (
+                            <ul className="pl-2.5 space-y-0.5 border-l border-[var(--border)] ml-3 my-0.5">
+                              {page.children.map((child) => {
+                                const childId = child.id || child.href || child.route || child.label || "";
+                                const childHref = child.href || (child.route ? `/admin/${child.route}` : "/admin");
+                                const childTitle = child.title || child.label || "";
+                                const isChildActive =
+                                  pathname === childHref || pathname.startsWith(childHref + "/");
+                                const countKey = child.label || childTitle;
+                                const liveCount = countKey ? overview?.counts?.[countKey] : undefined;
+                                const hasLive = liveCount !== undefined && liveCount !== null;
+                                return (
+                                  <li key={childId}>
+                                    <Link
+                                      href={childHref}
+                                      aria-current={isChildActive ? "page" : undefined}
+                                      onClick={onNavigate}
+                                      className={cn(
+                                        "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs transition-colors",
+                                        isChildActive
+                                          ? "bg-[color-mix(in_srgb,var(--action-primary)_14%,transparent)] text-[var(--text-primary)] font-medium"
+                                          : "text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"
+                                      )}
+                                    >
+                                      <span className="flex-1 truncate">{childTitle}</span>
+                                      {hasLive && (
+                                        <span
+                                          className={cn(
+                                            "ml-auto inline-flex items-center justify-center rounded-full text-[10px] font-medium min-w-[16px] h-[16px] px-1",
+                                            isChildActive
+                                              ? "bg-[color-mix(in_srgb,var(--action-primary)_22%,transparent)] text-[var(--text-primary)]"
+                                              : "bg-[var(--bg-elevated)] text-[var(--text-muted)]"
+                                          )}
+                                          title={`${childTitle}: ${liveCount} live`}
+                                        >
+                                          {liveCount}
+                                        </span>
+                                      )}
+                                    </Link>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          )}
+                        </li>
+                      );
+                    }
+
                     const isActive =
-                      pathname === href || pathname.startsWith(href + "/");
-                    const liveCount = overview?.counts?.[page.label];
+                      pathname === pageHref || pathname.startsWith(pageHref + "/");
+                    const countKey = page.label || pageTitle;
+                    const liveCount = countKey ? overview?.counts?.[countKey] : undefined;
                     const hasLive =
                       liveCount !== undefined && liveCount !== null;
                     return (
-                      <li key={page.label}>
+                      <li key={pageId}>
                         <Link
-                          href={href}
+                          href={pageHref}
                           aria-current={isActive ? "page" : undefined}
                           onClick={onNavigate}
                           className={cn(
@@ -397,7 +592,7 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
                               : "text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"
                           )}
                         >
-                          <span className="flex-1 truncate">{page.label}</span>
+                          <span className="flex-1 truncate">{pageTitle}</span>
                           {hasLive && (
                             <span
                               className={cn(
@@ -406,7 +601,7 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
                                   ? "bg-[color-mix(in_srgb,var(--action-primary)_22%,transparent)] text-[var(--text-primary)]"
                                   : "bg-[var(--bg-elevated)] text-[var(--text-muted)]"
                               )}
-                              title={`${page.label}: ${liveCount} live`}
+                              title={`${pageTitle}: ${liveCount} live`}
                             >
                               {liveCount}
                             </span>
@@ -425,13 +620,80 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
         {!isCollapsed && personalRoutes.length > 0 && (
           <div className="border-t border-[var(--border)] mt-2 pt-2 px-1">
             {personalRoutes.map((p) => {
-              const href = p.href || "/admin";
+              const pId = p.id || p.href || p.route || p.label || "";
+              const pTitle = p.title || p.label || "";
+              const pHref = p.href || (p.route ? `/admin/${p.route}` : "/admin");
+
+              if (p.children && p.children.length > 0) {
+                const isGroupOpen = groupOpen[pId] ?? false;
+                const isGroupActive =
+                  pathname === pHref ||
+                  pathname.startsWith(pHref + "/") ||
+                  p.children.some((c) => {
+                    const cUrl = c.href || (c.route ? `/admin/${c.route}` : "/admin");
+                    return pathname === cUrl || pathname.startsWith(cUrl + "/");
+                  });
+
+                return (
+                  <div key={pId} className="space-y-0.5">
+                    <button
+                      type="button"
+                      onClick={() => toggleGroup(pId)}
+                      aria-expanded={isGroupOpen}
+                      className={cn(
+                        "flex items-center gap-1.5 w-full rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors text-left",
+                        isGroupActive
+                          ? "text-[var(--text-primary)] font-medium"
+                          : "text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"
+                      )}
+                    >
+                      <span className="flex-1 truncate">{pTitle}</span>
+                      <ChevronRight
+                        className={cn(
+                          "h-3.5 w-3.5 shrink-0 transition-transform text-[var(--text-muted)]",
+                          isGroupOpen ? "rotate-90" : "rotate-0"
+                        )}
+                        aria-hidden="true"
+                      />
+                    </button>
+                    {isGroupOpen && (
+                      <ul className="pl-2.5 space-y-0.5 border-l border-[var(--border)] ml-3 my-0.5">
+                        {p.children.map((child) => {
+                          const childId = child.id || child.href || child.route || child.label || "";
+                          const childHref = child.href || (child.route ? `/admin/${child.route}` : "/admin");
+                          const childTitle = child.title || child.label || "";
+                          const isChildActive =
+                            pathname === childHref || pathname.startsWith(childHref + "/");
+                          return (
+                            <li key={childId}>
+                              <Link
+                                href={childHref}
+                                aria-current={isChildActive ? "page" : undefined}
+                                onClick={onNavigate}
+                                className={cn(
+                                  "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs transition-colors",
+                                  isChildActive
+                                    ? "bg-[color-mix(in_srgb,var(--action-primary)_14%,transparent)] text-[var(--text-primary)] font-medium"
+                                    : "text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"
+                                )}
+                              >
+                                <span className="flex-1 truncate">{childTitle}</span>
+                              </Link>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </div>
+                );
+              }
+
               const isActive =
-                pathname === href || pathname.startsWith(href + "/");
+                pathname === pHref || pathname.startsWith(pHref + "/");
               return (
                 <Link
                   key={p.href}
-                  href={href}
+                  href={pHref}
                   aria-current={isActive ? "page" : undefined}
                   onClick={onNavigate}
                   className={cn(
@@ -441,7 +703,7 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
                       : "text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"
                   )}
                 >
-                  <span className="flex-1 truncate">{p.label}</span>
+                  <span className="flex-1 truncate">{pTitle}</span>
                   <ArrowUpRight
                     className="h-3.5 w-3.5 opacity-60"
                     aria-hidden="true"

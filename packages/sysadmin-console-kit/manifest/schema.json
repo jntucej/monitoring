@@ -62,7 +62,8 @@
                     "calendar",
                     "list",
                     "feed+rules",
-                    "charts"
+                    "charts",
+                    "group"
                   ]
                 },
                 "pollMs": { "type": "integer", "minimum": 0 },
@@ -126,7 +127,8 @@
               "tree",
               "calendar",
               "list",
-              "feed+rules"
+              "feed+rules",
+              "group"
             ]
           }
         }

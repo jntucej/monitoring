@@ -65,6 +65,7 @@ interface ManifestPage {
   kind?: string;
   pollMs?: number;
   sse?: string;
+  children?: ManifestPage[];
   api?: Record<string, string>;
   drawer?: Record<string, unknown>;
   tabs?: unknown[];
@@ -112,6 +113,31 @@ function iconFor(name: string): LucideIcon {
 // ── LocalStorage keys ─────────────────────────────────────────────────────
 const OPEN_KEY = "sysadmin:sidebar:open";
 const COLLAPSED_KEY = "sysadmin:sidebar:collapsed";
+
+function loadGroupOpen(pageId: string): boolean | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw =
+      window.localStorage.getItem(`sysadmin:sidebar:page:${pageId}`) ??
+      window.localStorage.getItem(pageId);
+    if (raw !== null) {
+      return raw === "1" || raw === "true" || raw === "open";
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+function saveGroupOpen(pageId: string, isOpen: boolean) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(`sysadmin:sidebar:page:${pageId}`, isOpen ? "1" : "0");
+    window.localStorage.setItem(pageId, isOpen ? "1" : "0");
+  } catch {
+    /* no-op */
+  }
+}
 
 function loadOpenState(): Record<string, boolean> {
   if (typeof window === "undefined") return {};
@@ -213,12 +239,83 @@ export function Sidebar({ overview, forceExpanded, onNavigate }: SidebarProps) {
     }
   }, [collapsed, hydratedCollapsed]);
 
+  const [groupOpen, setGroupOpen] = useState<Record<string, boolean>>({});
+
+  // Initial group hydration
+  useEffect(() => {
+    const initial: Record<string, boolean> = {};
+    categories.forEach((cat) => {
+      cat.pages.forEach((p) => {
+        if (p.children && p.children.length > 0) {
+          const stored = loadGroupOpen(p.id);
+          const pageUrl = p.route ? `/sysadmin/${p.route}` : "/sysadmin";
+          const isUnder =
+            pathname === pageUrl ||
+            pathname.startsWith(pageUrl + "/") ||
+            p.children.some((c) => {
+              const cUrl = c.route ? `/sysadmin/${c.route}` : "/sysadmin";
+              return pathname === cUrl || pathname.startsWith(cUrl + "/");
+            });
+          if (stored !== null) {
+            initial[p.id] = stored || isUnder;
+          } else {
+            initial[p.id] = isUnder;
+          }
+        }
+      });
+    });
+    setGroupOpen((prev) => ({ ...initial, ...prev }));
+  }, [categories, pathname]);
+
+  // When collapsed, if the current path starts with page.route, auto-expand the group
+  useEffect(() => {
+    categories.forEach((cat) => {
+      cat.pages.forEach((p) => {
+        if (p.children && p.children.length > 0) {
+          const pageUrl = p.route ? `/sysadmin/${p.route}` : "/sysadmin";
+          const matches =
+            pathname === pageUrl ||
+            pathname.startsWith(pageUrl + "/") ||
+            p.children.some((c) => {
+              const cUrl = c.route ? `/sysadmin/${c.route}` : "/sysadmin";
+              return pathname === cUrl || pathname.startsWith(cUrl + "/");
+            });
+          if (matches) {
+            setGroupOpen((prev) => {
+              if (prev[p.id]) return prev;
+              saveGroupOpen(p.id, true);
+              return { ...prev, [p.id]: true };
+            });
+          }
+        }
+      });
+    });
+  }, [categories, pathname]);
+
+  const toggleGroup = useCallback((pageId: string) => {
+    setGroupOpen((prev) => {
+      const current = prev[pageId] ?? loadGroupOpen(pageId) ?? false;
+      const next = !current;
+      saveGroupOpen(pageId, next);
+      return { ...prev, [pageId]: next };
+    });
+  }, []);
+
   // Auto-expand the category containing the current pathname.
   const containingCatId = useMemo(() => {
     const active = categories.find((c) =>
       c.pages.some((p) => {
         const url = p.route ? `/sysadmin/${p.route}` : "/sysadmin";
-        return pathname === url || pathname.startsWith(url + "/");
+        if (pathname === url || pathname.startsWith(url + "/")) return true;
+        if (
+          p.children?.some((child) => {
+            const childUrl = child.route ? `/sysadmin/${child.route}` : "/sysadmin";
+            return pathname === childUrl || pathname.startsWith(childUrl + "/");
+          })
+        ) {
+          return true;
+        }
+        return false;
       })
     );
     return active?.id ?? null;
@@ -372,6 +469,89 @@ export function Sidebar({ overview, forceExpanded, onNavigate }: SidebarProps) {
               {isOpen && (
                 <ul className="space-y-0.5 pb-1">
                   {cat.pages.map((page) => {
+                    if (page.children && page.children.length > 0) {
+                      const isGroupOpen = groupOpen[page.id] ?? false;
+                      const groupUrl = page.route
+                        ? `/sysadmin/${page.route}`
+                        : "/sysadmin";
+                      const isGroupActive =
+                        pathname === groupUrl ||
+                        pathname.startsWith(groupUrl + "/") ||
+                        page.children.some((c) => {
+                          const cUrl = c.route ? `/sysadmin/${c.route}` : "/sysadmin";
+                          return pathname === cUrl || pathname.startsWith(cUrl + "/");
+                        });
+
+                      return (
+                        <li key={page.id} className="space-y-0.5">
+                          <button
+                            type="button"
+                            onClick={() => toggleGroup(page.id)}
+                            aria-expanded={isGroupOpen}
+                            className={cn(
+                              "flex items-center gap-1.5 w-full rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors text-left",
+                              isGroupActive
+                                ? "text-[var(--text-primary)] font-medium"
+                                : "text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"
+                            )}
+                          >
+                            <span className="flex-1 truncate">{page.title}</span>
+                            <ChevronRight
+                              className={cn(
+                                "h-3.5 w-3.5 shrink-0 transition-transform text-[var(--text-muted)]",
+                                isGroupOpen ? "rotate-90" : "rotate-0"
+                              )}
+                              aria-hidden="true"
+                            />
+                          </button>
+                          {isGroupOpen && (
+                            <ul className="pl-2.5 space-y-0.5 border-l border-[var(--border)] ml-3 my-0.5">
+                              {page.children.map((child) => {
+                                const childHref = child.route
+                                  ? `/sysadmin/${child.route}`
+                                  : "/sysadmin";
+                                const isChildActive =
+                                  pathname === childHref || pathname.startsWith(childHref + "/");
+                                const liveCount = overview?.counts?.[child.id];
+                                const hasLive =
+                                  liveCount !== undefined && liveCount !== null;
+                                return (
+                                  <li key={child.id}>
+                                    <Link
+                                      href={childHref}
+                                      aria-current={isChildActive ? "page" : undefined}
+                                      onClick={onNavigate}
+                                      className={cn(
+                                        "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs transition-colors",
+                                        isChildActive
+                                          ? "bg-[color-mix(in_srgb,var(--action-primary)_14%,transparent)] text-[var(--text-primary)] font-medium"
+                                          : "text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"
+                                      )}
+                                    >
+                                      <span className="flex-1 truncate">{child.title}</span>
+                                      {hasLive && (
+                                        <span
+                                          className={cn(
+                                            "ml-auto inline-flex items-center justify-center rounded-full text-[10px] font-medium min-w-[16px] h-[16px] px-1",
+                                            isChildActive
+                                              ? "bg-[color-mix(in_srgb,var(--action-primary)_22%,transparent)] text-[var(--text-primary)]"
+                                              : "bg-[var(--bg-elevated)] text-[var(--text-muted)]"
+                                          )}
+                                          title={`${child.title}: ${liveCount} live`}
+                                        >
+                                          {liveCount}
+                                        </span>
+                                      )}
+                                    </Link>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          )}
+                        </li>
+                      );
+                    }
+
                     const href = page.route
                       ? `/sysadmin/${page.route}`
                       : "/sysadmin";

@@ -7,6 +7,7 @@ import type { ReasonsData, ReasonsEntity } from "@/components/sysadmin/domains/p
 interface Props {
   data: ReasonsData;
   onRowClick: (e: ReasonsEntity) => void;
+  tab?: string;
 }
 
 export function ReasonsContent({ data, onRowClick }: Props) {
@@ -25,7 +26,7 @@ export function ReasonsContent({ data, onRowClick }: Props) {
               <button
                 type="button"
                 className="w-full text-left px-3 py-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-                onClick={() => onRowClick(item as any)}
+                onClick={() => onRowClick(item as unknown as ReasonsEntity)}
               >
                 {item.id}
               </button>

@@ -7,6 +7,7 @@ import type { AccessData, AccessEntity } from "@/components/sysadmin/domains/acc
 interface Props {
   data: AccessData;
   onRowClick: (e: AccessEntity) => void;
+  tab?: string;
 }
 
 export function AccessContent({ data, onRowClick }: Props) {

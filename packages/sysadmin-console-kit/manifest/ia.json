@@ -123,14 +123,8 @@
           "id": "access",
           "route": "access",
           "title": "Access",
-          "kind": "tabbed",
-          "pollMs": 30000,
-          "tabs": [
-            "roles",
-            { "id": "sessions", "sse": "/api/admin/sessions/stream" },
-            "mfa",
-            "codes"
-          ]
+          "kind": "cards",
+          "pollMs": 30000
         },
         {
           "id": "roles",
@@ -207,9 +201,14 @@
           "id": "health",
           "route": "health",
           "title": "Health",
-          "kind": "tabbed",
+          "kind": "group",
           "pollMs": 30000,
-          "tabs": ["app", "database", "infra", "redis"]
+          "children": [
+            { "id": "health-app", "route": "health/app", "title": "App Health", "kind": "cards" },
+            { "id": "health-database", "route": "health/database", "title": "Database", "kind": "cards" },
+            { "id": "health-infra", "route": "health/infra", "title": "Infra", "kind": "cards" },
+            { "id": "health-redis", "route": "health/redis", "title": "Redis", "kind": "cards" }
+          ]
         }
       ]
     },
@@ -317,9 +316,8 @@
           "id": "data",
           "route": "data",
           "title": "Data lifecycle",
-          "kind": "tabbed",
-          "pollMs": 60000,
-          "tabs": ["retention", "exports", "anonymize", "restores", "backups"]
+          "kind": "cards",
+          "pollMs": 60000
         },
         {
           "id": "backup",
@@ -420,7 +418,7 @@
           "id": "reasons",
           "route": "reasons",
           "title": "Reason catalog",
-          "kind": "tabbed",
+          "kind": "table",
           "pollMs": 120000
         },
         {
@@ -455,7 +453,7 @@
           "id": "system",
           "route": "system",
           "title": "System",
-          "kind": "tabbed",
+          "kind": "cards",
           "pollMs": 60000
         },
         {
@@ -496,7 +494,7 @@
           "id": "compliance",
           "route": "compliance",
           "title": "Compliance",
-          "kind": "tabbed",
+          "kind": "cards",
           "pollMs": 120000
         },
         {
@@ -510,7 +508,7 @@
           "id": "consent",
           "route": "consent",
           "title": "Consent Management",
-          "kind": "tabbed",
+          "kind": "cards",
           "pollMs": 120000
         }
       ]

@@ -10,7 +10,7 @@ interface RecentScansProps {
   onSelect?: (scan: Scan) => void;
 }
 
-type FilterTab = "ALL" | "IN" | "OUT" | "FLAGGED";
+type ScanFilter = "ALL" | "IN" | "OUT" | "FLAGGED";
 
 /**
  * Memoized scan row. Stable reference so re-renders of the list don't
@@ -72,7 +72,7 @@ const Row = memo(function Row({
 
 export function RecentScans({ scans, onSelect }: RecentScansProps) {
   const isGlossyMotion = useGlossyMotion();
-  const [filter, setFilter] = useState<FilterTab>("ALL");
+  const [filter, setFilter] = useState<ScanFilter>("ALL");
 
   const filteredScans = (scans || []).filter((scan) => {
     if (filter === "IN") return scan.direction === "IN";
@@ -95,9 +95,9 @@ export function RecentScans({ scans, onSelect }: RecentScansProps) {
           <p className="text-[10px] text-[var(--text-muted)] mt-0.5">Tap any record to open the person overview.</p>
         </div>
 
-        {/* Live Filter Stream Tabs */}
+        {/* Live Filter Stream */}
         <div className="flex items-center gap-1 bg-[var(--bg-elevated)] p-1 rounded-xl border border-[var(--border)] self-start sm:self-auto overflow-x-auto max-w-full no-scrollbar">
-          {(["ALL", "IN", "OUT", "FLAGGED"] as FilterTab[]).map((tab) => {
+          {(["ALL", "IN", "OUT", "FLAGGED"] as ScanFilter[]).map((tab) => {
             const isActive = filter === tab;
             return (
               <button

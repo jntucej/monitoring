@@ -6,11 +6,18 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { useDashboardData } from "@/hooks/useDashboardData";
-import { HealthContent, TABS } from "@/components/sysadmin/domains/monitoring/HealthContent";
+import { HealthContent } from "@/components/sysadmin/domains/monitoring/HealthContent";
 import type { HealthData } from "@/components/sysadmin/domains/monitoring/types";
 
 export const VALID_TABS = ["app", "database", "infra", "redis"] as const;
 type Tab = (typeof VALID_TABS)[number];
+
+const TAB_LABELS: Record<Tab, string> = {
+  app: "App Health",
+  database: "Database",
+  infra: "Infra",
+  redis: "Redis",
+};
 
 /**
  * Shared health content view. Accepts the active tab as a prop (no URL
@@ -29,7 +36,7 @@ export function HealthTabContent({ tab }: { tab: Tab }) {
   }, [refresh]);
 
   const tabLabel = useMemo(
-    () => TABS.find((t) => t.id === tab)?.label ?? "App",
+    () => TAB_LABELS[tab] ?? "App Health",
     [tab]
   );
 

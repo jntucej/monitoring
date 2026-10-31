@@ -7,6 +7,7 @@ import type { SystemData, SystemEntity } from "@/components/sysadmin/domains/pla
 interface Props {
   data: SystemData;
   onRowClick: (e: SystemEntity) => void;
+  tab?: string;
 }
 
 export function SystemContent({ data, onRowClick }: Props) {
@@ -25,7 +26,7 @@ export function SystemContent({ data, onRowClick }: Props) {
               <button
                 type="button"
                 className="w-full text-left px-3 py-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-                onClick={() => onRowClick(item as any)}
+                onClick={() => onRowClick(item as unknown as SystemEntity)}
               >
                 {item.id}
               </button>

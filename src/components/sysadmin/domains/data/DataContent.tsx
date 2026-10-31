@@ -7,6 +7,7 @@ import type { DataData, DataEntity } from "@/components/sysadmin/domains/data/ty
 interface Props {
   data: DataData;
   onRowClick: (e: DataEntity) => void;
+  tab?: string;
 }
 
 export function DataContent({ data, onRowClick }: Props) {
@@ -25,7 +26,7 @@ export function DataContent({ data, onRowClick }: Props) {
               <button
                 type="button"
                 className="w-full text-left px-3 py-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-                onClick={() => onRowClick(item as any)}
+                onClick={() => onRowClick(item as unknown as DataEntity)}
               >
                 {item.id}
               </button>

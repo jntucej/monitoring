@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
@@ -59,7 +60,15 @@ function applyAccent(id: AccentId) {
   document.documentElement.style.setProperty("--account-accent", ACCENTS[id].hex);
 }
 
-export function AdminProfilePanel({ tab }: { tab: Tab }) {
+export function AdminProfilePanel({ tab: propTab }: { tab?: Tab } = {}) {
+  const pathname = usePathname();
+  const tab: Tab =
+    propTab ??
+    (pathname.includes("/security")
+      ? "security"
+      : pathname.includes("/appearance")
+        ? "appearance"
+        : "personal");
   const { user, role } = useAuthStore();
   const { theme, setTheme } = useUIStore();
   const addToast = useUIStore((s) => s.addToast);

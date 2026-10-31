@@ -83,7 +83,7 @@ interface AssigneesResponse {
 
 /* ── merged row type ──────────────────────────────────────────────── */
 
-type FilterTab = "all" | "alerts" | "escalated" | "overdue";
+type FilterCategory = "all" | "alerts" | "escalated" | "overdue";
 
 interface MergedRow {
   key: string;
@@ -99,7 +99,7 @@ interface MergedRow {
   isOverdue: boolean;
 }
 
-const FILTER_TABS: Array<{ id: FilterTab; label: string }> = [
+const FILTER_CATEGORIES: Array<{ id: FilterCategory; label: string }> = [
   { id: "all", label: "All" },
   { id: "alerts", label: "Alerts" },
   { id: "escalated", label: "Escalated" },
@@ -141,7 +141,7 @@ export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
       ttlMs: 60_000,
     });
 
-  const [filter, setFilter] = useState<FilterTab>("all");
+  const [filter, setFilter] = useState<FilterCategory>("all");
   const [assigningRow, setAssigningRow] = useState<string | null>(null);
   const [busyKey, setBusyKey] = useState<string | null>(null);
 
@@ -404,9 +404,9 @@ export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
         </button>
       </div>
 
-      {/* Filter tabs */}
+      {/* Filter categories */}
       <div className="flex flex-wrap gap-1 mb-3" role="tablist" aria-label="Filter escalations">
-        {FILTER_TABS.map((tab) => (
+        {FILTER_CATEGORIES.map((tab) => (
           <button
             key={tab.id}
             type="button"

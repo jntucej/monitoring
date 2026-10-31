@@ -8,21 +8,13 @@
 
 "use client";
 
-import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 import { HeatStrip, VIZ_THEME, statusColor } from "@/components/sysadmin/kit/viz";
 import type { HeatCell } from "@/components/sysadmin/kit/viz";
 import { MiniGauge } from "@/components/sysadmin/kit/sidebar";
 import type { HealthData } from "@/components/sysadmin/domains/monitoring/types";
 
-type TabId = "app" | "database" | "infra" | "redis";
-
-const TABS: Array<{ id: TabId; label: string }> = [
-  { id: "app", label: "App" },
-  { id: "database", label: "Database" },
-  { id: "infra", label: "Infra" },
-  { id: "redis", label: "Redis" },
-];
+export type TabId = "app" | "database" | "infra" | "redis";
 
 // ── section helpers ──────────────────────────────────────────────────────────
 
@@ -150,56 +142,26 @@ function RedisSection({ data }: { data: HealthData["redis"] | null | undefined }
 
 export interface HealthContentProps {
   data: HealthData;
-  activeTab: TabId;
-  onTabChange: (tab: TabId) => void;
+  activeTab?: TabId;
+  tab?: TabId;
+  onTabChange?: (tab: TabId) => void;
 }
 
-export function HealthContent({ data, activeTab, onTabChange }: HealthContentProps) {
-  const active = TABS.find((t) => t.id === activeTab) ?? TABS[0];
+export function HealthContent({ data, activeTab, tab }: HealthContentProps) {
+  const currentView = tab ?? activeTab ?? "app";
 
   return (
     <div className="space-y-4">
-      {/* tab strip */}
-      <div
-        role="tablist"
-        className="flex gap-1 rounded-lg border p-1"
-        style={{ borderColor: "var(--border)", background: "var(--bg-surface)" }}
-      >
-        {TABS.map((t) => {
-          const isActive = t.id === active.id;
-          return (
-            <button
-              key={t.id}
-              role="tab"
-              aria-selected={isActive}
-              type="button"
-              onClick={() => onTabChange(t.id)}
-              className={cn(
-                "flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
-              )}
-              style={{
-                background: isActive ? "color-mix(in srgb, var(--action-primary) 12%, transparent)" : "transparent",
-                color: isActive ? "var(--action-primary)" : "var(--text-muted)",
-              }}
-            >
-              {t.label}
-            </button>
-          );
-        })}
-      </div>
-
       {/* active section */}
       <div
         className="rounded-lg border p-4"
         style={{ borderColor: "var(--border)", background: "var(--bg-surface)" }}
       >
-        {active.id === "app" && <AppSection data={data.app} />}
-        {active.id === "database" && <DatabaseSection data={data.database} />}
-        {active.id === "infra" && <InfraSection data={data.infra} />}
-        {active.id === "redis" && <RedisSection data={data.redis} />}
+        {currentView === "app" && <AppSection data={data.app} />}
+        {currentView === "database" && <DatabaseSection data={data.database} />}
+        {currentView === "infra" && <InfraSection data={data.infra} />}
+        {currentView === "redis" && <RedisSection data={data.redis} />}
       </div>
     </div>
   );
 }
-
-export { TABS };
