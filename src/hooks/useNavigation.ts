@@ -382,13 +382,16 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           items: [
             { href: "/parent", label: "Today" },
             { href: "/parent/child", label: "Status" },
-            { href: "/parent/child-attendance", label: "Attendance" },
-            { href: "/parent/child-requests", label: "Requests" },
-            { href: "/parent/child-movement", label: "Movement" },
+            // Sub-pages consolidated into the guardian portal (single source
+            // of truth); the /parent/* slugs still redirect to these routes
+            // so deep links keep working.
+            { href: "/guardian/child-attendance", label: "Attendance" },
+            { href: "/guardian/child-requests", label: "Requests" },
+            { href: "/guardian/movement-info", label: "Movement" },
             { href: "/parent/passes", label: "Passes" },
-            { href: "/parent/pass-leave-submission", label: "Submit" },
+            { href: "/guardian/pass-leave-submission", label: "Submit" },
             { href: "/parent/settings", label: "Settings" },
-            { href: "/parent/contact-info", label: "Contact info" },
+            { href: "/guardian/contact-info", label: "Contact info" },
           ],
         },
       ];

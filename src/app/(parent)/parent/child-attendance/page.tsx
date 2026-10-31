@@ -1,16 +1,9 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { EmptyState } from "@/components/shared/EmptyState";
-import { Users } from "lucide-react";
-
-export default function ParentChildAttendancePage() {
-  return (
-    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
-      <EmptyState
-        icon={<Users className="w-8 h-8" />}
-        title="Child Attendance"
-        description="View class and hostel attendance records for your child."
-      />
-    </div>
-  );
+// The parent-app sub-page tree is consolidated into the guardian portal.
+// /guardian/child-attendance (approver route group) is the single source of
+// truth; this page only redirects so deep links + stale nav entries keep
+// working without duplicating the UI.
+export default function ParentChildAttendanceRedirect() {
+  redirect("/guardian/child-attendance");
 }

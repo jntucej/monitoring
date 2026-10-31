@@ -1,16 +1,7 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { EmptyState } from "@/components/shared/EmptyState";
-import { Users } from "lucide-react";
-
-export default function ParentChildRequestsPage() {
-  return (
-    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
-      <EmptyState
-        icon={<Users className="w-8 h-8" />}
-        title="Child Requests"
-        description="Leave, outpass, and permission requests submitted by your child."
-      />
-    </div>
-  );
+// Consolidated into the guardian portal. /guardian/child-requests is the
+// single source of truth for leave/outpass/permission request lists.
+export default function ParentChildRequestsRedirect() {
+  redirect("/guardian/child-requests");
 }
