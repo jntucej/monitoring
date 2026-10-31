@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
+import { ScrollEdgeBlue } from "@/components/shared/ScrollEdgeBlue";
 import { VPSidebar } from "./VPSidebar";
 import { VPNotificationBell } from "./VPNotificationBell";
 import { FocusMode } from "../_retention/FocusMode";
@@ -36,7 +37,9 @@ export function VPMobileShell({ children }: { children: React.ReactNode }) {
       </header>
 
       <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto w-full px-4 py-4">{children}</div>
+        <ScrollEdgeBlue className="h-full">
+          <div className="mx-auto w-full px-4 py-4">{children}</div>
+        </ScrollEdgeBlue>
       </main>
 
       {/* Left-anchored drawer */}
