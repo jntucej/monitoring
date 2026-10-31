@@ -47,8 +47,21 @@ echo "✓ Verified ${#SEEN_VERSIONS[@]} unique migration version prefixes"
 # grep exits 1 when it finds zero matches (the normal, healthy case); under
 # `set -o pipefail` that would otherwise kill this whole script mid-way, so
 # tolerate an empty result explicitly.
-# Count distinct migration files that declare direct ALTER TABLE statements for audit_logs_action_known.
-AUDIT_ACTION_OWNERS=$(grep -El -- '^[[:space:]]*ALTER[[:space:]]+TABLE[[:space:]]+public\.audit_logs[[:space:]]+(DROP|ADD)[[:space:]]+CONSTRAINT[[:space:]]+(IF[[:space:]]+EXISTS[[:space:]]+)?audit_logs_action_known' database/migrations/*.sql 2>/dev/null | wc -l || true)
+# Count migration files that own the constraint via a TOP-LEVEL ALTER;
+# statements inside DO $$ ... $$ blocks are idempotent widening extensions,
+# not a second owner.
+AUDIT_ACTION_OWNERS=0
+for mfile in "${FILES[@]}"; do
+  if awk '
+    /^DO \$\$/             { inblk = 1 }
+    inblk && /^\$\$;?$/   { inblk = 0 }
+    !inblk && /^[[:space:]]*ALTER[[:space:]]+TABLE[[:space:]]+public\.audit_logs[[:space:]]+(DROP|ADD)[[:space:]]+CONSTRAINT[[:space:]]+(IF[[:space:]]+EXISTS[[:space:]]+)?audit_logs_action_known/ { found = 1 }
+    END { exit found ? 0 : 1 }
+  ' "$mfile" 2>/dev/null; then
+    AUDIT_ACTION_OWNERS=$((AUDIT_ACTION_OWNERS + 1))
+    echo "  audit_logs_action_known top-level owner: $mfile"
+  fi
+done
 if [ "$AUDIT_ACTION_OWNERS" -gt 1 ]; then
   echo "ERROR: Multiple migrations modify audit_logs_action_known ($AUDIT_ACTION_OWNERS files found). Only one canonical migration allowed." >&2
   exit 1

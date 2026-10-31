@@ -31,7 +31,7 @@ hits=$(rg -n '(\?|&)workflowType=' "$ROOT" --glob '*.tsx' --glob '*.ts' || true)
   "query string uses workflowType; must be workflow_type: $(echo "$hits" | head -1 | cut -d: -f1)"
 
 # ── R2: alert() / confirm() in page files ────────────────────────────────────
-hits=$(rg -nE '\b(alert|confirm)\(' "$ROOT" --glob 'page.tsx' || true)
+hits=$(rg -n '\b(alert|confirm)\(' "$ROOT" --glob 'page.tsx' || true)
 [ -n "$hits" ] && record "R2" "med" "$(echo "$hits" | wc -l)" \
   "alert()/confirm() in page: $(echo "$hits" | head -1)"
 
