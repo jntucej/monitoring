@@ -2,12 +2,12 @@
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, X, RefreshCw, AlertTriangle, KeyRound, Volume2, VolumeX, Upload, ArrowLeftRight } from "lucide-react";
+import { Camera, X, RefreshCw, AlertTriangle, KeyRound, Volume2, VolumeX, Upload } from "lucide-react";
 import { playAudioFeedback } from "@/lib/sound";
 import jsQR from "jsqr";
 import { SCANNABLE_FORMATS, normalizeScannedPayload } from "@/lib/barcode";
 
-type ScanMode = "qr" | "barcode";
+type ScanMode = "qr" | "barcode" | "all";
 type FormatScope = ScanMode | "all";
 
 // QR codes decode via jsQR (universal, no API support needed). Linear/2D
@@ -109,7 +109,7 @@ export function Scanner({
   onScan,
   onManualEntryClick,
   gateId,
-  initialMode = "qr",
+  initialMode = "all",
   mode: modeProp,
 }: ScannerModalProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -379,6 +379,43 @@ export function Scanner({
 
     const activeMode = modeRef.current;
 
+    // ── "all" mode (desk default): one detector pass for QR AND 1D/2D
+    //    barcodes — the operator never picks a scan mode. QR is decoded by
+    //    the native detector with the jsQR fallback; barcodes ride the same
+    //    frame via the native BarcodeDetector when the browser has one. ──
+    if (activeMode === "all") {
+      const qrDetector = getQrDetector();
+      if (qrDetector) {
+        qrDetector
+          .detect(canvas)
+          .then((barcodes: Array<{ rawValue: string; format: string }>) => {
+            const hit = barcodes?.find((b) => b && b.rawValue);
+            if (hit) {
+              handleSuccessScan(hit.rawValue);
+              return;
+            }
+            runJsQrFallback(canvas, handleSuccessScan);
+          })
+          .catch(() => {
+            runJsQrFallback(canvas, handleSuccessScan);
+          });
+      } else {
+        runJsQrFallback(canvas, handleSuccessScan);
+      }
+      const barcodeDetector = getBarcodeDetector();
+      if (barcodeDetector) {
+        barcodeDetector
+          .detect(canvas)
+          .then((barcodes: Array<{ rawValue: string }>) => {
+            if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
+              handleSuccessScan(barcodes[0].rawValue);
+            }
+          })
+          .catch(() => {});
+      }
+      return;
+    }
+
     // ── QR mode ───────────────────────────────────────────────────────────────
     if (activeMode === "qr") {
       const qrDetector = getQrDetector();
@@ -636,21 +673,21 @@ export function Scanner({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-md">
+      <div className="fixed inset-0 z-50 bg-black">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          className="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90dvh]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="relative w-full h-full flex flex-col overflow-hidden"
         >
-          {/* Header */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 bg-slate-900/90 sticky top-0 z-20">
-            <div className="flex items-center gap-2.5">
+          {/* Header — one compact status line. No decoration. */}
+          <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-800/60 bg-slate-950/85 z-10">
+            <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-8 h-8 rounded-xl bg-slate-800 text-slate-300 flex items-center justify-center border border-slate-700">
                 <Camera className="w-4 h-4" />
               </div>
-              <div>
-                <h2 className="text-sm font-bold text-white">
+              <div className="min-w-0">
+                <h2 className="text-sm font-bold text-white truncate">
                   {gateId ? `Gate ${gateId}` : "Scanner"}
                 </h2>
                 <p className="text-[11px] text-slate-400">Auto-detecting · no re-prompt</p>
@@ -675,34 +712,21 @@ export function Scanner({
             </div>
           </div>
 
-          {/* Mode indicator — the mode was chosen by the viewfinder button the
-              operator tapped; the link just flips to the other mode. */}
-          <div className="flex items-center justify-between border-b border-slate-800 bg-slate-900/60 px-4 py-2.5">
-            <span className="flex items-center gap-2 text-xs font-bold text-slate-300">
-              <span className="w-2 h-2 rounded-full bg-slate-400 animate-pulse" />
-              {mode === "qr" ? "QR-only mode" : "Barcode-only mode"}
-            </span>
-            <button
-              type="button"
-              onClick={() => switchMode(mode === "qr" ? "barcode" : "qr")}
-              className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 hover:text-white transition-colors"
-            >
-              <ArrowLeftRight className="w-3.5 h-3.5" />
-              {mode === "qr" ? "Switch to Barcode" : "Switch to QR"}
-            </button>
-          </div>
+          {/* No mode row: the desk auto-detects QR and 1D/2D barcodes in one
+              pass — the operator never picks a scan mode. */}
 
-          {/* Camera viewfinder */}
-          <div className="relative w-full h-[320px] sm:h-[400px] bg-black flex items-center justify-center overflow-hidden">
+          {/* Camera viewfinder — full-bleed: fills everything between the
+              status line and the action bar. */}
+          <div className="relative flex-1 min-h-0 bg-black overflow-hidden">
             <canvas ref={canvasRef} className="hidden" />
-            <video ref={videoRef} className="w-full h-full object-cover" playsInline muted autoPlay />
+            <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover" playsInline muted autoPlay />
 
-            {/* Barcode tab: warn when the phone's browser can't decode 1D/2D
-                natively so the operator knows live auto-detect won't match. */}
-            {cameraState === "active" && mode === "barcode" && !barcodeApiAvailable && (
+            {/* Warn when the phone's browser can't decode 1D/2D barcodes
+                natively so the operator knows live auto-detect is QR-only. */}
+            {cameraState === "active" && mode === "all" && !barcodeApiAvailable && (
               <div className="absolute top-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 text-[10px] font-semibold text-amber-300 bg-amber-950/80 border border-amber-500/40 rounded-full px-3 py-1.5 pointer-events-none">
                 <AlertTriangle className="w-3 h-3" />
-                <span>No native barcode decoder in this browser — switch to QR or Upload below</span>
+                <span>No native barcode decoder in this browser — QR only · Use Upload below</span>
               </div>
             )}
 
@@ -757,7 +781,7 @@ export function Scanner({
                   onClick={() => fileInputRef.current?.click()}
                   className="w-full sm:flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs transition-all flex items-center justify-center gap-2"
                 >
-                  <Upload className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <Upload className="w-4 h-4 text-slate-400 shrink-0" />
                   <span className="truncate">Upload QR Image</span>
                 </button>
                 {onManualEntryClick && (
@@ -766,18 +790,11 @@ export function Scanner({
                     onClick={() => { stopCamera(); onClose(); onManualEntryClick(); }}
                     className="w-full sm:flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs transition-all flex items-center justify-center gap-2"
                   >
-                    <KeyRound className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <KeyRound className="w-4 h-4 text-slate-400 shrink-0" />
                     <span className="truncate">Manual Entry</span>
                   </button>
                 )}
               </div>
-              <button
-                type="button"
-                onClick={() => { stopCamera(); onClose(); }}
-                className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 text-xs font-bold"
-              >
-                Cancel & Close
-              </button>
             </div>
           </div>
         </motion.div>
