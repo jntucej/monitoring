@@ -1,13 +1,32 @@
-import type { Metadata } from "next";
-import { NOINDEX_METADATA } from "@/lib/seo";
-import { VisitorShell } from "./VisitorShell";
+"use client";
 
-export const metadata: Metadata = NOINDEX_METADATA;
+import { Suspense } from "react";
+import { PageLoading } from "@/components/shared/LoadingStates";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+import { RoleDesktopShell } from "@/components/shell/RoleDesktopShell";
+import { RoleMobileShell } from "@/components/shell/RoleMobileShell";
+import { VISITOR_NAV, NAV_STORAGE_KEY } from "./_shell/nav";
+import type { Role } from "@/lib/types";
 
-export default function VisitorLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return <VisitorShell>{children}</VisitorShell>;
+const MANIFEST = {
+  role: "visitor",
+  brand: { short: "Visitor", long: "Visit Portal" },
+  rootHref: "/visitor",
+  storageKey: NAV_STORAGE_KEY,
+  nav: VISITOR_NAV,
+};
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <AuthGuard allowedRoles={["visitor", "admin", "sysadmin"] as Role[]}>
+      <Suspense fallback={<PageLoading />}>
+        <div className="hidden lg:block">
+          <RoleDesktopShell manifest={MANIFEST}>{children}</RoleDesktopShell>
+        </div>
+        <div className="block lg:hidden">
+          <RoleMobileShell manifest={MANIFEST}>{children}</RoleMobileShell>
+        </div>
+      </Suspense>
+    </AuthGuard>
+  );
 }

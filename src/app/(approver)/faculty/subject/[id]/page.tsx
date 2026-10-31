@@ -32,7 +32,6 @@ import {
 import { Suspense } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import { RoleConsole } from "@/components/shared/RoleConsole";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
@@ -265,24 +264,22 @@ function SubjectClassDrilldownInner() {
     <AuthGuard allowedRoles={["faculty", "admin", "sysadmin"]}>
       <Suspense fallback={<PageLoading />}>
         <div key={`${classId}:${selectedRow?.id ?? ""}`} className="min-w-0">
-          <RoleConsole role="subject_faculty" roleRoot="/faculty/subject">
-            <div className="flex flex-col min-w-0">
-              <div className="px-4 pt-4">
-                <button
-                  type="button"
-                  onClick={() => router.replace("/faculty/subject", { scroll: false })}
-                  className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
-                >
-                  <ArrowRight className="w-3 h-3 rotate-180" /> Back to subject picker
-                </button>
-              </div>
-              <SubjectClassDrilldown
-                classId={classId}
-                subject={subject}
-                onStudentSelect={handleStudentSelect}
-              />
+          <div className="flex flex-col min-w-0">
+            <div className="px-4 pt-4">
+              <button
+                type="button"
+                onClick={() => router.replace("/faculty/subject", { scroll: false })}
+                className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+              >
+                <ArrowRight className="w-3 h-3 rotate-180" /> Back to subject picker
+              </button>
             </div>
-          </RoleConsole>
+            <SubjectClassDrilldown
+              classId={classId}
+              subject={subject}
+              onStudentSelect={handleStudentSelect}
+            />
+          </div>
         </div>
         <DevContactStrip />
       </Suspense>

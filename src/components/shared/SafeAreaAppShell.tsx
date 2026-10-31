@@ -56,8 +56,7 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
     pathname?.startsWith("/admin") ||
     pathname?.startsWith("/operator") ||
     pathname?.startsWith("/gate") ||
-    // The student console owns its full-screen shell (StudentShell adds a
-    // mobile bottom tab bar). Hide the shared Sidebar nav so it never
+    // The student console owns its full-screen shell. Hide the shared Sidebar nav so it never
     // double-renders over the student layout.
     pathname?.startsWith("/student") ||
     pathname?.startsWith("/parent") ||

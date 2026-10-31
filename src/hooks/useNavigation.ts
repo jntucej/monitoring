@@ -54,31 +54,30 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "Caretaker Console",
           items: [
-            { href: "/caretaker", label: "Overview", icon: "LayoutDashboard", badge: "OVERVIEW" },
-            { href: "/caretaker/maintenance", label: "Maintenance", icon: "Wrench", badge: "OPEN" },
-            { href: "/caretaker/workers", label: "Workers", icon: "Users" },
+            { href: "/caretaker", label: "Today" },
+            { href: "/caretaker/complaints", label: "Complaints" },
+            { href: "/caretaker/maintenance", label: "Maintenance" },
+            { href: "/caretaker/workers", label: "Workers" },
+            { href: "/caretaker/buildings", label: "Buildings" },
           ],
         },
       ];
       break;
 
     case "hostel_manager":
-      // Hostel manager is migrated to the RoleConsole shell (kanban:tickets
-      // of hostel tickets, scoped by hostel_scope). Single console group of
-      // exactly 5 items so the IconRail stays lean.
-      // maintenance-requests, occupancy-reports, operational-reports,
-      // resident-service-requests, room-bed-allocation deleted (redundant
-      // stubs — data is served by /api/hostel-manager/summary +
-      // /api/occupancy/presence-matrix + /api/campus-extra/analytics,
-      // already rendered by the RoleConsole panels and remaining pages).
       groups = [
         {
           groupLabel: "Hostel Manager Console",
           items: [
-            { href: "/hostel-manager", label: "Tickets", icon: "Ticket", badge: "OPEN" },
-            { href: "/hostel-manager/housekeeping-tasks", label: "Housekeeping", icon: "Wrench" },
-            { href: "/hostel-manager/resource-management", label: "Resources", icon: "Package" },
-            { href: "/hostel-manager/tickets", label: "My Tickets", icon: "ClipboardList" },
+            { href: "/hostel-manager", label: "Today" },
+            { href: "/hostel-manager/tickets", label: "Resident tickets" },
+            { href: "/hostel-manager/complaints", label: "Complaints" },
+            { href: "/hostel-manager/housekeeping-tasks", label: "Housekeeping" },
+            { href: "/hostel-manager/resource-management", label: "Resources" },
+            { href: "/hostel-manager/maintenance", label: "Maintenance" },
+            { href: "/hostel-manager/residents", label: "All residents" },
+            { href: "/hostel-manager/rooms", label: "Rooms" },
+            { href: "/hostel-manager/allocation", label: "Allocation" },
           ],
         },
       ];
@@ -89,7 +88,17 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "Deputy Warden Console",
           items: [
-            { href: "/deputy-warden", label: "Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
+            { href: "/deputy-warden", label: "Today" },
+            { href: "/deputy-warden/outpass-queue", label: "Outpass queue" },
+            { href: "/deputy-warden/leave-requests", label: "Leave requests" },
+            { href: "/deputy-warden/delegated-approvals", label: "Delegated" },
+            { href: "/deputy-warden/daily-overview", label: "Overview" },
+            { href: "/deputy-warden/gate-movement", label: "Gate movement" },
+            { href: "/deputy-warden/curfew-oversight", label: "Curfew" },
+            { href: "/deputy-warden/incident-reporting", label: "Incidents" },
+            { href: "/deputy-warden/shift-handover", label: "Handover" },
+            { href: "/deputy-warden/decision-history", label: "Decision history" },
+            { href: "/deputy-warden/complaints", label: "Complaints" },
           ],
         },
       ];
@@ -128,69 +137,62 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       break;
 
     case "oie":
-      // OIE is migrated to the RoleConsole shell (kanban:exam queue via
-      // /api/oie/queue, exam-scoped). Single console group of exactly 5 items
-      // so the IconRail stays lean. No "Exam Branch" / "General & Support"
-      // groups.
       groups = [
         {
           groupLabel: "OIE Console",
           items: [
-            { href: "/oie", label: "Exam Queue", icon: "CheckSquare", badge: "PENDING" },
-            { href: "/oie/candidate-attendance", label: "Candidates", icon: "Users" },
-            { href: "/oie/examination-day-access", label: "Access", icon: "DoorOpen" },
-            { href: "/oie/access-exceptions", label: "Exceptions", icon: "ShieldAlert" },
-            { href: "/oie/records", label: "Records", icon: "FileSpreadsheet" },
+            { href: "/oie", label: "Today" },
+            { href: "/oie/queue/pending", label: "Pending" },
+            { href: "/oie/queue/escalated", label: "Escalated" },
+            { href: "/oie/queue/history", label: "History" },
+            { href: "/oie/examination-day-access", label: "Day access" },
+            { href: "/oie/access-exceptions", label: "Exceptions" },
+            { href: "/oie/candidate-attendance", label: "Candidate attendance" },
+            { href: "/oie/exam-branch-coordination", label: "Branch coordination" },
+            { href: "/oie/records", label: "Records" },
+            { href: "/oie/decision-history", label: "Decision history" },
+            { href: "/oie/examination-reports", label: "Reports" },
           ],
         },
       ];
       break;
 
     case "exam_superintendent":
-      // Exam superintendent is migrated to the RoleConsole shell (kanban via
-      // /api/exam/access, PENDING/ACTIVE/CLOSED columns). Single console group
-      // of exactly 5 items so the IconRail stays lean. No Account group.
       groups = [
         {
           groupLabel: "Exam Superintendent Console",
           items: [
-            { href: "/exam/superintendent/access", label: "Access", icon: "DoorOpen", badge: "PENDING" },
-            { href: "/exam/superintendent/schedule", label: "Schedule", icon: "CalendarClock" },
-            { href: "/exam/superintendent/incidents", label: "Incidents", icon: "ShieldAlert" },
-            { href: "/exam/superintendent/reports", label: "Reports", icon: "FileSpreadsheet" },
-            { href: "/exam/superintendent/access", label: "Candidates", icon: "Users" },
+            { href: "/exam/superintendent", label: "Today" },
+            { href: "/exam/superintendent/access", label: "Access" },
+            { href: "/exam/superintendent/schedule", label: "Schedule" },
+            { href: "/exam/superintendent/incidents", label: "Incidents" },
+            { href: "/exam/superintendent/reports", label: "Reports" },
           ],
         },
       ];
       break;
 
     case "exam_branch":
-      // Exam branch is migrated to the RoleConsole shell (kanban: exam
-      // permissions self-scoped to the caller's own branch via
-      // /api/permissions?workflow_type=exam&branch=:self). Single console
-      // group of exactly 5 items so the IconRail stays lean. No Account.
       groups = [
         {
           groupLabel: "Exam Branch Console",
           items: [
-            { href: "/exam-branch/pass-queue", label: "Pass Queue", icon: "ClipboardList", badge: "PENDING" },
-            { href: "/exam-branch/oie-handoff", label: "OIE Handoff", icon: "ArrowLeftRight" },
-            { href: "/exam-branch/discrepancies", label: "Discrepancies", icon: "ShieldAlert" },
-            { href: "/exam-branch/records", label: "Records", icon: "FileSpreadsheet" },
-            { href: "/exam-branch/reports", label: "Reports", icon: "BarChart3" },
+            { href: "/exam-branch", label: "Today" },
+            { href: "/exam-branch/pass-queue", label: "Pass queue" },
+            { href: "/exam-branch/oie-approval-requests", label: "OIE approvals" },
+            { href: "/exam-branch/oie-handoff", label: "OIE handoff" },
+            { href: "/exam-branch/records", label: "Records" },
+            { href: "/exam-branch/verification", label: "Verification" },
+            { href: "/exam-branch/discrepancies", label: "Discrepancies" },
+            { href: "/exam-branch/calendar", label: "Calendar" },
+            { href: "/exam-branch/docs", label: "Docs" },
+            { href: "/exam-branch/reports", label: "Reports" },
           ],
         },
       ];
       break;
 
-    case "hostel_manager":
-    case "caretaker":
-      // Already handled above; these were listed in original code too
-      break;
 
-    case "deputy_warden":
-      // Already handled above
-      break;
 
     case "principal":
       // Already handled above
@@ -200,13 +202,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       // Already handled above
       break;
 
-    case "oie":
-      // Already handled above
-      break;
 
-    case "exam_branch":
-      // Already handled above
-      break;
 
     case "sysadmin":
       // SysAdmin is migrated to the RoleConsole shell (feed:application-health
@@ -251,18 +247,17 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       break;
 
     case "operator":
-      // Lean gate-desk nav: exactly 4 items (Scan, Log, Flags, More).
-      // Scan → operator root (kiosk scanner). Log → transactions log.
-      // Flags → exceptions/flagged scans. More → secondary commands.
-      // No Account, no Reports, no Stats rows.
       groups = [
         {
           groupLabel: "Gate Operations Desk",
           items: [
-            { href: "/operator", label: "Scan", icon: "QrCode", badge: "ACTIVE" },
-            { href: "/operator/transactions", label: "Log", icon: "Clock" },
-            { href: "/operator/exceptions", label: "Flags", icon: "ShieldAlert" },
-            { href: "/operator/manual-entry", label: "More", icon: "MoreHorizontal" },
+            { href: "/operator", label: "Desk" },
+            { href: "/operator/transactions", label: "Transactions" },
+            { href: "/operator/exceptions", label: "Exceptions" },
+            { href: "/operator/manual-entry", label: "Manual entry" },
+            { href: "/operator/pass-verification", label: "Pass verification" },
+            { href: "/operator/claim", label: "Claim gate" },
+            { href: "/operator/kiosk-pin", label: "Kiosk PIN" },
           ],
         },
       ];
@@ -289,22 +284,22 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       break;
 
     case "mess_incharge":
-      // Mess In-charge is migrated to the RoleConsole shell (digest board via
-      // /api/mess/analytics + MealServePanel). Single console group of exactly
-      // 5 items so the IconRail stays lean. No "General & Support" group. The
-      // five items route to the real mess sub-pages under /mess/.
       groups = [
         {
           groupLabel: "Mess Console",
           items: [
-            { href: "/mess", label: "Today", icon: "Utensils", badge: "PENDING" },
-            { href: "/mess/menu-management", label: "Menu", icon: "Salad" },
-            { href: "/mess/daily-meal-counts", label: "Counts", icon: "BarChart3" },
-            { href: "/mess/inventory-stock", label: "Inventory", icon: "Package" },
-            { href: "/mess/mess-issues", label: "Issues", icon: "ShieldAlert" },
-            { href: "/mess/special-events", label: "Special Events", icon: "CalendarDays" },
-            { href: "/mess/verify-token", label: "Verify Token", icon: "ScanLine" },
-            { href: "/mess/reviews", label: "Meal Reviews", icon: "UtensilsCrossed" },
+            { href: "/mess", label: "Today" },
+            { href: "/mess/menu-management", label: "Menu" },
+            { href: "/mess/daily-meal-counts", label: "Daily counts" },
+            { href: "/mess/meal-attendance", label: "Attendance" },
+            { href: "/mess/consumption-reports", label: "Consumption" },
+            { href: "/mess/inventory-stock", label: "Stock" },
+            { href: "/mess/special-events", label: "Special events" },
+            { href: "/mess/reviews", label: "Reviews" },
+            { href: "/mess/mess-issues", label: "Issues" },
+            { href: "/mess/operational-requests", label: "Requests" },
+            { href: "/mess/verify-token", label: "Verify token" },
+            { href: "/mess/scan", label: "Scan" },
           ],
         },
       ];
@@ -315,22 +310,15 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "Faculty Portal",
           items: [
-            { href: "/faculty/permissions", label: "Student Permissions", icon: "CheckSquare", badge: "PENDING" },
-            { href: "/faculty", label: "Faculty Attendance Desk", icon: "UserCheck", badge: "MY DEPT" },
-            { href: "/person", label: "Digital Gate Pass", icon: "QrCode" },
-          ],
-        },
-        {
-          groupLabel: "Campus Life",
-          items: [
-            { href: "/campus", label: "My Campus", icon: "Sparkles" },
-          ],
-        },
-        {
-          groupLabel: "General",
-          items: [
-            { href: "/profile", label: "My Profile", icon: "User" },
-            { href: "/about", label: "About Campus", icon: "HelpCircle" },
+            { href: "/faculty", label: "Today" },
+            { href: "/faculty/my-classes", label: "My classes" },
+            { href: "/faculty/attendance", label: "Attendance" },
+            { href: "/faculty/student-directory", label: "Students" },
+            { href: "/faculty/permissions", label: "Permissions" },
+            { href: "/faculty/correction-requests", label: "Corrections" },
+            { href: "/faculty/request-history", label: "Request history" },
+            { href: "/faculty/reports", label: "Reports" },
+            { href: "/faculty/notifications", label: "Notifications" },
           ],
         },
       ];
@@ -341,31 +329,29 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "Staff Console",
           items: [
-            { href: "/staff", label: "My Day", icon: "ClipboardList", badge: "MY DAY" },
-            { href: "/staff/duties", label: "Duties", icon: "CalendarClock" },
-            { href: "/staff/leaves", label: "Leaves", icon: "CalendarDays", badge: "PENDING" },
-            { href: "/staff/history", label: "History", icon: "History" },
+            { href: "/staff", label: "Today" },
+            { href: "/staff/my-day", label: "My day" },
+            { href: "/staff/assigned-tasks", label: "Assigned tasks" },
+            { href: "/staff/duties", label: "Duties" },
+            { href: "/staff/requests", label: "Requests" },
+            { href: "/staff/leaves", label: "Leaves" },
+            { href: "/staff/request-status", label: "Request status" },
+            { href: "/staff/history", label: "History" },
+            { href: "/staff/notifications", label: "Notifications" },
           ],
         },
       ];
       break;
 
     case "worker":
-      // Worker is migrated to the RoleConsole shell (digest board via
-      // /api/workers/my-work: tasks / completedLastWeek / todayShift, plus
-      // MyWorkPanel). Single console group of exactly 5 items so the IconRail
-      // stays lean. No Account / Campus Life / General groups. All 5 commands
-      // are navigation to the worker root — today only the root sub-page
-      // (/worker/page.tsx) exists on disk, so every item targets /worker.
       groups = [
         {
           groupLabel: "Worker Console",
           items: [
-            { href: "/worker", label: "My Work", icon: "ClipboardList", badge: "TASKS" },
-            { href: "/worker", label: "Shifts", icon: "CalendarClock" },
-            { href: "/worker", label: "Work Orders", icon: "Wrench" },
-            { href: "/worker", label: "History", icon: "History" },
-            { href: "/worker", label: "Records", icon: "FileSpreadsheet" },
+            { href: "/worker", label: "Today" },
+            { href: "/worker/shifts", label: "Shifts" },
+            { href: "/worker/work-orders", label: "Work orders" },
+            { href: "/worker/history", label: "History" },
           ],
         },
       ];
@@ -376,30 +362,38 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "Student Console",
           items: [
-            { href: "/student", label: "Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
-            { href: "/student/passes", label: "Passes", icon: "DoorOpen" },
-            { href: "/student/permissions", label: "Permissions", icon: "ClipboardList" },
-            { href: "/student/history", label: "Movement", icon: "Clock" },
-            { href: "/student/mess", label: "Mess", icon: "UtensilsCrossed" },
+            { href: "/student", label: "Home" },
+            { href: "/student/permissions", label: "My tickets" },
+            { href: "/student/permissions/new", label: "New request" },
+            { href: "/student/request-tracking", label: "Tracking" },
+            { href: "/student/id", label: "My ID" },
+            { href: "/student/mess/token", label: "Meal token" },
+            { href: "/student/mess/reviews", label: "Reviews" },
+            { href: "/student/mess/special", label: "Special" },
+            { href: "/student/mess-bill", label: "Bill" },
+            { href: "/student/complaints", label: "Complaints" },
+            { href: "/student/anti-ragging", label: "Anti-ragging" },
+            { href: "/student/notifications", label: "Notifications" },
+            { href: "/student/profile", label: "Profile" },
           ],
         },
       ];
       break;
 
     case "parent":
-      // Parent is migrated to the RoleConsole shell (feed:child-activity
-      // timeline via /api/parents/me). Single console group of exactly 5 items
-      // so the IconRail stays lean. No "Account" group. All 5 commands are
-      // navigation (parent is a read-only role).
       groups = [
         {
           groupLabel: "Parent Console",
           items: [
-            { href: "/parent", label: "Timeline", icon: "History", badge: "PENDING" },
-            { href: "/parent/settings", label: "Notifications", icon: "Bell" },
-            { href: "/parent/passes", label: "Fees", icon: "CreditCard" },
-            { href: "/parent/child", label: "Records", icon: "FileSpreadsheet" },
-            { href: "/support", label: "Contact", icon: "MessageSquare" },
+            { href: "/parent", label: "Today" },
+            { href: "/parent/child", label: "Status" },
+            { href: "/parent/child-attendance", label: "Attendance" },
+            { href: "/parent/child-requests", label: "Requests" },
+            { href: "/parent/child-movement", label: "Movement" },
+            { href: "/parent/passes", label: "Passes" },
+            { href: "/parent/pass-leave-submission", label: "Submit" },
+            { href: "/parent/settings", label: "Settings" },
+            { href: "/parent/contact-info", label: "Contact info" },
           ],
         },
       ];
@@ -426,6 +420,67 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           items: [
             { href: "/profile", label: "My Profile", icon: "User" },
             { href: "/about", label: "About Campus", icon: "HelpCircle" },
+          ],
+        },
+      ];
+      break;
+
+    case "class_teacher":
+      groups = [
+        {
+          groupLabel: "Faculty Portal",
+          items: [
+            { href: "/faculty", label: "Today" },
+            { href: "/faculty/my-classes", label: "My classes" },
+            { href: "/faculty/attendance", label: "Attendance" },
+            { href: "/faculty/student-directory", label: "Students" },
+            { href: "/faculty/permissions", label: "Permissions" },
+            { href: "/faculty/correction-requests", label: "Corrections" },
+            { href: "/faculty/request-history", label: "Request history" },
+            { href: "/faculty/reports", label: "Reports" },
+            { href: "/faculty/notifications", label: "Notifications" },
+          ],
+        },
+      ];
+      break;
+
+    case "subject_faculty":
+      groups = [
+        {
+          groupLabel: "Subject Faculty Console",
+          items: [
+            { href: "/faculty/subject", label: "Today" },
+            { href: "/faculty/subject/classes", label: "My classes" },
+            { href: "/faculty/subject/attendance", label: "Attendance" },
+          ],
+        },
+      ];
+      break;
+
+    case "visitor":
+      groups = [
+        {
+          groupLabel: "Visitor Portal",
+          items: [
+            { href: "/visitor", label: "Home" },
+            { href: "/visitor/registration", label: "Registration" },
+            { href: "/visitor/host-info", label: "Host info" },
+            { href: "/visitor/approval-status", label: "Approval status" },
+            { href: "/visitor/visit-details", label: "Visit details" },
+            { href: "/visitor/checkin-out", label: "Check in/out" },
+            { href: "/visitor/history", label: "History" },
+          ],
+        },
+      ];
+      break;
+
+    case "emo":
+      groups = [
+        {
+          groupLabel: "EMO Console",
+          items: [
+            { href: "/emo", label: "Today" },
+            { href: "/emo/complaints", label: "Complaints" },
           ],
         },
       ];

@@ -1,35 +1,30 @@
 "use client";
 
-import React from "react";
 import { Suspense } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import { RoleConsole } from "@/components/shared/RoleConsole";
+import { RoleDesktopShell } from "@/components/shell/RoleDesktopShell";
+import { RoleMobileShell } from "@/components/shell/RoleMobileShell";
+import { CARETAKER_NAV, NAV_STORAGE_KEY } from "./_shell/nav";
 import type { Role } from "@/lib/types";
 
-/**
- * Caretaker console layout — mirrors the HOD/staff mount pattern.
- *
- * The local sticky tab bar (TABS / CaretakerTabs) is removed. The shell is
- * the RoleConsole: IconRail + Grid board (caretaker summary, grouped by
- * status) + ContextPanel + CaretakerStatusBar + caretaker CommandBar.
- * Sub-pages pass their content through `children`; the root page renders a
- * GridBoard of the caretaker summary grouped by status.
- */
-export default function CaretakerConsoleLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+const MANIFEST = {
+  role: "caretaker",
+  brand: { short: "Caretaker", long: "Facilities Console" },
+  rootHref: "/caretaker",
+  storageKey: NAV_STORAGE_KEY,
+  nav: CARETAKER_NAV,
+};
+
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <AuthGuard allowedRoles={["caretaker", "admin", "sysadmin"] as Role[]}>
       <Suspense fallback={<PageLoading />}>
-        <div className="min-w-0">
-          <RoleConsole role="caretaker" roleRoot="/caretaker">
-            {children}
-          </RoleConsole>
-          <DevContactStrip />
+        <div className="hidden lg:block">
+          <RoleDesktopShell manifest={MANIFEST}>{children}</RoleDesktopShell>
+        </div>
+        <div className="block lg:hidden">
+          <RoleMobileShell manifest={MANIFEST}>{children}</RoleMobileShell>
         </div>
       </Suspense>
     </AuthGuard>

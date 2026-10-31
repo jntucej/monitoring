@@ -1,38 +1,30 @@
 "use client";
 
-import React from "react";
 import { Suspense } from "react";
-import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoading";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+import { PageLoading } from "@/components/shared/LoadingStates";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import { RoleConsole } from "@/components/shared/RoleConsole";
+import { RoleDesktopShell } from "@/components/shell/RoleDesktopShell";
+import { RoleMobileShell } from "@/components/shell/RoleMobileShell";
+import { WORKER_NAV, NAV_STORAGE_KEY } from "./_shell/nav";
 import type { Role } from "@/lib/types";
 
-/**
- * Worker console layout — mirrors the OIE / staff mount pattern.
- *
- * The shell is the RoleConsole: IconRail + digest Board (worker's own
- * /api/workers/my-work: tasks / completedLastWeek / todayShift) +
- * MyWorkPanel (open work items) + WorkerStatusBar + WorkerCommandBar
- * (my-work / shifts / work-orders / history / records). The root page
- * returns null so the default board fallback shows. Sub-pages (if any are
- * added later) pass their content through `children`.
- */
-export default function WorkerConsoleLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+const MANIFEST = {
+  role: "worker",
+  brand: { short: "Worker", long: "Work Console" },
+  rootHref: "/worker",
+  storageKey: NAV_STORAGE_KEY,
+  nav: WORKER_NAV,
+};
+
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <AuthGuard
-      allowedRoles={["worker", "admin", "sysadmin", "supervisor"] as Role[]}
-    >
-      <Suspense fallback={<OperatorPageLoading />}>
-        <div className="min-w-0">
-          <RoleConsole role="worker" roleRoot="/worker">
-            {children}
-          </RoleConsole>
-          <DevContactStrip />
+    <AuthGuard allowedRoles={["worker", "admin", "sysadmin", "supervisor"] as Role[]}>
+      <Suspense fallback={<PageLoading />}>
+        <div className="hidden lg:block">
+          <RoleDesktopShell manifest={MANIFEST}>{children}</RoleDesktopShell>
+        </div>
+        <div className="block lg:hidden">
+          <RoleMobileShell manifest={MANIFEST}>{children}</RoleMobileShell>
         </div>
       </Suspense>
     </AuthGuard>
