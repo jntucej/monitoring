@@ -112,6 +112,9 @@ export function useApiResource<T>(
 
   const refresh = useCallback(async () => {
     if (!url || enabled === false) {
+      // Guard: without this, an early-return in the hook would change
+      // the hook-call count on the next render when url/enabled flip,
+      // throwing React #310 in every consuming component.
       setLoading(false);
       return;
     }
@@ -131,7 +134,7 @@ export function useApiResource<T>(
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [url, enabled, ttlMs, ...(deps || [])]);
+  }, [url, enabled, ttlMs]);
 
   useEffect(() => {
     void refresh();

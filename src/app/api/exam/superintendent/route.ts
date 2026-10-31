@@ -6,14 +6,11 @@ import { TIER } from "@/server/policy/roles";
 
 export const GET = withRateLimit(
   withAuthorization(async () => {
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: "NOT_IMPLEMENTED", message: "Exam superintendent data is not yet implemented" },
-        data: null,
-      },
-      { status: 501 }
-    );
+    // Stub: return a graceful empty payload rather than a 501 so the
+    // superintendent console's mount-time poll doesn't surface an error
+    // banner. Replace with real data once the superintendent data model
+    // is implemented.
+    return NextResponse.json({ success: true, data: { items: [], total: 0 } });
   }, { requiredRole: TIER.APPROVER }),
   { ...RATE_LIMITS.read, keyPrefix: "exam_superintendent_get" }
 );

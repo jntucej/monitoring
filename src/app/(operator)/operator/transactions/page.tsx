@@ -47,7 +47,12 @@ interface TransactionsResponse {
 type DirectionFilter = "ALL" | "IN" | "OUT";
 
 function OperatorTransactionsInner() {
-  const user = useAuthStore((s) => s.user);
+  // Stable selector: without `.select((s) => s.user?.id)` the hook returns
+  // a fresh object reference on every poll (the auth store's user field
+  // is not referentially stable here), which re-triggers useApiResource's
+  // effect → new refresh callback → effect re-runs → setState in the
+  // effect → re-render → loop (Minified React #310).
+  const enabled = useAuthStore((s) => !!s.user);
 
   const {
     data,
@@ -56,6 +61,7 @@ function OperatorTransactionsInner() {
     refresh,
   } = useApiResource<TransactionsResponse>("/api/operator/transactions", {
     ttlMs: 30_000,
+    enabled,
   });
 
   const refreshAll = useCallback(async () => {
@@ -63,7 +69,7 @@ function OperatorTransactionsInner() {
     await refresh();
   }, [refresh]);
 
-  usePolling(refreshAll, { intervalMs: 30_000, enabled: !!user });
+  usePolling(refreshAll, { intervalMs: 30_000, enabled });
 
   const [filter, setFilter] = useState<DirectionFilter>("ALL");
   const busy = loading && !data;
