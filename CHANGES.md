@@ -99,3 +99,45 @@ being asked as a question.
 - **No history squash.** Per-phase commits were kept (each gated); the
   single-mission-commit consolidation was declined as the safer option —
   gate evidence stays in the commit log. Nothing pushed.
+
+## Merge origin/fix/sync-and-push-fix (ff1d8cf0) + gate repairs (d2cf5ad0)
+
+- **Merged the 9-commit audit/security branch** (base 59946a93, built
+  against older main). Resolution policy: keep main's newer structure
+  wherever it diverged; fold in the branch's security value.
+  - Folded: `password_must_change` end-to-end (authContext SELECT +
+    interface + return; authorization allowlist enforcement throwing
+    `PASSWORD_CHANGE_REQUIRED` 403 outside /api/auth/change-password,
+    logout, logout-all, session); login-attempts upsert repo;
+    WebAuthn `publicKeyPem` required; 2FA session version bump;
+    `instrumentation` hook wired into next.config.mjs.
+  - Kept main: gate/scan operator+gate rate limiting, rewritten auth
+    middleware (metrics, body caching), attachment-storage S3 layer,
+    evolved scaffold/regenerate/auto-fix scripts, cinematic login,
+    CF-Connecting-IP Caddyfile hardening, 8-14-digit migration
+    tolerance (20261027_gate_ops is 8-digit; strict 14-digit from the
+    branch would false-fail), package.json without verify:admin-gating
+    (that script does not exist in main).
+  - Deduped `ServiceUnavailableError` (both sides had added it; kept
+    main's flexible signature).
+- **Migration version collision** from the merge: main's
+  `refresh_students_view` and the branch's `enrollment_purpose_check`
+  both at 20261030000000 → refresh renamed to `20261030000005`
+  (no mutual dependency; verified by content).
+- **check-migrations owner guard refined at the cause** (d2cf5ad0):
+  the branch's `20261030000003` widens the audit action CHECK inside a
+  `DO $$` block; the old grep counted that indented ALTER as a second
+  top-level owner. Guard now counts only top-level ALTERs (awk skips
+  DO-block bodies). Not suppressed: two genuinely conflicting
+  top-level definitions would still fail.
+- **self-audit R12 regex repaired at the cause** (d2cf5ad0):
+  `rg -nE '<pattern>'` — rg's `-E` is `--encoding`, so the pattern was
+  parsed as an encoding name and the scan silently produced 0/bo
+  counts. Now `rg -n '<pattern>'`. R7/R12 counts (108 / 97) are now
+  REAL and remain the audit debt queue, alongside R2×6, R5×3, R8×25,
+  R9×6, R11×1.
+- **Gate state after merge:** check-migrations (155 replayed clean),
+  verify-all-fixes, check-no-tabs, check-dead-routes,
+  check-rls-enforcement, check-role-scoping all exit 0. tsc clean,
+  next build clean. self-audit exit 1 = 7 pre-existing debt rules,
+  no script errors. Nothing pushed.
