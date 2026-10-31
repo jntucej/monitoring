@@ -314,22 +314,7 @@ export const CONSOLES: Record<string, RoleConsoleConfig> = {
     statusFields: ["examDay", "halls", "incidents", "candidates"],
     extraPanels: ["IncidentPanel"],
   },
-  supervisor: {
-    role: "supervisor",
-    opsHeader: true,
-    nav: ["live", "escalations", "gates", "shifts", "reports"],
-    statusStrip: false,
-    recentSheet: false,
-    board: {
-      kind: "digest",
-      source: "/api/supervisor/escalations",
-      itemKey: "escalation",
-    },
-    contextEntity: "escalation",
-    commands: ["approve", "escalate", "assign", "resolve", "handover"],
-    statusFields: ["escalations", "pending", "critical", "active"],
-    extraPanels: ["EscalationPanel"],
-  },
+  // supervisor: removed in high-retention console migration (uses shared RoleDesktopShell/RoleMobileShell)
   parent: {
     role: "parent",
     nav: ["timeline", "notifications", "fees", "records", "contact"],

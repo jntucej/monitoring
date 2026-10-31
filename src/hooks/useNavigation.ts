@@ -269,24 +269,19 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       break;
 
     case "supervisor":
-      // Supervisor is migrated to the RoleConsole shell (feed:escalations
-      // via /api/supervisor/escalations, scoped to the caller's supervised_gates).
-      // Single console group of exactly 5 items so the IconRail stays lean.
-      // No "Campus Radar" / "General & Support" groups. No Account group.
-      groups = [
+      return [
         {
-          groupLabel: "Supervisor Console",
+          groupLabel: "Supervisor",
           items: [
-            { href: "/supervisor", label: "Live", icon: "Activity", badge: "PENDING" },
-            { href: "/supervisor/wall", label: "Gate Wall", icon: "Radio" },
-            { href: "/supervisor/escalation-centre", label: "Escalations", icon: "ShieldAlert" },
-            { href: "/supervisor/gates", label: "Gates", icon: "DoorOpen" },
-            { href: "/supervisor/shifts", label: "Shifts", icon: "CalendarClock" },
-            { href: "/supervisor/reports", label: "Reports", icon: "FileSpreadsheet" },
+            { href: "/supervisor", label: "Today", icon: "LayoutDashboard" },
+            { href: "/supervisor/shift/live", label: "Shift", icon: "Clock" },
+            { href: "/supervisor/team/workers", label: "Team", icon: "Users" },
+            { href: "/supervisor/gates/live", label: "Gates", icon: "DoorOpen" },
+            { href: "/supervisor/response/escalations", label: "Response", icon: "Siren" },
+            { href: "/supervisor/reports", label: "Reports", icon: "BarChart3" },
           ],
         },
       ];
-      break;
 
     case "mess_incharge":
       // Mess In-charge is migrated to the RoleConsole shell (digest board via
