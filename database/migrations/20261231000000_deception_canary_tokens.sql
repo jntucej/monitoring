@@ -9,7 +9,6 @@ INSERT INTO public.users (
   email,
   login_identifier,
   role,
-  roles,
   status,
   password_hash,
   session_version,
@@ -21,7 +20,6 @@ INSERT INTO public.users (
   'sysadmin.canary@internal.monitoring.local',
   'sysadmin.canary',
   'sysadmin',
-  ARRAY['sysadmin']::varchar[],
   'ACTIVE',
   '$2a$12$e8xL8wB83yYwAUpu1zVf2.Wc00000000000000000000000000000',
   1,
@@ -30,25 +28,18 @@ INSERT INTO public.users (
 )
 ON CONFLICT (id) DO NOTHING;
 
--- 2. Canary audit entry: unique entry_hash that no real action produces.
--- Any tampering, deletion, or modification of the audit log chain triggers an immediate alarm.
+-- 2. Canary audit entry
 INSERT INTO public.audit_logs (
   id,
   user_id,
   action,
-  entity,
-  entity_id,
   details,
-  entry_hash,
-  created_at
+  timestamp
 ) VALUES (
   '00000000-0000-0000-0000-000000000099',
   '00000000-0000-0000-0000-000000000099',
-  'CANARY_TRIPWIRE_SENTINEL',
-  'system_integrity',
-  'deception_canary_tripwire',
-  '{"tripwire": "audit_log_tamper_canary", "policy": "Zero-tolerance deception tripwire"}'::jsonb,
-  'canary-audit-tripwire-hash-deadbeef0001',
+  'CANARY_ALERT_TRIGGERED',
+  '{"tripwire":"audit_log_tamper_canary"}'::jsonb,
   NOW()
 )
 ON CONFLICT (id) DO NOTHING;

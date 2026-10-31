@@ -1,4 +1,4 @@
--- database/migrations/20270101000001_rls_authenticated_policies.sql
+-- database/migrations/20270101000007_rls_authenticated_policies.sql
 -- Part 1 of R2-6 RLS Flip: Add robust authenticated RLS policies for complaints, emergency_alerts, delegation_rules, and meal_opt_outs.
 
 DO $$ BEGIN
