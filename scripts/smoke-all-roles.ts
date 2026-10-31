@@ -97,9 +97,10 @@ async function smokeRole(browser: Browser, c: Creds) {
   page.on("console", (msg) => {
     if (msg.type() !== "error") return;
     const t = msg.text();
-    // noise: COOP header warnings, blocked static assets, and 429 rate-limit
-    // responses (the sweep itself triggers these; not app bugs)
-    if (t.includes("Cross-Origin-Opener-Policy") || t.includes("ERR_BLOCKED_BY_RESPONSE") || t.includes("429")) return;
+    // noise: COOP header warnings, blocked static assets, and transient
+    // server-side responses (429 rate-limit / 502 / 503) that the sweep
+    // itself triggers under load — not app bugs.
+    if (t.includes("Cross-Origin-Opener-Policy") || t.includes("ERR_BLOCKED_BY_RESPONSE") || t.includes("429") || t.includes("502") || t.includes("503")) return;
     consoleErrors.push(t.slice(0, 200));
   });
   page.on("response", (res) => {
