@@ -268,22 +268,7 @@ export function MobileOperatorScanView() {
             <video ref={videoRef} className="w-full h-full object-cover" />
             <canvas ref={canvasRef} className="hidden" />
 
-            {/* Visual Crosshair HUD Overlay */}
-            <div className="absolute inset-0 border-[3px] border-emerald-500/30 m-8 rounded-3xl pointer-events-none flex flex-col justify-between p-4">
-              <div className="flex justify-between">
-                <div className="w-8 h-8 border-t-4 border-l-4 border-emerald-400 rounded-tl-lg" />
-                <div className="w-8 h-8 border-t-4 border-r-4 border-emerald-400 rounded-tr-lg" />
-              </div>
-              <motion.div
-                animate={{ y: ["0%", "100%", "0%"] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                className="w-full h-1 bg-emerald-400 shadow-[0_0_15px_#10b981]"
-              />
-              <div className="flex justify-between">
-                <div className="w-8 h-8 border-b-4 border-l-4 border-emerald-400 rounded-bl-lg" />
-                <div className="w-8 h-8 border-b-4 border-r-4 border-emerald-400 rounded-br-lg" />
-              </div>
-            </div>
+            <div className="pointer-events-none absolute inset-0 border border-white/10 m-8 rounded-3xl" />
 
             <button
               onClick={stopCamera}
@@ -294,8 +279,8 @@ export function MobileOperatorScanView() {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center p-6 text-center space-y-6">
-            <div className="w-24 h-24 rounded-3xl bg-emerald-500/10 border-2 border-emerald-500/30 flex items-center justify-center shadow-2xl shadow-emerald-500/20">
-              <Camera className="w-12 h-12 text-emerald-400" />
+            <div className="w-24 h-24 rounded-3xl bg-slate-800/60 border-2 border-slate-700 flex items-center justify-center">
+              <Camera className="w-12 h-12 text-slate-400" />
             </div>
             <div>
               <h2 className="text-xl font-bold text-white">Scanner Ready</h2>
@@ -368,7 +353,7 @@ export function MobileOperatorScanView() {
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 250 }}
-            className="absolute inset-x-0 bottom-0 bg-slate-900 border-t-2 border-emerald-500 rounded-t-3xl p-6 z-40 space-y-5 shadow-2xl"
+            className="absolute inset-x-0 bottom-0 bg-slate-900 border-t border-slate-700 rounded-t-3xl p-6 z-40 space-y-5 shadow-2xl"
           >
             <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto" />
             <div className="flex items-center gap-4">
@@ -377,7 +362,7 @@ export function MobileOperatorScanView() {
                 alt={currentStudent.name}
                 width={64}
                 height={64}
-                className="w-16 h-16 rounded-2xl object-cover border-2 border-emerald-400"
+                className="w-16 h-16 rounded-2xl object-cover border-2 border-slate-600"
               />
               <div className="flex-1 min-w-0">
                 <h3 className="text-lg font-bold text-white truncate">{currentStudent.name}</h3>

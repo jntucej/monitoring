@@ -646,7 +646,7 @@ export function Scanner({
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 bg-slate-900/90 sticky top-0 z-20">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+              <div className="w-8 h-8 rounded-xl bg-slate-800 text-slate-300 flex items-center justify-center border border-slate-700">
                 <Camera className="w-4 h-4" />
               </div>
               <div>
@@ -663,7 +663,7 @@ export function Scanner({
                 className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors"
                 title={soundEnabled ? "Mute" : "Unmute"}
               >
-                {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-slate-300" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
               </button>
               <button
                 onClick={() => { stopCamera(); onClose(); }}
@@ -678,8 +678,8 @@ export function Scanner({
           {/* Mode indicator — the mode was chosen by the viewfinder button the
               operator tapped; the link just flips to the other mode. */}
           <div className="flex items-center justify-between border-b border-slate-800 bg-slate-900/60 px-4 py-2.5">
-            <span className="flex items-center gap-2 text-xs font-bold text-emerald-400">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="flex items-center gap-2 text-xs font-bold text-slate-300">
+              <span className="w-2 h-2 rounded-full bg-slate-400 animate-pulse" />
               {mode === "qr" ? "QR-only mode" : "Barcode-only mode"}
             </span>
             <button
@@ -708,7 +708,7 @@ export function Scanner({
 
             {cameraState === "active" && (
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-3">
-                <div className="w-40 h-40 rounded-2xl border-2 border-emerald-400/70 shadow-[0_0_20px_rgba(52,211,153,0.35)]" />
+                <div className="w-40 h-40 rounded-2xl border border-white/15" />
                 <p className="text-[11px] font-semibold text-white/90 bg-slate-950/70 rounded-full px-3 py-1">
                   {mode === "qr"
                     ? "Point at a QR code — auto-detecting"
@@ -718,7 +718,7 @@ export function Scanner({
             )}
             {cameraState === "requesting" && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950 text-white space-y-3 p-4 text-center">
-                <RefreshCw className="w-8 h-8 text-emerald-400 animate-spin" />
+                <RefreshCw className="w-8 h-8 text-slate-400 animate-spin" />
                 <p className="text-xs text-slate-300 font-medium">Initializing camera...</p>
               </div>
             )}
@@ -733,7 +733,7 @@ export function Scanner({
                 <button
                   type="button"
                   onClick={() => startCamera()}
-                  className="mt-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5"
+                  className="mt-2 px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold flex items-center gap-1.5"
                 >
                   <RefreshCw className="w-3.5 h-3.5" /> Retry
                 </button>

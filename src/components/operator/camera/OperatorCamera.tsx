@@ -444,7 +444,7 @@ export function OperatorCamera({
 
       {cameraState === "active" && (
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-3">
-          <div className="w-40 h-40 rounded-2xl border-2 border-emerald-400/70 shadow-[0_0_20px_rgba(52,211,153,0.35)]" />
+          <div className="w-40 h-40 rounded-2xl border border-white/15" />
           <p className="text-[11px] font-semibold text-white/90 bg-slate-950/70 rounded-full px-3 py-1">
             {mode === "qr" ? "Point at a QR code" : "Point at a barcode"}
           </p>
@@ -454,7 +454,7 @@ export function OperatorCamera({
       {cameraState === "requesting" && (
         <div className="absolute inset-0 flex items-center justify-center bg-slate-950">
           <div className="text-center">
-            <div className="w-8 h-8 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin mx-auto" />
+            <div className="w-8 h-8 border-2 border-slate-400 border-t-transparent rounded-full animate-spin mx-auto" />
             <p className="text-xs text-slate-400 mt-2">Initializing camera...</p>
           </div>
         </div>
