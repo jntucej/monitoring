@@ -38,7 +38,7 @@ const AXIS = {
 const TOOLTIP = {
   background: "var(--bg-elevated)",
   border: "1px solid var(--border)",
-  borderRadius: 8,
+  borderRadius: 12,
   fontSize: 12,
   color: "var(--text-primary)",
 };

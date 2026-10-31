@@ -192,7 +192,7 @@ function StageFunnel({ data }: { data: { stage: string; count: number }[] }) {
       <BarChart data={data} margin={{ top: 6, right: 10, left: -10, bottom: 6 }}>
         <XAxis dataKey="stage" type="category" stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} interval={0} />
         <YAxis stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} />
-        <Tooltip contentStyle={{ backgroundColor: "var(--bg-elevated)", borderColor: "var(--border)", color: "var(--text-primary)", borderRadius: "8px" }} />
+        <Tooltip contentStyle={{ backgroundColor: "var(--bg-elevated)", borderColor: "var(--border)", color: "var(--text-primary)", borderRadius: "12px" }} />
         <Bar dataKey="count" radius={[4, 4, 0, 0]} fill={colors[0]} />
       </BarChart>
     </ResponsiveContainer>
