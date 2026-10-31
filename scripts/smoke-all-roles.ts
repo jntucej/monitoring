@@ -175,7 +175,7 @@ async function main() {
     const result = await smokeRole(browser, c);
     report.push(result);
     fs.writeFileSync(CREDS_PATH + ".progress.json", JSON.stringify(report, null, 2));
-    const bad = r as { role: string; ok: boolean; consoleErrors: string[]; badApis: string[]; leaves: Array<{ leaf: string; status: number; anchorOk: boolean; error: string | null }>; reason?: string };
+    const bad = result as { role: string; ok: boolean; consoleErrors: string[]; badApis: string[]; leaves: Array<{ leaf: string; status: number; anchorOk: boolean; error: string | null }>; reason?: string };
     const status = bad.reason ? `LOGIN FAILED` : bad.ok ? "PASS" : "FAIL";
     console.log(`[${status}] ${bad.role} ${bad.reason ? `(${bad.reason})` : ""}`);
     if (verbose) {
