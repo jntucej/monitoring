@@ -2,7 +2,6 @@ import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { getDailyStats } from "@/server/services/analytics/daily-stats";
 import { ok } from "@/server/http/response";
-import { TIER } from "@/server/policy/roles";
 
 export const GET = withAuthorization(
   async (req: NextRequest) => {
@@ -13,5 +12,5 @@ export const GET = withAuthorization(
     });
     return ok({ date, stats });
   },
-  { requiredRole: TIER.SELF },
+  { requiredRole: ["admin", "sysadmin"] },
 );

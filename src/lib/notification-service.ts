@@ -204,7 +204,7 @@ export async function sendNotification(
       recipientType,
       channels: finalChannels,
       data,
-      read: false,
+      readAt: undefined,
       createdAt: new Date().toISOString(),
     };
 
@@ -221,7 +221,7 @@ export async function sendNotification(
         recipient_type: recipientType,
         channels: finalChannels,
         data: data,
-        read: false,
+        read_at: null,
         created_at: newNotifObj.createdAt,
       })
       .select()
@@ -242,7 +242,7 @@ export async function sendNotification(
       recipientType: notification.recipient_type,
       channels: notification.channels || finalChannels,
       data: notification.data,
-      read: notification.read,
+      readAt: notification.read_at,
       createdAt: notification.created_at,
     };
 
@@ -353,7 +353,7 @@ export async function getNotifications(
     .limit(limit);
 
   if (unreadOnly) {
-    query = query.eq('read', false);
+    query = query.is('read_at', null);
   }
 
   const { data, error } = await query;
@@ -372,9 +372,8 @@ export async function getNotifications(
     recipientType: n.recipient_type,
     channels: n.channels || [],
     data: n.data,
-    read: n.read,
-    deliveredAt: n.delivered_at,
     readAt: n.read_at,
+    deliveredAt: n.delivered_at,
     createdAt: n.created_at,
   }));
 }
@@ -383,7 +382,7 @@ export async function getNotifications(
 export async function markNotificationRead(notificationId: string): Promise<boolean> {
   const { error } = await getDbClient()
     .from('notifications')
-    .update({ read: true, read_at: new Date().toISOString() })
+    .update({ read_at: new Date().toISOString() })
     .eq('id', notificationId);
 
   if (error) {
@@ -397,9 +396,9 @@ export async function markNotificationRead(notificationId: string): Promise<bool
 export async function markAllNotificationsRead(userId: string): Promise<boolean> {
   const { error } = await getDbClient()
     .from('notifications')
-    .update({ read: true, read_at: new Date().toISOString() })
+    .update({ read_at: new Date().toISOString() })
     .or(`recipient_id.eq.${userId},recipient_id.eq.all`)
-    .eq('read', false);
+    .is('read_at', null);
 
   if (error) {
     console.error('Error marking all notifications as read:', error);
@@ -414,7 +413,7 @@ export async function getUnreadCount(userId: string): Promise<number> {
     .from('notifications')
     .select('*', { count: 'exact', head: true })
     .or(`recipient_id.eq.${userId},recipient_id.eq.all`)
-    .eq('read', false);
+    .is('read_at', null);
 
   if (error) {
     console.error('Error getting unread count:', error);

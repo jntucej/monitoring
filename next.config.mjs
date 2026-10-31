@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   poweredByHeader: false,
+  instrumentation: () => import("./src/instrumentation"),
   reactStrictMode: true,
   compress: true,
   experimental: {

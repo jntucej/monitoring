@@ -29,9 +29,8 @@ export interface Notification {
   recipientType: 'person' | 'role' | 'department' | 'all';
   channels: NotificationChannel[];
   data?: Record<string, any>;
-  read: boolean;
-  deliveredAt?: string;
   readAt?: string;
+  deliveredAt?: string;
   createdAt: string;
 }
 

@@ -2,10 +2,10 @@
 date > /var/log/monitoring-heartbeat.log
 cd /root/monitoring
 while IFS='=' read -r key value; do
-  [[ "$key" =~ ^#.*$ || -z "$key" ]] && continue
-  value="${value%\"}"
-  value="${value#\"}"
-  export "$key=$value"
+  [[ -z "$key" || "$key" =~ ^[[:space:]]*# ]] && continue
+  key="${key//[[:space:]]/}"
+  value="${value%\"}"; value="${value#\"}"
+  [[ -n "$key" ]] && export "$key=$value"
 done < .env
 
 # Deduplication file

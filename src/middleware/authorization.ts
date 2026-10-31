@@ -100,6 +100,21 @@ export function withAuthorization(
         if (!options.allowInactive && !auth.isActive) {
           throw new AuthError("ACCOUNT_INACTIVE", "Account is not active", 403);
         }
+        // Enforce mandatory password change (audit round 3): a user flagged
+        // password_must_change may only reach a small allowlist of
+        // self-service auth routes until the password is changed.
+        const PASSWORD_CHANGE_ALLOWLIST = new Set([
+          "/api/auth/change-password",
+          "/api/auth/logout",
+          "/api/auth/logout-all",
+          "/api/auth/session",
+        ]);
+        if (
+          auth.passwordMustChange &&
+          !PASSWORD_CHANGE_ALLOWLIST.has(req.nextUrl.pathname)
+        ) {
+          throw new AuthError("PASSWORD_CHANGE_REQUIRED", "Change your password to continue.", 403);
+        }
         if (effectiveRequiredRole) {
           const allowed = Array.isArray(effectiveRequiredRole)
             ? effectiveRequiredRole

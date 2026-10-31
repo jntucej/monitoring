@@ -27,9 +27,15 @@ fi
 
 # Check port 80/443 conflicts
 if command -v ss >/dev/null 2>&1; then
-  if ss -tulpn | grep -E ':(80|443)\b' | grep -v 'caddy' >/dev/null 2>&1; then
-    echo "⚠️  WARNING: Host port 80/443 is in use. Stop any host web server before starting Caddy."
-    WARNINGS=$((WARNINGS + 1))
+  PORT_CONFLICTS=$(ss -tulpn 2>/dev/null | grep -E ':(80|443)\b' | grep -v 'caddy' || true)
+  if [ -n "$PORT_CONFLICTS" ]; then
+    echo "❌ FAIL: Host port 80/443 is in use by non-Caddy service."
+    echo "   Conflicts:"
+    echo "$PORT_CONFLICTS" | sed 's/^/   /'
+    echo "   Stop the conflicting service before deploying."
+    FAILURES=$((FAILURES + 1))
+  else
+    echo "✅ No port conflicts detected on 80/443."
   fi
 fi
 

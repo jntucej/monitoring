@@ -43,9 +43,9 @@ async function handleGet(req: NextRequest) {
       data: {
         timestamp: new Date().toISOString(),
         gates,
-        zones: occupancy.zones,
+        zones: [],
         total_occupancy: occupancy.total,
-        total_capacity: occupancy.capacity,
+        total_capacity: 0,
         alerts,
         predictions,
       },

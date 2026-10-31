@@ -4,6 +4,7 @@ set -euo pipefail
 
 BASE="/opt/monitoring"
 BACKUP_ROOT="$BASE/backups/daily"
+SAFETY_DIR="$BASE/backups/pre-recovery"
 
 echo "=== Gate Monitor Recovery Tool ==="
 echo ""
@@ -19,6 +20,28 @@ fi
 echo "Latest backup: $LATEST ($(ls -lh "$LATEST" | awk '{print $5}'))"
 echo ""
 
+# SAFEGUARD: Backup current state before restoring
+echo "Safeguarding current state..."
+mkdir -p "$SAFETY_DIR"
+SAFETY_FILE="$SAFETY_DIR/pre-recovery-$(date +%Y%m%d_%H%M%S).sql.gz"
+
+if docker ps --format '{{.Names}}' | grep -q "^gate_postgres$"; then
+    # Check DB health before dumping
+    if docker exec gate_postgres pg_isready -U postgres -d gate_monitor >/dev/null 2>&1; then
+        if docker exec gate_postgres pg_dump -U postgres -d gate_monitor 2>/dev/null | gzip > "$SAFETY_FILE"; then
+            echo "✅ Current state saved to $SAFETY_FILE ($(ls -lh "$SAFETY_FILE" | awk '{print $5}'))"
+        else
+            echo "⚠️  Could not dump current state (DB may be corrupt); proceeding without safety backup."
+            rm -f "$SAFETY_FILE"
+        fi
+    else
+        echo "⚠️  Database not healthy; cannot create safety backup."
+    fi
+else
+    echo "⚠️  No running DB container; cannot create safety backup."
+fi
+
+echo ""
 # Check if container is running
 if ! docker ps --format '{{.Names}}' | grep -q "^gate_postgres$"; then
     echo "Starting gate_postgres..."
@@ -30,6 +53,13 @@ if ! docker ps --format '{{.Names}}' | grep -q "^gate_postgres$"; then
         fi
         sleep 2
     done
+fi
+
+# Verify DB is ready before restore
+echo "Verifying database health before restore..."
+if ! docker exec gate_postgres pg_isready -U postgres -d gate_monitor 2>/dev/null; then
+    echo "❌ ERROR: Database not ready after startup. Aborting."
+    exit 1
 fi
 
 echo "Restoring database from backup..."

@@ -21,6 +21,14 @@ docker compose --env-file "${ENV_FILE}" exec -T postgres pg_isready || {
 }
 echo "✅ PostgreSQL is healthy and accepting connections."
 
+echo "==> 2.1 Verifying PostgreSQL Auth for Application User..."
+docker compose --env-file "${ENV_FILE}" exec -T postgres \
+  psql -U gate_app -d gate_monitor -c "SELECT 1 FROM users LIMIT 0" >/dev/null || {
+  echo "❌ PostgreSQL auth/grants broken for gate_app. Check RLS policies and grants."
+  exit 1
+}
+echo "✅ PostgreSQL auth verified for gate_app user."
+
 echo "==> 3. Verifying Redis Health..."
 docker compose --env-file "${ENV_FILE}" exec -T redis redis-cli ping || {
   echo "❌ Redis ping failed."

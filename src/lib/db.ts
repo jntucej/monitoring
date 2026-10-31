@@ -1903,7 +1903,7 @@ export async function addNotification(
     recipient_type: validRecipientType,
     channels: ['in_app'],
     data: gateId ? { gate_id: gateId } : {},
-    read: false,
+    read_at: null,
     created_at: timestamp,
   };
 

@@ -9,36 +9,73 @@ from pathlib import Path
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 _auth_chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+_allowed_user_ids_str = os.environ.get("TELEGRAM_ALLOWED_USER_IDS", "")
+_allowed_chat_ids_str = os.environ.get("TELEGRAM_ALLOWED_CHAT_IDS", "")
+
+# Parse allowed user IDs and chat IDs
+ALLOWED_USER_IDS = {int(x.strip()) for x in _allowed_user_ids_str.split(",") if x.strip() and x.strip().isdigit()}
+ALLOWED_CHAT_IDS = {int(x.strip()) for x in _allowed_chat_ids_str.split(",") if x.strip() and x.strip().isdigit()}
+
+# Fallback to legacy AUTHORIZED_CHAT_ID if new env vars not set
+if not ALLOWED_USER_IDS and _auth_chat_id:
+    ALLOWED_CHAT_IDS = {int(_auth_chat_id)}
 
 if not TELEGRAM_TOKEN:
     raise SystemExit("FATAL: TELEGRAM_BOT_TOKEN must be set")
-if not _auth_chat_id:
-    raise SystemExit("FATAL: TELEGRAM_CHAT_ID must be set")
 
-AUTHORIZED_CHAT_ID = int(_auth_chat_id)
 BASE_DIR = Path("/root/monitoring")
 
 # Explicit command allowlist
-ALLOWED_COMMANDS = {"help", "status", "status", "log", "restart", "health", "deploylog", "deploystatus", "checkstatus", "stats", "tail", "ps", "updates"}
+ALLOWED_COMMANDS = {"help", "status", "log", "restart", "health", "deploylog", "deploystatus", "checkstatus", "stats", "tail", "ps", "updates"}
 
-def tg_send(msg: str, chat_id: int = AUTHORIZED_CHAT_ID) -> None:
+def _user_allowed(chat_id: int, from_user_id: int = None) -> bool:
+    """Check if the user/chat is authorized."""
+    # If specific user IDs are configured, check them
+    if ALLOWED_USER_IDS:
+        if from_user_id is None:
+            from_user_id = chat_id
+        if from_user_id not in ALLOWED_USER_IDS:
+            return False
+    # If specific chat IDs are configured, check them
+    if ALLOWED_CHAT_IDS:
+        if chat_id not in ALLOWED_CHAT_IDS:
+            return False
+    return True
+
+def tg_send(msg: str, chat_id: int = None) -> None:
     if not TELEGRAM_TOKEN: return
     import urllib.request, urllib.parse
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage?chat_id={chat_id}&text={urllib.parse.quote(msg)}"
+    target_chat = chat_id or (next(iter(ALLOWED_CHAT_IDS)) if ALLOWED_CHAT_IDS else None)
+    if not target_chat:
+        return
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage?chat_id={target_chat}&text={urllib.parse.quote(msg)}"
     try: urllib.request.urlopen(url, timeout=10).read()
     except Exception: pass
 
-def run(cmd: list) -> str:
+def run(cmd: list, timeout: int = 10) -> str:
+    """Run command safely without shell=True to prevent RCE."""
     try:
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
-        return (r.stdout + r.stderr).strip() or "(no output)"
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, start_new_session=True)
+        try:
+            out, err = proc.communicate(timeout=timeout)
+            # Kill process and children if timeout
+            if proc.returncode is None:
+                proc.terminate()
+                try:
+                    proc.kill()
+                except ProcessLookupError:
+                    pass
+            return (out + err).strip() or "(no output)"
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            return f"Error: Command timed out after {timeout}s"
     except Exception as e:
         return f"Error: {e}"
 
-def handle(cmd: str, chat_id: int) -> str:
+def handle(cmd: str, chat_id: int, from_user_id: int = None) -> str:
     # Defense in depth: re-verify authorization inside handle()
-    if chat_id != AUTHORIZED_CHAT_ID:
-        print(f"[SECURITY] Unauthorized command from chat {chat_id}: {cmd!r}")
+    if not _user_allowed(chat_id, from_user_id):
+        print(f"[SECURITY] Unauthorized command from chat {chat_id} user {from_user_id}: {cmd!r}")
         return "Unauthorized."
 
     parts = cmd.strip().split()
@@ -112,10 +149,11 @@ def main():
                 msg = update.get("message")
                 if not msg: continue
                 chat = msg.get("chat", {}).get("id")
+                from_user = msg.get("from", {}).get("id")
                 text = msg.get("text", "").strip()
                 if not text or not text.startswith("/"): continue
-                
-                response = handle(text[1:], chat)
+
+                response = handle(text[1:], chat, from_user)
                 tg_send(response, chat)
         except Exception:
             time.sleep(5)

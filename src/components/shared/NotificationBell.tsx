@@ -51,7 +51,7 @@ export function NotificationBell() {
       const json = await res.json();
       if (json.success && Array.isArray(json.data)) {
         setNotifications(json.data);
-        setUnreadCount(json.data.filter((n: any) => !n.read && !n.resolved).length);
+        setUnreadCount(json.data.filter((n: any) => !n.readAt && !n.resolved).length);
       }
     } catch (err) {
       console.error('Failed to load notifications:', err);
@@ -75,7 +75,7 @@ export function NotificationBell() {
             const parsed = JSON.parse(event.data);
             if (parsed.type === 'notifications' && Array.isArray(parsed.data)) {
               setNotifications(parsed.data);
-              setUnreadCount(parsed.data.filter((n: Notification) => !n.read).length);
+              setUnreadCount(parsed.data.filter((n: Notification) => !n.readAt).length);
             }
           } catch (parseErr) {
             console.error('Failed to parse SSE notification message:', parseErr);
@@ -109,13 +109,13 @@ export function NotificationBell() {
 
   const handleMarkRead = async (id: string) => {
     setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+      prev.map((n) => (n.id === id ? { ...n, readAt: new Date().toISOString() } : n))
     );
     setUnreadCount((prev) => Math.max(0, prev - 1));
   };
 
   const handleMarkAllRead = async () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    setNotifications((prev) => prev.map((n) => ({ ...n, readAt: new Date().toISOString() })));
     setUnreadCount(0);
   };
 
@@ -131,7 +131,7 @@ export function NotificationBell() {
   };
 
   const filteredNotifications = filter === 'unread' 
-    ? notifications.filter((n) => !n.read) 
+    ? notifications.filter((n) => !n.readAt) 
     : notifications;
 
   return (
@@ -228,7 +228,7 @@ export function NotificationBell() {
                     <div
                       key={n.id}
                       className={`p-4 transition-colors hover:bg-[var(--bg-card)]/60 flex items-start gap-3 ${
-                        !n.read ? 'bg-[var(--bg-card)]/30' : ''
+                        !n.readAt ? 'bg-[var(--bg-card)]/30' : ''
                       }`}
                     >
                       <div className={`p-2 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] mt-0.5 shrink-0 ${color}`}>
@@ -236,7 +236,7 @@ export function NotificationBell() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
-                          <h4 className={`text-xs font-semibold truncate ${!n.read ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}`}>
+                          <h4 className={`text-xs font-semibold truncate ${!n.readAt ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}`}>
                             {n.title}
                           </h4>
                           <span className="text-[10px] text-[var(--text-muted)] shrink-0">
@@ -256,7 +256,7 @@ export function NotificationBell() {
                           </a>
                         )}
                       </div>
-                      {!n.read && (
+                      {!n.readAt && (
                         <button
                           onClick={() => handleMarkRead(n.id)}
                           className="text-[var(--text-muted)] hover:text-emerald-400 p-1 rounded-lg hover:bg-[var(--bg-base)] transition-colors mt-0.5 shrink-0"

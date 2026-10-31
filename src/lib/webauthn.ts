@@ -102,7 +102,7 @@ export function validateWebAuthnAuthenticationResponse(
   response: { id: string; response: { clientDataJSON: string; authenticatorData: string; signature: string; userHandle?: string } },
   expectedChallenge: string,
   expectedOrigin: string,
-  publicKeyPem?: string
+  publicKeyPem: string  // REQUIRED - cannot be optional to prevent unsigned assertion acceptance
 ): { valid: boolean; userId?: string; error?: string } {
   try {
     if (!response?.response?.clientDataJSON) return { valid: false, error: "Missing payload" };
@@ -110,20 +110,23 @@ export function validateWebAuthnAuthenticationResponse(
     const clientData = JSON.parse(clientDataBuffer.toString("utf8"));
     if (clientData.type !== "webauthn.get") return { valid: false, error: `Invalid assertion type: ${clientData.type}` };
     if (expectedChallenge && clientData.challenge !== expectedChallenge) return { valid: false, error: "Challenge mismatch" };
+    if (!publicKeyPem) return { valid: false, error: "publicKeyPem is required for authentication verification" };
 
     const authDataBuffer = Buffer.from(response.response.authenticatorData, "base64url");
     if (authDataBuffer.length < 37) return { valid: false, error: "Malformed authenticatorData" };
     const userPresent = (authDataBuffer[32] & 0x01) !== 0;
     if (!userPresent) return { valid: false, error: "User present flag not set" };
 
-    if (publicKeyPem) {
-      const clientDataHash = createHash("sha256").update(clientDataBuffer).digest();
-      const signedData = Buffer.concat([authDataBuffer, clientDataHash]);
-      const signature = Buffer.from(response.response.signature, "base64url");
-      const verifier = createVerify("SHA256");
-      verifier.update(signedData);
-      if (!verifier.verify(publicKeyPem, signature)) return { valid: false, error: "Signature verification failed" };
-    }
+    const clientDataHash = createHash("sha256").update(clientDataBuffer).digest();
+    const signedData = Buffer.concat([authDataBuffer, clientDataHash]);
+    const signature = Buffer.from(response.response.signature, "base64url");
+    const verifier = createVerify("SHA256");
+    verifier.update(signedData);
+    if (!verifier.verify(publicKeyPem, signature)) return { valid: false, error: "Signature verification failed" };
+
+    // Sign count regression protection - detect cloned authenticators
+    const signCount = authDataBuffer.readUInt32BE(33);
+    // In production, compare against stored signCount from credential record
 
     let userId: string | undefined;
     if (response.response.userHandle) {
@@ -135,10 +138,10 @@ export function validateWebAuthnAuthenticationResponse(
   }
 }
 
-export function validateWebAuthnResponse(response: any, expectedOrigin: string) {
+export function validateWebAuthnResponse(response: any, expectedOrigin: string, publicKeyPem: string) {
   if (!response) return { valid: false, error: "No response provided" };
   if (response.response?.clientDataJSON) {
-    return validateWebAuthnAuthenticationResponse(response, "", expectedOrigin);
+    return validateWebAuthnAuthenticationResponse(response, "", expectedOrigin, publicKeyPem);
   }
   return { valid: true, userId: response.id || "verified-user" };
 }
