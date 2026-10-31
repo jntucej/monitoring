@@ -11,7 +11,22 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   try {
     const dayIdParam = req.nextUrl.searchParams.get("dayId");
     const day = dayIdParam ? await getDayById(dayIdParam) : await getNextActiveDay();
-    if (!day) return fail("DAY_NOT_FOUND", "No mess day found for analytics", 404);
+    if (!day) {
+      // No active mess day: return a graceful empty payload instead of a
+      // 404 so the console's mount-time poll doesn't surface a console
+      // error. The UI shows "no data" rather than an error banner.
+      return ok({
+        messDayId: null,
+        mealDate: null,
+        totalHostellers: 0,
+        selectedCount: 0,
+        notSelected: 0,
+        declaredPresent: 0,
+        confirmedPresent: 0,
+        byPrimary: { VEG: 0, NON_VEG: 0 },
+        byHostelBlock: {},
+      });
+    }
 
     // Total eligible hostellers: students with a hostel block in student_details.
     const hostellersRes = await query(

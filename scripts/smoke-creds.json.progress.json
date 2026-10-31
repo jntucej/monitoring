@@ -163,11 +163,9 @@
   },
   {
     "role": "operator",
-    "ok": false,
-    "url": "https://monitor.ucej.in/operator",
-    "consoleErrors": [
-      "Error: Minified React error #310; visit https://react.dev/errors/310 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.\n    at aT (https://mo"
-    ],
+    "ok": true,
+    "url": "https://monitor.ucej.in/gate/5f2183c9-51ae-4677-8f38-52a17bbe0538",
+    "consoleErrors": [],
     "badApis": [],
     "leaves": [
       {
