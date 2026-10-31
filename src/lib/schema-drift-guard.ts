@@ -132,6 +132,20 @@ export async function checkSchemaDrift(minIntervalMs = 5 * 60 * 1000): Promise<D
       seen.add(r.version);
       recordedCount += 1;
     }
+    // Mirror the runner's record logic: some legacy schema_migrations rows
+    // record a migration under a form that is neither the bare version nor
+    // the current filename (historical renames). Accept any row whose
+    // version OR filename references this file as "recorded" evidence.
+    const { rows: fileRows } = await pool.query<{ filename: string | null }>(
+      "SELECT filename FROM schema_migrations WHERE filename IS NOT NULL"
+    );
+    for (const r of fileRows) {
+      if (!r.filename) continue;
+      seen.add(r.filename);
+      // Also accept the extension-less filename form (the runner records
+      // under the .sql name and reads it back under the extension-less name).
+      seen.add(r.filename.replace(/\.sql$/, ""));
+    }
   } catch (err: any) {
     if (err?.code === "42P01") {
       // schema_migrations table does not exist yet (fresh install).
@@ -145,7 +159,12 @@ export async function checkSchemaDrift(minIntervalMs = 5 * 60 * 1000): Promise<D
 
   const missing: string[] = [];
   for (const f of files) {
-    const v = f.match(/^(\d+)/)?.[1];
+    // Match the runner's version extraction exactly: the prefix up to the
+    // first underscore (e.g. 20261101120000_email_queue_tracking.sql ->
+    // 20261101120000). Some legacy schema_migrations rows record the version
+    // with a different form, so both the bare version and the filename are
+    // accepted as "recorded" evidence below.
+    const v = f.match(/^(\d+(?:_\d+)*)/)?.[1].split("_")[0] ?? null;
     if (!v) continue;
     // A migration is "recorded" if either the bare version OR the full
     // filename appears in schema_migrations. Some historical rows use
