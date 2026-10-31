@@ -1,39 +1,27 @@
 "use client";
 
-import React from "react";
 import { Suspense } from "react";
-import { PrincipalLoading } from "@/components/principal/shared/PrincipalLoading";
+import { PageLoading } from "@/components/shared/LoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import { RoleConsole } from "@/components/shared/RoleConsole";
-import type { Role } from "@/lib/types";
+import { PrincipalDesktopShell } from "./_shell/PrincipalDesktopShell";
+import { PrincipalMobileShell } from "./_shell/PrincipalMobileShell";
 
-/**
- * Principal console layout — mirrors the oie/supervisor mount pattern.
- *
- * The local sticky tab bar (TABS / section links) is removed. The shell is the
- * RoleConsole: IconRail (5 items) + Board feed (/api/principal/dashboard) +
- * PrincipalDashboardPanel (top-priority items) + ticket ContextPanel +
- * PrincipalStatusBar + PrincipalCommandBar (dashboard / delegations / audit /
- * reports / approvals). Scope is all workflows (top authority role, no
- * hostel/branch filter). Sub-pages pass their content through `children`.
- */
-export default function PrincipalConsoleLayout({
+export default function PrincipalLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <AuthGuard
-      allowedRoles={["principal", "vice_principal", "admin", "sysadmin"] as Role[]}
-    >
-      <Suspense fallback={<PrincipalLoading />}>
-        <div className="min-w-0">
-          <RoleConsole role="principal" roleRoot="/principal">
-            {children}
-          </RoleConsole>
-          <DevContactStrip />
+    <AuthGuard allowedRoles={["principal", "admin", "sysadmin"]}>
+      <Suspense fallback={<PageLoading />}>
+        <div className="hidden lg:block">
+          <PrincipalDesktopShell>{children}</PrincipalDesktopShell>
         </div>
+        <div className="block lg:hidden">
+          <PrincipalMobileShell>{children}</PrincipalMobileShell>
+        </div>
+        <DevContactStrip />
       </Suspense>
     </AuthGuard>
   );
