@@ -207,8 +207,12 @@ export const verifyPasswordResetToken = (t: string) =>
 /**
  * @deprecated Never call this directly. See src/lib/auth-token.ts.
  */
-export async function verifyAuthToken(t: string): Promise<AuthTokenClaims | null> {
-  return verifyAccessToken(t);
+export async function verifyAuthToken(_t: string): Promise<AuthTokenClaims | null> {
+  throw new Error(
+    "verifyAuthToken was removed. Use verifyAccessToken (access tokens) or " +
+      "verifyRefreshToken (refresh tokens). Verifying a refresh token as an " +
+      "access token (or vice versa) is a token-confusion vulnerability.",
+  );
 }
 
 // ── Password hashing / verification ─────────────────────────────────────
