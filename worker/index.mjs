@@ -1,4 +1,3 @@
-import "./rate-limit-cleanup.mjs";
 import http from "node:http";
 import sendEmails from './jobs/send_emails.js';
 
@@ -57,6 +56,30 @@ import cleanupEphemeral from './jobs/cleanup_ephemeral.js';
 async function cleanupRateLimits() {
   const pool = getWorkerDbPool();
   await pool.query('SELECT public.cleanup_rate_limits()');
+}
+
+// Advisory-lock-wrapped job runner: only one worker may run a given job at a
+// time (multi-replica safe). A per-job error is logged and never blocks the
+// remaining jobs.
+async function runJob(name, fn) {
+  const pool = getWorkerDbPool();
+  try {
+    const { rows } = await pool.query(
+      "SELECT pg_try_advisory_lock(hashtext($1)) AS locked",
+      [`worker:${name}`]
+    );
+    if (!rows[0].locked) {
+      console.log(`[worker] ${name} skipped — another worker holds the lock`);
+      return;
+    }
+    try {
+      await fn();
+    } finally {
+      await pool.query("SELECT pg_advisory_unlock(hashtext($1))", [`worker:${name}`]);
+    }
+  } catch (err) {
+    console.error(`[worker] ${name} lock/run error:`, err);
+  }
 }
 
 async function rotateAuditLogs() {
