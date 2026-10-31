@@ -36,7 +36,7 @@ export default function VerifyTokenPage() {
   }, []);
 
   return (
-    <div className="mx-auto w-full max-w-4xl p-4 md:p-6">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
       <PageHeader
         title="Verify meal token"
         subtitle="Scan a student's QR or enter their roll + 6-character code."
@@ -54,7 +54,7 @@ export default function VerifyTokenPage() {
                   key={ev.id}
                   type="button"
                   onClick={() => setActiveEventId(ev.id)}
-                  className="flex items-center justify-between rounded-lg border border-[var(--border)] px-3 py-2 text-left text-sm hover:bg-[var(--bg-elevated)]"
+                  className="flex min-h-[44px] items-center justify-between rounded-lg border border-[var(--border)] px-3 py-2 text-left text-sm hover:bg-[var(--bg-elevated)]"
                 >
                   <span>
                     <span className="font-medium text-[var(--text-primary)]">{ev.title}</span>
@@ -73,7 +73,7 @@ export default function VerifyTokenPage() {
             <button
               type="button"
               onClick={() => setActiveEventId(null)}
-              className="mb-3 text-sm text-[var(--text-secondary)] underline"
+              className="mb-3 inline-flex min-h-[44px] items-center text-sm text-[var(--text-secondary)] underline"
             >
               ← Change event
             </button>

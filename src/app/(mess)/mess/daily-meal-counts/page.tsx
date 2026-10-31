@@ -75,7 +75,7 @@ function WidgetError({ message, onRetry }: { message: string; onRetry: () => voi
       <button
         type="button"
         onClick={onRetry}
-        className="rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+        className="min-h-[44px] inline-flex items-center justify-center rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
       >
         Retry
       </button>
@@ -120,10 +120,10 @@ function MessDailyMealCountsInner() {
   const d = counts?.data;
 
   return (
-    <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       <Link
         href="/mess"
-        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex min-h-[44px] items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
       >
         Back to Mess Overview
       </Link>
@@ -155,7 +155,7 @@ function MessDailyMealCountsInner() {
             </div>
           ) : d && d.total > 0 ? (
             <div className="p-4 min-w-0">
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 min-w-0">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 min-w-0">
                 <StatCard icon={Users} label="Selected" value={d.total} sub="Preferences declared" accent="text-sky-400" />
                 <StatCard icon={CalendarDays} label="Declared Present" value={d.declaredPresent} sub="will_be_present = TRUE" accent="text-amber-400" />
                 <StatCard icon={CheckCircle2} label="Served" value={d.confirmed} sub="Confirmed meals" accent="text-emerald-400" />

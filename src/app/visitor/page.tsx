@@ -18,7 +18,7 @@ const CARDS = [
 
 export default function VisitorLandingPage() {
   return (
-    <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-6">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
       <header className="space-y-1">
         <h1 className="text-2xl font-bold">Visitor Portal</h1>
         <p className="text-sm text-[var(--text-muted)]">
@@ -26,12 +26,12 @@ export default function VisitorLandingPage() {
         </p>
       </header>
       <WidgetBoundary name="VisitorNavigation" title="Visitor Services">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {CARDS.map(({ href, icon: Icon, label, desc }) => (
             <Link
               key={href}
               href={href}
-              className="group flex items-center justify-between rounded-xl border border-[var(--border)] p-4 hover:bg-[var(--bg-elev-1)] transition-colors"
+              className="group min-h-[44px] flex items-center justify-between rounded-xl border border-[var(--border)] p-4 hover:bg-[var(--bg-elev-1)] transition-colors"
             >
               <div className="flex items-center gap-3 min-w-0">
                 <Icon className="w-5 h-5 shrink-0" />

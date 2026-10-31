@@ -69,7 +69,7 @@ function WidgetError({ message, onRetry }: { message: string; onRetry: () => voi
       <button
         type="button"
         onClick={onRetry}
-        className="rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+        className="min-h-[44px] inline-flex items-center justify-center rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
       >
         Retry
       </button>
@@ -92,7 +92,7 @@ function MessMenuInner() {
   const menuHasDay = Boolean(menuData?.mealDate);
 
   return (
-    <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       <WidgetBoundary title="Menu Management">
         <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
           <div className="px-4 py-3 border-b border-slate-800 flex items-center gap-2 min-w-0">
@@ -122,7 +122,7 @@ function MessMenuInner() {
                   <div className="flex-1" />
                   <Link
                     href="/mess/scan"
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-400 hover:bg-emerald-500/20 shrink-0"
+                    className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-400 hover:bg-emerald-500/20 shrink-0"
                   >
                     <Eye className="w-3.5 h-3.5" /> Token Scanner
                   </Link>

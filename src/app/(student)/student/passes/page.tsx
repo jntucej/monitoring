@@ -221,12 +221,12 @@ const api = useApi();
   };
 
   return (
-    <div className="space-y-6 pb-12 select-none">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 pb-12 select-none">
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Link href="/student" className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors" aria-label="Back to student hub">
+            <Link href="/student" className="min-h-[44px] inline-flex items-center justify-center p-2 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors" aria-label="Back to student hub">
               <ArrowLeft className="w-4 h-4" />
             </Link>
             <p className="text-xs text-[var(--text-muted)]">
@@ -240,7 +240,7 @@ const api = useApi();
 
         <button
           onClick={() => setShowNewModal(true)}
-          className="px-4 py-2.5 rounded-xl bg-[var(--action-primary)] text-white font-bold text-xs shadow-md hover:opacity-95 flex items-center justify-center gap-2 active:scale-95 transition-all"
+          className="min-h-[44px] px-4 py-2.5 rounded-xl bg-[var(--action-primary)] text-white font-bold text-xs shadow-md hover:opacity-95 flex items-center justify-center gap-2 active:scale-95 transition-all"
         >
           <Plus className="w-4 h-4" />
           <span>Apply Gate Pass</span>
@@ -383,14 +383,14 @@ const api = useApi();
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-[var(--text-secondary)]" htmlFor="from-departure">From (Departure)</label>
                   <input id="from-departure"
                     type="datetime-local"
                     value={fromTime}
                     onChange={(e) => handleFromTimeChange(e.target.value)}
-                    className="w-full p-2.5 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)]"
+                    className="w-full min-h-[44px] p-2.5 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)]"
                     disabled={submitting}
                     required
                   />
@@ -402,7 +402,7 @@ const api = useApi();
                     value={toTime}
                     onChange={(e) => setToTime(e.target.value)}
                     max={passType === "day_pass" && fromTime ? `${fromTime.split("T")[0]}T23:59` : undefined}
-                    className="w-full p-2.5 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)]"
+                    className="w-full min-h-[44px] p-2.5 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)]"
                     disabled={submitting}
                     required
                   />

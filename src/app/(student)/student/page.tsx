@@ -133,7 +133,7 @@ function StudentDashboardInner() {
   }, [dashboard]);
 
   return (
-    <div className="space-y-6 pb-12 min-w-0">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 pb-12 min-w-0">
       <section aria-label="Student hero" className="rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="min-w-0">
@@ -148,7 +148,7 @@ function StudentDashboardInner() {
           <div className="flex items-center gap-3">
             <Link
               href="/student/id"
-              className="inline-flex items-center gap-2 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] px-3 py-2 text-xs font-semibold text-[var(--text-primary)]"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] px-3 py-2 text-xs font-semibold text-[var(--text-primary)]"
             >
               <QrCode className="h-4 w-4 text-[var(--action-primary)]" />
               Open Digital ID
@@ -180,7 +180,7 @@ function StudentDashboardInner() {
             <button
               type="button"
               onClick={() => setShowQrModal(true)}
-              className="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-2"
+              className="min-h-[44px] px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-2"
             >
               <QrCode className="w-4 h-4" />
               Show QR at Gate
@@ -217,7 +217,7 @@ function StudentDashboardInner() {
             <button
               type="button"
               onClick={() => void loadDashboard()}
-              className="mt-3 rounded-xl bg-rose-500/20 border border-rose-500/30 px-3 py-1.5 text-[11px] font-bold text-rose-300 hover:bg-rose-500/30"
+              className="mt-3 inline-flex min-h-[44px] items-center justify-center rounded-xl bg-rose-500/20 border border-rose-500/30 px-3 py-1.5 text-[11px] font-bold text-rose-300 hover:bg-rose-500/30"
             >
               Retry
             </button>
@@ -227,7 +227,7 @@ function StudentDashboardInner() {
             Loading your dashboard...
           </div>
         ) : todayGlance ? (
-          <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div className="rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] p-4">
               <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Curfew Score</p>
               <p className="mt-1 text-2xl font-black text-[var(--text-primary)]">{todayGlance.curfewScore}</p>
@@ -271,7 +271,7 @@ function StudentDashboardInner() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Link
             href="/student/permissions/new"
-            className="p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/15 transition-all flex items-center gap-2.5 group"
+            className="min-h-[44px] p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/15 transition-all flex items-center gap-2.5 group"
           >
             <div className="p-2 rounded-xl bg-indigo-500/20 text-indigo-400">
               <Send className="w-4 h-4" />
@@ -284,7 +284,7 @@ function StudentDashboardInner() {
 
           <Link
             href="/student/gate-pass?action=new"
-            className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/15 transition-all flex items-center gap-2.5"
+            className="min-h-[44px] p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/15 transition-all flex items-center gap-2.5"
           >
             <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400">
               <Calendar className="w-4 h-4" />
@@ -297,7 +297,7 @@ function StudentDashboardInner() {
 
           <Link
             href="/student/history"
-            className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/15 transition-all flex items-center gap-2.5"
+            className="min-h-[44px] p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/15 transition-all flex items-center gap-2.5"
           >
             <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400">
               <Clock className="w-4 h-4" />

@@ -72,7 +72,7 @@ function OperatorStatsInner() {
     iso ? new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—";
 
   return (
-    <div className="mx-auto max-w-4xl space-y-5 px-4 py-6 md:px-6 min-w-0">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <div className="flex items-center gap-2 min-w-0">
@@ -95,14 +95,14 @@ function OperatorStatsInner() {
             <Loader2 className="w-4 h-4 shrink-0 animate-spin" />
             <span className="truncate">Stats unavailable: {error}</span>
           </span>
-          <button type="button" onClick={() => void refresh()} className="rounded-lg border border-amber-400/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0">
+          <button type="button" onClick={() => void refresh()} className="min-h-[44px] inline-flex items-center justify-center rounded-lg border border-amber-400/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0">
             Retry
           </button>
         </div>
       )}
 
       {/* Summary cards */}
-      <div className="grid grid-cols-3 gap-3 min-w-0">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-0">
         {[
           { label: "Total Scans", value: counts?.total ?? 0, tone: "text-[var(--text-primary)]", icon: ListOrdered },
           { label: "Entries", value: counts?.entries ?? 0, tone: "text-emerald-400", icon: ArrowDownLeft },

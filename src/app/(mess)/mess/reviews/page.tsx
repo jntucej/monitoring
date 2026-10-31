@@ -55,13 +55,13 @@ export default function MessReviewsPage() {
   useEffect(() => { void load(); }, [load]);
 
   return (
-    <div className="mx-auto w-full max-w-6xl p-4 md:p-6">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
       <PageHeader
         title="Meal Reviews"
         subtitle="Satisfaction distribution and recent student comments."
         actions={
           <button type="button" onClick={() => void load()}
-            className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] px-3 py-2 text-sm text-[var(--text-secondary)]">
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-[var(--border)] px-3 py-2 text-sm text-[var(--text-secondary)]">
             <RefreshCw className="h-4 w-4" /> Refresh
           </button>
         }
@@ -71,7 +71,7 @@ export default function MessReviewsPage() {
         {error && <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-300">{error}</div>}
         {data && (
           <div className="space-y-4">
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
               {MEAL_TYPES.map((m) => (
                 <div key={m} className="rounded-xl border border-[var(--border)] p-3">
                   <div className="text-xs uppercase tracking-wide text-[var(--text-muted)]">{MEAL_LABEL[m]}</div>

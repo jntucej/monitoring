@@ -61,7 +61,7 @@ function OperatorAnnouncementsInner() {
     iso ? new Date(iso).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }) : "—";
 
   return (
-    <div className="mx-auto max-w-2xl space-y-5 px-4 py-6 md:px-6 min-w-0">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       <div className="flex items-center justify-between min-w-0">
         <div className="min-w-0">
           <div className="flex items-center gap-2 min-w-0">
@@ -76,7 +76,7 @@ function OperatorAnnouncementsInner() {
           type="button"
           onClick={() => void loadAnnouncements()}
           disabled={loading}
-          className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition shrink-0 disabled:opacity-50"
+          className="min-h-[44px] inline-flex items-center justify-center rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition shrink-0 disabled:opacity-50"
         >
           {loading ? (
             <span className="flex items-center gap-1.5"><Loader2 className="w-3 h-3 animate-spin" />Loading</span>

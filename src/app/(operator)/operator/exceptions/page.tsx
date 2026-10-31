@@ -142,7 +142,7 @@ function ExceptionsInner() {
       : "—";
 
   return (
-    <div className="mx-auto max-w-6xl space-y-5 px-4 py-6 md:px-6 min-w-0">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       {(txError || permError) && (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex items-center gap-2 min-w-0">
           <AlertTriangle className="w-4 h-4 shrink-0" />
@@ -155,13 +155,13 @@ function ExceptionsInner() {
       <OperatorWidgetBoundary title="Today&rsquo;s Exceptions">
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] overflow-hidden min-w-0">
           {/* Filter tabs */}
-          <div className="flex items-center gap-1 px-3 py-2 border-b border-[var(--border)] overflow-x-auto no-scrollbar min-w-0">
+          <div className="flex flex-wrap items-center gap-2 px-3 py-2 border-b border-[var(--border)] min-w-0">
             {(["ALL", "FLAGGED", "DENIED", "MANUAL"] as Filter[]).map((f) => (
               <button
                 key={f}
                 type="button"
                 onClick={() => setFilter(f)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors shrink-0 ${
+                className={`min-h-[44px] inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors shrink-0 ${
                   filter === f
                     ? "bg-[var(--action-primary)]/15 text-[var(--action-primary)]"
                     : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"

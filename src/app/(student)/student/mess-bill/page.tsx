@@ -1,13 +1,18 @@
 "use client";
-// src/app/(student)/student/mess-bill/page.tsx
-"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import { getAuthHeaders } from "@/lib/utils";
 
+interface MessBillData {
+  totalServed?: number;
+  totalAmount?: number;
+  mealRate?: number;
+  cutoffTime?: string;
+}
+
 export default function MessBillPage() {
   const [month, setMonth] = useState(new Date().toISOString().slice(0, 7));
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<MessBillData | null>(null);
   const [optOutDate, setOptOutDate] = useState("");
   const [optOutType, setOptOutType] = useState("LUNCH");
   const [optOutReason, setOptOutReason] = useState("");
@@ -53,14 +58,14 @@ export default function MessBillPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4 sm:p-4 sm:p-6 space-y-4 sm:space-y-4 sm:space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-6">
+      <div className="flex flex-wrap justify-between items-center gap-3">
         <h1 className="text-2xl font-semibold">Mess Bill & Meal Opt-Outs</h1>
         <input
           type="month"
           value={month}
           onChange={(e) => setMonth(e.target.value)}
-          className="border rounded p-2 text-sm bg-white"
+          className="min-h-[44px] border rounded p-2 text-sm bg-white"
         />
       </div>
 
@@ -87,7 +92,7 @@ export default function MessBillPage() {
 
       <div className="border rounded bg-white p-6 space-y-4 shadow-sm">
         <h2 className="font-semibold text-slate-900">Opt out of a upcoming meal</h2>
-        <form onSubmit={optOut} className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+        <form onSubmit={optOut} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 items-end">
           <div>
             <label className="block text-xs font-medium text-slate-700 mb-1" htmlFor="date">Date</label>
             <input id="date"
@@ -95,7 +100,7 @@ export default function MessBillPage() {
               required
               value={optOutDate}
               onChange={(e) => setOptOutDate(e.target.value)}
-              className="w-full border rounded p-2 text-sm"
+              className="w-full min-h-[44px] border rounded p-2 text-sm"
             />
           </div>
           <div>
@@ -103,7 +108,7 @@ export default function MessBillPage() {
             <select id="meal"
               value={optOutType}
               onChange={(e) => setOptOutType(e.target.value)}
-              className="w-full border rounded p-2 text-sm bg-white"
+              className="w-full min-h-[44px] border rounded p-2 text-sm bg-white"
             >
               <option value="BREAKFAST">Breakfast</option>
               <option value="LUNCH">Lunch</option>
@@ -116,10 +121,10 @@ export default function MessBillPage() {
               placeholder="e.g. Going home"
               value={optOutReason}
               onChange={(e) => setOptOutReason(e.target.value)}
-              className="w-full border rounded p-2 text-sm"
+              className="w-full min-h-[44px] border rounded p-2 text-sm"
             />
           </div>
-          <button type="submit" className="px-4 py-2 rounded bg-slate-900 text-white text-sm font-medium">
+          <button type="submit" className="w-full min-h-[44px] inline-flex items-center justify-center px-4 py-2 rounded bg-slate-900 text-white text-sm font-medium">
             Confirm opt-out
           </button>
         </form>

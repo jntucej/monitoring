@@ -39,7 +39,7 @@ export default function ParentSettingsPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
       <div>
         <p className="text-2xl font-extrabold text-[var(--text-primary)]">Guardian Settings</p>
         <p className="text-xs text-[var(--text-muted)]">Manage preferences and profile</p>
@@ -61,15 +61,15 @@ export default function ParentSettingsPage() {
             <div className="space-y-3 text-xs">
               <div>
                 <label className="block text-[var(--text-muted)] mb-1 font-medium">Full Name</label>
-                <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full px-3 py-2 bg-[var(--bg-base)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-primary)]" required />
+                <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-base)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-primary)]" required />
               </div>
               <div>
                 <label className="block text-[var(--text-muted)] mb-1 font-medium">Email</label>
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-3 py-2 bg-[var(--bg-base)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-primary)]" required />
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-base)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-primary)]" required />
               </div>
               <div>
                 <label className="block text-[var(--text-muted)] mb-1 font-medium">Phone</label>
-                <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full px-3 py-2 bg-[var(--bg-base)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-primary)]" />
+                <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-base)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-primary)]" />
               </div>
             </div>
           </div>
@@ -96,7 +96,7 @@ export default function ParentSettingsPage() {
         </div>
 
         <div className="flex justify-end">
-          <button type="submit" disabled={saving} className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-sky-600 text-white font-semibold text-xs hover:bg-sky-500 transition-colors shadow-md disabled:opacity-50">
+          <button type="submit" disabled={saving} className="inline-flex min-h-[44px] items-center gap-2 px-6 py-2.5 rounded-xl bg-sky-600 text-white font-semibold text-xs hover:bg-sky-500 transition-colors shadow-md disabled:opacity-50">
             <Save className="w-4 h-4" /> Save Preferences
           </button>
         </div>

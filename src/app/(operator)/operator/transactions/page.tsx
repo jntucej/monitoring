@@ -87,7 +87,7 @@ function OperatorTransactionsInner() {
       : "—";
 
   return (
-    <div className="mx-auto max-w-6xl space-y-5 px-4 py-6 md:px-6 min-w-0">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
@@ -116,7 +116,7 @@ function OperatorTransactionsInner() {
           <button
             type="button"
             onClick={() => void refresh()}
-            className="rounded-lg border border-amber-400/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+            className="min-h-[44px] inline-flex items-center justify-center rounded-lg border border-amber-400/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
           >
             Retry
           </button>
@@ -126,7 +126,7 @@ function OperatorTransactionsInner() {
       <OperatorWidgetBoundary title="Movement Log">
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] overflow-hidden min-w-0">
           {/* Counts strip */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-px border-b border-[var(--border)]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px border-b border-[var(--border)]">
             {[
               { label: "Total", value: counts?.total ?? 0, tone: "text-[var(--text-primary)]" },
               { label: "Entries", value: counts?.entries ?? 0, tone: "text-emerald-400" },
@@ -145,13 +145,13 @@ function OperatorTransactionsInner() {
           </div>
 
           {/* Direction filter */}
-          <div className="flex items-center gap-1 px-3 py-2 border-b border-[var(--border)] overflow-x-auto no-scrollbar min-w-0">
+          <div className="flex flex-wrap items-center gap-2 px-3 py-2 border-b border-[var(--border)] min-w-0">
             {(["ALL", "IN", "OUT"] as DirectionFilter[]).map((f) => (
               <button
                 key={f}
                 type="button"
                 onClick={() => setFilter(f)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors shrink-0 ${
+                className={`min-h-[44px] inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors shrink-0 ${
                   filter === f
                     ? "bg-[var(--action-primary)]/15 text-[var(--action-primary)]"
                     : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"

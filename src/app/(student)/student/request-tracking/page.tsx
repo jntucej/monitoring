@@ -48,23 +48,23 @@ function StudentRequestTrackingInner() {
   const filtered = filter === "ALL" ? tickets : tickets.filter((t) => t.status === filter);
 
   return (
-    <div className="mx-auto max-w-4xl space-y-5 px-4 py-6 md:px-6 min-w-0">
-      <div className="flex items-center justify-between gap-3 min-w-0">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
+      <div className="flex flex-wrap items-center justify-between gap-3 min-w-0">
         <div className="flex items-center gap-2 min-w-0">
           <ClipboardList className="w-5 h-5 text-[var(--action-primary)]" />
           <p className="text-sm font-semibold text-[var(--text-primary)]">Request Tracking</p>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           <button
             type="button"
             onClick={() => { clearCache(); void fetchTickets(); }}
-            className="rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-2.5 py-1.5 text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            className="min-h-[44px] inline-flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-2.5 py-1.5 text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)]"
           >
             Refresh
           </button>
           <Link
             href="/student/pass-application"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--action-primary)] px-3 py-1.5 text-xs font-bold text-white"
+            className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg bg-[var(--action-primary)] px-3 py-1.5 text-xs font-bold text-white"
           >
             <Plus className="w-3.5 h-3.5" /> New Request
           </Link>
@@ -72,13 +72,13 @@ function StudentRequestTrackingInner() {
       </div>
 
       {/* Filter chips */}
-      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+      <div className="flex flex-wrap items-center gap-2">
         {FILTERS.map((f) => (
           <button
             key={f}
             type="button"
             onClick={() => setFilter(f)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+            className={`min-h-[44px] inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
               filter === f
                 ? "bg-[var(--action-primary)] text-white"
                 : "bg-[var(--bg-elevated)] text-[var(--text-muted)] border border-[var(--border)] hover:text-[var(--text-primary)]"

@@ -48,7 +48,7 @@ function WorkerWorkOrdersInner() {
   const busy = loading && !data;
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 md:px-6 min-w-0">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-6 min-w-0">
       <div className="flex items-center gap-3 min-w-0">
         <ClipboardList className="h-6 w-6 text-sky-400 shrink-0" />
         <div className="min-w-0">

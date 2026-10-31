@@ -145,7 +145,7 @@ function ScanPageInner() {
   const serveable = state.kind === "result" && state.token.valid && !state.serving && !isServed;
 
   return (
-    <div className="space-y-5">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5">
       {/* Header */}
       <div className="rounded-2xl border border-slate-800 bg-[#0d1220] p-4 sm:p-5">
         <div className="flex items-center justify-between gap-3">
@@ -168,7 +168,7 @@ function ScanPageInner() {
       <WidgetBoundary title="Scanner">
         <button
           onClick={() => setShowScanner(true)}
-          className="w-full inline-flex items-center justify-center gap-2 px-4 py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-black uppercase tracking-wider transition"
+          className="w-full inline-flex min-h-[44px] items-center justify-center gap-2 px-4 py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-black uppercase tracking-wider transition"
         >
           <ScanLine className="w-4 h-4" /> Open Camera Scanner
         </button>
@@ -190,7 +190,7 @@ function ScanPageInner() {
           </p>
           <button
             onClick={() => setManualOpen((o) => !o)}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-[11px] font-bold transition"
+            className="inline-flex min-h-[44px] items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-[11px] font-bold transition"
           >
             <KeyRound className="w-3.5 h-3.5 text-emerald-400" />
             {manualOpen ? "Hide entry form" : "Enter token code"}
@@ -204,12 +204,12 @@ function ScanPageInner() {
                 onChange={(e) => setManualCode(e.target.value)}
                 placeholder="e.g. M2610-4F7A2"
                 autoFocus
-                className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm font-mono text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+                className="w-full min-h-[44px] px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm font-mono text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500"
               />
               <button
                 type="submit"
                 disabled={manualChecking || !manualCode.trim()}
-                className="w-full inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-xs font-bold transition"
+                className="w-full inline-flex min-h-[44px] items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-xs font-bold transition"
               >
                 {manualChecking ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -261,7 +261,7 @@ function ScanPageInner() {
               </div>
               <button
                 onClick={reset}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-[11px] font-bold transition"
+                className="inline-flex min-h-[44px] items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-[11px] font-bold transition"
               >
                 <RotateCcw className="w-3.5 h-3.5" /> Try again
               </button>

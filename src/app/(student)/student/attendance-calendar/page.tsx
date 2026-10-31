@@ -70,7 +70,7 @@ function StudentAttendanceCalendarInner() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl space-y-5 px-4 py-6 md:px-6 min-w-0">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       <div className="flex items-center gap-2">
         <CalendarDays className="w-5 h-5 text-[var(--action-primary)]" />
         <p className="text-sm font-semibold text-[var(--text-primary)]">Attendance Calendar</p>
@@ -88,7 +88,7 @@ function StudentAttendanceCalendarInner() {
           <button
             type="button"
             onClick={prevMonth}
-            className="rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-2.5 py-1.5 text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            className="min-h-[44px] inline-flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-2.5 py-1.5 text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)]"
           >
             ← Prev
           </button>
@@ -98,7 +98,7 @@ function StudentAttendanceCalendarInner() {
           <button
             type="button"
             onClick={nextMonth}
-            className="rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-2.5 py-1.5 text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            className="min-h-[44px] inline-flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-2.5 py-1.5 text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)]"
           >
             Next →
           </button>
@@ -165,7 +165,7 @@ function StudentAttendanceCalendarInner() {
       {selected && (
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-4 text-xs min-w-0">
           <p className="font-bold text-[var(--text-primary)] mb-2">{selected.date}</p>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <p className="text-[var(--text-muted)]">Time in</p>
               <p className="font-mono text-[var(--text-primary)]">{selected.time_in || "—"}</p>
@@ -185,7 +185,7 @@ function StudentAttendanceCalendarInner() {
 
       {/* Monthly summary */}
       {summary && (
-        <div className="grid grid-cols-3 gap-3 min-w-0">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-0">
           <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3">
             <div className="flex items-center gap-1.5 text-emerald-400 mb-1">
               <CheckCircle2 className="w-4 h-4" />

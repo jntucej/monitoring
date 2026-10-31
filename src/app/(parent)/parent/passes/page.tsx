@@ -50,9 +50,8 @@ export default function ParentPassesPage() {
       } else {
         setError(typeof json.error === "string" ? json.error : json.error?.message ?? "Failed to load passes");
       }
-    } catch (err: any) {
-      console.error("Failed to load pass requests:", err);
-      setError(err?.message ?? "Failed to load pass requests");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to load pass requests");
     } finally {
       setLoading(false);
     }
@@ -65,7 +64,7 @@ export default function ParentPassesPage() {
   usePolling(load, { intervalMs: 30_000 });
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
       <div>
         <p className="text-2xl font-bold">Pass Requests</p>
         <p className="text-[var(--text-muted)]">Request and track gate passes</p>

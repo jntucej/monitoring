@@ -229,7 +229,7 @@ function ManualEntryInner() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl space-y-5 px-4 py-6 md:px-6 min-w-0">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       {/* Lookup form */}
       <OperatorWidgetBoundary title="Person Lookup">
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-4 space-y-3 min-w-0">
@@ -247,7 +247,7 @@ function ManualEntryInner() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Aditi Sharma"
-                className="w-full px-3 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-base)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
+                className="w-full min-h-[44px] px-3 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-base)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
               />
             </div>
             <div className="space-y-1.5 min-w-0">
@@ -266,7 +266,7 @@ function ManualEntryInner() {
                   if (e.key === "Enter") void runLookup();
                 }}
                 placeholder="e.g. 24JJ1A0501"
-                className="w-full px-3 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-base)] font-mono text-sm text-[var(--text-primary)] uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
+                className="w-full min-h-[44px] px-3 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-base)] font-mono text-sm text-[var(--text-primary)] uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
               />
             </div>
           </div>
@@ -274,7 +274,7 @@ function ManualEntryInner() {
             type="button"
             onClick={() => void runLookup()}
             disabled={lookupState === "loading" || !idNumber.trim()}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--action-primary)] px-4 py-2.5 text-sm font-bold text-slate-950 hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
+            className="w-full sm:w-auto inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-[var(--action-primary)] px-4 py-2.5 text-sm font-bold text-slate-950 hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
           >
             {lookupState === "loading" ? (
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" />
@@ -352,7 +352,7 @@ function ManualEntryInner() {
                   {personStatusLabel(result.status)}
                 </span>
               </div>
-              <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 mt-3 text-xs min-w-0">
+              <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 mt-3 text-xs min-w-0">
                 <div>
                   <dt className="text-[var(--text-muted)]">Type</dt>
                   <dd className="text-[var(--text-primary)] font-medium capitalize">
@@ -430,7 +430,7 @@ function ManualEntryInner() {
                     type="button"
                     onClick={() => setRecordDirection(d)}
                     disabled={recordState === "submitting"}
-                    className={`px-3 py-2 rounded-lg border text-sm font-bold transition disabled:opacity-50 ${
+                    className={`min-h-[44px] inline-flex items-center justify-center px-3 py-2 rounded-lg border text-sm font-bold transition disabled:opacity-50 ${
                       recordDirection === d
                         ? "bg-[var(--action-primary)] border-[var(--action-primary)] text-slate-950"
                         : "border-[var(--border)] bg-[var(--bg-base)] text-[var(--text-primary)] hover:border-[var(--border)]"
@@ -484,7 +484,7 @@ function ManualEntryInner() {
                     type="button"
                     onClick={() => setRecordEntryType("hosteller")}
                     disabled={recordState === "submitting"}
-                    className={`px-3 py-2 rounded-lg text-sm border transition-colors ${
+                    className={`min-h-[44px] inline-flex items-center justify-center px-3 py-2 rounded-lg text-sm border transition-colors ${
                       recordEntryType === "hosteller"
                         ? "border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-text)] font-medium"
                         : "border-[var(--border)] bg-[var(--bg-base)] text-[var(--text-primary)] hover:border-[var(--border-strong)]"
@@ -496,7 +496,7 @@ function ManualEntryInner() {
                     type="button"
                     onClick={() => setRecordEntryType("day_scholar")}
                     disabled={recordState === "submitting"}
-                    className={`px-3 py-2 rounded-lg text-sm border transition-colors ${
+                    className={`min-h-[44px] inline-flex items-center justify-center px-3 py-2 rounded-lg text-sm border transition-colors ${
                       recordEntryType === "day_scholar"
                         ? "border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-text)] font-medium"
                         : "border-[var(--border)] bg-[var(--bg-base)] text-[var(--text-primary)] hover:border-[var(--border-strong)]"
@@ -528,7 +528,7 @@ function ManualEntryInner() {
                 onChange={(e) => setRecordReasonText(e.target.value)}
                 placeholder="e.g. returning from doctor visit"
                 disabled={recordState === "submitting"}
-                className="w-full px-3 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-base)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
+                className="w-full min-h-[44px] px-3 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-base)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
               />
             </div>
 
@@ -573,7 +573,7 @@ function ManualEntryInner() {
               type="button"
               onClick={() => void submitRecord()}
               disabled={recordState === "submitting"}
-              className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--action-primary)] px-4 py-2.5 text-sm font-bold text-slate-950 hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
+              className="w-full inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-[var(--action-primary)] px-4 py-2.5 text-sm font-bold text-slate-950 hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
             >
               {recordState === "submitting" ? (
                 <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" />

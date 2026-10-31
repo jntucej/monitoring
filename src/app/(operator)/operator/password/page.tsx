@@ -8,7 +8,7 @@ import { OperatorChangePasswordCard } from "@/components/operator/profile/Operat
 
 function OperatorPasswordInner() {
   return (
-    <div className="mx-auto max-w-xl space-y-5 px-4 py-6 md:px-6 min-w-0">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       <div className="min-w-0">
         <h2 className="text-lg font-bold text-[var(--text-primary)]">Change Password</h2>
         <p className="text-xs text-[var(--text-muted)] mt-1 min-w-0">

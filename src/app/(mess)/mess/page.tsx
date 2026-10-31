@@ -18,7 +18,7 @@ export default function MessPage() {
   return (
     <Suspense fallback={<PageLoading />}>
       <AuthGuard allowedRoles={["mess_incharge", "admin", "sysadmin"]}>
-        <div className="space-y-6">
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
           <DevContactStrip />
           <WidgetBoundary name="RoleDashboardPanel" title="Mess Incharge Dashboard">
             <RoleDashboardPanel

@@ -65,7 +65,7 @@ function WidgetError({ message, onRetry }: { message: string; onRetry: () => voi
       <button
         type="button"
         onClick={onRetry}
-        className="rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+        className="min-h-[44px] inline-flex items-center justify-center rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
       >
         Retry
       </button>
@@ -131,10 +131,10 @@ function MessIssuesInner() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       <Link
         href="/mess"
-        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex min-h-[44px] items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
       >
         Back to Mess Overview
       </Link>
@@ -149,7 +149,7 @@ function MessIssuesInner() {
         <button
           type="button"
           onClick={() => setRaiseOpen((o) => !o)}
-          className="inline-flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-400 hover:bg-emerald-500/20 shrink-0"
+          className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-400 hover:bg-emerald-500/20 shrink-0"
         >
           <Plus className="w-4 h-4" /> Raise Issue
         </button>
@@ -173,7 +173,7 @@ function MessIssuesInner() {
                 <select
                   value={eventType}
                   onChange={(e) => setEventType(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
+                  className="mt-1 w-full min-h-[44px] rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
                 >
                   <option value="NO_SHOW_FLAGGED">No-show flagged</option>
                   <option value="TOKEN_REVOKED">Token revoked</option>
@@ -194,11 +194,11 @@ function MessIssuesInner() {
                 />
               </label>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="submit"
                 disabled={raising || !description.trim()}
-                className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 px-4 py-2 text-sm font-semibold text-white transition"
+                className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 px-4 py-2 text-sm font-semibold text-white transition"
               >
                 {raising ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                 Raise Issue
@@ -206,7 +206,7 @@ function MessIssuesInner() {
               <button
                 type="button"
                 onClick={() => setRaiseOpen(false)}
-                className="inline-flex items-center rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-400 hover:bg-slate-800"
+                className="inline-flex min-h-[44px] items-center rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-400 hover:bg-slate-800"
               >
                 Cancel
               </button>

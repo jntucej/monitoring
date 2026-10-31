@@ -19,7 +19,7 @@ export default function ExamSuperintendentPage() {
   return (
     <Suspense fallback={<PageLoading />}>
       <AuthGuard allowedRoles={["exam_superintendent"]}>
-        <div className="space-y-6">
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
           <DevContactStrip />
           <WidgetBoundary name="RoleDashboardPanel" title="Exam Superintendent Dashboard">
             <RoleDashboardPanel

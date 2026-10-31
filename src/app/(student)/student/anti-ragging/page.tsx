@@ -41,7 +41,7 @@ export default function AntiRaggingPage() {
 
   if (caseNumber) {
     return (
-      <div className="max-w-xl mx-auto p-6 space-y-4 bg-white border rounded shadow-sm mt-8">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-4 py-6">
         <h1 className="text-2xl font-semibold text-emerald-700">Case filed successfully</h1>
         <p className="text-sm">
           Your confidential case number is <strong className="font-mono">{caseNumber}</strong>.
@@ -62,7 +62,7 @@ export default function AntiRaggingPage() {
   }
 
   return (
-    <form onSubmit={submit} className="max-w-2xl mx-auto p-6 space-y-4 bg-white border rounded shadow-sm mt-8">
+    <form onSubmit={submit} className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-4 py-6">
       <div>
         <h1 className="text-2xl font-semibold text-rose-600">Anti-Ragging / Harassment Report</h1>
         <p className="text-sm text-slate-600 mt-1">
@@ -75,7 +75,7 @@ export default function AntiRaggingPage() {
         <select id="category"
           value={form.category}
           onChange={(e) => setForm({ ...form, category: e.target.value })}
-          className="w-full border rounded p-2 text-sm"
+          className="w-full min-h-[44px] border rounded p-2 text-sm"
         >
           <option value="ragging">Ragging</option>
           <option value="harassment">Harassment</option>
@@ -103,11 +103,11 @@ export default function AntiRaggingPage() {
           placeholder="e.g. Hostel B Mess, Corridor 2"
           value={form.location}
           onChange={(e) => setForm({ ...form, location: e.target.value })}
-          className="w-full border rounded p-2 text-sm"
+          className="w-full min-h-[44px] border rounded p-2 text-sm"
         />
       </div>
 
-      <button type="submit" disabled={busy} className="px-4 py-2 bg-rose-600 text-white rounded text-sm font-medium disabled:opacity-50">
+      <button type="submit" disabled={busy} className="inline-flex min-h-[44px] items-center justify-center px-4 py-2 bg-rose-600 text-white rounded text-sm font-medium disabled:opacity-50">
         {busy ? "Filing confidential report..." : "Submit Confidential Report"}
       </button>
     </form>

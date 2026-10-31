@@ -45,17 +45,17 @@ const api = useApi();
   const filtered = filter === "ALL" ? scans : scans.filter((s) => s.direction === filter);
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <p className="text-[var(--text-muted)]">All your gate activity</p>
         </div>
-        <div className="flex items-center gap-1 bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg p-1">
+        <div className="flex flex-wrap items-center gap-1 bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg p-1">
           {(["ALL", "IN", "OUT"] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-3 py-1 text-sm rounded-md transition ${
+              className={`min-h-[44px] inline-flex items-center justify-center px-3 py-1 text-sm rounded-md transition ${
                 filter === f
                   ? "bg-[var(--action-primary)] text-white"
                   : "text-[var(--text-muted)] hover:text-white"

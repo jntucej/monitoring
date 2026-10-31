@@ -18,7 +18,7 @@ export default function WorkerPage() {
   return (
     <Suspense fallback={<OperatorPageLoading />}>
       <AuthGuard allowedRoles={["worker"]}>
-        <div className="space-y-6">
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
           <DevContactStrip />
           <OperatorWidgetBoundary name="RoleDashboardPanel" title="Worker Dashboard">
             <RoleDashboardPanel

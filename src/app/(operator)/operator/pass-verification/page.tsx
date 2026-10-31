@@ -106,7 +106,7 @@ function PassVerificationInner() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl space-y-5 px-4 py-6 md:px-6 min-w-0">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       {error && (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
@@ -116,7 +116,7 @@ function PassVerificationInner() {
           <button
             type="button"
             onClick={() => void refresh()}
-            className="rounded-lg border border-amber-400/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+            className="min-h-[44px] inline-flex items-center justify-center rounded-lg border border-amber-400/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
           >
             Retry
           </button>
@@ -189,14 +189,14 @@ function PassVerificationInner() {
                           value={rejectComment}
                           onChange={(e) => setRejectComment(e.target.value)}
                           placeholder="Reason for rejection (required)"
-                          className="w-full sm:w-56 rounded-lg border border-rose-500/40 bg-[var(--bg-base)] px-2.5 py-1.5 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-rose-500/40 outline-none"
+                          className="w-full sm:w-56 min-h-[44px] rounded-lg border border-rose-500/40 bg-[var(--bg-base)] px-2.5 py-1.5 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-rose-500/40 outline-none"
                         />
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <button
                             type="button"
                             onClick={() => handleRejectConfirm(ticket)}
                             disabled={!rejectComment.trim() || actingTicket === rejectKey}
-                            className="inline-flex items-center gap-1.5 rounded-lg bg-rose-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-rose-600 disabled:opacity-50 transition-colors"
+                            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-rose-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-rose-600 disabled:opacity-50 transition-colors"
                           >
                             {actingTicket === rejectKey ? (
                               <Loader2 className="w-3 h-3 animate-spin motion-reduce:animate-none" />
@@ -211,19 +211,19 @@ function PassVerificationInner() {
                               setRejectingTicket(null);
                               setRejectComment("");
                             }}
-                            className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+                            className="min-h-[44px] inline-flex items-center rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
                           >
                             Cancel
                           </button>
                         </div>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex flex-wrap items-center gap-2 shrink-0">
                         <button
                           type="button"
                           onClick={() => void act(ticket, "APPROVE")}
                           disabled={actingTicket === key}
-                          className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-bold text-slate-950 hover:bg-emerald-400 disabled:opacity-50 transition-colors"
+                          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-bold text-slate-950 hover:bg-emerald-400 disabled:opacity-50 transition-colors"
                         >
                           {actingTicket === key ? (
                             <Loader2 className="w-3 h-3 animate-spin motion-reduce:animate-none" />
@@ -238,7 +238,7 @@ function PassVerificationInner() {
                             setRejectingTicket(ticket);
                             setRejectComment("");
                           }}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-400 hover:bg-rose-500/20 transition-colors"
+                          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-400 hover:bg-rose-500/20 transition-colors"
                         >
                           <X className="w-3 h-3" />
                           Reject

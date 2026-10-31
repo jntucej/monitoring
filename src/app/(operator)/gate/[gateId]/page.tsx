@@ -644,13 +644,13 @@ function OperatorPageInner() {
                           onChange={(e) => setManualRollInput(e.target.value.toUpperCase())}
                           placeholder="e.g. &gt;24JJ1A0501"
                           disabled={!!activeLockdown}
-                          className="w-full px-4 py-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-base font-mono font-bold tracking-wider text-[var(--text-primary)] uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none disabled:opacity-50"
+                          className="w-full min-h-[44px] px-4 py-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-base font-mono font-bold tracking-wider text-[var(--text-primary)] uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none disabled:opacity-50"
                         />
 
                         <button
                           type="submit"
                           disabled={!manualRollInput.trim() || state === "detecting" || !!activeLockdown}
-                          className="w-full py-3.5 px-4 rounded-xl bg-[var(--action-primary)] border border-emerald-500/20 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-bold text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.99]"
+                          className="w-full min-h-[44px] py-3.5 px-4 rounded-xl bg-[var(--action-primary)] border border-emerald-500/20 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-bold text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.99]"
                         >
                           <KeyRound className="w-5 h-5" />
                           <span>Verify Roll Number</span>
@@ -692,7 +692,7 @@ function OperatorPageInner() {
       {/* Offline banner — shows when navigator.onLine is false */}
       <OfflineBanner />
 
-      <main className="flex-1 w-full max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto p-2 sm:p-4 space-y-3">
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3">
         {/* Emergency Lockdown Active Alert Header Banner */}
         {activeLockdown && (
           <div className="bg-rose-600 text-white p-4 rounded-xl border border-rose-700 shadow-lg flex items-center justify-between animate-pulse">
@@ -850,7 +850,7 @@ function OperatorPageInner() {
                     </p>
                   )}
                 </div>
-                <div className="flex justify-center gap-2">
+                <div className="flex flex-wrap justify-center gap-2">
                   {canRetry && (
                     <button
                       type="button"
@@ -858,7 +858,7 @@ function OperatorPageInner() {
                       onClick={() => {
                         if (currentStudent) { confirmScan(addToast, undefined, undefined, entryType ?? undefined); } else if (lastRollRef.current) { startScan(lastRollRef.current); } else { reset(); }
                       }}
-                      className="px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs hover:bg-emerald-400 transition-colors active:scale-[0.98] flex items-center gap-1.5"
+                      className="min-h-[44px] px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs hover:bg-emerald-400 transition-colors active:scale-[0.98] flex items-center justify-center gap-1.5"
                     >
                       <RefreshCw className="w-3.5 h-3.5" /> Retry
                     </button>
@@ -872,7 +872,7 @@ function OperatorPageInner() {
                         reset();
                       }
                     }}
-                    className="px-4 py-2 rounded-xl bg-rose-500 text-white font-semibold text-xs hover:bg-rose-600 transition-colors active:scale-[0.98]"
+                    className="min-h-[44px] px-4 py-2 rounded-xl bg-rose-500 text-white font-semibold text-xs hover:bg-rose-600 transition-colors active:scale-[0.98] flex items-center justify-center"
                   >
                     {isAuthError ? "Dismiss & Sign In Again" : "Dismiss"}
                   </button>
@@ -887,14 +887,14 @@ function OperatorPageInner() {
           keyboard shortcuts. Switching QR<->Barcode just flips the Scanner's
           decode mode in place (stream stays warm); Manual drops into the
           hand-entry sub-mode. */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-70 flex gap-2 rounded-full bg-black/80 px-4 py-2 backdrop-blur items-center">
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-70 flex flex-wrap gap-2 rounded-full bg-black/80 px-4 py-2 backdrop-blur items-center">
         <button
           type="button"
           onClick={() => {
             primeAudioOnGesture();
             setScanMode("qr");
           }}
-          className={`rounded-full px-3.5 py-1.5 text-[11px] font-bold tracking-wide transition-colors ${
+          className={`min-h-[44px] inline-flex items-center justify-center rounded-full px-3.5 py-1.5 text-[11px] font-bold tracking-wide transition-colors ${
             scanMode === "qr"
               ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
               : "bg-white/5 text-slate-400 border border-white/10 hover:text-slate-200"
@@ -908,7 +908,7 @@ function OperatorPageInner() {
             primeAudioOnGesture();
             setScanMode("barcode");
           }}
-          className={`rounded-full px-3.5 py-1.5 text-[11px] font-bold tracking-wide transition-colors ${
+          className={`min-h-[44px] inline-flex items-center justify-center rounded-full px-3.5 py-1.5 text-[11px] font-bold tracking-wide transition-colors ${
             scanMode === "barcode"
               ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
               : "bg-white/5 text-slate-400 border border-white/10 hover:text-slate-200"
@@ -922,7 +922,7 @@ function OperatorPageInner() {
             primeAudioOnGesture();
             setOperatorSubMode("manual");
           }}
-          className={`rounded-full px-3.5 py-1.5 text-[11px] font-bold tracking-wide transition-colors ${
+          className={`min-h-[44px] inline-flex items-center justify-center rounded-full px-3.5 py-1.5 text-[11px] font-bold tracking-wide transition-colors ${
             operatorSubMode === "manual"
               ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
               : "bg-white/5 text-slate-400 border border-white/10 hover:text-slate-200"

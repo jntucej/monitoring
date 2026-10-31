@@ -60,7 +60,7 @@ export default function StudentPermissionsPage() {
 
   return (
     <AuthGuard allowedRoles={["student"]}>
-      <div className="p-4 md:p-4 sm:p-4 sm:p-6 space-y-4 sm:space-y-4 sm:space-y-6 max-w-4xl mx-auto">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -70,7 +70,7 @@ export default function StudentPermissionsPage() {
             <p className="text-xs md:text-sm text-[var(--text-muted)]">Track your requests and approvals</p>
           </div>
           <Link href="/student/permissions/new">
-            <Button className="gap-2 bg-[var(--action-primary)] hover:opacity-90 text-white font-semibold">
+            <Button className="min-h-[44px] gap-2 bg-[var(--action-primary)] hover:opacity-90 text-white font-semibold">
               <Plus className="w-4 h-4" /> New Permission
             </Button>
           </Link>
@@ -83,7 +83,7 @@ export default function StudentPermissionsPage() {
           </div>
         )}
 
-        <div className="flex gap-1.5 overflow-x-auto pb-1">
+        <div className="flex flex-wrap gap-2 pb-1">
           {FILTERS.map((f) => {
             const count =
               f === "ALL" ? tickets.length : tickets.filter((t) => t.status === f).length;
@@ -92,7 +92,7 @@ export default function StudentPermissionsPage() {
                 key={f}
                 type="button"
                 onClick={() => setFilter(f)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                className={`min-h-[44px] inline-flex items-center justify-center px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
                   filter === f
                     ? "bg-[var(--action-primary)] text-white shadow"
                     : "bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"

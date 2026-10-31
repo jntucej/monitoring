@@ -41,7 +41,7 @@ function ModeCard({
       type="button"
       onClick={onClick}
       disabled={disabled || selected}
-      className={`w-full text-left rounded-xl border p-4 transition-all ${
+      className={`w-full min-h-[44px] text-left rounded-xl border p-4 transition-all ${
         selected
           ? `${color} border-current bg-current/10`
           : "border-[var(--border)] bg-[var(--bg-elevated)] hover:border-[var(--border)]"
@@ -123,7 +123,7 @@ function OperatorModeInner() {
   ];
 
   return (
-    <div className="mx-auto max-w-2xl space-y-5 px-4 py-6 md:px-6 min-w-0">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       <div className="min-w-0">
         <h2 className="text-lg font-bold text-[var(--text-primary)]">Gate Mode</h2>
         <p className="text-xs text-[var(--text-muted)] mt-1 min-w-0">
@@ -135,7 +135,7 @@ function OperatorModeInner() {
         <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-300 flex items-center gap-2 min-w-0">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <span className="truncate">{error}</span>
-          <button type="button" onClick={() => void loadMode()} className="ml-auto text-xs font-semibold hover:underline shrink-0">Retry</button>
+          <button type="button" onClick={() => void loadMode()} className="ml-auto min-h-[44px] inline-flex items-center text-xs font-semibold hover:underline shrink-0">Retry</button>
         </div>
       )}
 
@@ -201,7 +201,7 @@ function OperatorModeInner() {
               onChange={(e) => setReason(e.target.value)}
               placeholder="e.g. Scheduled system update"
               disabled={submitting}
-              className="w-full px-3 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-base)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none disabled:opacity-50"
+              className="w-full min-h-[44px] px-3 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-base)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none disabled:opacity-50"
             />
           </div>
 
@@ -212,7 +212,7 @@ function OperatorModeInner() {
               if (selected) void handleSetMode(selected.mode);
             }}
             disabled={submitting || !mode}
-            className="w-full rounded-lg bg-[var(--action-primary)] px-4 py-2.5 text-sm font-bold text-slate-950 hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
+            className="w-full min-h-[44px] inline-flex items-center justify-center rounded-lg bg-[var(--action-primary)] px-4 py-2.5 text-sm font-bold text-slate-950 hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
           >
             {submitting ? (
               <span className="flex items-center justify-center gap-2">

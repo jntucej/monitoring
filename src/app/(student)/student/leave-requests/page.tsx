@@ -84,7 +84,7 @@ function StudentLeaveRequestsInner() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl space-y-5 px-4 py-6 md:px-6 min-w-0">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       <div className="flex items-center gap-2">
         <FileText className="w-5 h-5 text-[var(--action-primary)]" />
         <p className="text-sm font-semibold text-[var(--text-primary)]">Leave Requests</p>
@@ -105,7 +105,7 @@ function StudentLeaveRequestsInner() {
           </div>
           <Link
             href="/student/request-tracking"
-            className="inline-flex items-center gap-1 text-xs font-bold text-emerald-400 hover:underline shrink-0"
+            className="inline-flex min-h-[44px] items-center gap-1 text-xs font-bold text-emerald-400 hover:underline shrink-0"
           >
             Track <ArrowRight className="w-3 h-3" />
           </Link>
@@ -122,7 +122,7 @@ function StudentLeaveRequestsInner() {
                 key={k.kind}
                 type="button"
                 onClick={() => handleLeaveTypeSelect(k.kind)}
-                className={`p-3 rounded-xl border text-left transition-colors ${
+                className={`min-h-[44px] p-3 rounded-xl border text-left transition-colors ${
                   selectedKind === k.kind
                     ? "border-[var(--action-primary)] bg-[var(--action-primary)]/10"
                     : "border-[var(--border)] bg-[var(--bg-elevated)] hover:border-[var(--text-muted)]"
@@ -143,7 +143,7 @@ function StudentLeaveRequestsInner() {
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-full p-2.5 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)]"
+              className="w-full min-h-[44px] p-2.5 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)]"
               required
               disabled={submitting}
             />
@@ -155,7 +155,7 @@ function StudentLeaveRequestsInner() {
               value={endDate}
               min={startDate || undefined}
               onChange={(e) => setEndDate(e.target.value)}
-              className="w-full p-2.5 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)]"
+              className="w-full min-h-[44px] p-2.5 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)]"
               required
               disabled={submitting}
             />
@@ -179,7 +179,7 @@ function StudentLeaveRequestsInner() {
           <button
             type="submit"
             disabled={submitting}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--action-primary)] px-4 py-2.5 text-xs font-bold text-white shadow-md hover:opacity-90 disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl bg-[var(--action-primary)] px-4 py-2.5 text-xs font-bold text-white shadow-md hover:opacity-90 disabled:opacity-50"
           >
             {submitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Clock className="w-3.5 h-3.5" />}
             Submit Leave Request
@@ -187,11 +187,11 @@ function StudentLeaveRequestsInner() {
         </div>
       </form>
 
-      <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-elevated)]/40 p-3 text-xs flex items-center justify-between gap-3 min-w-0">
+      <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-elevated)]/40 p-3 text-xs flex flex-wrap items-center justify-between gap-3 min-w-0">
         <span className="text-[var(--text-muted)]">All your leave and pass requests appear in one timeline.</span>
         <Link
           href="/student/request-tracking"
-          className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20 shrink-0"
+          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20 shrink-0"
         >
           Request Tracking <ArrowRight className="w-3.5 h-3.5" />
         </Link>
