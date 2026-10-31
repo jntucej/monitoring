@@ -50,10 +50,20 @@ GRANT EXECUTE ON FUNCTION public.issue_enrollment_code(UUID, TEXT) TO service_ro
 -- Additional fixes referenced in audit:
 -- ============================================================================
 
--- DB-9: Add soft-delete to permissions (cancelled tickets should not persist)
-ALTER TABLE public.permission_requests ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
+-- DB-9: Add soft-delete to permissions (cancelled tickets should not persist).
+-- NOTE: permission_requests was renamed to permissions and wrapped in a
+-- VIEW by 20261026000001_permission_workflow_reconciliation. The VIEW
+-- cannot be ALTERed, so deleted_at is added to the base table permissions
+-- and the view is re-created to carry the new column through. The partial
+-- index is created on the base table permissions, not the view.
+ALTER TABLE public.permissions ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
+-- Recreate the compatibility view over the base table so the new deleted_at
+-- column is carried through. SELECT * avoids duplicating any column that a
+-- later view recreation may have already aliased (e.g. student_user_id).
+CREATE OR REPLACE VIEW public.permission_requests AS
+  SELECT * FROM public.permissions;
 CREATE INDEX IF NOT EXISTS idx_permission_requests_deleted 
-  ON public.permission_requests(deleted_at) 
+  ON public.permissions(deleted_at) 
   WHERE deleted_at IS NULL;
 
 -- R9-5: Add used_at to gate_passes for replay protection
