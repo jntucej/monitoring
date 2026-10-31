@@ -12,6 +12,7 @@ const MANIFEST = {
   role: "mess_incharge",
   brand: { short: "Mess", long: "Mess Console" },
   rootHref: "/mess",
+  hasProfile: false,
   storageKey: NAV_STORAGE_KEY,
   nav: MESS_NAV,
 };

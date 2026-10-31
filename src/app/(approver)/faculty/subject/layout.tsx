@@ -12,6 +12,7 @@ const MANIFEST = {
   role: "subject_faculty",
   brand: { short: "Subject Faculty", long: "Teaching Console" },
   rootHref: "/faculty/subject",
+  hasProfile: false,
   storageKey: NAV_STORAGE_KEY,
   nav: SUBJECT_FACULTY_NAV,
 };

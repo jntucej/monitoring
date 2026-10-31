@@ -12,6 +12,7 @@ const MANIFEST = {
   role: "exam_branch",
   brand: { short: "Exam Branch", long: "Records Console" },
   rootHref: "/exam-branch",
+  hasProfile: false,
   storageKey: NAV_STORAGE_KEY,
   nav: EXAM_BRANCH_NAV,
 };

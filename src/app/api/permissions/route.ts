@@ -320,12 +320,17 @@ async function handleGet(
     where.push(`current_stage = $${params.length}`);
   } else if (["mess_incharge", "worker"].includes(role)) {
     // Operational roles: no approval queue of their own. Their consoles poll
-    // /api/permissions for the shared "Quick Actions" widget — returning 403
-    // here spammed the console with errors on every mount. Scope them to a
-    // stage no ticket can be routed to, so they always get an empty queue
-    // instead of a 403.
-    params.push("mess_incharge_internal_only");
-    where.push(`current_stage = $${params.length}`);
+    // /api/permissions for the shared "Quick Actions" widget — return an
+    // explicit empty queue instead of 403ing or querying a nonexistent stage
+    // value (the `current_stage` column has a check constraint and would
+    // reject any made-up stage string with 22P02).
+    return NextResponse.json({
+      success: true,
+      data: {
+        permissions: [],
+        summary: { pending: 0, granted: 0, denied: 0, expired: 0, total: 0 },
+      },
+    });
   } else {
     return fail("FORBIDDEN", "Role has no permission visibility", 403);
   }

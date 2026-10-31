@@ -26,4 +26,7 @@ export interface RoleManifest {
   nav: NavEntry[];
   /** Optional footer slot (streak pills, focus-mode trigger). */
   footer?: React.ComponentType;
+  /** When false, the sidebar footer omits the "Account settings" profile link
+   *  (set for roles whose console has no /{role}/profile route). */
+  hasProfile?: boolean;
 }

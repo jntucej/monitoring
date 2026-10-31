@@ -12,6 +12,7 @@ const MANIFEST = {
   role: "exam_superintendent",
   brand: { short: "Exam Superintendent", long: "Exam Day Console" },
   rootHref: "/exam/superintendent",
+  hasProfile: false,
   storageKey: NAV_STORAGE_KEY,
   nav: EXAM_SUPER_NAV,
 };

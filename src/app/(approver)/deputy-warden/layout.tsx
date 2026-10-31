@@ -12,6 +12,7 @@ const MANIFEST = {
   role: "deputy_warden",
   brand: { short: "Deputy Warden", long: "Hostel Ops" },
   rootHref: "/deputy-warden",
+  hasProfile: false,
   storageKey: NAV_STORAGE_KEY,
   nav: DEPUTY_WARDEN_NAV,
 };

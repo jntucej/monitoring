@@ -12,6 +12,7 @@ const MANIFEST = {
   role: "hostel_manager",
   brand: { short: "Hostel Manager", long: "Residence Console" },
   rootHref: "/hostel-manager",
+  hasProfile: false,
   storageKey: NAV_STORAGE_KEY,
   nav: HOSTEL_MANAGER_NAV,
 };

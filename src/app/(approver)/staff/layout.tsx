@@ -12,6 +12,7 @@ const MANIFEST = {
   role: "staff",
   brand: { short: "Staff", long: "Staff Console" },
   rootHref: "/staff",
+  hasProfile: false,
   storageKey: NAV_STORAGE_KEY,
   nav: STAFF_NAV,
 };

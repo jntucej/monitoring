@@ -12,6 +12,7 @@ const MANIFEST = {
   role: "emo",
   brand: { short: "EMO", long: "Electrical Maintenance" },
   rootHref: "/emo",
+  hasProfile: false,
   storageKey: NAV_STORAGE_KEY,
   nav: EMO_NAV,
 };

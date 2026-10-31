@@ -12,6 +12,7 @@ const MANIFEST = {
   role: "oie",
   brand: { short: "OIE", long: "Exam Console" },
   rootHref: "/oie",
+  hasProfile: false,
   storageKey: NAV_STORAGE_KEY,
   nav: OIE_NAV,
 };

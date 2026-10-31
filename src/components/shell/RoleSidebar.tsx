@@ -112,13 +112,15 @@ export function RoleSidebar({
 
       <footer className="shrink-0 border-t border-[var(--border)] p-2 space-y-1">
         {Footer && <Footer />}
-        <Link
-          href={`${manifest.rootHref}/profile`}
-          onClick={close}
-          className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]"
-        >
-          Account settings
-        </Link>
+        {manifest.hasProfile !== false && (
+          <Link
+            href={`${manifest.rootHref}/profile`}
+            onClick={close}
+            className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]"
+          >
+            Account settings
+          </Link>
+        )}
       </footer>
     </div>
   );

@@ -12,6 +12,7 @@ const MANIFEST = {
   role: "parent",
   brand: { short: "Parent", long: "Guardian Console" },
   rootHref: "/parent",
+  hasProfile: false,
   storageKey: NAV_STORAGE_KEY,
   nav: PARENT_NAV,
 };

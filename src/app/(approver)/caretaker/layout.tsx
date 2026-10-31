@@ -12,6 +12,7 @@ const MANIFEST = {
   role: "caretaker",
   brand: { short: "Caretaker", long: "Facilities Console" },
   rootHref: "/caretaker",
+  hasProfile: false,
   storageKey: NAV_STORAGE_KEY,
   nav: CARETAKER_NAV,
 };
