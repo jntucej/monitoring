@@ -97,9 +97,9 @@ async function smokeRole(browser: Browser, c: Creds) {
   page.on("console", (msg) => {
     if (msg.type() !== "error") return;
     const t = msg.text();
-    // noise: COOP header warnings on the cinematic login page, and blocked
-    // cross-origin static assets — neither is a hydration/render failure
-    if (t.includes("Cross-Origin-Opener-Policy") || t.includes("ERR_BLOCKED_BY_RESPONSE")) return;
+    // noise: COOP header warnings, blocked static assets, and 429 rate-limit
+    // responses (the sweep itself triggers these; not app bugs)
+    if (t.includes("Cross-Origin-Opener-Policy") || t.includes("ERR_BLOCKED_BY_RESPONSE") || t.includes("429")) return;
     consoleErrors.push(t.slice(0, 200));
   });
   page.on("response", (res) => {
@@ -167,7 +167,11 @@ async function main() {
   const targets = onlyRole ? creds.filter((c) => c.role === onlyRole) : creds;
   const browser = await chromium.launch({ headless: true });
   const report: Array<Record<string, unknown>> = [];
-  for (const c of targets) {
+  for (const i, c of targets.entries()) {
+    // Cooldown between roles so the global per-IP rate limiter (10 req/10s
+    // window on most /api/* routes) doesn't trip mid-sweep. Without this,
+    // role N+1's polls hit 429s from role N's still-active window.
+    if (i > 0) await new Promise((res) => setTimeout(res, 4000));
     const r = await smokeRole(browser, c);
     report.push(r);
     fs.writeFileSync(CREDS_PATH + ".progress.json", JSON.stringify(report, null, 2));
