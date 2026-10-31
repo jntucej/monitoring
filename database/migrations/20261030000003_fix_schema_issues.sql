@@ -22,117 +22,19 @@ DROP INDEX IF EXISTS public.users_email_lower_key;
 
 -- First check if constraint exists and get current values
 DO $$
-DECLARE
-  current_actions TEXT;
-  missing_actions TEXT[] := ARRAY[
-    'COMPLAINT_CREATED', 'COMPLAINT_UPDATED', 'COMPLAINT_RESOLVED', 'COMPLAINT_ESCALATED',
-    'SOS_ALERT_RAISED', 'SOS_ALERT_RESPONDED', 'SOS_ALERT_CLEARED',
-    'DELEGATION_CREATED', 'DELEGATION_REVOKED', 'DELEGATION_TRANSFERRED',
-    'MEAL_OPT_IN', 'MEAL_OPT_OUT', 'MEAL_TOKEN_REDEEMED',
-    'GUARDIAN_VERIFIED', 'GUARDIAN_UNVERIFIED',
-    'ANTI_RAGGING_REPORTED', 'ANTI_RAGGING_INVESTIGATED', 'ANTI_RAGGING_RESOLVED'
-  ];
 BEGIN
-  -- Check if constraint exists
-  IF EXISTS (
-    SELECT 1 FROM pg_constraint 
-    WHERE conname = 'audit_logs_action_known' 
-    AND conrelid = 'public.audit_logs'::regclass
-  ) THEN
-    -- Get current constraint definition
-    SELECT pg_get_constraintdef(oid) 
-    INTO current_actions
-    FROM pg_constraint 
-    WHERE conname = 'audit_logs_action_known' 
-    AND conrelid = 'public.audit_logs'::regclass;
-    
-    -- Log for debugging
-    RAISE NOTICE 'Current audit_logs constraint exists. Adding missing actions...';
-    
-    -- Drop and recreate with extended actions
-    ALTER TABLE public.audit_logs DROP CONSTRAINT audit_logs_action_known;
-    
-    ALTER TABLE public.audit_logs
-      ADD CONSTRAINT audit_logs_action_known
-      CHECK (action IN (
-        'LOGIN','LOGOUT','LOGIN_FAILED',
-        'PASS_CREATED','PASS_APPROVED','PASS_REJECTED','GATE_PASS_CREATED',
-        'GATE_PASS_APPROVED','GATE_PASS_REJECTED','GATE_PASS_UPDATED',
-        'SCAN_CREATED','GATE_SCAN_RECORDED','SCAN_CORRECTED','MOVEMENT_CREATED',
-        'VISITOR_CHECK_IN','VISITOR_CHECK_OUT',
-        'USER_CREATED','USER_UPDATED','USER_DELETED','USER_DEACTIVATED',
-        'ROLE_CHANGED','ACCOUNT_STATUS_CHANGED','PERMISSION_CHANGED',
-        'SYSTEM_CONFIG_CHANGED','DATA_EXPORTED',
-        'BACKUP_CREATED','BACKUP_RESTORED',
-        'EMERGENCY_BROADCAST','GATE_OFFLINE','GATE_ONLINE',
-        'SMART_SCHEDULE_APPLIED','CRON_REPORTS_EXECUTED',
-        'PIN_CHANGED','PASSWORD_CHANGED',
-        'SESSION_FORCE_REVOKED','SESSION_VERSION_BUMP',
-        'BACK_GATE_GEO_MISMATCH','REFRESH_REVOKED_TOKEN_USED',
-        'THUMBPRINT_REGISTERED','THUMBPRINT_CLEARED',
-        'MFA_ENROLL_REPLAY_BLOCKED','EMERGENCY_MFA_TOKEN_GENERATED',
-        'MFA_RECOVERY_CODES_REGENERATED','MFA_OVERRIDE_ACTIVE',
-        'FILE_UPLOADED','BULK_STUDENT_UPDATE','BATCH_PROMOTION',
-        'ALERT_RESOLVE_DENIED','ALERT_RESOLVED',
-        'HOD_CROSS_DEPT_ATTEMPT','SUPPORT_TICKET_UPDATED',
-        'RETENTION_RUN','PREDICTIONS_RETRAINED',
-        'GATE_PASS_BULK_APPROVED','ADMIN_STREAM_OTHER_USER',
-        'MFA_REQUIRED_FOR_ADMIN_CHANGED','ROLE_REGISTRY_CHANGED',
-        'PHOTO_CAPTURED','PHOTO_CAPTURE_CONSENT_DENIED',
-        'MANUAL_ENTRY_AUTHORIZED','MANUAL_ENTRY_DENIED',
-        'ENROLLMENT_CODE_ISSUED','ENROLLMENT_CODE_REDEEMED',
-        'ENROLLMENT_CODE_REJECTED','USER_ONBOARDED',
-        'ROLE_GRANTED','ROLE_REVOKED','MOBILE_ENROLLMENT_CODE_ISSUED',
-        -- New actions added for R1-5
-        'COMPLAINT_CREATED','COMPLAINT_UPDATED','COMPLAINT_RESOLVED','COMPLAINT_ESCALATED',
-        'SOS_ALERT_RAISED','SOS_ALERT_RESPONDED','SOS_ALERT_CLEARED',
-        'DELEGATION_CREATED','DELEGATION_REVOKED','DELEGATION_TRANSFERRED',
-        'MEAL_OPT_IN','MEAL_OPT_OUT','MEAL_TOKEN_REDEEMED',
-        'GUARDIAN_VERIFIED','GUARDIAN_UNVERIFIED',
-        'ANTI_RAGGING_REPORTED','ANTI_RAGGING_INVESTIGATED','ANTI_RAGGING_RESOLVED'
-      ));
-  ELSE
-    -- Create constraint if it doesn't exist
-    ALTER TABLE public.audit_logs
-      ADD CONSTRAINT audit_logs_action_known
-      CHECK (action IN (
-        'LOGIN','LOGOUT','LOGIN_FAILED',
-        'PASS_CREATED','PASS_APPROVED','PASS_REJECTED','GATE_PASS_CREATED',
-        'GATE_PASS_APPROVED','GATE_PASS_REJECTED','GATE_PASS_UPDATED',
-        'SCAN_CREATED','GATE_SCAN_RECORDED','SCAN_CORRECTED','MOVEMENT_CREATED',
-        'VISITOR_CHECK_IN','VISITOR_CHECK_OUT',
-        'USER_CREATED','USER_UPDATED','USER_DELETED','USER_DEACTIVATED',
-        'ROLE_CHANGED','ACCOUNT_STATUS_CHANGED','PERMISSION_CHANGED',
-        'SYSTEM_CONFIG_CHANGED','DATA_EXPORTED',
-        'BACKUP_CREATED','BACKUP_RESTORED',
-        'EMERGENCY_BROADCAST','GATE_OFFLINE','GATE_ONLINE',
-        'SMART_SCHEDULE_APPLIED','CRON_REPORTS_EXECUTED',
-        'PIN_CHANGED','PASSWORD_CHANGED',
-        'SESSION_FORCE_REVOKED','SESSION_VERSION_BUMP',
-        'BACK_GATE_GEO_MISMATCH','REFRESH_REVOKED_TOKEN_USED',
-        'THUMBPRINT_REGISTERED','THUMBPRINT_CLEARED',
-        'MFA_ENROLL_REPLAY_BLOCKED','EMERGENCY_MFA_TOKEN_GENERATED',
-        'MFA_RECOVERY_CODES_REGENERATED','MFA_OVERRIDE_ACTIVE',
-        'FILE_UPLOADED','BULK_STUDENT_UPDATE','BATCH_PROMOTION',
-        'ALERT_RESOLVE_DENIED','ALERT_RESOLVED',
-        'HOD_CROSS_DEPT_ATTEMPT','SUPPORT_TICKET_UPDATED',
-        'RETENTION_RUN','PREDICTIONS_RETRAINED',
-        'GATE_PASS_BULK_APPROVED','ADMIN_STREAM_OTHER_USER',
-        'MFA_REQUIRED_FOR_ADMIN_CHANGED','ROLE_REGISTRY_CHANGED',
-        'PHOTO_CAPTURED','PHOTO_CAPTURE_CONSENT_DENIED',
-        'MANUAL_ENTRY_AUTHORIZED','MANUAL_ENTRY_DENIED',
-        'ENROLLMENT_CODE_ISSUED','ENROLLMENT_CODE_REDEEMED',
-        'ENROLLMENT_CODE_REJECTED','USER_ONBOARDED',
-        'ROLE_GRANTED','ROLE_REVOKED','MOBILE_ENROLLMENT_CODE_ISSUED',
-        -- New actions
-        'COMPLAINT_CREATED','COMPLAINT_UPDATED','COMPLAINT_RESOLVED','COMPLAINT_ESCALATED',
-        'SOS_ALERT_RAISED','SOS_ALERT_RESPONDED','SOS_ALERT_CLEARED',
-        'DELEGATION_CREATED','DELEGATION_REVOKED','DELEGATION_TRANSFERRED',
-        'MEAL_OPT_IN','MEAL_OPT_OUT','MEAL_TOKEN_REDEEMED',
-        'GUARDIAN_VERIFIED','GUARDIAN_UNVERIFIED',
-        'ANTI_RAGGING_REPORTED','ANTI_RAGGING_INVESTIGATED','ANTI_RAGGING_RESOLVED'
-      ));
-  END IF;
+  -- R1-5 / R6-1 audit action set is now owned SOLELY by
+  -- 20270101000014_audit_action_canonical_owner.sql (the single owner-of-record
+  -- for audit_logs_action_known). This migration's drop/recreate with the
+  -- narrow historical IN-list was removed: on any environment where the
+  -- canonical owner migration (or later code) has introduced new actions,
+  -- the narrow IN-list re-add fails with
+  -- "check constraint audit_logs_action_known ... violated by some row" and
+  -- aborts the whole replay. The constraint is now a monotonic widen-only
+  -- surface owned by 20270101000014; this block is a no-op kept for
+  -- structural replay (the DROP/ADD inside the DO was the only non-trivial
+  -- statement here, and it has been replaced by the canonical owner).
+  NULL;
 END $$;
 
 -- ============================================================================
