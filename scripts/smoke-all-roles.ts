@@ -167,13 +167,13 @@ async function main() {
   const targets = onlyRole ? creds.filter((c) => c.role === onlyRole) : creds;
   const browser = await chromium.launch({ headless: true });
   const report: Array<Record<string, unknown>> = [];
-  for (const i, c of targets.entries()) {
+  for (let i = 0; i < targets.length; i++) {
+    const c = targets[i];
     // Cooldown between roles so the global per-IP rate limiter (10 req/10s
-    // window on most /api/* routes) doesn't trip mid-sweep. Without this,
-    // role N+1's polls hit 429s from role N's still-active window.
+    // window on most /api/* routes) doesn't trip mid-sweep.
     if (i > 0) await new Promise((res) => setTimeout(res, 4000));
-    const r = await smokeRole(browser, c);
-    report.push(r);
+    const result = await smokeRole(browser, c);
+    report.push(result);
     fs.writeFileSync(CREDS_PATH + ".progress.json", JSON.stringify(report, null, 2));
     const bad = r as { role: string; ok: boolean; consoleErrors: string[]; badApis: string[]; leaves: Array<{ leaf: string; status: number; anchorOk: boolean; error: string | null }>; reason?: string };
     const status = bad.reason ? `LOGIN FAILED` : bad.ok ? "PASS" : "FAIL";
