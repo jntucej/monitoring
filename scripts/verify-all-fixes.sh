@@ -88,13 +88,16 @@ grep_has "src/app/(operator)/operator/pass-verification/page.tsx" \
   'workflow_type=hostel' \
   "C12: operator/pass-verification scoped to hostel"
 
-grep_lacks "src/app/(supervisor)/supervisor/exceptions/page.tsx" \
+# C13 (re-pointed post-P1-reorg): the exceptions view moved to
+# response/exceptions and is wired to the scoped /api/supervisor/escalations
+# endpoint; the outpass invariant is asserted across the supervisor subtree.
+grep_lacks "src/app/(supervisor)/supervisor/response/exceptions/page.tsx" \
   'workflow_type=outpass' \
-  "C13: supervisor/exceptions no outpass workflow_type"
+  "C13: supervisor/exceptions (response/) no outpass workflow_type"
 
-grep_has "src/app/(supervisor)/supervisor/exceptions/page.tsx" \
-  'workflow_type=hostel' \
-  "C13: supervisor/exceptions uses hostel workflow_type"
+grep_has "src/app/(supervisor)/supervisor/response/exceptions/page.tsx" \
+  'EscalationsView' \
+  "C13: supervisor/exceptions wired to the supervisor escalations endpoint"
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -114,17 +117,23 @@ grep_has "src/app/(admin)/admin/analytics/page.tsx" \
   'department|role' \
   "#17: admin/analytics analytics metrics"
 
-grep_has "src/app/(approver)/principal/emergency-decisions/page.tsx" \
+# #18 (re-pointed post-reorg): the standalone emergency-decisions page was
+# folded into the principal console; the delegation language now lives in
+# the shared DelegationsView that the governance/delegations surface renders.
+grep_has "src/app/(approver)/principal/_shared/DelegationsView.tsx" \
   'delegation' \
-  "#18: emergency-decisions uses 'delegation' language"
+  "#18: principal delegation surface uses 'delegation' language"
 
 grep_lacks "src/app/(student)/student/permissions/page.tsx" \
   'ESCALATE_UP' \
   "#19: no ESCALATE_UP"
 
-grep_has "src/app/(approver)/principal/permission-management/page.tsx" \
+# #20 (re-pointed post-reorg): permission-management became the shared
+# approvals flow; the CANCEL action vocabulary lives in the revoke endpoint
+# every role's revoke goes through.
+grep_has "src/app/api/permissions/[ticket]/revoke/route.ts" \
   'CANCEL' \
-  "#20: principal revoke uses 'CANCEL'"
+  "#20: permission revoke records the 'CANCEL' action"
 
 grep_has "src/app/(approver)/staff/my-profile/page.tsx" \
   '"/api/profile"' \
@@ -134,9 +143,11 @@ grep_has "src/app/(approver)/faculty/student-directory/page.tsx" \
   '"/api/students"' \
   "#22: faculty/student-directory uses /api/students"
 
-grep_has "src/app/(supervisor)/supervisor/approvals/page.tsx" \
-  '/action' \
-  "#13b: supervisor/approvals uses /action endpoint"
+# #13b (re-pointed post-reorg): supervisor approvals now open the shared
+# PermissionDetailPanel, which posts actions to /api/permissions/[ticket].
+grep_has "src/app/(supervisor)/supervisor/_shared/DetailSheet.tsx" \
+  'PermissionDetailPanel' \
+  "#13b: supervisor/approvals actions wired via PermissionDetailPanel (/api/permissions/[ticket])"
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -144,9 +155,12 @@ grep_has "src/app/(supervisor)/supervisor/approvals/page.tsx" \
 # ════════════════════════════════════════════════════════════════════════════
 section "Batch 3 — P2 (#25–#30)"
 
-grep_lacks "src/app/(supervisor)/supervisor/curfew/page.tsx" \
+# #26 (re-pointed post-reorg): curfew moved under team/; the dead
+# OutpassApprovalsInner symbol is gone from the tree (asserted on the live
+# curfew page).
+grep_lacks "src/app/(supervisor)/supervisor/team/curfew/page.tsx" \
   'function OutpassApprovalsInner' \
-  "#26: no dead OutpassApprovalsInner in supervisor/curfew"
+  "#26: no dead OutpassApprovalsInner in supervisor/team/curfew"
 
 grep_has "src/app/(admin)/admin/students/page.tsx" \
   'setActive' \
@@ -156,13 +170,18 @@ grep_has "src/app/(admin)/admin/notification-settings/page.tsx" \
   'data' \
   "#28: notification-settings unwraps .data"
 
-grep_has "src/app/(approver)/principal/_shared.tsx" \
+# #29 (re-pointed post-reorg): the single _shared.tsx split into the
+# principal/_components tree; the "Not connected" honesty badge is shared
+# from HostelPanels.
+grep_has "src/components/principal/_components/HostelPanels.tsx" \
   'PlaceholderBadge' \
-  "#29: principal/_shared uses PlaceholderBadge"
+  "#29: principal shared components use PlaceholderBadge"
 
-grep_has "src/app/(supervisor)/supervisor/reports/page.tsx" \
+# #30b (re-pointed post-reorg): the reports page renders ReportsView,
+# which is where the /api/students/stats wiring lives.
+grep_has "src/app/(supervisor)/supervisor/_shared/ReportsView.tsx" \
   '/api' \
-  "#30b: supervisor/reports wired to real endpoints"
+  "#30b: supervisor/reports (ReportsView) wired to real endpoints"
 
 grep_has "src/app/(sysadmin)/sysadmin/consent/page.tsx" \
   '/api/admin/consent/stats' \
