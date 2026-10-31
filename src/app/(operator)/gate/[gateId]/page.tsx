@@ -75,24 +75,29 @@ function OperatorPageInner() {
   const currentTab = isSpecialPath && gateIdParam === "history" ? "history" : (searchParams?.get("tab") || "scandesk");
   
   const { addToast } = useToast();
-  const operatorStore = useOperatorStore();
-  const {
-    state,
-    currentStudent,
-    currentCampusStatus,
-    lastScan,
-    selectedDirection,
-    todaysStats,
-    recentScans,
-    outing,
-    error,
-    startScan,
-    cancelScan,
-    reset,
-    setGate,
-    loadStats,
-  } = operatorStore;
-  const confirmScan = operatorStore.confirmScan;
+  // Subscribe via individual selectors, NOT the whole store object.
+  // A full `useOperatorStore()` call re-renders this 900-line component
+  // on every store field change (scan state, stats, lockdown, etc.),
+  // which drives the "too many re-renders" React #310 loop on the
+  // operator console.
+  const state = useOperatorStore((s) => s.state);
+  const currentStudent = useOperatorStore((s) => s.currentStudent);
+  const currentCampusStatus = useOperatorStore((s) => s.currentCampusStatus);
+  const lastScan = useOperatorStore((s) => s.lastScan);
+  const selectedDirection = useOperatorStore((s) => s.selectedDirection);
+  const todaysStats = useOperatorStore((s) => s.todaysStats);
+  const recentScans = useOperatorStore((s) => s.recentScans);
+  const outing = useOperatorStore((s) => s.outing);
+  const error = useOperatorStore((s) => s.error);
+  const startScan = useOperatorStore((s) => s.startScan);
+  const cancelScan = useOperatorStore((s) => s.cancelScan);
+  const reset = useOperatorStore((s) => s.reset);
+  const setGate = useOperatorStore((s) => s.setGate);
+  const loadStats = useOperatorStore((s) => s.loadStats);
+  const confirmScan = useOperatorStore((s) => s.confirmScan);
+  const entryType = useOperatorStore((s) => s.entryType);
+  const lastOutReason = useOperatorStore((s) => s.lastOutReason);
+  const gateState = useOperatorStore((s) => s.gate);
 
   const [selectedScan, setSelectedScan] = useState<ScanRecord | null>(null);
   const [activeLockdown, setActiveLockdown] = useState<any>(null);
@@ -308,11 +313,11 @@ function OperatorPageInner() {
           const match = data.data.find(
             (g: any) => g.id === gateId || g.gate_code === gateId || g.gateCode === gateId || g.id === `gate-${gateId}`
           );
-          setGateName(match?.name || operatorStore.gate?.name || `Gate ${gateId}`);
+          setGateName(match?.name || gateState?.name || `Gate ${gateId}`);
         }
       })
-      .catch(() => setGateName(operatorStore.gate?.name || `Gate ${gateId}`));
-  }, [gateId, operatorStore.gate?.name]);
+      .catch(() => setGateName(gateState?.name || `Gate ${gateId}`));
+  }, [gateId, gateState?.name]);
 
   // useCallback: the reference must be stable across renders. The
   // `useEffect([handleQRScanned])` below (line 478) and the `onScan` prop
@@ -715,7 +720,7 @@ function OperatorPageInner() {
                 setOperatorSubMode("manual");
                 setManualRollInput(cmd.roll_number);
               } else if (cmd.action === "EXIT") {
-                if (currentStudent) confirmScan(addToast, "OUT", undefined, operatorStore.entryType ?? undefined);
+                if (currentStudent) confirmScan(addToast, "OUT", undefined, entryType ?? undefined);
               } else if (cmd.action === "UNKNOWN") {
                 cancelScan();
               }
@@ -764,8 +769,8 @@ function OperatorPageInner() {
               <ScanConfirmation
                 student={currentStudent}
                 campusStatus={currentCampusStatus}
-                currentEntryType={operatorStore.entryType}
-                lastOutReason={operatorStore.lastOutReason}
+                currentEntryType={entryType}
+                lastOutReason={lastOutReason}
                 onConfirm={async (dir, reason, entryType, buttonId) =>
                   await confirmScan(addToast, dir, reason, entryType, buttonId)
                 }
@@ -851,7 +856,7 @@ function OperatorPageInner() {
                       type="button"
                       id="retry-btn"
                       onClick={() => {
-                        if (currentStudent) { confirmScan(addToast, undefined, undefined, operatorStore.entryType ?? undefined); } else if (lastRollRef.current) { startScan(lastRollRef.current); } else { reset(); }
+                        if (currentStudent) { confirmScan(addToast, undefined, undefined, entryType ?? undefined); } else if (lastRollRef.current) { startScan(lastRollRef.current); } else { reset(); }
                       }}
                       className="px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs hover:bg-emerald-400 transition-colors active:scale-[0.98] flex items-center gap-1.5"
                     >

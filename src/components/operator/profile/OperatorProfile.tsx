@@ -12,7 +12,9 @@ import Link from "next/link";
 import { OperatorThemeToggle } from "@/components/operator/shared/OperatorThemeToggle";
 
 export function OperatorProfile() {
-  const { user, role, logout } = useAuthStore();
+  const user = useAuthStore((s) => s.user);
+  const role = useAuthStore((s) => s.role);
+  const logout = useAuthStore((s) => s.logout);
   const { theme, setTheme, addToast } = useUIStore();
 
   const handleLogout = async () => {

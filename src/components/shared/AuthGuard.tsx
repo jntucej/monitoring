@@ -14,7 +14,14 @@ interface AuthGuardProps {
 export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   const router = useRouter();
   const hasHydrated = useHasHydrated();
-  const { user, authenticated, checkSession } = useAuthStore();
+  // Subscribe via individual selectors, not the whole store object. A full
+  // `useAuthStore()` call re-renders this component on every store field
+  // change (including transient loading flags), which cascades into the
+  // child shell and triggers the React #310 "too many re-renders" loop on
+  // operator consoles where AuthGuard wraps RoleDesktopShell.
+  const user = useAuthStore((s) => s.user);
+  const authenticated = useAuthStore((s) => s.authenticated);
+  const checkSession = useAuthStore((s) => s.checkSession);
   const [isChecking, setIsChecking] = useState(true);
   const [timedOut, setTimedOut] = useState(false);
   const redirectCountRef = useRef(0);

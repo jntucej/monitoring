@@ -264,15 +264,9 @@
   },
   {
     "role": "exam_superintendent",
-    "ok": false,
+    "ok": true,
     "url": "https://monitor.ucej.in/exam/superintendent",
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 501 ()",
-      "Failed to load resource: the server responded with a status of 501 ()",
-      "Failed to load resource: the server responded with a status of 501 ()",
-      "Failed to load resource: the server responded with a status of 501 ()",
-      "Failed to load resource: the server responded with a status of 501 ()"
-    ],
+    "consoleErrors": [],
     "badApis": [],
     "leaves": [
       {
