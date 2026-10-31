@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, X, ArrowUpRight, Keyboard, Loader2 } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
+import { getAuthHeaders } from "@/lib/utils";
 import { useHodRetention } from "@/stores/hodRetentionStore";
 import { SlaBadge } from "@/components/approver/SlaBadge";
 import { useUIStore } from "@/stores/uiStore";
@@ -72,7 +73,7 @@ export function FocusMode({
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
-            ...((window as any).__getAuthHeaders?.() ?? {}),
+            ...getAuthHeaders(),
           },
           body: JSON.stringify({ action }),
         });

@@ -22,8 +22,18 @@ const PRIORITY_COLORS = {
   critical: 'text-rose-500',
 };
 
+// Roles the /api/notifications route actually serves. Polling for any
+// other role returns 403 and spams the console with errors on every
+// mount, so the bell renders inert (no data, no bell action count) for
+// roles outside this allowlist instead of firing a doomed request.
+const BELL_SUPPORTED_ROLES = new Set([
+  'admin', 'sysadmin', 'operator', 'supervisor',
+  'vice_principal', 'principal', 'hod', 'staff', 'faculty',
+]);
+
 export function NotificationBell() {
   const { user } = useAuthStore();
+  const bellSupported = BELL_SUPPORTED_ROLES.has(user?.role ?? '');
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
@@ -33,6 +43,7 @@ export function NotificationBell() {
   const isGlossyMotion = useGlossyMotion();
 
   const loadNotifications = async () => {
+    if (!bellSupported) return; // role not served by /api/notifications — stay inert
     if (!user?.id) return;
     setLoading(true);
     try {
@@ -50,7 +61,7 @@ export function NotificationBell() {
   };
 
   useEffect(() => {
-    if (user?.id) {
+    if (bellSupported && user?.id) {
       loadNotifications();
 
       // Realtime Server-Sent Events (SSE) stream for instant alerts
@@ -84,7 +95,7 @@ export function NotificationBell() {
         }
       };
     }
-  }, [user?.id, user?.role]);
+  }, [bellSupported, user?.id, user?.role]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
