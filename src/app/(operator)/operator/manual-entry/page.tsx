@@ -423,7 +423,7 @@ function ManualEntryInner() {
               <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
                 Direction
               </span>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {(["IN", "OUT"] as const).map((d) => (
                   <button
                     key={d}
@@ -479,7 +479,7 @@ function ManualEntryInner() {
                 >
                   Entry type
                 </label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setRecordEntryType("hosteller")}

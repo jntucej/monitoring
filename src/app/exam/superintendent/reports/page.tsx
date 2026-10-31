@@ -105,7 +105,7 @@ function ExamSuperintendentReportsInner() {
           </div>
 
           {/* Outcome breakdown */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 min-w-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-4 min-w-0">
             {busy ? (
               Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="h-14 animate-pulse rounded-lg bg-slate-800/40" />

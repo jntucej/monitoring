@@ -200,7 +200,7 @@ function AccessExceptionsInner() {
 
       {/* KPI strip */}
       <WidgetBoundary title="Access Exception KPIs">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 min-w-0">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
           <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
             <div className="flex items-center gap-2 text-slate-400 text-xs font-semibold uppercase tracking-wide">
               <FileWarning className="w-4 h-4 shrink-0" />

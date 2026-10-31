@@ -186,7 +186,7 @@ function MovementInfoInner() {
           </div>
 
           {/* KPI strip */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {[
               { label: "Wards linked", value: String(total), accent: "text-white" },
               { label: "Entries (recent)", value: String(entries), accent: "text-emerald-400" },
