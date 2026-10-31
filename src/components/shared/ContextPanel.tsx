@@ -163,7 +163,7 @@ export function ContextPanel({ row, onClose, historyHref = "/operator/transactio
         </div>
         <button
           onClick={onClose}
-          className="p-1.5 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-muted)] transition-colors shrink-0"
+          className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-muted)] transition-colors shrink-0"
           aria-label="Close context panel"
         >
           <X className="w-4 h-4" />

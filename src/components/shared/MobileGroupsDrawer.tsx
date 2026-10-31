@@ -45,7 +45,7 @@ export function MobileGroupsDrawer({ groups, roleRoot }: MobileGroupsDrawerProps
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Open navigation menu"
-        className="md:hidden fixed top-3 left-3 z-50 w-10 h-10 rounded-xl flex items-center justify-center border border-[var(--border)] bg-[var(--bg-elevated)]/95 backdrop-blur-md text-[var(--text-secondary)] active:scale-95 transition-transform"
+        className="md:hidden fixed top-3 left-3 z-50 min-w-[44px] min-h-[44px] rounded-xl flex items-center justify-center border border-[var(--border)] bg-[var(--bg-elevated)]/95 backdrop-blur-md text-[var(--text-secondary)] active:scale-95 transition-transform"
       >
         <Menu className="w-4 h-4" />
       </button>
@@ -80,7 +80,7 @@ export function MobileGroupsDrawer({ groups, roleRoot }: MobileGroupsDrawerProps
             type="button"
             onClick={() => setOpen(false)}
             aria-label="Close navigation menu"
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-colors"
+            className="min-w-[44px] min-h-[44px] rounded-lg flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-colors"
           >
             <X className="w-4 h-4" />
           </button>

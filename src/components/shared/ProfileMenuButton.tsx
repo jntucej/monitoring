@@ -170,7 +170,7 @@ export function ProfileMenuButton({
       </button>
 
       {open && (
-        <div className="absolute right-0 bottom-full sm:bottom-11 z-50 mb-2 w-64 sm:w-72 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-2xl overflow-hidden">
+        <div className="absolute right-0 bottom-full sm:bottom-11 z-50 mb-2 w-[calc(100vw-2rem)] sm:w-72 max-w-xs rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-2xl overflow-hidden max-h-[85dvh] overflow-y-auto">
           {/* Identity */}
           <div className="px-4 py-3 border-b border-[var(--border)]">
             <p className="text-sm font-bold text-[var(--text-primary)] truncate">
@@ -201,7 +201,7 @@ export function ProfileMenuButton({
                       onClick={() => setTheme(t)}
                       aria-label={`Switch to ${t} theme`}
                       className={cn(
-                        "w-7 h-7 rounded-lg flex items-center justify-center transition-all",
+                        "w-8 h-8 min-w-[32px] min-h-[32px] sm:w-7 sm:h-7 rounded-lg flex items-center justify-center transition-all",
                         active
                           ? "bg-[var(--action-primary)] text-white shadow-sm"
                           : "bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-[var(--border)]"
@@ -233,7 +233,7 @@ export function ProfileMenuButton({
                       onClick={() => pickAccent(id)}
                       aria-label={`Use ${a.label} accent`}
                       className={cn(
-                        "w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-95",
+                        "w-8 h-8 min-w-[32px] min-h-[32px] sm:w-7 sm:h-7 rounded-full flex items-center justify-center transition-all active:scale-95",
                         a.swatch,
                         active ? cn("ring-2 ring-offset-2 ring-offset-[var(--bg-surface)]", a.ring) : "opacity-70 hover:opacity-100"
                       )}

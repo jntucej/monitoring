@@ -1061,6 +1061,18 @@ button, a, [role="button"], .clickable-card {
   min-width: 44px;
 }
 
+/* Safe interactive touch wrapper utility */
+.touch-target-min {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Long unbroken words / strings safeguard across all containers */
+body {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
 /* Ensure all interactive elements have adequate touch targets on mobile */
 @media (max-width: 767px) {
   button,

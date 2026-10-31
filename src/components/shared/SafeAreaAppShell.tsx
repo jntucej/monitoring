@@ -116,7 +116,7 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.12, ease: "easeOut" }}
-                className="w-full flex flex-col"
+                className="w-full min-w-0 flex flex-col"
               >
                 {children}
               </motion.div>

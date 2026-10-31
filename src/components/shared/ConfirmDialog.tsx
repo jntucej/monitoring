@@ -34,7 +34,7 @@ export function ConfirmDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="relative w-full max-w-md bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 shadow-2xl">
+      <div className="relative w-full max-w-md max-h-[90dvh] overflow-y-auto bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 shadow-2xl">
         <div className="flex items-center gap-3 mb-4">
           <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center ${
             variant === "destructive" ? "bg-rose-500/20 text-rose-400" :

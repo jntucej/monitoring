@@ -97,21 +97,16 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
       break;
 
     case "principal":
-      // Principal is migrated to the RoleConsole shell (feed:dashboard via
-      // /api/principal/dashboard). Principal is a top authority role — scope
-      // is all workflows, no hostel/branch filter. Single console group of
-      // exactly 5 items so the IconRail stays lean. No "Campus Life" /
-      // "General & Support" groups. All 5 commands are pure navigation to the
-      // real principal sub-pages under /principal/.
       groups = [
         {
-          groupLabel: "Principal Console",
+          groupLabel: "Principal",
           items: [
-            { href: "/principal", label: "Dashboard", icon: "LayoutDashboard", badge: "OVERVIEW" },
-            { href: "/principal/delegation-manager", label: "Delegations", icon: "UserCog" },
-            { href: "/principal/audit", label: "Audit", icon: "ScrollText" },
-            { href: "/principal/reports", label: "Reports", icon: "FileSpreadsheet" },
-            { href: "/principal/approvals", label: "Approvals", icon: "CheckSquare", badge: "PENDING" },
+            { href: "/principal", label: "Today", icon: "LayoutDashboard" },
+            { href: "/principal/approvals/pending", label: "Approvals", icon: "CheckSquare" },
+            { href: "/principal/people/departments", label: "People", icon: "Users" },
+            { href: "/principal/operations/gates", label: "Operations", icon: "DoorOpen" },
+            { href: "/principal/examinations", label: "Exams", icon: "FileText" },
+            { href: "/principal/governance/audit", label: "Governance", icon: "Scale" },
           ],
         },
       ];

@@ -26,7 +26,7 @@ export function NetworkStatusBanner() {
   if (!isOffline) return null;
 
   return (
-    <div className="bg-rose-600 text-white px-4 py-2.5 text-xs font-bold flex items-center justify-center gap-2 shadow-lg z-50 sticky top-0 border-b border-rose-700 animate-in slide-in-from-top duration-200">
+    <div className="bg-rose-600 text-white px-4 py-2.5 text-xs font-bold flex items-center justify-center gap-2 shadow-lg z-50 sticky top-0 border-b border-rose-700 animate-in slide-in-from-top duration-200 max-w-full overflow-hidden break-words text-center">
       <WifiOff className="w-4 h-4 shrink-0 animate-pulse text-white" />
       <div className="flex items-center gap-1.5 flex-wrap justify-center">
         <span>⚠️ Server Connection Required —</span>

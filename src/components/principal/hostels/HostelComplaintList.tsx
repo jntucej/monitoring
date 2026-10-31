@@ -68,7 +68,7 @@ export function HostelComplaintList() {
             {complaints.slice(0, 10).map((c) => (
               <li key={c.id} className="min-w-0">
                 <Link
-                  href={`/principal/respond/complaints/${c.id}`}
+                  href={`/principal/operations/incidents`}
                   className="block p-2.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-[var(--text-muted)] transition-colors"
                 >
                   <div className="flex items-center gap-2 min-w-0">

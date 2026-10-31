@@ -44,15 +44,19 @@ export function AnnouncementBanner() {
   const current = activeAnnouncements[0];
 
   return (
-    <div className="bg-amber-500 text-white px-4 py-2 flex items-center justify-between text-sm shadow-md transition">
-      <div className="flex items-center gap-3">
+    <div className="bg-amber-500 text-white px-4 py-2 flex items-center justify-between text-sm shadow-md transition gap-2">
+      <div className="flex items-center gap-3 min-w-0 flex-1">
         <Megaphone className="w-5 h-5 flex-shrink-0 animate-bounce" />
-        <div>
+        <div className="min-w-0 truncate">
           <span className="font-semibold mr-2">[{current.title}]:</span>
           <span>{current.message}</span>
         </div>
       </div>
-      <button onClick={() => handleDismiss(current.id)} className="p-1 hover:bg-amber-600 rounded-full transition">
+      <button
+        onClick={() => handleDismiss(current.id)}
+        aria-label="Dismiss announcement"
+        className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-amber-600 rounded-full transition shrink-0"
+      >
         <X className="w-4 h-4" />
       </button>
     </div>

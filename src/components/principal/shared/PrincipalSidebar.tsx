@@ -93,8 +93,8 @@ const NAV_CATEGORIES = [
     icon: <Share2 className="h-4 w-4" />,
     defaultOpen: false,
     items: [
-      { href: "/principal/delegation-manager", label: "Rules", icon: Settings },
-      { href: "/principal/delegation-manager", label: "In Force", icon: CheckCircle2 },
+      { href: "/principal/governance/delegations", label: "Rules", icon: Settings },
+      { href: "/principal/governance/delegations", label: "In Force", icon: CheckCircle2 },
       { href: "/principal/audit", label: "History", icon: History },
     ],
   },

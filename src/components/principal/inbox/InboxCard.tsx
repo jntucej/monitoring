@@ -38,7 +38,7 @@ export interface InboxCardProps {
 /**
  * InboxCard — mobile-first card showing SLA badge, stage tag,
  * student name/roll, workflow/reason, and forwarded-by.
- * Tapping opens InboxDetailSheet (or navigates to /principal/inbox/[ticket]).
+ * Tapping opens InboxDetailSheet (or navigates to /principal/approvals/pending).
  */
 export function InboxCard({ ticket, onOpenDetail, selected, onToggleSelect }: InboxCardProps) {
   const student = ticket.student;

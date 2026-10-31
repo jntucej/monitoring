@@ -9,10 +9,10 @@
  * five commands are pure navigations to the real principal sub-pages under
  * /principal/:
  *   dashboard    → /principal
- *   delegations  → /principal/delegation-manager
- *   audit        → /principal/audit
- *   reports      → /principal/reports
- *   approvals    → /principal/approvals
+ *   delegations  → /principal/governance/delegations
+ *   audit        → /principal/governance/audit
+ *   reports      → /principal/governance/reports
+ *   approvals    → /principal/approvals/pending
  *
  * Keyboard: up/down to navigate, Enter to execute, Escape to close.
  */
@@ -50,30 +50,30 @@ const COMMAND_DEFS: CommandDef[] = [
   {
     id: "delegations",
     label: "Open delegation manager",
-    hint: "delegations — Go to the delegation-manager page",
+    hint: "delegations — Go to the delegations page",
     icon: UserCog,
-    href: "/principal/delegation-manager",
+    href: "/principal/governance/delegations",
   },
   {
     id: "audit",
     label: "Open audit trail",
     hint: "audit — Go to the audit page",
     icon: ScrollText,
-    href: "/principal/audit",
+    href: "/principal/governance/audit",
   },
   {
     id: "reports",
     label: "Open reports",
     hint: "reports — Go to the reports page",
     icon: FileSpreadsheet,
-    href: "/principal/reports",
+    href: "/principal/governance/reports",
   },
   {
     id: "approvals",
     label: "Open pending approvals",
     hint: "approvals — Go to the approvals queue",
     icon: CheckSquare,
-    href: "/principal/approvals",
+    href: "/principal/approvals/pending",
   },
 ];
 

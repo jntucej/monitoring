@@ -72,7 +72,7 @@ export function EmergencyPlaybook({
           <motion.div
             initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 26, stiffness: 260 }}
-            className="fixed right-0 top-0 z-[var(--z-modal)] h-full w-full max-w-md overflow-y-auto border-l border-[var(--border)] bg-[var(--bg-surface)] p-6"
+            className="fixed right-0 top-0 z-[var(--z-modal)] h-full w-full max-w-md max-w-[100vw] overflow-y-auto border-l border-[var(--border)] bg-[var(--bg-surface)] p-6"
           >
             <div className="flex items-start justify-between">
               <div>
