@@ -109,7 +109,7 @@ export default function VPTodayPage() {
         />
 
         {/* 4. Two-up: Wins + Insight */}
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2">
           <WinFeed />
           <InsightCard
             thisWeek={d?.insights.thisWeek ?? 0}
@@ -119,7 +119,7 @@ export default function VPTodayPage() {
         </div>
 
         {/* 5. Hot spots + Due soon — two-up on desktop */}
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2">
           <HotSpots spots={d?.hotSpots ?? []} />
           <UpcomingPreview items={d?.upcoming ?? []} />
         </div>
