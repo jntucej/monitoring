@@ -25,13 +25,18 @@ function OperatorShellInner({ children }: { children: React.ReactNode }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement | null>(null);
 
-  if (role === "worker") return <>{children}</>;
-  if (loading) return null;
-  if (!assigned) return <GatePickerScreen />;
-
+  // Declared BEFORE the early returns below — calling useCallback after a
+  // conditional return is a rules-of-hooks violation. The hook count changes
+  // between renders whenever role/loading/assigned flips, which throws
+  // Minified React error #310 ("too many re-renders" / hook-order crash)
+  // on the operator console.
   const handleSettingsClick = useCallback(() => {
     profileRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
+
+  if (role === "worker") return <>{children}</>;
+  if (loading) return null;
+  if (!assigned) return <GatePickerScreen />;
 
   return (
     <div className="relative min-h-screen bg-[var(--bg-base)]">
