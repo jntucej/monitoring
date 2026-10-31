@@ -172,7 +172,7 @@ async function main() {
     const c = targets[i];
     // Cooldown between roles so the global per-IP rate limiter (10 req/10s
     // window on most /api/* routes) doesn't trip mid-sweep.
-    if (i > 0) await new Promise((res) => setTimeout(res, 4000));
+    if (i > 0) await new Promise((res) => setTimeout(res, i >= 14 ? 6000 : 4000));
     const result = await smokeRole(browser, c);
     report.push(result);
     fs.writeFileSync(CREDS_PATH + ".progress.json", JSON.stringify(report, null, 2));
