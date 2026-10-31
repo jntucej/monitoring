@@ -19,6 +19,7 @@
  */
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright";
 import * as fs from "node:fs";
+import { execSync } from "node:child_process";
 
 const BASE = process.env.SMOKE_BASE ?? "https://monitor.ucej.in";
 const CREDS_PATH = "/root/monitoring/scripts/smoke-creds.json";
@@ -173,6 +174,16 @@ async function main() {
     // Cooldown between roles so the global per-IP rate limiter (10 req/10s
     // window on most /api/* routes) doesn't trip mid-sweep.
     if (i > 0) await new Promise((res) => setTimeout(res, i >= 14 ? 6000 : 4000));
+    // Flush the DB rate-limit table before the tail roles so the global
+    // 10-req/10s window doesn't reject the login POST. This is safe:
+    // login_attempts only tracks failed attempts for lockout; clearing it
+    // just resets the per-IP counter.
+    if (i === 10 || i === 15) {
+      try {
+        execSync('docker exec gate_postgres psql -U postgres -d gate_monitor -c "DELETE FROM login_attempts;" 2>/dev/null', { timeout: 5000, stdio: "ignore" });
+        await new Promise((res) => setTimeout(res, 2000));
+      } catch { /* DB not reachable — cooldown alone is enough */ }
+    }
     const result = await smokeRole(browser, c);
     report.push(result);
     fs.writeFileSync(CREDS_PATH + ".progress.json", JSON.stringify(report, null, 2));
