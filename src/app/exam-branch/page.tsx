@@ -1,3 +1,4 @@
+"use client";
 import { Suspense } from "react";
 import { FileSpreadsheet } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
