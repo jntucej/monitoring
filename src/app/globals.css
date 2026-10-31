@@ -1423,6 +1423,12 @@ html[data-device-profile="legacy"] .glass-card {
   position: relative;
 }
 
+@media (max-width: 640px) {
+  .scroll-edge-blue {
+    --edge-size: 44px;
+  }
+}
+
 /* Top progressive blue veil — pinned to the container's top edge */
 .scroll-edge-blue > .edge-blue-veil.top,
 .scroll-edge-blue::before {

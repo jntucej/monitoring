@@ -36,18 +36,40 @@ export function ScrollEdgeBlue({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+
     const onScroll = () => {
       const top = el.scrollTop;
-      const max = el.scrollHeight - el.clientHeight;
+      const max = Math.max(0, el.scrollHeight - el.clientHeight);
       const bottom = Math.max(0, max - top);
-      const topVar = Math.min(1, top / 140);
-      const bottomVar = Math.min(1, bottom / 140);
+      // If container is not scrollable, don't show edge blur
+      const topVar = max > 0 ? Math.min(1, top / 140) : 0;
+      const bottomVar = max > 0 ? Math.min(1, bottom / 140) : 0;
       el.style.setProperty("--edge-top", String(topVar));
       el.style.setProperty("--edge-bottom", String(bottomVar));
     };
+
     el.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+
+    // Observe size changes of the container or its content to recompute blur immediately
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver(() => {
+        onScroll();
+      });
+      ro.observe(el);
+      if (el.firstElementChild) {
+        ro.observe(el.firstElementChild);
+      }
+    }
+
     onScroll();
-    return () => el.removeEventListener("scroll", onScroll);
+
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (ro) ro.disconnect();
+    };
   }, []);
 
   return (
