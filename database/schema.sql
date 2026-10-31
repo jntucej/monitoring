@@ -63,12 +63,6 @@ CREATE TABLE IF NOT EXISTS users (
   initial_pin_hash     TEXT,
   flag_status          TEXT CHECK (flag_status IN ('OVERDUE', 'UNAUTHORIZED_EXIT', 'NO_GATE_PASS', 'SUSPENDED', 'CURFEW_VIOLATION', 'MANUAL_LOCKDOWN')),
   last_password_change TIMESTAMPTZ,
-  sso_provider TEXT,
-  sso_subject TEXT,
-  two_factor_enabled BOOLEAN NOT NULL DEFAULT FALSE,
-  two_factor_secret TEXT,
-  two_factor_enrolled_at TIMESTAMPTZ,
-  two_factor_recovery_codes TEXT[],
   pin_set_by UUID REFERENCES users(id),
   pin_set_at TIMESTAMPTZ,
   pin_must_change BOOLEAN NOT NULL DEFAULT FALSE,
@@ -397,30 +391,11 @@ CREATE TABLE IF NOT EXISTS system_settings (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS sso_config (
-  id TEXT PRIMARY KEY DEFAULT 'default',
-  provider_id TEXT NOT NULL DEFAULT 'google',
-  enabled BOOLEAN NOT NULL DEFAULT true,
-  client_id TEXT NOT NULL,
-  issuer_url TEXT NOT NULL,
-  group_mappings JSONB NOT NULL DEFAULT '{}'::jsonb,
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+-- sso_config / sso_authorization_states / two_factor_* were removed by the
+-- 20261216000000 (MFA subsystem removal) and 20261228000000 (SSO subsystem
+-- removal) migrations. They no longer exist in the live schema and are not
+-- declared here; schema.sql tracks the post-migration state.
 
-CREATE TABLE IF NOT EXISTS sso_authorization_states (
-  state         TEXT PRIMARY KEY,
-  nonce         TEXT NOT NULL,
-  code_verifier TEXT,
-  provider_id   TEXT NOT NULL,
-  redirect_to   TEXT,
-  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  expires_at    TIMESTAMPTZ NOT NULL,
-  consumed_at   TIMESTAMPTZ
-);
-
-CREATE INDEX IF NOT EXISTS idx_sso_states_expires
-  ON sso_authorization_states (expires_at)
-  WHERE consumed_at IS NULL;
 
 
 CREATE TABLE IF NOT EXISTS support_tickets (

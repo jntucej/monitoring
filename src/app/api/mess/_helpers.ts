@@ -3,16 +3,19 @@ import { query } from "@/lib/db";
 
 /**
  * Resolve the calling user's student details.
- * Mess eligibility: student_type IN ('HM','HF') OR hostel_block IS NOT NULL
- * (student_details.student_type is currently unpopulated, so the hostel_block
- * check acts as the fallback).
+ * Mess eligibility is driven by the LIVE entry type
+ * (student_details.current_entry_type) when set: 'day_scholar' → not
+ * eligible, 'hosteller' → eligible. It falls back to the legacy
+ * student_type IN ('HM','HF') OR hostel_block IS NOT NULL only when
+ * current_entry_type is null (never transitioned at the gate yet).
  */
 export async function getMyStudentDetails(userId: string) {
   const res = await query(
     `SELECT u.unique_id AS roll,
             u.name,
             sd.student_type,
-            sd.hostel_block
+            sd.hostel_block,
+            sd.current_entry_type
        FROM users u
        LEFT JOIN student_details sd ON sd.user_id::text = u.id::text
       WHERE u.id::text = $1`,
@@ -25,10 +28,24 @@ export async function getMyStudentDetails(userId: string) {
     name: row.name ?? "",
     studentType: row.student_type ?? null,
     hostelBlock: row.hostel_block ?? null,
+    currentEntryType: row.current_entry_type ?? null,
   };
 }
 
-export function isMessEligible(studentType: string | null, hostelBlock: string | null | undefined): boolean {
+/**
+ * Mess eligibility. Prefer the live current_entry_type when the student has
+ * already transitioned at the gate; only fall back to the legacy
+ * student_type / hostel_block check for never-scanned students. A
+ * day_scholar (or any entry type that is not 'hosteller') is not eligible.
+ */
+export function isMessEligible(
+  studentType: string | null,
+  hostelBlock: string | null | undefined,
+  currentEntryType?: string | null
+): boolean {
+  if (currentEntryType === "day_scholar") return false;
+  if (currentEntryType === "hosteller") return true;
+  // Live type unknown (never transitioned) → legacy fallback.
   return studentType === "HM" || studentType === "HF" || !!hostelBlock;
 }
 

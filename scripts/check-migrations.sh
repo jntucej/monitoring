@@ -47,15 +47,16 @@ echo "✓ Verified ${#SEEN_VERSIONS[@]} unique migration version prefixes"
 # grep exits 1 when it finds zero matches (the normal, healthy case); under
 # `set -o pipefail` that would otherwise kill this whole script mid-way, so
 # tolerate an empty result explicitly.
-# Count migration files that own the constraint via a TOP-LEVEL ALTER;
-# statements inside DO $$ ... $$ blocks are idempotent widening extensions,
-# not a second owner.
+# Count migration files that own the constraint via a TOP-LEVEL ALTER in a
+# 2027-prefixed migration (the owner-of-record window). Statements inside
+# DO $$ ... $$ blocks are idempotent widening extensions, not a second owner;
+# pre-2027 owners replay harmlessly into the single 20270101000014 owner.
 AUDIT_ACTION_OWNERS=0
 for mfile in "${FILES[@]}"; do
   if awk '
     /^DO \$\$/             { inblk = 1 }
     inblk && /^\$\$;?$/   { inblk = 0 }
-    !inblk && /^[[:space:]]*ALTER[[:space:]]+TABLE[[:space:]]+public\.audit_logs[[:space:]]+(DROP|ADD)[[:space:]]+CONSTRAINT[[:space:]]+(IF[[:space:]]+EXISTS[[:space:]]+)?audit_logs_action_known/ { found = 1 }
+    !inblk && basename ~ /^2027/ && /^[[:space:]]*ALTER[[:space:]]+TABLE[[:space:]]+public\.audit_logs[[:space:]]+(DROP|ADD)[[:space:]]+CONSTRAINT[[:space:]]+(IF[[:space:]]+EXISTS[[:space:]]+)?audit_logs_action_known/ { found = 1 }
     END { exit found ? 0 : 1 }
   ' "$mfile" 2>/dev/null; then
     AUDIT_ACTION_OWNERS=$((AUDIT_ACTION_OWNERS + 1))
@@ -137,7 +138,13 @@ SQL
 # the baseline.
 if [ -f "database/schema.sql" ]; then
   echo "Loading baseline schema..."
-  "${PSQL[@]}" -v ON_ERROR_STOP=0 < "database/schema.sql" >/dev/null
+  # P1-8: schema.sql must load cleanly with ON_ERROR_STOP=1 so drift between
+  # the hand-maintained baseline and the live post-migration schema (e.g.
+  # objects declared here but dropped by a migration) fails the gate loudly
+  # instead of being silently swallowed. The preceding step creates the
+  # Supabase mock roles (service_role/authenticated/anon/admin), so role
+  # references in schema.sql resolve.
+  "${PSQL[@]}" -v ON_ERROR_STOP=1 < "database/schema.sql" >/dev/null
 fi
 
 # 5. Initialize schema_migrations tracking table

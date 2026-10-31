@@ -9,12 +9,27 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-URL="${DATABASE_URL:-postgres://postgres:ci_dummy_postgres_password_123@localhost:5432/gate_monitor}"
+# gate_app credential for a fresh bootstrap. Prefer a dedicated rotated value
+# (GATE_APP_PASSWORD, as written by scripts/rotate-db-creds.sh); fall back to
+# the superuser password so a bare bootstrap is self-sufficient.
+GATE_APP_PASSWORD="${GATE_APP_PASSWORD:-${POSTGRES_PASSWORD:-postgres}}"
+URL="${DATABASE_URL:-postgres://postgres:***@localhost:5432/gate_monitor}"
 
 psql_exec() { command psql "$URL" -v ON_ERROR_STOP=1 "$@"; }
 
 echo "==> 1. Bootstrap (roles + extensions)"
-psql_exec -f database/bootstrap.sql
+# Pass the gate_app credential as a custom GUC so bootstrap.sql can set it.
+psql_exec --set "gate.app_password=${GATE_APP_PASSWORD}" -f database/bootstrap.sql
+
+echo "==> 1b. Verify gate_app can authenticate"
+if command -v psql >/dev/null 2>&1; then
+  APP_URL="postgres://gate_app:***@localhost:5432/${POSTGRES_DB:-gate_monitor}"
+  if psql "$APP_URL" -c "SELECT 1 AS ok;" >/dev/null 2>&1; then
+    echo "   gate_app login OK"
+  else
+    echo "   ⚠️  gate_app login FAILED — run: bash scripts/rotate-db-creds.sh  (or set GATE_APP_PASSWORD and re-run)"
+  fi
+fi
 
 echo "==> 2. Schema baseline"
 psql_exec -f database/schema.sql

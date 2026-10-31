@@ -121,7 +121,7 @@ async function handlePost(req: any, { auth }: { auth: AuthContext }) {
 
     const me = await getMyStudentDetails(userId);
     if (!me) return fail("STUDENT_NOT_FOUND", "No student profile found for this user", 403);
-    if (!isMessEligible(me.studentType, me.hostelBlock)) {
+    if (!isMessEligible(me.studentType, me.hostelBlock, me.currentEntryType)) {
       return fail("NOT_ELIGIBLE", "You are not eligible for mess meals", 403);
     }
 

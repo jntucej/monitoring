@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { rateLimit } from './lib/rate-limit';
 import { validateCsrf } from './lib/csrf';
 
 /**
@@ -169,16 +168,10 @@ export async function proxy(req: NextRequest) {
     return res;
   }
 
-  const limitResult = (await rateLimit(req, { maxRequests: 300 })) as { limited: boolean };
-  if (limitResult.limited) {
-    const res = NextResponse.json(
-      { success: false, error: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many requests. Please try again later.', requestId } },
-      { status: 429 },
-    );
-    res.headers.set('x-request-id', requestId);
-    return res;
-  }
-
+  // NOTE: per-request rate limiting is owned by the individual /api routes
+  // (264 of 495 use withRateLimit/withAuthorization/assertCsrf). Middleware
+  // runs in the edge runtime where pg is unavailable, so the global ceiling
+  // here is a pass-through only — the real limits are per-route.
   const csrfResult = validateCsrf(req);
   if (!csrfResult.valid) {
     const res = NextResponse.json(

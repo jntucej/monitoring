@@ -29,4 +29,11 @@ export async function register() {
 
   const { runSchemaDriftGuardOnBoot } = await import("@/lib/schema-drift-guard");
   runSchemaDriftGuardOnBoot();
+
+  // P1-9: RLS posture assertion. After 20261231000005 the intended posture is
+  // NOBYPASSRLS on both postgres and gate_app so RLS policies are the active
+  // defense-in-depth layer (a hybrid BYPASSRLS state silently zeroes app
+  // reads). Detect a regression at boot and log it loudly.
+  const { assertRlsPosture } = await import("@/lib/rls-posture-guard");
+  assertRlsPosture();
 }

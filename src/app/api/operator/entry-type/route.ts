@@ -287,7 +287,8 @@ async function handlePost(
                    type_chosen_at_gate = $4,
                    hostel_block = NULL,
                    room_number = NULL,
-                   warden_id = NULL
+                   warden_id = NULL,
+                   hostel_curfew_time = NULL
              WHERE user_id = $5`,
             [dayScholarSt, entryType, now, gateId, user.id],
           );

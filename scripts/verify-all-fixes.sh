@@ -241,6 +241,15 @@ grep_has packages/ai-scheduler-kit/src/SchedulerDashboard.tsx \
   'requires an explicit adapter' \
   "9: SchedulerDashboard throws without adapter"
 
+# ════════════════════════════════════════════════════════════════════════════
+# GATE — live-DB regression checks (require the running stack)
+# ════════════════════════════════════════════════════════════════════════════
+section "Gate — gate_app RLS read-set (silent-zero-row regression)"
+if bash scripts/check-gate-app-read-set.sh; then
+  p "gate_app can read every RLS-enabled table (P0-2)"
+else
+  f "gate_app can read every RLS-enabled table (P0-2)" "$(bash scripts/check-gate-app-read-set.sh 2>&1 | head -1)"
+fi
 
 # ════════════════════════════════════════════════════════════════════════════
 # SUMMARY

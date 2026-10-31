@@ -40,7 +40,6 @@ interface CachedUserRow {
   gate_id: string | null;
   department_id: string | null;
   employee_id: string | null;
-  two_factor_enabled: boolean;
   password_must_change: boolean;
   handle: string | null;
   supervised_gates: string[] | null;
@@ -57,7 +56,7 @@ async function getUserRowCached(userId: string): Promise<CachedUserRow | null> {
   const res = await query(
     `SELECT id, role, status, email, session_version, unique_id,
             login_identifier, gate_id, department_id, employee_id,
-            two_factor_enabled, password_must_change,
+            password_must_change,
             handle, supervised_gates
      FROM public.users WHERE id = $1 AND deleted_at IS NULL LIMIT 1`,
     [userId],
@@ -127,7 +126,12 @@ export interface AuthContext {
   /** The user's active session handle/token for single-session enforcement */
   handle?: string;
 
-  /** Whether the user has 2FA enabled */
+  /**
+   * Whether the user has 2FA enabled. MFA/2FA was removed from the
+   * architecture (20261216000000); the column no longer exists on users,
+   * so this is always false — kept only for source compatibility of the
+   * two downstream consumers that still read it.
+   */
   twoFactorEnabled: boolean;
 
   /** Whether the user must change their password before proceeding */
@@ -235,7 +239,7 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
     isAuthenticated: true,
     isActive: profile.status === 'ACTIVE',
     handle: profile.handle || undefined,
-    twoFactorEnabled: profile.two_factor_enabled === true,
+    twoFactorEnabled: false,
     passwordMustChange: profile.password_must_change === true,
     supervisedGates: profile.supervised_gates,
   };

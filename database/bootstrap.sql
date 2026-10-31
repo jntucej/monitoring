@@ -19,6 +19,20 @@ DO $$ BEGIN CREATE ROLE admin;          EXCEPTION WHEN duplicate_object THEN NUL
 
 GRANT supabase_admin TO service_role;
 
+-- gate_app login credential. The app connects as
+--   postgres://gate_app:<password>@host:port/db
+-- so the role MUST carry a non-NULL password, or a fresh deploy cannot
+-- authenticate. bootstrap.sql is fed by scripts/db-bootstrap.sh, which passes
+-- the target credential via the GUC `gate.app_password` (SET from the
+-- environment). Defaulting to 'postgres' keeps a bare `psql -f bootstrap.sql`
+-- self-sufficient against the stock superuser password; in production
+-- scripts/rotate-db-creds.sh later overrides this with a dedicated, rotated
+-- value and rewrites the GATE_APP_PASSWORD that the compose DSN reads.
+DO $$
+BEGIN
+  ALTER ROLE gate_app WITH LOGIN PASSWORD coalesce(nullif(current_setting('gate.app_password', true), ''), 'postgres');
+EXCEPTION WHEN undefined_object THEN NULL; END $$;
+
 -- ---------------------------------------------------------------------------
 -- 2. Auth Schema (for SSO/MFA-related tables)
 -- ---------------------------------------------------------------------------

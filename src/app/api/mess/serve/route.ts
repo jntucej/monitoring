@@ -5,6 +5,7 @@ import { withRateLimit } from "@/lib/rate-limit";
 import { ok, fail } from "@/server/http/response";
 import { TIER } from "@/server/policy/roles";
 import type { AuthContext } from "@/lib/authContext";
+import { getMyStudentDetails, isMessEligible } from "../_helpers";
 
 /**
  * CAS-consume a mess meal token.
@@ -67,7 +68,27 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
 
     const token = consumed[0];
 
-    // 2. Record the serve (idempotent per user+meal-day) AND clear the
+    // 2. Re-check eligibility BEFORE recording the serve. A token that was
+    //    revoked by the hosteller→day_scholar transition but not yet
+    //    consumed can still be CAS-consumed by this query path; guard the
+    //    record so the student's day-scholar state is authoritative.
+    const owner = await getMyStudentDetails(token.user_id);
+    if (owner && !isMessEligible(owner.studentType, owner.hostelBlock, owner.currentEntryType)) {
+      // Roll back the CAS consume we just did so the token stays clean.
+      await query(
+        `UPDATE mess_tokens SET used_at = NULL, used_by = NULL WHERE id = $1 AND used_by = $2::uuid`,
+        [token.id, auth.userId],
+      );
+      await addAudit({
+        action: "MESS_SERVE_NOT_ELIGIBLE",
+        userId: auth.userId,
+        role: auth.role,
+        details: { tokenCode, ownerUserId: token.user_id },
+      });
+      return fail("NOT_ELIGIBLE", "Student is no longer mess-eligible", 403);
+    }
+
+    // 3. Record the serve (idempotent per user+meal-day) AND clear the
     //    student's "will be present" preference for that day (M10), so the
     //    consumed meal no longer skews attendance analytics. M12: both writes
     //    run in one transaction so they cannot orphan each other.

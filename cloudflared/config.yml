@@ -1,21 +1,18 @@
-# cloudflared CLI-managed tunnel config
-# Generated: cloudflared tunnel create gate-monitor
-# Tunnel UUID:   <set-by-create>
-# Credentials:   /opt/monitoring/compose/cloudflared/credentials.json
+# cloudflared token-managed tunnel config.
 #
-# This file lives in Git (reproducible). The tunnel definition is local to the
-# VPS, not in the Cloudflare dashboard — so no token to leak, no dashboard
-# dependency, and recreating the tunnel is: re-run `cloudflared tunnel create`
-# and re-paste the UUID below.
+# AUTH MODEL: token-managed (single model). The cloudflared container runs
+#   `cloudflared tunnel run $TUNNEL_TOKEN --config /etc/cloudflared/config.yml`
+# where TUNNEL_TOKEN = CLOUDFLARE_TUNNEL_TOKEN from .env (created in the
+# Cloudflare dashboard). This file therefore carries ONLY the ingress/origin
+# settings — no `tunnel:` UUID, no `credentials-file:`. The token authenticates
+# the connector; the config defines what it routes.
 #
-# See RUNBOOK.md § "Cloudflare Tunnel (CLI-managed)" for the full lifecycle.
-
-tunnel: <TUNNEL_UUID>
-credentials-file: /etc/cloudflared/credentials.json
+#   - monitor.cej.in -> Caddy -> web:3000 (the public app)
+#   - hooks.cej.in   -> web:3000          (Resend bounce/complaint webhooks)
+#
+# See RUNBOOK.md § "Cloudflare Tunnel (token-managed)" for the lifecycle.
 
 # Ingress rules. Order matters: first match wins.
-#   - monitor.cej.in  -> the public app (Caddy -> web:3000)
-#   - hooks.cej.in     -> Resend bounce/complaint webhooks (web:3000)
 ingress:
   - hostname: monitor.cej.in
     service: http://caddy:80
