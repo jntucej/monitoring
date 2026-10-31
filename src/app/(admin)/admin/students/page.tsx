@@ -203,9 +203,9 @@ function AdminStudentsInner() {
 
   if (!data && !error) {
     return (
-      <div className="space-y-4 p-4 md:p-6">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-4 py-4 md:py-6">
         <Skeleton className="h-10 w-64" />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-24 rounded-2xl" />
           ))}
@@ -225,7 +225,7 @@ function AdminStudentsInner() {
   }));
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-4 md:py-6">
       <PageHeader
         title="Students"
         subtitle="Full student roster with department, year, and hostel state"
@@ -239,7 +239,7 @@ function AdminStudentsInner() {
       )}
 
       {/* KPI row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="glass-card p-4">
           <p className="text-xs text-[var(--text-muted)]">Total students</p>
           <p className="text-2xl font-bold text-[var(--text-primary)] tabular-nums">
@@ -372,7 +372,7 @@ function AdminStudentsInner() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by name, roll, or email…"
-              className="w-full pl-9 pr-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]/40 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--action-primary)]/40"
+              className="w-full min-h-[44px] pl-9 pr-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]/40 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--action-primary)]/40"
             />
           </div>
 
@@ -484,13 +484,13 @@ function AdminStudentsInner() {
               </div>
               <button
                 onClick={() => setActive(null)}
-                className="p-1 rounded hover:bg-[var(--bg-surface)]/60"
+                className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded hover:bg-[var(--bg-surface)]/60"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </header>
 
-            <dl className="grid grid-cols-2 gap-3 text-xs">
+            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <div>
                 <dt className="text-[var(--text-muted)]">Department</dt>
                 <dd className="text-[var(--text-primary)]">{active.department ?? "—"}</dd>

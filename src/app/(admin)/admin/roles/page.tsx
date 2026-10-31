@@ -94,7 +94,7 @@ function Node({
     <div>
       <button
         onClick={() => hasChildren && onToggle(node.code)}
-        className="flex items-center gap-2 w-full text-left rounded-lg px-2 py-1.5 hover:bg-[var(--bg-surface)]/60 group"
+        className="flex items-center gap-2 w-full min-h-[44px] text-left rounded-lg px-2 py-1.5 hover:bg-[var(--bg-surface)]/60 group"
       >
         {hasChildren ? (
           isOpen ? (
@@ -195,9 +195,9 @@ function AdminRolesInner() {
 
   if (!data && !error) {
     return (
-      <div className="space-y-4 p-4 md:p-6">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-4 py-4 md:py-6">
         <Skeleton className="h-10 w-64" />
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {Array.from({ length: 3 }).map((_, i) => (
             <Skeleton key={i} className="h-24 rounded-2xl" />
           ))}
@@ -208,7 +208,7 @@ function AdminRolesInner() {
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-4 md:py-6">
       <PageHeader
         title="Roles & Hierarchy"
         subtitle="Role graph, membership, and on-campus presence"
@@ -222,7 +222,7 @@ function AdminRolesInner() {
       )}
 
       {/* KPI row */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="glass-card p-4">
           <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] mb-1">
             <ShieldCheck className="w-3.5 h-3.5" /> Roles defined
@@ -257,24 +257,24 @@ function AdminRolesInner() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search roles…"
-            className="w-full pl-9 pr-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]/40 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--action-primary)]/40"
+            className="w-full min-h-[44px] pl-9 pr-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]/40 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--action-primary)]/40"
           />
         </div>
         <button
           onClick={expandAll}
-          className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] hover:bg-[var(--bg-surface)]/60"
+          className="text-xs px-3 py-1.5 min-h-[44px] rounded-lg border border-[var(--border)] hover:bg-[var(--bg-surface)]/60 flex items-center justify-center"
         >
           Expand all
         </button>
         <button
           onClick={collapseAll}
-          className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] hover:bg-[var(--bg-surface)]/60"
+          className="text-xs px-3 py-1.5 min-h-[44px] rounded-lg border border-[var(--border)] hover:bg-[var(--bg-surface)]/60 flex items-center justify-center"
         >
           Collapse all
         </button>
         <button
           onClick={load}
-          className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] hover:bg-[var(--bg-surface)]/60"
+          className="flex items-center gap-1.5 text-xs px-3 py-1.5 min-h-[44px] rounded-lg border border-[var(--border)] hover:bg-[var(--bg-surface)]/60 justify-center"
         >
           <RefreshCw className="w-3.5 h-3.5" /> Refresh
         </button>
@@ -294,7 +294,7 @@ function AdminRolesInner() {
                   {filteredNodes.map((n) => (
                     <li
                       key={n.code}
-                      className="flex items-center justify-between rounded-lg px-2 py-1.5 bg-[var(--bg-surface)]/40"
+                      className="flex items-center justify-between rounded-lg px-2 py-1.5 bg-[var(--bg-surface)]/40 min-h-[44px]"
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         <ShieldCheck className="w-4 h-4 text-[var(--action-primary)] shrink-0" />
@@ -317,10 +317,12 @@ function AdminRolesInner() {
                   )}
                 </ul>
               ) : (
-                <div className="space-y-1">
-                  {tree.map((n) => (
-                    <Node key={n.code} node={n} expanded={expanded} onToggle={toggle} />
-                  ))}
+                <div className="overflow-x-auto">
+                  <div className="min-w-[640px] space-y-1">
+                    {tree.map((n) => (
+                      <Node key={n.code} node={n} expanded={expanded} onToggle={toggle} />
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -363,7 +365,7 @@ function AdminRolesInner() {
             </ul>
             <Link
               href="/sysadmin/roles"
-              className="mt-3 flex items-center justify-center gap-1 text-xs text-[var(--action-primary)] hover:underline"
+              className="mt-3 flex items-center justify-center gap-1 text-xs text-[var(--action-primary)] hover:underline min-h-[44px]"
             >
               Full sysadmin role panel <ArrowUpRight className="w-3 h-3" />
             </Link>

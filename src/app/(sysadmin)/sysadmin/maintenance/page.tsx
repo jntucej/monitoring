@@ -11,7 +11,7 @@ import { Wrench } from "lucide-react";
 export default function MaintenancePage() {
   return (
     <AuthGuard allowedRoles={["sysadmin", "admin"]}>
-      <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-4">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="flex items-center gap-2">
           <Wrench className="w-5 h-5 text-[var(--action-primary)]" />
           <div>

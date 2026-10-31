@@ -105,7 +105,7 @@ function AdminOverviewInner() {
     : [];
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
       {/* Hero */}
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 sm:p-8">
         <div className="flex items-start gap-4">
@@ -122,11 +122,11 @@ function AdminOverviewInner() {
         </div>
       </div>
 
-      {/* Live Overview */}
-      <WidgetBoundary name="LiveOverview" title="Overview">
+      {/* Grid of Key Admin Functions */}
+      <WidgetBoundary name="LiveOverview" title="Operational Metrics">
         <div>
-          <h2 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-4">
-            Live Overview
+          <h2 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">
+            Operational Metrics
           </h2>
           {error ? (
             <div className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-4 text-sm text-rose-300">
@@ -137,7 +137,7 @@ function AdminOverviewInner() {
               Loading overview…
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {statCards.map((card) => {
                 const Icon = card.icon;
                 return (

@@ -74,7 +74,7 @@ function AdminPassesInner() {
 
   if (loading) {
     return (
-      <div className="space-y-4 p-4 md:p-6">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-4 py-4 md:py-6">
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-72 rounded-2xl" />
       </div>
@@ -82,14 +82,14 @@ function AdminPassesInner() {
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-4 md:py-6">
       <PageHeader
         title="Gate Passes"
         subtitle="Outing, day-pass, and home-out pass records"
         onRefresh={load}
       />
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="glass-card p-4">
           <p className="text-xs text-[var(--text-muted)] flex items-center gap-1.5"><QrCode className="w-3.5 h-3.5" /> Total</p>
           <p className="text-2xl font-bold text-[var(--text-primary)] tabular-nums">{rows.length}</p>
@@ -110,13 +110,13 @@ function AdminPassesInner() {
 
       <WidgetBoundary title="Pass records">
         <div className="glass-card">
-          <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
+          <div className="p-4 border-b border-[var(--border)] flex items-center gap-2 min-h-[44px]">
             <Search className="w-4 h-4 text-[var(--text-muted)]" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Filter by roll, name, type, or status…"
-              className="flex-1 bg-transparent text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
+              className="flex-1 min-h-[44px] bg-transparent text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
             />
           </div>
           <div className="overflow-x-auto">

@@ -105,17 +105,17 @@ export default function AlertRulesPage() {
 
   return (
     <AuthGuard allowedRoles={["sysadmin", "admin"]}>
-      <div className="max-w-6xl mx-auto p-4 sm:p-4 sm:p-4 sm:p-6 space-y-4 sm:space-y-4 sm:space-y-6">
-        <div className="flex justify-between items-center">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <p className="text-2xl font-bold tracking-tight flex items-center gap-2">
               <Bell className="w-6 h-6 text-amber-500" /> Alert Rules Management
             </p>
             <p className="text-sm text-gray-500">Configure real-time monitoring and threshold alerts.</p>
           </div>
-          <div className="flex gap-2">
-            <Button onClick={fetchAlerts} variant="secondary" size="sm" className="gap-2"><RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} /> Refresh</Button>
-            <Button onClick={() => setIsModalOpen(true)} variant="primary" size="sm" className="gap-2"><Plus className="w-4 h-4" /> Create Rule</Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button onClick={fetchAlerts} variant="secondary" size="sm" className="gap-2 min-h-[44px]"><RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} /> Refresh</Button>
+            <Button onClick={() => setIsModalOpen(true)} variant="primary" size="sm" className="gap-2 min-h-[44px]"><Plus className="w-4 h-4" /> Create Rule</Button>
           </div>
         </div>
         <Card className="border">
@@ -230,7 +230,7 @@ export default function AlertRulesPage() {
           <form onSubmit={handleCreate} className="space-y-4">
             <Input label="Rule Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
             <Input label="Metric Token" value={formData.metric} onChange={(e) => setFormData({ ...formData, metric: e.target.value })} required />
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-medium mb-1 uppercase text-gray-500">Severity</label>
                 <Select
@@ -240,7 +240,7 @@ export default function AlertRulesPage() {
                     { value: "info", label: "Info" },
                   ]}
                   value={formData.severity}
-                  onChange={(val) => setFormData({ ...formData, severity: val as any })}
+                  onChange={(val) => setFormData({ ...formData, severity: val as "critical" | "warning" | "info" })}
                 />
               </div>
               <div>
@@ -253,11 +253,11 @@ export default function AlertRulesPage() {
                     { value: "email", label: "Email" },
                   ]}
                   value={formData.channel}
-                  onChange={(val) => setFormData({ ...formData, channel: val as any })}
+                  onChange={(val) => setFormData({ ...formData, channel: val as "opsgenie" | "pagerduty" | "webhook" | "email" })}
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input label="Threshold" type="number" value={formData.threshold} onChange={(e) => setFormData({ ...formData, threshold: e.target.value })} required />
               <Input label="Window (Mins)" type="number" value={formData.durationMinutes} onChange={(e) => setFormData({ ...formData, durationMinutes: e.target.value })} required />
             </div>

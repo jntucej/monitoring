@@ -150,7 +150,7 @@ export default function AdminGatesPage() {
   };
 
   return (
-    <div className="p-4 sm:p-4 sm:p-6 space-y-4 sm:space-y-4 sm:space-y-6">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -162,7 +162,7 @@ export default function AdminGatesPage() {
         <button
           type="button"
           onClick={() => setShowCreate((v) => !v)}
-          className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold"
+          className="flex items-center gap-2 px-3.5 py-2 min-h-[44px] rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shrink-0"
         >
           <Plus className="w-3.5 h-3.5" />
           {showCreate ? "Hide Create Form" : "Create Gate"}
@@ -207,12 +207,12 @@ export default function AdminGatesPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 disabled={updatingMode}
                 onClick={() => handleSetGateMode("OPEN")}
-                className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                className={`px-3 py-2 min-h-[44px] rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
                   gateMode === "OPEN"
                     ? "bg-emerald-600 text-white shadow-sm"
                     : "bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
@@ -225,7 +225,7 @@ export default function AdminGatesPage() {
                 type="button"
                 disabled={updatingMode}
                 onClick={() => handleSetGateMode("CURFEW")}
-                className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                className={`px-3 py-2 min-h-[44px] rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
                   gateMode === "CURFEW"
                     ? "bg-amber-600 text-white shadow-sm"
                     : "bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
@@ -238,7 +238,7 @@ export default function AdminGatesPage() {
                 type="button"
                 disabled={updatingMode}
                 onClick={() => handleSetGateMode("MAINTENANCE")}
-                className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                className={`px-3 py-2 min-h-[44px] rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
                   gateMode === "MAINTENANCE"
                     ? "bg-rose-600 text-white shadow-sm"
                     : "bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
@@ -265,7 +265,7 @@ export default function AdminGatesPage() {
                   onChange={(e) => setCreateForm({ ...createForm, gateCode: e.target.value })}
                   required
                   placeholder="e.g. G-MAIN"
-                  className="mt-1 w-full px-3 py-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-sm text-[var(--text-primary)] outline-none focus:border-emerald-500"
+                  className="mt-1 w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-sm text-[var(--text-primary)] outline-none focus:border-emerald-500"
                 />
               </label>
               <label className="block">
@@ -274,7 +274,7 @@ export default function AdminGatesPage() {
                   value={createForm.name}
                   onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
                   placeholder="Main Gate"
-                  className="mt-1 w-full px-3 py-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-sm text-[var(--text-primary)] outline-none focus:border-emerald-500"
+                  className="mt-1 w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-sm text-[var(--text-primary)] outline-none focus:border-emerald-500"
                 />
               </label>
               <label className="block">
@@ -283,7 +283,7 @@ export default function AdminGatesPage() {
                   value={createForm.location}
                   onChange={(e) => setCreateForm({ ...createForm, location: e.target.value })}
                   placeholder="Campus"
-                  className="mt-1 w-full px-3 py-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-sm text-[var(--text-primary)] outline-none focus:border-emerald-500"
+                  className="mt-1 w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-sm text-[var(--text-primary)] outline-none focus:border-emerald-500"
                 />
               </label>
               <label className="block">
@@ -291,7 +291,7 @@ export default function AdminGatesPage() {
                 <select
                   value={createForm.type}
                   onChange={(e) => setCreateForm({ ...createForm, type: e.target.value })}
-                  className="mt-1 w-full px-3 py-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-sm text-[var(--text-primary)] outline-none focus:border-emerald-500"
+                  className="mt-1 w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-sm text-[var(--text-primary)] outline-none focus:border-emerald-500"
                 >
                   <option value="standard">standard</option>
                   <option value="staff">staff</option>
@@ -304,7 +304,7 @@ export default function AdminGatesPage() {
                 <select
                   value={createForm.audience}
                   onChange={(e) => setCreateForm({ ...createForm, audience: e.target.value })}
-                  className="mt-1 w-full px-3 py-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-sm text-[var(--text-primary)] outline-none focus:border-emerald-500"
+                  className="mt-1 w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-sm text-[var(--text-primary)] outline-none focus:border-emerald-500"
                 >
                   <option value="all">all</option>
                   <option value="staff">staff</option>
@@ -315,7 +315,7 @@ export default function AdminGatesPage() {
             <button
               type="submit"
               disabled={creating || !createForm.gateCode.trim()}
-              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-bold flex items-center gap-2"
+              className="px-4 py-2 min-h-[44px] rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-bold flex items-center gap-2"
             >
               <CheckCircle2 className="w-3.5 h-3.5" />
               {creating ? "Creating..." : "Create Gate"}
@@ -372,7 +372,7 @@ export default function AdminGatesPage() {
                         <td className="py-3 px-4 text-[var(--text-muted)]">
                           <Link
                             href={`/admin/gates/${g.id}`}
-                            className="px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[11px] font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-base)] transition"
+                            className="px-2.5 py-1 min-h-[44px] inline-flex items-center rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[11px] font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-base)] transition"
                           >
                             Details & Status
                           </Link>

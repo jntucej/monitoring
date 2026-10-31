@@ -61,7 +61,7 @@ function RedisWorkerInner() {
   const d = (data as { success: boolean; data: RedisWorkerData } | null)?.data;
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 min-w-0">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-4 sm:py-6 min-w-0">
       <div>
         <p className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
           <Boxes className="w-6 h-6 text-sky-400" />
@@ -95,13 +95,13 @@ function RedisWorkerInner() {
               <StatusPill status={d?.redis?.status} />
             </div>
             {busy ? (
-              <div className="p-4 grid grid-cols-3 gap-2">
+              <div className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className="h-12 animate-pulse rounded-lg bg-slate-800/40" />
                 ))}
               </div>
             ) : d?.redisDetails ? (
-              <div className="grid grid-cols-3 gap-3 p-4 min-w-0">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 min-w-0">
                 <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
                   <p className="text-[10px] text-slate-500 uppercase">Clients</p>
                   <p className="text-lg font-bold text-sky-400">

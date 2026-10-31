@@ -206,7 +206,7 @@ function AdminAnalyticsInner() {
   };
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-4 md:py-6">
       <PageHeader
         title="Campus Analytics"
         subtitle={`Traffic and occupancy from ${data?.range.from ?? "—"} to ${data?.range.to ?? "—"}`}
@@ -218,7 +218,7 @@ function AdminAnalyticsInner() {
                   key={days}
                   type="button"
                   onClick={() => setRange(days)}
-                  className={`px-3 py-1 rounded-lg font-medium transition ${
+                  className={`px-3 py-1 min-h-[44px] rounded-lg font-medium transition flex items-center justify-center ${
                     range === days
                       ? "bg-[var(--action-primary)] text-white shadow"
                       : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
@@ -232,14 +232,14 @@ function AdminAnalyticsInner() {
               type="button"
               onClick={exportCsv}
               disabled={!data || data.daily.length === 0}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 min-h-[44px] rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] disabled:opacity-50"
             >
               <Download className="w-3.5 h-3.5" /> Export CSV
             </button>
             <button
               type="button"
               onClick={load}
-              className="p-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+              className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               title="Refresh"
             >
               <RefreshCw className="w-4 h-4" />
@@ -322,7 +322,7 @@ function AdminAnalyticsInner() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <WidgetBoundary title="Traffic Volume">
           <div className="glass-card p-4 sm:p-5 space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h3 className="text-sm font-semibold text-[var(--text-primary)]">Gate Traffic Flow</h3>
                 <p className="text-xs text-[var(--text-muted)]">Entries versus exits over time</p>
@@ -345,7 +345,7 @@ function AdminAnalyticsInner() {
 
         <WidgetBoundary title="Campus Occupancy">
           <div className="glass-card p-4 sm:p-5 space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h3 className="text-sm font-semibold text-[var(--text-primary)]">On-Campus Occupancy</h3>
                 <p className="text-xs text-[var(--text-muted)]">Net population count present on grounds</p>
@@ -368,7 +368,7 @@ function AdminAnalyticsInner() {
 
         <WidgetBoundary title="Department Distribution">
           <div className="glass-card p-4 sm:p-5 space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h3 className="text-sm font-semibold text-[var(--text-primary)]">Students by Department</h3>
                 <p className="text-xs text-[var(--text-muted)]">Active departmental headcounts</p>
@@ -379,7 +379,7 @@ function AdminAnalyticsInner() {
               <ChartRenderer
                 type={roleType === "composed" ? "bar" : roleType}
                 data={deptData}
-                series={[{ key: "count", label: "Students", color: CHART_PALETTE.primary, type: roleType === "composed" ? "bar" : roleType as any }]}
+                series={[{ key: "count", label: "Students", color: CHART_PALETTE.primary, type: roleType === "composed" ? "bar" : (roleType === "line" || roleType === "area" || roleType === "bar" ? roleType : "bar") }]}
                 xKey="name"
                 height={280}
               />
@@ -391,7 +391,7 @@ function AdminAnalyticsInner() {
 
         <WidgetBoundary title="Role Distribution">
           <div className="glass-card p-4 sm:p-5 space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h3 className="text-sm font-semibold text-[var(--text-primary)]">Active Users by Role</h3>
                 <p className="text-xs text-[var(--text-muted)]">Breakdown of operational accounts</p>

@@ -96,7 +96,7 @@ const api = useApi();
 
   return (
     <AuthGuard allowedRoles={["sysadmin"]}>
-      <div className="space-y-6">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <p className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
@@ -119,7 +119,7 @@ const api = useApi();
                 order: navItems.length + 1,
               })
             }
-            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl text-xs flex items-center gap-2 transition"
+            className="px-4 py-2 min-h-[44px] bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl text-xs flex items-center gap-2 transition"
           >
             <Plus className="w-4 h-4" /> Add Nav Item
           </button>
@@ -145,7 +145,7 @@ const api = useApi();
               type="button"
               key={role}
               onClick={() => setSelectedRole(role)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition ${
+              className={`px-4 py-2 min-h-[44px] rounded-xl text-xs font-bold uppercase tracking-wider transition ${
                 selectedRole === role
                   ? "bg-blue-500 text-white shadow-lg shadow-blue-500/20"
                   : "bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-muted)] hover:text-white"
@@ -259,7 +259,7 @@ const api = useApi();
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase mb-1">
                       Lucide Icon Name
@@ -270,7 +270,7 @@ const api = useApi();
                       value={editingItem.icon || ""}
                       onChange={(e) => setEditingItem({ ...editingItem, icon: e.target.value })}
                       placeholder="e.g. DoorOpen"
-                      className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm font-mono text-[var(--text-primary)] focus:outline-none focus:border-blue-400"
+                      className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm font-mono text-[var(--text-primary)] focus:outline-none focus:border-blue-400"
                     />
                   </div>
                   <div>
@@ -282,7 +282,7 @@ const api = useApi();
                       required
                       value={editingItem.order ?? 1}
                       onChange={(e) => setEditingItem({ ...editingItem, order: Number(e.target.value) })}
-                      className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm font-mono text-[var(--text-primary)] focus:outline-none focus:border-blue-400"
+                      className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm font-mono text-[var(--text-primary)] focus:outline-none focus:border-blue-400"
                     />
                   </div>
                 </div>
@@ -291,13 +291,13 @@ const api = useApi();
                   <button
                     type="button"
                     onClick={() => setEditingItem(null)}
-                    className="px-4 py-2 bg-[var(--bg-elevated)] text-[var(--text-muted)] rounded-xl text-xs font-semibold hover:bg-[var(--border)] transition"
+                    className="px-4 py-2 min-h-[44px] bg-[var(--bg-elevated)] text-[var(--text-muted)] rounded-xl text-xs font-semibold hover:bg-[var(--border)] transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-blue-500 text-white rounded-xl text-xs font-semibold hover:bg-blue-600 transition"
+                    className="px-4 py-2 min-h-[44px] bg-blue-500 text-white rounded-xl text-xs font-semibold hover:bg-blue-600 transition"
                   >
                     Save Item
                   </button>

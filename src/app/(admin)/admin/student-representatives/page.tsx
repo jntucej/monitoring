@@ -57,21 +57,21 @@ export default function RepsPage() {
   };
 
   return (
-    <div className="p-4 sm:p-4 sm:p-6 max-w-5xl mx-auto space-y-4 sm:space-y-4 sm:space-y-6">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
       <h1 className="text-2xl font-semibold">Student representatives</h1>
 
-      <form onSubmit={create} className="grid grid-cols-2 gap-3 border p-4 rounded bg-white shadow-sm">
+      <form onSubmit={create} className="grid grid-cols-1 sm:grid-cols-2 gap-3 border p-4 rounded bg-white shadow-sm">
         <input
           required
           placeholder="Student UUID"
           value={form.studentId}
           onChange={(e) => setForm({ ...form, studentId: e.target.value })}
-          className="border rounded p-2 text-sm"
+          className="border rounded p-2 text-sm min-h-[44px]"
         />
         <select
           value={form.scopeType}
           onChange={(e) => setForm({ ...form, scopeType: e.target.value })}
-          className="border rounded p-2 text-sm"
+          className="border rounded p-2 text-sm min-h-[44px]"
         >
           <option value="class">Class</option>
           <option value="department">Department</option>
@@ -85,24 +85,24 @@ export default function RepsPage() {
           placeholder="Scope ID (e.g. CSE-3-A, BlockA)"
           value={form.scopeId}
           onChange={(e) => setForm({ ...form, scopeId: e.target.value })}
-          className="border rounded p-2 text-sm"
+          className="border rounded p-2 text-sm min-h-[44px]"
         />
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <input
             type="date"
             value={form.validFrom}
             onChange={(e) => setForm({ ...form, validFrom: e.target.value })}
-            className="border rounded p-2 text-sm flex-1"
+            className="border rounded p-2 text-sm flex-1 min-h-[44px]"
           />
           <input
             type="date"
             required
             value={form.validTo}
             onChange={(e) => setForm({ ...form, validTo: e.target.value })}
-            className="border rounded p-2 text-sm flex-1"
+            className="border rounded p-2 text-sm flex-1 min-h-[44px]"
           />
         </div>
-        <button type="submit" className="px-4 py-2 rounded bg-slate-900 text-white text-sm col-span-2 font-medium">
+        <button type="submit" className="px-4 py-2 rounded bg-slate-900 text-white text-sm col-span-1 sm:col-span-2 font-medium min-h-[44px]">
           Appoint representative
         </button>
       </form>

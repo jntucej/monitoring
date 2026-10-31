@@ -86,7 +86,7 @@ function AdminGateDeviceConfigurationInner() {
   );
 
   return (
-    <div className="space-y-4">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
       <PageHeader
         title="Gate & Device Configuration"
         subtitle="Gate roster, schedules, and per-device settings"
@@ -181,7 +181,7 @@ function AdminGateDeviceConfigurationInner() {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 text-[11px]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
                   <div className="rounded-lg bg-slate-900/60 p-2.5">
                     <p className="text-slate-500 mb-0.5">Geofence</p>
                     <p className="text-slate-200 tabular-nums">

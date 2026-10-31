@@ -81,7 +81,7 @@ function SecurityReinforcedInner() {
           : "bg-slate-700/40 text-slate-400";
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto p-4 md:p-6 min-w-0">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-4 md:py-6 min-w-0">
       <PageHeader
         title="Infrastructure Security"
         subtitle="Zero-trust posture: identity, keys, sessions and service health"
@@ -111,7 +111,7 @@ function SecurityReinforcedInner() {
           </div>
 
           {busy ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
               {Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={i}
@@ -120,7 +120,7 @@ function SecurityReinforcedInner() {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 min-w-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 min-w-0">
               <div className="rounded-lg bg-[var(--bg-elevated)] p-3 min-w-0">
                 <p className="text-[10px] uppercase text-[var(--text-muted)]">Overall</p>
                 <p className="mt-1">

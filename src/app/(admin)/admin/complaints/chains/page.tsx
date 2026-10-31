@@ -5,8 +5,15 @@
 import { useCallback, useEffect, useState } from "react";
 import { getAuthHeaders } from "@/lib/utils";
 
+interface ComplaintCategoryRow {
+  code: string;
+  label: string;
+  ownerRole?: string;
+  slaHours?: number;
+}
+
 export default function ChainsPage() {
-  const [rows, setRows] = useState<any[]>([]);
+  const [rows, setRows] = useState<ComplaintCategoryRow[]>([]);
 
   const load = useCallback(async () => {
     const r = await fetch("/api/admin/complaint-categories", { headers: getAuthHeaders() });
@@ -19,7 +26,7 @@ export default function ChainsPage() {
   }, [load]);
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-4">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-6">
       <h1 className="text-2xl font-semibold">Complaint escalation chains</h1>
       <p className="text-sm text-slate-600">
         Chains are seeded via migration. To modify, edit <code className="px-1 bg-slate-100 rounded">complaint_escalation_chains</code> directly.

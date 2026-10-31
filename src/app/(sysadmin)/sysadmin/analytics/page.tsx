@@ -106,9 +106,9 @@ function SysAdminAnalyticsInner() {
 
   if (!data && !error) {
     return (
-      <div className="space-y-4 p-4 md:p-6">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-4 py-4 md:py-6">
         <Skeleton className="h-10 w-64" />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-2xl" />)}
         </div>
         <Skeleton className="h-72 rounded-2xl" />
@@ -117,25 +117,25 @@ function SysAdminAnalyticsInner() {
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-4 md:py-6">
       <PageHeader title="Analytics" subtitle="Traffic, occupancy, and demographic breakdowns" onRefresh={load} />
       {error && <div className="glass-card border border-[var(--action-danger)]/30 p-3 text-sm text-[var(--action-danger)]">{error}</div>}
 
       <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex gap-1 glass-card p-1">
+        <div className="flex flex-wrap gap-1 glass-card p-1">
           {([7, 14, 30] as const).map((d) => (
-            <button key={d} onClick={() => setRange(d)} className={`text-xs px-3 py-1 rounded-lg ${range === d ? "bg-[var(--action-primary)] text-white" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}>
+            <button key={d} onClick={() => setRange(d)} className={`text-xs px-3 py-1 min-h-[44px] rounded-lg flex items-center justify-center ${range === d ? "bg-[var(--action-primary)] text-white" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}>
               {d}d
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={exportCsv} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] hover:bg-[var(--bg-surface)]/60"><Download className="w-3.5 h-3.5" /> CSV</button>
-          <button onClick={load} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] hover:bg-[var(--bg-surface)]/60"><RefreshCw className="w-3.5 h-3.5" /> Refresh</button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button onClick={exportCsv} className="flex items-center gap-1.5 text-xs px-3 py-1.5 min-h-[44px] rounded-lg border border-[var(--border)] hover:bg-[var(--bg-surface)]/60"><Download className="w-3.5 h-3.5" /> CSV</button>
+          <button onClick={load} className="flex items-center gap-1.5 text-xs px-3 py-1.5 min-h-[44px] rounded-lg border border-[var(--border)] hover:bg-[var(--bg-surface)]/60"><RefreshCw className="w-3.5 h-3.5" /> Refresh</button>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="glass-card p-4">
           <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] mb-1"><TrendingUp className="w-3.5 h-3.5 text-[var(--action-primary)]" /> Total entries</div>
           <p className="text-2xl font-bold text-[var(--text-primary)] tabular-nums">{data?.totals.entries.toLocaleString() ?? "—"}</p>

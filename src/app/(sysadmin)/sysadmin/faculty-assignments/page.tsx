@@ -148,7 +148,7 @@ function AdminFacultyAssignmentsInner() {
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-4 md:py-6">
       <PageHeader
         title="Faculty Assignments"
         subtitle="Assign faculty to classes and subjects"
@@ -156,13 +156,13 @@ function AdminFacultyAssignmentsInner() {
       />
 
       <WidgetBoundary title="New assignment">
-        <form onSubmit={assign} className="glass-card p-4 grid grid-cols-2 md:grid-cols-5 gap-3 items-end">
+        <form onSubmit={assign} className="glass-card p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 items-end">
           <label>
             <span className="text-xs font-semibold text-[var(--text-secondary)] block mb-1">Faculty</span>
             <select
               value={draft.facultyId}
               onChange={(e) => setDraft((d) => ({ ...d, facultyId: e.target.value }))}
-              className="w-full px-3 py-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-sm"
+              className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-sm"
               required
             >
               <option value="">Select</option>
@@ -174,7 +174,7 @@ function AdminFacultyAssignmentsInner() {
             <select
               value={draft.classId}
               onChange={(e) => setDraft((d) => ({ ...d, classId: e.target.value }))}
-              className="w-full px-3 py-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-sm"
+              className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-sm"
               required
             >
               <option value="">Select</option>
@@ -186,7 +186,7 @@ function AdminFacultyAssignmentsInner() {
             <select
               value={draft.subjectCode}
               onChange={(e) => setDraft((d) => ({ ...d, subjectCode: e.target.value }))}
-              className="w-full px-3 py-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-sm"
+              className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-sm"
               required
             >
               <option value="">Select</option>
@@ -198,14 +198,14 @@ function AdminFacultyAssignmentsInner() {
             <select
               value={draft.role}
               onChange={(e) => setDraft((d) => ({ ...d, role: e.target.value as FacultyAssignment["role"] }))}
-              className="w-full px-3 py-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-sm"
+              className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-sm"
             >
               <option value="subject_faculty">Subject faculty</option>
               <option value="assistant">Assistant</option>
             </select>
           </label>
           <button type="submit" disabled={saving}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--action-primary)] text-white text-xs font-semibold disabled:opacity-50">
+            className="inline-flex items-center justify-center gap-1.5 px-3 py-2 min-h-[44px] rounded-lg bg-[var(--action-primary)] text-white text-xs font-semibold disabled:opacity-50">
             {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />} Assign
           </button>
         </form>
@@ -213,16 +213,16 @@ function AdminFacultyAssignmentsInner() {
 
       <WidgetBoundary title="Assignment list">
         <div className="glass-card">
-          <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
+          <div className="p-4 border-b border-[var(--border)] flex flex-wrap items-center gap-2">
             <Link2 className="w-4 h-4 text-[var(--action-primary)]" />
             <span className="text-sm font-semibold">{filtered.length} assignments</span>
-            <div className="ml-auto relative">
+            <div className="ml-auto relative min-w-[160px]">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-muted)]" />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Filter…"
-                className="pl-8 pr-3 py-1.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-xs w-40"
+                className="pl-8 pr-3 py-1.5 min-h-[44px] rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-xs w-full sm:w-40"
               />
             </div>
           </div>
@@ -259,7 +259,7 @@ function AdminFacultyAssignmentsInner() {
                     </td>
                     <td className="p-3 text-right">
                       <button onClick={() => unassign(r.id)} aria-label="Unassign"
-                        className="text-[var(--text-muted)] hover:text-[var(--action-danger)] transition-colors">
+                        className="p-2 min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--action-danger)] transition-colors">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </td>

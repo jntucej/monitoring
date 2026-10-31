@@ -90,8 +90,8 @@ export default function ExitReasonsPage() {
 
   return (
     <AuthGuard allowedRoles={["sysadmin"]}>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <p className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
               <DoorOpen className="w-6 h-6 text-amber-400" />
@@ -115,7 +115,7 @@ export default function ExitReasonsPage() {
                 maxDurationHours: 12,
               })
             }
-            className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-xl text-xs flex items-center gap-2 transition"
+            className="px-4 py-2 min-h-[44px] bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-xl text-xs flex items-center gap-2 transition shrink-0"
           >
             <Plus className="w-4 h-4" /> Add Exit Reason
           </button>
@@ -187,14 +187,14 @@ export default function ExitReasonsPage() {
                         <button
                           type="button"
                           onClick={() => setEditingReason(r)}
-                          className="p-1.5 rounded-lg bg-[var(--bg-elevated)] hover:text-amber-400 transition"
+                          className="p-2 min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-lg bg-[var(--bg-elevated)] hover:text-amber-400 transition"
                         >
                           <Edit3 className="w-4 h-4" />
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDelete(r.code)}
-                          className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition"
+                          className="p-2 min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -215,7 +215,7 @@ export default function ExitReasonsPage() {
               </h3>
 
               <form onSubmit={handleSave} className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase mb-1">
                       Reason Code
@@ -226,7 +226,7 @@ export default function ExitReasonsPage() {
                       value={editingReason.code || ""}
                       onChange={(e) => setEditingReason({ ...editingReason, code: e.target.value.toUpperCase() })}
                       placeholder="e.g. MEDICAL"
-                      className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm font-mono text-[var(--text-primary)] focus:outline-none focus:border-amber-400"
+                      className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm font-mono text-[var(--text-primary)] focus:outline-none focus:border-amber-400"
                     />
                   </div>
                   <div>
@@ -239,7 +239,7 @@ export default function ExitReasonsPage() {
                       value={editingReason.name || ""}
                       onChange={(e) => setEditingReason({ ...editingReason, name: e.target.value })}
                       placeholder="e.g. Medical Emergency"
-                      className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:border-amber-400"
+                      className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:border-amber-400"
                     />
                   </div>
                 </div>
@@ -257,7 +257,7 @@ export default function ExitReasonsPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase mb-1">
                       Approval Level
@@ -265,7 +265,7 @@ export default function ExitReasonsPage() {
                     <select
                       value={editingReason.approvalBy || "principal"}
                       onChange={(e) => setEditingReason({ ...editingReason, approvalBy: e.target.value })}
-                      className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:border-amber-400"
+                      className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:border-amber-400"
                     >
                       <option value="principal">Principal</option>
                       <option value="warden">Warden</option>
@@ -282,7 +282,7 @@ export default function ExitReasonsPage() {
                       value={editingReason.maxDurationHours || ""}
                       onChange={(e) => setEditingReason({ ...editingReason, maxDurationHours: e.target.value ? Number(e.target.value) : null })}
                       placeholder="e.g. 24"
-                      className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm font-mono text-[var(--text-primary)] focus:outline-none focus:border-amber-400"
+                      className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm font-mono text-[var(--text-primary)] focus:outline-none focus:border-amber-400"
                     />
                   </div>
                 </div>
@@ -291,14 +291,14 @@ export default function ExitReasonsPage() {
                   <button
                     type="button"
                     onClick={() => setEditingReason(null)}
-                    className="px-4 py-2 bg-[var(--bg-elevated)] text-[var(--text-muted)] rounded-xl text-xs font-semibold hover:bg-[var(--border)] transition"
+                    className="px-4 py-2 min-h-[44px] bg-[var(--bg-elevated)] text-[var(--text-muted)] rounded-xl text-xs font-semibold hover:bg-[var(--border)] transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={!editingReason.code || !editingReason.name}
-                    className="px-4 py-2 bg-amber-500 text-black rounded-xl text-xs font-semibold hover:bg-amber-600 transition disabled:opacity-50 disabled:pointer-events-none"
+                    className="px-4 py-2 min-h-[44px] bg-amber-500 text-black rounded-xl text-xs font-semibold hover:bg-amber-600 transition disabled:opacity-50 disabled:pointer-events-none"
                   >
                     Save Exit Reason
                   </button>

@@ -93,7 +93,7 @@ export default function SysAdminAttendancePage() {
 
   return (
     <AuthGuard allowedRoles={["admin", "sysadmin"]}>
-      <div className="space-y-6">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
         <PageHeader title="Attendance" subtitle="Daily student attendance records" />
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">
@@ -101,12 +101,12 @@ export default function SysAdminAttendancePage() {
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="px-3 py-1.5 rounded-lg bg-[var(--bg-surface)] border border-[var(--border)] text-sm"
+              className="px-3 py-1.5 min-h-[44px] rounded-lg bg-[var(--bg-surface)] border border-[var(--border)] text-sm"
             />
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-4 text-center">
             <p className="text-2xl font-bold text-emerald-400">{stats.present}</p>
             <p className="text-xs text-[var(--text-muted)]">Present</p>
@@ -132,6 +132,7 @@ export default function SysAdminAttendancePage() {
             </span>
           </div>
           <DataTable
+            mobileLayout="cards"
             columns={[
               { header: "Student", accessor: (r) => r.name, className: "font-medium" },
               { header: "Roll No", accessor: (r) => r.roll, className: "font-mono text-[var(--text-muted)]" },

@@ -323,7 +323,7 @@ export function CommandCenterContent({ data }: CommandCenterContentProps) {
       {/* ── KPI tiles */}
       <section
         aria-label="Key metrics"
-        className="grid grid-cols-2 gap-3 lg:grid-cols-4"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"
       >
         {tiles.map((t) => (
           <KpiCard key={t.id} tile={t} />

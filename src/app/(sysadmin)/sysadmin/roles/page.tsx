@@ -614,8 +614,8 @@ export default function RolesManagementPage() {
 
   return (
     <AuthGuard allowedRoles={["sysadmin"]}>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <p className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
               <UserCog className="w-6 h-6 text-purple-400" />
@@ -635,7 +635,7 @@ export default function RolesManagementPage() {
                 default_redirect: "/profile",
               })
             }
-            className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-xl text-xs flex items-center gap-2 transition"
+            className="px-4 py-2 min-h-[44px] bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-xl text-xs flex items-center gap-2 transition shrink-0"
           >
             <Plus className="w-4 h-4" /> Define System Role
           </button>
@@ -643,7 +643,7 @@ export default function RolesManagementPage() {
 
         {/* ------------------------------------------------ role hierarchy graph (from /api/roles-graph) */}
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)] bg-[var(--bg-elevated)]/50">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3 border-b border-[var(--border)] bg-[var(--bg-elevated)]/50">
             <div className="flex items-center gap-2">
               <Network className="w-4 h-4 text-purple-400" />
               <div>
@@ -657,41 +657,43 @@ export default function RolesManagementPage() {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={() => void refreshGraph()}
                 disabled={countLoading}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[10px] font-semibold text-[var(--text-muted)] hover:text-purple-400 transition disabled:opacity-50"
+                className="inline-flex items-center gap-1 px-3 py-1.5 min-h-[44px] rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[10px] font-semibold text-[var(--text-muted)] hover:text-purple-400 transition disabled:opacity-50"
               >
                 <RefreshCw className="w-3 h-3" /> Refresh
               </button>
               <button
                 onClick={expandAll}
-                className="px-3 py-1.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[10px] font-semibold text-[var(--text-muted)] hover:text-purple-400 transition"
+                className="px-3 py-1.5 min-h-[44px] rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[10px] font-semibold text-[var(--text-muted)] hover:text-purple-400 transition"
               >
                 Expand All
               </button>
               <button
                 onClick={collapseAll}
-                className="px-3 py-1.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[10px] font-semibold text-[var(--text-muted)] hover:text-purple-400 transition"
+                className="px-3 py-1.5 min-h-[44px] rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[10px] font-semibold text-[var(--text-muted)] hover:text-purple-400 transition"
               >
                 Collapse All
               </button>
             </div>
           </div>
 
-          <div className="p-4 space-y-2">
-            {loading ? (
-              <div className="p-8 text-center text-[var(--text-muted)] text-sm animate-pulse">
-                Loading role hierarchy…
-              </div>
-            ) : tree.length === 0 ? (
-              <div className="p-8 text-center text-[var(--text-muted)] text-sm">
-                No roles defined yet. Use &ldquo;Define System Role&rdquo; to add one.
-              </div>
-            ) : (
-              tree.map((node) => renderTreeNode(node))
-            )}
+          <div className="overflow-x-auto">
+            <div className="min-w-[640px] p-4 space-y-2">
+              {loading ? (
+                <div className="p-8 text-center text-[var(--text-muted)] text-sm animate-pulse">
+                  Loading role hierarchy…
+                </div>
+              ) : tree.length === 0 ? (
+                <div className="p-8 text-center text-[var(--text-muted)] text-sm">
+                  No roles defined yet. Use &ldquo;Define System Role&rdquo; to add one.
+                </div>
+              ) : (
+                tree.map((node) => renderTreeNode(node))
+              )}
+            </div>
           </div>
         </div>
 
@@ -865,7 +867,7 @@ export default function RolesManagementPage() {
                   value={grantSearch}
                   onChange={(e) => searchUsers(e.target.value)}
                   placeholder="Search by name, email, or ID…"
-                  className="w-full pl-9 pr-3 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:border-emerald-400"
+                  className="w-full min-h-[44px] pl-9 pr-3 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:border-emerald-400"
                 />
                 {grantSearch && (
                   <button
@@ -873,7 +875,7 @@ export default function RolesManagementPage() {
                       setGrantSearch("");
                       setGrantResults([]);
                     }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-rose-400 transition"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px] flex items-center justify-center text-[var(--text-muted)] hover:text-rose-400 transition"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -901,7 +903,7 @@ export default function RolesManagementPage() {
                         <button
                           onClick={() => grantRole(u)}
                           disabled={grantBusy || hasRole}
-                          className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition ${
+                          className={`px-3 py-1.5 min-h-[44px] rounded-lg text-xs font-bold transition flex items-center justify-center ${
                             hasRole
                               ? "bg-[var(--bg-elevated)] text-[var(--text-muted)] cursor-not-allowed"
                               : "bg-emerald-500 hover:bg-emerald-600 text-white"
@@ -918,7 +920,7 @@ export default function RolesManagementPage() {
                               ? "Role graph unavailable — assign a replacement role manually"
                               : `Demote to '${roleParents[grantRoleCode]}'`
                           }
-                          className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-rose-500/15 text-rose-400 hover:bg-rose-500/30 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                          className="px-3 py-1.5 min-h-[44px] rounded-lg text-xs font-bold transition flex items-center justify-center bg-rose-500/15 text-rose-400 hover:bg-rose-500/30 disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                           Revoke
                         </button>
@@ -1002,7 +1004,7 @@ export default function RolesManagementPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase mb-1">
                       Lucide Icon Token
@@ -1014,7 +1016,7 @@ export default function RolesManagementPage() {
                         setEditingRole({ ...editingRole, icon_name: e.target.value })
                       }
                       placeholder="e.g. Shield"
-                      className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm font-mono text-[var(--text-primary)] focus:outline-none focus:border-purple-400"
+                      className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm font-mono text-[var(--text-primary)] focus:outline-none focus:border-purple-400"
                     />
                   </div>
                   <div>
@@ -1028,7 +1030,7 @@ export default function RolesManagementPage() {
                         setEditingRole({ ...editingRole, default_redirect: e.target.value })
                       }
                       placeholder="e.g. /admin"
-                      className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm font-mono text-[var(--text-primary)] focus:outline-none focus:border-purple-400"
+                      className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm font-mono text-[var(--text-primary)] focus:outline-none focus:border-purple-400"
                     />
                   </div>
                 </div>
@@ -1037,13 +1039,13 @@ export default function RolesManagementPage() {
                   <button
                     type="button"
                     onClick={() => setEditingRole(null)}
-                    className="px-4 py-2 bg-[var(--bg-elevated)] text-[var(--text-muted)] rounded-xl text-xs font-semibold hover:bg-[var(--border)] transition"
+                    className="px-4 py-2 min-h-[44px] bg-[var(--bg-elevated)] text-[var(--text-muted)] rounded-xl text-xs font-semibold hover:bg-[var(--border)] transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-purple-500 text-white rounded-xl text-xs font-semibold hover:bg-purple-600 transition"
+                    className="px-4 py-2 min-h-[44px] bg-purple-500 text-white rounded-xl text-xs font-semibold hover:bg-purple-600 transition"
                   >
                     Save Role
                   </button>

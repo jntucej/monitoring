@@ -57,7 +57,7 @@ function ApplicationHealthInner() {
   const safeHealth = health ?? { status: "degraded", uptimeSeconds: 0, metrics: { activeUsers: 0, activeSessions: 0, requestsPerMinute: 0, errorRate: 0, avgResponseTime: 0 }, recentAlerts: [] };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 min-w-0">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-4 sm:py-6 min-w-0">
       <div>
         <p className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
           <Activity className="w-6 h-6 text-rose-400" />
@@ -103,7 +103,7 @@ function ApplicationHealthInner() {
                 {health?.status ?? "loading"}
               </span>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 p-4 min-w-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 p-4 min-w-0">
               {busy ? (
                 Array.from({ length: 6 }).map((_, i) => (
                   <div key={i} className="h-14 animate-pulse rounded-lg bg-slate-800/40" />

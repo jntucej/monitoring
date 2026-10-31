@@ -5,8 +5,18 @@
 import { useCallback, useEffect, useState } from "react";
 import { getAuthHeaders } from "@/lib/utils";
 
+interface CategoryRow {
+  code: string;
+  label: string;
+  ownerRole?: string;
+  slaHours?: number;
+  anonymousAllowed?: boolean;
+  girlsCellEligible?: boolean;
+  isActive?: boolean;
+}
+
 export default function CategoriesPage() {
-  const [rows, setRows] = useState<any[]>([]);
+  const [rows, setRows] = useState<CategoryRow[]>([]);
   const [saving, setSaving] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -31,7 +41,7 @@ export default function CategoriesPage() {
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-4">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-6">
       <h1 className="text-2xl font-semibold">Complaint categories</h1>
       <div className="border rounded bg-white overflow-x-auto">
         <table className="w-full text-sm">
@@ -58,7 +68,7 @@ export default function CategoriesPage() {
                     defaultValue={c.slaHours}
                     disabled={saving === c.code}
                     onBlur={(e) => patch(c.code, "slaHours", Number(e.target.value))}
-                    className="w-20 border rounded p-1 text-sm"
+                    className="w-20 border rounded p-1 text-sm min-h-[44px]"
                   />
                 </td>
                 <td className="p-3">
@@ -67,6 +77,7 @@ export default function CategoriesPage() {
                     checked={c.anonymousAllowed}
                     disabled={saving === c.code}
                     onChange={(e) => patch(c.code, "anonymousAllowed", e.target.checked)}
+                    className="h-5 w-5"
                   />
                 </td>
                 <td className="p-3">
@@ -75,6 +86,7 @@ export default function CategoriesPage() {
                     checked={c.girlsCellEligible}
                     disabled={saving === c.code}
                     onChange={(e) => patch(c.code, "girlsCellEligible", e.target.checked)}
+                    className="h-5 w-5"
                   />
                 </td>
                 <td className="p-3">
@@ -83,6 +95,7 @@ export default function CategoriesPage() {
                     checked={c.isActive}
                     disabled={saving === c.code}
                     onChange={(e) => patch(c.code, "isActive", e.target.checked)}
+                    className="h-5 w-5"
                   />
                 </td>
               </tr>

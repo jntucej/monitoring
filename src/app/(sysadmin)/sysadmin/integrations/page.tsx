@@ -8,7 +8,7 @@ import { LMSIntegration } from "@/components/sysadmin/LMSIntegration";
 export default function IntegrationsPage() {
   return (
     <AuthGuard allowedRoles={["sysadmin", "admin"]}>
-      <div className="max-w-6xl mx-auto p-4 sm:p-4 sm:p-4 sm:p-6 space-y-4 sm:space-y-4 sm:space-y-6">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
         <LMSIntegration />
         <IntegrationsDashboard />
       </div>
