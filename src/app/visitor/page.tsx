@@ -5,7 +5,6 @@ import { UserCheck, Clock, History, User, FileText, MapPin, ArrowRight } from "l
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
-import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 
 const CARDS = [
   { href: "/visitor/registration",   icon: UserCheck, label: "Registration",     desc: "Update your visitor profile" },
@@ -51,9 +50,6 @@ export default function VisitorLandingPage() {
       </WidgetBoundary>
       <WidgetBoundary name="TaskContinuity" title="Task Continuity">
         <TaskContinuity />
-      </WidgetBoundary>
-      <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar">
-        <UnifiedCampusCalendar />
       </WidgetBoundary>
     </div>
   );

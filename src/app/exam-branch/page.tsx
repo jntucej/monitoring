@@ -14,6 +14,7 @@ import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
+import { KanbanBoard } from "@/components/shared/KanbanBoard";
 
 export default function ExamBranchPage() {
   return (
@@ -28,6 +29,12 @@ export default function ExamBranchPage() {
               endpoint={null}
             />
           </WidgetBoundary>
+          <KanbanBoard
+            source="/api/permissions?workflow_type=exam"
+            itemKey="permission"
+            columns={["PENDING", "VERIFYING", "APPROVED", "REJECTED"]}
+            onSelect={() => {}}
+          />
           <WidgetBoundary name="AttentionQueue" title="Attention Queue"><AttentionQueue /></WidgetBoundary>
           <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home"><PersonalizedCampusHome /></WidgetBoundary>
           <WidgetBoundary name="TaskContinuity" title="Task Continuity"><TaskContinuity /></WidgetBoundary>

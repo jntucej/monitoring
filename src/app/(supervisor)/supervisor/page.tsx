@@ -21,6 +21,21 @@ import { DigitalHandover } from "@/components/retention/DigitalHandover";
 import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
+import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
+function KpiTile({ label, value, tone = "ok" }: { label: string; value: string | number; tone?: "ok" | "warn" | "bad" | "neutral" }) {
+  const toneClass = tone === "bad" ? "text-red-400" : tone === "warn" ? "text-amber-400" : tone === "neutral" ? "text-[var(--text-muted)]" : "text-[var(--text-primary)]";
+  return (
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3 min-w-0">
+      <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">{label}</div>
+      <div className={`mt-1 text-lg font-extrabold truncate ${toneClass}`}>{value}</div>
+    </div>
+  );
+}
 
 interface SupervisorOverview {
   counts: {
@@ -107,6 +122,13 @@ export default function SupervisorTodayPage() {
   const totalGates = d?.gates.length ?? 0;
   const gatesOnline = d?.gates.filter((g) => g.isActive && g.onPost > 0).length ?? 0;
   const securityOnDuty = 0; // enriched by TeamRoster's own fetch
+  const shiftActive = d?.shift.startedAt != null;
+  const kpis = [
+    { label: "Shift", value: shiftActive ? "On shift" : "Off shift", tone: shiftActive ? ("ok" as const) : ("neutral" as const) },
+    { label: "Gates online", value: `${gatesOnline}/${totalGates}`, tone: "neutral" as const },
+    { label: "Open escalations", value: escalationsOpen, tone: escalationsOpen > 0 ? ("bad" as const) : ("ok" as const) },
+    { label: "Open incidents", value: incidentsOpen, tone: incidentsOpen > 0 ? ("bad" as const) : ("ok" as const) },
+  ];
 
   return (
     <>
@@ -114,6 +136,10 @@ export default function SupervisorTodayPage() {
       <FocusMode open={focusOpen} onClose={() => setFocusOpen(false)} />
 
       <div className="mx-auto w-full max-w-7xl space-y-4 min-w-0">
+        <PageHeader title="Supervisor" subtitle="Shift command & gate operations" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          {kpis.map((k) => <KpiTile key={k.label} {...k} />)}
+        </div>
         {/* 1. Shift bar — shift-aware, not day-aware */}
         <WidgetBoundary name="ShiftBar" title="Shift Bar">
           <ShiftBar
@@ -175,6 +201,10 @@ export default function SupervisorTodayPage() {
           <DigitalHandover />
         </WidgetBoundary>
 
+        <WidgetBoundary name="RoleAnalytics" title="Role Analytics">
+          <RoleAnalytics />
+        </WidgetBoundary>
+
         <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home">
           <PersonalizedCampusHome />
         </WidgetBoundary>
@@ -186,6 +216,16 @@ export default function SupervisorTodayPage() {
         <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar">
           <UnifiedCampusCalendar />
         </WidgetBoundary>
+
+        <WidgetBoundary name="QuickActions" title="Quick Actions">
+          <QuickActions />
+        </WidgetBoundary>
+
+        <WidgetBoundary name="NotificationCenter" title="Notification Center">
+          <NotificationCenter />
+        </WidgetBoundary>
+
+        <DevContactStrip />
       </div>
     </>
   );
