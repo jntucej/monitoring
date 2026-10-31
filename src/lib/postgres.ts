@@ -123,11 +123,21 @@ export async function withTransaction<T>(
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
+    // SET/SET LOCAL do not accept $n bind placeholders in PostgreSQL — the
+    // command parser rejects them ("syntax error at or near \"$1\""). The
+    // portable way to set a GUC transactionally (auto-revert on COMMIT/
+    // ROLLBACK) is set_config($1, $2, true) where $3=true means "local".
     if (options?.currentUserId) {
-      await client.query("SET LOCAL app.current_user_id = $1", [options.currentUserId]);
+      await client.query(
+        "SELECT set_config($$app.current_user_id$$, $1, true)",
+        [options.currentUserId],
+      );
     }
     if (options?.currentRole) {
-      await client.query("SET LOCAL app.current_role = $1", [options.currentRole]);
+      await client.query(
+        "SELECT set_config($$app.current_role$$, $1, true)",
+        [options.currentRole],
+      );
     }
     const result = await callback(client);
     await client.query("COMMIT");
