@@ -38,15 +38,49 @@ const onlyRole = process.argv.find((a) => a.startsWith("--role="))?.split("=")[1
 const verbose = process.argv.includes("--verbose");
 
 async function login(page: Page, c: Creds): Promise<string | null> {
-  await page.goto(`${BASE}/login`, { waitUntil: "domcontentloaded" });
-  await page.getByPlaceholder(/login|id|email|roll/i).first().fill(c.login);
-  await page.getByPlaceholder(/password/i).first().fill(c.password);
-  await page.getByRole("button", { name: /log ?in/i }).first().click();
-  await page.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => {});
-  const body = await page.content();
-  if (/log in/i.test(body) && /password/i.test(body) && !body.includes(c.anchor)) {
-    return null; // still on login form
+  // 1) hit the real login API (server-side validation: token, user, role)
+  const res = await page.request.post(`${BASE}/api/auth/login`, {
+    data: { login: c.login, password: c.password },
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok() || !body?.data?.token) {
+    return null; // login failed — record the role as FAIL
   }
+  // 2) seed the auth store exactly the way the real login flow does:
+  //    `auth.token` in sessionStorage (read by getAuthHeaders on every fetch)
+  //    plus the store's persisted shape so AuthGuard sees a hydrated session.
+  const token = body.data.token;
+  const user = body.data.user ?? {};
+  // Seed storage on the target origin WITHOUT mounting the app (about:blank is
+  // cross-origin; we must be on-origin to write its storage, but going to the
+  // login page would mount the store and let its mount-time checkSession()
+  // race and clear the token we just set). Use the app's own /login page
+  // but immediately navigate away before any effect can run — the token is
+  // in sessionStorage which survives the navigation, and on /hod the store
+  // rehydrates with authenticated:true + a live token, so checkSession passes.
+  await page.goto(`${BASE}/login`, { waitUntil: "commit" });
+  await page.evaluate(
+    ([token, user]) => {
+      sessionStorage.setItem("auth.token", token);
+      localStorage.setItem(
+        "mycampus-auth",
+        JSON.stringify({
+          state: {
+            user,
+            role: user.role,
+            authenticated: true,
+          },
+          version: 0,
+        })
+      );
+    },
+    [token, user] as const
+  );
+  // 3) navigate to the role's root — AuthGuard should now pass through
+  await page.goto(`${BASE}${c.rootHref}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+  await page.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => {});
+  // bounced back to /login = token wasn't accepted
+  if (page.url().includes("/login")) return null;
   return page.url();
 }
 
@@ -57,7 +91,12 @@ async function smokeRole(browser: Browser, c: Creds) {
   const consoleErrors: string[] = [];
   const badApis: string[] = [];
   page.on("console", (msg) => {
-    if (msg.type() === "error") consoleErrors.push(msg.text().slice(0, 200));
+    if (msg.type() !== "error") return;
+    const t = msg.text();
+    // noise: COOP header warnings on the cinematic login page, and blocked
+    // cross-origin static assets — neither is a hydration/render failure
+    if (t.includes("Cross-Origin-Opener-Policy") || t.includes("ERR_BLOCKED_BY_RESPONSE")) return;
+    consoleErrors.push(t.slice(0, 200));
   });
   page.on("response", (res) => {
     if (res.url().includes("/api/") && (res.status() === 401 || res.status() === 403)) {
@@ -77,9 +116,24 @@ async function smokeRole(browser: Browser, c: Creds) {
   const results: Array<{ leaf: string; status: number; anchorOk: boolean; error: string | null }> = [];
   for (const leaf of leaves) {
     const res = await page.goto(`${BASE}${leaf}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
-    await page.waitForLoadState("networkidle", { timeout: 10_000 }).catch(() => {});
+    // Wait for the shell's brand text to actually render (proves hydration +
+    // AuthGuard passed). Bounded — an infinite loader fails the anchor here.
+    let anchorOk = false;
+    if (c.anchor) {
+      try {
+        await page.waitForFunction(
+          (a) => document.body.innerText.includes(a),
+          c.anchor,
+          { timeout: 15_000 }
+        );
+        anchorOk = true;
+      } catch {
+        anchorOk = false;
+      }
+    } else {
+      anchorOk = (await page.content()).length > 500;
+    }
     const html = await page.content();
-    const anchorOk = c.anchor ? html.includes(c.anchor) : html.length > 500;
     results.push({
       leaf,
       status: res?.status() ?? 0,

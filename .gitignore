@@ -119,3 +119,5 @@ users.json
 # Permission workflow document uploads (never commit)
 data/uploads/
 .scannerwork/
+scripts/smoke-creds.json
+scripts/smoke-report.json

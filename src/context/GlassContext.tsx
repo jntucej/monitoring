@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode, useRef, useMemo } from "react";
 import { useReducedMotion } from "framer-motion";
 import { useUIStore } from "@/stores/uiStore";
+import { useAuthStore } from "@/stores/authStore";
 import { GateMonitorWS } from "@/lib/websocket";
 import { AlertPayload, GateStatusChangePayload } from "@/lib/mockData";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
@@ -160,12 +161,18 @@ export function GlassProvider({
   // --- WEBSOCKET LIVE FEED SUBSCRIPTION ---
   const wsRef = useRef<GateMonitorWS | null>(null);
   const pathname = usePathname();
+  // The /api/gate/stream SSE endpoint is gated to these roles; opening it for
+  // any other role 403s on every mount (the 403 storm on non-operator consoles).
+  const userRole = useAuthStore((s) => s.role);
+  const GATE_STREAM_ROLES = new Set(["admin", "sysadmin", "operator", "supervisor", "oie"]);
+  const roleAllowedGateStream = GATE_STREAM_ROLES.has(userRole ?? "");
 
   // Public / landing routes never need the gate realtime stream. Opening it
   // there would fire an SSE connection (and a console warning) that the page
   // doesn't use. The app shell and operator kiosk still connect as before.
   const PUBLIC_ROUTE = /^\/(login|about|help|support|campus|visitor|profile|security|settings|forbidden|bootstrap)?\/?$/;
-  const shouldConnectRealtime = !PUBLIC_ROUTE.test(pathname ?? "/");
+  const shouldConnectRealtime =
+    !PUBLIC_ROUTE.test(pathname ?? "/") && roleAllowedGateStream;
 
   useEffect(() => {
     if (!shouldConnectRealtime) return;
@@ -237,7 +244,7 @@ export function GlassProvider({
         wsRef.current = null;
       }
     };
-  }, [shouldConnectRealtime]);
+  }, [shouldConnectRealtime, roleAllowedGateStream]);
 
   // --- RUNTIME FPS DETECTION & REF-THROTTLED TIER ENGINE ---
   const [performanceTier, setPerformanceTierState] = useState<PerformanceTier>("splusplus");
