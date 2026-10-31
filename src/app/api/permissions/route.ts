@@ -318,6 +318,14 @@ async function handleGet(
     // them to that stage only — they must not see exam/memo/staff-leave queues.
     params.push("hostel_manager");
     where.push(`current_stage = $${params.length}`);
+  } else if (["mess_incharge", "worker"].includes(role)) {
+    // Operational roles: no approval queue of their own. Their consoles poll
+    // /api/permissions for the shared "Quick Actions" widget — returning 403
+    // here spammed the console with errors on every mount. Scope them to a
+    // stage no ticket can be routed to, so they always get an empty queue
+    // instead of a 403.
+    params.push("mess_incharge_internal_only");
+    where.push(`current_stage = $${params.length}`);
   } else {
     return fail("FORBIDDEN", "Role has no permission visibility", 403);
   }

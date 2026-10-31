@@ -28,6 +28,7 @@ const ALL_ROLES: Role[] = [
   "exam_branch", "vice_principal", "principal", "admin", "sysadmin",
   "operator", "supervisor", "worker", "caretaker", "deputy_warden",
   "hostel_manager", "mess_incharge", "visitor",
+  "exam_superintendent",
 ];
 
 interface AttentionItem {
@@ -56,6 +57,14 @@ function ownedStages(role: Role): string[] {
       "caretaker", "deputy_warden", "hostel_manager", "warden_or_principal",
       "lab_incharge",
     ];
+  }
+  if (role === "exam_superintendent") {
+    // The exam workflow routes through oie → exam_branch → vice_principal →
+    // principal; the superintend
+ent sits at the front of that chain and needs
+    // visibility across it (a bare "exam_superintendent" stage owns zero tickets,
+    // which made /api/attention/queue always return empty for this role).
+    return ["oie", "exam_branch", "vice_principal", "principal"];
   }
   return [...list];
 }
@@ -501,6 +510,7 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }): Pr
       case "hod":
       case "oie":
       case "exam_branch":
+      case "exam_superintendent":
       case "vice_principal":
       case "principal":
       case "admin":

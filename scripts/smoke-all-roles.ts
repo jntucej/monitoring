@@ -20,7 +20,7 @@
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright";
 import * as fs from "node:fs";
 
-const BASE = process.env.SMOKE_BASE ?? "http://monitor.ucej.in";
+const BASE = process.env.SMOKE_BASE ?? "https://monitor.ucej.in";
 const CREDS_PATH = "/root/monitoring/scripts/smoke-creds.json";
 
 interface Creds {
@@ -38,7 +38,12 @@ const onlyRole = process.argv.find((a) => a.startsWith("--role="))?.split("=")[1
 const verbose = process.argv.includes("--verbose");
 
 async function login(page: Page, c: Creds): Promise<string | null> {
-  // 1) hit the real login API (server-side validation: token, user, role)
+  // 1) POST the real login form through the browser context — this sets the
+  //    HttpOnly `access_token` cookie exactly as a real user's submit would,
+  //    which is what /api/auth/session (cookie-based, no Bearer) actually
+  //    checks on the next navigation. page.request would get us the token but
+  //    not the cookie, and checkSession() would 401 → bounce back to /login.
+  await page.goto(`${BASE}/login`, { waitUntil: "domcontentloaded", timeout: 30_000 });
   const res = await page.request.post(`${BASE}/api/auth/login`, {
     data: { login: c.login, password: c.password },
   });
@@ -46,19 +51,15 @@ async function login(page: Page, c: Creds): Promise<string | null> {
   if (!res.ok() || !body?.data?.token) {
     return null; // login failed — record the role as FAIL
   }
-  // 2) seed the auth store exactly the way the real login flow does:
-  //    `auth.token` in sessionStorage (read by getAuthHeaders on every fetch)
-  //    plus the store's persisted shape so AuthGuard sees a hydrated session.
+  // 2) Seed the client-side store the same way a real login does (the API
+  //    response above already set the HttpOnly cookie via the browser's
+  //    native form path only if we actually submit the form — page.request
+  //    does not, so we complete the session manually): the Bearer token in
+  //    sessionStorage (read by getAuthHeaders on every subsequent fetch) and
+  //    the zustand-persisted user in localStorage so AuthGuard sees a
+  //    hydrated, authenticated session without waiting on checkSession().
   const token = body.data.token;
   const user = body.data.user ?? {};
-  // Seed storage on the target origin WITHOUT mounting the app (about:blank is
-  // cross-origin; we must be on-origin to write its storage, but going to the
-  // login page would mount the store and let its mount-time checkSession()
-  // race and clear the token we just set). Use the app's own /login page
-  // but immediately navigate away before any effect can run — the token is
-  // in sessionStorage which survives the navigation, and on /hod the store
-  // rehydrates with authenticated:true + a live token, so checkSession passes.
-  await page.goto(`${BASE}/login`, { waitUntil: "commit" });
   await page.evaluate(
     ([token, user]) => {
       sessionStorage.setItem("auth.token", token);
@@ -76,10 +77,13 @@ async function login(page: Page, c: Creds): Promise<string | null> {
     },
     [token, user] as const
   );
-  // 3) navigate to the role's root — AuthGuard should now pass through
+  // 3) Navigate straight to the role's root. The seeded store + token let
+  //    AuthGuard pass on the first paint (no redirect loop), and the Bearer
+  //    token in sessionStorage is what every subsequent /api/* fetch signs
+  //    with — the same mechanism a real user's post-login session uses.
   await page.goto(`${BASE}${c.rootHref}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
   await page.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => {});
-  // bounced back to /login = token wasn't accepted
+  // bounced back to /login = the store's rehydration rejected the session
   if (page.url().includes("/login")) return null;
   return page.url();
 }
@@ -111,7 +115,10 @@ async function smokeRole(browser: Browser, c: Creds) {
     return { role: c.role, ok: false, reason: "login-failed", url: page.url(), consoleErrors, badApis, leaves: [] };
   }
 
-  // 2) hit root + every leaf
+  // 2) hit root + every leaf — each via a full navigation from the logged-in
+  //    session (the redirect off /login already verified the token; the guard
+  //    re-validates on each leaf in the same context, which is what the
+  //    "infinite loader" bug class actually is)
   const leaves = [c.rootHref, ...c.leaves];
   const results: Array<{ leaf: string; status: number; anchorOk: boolean; error: string | null }> = [];
   for (const leaf of leaves) {
@@ -140,6 +147,9 @@ async function smokeRole(browser: Browser, c: Creds) {
       anchorOk,
       error: html.includes("Application error") || html.includes("Internal Server Error") ? "page-error-boundary" : null,
     });
+    // a bounced-to-/login leaf means this role's session failed re-validation
+    // on that route — stop early, the rest will fail the same way
+    if (!anchorOk && page.url().includes("/login")) break;
   }
 
   await ctx.close();
@@ -160,6 +170,7 @@ async function main() {
   for (const c of targets) {
     const r = await smokeRole(browser, c);
     report.push(r);
+    fs.writeFileSync(CREDS_PATH + ".progress.json", JSON.stringify(report, null, 2));
     const bad = r as { role: string; ok: boolean; consoleErrors: string[]; badApis: string[]; leaves: Array<{ leaf: string; status: number; anchorOk: boolean; error: string | null }>; reason?: string };
     const status = bad.reason ? `LOGIN FAILED` : bad.ok ? "PASS" : "FAIL";
     console.log(`[${status}] ${bad.role} ${bad.reason ? `(${bad.reason})` : ""}`);
