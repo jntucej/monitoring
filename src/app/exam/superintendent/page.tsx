@@ -12,6 +12,7 @@ import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
 import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
+import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 
 export default function ExamSuperintendentPage() {
@@ -20,20 +21,29 @@ export default function ExamSuperintendentPage() {
       <AuthGuard allowedRoles={["exam_superintendent"]}>
         <div className="space-y-6">
           <DevContactStrip />
-          <WidgetBoundary>
+          <WidgetBoundary name="RoleDashboardPanel" title="Exam Superintendent Dashboard">
             <RoleDashboardPanel
               title="Exam Superintendent dashboard"
               icon={ScanEye}
               endpoint="/api/exam/superintendent"
+              mapKpis={(raw: unknown) => {
+                const d = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
+                const items = Array.isArray(d.items) ? d.items.length : 0;
+                const total = typeof d.total === "number" ? d.total : items;
+                return [
+                  { label: "Queue items", value: total },
+                ];
+              }}
             />
           </WidgetBoundary>
-          <WidgetBoundary><AttentionQueue /></WidgetBoundary>
-          <WidgetBoundary><PersonalizedCampusHome /></WidgetBoundary>
-          <WidgetBoundary><TaskContinuity /></WidgetBoundary>
-          <WidgetBoundary><UnifiedCampusCalendar /></WidgetBoundary>
-          <WidgetBoundary><ActivityTimeline /></WidgetBoundary>
-          <WidgetBoundary><QuickActions /></WidgetBoundary>
-          <WidgetBoundary><NotificationCenter /></WidgetBoundary>
+          <WidgetBoundary name="AttentionQueue" title="Attention Queue"><AttentionQueue /></WidgetBoundary>
+          <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home"><PersonalizedCampusHome /></WidgetBoundary>
+          <WidgetBoundary name="TaskContinuity" title="Task Continuity"><TaskContinuity /></WidgetBoundary>
+          <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar"><UnifiedCampusCalendar /></WidgetBoundary>
+          <WidgetBoundary name="RoleAnalytics" title="Role Analytics"><RoleAnalytics /></WidgetBoundary>
+          <WidgetBoundary name="ActivityTimeline" title="Activity Timeline"><ActivityTimeline /></WidgetBoundary>
+          <WidgetBoundary name="QuickActions" title="Quick Actions"><QuickActions /></WidgetBoundary>
+          <WidgetBoundary name="NotificationCenter" title="Notification Center"><NotificationCenter /></WidgetBoundary>
         </div>
       </AuthGuard>
     </Suspense>

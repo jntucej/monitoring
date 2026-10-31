@@ -22,6 +22,13 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { PassQrModal } from "@/components/student/PassQrModal";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { CampusKnowledgeCentre } from "@/components/retention/CampusKnowledgeCentre";
+import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
+import { ContributionPortfolio } from "@/components/retention/ContributionPortfolio";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 
 type StudentDashboardPayload = {
   curfew: {
@@ -303,50 +310,83 @@ function StudentDashboardInner() {
         </div>
       </section>
 
-      <section aria-label="Campus pulse" className="rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <h2 className="text-sm font-bold text-[var(--text-primary)]">Campus Pulse</h2>
-            <p className="text-xs text-[var(--text-muted)]">Announcements and events in one calm feed.</p>
+      <WidgetBoundary name="CampusPulse" title="Campus Pulse">
+        <section aria-label="Campus pulse" className="rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-bold text-[var(--text-primary)]">Campus Pulse</h2>
+              <p className="text-xs text-[var(--text-muted)]">Announcements and events in one calm feed.</p>
+            </div>
+            <TrendingUp className="w-4 h-4 text-[var(--action-info)]" />
           </div>
-          <TrendingUp className="w-4 h-4 text-[var(--action-info)]" />
-        </div>
 
-        <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <CampusFeed limit={8} />
-          <EventsPanel limit={4} />
-        </div>
-      </section>
+          <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <CampusFeed limit={8} />
+            <EventsPanel limit={4} />
+          </div>
+        </section>
+      </WidgetBoundary>
 
-      <section aria-label="Progress strip" className="rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <Achievements />
-          <PersonalGoals />
-        </div>
-      </section>
+      <WidgetBoundary name="ProgressStrip" title="Progress & Achievements">
+        <section aria-label="Progress strip" className="rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <Achievements />
+            <PersonalGoals />
+          </div>
+        </section>
+      </WidgetBoundary>
 
-      <section aria-label="Recent activity" className="rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
-        <ActivityTimeline limit={8} />
-      </section>
+      <WidgetBoundary name="ActivityTimeline" title="Recent Activity">
+        <section aria-label="Recent activity" className="rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+          <ActivityTimeline limit={8} />
+        </section>
+      </WidgetBoundary>
 
-      <section aria-label="Student overview widgets" className="space-y-3">
-        <div className="flex items-center gap-2 justify-center sm:justify-start">
-          <p className="text-sm font-semibold text-[var(--text-primary)]">Status and Pass Widgets</p>
-        </div>
-        <StudentDashboardWidgets />
-      </section>
+      <WidgetBoundary name="StudentDashboardWidgets" title="Status and Pass Widgets">
+        <section aria-label="Student overview widgets" className="space-y-3">
+          <div className="flex items-center gap-2 justify-center sm:justify-start">
+            <p className="text-sm font-semibold text-[var(--text-primary)]">Status and Pass Widgets</p>
+          </div>
+          <StudentDashboardWidgets />
+        </section>
+      </WidgetBoundary>
 
-      <section aria-label="Digital ID card" className="space-y-3">
-        <div className="flex items-center gap-2 justify-center sm:justify-start">
-          <p className="text-sm font-semibold text-[var(--text-primary)]">Digital Campus ID Card</p>
-        </div>
-        <div className="max-w-md mx-auto sm:max-w-none">
-          <DigitalIdCard />
-        </div>
-      </section>
+      <WidgetBoundary name="DigitalIdCard" title="Digital Campus ID Card">
+        <section aria-label="Digital ID card" className="space-y-3">
+          <div className="flex items-center gap-2 justify-center sm:justify-start">
+            <p className="text-sm font-semibold text-[var(--text-primary)]">Digital Campus ID Card</p>
+          </div>
+          <div className="max-w-md mx-auto sm:max-w-none">
+            <DigitalIdCard />
+          </div>
+        </section>
+      </WidgetBoundary>
 
-      <QuickActions />
-      <NotificationCenter />
+      <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home">
+        <PersonalizedCampusHome />
+      </WidgetBoundary>
+      <WidgetBoundary name="TaskContinuity" title="Task Continuity">
+        <TaskContinuity />
+      </WidgetBoundary>
+      <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar">
+        <UnifiedCampusCalendar />
+      </WidgetBoundary>
+      <WidgetBoundary name="CampusKnowledgeCentre" title="Campus Knowledge Centre">
+        <CampusKnowledgeCentre />
+      </WidgetBoundary>
+      <WidgetBoundary name="CampusFeedbackDesk" title="Campus Feedback Desk">
+        <CampusFeedbackDesk />
+      </WidgetBoundary>
+      <WidgetBoundary name="ContributionPortfolio" title="Contribution Portfolio">
+        <ContributionPortfolio />
+      </WidgetBoundary>
+
+      <WidgetBoundary name="QuickActions" title="Quick Actions">
+        <QuickActions />
+      </WidgetBoundary>
+      <WidgetBoundary name="NotificationCenter" title="Notification Center">
+        <NotificationCenter />
+      </WidgetBoundary>
     </div>
   );
 }

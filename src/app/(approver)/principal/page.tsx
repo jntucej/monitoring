@@ -16,6 +16,13 @@ import { InsightCard } from "./_retention/InsightCard";
 import { EmergencyPulse } from "./_retention/EmergencyPulse";
 import { UpcomingPreview, type UpcomingItem } from "./_retention/UpcomingPreview";
 import { CelebrateOverlay } from "./_retention/CelebrateOverlay";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { PrincipalDigest } from "@/components/retention/PrincipalDigest";
+import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
+import { CampusKnowledgeCentre } from "@/components/retention/CampusKnowledgeCentre";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 
 interface PrincipalOverview {
   success?: boolean;
@@ -94,52 +101,91 @@ export default function PrincipalTodayPage() {
       <div className="space-y-4">
         {/* 1. Emergency pulse — only when present, top priority */}
         {d?.emergency && d.emergency.length > 0 && (
-          <EmergencyPulse items={d.emergency} />
+          <WidgetBoundary name="EmergencyPulse" title="Emergency Pulse">
+            <EmergencyPulse items={d.emergency} />
+          </WidgetBoundary>
         )}
 
         {/* 2. Morning brief — greeting + streak + daily progress */}
-        <MorningBrief
-          pending={pending}
-          cleared={d?.counts.todayDecisions ?? 0}
-          target={Math.max(5, pending + (d?.counts.todayDecisions ?? 0))}
-        />
+        <WidgetBoundary name="MorningBrief" title="Morning Brief">
+          <MorningBrief
+            pending={pending}
+            cleared={d?.counts.todayDecisions ?? 0}
+            target={Math.max(5, pending + (d?.counts.todayDecisions ?? 0))}
+          />
+        </WidgetBoundary>
 
         {/* 3. Focus zone — the one item that matters right now */}
-        <FocusZone item={focusItem} onEnterFocus={() => setFocusOpen(true)} />
+        <WidgetBoundary name="FocusZone" title="Focus Zone">
+          <FocusZone item={focusItem} onEnterFocus={() => setFocusOpen(true)} />
+        </WidgetBoundary>
 
         {/* 4. Chain impact + Delegation health — the leverage view */}
-        <div className="grid gap-4 md:grid-cols-2">
-          <ChainImpact
-            students={d?.chainImpact.students ?? 0}
-            faculty={d?.chainImpact.faculty ?? 0}
-            total={d?.chainImpact.total ?? 0}
-          />
-          <DelegationHealth
-            active={d?.delegations.active ?? 0}
-            expiringSoon={d?.delegations.expiringSoon ?? 0}
-          />
-        </div>
+        <WidgetBoundary name="ChainAndDelegation" title="Chain Impact & Delegation">
+          <div className="grid gap-4 md:grid-cols-2">
+            <ChainImpact
+              students={d?.chainImpact.students ?? 0}
+              faculty={d?.chainImpact.faculty ?? 0}
+              total={d?.chainImpact.total ?? 0}
+            />
+            <DelegationHealth
+              active={d?.delegations.active ?? 0}
+              expiringSoon={d?.delegations.expiringSoon ?? 0}
+            />
+          </div>
+        </WidgetBoundary>
 
         {/* 5. Scorecard — personal bests */}
-        <StrategicScorecard
-          thisWeek={d?.counts.todayDecisions ?? 0}
-          lastWeek={0}
-          avgResponseSec={0}
-        />
-
-        {/* 6. Wins + Insight */}
-        <div className="grid gap-4 md:grid-cols-2">
-          <WinFeed />
-          <InsightCard
+        <WidgetBoundary name="StrategicScorecard" title="Strategic Scorecard">
+          <StrategicScorecard
             thisWeek={d?.counts.todayDecisions ?? 0}
             lastWeek={0}
             avgResponseSec={0}
-            chainTotal={d?.chainImpact.total ?? 0}
           />
-        </div>
+        </WidgetBoundary>
+
+        {/* 6. Wins + Insight */}
+        <WidgetBoundary name="WinsAndInsights" title="Wins & Insights">
+          <div className="grid gap-4 md:grid-cols-2">
+            <WinFeed />
+            <InsightCard
+              thisWeek={d?.counts.todayDecisions ?? 0}
+              lastWeek={0}
+              avgResponseSec={0}
+              chainTotal={d?.chainImpact.total ?? 0}
+            />
+          </div>
+        </WidgetBoundary>
 
         {/* 7. Upcoming — SLA deadlines within 24h */}
-        <UpcomingPreview items={upcoming} />
+        <WidgetBoundary name="UpcomingPreview" title="Upcoming Preview">
+          <UpcomingPreview items={upcoming} />
+        </WidgetBoundary>
+
+        {/* 8. Retention & Analytics Widgets */}
+        <WidgetBoundary name="PrincipalDigest" title="Principal Digest">
+          <PrincipalDigest />
+        </WidgetBoundary>
+
+        <WidgetBoundary name="RoleAnalytics" title="Role Analytics">
+          <RoleAnalytics />
+        </WidgetBoundary>
+
+        <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home">
+          <PersonalizedCampusHome />
+        </WidgetBoundary>
+
+        <WidgetBoundary name="TaskContinuity" title="Task Continuity">
+          <TaskContinuity />
+        </WidgetBoundary>
+
+        <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar">
+          <UnifiedCampusCalendar />
+        </WidgetBoundary>
+
+        <WidgetBoundary name="CampusKnowledgeCentre" title="Campus Knowledge Centre">
+          <CampusKnowledgeCentre />
+        </WidgetBoundary>
       </div>
     </>
   );

@@ -12,6 +12,7 @@ import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
 import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
+import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 
 export default function DeputyWardenPage() {
@@ -20,29 +21,30 @@ export default function DeputyWardenPage() {
       <AuthGuard allowedRoles={["deputy_warden", "principal"]}>
         <div className="space-y-6">
           <DevContactStrip />
-          <WidgetBoundary>
+          <WidgetBoundary name="RoleDashboardPanel" title="Deputy Warden Dashboard">
             <RoleDashboardPanel
               title="Deputy Warden dashboard"
               icon={ShieldCheck}
               endpoint="/api/deputy-warden/delegation"
-              mapKpis={(raw: any) => {
-                const d = raw ?? {};
+              mapKpis={(raw: unknown) => {
+                const d = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
                 const scopes = Array.isArray(d.scopes) ? d.scopes.length : 0;
                 return [
-                  { label: "Delegation", value: d.active ? "Active" : "Inactive", tone: d.active ? "ok" as const : "neutral" as const },
+                  { label: "Delegation", value: d.active ? "Active" : "Inactive", tone: d.active ? ("ok" as const) : ("neutral" as const) },
                   { label: "Scopes", value: scopes },
-                  { label: "Delegated by", value: d.delegatedBy ?? "—", hint: d.note ?? undefined },
+                  { label: "Delegated by", value: (d.delegatedBy as string) ?? "—", hint: (d.note as string) ?? undefined },
                 ];
               }}
             />
           </WidgetBoundary>
-          <WidgetBoundary><AttentionQueue /></WidgetBoundary>
-          <WidgetBoundary><PersonalizedCampusHome /></WidgetBoundary>
-          <WidgetBoundary><TaskContinuity /></WidgetBoundary>
-          <WidgetBoundary><UnifiedCampusCalendar /></WidgetBoundary>
-          <WidgetBoundary><ActivityTimeline /></WidgetBoundary>
-          <WidgetBoundary><QuickActions /></WidgetBoundary>
-          <WidgetBoundary><NotificationCenter /></WidgetBoundary>
+          <WidgetBoundary name="AttentionQueue" title="Attention Queue"><AttentionQueue /></WidgetBoundary>
+          <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home"><PersonalizedCampusHome /></WidgetBoundary>
+          <WidgetBoundary name="TaskContinuity" title="Task Continuity"><TaskContinuity /></WidgetBoundary>
+          <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar"><UnifiedCampusCalendar /></WidgetBoundary>
+          <WidgetBoundary name="RoleAnalytics" title="Role Analytics"><RoleAnalytics /></WidgetBoundary>
+          <WidgetBoundary name="ActivityTimeline" title="Activity Timeline"><ActivityTimeline /></WidgetBoundary>
+          <WidgetBoundary name="QuickActions" title="Quick Actions"><QuickActions /></WidgetBoundary>
+          <WidgetBoundary name="NotificationCenter" title="Notification Center"><NotificationCenter /></WidgetBoundary>
         </div>
       </AuthGuard>
     </Suspense>

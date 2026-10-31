@@ -20,32 +20,32 @@ export default function MessPage() {
       <AuthGuard allowedRoles={["mess_incharge", "admin", "sysadmin"]}>
         <div className="space-y-6">
           <DevContactStrip />
-          <WidgetBoundary>
+          <WidgetBoundary name="RoleDashboardPanel" title="Mess Incharge Dashboard">
             <RoleDashboardPanel
               title="Mess Incharge dashboard"
               icon={UtensilsCrossed}
               endpoint="/api/mess/analytics"
-              mapKpis={(raw: any) => {
-                const d = raw ?? {};
-                const declared = d.declaredPresent ?? 0;
-                const confirmed = d.confirmedPresent ?? 0;
+              mapKpis={(raw: unknown) => {
+                const d = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
+                const declared = (d.declaredPresent as number) ?? 0;
+                const confirmed = (d.confirmedPresent as number) ?? 0;
                 const rate = declared > 0 ? Math.round((confirmed / declared) * 100) : 0;
                 return [
                   { label: "Declared", value: declared },
                   { label: "Confirmed", value: confirmed, tone: "ok" as const },
-                  { label: "Attendance", value: `${rate}%`, tone: rate >= 80 ? "ok" as const : rate >= 50 ? "warn" as const : "danger" as const },
-                  { label: "Meal date", value: d.mealDate ?? "—" },
+                  { label: "Attendance", value: `${rate}%`, tone: rate >= 80 ? ("ok" as const) : rate >= 50 ? ("warn" as const) : ("danger" as const) },
+                  { label: "Meal date", value: (d.mealDate as string) ?? "—" },
                 ];
               }}
             />
           </WidgetBoundary>
-          <WidgetBoundary><AttentionQueue /></WidgetBoundary>
-          <WidgetBoundary><PersonalizedCampusHome /></WidgetBoundary>
-          <WidgetBoundary><TaskContinuity /></WidgetBoundary>
-          <WidgetBoundary><UnifiedCampusCalendar /></WidgetBoundary>
-          <WidgetBoundary><ActivityTimeline /></WidgetBoundary>
-          <WidgetBoundary><QuickActions /></WidgetBoundary>
-          <WidgetBoundary><NotificationCenter /></WidgetBoundary>
+          <WidgetBoundary name="AttentionQueue" title="Attention Queue"><AttentionQueue /></WidgetBoundary>
+          <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home"><PersonalizedCampusHome /></WidgetBoundary>
+          <WidgetBoundary name="TaskContinuity" title="Task Continuity"><TaskContinuity /></WidgetBoundary>
+          <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar"><UnifiedCampusCalendar /></WidgetBoundary>
+          <WidgetBoundary name="ActivityTimeline" title="Activity Timeline"><ActivityTimeline /></WidgetBoundary>
+          <WidgetBoundary name="QuickActions" title="Quick Actions"><QuickActions /></WidgetBoundary>
+          <WidgetBoundary name="NotificationCenter" title="Notification Center"><NotificationCenter /></WidgetBoundary>
         </div>
       </AuthGuard>
     </Suspense>

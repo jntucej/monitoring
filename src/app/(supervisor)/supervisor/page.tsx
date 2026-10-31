@@ -16,6 +16,11 @@ import { WinFeed } from "./_retention/WinFeed";
 import { InsightCard } from "./_retention/InsightCard";
 import { UpcomingPreview, type UpcomingItem } from "./_retention/UpcomingPreview";
 import { CelebrateOverlay } from "./_retention/CelebrateOverlay";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { DigitalHandover } from "@/components/retention/DigitalHandover";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 
 interface SupervisorOverview {
   counts: {
@@ -110,46 +115,77 @@ export default function SupervisorTodayPage() {
 
       <div className="space-y-4">
         {/* 1. Shift bar — shift-aware, not day-aware */}
-        <ShiftBar
-          startedAt={d?.shift.startedAt ?? null}
-          endsAt={d?.shift.endsAt ?? null}
-          escalationsOpen={escalationsOpen}
-          incidentsOpen={incidentsOpen}
-        />
-
-        {/* 2. Focus zone — the one thing to clear right now */}
-        <FocusZone item={focusItem} onEnterFocus={() => setFocusOpen(true)} />
-
-        {/* 3. Team + Gates — the two things a supervisor watches */}
-        <div className="grid gap-4 lg:grid-cols-2">
-          <TeamRoster />
-          <GateWall gates={d?.gates ?? []} />
-        </div>
-
-        {/* 4. Handover streak — supervisor-specific */}
-        <HandoverStreak />
-
-        {/* 5. Scorecard */}
-        <Scorecard
-          thisWeek={d?.counts.resolvedToday ?? 0}
-          lastWeek={0}
-          avgResponseSec={0}
-        />
-
-        {/* 6. Wins + Insight */}
-        <div className="grid gap-4 lg:grid-cols-2">
-          <WinFeed />
-          <InsightCard
+        <WidgetBoundary name="ShiftBar" title="Shift Bar">
+          <ShiftBar
+            startedAt={d?.shift.startedAt ?? null}
+            endsAt={d?.shift.endsAt ?? null}
             escalationsOpen={escalationsOpen}
             incidentsOpen={incidentsOpen}
-            gatesOnline={gatesOnline}
-            totalGates={totalGates}
-            securityOnDuty={securityOnDuty}
           />
-        </div>
+        </WidgetBoundary>
+
+        {/* 2. Focus zone — the one thing to clear right now */}
+        <WidgetBoundary name="FocusZone" title="Focus Zone">
+          <FocusZone item={focusItem} onEnterFocus={() => setFocusOpen(true)} />
+        </WidgetBoundary>
+
+        {/* 3. Team + Gates — the two things a supervisor watches */}
+        <WidgetBoundary name="TeamAndGates" title="Team & Gates">
+          <div className="grid gap-4 lg:grid-cols-2">
+            <TeamRoster />
+            <GateWall gates={d?.gates ?? []} />
+          </div>
+        </WidgetBoundary>
+
+        {/* 4. Handover streak — supervisor-specific */}
+        <WidgetBoundary name="HandoverStreak" title="Handover Streak">
+          <HandoverStreak />
+        </WidgetBoundary>
+
+        {/* 5. Scorecard */}
+        <WidgetBoundary name="Scorecard" title="Scorecard">
+          <Scorecard
+            thisWeek={d?.counts.resolvedToday ?? 0}
+            lastWeek={0}
+            avgResponseSec={0}
+          />
+        </WidgetBoundary>
+
+        {/* 6. Wins + Insight */}
+        <WidgetBoundary name="WinsAndInsights" title="Wins & Insights">
+          <div className="grid gap-4 lg:grid-cols-2">
+            <WinFeed />
+            <InsightCard
+              escalationsOpen={escalationsOpen}
+              incidentsOpen={incidentsOpen}
+              gatesOnline={gatesOnline}
+              totalGates={totalGates}
+              securityOnDuty={securityOnDuty}
+            />
+          </div>
+        </WidgetBoundary>
 
         {/* 7. Upcoming — SLA deadlines */}
-        <UpcomingPreview items={upcoming} />
+        <WidgetBoundary name="UpcomingPreview" title="Upcoming Preview">
+          <UpcomingPreview items={upcoming} />
+        </WidgetBoundary>
+
+        {/* 8. Retention & Handover Widgets */}
+        <WidgetBoundary name="DigitalHandover" title="Digital Handover">
+          <DigitalHandover />
+        </WidgetBoundary>
+
+        <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home">
+          <PersonalizedCampusHome />
+        </WidgetBoundary>
+
+        <WidgetBoundary name="TaskContinuity" title="Task Continuity">
+          <TaskContinuity />
+        </WidgetBoundary>
+
+        <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar">
+          <UnifiedCampusCalendar />
+        </WidgetBoundary>
       </div>
     </>
   );

@@ -20,28 +20,28 @@ export default function ParentPage() {
       <AuthGuard allowedRoles={["parent", "guardian"]}>
         <div className="space-y-6">
           <DevContactStrip />
-          <WidgetBoundary>
+          <WidgetBoundary name="RoleDashboardPanel" title="Parent Dashboard">
             <RoleDashboardPanel
               title="Parent dashboard"
               icon={Users}
               endpoint="/api/parents/me"
-              mapKpis={(raw: any) => {
-                const d = raw ?? {};
+              mapKpis={(raw: unknown) => {
+                const d = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
                 const children = Array.isArray(d.children) ? d.children.length : 0;
                 return [
                   { label: "Children", value: children },
-                  { label: "Open requests", value: d.totalOpenRequests ?? 0, tone: "warn" as const },
+                  { label: "Open requests", value: (d.totalOpenRequests as number) ?? 0, tone: "warn" as const },
                 ];
               }}
             />
           </WidgetBoundary>
-          <WidgetBoundary><AttentionQueue /></WidgetBoundary>
-          <WidgetBoundary><PersonalizedCampusHome /></WidgetBoundary>
-          <WidgetBoundary><TaskContinuity /></WidgetBoundary>
-          <WidgetBoundary><UnifiedCampusCalendar /></WidgetBoundary>
-          <WidgetBoundary><ActivityTimeline /></WidgetBoundary>
-          <WidgetBoundary><QuickActions /></WidgetBoundary>
-          <WidgetBoundary><NotificationCenter /></WidgetBoundary>
+          <WidgetBoundary name="AttentionQueue" title="Attention Queue"><AttentionQueue /></WidgetBoundary>
+          <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home"><PersonalizedCampusHome /></WidgetBoundary>
+          <WidgetBoundary name="TaskContinuity" title="Task Continuity"><TaskContinuity /></WidgetBoundary>
+          <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar"><UnifiedCampusCalendar /></WidgetBoundary>
+          <WidgetBoundary name="ActivityTimeline" title="Activity Timeline"><ActivityTimeline /></WidgetBoundary>
+          <WidgetBoundary name="QuickActions" title="Quick Actions"><QuickActions /></WidgetBoundary>
+          <WidgetBoundary name="NotificationCenter" title="Notification Center"><NotificationCenter /></WidgetBoundary>
         </div>
       </AuthGuard>
     </Suspense>

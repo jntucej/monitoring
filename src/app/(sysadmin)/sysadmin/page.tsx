@@ -7,6 +7,9 @@ import { useDashboardData } from "@/hooks/useDashboardData";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { CommandCenterContent } from "@/components/sysadmin/domains/overview/CommandCenterContent";
 import type { CommandCenterData } from "@/components/sysadmin/domains/overview/types";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 
 /**
  * SysAdmin Command Center — the live operational-state cockpit.
@@ -54,11 +57,21 @@ export default function SysadminCommandCenterPage() {
         </div>
       ) : (
         data && (
-          <WidgetBoundary title="Command Center">
+          <WidgetBoundary name="CommandCenter" title="Command Center">
             <CommandCenterContent data={data} onRefresh={refresh} />
           </WidgetBoundary>
         )
       )}
+
+      <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home">
+        <PersonalizedCampusHome />
+      </WidgetBoundary>
+      <WidgetBoundary name="TaskContinuity" title="Task Continuity">
+        <TaskContinuity />
+      </WidgetBoundary>
+      <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar">
+        <UnifiedCampusCalendar />
+      </WidgetBoundary>
     </>
   );
 }

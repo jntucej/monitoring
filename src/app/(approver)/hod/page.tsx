@@ -17,6 +17,11 @@ import { WinFeed } from "./_retention/WinFeed";
 import { InsightCard } from "./_retention/InsightCard";
 import { UpcomingPreview, type UpcomingItem } from "./_retention/UpcomingPreview";
 import { CelebrateOverlay } from "./_retention/CelebrateOverlay";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 
 interface PriorityItem {
   id: string;
@@ -115,64 +120,97 @@ export default function HodTodayPage() {
 
       <div className="space-y-4">
         {/* 1. Morning brief — greeting + dual streaks + progress */}
-        <MorningBrief
-          pending={pending}
-          cleared={d?.counts.todayDecisions ?? 0}
-          target={Math.max(5, pending + (d?.counts.todayDecisions ?? 0))}
-        />
+        <WidgetBoundary name="MorningBrief" title="Morning Brief">
+          <MorningBrief
+            pending={pending}
+            cleared={d?.counts.todayDecisions ?? 0}
+            target={Math.max(5, pending + (d?.counts.todayDecisions ?? 0))}
+          />
+        </WidgetBoundary>
 
         {/* 2. Between classes — teaching rhythm */}
-        <BetweenClasses
-          schedule={d?.schedule ?? []}
-          pendingCount={pending}
-        />
+        <WidgetBoundary name="BetweenClasses" title="Between Classes">
+          <BetweenClasses
+            schedule={d?.schedule ?? []}
+            pendingCount={pending}
+          />
+        </WidgetBoundary>
 
         {/* 3. Focus zone — the one thing to clear right now */}
-        <FocusZone item={focusItem} onEnterFocus={() => setFocusOpen(true)} />
+        <WidgetBoundary name="FocusZone" title="Focus Zone">
+          <FocusZone item={focusItem} onEnterFocus={() => setFocusOpen(true)} />
+        </WidgetBoundary>
 
         {/* 4. Department pulse + Faculty care — the care view */}
-        <div className="grid gap-4 md:grid-cols-2">
-          <DepartmentPulse
-            myRate={d?.pulse.myRate ?? 0}
-            collegeAvg={d?.pulse.collegeAvg ?? 0}
-            myRank={d?.pulse.myRank ?? 0}
-            totalDepts={d?.pulse.totalDepts ?? 0}
-          />
-          <FacultyCare
-            total={d?.faculty.total ?? 0}
-            presentToday={d?.faculty.presentToday ?? 0}
-            lateToday={d?.faculty.lateToday ?? 0}
-            absentToday={d?.faculty.absentToday ?? 0}
-          />
-        </div>
+        <WidgetBoundary name="PulseAndCare" title="Department Pulse & Faculty Care">
+          <div className="grid gap-4 md:grid-cols-2">
+            <DepartmentPulse
+              myRate={d?.pulse.myRate ?? 0}
+              collegeAvg={d?.pulse.collegeAvg ?? 0}
+              myRank={d?.pulse.myRank ?? 0}
+              totalDepts={d?.pulse.totalDepts ?? 0}
+            />
+            <FacultyCare
+              total={d?.faculty.total ?? 0}
+              presentToday={d?.faculty.presentToday ?? 0}
+              lateToday={d?.faculty.lateToday ?? 0}
+              absentToday={d?.faculty.absentToday ?? 0}
+            />
+          </div>
+        </WidgetBoundary>
 
         {/* 5. Student impact */}
-        <ImpactCard
-          studentsTotal={d?.students.total ?? 0}
-          onCampus={d?.students.onCampus ?? 0}
-          decisionsToday={d?.counts.todayDecisions ?? 0}
-        />
+        <WidgetBoundary name="ImpactCard" title="Student Impact">
+          <ImpactCard
+            studentsTotal={d?.students.total ?? 0}
+            onCampus={d?.students.onCampus ?? 0}
+            decisionsToday={d?.counts.todayDecisions ?? 0}
+          />
+        </WidgetBoundary>
 
         {/* 6. Scorecard */}
-        <Scorecard
-          thisWeek={d?.counts.todayDecisions ?? 0}
-          lastWeek={0}
-          avgResponseSec={0}
-        />
+        <WidgetBoundary name="Scorecard" title="Scorecard">
+          <Scorecard
+            thisWeek={d?.counts.todayDecisions ?? 0}
+            lastWeek={0}
+            avgResponseSec={0}
+          />
+        </WidgetBoundary>
 
         {/* 7. Wins + Insight */}
-        <div className="grid gap-4 md:grid-cols-2">
-          <WinFeed />
-          <InsightCard
-            facultyNeedsAttention={d?.faculty.needsAttention ?? 0}
-            pendingApprovals={pending}
-            departmentRank={d?.pulse.myRank ?? 0}
-            totalDepts={d?.pulse.totalDepts ?? 0}
-          />
-        </div>
+        <WidgetBoundary name="WinsAndInsights" title="Wins & Insights">
+          <div className="grid gap-4 md:grid-cols-2">
+            <WinFeed />
+            <InsightCard
+              facultyNeedsAttention={d?.faculty.needsAttention ?? 0}
+              pendingApprovals={pending}
+              departmentRank={d?.pulse.myRank ?? 0}
+              totalDepts={d?.pulse.totalDepts ?? 0}
+            />
+          </div>
+        </WidgetBoundary>
 
         {/* 8. Upcoming */}
-        <UpcomingPreview items={upcoming} />
+        <WidgetBoundary name="UpcomingPreview" title="Upcoming Preview">
+          <UpcomingPreview items={upcoming} />
+        </WidgetBoundary>
+
+        {/* 9. Retention & Analytics Widgets */}
+        <WidgetBoundary name="RoleAnalytics" title="Role Analytics">
+          <RoleAnalytics />
+        </WidgetBoundary>
+
+        <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home">
+          <PersonalizedCampusHome />
+        </WidgetBoundary>
+
+        <WidgetBoundary name="TaskContinuity" title="Task Continuity">
+          <TaskContinuity />
+        </WidgetBoundary>
+
+        <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar">
+          <UnifiedCampusCalendar />
+        </WidgetBoundary>
       </div>
     </>
   );

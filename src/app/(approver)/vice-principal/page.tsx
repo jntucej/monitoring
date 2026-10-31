@@ -15,6 +15,11 @@ import { HotSpots, type HotSpot } from "./_retention/HotSpots";
 import { UpcomingPreview, type UpcomingItem } from "./_retention/UpcomingPreview";
 import { PrincipalBridge } from "./_retention/PrincipalBridge";
 import { CelebrateOverlay } from "./_retention/CelebrateOverlay";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 
 interface VPOverview {
   success?: boolean;
@@ -92,43 +97,72 @@ export default function VPTodayPage() {
 
       <div className="space-y-4">
         {/* 1. Morning Brief — greeting + streak + progress */}
-        <MorningBrief
-          pending={pending}
-          cleared={todayCleared}
-          target={dailyTarget}
-        />
+        <WidgetBoundary name="MorningBrief" title="Morning Brief">
+          <MorningBrief
+            pending={pending}
+            cleared={todayCleared}
+            target={dailyTarget}
+          />
+        </WidgetBoundary>
 
         {/* 2. Focus Zone — the one thing right now */}
-        <FocusZone item={focusItem} onEnterFocus={() => setFocusOpen(true)} />
+        <WidgetBoundary name="FocusZone" title="Focus Zone">
+          <FocusZone item={focusItem} onEnterFocus={() => setFocusOpen(true)} />
+        </WidgetBoundary>
 
         {/* 3. Scorecard — your week, your bests */}
-        <Scorecard
-          thisWeek={d?.insights.thisWeek ?? 0}
-          lastWeek={d?.insights.lastWeek ?? 0}
-          avgResponseSec={d?.insights.avgResponseSec ?? 0}
-        />
-
-        {/* 4. Two-up: Wins + Insight */}
-        <div className="grid gap-4 md:grid-cols-2">
-          <WinFeed />
-          <InsightCard
+        <WidgetBoundary name="Scorecard" title="Scorecard">
+          <Scorecard
             thisWeek={d?.insights.thisWeek ?? 0}
             lastWeek={d?.insights.lastWeek ?? 0}
             avgResponseSec={d?.insights.avgResponseSec ?? 0}
           />
-        </div>
+        </WidgetBoundary>
+
+        {/* 4. Two-up: Wins + Insight */}
+        <WidgetBoundary name="WinsAndInsights" title="Wins & Insights">
+          <div className="grid gap-4 md:grid-cols-2">
+            <WinFeed />
+            <InsightCard
+              thisWeek={d?.insights.thisWeek ?? 0}
+              lastWeek={d?.insights.lastWeek ?? 0}
+              avgResponseSec={d?.insights.avgResponseSec ?? 0}
+            />
+          </div>
+        </WidgetBoundary>
 
         {/* 5. Hot spots + Due soon — two-up on desktop */}
-        <div className="grid gap-4 md:grid-cols-2">
-          <HotSpots spots={d?.hotSpots ?? []} />
-          <UpcomingPreview items={d?.upcoming ?? []} />
-        </div>
+        <WidgetBoundary name="HotSpotsAndUpcoming" title="Hot Spots & Upcoming">
+          <div className="grid gap-4 md:grid-cols-2">
+            <HotSpots spots={d?.hotSpots ?? []} />
+            <UpcomingPreview items={d?.upcoming ?? []} />
+          </div>
+        </WidgetBoundary>
 
         {/* 6. Principal Bridge — social proof */}
-        <PrincipalBridge
-          myPending={d?.principalBridge.myPending ?? 0}
-          principalPending={d?.principalBridge.principalPending ?? 0}
-        />
+        <WidgetBoundary name="PrincipalBridge" title="Principal Bridge">
+          <PrincipalBridge
+            myPending={d?.principalBridge.myPending ?? 0}
+            principalPending={d?.principalBridge.principalPending ?? 0}
+          />
+        </WidgetBoundary>
+
+        {/* 7. Retention & Analytics Widgets */}
+        <WidgetBoundary name="RoleAnalytics" title="Role Analytics">
+          <RoleAnalytics />
+        </WidgetBoundary>
+
+        <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home">
+          <PersonalizedCampusHome />
+        </WidgetBoundary>
+
+        <WidgetBoundary name="TaskContinuity" title="Task Continuity">
+          <TaskContinuity />
+        </WidgetBoundary>
+
+        <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar">
+          <UnifiedCampusCalendar />
+        </WidgetBoundary>
       </div>
     </>
   );

@@ -12,6 +12,7 @@ import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
 import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
+import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 
 export default function HostelManagerPage() {
@@ -20,27 +21,28 @@ export default function HostelManagerPage() {
       <AuthGuard allowedRoles={["hostel_manager", "principal"]}>
         <div className="space-y-6">
           <DevContactStrip />
-          <WidgetBoundary>
+          <WidgetBoundary name="RoleDashboardPanel" title="Hostel Manager Dashboard">
             <RoleDashboardPanel
               title="Hostel Manager dashboard"
               icon={Building2}
               endpoint="/api/hostel-manager/summary"
-              mapKpis={(raw: any) => {
-                const d = raw ?? {};
+              mapKpis={(raw: unknown) => {
+                const d = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
                 return [
-                  { label: "Pending tickets", value: d.pendingCount ?? 0, tone: "warn" as const },
-                  { label: "Assigned hostel", value: d.assignedHostel ?? "—" },
+                  { label: "Pending tickets", value: (d.pendingCount as number) ?? 0, tone: "warn" as const },
+                  { label: "Assigned hostel", value: (d.assignedHostel as string) ?? "—" },
                 ];
               }}
             />
           </WidgetBoundary>
-          <WidgetBoundary><AttentionQueue /></WidgetBoundary>
-          <WidgetBoundary><PersonalizedCampusHome /></WidgetBoundary>
-          <WidgetBoundary><TaskContinuity /></WidgetBoundary>
-          <WidgetBoundary><UnifiedCampusCalendar /></WidgetBoundary>
-          <WidgetBoundary><ActivityTimeline /></WidgetBoundary>
-          <WidgetBoundary><QuickActions /></WidgetBoundary>
-          <WidgetBoundary><NotificationCenter /></WidgetBoundary>
+          <WidgetBoundary name="AttentionQueue" title="Attention Queue"><AttentionQueue /></WidgetBoundary>
+          <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home"><PersonalizedCampusHome /></WidgetBoundary>
+          <WidgetBoundary name="TaskContinuity" title="Task Continuity"><TaskContinuity /></WidgetBoundary>
+          <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar"><UnifiedCampusCalendar /></WidgetBoundary>
+          <WidgetBoundary name="RoleAnalytics" title="Role Analytics"><RoleAnalytics /></WidgetBoundary>
+          <WidgetBoundary name="ActivityTimeline" title="Activity Timeline"><ActivityTimeline /></WidgetBoundary>
+          <WidgetBoundary name="QuickActions" title="Quick Actions"><QuickActions /></WidgetBoundary>
+          <WidgetBoundary name="NotificationCenter" title="Notification Center"><NotificationCenter /></WidgetBoundary>
         </div>
       </AuthGuard>
     </Suspense>

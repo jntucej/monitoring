@@ -18,11 +18,14 @@ import {
   Clock,
 } from "lucide-react";
 import Link from "next/link";
-import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
+import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
+import { TaskContinuity } from "@/components/retention/TaskContinuity";
+import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 
-const iconMap: Record<string, any> = {
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Activity,
   Shield,
   AlertTriangle,
@@ -37,6 +40,14 @@ const iconMap: Record<string, any> = {
   Database,
 };
 
+interface AuditEvent {
+  id: string;
+  action: string;
+  userName?: string;
+  userRole?: string;
+  timestamp?: string;
+}
+
 interface OverviewData {
   command: { health: string[] };
   identity: { active: number; suspended: number; deprovisioned: number };
@@ -44,6 +55,7 @@ interface OverviewData {
   gates: { status: string[] };
   alerts: { critical: number; high: number; medium: number; low: number };
   counts: Record<string, number>;
+  recentAuditEvents?: AuditEvent[];
 }
 
 function fmt(n: number | string | null | undefined): string {
@@ -111,7 +123,7 @@ function AdminOverviewInner() {
       </div>
 
       {/* Live Overview */}
-      <WidgetBoundary title="Overview">
+      <WidgetBoundary name="LiveOverview" title="Overview">
         <div>
           <h2 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-4">
             Live Overview
@@ -148,15 +160,13 @@ function AdminOverviewInner() {
             </div>
           )}
 
-          {typeof data === "object" && data != null && "recentAuditEvents" in data &&
-            Array.isArray((data as any).recentAuditEvents) &&
-            (data as any).recentAuditEvents.length > 0 && (
+          {data?.recentAuditEvents && data.recentAuditEvents.length > 0 && (
             <div className="mt-6">
               <h3 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3 flex items-center gap-2">
                 <Clock className="w-3.5 h-3.5" /> Recent Campus Events
               </h3>
               <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] divide-y divide-[var(--border)]">
-                {(data as any).recentAuditEvents.map((e: any) => (
+                {data.recentAuditEvents.map((e) => (
                   <div key={e.id} className="px-4 py-3 flex items-center justify-between gap-3">
                     <div className="min-w-0">
                       <code className="text-xs bg-[var(--bg-elevated)] border border-[var(--border)] rounded px-1.5 py-1.5 text-emerald-400">
@@ -175,6 +185,16 @@ function AdminOverviewInner() {
             </div>
           )}
         </div>
+      </WidgetBoundary>
+
+      <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home">
+        <PersonalizedCampusHome />
+      </WidgetBoundary>
+      <WidgetBoundary name="TaskContinuity" title="Task Continuity">
+        <TaskContinuity />
+      </WidgetBoundary>
+      <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar">
+        <UnifiedCampusCalendar />
       </WidgetBoundary>
 
       {/* Module Cards */}

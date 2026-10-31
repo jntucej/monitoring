@@ -20,29 +20,30 @@ export default function WorkerPage() {
       <AuthGuard allowedRoles={["worker"]}>
         <div className="space-y-6">
           <DevContactStrip />
-          <OperatorWidgetBoundary>
+          <OperatorWidgetBoundary name="RoleDashboardPanel" title="Worker Dashboard">
             <RoleDashboardPanel
               title="Worker dashboard"
               icon={HardHat}
               endpoint="/api/workers/my-work"
-              mapKpis={(raw: any) => {
-                const d = raw ?? {};
+              mapKpis={(raw: unknown) => {
+                const d = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
                 const tasks = Array.isArray(d.tasks) ? d.tasks.length : 0;
+                const todayShift = d.todayShift as Record<string, unknown> | undefined;
                 return [
-                  { label: "Assigned tasks", value: tasks, tone: tasks > 0 ? "warn" as const : "ok" as const },
-                  { label: "Completed (week)", value: d.completedLastWeek ?? 0, tone: "ok" as const },
-                  { label: "On shift", value: d.todayShift?.checkIn ? "Yes" : "No" },
+                  { label: "Assigned tasks", value: tasks, tone: tasks > 0 ? ("warn" as const) : ("ok" as const) },
+                  { label: "Completed (week)", value: (d.completedLastWeek as number) ?? 0, tone: "ok" as const },
+                  { label: "On shift", value: todayShift?.checkIn ? "Yes" : "No" },
                 ];
               }}
             />
           </OperatorWidgetBoundary>
-          <OperatorWidgetBoundary><AttentionQueue /></OperatorWidgetBoundary>
-          <OperatorWidgetBoundary><PersonalizedCampusHome /></OperatorWidgetBoundary>
-          <OperatorWidgetBoundary><TaskContinuity /></OperatorWidgetBoundary>
-          <OperatorWidgetBoundary><UnifiedCampusCalendar /></OperatorWidgetBoundary>
-          <OperatorWidgetBoundary><ActivityTimeline /></OperatorWidgetBoundary>
-          <OperatorWidgetBoundary><QuickActions /></OperatorWidgetBoundary>
-          <OperatorWidgetBoundary><OperatorNotifications /></OperatorWidgetBoundary>
+          <OperatorWidgetBoundary name="AttentionQueue" title="Attention Queue"><AttentionQueue /></OperatorWidgetBoundary>
+          <OperatorWidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home"><PersonalizedCampusHome /></OperatorWidgetBoundary>
+          <OperatorWidgetBoundary name="TaskContinuity" title="Task Continuity"><TaskContinuity /></OperatorWidgetBoundary>
+          <OperatorWidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar"><UnifiedCampusCalendar /></OperatorWidgetBoundary>
+          <OperatorWidgetBoundary name="ActivityTimeline" title="Activity Timeline"><ActivityTimeline /></OperatorWidgetBoundary>
+          <OperatorWidgetBoundary name="QuickActions" title="Quick Actions"><QuickActions /></OperatorWidgetBoundary>
+          <OperatorWidgetBoundary name="OperatorNotifications" title="Operator Notifications"><OperatorNotifications /></OperatorWidgetBoundary>
         </div>
       </AuthGuard>
     </Suspense>

@@ -12,6 +12,9 @@ import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
 import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
+import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
+import { CampusKnowledgeCentre } from "@/components/retention/CampusKnowledgeCentre";
+import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
 import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 
 export default function StaffPage() {
@@ -20,29 +23,37 @@ export default function StaffPage() {
       <AuthGuard allowedRoles={["staff"]}>
         <div className="space-y-6">
           <DevContactStrip />
-          <WidgetBoundary>
+          <WidgetBoundary name="RoleDashboardPanel" title="Staff Dashboard">
             <RoleDashboardPanel
               title="Staff dashboard"
               icon={Briefcase}
               endpoint="/api/staff/my-day"
-              mapKpis={(raw: any) => {
-                const d = raw ?? {};
-                const s = d.myDaySummary ?? d.assignedTasks ?? {};
+              mapKpis={(raw: unknown) => {
+                const d = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
+                const s = ((d.myDaySummary ?? d.assignedTasks) && typeof (d.myDaySummary ?? d.assignedTasks) === "object"
+                  ? (d.myDaySummary ?? d.assignedTasks)
+                  : {}) as Record<string, unknown>;
+                const myRecent = Array.isArray(d.myRecent) ? d.myRecent : [];
+                const openRequests = Array.isArray(d.openRequests) ? d.openRequests : [];
+                const dutyRoster = Array.isArray(d.dutyRoster) ? d.dutyRoster : [];
                 return [
-                  { label: "Movements today", value: s.movementsToday ?? (Array.isArray(d.myRecent) ? d.myRecent.length : 0) },
-                  { label: "Open requests", value: s.openRequestsCount ?? (Array.isArray(d.openRequests) ? d.openRequests.length : 0), tone: "warn" as const },
-                  { label: "On shift", value: s.rosterOnShift ?? (Array.isArray(d.dutyRoster) ? d.dutyRoster.length : 0) },
+                  { label: "Movements today", value: (s.movementsToday as number | undefined) ?? myRecent.length },
+                  { label: "Open requests", value: (s.openRequestsCount as number | undefined) ?? openRequests.length, tone: "warn" as const },
+                  { label: "On shift", value: (s.rosterOnShift as number | undefined) ?? dutyRoster.length },
                 ];
               }}
             />
           </WidgetBoundary>
-          <WidgetBoundary><AttentionQueue /></WidgetBoundary>
-          <WidgetBoundary><PersonalizedCampusHome /></WidgetBoundary>
-          <WidgetBoundary><TaskContinuity /></WidgetBoundary>
-          <WidgetBoundary><UnifiedCampusCalendar /></WidgetBoundary>
-          <WidgetBoundary><ActivityTimeline /></WidgetBoundary>
-          <WidgetBoundary><QuickActions /></WidgetBoundary>
-          <WidgetBoundary><NotificationCenter /></WidgetBoundary>
+          <WidgetBoundary name="AttentionQueue" title="Attention Queue"><AttentionQueue /></WidgetBoundary>
+          <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home"><PersonalizedCampusHome /></WidgetBoundary>
+          <WidgetBoundary name="TaskContinuity" title="Task Continuity"><TaskContinuity /></WidgetBoundary>
+          <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar"><UnifiedCampusCalendar /></WidgetBoundary>
+          <WidgetBoundary name="RoleAnalytics" title="Role Analytics"><RoleAnalytics /></WidgetBoundary>
+          <WidgetBoundary name="CampusKnowledgeCentre" title="Campus Knowledge Centre"><CampusKnowledgeCentre /></WidgetBoundary>
+          <WidgetBoundary name="CampusFeedbackDesk" title="Campus Feedback Desk"><CampusFeedbackDesk /></WidgetBoundary>
+          <WidgetBoundary name="ActivityTimeline" title="Activity Timeline"><ActivityTimeline /></WidgetBoundary>
+          <WidgetBoundary name="QuickActions" title="Quick Actions"><QuickActions /></WidgetBoundary>
+          <WidgetBoundary name="NotificationCenter" title="Notification Center"><NotificationCenter /></WidgetBoundary>
         </div>
       </AuthGuard>
     </Suspense>
