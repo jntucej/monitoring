@@ -12,6 +12,7 @@ export const OPERATOR_NAV: NavEntry[] = [
     label: "Activity",
     icon: History,
     children: [
+      { href: "/operator/stats", label: "Stats" },
       { href: "/operator/transactions", label: "Transactions" },
       { href: "/operator/exceptions", label: "Exceptions" },
     ],
