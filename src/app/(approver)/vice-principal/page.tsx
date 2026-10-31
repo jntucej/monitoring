@@ -95,7 +95,7 @@ export default function VPTodayPage() {
       <CelebrateOverlay queueEmpty={queueEmpty && sessionDecisions > 0} />
       <FocusMode open={focusOpen} onClose={() => setFocusOpen(false)} />
 
-      <div className="space-y-4">
+      <div className="mx-auto w-full max-w-7xl space-y-4 min-w-0">
         {/* 1. Morning Brief — greeting + streak + progress */}
         <WidgetBoundary name="MorningBrief" title="Morning Brief">
           <MorningBrief

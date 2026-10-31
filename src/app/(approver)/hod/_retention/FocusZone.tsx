@@ -71,14 +71,14 @@ export function FocusZone({
       <div className="mt-4 flex flex-col gap-2 sm:flex-row">
         <button
           onClick={onEnterFocus}
-          className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--action-primary)] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[var(--action-primary)]/90"
+          className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--action-primary)] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[var(--action-primary)]/90"
         >
           Open in focus mode
           <ArrowRight className="size-4" />
         </button>
         <Link
           href={item.href}
-          className="flex flex-1 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-2.5 text-sm font-medium text-[var(--text-primary)] transition hover:bg-[var(--bg-elevated)]"
+          className="flex min-h-[44px] flex-1 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-2.5 text-sm font-medium text-[var(--text-primary)] transition hover:bg-[var(--bg-elevated)]"
         >
           View details
         </Link>

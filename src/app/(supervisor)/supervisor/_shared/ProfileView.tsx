@@ -34,7 +34,7 @@ export function ProfileView() {
         </p>
       </header>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
         <KpiCard label="Account Status" value="Active" tone="ok" />
         <KpiCard label="Authority Tier" value="Shift Supervisor" tone="ok" />
         <KpiCard label="Security" value="MFA Enabled" tone="ok" />

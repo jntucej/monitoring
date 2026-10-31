@@ -24,13 +24,13 @@ export function DelegationHealth({
         </div>
         <Link
           href="/principal/governance/delegations"
-          className="text-[11px] text-[var(--action-primary)] hover:underline"
+          className="inline-flex min-h-[44px] items-center text-[11px] text-[var(--action-primary)] hover:underline"
         >
           Manage
         </Link>
       </header>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <p className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
             Active

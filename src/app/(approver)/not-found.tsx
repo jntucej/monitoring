@@ -14,7 +14,7 @@ export default function ApproverNotFound() {
         </p>
         <Link
           href="/approver"
-          className="inline-flex items-center gap-2 rounded-lg bg-[var(--action-primary)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+          className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-[var(--action-primary)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
         >
           Back to dashboard
         </Link>

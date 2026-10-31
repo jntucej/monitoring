@@ -48,7 +48,7 @@ export function DepartmentsView() {
         </p>
       </header>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <KpiCard label="Departments" value={d?.summary.totalDepts} />
         <KpiCard label="Students" value={d?.summary.totalStudents} />
         <KpiCard label="Faculty" value={d?.summary.totalFaculty} />

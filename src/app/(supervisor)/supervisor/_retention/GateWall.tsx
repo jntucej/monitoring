@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { DoorOpen, DoorClosed, Users, AlertTriangle } from "lucide-react";
 
-interface Gate {
+export interface Gate {
   id: string;
   name: string;
   isActive: boolean;

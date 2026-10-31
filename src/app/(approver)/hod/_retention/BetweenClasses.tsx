@@ -135,7 +135,7 @@ export function BetweenClasses({
       {pendingCount > 0 && (
         <a
           href="/hod/approvals/pending"
-          className="mt-3 flex items-center justify-center gap-1 rounded-lg border border-[var(--action-primary)]/30 bg-[var(--action-primary)]/5 px-3 py-2 text-xs font-medium text-[var(--action-primary)] transition hover:bg-[var(--action-primary)]/10"
+          className="mt-3 flex min-h-[44px] items-center justify-center gap-1 rounded-lg border border-[var(--action-primary)]/30 bg-[var(--action-primary)]/5 px-3 py-2 text-xs font-medium text-[var(--action-primary)] transition hover:bg-[var(--action-primary)]/10"
         >
           Clear {pendingCount} approval{pendingCount === 1 ? "" : "s"} now
           <ArrowRight className="size-3" />

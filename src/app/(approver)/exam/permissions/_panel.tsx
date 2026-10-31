@@ -16,26 +16,13 @@ import {
   Loader2,
   Inbox,
 } from "lucide-react";
+import type { PermissionItem } from "@/components/approver/PermissionRow";
 
 export type ExamQueue = "oie" | "vice_principal";
 
-interface PermissionRequestRow {
-  id: string;
-  ticket_number: string;
-  workflow_type: string;
-  current_stage: string;
-  status: string;
-  sla_deadline?: string | null;
-  student?: {
-    id: string;
-    name: string;
-    student_details?: { roll?: string; hostel_block?: string } | null;
-  } | null;
-}
-
 interface PermissionsResponse {
   success: boolean;
-  data: PermissionRequestRow[];
+  data: PermissionItem[];
   total?: number;
 }
 
@@ -121,7 +108,7 @@ export function ExamPermissionsPanel({ queue }: { queue: ExamQueue }) {
   }).length;
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
+    <div className="mx-auto w-full max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8 py-6 min-w-0">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="mt-1 text-sm text-slate-400">
@@ -177,7 +164,7 @@ export function ExamPermissionsPanel({ queue }: { queue: ExamQueue }) {
               stageFilter="oie"
               title="OIE Queue"
               subtitle="Officer in Examination approval queue"
-              initialPermissions={oieData.data as any}
+              initialPermissions={oieData.data}
             />
           ) : oieLoading ? (
             <div className="p-4 flex items-center gap-2 text-sm text-slate-500">
@@ -196,7 +183,7 @@ export function ExamPermissionsPanel({ queue }: { queue: ExamQueue }) {
               stageFilter="vice_principal"
               title="Vice Principal Queue"
               subtitle="Vice Principal examination review queue"
-              initialPermissions={vpData.data as any}
+              initialPermissions={vpData.data}
             />
           ) : vpLoading ? (
             <div className="p-4 flex items-center gap-2 text-sm text-slate-500">

@@ -43,7 +43,7 @@ export function ShiftHandoverView() {
         </p>
       </header>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <HandoverStreak />
 
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
@@ -72,7 +72,7 @@ export function ShiftHandoverView() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--action-primary)] py-2.5 text-xs font-semibold text-white transition hover:bg-[var(--action-primary)]/90 disabled:opacity-50"
+                className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-[var(--action-primary)] py-2.5 text-xs font-semibold text-white transition hover:bg-[var(--action-primary)]/90 disabled:opacity-50"
               >
                 <Send className="size-3.5" />
                 {submitting ? "Submitting..." : "Submit Shift Handover"}

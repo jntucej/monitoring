@@ -40,7 +40,7 @@ export function UpcomingPreview({ items }: { items: UpcomingItem[] }) {
           <li key={item.ticket}>
             <Link
               href={`/hod/approvals/pending?ticket=${encodeURIComponent(item.ticket)}`}
-              className="flex items-center gap-2 rounded-lg p-2 text-xs transition hover:bg-[var(--bg-elevated)]"
+              className="flex min-h-[44px] items-center gap-2 rounded-lg p-2 text-xs transition hover:bg-[var(--bg-elevated)]"
             >
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium text-[var(--text-primary)]">{item.subject}</p>

@@ -85,7 +85,7 @@ export function TeamRoster() {
       ) : (
         <>
           {/* Summary strip */}
-          <div className="mb-3 grid grid-cols-3 gap-2 text-center">
+          <div className="mb-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-center">
             <div>
               <p className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
                 On post

@@ -148,7 +148,7 @@ export function FocusMode({
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="flex size-8 items-center justify-center rounded-md text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
+              className="flex size-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
               aria-label="Exit focus mode"
             >
               <X className="size-4" />
@@ -238,7 +238,7 @@ export function FocusMode({
                   <button
                     disabled={busy}
                     onClick={() => decide("APPROVE")}
-                    className="flex items-center justify-center gap-2 rounded-xl bg-[var(--action-primary)] px-4 py-3 text-sm font-medium text-white transition disabled:opacity-50"
+                    className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-[var(--action-primary)] px-4 py-3 text-sm font-medium text-white transition disabled:opacity-50"
                   >
                     {busy ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
                     Approve
@@ -246,7 +246,7 @@ export function FocusMode({
                   <button
                     disabled={busy}
                     onClick={() => decide("REJECT")}
-                    className="flex items-center justify-center gap-2 rounded-xl border border-[var(--action-danger)]/40 bg-[var(--action-danger)]/5 px-4 py-3 text-sm font-medium text-[var(--action-danger)] transition disabled:opacity-50"
+                    className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-[var(--action-danger)]/40 bg-[var(--action-danger)]/5 px-4 py-3 text-sm font-medium text-[var(--action-danger)] transition disabled:opacity-50"
                   >
                     <X className="size-4" />
                     Reject
@@ -254,7 +254,7 @@ export function FocusMode({
                   <button
                     disabled={busy}
                     onClick={() => decide("ESCALATE")}
-                    className="flex items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3 text-sm font-medium text-[var(--text-primary)] transition disabled:opacity-50"
+                    className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3 text-sm font-medium text-[var(--text-primary)] transition disabled:opacity-50"
                   >
                     <ArrowUpRight className="size-4" />
                     Escalate

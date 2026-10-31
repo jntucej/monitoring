@@ -51,7 +51,7 @@ export function FacultyAttendanceView() {
         </p>
       </header>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <KpiCard label="Absent Today" value={absentCount} tone={absentCount > 0 ? "danger" : "ok"} />
         <KpiCard label="Late Arrivals" value={lateCount} tone={lateCount > 0 ? "warn" : "ok"} />
         <KpiCard label="Total Faculty" value={totalCount} tone="neutral" />

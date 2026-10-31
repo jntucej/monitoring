@@ -59,7 +59,7 @@ export function ApprovalsView({
               <li key={item.id}>
                 <button
                   onClick={() => setSelected(item)}
-                  className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3 text-left"
+                  className="w-full min-h-[44px] rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3 text-left"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">

@@ -28,7 +28,7 @@ export function FacultyCare({
         </div>
         <Link
           href="/hod/faculty/attendance"
-          className="text-[11px] text-[var(--action-primary)] hover:underline"
+          className="inline-flex min-h-[44px] items-center text-[11px] text-[var(--action-primary)] hover:underline"
         >
           Details
         </Link>
@@ -63,7 +63,7 @@ export function FacultyCare({
             <ArrowRight className="size-3.5 text-[var(--text-muted)]" />
           </div>
 
-          <div className="grid grid-cols-3 gap-2 text-center">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center">
             <div>
               <p className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">Present</p>
               <p className="text-lg font-semibold tabular-nums text-[var(--action-primary)]">

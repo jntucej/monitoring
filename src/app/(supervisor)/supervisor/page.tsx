@@ -113,7 +113,7 @@ export default function SupervisorTodayPage() {
       <CelebrateOverlay queueEmpty={pending === 0 && sessionDecisions > 0} />
       <FocusMode open={focusOpen} onClose={() => setFocusOpen(false)} />
 
-      <div className="space-y-4">
+      <div className="mx-auto w-full max-w-7xl space-y-4 min-w-0">
         {/* 1. Shift bar — shift-aware, not day-aware */}
         <WidgetBoundary name="ShiftBar" title="Shift Bar">
           <ShiftBar
@@ -131,7 +131,7 @@ export default function SupervisorTodayPage() {
 
         {/* 3. Team + Gates — the two things a supervisor watches */}
         <WidgetBoundary name="TeamAndGates" title="Team & Gates">
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <TeamRoster />
             <GateWall gates={d?.gates ?? []} />
           </div>
@@ -153,7 +153,7 @@ export default function SupervisorTodayPage() {
 
         {/* 6. Wins + Insight */}
         <WidgetBoundary name="WinsAndInsights" title="Wins & Insights">
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <WinFeed />
             <InsightCard
               escalationsOpen={escalationsOpen}

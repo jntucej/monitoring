@@ -113,7 +113,7 @@ export function WorkersView() {
             placeholder="Search workers..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] py-2 pl-9 pr-3 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--action-primary)]"
+            className="w-full min-h-[44px] rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] py-2 pl-9 pr-3 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--action-primary)]"
           />
         </div>
 
@@ -121,7 +121,7 @@ export function WorkersView() {
           <select
             value={selectedGate}
             onChange={(e) => setSelectedGate(e.target.value)}
-            className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2 text-xs text-[var(--text-primary)] focus:outline-none"
+            className="min-h-[44px] rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2 text-xs text-[var(--text-primary)] focus:outline-none"
           >
             <option value="all">All Gates</option>
             {gates.map((g) => (
@@ -139,7 +139,7 @@ export function WorkersView() {
           <button
             key={c.id}
             onClick={() => setCategory(c.id)}
-            className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+            className={`inline-flex min-h-[44px] items-center rounded-full px-3 py-1 text-xs font-medium transition ${
               category === c.id
                 ? "bg-[var(--action-primary)] text-white"
                 : "bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
@@ -220,7 +220,8 @@ export function WorkersView() {
               </div>
               <button
                 onClick={() => setActiveWorker(null)}
-                className="rounded-lg p-1 text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]"
+                aria-label="Close"
+                className="flex size-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]"
               >
                 <X className="size-4" />
               </button>
@@ -242,7 +243,7 @@ export function WorkersView() {
                 <div className="pt-3">
                   <a
                     href={`tel:***${activeWorker.phoneTail}`}
-                    className="flex items-center justify-center gap-2 rounded-xl bg-[var(--action-primary)] py-2.5 font-medium text-white transition hover:bg-[var(--action-primary)]/90"
+                    className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-[var(--action-primary)] py-2.5 font-medium text-white transition hover:bg-[var(--action-primary)]/90"
                   >
                     <Phone className="size-4" />
                     Call Worker (***{activeWorker.phoneTail})

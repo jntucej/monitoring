@@ -24,7 +24,7 @@ export function EmergencyPulse({
           <li key={item.ticket}>
             <Link
               href={`/principal/approvals/pending?ticket=${encodeURIComponent(item.ticket)}`}
-              className="flex items-center gap-2 rounded-lg p-1.5 text-xs transition hover:bg-[var(--action-danger)]/10"
+              className="flex min-h-[44px] items-center gap-2 rounded-lg p-1.5 text-xs transition hover:bg-[var(--action-danger)]/10"
             >
               <span className="min-w-0 flex-1 truncate font-medium text-[var(--text-primary)]">
                 {item.subject}

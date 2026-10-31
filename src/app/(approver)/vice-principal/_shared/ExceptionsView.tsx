@@ -56,7 +56,7 @@ export function ExceptionsView() {
         </p>
       </header>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <KpiCard label="Absent" value={absent.length} tone="danger" />
         <KpiCard label="Late" value={late.length} tone="warn" />
         <KpiCard label="Flagged" value={flagged.length} tone="info" />

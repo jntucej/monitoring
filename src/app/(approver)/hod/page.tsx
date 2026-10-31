@@ -118,7 +118,7 @@ export default function HodTodayPage() {
       <CelebrateOverlay queueEmpty={pending === 0 && sessionDecisions > 0} />
       <FocusMode open={focusOpen} onClose={() => setFocusOpen(false)} />
 
-      <div className="space-y-4">
+      <div className="mx-auto w-full max-w-7xl space-y-4 min-w-0">
         {/* 1. Morning brief — greeting + dual streaks + progress */}
         <WidgetBoundary name="MorningBrief" title="Morning Brief">
           <MorningBrief

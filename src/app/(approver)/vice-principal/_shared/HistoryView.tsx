@@ -52,7 +52,7 @@ export function HistoryView({
         <p className="text-xs text-[var(--text-muted)]">Decision outcomes over the last {days} days</p>
       </header>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <MiniStat label="Approved" value={d?.totals.approved} tone="ok" />
         <MiniStat label="Rejected" value={d?.totals.rejected} tone="danger" />
         <MiniStat label="Forwarded" value={d?.totals.forwarded} tone="info" />

@@ -44,7 +44,7 @@ export function ReportsView() {
         </p>
       </header>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <KpiCard label="On Campus Today" value={stats?.onCampusToday} tone="ok" />
         <KpiCard label="Entries Today" value={stats?.todayEntries} tone="info" />
         <KpiCard label="Exits Today" value={stats?.todayExits} tone="warn" />

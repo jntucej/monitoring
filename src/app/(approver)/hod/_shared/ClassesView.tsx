@@ -53,7 +53,7 @@ export function ClassesView() {
         </p>
       </header>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <KpiCard label="Scheduled Classes" value={items.length} tone="ok" />
         <KpiCard label="Marked" value={markedCount} tone="ok" />
         <KpiCard

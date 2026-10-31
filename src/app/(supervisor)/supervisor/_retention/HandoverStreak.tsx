@@ -32,7 +32,7 @@ export function HandoverStreak() {
         </h2>
       </header>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <p className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
             Clean shifts

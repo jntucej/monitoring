@@ -25,7 +25,7 @@ export function PrincipalMobileShell({ children }: { children: React.ReactNode }
             type="button"
             onClick={() => setOpen(true)}
             aria-label="Open navigation"
-            className="flex size-9 items-center justify-center rounded-md text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
+            className="flex size-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
           >
             <Menu className="size-5" />
           </button>
@@ -38,7 +38,7 @@ export function PrincipalMobileShell({ children }: { children: React.ReactNode }
 
       <main className="flex-1 overflow-y-auto">
         <ScrollEdgeBlue className="h-full">
-          <div className="mx-auto w-full px-4 py-4">{children}</div>
+          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-4">{children}</div>
         </ScrollEdgeBlue>
       </main>
 
@@ -57,7 +57,7 @@ export function PrincipalMobileShell({ children }: { children: React.ReactNode }
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Close navigation"
-                className="flex size-8 items-center justify-center rounded-md text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
+                className="flex size-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
               >
                 <X className="size-4" />
               </button>

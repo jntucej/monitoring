@@ -7,18 +7,20 @@ import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
 
+interface DepartmentItem {
+  code: string;
+  name: string;
+  hodName: string | null;
+  faculty: number;
+  students: number;
+  ratio: number;
+  attendancePct: number;
+}
+
 interface AcademicsResponse {
   success?: boolean;
   data: {
-    departments: Array<{
-      code: string;
-      name: string;
-      hodName: string | null;
-      faculty: number;
-      students: number;
-      ratio: number;
-      attendancePct: number;
-    }>;
+    departments: DepartmentItem[];
     summary: {
       totalDepts: number;
       totalStudents: number;
@@ -45,7 +47,7 @@ export function DepartmentsView() {
         </p>
       </header>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <KpiCard label="Departments" value={d?.summary?.totalDepts} />
         <KpiCard label="Students" value={d?.summary?.totalStudents} />
         <KpiCard label="Faculty" value={d?.summary?.totalFaculty} />
@@ -89,20 +91,21 @@ export function DepartmentsView() {
           </ul>
 
           <div className="hidden md:block">
-            <DataTable
+            <DataTable<DepartmentItem>
               columns={[
-                { header: "Department", accessor: (r: any) => r.name },
-                { header: "HOD", accessor: (r: any) => r.hodName ?? "—" },
-                { header: "Students", accessor: (r: any) => r.students },
-                { header: "Faculty", accessor: (r: any) => r.faculty },
-                { header: "Ratio", accessor: (r: any) => `1:${r.ratio}` },
+                { header: "Department", accessor: (r) => r.name },
+                { header: "HOD", accessor: (r) => r.hodName ?? "—" },
+                { header: "Students", accessor: (r) => r.students },
+                { header: "Faculty", accessor: (r) => r.faculty },
+                { header: "Ratio", accessor: (r) => `1:${r.ratio}` },
                 {
                   header: "Attendance",
-                  accessor: (r: any) => `${r.attendancePct}%`,
+                  accessor: (r) => `${r.attendancePct}%`,
                 },
               ]}
               data={d?.departments ?? []}
-              keyExtractor={(r: any) => r.code}
+              keyExtractor={(r) => r.code}
+              mobileLayout="cards"
             />
           </div>
         </>

@@ -41,7 +41,7 @@ export function ExamsView() {
         </p>
       </header>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
         <KpiCard label="Total Clearances" value={exceptions.length} />
         <KpiCard label="Pending Action" value={pendingCount} tone={pendingCount > 0 ? "warn" : "ok"} />
         <KpiCard

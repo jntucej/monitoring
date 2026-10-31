@@ -154,7 +154,7 @@ function LinkRow({
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition",
+        "flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2 text-sm transition",
         active
           ? "bg-[var(--action-primary)]/10 font-medium text-[var(--action-primary)]"
           : "text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
@@ -191,7 +191,7 @@ function GroupRow({
         onClick={onToggle}
         aria-expanded={expanded}
         className={cn(
-          "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition",
+          "flex min-h-[44px] w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition",
           active
             ? "text-[var(--action-primary)]"
             : "text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
@@ -218,7 +218,7 @@ function GroupRow({
                   onClick={onNavigate}
                   aria-current={childActive ? "page" : undefined}
                   className={cn(
-                    "block rounded-md px-3 py-1.5 text-xs transition",
+                    "flex min-h-[44px] items-center rounded-md px-3 py-1.5 text-xs transition",
                     childActive
                       ? "bg-[var(--action-primary)]/10 font-medium text-[var(--action-primary)]"
                       : "text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-secondary)]"

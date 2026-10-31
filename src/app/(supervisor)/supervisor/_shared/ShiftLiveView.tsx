@@ -3,14 +3,14 @@
 import { ShiftBar } from "../_retention/ShiftBar";
 import { HandoverStreak } from "../_retention/HandoverStreak";
 import { useApiResource } from "@/hooks/useApiResource";
-import { GateWall } from "../_retention/GateWall";
+import { GateWall, type Gate } from "../_retention/GateWall";
 
 export function ShiftLiveView() {
   const { data } = useApiResource<{
     data: {
       shift: { startedAt: string | null; endsAt: string | null };
       counts: { escalationsOpen: number; incidentsOpen: number };
-      gates: any[];
+      gates: Gate[];
     };
   }>("/api/supervisor/dashboard");
 
@@ -28,7 +28,7 @@ export function ShiftLiveView() {
         escalationsOpen={d?.counts?.escalationsOpen ?? 0}
         incidentsOpen={d?.counts?.incidentsOpen ?? 0}
       />
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <HandoverStreak />
         <GateWall gates={d?.gates ?? []} />
       </div>

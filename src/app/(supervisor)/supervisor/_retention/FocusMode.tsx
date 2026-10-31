@@ -64,7 +64,7 @@ export function FocusMode({
       const t0 = Date.now();
       try {
         let endpoint = "";
-        let body: any = {};
+        let body: Record<string, unknown> = {};
 
         if (current.kind === "escalation") {
           endpoint = `/api/permissions/${current.id}/stepup`;
@@ -99,8 +99,8 @@ export function FocusMode({
         );
 
         await refresh();
-      } catch (err: any) {
-        errorToast(err?.message ?? "Action failed");
+      } catch (err: unknown) {
+        errorToast(err instanceof Error ? err.message : "Action failed");
       } finally {
         setBusy(false);
       }
@@ -158,7 +158,8 @@ export function FocusMode({
             </span>
             <button
               onClick={onClose}
-              className="rounded-lg p-1 text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]"
+              aria-label="Close"
+              className="flex size-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]"
             >
               ✕
             </button>
@@ -179,7 +180,7 @@ export function FocusMode({
             </p>
             <button
               onClick={onClose}
-              className="mt-6 rounded-xl bg-[var(--action-primary)] px-5 py-2 text-sm font-medium text-white"
+              className="mt-6 min-h-[44px] rounded-xl bg-[var(--action-primary)] px-5 py-2 text-sm font-medium text-white"
             >
               Exit Focus Mode
             </button>
@@ -215,7 +216,7 @@ export function FocusMode({
                 <button
                   disabled={busy}
                   onClick={() => act("resolve")}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--action-primary)] py-3 text-sm font-medium text-white transition hover:bg-[var(--action-primary)]/90 disabled:opacity-50"
+                  className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--action-primary)] py-3 text-sm font-medium text-white transition hover:bg-[var(--action-primary)]/90 disabled:opacity-50"
                 >
                   <Check className="size-4" />
                   Resolve / Clear (A)
@@ -223,7 +224,7 @@ export function FocusMode({
                 <button
                   disabled={busy}
                   onClick={() => act("escalate")}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] py-3 text-sm font-medium text-[var(--text-primary)] transition hover:bg-[var(--bg-elevated)] disabled:opacity-50"
+                  className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] py-3 text-sm font-medium text-[var(--text-primary)] transition hover:bg-[var(--bg-elevated)] disabled:opacity-50"
                 >
                   <ArrowUpRight className="size-4" />
                   Escalate higher (E)

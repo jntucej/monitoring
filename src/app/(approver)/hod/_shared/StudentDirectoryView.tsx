@@ -43,7 +43,7 @@ export function StudentDirectoryView() {
         </p>
       </header>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <KpiCard label="Total Students" value={students.length} tone="ok" />
         <KpiCard label="Hostellers" value={hostelCount} tone="neutral" />
         <KpiCard label="Day Scholars" value={dayScholarCount} tone="info" />

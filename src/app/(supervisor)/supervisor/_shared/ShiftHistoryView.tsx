@@ -16,7 +16,7 @@ export function ShiftHistoryView() {
         <p className="text-xs text-[var(--text-muted)]">Historical record of completed shifts and handover logs</p>
       </header>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
           <p className="text-[10px] uppercase text-[var(--text-muted)]">Current Streak</p>
           <p className="text-2xl font-bold text-[var(--action-primary)] mt-1">{cleanStreak} shifts</p>

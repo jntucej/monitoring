@@ -32,7 +32,7 @@ export function ImpactCard({
         </div>
         <Link
           href="/hod/students"
-          className="text-[11px] text-[var(--action-primary)] hover:underline"
+          className="inline-flex min-h-[44px] items-center text-[11px] text-[var(--action-primary)] hover:underline"
         >
           All {studentsTotal}
         </Link>
@@ -45,7 +45,7 @@ export function ImpactCard({
         <span className="text-xs text-[var(--text-muted)]">on campus right now</span>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-3">
+      <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <p className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
             On campus

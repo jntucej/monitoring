@@ -41,7 +41,7 @@ export function HostelView() {
         </p>
       </header>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <KpiCard label="Blocks" value={blocks.length} />
         <KpiCard label="Capacity" value={totalCapacity} />
         <KpiCard label="Occupied" value={totalOccupied} />

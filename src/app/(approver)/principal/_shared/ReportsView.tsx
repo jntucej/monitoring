@@ -36,7 +36,7 @@ export function ReportsView() {
         </p>
       </header>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <KpiCard label="Pending Now" value={d?.totalPending} />
         <KpiCard label="Decisions Cleared" value={d?.totalApproved} tone="ok" />
         <KpiCard label="Escalations" value={d?.totalEscalated} tone={d?.totalEscalated ? "warn" : "ok"} />

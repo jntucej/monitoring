@@ -33,7 +33,7 @@ export function ChainImpact({
         </h2>
       </header>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="flex items-center gap-2">
           <GraduationCap className="size-4 text-[var(--text-muted)]" />
           <div>

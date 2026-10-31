@@ -38,8 +38,8 @@ function VicePrincipalProfileInner() {
   usePolling(load, { intervalMs: 60_000 });
 
   return (
-    <div className="px-4 sm:px-6 py-6 space-y-4 max-w-4xl">
-      <h1 className="text-xl font-bold text-[var(--text-primary)]">Profile</h1>
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-4 min-w-0">
+      <h1 className="text-xl font-bold text-[var(--text-primary)]">Vice Principal Profile</h1>
 
       <WidgetBoundary title="Vice Principal Profile">
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5">

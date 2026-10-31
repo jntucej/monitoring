@@ -38,7 +38,7 @@ export function AuditView() {
         </p>
       </header>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
         <KpiCard label="Recent Events" value={logs.length} />
         <KpiCard label="Audit Logging" value="Active" tone="ok" />
         <KpiCard label="Integrity" value="Verified" tone="ok" />
