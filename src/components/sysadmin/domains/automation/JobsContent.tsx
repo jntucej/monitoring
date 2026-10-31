@@ -149,7 +149,7 @@ export function JobsContent({ data }: JobsContentProps) {
   return (
     <div className="space-y-6">
       {/* KPI tiles */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <KpiTile label="Healthy" value={`${healthy_pct}%`} tone={healthyTone} hint="of last 14d" />
         <KpiTile
           label="Failed 24h"

@@ -50,7 +50,7 @@ export function CsvValidationPreview({ validationResult, commitResult, committin
       {commitResult && (
         <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-5 space-y-3">
           <div className="flex items-center gap-2 text-emerald-500"><CheckCircle2 className="w-5 h-5" /><h4 className="font-semibold text-sm">Bulk Import Succeeded</h4></div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
             <div className="p-3 bg-[var(--surface-default)] rounded-lg border border-[var(--border-subtle)]"><span className="text-[10px] text-[var(--text-muted)] uppercase font-semibold">Total</span><p className="text-lg font-bold text-[var(--text-primary)]">{commitResult.total}</p></div>
             <div className="p-3 bg-[var(--surface-default)] rounded-lg border border-[var(--border-subtle)]"><span className="text-[10px] text-emerald-500 uppercase font-semibold">Created</span><p className="text-lg font-bold text-emerald-500">{commitResult.created}</p></div>
             <div className="p-3 bg-[var(--surface-default)] rounded-lg border border-[var(--border-subtle)]"><span className="text-[10px] text-sky-500 uppercase font-semibold">Updated</span><p className="text-lg font-bold text-sky-500">{commitResult.updated}</p></div>

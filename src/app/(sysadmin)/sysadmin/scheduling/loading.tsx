@@ -6,7 +6,7 @@ export default function Loading() {
         <div className="h-7 w-72 animate-pulse rounded bg-[var(--bg-elevated)]" />
         <div className="h-4 w-96 animate-pulse rounded bg-[var(--bg-elevated)]" />
       </div>
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className="h-24 animate-pulse rounded-xl bg-[var(--bg-elevated)]" />
         ))}

@@ -271,7 +271,7 @@ export function AdminProfilePanel({ tab: propTab }: { tab?: Tab } = {}) {
         <div className="space-y-6">
           <WidgetBoundary title="Console Theme">
             <SectionCard title="Console Theme" description="Choose how the admin console looks" icon={Palette}>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {([
                   { id: "dark", label: "Dark", Icon: Moon },
                   { id: "light", label: "Light", Icon: Sun },

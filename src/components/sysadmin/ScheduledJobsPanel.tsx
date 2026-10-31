@@ -537,7 +537,7 @@ const api = useApi();
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
         <KpiCard label="Total"        value={kpis.total}        sub={`${kpis.enabled} enabled`}  icon={CircleDot}      accent="sky"     loading={loading} />
         <KpiCard label="Active"       value={kpis.enabled}      sub="Scheduled & running"        icon={Play}           accent="emerald" loading={loading} />
         <KpiCard label="Paused"       value={kpis.disabled}     sub="Disabled by operator"       icon={Pause}          accent="amber"   loading={loading} />

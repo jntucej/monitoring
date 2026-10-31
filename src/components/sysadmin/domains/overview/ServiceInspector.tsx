@@ -58,7 +58,7 @@ function SectionPanel({ section, data, loading }: { section: keyof HealthData; d
       const db = data.database;
       if (!db) return <p className="text-xs text-[var(--text-muted)]">No database metrics.</p>;
       return (
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] p-2">
             <p className="text-[10px] uppercase text-[var(--text-muted)]">Active Conns</p>
             <p className="text-lg font-semibold text-[var(--text-primary)]">{db.conns}</p>

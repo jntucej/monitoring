@@ -143,7 +143,7 @@ export function PeopleContent({ data, loading, error, onRowClick }: Props) {
         </div>
 
         {/* KPI strip */}
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <Kpi label="Total" value={String(d.total)} spark={kpiSpark(d.total)} tone="neutral" />
           <Kpi label="Active %" value={`${activePct}%`} spark={kpiSpark(activePct * 2)} tone="ok" />
           <Kpi

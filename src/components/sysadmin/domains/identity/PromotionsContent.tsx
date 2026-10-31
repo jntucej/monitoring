@@ -85,7 +85,7 @@ export function PromotionsContent({ data, loading, error }: Props) {
         </div>
 
         {/* KPI row: pending / approved this month / rejected */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Kpi label="Pending" value={String(d.pending)} tone="var(--action-warning)" />
           <Kpi
             label="Approved this month"

@@ -194,7 +194,7 @@ function CampusDigitalTwinView() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
             <div className="p-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded text-center">
               <span className="text-[var(--text-secondary)]">Students</span>
               <div className="font-bold text-sm text-blue-400">

@@ -168,7 +168,7 @@ export function SafetyContent({ data }: SafetyContentProps) {
             {data.open_incidents} open incident{data.open_incidents !== 1 ? "s" : ""}
           </span>
         </div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {data.gate_states.map((g) => (
             <GateArc key={g.gate_code} code={g.gate_code} state={g.state} />
           ))}

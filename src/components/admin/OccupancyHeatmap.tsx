@@ -148,7 +148,7 @@ export function OccupancyHeatmap() {
       </div>
 
       {/* Summary strip */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-3">
           <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Inside</div>
           <div className="text-2xl font-black text-white mt-1">{totalInside}</div>

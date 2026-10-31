@@ -178,7 +178,7 @@ export function DeploymentsContent(
   return (
     <div className="space-y-6">
       {/* KPI strip */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {/* last deploy */}
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3">
           <p className="text-[10px] uppercase tracking-wide text-[var(--text-muted)] mb-1">

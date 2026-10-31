@@ -136,7 +136,7 @@ export function GateDeviceTracker({ devices, onRefresh }: GateDeviceTrackerProps
               </div>
 
               {/* Counters */}
-              <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                 <div className="p-2.5 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
                   <div className="text-[10px] text-[var(--text-muted)] flex items-center gap-1">
                     <ArrowDownLeft className="w-3 h-3 text-emerald-400" />

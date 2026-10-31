@@ -25,7 +25,7 @@ export function CampusStatusCards({ studentStats, facultyStats, staffStats, work
           🏫 Campus Occupancy Overview
         </span>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
         <Link href="/admin/students" className="block p-3 rounded-xl bg-blue-500/5 border border-blue-500/15 hover:bg-blue-500/10 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer group">
           <div className="flex items-center gap-1.5 text-[10px] font-medium text-blue-400/80 group-hover:text-blue-400 transition-colors">
             <GraduationCap className="w-3 h-3" /> <span className="sm:inline hidden">Students</span><span className="sm:hidden">📚</span>

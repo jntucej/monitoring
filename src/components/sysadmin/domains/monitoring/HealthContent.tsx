@@ -76,7 +76,7 @@ function DatabaseSection({ data }: { data: HealthData["database"] | null | undef
     : "—";
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <KpiNumber label="Active connections" value={data.conns} />
         <KpiNumber label="Pool slots" value={data.pool} />
       </div>

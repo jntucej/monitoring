@@ -219,7 +219,7 @@ export function SchedulingPanel() {
       ) : null}
 
       <WidgetBoundary title="scheduling-kpis">
-        <section aria-label="Key metrics" className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <section aria-label="Key metrics" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <KpiCard
             icon={Sparkles}
             label="Total items"

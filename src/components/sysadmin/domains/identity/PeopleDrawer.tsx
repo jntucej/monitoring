@@ -122,7 +122,7 @@ export function PeopleDrawer({ row, personId, onClose }: Props) {
             <>
               {/* PROFILE */}
               <Section title="Profile">
-                <dl className="grid grid-cols-2 gap-2 text-sm">
+                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                   <Field k="Role" v={d.role} />
                   <Field k="State" v={d.state} />
                   <Field k="Phone" v={d.phone ?? "—"} />

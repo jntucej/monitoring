@@ -195,7 +195,7 @@ export function AlertsContent({ data, sseState = "idle" }: AlertsContentProps) {
   return (
     <div className="space-y-6">
       {/* KPI chips row */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <div
           className="rounded-lg border p-3 bg-[var(--bg-surface)]"
           style={{ borderColor: "var(--border)" }}
