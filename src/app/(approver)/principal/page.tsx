@@ -23,6 +23,11 @@ import { CampusKnowledgeCentre } from "@/components/retention/CampusKnowledgeCen
 import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 
 interface PrincipalOverview {
   success?: boolean;
@@ -47,6 +52,17 @@ interface PrincipalOverview {
     emergency: Array<{ ticket: string; subject: string; age: string }>;
     exams: { pendingClearances: number; todayCandidates: number };
   };
+}
+
+
+function KpiTile({ label, value, tone = "ok" }: { label: string; value: string | number; tone?: "ok" | "warn" | "bad" }) {
+  const toneClass = tone === "bad" ? "text-red-400" : tone === "warn" ? "text-amber-400" : "text-[var(--text-primary)]";
+  return (
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elev-1)] p-4 min-w-0">
+      <div className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">{label}</div>
+      <div className={`mt-1 text-2xl font-bold ${toneClass}`}>{value}</div>
+    </div>
+  );
 }
 
 export default function PrincipalTodayPage() {
@@ -99,7 +115,16 @@ export default function PrincipalTodayPage() {
       <FocusMode open={focusOpen} onClose={() => setFocusOpen(false)} />
 
       <div className="mx-auto w-full max-w-7xl space-y-4 min-w-0">
-        {/* 1. Emergency pulse — only when present, top priority */}
+<PageHeader title="Principal" subtitle="Campus leadership console" />
+        <WidgetBoundary name="PrincipalKpis" title="Principal KPIs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <KpiTile label="Pending approvals" value={d?.counts.pending ?? 0} />
+            <KpiTile label="Overdue" value={d?.counts.overdue ?? 0} tone={(d?.counts.overdue ?? 0) > 0 ? "bad" : "ok"} />
+            <KpiTile label="Emergencies" value={d?.emergency?.length ?? 0} tone={(d?.emergency?.length ?? 0) > 0 ? "warn" : "ok"} />
+            <KpiTile label="Delegations active" value={d?.delegations.active ?? 0} />
+          </div>
+        </WidgetBoundary>
+                {/* 1. Emergency pulse — only when present, top priority */}
         {d?.emergency && d.emergency.length > 0 && (
           <WidgetBoundary name="EmergencyPulse" title="Emergency Pulse">
             <EmergencyPulse items={d.emergency} />
@@ -186,6 +211,10 @@ export default function PrincipalTodayPage() {
         <WidgetBoundary name="CampusKnowledgeCentre" title="Campus Knowledge Centre">
           <CampusKnowledgeCentre />
         </WidgetBoundary>
+<WidgetBoundary name="QuickActions" title="Quick Actions"><QuickActions /></WidgetBoundary>
+          <WidgetBoundary name="NotificationCenter" title="Notification Center"><NotificationCenter /></WidgetBoundary>
+          <DevContactStrip />
+
       </div>
     </>
   );

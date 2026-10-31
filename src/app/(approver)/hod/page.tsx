@@ -22,6 +22,11 @@ import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { QuickActions } from "@/components/shared/QuickActions";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 
 interface PriorityItem {
   id: string;
@@ -61,6 +66,17 @@ interface HodOverviewData {
 interface HodOverviewResponse {
   success?: boolean;
   data?: HodOverviewData;
+}
+
+
+function KpiTile({ label, value, tone = "ok" }: { label: string; value: string | number; tone?: "ok" | "warn" | "bad" }) {
+  const toneClass = tone === "bad" ? "text-red-400" : tone === "warn" ? "text-amber-400" : "text-[var(--text-primary)]";
+  return (
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elev-1)] p-4 min-w-0">
+      <div className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">{label}</div>
+      <div className={`mt-1 text-2xl font-bold ${toneClass}`}>{value}</div>
+    </div>
+  );
 }
 
 export default function HodTodayPage() {
@@ -119,7 +135,16 @@ export default function HodTodayPage() {
       <FocusMode open={focusOpen} onClose={() => setFocusOpen(false)} />
 
       <div className="mx-auto w-full max-w-7xl space-y-4 min-w-0">
-        {/* 1. Morning brief — greeting + dual streaks + progress */}
+<PageHeader title="Head of Department" subtitle="Department leadership console" />
+        <WidgetBoundary name="HodKpis" title="HOD KPIs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <KpiTile label="Pending approvals" value={d?.counts.pending ?? 0} />
+            <KpiTile label="Escalated" value={d?.counts.escalated ?? 0} tone={(d?.counts.escalated ?? 0) > 0 ? "warn" : "ok"} />
+            <KpiTile label="Faculty present" value={d?.faculty.total ? `${d.faculty.presentToday}/${d.faculty.total}` : "—"} />
+            <KpiTile label="Dept rank" value={d?.pulse.myRank ? `#${d.pulse.myRank}/${d.pulse.totalDepts}` : "—"} />
+          </div>
+        </WidgetBoundary>
+                {/* 1. Morning brief — greeting + dual streaks + progress */}
         <WidgetBoundary name="MorningBrief" title="Morning Brief">
           <MorningBrief
             pending={pending}
@@ -211,6 +236,10 @@ export default function HodTodayPage() {
         <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar">
           <UnifiedCampusCalendar />
         </WidgetBoundary>
+<WidgetBoundary name="QuickActions" title="Quick Actions"><QuickActions /></WidgetBoundary>
+          <WidgetBoundary name="NotificationCenter" title="Notification Center"><NotificationCenter /></WidgetBoundary>
+          <DevContactStrip />
+
       </div>
     </>
   );

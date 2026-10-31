@@ -1,6 +1,6 @@
 "use client";
 import { Suspense } from "react";
-import { ClipboardCheck } from "lucide-react";
+import { useApiResource } from "@/hooks/useApiResource";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
@@ -13,27 +13,47 @@ import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampu
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
-import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
+import { KanbanBoard } from "@/components/shared/KanbanBoard";
+import { PageHeader } from "@/components/shared/PageHeader";
+
+
+function KpiTile({ label, value, tone = "ok" }: { label: string; value: string | number; tone?: "ok" | "warn" | "bad" }) {
+  const toneClass = tone === "bad" ? "text-red-400" : tone === "warn" ? "text-amber-400" : "text-[var(--text-primary)]";
+  return (
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elev-1)] p-4 min-w-0">
+      <div className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">{label}</div>
+      <div className={`mt-1 text-2xl font-bold ${toneClass}`}>{value}</div>
+    </div>
+  );
+}
 
 export default function OiePage() {
+  interface OieQueueItem { id?: string; status?: string; current_stage?: string; }
+  type OieQueueData = OieQueueItem[] | { data?: OieQueueItem[] };
+  const { data } = useApiResource<OieQueueData>("/api/oie/queue", { ttlMs: 15_000 });
+  const queue = Array.isArray(data) ? data : data?.data ?? [];
+  const pendingCount = queue.filter((i) => i.status?.toUpperCase() === "PENDING").length;
+  const escalatedCount = queue.filter((i) => i.status?.toUpperCase() === "ESCALATED").length;
+
   return (
     <Suspense fallback={<PageLoading />}>
       <AuthGuard allowedRoles={["oie"]}>
         <div className="space-y-6">
           <DevContactStrip />
-          <WidgetBoundary name="RoleDashboardPanel" title="OIE Dashboard">
-            <RoleDashboardPanel
-              title="OIE dashboard"
-              icon={ClipboardCheck}
-              endpoint="/api/oie/queue"
-              mapKpis={(raw: unknown) => {
-                const list = Array.isArray(raw) ? raw : [];
-                return [
-                  { label: "Queue length", value: list.length, tone: list.length > 0 ? ("warn" as const) : ("ok" as const) },
-                ];
-              }}
-            />
+          <PageHeader title="OIE" subtitle="Examinations cell — clearances & exceptions" />
+          <WidgetBoundary name="OieKpis" title="OIE KPIs">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <KpiTile label="Queue depth" value={queue.length} tone={queue.length > 0 ? "warn" : "ok"} />
+              <KpiTile label="Pending clearances" value={pendingCount} />
+              <KpiTile label="Exceptions open" value={escalatedCount} tone={escalatedCount > 0 ? "warn" : "ok"} />
+            </div>
           </WidgetBoundary>
+          <KanbanBoard
+            source="/api/oie/queue"
+            columns={["PENDING", "ESCALATED", "APPROVED", "REJECTED"]}
+            itemKey="permission"
+            onSelect={() => {}}
+          />
           <WidgetBoundary name="AttentionQueue" title="Attention Queue"><AttentionQueue /></WidgetBoundary>
           <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home"><PersonalizedCampusHome /></WidgetBoundary>
           <WidgetBoundary name="TaskContinuity" title="Task Continuity"><TaskContinuity /></WidgetBoundary>
