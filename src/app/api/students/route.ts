@@ -8,7 +8,7 @@ import type { Person, Student } from "@/lib/types";
 
 const HOSTEL_CODES = ["CSE", "IT", "ECE", "EEE", "ME"];
 const WARDEN_ROLES = ["principal", "supervisor"];
-const PRINCIPAL_ROLES = ["principal"];
+const PRINCIPAL_ROLES = ["principal", "vice_principal", "hod"];
 
 /**
  * Warden/supervisor scoped roster query, via the Postgres service client:
@@ -112,7 +112,7 @@ async function handleGet(req: NextRequest) {
 
 export const GET = withRateLimit(
   withAuthorization(handleGet, {
-    requiredRole: ["admin", "sysadmin", "parent", "guardian", "principal", "supervisor"],
+    requiredRole: ["admin", "sysadmin", "parent", "guardian", "principal", "vice_principal", "supervisor", "hod"],
   }),
   { keyPrefix: "students_list", maxRequests: 100 }
 );
