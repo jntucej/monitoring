@@ -49,6 +49,7 @@ export function BotPanel() {
   const setVoiceModeConfirmed = useBotStore((s) => s.setVoiceModeConfirmed);
   const langPromptPending = useBotStore((s) => s.langPromptPending);
   const setLangPromptPending = useBotStore((s) => s.setLangPromptPending);
+  const userRole = useAuthStore((s) => s.role);
   const requestVoiceMode = useBotStore((s) => s.requestVoiceMode);
   const messages = useBotStore((s) => s.messages);
   const streaming = useBotStore((s) => s.streaming);
@@ -129,12 +130,35 @@ export function BotPanel() {
     if (stt.listening && tts.speaking) tts.stop();
   }, [stt.listening, tts]);
 
-  // Auto-focus input on desktop
+  // Auto-focus the composer on open (desktop); on close, return focus to
+  // the launcher button so keyboard/screen-reader users are never stranded
+  // in the detached panel.
   useEffect(() => {
     if (open && !isMobile && !voiceMode) {
-      setTimeout(() => inputRef.current?.focus(), 220);
+      const t = setTimeout(() => inputRef.current?.focus(), 220);
+      return () => clearTimeout(t);
+    }
+    if (!open) {
+      // Give the exit animation a beat before stealing focus back.
+      const t = setTimeout(() => {
+        document.getElementById("bot-launcher-btn")?.focus();
+      }, 260);
+      return () => clearTimeout(t);
     }
   }, [open, isMobile, voiceMode]);
+
+  // Cmd/Ctrl+J opens the panel (design doc: J, not K — K is the command
+  // palette). Esc already closes (effect above).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "j") {
+        e.preventDefault();
+        useBotStore.getState().toggleOpen();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   // Escape key closes and clears speech
   useEffect(() => {
@@ -319,6 +343,7 @@ export function BotPanel() {
     }).catch(() => {});
   }, []);
 
+  const [confirmPending, setConfirmPending] = useState(false);
   const handleClose = () => {
     if (stt.listening) stt.stop();
     tts.stop();
@@ -374,7 +399,7 @@ export function BotPanel() {
         open ? "" : "pointer-events-none",
       ].join(" ")}
       role="dialog"
-      aria-modal="true"
+      aria-modal="false"
       aria-label={t.title}
       aria-hidden={!open}
     >
@@ -399,17 +424,16 @@ export function BotPanel() {
         ttsSupported={tts.supported}
         onToggleVoiceReplies={handleToggleVoiceReplies}
         onNewChat={() => {
-          // Two-tap destructive action: first tap surfaces a confirm row,
-          // second tap (within 4s) actually clears. A single accidental
-          // tap no longer burns the whole thread.
+          // Two-tap destructive action: first tap surfaces a visible
+          // confirm row, second tap (within 4s) actually clears.
           const st = useBotStore.getState();
           if (st.messages.length === 0) return;
-          if (!confirmPendingRef.current) {
-            confirmPendingRef.current = true;
-            window.setTimeout(() => { confirmPendingRef.current = false; }, 4000);
+          if (!confirmPending) {
+            setConfirmPending(true);
+            window.setTimeout(() => setConfirmPending(false), 4000);
             return;
           }
-          confirmPendingRef.current = false;
+          setConfirmPending(false);
           resetChat();
           tts.stop();
         }}
@@ -513,6 +537,35 @@ export function BotPanel() {
         </div>
       )}
 
+      {confirmPending && (
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="relative z-10 mx-3 my-1.5 flex items-center justify-between gap-2 rounded-lg
+                     border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] text-amber-300"
+        >
+          <span>Start a new chat? Your current history will be cleared.</span>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => {
+                setConfirmPending(false);
+                resetChat();
+                tts.stop();
+              }}
+              className="text-amber-300 hover:underline underline-offset-2"
+            >
+              Clear
+            </button>
+            <button
+              onClick={() => setConfirmPending(false)}
+              className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
       <BotMessages
         t={t}
         onFeedback={setFeedback}
@@ -520,6 +573,7 @@ export function BotPanel() {
         onChip={handleChip}
         interim={stt.interim}
         listening={stt.listening}
+        role={userRole}
         onScrollToTop={loadOlder}
         loadingOlder={loadingOlder}
       />

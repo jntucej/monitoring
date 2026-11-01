@@ -7,6 +7,10 @@ export type BotRole = "user" | "assistant";
 export interface Citation {
   n: number; id: string; documentId: string;
   title: string; source: string | null; score: number;
+  /** The source paragraph the chunk was cut from — powers the citation
+      popover so a tapped citation shows the actual passage, not just a
+      title. Truncated to ~600 chars by buildPrompt. */
+  excerpt?: string;
 }
 
 export interface BotMsg {

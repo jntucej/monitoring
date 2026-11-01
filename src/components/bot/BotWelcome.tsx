@@ -1,11 +1,23 @@
 "use client";
 import { memo } from "react";
 import { motion } from "framer-motion";
+import { BotBoat } from "./BotBoat";
 import type { BotStrings } from "@/lib/i18n/bot-strings";
+import type { RoleWelcome } from "./role-welcome";
 
 export const BotWelcome = memo(function BotWelcome({
-  t, onChip, disabled,
-}: { t: BotStrings; onChip: (prompt: string) => void; disabled?: boolean }) {
+  t, onChip, disabled, welcome,
+}: {
+  t: BotStrings;
+  onChip: (prompt: string) => void;
+  disabled?: boolean;
+  /** Role-specific subtitle + examples (see role-welcome.ts). Falls back
+      to the generic strings when omitted. */
+  welcome?: RoleWelcome;
+}) {
+  const chips = welcome?.chips ?? [];
+  const questions = welcome?.questions ?? t.suggestions;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -13,28 +25,43 @@ export const BotWelcome = memo(function BotWelcome({
       transition={{ duration: 0.25 }}
       className="pt-1"
     >
-      <p className="text-xs text-[var(--text-muted)] mb-3 text-center">{t.tryAsking}</p>
-
-      <div className="flex flex-wrap gap-1.5 justify-center mb-3">
-        {t.quickChips.map((c, i) => (
-          <motion.button
-            key={c.label}
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.04 }}
-            disabled={disabled}
-            onClick={() => onChip(c.prompt)}
-            className="text-[11px] px-2.5 py-1 rounded-full border border-[var(--border)]
-                       hover:bg-[var(--bg-elevated)] active:scale-95 transition
-                       disabled:opacity-50 text-[var(--text-secondary)]"
-          >
-            {c.label}
-          </motion.button>
-        ))}
+      {/* Welcome card: boat silhouette + institutional title. No emoji,
+          no slogan — the "quiet library desk attendant" tone. */}
+      <div className="flex flex-col items-center gap-1.5 mb-4">
+        <div className="h-11 w-11 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)]
+                        flex items-center justify-center">
+          <BotBoat size={24} />
+        </div>
+        <p className="text-[15px] font-semibold text-[var(--text-primary)]">{t.title}</p>
+        {welcome && (
+          <p className="text-[11px] text-[var(--text-muted)]">{welcome.subtitle}</p>
+        )}
       </div>
 
+      <p className="text-xs text-[var(--text-muted)] mb-2 text-center">{t.tryAsking}</p>
+
+      {chips.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 justify-center mb-3">
+          {chips.map((label, i) => (
+            <motion.button
+              key={label}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.04 }}
+              disabled={disabled}
+              onClick={() => onChip(label)}
+              className="text-[11px] px-2.5 py-1 rounded-full border border-[var(--border)]
+                         hover:bg-[var(--bg-elevated)] active:scale-95 transition
+                         disabled:opacity-50 text-[var(--text-secondary)]"
+            >
+              {label}
+            </motion.button>
+          ))}
+        </div>
+      )}
+
       <div className="grid gap-2">
-        {t.suggestions.map((s, i) => (
+        {questions.map((s, i) => (
           <motion.button
             key={s}
             initial={{ opacity: 0, y: 4 }}

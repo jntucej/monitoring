@@ -3,6 +3,7 @@ import { memo, useState } from "react";
 import { motion } from "framer-motion";
 import { ThumbsUp, ThumbsDown, AlertCircle, RotateCcw, Copy, RefreshCw } from "lucide-react";
 import { MarkdownLite } from "./MarkdownLite";
+import { CitationChip } from "./CitationChip";
 import type { BotMsg } from "./store";
 import { playAudioFeedback } from "@/lib/sound";
 
@@ -78,14 +79,8 @@ export const BotBubble = memo(function BotBubble({
         </div>
 
         {!isUser && cites.length > 0 && !isStreaming && (
-          <div className="mt-2 pt-2 border-t border-[var(--border)] space-y-1">
-            {cites.map((c) => (
-              <div key={c.n} className="text-[11px] text-[var(--text-muted)] leading-snug">
-                <span className="font-medium text-[var(--text-secondary)]">[{c.n}]</span>{" "}
-                {c.title}{c.source ? ` — ${c.source}` : ""}
-                <span className="opacity-60"> · {(c.score * 100).toFixed(0)}%</span>
-              </div>
-            ))}
+          <div className="mt-2 pt-2 border-t border-[var(--border)]">
+            <CitationChip cites={cites} />
           </div>
         )}
 

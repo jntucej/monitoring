@@ -4,6 +4,8 @@ import { Sparkles, ArrowDown } from "lucide-react";
 import { useBotStore, type BotMsg } from "./store";
 import { BotBubble } from "./BotBubble";
 import { BotWelcome } from "./BotWelcome";
+import { roleWelcome } from "./role-welcome";
+import type { Role } from "@/lib/types";
 import type { BotStrings } from "@/lib/i18n/bot-strings";
 
 interface Props {
@@ -13,6 +15,9 @@ interface Props {
   onChip: (prompt: string) => void;
   interim: string;
   listening: boolean;
+  /** The authenticated user's role — drives the role-specific welcome
+      subtitle + suggestion chips (see role-welcome.ts). */
+  role?: Role | null;
   /** Called when the user scrolls to the top and older pages exist. */
   onScrollToTop?: () => void;
   /** While a "load older" request is in flight — shows a spinner at the top. */
@@ -50,7 +55,7 @@ function useStickToBottom(deps: unknown[], ref: React.RefObject<HTMLDivElement |
 }
 
 export const BotMessages = memo(function BotMessages({
-  t, onFeedback, onRetry, onChip, interim, listening, onScrollToTop, loadingOlder,
+  t, onFeedback, onRetry, onChip, interim, listening, role, onScrollToTop, loadingOlder,
 }: Props) {
   const messages = useBotStore((s) => s.messages);
   const streaming = useBotStore((s) => s.streaming);
@@ -115,7 +120,7 @@ export const BotMessages = memo(function BotMessages({
           </div>
         )}
         {messages.length === 0 && (
-          <BotWelcome t={t} onChip={onChip} disabled={streaming} />
+          <BotWelcome t={t} onChip={onChip} disabled={streaming} welcome={roleWelcome(role ?? null)} />
         )}
 
         {messages.map((m, i) => {

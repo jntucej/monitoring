@@ -14,10 +14,10 @@ export interface BotStrings {
 
 export const BOT_STRINGS: Record<BotLang, BotStrings> = {
   en: {
-    title: "Harbor",
-    subtitle: "Gate Monitor assistant · ask me anything",
-    placeholder: "Ask Harbor…",
-    send: "Send", stop: "Stop", newChat: "New chat", close: "Close Harbor", open: "Open Harbor assistant",
+    title: "Campus Assistant",
+    subtitle: "Policies · Schedules · Services",
+    placeholder: "Ask about campus…",
+    send: "Send", stop: "Stop", newChat: "New chat", close: "Close assistant", open: "Open campus assistant",
     listening: "Listening…", thinking: "Thinking…", speaking: "Speaking…",
     tryAsking: "Try asking:",
     micUnsupported: "Voice input isn't supported on this browser. Type your question instead.",
@@ -46,10 +46,10 @@ export const BOT_STRINGS: Record<BotLang, BotStrings> = {
     keyboardHint: "Enter to send · Shift+Enter for new line",
   },
   te: {
-    title: "Harbor",
-    subtitle: "గేట్ మానిటర్ సహాయకుడు · ఏదైనా అడగండి",
-    placeholder: "Harbor ని అడగండి…",
-    send: "పంపు", stop: "ఆపు", newChat: "కొత్త చాట్", close: "Harbor మూసివేయి", open: "Harbor తెరవండి",
+    title: "క్యాంపస్ అసిస్టెంట్",
+    subtitle: "నియమాలు · షెడ్యూల్స్ · సేవలు",
+    placeholder: "క్యాంపస్ గురించి అడగండి…",
+    send: "పంపు", stop: "ఆపు", newChat: "కొత్త చాట్", close: "అసిస్టెంట్ మూసేయి", open: "క్యాంపస్ అసిస్టెంట్ తెరవండి",
     listening: "వినుతున్నాను…", thinking: "ఆలోచిస్తున్నాను…", speaking: "మాట్లాడుతున్నాను…",
     tryAsking: "ఇలా అడగండి:",
     micUnsupported: "ఈ బ్రౌజర్‌లో వాయిస్ ఇన్‌పుట్ లేదు. టైప్ చేయండి.",
