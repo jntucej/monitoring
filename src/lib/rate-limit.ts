@@ -80,7 +80,42 @@ interface MemoryBucket {
 }
 const fallbackMemoryStore = new Map<string, MemoryBucket>();
 
-function checkFallbackMemoryLimit(key: string, cfg: Required<RateLimitConfig>): RateLimitResult {
+// Auth-sensitive key prefixes that MUST fail closed when the shared
+// Postgres store is unreachable: with 2+ web replicas the per-instance
+// in-memory fallback degrades the limit to near-useless, and an auth
+// limiter that silently stops limiting is a credential-guessing hole.
+// Everything else stays fail-open (availability > strictness for non-auth).
+const AUTH_SENSITIVE_KEY_PREFIXES = [
+  "login:",
+  "pin:",
+  "kiosk-session:",
+  "bootstrap:",
+  "password_reset_email:",
+] as const;
+
+function isAuthSensitiveKey(key: string): boolean {
+  return AUTH_SENSITIVE_KEY_PREFIXES.some((p) => key.startsWith(p));
+}
+
+let authSensitiveFallbackWarned = false;
+
+function checkFallbackMemoryLimit(key: string, cfg: Required<RateLimitConfig>, failClosed = false): RateLimitResult {
+  if (failClosed) {
+    // Auth-sensitive key with no shared store: deny the request. Loud log so
+    // the operator sees the shared-store outage instead of discovering it
+    // when auth locks silently stop working.
+    if (!authSensitiveFallbackWarned) {
+      authSensitiveFallbackWarned = true;
+      console.error(
+        `[rate-limit] FAIL-CLOSED: shared rate-limit store (Postgres rate_limit_buckets) unreachable ` +
+        `for auth-sensitive key '${key}' — denying request (503). This is not a per-replica fallback; ` +
+        `the limiter cannot bound credential-guessing across replicas.`
+      );
+      // Clear the latch so a subsequent recovery + re-outage logs again.
+      setTimeout(() => { authSensitiveFallbackWarned = false; }, 60_000);
+    }
+    return { limited: true, remaining: 0, resetTime: new Date(Date.now() + 60_000), retryAfter: 60 };
+  }
   const now = Date.now();
   let bucket = fallbackMemoryStore.get(key);
   if (!bucket || bucket.resetAt <= now) {
@@ -134,6 +169,15 @@ export async function checkRateLimit(
       : undefined;
     return { limited, remaining, resetTime: new Date(row.reset_at), retryAfter };
   } catch (err) {
+    if (isAuthSensitiveKey(key)) {
+      // Auth-sensitive key (login/pin/kiosk/bootstrap/password-reset): the
+      // shared store is the ONLY thing bounding credential-guessing across
+      // replicas — the per-instance memory fallback cannot replace it. Fail
+      // closed: report the key as limited so the caller denies the request
+      // (a 503, not a 429, but the withRateLimit caller maps `limited` to
+      // its reject path either way).
+      return checkFallbackMemoryLimit(key, cfg, true);
+    }
     console.warn("[rate-limit] DB store unavailable, degrading to local memory store:", err);
     return checkFallbackMemoryLimit(key, cfg);
   }
@@ -163,22 +207,39 @@ export function withRateLimit<TArgs extends unknown[] = unknown[]>(
   const cfg = resolveConfig(config);
   return async (req: NextRequest, ...args: TArgs): Promise<Response> => {
     let result: RateLimitResult;
+    let failClosed = false;
     try {
       result = await checkRateLimit(req, cfg);
     } catch (err) {
-      // If the DB is unreachable, fail-open but log loudly. A limiter that
-      // 500s is worse than no limiter — it takes the whole auth flow down.
-      console.error("[rate-limit] store failure, failing open", err);
-      return handler(req, ...args);
+      // Store failure that checkRateLimit could not absorb. For
+      // auth-sensitive keys this is an exception (they are handled by the
+      // catch inside checkRateLimit and never reach here); fail closed
+      // here as well for the belt-and-braces case.
+      if (isAuthSensitiveKey(bucketKey(req, cfg))) {
+        failClosed = true;
+        result = checkFallbackMemoryLimit(bucketKey(req, cfg), cfg, true);
+      } else {
+        // If the DB is unreachable, fail-open but log loudly. A limiter that
+        // 500s is worse than no limiter — it takes the whole auth flow down.
+        console.error("[rate-limit] store failure, failing open", err);
+        return handler(req, ...args);
+      }
     }
     if (result.limited) {
+      const status = failClosed ? 503 : 429;
+      const code = failClosed ? "RATE_LIMIT_STORE_UNAVAILABLE" : "RATE_LIMIT_EXCEEDED";
       return NextResponse.json(
         {
           success: false,
-          error: { code: "RATE_LIMIT_EXCEEDED", message: "Too many requests" },
+          error: {
+            code,
+            message: failClosed
+              ? "Rate-limit store unavailable; auth request denied (fail-closed)"
+              : "Too many requests",
+          },
         },
         {
-          status: 429,
+          status,
           headers: {
             "retry-after": String(result.retryAfter ?? 60),
             "x-ratelimit-limit": String(cfg.maxRequests),

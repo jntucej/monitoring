@@ -1,7 +1,7 @@
 /**
  * Send queued emails via Brevo SMTP (port 587 STARTTLS).
  *
- * Runs every 2 minutes via worker/rate-limit-cleanup.mjs schedule.
+ * Runs every 2 minutes via the worker/index.mjs schedule.
  * Daily limit: 300 emails (Brevo free tier). The 301st+ item stays
  * 'pending' until the next UTC day boundary, then retries.
  *

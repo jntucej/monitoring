@@ -1,15 +1,21 @@
 import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { getActiveLockdown } from "@/lib/db";
+import { recordSseEvent, replaySince, highestSseId, sseWire } from "@/lib/sse-ring-buffer";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 45; // ponytail: limit lifetime to 45s for serverless execution
 
 /**
  * GET /api/admin/lockdown/stream — Real-time SSE endpoint for lockdown status updates.
+ * Reconnect semantics: every event carries a monotonic `id:` line; the
+ * browser's EventSource `Last-Event-ID` is honored by replaying the
+ * module-scoped ring buffer so the gap between the 45s serverless cutoff
+ * and the reconnect is closed.
  */
 async function handleGet(req: NextRequest) {
   const encoder = new TextEncoder();
+  const ringKey = "lockdown-stream";
 
   const stream = new ReadableStream({
     async start(controller) {
@@ -26,18 +32,39 @@ async function handleGet(req: NextRequest) {
             lastId = currentId;
             lastActiveStatus = isActive;
 
-            const payload = JSON.stringify({
+            const payload = {
               timestamp: new Date().toISOString(),
               active: isActive,
               lockdown: active,
-            });
-
-            controller.enqueue(encoder.encode(`data: ${payload}\n\n`));
+            };
+            const evId = recordSseEvent(ringKey, payload, "lockdown");
+            controller.enqueue(encoder.encode(sseWire({ id: evId, event: "lockdown", data: payload })));
           }
         } catch {
           // ignore stream check errors
         }
       };
+
+      // On reconnect: replay buffered lockdown events since the client's
+      // last-seen id (or emit a resubscribe payload on a fresh connect).
+      const lastEventIdHeader = req.headers.get("last-event-id");
+      const reconnectLastId = lastEventIdHeader ? Number(lastEventIdHeader) : 0;
+      if (reconnectLastId > 0) {
+        const replayed = replaySince(ringKey, reconnectLastId);
+        for (const e of replayed) {
+          try {
+            controller.enqueue(encoder.encode(sseWire(e)));
+          } catch {}
+        }
+      } else {
+        const highest = highestSseId(ringKey);
+        if (highest > 0) {
+          const id = recordSseEvent(ringKey, { event: "resubscribe", highestId: highest, timestamp: new Date().toISOString() }, "resubscribe");
+          try {
+            controller.enqueue(encoder.encode(sseWire({ id, event: "resubscribe", data: { event: "resubscribe", highestId: highest, timestamp: new Date().toISOString() } })));
+          } catch {}
+        }
+      }
 
       // Initial state push
       await sendEvent();

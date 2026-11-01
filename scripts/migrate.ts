@@ -121,6 +121,14 @@ async function main() {
     // applied_at) without a checksum. If checksum was created NOT NULL those
     // inserts fail. Make it nullable so legacy rows land; the runner's
     // backfill (below) stamps the checksum on the next run.
+    //
+    // NOTE: migration 20270101000018 (canonicalize_schema_migrations) has
+    // since made filename/checksum NOT NULL on the canonical table shape.
+    // On fresh databases the CREATE TABLE above creates the canonical shape
+    // directly, so the ALTERs below are no-ops. On mixed-version installs
+    // where the canonical migration has not yet run, these keep the runner
+    // working — they are the adaptive fallback paths. Do NOT delete them
+    // until 20270101000018 is confirmed applied everywhere.
     await client.query(`
       ALTER TABLE schema_migrations ALTER COLUMN checksum DROP NOT NULL
     `).catch(() => {});

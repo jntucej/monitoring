@@ -53,11 +53,13 @@ function ExamBranchRecordsInner() {
   const tier = getRoleTier(role);
 
   /*
-   * exam_branch is not a stage name in /api/permissions (allowed stage values:
-   * faculty, hod, oie, vice_principal, principal, caretaker, deputy_warden,
-   * hostel_manager, warden_or_principal).
-   * Fetch all exam workflow requests regardless of stage to give the records
-   * view a complete candidate & examination history.
+   * exam_branch participates in the exam permission workflow: it sits in
+   * WORKFLOW_STAGES.exam (hod → oie → exam_branch → vice_principal →
+   * principal) and /api/permissions exposes it in STAGES_BY_ROLE
+   * (exam_branch: ["exam_branch", "exam_branch_forwarded"]). The records
+   * view shows the full exam-request ledger; the actable subset for this
+   * role is fetched via /api/permissions?assigned_to_me=true (which the
+   * Approvals panel below uses).
    */
   const {
     data,

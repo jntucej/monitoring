@@ -22,6 +22,7 @@
 set -euo pipefail
 
 BASE_DIR="${BASE_DIR:-/opt/monitoring}"
+CRON_TELEGRAM_TOKEN="${TELEGRAM_BOT_TOKEN:-}"
 
 if ! command -v crontab >/dev/null 2>&1 && [ ! -d /etc/cron.d ]; then
   echo "❌ cron is not available on this host; install cron (or cronie) first."
@@ -40,8 +41,12 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 # Full backup every 6 hours (matches master-backup.sh's 6h cadence comment).
 0 */6 * * *  root  bash ${BASE_DIR}/scripts/master-backup.sh >> ${BASE_DIR}/backups/cron.log 2>&1
 
-# Restore-test the latest backup nightly at 03:15.
-15 3 * * *   root  bash ${BASE_DIR}/scripts/verify-backup.sh >> ${BASE_DIR}/backups/verify.log 2>&1
+# Restore-test the latest backup nightly at 03:15. On a non-zero exit
+# (failed restore drill) notify the operator directly — a failed backup
+# drill that only lands in verify.log is invisible until the next real
+# restore attempt, so the failure is pushed to Telegram (when configured)
+# instead of waiting for the log to be read.
+15 3 * * *   root  bash -c 'LOG='${BASE_DIR}'/backups/verify.log; bash '${BASE_DIR}'/scripts/verify-backup.sh >> "$LOG" 2>&1; RC=$?; if [ $RC -ne 0 ]; then TAIL=$(tail -n 20 "$LOG" 2>/dev/null || true); MSG="⚠️ Backup restore drill FAILED (exit $RC) at $(date -Iseconds)\\nLast log lines:\\n$TAIL"; TELEGRAM_BOT_TOKEN='${CRON_TELEGRAM_TOKEN}' bash '${BASE_DIR}'/scripts/telegram-notify.sh "$MSG" 2>/dev/null || true; fi; exit $RC'
 EOF
 chmod 644 /etc/cron.d/gate-backup
 echo "✓ Installed /etc/cron.d/gate-backup"

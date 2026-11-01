@@ -26,11 +26,13 @@
 import { readdir, stat } from "fs/promises";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
+import { createHash } from "crypto";
 
 interface DriftReport {
   missing: string[];   // migration files whose version is NOT in schema_migrations
   total: number;       // total migration files on disk
   recorded: number;    // total versions in schema_migrations
+  drifted: string[];   // files whose on-disk checksum no longer matches the recorded one
 }
 
 let lastCheckAt: number | null = null;
@@ -105,7 +107,7 @@ export async function checkSchemaDrift(minIntervalMs = 5 * 60 * 1000): Promise<D
 
   if (files.length === 0) {
     lastCheckAt = now;
-    return { missing: [], total: 0, recorded: 0 };
+    return { missing: [], total: 0, recorded: 0, drifted: [] };
   }
 
   // Lazy import so that client-side bundlers (and the browser build)
@@ -120,6 +122,7 @@ export async function checkSchemaDrift(minIntervalMs = 5 * 60 * 1000): Promise<D
   }
 
   const seen = new Set<string>();
+  const recordedChecksums = new Map<string, string>();
   let recordedCount = 0;
   try {
     // The schema_migrations table has a `version` column that is the
@@ -136,8 +139,12 @@ export async function checkSchemaDrift(minIntervalMs = 5 * 60 * 1000): Promise<D
     // record a migration under a form that is neither the bare version nor
     // the current filename (historical renames). Accept any row whose
     // version OR filename references this file as "recorded" evidence.
-    const { rows: fileRows } = await pool.query<{ filename: string | null }>(
-      "SELECT filename FROM schema_migrations WHERE filename IS NOT NULL"
+    //
+    // Post-20270101000018 the table is canonical (filename/checksum NOT NULL);
+    // checksums recorded as 'legacy-no-checksum' are skipped in drift checks
+    // (the backfill placeholder means "no real hash was recorded").
+    const { rows: fileRows } = await pool.query<{ filename: string | null; checksum: string | null }>(
+      "SELECT filename, checksum FROM schema_migrations WHERE filename IS NOT NULL"
     );
     for (const r of fileRows) {
       if (!r.filename) continue;
@@ -145,6 +152,11 @@ export async function checkSchemaDrift(minIntervalMs = 5 * 60 * 1000): Promise<D
       // Also accept the extension-less filename form (the runner records
       // under the .sql name and reads it back under the extension-less name).
       seen.add(r.filename.replace(/\.sql$/, ""));
+      // Remember recorded checksums for drift detection (only real sha256
+      // values — skip the 'legacy-no-checksum' placeholder).
+      if (r.checksum && r.checksum !== "legacy-no-checksum") {
+        recordedChecksums.set(r.filename, r.checksum);
+      }
     }
   } catch (err: any) {
     if (err?.code === "42P01") {
@@ -158,6 +170,7 @@ export async function checkSchemaDrift(minIntervalMs = 5 * 60 * 1000): Promise<D
   }
 
   const missing: string[] = [];
+  const drifted: string[] = [];
   for (const f of files) {
     // Match the runner's version extraction exactly: the prefix up to the
     // first underscore (e.g. 20261101120000_email_queue_tracking.sql ->
@@ -170,12 +183,38 @@ export async function checkSchemaDrift(minIntervalMs = 5 * 60 * 1000): Promise<D
     // filename appears in schema_migrations. Some historical rows use
     // one format, later rows use the other — treat both as valid
     // evidence that the file was applied.
-    if (seen.has(v) || seen.has(f)) continue;
+    if (seen.has(v) || seen.has(f)) {
+      // Checksum drift: for files that are recorded with a real sha256
+      // checksum (not the 'legacy-no-checksum' placeholder), verify the
+      // on-disk file matches. This is the check that was meaningless
+      // before 20270101000018 canonicalized the table shape.
+      const recorded = recordedChecksums.get(f);
+      if (recorded) {
+        try {
+          const { readFileSync } = await import("fs");
+          const onDisk = readFileSync(join(dir, f), "utf8");
+          const hash = createHash("sha256").update(onDisk).digest("hex");
+          if (hash !== recorded) {
+            drifted.push(f);
+          }
+        } catch {
+          // File not readable on disk (container build may not carry it);
+          // skip the checksum check rather than false-positive.
+        }
+      }
+      continue;
+    }
     missing.push(f);
   }
 
   lastCheckAt = now;
 
+  if (drifted.length > 0) {
+    console.error(
+      `[schema-drift] ${drifted.length} migration file(s) on disk have content that differs from the recorded checksum (drifted): ${drifted.join(", ")}. ` +
+      `Re-run the migration with --force to re-stamp the checksum, or restore the original file.`
+    );
+  }
   if (missing.length > 0) {
     const strict = process.env.GATE_SCHEMA_DRIFT_STRICT === "true";
     const msg = `[schema-drift] ${missing.length} migration file(s) on disk are NOT recorded in schema_migrations: ${missing.join(", ")}. Apply them with: npx tsx scripts/migrate.ts (or: psql < <file> one by one).`;
@@ -187,11 +226,11 @@ export async function checkSchemaDrift(minIntervalMs = 5 * 60 * 1000): Promise<D
     } else {
       console.error(msg);
     }
-  } else {
-    console.log(`[schema-drift] OK: ${files.length} migrations on disk, ${recordedCount} recorded versions, 0 missing.`);
+  } else if (drifted.length === 0) {
+    console.log(`[schema-drift] OK: ${files.length} migrations on disk, ${recordedCount} recorded versions, 0 missing, 0 drifted.`);
   }
 
-  return { missing, total: files.length, recorded: recordedCount };
+  return { missing, total: files.length, recorded: recordedCount, drifted };
 }
 
 /**

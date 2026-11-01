@@ -1,17 +1,28 @@
 /**
  * Server-Sent Events endpoint for real-time gate monitoring.
  * This replaces the WebSocket at /ws since WS isn't supported by Next.js serverless.
- * 
+ *
  * GET /api/gate/stream — Real-time SSE endpoint for gate status updates.
+ *
+ * Reconnect semantics (2026-11): every event carries a monotonic `id:` line.
+ * The client's browser EventSource sends `Last-Event-ID` on reconnect; the
+ * server replays buffered events since that id from the module-scoped ring
+ * buffer (src/lib/sse-ring-buffer.ts), closing the gap between the 45s
+ * serverless cutoff and the reconnect. A fresh connection (no Last-Event-ID)
+ * receives a `resubscribe` payload with the current highest id so the client
+ * can reconcile a full snapshot against anything it missed.
  */
 
 import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { getDbClient } from "@/lib/db";
+import { recordSseEvent, replaySince, highestSseId, sseWire } from "@/lib/sse-ring-buffer";
 import type { AuthContext } from "@/lib/authContext";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 45; // ponytail: limit lifetime to 45s for serverless execution
+
+const RING_KEY = "gate-stream";
 
 async function handleGet(req: NextRequest, ctx: { auth: AuthContext }) {
   const encoder = new TextEncoder();
@@ -35,9 +46,11 @@ async function handleGet(req: NextRequest, ctx: { auth: AuthContext }) {
     async start(controller) {
       const sendEvent = (data: any, event?: string) => {
         try {
-          const line = event 
-            ? `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`
-            : `data: ${JSON.stringify(data)}\n\n`;
+          // Record in the shared ring buffer so a reconnecting client can
+          // replay events it missed during the 45s cutoff. The returned id
+          // is emitted as the SSE `id:` line (monotonic, per ring key).
+          const id = recordSseEvent(RING_KEY, data, event);
+          const line = sseWire({ id, event, data });
           controller.enqueue(encoder.encode(line));
         } catch {}
       };
@@ -47,6 +60,50 @@ async function handleGet(req: NextRequest, ctx: { auth: AuthContext }) {
           controller.enqueue(encoder.encode(`: ping\n\n`));
         } catch {}
       };
+
+      // On reconnect, the browser's EventSource sends `Last-Event-ID`.
+      // Replay anything the ring buffer holds since that id, so the gap
+      // between the 45s cutoff and the reconnect is closed. A fresh
+      // connection (no last id) gets a `resubscribe` payload with the
+      // current highest id so the client can reconcile its snapshot.
+      const lastEventIdHeader = req.headers.get("last-event-id");
+      const lastId = lastEventIdHeader ? Number(lastEventIdHeader) : 0;
+      if (lastId > 0) {
+        const replayed = replaySince(RING_KEY, lastId);
+        for (const e of replayed) {
+          try {
+            controller.enqueue(encoder.encode(sseWire(e)));
+          } catch {}
+        }
+        if (replayed.length > 0) {
+          // Signal that a replay happened so the client knows to merge
+          // (not re-snapshot) the replayed events.
+          try {
+            const id = recordSseEvent(RING_KEY, {
+              event: "replayed",
+              lastId,
+              count: replayed.length,
+              timestamp: new Date().toISOString(),
+            }, "replayed");
+            controller.enqueue(encoder.encode(sseWire({ id, event: "replayed", data: { event: "replayed", lastId, count: replayed.length, timestamp: new Date().toISOString() } })));
+          } catch {}
+        }
+      } else {
+        const highest = highestSseId(RING_KEY);
+        if (highest > 0) {
+          // Fresh connection but the ring already has history: tell the
+          // client the baseline so it can request a resync if it had a
+          // prior id (stored client-side) that's older than this.
+          try {
+            const id = recordSseEvent(RING_KEY, {
+              event: "resubscribe",
+              highestId: highest,
+              timestamp: new Date().toISOString(),
+            }, "resubscribe");
+            controller.enqueue(encoder.encode(sseWire({ id, event: "resubscribe", data: { event: "resubscribe", highestId: highest, timestamp: new Date().toISOString() } })));
+          } catch {}
+        }
+      }
 
       // Fetch current gate statuses from database
       const fetchGateData = async () => {

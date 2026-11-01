@@ -2,8 +2,11 @@ import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { getNotifications } from "@/lib/db";
 import { err } from "@/lib/api-response";
+import { recordSseEvent, replaySince, highestSseId, sseWire } from "@/lib/sse-ring-buffer";
 
 // SSE stream: securely streams user notifications with ping keepalive and session IDOR guards
+// Reconnect semantics: per-user ring buffer (keyed by userId) so a reconnect
+// replays only events the caller is authorized to see — no cross-user leak.
 async function handleGet(req: NextRequest) {
   const callerId = req.headers.get("x-user-id");
   const callerRole = req.headers.get("x-user-role") || "user";
@@ -29,11 +32,15 @@ async function handleGet(req: NextRequest) {
     });
   }
 
+  // Per-user ring key: only the caller's own events are replayed on reconnect.
+  const ringKey = `notifications-stream:${userId}`;
+
   const stream = new ReadableStream({
     async start(controller) {
-      const sendEvent = (data: any) => {
+      const sendEvent = (data: any, event?: string) => {
         try {
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
+          const id = recordSseEvent(ringKey, data, event);
+          controller.enqueue(encoder.encode(sseWire({ id, event, data })));
         } catch {}
       };
 
@@ -43,7 +50,27 @@ async function handleGet(req: NextRequest) {
         } catch {}
       };
 
-      sendEvent({ type: "connected", timestamp: new Date().toISOString() });
+      // Reconnect: replay buffered events since the client's last-seen id.
+      const lastEventIdHeader = req.headers.get("last-event-id");
+      const lastId = lastEventIdHeader ? Number(lastEventIdHeader) : 0;
+      if (lastId > 0) {
+        const replayed = replaySince(ringKey, lastId);
+        for (const e of replayed) {
+          try {
+            controller.enqueue(encoder.encode(sseWire(e)));
+          } catch {}
+        }
+      } else {
+        const highest = highestSseId(ringKey);
+        if (highest > 0) {
+          const id = recordSseEvent(ringKey, { event: "resubscribe", highestId: highest, timestamp: new Date().toISOString() }, "resubscribe");
+          try {
+            controller.enqueue(encoder.encode(sseWire({ id, event: "resubscribe", data: { event: "resubscribe", highestId: highest, timestamp: new Date().toISOString() } })));
+          } catch {}
+        }
+      }
+
+      sendEvent({ type: "connected", timestamp: new Date().toISOString() }, "connected");
 
       let lastJson = "";
       const checkAndSend = async () => {
@@ -52,7 +79,7 @@ async function handleGet(req: NextRequest) {
           const currentJson = JSON.stringify(items);
           if (currentJson !== lastJson) {
             lastJson = currentJson;
-            sendEvent({ type: "notifications", data: items, unreadCount: items.filter((n: any) => !n.readAt).length });
+            sendEvent({ type: "notifications", data: items, unreadCount: items.filter((n: any) => !n.readAt).length }, "notifications");
           }
         } catch {}
       };

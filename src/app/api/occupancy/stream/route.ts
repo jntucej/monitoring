@@ -1,9 +1,12 @@
 import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { getCurrentOccupancy } from "@/server/services/occupancy/occupancy";
+import { recordSseEvent, replaySince, highestSseId, sseWire } from "@/lib/sse-ring-buffer";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 45; // ponytail: limit lifetime to 45s for serverless execution
+
+const RING_KEY = "occupancy-stream";
 
 async function handleGet(req: NextRequest) {
   const encoder = new TextEncoder();
@@ -18,7 +21,8 @@ async function handleGet(req: NextRequest) {
           const payload = JSON.stringify(data);
           if (force || payload !== lastPayload) {
             lastPayload = payload;
-            controller.enqueue(encoder.encode(`data: ${payload}\n\n`));
+            const id = recordSseEvent(RING_KEY, data);
+            controller.enqueue(encoder.encode(sseWire({ id, event: "occupancy", data })));
           }
         } catch {
           // ignore stream fetch errors
@@ -30,6 +34,27 @@ async function handleGet(req: NextRequest) {
           controller.enqueue(encoder.encode(`: ping\n\n`));
         } catch {}
       };
+
+      // Reconnect: replay buffered occupancy events since the client's
+      // last-seen id (or emit a resubscribe payload on a fresh connect).
+      const lastEventIdHeader = req.headers.get("last-event-id");
+      const lastId = lastEventIdHeader ? Number(lastEventIdHeader) : 0;
+      if (lastId > 0) {
+        const replayed = replaySince(RING_KEY, lastId);
+        for (const e of replayed) {
+          try {
+            controller.enqueue(encoder.encode(sseWire(e)));
+          } catch {}
+        }
+      } else {
+        const highest = highestSseId(RING_KEY);
+        if (highest > 0) {
+          try {
+            const id = recordSseEvent(RING_KEY, { event: "resubscribe", highestId: highest, timestamp: new Date().toISOString() }, "resubscribe");
+            controller.enqueue(encoder.encode(sseWire({ id, event: "resubscribe", data: { event: "resubscribe", highestId: highest, timestamp: new Date().toISOString() } })));
+          } catch {}
+        }
+      }
 
       await sendUpdate(true);
       const interval = setInterval(() => sendUpdate(false), 3000);

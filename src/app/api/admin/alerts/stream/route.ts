@@ -4,6 +4,7 @@ import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Alert } from "@/lib/types";
+import { recordSseEvent, replaySince, highestSseId, sseWire } from "@/lib/sse-ring-buffer";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 45;
@@ -56,12 +57,16 @@ async function handleGet(req: NextRequest, ctx: { auth: AuthContext }): Promise<
           if (signature !== lastSignature) {
             lastSignature = signature;
             heartbeatAt = Date.now();
-            const payload = JSON.stringify({
+            const payload = {
               type: "alerts",
               timestamp: new Date().toISOString(),
               data: rows,
-            });
-            controller.enqueue(encoder.encode(`data: ${payload}\n\n`));
+            };
+            // Record in the per-role ring buffer so a reconnecting admin
+            // client can replay alerts it missed during the 45s cutoff.
+            const ringKey = `alerts-stream:${auth.role}`;
+            const id = recordSseEvent(ringKey, payload, "alerts");
+            controller.enqueue(encoder.encode(sseWire({ id, event: "alerts", data: payload })));
             return;
           }
 
@@ -73,6 +78,28 @@ async function handleGet(req: NextRequest, ctx: { auth: AuthContext }): Promise<
           // If a poll tick fails, keep the stream alive and retry on the next tick.
         }
       };
+
+      // On reconnect the browser's EventSource sends `Last-Event-ID`.
+      // Replay anything the ring buffer holds since that id.
+      const ringKey = `alerts-stream:${auth.role}`;
+      const lastEventIdHeader = req.headers.get("last-event-id");
+      const lastId = lastEventIdHeader ? Number(lastEventIdHeader) : 0;
+      if (lastId > 0) {
+        const replayed = replaySince(ringKey, lastId);
+        for (const e of replayed) {
+          try {
+            controller.enqueue(encoder.encode(sseWire(e)));
+          } catch {}
+        }
+      } else {
+        const highest = highestSseId(ringKey);
+        if (highest > 0) {
+          const id = recordSseEvent(ringKey, { event: "resubscribe", highestId: highest, timestamp: new Date().toISOString() }, "resubscribe");
+          try {
+            controller.enqueue(encoder.encode(sseWire({ id, event: "resubscribe", data: { event: "resubscribe", highestId: highest, timestamp: new Date().toISOString() } })));
+          } catch {}
+        }
+      }
 
       await sendSnapshot();
       const interval = setInterval(sendSnapshot, 2_000);
