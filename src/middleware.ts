@@ -29,7 +29,7 @@ const HOME_DEFAULT_ROUTE: Record<string, string> = {
   caretaker: '/hostel/permissions',
   deputy_warden: '/deputy-warden',
   hostel_manager: '/hostel-manager',
-  principal: '/principal/permissions',
+  principal: '/principal/approvals',
   vice_principal: '/vice-principal',
   oie: '/oie',
   exam_branch: '/exam-branch',

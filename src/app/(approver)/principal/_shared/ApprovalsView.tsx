@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
 import { DataTable } from "@/components/ui/DataTable";
@@ -25,6 +25,20 @@ export function ApprovalsView({
 }) {
   const [selected, setSelected] = useState<PermissionItem | null>(null);
 
+  // ?ticket= deep link (retention widgets / notification emails open a specific
+  // ticket's DetailSheet on the matching view).
+  const [ticketParam] = useState(() =>
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("ticket")
+      : null
+  );
+  const openTicket = (rows: PermissionItem[]) => {
+    if (ticketParam) {
+      const hit = rows.find((r) => r.ticket_number === ticketParam);
+      if (hit) setSelected(hit);
+    }
+  };
+
   const url =
     status === "OVERDUE"
       ? "/api/permissions?stage=principal&overdue=true"
@@ -37,6 +51,8 @@ export function ApprovalsView({
   });
 
   const rows = data?.data ?? [];
+
+  useEffect(() => { openTicket(rows); }, [data]); // eslint-disable-line
 
   return (
     <div className="space-y-4">

@@ -57,7 +57,7 @@ const getPriorityItems = (role: Role, items: NavItem[]): NavItem[] => {
     sysadmin: ['/sysadmin', '/sysadmin/analytics', '/sysadmin/security', '/sysadmin/audit'],
     operator: ['/gate', '/gate/history', '/admin/alerts', '/gate/manual'],
     supervisor: ['/supervisor', '/supervisor?tab=approvals', '/supervisor?tab=alerts', '/supervisor?tab=curfew'],
-    principal: ['/principal', '/principal/permissions'],
+    principal: ['/principal', '/principal/approvals'],
     student: ['/student', '/student/history', '/student/passes', '/student/profile'],
     parent: ['/parent', '/parent/requests', '/parent/students', '/parent/profile'],
     guardian: ['/parent', '/parent/requests', '/parent/students', '/parent/profile'],

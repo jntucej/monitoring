@@ -53,7 +53,7 @@ const NAV_CATEGORIES = [
       { href: "/principal/approvals?tab=overdue", label: "Overdue", icon: Clock },
       { href: "/principal/approvals?tab=delegated", label: "Delegated", icon: Share2 },
       { href: "/principal/approvals?tab=escalated", label: "Escalated", icon: AlertTriangle },
-      { href: "/principal/permissions", label: "Manage Approved", icon: CheckCircle2 },
+      { href: "/principal/approvals", label: "Manage Approved", icon: CheckCircle2 },
     ],
   },
   {
@@ -61,10 +61,10 @@ const NAV_CATEGORIES = [
     icon: <Building2 className="h-4 w-4" />,
     defaultOpen: false,
     items: [
-      { href: "/principal/gate-activity", label: "Overview", icon: LayoutDashboard },
-      { href: "/principal/hostel-oversight", label: "Curfew", icon: ShieldCheck },
-      { href: "/principal/complaints", label: "Complaints", icon: MessageSquare },
-      { href: "/principal/gate-activity", label: "Activity", icon: Bell },
+      { href: "/principal/operations/gates", label: "Overview", icon: LayoutDashboard },
+      { href: "/principal/operations/hostel", label: "Curfew", icon: ShieldCheck },
+      { href: "/principal/operations/incidents", label: "Complaints", icon: MessageSquare },
+      { href: "/principal/operations/gates", label: "Activity", icon: Bell },
     ],
   },
   {
@@ -72,10 +72,10 @@ const NAV_CATEGORIES = [
     icon: <Eye className="h-4 w-4" />,
     defaultOpen: false,
     items: [
-      { href: "/principal/departments", label: "Departments", icon: Users },
-      { href: "/principal/examination-oversight", label: "Exams", icon: BookOpen },
-      { href: "/principal/campus-activity", label: "Campus Activity", icon: Calendar },
-      { href: "/principal/sla-heatmap", label: "SLA Heatmap", icon: Thermometer },
+      { href: "/principal/people/departments", label: "Departments", icon: Users },
+      { href: "/principal/examinations", label: "Exams", icon: BookOpen },
+      { href: "/principal/operations/gates", label: "Campus Activity", icon: Calendar },
+      { href: "/principal/governance/analytics", label: "SLA Heatmap", icon: Thermometer },
     ],
   },
   {
@@ -83,9 +83,9 @@ const NAV_CATEGORIES = [
     icon: <AlertCircle className="h-4 w-4" />,
     defaultOpen: false,
     items: [
-      { href: "/principal/complaints", label: "Complaints", icon: MessageSquare },
-      { href: "/principal/incidents", label: "Incidents", icon: AlertTriangle },
-      { href: "/principal/emergency-decisions", label: "Emergency", icon: Flame },
+      { href: "/principal/operations/incidents", label: "Complaints", icon: MessageSquare },
+      { href: "/principal/operations/incidents", label: "Incidents", icon: AlertTriangle },
+      { href: "/principal/governance/audit", label: "Emergency", icon: Flame },
     ],
   },
   {
@@ -95,7 +95,7 @@ const NAV_CATEGORIES = [
     items: [
       { href: "/principal/governance/delegations", label: "Rules", icon: Settings },
       { href: "/principal/governance/delegations", label: "In Force", icon: CheckCircle2 },
-      { href: "/principal/audit", label: "History", icon: History },
+      { href: "/principal/governance/audit", label: "History", icon: History },
     ],
   },
   {
@@ -103,8 +103,8 @@ const NAV_CATEGORIES = [
     icon: <FileText className="h-4 w-4" />,
     defaultOpen: false,
     items: [
-      { href: "/principal/audit", label: "Audit", icon: FileText },
-      { href: "/principal/reports", label: "Reports", icon: PieChart },
+      { href: "/principal/governance/audit", label: "Audit", icon: FileText },
+      { href: "/principal/governance/reports", label: "Reports", icon: PieChart },
     ],
   },
 ];
@@ -187,7 +187,7 @@ export const PrincipalSidebar = memo(function PrincipalSidebar({
           {/* Profile section */}
           <div className="mt-6 border-t border-[var(--border)] pt-4">
             <PrincipalSidebarCategory title="PROFILE" icon={<UserCircle className="h-4 w-4" />} defaultOpen={false}>
-              <NavItem href="/principal/settings" label="Settings" icon={Settings} />
+              <NavItem href="/principal/governance/delegations" label="Settings" icon={Settings} />
               <NavItem href="/principal/profile" label="Profile" icon={UserCircle} />
             </PrincipalSidebarCategory>
           </div>

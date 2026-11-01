@@ -39,7 +39,7 @@ export function UpcomingPreview({ items }: { items: UpcomingItem[] }) {
         {items.map((item) => (
           <li key={item.ticket}>
             <Link
-              href={`/principal/approvals/pending?ticket=${encodeURIComponent(item.ticket)}`}
+              href={`/principal/approvals?ticket=${encodeURIComponent(item.ticket)}`}
               className="flex min-h-[44px] items-center gap-2 rounded-lg p-2 text-xs transition hover:bg-[var(--bg-elevated)]"
             >
               <div className="min-w-0 flex-1">

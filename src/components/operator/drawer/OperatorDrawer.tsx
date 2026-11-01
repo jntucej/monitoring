@@ -31,7 +31,7 @@ const CATEGORIES: DrawerCategoryDef[] = [
     label: "SCAN",
     icon: Home,
     items: [
-      { href: "/gate/main", label: "Gate Desk", icon: Home },
+      { href: "/operator", label: "Gate Desk", icon: Home },
       { href: "/operator/manual-entry", label: "Manual Entry", icon: Home },
       { href: "/operator/pass-verification", label: "Pass Verification", icon: Home },
     ],

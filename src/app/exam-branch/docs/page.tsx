@@ -158,7 +158,7 @@ function ExamBranchDocsInner() {
               </p>
             </div>
             <Link
-              href="/docs"
+              href="/exam-branch/docs"
               className="inline-flex items-center gap-1 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-1.5 text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] shrink-0"
             >
               <ExternalLink className="w-3 h-3" /> Open

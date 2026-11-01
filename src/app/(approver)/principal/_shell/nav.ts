@@ -35,7 +35,7 @@ export const PRINCIPAL_NAV: PrincipalEntry[] = [
     label: "Approvals",
     icon: CheckSquare,
     children: [
-      { href: "/principal/approvals/pending", label: "Pending" },
+      { href: "/principal/approvals", label: "Pending" },
       { href: "/principal/approvals/escalated", label: "Escalated" },
       { href: "/principal/approvals/overdue", label: "Overdue" },
       { href: "/principal/approvals/delegated", label: "Delegated" },

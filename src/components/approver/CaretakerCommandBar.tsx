@@ -7,7 +7,7 @@
  *   assign <ticket> to <staff>   PATCH /api/permissions/<ticket> { action: "FORWARD", comment: "to <staff>" }
  *   resolve <ticket> [note]      PATCH /api/permissions/<ticket> { action: "APPROVE", comment: note }
  *   escalate <ticket>            PATCH /api/permissions/<ticket> { action: "ESCALATE" }
- *   view-assets                  router.push("/caretaker/assets")
+ *   view-assets                  router.push("/caretaker/maintenance")
  *
  * All ticket actions flow through the same /api/permissions/[ticket] PATCH
  * that the permission command bar uses — there is no /api/hostel-tickets/[id]

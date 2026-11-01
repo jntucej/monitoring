@@ -46,12 +46,12 @@ const APPROVER_ROLES = new Set([
 
 /** Canonical home + approvals inbox per approver role. */
 const APPROVER_HOMES: Record<string, { home: string; inbox: string; escalated?: string }> = {
-  principal: { home: "/principal", inbox: "/principal/permissions", escalated: "/principal/permissions?status=ESCALATED" },
+  principal: { home: "/principal", inbox: "/principal/approvals", escalated: "/principal/approvals?status=ESCALATED" },
   admin: { home: "/admin", inbox: "/admin/permissions", escalated: "/admin/permissions?status=ESCALATED" },
   sysadmin: { home: "/sysadmin", inbox: "/sysadmin", escalated: "/sysadmin?tab=approvals" },
   faculty: { home: "/faculty", inbox: "/faculty/permissions", escalated: "/faculty/permissions?status=ESCALATED" },
   hod: { home: "/hod", inbox: "/hod/approvals/pending", escalated: "/hod/approvals/escalated" },
-  vice_principal: { home: "/vice-principal", inbox: "/vice-principal/permissions", escalated: "/vice-principal/permissions?status=ESCALATED" },
+  vice_principal: { home: "/vice-principal", inbox: "/vice-principal/approvals", escalated: "/vice-principal/approvals?status=ESCALATED" },
   oie: { home: "/oie", inbox: "/oie/permissions", escalated: "/oie/permissions?status=ESCALATED" },
   exam_branch: { home: "/exam-branch", inbox: "/exam/permissions", escalated: "/exam/permissions?status=ESCALATED" },
   exam_superintendent: { home: "/exam/superintendent", inbox: "/exam/permissions", escalated: "/exam/permissions?status=ESCALATED" },

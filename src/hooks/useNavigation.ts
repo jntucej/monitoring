@@ -38,7 +38,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         groupLabel: "HOD Console",
         items: [
           { href: "/hod", label: "Today", icon: "LayoutDashboard" },
-          { href: "/hod/approvals/pending", label: "Approvals", icon: "CheckSquare" },
+          { href: "/hod", label: "Approvals", icon: "CheckSquare" },
           { href: "/hod/faculty/directory", label: "Faculty", icon: "Users" },
           { href: "/hod/students", label: "Students", icon: "GraduationCap" },
           { href: "/hod/classes", label: "Classes", icon: "BookOpen" },
@@ -69,7 +69,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           groupLabel: "Hostel Manager Console",
           items: [
             { href: "/hostel-manager", label: "Today" },
-            { href: "/hostel-manager/tickets", label: "Resident tickets" },
+            { href: "/hostel-manager", label: "Resident tickets" },
             { href: "/hostel-manager/complaints", label: "Complaints" },
             { href: "/hostel-manager/housekeeping-tasks", label: "Housekeeping" },
             { href: "/hostel-manager/resource-management", label: "Resources" },
@@ -88,7 +88,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           groupLabel: "Deputy Warden Console",
           items: [
             { href: "/deputy-warden", label: "Today" },
-            { href: "/deputy-warden/outpass-queue", label: "Outpass queue" },
+            { href: "/deputy-warden", label: "Outpass queue" },
             { href: "/deputy-warden/leave-requests", label: "Leave requests" },
             { href: "/deputy-warden/delegated-approvals", label: "Delegated" },
             { href: "/deputy-warden/daily-overview", label: "Overview" },
@@ -109,7 +109,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           groupLabel: "Principal",
           items: [
             { href: "/principal", label: "Today", icon: "LayoutDashboard" },
-            { href: "/principal/approvals/pending", label: "Approvals", icon: "CheckSquare" },
+            { href: "/principal", label: "Approvals", icon: "CheckSquare" },
             { href: "/principal/people/departments", label: "People", icon: "Users" },
             { href: "/principal/operations/gates", label: "Operations", icon: "DoorOpen" },
             { href: "/principal/examinations", label: "Exams", icon: "FileText" },
@@ -125,7 +125,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           groupLabel: "Vice Principal",
           items: [
             { href: "/vice-principal", label: "Today", icon: "LayoutDashboard" },
-            { href: "/vice-principal/approvals/pending", label: "Approvals", icon: "CheckSquare" },
+            { href: "/vice-principal", label: "Approvals", icon: "CheckSquare" },
             { href: "/vice-principal/academics/departments", label: "Academics", icon: "GraduationCap" },
             { href: "/vice-principal/examinations", label: "Examinations", icon: "FileText" },
             { href: "/vice-principal/history/30-days", label: "History", icon: "History" },
@@ -162,7 +162,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           groupLabel: "Exam Superintendent Console",
           items: [
             { href: "/exam/superintendent", label: "Today" },
-            { href: "/exam/superintendent/access", label: "Access" },
+            { href: "/exam/superintendent", label: "Access" },
             { href: "/exam/superintendent/schedule", label: "Schedule" },
             { href: "/exam/superintendent/incidents", label: "Incidents" },
             { href: "/exam/superintendent/reports", label: "Reports" },
@@ -177,7 +177,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
           groupLabel: "Exam Branch Console",
           items: [
             { href: "/exam-branch", label: "Today" },
-            { href: "/exam-branch/pass-queue", label: "Pass queue" },
+            { href: "/exam-branch", label: "Pass queue" },
             { href: "/exam-branch/oie-approval-requests", label: "OIE approvals" },
             { href: "/exam-branch/oie-handoff", label: "OIE handoff" },
             { href: "/exam-branch/records", label: "Records" },

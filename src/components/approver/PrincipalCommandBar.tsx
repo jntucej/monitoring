@@ -73,7 +73,7 @@ const COMMAND_DEFS: CommandDef[] = [
     label: "Open pending approvals",
     hint: "approvals — Go to the approvals queue",
     icon: CheckSquare,
-    href: "/principal/approvals/pending",
+    href: "/principal/approvals",
   },
 ];
 

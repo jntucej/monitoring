@@ -1,5 +1,7 @@
-import { redirect } from "next/navigation";
+"use client";
 
-export default function Page() {
-  redirect("/principal/approvals/pending");
+import { ApprovalsView } from "../_shared/ApprovalsView";
+
+export default function PrincipalApprovalsPage() {
+  return <ApprovalsView status="PENDING" title="Pending approvals" />;
 }

@@ -39,7 +39,7 @@ function buildCommands(role: string): CommandDef[] {
       label: "Scan badge",
       hint: "Open the scanner to read a pass or badge",
       icon: ScanLine,
-      href: "/gate/main",
+      href: "/operator",
     },
     "manual-entry": {
       id: "manual-entry",
@@ -53,7 +53,7 @@ function buildCommands(role: string): CommandDef[] {
       label: "Verify pass",
       hint: "Check a person's QR pass validity",
       icon: BadgeCheck,
-      href: "/operator/pass-verify",
+      href: "/operator/pass-verification",
     },
     lookup: {
       id: "lookup",
